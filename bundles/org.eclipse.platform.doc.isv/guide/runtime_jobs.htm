@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Concurrency infrastructure</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H1>
+Concurrency infrastructure</H1>
+<p>
+The <tt>org.eclipse.core.runtime.jobs</tt> package provides infrastructure for
+scheduling, executing, and managing concurrently running operations. The basic
+unit of concurrently running work is represented by the <tt>Job</tt> class. When
+a job is scheduled, it is added to a job queue managed by the platform.  A background
+thread will then remove jobs from the queue and invoke the <tt>Job.run</tt> method.
+Let's look at a trivial example of a job:
+<font color='#4444CC'><pre>
+   class TrivialJob extends Job {
+      public TrivialJob() {
+         super("Trivial Job");
+      }
+      public IStatus run(IProgressMonitor monitor) {
+         System.out.println("This is a job");
+         return Status.OK_STATUS;
+      }
+   }
+</pre></font>
+This job can be created and scheduled to execute as follows:
+<font color='#4444CC'><pre>
+   TrivialJob job = new TrivialJob();
+   System.out.println("About to schedule a job");
+   job.schedule();
+   System.out.println("Finished scheduling a job");
+</pre></font>
+The output of this program is timing dependent.  That is, there is no way
+to be sure when the job's <tt>run</tt> method will execute in relation
+to the thread that invoked <tt>schedule</tt>.  In this case, the output
+will either be:
+<font color='#4444CC'><pre>
+   About to schedule a job
+   This is a job
+   Finished scheduling a job
+</pre></font>
+Or:
+<font color='#4444CC'><pre>
+   About to schedule a job
+   Finished scheduling a job
+   This is a job
+</pre></font>
+</p>
+<p>
+If you want to be certain that a job has completed before continuing, you can use
+the <tt>Job.join</tt> method.  As with <tt>java.lang.Thread.join()</tt>, this 
+method will block the caller until the job has completed, or until the calling thread
+is interrupted.  Let's rewrite our snippet from above in a more deterministic manner:
+<font color='#4444CC'><pre>
+   TrivialJob job = new TrivialJob();
+   System.out.println("About to schedule a job");
+   job.schedule();
+   job.join();
+   if (job.getResult().isOk())
+      System.out.println("Job completed with success");
+   else
+      System.out.println("Job did not complete successfully");
+</pre></font>
+Assuming the <tt>join</tt> call is not interrupted, this method is guaranteed to
+return the following result:
+<font color='#4444CC'><pre>
+   About to schedule a job
+   This is a job
+   Job completed with success
+</pre></font>
+</p>
+<p>
+Of course, it is generally not useful to join a job immediately after scheduling it,
+since you obtain no concurrency by doing so. In this case you might as well
+call <tt>Job.run</tt> directly in the calling thread.  However, we will see some
+examples later on where <tt>join</tt> is more useful.
+</p>
+<p>
+You'll notice this new example also makes use of the job <i>result</i>.  The result
+is the <tt>IStatus</tt> object that is returned from the Job's <tt>run</tt> method.
+By creating your own subclass of <tt>Status</tt>, you can use the result to pass
+arbitrary objects back from the job's run method. The result can also be used to
+indicate failure (by returning an <tt>IStatus</tt> with severity <tt>IStatus.ERROR</tt>),
+or cancelation (<tt>IStatus.CANCEL</tt>).
+</p>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
+</BODY>
+</HTML>
