@@ -104,11 +104,12 @@ public class IBMCopyrightComment {
     }
 
     public int getRevisionYear() {
-        return revisionYear;
+        return revisionYear == -1 ? creationYear : revisionYear;
     }
 
     public void setRevisionYear(int year) {
-        revisionYear = year;
+        if (revisionYear != -1 || creationYear != year)
+            revisionYear = year;
     }
 
     private static String getLinePrefix(int commentStyle) {

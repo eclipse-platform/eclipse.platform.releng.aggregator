@@ -276,14 +276,19 @@ public class FixCopyrightAction implements IObjectActionDelegate {
             return;
         }
 
-        // only check CVS if the copyright statement might be too old
-        int revisionYear = ibmCopyright.getRevisionYear();
-        if (revisionYear < currentYear) {
-            int cvsYear = getCVSModificationYear(file, new NullProgressMonitor());
-            ibmCopyright.setRevisionYear(Math.max(revisionYear, cvsYear));
-        }
+        // figure out if the comment should be updated by comparing the date range
+        // in the comment to the last modification time provided by CVS
+
+        int revised = ibmCopyright.getRevisionYear();
+        int lastMod = revised;
+        if (lastMod < currentYear)
+            lastMod = getCVSModificationYear(file, new NullProgressMonitor());
+
+        if (lastMod <= revised)
+            return;
 
         // either replace old copyright or put the new one at the top of the file
+        ibmCopyright.setRevisionYear(lastMod);
         if (copyrightComment == null)
             aSourceFile.insert(ibmCopyright.getCopyrightComment());
         else {
