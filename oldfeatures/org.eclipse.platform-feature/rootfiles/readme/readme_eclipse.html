@@ -739,27 +739,62 @@ section.)</p>
 <h3>3.1.10 <a name="I-Platform-Compare">Platform - Compare</a></h3>
 <p>None.</p>
 <h3>3.2 <a name="I-JDT">Java Development Tools (JDT)</a></h3>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Running Java programs with
-non-Latin-1 characters in package or class names</i></h4>
-<i>You get a <code>java.lang.NoClassDefFoundError</code> when running Java
+<font FACE="Tms Rmn"><b>
+<p>Side effects of Step into Selection and Run to Line</p>
+</b>
+<p>The actions &quot;Step into Selection&quot; and &quot;Run to Line&quot;
+optimistically set breakpoints on the line the user has chosen to step into or
+run to. However, the debugger can not determine if or when execution will ever
+reach the chosen line. The breakpoints set by the underlying implementation are
+not visible to the user and can cause execution to suspend unexpectedly at a
+later time, when the associated line is actually executed. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=51507">51507</a>)</p>
+<b>
+<p>Default locale initialization incorrect</p>
+</b>
+<p>The default locale is generally initialized from the settings in the
+operating system when a target VM is launched. However, when using javaw.exe on
+JDK1.4.2, Windows XP, the default locale is incorrectly initialized to en_US, no
+matter what the operating system settings are. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=65945">65945</a>)</p>
+<b>
+<p>Suspend on uncaught exception overrides exception breakpoint location filters</p>
+</b>
+<p>Exception breakpoints can be configured with location filters (inclusive and
+exclusive). When an unchecked exception is configured to <b>not</b> suspend
+execution in a specific class, execution will still suspend when the user
+preference to suspend on uncaught exceptions is on. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66770">66770</a>)</p>
+<b>
+<p>Multiple references to the same object do not update in Variables view</p>
+</b>
+<p>When more than one variable references the same object in the Variables view,
+only one variable will update while stepping through source code. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58768">58768</a>)</p>
+</font>
+<h4> Running Java programs with
+non-Latin-1 characters in package or class names</h4>
+You get a <code>java.lang.NoClassDefFoundError</code> when running Java
 programs with non-Latin characters in the package or class names. The workaround
 is to package the class files as a JAR file and run the program out of the JAR
-and not from the file system directly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4181">4181</a>)</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Cannot run or debug class in
-a project with GB18030 characters in project name</i></h4>
-<p><i>Most class libraries do not properly support the creation of a system
+and not from the file system directly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4181">4181</a>)
+<h4>Cannot run or debug class in
+a project with GB18030 characters in project name</h4>
+<p>Most class libraries do not properly support the creation of a system
 process (via <code>java.lang.Runtime.exec(...)</code>) when the specified
 command line contains GB18030 characters. This limitation means the debugger
 cannot launch applications when the command line it generates contains GB18030
-characters. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=32206">32206</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Unable to debug stack
-overflows</i></h4>
-<p><i>If a debug session suspends on a <code>java.lang.StackOverflowError</code>
+characters. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=32206">32206</a>)</p>
+<b><font FACE="Tms Rmn">
+<p>Cannot detect installed JRE with GB18030 characters in path name</p>
+</font></b><font FACE="Tms Rmn">
+<p>Automatic JRE detection fails when the JRE is stored in a directory
+containing GB18030 characters in its name. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=33844">33844</a>)</p>
+</font>
+<h4> Unable to debug stack
+overflows</h4>
+<p>If a debug session suspends on a <code>java.lang.StackOverflowError</code>
 exception (due to an exception breakpoint), the debugger may not be able to
 retrieve any debug information from the target JVM. As well, the debugger may
-not be able to reliably interact with the target JVM past this point. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=19217">19217</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Evaluation limitation</i></h4>
-<p><i>The debugger uses threads in the target JVM to perform evaluations (both
+not be able to reliably interact with the target JVM past this point. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=19217">19217</a>)</p>
+<h4> Evaluation limitation</h4>
+<p>The debugger uses threads in the target JVM to perform evaluations (both
 explicit evaluations that the user requests, and implicit evaluations such as <code>toString()</code>
 invocations in the <b>Variables</b> view). The Java Debug Interface (JDI)
 requires that the thread in which an evaluation is performed be suspended by a
@@ -770,58 +805,42 @@ threads which did not encounter the breakpoint are not in a valid state to
 perform an evaluation. When an evaluation is attempted in a thread that is not
 in a valid state to perform an evaluation, an error message will appear to the
 effect of &quot;Thread must be suspended by step or breakpoint to perform method
-invocation&quot;. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=34440">34440</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Breakpoints outside of the
-build class path</i></h4>
-<p><i>Breakpoints can only be created on Java elements that are contained on the
-build class path of a project. The Java debugger automatically deletes
-breakpoints if their associated Java element is removed from the build path of a
-project. However, if the Java debug plug-in is not loaded when a build path is
-changed, such breakpoints will remain in the workspace, and can cause errors
-when the user attempts to go to the file associated with the breakpoint, from
-the Breakpoints view. (bug 34845)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Missing debug attributes</i></h4>
-<i>The debugger requires that class files be compiled with debug attributes if
+invocation&quot;. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=34440">34440</a>)</p>
+<h4> Missing debug attributes</h4>
+The debugger requires that class files be compiled with debug attributes if
 it is to be able to display line numbers and local variables. Quite often, class
 libraries (for example, &quot;<code>rt.jar</code>&quot;) are compiled without
 complete debug attributes, and thus local variables and method arguments for
-those classes are not visible in the debugger.</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Setting breakpoints</i></h4>
-<i>In general the debugger will not allow you to place breakpoints on lines of
-code that are not executable (comments, blank lines, etc.). However, there are
-some cases where the debugger will allow breakpoints on lines of code that are
-not executable. For example, the debugger will allow a breakpoint to be placed
-on a variable declaration that does not contain an initializer (&quot;int
-x;&quot;). Note that enabled breakpoints which are successfully installed on an
-executable line in a running (debuggable) VM are displayed with a checkmark.
-Breakpoints that are displayed without a checkmark are not installed in a
-running (debuggable) VM. (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8473">8473</a>,
-<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=12696">12696</a>)</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Using Hot Code Replace</i></h4>
-<i>Hot code replace is supported on JDK 1.4.x VMs, and IBM J9 VMs. Hot code
-replace is limited to changes which do not effect the shape of a class. That is,
-changes within existing methods are supported, but the addition or removal of
-members is not supported.</i>
-<p><i>Note that hot code replace and stepping on JDK 1.4.0 VMs was unreliable.
-The underlying VM problems were fixed in JDK 1.4.1.</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Scrapbook</i></h4>
-<i>Setting a breakpoint inside a scrapbook page is not supported.</i>
-<p><i>When a snippet is run in the scrapbook which directly or indirectly calls <code>System.exit(int)</code>,
+those classes are not visible in the debugger.
+<h4> Using Hot Code Replace</h4>
+<font FACE="Tms Rmn">
+<p>Hot code replace is supported on JDK 1.4.x VMs, and IBM J9 VMs. The debugger
+will attempt to replace all class files that change in the workspace as the user
+edits and builds source code. However, hot code replace is limited to changes
+that a particular virtual machine implementation supports. For example, changes
+within existing methods may be supported, but the addition or removal of members
+may not be.</p>
+<p>Note that hot code replace and stepping on JDK 1.4.0 VMs was unreliable. The
+underlying VM problems were fixed in JDK 1.4.1, and later.</p>
+</font>
+<h4> Scrapbook</h4>
+Setting a breakpoint inside a scrapbook page is not supported.
+<p>When a snippet is run in the scrapbook which directly or indirectly calls <code>System.exit(int)</code>,
 the evaluation cannot be completed, and will result in a stack trace for a <code>com.sun.jdi.VMDisconnectedException</code>
-being displayed in the scrapbook editor.</i>
-<p><i>Terminating a scrapbook page while it is performing an evaluation results
+being displayed in the scrapbook editor.
+<p>Terminating a scrapbook page while it is performing an evaluation results
 in a <code>com.sun.jdi.VMDisconnectedException</code> being displayed in the
-scrapbook editor.</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Debugging over slow
-connections</i></h4>
-<i>A global Java debug preference specifies the debugger timeout, which is the
+scrapbook editor.
+<h4> Debugging over slow
+connections</h4>
+A global Java debug preference specifies the debugger timeout, which is the
 maximum amount of time the debugger waits for a response from the target VM
 after making a request of that VM. Slow connections may require that this value
 be increased. The timeout value can be edited from the <b>Java &gt; Debug </b>preference
 page. Changing the timeout value only effects subsequently launched VM, not VMs
-that are already running.</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Updating of inspected values</i></h4>
-<i>When inspecting the result of an evaluated expression in the debugger, it is
+that are already running.
+<h4> Updating of inspected values</h4>
+When inspecting the result of an evaluated expression in the debugger, it is
 important to note that the result displayed is the result of that expression at
 the time it was evaluated. For example, when inspecting a simple integer counter
 (primitive data type), the value displayed in the Expressions view is the value
@@ -831,85 +850,21 @@ the value bound to a variable - it is displaying the value of an expression, and
 the value of a primitive data type cannot change). However, if an expression
 results in an object, fields of that object will be updated in the inspector as
 they change in the running program (since the value bound to fields in an object
-can change).</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Stepping over native methods
-that perform I/O</i></h4>
-<i>When the debugger steps over native methods that perform I/O to <code>System.out</code>
+can change).
+<h4> Stepping over native methods
+that perform I/O</h4>
+When the debugger steps over native methods that perform I/O to <code>System.out</code>
 or <code>System.err</code>, the output may not appear immediately unless the
-native performs a flush on the output buffer.</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] VM and process termination
-running on IBM 1.3 JVM on Linux (Linux only)</i></h4>
-<i>Terminating a launch, debug target, or system process associated with a debug
+native performs a flush on the output buffer.
+<h4> VM and process termination
+running on IBM 1.3 JVM on Linux (Linux only)</h4>
+Terminating a launch, debug target, or system process associated with a debug
 target running on the IBM 1.3 JVM on the Linux platform does not work when the
 associated debug target has a suspended thread. To remove such debug targets
 from the debug UI, select <b>Terminate and Remove</b> from the debug view's
 pop-up menu (or use the shortcut &quot;delete&quot; key). Associated system
 processes in the OS may not be properly cleaned up. If a debug target has no
-suspended threads, termination works properly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1631">1631</a>)</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Searching for constant field
-references</i></h4>
-<i>Search does not find references to constant fields inside binaries because
-the Java Language Specification mandates that constant field values be inlined
-in the class file's bytecodes, leaving no trace of a field reference.&nbsp;(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=12044">12044</a>)</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Quick fix and imports from
-default packages</i></h4>
-<p><i>Quick fix does not handle imports from default packages. Note that
-importing from a default package is no longer supported in JDK 1.4 (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19487">19487</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Javadoc hover in the Java
-editor</i></h4>
-<p><i>The Javadoc hover help shown when hovering over identifiers in the Java
-editor does not handle links inside of Javadoc comments properly. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20644">20644</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Cut, copy, paste not working
-for linked resources in views showing Java elements</i></h4>
-<p><i>The cut, copy, and paste actions do not work for linked files and folders
-appearing in views that show Java elements, including the Package Explorer. The
-workaround is to use these actions from the Navigator view instead. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34568">34568</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Java working sets not
-working correctly for elements from JRE system library container</i></h4>
-<p><i>Appling a working set consisting entirely of elements from the JRE System
-library container as a filter to the packages view might result in an empty
-Package Explorer. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35395">35395</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Cannot generate Javadoc for
-packages with GB18030 characters in the name</i></h4>
-<p><i>Most class libraries do not properly support the creation of a system
-process (via <code>java.lang.Runtime.exec(...)</code>) when the specified
-command line contains GB18030 characters. Since Javadoc is created using the
-Javadoc executable provided with the JDK, generating Javadoc fails if the
-package or class name contains GB18030 characters. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32215">32215</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Linked editing does not work
-correctly in overwrite mode</i></h4>
-<p><i>Linked editing is used for renaming elements within a single compilation
-unit and for templates with multiple occurrences of the same template variable.
-Linked editing does not work correctly in overwrite mode. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35216">35216</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Catch block code generation
-template must end with newline if last line is line comment</i></h4>
-<p><i>If the last line of the catch block code generation template is a line
-comment then the line must be terminated with a newline. Otherwise the closing
-curly bracket ends up on the comment line, resulting in a compilation error.
-(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35746">35746</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Problem opening class file
-editor</i></h4>
-<p><i>If the &quot;Use classpath containers&quot; preference has been enabled on
-the <b>Plug-in Development &gt; Java Build Path Control</b> preference page, you
-may not be able to open a class file editor for a class file contained in a JAR
-in the &quot;Required plug-in entries&quot; container. One way to work around
-the problem is to expand the class file in the Packages Explorer; this displays
-the class file's structure just as the editor would. If a source code zip is
-available for the JAR, another option is to attach source to the JAR file.</i></p>
-<p><i>To attach source to a JAR in the &quot;Required plug-in entries&quot;
-container, follow these steps:</i></p>
-<ol>
-  <li><i>In the Package Explorer, select the project and open <b>Project &gt;
-    Properties</b> from the context menu</i>
-  <li><i>Select the <b>Java Build Path</b> page</i>
-  <li><i>Flip to the <b>Libraries</b> page</i>
-  <li><i>Expand the &quot;Required plug-in entries&quot; item</i>
-  <li><i>Expand the item for the JAR</i>
-  <li><i>Select &quot;Source Attachment&quot; and press <b>Edit</b></i>
-  <li><i>Enter the location of the corresponding source zip</i>
-  <li><i>OK to acknowledge</i></li>
-</ol>
-<p><i>(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35769">35769</a>)</i></p>
+suspended threads, termination works properly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1631">1631</a>)<font FACE="Tms Rmn"></font>
 <h3>3.3 <a name="I-PDE">Plug-in Development Environment (PDE)</a></h3>
 <h4><i>[TBD - carryover from 2.1.3; review for 3.0] PDE source page colors do
 not take effect on Apply</i></h4>
