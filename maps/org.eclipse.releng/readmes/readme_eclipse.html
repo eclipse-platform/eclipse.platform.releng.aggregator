@@ -14,7 +14,7 @@ Eclipse Project Release Notes</h1>
 <p>
 
 <b>DRAFT </b>Pre-release 2.1.0<br>
-Last revised March 3, 2003</p>
+Last revised March 4, 2003</p>
 
 <p align="left">
 
@@ -209,11 +209,11 @@ Mac OS X configuration is considered early access
       <td height="15">Primary</td>
     </tr>
     <tr> 
-      <td width="42%" height="16">SuSE Linux 7.3 x86 (GTK 2.2 required for DBCS)</td>
+      <td width="42%" height="16">SuSE Linux 8.1 x86 (GTK 2.2 required for DBCS)</td>
       <td width="19%" height="16">Primary</td>
     </tr>
     <tr> 
-      <td width="42%" height="16">Other Linux; kernel version 2.4.7, and GTK 2.0.6
+      <td width="42%" height="16">Other Linux; GTK 2.0.6
         (GTK 2.2 required for DBCS)</td>
       <td width="19%" height="16">Untested</td>
     </tr>
@@ -556,7 +556,7 @@ never set the leading comment for any AST nodes they create, the change is moot 
 most clients. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=29176">29176</a>)</p>
 
 <h4>
- Java model operations</h4>
+ Empty array passed to Java model operation</h4>
 
 <p>In Eclipse 2.0, certain Java model API operations (<code>IJavaModel.delete</code>, <code>copy</code>,
 <code>move</code>, and <code>rename</code>) threw an <code>ArrayIndexOutOfBoundsException</code>
@@ -565,10 +565,25 @@ For 2.1, the specification and implementation of these operations have been
 changed to throw <code>JavaModelException</code> in such cases. Clients need to
 be aware that the empty array case does indeed trigger an exception. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=32219">32219</a>)</p>
 
-<h4>Source attachments</h4>
+<h4>Non-Java projects included in Java model&nbsp;</h4>
 
-<p>[Describe new rules for source attachments (if these changes are breaking).]
-(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=22145">22145</a>)</p>
+<p>In Eclipse 2.0, non-Java projects and closed projects were excluded from the
+Java model. In 2.1, non-Java projects and closed projects are available from the
+Java model via <code>IJavaModel.getNonJavaResources</code>. Their inclusion in
+the Java model means that they appear in Java model deltas, under <code>IJavaElementDelta.getResourceDeltas</code>.
+This change may affect clients that listen for Java element deltas (via <code>JavaCore.addElementChangedListener</code>)
+if they make overly strong assumptions about triggering conditions and contents.
+(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=29274">29274</a>)</p>
+
+<h4>Java element changed events for full working copy lifecycle</h4>
+
+<p>In Eclipse 2.0, Java element changed events were reported for changes to
+shared working copies, but not when they were created or destroyed. In 2.1, Java
+element changed events are uniformly issued for the full lifecycle of working
+copies and apply equally to non-shared as well as shared working copies. This
+change may affect clients that listen for Java element deltas (via <code>JavaCore.addElementChangedListener</code>)
+if they make overly strong assumptions about triggering conditions and contents.
+(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32981">32981</a>)</p>
 
 <h3>
  JDT - UI</h3>
@@ -735,6 +750,15 @@ the command line:</p>
 <h3>
 3.1.1 <a name="I-Platform - Core">Platform -
 Core</a></h3>
+
+<h4>
+Declaring package name prefixes improves plug-in class loading speed</h4>
+
+<p>
+A significant (10-15%) speed increase in the time to load a plug-in's classes
+can be obtained simply by declaring the package name prefixes found in that
+plug-in's runtime library JARs. This is done in the new Package Prefixes section
+of the Runtime page in the PDE plug-in manifest editor. (Further information <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/docs/package-prefixes/prefixes.html">here</a>.)</p>
 
 <h4><b>Invalid characters in install directory prevents Eclipse from starting</b></h4>
 <p> Eclipse will fail to launch if installed in a directory whose path contains certain invalid
