@@ -1,0 +1,957 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Author" content="IBM">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Eclipse 3.0 Porting Guide</title>
+</head>
+
+<body>
+
+<h1>Eclipse 3.0 Porting Guide</h1>
+<p>Draft for 3.0 M5<br>
+Last revised November 19, 2003</p>
+<p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
+Porting Guide is being included with each milestone build to facilitate climbing
+aboard the 3.0 release wagon at an early stage, or to estimate the amount of
+effort that will be involved in eventually porting existing plug-ins to 3.0. The
+Eclipse APIs will be stable with respect to breaking changes by late 2003 (see <a href="http://www.eclipse.org/eclipse/development/eclipse_project_plan_3_0.html">Eclipse
+3.0 plan</a> for exact dates).</i></p>
+<p>This porting guide describes how to port existing 2.1 plug-ins to 3.0. Is is
+organized as follows:</p>
+<ul>
+  <li>Required Changes for 3.0</li>
+  <li>Suggested Changes for 3.0</li>
+  <li>Proposal Changes for 3.0</li>
+  <li>PDE Plug-in Migration Tool</li>
+  <li>General Information on Compatibility</li>
+</ul>
+<h2>Required Changes for 3.0</h2>
+<p>This section describes changes that impact existing plug-ins. If your plug-in
+is affected, you will have to change your plug-in in order to get it to work
+properly with Eclipse 3.0.</p>
+<h3>Plug-in manifest version</h3>
+<p>The header of the manifest files for plug-ins (and plug-in fragments) has
+changed to include a new line which identifies the appropriate plug-in manifest
+version. Prior to 3.0, plug-ins did not carry one of these &lt;?eclipse ...?&gt;
+lines; after 3.0, they must always have one. This change is to allow the Eclipse
+runtime to reliably recognize pre-3.0 plug-ins that have not been ported to 3.0,
+so that it can automatically provide greater binary compatibility for such
+plug-ins. This is the general form of the plugin.xml file (fragment.xml is
+similar):</p>
+<p><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;<br>
+<u>&lt;?eclipse version=&quot;3.0&quot;?&gt;<br>
+</u>&lt;plugin ...&gt;<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&lt;/plugin&gt;</code>
+<p>When porting to 3.0, add the indicated line to the manifest of existing
+plug-ins and plug-in fragments. (The PDE plug-in migration tool adds this line.)</p>
+<h3>Restructuring of org.eclipse.ui plug-in</h3>
+<p>The org.eclipse.ui plug-in, which used to be the main Platform UI plug-in,
+now provides just the API and extension points for the generic (i.e.,
+non-IDE-specific) workbench. Optional and IDE-specific API and extension points
+have moved to other plug-ins.</p>
+<p>The impact of this change is two-fold: (1) the moved org.eclipse.ui extension
+points have new extension point ids; and (2) the list of required plug-ins has
+changed.</p>
+<p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the
+absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest)
+and automatically compensates for these extension point and plug-in dependency
+changes. This should be viewed as a stopgap measure that increases the
+likelihood that an existing plug-in that depends on org.eclipse.ui will work in
+3.0. However, when porting the existing plug-in to 3.0, the plug-in's manifest
+needs to be updated to reflect the new structure of the Eclipse UI plug-ins.</p>
+<p>The org.eclipse.ui extension points in the following table have moved to
+different plug-ins, causing their extension point ids to change. If an existing
+plug-in contributes an extension to the moved extension points, then the
+reference in the &quot;point&quot; attribute of the &lt;extension&gt; element in
+the plug-in manifest file must be changed to refer to the corresponding new ones
+extension point id. (The PDE plug-in migration tool makes these fix-ups.)</p>
+<table border="1" width="80%">
+  <tr>
+    <td width="50%">
+      <p align="center"><b>Old extension point id</b></td>
+    <td width="50%">
+      <p align="center"><b>New extension point id</b></td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.markerHelp</td>
+    <td width="50%">org.eclipse.ui.<i>ide</i>.markerHelp</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.markerImageProviders</td>
+    <td width="50%">org.eclipse.ui.<i>ide</i>.markerImageProviders</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.markerResolution</td>
+    <td width="50%">org.eclipse.ui.<i>ide</i>.markerResolution</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.projectNatureImages</td>
+    <td width="50%">org.eclipse.ui.<i>ide</i>.projectNatureImages</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.resourceFilters</td>
+    <td width="50%">org.eclipse.ui.<i>ide</i>.resourceFilters</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.markerUpdaters</td>
+    <td width="50%">org.eclipse.ui.<i>editors</i>.markerUpdaters</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.documentProviders</td>
+    <td width="50%">org.eclipse.ui.<i>editors</i>.documentProviders</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.workbench.texteditor.<br>
+      markerAnnotationSpecification</td>
+    <td width="50%">org.eclipse.ui.<i>editors</i>.markerAnnotationSpecification</td>
+  </tr>
+</table>
+<p>The following table lists the API packages formerly provided by the
+org.eclipse.ui plug-in that have been moved to different plug-ins. (The names of
+the API packages, classes, fields, and methods did not change.) In some cases,
+the API packages are now split across more than one plug-in. Since the API
+classes visible to any given plug-in are determined by that plug-in's list of
+required plug-ins, these changes may require adjusting
+&quot;&lt;requires&gt;&quot; elements in an existing plug-in's manifest to
+regain access to API class.</p>
+<p>This change only affects plug-ins that depend on the org.eclipse.ui plug-in
+(that is, includes &lt;import plugin=&quot;org.eclipse.ui&quot;/&gt; in the
+&lt;requires&gt; section of the plug-in manifest); all other plug-ins are
+unaffected. If it is affected, you <i>may</i> need to change the &lt;import&gt;
+element, or add additional &lt;import&gt; elements, so that all the API classes
+your plug-in needs are in scope. We strongly recommend that plug-ins only state
+dependencies on the plug-ins that they actually use. Including unnecessary
+dependencies reduces runtime performance because the Java class loader must
+search for classes in all dependents. (The PDE plug-in migration tool will fix
+up the dependencies, and help to determine a minimal set.)</p>
+<table border="1" width="80%">
+  <tr>
+    <td width="33%">
+      <p align="center"><b>API package</b></td>
+    <td width="33%">
+      <p align="center"><b>2.1 plug-in</b></td>
+    <td width="34%">
+      <p align="center"><b>Corresponding 3.0 plug-in(s)</b></td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.jface.text.*</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.jface.text</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.text.*</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.jface.text</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui, org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.actions</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui, org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.dialogs</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui, org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.editors.*</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.editor</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.model</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui, org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.part</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui, org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.texteditor</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.workbench.texteditor, org.eclipse.ui.editors</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.texteditor.*</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.workbench.texteditor</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.views.bookmarkexplorer</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.views.contentoutline</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.views</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.views.markers</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.views.navigator</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.views.properties</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.views</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.views.tasklist</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.wizards.datatransfer</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.ide</td>
+  </tr>
+  <tr>
+    <td width="33%">org.eclipse.ui.wizards.newresource</td>
+    <td width="33%">org.eclipse.ui</td>
+    <td width="34%">org.eclipse.ui.ide</td>
+  </tr>
+</table>
+<h3>Changes to API classes and interfaces (by package)</h3>
+<h4>IWorkbench (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following method was removed from this interface because it was
+    IDE-specific:
+    <ul>
+      <li>public IMarkerHelpRegistry getMarkerHelpRegistry()</li>
+    </ul>
+  </li>
+  <li>Clients of getMarkerHelpRegistry() should instead call the public static
+    method IDE.getMarkerHelpRegistry() declared in the org.eclipse.ui.ide
+    package (org.eclipse.ui.ide plug-in).</li>
+</ul>
+<h4>IWorkbenchPage (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following methods were removed from this interface because they were
+    IDE-specific:
+    <ul>
+      <li>public IEditorPart openEditor(IFile input)</li>
+      <li>public IEditorPart openEditor(IFile input, String editorID)</li>
+      <li>public IEditorPart openEditor(IFile input, String editorID, boolean
+        activate)</li>
+      <li>public IEditorPart openEditor(IMarker marker)</li>
+      <li>public IEditorPart openEditor(IMarker marker, boolean activate)</li>
+      <li>public void openSystemEditor(IFile input)</li>
+    </ul>
+  </li>
+  <li>Clients of openEditor(IFile,*) methods should convert the IFile to an
+    IEditorInput using new FileEditorInput(IFile) and then call one of the
+    openEditor(IEditorInput,*) methods. Thus
+    <ul>
+      <li>rewrite page.openEditor(file,editorID) as openEditor(new
+        FileEditorInput(file), editorID)</li>
+      <li>rewrite page.openEditor(file,editorID, activate) as openEditor(new
+        FileEditorInput(file), editorID, activate)</li>
+    </ul>
+  </li>
+  <li>Clients of openEditor(IFile) method should call
+    org.eclipse.ui.ide.IDE.openEditor(IWorkbenchPage, IFile, boolean)
+    <ul>
+      <li>rewrite openEditor(file) as IDE.openEditor(page, file, true)</li>
+    </ul>
+  </li>
+  <li>Clients of openEditor(IMarker, ...) methods should call
+    org.eclipse.ui.ide.IDE.openEditor(IWorkbenchPage, IMarker, boolean)
+    <ul>
+      <li>rewrite page.openEditor(marker) as IDE.openEditor(page, marker, true)</li>
+      <li>rewrite page.openEditor(IMarker, activate) as IDE.openEditor(page,
+        marker, activate)</li>
+      <li>editors that can position themselves based on IMarker information
+        should implement or adapt to org.eclipse.ui.ide.IMarkerEditorPositioner</li>
+    </ul>
+  </li>
+  <li>Clients of openSystemEditor(IFile) method should convert the IFile to an
+    IEditorInput using new FileEditorInput(IFile) and then call the
+    openEditor(IEditorInput,String) method. Thus
+    <ul>
+      <li>rewrite page.openSystemEditor(file) as page.openEditor(new
+        FileEditorInput(file), IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID)</li>
+      <li>Note: clients using editor id
+        IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID must pass an editor input
+        which implements org.eclipse.ui.IPathEditorInput (which FileEditorInput
+        does).</li>
+    </ul>
+  </li>
+</ul>
+<h4>IEditorPart (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following method was removed from this interface because it was
+    resource-specific:
+    <ul>
+      <li>public void gotoMarker(IMarker marker)</li>
+    </ul>
+  </li>
+  <li>Clients that called this method should instead test if the editor part
+    implements or adapts to org.eclipse.ui.ide.IGotoMarker and if so, call
+    gotoMarker(IMarker). The IDE class has a convenience method for doing so:<br>
+    <code>IDE.gotoMarker(editor, marker);</code></li>
+  <li>Clients that implement an editor that can position itself based on IMarker
+    information should implement or adapt to org.eclipse.ui.ide.IGotoMarker.</li>
+  <li>Since IGotoMarker's only method is gotoMarker(IMarker), existing editor
+    implementations can adapt to this change simply by adding <code>extends
+    IGotoMarker</code> to the class definition.</li>
+</ul>
+<h4>EditorPart (package org.eclipse.ui.part)</h4>
+<ul>
+  <li>The following former IEditorPart method was removed from this class
+    because it was resource-specific:
+    <ul>
+      <li>public void gotoMarker(IMarker marker)</li>
+    </ul>
+  </li>
+  <li>See above instructions for IEditorPart.gotoMarker.</li>
+</ul>
+<h4>MultiEditor (package org.eclipse.ui.part)</h4>
+<ul>
+  <li>The following former IEditorPart method was removed from this class
+    because it was resource-specific:
+    <ul>
+      <li>public void gotoMarker(IMarker marker)</li>
+    </ul>
+  </li>
+  <li>See above instructions for IEditorPart.gotoMarker.</li>
+</ul>
+<h4>MultiPageEditor (package org.eclipse.ui.part)</h4>
+<ul>
+  <li>N.B. This class was previously deprecated</li>
+  <li>The following former IEditorPart method was removed from this class
+    because it was resource-specific:
+    <ul>
+      <li>public void gotoMarker(IMarker marker)</li>
+    </ul>
+  </li>
+  <li>See above instructions for IEditorPart.gotoMarker.</li>
+</ul>
+<h4>MultiPageEditorPart (package org.eclipse.ui.part)</h4>
+<ul>
+  <li>The following former IEditorPart method was removed from this class
+    because it was resource-specific:
+    <ul>
+      <li>public void gotoMarker(IMarker marker)</li>
+    </ul>
+  </li>
+  <li>See above instructions for IEditorPart.gotoMarker.</li>
+</ul>
+<h4>IEditorLauncher (package org.eclipse.ui)</h4>
+<ul>
+  <li>The editor launcher interface is implemented by plug-ins that contribute
+    external editors.</li>
+  <li>The following method was removed from this interface because it was
+    resource-specific:
+    <ul>
+      <li>public void open(IFile file)</li>
+    </ul>
+  </li>
+  <li>It was replaced by
+    <ul>
+      <li>public void open(IPath file)</li>
+    </ul>
+  </li>
+  <li>Clients that call IEditorLauncher.open(file) should instead call
+    IEditorLauncher.open(file.getLocation()).</li>
+  <li>Clients that implement this interface should replace their implementation
+    of open(IFile) by one for open(IPath).</li>
+</ul>
+<h4>IEditorRegistry (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following methods were removed from this interface because they were
+    resource-specific:
+    <ul>
+      <li>public IEditorDescriptor getDefaultEditor(IFile file)</li>
+      <li>public void setDefaultEditor(IFile file, String editorId)</li>
+      <li>public ImageDescriptor getImageDescriptor(IFile file)</li>
+    </ul>
+  </li>
+  <li>Clients that call getImageDescriptor(file) should call the
+    &quot;String&quot; equivalent method. Thus rewrite getImageDescriptor(file)
+    to be getImageDescriptor(file.getName())</li>
+  <li>Clients that call setDefaultEditor(IFile file, String editorId) and
+    getDefaultEditor(IFile file) should call the IDE equivalent methods. Thus
+    <ul>
+      <li>rewrite getDefaultEditor(file) to be IDE.getDefaultEditor(file)</li>
+      <li>rewrite setDefaultEditor(file, id) to be IDE.setDefaultEditor(file,
+        id)</li>
+    </ul>
+  </li>
+  <li>The API contract for the following method was changed:
+    <ul>
+      <li>public IEditorDescriptor getDefaultEditor() is now deprecated. It will
+        always return the System External Editor editor descriptor</li>
+      <li>This change impacts clients that assumed the default editor returned
+        would be a text editor.</li>
+    </ul>
+  </li>
+  <li>New constants that represent the system external editor and system
+    in-place editor identifiers (SYSTEM_EXTERNAL_EDITOR_ID and
+    SYSTEM_INPLACE_EDITOR_ID). These two editors require an editor input that
+    implements or adapts to org.eclipse.ui.IPathEditorInput. Note, the in-place
+    editor descriptor will not exist on platforms that do not support in-place
+    editing.</li>
+</ul>
+<h4>AbstractDocumentProvider (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>In order to free AbstractTextEditor from dependencies on
+    org.eclipse.core.resources, AbstractDocumentProvider introduces the concept
+    of document provider operations (DocumentProviderOperation) and document
+    provider operation runner (IRunnableContext). When requested to perform
+    reset, save, or synchronize, the AbstractDocumentProvider creates document
+    provider operations and uses the operation runner to execute them. The
+    runnable context can be provided by subclasses in the getOperationRunner
+    method.</li>
+  <li>Added protected abstract IRunnableContext getOperationRunner();
+    non-abstract subclasses must implement this method in order to provide their
+    own operation runner.</li>
+  <li>The method resetDocument has been changed to final in order to allow the
+    document provider to wrap the function with a document provider operation.
+    The document provider operation calls the newly introduced doResetDocument
+    method. AbstractDocumentProvider.doResetDocument contains the code that
+    originally resided inside AbstractDocumentProvider.resetDocument. Subclasses
+    must change their implementation of resetDocument to doResetDocument and any
+    contained call of super.resetDocument to super.doResetDocument.</li>
+  <li>The method saveDocument has been changed to final in order to allow the
+    document provider to wrap the function with a document provider operation.
+    The document provider operation calls the newly introduced doSaveDocument
+    method. AbstractDocumentProvider.doSaveDocument contains the code that
+    originally resided inside AbstractDocumentProvider.saveDocument. Subclasses
+    must change their implementation of saveDocument to doSaveDocument and any
+    contained call of super.saveDocument to super.doSaveDocument.</li>
+  <li>The method synchronize has been changed to final in order to allow the
+    document provider to wrap the function with a document provider operation.
+    The document provider operation calls the newly introduced doSynchronize
+    method. AbstractDocumentProvider.doSynchronize contains the code that
+    originally resided inside AbstractDocumentProvider.synchronize. Subclasses
+    must change their implementation of synchronize to doSynchronize and any
+    contained call of super.synchronized to super.doSynchronize.</li>
+</ul>
+<h4>AbstractTextEditor (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>The method IEditorPart.gotoMarker(IMarker marker) was removed from the
+    IEditorPart interface because it was resource-specific. The default
+    implementation provided by AbstractTextEditor has been removed from
+    AbstractTextEditor and has been moved to ExtendedTextEditor. Direct
+    subclasses of AbstractTextEditor or StatusTextEditor that want to provide
+    that functionality should follow the migration instructions given for
+    IEditorPart in this document.</li>
+  <li>AbstractTextEditor no longer differentiates between between implicit and
+    explicit document providers as the concrete implementation was resource
+    specific. This functionality has been moved to ExtendedTextEditor. Direct
+    subclasses of AbstractTextEditor or StatusTextEditor must perform the
+    following steps:
+    <ul>
+      <li>Override getDocumentProvider.</li>
+      <li>Override the newly introduced hook method for disposing the document
+        provider (disposeDocumentProvider)</li>
+      <li>Override the newly introduced hook method
+        setDocumentProvider(IEditorInput) that is called while updating the
+        document provider for the new editor input. I.e. that is the method in
+        which you can configure the appropriate implicit document provider for
+        the given editor input.</li>
+    </ul>
+  </li>
+  <li>All occurrences of WorkbenchModifyingOperation have been removed. The
+    editor now calls the document provider methods directly (see described
+    changes for AbstractDocumentProvider);
+    <ul>
+      <li>Removed createSaveOperation, changed performSaveOperation to
+        performSave. Subclasses of AbstractTextEditor overriding
+        createSaveOperation or performSaveOperation must now override
+        performSave.</li>
+      <li>Removed createdRevertOperation, changed peformRevertOperation to
+        performRevert. Sunclasses overriding createRevertOperation or
+        performRevertOperation must now override performRevert.</li>
+      <li>The implementation of the method handleEditorInputChanged has been
+        changed to not use WorkbenchModifyingOperation. Subclasses overriding
+        handleEditorInputChange must adapt accordingly. Please use the changes
+        applied to AbstractTextEditor.handleEditorInputChange as the blueprint.</li>
+    </ul>
+  </li>
+  <li>AbstractTextEditor.createActions no longer registers any actions under
+    ITextEditorActionConstants.ADD_TASK and ITextEditorActionConstant.BOOKMARK
+    as those actions are IDE specific. The registration of these actions has
+    been moved to ExtendedTextEditor. Direct subclasses of AbstractTextEditor or
+    StatusTextEditor should override the createActions method and add the
+    following lines (accordingly adapted to their circumstances):</li>
+  <li>
+    <pre> ResourceAction action= new AddMarkerAction(TextEditorMessages.getResourceBundle(), &quot;Editor.AddBookmark.&quot;, this, IMarker.BOOKMARK, true); //$NON-NLS-1$
+  action.setHelpContextId(ITextEditorHelpContextIds.BOOKMARK_ACTION);
+  action.setActionDefinitionId(ITextEditorActionDefinitionIds.ADD_BOOKMARK);
+  setAction(IDEActionFactory.BOOKMARK.getId(), action);     </pre>
+    <pre>  action= new AddTaskAction(TextEditorMessages.getResourceBundle(), &quot;Editor.AddTask.&quot;, this); //$NON-NLS-1$
+  action.setHelpContextId(ITextEditorHelpContextIds.ADD_TASK_ACTION);
+  action.setActionDefinitionId(ITextEditorActionDefinitionIds.ADD_TASK);
+  setAction(IDEActionFactory.ADD_TASK.getId(), action);</pre>
+  </li>
+</ul>
+<h4>StatusTextEditor (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>See migration notes for AbstractTextEditor.</li>
+  <li>StatusTextEditor provides the predicate method isErrorStatus(IStatus).
+    Subclasses may override in order to decide whether a given status must
+    considered an error or not.</li>
+</ul>
+<h4>ExtendedTextEditor (package org.eclipse.ui.editors.text)</h4>
+<ul>
+  <li>The IEditorPart method gotoMarker(IMarker marker) has been deprecated to
+    allow a future change of its visibility. Clients of this method must follow
+    the migration instructions in the deprecation message.
+  <li>ExtendedTextEditor returns an adapter for IGotoMarker.
+  <li>ExtendedTextEditor implements the concept of implicit/explicit document
+    providers previously provided by AbstractTextEditor. See migration notes for
+    AbstractTextEditor.
+</ul>
+<h4>StorageDocumentProvider (package eclipse.ui.editors.text)</h4>
+<ul>
+  <li>See migration notes for AbstractDocumentProvider.</li>
+  <li>Implements the getOperationRunner method defined by
+    AbstractDocumentProvider. Always returns null. When subclassing you should
+    not be affected by this change.</li>
+</ul>
+<h4>FileDocumentProvider (packge org.eclipse.ui.editors.text)</h4>
+<ul>
+  <li>See migration notes for AbstractDocumentProvider.</li>
+  <li>The method resetDocument has been changed to doResetDocument.</li>
+  <li>The method synchronize has been changed to doSynchronize.</li>
+  <li>Implements the getOperationRunner method returning
+    WorkspaceOperationRunner which executes given DocumentProviderOperations
+    inside a WorkspaceModifyingOperation.</li>
+</ul>
+<h2>Suggested Changes for 3.0</h2>
+<p>This section describes other API changes that area expected to have less of
+an impact on existing plug-ins. This includes deprecated API elements that
+nevertheless continue to work as in 2.1.</p>
+<h3>Changes to API classes and interfaces (by package)</h3>
+<h4>IWorkspaceRunnable and IWorkspace.run (org.eclipse.core.runtime)</h4>
+<p>Clients of the <tt>IWorkspace.run(IWorkspaceRunnable,IProgressMonitor)</tt>
+method should revisit their uses of this method and consider using the richer
+method <tt>IWorkspace.run(IWorkspaceRunnable,ISchedulingRule,int,IProgressMonitor)</tt>.
+The old <tt>IWorkspace.run</tt> method acquires a lock on the entire workspace
+for the duration of the <tt>IWorkspaceRunnable</tt>. This means that an
+operation run with this method will never be able to run concurrently with other
+operations that are changing the workspace. In Eclipse 3.0, many long-running
+operations have been moved into background threads, so the likelihood of
+conflicts between operations is greatly increased. If a modal foreground
+operation is blocked by a long-running background operation, the UI informs the
+user that it is waiting for a background operation to complete.</p>
+<p>The suggested solution is to switch all references to old <tt>IWorkspace.run</tt>
+to use new method with scheduling rule parameter. The scheduling rule should be
+the most fine-grained resource that encompasses all changes by that operation.
+If desired, a <tt>MultiRule</tt> can be used to specify multiple resource rules.
+If the operation tries to modify resources outside of the scope of the
+scheduling rule, a runtime exception will occur. The following table summarizes
+what scheduling rule is required for each of the different types of resource
+operations:</p>
+<table cellspacing="2" cellpadding="2" border="1">
+  <tbody>
+    <tr>
+      <th>Type of operation</th>
+      <th>Rule required</th>
+    <tr>
+      <td>Create, modify, or delete file or folder</td>
+      <td>Parent resource</td>
+    </tr>
+    <tr>
+      <td>Create, delete, open or close project</td>
+      <td>Project</td>
+    </tr>
+    <tr>
+      <td>Change project description</td>
+      <td>Workspace root</td>
+    </tr>
+    <tr>
+      <td>Refresh local</td>
+      <td>Resource</td>
+    </tr>
+    <tr>
+      <td>Create, delete, or modify marker</td>
+      <td><tt>null</tt></td>
+    </tr>
+    <tr>
+      <td>Create, delete or modify sync info</td>
+      <td>Resource</td>
+    </tr>
+    <tr>
+      <td>Build workspace or project</td>
+      <td>Workspace root</td>
+    </tr>
+  </tbody>
+</table>
+<h4>IWorkbenchPage (package org.eclipse.ui)</h4>
+<ul>
+  <li>The constant EDITOR_ID_ATTR is now deprecated. This is an IMarker
+    attribute name that specifies the preferred editor id to open the IMarker
+    resource with. This constant in now on org.eclipse.ui.ide.IDE class.</li>
+</ul>
+<h4>IEditorDescriptor (package org.eclipse.ui)</h4>
+<ul>
+  <li>There are new API methods to determine whether the editor will open
+    internally to the workbench page (isInternal), in-place to the workbench
+    window (isOpenInPlace), or externally to the workbench (isExternal). While
+    this is not a breaking change, it is a good opportunity for clients that are
+    illegally down-casting IEditorDescriptor to
+    org.eclipse.ui.internal.model.EditorDescriptor to call isInternal to bring
+    there code back into line.</li>
+</ul>
+<h4>ISharedImages (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following fields were removed (deprecated) from this interface because
+    they were IDE-specific:
+    <ul>
+      <li>String IMG_OBJ_PROJECT</li>
+      <li>String IMG_OBJ_PROJECT_CLOSED</li>
+      <li>String IMG_OPEN_MARKER</li>
+      <li>String IMG_OBJS_TASK_TSK</li>
+      <li>String IMG_OBJS_BKMRK_TSK</li>
+    </ul>
+  </li>
+  <li>Existing clients should instead use the fields of the same names declared
+    on IDE.SharedImages in the org.eclipse.ui.ide package of the
+    org.eclipse.ui.ide plug-in.</li>
+</ul>
+<h4>IWorkbenchActionConstants (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following fields were removed (deprecated) from this interface; they
+    are subsumed by the new ActionFactory class:
+    <ul>
+      <li>String BACK</li>
+      <li>String CLOSE</li>
+      <li>String CLOSE_ALL</li>
+      <li>String COPY</li>
+      <li>String CUT</li>
+      <li>String DELETE</li>
+      <li>String EXPORT</li>
+      <li>String FIND</li>
+      <li>String FORWARD</li>
+      <li>String IMPORT</li>
+      <li>String MOVE</li>
+      <li>String NEW</li>
+      <li>String NEXT</li>
+      <li>String PASTE</li>
+      <li>String PREVIOUS</li>
+      <li>String PRINT</li>
+      <li>String PROPERTIES</li>
+      <li>String QUIT</li>
+      <li>String REDO</li>
+      <li>String REFRESH</li>
+      <li>String RENAME</li>
+      <li>String REVERT</li>
+      <li>String SAVE</li>
+      <li>String SAVE_ALL</li>
+      <li>String SAVE_AS</li>
+      <li>String SELECT_ALL</li>
+      <li>String UNDO</li>
+      <li>String UP</li>
+    </ul>
+  </li>
+  <li>Clients should instead call getID() on the fields of the same names
+    declared on ActionFactory in the org.eclipse.ui.actions package (org.eclipse.ui
+    plug-in). For example, change IWorkbenchActionConstants.CUT to
+    ActionFactory.CUT.getId().</li>
+  <li>The following fields were removed (deprecated) from this interface because
+    they were IDE-specific.
+    <ul>
+      <li>String ABOUT</li>
+      <li>String ADD_TASK</li>
+      <li>String BOOKMARK</li>
+      <li>String BUILD</li>
+      <li>String BUILD_PROJECT</li>
+      <li>String CLOSE_PROJECT</li>
+      <li>String FIND</li>
+      <li>String OPEN_PROJECT</li>
+      <li>String REBUILD_ALL</li>
+      <li>String REBUILD_PROJECT</li>
+    </ul>
+  </li>
+  <li>Clients should instead call getID() on the fields of the same names
+    declared on IDEActionFactory in the org.eclipse.ui.ide package (org.eclipse.ui.ide
+    plug-in). For example, change IWorkbenchActionConstants.BUILD to
+    IDEActionFactory.BUILD.getId().</li>
+</ul>
+<h4>IWorkbenchPreferenceConstants (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following fields were removed (deprecated) from this interface because
+    they were IDE-specific:
+    <ul>
+      <li>String PROJECT_OPEN_NEW_PERSPECTIVE</li>
+    </ul>
+  </li>
+  <li>Clients should instead use the fields of the same names declared on
+    IDE.Preferences in the org.eclipse.ui.ide package.</li>
+</ul>
+<h4>IExportWizard (package org.eclipse.ui)</h4>
+<ul>
+  <li>Prior to 3.0, the selection passed to IWorkbenchWizard.init(IWorkbench,
+    IStructuredSelection) for an export wizard was preprocessed. If any of the
+    selections were IResources, or adaptable to IResource, then the selection
+    consisted only of these resources. In 3.0, the generic export wizard does
+    not do any preprocessing.&nbsp;</li>
+  <li>The selection passed to the wizard is generally used to prime the
+    particular wizard page with contextually appropriate values.</li>
+  <li>Client that implement IExportWizard and requires this resource-specific
+    selection transformation should add the following to their init(IWorkbench,
+    IStructuredSelection selection) method to computer <code>filteredSelection</code>
+    from <code>selection</code>:
+    <ul>
+      <li><code>IStructuredSelection filteredSelection = selection;<br>
+        List selectedResources = IDE.computeSelectedResources(currentSelection);<br>
+        if (!selectedResources.isEmpty()) {<br>
+        &nbsp;&nbsp;&nbsp; filteredSelection = new
+        StructuredSelection(selectedResources);<br>
+        }</code></li>
+    </ul>
+  </li>
+</ul>
+<h4>IImportWizard (package org.eclipse.ui)</h4>
+<ul>
+  <li>Prior to 3.0, the selection passed to IWorkbenchWizard.init(IWorkbench,
+    IStructuredSelection) for an import wizard was preprocessed. If any of the
+    selections were IResources, or adaptable to IResource, then the selection
+    consisted only of these resources. In 3.0, the generic import wizard does
+    not do any preprocessing.&nbsp;</li>
+  <li>The selection passed to the wizard is generally used to prime the
+    particular wizard page with contextually appropriate values.</li>
+  <li>Client that implement IImportWizard and requires this resource-specific
+    selection transformation should add the following to their init(IWorkbench,
+    IStructuredSelection selection) method to compute a filtered selection from
+    the selection passed in:
+    <ul>
+      <li><code>IStructuredSelection filteredSelection = selection;<br>
+        List selectedResources = IDE.computeSelectedResources(currentSelection);<br>
+        if (!selectedResources.isEmpty()) {<br>
+        &nbsp;&nbsp;&nbsp; filteredSelection = new
+        StructuredSelection(selectedResources);<br>
+        }</code></li>
+    </ul>
+  </li>
+</ul>
+<h4>INewWizard (package org.eclipse.ui)</h4>
+<ul>
+  <li>Prior to 3.0, the selection passed to IWorkbenchWizard.init(IWorkbench,
+    IStructuredSelection) for a new wizard was preprocessed. If there was no
+    structured selection at the time the wizard was invoked, but the active
+    workbench window had an active editor open on an IFile, then the selection
+    passed in would consist of that IFile. In 3.0, the generic new wizard does
+    not do any preprocessing, and an empty selection will be passed when there
+    is no structured selection.</li>
+  <li>The selection passed to the wizard is generally used to prime the
+    particular wizard page with contextually appropriate values.</li>
+  <li>Client that implement INewWizard and requires this capability should add
+    the following to their init(IWorkbench, IStructuredSelection selection)
+    method to compute a selection from the active editor's input:
+    <pre>if (selection.isEmpty()) {
+   IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+   if (window != null) {
+      IWorkbenchPart part = window.getPartService().getActivePart();
+      if (part instanceof IEditorPart) {
+         IEditorInput input = ((IEditorPart) part).getEditorInput();
+         if (input instanceof IFileEditorInput) {
+            selection = new StructuredSelection(((IFileEditorInput) input).getFile());
+         }
+      }		
+  }
+}</pre>
+  </li>
+</ul>
+<h4>WorkbenchHelp (package org.eclipse.ui.help)</h4>
+<ul>
+  <li>The following WorkbenchHelp method was removed (deprecated) from this
+    class because its result (IHelp) was removed (deprecated):
+    <ul>
+      <li>public static IHelp getHelpSupport()</li>
+    </ul>
+  </li>
+  <li>Clients that called this method to obtain an IHelp should instead call the
+    static methods on HelpSystem or WorkbenchHelp.</li>
+</ul>
+<h4>IHelp (package org.eclipse.help)</h4>
+<ul>
+  <li>This interface has been removed (deprecated). WorkbenchHelp.getHelpsupport()
+    was the only way to get hold of an IHelp object. This method has also been
+    removed (deprecated).</li>
+  <li>The following IHelp methods now appear as static methods on a new
+    HelpSystem class in the same package:
+    <ul>
+      <li>public IToc[] getTocs()</li>
+      <li>public IContext getContext(String contextId)</li>
+    </ul>
+  </li>
+  <li>The rest of the IHelp methods now appear as static method on WorkbenchHelp.</li>
+  <li>This interface was formerly mentioned in the contract for the
+    org.eclipse.help.support extension point. This extension point has been
+    renamed &quot;org.eclipse.ui.helpSupport&quot;, and the contract simplified
+    so that the implementer only needs supply the display methods. For these
+    purposes, IHelp has been replaced by AbstractHelpUI (in the
+    org.eclipse.ui.help package).</li>
+  <li>There should be no clients implementing this interface beyond the Platform
+    which supplied the sole implementation of this interface.</li>
+</ul>
+<h4>ITextEditorActionConstants (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>This interface additionally includes newly defined constants that redefine
+    deprecated constants inherited from org.eclipse.ui.IWorkbenchActionConstants.
+    This change allows clients to free their code from deprecation warnings. The
+    constants ADD_TASK and BOOKMARK have not been redefined as they are IDE
+    specific. When using these two constants in your code, please follow the
+    instructions given in the deprecation message.</li>
+</ul>
+<h4>IAbstractTextEditorHelpContextIds (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>BOOKMARK_ACTION and ADD_TASK_ACTION have been deprecated because they are
+    IDE specific. Use the constants defined in
+    org.eclipse.ui.editors.text.ITextEditorHelpContextIds instead.</li>
+</ul>
+<h4>BasicTextEditorActionContributor (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>BasicTextEditorActionContributor no longer assigns any editor action as
+    global action for org.eclipse.ui.IWorkbenchActionConstants.ADD_TASK and
+    org.eclipse.ui.IWorkbenchActionConstants.BOOKMARK because these actions are
+    IDE specific. This is now done by the
+    org.eclipse.ui.editors.text.TextEditorActionContributor. If your editors are
+    not configured to used TextEditorActionContributor but uses a contributor
+    that is a subclass of BasicTextEditorActionContributor, this contributor has
+    to be extended to also assign global action handlers for ADD_TASK and
+    BOOKMARK. This can be done by adding the following lines to the
+    setActiveEditor method of the editor action contributor:</li>
+  <li>
+    <pre> IActionBars actionBars= getActionBars();
+ if (actionBars != null) {
+   actionBars.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), getAction(textEditor, IDEActionFactory.ADD_TASK.getId()));
+   actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), getAction(textEditor, IDEActionFactory.BOOKMARK.getId()));
+ }</pre>
+  </li>
+</ul>
+<h4>TextEditorActionContributor (package org.eclipse.ui.editors.text)</h4>
+<ul>
+  <li>TextEditorActionContributor assigns global action handlers for
+    IWorkbenchActionConstants.ADD_TASK (now IDEActionFactory.ADD_TASK.getId())
+    and IWorkbenchActionConstants.BOOKMARK (now IDEActionFactory.BOOKMARK.getId()).
+    These action handlers have previously been registered by
+    BasicTextEditorActionContributor. See migration notes for
+    BasicTextEditorActionContributor.</li>
+</ul>
+<h3>Restructuring of org.eclipse.help plug-in</h3>
+<p>The org.eclipse.help plug-in, which used to hold APIs and extension points
+for contributing to and extending help system, as well as displaying help, now
+contains just APIs and extension points for contributing and accessing help
+resources. A portion of default help UI implementation contained in that plug-in
+has been moved to a new plug-in org.eclipse.help.base together with APIs for
+extending the implementation. The APIs and extension point for contributing Help
+UI and displaying help have been moved to org.eclipse.ui plug-in. This
+restructuring allows applications greater flexibility with regard to the help
+system; the new structure allows applications based on the generic workbench to
+provide their own Help UI and/or Help implementation, or to omit the help system
+entirely.</p>
+<p>Because the extension points and API packages affected are intended only for
+use by the help system itself, it is unlikely that existing plug-ins are
+affected by this change. For completeness, (The PDE plug-in migration tool will
+fix up the dependencies, and help to determine a minimal set.)</p>
+<ul>
+  <li>API packages org.eclipse.ui.help.browser and
+    org.eclipse.ui.help.standalone, formerly provided by the org.eclipse.help
+    plug-in, have been moved to the org.eclipse.help.base plug-in.</li>
+  <li>Extension points org.eclipse.help.browser, org.eclipse.help.luceneAnalyzer,
+    and org.eclipse.help.webapp, formerly defined by the org.eclipse.help
+    plug-in, have been moved to the org.eclipse.help.base plug-in, with a
+    corresponding change in extension point id.</li>
+  <li>Extension point org.eclipse.help.support has been replaced by the
+    org.eclipse.ui.helpSupport extension point. The contract for this extension
+    point changed as well (see entry for IHelp).</li>
+</ul>
+<h2>Proposed Changes</h2>
+<p>The following proposals are under discussion. They are included here because
+the proposed changes impact existing plug-ins being ported to 3.0.</p>
+<ul>
+  <li><a href="http://dev.eclipse.org/viewcvs/indextech.cgi/~checkout~/equinox-home/alternateRuntimes/migration.html">Equinox
+    runtime</a></li>
+</ul>
+<h2>PDE Plug-in Migration Tool</h2>
+<p>PDE provides a special wizard for converting 2.1 plug-in manifest to 3.0,
+found at <b>PDE Tools &gt; Migrate to 3.0</b>. on the context menu for the
+selected plugin.xml or fragment.xml file. In addition to adding &lt;?eclipse
+...?&gt; line, this migration tool also fixes up references to the extension
+points that have been renamed and changes the plug-ins dependencies list to
+reflect the Platform restructuring.</p>
+<h2>General Information on Compatibility</h2>
+<p>Eclipse 3.0 is not fully compatible with 2.0 and 2.1. The nature and scope of
+some of the key 3.0 plan items were such that the only feasible solutions break
+compatibility. The decision to make these breaking changes was done after open
+discussion with the community. That said, most of the Eclipse APIs are the same
+in 3.0 as in 2.1 and 2.0. We have only broken APIs in 3.0 when there is a
+compelling case for doing so, and have tried to do it in a controlled way that
+minimizes the effort required to port an existing plug-in to the 3.0 APIs.</p>
+<p><b>API Contract Compatibility:</b> Eclipse SDK 3.0 is upwards
+contract-compatible with Eclipse SDK 2.0 and 2.1 except in those areas noted in
+this document. Programs that use affected APIs and extension points will need to
+be ported to Eclipse SDK 3.0 APIs (API is construed broadly to include such
+things as plug-in extension points.) Downward contract compatibility is not
+supported. There is no guarantee that compliance with Eclipse SDK 3.0 APIs would
+ensure compliance with Eclipse SDK 2.0 or 2.1 APIs. Refer to <i><a href="http://eclipse.org/eclipse/development/java-api-evolution.html">Evolving
+Java-based APIs</a></i> for a discussion of the kinds of API changes that
+maintain contract compatibility.
+<p><b>Binary (plug-in) Compatibility:</b> Eclipse SDK 3.0 is upwards
+binary-compatible with Eclipse SDK 2.0 and 2.1 except in those areas noted in
+this document. Plug-ins that use affected APIs and extension points will need to
+be ported and recompiled for Eclipse SDK 3.0. Downward plug-in compatibility is
+not supported either. Plug-ins for Eclipse SDK 3.0 will not be usable in Eclipse
+SDK 2.0 or 2.1. Refer to <i><a href="http://eclipse.org/eclipse/development/java-api-evolution.html">Evolving
+Java-based APIs</a></i> for a discussion of the kinds of API changes that
+maintain binary compatibility.
+<p><b>Source Compatibility:</b> Eclipse SDK 3.0 is upwards source-compatible
+with Eclipse SDK 2.0 or 2.1 except in the areas noted in this document. This
+means that source files written to use Eclipse SDK 2.0 or 2.1 APIs might
+successfully compile and run against Eclipse SDK 3.0 APIs, although this is not
+guaranteed. Downward source compatibility is not supported. If source files use
+new Eclipse SDK APIs, they will not be usable with an earlier version of the
+Eclipse SDK.
+<p><b>Workspace Compatibility:</b> Eclipse SDK 3.0 is upwards
+workspace-compatible with Eclipse SDK 2.0 or 2.1 unless noted. This means that
+workspaces and projects created with Eclipse SDK 2.0 or 2.1 can be successfully
+opened by Eclipse SDK 3.0 and upgraded to a 3.0 workspace. This includes both
+hidden metadata, which is localized to a particular workspace, as well as
+metadata files found within a workspace project (e.g., the .project file), which
+may propagate between workspaces via file copying or team repositories.
+Individual plug-ins developed for Eclipse SDK 3.0 should provide similar upwards
+compatibility for their hidden and visible workspace metadata created by earlier
+versions; 3.0 plug-in developers are responsible for ensuring that their
+plug-ins recognize 3.0, 2.1, and 2.0 metadata and process it appropriately. User
+interface session state may be discarded when a workspace is upgraded. Downward
+workspace compatibility is not supported. A workspace created (or opened) by
+Eclipse SDK 3.0 will be unusable with an earlier version of Eclipse
+SDK.&nbsp;Visible metadata files created (or overwritten) by Eclipse SDK 3.0
+will generally be unusable with earlier versions of Eclipse SDK.
+<p><b>Non-compliant usage of API's</b>: All non-API methods and classes, and
+certainly everything in a package with &quot;internal&quot; in its name, are
+considered implementation details which may vary between operating environment
+and are subject to change without notice. Client plug-ins that directly depend
+on anything other than what is specified in the Eclipse SDK API are inherently
+unsupportable and receive no guarantees about compatibility within a single
+release much less with an earlier releases. Refer to <i><a href="http://www.eclipse.org/articles/Article-API%20use/eclipse-api-usage-rules.html">How
+to Use the Eclipse API</a></i> for information about how to write compliant
+plug-ins. This porting guide does not cover non-API methods and classes.</p>
+<p>(c) Copyright IBM Corp. and others 2003</p>
+
+</body>
+
+</html>
