@@ -54,11 +54,12 @@ public class IBMCopyrightComment {
    	    String body = comment.getContents();
 
         final String copyrightLabel = "Copyright (c) "; //$NON-NLS-1$
-
    	    int start = body.indexOf(copyrightLabel); //$NON-NLS-1$
-   	    int end = body.indexOf(" IBM Corporation", start); //$NON-NLS-1$
+   	    if (start == -1) return null;
+   	    int contrib = body.indexOf("Contributors:", start); //$NON-NLS-1$
+   	    int end = body.indexOf(" IBM Corp", start); //$NON-NLS-1$ // catch both IBM Corporation and IBM Corp.
 
-   	    if (start == -1 || end == -1)
+   	    if (end == -1 || end > contrib) // IBM must be on the copyright line, not the contributor line
    	        return null;
 
    	    String yearRange = body.substring(start + copyrightLabel.length(), end);
@@ -84,7 +85,7 @@ public class IBMCopyrightComment {
    	            // do nothing
    	        }
 
-   	    int contrib = body.indexOf("Contributors:"); //$NON-NLS-1$
+   	    
    	    String contribComment = body.substring(contrib);
    	    StringTokenizer tokens = new StringTokenizer(contribComment, "\r\n"); //$NON-NLS-1$
    	    tokens.nextToken();
