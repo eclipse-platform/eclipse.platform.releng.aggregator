@@ -26,7 +26,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	/**
 	 * The perfmsr plug-in's performance monitor
 	 */
-	private BasePerformanceMonitor fPerformanceMonitor;
+	private PerformanceMonitor fPerformanceMonitor;
 	
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
 
@@ -36,7 +36,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @param scenarioId the scenario id
 	 */
 	public OSPerformanceMeter(String scenarioId) {
-		fPerformanceMonitor= BasePerformanceMonitor.getPerformanceMonitor(false);
+		fPerformanceMonitor= PerformanceMonitor.getPerformanceMonitor(false);
 		fPerformanceMonitor.setTestName(scenarioId);
 		fScenarioId= scenarioId;
 	}

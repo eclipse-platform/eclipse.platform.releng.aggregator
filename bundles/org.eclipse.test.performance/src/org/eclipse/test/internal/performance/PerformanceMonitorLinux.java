@@ -16,9 +16,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.test.internal.performance.data.Scalar;
-
-class PerformanceMonitorLinux extends BasePerformanceMonitor {
+class PerformanceMonitorLinux extends PerformanceMonitor {
     
     /**
      * The status values for a Linux process, that is the values that come from /proc/self/stat.
@@ -130,30 +128,18 @@ class PerformanceMonitorLinux extends BasePerformanceMonitor {
     			}
     		}
  			
-			long v = jiffiesToMilliseconds(stat.utime);
-			writeValue(scalars, LoadValueConstants.What.userTime, v, "User time", formatedTime(v));
-			
-			v = jiffiesToMilliseconds(stat.stime);
-			writeValue(scalars, LoadValueConstants.What.kernelTime, v, "Kernel time", formatedTime(v));
-			
-			v = jiffiesToMilliseconds(stat.utime+stat.stime);
-			writeValue(scalars, LoadValueConstants.What.cpuTime, v, "CPU time", formatedTime(v));
-			
-			int i = pagesToBytes(statm.resident);
-			writeValue(scalars, LoadValueConstants.What.workingSet, i, "Working Set", formatEng(i));
-			
-			writeValue(scalars, LoadValueConstants.What.softPageFaults, stat.minflt, "Soft Page Faults", formatEng(stat.minflt));
-			
-			writeValue(scalars, LoadValueConstants.What.hardPageFaults, stat.majflt, "Hard Page Faults", formatEng(stat.majflt));
-			
-			i = pagesToBytes(statm.trs);
-			writeValue(scalars, LoadValueConstants.What.trs, i, "Text Size", formatEng(i));
-			
-			i = pagesToBytes(statm.drs);
-			writeValue(scalars, LoadValueConstants.What.drs, i, "Data Size", formatEng(i));
-			
-			i = pagesToBytes(statm.lrs);
-			writeValue(scalars, LoadValueConstants.What.lrs, i, "Library Size", formatEng(i));
+    		long pageSize= 4096;
+    		long jiffies= 10L;
+    		
+			addScalar(scalars, LoadValueConstants.What.userTime, "User time", stat.utime*jiffies);			
+			addScalar(scalars, LoadValueConstants.What.kernelTime, "Kernel time", stat.stime*jiffies);			
+			addScalar(scalars, LoadValueConstants.What.cpuTime, "CPU time", (stat.utime+stat.stime)*jiffies);			
+			addScalar(scalars, LoadValueConstants.What.workingSet, "Working Set", statm.resident*pageSize);		
+			addScalar(scalars, LoadValueConstants.What.softPageFaults, "Soft Page Faults", stat.minflt);			
+			addScalar(scalars, LoadValueConstants.What.hardPageFaults, "Hard Page Faults", stat.majflt);			
+			addScalar(scalars, LoadValueConstants.What.trs, "Text Size", statm.trs*pageSize);			
+			addScalar(scalars, LoadValueConstants.What.drs, "Data Size", statm.drs*pageSize);			
+			addScalar(scalars, LoadValueConstants.What.lrs, "Library Size", statm.lrs*pageSize);
 		}
 	}
 	
@@ -182,36 +168,10 @@ class PerformanceMonitorLinux extends BasePerformanceMonitor {
 			} catch (IOException e) {
 			}
 		}
-		writeValue(scalars, LoadValueConstants.What.physicalMemory, mi.total, "Physical Memory", formatEng(mi.total));
-		writeValue(scalars, LoadValueConstants.What.usedLinuxMemory, mi.used, "Used Memory", formatEng(mi.used));
-		writeValue(scalars, LoadValueConstants.What.freeLinuxMemory, mi.free, "Free Memory", formatEng(mi.free));
-		writeValue(scalars, LoadValueConstants.What.buffersLinux, mi.buffers, "Buffers Memory", formatEng(mi.buffers));
-		writeValue(scalars, LoadValueConstants.What.systemCache, mi.cache, "System Cache", formatEng(mi.cache));
+		addScalar(scalars, LoadValueConstants.What.physicalMemory, "Physical Memory", mi.total);
+		addScalar(scalars, LoadValueConstants.What.usedLinuxMemory, "Used Memory", mi.used);
+		addScalar(scalars, LoadValueConstants.What.freeLinuxMemory, "Free Memory", mi.free);
+		addScalar(scalars, LoadValueConstants.What.buffersLinux, "Buffers Memory", mi.buffers);
+		addScalar(scalars, LoadValueConstants.What.systemCache, "System Cache", mi.cache);
 	}
-	
-	/**
-	 * Convert jiffies to milliseconds. For pre 2.5 kernels on Intel it seems like this is 10ms per
-	 * jiffy. 
-	 * 
-	 * @param jiffies
-	 * @return
-	 */
-	private static long jiffiesToMilliseconds(long jiffies) {
-		//TODO for newer kernels you should call the jiffies_to_clock_t function
-		return jiffies * 10L;
-	}
-	
-	/**
-	 * Convert a value that is the number of pages into bytes.
-	 * @param pages
-	 * @return
-	 */
-	private static int pagesToBytes(int pages) {
-		return pages * 4096;
-	}
-	
-    private void writeValue(Map scalars, int i, long l, String string, String object) {
-        //System.out.println(i + ": " + string + " " + object);
-        scalars.put("" + i, new Scalar("" + i, l));
-    }
 }

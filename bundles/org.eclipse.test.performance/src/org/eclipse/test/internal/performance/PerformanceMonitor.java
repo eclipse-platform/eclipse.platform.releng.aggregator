@@ -29,25 +29,24 @@ import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 
-public class BasePerformanceMonitor {
+class PerformanceMonitor {
     
-    protected HashMap fRunProperties;
-    protected List fDataPoints;
+	private HashMap fRunProperties;
+	private List fDataPoints;
     private String fHostName;
 	private String fScenarioName;
 
 	private static DateFormat fDateFormat= DateFormat.getDateTimeInstance();
-    private static BasePerformanceMonitor fgPerformanceMonitor;
+    private static PerformanceMonitor fgPerformanceMonitor;
 
     
-    public static BasePerformanceMonitor getPerformanceMonitor(boolean shared) {
-		BasePerformanceMonitor pm;
+    public static PerformanceMonitor getPerformanceMonitor(boolean shared) {
+		PerformanceMonitor pm;
 		if (!shared)
 		    pm= create();
 		else {
-			if (fgPerformanceMonitor == null) {
+			if (fgPerformanceMonitor == null)
 				fgPerformanceMonitor= create();
-			}
 			pm= fgPerformanceMonitor;
 		}
 		return pm;
@@ -167,6 +166,11 @@ public class BasePerformanceMonitor {
 		// no default implementation
 	}
 	
+    void addScalar(Map scalars, int id, String string, long value) {
+        //System.out.println(id + ": " + string + " " + value);
+        scalars.put("" + id, new Scalar("" + id, value));
+    }
+    
     /* (non-Javadoc)
      * @see org.eclipse.perfmsr.core.IPerformanceMonitor#upload(java.lang.Object)
      */
@@ -182,7 +186,7 @@ public class BasePerformanceMonitor {
 	 * 
 	 * @see PerfMsrCorePlugin#getPerformanceMonitor(boolean) 
 	 */
-	private static BasePerformanceMonitor create() {
+	private static PerformanceMonitor create() {
 	    String os= System.getProperty("os.name");
 		if (os.startsWith("Windows"))
 		    return new PerformanceMonitorWindows();

@@ -16,7 +16,7 @@ import java.util.Map;
  * The Mac OS X version of the performance monitor.
  * (Uses default implementation for now).
  */
-class PerformanceMonitorMac extends BasePerformanceMonitor {
+class PerformanceMonitorMac extends PerformanceMonitor {
     
 	/**
 	 * Write out operating system counters for Mac OS X.
