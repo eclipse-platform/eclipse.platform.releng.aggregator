@@ -812,64 +812,55 @@ pop-up menu (or use the shortcut &quot;delete&quot; key). Associated system
 processes in the OS may not be properly cleaned up. If a debug target has no
 suspended threads, termination works properly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1631">1631</a>)
 <h3>3.3 <a name="I-PDE">Plug-in Development Environment (PDE)</a></h3>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] PDE source page colors do
-not take effect on Apply</i></h4>
-<p><i>Changes to the colors PDE uses for source pages of its multi-page editors
+<h4>Feature manifest editor does not preserve all comments</h4>
+<p>When non-Source page of the feature manifest editor is used, PDE will convert
+changes back into XML by regenerating the file. Although the overall content and
+most of the comments are preserved, some comments may be lost. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=59502">59502</a>)</p>
+<h4>Paste does not work in table viewers of the plug-in manifest editor</h4>
+<p>When you copy an item in one of the table viewers on the Dependencies,
+Extensions or Extension Points pages of the plug-in manifest editor, you will
+not be able to paste it. For copy and paste operations, use the source page of
+the editor. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67582">67582</a>)</p>
+<h4>PDE will not unzip source zips of some plug-ins</h4>
+<p>In the plug-in import wizard, when you choose to import plug-ins as
+&quot;projects with source folders&quot;, PDE will not unzip the source for the
+org.apache.ant, org.eclipse.osgi.util and org.eclipse.osgi.services. This is
+because the source ZIPs contains code that will not compile when unzipped as it
+requires additional JARs that are not part of the SDK. To avoid the creation of
+plug-in projects that won't compile, PDE will import these plug-ins as binary
+and attach source, so you would still be able to read the source, you just won't
+be able to modify it. Also, PDE will not unzip the source for the
+org.eclipse.swt plug-ins. In this case, it is because, when shipped, the swt
+code is spread across a plug-in and a fragment, and when unzipped, it will
+require circular dependencies between the plug-in and fragment projects. These
+circular dependencies are at minimum marked as warnings by the JDT compiler and
+may result in unpredictable build behavior. Therefore, PDE always imports
+org.elipse.swt as binary with source attached. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66314">66314</a>)</p>
+<h4>Search for an extension point reference may include a false hit</h4>
+<p>It is possible for an extension point search result to include a false hit in
+the following specific scenario. If you open the plug-in manifest editor on a
+plug-in that contains both a plugin.xml and manifest.mf, go to the Extension
+Points page, select one of the extension points and click on 'Find references',
+the result may include a false hit. The false hit would result only if another
+plug-in in the product had declared an extension point by the same id.
+Workaround in this case would be to perform the search through the Plug-in
+search page. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=62177">62177</a>)</p>
+<h4> PDE source page colors do
+not take effect on Apply</h4>
+<p>Changes to the colors PDE uses for source pages of its multi-page editors
 are not immediately visible in opened editors after pressing the Apply button
 on&nbsp; the <b>Plug-in Development &gt; Editors preference</b> page. To work
-around this problem, close the editor and and reopen it. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33640">33640</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Icons folder not included in
-bin.includes of some PDE templates</i></h4>
-<p><i>PDE provides a number of templates that can be used to create fully
-functioning plug-in projects and/or extensions. When projects are created, the <code>build.properties</code>
-file is created with the initial content, which includes the property
-'bin.includes' listing the plug-in manifest and its code JARs. However, it omits
-mention of other files created by the template, such as the <code>icons/</code>
-folder. As a request, these extra files do not end up in the plug-in when built
-using Ant build file or exported using 'Export deployable plug-ins and
-fragments' wizard. To work around this problem, add these files and directories
-manually in build.properties file. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35554">35554</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Emacs key bindings do not
-work in manifest editor fields</i></h4>
-<p><i>Non-default key bindings currently do not work in fields on non-source
-pages of the PDE manifest editors. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19482">19482</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Comments in source pages of
-PDE XML editors</i></h4>
-<p><i>PDE provides a number of multi-page editors that include a raw source
-page. Editors that handle XML files (plug-in, fragment and feature manifests)
-will preserve comments in most cases. However, comments will not be preserved if
-added before the root XML element, or if added after the last child element
-contained in the parent element. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=8000">8000</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Plug-in import wizard does
-not allow plug-ins of different versions to be imported</i></h4>
-<p><i>The Eclipse platform allows two plug-ins with the same ID but different
+around this problem, close the editor and and reopen it. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33640">33640</a>)</p>
+<h4> Emacs key bindings do not
+work in manifest editor fields</h4>
+<p>Non-default key bindings currently do not work in fields on non-source
+pages of the PDE manifest editors. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19482">19482</a>)</p>
+<h4> Plug-in import wizard does
+not allow plug-ins of different versions to be imported</h4>
+<p>The Eclipse platform allows two plug-ins with the same ID but different
 versions to coexist if the only thing they contribute is run-time libraries.
 However, PDE cannot handle these plug-ins because it creates project names using
-plug-in IDs during binary project import. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18500">18500</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] PDE nature required for
-plug-in manifest syntax checking</i></h4>
-<p><i>PDE will only be able to provide syntax checking and error/warning markers
-for plug-in manifests if the plug-in project has the PDE plug-in nature. A
-plug-in project automatically gets this nature when created by a PDE wizard.
-This situation can only occur if a regular Java project has been used to host a
-plug-in. The problem can be fixed by converting it into a PDE project. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19248">19248</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] PDE does not preserve
-original manifest file layout</i></h4>
-<p><i>When non-Source page of a PDE manifest editor is used, PDE will convert
-changes back into XML by regenerating the file. Although the overall content and
-the comments are preserved, the actual file layout is not. This may cause
-problems by showing false changes during file compare. If file layout is
-important, perform all editing in the Source page. Alternatively, avoid using
-Source pages altogether. Since XML files are generated in a way that respects
-and preserves the relative order of major elements (extensions, extension points
-etc.), changes made in a non-Source page of a PDE manifest editor do not result
-in false deltas during file compare. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19251">19251</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Go To Line in manifest
-editor causes Outline view to go blank</i></h4>
-<p><i>When the <b>Source &gt; Go To Line</b> command is invoked in the Source
-page of a PDE manifest editor, the Outline view will become gray. Since the
-Source page does not have a functional outline, there is no actual loss of
-function. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19361">19361</a>)</i></p>
+plug-in IDs during binary project import. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18500">18500</a>)</p>
 <h3><a name="I-Other">3.4 Other</a></h3>
 <h3><a name="I-Other-FTP-and-WebDAV">3.4.1 FTP and WebDAV support</a></h3>
 <h4><i>[TBD - carryover from 2.1.3; review for 3.0] When mapped to a target, the
