@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Locale specific files</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Locale specific files</h3>
+<p>Fragments are a convenient way to package national language
+translations.&nbsp; Let's look more closely at the directory structure used for
+installing locale-specific translation files.&nbsp; This directory structure is
+used regardless of whether the translated files are packaged in a fragment or
+delivered in the original plug-in.</p>
+<p>There are two mechanisms for locating locale specific files in a
+plug-in.&nbsp;&nbsp;</p>
+<ul>
+  <li><b>Platform core mechanism</b> (the platform's runtime locale-specific
+    subdirectory search)</li>
+  <li><b>Java resource bundles</b> (java.util.ResourceBundle)</li>
+</ul>
+<p>It is important to understand which mechanism is used to access any given
+file that must be translated so that you'll know what to name the file and where
+to put it in the file system relative to the plug-in.</p>
+<h4>Platform core mechanism</h4>
+<p>The platform core defines a directory structure that uses locale-specific
+subdirectories for files that differ by locale.&nbsp; Translated files are
+placed in a directory called <b>nl</b> under the plug-in.&nbsp; For example, the
+following install tree shows a trivial (no code) plug-in with locale-specific
+translations of its <b>about.properties</b> file.&nbsp; The various translations
+are shown as coming from a plug-in fragment rather than the plug-in
+itself.&nbsp; This is typical for shipping translations separately from the
+base, but you could also place the <b>nl</b> subdirectory under the plug-in
+itself.</p>
+<pre><font color="#4444CC">acmeweb/
+  eclipse/
+    plugins/
+      com.example.acme.acmewebsupport_1.0.0/
+        plugin.xml
+        about.properties    (default locale)
+      com.example.acme.fragmentofacmewebsupport_1.0.0/
+        fragment.xml   (a fragment of com.example.acme.acmewebsupport 1.0.0)
+        nl/
+          fr/
+            about.properties  (French locale)
+            CA/
+              about.properties  (French Canadian locale)
+            FR/
+              EURO/
+                about.properties (French France Euros)
+          en/
+            about.properties  (English locale)
+            CA/
+              about.properties  (English Canadian locale)
+            US/
+              about.properties (English US locale)
+         de/
+            about.properties (German locale) </font></pre>
+<p>The files to be translated are not contained in JAR files.&nbsp; Each file
+should have exactly the same file name, but be located in subdirectories
+underneath the <b>nl</b> subdirectory in the fragment's (or plug-in's) root.</p>
+<p>Only the most specific file is accessed at runtime.&nbsp; The file paths are
+searched as part of the <a href="../reference/api/org/eclipse/core/runtime/IPluginDescriptor.html"><b>IPluginDescriptor.find</b></a><b>
+</b>and<b> <a href="../reference/api/org/eclipse/core/runtime/Plugin.html">Plugin.find</a>
+</b>mechanism.&nbsp; For example, suppose the default locale is <b>en_CA</b>,
+and a plug-in searches for the <b>about.properties</b> as follows:</p>
+<pre><font color="#4444CC">somePlugin.find(&quot;$nl$/about.properties&quot;);</font></pre>
+<p>The method will return a URL corresponding to the first place <b>about.properties</b> is found according to the following
+order:</p>
+<pre><font color="#4444CC">com.example.acme.acmewebsupport_1.0.0/nl/en/CA/about.properties
+com.example.acme.fragmentofacmewebsupport_1.0.0/nl/en/CA/about.properties
+ ...  		&lt;any other fragments&gt;
+com.example.acme.acmewebsupport_1.0.0/nl/en/about.properties
+com.example.acme.fragmentofacmewebsupport_1.0.0/nl/en/about.properties
+ ...
+com.example.acme.acmewebsupport_1.0.0/about.properties
+com.example.acme.fragmentofacmewebsupport_1.0.0/about.properties</font></pre>
+<p>This mechanism is used by plug-ins to search for well known file names inside
+other plug-ins.&nbsp; This includes the following well known file names:</p>
+<ul>
+  <li><b>preferences.properties</b>&nbsp; (externalized strings for plug-in
+    -specific preference default overrides)</li>
+  <li><b>about.properties</b>&nbsp; (externalized strings for feature
+    &quot;about&quot; information)</li>
+  <li><b>plugin_customization.properties</b>&nbsp; (externalized strings for
+    product-specific preference default overrides)</li>
+  <li><b>splash.bmp</b>&nbsp; (product-specific splash screens)</li>
+</ul>
+<blockquote>
+  <p><i>(Note:&nbsp; The <b>plugin.properties</b> and <b>fragment.xml </b>are
+  conspicuously absent from this list.&nbsp; For historical reasons, these files
+  are treated as Java properties resource bundles and use the other mechanism.)</i></p>
+</blockquote>
+<h4>Java resource bundles</h4>
+<p>The standard Java handling of property resource bundles is used for other
+files.&nbsp; Translated files are contained in a JAR file, with each properties
+file having a locale-specific name, such as &quot;<b>message_en_CA.properties</b>&quot;.&nbsp;
+The files are in package-specific subdirectories and may appear in the plug-in
+itself or one of its fragments.&nbsp; Each translated properties file may be
+partial since lookup of keys accesses a well-defined chain of properties files.</p>
+<p>As noted above, <b>plugin.properties</b> and <b>fragment.xml</b> are accessed
+using this technique.</p>
+</BODY>
+</HTML>
