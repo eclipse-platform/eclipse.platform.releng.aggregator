@@ -1,0 +1,44 @@
+/*******************************************************************************
+ * Copyright (c) 2003, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.perfmsr.core;
+
+import org.eclipse.perfmsr.core.Upload.Status;
+import org.eclipse.test.internal.performance.data.Sample;
+
+public interface IPerformanceMonitor {
+
+    /**
+     * @param logFile
+     */
+    void setLogFile(String logFile);
+
+    /**
+     * @param scenarioId
+     */
+    void setTestName(String scenarioId);
+
+    /**
+     * @param i
+     */
+    void snapshot(int i);
+
+    /**
+     * @param object
+     * @return
+     */
+    Status upload(Object object);
+
+    /**
+     * @return
+     */
+    Sample getSample();
+
+}
