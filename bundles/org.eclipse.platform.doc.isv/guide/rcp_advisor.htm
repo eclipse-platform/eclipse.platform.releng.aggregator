@@ -14,12 +14,100 @@ Customizing the workbench
 <H2>
 Customizing the workbench</H2>
 <P>
-[This document is under construction.]  Topics to be covered:
+The entry point for supplying custom application behavior for a rich client application is the designation of a
+<b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>
+for configuring the workbench.  Your rich client plug-in should extend this abstract class to provide
+the application-specific configuration for the workbench.  The browser example does this using the 
+<b>BrowserAdvisor</b> class.
+<font color='#4444CC'><pre>
+			...
+			int code = PlatformUI.createAndRunWorkbench(display,
+					<b>new BrowserAdvisor()</b>);
+			...
+</pre></font> 
+A workbench advisor is responsible for implementing methods that configure the workbench with appropriate layout and
+features, such as the application's action bar or intro page.  The following list of advisor methods that can be overridden
+comes from the javadoc for <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>.
 <ul>
-<li>BrowserAdvisor</li>
-<li>lifecycle</li>
-<li>other advisor concepts...</li>
-</ul>
+<li><code>initialize</code> - called first; before any windows; use to
+register things</li>
+<li><code>preStartup</code> - called second; after initialize but
+before first window is opened; use to temporarily disable things during
+startup or restore</li>
+<li><code>postStartup</code> - called third; after first window is
+opened; use to reenable things temporarily disabled in previous step</li>
+<li><code>postRestore</code> - called after the workbench and its windows
+has been recreated from a previously saved state; use to adjust the
+restored workbench</li>
+<li><code>preWindowOpen</code> - called as each window is being opened; 
+use to configure aspects of the window other than action bars </li>
+<li><code>fillActionBars</code> - called after <code>preWindowOpen</code> to
+configure a window's action bars</li>
+<li><code>postWindowRestore</code> - called after a window has been
+recreated from a previously saved state; use to adjust the restored
+window</li>
+<li><code>postWindowCreate</code> -  called after a window has been created,
+either from an initial state or from a restored state;  used to adjust the
+window</li>
+<li><code>openIntro</code> - called immediately before a window is opened in
+order to create the introduction component, if any.
+<li><code>postWindowOpen</code> - called after a window has been
+opened; use to hook window listeners, etc.</li>
+<li><code>preWindowShellClose</code> - called when a window's shell
+is closed by the user; use to pre-screen window closings</li>
+<li><code>eventLoopException</code> - called to handle the case where the
+event loop has crashed; use to inform the user that things are not well</li>
+<li><code>eventLoopIdle</code> - called when there are currently no more
+events to be processed; use to perform other work or to yield until new
+events enter the queue</li>
+<li><code>preShutdown</code> - called just after event loop has terminated
+but before any windows have been closed; use to deregister things registered
+during initialize</li>
+<li><code>postShutdown</code> - called last; after event loop has terminated
+and all windows have been closed; use to deregister things registered during
+initialize</li>
+</ul> 
+</p>
+<p>
+As you can see, a rich client application has a lot of control over how the workbench is configured
+and implemented.  The primary function of the <b>BrowserApp</b> is to configure the action bars with
+menu items appropriate for a browser.  This is done in the <b>fillActionBars</b> method:
+<font color='#4444CC'><pre>
+	public void fillActionBars(IWorkbenchWindow window, IActionBarConfigurer configurer, int flags) {
+		...
+		BrowserActionBuilder builder = new BrowserActionBuilder(window);
+		getWorkbenchConfigurer().getWindowConfigurer(window).setData(BUILDER_KEY, builder); 
+		builder.fillActionBars(configurer, flags);
+	}
+</pre></font> 
+In this method, the workbench is configured with a specialized action builder.  This action builder
+is used to fill the action bars of the workbench.  We'll look at the details for how the actions are specified
+in <a href="rcp_actions.htm">Defining the actions</a>.  For now, we are focusing on how we configure
+the workbench.
+</p>
+<p>
+Note the use of the <b>getWorkbenchConfigurer()</b> method above.  The 
+<b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchConfigurer.html">IWorkbenchConfigurer</a></b> and
+<b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchWindowConfigurer.html">IWorkbenchWindowConfigurer</a></b> are
+used in conjunction with the <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>
+to customize the window.  These classes allow you to override many aspects of workbench creation at different levels.
+For example, the <b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchWindowConfigurer.html">IWorkbenchWindowConfigurer</a></b> defines
+protocol that assumes a particular configuration of controls in the workbench window, such an action bar, status line, perspective bar,
+cool bar, etc.  Its protocol allows you customize and populate these items.  The 
+<b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchConfigurer.html">IWorkbenchConfigurer</a></b> 
+operates at a higher level, allowing you to store application-specific data with the workbench.  The
+<b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b> provides
+access to these configurers through the life cycle methods noted above.  Lower level methods inside 
+<b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b> may be overridden
+to completely replace default behavior.  For example, your workbench advisor could
+override the method that creates the SWT controls in the window in order to provide a completely
+different implementation for the main window.
+<p>
+In other words, there are many ways (and levels) for customizing the workbench.
+The javadoc for <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>
+and <b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchConfigurer.html">IWorkbenchConfigurer</a></b>
+includes a complete description of the available protocol.  See also the complete implementation of
+<b>BrowserAdvisor</b> for comments on alternate implementations. 
 </p>
 
 <p><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></p>
