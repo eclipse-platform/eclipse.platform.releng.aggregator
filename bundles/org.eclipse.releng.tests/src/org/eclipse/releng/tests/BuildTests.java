@@ -696,12 +696,11 @@ public class BuildTests extends TestCase {
 		if (index ==-1){
 			index=aLine.indexOf("Files Contain Warnings Only");
 		}
-		if (index==-1){
-			return -1;
-		} else {		
+		if (index!=-1){
 			String aString = aLine.substring(0, index).trim();
 			return Integer.parseInt(aString);
 		}
+		return -1;
 	}
 	
 	public class FileSuffixFilter implements FilenameFilter {
