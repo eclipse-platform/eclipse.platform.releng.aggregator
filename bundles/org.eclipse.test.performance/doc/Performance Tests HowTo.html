@@ -10,7 +10,7 @@
 <h1>Performance Tests HowTo</h1>
 <p>
 By Christof Marti and Andr&eacute; Weinand, IBM OTI Labs<br>
-2004/10/15<br>
+2004/10/29<br>
 
 <p>
 The Eclipse performance test plugin (org.eclipse.test.performance)
@@ -119,17 +119,24 @@ than in real-world scenarios.
 
 If the number of performance tests grows large, it becomes harder to
 get a good overview of the performance characteristics of a build. A
-solution for this problem is a&nbsp; performance summary graph that
-tries to condense a small subset of key performance tests into a graph
-that fits onto a single page. Every Eclipse component can mark one or
-two tests for inclusion in this performance summary. The bar graph
-shows the performance development of about 20 tests relative to a
-reference build in an easy to grasp red/green presentation.<br>
+solution for this problem is a performance summary chart that
+tries to condense a small subset of key performance tests into a chart
+that fits onto a single page. Currently the performance infrastructure 
+supports two levels of summaries, one global and any number of "local" summaries.
+A local summary is typically associated with a component.
 <p>
-<img style="width: 800px; height: 282px;" alt="summary graph" src="FP_I200409240800_I200410050800.jpeg">
+A summary bar chart shows the performance development of about 20 tests relative to a
+reference build in an easy to grasp red/green presentation.
+<p>
+<img alt="summary graph" src="FP_I200409240800_I200410050800.jpeg">
+<p>
+So dependent on the total number of components every Eclipse component can tag one or
+two tests for inclusion in a global and up to 20 for a local performance summary.
+Tests marked for the global summary are automatically included for a local summary.
 <p>
 Marking a test for inclusion is done by passing a performance meter
-into the method Performance.tagAsGlobalSummary(...). This method should
+into the method Performance.tagAsGlobalSummary(...) or Performance.tagAsSummary(...).
+Both methods should
 be called outside of start/stop calls but it must be called before the
 the call to commit().
 <pre>
@@ -140,20 +147,21 @@ perf.<b>tagAsGlobalSummary</b>(pm, "A Short Name", Dimension.CPU_TIME);
 try {
 	// ...
 </pre>
+<p>
 In order to keep the overview graph small, only a single dimension (CPU_TIME, USED_JAVA_HEAP etc.) of
 the test's data is shown and only a short name is used to label the
 data (instead of the rather long scenario ID). Both the short label as
-well as the dimension must be supplied in the call to tagAsGlobalSummary.
+well as the dimension must be supplied in the calls to tagAsGlobalSummary and tagAsSummary.
 The available dimensions can be found in <code>org.eclipse.test.performance.Dimension</code>.
 
 <p>
-The PerformanceTestCase provides a similar method that must be called
+The PerformanceTestCase provides similar methods that must be called
 before startMeasuring():
 <pre>
-public class MyPerformanceTestCase extends PeformanceTestCase {
+public class MyPerformanceTestCase extends PerformanceTestCase {
 
 	public void testMyOperation() {
-		<b>tagAsGlobalSummary</b>("A Short Name", Dimension.CPU_TIME);
+		<b>tagAsSummary</b>("A Short Name", Dimension.CPU_TIME);
 		for (int i= 0; i &lt; 10; i++) {
 			startMeasuring();
 			toMeasure();
