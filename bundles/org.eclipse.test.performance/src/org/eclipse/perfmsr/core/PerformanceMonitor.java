@@ -10,14 +10,16 @@
  *******************************************************************************/
 package org.eclipse.perfmsr.core;
 
-import java.util.Date;
+import java.text.NumberFormat;
 import java.util.Map;
+
+import org.eclipse.test.internal.performance.data.Scalar;
 
 
 /**
  * The PerformanceMonitor for Windows.
- * (It does not have the suffix "Windows"  in its name because it relies on natives
- * and we could not change the class name). 
+ * (It does not have the suffix "Windows" in its name because it relies on natives
+ * which we cannot change right now). 
  */
 public class PerformanceMonitor extends BasePerformanceMonitor {
     
@@ -226,17 +228,17 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 			    return;
 			}
 			if (nativeGetPerformanceCounters(counters)) {
-				for (int i = 0; i < _map.length; i++) {
+				for (int i= 0; i < _map.length; i++) {
                 	if ((i ==  WhatIdx.committed || i == WhatIdx.openHandles) && counters[i] == -1)
                 	    continue;
                 	
-                	writeValue(_map[i].what, counters[i], _map[i].label, 
+                	writeValue(scalars, _map[i].what, counters[i], _map[i].label, 
                 		_map[i].isTime ? formatedTime(counters[i])
                 		        		: formatEng(counters[i]));
                 }
                 
-                long cpu = counters[WhatIdx.userTime] + counters[WhatIdx.kernelTime];
-                writeValue(LoadValueConstants.What.cpuTime, cpu, WhatLabel.cpuTime, formatedTime(cpu));
+                long cpu= counters[WhatIdx.userTime] + counters[WhatIdx.kernelTime];
+                writeValue(scalars, LoadValueConstants.What.cpuTime, cpu, WhatLabel.cpuTime, formatedTime(cpu));
 			}
 		}
     }
@@ -265,7 +267,7 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 			for (int i= 0; i < pi.values.length; i++) {
 				PerformanceInfo.PerformanceValue v= pi.values[i];
 				long result = v.rawValue();
-				writeValue(v.getWhat(), result, v.getLabel(), formatEng(result));
+				writeValue(scalars, v.getWhat(), result, v.getLabel(), formatEng(result));
 			}
 		}
 	}
@@ -295,15 +297,65 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 	
 	//---- dummies
 	
-    private String formatedTime(long l) {
-        return new Date(l).toString();
-    }
+	/**
+	 * Answer a formatted string for the elapsed time (minutes, hours or days) 
+	 * that is appropriate for the scale of the time.
+	 * 
+	 * @param diff time in milliseconds
+	 * 
+	 * I copied this from karasiuk.utility.TimeIt
+	 */
+	public static String formatedTime(long diff)
+	{
+		if (diff < 0)diff *= -1;
+ 		if (diff < 1000)
+ 			return String.valueOf(diff) + " milliseconds";
+ 		
+ 		NumberFormat nf = NumberFormat.getInstance();
+ 		nf.setMaximumFractionDigits(1);
+		double d = diff / 1000.0;	
+		if (d < 60)
+			return nf.format(d) + " seconds";
+		
+		d = d / 60.0;
+		if (d < 60.0)
+			return nf.format(d) + " minutes";
+	
+		d = d / 60.0;
+		if (d < 24.0)
+			return nf.format(d) + " hours";
+	
+		d = d / 24.0;
+		return nf.format(d) + " days";
+	}
+	
 
-    private String formatEng(long l) {
-        return Long.toString(l);
-    }
-
-    private void writeValue(int i, long l, String string, String object) {
-        System.out.println(i + ": " + string + " " + object);
+	/**
+	 * Answer a number formatted using engineering conventions, K thousands, M millions,
+	 * G billions and T trillions.
+	 * 
+	 * I copied this method from karasiuk.utility.Misc.
+	 */
+	public static String formatEng(long n)
+	{
+		if (n < 1000)return String.valueOf(n);
+		double d = n / 1000.0;
+		NumberFormat nf = NumberFormat.getInstance();
+		nf.setMaximumFractionDigits(1);
+		if (d < 1000.0)return nf.format(d) + "K";
+		
+		d = d / 1000.0;
+		if ( d < 1000.0)return nf.format(d) + "M";
+		
+		d = d / 1000.0;
+		if ( d < 1000.0)return nf.format(d) + "G";
+		
+		d = d / 1000.0;
+		return nf.format(d) + "T";
+	}
+	
+    private void writeValue(Map scalars, int i, long l, String string, String object) {
+        //System.out.println(i + ": " + string + " " + object);
+        scalars.put("" + i, new Scalar("" + i, l));
     }
 }
