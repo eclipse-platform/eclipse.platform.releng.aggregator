@@ -4,6 +4,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
 <title>Eclipse 3.0 Porting Guide</title>
 </head>
@@ -11,8 +13,8 @@
 <body>
 
 <h1>Eclipse 3.0 Porting Guide</h1>
-<p>Draft for 3.0 M5<br>
-Last revised November 20, 2003</p>
+<p>Draft for 3.0 M6<br>
+Last revised December 4, 2003</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -947,6 +949,321 @@ added are:</p>
 a complete path equivalent to that of the three new attributes. However, <code>VMRunners</code>
 that support the new boot path options should take advantage of the new
 attributes.</p>
+<h3>[JDT only] Improved support for working copies (package org.eclipse.jdt.core)</h3>
+<p>The Java model working copy facility has been reworked in 3.0 to provide
+greatly increased functionality. Prior to 3.0, the Java model allowed creation
+of individual working copies of compilation units. Changes could be made to the
+working copy and later committed. There was support for limited analysis of a
+working copy in the context of the rest of the Java model. However, there was no
+way these these analyses could ever take into account more than one of the
+working copies at a time.</p>
+<p>The changes in 3.0 make it possible to create and manage sets of working
+copies of compilation units, and to perform analyses in the presence of all
+working copies in a set. For example, it is now possible for a client like JDT
+refactoring to create working copies for one or more compilation units that it
+is considering modifying and then to resolve type references between the working
+copies. Formerly this was only possible after the changes to the compilation
+unit working copies had been committed.</p>
+<p>The Java model API changes in 2 ways to add this improved support:</p>
+<p>(1) The functionality formerly found on <code>IWorkingCopy</code> and
+inherited by <code>ICompilationUnit</code> has been consolidated into <code>ICompilationUnit</code>.
+The <code>IWorkingCopy</code> interface was only used in this one place, and was
+gratuitously more general that in needed to be. This change simplifies the API. <code>IWorkingCopy</code>
+has been deprecated. Other places in the API where <code>IWorkingCopy</code> is
+used as a parameter or result type have been deprecated as well; the replacement
+API methods mention <code>ICompilationUnit</code> instead of <code>IWorkingCopy</code>.</p>
+<p>(2) The interface <code>IBufferFactory</code> has been replaced by <code>WorkingCopyOwner</code>.
+The improved support for working copies requires that there be an object to own
+the working copies. Although <code>IBufferFactory</code> is in the right place,
+the name does not adequately convey how the new working copy mechanism works. <code>WorkingCopyOwner</code>
+is much more suggestive. In addition, <code>WorkingCopyOwner</code> is declared
+as an abstract class, rather than as an interface, to allow the notion of
+working copy owner to evolve in the future. The one method on <code>IBufferFactory</code>
+moves to <code>WorkingCopyOwner</code> unaffected. <code>WorkingCopyOwner</code>
+does not implement <code>IBufferFactory</code> to make it clear that <code>IBufferFactory</code>
+is a thing of the past. <code>IBufferFactory</code> has been deprecated. Other
+places in the API where <code>IBufferFactory</code> appears as a parameter or
+result type have been deprecated as well; the replacement API methods mention <code>WorkingCopyOwner</code>
+instead of <code>IBufferFactory</code>.</p>
+<p>These changes do not break binary compatibility.</p>
+<p>When migrating, all references to the type <code>IWorkingCopy</code> should
+instead reference <code>ICompilationUnit</code>. The sole implementation of <code>IWorkingCopy</code>
+implements <code>ICompilationUnit</code> as well, meaning objects of type <code>IWorkingCopy</code>
+can be safely cast to <code>ICompilationUnit</code>.</p>
+<p>A class that implements <code>IBufferFactory</code> will need to replaced by
+a subclass of <code>WorkingCopyOwner</code>. Although <code>WorkingCopyOwner</code>
+does not implement <code>IBufferFactory</code> itself, it would be possible to
+declare the subclass of <code>WorkingCopyOwner</code> that implements <code>IBufferFactory</code>
+thereby creating a bridge between old and new (<code>IBufferFactory</code>
+declares <code>createBuffer(IOpenable)</code> whereas <code>WorkingCopyOwner</code>
+declares <code>createBuffer(ICompilationUnit)</code>; <code>ICompilationUnit</code>
+extends <code>IOpenable</code>).</p>
+<p>Because the changes involving <code>IWorkingCopy</code> and <code>IBufferFactory</code>
+are interwined, we recommend dealing with both at the same time. The details of
+the deprecations are as follows:</p>
+<ul>
+  <li><code>IWorkingCopy</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public void commit(boolean, IProgressMonitor)</code> has been
+        deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public void commitWorkingCopy(boolean, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.commit(b,monitor)</code> as <code>((ICompilationUnit)
+            wc).commitWorkingCopy(b,monitor)</code></li>
+        </ul>
+      </li>
+      <li><code>public void destroy()</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public void discardWorkingCopy(boolean, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.destroy()</code> as <code>((ICompilationUnit)
+            wc).discardWorkingCopy()</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement findSharedWorkingCopy(IBufferFactory)</code>
+        has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit findWorkingCopy(WorkingCopyOwner)</code></li>
+            </ul>
+          </li>
+          <li>Note: <code>WorkingCopyOwner</code> substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getOriginal(IJavaElement)</code> has been
+        deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>IJavaElement</code>:
+            <ul>
+              <li><code>public IJavaElement getPrimaryElement()</code></li>
+            </ul>
+          </li>
+        </ul>
+        <ul>
+          <li>Rewrite <code>wc.getOriginal(elt)</code> as <code>elt.getPrimaryElement()</code></li>
+          <li>Note: Unlike <code>IWorkingCopy.getOriginal</code>, <code>IJavaElement.getPrimaryElement</code>
+            does not return <code>null</code> if the receiver is not a working
+            copy.</li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getOriginalElement()</code> has been
+        deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getPrimary()</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.getOriginalElement()</code> as <code>((ICompilationUnit)
+            wc).getPrimary()</code></li>
+          <li>Note: Unlike <code>IWorkingCopy.getOriginalElement</code>, <code>IWorkingCopy.getPrimary</code>
+            does not return <code>null</code> if the receiver is not a working
+            copy.</li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement[] findElements(IJavaElement)</code> has been
+        deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.findElements(elts)</code> as <code>((ICompilationUnit)
+            wc).findElements(elts)</code></li>
+        </ul>
+      </li>
+      <li><code>public IType findPrimaryType()</code> has been deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.findPrimaryType()</code> as <code>((ICompilationUnit)
+            wc).findPrimaryType()</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getSharedWorkingCopy(IProgressMonitor,
+        IBufferFactory, IProblemRequestor)</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(WorkingCopyOwner,
+                IProblemRequestor, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: the parameter order has changed, and <code>WorkingCopyOwner</code>
+            substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getWorkingCopy()</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.getWorkingCopy() </code>as <code>((ICompilationUnit)
+            wc).getWorkingCopy(null)</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getWorkingCopy(IProgressMonitor,
+        IBufferFactory, IProblemRequestor)</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(WorkingCopyOwner,
+                IProblemRequestor, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: the parameter order has changed, and <code>WorkingCopyOwner</code>
+            substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+      <li><code>public boolean isBasedOn(IResource)</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public boolean hasResourceChanged()</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.isBasesOn(res)</code> as <code>((ICompilationUnit)
+            wc).hasResourceChanged()</code></li>
+        </ul>
+      </li>
+      <li><code>public boolean isWorkingCopy()</code> has been deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.isWorkingCopy()</code> as <code>((ICompilationUnit)
+            wc).isWorkingCopy()</code></li>
+        </ul>
+      </li>
+      <li><code>public IMarker[]&nbsp; reconcile()</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public void reconcile(boolean,IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.reconcile()</code> as <code>((ICompilationUnit)
+            wc).reconcile(false, null)</code></li>
+          <li>Note: The former method always returned <code>null</code>; the
+            replacement method does not return a result.</li>
+        </ul>
+      </li>
+      <li><code>public void reconcile(boolean, IProgressMonitor)</code> has been
+        deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.reconcile(b,monitor)</code> as <code>((ICompilationUnit)
+            wc).reconcile(b.monitor)</code></li>
+        </ul>
+      </li>
+      <li><code>public void restore()</code> has been deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.restore()</code> as <code>((ICompilationUnit)
+            wc).restore()</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>IType</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public ITypeHierarchy newSupertypeHierarchy(IWorkingCopy[],
+        IProgressMonitor)</code> has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ITypeHierarchy newSupertypeHierarchy(c,
+                IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: The Java language rules for array types preclude casting <code>IWorkingCopy[]</code>
+            to <code>ICompilationUnit[]</code>.</li>
+        </ul>
+      </li>
+      <li><code>public ITypeHierarchy newTypeHierarchy(IWorkingCopy[],
+        IProgressMonitor)</code> has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ITypeHierarchy newTypeHierarchy(ICompilationUnit[],
+                IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: The Java language rules for array types preclude casting <code>IWorkingCopy[]</code>
+            to <code>ICompilationUnit[]</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>IClassFile</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public IJavaElement getWorkingCopy(IProgressMonitor,
+        IBufferFactory)</code> has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(WorkingCopyOwner,
+                IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: the parameter order has changed, and <code>WorkingCopyOwner</code>
+            substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>JavaCore</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public IWorkingCopy[] getSharedWorkingCopies(IBufferFactory)</code>
+        has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ICompilationUnit[]
+                getWorkingCopies(WorkingCopyOwner)</code></li>
+            </ul>
+          </li>
+          <li>Note: <code>WorkingCopyOwner</code> substitutes for <code>IBufferFactory.</code></li>
+          <li>Note: The Java language rules for array types preclude casting <code>ICompilationUnit[]</code>
+            to <code>IWorkingCopy[]</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>SearchEngine</code> (package <code>org.eclipse.jdt.core.search</code>)
+    <ul>
+      <li><code>public SearchEngine(IWorkingCopy[])</code> has been deprecated.
+        <ul>
+          <li>The replacement constructor is provided on the same class:
+            <ul>
+              <li><code>public SearchEngine(ICompilationUnit[])</code></li>
+            </ul>
+          </li>
+          <li>Note: The Java language rules for array types preclude casting <code>IWorkingCopy[]</code>
+            to <code>ICompilationUnit[]</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
 <h3>Restructuring of org.eclipse.help plug-in</h3>
 <p>The org.eclipse.help plug-in, which used to hold APIs and extension points
 for contributing to and extending help system, as well as displaying help, now
@@ -980,8 +1297,8 @@ completeness:</p>
 They are mentioned here because the proposed changes impact existing plug-ins
 being ported to 3.0.</p>
 <ul>
-  <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-core-home/runtime/index.html"><b>New 
-    core runtime</b></a> (plan items <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=37687">37687</a> 
+  <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/runtime/index.html"><b>New
+    core runtime</b></a> (plan items <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=37687">37687</a>
     and <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=36956">36956</a>)</li>
   <li><b>Remove dependency on org.eclipse.xerces plug-in</b> (plan item <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37696">37696</a>)</li>
 </ul>
@@ -1050,7 +1367,6 @@ unsupportable and receive no guarantees about compatibility within a single
 release much less with an earlier releases. Refer to <i><a href="http://www.eclipse.org/articles/Article-API%20use/eclipse-api-usage-rules.html">How
 to Use the Eclipse API</a></i> for information about how to write compliant
 plug-ins. This porting guide does not cover non-API methods and classes.</p>
-
 <p><a href="../hglegal.htm"><img src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="250" height="12"></a></p>
 
 </body>
