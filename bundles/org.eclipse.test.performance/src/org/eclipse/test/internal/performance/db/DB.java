@@ -40,6 +40,10 @@ public class DB {
     
     private static final boolean DEBUG= false;
     private static final boolean AGGREGATE= true;
+    
+    // the two supported DB types
+    private static final String DERBY= "derby"; //$NON-NLS-1$
+    private static final String CLOUDSCAPE= "cloudscape"; //$NON-NLS-1$
         
     private static DB fgDefault;
     
@@ -572,7 +576,8 @@ public class DB {
 
         if (fConnection != null)
             return;
-               
+
+
         String dbloc= PerformanceTestPlugin.getDBLocation();
         if (dbloc == null)
             return;
@@ -581,27 +586,31 @@ public class DB {
         String url= null;
         java.util.Properties info= new java.util.Properties();
         
+        fDBType= DERBY;	// assume we are using Derby
         try {            
             if (dbloc.startsWith("net://")) { //$NON-NLS-1$
                 // remote
                 fIsEmbedded= false;
-                info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
-                info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 // connect over network
                 if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
                 Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
+                info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
+                info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
                 url= dbloc + "/" + dbname;  //$NON-NLS-1$//$NON-NLS-2$
-                fDBType= "cloudscape"; //$NON-NLS-1$
             } else {
+                
+                // workaround for Derby issue: http://nagoya.apache.org/jira/browse/DERBY-1
+                if ("Mac OS X".equals(System.getProperty("os.name")))  //$NON-NLS-1$//$NON-NLS-2$
+                    System.setProperty("derby.storage.fileSyncTransactionLog", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+
                 // embedded
                 fIsEmbedded= true;
                 try {
                     Class.forName("org.apache.derby.jdbc.EmbeddedDriver"); //$NON-NLS-1$
-                    fDBType= "derby"; //$NON-NLS-1$
                 } catch (ClassNotFoundException e) {
                     Class.forName("com.ihost.cs.jdbc.CloudscapeDriver"); //$NON-NLS-1$
-                    fDBType= "cloudscape"; //$NON-NLS-1$
+                    fDBType= CLOUDSCAPE;
                 }
                 if (DEBUG) System.out.println("Loaded embedded " + fDBType); //$NON-NLS-1$
                 File f;
@@ -615,7 +624,17 @@ public class DB {
                 url= new File(f, dbname).getAbsolutePath();
             }
             info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-            fConnection= DriverManager.getConnection("jdbc:" + fDBType + ':' + url, info); //$NON-NLS-1$
+            try {
+                fConnection= DriverManager.getConnection("jdbc:" + fDBType + ":" + url, info); //$NON-NLS-1$ //$NON-NLS-2$
+            } catch (SQLException e) {
+                if (DERBY.equals(fDBType)) {
+                    if (DEBUG) System.out.println("DriverManager.getConnection failed; retrying for cloudscape"); //$NON-NLS-1$
+                    // try Cloudscape
+                    fDBType= CLOUDSCAPE;
+                    fConnection= DriverManager.getConnection("jdbc:" + fDBType + ":" + url, info); //$NON-NLS-1$ //$NON-NLS-2$
+                } else
+                    throw e;
+            }
             if (DEBUG) System.out.println("connect succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
