@@ -12,7 +12,57 @@ Working sets
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h2>Working sets</h2>
-<p>&nbsp;</p>
+<p>Users often find it necessary to filter views such as the navigator view in
+order to reduce clutter.&nbsp; Plug-ins can assist in filtering using different
+techniques.</p>
+
+
+<ul>
+  <li><b><a href="workbench_advext_resourceFilters.htm">Resource filters</a></b>
+    can be used to filter by file name.&nbsp; Plug-ins contribute resource
+    filters that the user can enable using a view's filter selection dialog.</li>
+  <li><b>Working sets</b> can be used to filter resources by only including
+    specified resources.&nbsp; Working sets are selected and defined using the
+    view's filter selection dialog.</li>
+</ul>
+<p><img border="0" src="images/workingset.jpg" width="438" height="474"></p>
+<p>If your plug-in implements a view that shows resources (or objects that are
+adaptable to <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>),
+you should support working sets.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>provides API for manipulating working sets.&nbsp; You can obtain an <b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>using <b><a href="../reference/api/org/eclipse/ui/IWorkbench.html">IWorkbench</a></b>
+API.</p>
+<pre><font color="#4444CC">IWorkingSetManager manager = workbench.getWorkingSetManager();</font></pre>
+<p><b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>allows you to<b> </b>manipulate and create working sets:</p>
+<ul>
+  <li><b>createWorkingSetSelectionDialog</b> - opens a working set dialog that
+    shows the user the current working sets and answers the selected working
+    sets</li>
+  <li><b>getWorkingSets()</b> - returns a list of all defined working sets</li>
+  <li><b>getWorkingSet(String name) </b>- returns a working set specified by
+    name</li>
+</ul>
+<p><b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>also provides property change notification as working sets are added,
+removed, or as they change.&nbsp; If your view or editor needs to respond to
+changes in the selected working set, it can add a listener for <b>CHANGE_WORKING_SET_CONTENT_CHANGE.</b></p>
+<h3>Adding new working set types</h3>
+
+
+<p>For many plug-ins, using <b><a href="../reference/api/org/eclipse/ui/IWorkingSetManager.html">IWorkingSetManager</a>
+</b>to provide resource filtering is sufficient.&nbsp; If your plug-in needs to
+define working sets differently, it can register a new type of working set using
+<b><a href="../reference/extension-points/org/eclipse/ui/workingSets.html">org.eclipse.ui.workingSets</a></b>.&nbsp;
+The Java tooling uses this feature to define a Java working set type.&nbsp;
+Working set types are shown when the user decides to add a working set.</p>
+
+
+<p><img border="0" src="images/workingSetTypes.jpg" width="438" height="431"></p>
+
+
+<p>See the <b><a href="../reference/extension-points/org/eclipse/ui/workingSets.html">org.eclipse.ui.workingSets</a>
+</b>extension point documentation for more detail.</p>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
