@@ -13,6 +13,13 @@
   <!-- should be done within the body of the suite target. -->
   <target name="init">
     <tstamp/>
+  	<!--determine if files are available to run startup performance tests-->
+  	<condition property="startupFrameworkAvailable">
+  		<and>
+  			<available file="${eclipse-home}/../../apt" />
+  			<isset property="performance"/>
+  		</and>
+  	</condition>
    </target>
 
   <!-- This target holds code to cleanup the testing environment after the tests -->
@@ -48,6 +55,16 @@
     </ant>
   </target>
 
+  <target name="startupTest" depends="init,cleanup" if="startupFrameworkAvailable">
+	  <exec dir="${eclipse-home}/../../apt/bin" executable="cmd">
+  		<arg line="/c autorun.bat" />
+	  </exec>
+  	  <copy todir="${results}/performance">
+  	  	<fileset dir="${eclipse-home}" includes="timer*" />
+  	  </copy>
+  	  		
+  </target>
+	
   <!-- This target defines the tests that need to be run. -->
-  <target name="suite" depends="benchmark,BuildTests"/>
+  <target name="suite" depends="startupTest,BuildTests"/>
  </project>
