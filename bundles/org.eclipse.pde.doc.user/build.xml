@@ -1,93 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="org.eclipse.pde.doc.user" default="plugin.zip" basedir=".">
-  <target name="initTemplate" unless="template">
-    <initTemplate/>
-  </target>
-  <target name="init" depends="initTemplate">
-    <property name="plugin" value="org.eclipse.pde.doc.user"/>
-    <property name="version" value="1.0.0"/>
-    <property name="stamp" value=""/>
-  </target>
+<project name="org.eclipse.pde.doc.user" default="build.jars" basedir=".">
 
-  <target name="src.zip" depends="init">
-    <property name="base" value="${basedir}/src.zip.pdetemp"/>
-    <delete dir="${base}"/>
-    <mkdir dir="${base}"/>
-    <antcall target="src">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-	<exec dir="${base}" executable="zip">
-	   <arg line="-r ${basedir}/${plugin}_${version}.src.zip ."/>
-	</exec>
-    <delete dir="${base}"/>
-  </target>
 
-  <target name="plugin.zip" depends="bin.zip"/>
-  <target name="bin.zip" depends="init">
-    <property name="base" value="${basedir}/bin.zip.pdetemp"/>
-    <delete dir="${base}"/>
-    <mkdir dir="${base}"/>
-    <antcall target="jar">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-    <antcall target="bin">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-	<exec dir="${base}" executable="zip">
-	  <arg line="-r ${basedir}/${plugin}_${version}.zip . -x *.bin.log "/>
-	</exec>
-    <delete dir="${base}"/>
-  </target>
+	<target name="init">
+		<property name="plugin" value="org.eclipse.pde.doc.user"/>
+		<property name="version" value="2.0.0"/>
+		<property name="stamp" value=""/>
+	</target>
 
-  <target name="log.zip" depends="init">
-    <property name="base" value="${basedir}/log.zip.pdetemp"/>
-    <delete dir="${base}"/>
-    <mkdir dir="${base}"/>
-    <antcall target="log">
-      <param name ="destroot" value="${base}/plugins/${plugin}_${version}"/>
-    </antcall>
-	<exec dir="${base}" executable="zip">
-	   <arg line="-r ${basedir}/${plugin}_${version}.log.zip ."/>
-	</exec>
-    <delete dir="${base}"/>
-  </target>
+	<target name="build.update.jar" depends="init">
+		<property name="base" value="${basedir}/bin.zip.pdetemp"/>
+		<delete dir="${base}"/>
+		<mkdir dir="${base}"/>
+		<antcall target="build.jars"/>
+		<antcall target="gather.bin.parts">
+			<param name="destination" value="${base}/"/>
+		</antcall>
+		<delete>
+			<fileset dir="${base}" includes="**/*.bin.log"/>
+		</delete>
+		<zip zipfile="${basedir}/${plugin}_${version}.jar" basedir="${base}/${plugin}_${version}"/>
+		<delete dir="${base}"/>
+	</target>
 
-  <target name="jar" depends="init">
-
-	<!-- Customization for zipping of doc. -->
-	<zip zipfile="${basedir}/doc.zip"
+	<target name="gather.bin.parts" depends="init" if="destination">
+<zip zipfile="${basedir}/doc.zip"
 		basedir="${basedir}"
 		includes="book.css, hglegal.htm, ngibmcpy.gif, guide/**"
-	/>			
-  
-  </target>
+	/>	
 
-  <target name="src" depends="init">
-  </target>
+		<mkdir dir="${destination}/${plugin}_${version}"/>
+		<copy todir="${destination}/${plugin}_${version}">
+			<fileset dir="${basedir}" includes="doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.gif,book.css" excludes="build.properties,build.xml"/>
+		</copy>
 
-  <target name="bin" depends="init">
-    <property name="destroot" value="${basedir}"/>
-    <ant antfile="${template}" target="bin">
-      <property name="includes" value="doc/,*.properties,*.xml,*.zip,*.html,*.htm,*.gif,book.css"/>
-      <property name="excludes" value="build.properties,build.xml"/>
-      <property name="dest" value="${destroot}"/>
-    </ant>
-  </target>
+	</target>
 
-  <target name="log" depends="init">
-    <property name="destroot" value="${basedir}"/>
-    <ant antfile="${template}" target="log">
-      <property name="dest" value="${destroot}"/>
-    </ant>
-  </target>
+	<target name="build.jars" depends="init">
+	</target>
 
-  <target name="clean" depends="init">
-    <delete>
-      <fileset dir="." includes="**/*.pdetemp"/>
-    </delete>
-    <delete file="${plugin}_${version}.zip"/>
-    <delete file="${plugin}_${version}.src.zip"/>
-    <delete file="${plugin}_${version}.doc.zip"/>
-    <delete file="${plugin}_${version}.log.zip"/>
-  </target>
+	<target name="gather.sources" depends="init" if="destination">
+		<mkdir dir="${destination}/${plugin}_${version}"/>
+	</target>
+
+	<target name="build.sources" depends="init">
+	</target>
+
+	<target name="gather.logs" depends="init">
+		<property name="base" value="${destination}/${plugin}_${version}"/>
+		<mkdir dir="${base}"/>
+		<copy todir="${base}">
+			<fileset dir="${basedir}" includes="*.log"/>
+		</copy>
+	</target>
+
+	<target name="clean" depends="init">
+		<delete>
+			<fileset dir="${basedir}" includes="**/*.pdetemp"/>
+		</delete>
+		<delete file="${plugin}_${version}.jar"/>
+		<delete file="${plugin}_${version}.src.zip"/>
+		<delete file="${plugin}_${version}.log.zip"/>
+	</target>
+
 </project>

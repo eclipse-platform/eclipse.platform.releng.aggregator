@@ -1,0 +1,68 @@
+<project name="Jdt Doc Isv Build" default="all"  basedir="." >
+
+<property name="install" value="${basedir}/../../" />
+
+<target name="all">
+	<antcall target="extensionPointDocCopy" />
+	<antcall target="examplesDocCopy" />
+	<antcall target="generateJavadoc" />	
+</target>
+
+
+<target name="extensionPointDocCopy" >
+	<copy todir="${install}/plugins/org.eclipse.jdt.doc.isv/reference/extension-points">
+    	<fileset dir="${install}/plugins/org.eclipse.debug.core/doc"/>
+    	<fileset dir="${install}/plugins/org.eclipse.debug.ui/doc"/>
+    	<!--fileset dir="${install}/plugins/org.eclipse.jdt.debug/doc"/-->
+    	<fileset dir="${install}/plugins/org.eclipse.jdt.launching/doc"/>
+    	<fileset dir="${install}/plugins/org.eclipse.jdt.ui/doc"/>
+    	<fileset dir="${install}/plugins/org.eclipse.search/doc"/>
+    </copy>
+</target>
+
+<target name="examplesDocCopy" >
+	 <copy todir="${install}/plugins/org.eclipse.jdt.doc.isv/samples">
+    	<fileset dir="${install}/plugins">
+    		<include name="**/org.eclipse.jdt.ui.examples.projects/doc-html/"/>
+	    </fileset>
+	  </copy>
+</target>
+
+<target name="generateJavadoc" if="JAVADOC14_HOME">
+
+	<condition property="optionsFile" value="jdtOptions">
+	      <os family="unix" />
+    </condition>
+    <condition property="optionsFile" value="jdtOptions.txt">
+	      <os family="windows" />
+    </condition>
+
+	<replace file="${basedir}/${optionsFile}" token="@version@" value="2.0 (pre-release)"/>
+	<replace file="${basedir}/${optionsFile}" token="@stamp@" value="${buildid}" />
+	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${rt}" />
+
+		
+	<!--scrub isv plugin directories of any preexisting api doc content-->
+	<delete dir="${install}/plugins/org.eclipse.jdt.doc.isv/reference/api"/>
+	<mkdir dir="${install}/plugins/org.eclipse.jdt.doc.isv/reference/api"/>
+
+	<exec dir="." executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
+		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
+	</exec>
+</target>
+
+</project>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
