@@ -67,9 +67,11 @@ public class TagAndReleaseOperation extends TagOperation {
 		monitor.beginTask("Tagging with " + getTag().getName(), 100);
 		super.execute(new SubProgressMonitor(monitor, 95));
 		
+		monitor.subTask("Updating and committing map files");
+        // Always update the map file even if tagging failed
+		updateMapFile();
+        // Only commit if there are no errors
 		if (!errorsOccurred()) {
-			monitor.subTask("Updating and committing map files");
-			updateMapFile();
 			try {
 				mapProject.commitMapProject(comment,monitor);
 			} catch (CoreException e) {
