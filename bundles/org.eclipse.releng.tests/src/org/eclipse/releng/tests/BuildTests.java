@@ -86,7 +86,6 @@ public class BuildTests extends TestCase {
 				int aNumber = parseLine(aLine);
 				if (aNumber > 0) {
 					result = true;
-					break;
 				}
 				aLine = aReader.readLine();
 			}
@@ -690,18 +689,18 @@ public class BuildTests extends TestCase {
 	 * warnings.
 	 */
 	private int parseLine(String aLine) {
-		int index = -1;
-				
-		if ((index = aLine.indexOf("Files Could Not Be Processed"))==-1){
-			return index;
+		int index = aLine.indexOf("Files Could Not Be Processed: ");
+		
+		if (index ==-1){
+			index=aLine.indexOf("Files Contain Error");
 		}
 		
-		if ((index = aLine.indexOf("Files Contain Error"))==-1){
-			return index;
+		if (index==-1){
+			return -1;
+		} else {		
+			String aString = aLine.substring(0, index).trim();
+			return Integer.parseInt(aString);
 		}
-		
-		String aString = aLine.substring(0, index).trim();
-		return Integer.parseInt(aString);
 	}
 	
 	public class FileSuffixFilter implements FilenameFilter {
