@@ -49,30 +49,36 @@ editor actions.&nbsp; However, adding your actions to the predefined team menu
 makes it easier for the end user to find your actions.</p>
 <p>Let's look at a CVS action that demonstrates some interesting points:</p>
 <pre><font color="#4444CC">&lt;extension
-     point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
-  &lt;objectContribution
-        objectClass=&quot;org.eclipse.core.resources.IFile&quot;
-        adaptable=&quot;true&quot;
-        id=&quot;org.eclipse.team.ccvs.ui.IFileContributions&quot;&gt;
-     &lt;filter
-           <b>name=&quot;projectNature&quot;
-          value=&quot;org.eclipse.team.cvs.core.cvsnature&quot;</b>&gt;
-     &lt;/filter&gt;
-     &lt;action
-           label=&quot;%IgnoreAction.label&quot;
-           tooltip=&quot;%IgnoreAction.tooltip&quot;
-           class=&quot;org.eclipse.team.internal.ccvs.ui.actions.IgnoreAction&quot;
-           <b>menubarPath=&quot;team.main/group3&quot;</b>
-           id=&quot;org.eclipse.team.ccvs.ui.ignore&quot;&gt;
-     &lt;/action&gt;
-   ...</font></pre>
-<p>Note that the action is contributed using the <a href="../reference/extension-points/org_eclipse_ui_popupMenus.html">org.eclipse.ui.popupMenus
+    point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
+     &lt;objectContribution
+           objectClass=&quot;org.eclipse.core.resources.IFile&quot;
+           adaptable=&quot;true&quot;
+           id=&quot;org.eclipse.team.ccvs.ui.IFileContributions&quot;&gt;
+        &lt;filter
+              <b>name=&quot;projectPersistentProperty&quot;</b>
+              <b>value=&quot;org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature&quot;&gt;</b>
+        &lt;/filter&gt;
+        &lt;action
+              label=&quot;%IgnoreAction.label&quot;
+              tooltip=&quot;%IgnoreAction.tooltip&quot;
+              class=&quot;org.eclipse.team.internal.ccvs.ui.actions.IgnoreAction&quot;
+              menubarPath=&quot;<b>team.main/group3</b>&quot;
+              helpContextId=&quot;org.eclipse.team.cvs.ui.team_ignore_action_context&quot;
+              id=&quot;org.eclipse.team.ccvs.ui.ignore&quot;&gt;
+        &lt;/action&gt;
+	...</font></pre>
+<p>Note that the action is contributed using the <a href="../reference/extension-points/org_eclipse_ui_popupMenus.html"><b>org.eclipse.ui.popupMenus
+</b>
 </a>workbench extension point.&nbsp; Here are some team-specific things
 happening in the markup:</p>
 <ul>
-  <li>the action is filtered by the project nature defined by the CVS
-    plug-in.&nbsp; This ensures that the CVS popup menu items only appear for
-    files that appear in projects with the CVS project nature.</li>
+  <li>the action is filtered by a project persistent property which identifies
+    team providers.&nbsp; The value of the property must be of the format <b>&quot;org.eclipse.team.core.repository=&lt;your
+    repository id&gt;&quot;</b> where <b>&lt;your repository id&gt;</b> is the <b>id</b>
+    provided in the <a href="../reference/extension-points/org_eclipse_team_core_repository.html"> <b> org.eclipse.team.core.repository</b></a> 
+    markup.&nbsp; This filter ensures that the CVS popup menu items only appear for
+    files that appear in projects that have been mapped to the CVS repository
+    id.</li>
   <li>the action is added to a group in the menu that was specified above in the
     team UI plug-in</li>
 </ul>

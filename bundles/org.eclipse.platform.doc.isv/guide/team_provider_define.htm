@@ -13,21 +13,28 @@
 <H3>
 Defining a provider</H3>
 <P >
-The <a href="../reference/extension-points/org_eclipse_core_resources_natures.html"> <b> org.eclipse.core.resources.natures</b></a> extension point is used to add a project nature definition.&nbsp;
+The <a href="../reference/extension-points/org_eclipse_team_core_repository.html"> <b> org.eclipse.team.core.repository</b></a> extension point is used to add a
+repository definition.&nbsp;
 Here is the markup for the CVS client.</P>
-<font color='#4444CC'><pre>&lt;extension 
-	point=&quot;org.eclipse.core.resources.natures&quot; 
-	id=&quot;cvsnature&quot; 
-	name=&quot;%cvsNature&quot;&gt;
-	&lt;runtime&gt;
-		&lt;run class=&quot;<b>org.eclipse.team.internal.ccvs.core.CVSTeamProvider</b>&quot;/&gt;
-	&lt;/runtime&gt;
-	&lt;<b>one-of-nature id=&quot;org.eclipse.team.repository-provider&quot;</b>/&gt;
+<font color='#4444CC'>
+<pre>&lt;extension
+    point=&quot;org.eclipse.team.core.repository&quot;&gt;
+      &lt;repository
+            class=&quot;org.eclipse.team.internal.ccvs.core.CVSTeamProvider&quot;
+            id=&quot;org.eclipse.team.cvs.core.cvsnature&quot;&gt;
+      &lt;/repository&gt;
 &lt;/extension&gt;</pre>
-<p>The project nature must be declared as one of the nature set &quot;org.eclipse.team.repository-provider.&quot;&nbsp;
-This ensures that only one repository provider can be assigned to any given
-project.&nbsp; The run class for the nature must extend <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.
+<p>This registers your team provider with the team support plug-in and assigns
+an id that should be used when your provider is associated with a project.&nbsp;
+The specified <b>class</b> for the repository must extend <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.
 </p>
+<blockquote>
+  <p><i>Note:&nbsp; In earlier implementations of the platform team support,
+  project natures were used to identify team providers.&nbsp; This is why you'll
+  often see project nature ids used as repository ids.&nbsp; This is just a
+  legacy of an evolving design.</i>
+</p>
+</blockquote>
 </font>
 
 
