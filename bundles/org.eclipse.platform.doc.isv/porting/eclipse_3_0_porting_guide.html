@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M6<br>
-Last revised December 16, 2003</p>
+Last revised December 17, 2003</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -720,6 +720,109 @@ ISchedulingRule, int, IProgressMonitor)</tt> has an optional flag, <tt>AVOID_UPD
 that operations can use as a hint to the platform to specify whether periodic
 updates are desired.</p>
 
+<h3>Eclipse 3.0 is more concurrent</h3>
+<p>
+Prior to Eclipse 3.0, Eclipse operated mostly in a single thread.  Most API methods
+and extension points operated either in the UI thread, or in a thread spawned from
+a progress dialog that blocked the UI thread.  Most plug-in writers did not have to
+worry much about thread safety, apart from ensuring that all UI activity occurred in
+the UI thread.  In Eclipse 3.0, there is generally much more concurrency.  Many 
+operations now occur in a background thread, where they may run concurrently with other
+threads, including the UI thread.  All plug-ins whose code runs in a background thread
+must now be aware of the thread safety of their code.
+</p>
+<p>
+In addition to plug-ins that are explicitly running operations in the background using
+the <tt>org.eclipse.core.runtime.jobs</tt> API, there are several platform API
+facilities and extension points that make use of background threads.  Plug-ins that
+hook into these facilities need to ensure that their code is thread safe.  The 
+following table summarizes the API and extension points that run some or all of
+their code in a background thread in Eclipse 3.0:
+</p>
+<p>
+<table border="1" width="80%">
+  <tr>
+    <td width="50%">
+      <p align="center"><b>Extension point or API class</b></td>
+    <td width="50%">
+      <p align="center"><b>Notes</b></td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.core.runtime.IRegistryChangeListener</td>
+    <td width="50%">New in Eclipse 3.0, runs in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.core.resources.IResourceChangeListener</td>
+    <td width="50%"><tt>AUTO_BUILD</tt> events now in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.core.resources.builders</td>
+    <td width="50%">Autobuild now in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.core.resources.ISaveParticipant</td>
+    <td width="50%"><tt>SNAPSHOT</tt> now in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.workbench.texteditor.quickdiffReferenceProvider</td>
+    <td width="50%">New in Eclipse 3.0, runs in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.decorators</td>
+    <td width="50%">Already in background in Eclipse 2.1</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.ui.startup</td>
+    <td width="50%">Already in background in Eclipse 2.1</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.team.core.org.eclipse.team.core.repository</td>
+    <td width="50%">Many operations now in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.team.ui.synchronizeParticipants</td>
+    <td width="50%">New in Eclipse 3.0, runs in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.debug.core.launchConfigurationTypes</td>
+    <td width="50%">Now runs in background</td>
+  </tr>
+  <tr>
+    <td width="50%">org.eclipse.jdt.core.IElementChangedListener</td>
+    <td width="50%"><tt>PRE_AUTO_BUILD</tt> now runs in background,
+    <tt>POST_RECONCILE</tt> already ran in the background</td>
+  </tr>
+</table>
+</p>
+<p>
+There are various strategies available for making code thread safe.  A naive
+solution is to ensure all work occurs in the UI thread, thus ensuring serialized
+execution.  This is a common approach for UI plug-ins that are not doing CPU-intensive
+processing.  When doing this, be aware of the deadlock risk inherent in <tt>Display.syncExec</tt>.
+<tt>Display.asyncExec</tt> is generally safer as it does not introduce deadlock risk, at
+the expense of losing precise control over when the code is executed.
+</p>
+<p>
+Other techniques for making thread safe code included:
+<ul>
+<li>Wrapping unsafe code in semaphores or java monitors.  The new concurrency
+infrastructure includes one such semaphore object: <tt>org.eclipse.core.runtime.jobs.ILock</tt>.
+The advantage of <tt>ILock</tt> over generic locks is that they transfer automatically to
+the UI thread when doing a <tt>syncExec</tt>, and there is deadlock detection support
+built into their implementation that logs and then resolves deadlocks.
+</li>
+<li>Message queues.  Code can be serialized by forwarding all processing to a message
+queue that is processed serially in a single thread. One such example is the SWT deferred
+event queue (<tt>Display.asyncExec</tt>), which is processed entirely in the UI thread.
+</li>
+<li>
+Immutable objects.  Make data structures immutable, and make new copies on modification.
+This is the approach used to make data structures such as <tt>java.lang.String</tt>
+and <tt>org.eclipse.core.runtime.IPath</tt> thread safe.  The advantage of immutable
+objects is extremely fast read access, at the cost of extra work on modification.
+</li>
+</ul>
+</p>
 
 <h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
 <p>This section describes other changes that we recommend be made when porting
@@ -1478,9 +1581,8 @@ IllegalArgumentException exception being thrown, and the specifications have
 been changed to state this, bringing it into line with the method on their
 superclass Dialog.setMessage. If you use Dialog.setMessage, ensure that that the
 string passed in is never null. Simply pass an empty string if you want a dialog
-with no text in the title.</p>
-
-
+with no text in the title.
+</p>
 <h2><a name="Proposed Changes for 3.0">Proposed Changes for 3.0</a></h2>
 <p>The following proposals are under discussion for inclusion in Eclipse 3.0.
 They are mentioned here because the proposed changes impact existing plug-ins
