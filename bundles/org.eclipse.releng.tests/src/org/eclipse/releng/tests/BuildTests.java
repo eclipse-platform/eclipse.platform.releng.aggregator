@@ -101,6 +101,7 @@ public class BuildTests extends TestCase {
 	}
 	
 	public void testCVSKTag() {
+		
 		boolean result = false;
 		
 		initializeCVSTypes();
@@ -109,7 +110,7 @@ public class BuildTests extends TestCase {
 		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
 
 		// String to use when running in an Eclipse runtime
-		// String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
+//		 String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
 
 		new File(logFileName).mkdirs();
 		logFileName = logFileName + File.separator + "cvsTypesLog.txt";
@@ -119,7 +120,7 @@ public class BuildTests extends TestCase {
 		String sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
 		
 		// Source location when running locally.  Run a source build to get it.
-		// String sourceDirectoryName = "d:\\sourceFetch";
+//		 String sourceDirectoryName = "d:\\sourceFetch";
 		
 		try {
 
@@ -240,16 +241,28 @@ public class BuildTests extends TestCase {
 			if (expectedType.equals(CVS_BINARY)) {
 				if (!entryType.equals(CVS_KB)) {
 					// Fail Binary Test
-					aLog.write("File: " + entryName + " was expected to be be binary");
-//					System.out.println("File: " + entryName + " was expected to be be binary");
+					int start = entryName.indexOf("plugins");
+					String fileName;
+					if (start == -1) {
+						fileName = entryName;
+					} else {
+						fileName = entryName.substring(start + "plugins".length() + 1);
+					}
+					aLog.write(fileName + " should be *BINARY*");
 					aLog.newLine();
 					result = true;
 				}
 			} else {
 				if (!(entryType.equals(CVS_KKV) || entryType.equals(CVS_KO))) {
 					// Fail
-					aLog.write("File: " + entryName + " was expected to be be text");
-//					System.out.println("File: " + entryName + " was expected to be be text");
+					int start = entryName.indexOf("plugins");
+					String fileName;
+					if (start == -1) {
+						fileName = entryName;
+					} else {
+						fileName = entryName.substring(start + "plugins".length() + 1);
+					}
+					aLog.write(fileName + " should be *TEXT*");
 					aLog.newLine();
 					result = true;
 				}
