@@ -27,12 +27,11 @@ public class CoreTestApplication implements IPlatformRunnable {
 	 */
 	public Object run(Object arguments) throws Exception {
 		String[] args= processCommandLine((String[]) arguments);
-		runTests(args);
-		return null;
+		return new Integer(runTests(args));
 	}
 
-	protected void runTests(String[] args) throws IOException {
-		EclipseTestRunner.main(args);
+	protected int runTests(String[] args) throws IOException {
+		return EclipseTestRunner.run(args);
 	}
 
 	public static boolean deltasEnabled() {

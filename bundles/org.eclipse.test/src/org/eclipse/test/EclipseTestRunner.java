@@ -44,6 +44,11 @@ import org.eclipse.core.runtime.Platform;
  * Example call: EclipseTestRunner -classname junit.samples.SimpleTest formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter
  */
 public class EclipseTestRunner implements TestListener {
+	class TestFailedException extends Exception {
+		TestFailedException(String message) {
+			super(message);
+		}
+	} 
 	/**
      * No problems with this test.
      */
@@ -126,10 +131,12 @@ public class EclipseTestRunner implements TestListener {
      * </pre>
      */
 	public static void main(String[] args) throws IOException {
+		System.exit(run(args));
+	}
+	public static int run(String[] args) throws IOException {
 		String className= null;
 		String testPluginName= null;
 		
-        boolean exitAtEnd = true;
         boolean haltError = false;
         boolean haltFail = false;
         
@@ -162,7 +169,7 @@ public class EclipseTestRunner implements TestListener {
                     createAndStoreFormatter(args[i].substring(10));
                 } catch (BuildException be) {
                     System.err.println(be.getMessage());
-                    System.exit(ERRORS);
+                    return ERRORS;
                 }
             } else if (args[i].startsWith("propsfile=")) {
                 FileInputStream in = new FileInputStream(args[i].substring(10));
@@ -170,7 +177,7 @@ public class EclipseTestRunner implements TestListener {
                 in.close();
             } else if (args[i].equals("-testlistener")) {
             	System.err.println("The -testlistener option is no longer supported\nuse the formatter= option instead");
-            	System.exit(ERRORS);
+            	return ERRORS;
 			}
         }
 			
@@ -190,7 +197,7 @@ public class EclipseTestRunner implements TestListener {
 	    EclipseTestRunner runner= new EclipseTestRunner(t, testPluginName, haltError, haltFail);
         transferFormatters(runner);
         runner.run();
-        System.exit(runner.getRetCode());
+        return runner.getRetCode();
 	}
 
     /**
@@ -213,7 +220,7 @@ public class EclipseTestRunner implements TestListener {
 	/**
 	 * Returns the Test corresponding to the given suite. 
 	 */
-	public Test getTest(String suiteClassName) {
+	protected Test getTest(String suiteClassName) throws TestFailedException {
 		if (suiteClassName.length() <= 0) {
 			clearStatus();
 			return null;
@@ -257,9 +264,9 @@ public class EclipseTestRunner implements TestListener {
 		return test;
 	}
 
-	protected void runFailed(String message) {
+	protected void runFailed(String message) throws TestFailedException {
 		System.err.println(message);
-		System.exit(ERRORS);
+		throw new TestFailedException(message);
 	}
 
 	protected void clearStatus() {
