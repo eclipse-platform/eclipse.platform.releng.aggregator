@@ -105,7 +105,10 @@ public class Scenario {
 	        TimeSeries ts= getTimeSeries(dim);
 	        int n= ts.getLength();
 	        for (int j= 0; j < n; j++) {
-	            String stddev= " [" + dim.getDisplayValue(ts.getStddev(j)) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	            String stddev= ""; //$NON-NLS-1$
+	            double stddev2= ts.getStddev(j);
+	            if (stddev2 != 0.0)
+	            	stddev= " [" + dim.getDisplayValue(stddev2) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	            r.addCellRight(dim.getDisplayValue(ts.getValue(j)) + stddev);
 	        }
 	        r.nextRow();
