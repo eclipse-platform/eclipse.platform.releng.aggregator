@@ -21,14 +21,29 @@ Plug-in Manifest</h1>
 identifiers. To eliminate ambiguity, here are some production rules for these [are
 referenced in text below]. In general, all identifiers are case-sensitive. </p>
 
-<pre>SimpleToken := sequence of characters from ('a-z','A-Z','0-9')&nbsp;</pre><pre>ComposedToken := SimpleToken | (SimpleToken '.' ComposedToken)&nbsp;</pre><pre>JavaClassName := ComposedToken&nbsp;</pre><pre>PlugInId := ComposedToken</pre><pre>PlugInPrereq := PlugInId | 'export' PlugInId&nbsp;</pre><pre>ExtensionId := SimpleToken&nbsp;</pre><pre>ExtensionPointId := SimpleToken&nbsp;</pre><pre>ExtensionPointReference := ExtensionPointID | (PlugInId '.' ExtensionPointId)</pre>
+<pre>SimpleToken := sequence of characters from ('a-z','A-Z','0-9')&nbsp;
+ComposedToken := SimpleToken | (SimpleToken '.' ComposedToken)&nbsp;
+JavaClassName := ComposedToken&nbsp;
+PlugInId := ComposedToken
+PlugInPrereq := PlugInId | 'export' PlugInId&nbsp;
+ExtensionId := SimpleToken&nbsp;
+ExtensionPointId := SimpleToken&nbsp;
+ExtensionPointReference := ExtensionPointID | (PlugInId '.' ExtensionPointId)</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
 remainder of this section describes the plugin.xml file structure as a series
 of DTD fragments. File <a href="plugin_dtd.html">plugin.dtd</a> presents the DTD
 definition in its entirety. </p>
 
-<pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;&nbsp;</pre><pre>&lt;!ELEMENT plugin (requires?, runtime?, extension-point*, extension*)&gt;&nbsp;</pre><pre>&lt;!ATTLIST plugin&nbsp;</pre><pre>&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre>&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre>&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre>&nbsp; provider-name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</pre><pre>&nbsp; class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;</pre><pre>&gt;</pre>
+<pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;&nbsp;
+&lt;!ELEMENT plugin (requires?, runtime?, extension-point*, extension*)&gt;&nbsp;
+&lt;!ATTLIST plugin&nbsp;
+&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&nbsp; provider-name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED
+&nbsp; class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;
+&gt;</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
 &lt;plugin&gt; element defines the body of the manifest. It optionally contains
@@ -96,7 +111,15 @@ plug-ins into extension points declared in other plug-ins). </p>
 &lt;requires&gt; section of the manifest declares any dependencies on other
 plug-ins. </p>
 
-<pre>&lt;!ELEMENT requires (import+)&gt;</pre><pre>&lt;!ELEMENT import EMPTY&gt;</pre><pre>&lt;!ATTLIST import</pre><pre>&nbsp;plugin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED</pre><pre>&nbsp;version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</pre><pre> match<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(perfect | equivalent | compatible | greaterOrEqual) &quot;compatible&quot;</pre><pre>&nbsp;export&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true | false) &quot;false&quot;</pre><pre>&nbsp;optional&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true | false) &quot;false&quot;</pre><pre>&gt;</pre>
+<pre>&lt;!ELEMENT requires (import+)&gt;
+&lt;!ELEMENT import EMPTY&gt;
+&lt;!ATTLIST import
+&nbsp;plugin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED
+&nbsp;version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED
+ match<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(perfect | equivalent | compatible | greaterOrEqual) &quot;compatible&quot;
+&nbsp;export&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true | false) &quot;false&quot;
+&nbsp;optional&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true | false) &quot;false&quot;
+&gt;</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>Each
 dependency is specified using an &lt;import&gt; element. It contains the
@@ -136,7 +159,16 @@ definition of one or more libraries that make up the plug-in runtime. The
 referenced libraries are used by the platform execution mechanisms (the plug-in
 class loader) to load and execute the correct code required by the plug-in. </p>
 
-<pre>&lt;!ELEMENT runtime (library+)&gt;&nbsp;</pre><pre>&lt;!ELEMENT library (export*)&gt;</pre><pre>&lt;!ATTLIST library&nbsp;</pre><pre>&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre><span style="mso-spacerun: yes">&nbsp; </span>type<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(code | resource) &quot;code&quot;</pre><pre>&gt;</pre><pre>&lt;!ELEMENT export EMPTY&gt;&nbsp;</pre><pre>&lt;!ATTLIST export</pre><pre>&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre>&gt;</pre>
+<pre>&lt;!ELEMENT runtime (library+)&gt;&nbsp;
+&lt;!ELEMENT library (export*)&gt;
+&lt;!ATTLIST library&nbsp;
+  name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+<span style="mso-spacerun: yes">&nbsp; </span>type<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(code | resource) &quot;code&quot;
+&gt;
+&lt;!ELEMENT export EMPTY&gt;&nbsp;
+&lt;!ATTLIST export
+&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&gt;</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
 &lt;runtime&gt; element has no attributes. </p>
@@ -208,7 +240,12 @@ defined an architecture for what it means to be a DTC and has implemented the
 code that looks for DTC extensions that have been configured into the extension
 points. </p>
 
-<pre>&lt;!ELEMENT extension-point EMPTY&gt;&nbsp;&nbsp;</pre><pre>&lt;!ATTLIST extension-point&nbsp;</pre><pre>&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre>&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;&nbsp;&nbsp;&nbsp;</pre><pre>&nbsp; schema&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;</pre><pre>&gt;</pre>
+<pre>&lt;!ELEMENT extension-point EMPTY&gt;&nbsp;&nbsp;
+&lt;!ATTLIST extension-point&nbsp;
+&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp; schema&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;
+&gt;</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
 &lt;extension-point&gt; element has the following attributes: </p>
@@ -246,7 +283,12 @@ simply passes the configuration information to the plug-in as part of the
 extension point processing (at the time the extension point logic queries all
 of its configured extensions). </p>
 
-<pre>&lt;!ELEMENT extension ANY&gt;&nbsp;</pre><pre>&lt;!ATTLIST extension&nbsp;</pre><pre>&nbsp; point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;</pre><pre>&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;</pre><pre>&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;</pre><pre>&gt;</pre>
+<pre>&lt;!ELEMENT extension ANY&gt;&nbsp;
+&lt;!ATTLIST extension&nbsp;
+&nbsp; point&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;
+&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED&nbsp;
+&gt;</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
 &lt;extension&gt; element has the following attributes: </p>
@@ -287,11 +329,19 @@ configuration section (between &lt;extension&gt; and &lt;/extension&gt; tags). <
 
 <pre><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></pre><pre><span
 style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Times New Roman";
-mso-bidi-font-family:"Courier New"'>Fragments are used to increase the scope of a plug-in.<span style="mso-spacerun: yes">&nbsp; </span>An example would be to incorporate data such as messages or labels in another language.<o:p></o:p></span></pre><pre><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></pre><pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;&nbsp;</pre><pre>&lt;!ELEMENT fragment (requires?, runtime?, extension-point*, extension*)&gt;</pre><pre>&lt;!ATTLIST fragment</pre><pre>&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED</pre><pre>&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED</pre><pre>&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED</pre><pre>&nbsp; provider-name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED</pre><pre><span style="mso-spacerun: yes">&nbsp; </span>plugin-id<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>CDATA #REQUIRED</pre><pre><span style="mso-spacerun: yes">&nbsp; </span>plugin-version<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>CDATA #REQUIRED</pre><pre><span style="mso-spacerun: yes">&nbsp; </span>match<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(perfect | equivalent | compatible | greaterOrEqual) &quot;compatible&quot;</pre><pre>&gt;</pre><pre><span
+mso-bidi-font-family:"Courier New"'>Fragments are used to increase the scope of a plug-in.<span style="mso-spacerun: yes">&nbsp; </span>An example would be to incorporate data such as messages or labels in another language.<o:p></o:p></span></pre><pre><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></pre><pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;&nbsp;
+&lt;!ELEMENT fragment (requires?, runtime?, extension-point*, extension*)&gt;
+&lt;!ATTLIST fragment
+&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED
+&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED
+&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED
+&nbsp; provider-name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED
+<span style="mso-spacerun: yes">&nbsp; </span>plugin-id<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>CDATA #REQUIRED
+<span style="mso-spacerun: yes">&nbsp; </span>plugin-version<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>CDATA #REQUIRED
+<span style="mso-spacerun: yes">&nbsp; </span>match<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(perfect | equivalent | compatible | greaterOrEqual) &quot;compatible&quot;
+&gt;</pre><pre><span
 style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Times New Roman";
 mso-bidi-font-family:"Courier New"'>Each fragment must be associated with a specific plug-in.<span style="mso-spacerun: yes">&nbsp; </span>The associated plug-in is identified with &lt;plugin-id&gt;, &lt;plugin-version&gt; and optionally, &lt;match&gt;.<span style="mso-spacerun: yes">&nbsp; </span>Note that if this specification matches more than one plug-in, the matching plug-in with the highest version number will be used.<o:p></o:p></span></pre><pre><span
-style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Times New Roman";
-mso-bidi-font-family:"Courier New"'><![if !supportEmptyParas]>&nbsp;<![endif]><o:p></o:p></span></pre><pre><span
 style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Times New Roman";
 mso-bidi-font-family:"Courier New"'>The &lt;requires&gt;, &lt;runtime&gt;, &lt;extension-point&gt;, and &lt;extension&gt; components of a fragment will be logically added to the matching plug-in.<o:p></o:p></span></pre>
 
