@@ -12,17 +12,119 @@
 <H1>
 Scheduling rules</H1>
 <p>
-[This documentation is under construction]
-</p>
+Job scheduling rules can be used to control when your jobs run in relation to
+other jobs. In particular, scheduling rules allow you to prevent multiple jobs
+from running concurrently in situations where concurrency can lead to inconsistent
+results. They also allow you to guarantee the execution order of a series of jobs.
+The power of scheduling rules is best illustrated by an example. Let's start by 
+defining two jobs that are used to turn a light switch on and off concurrently:
+<font color='#4444CC'><pre>
+   public class LightSwitch {
+      private boolean isOn = false;
+      public boolean isOn() {
+         return isOn;
+      }
+      public void on() {
+         new LightOn().schedule();
+      }
+      public void off() {
+         new LightOff().schedule();
+      }
+      class LightOn extends Job {
+         public LightOn() {
+            super("Turning on the light");
+         }
+         public IStatus run(IProgressMonitor monitor) {
+            System.out.println("Turning the light on");
+            isOn = true;
+            return Status.OK_STATUS;
+         }
+      }
+      class LightOff extends Job {
+         public LightOff() {
+            super("Turning off the light");
+         }
+         public IStatus run(IProgressMonitor monitor) {
+            System.out.println("Turning the light off");
+            isOn = false;
+            return Status.OK_STATUS;
+         }
+      }
+   }
+</pre></font>
+Now we create a simple program that creates a light switch and turns it
+on and off again:
+<font color='#4444CC'><pre>
+   LightSwitch light = new LightSwitch();
+   light.on();
+   light.off();
+   System.out.println("The light is on? " + switch.isOn());
+</pre></font>
+If we run this little program enough times, we will eventually obtain the following output:
+<font color='#4444CC'><pre>
+   Turning the light off
+   Turning the light on
+   The light is on? true
+</pre></font>
+How can that be?  We told the light to turn on and then off, so its final state
+should be off!  The problem is that there was nothing preventing the
+<tt>LightOff</tt> job from running at the same time as the <tt>LightOn</tt>
+job.  So, even though the &quot;on&quot; job was scheduled first, their
+concurrent execution means that there is no way to predict the exact
+execution order of the two concurrent jobs. If the <tt>LightOff</tt> job ends
+up running before the <tt>LightOn</tt> job, we get this invalid result.
+What we need is a way to prevent the two jobs from running concurrently, and 
+that's where scheduling rules come in.
 <p>
-Topics to be covered in this section:
-<ul>
-<li>Scheduling rules</li>
-</ul>
+We can fix this example by creating a simple scheduling rule that acts as a 
+<i>mutex</i> (also known as a <i>binary semaphore</i>):
+<font color='#4444CC'><pre>
+   class Mutex implements ISchedulingRule {
+      public boolean isConflicting(ISchedulingRule rule) {
+         return rule == this;
+      }
+      public boolean contains(ISchedulingRule rule) {
+         return rule == this;
+      }
+   }
+</pre></font>
+This rule is then added to the two light switch jobs from our previous example:
+<font color='#4444CC'><pre>
+   public class LightSwitch {
+      <b>final MutextRule rule = new MutexRule();</b>
+      ...
+      class LightOn extends Job {
+         public LightOn() {
+            super("Turning on the light");
+            <b>setRule(rule);</b>
+         }
+         ...
+      }
+      class LightOff extends Job {
+         public LightOff() {
+            super("Turning off the light");
+            <b>setRule(rule);</b>
+         }
+         ...
+      }
+   }
+</pre></font>
+<p>
+Now, when the two light switch jobs are scheduled, the job infrastructure will
+call the <tt>isConflicting</tt> method to compare the scheduling rules of the
+two jobs. It will notice that the two jobs have conflicting scheduling rules, and 
+will make sure that they run in the correct order. It will also make sure they never
+run at the same time. Now, if you run the example program a million times,
+you will always get the same result:
+<font color='#4444CC'><pre>
+   Turning the light on
+   Turning the light off
+   The light is on? false
+</pre></font>
+
+<p>
+[Patience! This document is a work in progress.]
 </p>
-
-
-
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>

@@ -25,17 +25,17 @@ to cancelation:
 <font color='#4444CC'><pre>
    public IStatus run(IProgressMonitor monitor) {
       final int ticks = 6000;
-      monitor.beginTask("Doing some work", ticks);
+      monitor.<b>beginTask</b>("Doing some work", ticks);
       try {
          for (int i = 0; i &lt; ticks; i++) {
-            if (monitor.isCanceled())
+            if (monitor.<b>isCanceled</b>())
                return Status.CANCEL_STATUS;
-            monitor.subTask("Processing tick #" + i);
+            monitor.<b>subTask</b>("Processing tick #" + i);
             //... do some work ...
-            monitor.worked(1);
+            monitor.<b>worked</b>(1);
          }
       } finally {
-         monitor.done();
+         monitor.<b>done</b>();
       }
       return Status.OK_STATUS;
    }
@@ -49,16 +49,28 @@ job is running:
 </p>
 <P ><img src="images/job-progress.jpg" alt="Job progress view" ></P>
 
-
-
+<p>
+If your job is an implementation detail that you do not want to show to users,
+you can flag your job as a <i>system job</i>.  A system job is just like any
+other job, except it does not appear in the progress view or cause the progress
+busy indicator in the status line to animate.  If your job is not either directly
+initiated by a user, or a periodic task that can be configured by a user, then your
+job should be a system job.  Making your job a system job is easy as pie:
+<font color='#4444CC'><pre>
+   class TrivialJob extends Job {
+      public TrivialJob() {
+         super("Trivial Job");
+         <b>setSystem(true)</b>;
+      }
+      ...
+   }
+</pre></font>
 <p>
 [The remainder of this document is under construction]<br>
 
 Other topics to be covered in this section:
 <ul>
-<li>system job</li>
 <li>progress groups</li>
-
 <li>job state</li>
 <li>job change listeners</li>
 
