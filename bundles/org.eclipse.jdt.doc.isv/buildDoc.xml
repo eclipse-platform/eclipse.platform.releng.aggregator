@@ -1,7 +1,5 @@
 <project name="Jdt Doc Isv Build" default="all"  basedir="." >
 
-<property name="install" value="${basedir}/../../" />
-
 <target name="all">
 	<antcall target="extensionPointDocCopy" />
 	<antcall target="examplesDocCopy" />
@@ -10,17 +8,17 @@
 
 
 <target name="extensionPointDocCopy" >
-	<copy todir="${install}/plugins/org.eclipse.jdt.doc.isv/reference/extension-points">
-    	<fileset dir="${install}/plugins/org.eclipse.jdt.debug.ui/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.jdt.launching/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.jdt.ui/doc"/>
+	<copy todir="reference/extension-points">
+    	<fileset dir="../org.eclipse.jdt.debug.ui/doc"/>
+    	<fileset dir="../org.eclipse.jdt.launching/doc"/>
+    	<fileset dir="../org.eclipse.jdt.ui/doc"/>
     </copy>
 </target>
 
 <target name="examplesDocCopy" >
-	 <copy todir="${install}/plugins/org.eclipse.jdt.doc.isv/samples">
-    	<fileset dir="${install}/plugins">
-    		<include name="**/org.eclipse.jdt.ui.examples.projects/doc-html/"/>
+	 <copy todir="samples">
+    	<fileset dir="..">
+    		<include name="org.eclipse.jdt.ui.examples.projects/doc-html/"/>
 	    </fileset>
 	  </copy>
 </target>
@@ -34,14 +32,12 @@
 	      <os family="windows" />
     </condition>
 
-	<replace file="${basedir}/${optionsFile}" token="@version@" value="2.0 (pre-release)"/>
-	<replace file="${basedir}/${optionsFile}" token="@stamp@" value="${buildid}" />
-	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${rt}" />
+	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 
 		
 	<!--scrub isv plugin directories of any preexisting api doc content-->
-	<delete dir="${install}/plugins/org.eclipse.jdt.doc.isv/reference/api"/>
-	<mkdir dir="${install}/plugins/org.eclipse.jdt.doc.isv/reference/api"/>
+	<delete dir="reference/api"/>
+	<mkdir dir="reference/api"/>
 
 	<exec dir="." executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
 		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />

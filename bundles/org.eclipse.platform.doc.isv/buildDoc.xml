@@ -1,37 +1,35 @@
 <project name="Platform Doc Isv Build" default="all"  basedir="." >
 
-<property name="install" value="${basedir}/../../" />
-
 <target name="all">
 	<antcall target="extensionPointDocCopy" />	<antcall target="examplesDocCopy" />	<antcall target="generateJavadoc" />	
 </target>
 
 <target name="extensionPointDocCopy">
-	<copy todir="${install}/plugins/org.eclipse.platform.doc.isv/reference/extension-points">    	<fileset dir="${install}/plugins/org.eclipse.ant.core/doc"/>    	<fileset dir="${install}/plugins/org.eclipse.compare/doc"/>    	<fileset dir="${install}/plugins/org.eclipse.search/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.core.resources/doc"/>    	<fileset dir="${install}/plugins/org.eclipse.core.runtime/doc"/>     	<fileset dir="${install}/plugins/org.eclipse.help/doc"/>
-     	<fileset dir="${install}/plugins/org.eclipse.help.ui/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.ui/doc"/>    	<fileset dir="${install}/plugins/org.eclipse.debug.core/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.debug.ui/doc"/>
-     	<fileset dir="${install}/plugins/org.eclipse.team.core/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.team.ui/doc"/>
-    	<fileset dir="${install}/plugins/org.eclipse.update.core/doc"/>
+	<copy todir="reference/extension-points">    	<fileset dir="../org.eclipse.ant.core/doc"/>    	<fileset dir="../org.eclipse.compare/doc"/>    	<fileset dir="../org.eclipse.search/doc"/>
+    	<fileset dir="../org.eclipse.core.resources/doc"/>    	<fileset dir="../org.eclipse.core.runtime/doc"/>     	<fileset dir="../org.eclipse.help/doc"/>
+     	<fileset dir="../org.eclipse.help.ui/doc"/>
+    	<fileset dir="../org.eclipse.ui/doc"/>    	<fileset dir="../org.eclipse.debug.core/doc"/>
+    	<fileset dir="../org.eclipse.debug.ui/doc"/>
+     	<fileset dir="../org.eclipse.team.core/doc"/>
+    	<fileset dir="../org.eclipse.team.ui/doc"/>
+    	<fileset dir="../org.eclipse.update.core/doc"/>
     </copy>
 </target>
 
 <target name="examplesDocCopy" >
-	<copy todir="${install}/plugins/org.eclipse.platform.doc.isv/samples">
-    	<fileset dir="${install}/plugins">
-    		<include name="**/org.eclipse.help.examples.ex1/doc-html/"/>
-	    	<include name="**/org.eclipse.swt.examples/doc-html/"/>
-	    	<include name="**/org.eclipse.swt.examples.controls/doc-html/"/>
-	    	<include name="**/org.eclipse.swt.examples.launcher/doc-html/"/>
-	        <include name="**/org.eclipse.swt.examples.layouts/doc-html/"/>
-	   		<include name="**/org.eclipse.swt.examples.ole.win32/doc-html/"/>
-	    	<include name="**/org.eclipse.swt.examples.paint/doc-html/"/>
-	   		<include name="**/org.eclipse.ui.examples.javaeditor/doc-html/"/>
-	    	<include name="**/org.eclipse.ui.examples.multipageeditor/doc-html/"/>
-	    	<include name="**/org.eclipse.ui.examples.propertysheet/doc-html/"/>
-	   		<include name="**/org.eclipse.ui.examples.readmetool/doc-html/"/>
+	<copy todir="samples">
+    	<fileset dir="..">
+    		<include name="org.eclipse.help.examples.ex1/doc-html/"/>
+	    	<include name="org.eclipse.swt.examples/doc-html/"/>
+	    	<include name="org.eclipse.swt.examples.controls/doc-html/"/>
+	    	<include name="org.eclipse.swt.examples.launcher/doc-html/"/>
+	        <include name="org.eclipse.swt.examples.layouts/doc-html/"/>
+	   		<include name="org.eclipse.swt.examples.ole.win32/doc-html/"/>
+	    	<include name="org.eclipse.swt.examples.paint/doc-html/"/>
+	   		<include name="org.eclipse.ui.examples.javaeditor/doc-html/"/>
+	    	<include name="org.eclipse.ui.examples.multipageeditor/doc-html/"/>
+	    	<include name="org.eclipse.ui.examples.propertysheet/doc-html/"/>
+	   		<include name="org.eclipse.ui.examples.readmetool/doc-html/"/>
 	    </fileset>
 	 </copy>
 </target>
@@ -44,14 +42,11 @@
 	      <os family="windows" />
     </condition>
 
-	<replace file="${basedir}/${optionsFile}" token="@version@" value="2.0 (pre-release)"/>
-	<replace file="${basedir}/${optionsFile}" token="@stamp@" value="${buildid}" />
-	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${rt}" />
-
+	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 		
 	<!--scrub isv plugin directories of any preexisting api doc content-->
-	<delete dir="${install}/plugins/org.eclipse.platform.doc.isv/reference/api"/>
-	<mkdir dir="${install}/plugins/org.eclipse.platform.doc.isv/reference/api"/>
+	<delete dir="reference/api"/>
+	<mkdir dir="reference/api"/>
 
 	<exec dir="." executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
 		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
