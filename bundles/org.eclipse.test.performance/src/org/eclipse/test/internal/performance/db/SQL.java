@@ -355,7 +355,7 @@ public class SQL {
     ResultSet querySummaryEntries(Variations variations, boolean global) throws SQLException {
         if (fQuerySummaryEntries == null)
             fQuerySummaryEntries= fConnection.prepareStatement(
-            		"select SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
+            		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
             		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
             		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
             		"SUMMARYENTRY.IS_GLOBAL = ?"	//$NON-NLS-1$
