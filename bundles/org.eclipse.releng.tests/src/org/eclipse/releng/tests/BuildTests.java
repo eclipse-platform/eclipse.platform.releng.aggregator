@@ -122,7 +122,7 @@ public class BuildTests extends TestCase {
 				aString = aString + element + "; ";
 			}
 		}
-		assertTrue("Feature directory missing required files: " + aString, result.size() == 0);
+		assertTrue("Plugin directory missing required files: " + aString, result.size() == 0);
 	}
 
 	private boolean testPluginFile(File aPlugin) {
