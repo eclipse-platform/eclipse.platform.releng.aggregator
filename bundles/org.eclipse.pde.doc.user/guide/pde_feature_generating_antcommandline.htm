@@ -10,53 +10,58 @@
 
 <h3>Generating Ant script from the command line</h3>
 
-<p>Ant scripts are typically generated using the PDE.&nbsp;&nbsp;</p>
-<p>PDE core classes can also be used from the command line to generate build scripts
-by hand.&nbsp; This is not typical, but for specialized automated builds written
-in Java, you can use the generation classes directly to drive the build process.</p>
-<p> Ant script generation facilities
-reside in the following classes.&nbsp; Command line arguments are also listed
-for each generator.
+<p>Ant scripts are typically generated using the PDE, but it is also possible to generate
+them by hand or from other scripts.&nbsp;<br>
+Indeed PDE exposes Ant tasks to generate the various build scripts. Build script generation facilities
+reside in the following tasks.&nbsp; Arguments are also listed for each task.
 </p>
+
 <ul>
-  <li><b>PluginBuildScriptGenerator</b><b> </b> generates
-    <i>build.xml</i> files for one or more specified plug-ins
-    <p><i>-install directoryName</i>&nbsp; - specifies the root directory of the target platform&nbsp;</p>
-    <p><i>-plugins pluginPath</i>&nbsp; - optional, specifies base directory for
-    plug-ins&nbsp;</p>
-    <p><i>-plugin pluginId</i>&nbsp; - specifies the id of a plug-in to generate; any
-    number of these may be specified&nbsp;</p>
-    <p>-<i>dev classPathEntries</i>&nbsp; - optional, sets the additional development
-    model class path entries<br>
+  <li><b>eclipse.fetch</b>: generates an ant script that fetches content from a CVS repository.
+  The eclipse fetch is driven by a file which format is described below (see Directory file format).
+   <p><i>elements</i> : a comma separated list of entries that will be fetched. Entry are expected to be of the form type@id like specified in the directory file format;
+   <p><i>install</i> :  the directory in which features and plugin projects will be checked out;
+   <p><i>directory</i> : the name of the directory file;
+   <p><i>scriptname</i> : the name of the generated script;
+   <p><i>children</i> : optional, specifies whether the script generation for contained plug-ins and fragments should not be invoked;
+   <p><i>cvspassfile</i> : optional, a cvs pass file.
   </li>
-  <li><b>FragmentBuildScriptGenerator</b> generates
-    <i>build.xml</i> files for one or more specified fragments
-    <p>-<i>install directoryName</i>&nbsp; - specifies the root directory of the target platform</p>
-    <p>-<i>plugins fragmentPath</i>&nbsp; - optional, specifies base directory for
-    fragments</p>
-    <p>-<i>fragment fragmentId&nbsp; </i>-&nbsp; specifies the id of a fragment to generate;
-    any number of these may be specified</p>
-    <p>-<i>dev classPathEntries</i>&nbsp; - optional, sets the additional development
-    model class path entries<br>
-  </li>
-  <li><b>ComponentBuildScriptGenerator</b> generates the
-    <i>build.xml</i> file for a specified component, and
-    optionally invokes generation of <i>build.xml </i> files for all contained
-    plug-ins and fragments as well
-    <p>-<i>install directoryName</i>&nbsp; - specifies the root directory of the target platform&nbsp;</p>
-    <p>-<i>nochildren</i>&nbsp; - optional, specifies that script generation for
-    contained plug-ins and fragments should not be invoked&nbsp;</p>
-    <p>-<i>component&nbsp;</i> - the id of the component to generate<br>
-  </li>
-  <li><b>ConfigurationBuildScriptGenerator</b> generates the
-    <i>build.xml</i> file for a specified configuration, and
-    optionally invokes generation of <i>build.xml</i> files for all contained
-    components, plug-ins and fragments as well
-    <p>-<i>install directoryName</i>&nbsp; - specifies the root directory of the target platform </p>
-    <p>-<i>nochildren</i>&nbsp; - optional, specifies that script generation for
-    contained components should not be invoked </p>
-    <p>-<i>configuration</i>&nbsp; - the id of the configuration to generate</li>
+<br>
+  <li><b>eclipse.buildScript</b>: generates a build.xml file for the given elements.
+  	<p><i>elements</i> : a comma separated list of entries that will be build. !!!
+  	<p><i>install</i> :  the directory where the features and plugins to build are located;
+  	<p><i>children</i> : optional, specifies whether the script generation for contained plug-ins and fragments should not be invoked;
+  	<p><i>devEntries</i> : optional, a comma separated list of directories to be given to the compile classpath. 
+  	<p><i>pluginPath</i> : optional, a comma separated list of URLs pointing to installed plugins. If specified this list must also include the whole list of plugins to be compiled.
+  </li> 	  	  	
 </ul>
+
+<h3>Directory file format</h3>
+Directory files are used to indicate where the plug-ins and features are located, as well as indicating which version
+should be fetched. It is a java property file which line format is "type@id=version, repositoryLocation, password".
+<ul>
+<li><i>type</i></li> : a string describing the type of the element. It must be one of the following: plugin, fragment, feature;
+<li><i>id</i></li> : the name of the CVS module where the element is located. Note that the feature/plugin/fragment.xml must be in the root of this module;
+<li><i>version</i></li> : an existing version tag in the respository;
+<li><i>repositoryLocation</i></li> : a cvs repository location;
+<li><i>password</i></li> : optional, a password to connect to this repository.
+</ul>
+<h4>Example of a directory file</h4>
+feature@org.eclipse.jdt.source=v20030114, :pserver:anonymous@dev.eclipse.org:/home/eclipse, <br>
+plugin@org.eclipse.core.boot=v20021215a, :pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
+plugin@org.eclipse.core.resources=v20030114, :pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
+fragment@org.eclipse.core.resources.win32=v20020911, :pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
+  
+  
+<h3>Using those targets</h3>
+The tasks previously described only works if eclipse is running. In the particular scenario of executing ant scripts using 
+eclipse tasks, it is recommended to execute the scripts through eclipse "ant runner". The command line for this particular
+case is the following:<br>
+&nbsp;&nbsp;java -cp startup.jar org.eclipse.core.launcher.Main -application org.eclipse.ant.core.antRunner -buildfile build.xml
+  <p>
+  
+Note that the parameters appearing after org.eclipse.ant.core.antRunner are the parameters that are passed to Ant.
+
 <p>&nbsp;<br>
 <a href="../hglegal2003.htm">
 <img src = "../images/ngibmcpy2003.gif" alt="Copyright IBM Corporation and others 2000, 2003" border="0" width="324" height="14"></a>
