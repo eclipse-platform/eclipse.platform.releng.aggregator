@@ -219,6 +219,17 @@ public class DB {
         return getDefault().internalStore(variations, sample);
     }
     
+    /**
+     * @param variations used to tag the data in the database
+     * @param sample the sample maked as failed
+     * @param failMesg the reason of the failure
+     */
+    public static void markAsFailed(Variations variations, Sample sample, String failMesg) {
+	    System.out.println("failed: " + variations);
+	    System.out.println("  " + sample);
+	    System.out.println("  " + failMesg);
+    }
+    
     public static Connection getConnection() {
         return getDefault().fConnection;
     }
@@ -326,7 +337,9 @@ public class DB {
                     if (dimension instanceof Dim)
                         fSQL.createSummaryEntry(variation_id, scenario_id, ((Dim)dimension).getId(), isGlobal);
                 }
-                fSQL.setScenarioShortName(scenario_id, sample.getShortname());
+                String shortName= sample.getShortname();
+                if (shortName != null)
+                    fSQL.setScenarioShortName(scenario_id, shortName);
             }
             int sample_id= fSQL.createSample(variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
