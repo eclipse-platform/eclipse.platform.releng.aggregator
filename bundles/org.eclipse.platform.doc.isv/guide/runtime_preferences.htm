@@ -64,34 +64,37 @@ IPreferencesService</a></b> protocol.  The platform's default preference service
 Once the preference service is obtained, preference values can be queried by name using any of
 <b>get...</b> methods provided in <b><a href="../reference/api/org/eclipse/core/runtime/preferences/IPreferencesService.html">IPreferencesService</a></b>.
 For example, the following snippet queries the value of the &quot;MyPreference&quot; preference in the plug-in
-&quot;org.mycompany.myplugin&quot;.
+&quot;com.example.myplugin&quot;.
 </p>
 <font color='#4444CC'><pre>
 	...
 	IPreferencesService service = Platform.getPreferencesService();
-	boolean value = service.getBoolean(&quot;org.mycompany.myplugin&quot;, &quot;MyPreference&quot;, true, <b>null</b>);
+	boolean value = service.getBoolean(&quot;com.example.myplugin&quot;, &quot;MyPreference&quot;, true, <b>null</b>);
 	//do something with the value.
 	...
 </pre></font>
-<p>The last parameter in the query method is an array of scope contexts to use when searching. The
-default scope lookup order is consulted and the context objects are used to help find the particular
-preference nodes to search. If the array is <b>null</b> then the platform assumes the scope uses the
-default hierarchy layout and guesses the correct node. 
+<p>The last parameter in the query method is an array of scope contexts to use when searching for the
+preference node. If the 
+array is <b>null</b>, then the platform assumes that the default scope search order should be used and guesses
+the appropriate preference node.  If an array of scopes contexts is passed, then this determines
+the scope lookup order that should be used to find the preference node.  The default scope lookup order
+is always consulted if no node can be found using the specified scopes.
 </p>
 <h3>
 Using scopes and nodes
 </h3>
 <p>
 If a plug-in needs finer control over the scope search order, classes that represent the scopes can be used
-to access a node that represents the preference at a particular scope.  In this way, an array of 
+to access the actual node that represents the preference at a particular scope.  In this way, an array of 
 nodes can be created that specifies the particular search order required.  The following snippet queries the
 preferences service for the same preference used above, but searches the configuration scope for the plug-in, 
-followed by the instance scope for the plug-in. </p>
+followed by the instance scope for the plug-in. When nodes are specified for the search order, the default
+scoping is not considered.  That is, the platform will only search the exact nodes that have been provided.</p>
 <font color='#4444CC'><pre>
 	...
 	IPreferencesService service = Platform.getPreferencesService();
-	Preferences configurationNode = new ConfigurationScope().getNode(&quot;org.mycompany.myplugin&quot;);
-	Preferences instanceNode = new InstanceScope().getNode(&quot;org.mycompany.myplugin&quot;);
+	Preferences configurationNode = new ConfigurationScope().getNode(&quot;com.example.myplugin&quot;);
+	Preferences instanceNode = new InstanceScope().getNode(&quot;com.example.myplugin&quot;);
 	Preferences[] nodes = new Preferences[] {configurationNode, instanceNode};
 	stringValue = service.get(&quot;MyPreference&quot;, &quot;true&quot;, nodes);
 	//do something with the value.
@@ -106,7 +109,7 @@ The following snippet traverses to a specific node and retrieves the preference 
 	...
 	IPreferencesService service = Platform.getPreferencesService();
 	Preferences root = service.getRootNode();
-	Preferences myInstanceNode = root.node(InstanceScope.SCOPE).node(&quot;org.mycompany.myplugin&quot;);
+	Preferences myInstanceNode = root.node(InstanceScope.SCOPE).node(&quot;com.example.myplugin&quot;);
 	if (myInstanceNode != null) {
 		value = node.getBoolean(&quot;MyPreference&quot;, &quot;true&quot;);
 		//do something with the value.
