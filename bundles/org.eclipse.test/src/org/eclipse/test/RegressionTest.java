@@ -153,14 +153,15 @@ public class RegressionTest {
 	 * Read the file given by s, and return its contents.
 	 */
 	static String readFile(String s) throws IOException {
-			FileInputStream r = new FileInputStream(s);
-			ByteArrayOutputStream aStream = new ByteArrayOutputStream();
-			int aByte = r.read();
-			while (aByte != -1) {
-				aStream.write(aByte);
-			}
-			r.close();
-			return aStream.toString();	
+		byte[] buf = new byte[8192];
+		FileInputStream r = new FileInputStream(s);
+		ByteArrayOutputStream aStream = new ByteArrayOutputStream();
+		int n;
+		while ((n = r.read(buf)) != -1) {
+			aStream.write(buf, 0, n);
+		}
+		r.close();
+		return aStream.toString();
 	}
 	
 	
