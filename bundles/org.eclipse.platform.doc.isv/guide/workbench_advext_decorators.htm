@@ -17,8 +17,67 @@ org.eclipse.ui.decorators</H3>
 
 
 
-<p>
-Show the decorator menu, an example decorator and some markup.</p>
+<p>Your plug-in can use <b>decorators</b> to annotate the images for resources
+and other objects that appear in the workbench views.&nbsp; Decorators are
+useful when your plug-in adds functionality for existing resource types.&nbsp;
+Many of the standard workbench views participate in showing decorations.&nbsp;
+Decorations are ultimately controlled by the end user via the workbench <b>Label
+Decorators</b> preferences page.</p>
+
+
+<p>For example, PDE contributes decorators that allow you to distinguish between
+binary and source projects.</p>
+
+
+<p><img border="0" src="images/workbenchdecorators.jpg" width="317" height="122"></p>
+
+
+<p>The <b>com.example.sourceProject&nbsp; </b>project is the only source project
+shown in the navigator.&nbsp; Note how all of the other binary projects show the
+binary decorator at the top left of the Java project icon.&nbsp; This decorator
+is contributed by PDE using the <a href="../reference/extension-points/org_eclipse_ui_decorators.html">org.eclipse.ui.decorators</a>
+extension point.</p>
+
+
+<pre><font color="#4444CC">&lt;extension
+   point=&quot;org.eclipse.ui.decorators&quot;&gt;
+      &lt;decorator
+            objectClass=&quot;org.eclipse.core.resources.IResource&quot;
+            adaptable=&quot;true&quot;
+            label=&quot;%decorator.label&quot;
+            state=&quot;false&quot;
+            <b>class</b>=&quot;org.eclipse.pde.internal.ui.wizards.imports.BinaryProjectDecorator&quot;
+            id=&quot;org.eclipse.pde.ui.binaryProjectDecorator&quot;&gt;
+         &lt;description&gt;
+            %decorator.desc
+         &lt;/description&gt;
+      &lt;/decorator&gt;
+&lt;/extension&gt;</font></pre>
+
+
+<p>The <b>class </b>attribute should name a class that implements <a href="../reference/api/org/eclipse/jface/viewers/ILabelDecorator.html">ILabelDecorator</a>.&nbsp;
+This class allows you to decorate the original label's image and text with your
+own annotations.&nbsp; The <b>label</b> and <b>description</b> attributes
+designate the text that is used to name and describe the decorator in the
+preferences dialog.&nbsp; The <b>objectClass</b> names the class of objects that
+the decorator should be applied to, with the <b>adaptable</b> flag indicating
+whether objects that adapt to the class should also be decorated.&nbsp; The
+state flag controls whether the decorator is visible by default.</p>
+
+
+<p>Decorators are controlled by the user via the preferences dialog.&nbsp;
+Individual decorators can be turned on and off.&nbsp; Even so, it is a good idea
+to design your decorators so that they do not overlap or conflict with existing
+platform SDK decorators.&nbsp; If your decorators include information that is
+expensive to compute or potentially distracting, you may want to contribute your
+own preferences that allow the user to further fine-tune the decorator once it
+is on.&nbsp; This is done by the CVS client.</p>
+
+
+<p><img border="0" src="images/cvsdecorators.jpg" width="508" height="454"></p>
+
+
+<p>&nbsp;</p>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
