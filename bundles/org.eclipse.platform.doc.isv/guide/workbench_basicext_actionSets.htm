@@ -61,7 +61,7 @@ action to the popup menu of the resource navigator.)&nbsp; The markup follows:</
    &lt;/extension&gt;</pre></font>
 <P >
 Wow, there's a lot going on here!&nbsp; Let's take it a step at a time, looking
-only at the first action.&nbsp;&nbsp;</P>
+only at the first action for now.&nbsp;&nbsp;</P>
 <P >
 First, the action set is declared and given a <b>label</b>.&nbsp;
 The label &quot;ReadMe Actions&quot; (defined for <b> %ActionSet.name</b> in the plug-in's
@@ -120,7 +120,7 @@ dialogs</a>.</P>
 
 
 <P >
-This action also supplies enabling conditions for its menu item and tool bar
+Finally, the action supplies enabling conditions for its menu item and tool bar
 item.&nbsp; They will only be enabled when a single (<b>enablesFor=&quot;1&quot;</b>)
 readme file (<b>selectionClass =&quot;org.eclipse.core.resources.IFile&quot;
 name=&quot;*.readme&quot;</b>) is selected.&nbsp; This action's menu and toolbar
@@ -131,93 +131,8 @@ runs the action <b>class</b>.</P>
 
 
 <P >
-<b>Retargeted actions</b></P>
-
-
-<P >Occasionally, a plug-in defines an action that may be implemented
-differently by different parts.&nbsp; This is called a retargeted action.&nbsp;
-The readme markup includes two actions that are retargeted, <b>readmeRetargetAction</b>
-and <b>readmeRetargetRelabelAction</b>.</P>
-
-
-<pre ><font color='#4444CC'>...
-&lt;action id=&quot;org_eclipse_ui_examples_readmetool_readmeRetargetAction&quot;
-   menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;
-   toolbarPath=&quot;readme&quot;
-   label=&quot;%ReadmeRetargetAction.label&quot;
-   tooltip=&quot;%ReadmeRetargetAction.tooltip&quot;
-   helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
-   icon=&quot;icons/ctool16/openbrwsr.gif&quot;
-   <b>retarget=&quot;true&quot;</b>&gt;
-&lt;/action&gt;
-&lt;action id=&quot;org_eclipse_ui_examples_readmetool_readmeRelabelRetargetAction&quot;
-   menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;
-   toolbarPath=&quot;readme&quot;
-   label=&quot;%ReadmeRelabelRetargetAction.label&quot;
-   tooltip=&quot;%ReadmeRelabelRetargetAction.tooltip&quot;
-   helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
-   icon=&quot;icons/ctool16/openbrwsr.gif&quot;
-   <b>retarget=&quot;true&quot;	</b>
-   <b>allowLabelUpdate=&quot;true&quot;</b>&gt;
-&lt;/action&gt;
-...
-</font></pre>
-
-
-<P >Retargeted actions do not specify an implementing class.&nbsp; Instead, any
-part that wants to implement the action must register a global handler (<a href="../reference/api/org/eclipse/ui/IActionBars.html"><b>IActionBars</b></a>.<b>setGlobalActionHandler</b>),
-specifying the id of the retargeted action.&nbsp; When the part becomes active, its
-handler will be used as the implementation for the action.&nbsp; Plug-ins should
-specify <b>retarget=&quot;true&quot; </b>when supplying retargeted actions.&nbsp; The <b>allowLabelUpdate</b> attribute determines whether the
-action handlers should be allowed to set a different label on the action when
-their part becomes active.&nbsp;&nbsp;</P>
-
-
-<P >The readme tool sets these global actions in its <b>ReadmeEditorActionBarContributor</b>.&nbsp;
-We saw these contributions before when we looked at the editor contribution
-class.&nbsp;&nbsp;</P>
-
-
-<pre ><font color="#4444CC">...
-action2 = new <b>RetargetAction</b>(<b>IReadmeConstants.RETARGET2</b>, MessageUtil.getString(&quot;Editor_Action2&quot;));
-action2.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action2&quot;));
-action2.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE_DISABLE);
-action2.setImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE_ENABLE);
-...
-action3 = new <b>LabelRetargetAction</b>(<b>IReadmeConstants.LABELRETARGET3</b>, MessageUtil.getString(&quot;Editor_Action3&quot;));
-action3.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE_DISABLE);
-action3.setImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE_ENABLE);
-...&nbsp;&nbsp;
-<b>handler2</b> = new EditorAction(MessageUtil.getString(&quot;Editor_Action2&quot;)); 
-...
-<b>handler3</b> = new EditorAction(MessageUtil.getString(&quot;Editor_Action3&quot;)); 
-...</font></pre>
-
-
-<P >The readme tool creates additional editor actions, <b>handler2</b> and <b>handler3</b>,&nbsp;
-to be used for the retargeted actions.&nbsp; They are associated with the
-actions by registering them as global handlers.</P>
-
-
-<pre ><font color="#4444CC">public void init(IActionBars bars, IWorkbenchPage page) {
-	super.init(bars, page);
-	bars.setGlobalActionHandler(<b>IReadmeConstants.RETARGET2, handler2</b>);
-	bars.setGlobalActionHandler(<b>IReadmeConstants.LABELRETARGET3, handler3</b>);
-	...</font></pre>
-
-
-<P >All of this means that the retargeted actions will be shown in the action set when the readme file
-editor is active.&nbsp; Sure enough, these actions become visible when the
-editor is active and the <b>readmeRelabelRetargetAction</b> has been renamed.</P>
-
-
-<P ><img border="0" src="images/readmeretargeted.jpg" width="493" height="78"></P>
-
-
-<P >For more detail, browse the code in <b>ReadmeEditorActionBarContributor</b>.</P>
-
-
-<P >&nbsp;</P>
+We'll look at the other two actions later in the context of <a href="wrkAdv_retarget_contribute.htm">retargetable
+actions</a>.</P>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
