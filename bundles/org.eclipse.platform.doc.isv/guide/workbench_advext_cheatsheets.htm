@@ -93,14 +93,21 @@ The first item for this cheat sheet describes how to open the Java perspective. 
 attribute specifies a class that can be used to run the action on behalf of the user.  The class must
 implement <a href="../reference/api/org/eclipse/jface/action/IAction.html"><b>IAction</b></a>.  This is rather
 convenient, as it allows you to reuse the action classes written for menu or toolbar contributions.
+</p>
+<p>
+The class for the action can optionally implement 
+<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetAction.html"><b>ICheatSheetAction</b></a>
+if the action uses parameters or needs to be aware of the cheat sheet and its state.  In this case, the action
+will be passed an array of parameters and a reference to the 
+<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetManager.html"><b>ICheatSheetManager</b></a>
+so that it can request additional information about the cheat sheet. 
 Any necessary parameters can be passed to the action's run method using the <b>param<i>N</i></b> attributes.
 </p>
 <p>
-If your action needs to be aware of the cheat sheet and its state, you can specify a class that implements
-<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetAction.html"><b>ICheatSheetAction</b></a>.  
-In this case, the action will be passed a reference to the 
-<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetManager.html"><b>ICheatSheetManager</b></a>
-so that it can request additional information about the cheat sheet.
+It is strongly recommended that actions invoked from cheat sheets report a success/fail outcome if running the
+action might fail.  (For example, the user might cancel the action from its dialog.)  See 
+<a href="../reference/api/org/eclipse/jface/action/IAction.html"><b>IAction</a>.notifyResult(boolean)</b> for
+more detail.
 </p>
 <p>
 Items do not have to define actions.  If your item must be performed manually by the user, you need not
