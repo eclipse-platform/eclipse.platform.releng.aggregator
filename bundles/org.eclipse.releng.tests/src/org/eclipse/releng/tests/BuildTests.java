@@ -738,8 +738,8 @@ public class BuildTests extends TestCase {
 	public static final String[] REQUIRED_FRAGMENT_FILES = {"fragment.xml"};
 	public static final String REQUIRED_FRAGMENT_SUFFIX = "";
 	
-	public static final String[] REQUIRED_SWT_FRAGMENT_FILES = {"about.html"};
-	public static final String REQUIRED_SWT_FRAGMENT_MANIFEST = "MANIFEST.MF";
+	public static final String[] REQUIRED_SWT_FRAGMENT_FILES = {"fragment.properties"};
+	public static final String REQUIRED_SWT_FRAGMENT_SUFFIX = "";
 	
 	public static final String[] REQUIRED_SOURCE_FILES = {"about.html"};
 	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
@@ -878,7 +878,7 @@ public class BuildTests extends TestCase {
 		}				
 		
 		// Are we an swt fragment
-		if (testDirectory(aPlugin, REQUIRED_SWT_FRAGMENT_FILES, REQUIRED_SWT_FRAGMENT_MANIFEST)) {
+		if (testDirectory(aPlugin, REQUIRED_SWT_FRAGMENT_FILES, REQUIRED_SWT_FRAGMENT_SUFFIX)) {
 			return true;
 		}		
 		
