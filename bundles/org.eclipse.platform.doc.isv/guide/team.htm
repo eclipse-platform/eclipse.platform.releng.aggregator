@@ -15,21 +15,62 @@ Team support</H1>
 The Eclipse platform is based on the concept of letting users create and edit
 resources in the file system.&nbsp; The <b>team</b> plug-in defines additional
 API that allow plug-ins to integrate the function of a versioning and
-configuration management repository.&nbsp; The function provided by a repository
+configuration management repository and deployment.&nbsp; The function provided by a repository
 fundamentally affects the user workflow, since there are additional steps for
 retrieving files, comparing their content with local content, versioning them,
 and returning updated files to the repository.&nbsp; The goal of the team
 plug-in API is to be passive enough to allow repository plug-in providers to
 define their own workflow so that users familiar with their product can use the
-platform in a similar fashion.
+platform in a similar fashion and provide support for worflows that we have found
+are useful for team plug-ins.
 </p>
 <p>
-This goal is accomplished by supplying basic hooks that allow team plug-ins to
-intervene in operations that manipulate resources.&nbsp; For example, when the
-user saves a file, a repository provider could save it to the repository, ask
-the user whether it should be checked into the repository, or compare it with
-the content in the repository.&nbsp;
+This goal is accomplished by supplying several building blocks:
+<ul>
+
+<li>Repository Providers<blockquote>
+A repository provider allows synchronization of workspace resources with a remote location. 
+At a minimum it allows pushing resources in the workspace to a remote location and pulling 
+resources from a remote location into the workspace.
+A repository provider is associated with a project and controls the resources
+in the project by optionally providing a IFileModificationValidator and IMoveDeleteHook. 
+There is only one repository provider associated with each project. A repository
+provider is associated to a project by providing a
+<a href="../reference/api/org/eclipse/team/ui/IConfigurationWizard.html">IConfigurationWizard</a>.
+</blockquote>
+
+<li>Deployment Providers [<b>new in 3.0</b>]
+<blockquote>
+A deployment provider allows synchronization of workspace resources with a remote location. 
+At a minimum it allows pushing resources in the workspace to a remote location and pulling 
+resources from a remote location into the workspace.The difference between a deployment 
+provider and repository provider is the following:
+<ul>
+<li>a deployment provider doesn't have full control of workspace resources whereas the repository
+provider can hook into the IMoveDeleteHook and IFileModificationValidator.
+<li>multiple deployment providers can be mapped to the same folder whereas there is only one
+repository provider per project.
+<li>a deployment provider can be mapped to any folder
+whereas the repository provider must be mapped at the project.
+</ul>
+</blockquote>
+
+<li>Resource Management
+<blockquote>
+Allows other plug-ins to indicate special handling of resources with respect to team operations.
+</blockquote>
+
+<li>Synchronization Support [<b>new in 3.0</b>]
+<blockquote>
+Synchronize support provides classes and interfaces for managing dynamic collections of 
+synchronization information. This support helps you manage information about variants
+of the resources in the workspace. For example, with FTP you could store timestamps for
+the latest remote file and the base for the currently loaded resource. Synchronization support
+provides APIs to help manage and persist resource variants.
+</blockquote>
+</ul>
 </p>
+
 <p>The UI support is also structured passively.&nbsp; Placeholders for team
 provider actions, preferences, and properties are defined by the team UI
 plug-in, but it's up to the team plug-in provider to define these UI
@@ -43,9 +84,6 @@ platform.&nbsp; In fact, it's even possible to have different client
 implementations for the same repository installed.&nbsp; For example, one could
 install a CVS client designed for experts and a different one for novice users.
 </p>
-
-
-
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
