@@ -21,19 +21,20 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-//import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.runtime.Platform;
-
 import junit.framework.TestCase;
+
+import org.eclipse.core.runtime.Platform;
 
 public class BuildTests extends TestCase {
 	
@@ -831,7 +832,7 @@ public class BuildTests extends TestCase {
 		File[] plugins = pluginDir.listFiles();
 		for (int i = 0; i < plugins.length; i++) {
 			File aPlugin = plugins[i];
-			if ((aPlugin.getName().indexOf("test") == -1) && (aPlugin.getName().indexOf(".jar")== -1)) {
+			if (aPlugin.getName().indexOf("test") == -1) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
 				}
@@ -892,26 +893,49 @@ public class BuildTests extends TestCase {
 	}
 	
 	private boolean testDirectory(File aDirectory, String[] requiredFiles, String requiredSuffix) {
-		if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
-			return false;
+		if (aDirectory.getName().endsWith(".jar")){
+			ArrayList list = new ArrayList();
+			try {
+				ZipFile jarredPlugin=new ZipFile(aDirectory);
+				Enumeration _enum=jarredPlugin.entries();
+				while (_enum.hasMoreElements()){
+					list.add(_enum.nextElement().toString());
+				}				
+			} catch (ZipException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (!list.containsAll(Arrays.asList(requiredFiles))) {
+				return false;
+			}
+		} else {
+			if (!Arrays.asList(aDirectory.list()).containsAll(
+					Arrays.asList(requiredFiles))) {
+				return false;
+			}
+
+			int index = aDirectory.getName().indexOf('_');
+			if (index == -1) {
+				index = aDirectory.getName().length();
+			}
+
+			String plainName = aDirectory.getName().substring(0, index);
+
+			if (requiredSuffix.equals("")
+					|| Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+				return true;
+			} else if (aDirectory
+					.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
+				return false;
+			}
 		}
-		
-		int index = aDirectory.getName().indexOf('_');
-		if (index == -1) {
-			index = aDirectory.getName().length();
-		}
-		
-		String plainName = aDirectory.getName().substring(0, index);
-		
-		if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
-			return true;
-		} else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
-			return false;
-		}
-		
 		return true;
 	}
 	
+
 	private boolean testBundleDirectory(File aDirectory, String[] requiredFiles, String manifestFile, String requiredSuffix) {
 		if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
 			return false;
