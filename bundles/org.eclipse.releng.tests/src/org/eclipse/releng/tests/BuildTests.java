@@ -569,7 +569,7 @@ public class BuildTests extends TestCase {
 		private String locateEclipseZip() {
 
 			// String to use when running as an automated test.			
-			String installDir = BootLoader.getInstallURL().getPath() + ".." + File.separator + "..";
+			String installDir = BootLoader.getInstallURL().getPath()+ File.separator  + ".." + File.separator + "..";
 			
 			// String to use when running in Eclipse
 			// String installDir = BootLoader.getInstallURL().getPath() + "..";
