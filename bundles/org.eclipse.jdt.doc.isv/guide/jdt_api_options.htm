@@ -11,6 +11,563 @@
 <BODY BGCOLOR="#ffffff">
 <H2>
 Manipulating JDT/Core options</H2>
+<P>
+The JDT/Core options are accessible from a few number of API.
+All these API are located in <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">JavaCore</a> class.
+Only four methods are necessary to manipulated options:
+<ul>
+<li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getDefaultOptions()">JavaCore.getDefaultOptions()</a> - Answer the default value of options.</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getOption(java.lang.String)">JavaCore.getOption()</a> - Answer the value of a specific option.</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getOptions()">JavaCore.getOptions()</a> - Answer the current values of options.</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setOptions(java.util.Hashtable)">JavaCore.setOptions()</a> - Replace the options values by new values.</li>
+</ul>
+</P>
+
+<P>
+The options are manipulated as a hashtable of all known configurable options with their values.
+Helper constants have been defined on <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">JavaCore</a> for each of the option ID and their possible constant values.</P>
+
+<P>
+If you want to configure JDT/Core with only your options, the code must be like the following example.
+<font color='#4444CC'><pre>
+   // Get the current options
+   Hashtable options = JavaCore.getDefaultOptions();
+   
+   // Change the value of an option
+   options.put(JavaCore.COMPILER_PB_DEPRECATION, JavaCore.ERROR);
+   
+   // Set the new options
+   JavaCore.setOptions(options);
+</pre></font>
+
+If you want to keep the current options and modify only one of them, you need to do like the second example.
+
+<font color='#4444CC'><pre>
+   // Get the current options
+   Hashtable options = JavaCore.getOptions();
+   
+   // Change the value of an option
+   options.put(JavaCore.COMPILER_PB_DEPRECATION, JavaCore.ERROR);
+   
+   // Set the new options
+   JavaCore.setOptions(options);
+</pre></font></P>
+
+<H3>JDT/Core options descriptions</h3>
+
+<P>
+The list of all the JDT/Core options are in the following tables. All the the tables have the same organisation with the option id surrounded with parenthesis and the default value printed in bold italics style.
+<br>
+<br>
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+
+<tr>
+<th>Description</th>
+<th width=130>Values</th>
+</tr>
+
+<tr>
+<td colspan=2><b>Option Name</b>   (OPTION_ID)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>Description</td>
+<td width=130>A_VALUE</td>
+</tr>
+<tr valign="top">
+<td width=130><b><i>DEFAULT_VALUE</i></b></td>
+</tr>
+<tr valign="top">
+<td width=130>ANOTHER_VALUE</td>
+</tr>
+
+</table>
+</P>
+
+<H4>Options category</h4>
+<ul>
+<li><a href="#compiler">Compiler options</a></li>
+<li><a href="#builder">Builder options</a></li>
+<li><a href="#javacore">JavaCore options</a></li>
+<li><a href="#formatter">Formatter options</a></li>
+<li><a href="#codeassist">CodeAssist options</a></li>
+</ul>
+
+<H4><a name="#compiler">Compiler options</a></h4>
+
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+<tr>
+<th>Description</th>
+<th width=140>Values</th>
+</tr>
+
+<tr>
+<td colspan=2><b>Generating Local Variable Debug Attribute</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_LOCAL_VARIABLE_ATTR">COMPILER_LOCAL_VARIABLE_ATTR</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When generated, this attribute will enable local variable names to be displayed in debugger, only in place where variables are definitely assigned (.class file is then bigger)</td>
+<td><i><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#GENERATE">GENERATE</a></b></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_GENERATE">DO_NOT_GENERATE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Generating Line Number Debug Attribute</b>  (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_LINE_NUMBER_ATTR">COMPILER_LINE_NUMBER_ATTR</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When generated, this attribute will enable source code highlighting in debugger (.class file is then bigger).</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#GENERATE">GENERATE</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_GENERATE">DO_NOT_GENERATE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Generating Source Debug Attribute</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_SOURCE_FILE_ATTR">COMPILER_SOURCE_FILE_ATTR</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When generated, this attribute will enable the debugger to present the corresponding source code.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#GENERATE">GENERATE</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_GENERATE">DO_NOT_GENERATE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Preserving Unused Local Variables</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_UNUSED_LOCAL">COMPILER_CODEGEN_UNUSED_LOCAL</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Unless requested to preserve unused local variables (i.e. never read), the compiler will optimize them out, potentially altering debugging.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#PRESERVE">PRESERVE</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#OPTIMIZE_OUT">OPTIMIZE_OUT</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Defining Target Java Platform</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_TARGET_PLATFORM">COMPILER_CODEGEN_TARGET_PLATFORM</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=4>For binary compatibility reason, .class files can be tagged to with certain VM versions and later. Note that "1.4" target require to toggle compliance mode to "1.4" too.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_1">VERSION_1_1</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_2">VERSION_1_2</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">VERSION_1_3</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">VERSION_1_4</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Unreachable Code</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNREACHABLE_CODE">COMPILER_PB_UNREACHABLE_CODE</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>Unreachable code can optionally be reported as an error, warning or simply ignored. The bytecode generation will always optimized it out.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Invalid Import</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_INVALID_IMPORT">COMPILER_PB_INVALID_IMPORT</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>An import statement that cannot be resolved might optionally be reported as an error, as a warning or ignored.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Attempt to Override Package-Default Method</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD">COMPILER_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>A package default method is not visible in a different package, and thus cannot be overridden. When enabling this option, the compiler will signal such scenarii either as an error or a warning.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Method With Constructor Name</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME">COMPILER_PB_METHOD_WITH_CONSTRUCTOR_NAME</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>Naming a method with a constructor name is generally considered poor style programming. When enabling this option, the compiler will signal such scenarii either as an error or a warning.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Deprecation</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_DEPRECATION">COMPILER_PB_DEPRECATION</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will signal use of deprecated API either as an error or a warning.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Hidden Catch Block</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_HIDDEN_CATCH_BLOCK">COMPILER_PB_HIDDEN_CATCH_BLOCK</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>Locally to a try statement, some catch blocks may hide others , e.g.
+<pre>
+   try {
+      throw new java.io.CharConversionException();
+   } catch (java.io.CharConversionException e) {
+   } catch (java.io.IOException e) {}.
+</pre>
+When enabling this option, the compiler will issue an error or a warning for hidden catch blocks corresponding to checked exceptions</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Unused Local</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_LOCAL">COMPILER_PB_UNUSED_LOCAL</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused local variables (i.e. variables never read from)</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Unused Parameter</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_PARAMETER">COMPILER_PB_UNUSED_PARAMETER</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused method parameters (i.e. parameters never read from)</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Unused Import</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_IMPORT">COMPILER_PB_UNUSED_IMPORT</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused import reference </td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Synthetic Access Emulation</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_SYNTHETIC_ACCESS_EMULATION">COMPILER_PB_SYNTHETIC_ACCESS_EMULATION</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning whenever it emulates access to a non-accessible member of an enclosing type. Such access can have performance implications.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Non-Externalized String Literal</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NON_NLS_STRING_LITERAL">COMPILER_PB_NON_NLS_STRING_LITERAL</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for non externalized String literal (i.e. non tagged with //$NON-NLS-<n>$)</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Usage of 'assert' Identifier</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_ASSERT_IDENTIFIER">COMPILER_PB_ASSERT_IDENTIFIER</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning whenever 'assert' is used as an identifier (reserved keyword in 1.4)</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Setting Source Compatibility Mode</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_SOURCE">COMPILER_SOURCE</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Specify whether source is 1.3 or 1.4 compatible. From 1.4 on, 'assert' is a keyword reserved for assertion support. Also note, than when toggling to 1.4 mode, the target VM level should be set to "1.4" and the compliance mode should be "1.4".</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">VERSION_1_3</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">VERSION_1_4</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Setting Compliance Level</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_COMPLIANCE">COMPILER_COMPLIANCE</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Select the compliance level for the compiler. In "1.3" mode, source and target settings should not go beyond "1.3" level.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">VERSION_1_3</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">VERSION_1_4</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Maximum number of problems reported per compilation unit</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_MAX_PER_UNIT">COMPILER_PB_MAX_PER_UNIT</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>Specify the maximum number of problems reported on each compilation unit (if the maximum is zero then all problems are reported).</td>
+<td>a positive integer. <br><b><i>Default value is 100</i></b></td>
+</tr>
+</tr>
+
+</table>
+
+<H4><a name="#builder">Builder options</a></h4>
+
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+
+<tr>
+<th>Description</th>
+<th width=150>Values</th>
+</tr>
+
+<tr>
+<td colspan=2><b>Specifying Filters for Resource Copying Control</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_JAVA_BUILD_RESOURCE_COPY_FILTER">CORE_JAVA_BUILD_RESOURCE_COPY_FILTER</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>Allow to specify some filters to control the resource copy process. (&lt;name&gt; is a file name pattern (only * wild-cards allowed) or the name of a folder which ends with '/')</td>
+<td>{&lt;name&gt;[,&lt;name&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+</tr>
+
+<tr>
+<td colspan=2><b>Abort if Invalid Classpath</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_JAVA_BUILD_INVALID_CLASSPATH">CORE_JAVA_BUILD_INVALID_CLASSPATH</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Allow to toggle the builder to abort if the classpath is invalid</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ABORT">ABORT</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+</table>
+
+<H4><a name="#javacore">JavaCore options</a></h4>
+
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+
+<tr>
+<th>Description</th>
+<th width=120>Values</th>
+</tr>
+
+<tr>
+<td colspan=2><b>Computing Project Build Order</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_JAVA_BUILD_ORDER">CORE_JAVA_BUILD_ORDER</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Indicate whether JavaCore should enforce the project build order to be based on the classpath prerequisite chain. When requesting to compute, this takes over the platform default order (based on project references).</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPUTE">COMPUTE</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Specify Default Source Encoding Format</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_ENCODING">CORE_ENCODING</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>Get the encoding format for compiled sources. This setting is read-only, it is equivalent to 'ResourcesPlugin.getEncoding()'.</td>
+<td>any of the supported encoding name. <br><b><i>Default value is platform default</i></b></td>
+</tr>
+</tr>
+
+</table>
+
+<H4><a name="#formatter">Formatter options</a></h4>
+
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+
+<tr>
+<th>Description</th>
+<th width=120>Values</th>
+</tr>
+
+<tr>
+<td colspan=2><b>Inserting New Line Before Opening Brace</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_NEWLINE_OPENING_BRACE">FORMATTER_NEWLINE_OPENING_BRACE</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When Insert, a new line is inserted before an opening brace, otherwise nothing is inserted</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#INSERT">INSERT</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_INSERT">DO_NOT_INSERT</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Inserting New Line Inside Control Statement</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_NEWLINE_CONTROL">FORMATTER_NEWLINE_CONTROL</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When Insert, a new line is inserted between } and following else, catch, finally</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#INSERT">INSERT</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_INSERT">DO_NOT_INSERT</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Clearing Blank Lines</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_CLEAR_BLANK_LINES">FORMATTER_CLEAR_BLANK_LINES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When Clear all, all blank lines are removed. When Preserve one, only one is kept and all others removed.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CLEAR_ALL">CLEAR_ALL</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#PRESERVE_ONE">PRESERVE_ONE</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Inserting New Line Between Else/If</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_NEWLINE_ELSE_IF">FORMATTER_NEWLINE_ELSE_IF</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When Insert, a blank line is inserted between an else and an if when they are contiguous. When choosing to not insert, else-if will be kept on the same line when possible.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#INSERT">INSERT</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_INSERT">DO_NOT_INSERT</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Inserting New Line In Empty Block</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_NEWLINE_EMPTY_BLOCK">FORMATTER_NEWLINE_EMPTY_BLOCK</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When insert, a line break is inserted between contiguous { and }, if } is not followed by a keyword.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#INSERT">INSERT</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_INSERT">DO_NOT_INSERT</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Splitting Lines Exceeding Length</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_LINE_SPLIT">FORMATTER_LINE_SPLIT</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>Enable splitting of long lines (exceeding the configurable length). Length of 0 will disable line splitting</td>
+<td>a positive integer. <br><b><i>Default value is 80</i></b></td>
+</tr>
+</tr>
+
+<tr>
+<td colspan=2><b>Compacting Assignment</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_COMPACT_ASSIGNMENT">FORMATTER_COMPACT_ASSIGNMENT</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Assignments can be formatted asymmetrically, e.g. 'int x= 2;', when Normal, a space is inserted before the assignment operator</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPACT">COMPACT</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#NORMAL">NORMAL</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Defining Indentation Character</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_TAB_CHAR">FORMATTER_TAB_CHAR</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Either choose to indent with tab characters or spaces</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#TAB">TAB</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#SPACE">SPACE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Defining Space Indentation Length</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_TAB_SIZE">FORMATTER_TAB_SIZE</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When using spaces, set the amount of space characters to use for each indentation mark.</td>
+<td>a positive integer. <br><b><i>Default value is 4</i></b></td>
+</tr>
+</tr>
+
+</table>
+
+<H4><a name="#codeassist">CodeAssist options</a></h4>
+
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+<tr>
+<th>Description</th>
+<th width=80>Values</th>
+</tr>
+
+<tr>
+<td colspan=2><b>Activate Visibility Sensitive Completion</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_VISIBILITY_CHECK">CODEASSIST_VISIBILITY_CHECK</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When active, completion doesn't show that you can not see (e.g. you can not see private methods of a super class).</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Automatic Qualification of Implicit Members</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_IMPLICIT_QUALIFICATION">CODEASSIST_IMPLICIT_QUALIFICATION</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When active, completion automatically qualifies completion on implicit field references and message expressions.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></i></b></td>
+</tr>
+
+</table>
 
 <P>&nbsp;<a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved." border="0"></a></P>
 </BODY>
