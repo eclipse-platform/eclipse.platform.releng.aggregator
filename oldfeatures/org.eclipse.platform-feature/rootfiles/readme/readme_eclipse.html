@@ -308,11 +308,11 @@ Eclipse product changed. Users in shared install scenarios may end up in this
 situation as previous builds of Eclipse automatically generated config.ini files
 in some cases. The work around is either to delete the local config.ini or
 update the eclipse.product line to read eclipse.product=org.eclipse.platform.ide.</p>
-<h4><b>Changing the charset for a resource causes inconsistencies</b></h4>
-<p>Changing the charset for a resource (or the whole workspace) does not trigger resource change events or auto builds. The result is that 
+<h4><b>Changing the character encoding for a resource causes inconsistencies</b></h4>
+<p>Changing the character encoding for a resource (or the whole workspace) does not trigger resource change events or auto builds. The result is that 
 builders and listeners that maintain state derived from the affected resources will not have a chance to run, causing
 inconsistencies (such as compiler errors not going away and searching for references not working properly).
-To avoid the problem, create the project and set its charset before creating (or
+To avoid the problem, create the project and set its character encoding before creating (or
 importing) any files in it. However, if you do need to make a project consistent
 again, try the following steps (in order):</p>
 
@@ -576,12 +576,6 @@ Motif only)</h4>
 <p>When using Linux Motif and GB18030 IME &quot;chinput&quot;, Eclipse can
 crash if the IME client window is left open when the parent window is disposed.
 (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32045">32045</a>)</p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Problems with Japanese IME
-(Linux Motif only)</i></h4>
-<p><i>On Linux Motif, the Japanese IME Wnn7 Personal is not working properly
-with Eclipse: the pre-edit text does not appear in the text widget, making it
-unusable. The IME that we tested - Kinput2 on the client + Canna on the server
-side (default IME in RedHat 8.0) - works fine. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=31754">31754</a>)</i></p>
 <h4> Using IBM J9 VM (Photon and
 AIX)</h4>
 <p>On QNX Photon and IBM AIX, the SWT library will not be found when running
@@ -717,44 +711,42 @@ section.)</p>
 <h4>Searching for constant field references</h4>
 <p>Search does not find references to constant fields inside binaries because
 the Java Language Specification mandates that constant field values be inlined
-in the class file's bytecodes, leaving no trace of a field reference.&nbsp;(bug
-12044)</p>
-<h4>Using an installed JRE 1.5</h4>
-<p>JDT does not yet support 1.5 JREs other than for running or debugging
-programs against them. The Eclipse Java compiler is either 1.3 or 1.4 compliant;
-and until it become 1.5 compliant, all tooling will not be able to handle the
-1.5 language additions. You may still compile 1.4 programs against 1.5
-libraries, since we ensured that our compiler would tolerate them, with the
-exception of covariance scenario (which was forbidden under JLS 2nd edition).
-Note that J2SE 1.5 language features are still being finalized, and will be
-covered by forthcoming JLS 3rd edition. In parallel to the present release, JDT
-is working on a preview of J2SE 1.5 support which is posted on eclipse.org
-update site. You may find more information about it on the Cheetah
-page.&nbsp;(bug 36938)</p>
+in the class file's bytecodes, leaving no trace of a field reference.&nbsp;(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=12044">12044</a>)</p>
+<h4>Developing programs with J2SE 1.5</h4>
+<p>The Java tools do not yet support fully J2SE 1.5. You can run or debug programs against
+a 1.5 JRE, and safely compile 1.4 programs against 1.5 libraries (the Eclipse compiler tolerates
+them with the
+exception of covariance scenarios which are forbidden under JLS 2nd edition).
+However, the Eclipse Java compiler and IDE are unable to handle source files
+contain of the new Java language features (generics, enhanced for loops, static
+imports, metadata annotations, varargs) being added in 1.5, which will be
+codified in the forthcoming Java Language Specification (JLS) 3rd edition. An
+early preview of the full Eclipse support for J2SE 1.5 is developing in parallel
+with 3.0, and is available from the <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/jdt-core-home/r3.0/main.html#updates">Cheetah</a>
+page.&nbsp;(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=36938">36938</a>)</p>
 <h4>Missing secondary types in editor</h4>
-<p>When referencing a secondary type defined in another compilation unit (i.e. a
-toplevel type which name does not match its file name), the editor may
-incorrectly report it to be missing. When building however, the compiler has no
-problem. The only workaround is to avoid defining secondary types, and rather
-have all types defined in their own file.</p>
+<p>When referencing a secondary type defined in another compilation unit (i.e., a
+top level type whose name does not match its file name), the editor may
+incorrectly report it to be missing. The Java compiler handles this case fine.</p>
 <h4>Java indexing crash recovery</h4>
-<p>JDT is indexing in background all modified Java files. Under some rare
-circumstances, the indexer may crash, in which case it will silently recover
-automatically by restarting and rebuilding the affected indexes. When crash
-recovery occurs, an entry is added into the .log file, to keep track of it. It
-is simply informative and should not cause any harm to subsequent search
-operations. (bug 68189)</p>
+<p>The Java tools index modified Java files in the background. If the indexer
+happens to crash (which it can under rare circumstances), it will automatically recover
+and rebuild the affected indexes. If this happens, it adds an informative entry
+to the .log file to. The rebuilt indexes are fine, and the crash does not impact
+subsequent search
+operations. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66836">66836</a>)</p>
 <h4>Classpath entry denoting external class folder is now properly rejected</h4>
-<p>Though external class folder (i.e. folder containing .class files and located
-outside workspace) were not supported by the JDT law, no problem was reported
+<p>Although external class folders (i.e., folder containing .class files and located
+outside workspace) were never properly supported by the JDT, a problem was never
+reported
 when constructing such a build path. JDT now properly diagnoses a problem in
-this situation. In order to still beneficiate from external .class files, a
+this situation. In order to still benefit from external .class files, a
 class folder must be mounted as a linked folder in Eclipse workspace (in project
-properties, select Java Build Path&gt;Libraries&gt;Add Class Folder&gt;Create
-New Folder...&gt;Advanced&gt;. Then a folder name can be associated with an
+properties, select Java Build Path &gt; Libraries &gt; Add Class Folder &gt; Create
+New Folder... &gt; Advanced. Then a folder name can be associated with an
 arbitrary file system location by checking &quot;Link to folder on the file
 system). Once mounted, the linked class folder can normally be referenced on a
-build path, and from thereon programs can be compiled against it. (bug 67631)</p>
+build path, and from there on programs can be compiled against it. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67631">67631</a>)</p>
 <h4>Package Explorer not asking for filter removal</h4>
 <p>Show In &gt; Package Explorer normally asks for removal of filters when the
 compilation unit to be shown in the Package Explorer is filtered out. However,
