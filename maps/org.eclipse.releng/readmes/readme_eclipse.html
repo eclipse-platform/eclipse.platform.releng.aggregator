@@ -1468,8 +1468,7 @@ section provides advice for what to do and to not do. It addresses the specific
 issues with the Eclipse SDK.</p>
 <p>The typical failure mode is noticed by the 2.1 user. 2.1 metadata is lost
 when a 2.0 user saves changes and then commits the updated metadata files to the
-repository.</p>
-<p>Here's how things typically go awry:</p>
+repository. Here's how things typically go awry:</p>
 <ul>
   <li>A user working in Eclipse 2.1 creates or modifies a project in a way that
     results in changes to a shared metadata file that rely on 2.1-specific
@@ -1489,51 +1488,57 @@ repository.</p>
     be unaware that they have just taken a retrograde step until later, when
     things start to malfunction.</li>
 </ul>
-<p>Things to watch out for when the project is to be shared with 2.0:</p>
-<ol>
-  <li>Linked folders and files. This support was added in 2.1. Information about
-    linked resources is recorded in the project's <code>.project</code> file.
-    Recommendation: do not use. Better still, disable linked resources via the <b>Workbench
-    &gt; Linked Resources</b> preference page.</li>
-  <li>External tool (Ant) builders. Information about external tool builder is
-    recorded in the project's <code>.project</code> file. The format of the
-    information changed between 2.0 and 2.1. Builders created or changed in 2.1
-    use the new format, which is not understood by a 2.0 workspace. Builders
-    created in 2.0 use the old format and continue to work in 2.1.
-    Recommendation: Always create or edit external tools builders from a 2.0
-    workspace.</li>
-  <li>Optional exclusion patterns on Java source entries on the build class
-    path. This support was added in 2.1. This information is recorded in the
-    project's <code>.classpath</code> file. Recommendation: do not specify
-    exclusion patterns.&nbsp; Better still, disable exclusion patterns via the<b>
-    Java &gt; Compiler &gt; Build Path</b>&nbsp; preference page.</li>
-  <li>Output folders associated with Java source entries on the build class
-    path. This support was added in 2.1. This information is recorded in the
-    project's <code>.classpath</code> file. Recommendation: do not specify
-    anything other than the default (project-wide) output folder.&nbsp; Better
-    still, disable multiple output locations via the<b> Java &gt; Compiler &gt;
-    Build Path</b>&nbsp; preference page.</li>
-  <li>Source attachment root path. When attaching a source ZIP to a library JAR
-    on the Java build path, the source root path prefix is inferred
-    automatically. This has changed from 2.0, where it could be explicitly set
-    via the UI and explicitly recorded in the project's <code>.classpath</code>
-    file. Consequently, a Java project created in a 2.1 workspace might not find
-    the attached source. Recommendation: Use 2.0 to specify the source
-    attachment root path. There is additional source attachment flexibility
-    provided in 2.1: you can provide a folder instead of a JAR or zip as a
-    source attachment, and you can attach source to a class file folder; this
-    functionality is not available in 2.0 (where the 2.1 information is
-    ignored).&nbsp; Recommendation: Use 2.0 to specify the source attachment.</li>
-  <li>PDE classpath containers for dependent plug-ins. PDE's use of classpath
-    containers was added in 2.1. Classpath containers are recorded in the
-    project's <code>.classpath</code> file. If PDE classpath containers are
-    used, then a 2.0 workspace will have unresolved classpath entries and
-    therefore most Java capabilities (including compilation, search, run, debug)
-    will not produce the expected results. Recommendation: Ensure that the
-    setting on the <b>Plug-in Development &gt; Java Build Path Control </b>preference
+<p>Here are a list of things to watch out for when the project is to be shared
+with 2.0:</p>
+<ul>
+  <li><b>Linked folders and files<br>
+    </b>This support was added in 2.1. Information about linked resources is
+    recorded in the project's <code>.project</code> file. Recommendation: do not
+    use. Better still, disable linked resources via the <b>Workbench &gt; Linked
+    Resources</b> preference page.</li>
+  <li><b>External tool (Ant) builders</b><br>
+    Information about external tool builder is recorded in the project's <code>.project</code>
+    file. The format of the information changed between 2.0 and 2.1. Builders
+    created or changed in 2.1 use the new format, which is not understood by a
+    2.0 workspace. Builders created in 2.0 use the old format and continue to
+    work in 2.1. Recommendation: Always create or edit external tools builders
+    from a 2.0 workspace.</li>
+  <li><b>Optional exclusion patterns on Java source entries on the build class
+    path</b><br>
+    This support was added in 2.1. This information is recorded in the project's
+    <code>.classpath</code> file. Recommendation: do not specify exclusion
+    patterns.&nbsp; Better still, disable exclusion patterns via the<b> Java
+    &gt; Compiler &gt; Build Path</b>&nbsp; preference page.</li>
+  <li><b>Output folders associated with Java source entries on the build class
+    path</b><br>
+    This support was added in 2.1. This information is recorded in the project's
+    <code>.classpath</code> file. Recommendation: do not specify anything other
+    than the default (project-wide) output folder.&nbsp; Better still, disable
+    multiple output locations via the<b> Java &gt; Compiler &gt; Build Path</b>&nbsp;
+    preference page.</li>
+  <li><b>Source attachment root path associated with Java library entries on the
+    build class path</b><br>
+    When attaching a source ZIP to a library JAR on the Java build path, the
+    source root path prefix is inferred automatically. This has changed from
+    2.0, where it could be explicitly set via the UI and explicitly recorded in
+    the project's <code>.classpath</code> file. Consequently, a Java project
+    created in a 2.1 workspace might not find the attached source.
+    Recommendation: Use 2.0 to specify the source attachment root path. There is
+    additional source attachment flexibility provided in 2.1: you can provide a
+    folder instead of a JAR or zip as a source attachment, and you can attach
+    source to a class file folder; this functionality is not available in 2.0
+    (where the 2.1 information is ignored).&nbsp; Recommendation: Use 2.0 to
+    specify the source attachment.</li>
+  <li><b>PDE classpath containers for dependent plug-ins</b><br>
+    PDE's use of classpath containers was added in 2.1. Classpath containers are
+    recorded in the project's <code>.classpath</code> file. If PDE classpath
+    containers are used, then a 2.0 workspace will have unresolved classpath
+    entries and therefore most Java capabilities (including compilation, search,
+    run, debug) will not produce the expected results. Recommendation: Ensure
+    that the setting on the <b>Plug-in Development &gt; Java Build Path Control </b>preference
     page for using classpath containers is disabled before creating any plug-in
     (or fragment) projects.</li>
-</ol>
+</ul>
 <h4>Using Eclipse 2.1 to develop plug-ins that work in Eclipse 2.0</h4>
 <p>It is also possible (and reasonable) to use Eclipse 2.1 to develop a plug-in
 intended to work in Eclipse 2.0. Use the <b>Plug-in Development &gt; Target
@@ -1552,7 +1557,7 @@ United States, other countries, or both.</p>
 Microsoft Corporation in the United States, other countries, or both.</p>
 <p>Other company, product, and service names may be trademarks or service marks
 of others.</p>
-<p>(c) Copyright IBM Corp. and others 2003</p>
+<p>(c) Copyright 2003 IBM Corp. and others 2003</p>
 
 </body>
 
