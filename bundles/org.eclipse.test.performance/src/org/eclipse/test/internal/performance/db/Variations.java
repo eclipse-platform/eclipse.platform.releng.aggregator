@@ -17,18 +17,35 @@ import java.util.StringTokenizer;
 
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 
+/**
+ * The <code>Variations</code> class represents a set of key/value pairs
+ * that are used to tag data stored in the performance database and to
+ * query for data from the databse. 
+ */
 public class Variations extends Properties {
     
     private static final long serialVersionUID= 1L;
 
+    /**
+     * Creates an empty set of key/value pairs.
+     */
     public Variations() {
         //
     }
 
+    /**
+     * Creates a set of key/value pairs by parsing the given string.
+     * The strings format is an implementation detail of the database.
+     * @param dbRepresentation
+     */
     public Variations(String dbRepresentation) {
         parse(this, dbRepresentation);
     }
 
+    /**
+     * Creates a set of key/value pairs that consists
+     * @deprecated Use the default constructor instead and fill in key/value pairs explicitely.
+     */
     public Variations(String config, String build) {
         if (config != null)
             put(PerformanceTestPlugin.CONFIG, config);

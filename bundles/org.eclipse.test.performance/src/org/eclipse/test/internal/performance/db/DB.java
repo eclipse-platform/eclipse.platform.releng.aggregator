@@ -50,10 +50,18 @@ public class DB {
     }
    
     // Scenarios
+    /**
+     * Return all Scenarios that match the given config, build, and scenario name.
+     * @deprecated Use the Variations based form of this method.
+     */
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
         return queryScenarios(configName, new String[] { buildPattern }, scenarioPattern, null);
     }
 
+    /**
+     * Return the specified Dimensions of all Scenarios that match the given config, build, and scenario name.
+     * @deprecated Use the Variations based form of this method.
+     */
     public static Scenario[] queryScenarios(String configName, String[] buildPatterns, String scenarioPattern, Dim[] dimensions) {
         
         if ("%".equals(configName)) { //$NON-NLS-1$
@@ -79,12 +87,24 @@ public class DB {
         return getDefault().internalQuerySummaries(variationPatterns, global);
     }
 
-    // build names
+    /**
+     * Adds 
+     * @param names
+     * @param variationPatterns
+     * @param scenarioPattern
+     * 
+     */
     public static void queryBuildNames(List names, Variations variationPatterns, String scenarioPattern) {
         getDefault().internalQueryBuildNames(names, variationPatterns, scenarioPattern);
     }
 
-
+    /**
+     * Store the data contained in the given sample in the database.
+     * The data is tagged with key/value pairs from variations.
+     * @param variations used to tag the data in the database
+     * @param sample the sample to store
+     * @return returns true if data could be stored successfully
+     */
     public static boolean store(Variations variations, Sample sample) {
         return getDefault().internalStore(variations, sample);
     }
