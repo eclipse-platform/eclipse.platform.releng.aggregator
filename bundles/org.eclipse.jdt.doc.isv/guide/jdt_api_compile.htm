@@ -132,7 +132,7 @@ can be changed according to the default locale. The constants defined in <b><a h
   Working copies can be reconciled with problem detection if a <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">
  IProblemRequestor</a>
 </b> has been supplied for the working copy creation. To achieve this, you 
-can use the <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean, org.eclipse.core.runtime.IProgressMonitor)">
+can use the <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)">
  reconcile</a></b> method. Here is an example: <font color="#4444cc">
 <pre>
   ICompilationUnit unit = ..; // get some compilation unit
@@ -148,11 +148,11 @@ can use the <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#
   };
     
   // use working copy to hold source with error
-  IWorkingCopy workingCopy = (IWorkingCopy)unit.getWorkingCopy(null, null, problemRequestor);
+  ICompilationUnit workingCopy = unit.getWorkingCopy(new WorkingCopyOwner() {}, problemRequestor, null);
   ((IOpenable)workingCopy).getBuffer().setContents(&quot;public class X extends Zork {}&quot;);
 
   // trigger reconciliation			
-  workingCopy.reconcile(true, null);
+  workingCopy.reconcile(NO_AST, true, null, null);
 </pre></font> You can add an action on the reported problems in the acceptProblem(IProblem) 
 method. In this example, the reported problem will be that <b>Zork cannot 
 be resolved or is not a valid superclass</b> and its id is <b>IProblem.SuperclassNotFound</b>

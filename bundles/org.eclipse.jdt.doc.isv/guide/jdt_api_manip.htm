@@ -57,79 +57,75 @@ Code can be modified by manipulating the compilation unit (and thus the underlyi
 one can modify an in-memory copy of the compilation unit called a working copy. </P>
 <P>
 A working copy is obtained from a compilation unit using the 
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getWorkingCopy()">getWorkingCopy</a></b>
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#getWorkingCopy(org.eclipse.core.runtime.IProgressMonitor)">getWorkingCopy</a></b>
 method. (Note that the compilation unit does not need to exist in the Java model
-in order for a working copy to be created.)&nbsp; Whoever creates such a working copy is responsible for destroying it when not needed any longer using the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#destroy()">destroy</a></b>
+in order for a working copy to be created.)&nbsp; Whoever creates such a working copy is responsible for discarding it when not needed any longer using the
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#discardWorkingCopy()">discardWorkingCopy</a></b>
 method. </P>
 <P>
 Working copies modify an in-memory buffer. The <b>getWorkingCopy()</b> method creates a default buffer, but
 clients can provide their own buffer implementation using the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getWorkingCopy(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.jdt.core.IBufferFactory, org.eclipse.jdt.core.IProblemRequestor)">getWorkingCopy(IProgressMonitor, IBufferFactory, IProblemRequestor)</a></b>
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#getWorkingCopy(org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.jdt.core.IProblemRequestor, org.eclipse.core.runtime.IProgressMonitor)">getWorkingCopy(WorkingCopyOwner, IProblemRequestor, IProgressMonitor)</a></b>
 method. Clients can manipulate the text of this buffer directly. If they do so, they must synchronize the working copy with
 the buffer from time to time using either the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile()">reconcile()</a></b>
-method or the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean, org.eclipse.core.runtime.IProgressMonitor)">reconcile(boolean,IProgressMonitor)</a></b>
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)">reconcile(int, boolean, WorkingCopyOwner, IProgressMonitor)</a></b>
 method.  </P>
 <P>
 Finally a working copy can be saved to disk (replacing the original compilation unit) using the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#commit(boolean, org.eclipse.core.runtime.IProgressMonitor)">commit</a></b>
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#commitWorkingCopy(boolean, org.eclipse.core.runtime.IProgressMonitor)">commitWorkingCopy</a></b>
 method.&nbsp;&nbsp; </P>
 <P>
-For example the following code snippet creates a working copy on a compilation unit using a custom buffer factory. The snippet
-modifies the buffer, reconciles the changes, commits the changes to disk and finally destroys the working copy. </P>
+For example the following code snippet creates a working copy on a compilation unit using a custom working copy owner. The snippet
+modifies the buffer, reconciles the changes, commits the changes to disk and finally discards the working copy. </P>
 <font color='#4444CC'><pre>
     // Get original compilation unit
     ICompilationUnit originalUnit = ...;
     
-    // Get buffer factory
-    IBufferFactory factory = ...;
+    // Get working copy owner
+    WorkingCopyOwner owner = ...;
     
     // Create working copy
-    IWorkingCopy workingCopy = (IWorkingCopy)originalUnit.getWorkingCopy(null, factory, null);
+    ICompilationUnit workingCopy = originalUnit.getWorkingCopy(owner, null, null);
     
     // Modify buffer and reconcile
     IBuffer buffer = ((IOpenable)workingCopy).getBuffer();
     buffer.append(&quot;class X {}&quot;);
-    workingCopy.reconcile();
+    workingCopy.reconcile(NO_AST, false, null, null);
     
     // Commit changes
-    workingCopy.commit(false, null);
+    workingCopy.commitWorkingCopy(false, null);
     
     // Destroy working copy
-    workingCopy.destroy();
+    workingCopy.discardWorkingCopy();
 </pre></font>
 <P>
-Working copies can also be shared by several clients. A shared working copy is created using the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getSharedWorkingCopy(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.jdt.core.IBufferFactory, org.eclipse.jdt.core.IProblemRequestor)">getSharedWorkingCopy</a></b>
-method and it can be later retrieved using the
-<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#findSharedWorkingCopy(org.eclipse.jdt.core.IBufferFactory)">findSharedWorkingCopy</a></b>
-method. A shared working copy is thus keyed on the original compilation unit and on a buffer factory.</P>
+Working copies can also be shared by several clients using a working copy owner. A working copy can be later retrieved using the
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#findWorkingCopy(org.eclipse.jdt.core.WorkingCopyOwner)">findWorkingCopy</a></b>
+method. A shared working copy is thus keyed on the original compilation unit and on a working copy owner.</P>
 <P>
-The following shows how client 1 creates a shared working copy, client 2 retrieves this working copy, client 1 destroys the
+The following shows how client 1 creates a shared working copy, client 2 retrieves this working copy, client 1 discards the
 working copy, and client 2 trying to retrieve the shared working copy notices it does not exist any longer: </P>
 <font color='#4444CC'><pre>
     // Client 1 &amp; 2: Get original compilation unit
     ICompilationUnit originalUnit = ...;
     
-    // Client 1 &amp; 2: Get buffer factory
-    IBufferFactory factory = ...;
+    // Client 1 &amp; 2: Get working copy owner
+    WorkingCopyOwner owner = ...;
     
     // Client 1: Create shared working copy
-    IWorkingCopy workingCopyForClient1 = (IWorkingCopy)originalUnit.getSharedWorkingCopy(null, factory, null);
+    ICompilationUnit workingCopyForClient1 = originalUnit.getWorkingCopy(owner, null, null);
     
     // Client 2: Retrieve shared working copy
-    IWorkingCopy workingCopyForClient2 = (IWorkingCopy)originalUnit.findSharedWorkingCopy(factory);
+    ICompilationUnit workingCopyForClient2 = originalUnit.findWorkingCopy(owner);
      
     // This is the same working copy
     assert workingCopyForClient1 == workingCopyForClient2;
     
-    // Client 1: Destroy shared working copy
-    workingCopyForClient1.destroy();
+    // Client 1: Discard shared working copy
+    workingCopyForClient1.discardWorkingCopy();
     
     // Client 2: Attempt to retrieve shared working copy and find out it's null
-    workingCopyForClient2 = (IWorkingCopy)originalUnit.findSharedWorkingCopy(factory);
+    workingCopyForClient2 = originalUnit.findWorkingCopy(owner);
     assert workingCopyForClient2 == null;
 </pre></font>
 
@@ -321,24 +317,20 @@ If your plug-in needs to know about changes to Java elements after the fact, you
 You can be more specific and specify the type of events you're interested in using 
 <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#addElementChangedListener(org.eclipse.jdt.core.IElementChangedListener, int)"><b> addElementChangedListener(IElementChangedListener, int)</b></a>. </P>
 <P>
-For example, if you're only interested in listening for events before the builders run: </P>
+For example, if you're only interested in listening for events during a reconcile operation: </P>
 <font color='#4444CC'><pre>
-   JavaCore.addElementChangedListener(new MyJavaElementChangeReporter(), ElementChangedEvent.PRE_AUTO_BUILD);
+   JavaCore.addElementChangedListener(new MyJavaElementChangeReporter(), ElementChangedEvent.POST_RECONCILE);
 </pre></font>
 <P>
-There are three kinds of events that are supported by <b>JavaCore</b>:
+There are two kinds of events that are supported by <b>JavaCore</b>:
 <ul>
 <li><a href="../reference/api/org/eclipse/jdt/core/ElementChangedEvent.html#POST_CHANGE"><b>POST_CHANGE</b></a>: 
       Listeners of this event kind will get notified during the corresponding 
       <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IResourceChangeEvent.html#POST_CHANGE"><b>POST_CHANGE</b></a> 
       resource change notification.</li>
-<li><a href="../reference/api/org/eclipse/jdt/core/ElementChangedEvent.html#PRE_AUTO_BUILD"><b>PRE_AUTO_BUILD</b></a>: 
-      Listeners of this event kind will get notified during the corresponding 
-      <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IResourceChangeEvent.html#PRE_AUTO_BUILD"><b>PRE_AUTO_BUILD</b></a> 
-      resource change notification.</li>
 <li><a href="../reference/api/org/eclipse/jdt/core/ElementChangedEvent.html#POST_RECONCILE"><b>POST_RECONCILE</b></a>: 
       Listeners of this event kind will get notified at the end of a reconcile operation on a working copy
-      (see <a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile()"><b>IWorkingCopy.reconcile()</b></a>).</li>
+      (see <a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)"><b>ICompilationUnit.reconcile(int, boolean, WorkingCopyOwner, IProgressMonitor)</b></a>).</li>
 </ul> <p></P>
 <P>
 Java element change listeners are similar conceptually to resource change listeners
@@ -408,7 +400,7 @@ Several kinds of operations can trigger a Java element change notification. Here
 <li>Changing the source attachment of a .jar file, e.g. <a href="../reference/api/org/eclipse/jdt/core/IPackageFragmentRoot.html#attachSource(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"><b>IPackageFragmentRoot.attachSource</b></a>
      (the delta indicates that the source was <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_SOURCEDETACHED">detached</a>
      then <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_SOURCEATTACHED">attached</a>)</li>
-<li>Reconciling a working copy with its buffer, e.g. <a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile()"><b>IWorkingCopy.reconcile</b></a></li>
+<li>Reconciling a working copy with its buffer, e.g. <a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)"><b>ICompilationUnit.reconcile</b></a></li>
 <li>Modifying an <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a> that ends with ".java" and that is on the
       project's classpath, e.g. using <b>IFile.setContents</b> (the delta indicates that a compilation unit was changed, but 
       <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_FINE_GRAINED">no finer-grained information</a>
