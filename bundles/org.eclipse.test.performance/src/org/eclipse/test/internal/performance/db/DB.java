@@ -17,6 +17,7 @@ import java.util.Properties;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.Dimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
+import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -29,6 +30,9 @@ public class DB {
     private int fRefCount;
     private Connection fConnection;
     private SQL fSQL;
+    
+    private int fConfigID;
+    private int fSessionID;
     
     
     public synchronized static DB acquire() {
@@ -56,6 +60,19 @@ public class DB {
     public SQL getSQL() {
         return fSQL;
     }
+
+    private int getConfig(Sample sample) throws SQLException {
+        if (fConfigID == 0)
+            fConfigID= fSQL.getConfig("burano", "MacOS X");
+        return fConfigID;
+    }
+    
+
+    private int getSession(Sample sample) throws SQLException {
+        if (fSessionID == 0)
+            fSessionID= fSQL.addSession("3.1", getConfig(sample));
+        return fSessionID;
+    }
     
     public void store(Sample sample) {
         
@@ -63,16 +80,13 @@ public class DB {
             return;
                 
 	    try {
-            int config_id= fSQL.getConfig("burano", "MacOS X");
-            int session_id= fSQL.addSession("3.1", config_id);
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
-            int sample_id= fSQL.createSample(session_id, scenario_id, 0);
-            int draw_id= fSQL.createDraw(sample_id);
-            int datapoint_id= fSQL.createDataPoint(draw_id);
+            int sample_id= fSQL.createSample(getSession(sample), scenario_id, sample.getStartTime());
             
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
 			    DataPoint dp= dataPoints[i];
+	            int datapoint_id= fSQL.createDataPoint(sample_id, i, dp.getStep());
 			    Scalar[] scalars= dp.getScalars();
 			    for (int j= 0; j < scalars.length; j++) {
 			        Scalar scalar= scalars[j];
@@ -93,9 +107,16 @@ public class DB {
  
         ResultSet result= null;
         try {
-            result= fSQL.query("burano", "MacOS X", refID, scenarioID, Dimensions.USER_TIME.getId());
-            for (int i= 0; result.next(); i++)
-                System.out.println(i + ": " + result.getString(1));
+            result= fSQL.query2("burano", "MacOS X", refID, scenarioID);
+            for (int i= 0; result.next(); i++) {
+		        int sample= result.getInt(1);
+		        int seq= result.getInt(2);
+		        int step= result.getInt(3);
+                int dim_id= result.getInt(4);
+                long value= result.getBigDecimal(5).longValue();
+                Date d= new Date(result.getBigDecimal(6).longValue());
+                System.out.println(i + ": " + sample+","+seq +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());
+            }
             result.close();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -244,7 +265,7 @@ public class DB {
             System.out.println("end adding to DB");
             */
             
-            ResultSet result= sql.query("burano", "MacOS X", "3.1", "aFirstTest", Dimensions.USER_TIME.getId());
+            ResultSet result= sql.query1("burano", "MacOS X", "3.1", "aFirstTest", Dimensions.USER_TIME.getId());
             for (int i= 0; result.next(); i++)
                 System.out.println(i + ": " + result.getString(1));
             result.close();

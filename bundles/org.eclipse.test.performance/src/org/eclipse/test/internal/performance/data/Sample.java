@@ -19,16 +19,26 @@ import junit.framework.Assert;
  */
 public class Sample {
 	String fScenarioID;
+	long fStartTime;
 	Map fProperties;
 	DataPoint[] fDataPoints;
 	
-	public Sample(String scenarioID, Map properties, DataPoint[] dataPoints) {
+	public Sample(String scenarioID, long starttime, Map properties, DataPoint[] dataPoints) {
 		Assert.assertTrue("scenarioID is null", scenarioID != null); //$NON-NLS-1$
 		fScenarioID= scenarioID;
+		fStartTime= starttime;
 		fProperties= properties;
 		fDataPoints= dataPoints;
 	}
 	
+	public String getScenarioID() {
+	    return fScenarioID;
+	}
+	
+    public long getStartTime() {
+         return fStartTime;
+    }
+    
 	public String getProperty(String name) {
 		return (String) fProperties.get(name);
 	}
@@ -37,10 +47,6 @@ public class Sample {
 		DataPoint[] dataPoints= new DataPoint[fDataPoints.length];
 		System.arraycopy(fDataPoints, 0, dataPoints, 0, fDataPoints.length);
 		return dataPoints;
-	}
-	
-	public String getScenarioID() {
-	    return fScenarioID;
 	}
 	
 	public String toString() {

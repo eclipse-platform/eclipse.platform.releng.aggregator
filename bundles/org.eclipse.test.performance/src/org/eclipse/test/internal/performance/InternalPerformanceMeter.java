@@ -33,9 +33,6 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 	public static final String RUN_TS_PROPERTY= "runTS"; //$NON-NLS-1$
 	public static final String TESTNAME_PROPERTY= "testname"; //$NON-NLS-1$
 	
-	public static final String BEFORE= "1"; //$NON-NLS-1$
-	public static final String AFTER= "2"; //$NON-NLS-1$
-
 	private String fScenarioId;
 
 	

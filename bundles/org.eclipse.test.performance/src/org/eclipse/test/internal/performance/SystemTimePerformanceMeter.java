@@ -27,6 +27,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	
 	private static final int DEFAULT_INITIAL_CAPACITY= 3;
 	
+	private long fStartDate;
 	private List fStartTime;
 	private List fStopTime;
 	
@@ -35,6 +36,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public SystemTimePerformanceMeter(String scenario) {
 		this(scenario, DEFAULT_INITIAL_CAPACITY);
+		fStartDate= System.currentTimeMillis();
 	}
 	
 	/**
@@ -95,21 +97,19 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 		Map properties= new HashMap();
 		properties.put(DRIVER_PROPERTY, getBuildId());
 		properties.put(HOSTNAME_PROPERTY, getHostName());
-		properties.put(RUN_TS_PROPERTY, String.valueOf(System.currentTimeMillis()));
-		properties.put(TESTNAME_PROPERTY, getScenarioName());
 		
 		DataPoint[] data= new DataPoint[2*fStartTime.size()];
 		for (int i= 0; i < fStartTime.size(); i++) {
-			data[2*i]= createDataPoint(BEFORE, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
-			data[2*i + 1]= createDataPoint(AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
+			data[2*i]= createDataPoint(0, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
+			data[2*i+1]= createDataPoint(1, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
 		}
 		
-		return new Sample(getScenarioName(), properties, data);
+		return new Sample(getScenarioName(), fStartDate, properties, data);
 	}
 
-	private DataPoint createDataPoint(String kind, Dimension dimension, long value) {
+	private DataPoint createDataPoint(int step, Dimension dimension, long value) {
 		Map scalars= new HashMap();
 		scalars.put(dimension, new Scalar(dimension, value));
-		return new DataPoint(kind, scalars);
+		return new DataPoint(step, scalars);
 	}
 }

@@ -13,15 +13,12 @@ package org.eclipse.test.internal.performance.eval;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 import junit.framework.Assert;
-
-
 
 /**
  * @since 3.1
@@ -78,9 +75,9 @@ public class StatisticsSession {
 		
 		for (int i= 0; i < datapoints.length - 1; i += 2) {
 			DataPoint before= datapoints[i];
-			Assert.assertTrue("order of datapoints makes no sense", before.getKind().equals(InternalPerformanceMeter.BEFORE)); //$NON-NLS-1$
+			Assert.assertTrue("order of datapoints makes no sense", before.getStep() == 0); //$NON-NLS-1$
 			DataPoint after= datapoints[i + 1];
-			Assert.assertTrue("order of datapoints makes no sense", after.getKind().equals(InternalPerformanceMeter.AFTER)); //$NON-NLS-1$
+			Assert.assertTrue("order of datapoints makes no sense", after.getStep() == 1); //$NON-NLS-1$
 			
 			Scalar delta= getDelta(before, after, dimension);
 			long magnitude= delta.getMagnitude();

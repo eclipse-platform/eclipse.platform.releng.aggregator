@@ -32,6 +32,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
 
 	private PerformanceMonitor fPerformanceMonitor;
+	private long fStartTime;
 	private List fDataPoints= new ArrayList();
 	private DB fDB;
     
@@ -42,6 +43,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	public OSPerformanceMeter(String scenarioId) {
 	    super(scenarioId);
 		fPerformanceMonitor= PerformanceMonitor.getPerformanceMonitor();
+		fStartTime= System.currentTimeMillis();
 	}
 	
 	/*
@@ -58,14 +60,14 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#start()
 	 */
 	public void start() {
-		snapshot(BEFORE);
+		snapshot(0);
 	}
 	
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
 	public void stop() {
-		snapshot(AFTER);
+		snapshot(1);
 	}
 	
 	/*
@@ -89,14 +91,14 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	        HashMap runProperties= new HashMap();
 	        collectRunInfo(runProperties);
 	        fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
-	        return new Sample(getScenarioName(), runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
+	        return new Sample(getScenarioName(), fStartTime, runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
 	    }
 	    return null;
 	}
 	
 	//---- private stuff ------
 	
-    private void snapshot(String step) {
+    private void snapshot(int step) {
 	    HashMap map= new HashMap();
 	    
 	    if (true) {
@@ -151,9 +153,9 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	    
         runProperties.put(DRIVER_PROPERTY, getBuildId());
         runProperties.put(HOSTNAME_PROPERTY, getHostName());
-        runProperties.put(RUN_TS_PROPERTY, new Long(System.currentTimeMillis()));
-        runProperties.put(TESTNAME_PROPERTY, getScenarioName());
-	    	    
+        runProperties.put(RUN_TS_PROPERTY, new Long(fStartTime));	// not necessary
+
+        /*
 		String version= System.getProperty("java.fullversion");
 		if (version == null)
 		    version= System.getProperty("java.runtime.version");
@@ -165,5 +167,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 		b.append(" eclipse.commands=");
 			b.append(System.getProperty("eclipse.commands"));
 		runProperties.put("cmdArgs", b.toString());
-	}	
+		*/
+	}
 }

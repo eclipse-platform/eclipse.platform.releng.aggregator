@@ -17,16 +17,16 @@ import java.util.Map;
  * @since 3.1
  */
 public class DataPoint {
-	private String fKind; // TODO this is perfmsr dependent
+	private int fStep;
 	private Map fScalars;
 	
-	public DataPoint(String kind, Map values) {
-		fKind= kind;
+	public DataPoint(int step, Map values) {
+		fStep= step;
 		fScalars= values;
 	}
 	
-	public String getKind() {
-		return fKind;
+	public int getStep() {
+		return fStep;
 	}
 	
 	public Scalar[] getScalars() {
@@ -38,6 +38,6 @@ public class DataPoint {
 	}
 	
 	public String toString() {
-		return "DataPoint [kind= " + fKind + ", #dimensions: " + fScalars.size() + "]";
+		return "DataPoint [step= " + fStep + ", #dimensions: " + fScalars.size() + "]";
 	}
 }
