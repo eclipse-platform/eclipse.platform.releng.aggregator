@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Documents and partitions
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Documents and partitions</H2>
+<p>The platform text support
+    defines a generic <b>document</b> model for text and provides a viewer that
+    displays text using this model.&nbsp;We will start by looking at the Java
+editor example and how it structures its information.</p>
+<h3>Document providers and documents</h3>
+<p>In the workbench, an editor is typically opened by selecting a domain element
+(such as a file or an element stored inside an archive file) and opening
+it.&nbsp; When the editor is created, it is associated with an <b>editor input</b>,
+which describes the object being edited.</p>
+<p>The object that is opened can be a file in the file system (<a href="../reference/api/org/eclipse/ui/IFileEditorInput.html"><b>IFileEditorInput</b></a>),
+a file located inside a file archive, such as ZIP file (<a href="../reference/api/org/eclipse/ui/IStorageEditorInput.html"><b>IStorageEditorInput</b></a>),
+or something specialized for your editor.&nbsp; The platform text framework
+assumes little about the editor input itself.&nbsp; It is concerned with
+providing a definition for the presentation model of the input.</p>
+<p>In order to effectively display and manipulate different kinds of elements, a
+generic presentation model must be defined.&nbsp; Your editor must provide a way
+to map from its expected domain model (the editor input) to the presentation
+model.&nbsp; This mapping is defined by you in a <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocumentProvider</b></a>.&nbsp;
+Given an editor input, a document provider will supply an appropriate <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>.</p>
+<p>For example...&lt;java editor&gt;</p>
+<p>The document provider instance should be shared between editors.&nbsp; That
+is, only one instance of the provider should be used to perform this
+mapping.&nbsp; You can manage the reference to this provider in your plug-in
+class (example?).&nbsp; You can also specify your document provider in the XML
+markup and the workbench will manage your provider instance for you.&nbsp; (show
+the markup in the JavaEditor).</p>
+<h3>Partitions</h3>
+<p>Documents are divided into
+    non-overlapping <b>partitions</b>, which can be useful when the text
+    represents multiple elements with different behaviors (such as methods and
+    comments inside a Java file).&nbsp;&nbsp;</p>
+<p> (Elaborate on what partitions exist in
+the example...how the document is connected with a partitioner -
+JavaDocumentProvider.createDocument)</p>
+<p>Each partitions is assigned a <b>content type</b>
+    which is used to identify regions in the document where different behavior should be
+    assigned.&nbsp; Document <b>positions</b> can be used to
+    define text regions that remain updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
+<p><b><a href="../reference/api/org/eclipse/jface/text/formatter/package-summary.html">org.eclipse.jface.text.formatter</a></b>
+    defines a text viewer add-on which can be configured with different <b>formatting</b> 
+    behavior per partition content type.&nbsp; Formatting is achieved by
+    manipulating white spaces and delimiters in order to present the text in a
+    structured fashion.&nbsp; Formatting is most commonly used when editing code and is
+    often driven by user preference.&nbsp; The JDT source code editor uses this
+    support to provide user-driven Java code formatting.&nbsp; (show example)</p>
+<h3>Rule based document partitioning</h3>
+<p><b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
+    provides <b>rule-based document scanning</b>.&nbsp; Plug-ins can use rules
+    to distinguish tokens such as line delimiters, white space, and generic
+    patterns when scanning a document.&nbsp; This package also provides support
+    for rule-driven presentation reconciling and document partitioning.&nbsp;&nbsp;
+<p> The Java editor example uses this package to parse Java
+    code.&nbsp;&nbsp;
+<p> JavaDocumentProvider.createJavaPartitioner.&nbsp; Configure a
+default partitioner.
+<p>&nbsp;</p>
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
+
+</BODY>
+</HTML>
