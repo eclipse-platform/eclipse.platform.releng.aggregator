@@ -7,6 +7,8 @@
 	<antcall target="createDocZip" />
 </target>
 
+
+
 <target name="convertSchemaToHtml" if="eclipse.running">
 	<property name="dest" value="reference/extension-points" />
 	    <record name="jdtconvert.txt" action="start"/>
@@ -30,6 +32,10 @@
 
 <target name="generateJavadoc" if="JAVADOC14_HOME">
 
+	<!--hack to ensure the platform doc is built before JDT - needs to be fixed in PDE BUILD-->
+	<available file="../org.eclipse.platform.doc.isv/doc.zip" property="platform.doc.zip.present"/>
+	<antcall target="buildPlatformDocIsv" />
+
 	<condition property="optionsFile" value="jdtOptions">
 	      <os family="unix" />
     </condition>
@@ -44,9 +50,13 @@
 	<delete dir="reference/api"/>
 	<mkdir dir="reference/api"/>
 
-	<exec dir="${basedir}" executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
+	<exec dir="." executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
 		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
 	</exec>
+</target>
+
+<target name="buildPlatformDoc" unless="platform.doc.zip.present">
+	<ant antfile="buildDoc.xml" dir="../org.eclipse.platform.doc.isv" />
 </target>
 
 <target name="createDocZip">
