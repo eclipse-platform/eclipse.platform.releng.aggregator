@@ -18,18 +18,18 @@ DBNAME=perfDB
 # the Java VM
 JAVA=/usr/bin/java
 
-#MacOS: NSC="$JAVA -Dderby.system.home=$DBROOT -Dderby.storage.fileSyncTransactionLog=true org.apache.derby.drda.NetworkServerControl"
-NSC="$JAVA -Dderby.system.home=$DBROOT org.apache.derby.drda.NetworkServerControl"
+#MacOS: NSC="-Dderby.system.home=$DBROOT -Dderby.storage.fileSyncTransactionLog=true org.apache.derby.drda.NetworkServerControl"
+NSC="-Dderby.system.home=$DBROOT org.apache.derby.drda.NetworkServerControl"
 
 export CLASSPATH="${CSLIB}/derby.jar:${CSLIB}/derbytools.jar:${CSLIB}/derbynet.jar:${CLASSPATH}"
 
 case $1 in
 	start )
-		$NSC start -h 0.0.0.0
+		$JAVA -Xms256M -Xmx256M $NSC start -h 0.0.0.0
 		break;;
 		
 	stop )
-		$NSC shutdown
+		$JAVA $NSC shutdown
 		break;;
 
 	ij )
