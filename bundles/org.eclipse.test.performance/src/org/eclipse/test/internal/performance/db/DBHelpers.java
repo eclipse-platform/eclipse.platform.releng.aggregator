@@ -11,7 +11,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
 
@@ -23,9 +22,6 @@ public class DBHelpers {
     
     public static void main(String[] args) throws SQLException {
         
-        //System.setProperty("eclipse.perf.dbloc", "net://relengbuildserv.ottawa.ibm.com");
-        System.setProperty("eclipse.perf.dbloc", "net://bachlnx.ottawa.ibm.com");
-        //System.setProperty("eclipse.perf.dbloc", "net://9.26.193.84");
         //System.setProperty("eclipse.perf.dbloc", "net://localhost");
                         
         DBHelpers db= new DBHelpers();

@@ -225,9 +225,7 @@ public class DB {
      * @param failMesg the reason of the failure
      */
     public static void markAsFailed(Variations variations, Sample sample, String failMesg) {
-	    System.out.println("failed: " + variations);
-	    System.out.println("  " + sample);
-	    System.out.println("  " + failMesg);
+    		// empty for now
     }
     
     public static Connection getConnection() {
@@ -639,7 +637,7 @@ public class DB {
             try {
                 fConnection= DriverManager.getConnection("jdbc:" + fDBType + ":" + url, info); //$NON-NLS-1$ //$NON-NLS-2$
             } catch (SQLException e) {
-                if ("08001".equals(e.getSQLState()) && DERBY.equals(fDBType)) {
+                if ("08001".equals(e.getSQLState()) && DERBY.equals(fDBType)) { //$NON-NLS-1$
                     if (DEBUG) System.out.println("DriverManager.getConnection failed; retrying for cloudscape"); //$NON-NLS-1$
                     // try Cloudscape
                     fDBType= CLOUDSCAPE;
