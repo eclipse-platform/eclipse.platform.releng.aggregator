@@ -263,6 +263,27 @@ If your plug-in needs to know about changes to Java elements after the fact, you
    JavaCore.addElementChangedListener(new MyJavaElementChangeReporter());
 </pre></font>
 <P>
+You can be more specific and specify the type of events you're interested in using 
+<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#addElementChangedListener(org.eclipse.jdt.core.IElementChangedListener, int)"><b> addElementChangedListener(IElementChangedListener, int)</b></a>. </P>
+<P>
+For example, if you're only interested in listening for events before the builders run: </P>
+<font color='#4444CC'><pre>
+   JavaCore.addElementChangedListener(new MyJavaElementChangeReporter(), ElementChangedEvent.PRE_AUTO_BUILD);
+</pre></font>
+<P>
+There are three kinds of events that are supported by <b>JavaCore</b>:
+<ul>
+<li><a href="../reference/api/org/eclipse/jdt/core/ElementChangedEvent.html#POST_CHANGE"><b>POST_CHANGE</b></a>: 
+      Listeners of this event kind will get notified during the corresponding <b>POST_CHANGE</b> 
+      resource change notification.</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/ElementChangedEvent.html#PRE_AUTO_BUILD"><b>PRE_AUTO_BUILD</b></a>: 
+      Listeners of this event kind will get notified during the corresponding <b>PRE_AUTO_BUILD</b> 
+      resource change notification.</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/ElementChangedEvent.html#POST_RECONCILE"><b>POST_RECONCILE</b></a>: 
+      Listeners of this event kind will get notified at the end of a reconcile operation on a working copy
+      (see <a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile()"><b>IWorkingCopy.reconcile()</b></a>).</li>
+</ul> </P>
+<P>
 Java element change listeners are similar conceptually to resource change listeners
 (described in
 <a HREF="../../org.eclipse.platform.doc.isv/guide/resAdv_events.htm" CLASS="XRef">tracking resource changes</a>). The following snippet implements a Java element change reporter that prints the element deltas to the system console.</P>
