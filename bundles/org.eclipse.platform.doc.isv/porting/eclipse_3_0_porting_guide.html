@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 RC1<br>
-Last revised May 28, 2004</p>
+Last revised June 18, 2004</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -642,6 +642,13 @@ been changed to match the others. Existing code that was functioning correctly
 on {Windows, GTK} and on {Motif, Photon} is unlikely to be affected. But it is
 wise to check your code to ensure that it does not rely on an invalid event
 order.</p>
+<h3>IStatus (org.eclipse.core.runtime)</h3>
+<p>
+<code>IStatus</code> has a new severity constant, <code>IStatus.CANCEL</code>,
+that can be used to indicate cancelation. Callers of <code>IStatus.getSeverity</code>
+that relied on the assumption that the set of possible severities was closed may be
+affected by this addition. Callers of <code>getSeverity</code> may need to update 
+their code to include the new severity.</p>
 <h3>IResourceChangeEvent (org.eclipse.core.resources)</h3>
 <p>In Eclipse 3.0, workspace auto-build now occurs in a background thread. This
 required an API contract change to <tt>IResourceChangeEvent</tt>. The contract
