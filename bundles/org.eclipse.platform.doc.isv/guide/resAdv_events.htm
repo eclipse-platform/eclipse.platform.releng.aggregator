@@ -130,7 +130,8 @@ the project from your plug-in's directory.&nbsp; The workspace is locked (no res
 <P CLASS="CellBody">
 Notifies listeners before any auto-building occurs.&nbsp; This event is
 broadcast when the platform detects an auto-build needs to occur, regardless of
-whether auto-building is actually enabled.&nbsp; The workspace is <b> not</b> locked during this event (resources can be updated). The event contains a resource delta describing the changes that have occurred since the last
+whether auto-building is actually enabled.&nbsp; The workspace is <b> not</b> locked during this event (resources can be updated). 
+The event contains a resource delta describing the changes that have occurred since the last
 <b>POST_CHANGE</b> event was reported.</P>
 </TD>
 </TR>
@@ -274,14 +275,24 @@ the <b>IResourceDelta.CHANGED</b> case could be implemented to further describe 
       break;
    ...
 </pre></font>
-<P >
+<p>
 For a complete description of resource deltas, visitors, and marker deltas, consult the
 API specification for <b><a href="../reference/api/org/eclipse/core/resources/IResourceDelta.html">IResourceDelta</a></b>,
 <b><a href="../reference/api/org/eclipse/core/resources/IResourceDeltaVisitor.html">IResourceDeltaVisitor</a></b>, and
 <b><a href="../reference/api/org/eclipse/core/resources/IMarkerDelta.html">IMarkerDelta</a></b>.</P>
 <i><blockquote>
-Note:&nbsp; Resource change listeners are useful for tracking changes that occur to resources while your plug-in is activated. If your plug-in registers a resource change listener during its startup code, it's possible that many resource change events have been triggered before the activation of your plug-in. The resource delta contained in the first resource change event received by your plug-in will not contain all of the changes made since your plug-in was last activated. If you need to track changes made between activations of your plug-in, you should use the support provided for workspace saving. This is described in
+Note:&nbsp; Resource change listeners are useful for tracking changes that occur to resources while 
+your plug-in is activated. If your plug-in registers a resource change listener during its startup code, 
+it's possible that many resource change events have been triggered before the activation of your plug-in. 
+The resource delta contained in the first resource change event received by your plug-in will not contain 
+all of the changes made since your plug-in was last activated. If you need to track changes made between 
+activations of your plug-in, you should use the support provided for workspace saving. This is described in
 <a HREF="resAdv_saving.htm" CLASS="XRef"> Workspace save participation</a>.</blockquote></i>
+<i><blockquote>
+Note:&nbsp; Some resource change events are triggered during processing that occurs in a background thread.  Resource
+change listeners should be thread-safe, and any code that performs UI tasks as part of responding to a resource
+change should be structured accordingly.  See <a href="swt_threading.htm">Threading issues</a> for more detail.
+</blockquote></i>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 
