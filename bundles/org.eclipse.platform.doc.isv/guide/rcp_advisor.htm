@@ -14,7 +14,7 @@ Customizing the workbench
 <H2>
 Customizing the workbench</H2>
 <P>
-The entry point for supplying custom application behavior for a rich client application is the designation of a
+The "entry point" for supplying custom workbench behavior is the designation of a
 <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>
 for configuring the workbench.  Your rich client plug-in should extend this abstract class to provide
 the application-specific configuration for the workbench.  The browser example does this using the 
@@ -25,8 +25,13 @@ the application-specific configuration for the workbench.  The browser example d
 					<b>new BrowserAdvisor()</b>);
 			...
 </pre></font> 
-A workbench advisor is responsible for implementing methods that configure the workbench with appropriate layout and
-features, such as the application's action bar or intro page.  The following list of advisor methods that can be overridden
+A workbench advisor is responsible for overriding methods to configure the workbench with its desired layout and
+features, such as the action bar items or intro page.  
+</p>
+<h3>The workbench life-cycle</h3>
+<p>Life-cycle methods provided by the workbench advisor allow
+your application to hook into the creation of the workbench at any point in time and influence the behavior.
+The following list of advisor life-cycle methods that can be overridden
 comes from the javadoc for <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>.
 <ul>
 <li><code>initialize</code> - called first; before any windows; use to
@@ -70,7 +75,7 @@ initialize</li>
 </p>
 <p>
 As you can see, a rich client application has a lot of control over how the workbench is configured
-and implemented.  The primary function of the <b>BrowserApp</b> is to configure the action bars with
+and implemented.  In the browser example, the primary function of the <b>BrowserAdvisor</b> is to configure the action bars with
 menu items appropriate for a browser.  This is done in the <b>fillActionBars</b> method:
 <font color='#4444CC'><pre>
 	public void fillActionBars(IWorkbenchWindow window, IActionBarConfigurer configurer, int flags) {
@@ -97,15 +102,17 @@ cool bar, etc.  Its protocol allows you customize and populate these items.  The
 <b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchConfigurer.html">IWorkbenchConfigurer</a></b> 
 operates at a higher level, allowing you to store application-specific data with the workbench.  The
 <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b> provides
-access to these configurers through the life cycle methods noted above.  Lower level methods inside 
+access to these configurers in the life-cycle methods noted above.  Lower level methods inside 
 <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b> may be overridden
 to completely replace default behavior.  For example, your workbench advisor could
 override the method that creates the SWT controls in the window in order to provide a completely
 different implementation for the main window.
 <p>
-In other words, there are many ways (and levels) for customizing the workbench.
-The javadoc for <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>
-and <b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchConfigurer.html">IWorkbenchConfigurer</a></b>
+In other words, there are many ways to customize the workbench and several different levels at which these
+techniques can be used.
+The javadoc for <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>,
+<b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchConfigurer.html">IWorkbenchConfigurer</a></b>, and
+<b><a href="../reference/api/org/eclipse/ui/application/IWorkbenchWindowConfigurer.html">IWorkbenchWindowConfigurer</a></b>
 includes a complete description of the available protocol.  See also the complete implementation of
 <b>BrowserAdvisor</b> for comments on alternate implementations. 
 </p>
