@@ -20,18 +20,23 @@ reside in the following tasks.&nbsp; Arguments are also listed for each task.
   <li><b>eclipse.fetch</b>: generates an Ant script that fetches content from a CVS repository.
   The eclipse fetch is driven by a file whose format is described below (see <a href="#directoryFileFormat">Directory file format</a>).
    <p><i>elements</i> : a comma separated list of entries that will be fetched. Entries are expected to be of the form type@id as specified in the directory file format;
-   <p><i>install</i> :  the directory into which features and plug-in projects will be checked out;
+   <p><i>buildDirectory</i> :  the directory into which features and plug-in projects will be checked out;
    <p><i>directory</i> : the name of the directory file;
-   <p><i>scriptname</i> : the name of the generated script;
    <p><i>children</i> : optional, specifies whether the script generation for contained plug-ins and fragments should be invoked. Default is set to true;
-   <p><i>cvspassfile</i> : optional, the name of a CVS password file.
+   <p><i>cvspassfile</i> : optional, the name of a CVS password file;
+   <p><i>fetchTag</i> : optional, overrides the tag provided by in directory file by the given value;
+   <p><i>configInfo</i> : optional, an ampersand separated list of configuration indicates the targeted configuration. The default is set to be platform independent.
   </li>
 <br>
   <li><b>eclipse.buildScript</b>: generates a build.xml file for the given elements.
   	<p><i>elements</i> : a comma separated list of entries that will be built. Entry are expected to be of the form type@id as specified in the directory file format;
-  	<p><i>install</i> :  the directory where the features and plug-ins to build are located;
+  	<p><i>buildDirectory</i> :  the directory where the features and plug-ins to build are located;
   	<p><i>children</i> : optional, specifies whether the script generation for contained plug-ins and fragments should be invoked. Default is set to true;
-  	<p><i>devEntries</i> : optional, a comma separated list of directories to be given to the compile classpath. 
+  	<p><i>recursiveGeneration</i> : optional, specified whether the script generation for contained features should be invoked. Default is set to true;
+  	<p><i>devEntries</i> : optional, a comma separated list of directories to be given to the compile classpath;
+  	<p><i>buildlingOSGi</i> : optional, indicates if the pluginsflag indicating if the target is 3.0 or 2.1;
+  	<p><i>baseLocation</i> : optional, indicates a folder which contains installed features and folders;
+  	<p><i>configInfo</i> : optional, an ampersand separated list of configuration indicates the targeted configuration. The default is set to be platform independent.
   	<p><i>pluginPath</i> : optional, a comma separated list of URLs pointing to installed plug-ins. If specified, this list must include the whole list of plug-ins to be compiled.
   </li> 	  	  	
 </ul>
@@ -39,9 +44,10 @@ reside in the following tasks.&nbsp; Arguments are also listed for each task.
 <h4>Examples</h4>
 <pre>
 &lt;eclipse.fetch elements=&quot;plugin@org.eclipse.core.boot&quot;
-		install=&quot;c:\toBuild&quot;
+		buildDirectory=&quot;c:\toBuild&quot;
 		directory=&quot;directory.txt&quot;
-		scriptname=&quot;fetch.xml&quot;/&gt;
+		configInfo=&quot;win32,win32,x86 & linux, motif, x86&quot;
+		/&gt;
 		
 &lt;eclipse.buildScript elements=&quot;plugin@org.eclipse.core.boot&quot; 
 		install=&quot;c:\toBuild&quot;/&gt;
@@ -50,20 +56,20 @@ reside in the following tasks.&nbsp; Arguments are also listed for each task.
 <h3>Directory file format</h3>
 </a>
 Directory files are used to indicate where the plug-ins and features are located, as well as indicating which version
-should be fetched. It is a Java property file whose line format is &quot;type@id=version, repositoryLocation, password&quot;.
+should be fetched. It is a Java property file whose line format is &quot;type@id=version, repositoryLocation, password,path&quot;.
 <ul>
 <li><i>type</i></li> : a string describing the type of the element. It must be one of the following: plugin, fragment, feature;
 <li><i>id</i></li> : the name of the CVS module where the element is located. Note that the feature/plugin/fragment.xml must be in the root of this module;
 <li><i>version</i></li> : an existing version tag in the repository;
 <li><i>repositoryLocation</i></li> : a CVS repository location;
-<li><i>password</i></li> : optional, a password to connect to this repository.
+<li><i>password</i></li> : optional, a password to connect to this repository;
+<li><i>path</i><li> : optional, the cvs module name and path to the element manifest.
 </ul>
 <h4>Example of a directory file</h4>
 <tt>
-feature@org.eclipse.jdt.source=v20030114, :pserver:anonymous@dev.eclipse.org:/home/eclipse, <br>
-plugin@org.eclipse.core.boot=v20021215a, :pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
-plugin@org.eclipse.core.resources=v20030114, :pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
-fragment@org.eclipse.core.resources.win32=v20020911, :pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
+plugin@org.eclipse.pde.build=v20040622,:pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
+feature@org.eclipse.pde.builder=v20040622,:pserver:anonymous@dev.eclipse.org:/home/eclipse,,org.eclipse.pde.build/feature<br>
+plugin@org.eclipse.osgi=v20040617a,:pserver:anonymous@dev.eclipse.org:/home/eclipse,
 </tt>
   
 <h3>Using the targets</h3>
