@@ -14,13 +14,14 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M6<br>
-Last revised December 17, 2003</p>
+Last revised December 18, 2003</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
-effort that will be involved in eventually porting existing plug-ins to 3.0. The
-Eclipse APIs will be stable with respect to breaking changes by late 2003 (see <a href="http://www.eclipse.org/eclipse/development/eclipse_project_plan_3_0.html">Eclipse
-3.0 plan</a> for exact dates).</i></p>
+effort that will be involved in eventually porting existing plug-ins to 3.0.
+While we will continue to improve and refine this porting guide and to document
+any further areas requiring attention, the significant breaking changes to the
+Eclipse APIs are now behind us.</i></p>
 <p>This porting guide describes how to port existing 2.1 plug-ins to 3.0. It is
 organized as follows:</p>
 <ul>
@@ -824,6 +825,221 @@ objects is extremely fast read access, at the cost of extra work on modification
 </ul>
 </p>
 
+<h3>Restructuring of Platform Core Runtime</h3>
+<p>The Eclipse 3.0 Platform Runtime is based on OSGi, necessitating changes to
+the structure of the two Platform Runtime plug-ins, org.eclipse.core.runtime and
+org.eclipse.core.boot.</p>
+<p>A new org.eclipse.core.runtime.compatibility plug-in provides an
+implementation bridge between the old and new APIs, and is the new home for some
+of the obsolete APIs formerly found in org.eclipse.core.runtime and
+org.eclipse.core.boot. Obsolete API will be deprecated in a future release in
+favor of the OSGi-based API, once the OSGi-based APIs have stabilized and
+matured. The new OSGi-based Eclipse Runtime API is available in the
+org.eclipse.core.runtime plug-in for early adopters wishing to take advantage of
+its new capabilities. Platform Runtime extension points were not affected by the
+restructuring.</p>
+<p>For 3.0, all plug-ins that reference API classes in the
+org.eclipse.core.runtime or org.eclipse.core.runtime.compatibility plug-ins must
+explicitly include &lt;import plugin=&quot;org.eclipse.core.runtime.compatibility&quot;/&gt;
+in the plug-in manifest. The org.eclipse.core.runtime.compatibility plug-in
+re-exports the API from org.eclipse.core.runtime, so this declaration makes the
+old and new API available. Explicit references to the org.eclipse.core.boot
+plug-in should be deleted from the plug-in manifest.</p>
+<p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the
+absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest)
+and automatically compensates for these changes to the Platform Runtime. This
+should be viewed as a stopgap measure to allow existing plug-in that explicitly
+or implicitly depends on org.eclipse.core.runtime or org.eclipse.core.boot to
+work in 3.0. However, when porting the existing plug-in to 3.0, the plug-in's
+manifest needs to be updated to reflect the new structure of the Eclipse
+Platform Runtime plug-ins. The PDE plug-in manifest migration tool will add a
+dependency to org.eclipse.core.runtime.compatibility if required.</p>
+<h3>URL Stream Handler extensions</h3>
+<p>The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension
+point was changed to use the URL Stream Handler service provided by OSGi. The
+OSGi support is superior to the one in Eclipse 2.1, and correctly handles
+dynamic handlers. Because of various design issues with the base Java URL
+handler mechanism, URLStreamHandlers registered with the OSGi handler service
+must implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>.</p>
+<p>The change affects plug-ins that contribute extensions to the <tt>org.eclipse.core.runtime.urlHandlers</tt>
+extension point. Formerly, the main class had to implement <tt>java.net.URLStreamHandler</tt>.
+It needs to be updated to implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>
+interface. The OSGi framework provides an abstract base class (<tt>org.osgi.service.url.AbstractURLStreamHandlerService</tt>)
+that can be subclassed.</p>
+<h3>Classload order</h3>
+<p><b>Who is affected:</b> Plug-ins which supply packages provided which are
+also supplied by other plug-ins. A very limited number of plug-ins are affected
+by this change and some of those affected will actually benefit (see below).</p>
+<p><b>Description:</b> In Eclipse 2.x, classloaders search for classes using the
+so-called <i>PSP</i> ordering. That is, a given classloader would first consult
+its <b>p</b>arent classloader (in practice this is the Java boot classloader),
+then its own classpath contents (i.e., <b>s</b>elf) and finally all of its <b>p</b>rerequisites
+in declared order. OSGi offers an optimization over this model, the so-called <i>PP|S</i>
+(read P, P or S) ordering. In this approach a classloader will consult its
+parent (again, effectively the Java boot classloader), then either a single
+prerequisite known to contribute classes in the package being queried then its
+own classpath entries for the desired class.</p>
+<p>The classloader determines whether to consult self or its prerequisites based
+on its imported and required packages. This information is inferred from the
+plug-in content in the case of legacy plug-ins and directly specified in the
+case of new plug-ins. In either case, it is known <i>a priori</i> which
+classloaders will supply the classes for which packages. This offers performance
+improvements as well as a solution to the vexing problem of multiple
+prerequisites contributing the same classes.</p>
+<p>Take for example the case of Xerces and Xalan. Both contain various classes
+from org.xml packages. Under the PSP model, the Xerces plug-in would see its
+copy of these classes while the Xalan plug-in would see their copy. Since these
+plug-ins need to communicate, ClassCastExceptions occur. Under the PP|S model,
+only one of the two plug-ins contributes the duplicate classes and both plug-ins
+see the same copies.</p>
+<p><b>Action required:</b> The action required depends on the particulars of the
+usecase. Affected developers need to review their classpath and resolve any
+conflicts which may be happening.</p>
+<h3>Class loader protection domain not set</h3>
+<p><b>Who is affected:</b> Plug-ins which expect the protection domain of their
+class loader to be set at all times.</p>
+<p><b>Description:</b> In Eclipse 2.1 plug-in class loaders were
+SecureClassloaders. As such, they always had a protection domain set. In Eclipse
+3.0 classloaders do not extend SecureClassloader and only set the protection
+domain if Java security is turned on (not the normal case).</p>
+<p><b>Action required:</b> The action required will depend on the scenario in
+which the plug-in is using the protection domain.</p>
+<h3>Default package content cannot be shared</h3>
+<p><b>Who is affected:</b> Plug-ins which expect to use types or resources in
+the default package of another plug-in. The use of the default package is very
+rare. The only uses we have seen is where test suites use the default package
+and <tt>getResource()</tt> to access test data.</p>
+<p><b>Description:</b> The new Eclipse runtime allows plug-ins to contribute
+more classpath information. This information is used to optimize class loading
+such that searching arbitrarily long prerequisite chains is not required. The
+technique used for specifying this information does not allow for the sharing of
+the default package. As such, a plug-in's class loader is able to see the
+default package in its own classpath but not in that of its prerequisite
+plug-ins.</p>
+<p><b>Action required:</b> Plug-in developers should address this by moving such
+files to non-root directories on their classpath. Note that moving them to say <tt>icons/</tt>
+in the jar does not particularly help because the package &quot;icons&quot;
+would typically be exported and would surely conflict with some other plug-in
+doing the same. Also note that Java package naming rules do not allow for
+package segments which contain whitespace. The best approach is to put the files
+in a real, unique, package (or remove such files from the classpath and access
+them via the new <tt>Bundle.getEntry()</tt> API).</p>
+<h3>PluginModel object casting</h3>
+<p><b>Who is affected:</b> Plug-ins which cast objects of type IPlugin* to
+Plugin*Model. Even though the relationship between these interfaces and the
+model classes is not a specified part of the Eclipse 2.1 API we are explicitly
+calling out this change as we have found that PDE and a few others are currently
+take advantaging of the correlation in the 2.1 implementation.</p>
+<p><b>Description:</b> The Eclipse API provides a series of interfaces (e.g., <tt>IPluginDescriptor</tt>)
+and so-called &quot;model&quot; classes (e.g., <tt>PluginDescriptorModel</tt>)
+related to plug-ins and the plug-in registry. In the Eclipse 2.1 implementation
+it happens that the model classes implement the relevant interfaces. In the new
+runtime the plug-in registry has been significantly reworked to allow for a
+separation between the classloading and prerequisite aspects of plug-ins and the
+extension and extension-point aspects. As such the Eclipse 3.0 runtims is unable
+to maintain the implementation relationship present in 2.1.</p>
+<p><b>Action required:</b> Developers currently relying on this non-API
+relationship will need to rework their code according to their usecase. More
+information on this is given in the recommended changes section of this
+document.</p>
+<h3>ILibrary implementation incomplete</h3>
+<p><b>Who is affected:</b> User of <tt>org.eclipse.core.runtime.ILibrary</tt>.</p>
+<p><b>Description:</b> The new runtime maintains the classpath entries in a
+different and incompatible form from Eclipse. As a result, the compatibility
+layer is unable to correctly model the underlying OSGi structures as ILibrary
+objects.</p>
+<p><b>Action required:</b> Users of ILibrary should consider accessing the
+desired header values (e.g., <tt>Bundle-Classpath</tt>) from the appropriate
+Bundle (see <tt>Bundle.getHeaders()</tt>) and using the <tt>ManifestElement</tt>
+helper class to interpret the entries.</p>
+<h3>Invalid assumptions regarding the form of URLs</h3>
+<p><b>Who is affected:</b> Plug-ins which make assumptions regarding their
+installation structure, location and the local file system layout.</p>
+<p><b>Description:</b> Methods such as <tt>IPluginDescriptor.getInstallURL()</tt>
+return URLs of a particular form. Despite this form not being specified, various
+plug-ins make assumptions based on the current implementation. For example, they
+may expect to get a <tt>file:</tt> URL and use URL.getFile() and use <tt>java.io.File</tt>
+manipulation on the result. To date, this has been a workable but rather unsafe
+approach. For example, if a plug-in is installed on a web server, it is possible
+that an <tt>http:</tt> URL would be returned. The new Eclipse 3.0 runtime is
+even more flexible and opens more possibilities for execution configurations
+(e.g., maintaining whole plug-ins in JARs rather than exploded in directories).
+That is , while new runtime does not actually break 2.1 API, it exposes more
+cases where assumptions made in current plug-ins are invalid.</p>
+<p><b>Action required:</b> Plug-in writers should ensure that the information to
+which they need access is available via <tt>getResource()</tt> (and is on the
+classpath) or use the relevant API for accessing the contents of a plug-in
+(e.g., <tt>Bundle.getEntry(String)</tt>).</p>
+<h3>BootLoader API methods deleted</h3>
+<p><b>Who is affected:</b> Plug-ins which use certain API methods from the class
+<tt>org.eclipse.core.boot.BootLoader</tt>.</p>
+<p><b>Description:</b> Methods such as getRunnable(), startup(), shutdown() and
+run() were removed from the BootLoader class (now supplied in the compatibility
+layer).</p>
+<p><b>Action required:</b> In general this API is used by very few people. It is
+intended as the interface between the main() in startup.jar and the Eclipse
+runtime. Having said that, in some cases this removal was too eager and the API
+should be added back. This is under investigation.</p>
+<h3>Re-exporting runtime API</h3>
+<p><b>Who is affected:</b> Plug-ins which expose API that includes elements from
+changed runtime API.</p>
+<p><b>Description:</b> Various plug-ins expose API that includes elements from
+the runtime API. With the changes to the Eclipse 3.0 runtime outlined here,
+client plug-ins must re-evaluate their use of runtime API in their API.</p>
+<p><b>Action required:</b> This scenario is quite quite rare are very little of
+the Eclipse runtime API is changing. Depending on the scenario, clients may have
+to change their API or continue to rely on the the compatibility layer.</p>
+<h3>Plug-in parsing methods on Platform</h3>
+<p><b>Who is affected:</b> Users of <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
+Factory).</tt></p>
+<p><b>Description:</b> The method <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
+Factory)</tt> has been deleted. The API associated with the Factory argument has
+been deprecated and moved from the org.eclipse.core.runtime plug-in up to the
+org.eclipse.core.runtime.compatibility plug-in (which depends on the runtime
+plug-in).</p>
+<p><b>Action required:</b> Users of the deleted method can use the same method
+on the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
+<h3>Changes to build scripts</h3>
+<p><b>Who is affected:</b> Developers maintaining scripts (e.g., Ant build.xml
+files) which define classpaths containing runtime related jars and class
+directories.</p>
+<p><b>Description:</b> The new runtime contains a number of new plug-ins and
+jars. Their introduction was mandated by the refactoring of the runtime into
+configurable pieces. For most runtime situations these changes are transparent.
+However, if you have custom build.xml (or similar) scripts which currently
+compile code against <tt>org.eclipse.core.runtime</tt>, you will need to update
+them before they will function correctly. A typical script contains a classpath
+entry in a &lt;javac&gt; task that references the <tt>org.eclipse.core.runtime</tt>
+plug-in as follows:</p>
+<pre>    ../org.eclipse.core.runtime/bin;../org.eclipse.core.runtime/runtime.jar</pre>
+<p>The runtime plug-in continues to contain much of the original runtime code.
+However, various parts of the runtime which are there only for compatibility
+purposes are contained in a compatibility plug-in (<tt>org.eclispe.core.runtime.compatibility</tt>).
+Most of the new runtime code is contained in a collection of plug-ins (<tt>org.eclipse.osgi.*</tt>).</p>
+<p><b>Action required:</b> Developers should add the entries below as needed to
+eliminate compilation errors. While the complete set of jars supplied is listed
+below, typical uses require only a subset on the classpath at compile time. As
+usual, the inclusion of the /bin directories is discretionary. The entries are
+given here in logical groupings by supplying plug-in:</p>
+<ul>
+  <li>../org.eclipse.core.runtime.compatibility/bin;../org.eclipse.core.runtime.compatibility/compatibility.jar;</li>
+  <li>../org.eclipse.osgi/bin;../org.eclipse.osgi/osgi.jar;</li>
+  <li>../org.eclipse.update.configurator/bin;../org.eclipse.update.configurator/configurator.jar;</li>
+  <li>../org.eclipse.osgi.util/util.jar;</li>
+</ul>
+<p>In addition the following jars may be required in special cases:</p>
+<ul>
+  <li>../org.eclipse.osgi/core.jar; ../org.eclipse.osgi/resolver.jar; ../org.eclipse.osgi/defaultAdaptor.jar;
+    ../org.eclipse.osgi/eclipseAdaptor.jar; ../org.eclipse.osgi/console.jar</li>
+</ul>
+<p>While updating such scripts, you should also take the opportunity to clean up
+(i.e., remove) references to <tt>org.eclipse.core.boot</tt>. This plug-in is
+obsolete and longer contains any code. The entries can be left on the classpath
+but they serve no purpose and should be removed. Look to remove:<br>
+</p>
+<pre>    ../org.eclipse.core.boot/bin;../org.eclipse.core.boot/boot.jar</pre>
+
+
 <h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
 <p>This section describes other changes that we recommend be made when porting
 an existing plug-in to 3.0.</p>
@@ -1588,9 +1804,6 @@ with no text in the title.
 They are mentioned here because the proposed changes impact existing plug-ins
 being ported to 3.0.</p>
 <ul>
-  <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/runtime/index.html"><b>New
-    core runtime</b></a> (plan items <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=37687">37687</a>
-    and <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=36956">36956</a>)</li>
   <li><b>Remove dependency on org.eclipse.xerces plug-in</b> (plan item <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37696">37696</a>)</li>
 </ul>
 <h2><a name="PDE Plug-in Migration Tool">PDE Plug-in Migration Tool</a></h2>
