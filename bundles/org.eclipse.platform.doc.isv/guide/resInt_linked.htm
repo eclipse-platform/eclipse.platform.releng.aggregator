@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Linked resources
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Linked resources</H2>
+<P >
+In release 2.1, the concept of <i>linked resources</i> was
+added to the resources plug-in.  Linked resources are files and folders that are stored in locations 
+in the file system outside of the project's location.  These special resources must
+have a project as their parent resource.  In the file system, these resources can
+be located virtually anywhere.  They can be outside the project location, and they
+can even be within another project.  There are only a few restrictions on linked
+resource locations.  To ensure that a given location is valid for creating a linked
+resource, use the API method 
+<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html">IWorkspace</a>.validateLinkLocation</b>.
+</P>
+<P>
+Linked resources are created using the method 
+<b><a href="../reference/api/org/eclipse/core/resources/IFolder.html">IFolder</a>.createLink</b> or
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a>.createLink</b>.  
+To find out programmatically whether a given resource is a link, use the method
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.isLinked</b>.
+Note that this method will only return <code>true</code> for linked resources, not for children 
+of linked resources.
+</P>
+<P>
+Apart from these special methods for creating linked resources and
+finding out if a resource is linked, you can use normal workspace API when manipulating linked
+resources.  In most respects, linked resources act exactly like any other resource in
+the workspace.  However, some restrictions apply on where linked resources can be
+copied or moved to, and how linked resources are deleted.  See the javadoc for the
+standard resource manipulation methods on 
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
+and its sub-classes for more details.
+</P>
+<h3>Path variables</h3>
+<P>
+A workspace path variable is a simple (String -&gt;
+<b><a href="../reference/api/org/eclipse/core/runtime/IPath.html">IPath</a></b>) mapping that 
+defines a kind of shortcut for a location in the file system.  Path variables can be used
+when creating linked resources to avoid hard-coding the absolute file system path
+that the linked resource points to.  This has several benefits:
+<ul>
+<li>Saves some effort when defining several linked resources under a common root.</li>
+<li>Allows redefining the location of several variables at once, by redefining
+the value of the variable.</li>
+<li>Allows sharing projects containing linked resources without sharing absolute
+paths that can vary from one machine to another.</li>
+</ul>
+</p>
+<p>
+The last item in this list deserves a bit of explanation.  When you create linked
+resources in your project, a description of the linked resource is added to the
+project description file (&quot;.project&quot;) in the project's content area.
+If you share this project with another user, either by copying the project content
+area or by using a repository, you don't usually want to share hard-coded paths.
+For example, you might have external resources stored under c:\temp on your machine,
+while your team-mate using Unix might have it stored in /home/username/tmp. You can
+define a path variable to work around this difference:
+<font color='#4444CC'><pre>
+    User A defines path variable TEMP=c:\temp
+    User B defines path variable TEMP=/home/userb/tmp
+    Both users share a project that contains a linked file at &quot;TEMP/shared.txt&quot;
+</pre></font>
+</p>
+<p>
+All the API for creating, manipulating, and resolving path variables is found on the
+<a href="../reference/api/org/eclipse/core/resources/IPathVariableManager.html">IPathVariableManager</a></b>
+class.  This class also provides methods for validating variable names and values before
+you create them, and for installing a listener to be notified when path variable definitions
+change.  You can grab an instance of this class using
+<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html">IWorkspace</a>.getPathVariableManager</b>.
+See the API javadoc and the code examples at the end of this section for more details.
+</p>
+<p>
+The method 
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.getRawLocation</b>
+can be used to find out the unresolved location of a linked resource.  For resources
+that are not linked resources relative to a path variable, the <b>getRawLocation</b>
+method acts exactly like the <b>getLocation</b> method.
+</p>
+<h3>Broken links</h3>
+<p>
+Clients that manipulate resources programmatically need to be aware of the possibility of
+broken links.  Broken links are linked resources whose file system location does not exist,
+or linked resources whose locations are relative to an undefined path variable.  Here are
+some considerations to keep in mind (all of the following methods are on 
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>):
+<ul>
+<li>The <b>copy</b> and <b>move</b> methods will fail when called on broken links.</li>
+<li>Calling <b>refreshLocal</b> on a broken link will not cause the resource to be removed
+from the workspace, as it does for normal resources that are missing from the file system.</li>
+<li>The method <b>getLocation</b> will return <code>null</code> for linked resources
+whose locations are relative to undefined path variables.</li>
+<li>You can still use <b>delete</b> to remove broken links from the workspace.</li>
+</ul>
+<H3>Compatibility with installed plug-ins</H3>
+<p>
+Some plug-ins may not be able to handle linked resources, so there are a number
+of mechanisms available for disabling them.  If you are writing a plug-in that absolutely
+needs all of a project's contents to be located in the project's default location, you 
+can use these mechanisms to prevent users from creating linked resources where
+you don't want them to appear.
+</p>
+<p>
+The first mechanism is called the <i>project nature veto</i>.  If you define your
+own <a href="resAdv_natures.htm">project nature</a>, you can specify in the nature 
+definition that the nature is not compatible with linked resources.  Here is an example 
+of a nature definition (from plugin.xml) that 
+employs the nature veto:
+<font color='#4444CC'><pre>
+&lt;extension
+	id=&quot;myNature&quot;
+	name=&quot;My Nature&quot;
+	point=&quot;org.eclipse.core.resources.natures&quot;&gt;
+	&lt;runtime&gt;
+		&lt;run class=&quot;com.xyz.MyNature&quot;/&gt;
+	&lt;/runtime&gt;
+	&lt;options allowLinking=&quot;false&quot;/&gt;
+&lt;/extension&gt;
+</pre></font>
+</p>
+<p>
+The second mechanism for preventing linked resource creation is the <i>team hook</i>.
+If you define your own repository implementation, you can make use of the
+<code>org.eclipse.core.resources.teamHook</code> extension point to prevent the creation of linked
+resources in projects that are shared with your repository type.  By default, 
+repository providers do <em>not</em> allow linked resources in projects they 
+are shared with.  So if you are using repository support provided by an older plug-in
+that is not aware of linked resources, you will not be able to create linked resources
+in those projects. Refer to the API javadoc for the teamHook extension point for more details.
+</p>
+<p>
+Finally, there is a preference setting that can be used to disable linked resources
+for the entire workspace.  While the previous two veto mechanisms only worked
+on a per-project basis, this preference affects all projects in the workspace.  To do
+this programatically, simply set the preference whose key is 
+<code>ResourcesPlugin.PREF_DISABLE_LINKING</code> to <code>true</code>.
+This setting will typically be used in conjunction with the primary feature
+<a href="product_config.htm#preferences">preference override mechanism</a> to 
+allow the primary feature of the Eclipse install to turn off linked resources.  
+Note that even when set, users or plug-ins can override this by turning the preference
+off.
+</p>
+
+<H3>Linked resources in code</H3>
+<P >
+Let's go into some examples of using linked resources in code. We'll start by 
+defining a path variable:
+<font color='#4444CC'><pre>
+   IWorkspace workspace = ResourcesPlugin.getWorkspace();
+   IPathVariableManager pathMan = workspace.getPathVariableManager();
+   String name = &quot;TEMP&quot;;
+   IPath value = new Path(&quot;c:\\temp&quot;);
+   if (pathMan.validateName(name).isOK() && pathMan.validateValue(value).isOK()) {
+      pathMan.setValue(name, value);
+   } else {
+      //invalid name or value, throw an exception or warn user
+   }
+</pre></font>
+Now we can create a linked resource relative to the defined path variable:
+<font color='#4444CC'><pre>
+   IProject project = workspace.getProject(&quot;Project&quot;);//assume this exists
+   IFolder link = project.getFolder(&quot;Link&quot;);
+   IPath location = new Path(&quot;TEMP/folder&quot;);
+   if (workspace.validateLinkLocation(location).isOK()) {
+      link.createLink(location, IResource.NONE, null);
+   } else {
+      //invalid location, throw an exception or warn user
+   }
+</pre></font>
+That's it!  You now have a linked folder in your workspace called &quot;Link&quot;
+that is located at &quot;c:\temp\folder&quot;.
+</p>
+<p>
+Let's end with some code snippets on this linked resource to illustrate the behavior other
+methods related to linked resources:
+<font color='#4444CC'><pre>
+   link.getFullPath() ==&gt; &quot;/Project/Link&quot;
+   link.getLocation() ==&gt; &quot;c:\temp\folder&quot;
+   link.getRawLocation() ==&gt; &quot;TEMP/folder&quot;
+   link.isLinked() ==&gt; &quot;true&quot;
+   
+   IFile child = link.getFile("abc.txt");
+   child.create(...);
+   child.getFullPath() ==&gt; &quot;/Project/Link/abc.txt&quot;
+   child.getLocation() ==&gt; &quot;c:\temp\folder\abc.txt&quot;
+   child.getRawLocation() ==&gt; &quot;c:\temp\folder\abc.txt&quot;
+   child.isLinked() ==&gt; &quot;false&quot;
+   
+</pre></font>
+</p>
+<p>
+<P><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2003." width="250" height="12"></a></P>
+
+</BODY>
+</HTML>
