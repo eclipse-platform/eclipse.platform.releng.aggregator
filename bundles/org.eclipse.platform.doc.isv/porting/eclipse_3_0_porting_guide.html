@@ -21,16 +21,17 @@ aboard the 3.0 release wagon at an early stage, or to estimate the amount of
 effort that will be involved in eventually porting existing plug-ins to 3.0. The
 Eclipse APIs will be stable with respect to breaking changes by late 2003 (see <a href="http://www.eclipse.org/eclipse/development/eclipse_project_plan_3_0.html">Eclipse
 3.0 plan</a> for exact dates).</i></p>
-<p>This porting guide describes how to port existing 2.1 plug-ins to 3.0. Is is
+<p>This porting guide describes how to port existing 2.1 plug-ins to 3.0. It is
 organized as follows:</p>
 <ul>
-  <li>Required Changes for 3.0</li>
-  <li>Suggested Changes for 3.0</li>
-  <li>Proposal Changes for 3.0</li>
-  <li>PDE Plug-in Migration Tool</li>
-  <li>General Information on Compatibility</li>
+  <li><a href="#Required Changes for 3.0">Required Changes</a></li>
+  <li><a href="#Recommended Changes for 3.0">Recommended Changes</a></li>
+  <li><a href="#Proposed Changes for 3.0">Proposed Changes</a></li>
+  <li><a href="#PDE Plug-in Migration Tool">PDE Plug-in Migration Tool</a></li>
+  <li><a href="#General Information on Compatibility">General Information on
+    Compatibility</a></li>
 </ul>
-<h2>Required Changes for 3.0</h2>
+<h2><a name="Required Changes for 3.0">Required Changes for 3.0</a></h2>
 <p>This section describes changes that impact existing plug-ins. If your plug-in
 is affected, you will have to change your plug-in in order to get it to work
 properly with Eclipse 3.0.</p>
@@ -538,10 +539,18 @@ up the dependencies, and help to determine a minimal set.)</p>
     WorkspaceOperationRunner which executes given DocumentProviderOperations
     inside a WorkspaceModifyingOperation.</li>
 </ul>
-<h2>Suggested Changes for 3.0</h2>
-<p>This section describes other API changes that area expected to have less of
-an impact on existing plug-ins. This includes deprecated API elements that
-nevertheless continue to work as in 2.1.</p>
+<h3>Generic Console</h3>
+<p>With the work for the generic console support, the view id for the console
+has changed from org.eclipse.debug.ui.ConsoleView. This results in problems at
+startup such as &quot;Could not restore workbench layout&quot; with details that
+&quot;Could not create view: org.eclipse.debug.ui.ConsoleView&quot; for the
+particular perspective that contained reference to the old view id. The
+equivalent view id is now: &quot;org.eclipse.ui.console.ConsoleView&quot;.<br>
+The generic console is available via the Window&gt;Show View&gt;Basic&gt;Console
+and is used by the Eclipse debug and Ant integration.</p>
+<h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
+<p>This section describes other changes that we recommend be made when porting
+an existing plug-in to 3.0.</p>
 <h3>Changes to API classes and interfaces (by package)</h3>
 <h4>IWorkspaceRunnable and IWorkspace.run (org.eclipse.core.runtime)</h4>
 <p>Clients of the <tt>IWorkspace.run(IWorkspaceRunnable,IProgressMonitor)</tt>
@@ -851,6 +860,95 @@ operations:</p>
     BasicTextEditorActionContributor. See migration notes for
     BasicTextEditorActionContributor.</li>
 </ul>
+<h4>ILaunchConfigurationType (package org.eclipse.debug.core)</h4>
+<p>With the introduction of extensible launch modes in 3.0, more than one launch
+delegate can exist for a launch configuration type. Releases prior to 3.0 only
+supported one launch delegate per launch configuration type. The method <code>ILaunchConfigurationType.getDelegate()</code>
+is now deprecated. The method <code>getDelegate(String mode)</code> should be
+used in its place to retrieve the launch delegate for a specific launch mode.
+The deprecated method has been changed to return the launch delegate for the <code>run</code>
+mode.</p>
+<h4>ILaunchConfigurationTab and ILaunchConfigurationTabGroup (package
+org.eclipse.debug.ui)</h4>
+<p>Launch tab groups and launch tabs are no longer notified when a launch
+completes. The method <code>launched(ILaunch)</code> in the interfaces <code>ILaunchConfigurationTab</code>
+and <code>ILaunchConfigurationTabGroup</code> has been deprecated and is no
+longer called. Relying on this method for launch function was always
+problematic, since tabs only exist when launching is performed from the launch
+dialog. Also, with the introduction of background launching, this method can no
+longer be called, as the launch dialog is be closed before the resulting launch
+object exists.</p>
+<h4>ILaunchConfigurationTab and AbstractLaunchConfigurationTab (package
+org.eclipse.debug.ui)</h4>
+<p>Two methods have been added to the <code>ILaunchConfigurationTab</code>
+interface - activated and deactivated. These new life cycle methods are called
+when a tab is entered and exited respectively. Existing implementations of <code>ILaunchConfigurationTab</code>
+that subclass the abstract class provided by the debug plug-in (<code>AbstractLaunchConfigurationTab</code>)
+are binary compatible since the methods are implemented in the abstract class.</p>
+<p>In prior releases, a tab was sent the message <code>initializeFrom</code>
+when it was activated, and <code>performApply</code> when it was deactivated. In
+this way, the launch configuration tab framework provided inter-tab
+communication via a launch configuration (by updating the configuration with
+current attribute values when a tab is exited, and updating the newly entered
+tab). However, since many tabs do not perform inter-tab communication, this can
+be inefficient. As well, there was no way to distinguish between a tab being
+activated, and a tab displaying a selected launch configuration for the first
+time. The newly added methods allow tabs to distinguish between activation and
+initialization, and deactivation and saving current values.</p>
+<p>The default implementation of <code>activated</code>, provided by the
+abstract tab, calls <code>initializeFrom</code>. And, the default implementation
+of <code>deactivated</code> calls <code>performApply</code>. Tabs wishing to
+take advantage of the new API should override these methods as required.
+Generally, for tabs that do not perform inter-tab communication, the recommended
+approach is to re-implement these methods to do nothing.</p>
+<h4>launchConfigurationTabGroup extension point Type (package
+org.eclipse.debug.ui)</h4>
+<p>In prior releases, perspective switching was specified on a launch
+configuration, via the launch configuration attributes <code>ATTR_TARGET_DEBUG_PERSPECTIVE</code>
+and <code>ATTR_TARGET_RUN_PERSPECTIVE</code>. With the addition of extensible
+launch modes in 3.0, this approach no longer scales. Perspective switching is
+now specified on launch configuration type basis, per launch mode that a launch
+configuration type supports. API has been added to <code>DebugUITools</code> to
+set and get the perspective associated with a launch configuration type for a
+specific launch mode.</p>
+<p>An additional, optional, <code>launchMode</code> element has been added to
+the <code>launchConfigurationTabGroup</code> extension point, allowing a
+contributed tab group to specify a default perspective for a launch
+configuration type and mode.</p>
+<p>From the Eclipse user interface, users can edit the perspective associated
+with a launch configuration type by opening the launch configuration dialog, and
+selecting a launch configuration type node in the tree (rather than an
+individual configuration). A tab is displayed allowing the user to set a
+perspective with each supported launch mode.</p>
+<h4>[JDT only] IVMRunner (package org.eclipse.jdt.launching)</h4>
+<p>Two methods have been added to the <code>VMRunnerConfiguration</code> class
+to support the setting and retrieving of environment variables. Implementors of <code>IVMRunner</code>
+should call <code>VMRunnerConfiguration.getEnvironment()</code> and pass that
+environment into the executed JVM. Clients who use <code>DebugPlugin.exec(String[]
+cmdLine, File workingDirectory)</code> can do this by calling <code>DebugPlugin.exec(String[]
+cmdLine, File workingDirectory, String[] envp)</code> instead. Simply passing in
+the result from <code>getEnvironment()</code> is sufficient.</p>
+<h4>[JDT only] VMRunnerConfiguration and Bootstrap Classes (package
+org.eclipse.jdt.launching)</h4>
+<p>In prior releases, the <code>VMRunnerConfiguration</code> had one attribute
+to describe a boot path. The attribute is a collection of <code>Strings</code>
+to be specified in the -<code>Xbootclasspath</code> argument. Three new
+attributes have been added to the VMRunnerConfiguration to support JVMs that
+allow for prepending and appending to the boot path. The new methods/attributes
+added are:</p>
+<ul>
+  <li><code>getPrependBootClassPath()</code> - returns a collection of entries
+    to be prepended to the boot path (the <code>-Xbootclasspath/p</code>
+    argument)
+  <li><code>getMainBootClassPath()</code> - returns a collection of entries to
+    be placed on the boot path (the <code>-Xbootclasspath</code> argument)
+  <li><code>getAppendBootClassPath()</code> - returns a collection of entries to
+    be appended to the boot path (the <code>-Xbootclasspath/a</code> argument)</li>
+</ul>
+<p>The old attribute,<code> getBootClassPath()</code>, still exists and contains
+a complete path equivalent to that of the three new attributes. However, <code>VMRunners</code>
+that support the new boot path options should take advantage of the new
+attributes.</p>
 <h3>Restructuring of org.eclipse.help plug-in</h3>
 <p>The org.eclipse.help plug-in, which used to hold APIs and extension points
 for contributing to and extending help system, as well as displaying help, now
@@ -865,8 +963,8 @@ provide their own Help UI and/or Help implementation, or to omit the help system
 entirely.</p>
 <p>Because the extension points and API packages affected are intended only for
 use by the help system itself, it is unlikely that existing plug-ins are
-affected by this change. For completeness, (The PDE plug-in migration tool will
-fix up the dependencies, and help to determine a minimal set.)</p>
+affected by this change. They are included here only for the sake of
+completeness:</p>
 <ul>
   <li>API packages org.eclipse.ui.help.browser and
     org.eclipse.ui.help.standalone, formerly provided by the org.eclipse.help
@@ -879,21 +977,25 @@ fix up the dependencies, and help to determine a minimal set.)</p>
     org.eclipse.ui.helpSupport extension point. The contract for this extension
     point changed as well (see entry for IHelp).</li>
 </ul>
-<h2>Proposed Changes</h2>
-<p>The following proposals are under discussion. They are included here because
-the proposed changes impact existing plug-ins being ported to 3.0.</p>
+<h2><a name="Proposed Changes for 3.0">Proposed Changes for 3.0</a></h2>
+<p>The following proposals are under discussion for inclusion in Eclipse 3.0.
+They are mentioned here because the proposed changes impact existing plug-ins
+being ported to 3.0.</p>
 <ul>
-  <li><a href="http://dev.eclipse.org/viewcvs/indextech.cgi/~checkout~/equinox-home/alternateRuntimes/migration.html">Equinox
-    runtime</a></li>
+  <li><a href="http://dev.eclipse.org/viewcvs/indextech.cgi/~checkout~/equinox-home/alternateRuntimes/migration.html"><b>New
+    core runtime</b></a> (plan items <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=37687">37687</a>
+    and <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=36956">36956</a>)</li>
+  <li><b>Remove dependency on org.eclipse.xerces plug-in</b> (plan item <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37696">37696</a>)</li>
 </ul>
-<h2>PDE Plug-in Migration Tool</h2>
+<h2><a name="PDE Plug-in Migration Tool">PDE Plug-in Migration Tool</a></h2>
 <p>PDE provides a special wizard for converting 2.1 plug-in manifest to 3.0,
 found at <b>PDE Tools &gt; Migrate to 3.0</b>. on the context menu for the
 selected plugin.xml or fragment.xml file. In addition to adding &lt;?eclipse
 ...?&gt; line, this migration tool also fixes up references to the extension
 points that have been renamed and changes the plug-ins dependencies list to
 reflect the Platform restructuring.</p>
-<h2>General Information on Compatibility</h2>
+<h2><a name="General Information on Compatibility">General Information on
+Compatibility</a></h2>
 <p>Eclipse 3.0 is not fully compatible with 2.0 and 2.1. The nature and scope of
 some of the key 3.0 plan items were such that the only feasible solutions break
 compatibility. The decision to make these breaking changes was done after open
