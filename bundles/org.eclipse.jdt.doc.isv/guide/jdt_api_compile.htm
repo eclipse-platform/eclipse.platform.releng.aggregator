@@ -59,11 +59,12 @@ simply need to define the <b>build.compiler</b> property in your script. Here is
 	&lt;/target&gt;
 &lt;/project&gt;
 </pre></font>
-The syntax used for the javac Ant task can be found in the <a href="http://jakarta.apache.org/ant/manual/CoreTasks/javac.html">Ant javac task documentation</a>.
+The syntax used for the javac Ant task can be found in the <a href="http://jakarta.apache.org/ant/manual/CoreTasks/javac.html">Ant javac task documentation</a>. The current adapter supports
+the Javac Ant task 1.4.1. A 1.5 version will be available when Ant 1.5 is released.
 <h3>
 Problem determination</h3>
 <p>
-The JDT core defines a specialized marker (marker type "<b>org.eclipse.jdt.core.problem</b>
+The JDT Core defines a specialized marker (marker type "<b>org.eclipse.jdt.core.problem</b>
 ") to denote compilation problems. To programmatically discover problems
 detected by the compiler, the standard platform marker protocol should be
 used. See <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_markers.htm" class="XRef">resource
@@ -76,9 +77,13 @@ The following snippet finds all Java problem markers in a compilation unit.</p>
 builder and are removed automatically as problems are resolved and the Java
 source is recompiled.</p>
 
-<p>The marker ID value is set by one of the constants in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">IProblem</a></b>.
+<p>The problem id value is set by one of the constants in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">IProblem</a></b>. The problem's id is reliable,
+but the message is localized and therefore can changed according to the default locale. The contants defined in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">IProblem</a></b>
+are self-descriptive.
 </p>
-<p>An implementation of <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> should be defined to collect the problems discovered during a Java operation.
+<p>An implementation of <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> should be defined to collect the problems discovered during a Java operation. 
+ Working copies can be reconcile with problem detection if a <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> has been supplied for the
+working copy creation. To archieve this, you can use the method <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean,%20org.eclipse.core.runtime.IProgressMonitor)">reconcile(boolean forceProblemDetection, IProgressMonitor monitor)</a></b>.
 An example of such an implementor is the member class <b>CompilationUnitAnnotationModel</b> of the class <b>org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider</b>.</p>
 
 <p>
