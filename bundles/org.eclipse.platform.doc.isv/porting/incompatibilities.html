@@ -52,6 +52,7 @@ incompatible ways between 2.1 and 3.0 in the following areas. Each entry provide
   <li>Platform build scripts</li>
   <li>install.ini</li>
   <li>Changes to PDE build ant task</li>
+  <li>Plug-in export does not get the plug-in's JAR for free</li>
 </ol>
 <p>&nbsp;&nbsp;&nbsp;</p>
 <hr>
@@ -540,10 +541,9 @@ are:</p>
 and is used by the Eclipse debug and Ant integration.</p>
 <p>The view id for the console has changed from org.eclipse.debug.ui.ConsoleView
 to org.eclipse.ui.console.ConsoleView. 2.1 plug-ins that programmatically open
-the console will discover that the old view no longer exists.</p>
-<h3>13. [JDT only] IJavaBreakpointListener (package org.eclipse.jdt.debug.core)</h3>
-<p>In 3.0, the return types for the methods
-IJavaBreakpointListener.breakpointHit(IJavaBreakpoint, IJavaThread) and
+the console will be unsuccessful because that the old view no longer exists.</p>
+<h3>13. Java breakpoint listeners</h3>
+<p>In 3.0, the return types for the methods org.eclipse.jdt.debug.core.IJavaBreakpointListener.breakpointHit(IJavaBreakpoint, IJavaThread) and
 installingBreakpoing(IJavaTarget, IJavaBreakpoint, IJavaType) changed from
 boolean to int to allow listeners to vote &quot;don't care&quot;. In releases
 prior to 3.0, listeners could only vote &quot;suspend&quot; or &quot;don't
@@ -570,10 +570,10 @@ itself, save the one that reported the problem (<a href="https://bugs.eclipse.or
 code that implements the IJavaBreakpointListener interface. This code needs to
 be modified to return an appropriate int value before it will compile or run in
 3.0.</p>
-<h3>14. Clipboard access in UI thread (package org.eclipse.swt.dnd)</h3>
-<p>Prior to 3.0, the methods on the SWT Clipboard class were tacitly permitted
+<h3>14. Clipboard access in UI thread</h3>
+<p>Prior to 3.0, the methods on the SWT class org.eclipse.swt.dnd.Clipboard were tacitly permitted
 to run in threads other than the UI thread. This oversight resulted in failures
-on GTK where the operating system requires that clipboard interactions be
+on GTK where the operating system requires that all clipboard interactions be
 performed in the UI thread. The oversight was not revealed earlier because many
 applications are single-threaded and receive most of their testing on Windows.
 In order for the Clipboard API to be sustainable and cross-platform, in 3.0 the
@@ -584,20 +584,20 @@ components such as the text editor, which insulate many clients from this
 breaking change. Existing code that does make direct use of Clipboard should
 ensure that the API methods are called on the correct thread, using
 Display.asyncExec or syncExec as required to shift accesses into the UI thread.</p>
-<h3>15. SWT.KeyDown events</h3>
-<p>In 3.0 key down events are reported before the work is done in the OS. This
+<h3>15. Key down events</h3>
+<p>In 3.0, SWT reports key down events before the work is done in the OS. This
 is much earlier than it was prior to 3.0. This change was made to support key
 bindings in Eclipse which necessitates intercepting key events before any widget
 had a chance to process the character. Consequences of this change are visible
-to code that handles low-level SWT.KeyDown events directly. For example, it
+to code that handles low-level org.eclipse.swt.SWT.KeyDown events directly. For example, it
 means that when a listener on a Text widget receives a key down event, the
 widget's content (getText()) will not yet include the key just typed (it would
 have prior to 3.0). The recommended way to get the full text from the widget
 including the current key is to handle the higher-level SWT.Modify or SWT.Verify
 events rather than the low-level SWT.KeyDown event; code that does it this way
 is unaffected by this change.</p>
-<h3>16. Tab traversal of SWT Canvas (package org.eclipse.swt.widgets)</h3>
-<p>Prior to 3.0, when the focus was in an SWT Canvas or one of its subclasses
+<h3>16. Tab traversal of SWT canvas and custom controls</h3>
+<p>Prior to 3.0, when the focus was in the SWT class org.eclipse.swt.widgets.Canvas or one of its subclasses
 (including custom widgets), typing Ctrl+Tab, Shift+Tab, Ctrl+PgUp, or Ctrl+PgDn
 would automatically trigger traversal to the next/previous widget without
 reporting a key event. This behavior was unspecified, and runs counter to the
@@ -607,8 +607,8 @@ Eclipse key bindings in 3.0, the default behavior was changed so that Canvas now
 sees Ctrl+Tab, Shift+Tab, Ctrl+PgUp, and Ctrl+PgDn key events instead of
 traversing. If you use a raw Canvas or define a subclass of Canvas, ensure that
 that you register a traverse listener.</p>
-<h3>17. Selection event order in Table and Tree widgets</h3>
-<p>Mouse selections of items in SWT Table and Tree widgets generate the event
+<h3>17. Selection event order in SWT table and tree widgets</h3>
+<p>Mouse selections of items in the SWT classes org.eclipse.swt.widgets.Table and Tree generate the event
 sequence MouseDown-Selection-MouseUp uniformly in all operating environments.
 Similarly, keyboard selections generate the event sequence
 KeyDown-Selection-KeyUp uniformly in all operating environments. Prior to 3.0,
@@ -619,44 +619,46 @@ been changed to match the others. Existing code that was functioning correctly
 on {Windows, GTK} and on {Motif, Photon} is unlikely to be affected. But it is
 wise to check your code to ensure that it does not rely on an invalid event
 order.</p>
-<h3>18. IStatus (org.eclipse.core.runtime)</h3>
-<p>
-<code>IStatus</code> has a new severity constant, <code>IStatus.CANCEL</code>,
-that can be used to indicate cancelation. Callers of <code>IStatus.getSeverity</code>
-that relied on the assumption that the set of possible severities was closed may be
-affected by this addition. Callers of <code>getSeverity</code> may need to update 
+<h3>18. New severity level in status objects</h3>
+<p><code>org.eclipse.core.runtime.IStatus</code> has a new severity constant, <code>IStatus.CANCEL</code>,
+that can be used to indicate cancelation. Callers of <code>IStatus.getSeverity()</code>
+that rely on the set of possible severities being limited to <code>IStatus.OK</code>,
+<code>INFO</code>, <code>WARNING</code>, and <code>ERROR</code> are affected by this addition. Callers of
+<code>getSeverity</code> should update 
 their code to include the new severity.</p>
-<h3>19. IResourceChangeEvent (org.eclipse.core.resources)</h3>
+<h3>19. Build-related resource change notifications</h3>
 <p>In Eclipse 3.0, workspace auto-build now occurs in a background thread. This
-required an API contract change to <tt>IResourceChangeEvent</tt>. The contract
-of <tt>IResourceChangeEvent</tt> previously guaranteed the following ordering of
+required an API contract change to <code>org.eclipse.core.resources.IResourceChangeEvent</code>. The contract
+of <code>IResourceChangeEvent</code> previously guaranteed the following ordering of
 events for all workspace changes:
 <ol>
-  <li><tt>PRE_DELETE</tt> or <tt>PRE_CLOSE</tt> event notification if applicable</li>
+  <li><code>PRE_DELETE</code> or <code>PRE_CLOSE</code> event notification if applicable</li>
   <li>Perform the operation</li>
-  <li><tt>PRE_AUTO_BUILD</tt> event notification</li>
+  <li><code>PRE_AUTO_BUILD</code> event notification</li>
   <li>If auto-build is on, perform incremental workspace build</li>
-  <li><tt>POST_AUTO_BUILD</tt> event notification</li>
-  <li><tt>POST_CHANGE</tt> event notification</li>
+  <li><code>POST_AUTO_BUILD</code> event notification</li>
+  <li><code>POST_CHANGE</code> event notification</li>
 </ol>
 <p>With auto-build now running in the background, there is no longer any
-guarantee about the temporal relationship between the <tt>AUTO_BUILD</tt> events
-and the <tt>POST_CHANGE</tt> event. In Eclipse 3.0, steps 3-5 in the above
+guarantee about the temporal relationship between the <code>AUTO_BUILD</code> events
+and the <code>POST_CHANGE</code> event. In Eclipse 3.0, steps 3-5 in the above
 structure are removed from the operation. The resulting picture looks like this:
 <ol>
-  <li><tt>PRE_DELETE</tt> or <tt>PRE_CLOSE</tt> event notification if applicable</li>
+  <li><code>PRE_DELETE</code> or <code>PRE_CLOSE</code> event notification if applicable</li>
   <li>Perform the operation</li>
-  <li><tt>POST_CHANGE</tt> event notification</li>
+  <li><code>POST_CHANGE</code> event notification</li>
 </ol>
 <p>Periodically, the platform will perform a background workspace build
 operation. Note that this happens regardless of the whether auto-build is on or
 off. The exact timing of when this build occurs will not be specified. The
 structure of the build operation will look like this:
 <ol>
-  <li><tt>PRE_AUTO_BUILD</tt> event notification</li>
+  <li><code>PRE_BUILD</code> event notification (<code>PRE_BUILD</code> is the
+    new name for <code>PRE_AUTO_BUILD)</code></li>
   <li>If auto-build is on, perform incremental workspace build</li>
-  <li><tt>POST_AUTO_BUILD</tt> event notification</li>
-  <li><tt>POST_CHANGE</tt> event notification</li>
+  <li><code>POST_BUILD</code> event notification (<code>POST_BUILD</code> is the
+    new name for <code>POST_AUTO_BUILD)</code></li>
+  <li><code>POST_CHANGE</code> event notification</li>
 </ol>
 The reference point for the deltas received by auto-build listeners will be
 different from post-change listeners. Build listeners will receive notification
@@ -665,57 +667,57 @@ will receive a delta describing all changes since the last post-change
 notification. This new structure retains three characteristics of resource
 change listeners that have been true since Eclipse 1.0:
 <ul>
-  <li><tt>POST_CHANGE</tt> listeners receive notification of absolutely all
+  <li><code>POST_CHANGE</code> listeners receive notification of absolutely all
     resource changes that occur during the time they are registered. This
     includes changes made by builders, and changes made by other listeners.</li>
-  <li><tt>PRE_AUTO_BUILD</tt> listeners receive notification of all resource
+  <li><code>PRE_AUTO_BUILD</code> listeners receive notification of all resource
     changes <b>except</b> changes made by builders and resource change
     listeners.
-  <li><tt>POST_AUTO_BUILD</tt> listeners receive notification of all resource
-    changes <b>except</b> changes made by other <tt>POST_AUTO_BUILD</tt>
+  <li><code>POST_AUTO_BUILD</code> listeners receive notification of all resource
+    changes <b>except</b> changes made by other <code>POST_AUTO_BUILD</code>
     listeners.
 </ul>
 However, there are some important differences with this approach. Prior to
-Eclipse 3.0, auto-build listeners were always called before <tt>POST_CHANGE</tt>
+Eclipse 3.0, auto-build listeners were always called before <code>POST_CHANGE</code>
 listeners. For this reason, the delta received by auto-build listeners was
-always a subset of the delta received by the <tt>POST_CHANGE</tt> listeners.
+always a subset of the delta received by the <code>POST_CHANGE</code> listeners.
 This relationship is now essentially reversed. Auto-build listeners will receive
-a delta that is a super-set of all deltas supplied to <tt>POST_CHANGE</tt>
+a delta that is a super-set of all deltas supplied to <code>POST_CHANGE</code>
 listeners since the end of the last background build. As before, auto-build
 listeners will be allowed to modify the workspace, and post-change listeners
 will not.
 <p>It will no longer be true that upon completion of a workspace changing
-operation, that <tt>AUTO_BUILD</tt> event listeners will have been notified.
+operation, that <code>AUTO_BUILD</code> event listeners will have been notified.
 Client code that registers resource change listeners with <code>IWorkspace.addResourceChangeListener(IResourceChangeListener)</code>
-is&nbsp; unlikely to be affected by this change because <tt>AUTO_BUILD</tt>
+is unlikely to be affected by this change because <code>AUTO_BUILD</code>
 events were never reported to these listeners. However, clients that use <code>IWorkspace.addResourceChangeListener(IResourceChangeListener,int)</code>
-and specify an event mask that includes <tt>AUTO_BUILD</tt> events are likely to
+and specify an event mask that includes <code>AUTO_BUILD</code> events are likely to
 be broken by this change if they make assumptions about when auto-build
 listeners run or what thread they run in. For example, if an auto-build listener
 is updating a domain model to reflect changes to the workspace, then this update
 might not have happened when the workspace changing operation returns. It is
 worth noting that only UI-level code can be affected in this way. Core-level
-code that is called via API may be called within the scope of an <tt>IWorkspaceRunnable</tt>,
+code that is called via API may be called within the scope of an <code>IWorkspaceRunnable</code>,
 so it can never be sure about when resource change listeners will be called. The
-suggested fix for this breakage is to use <tt>POST_CHANGE</tt> instead of build
+suggested fix for this breakage is to use <code>POST_CHANGE</code> instead of build
 listeners if it is necessary to have notification occur before the operation
 completes.</p>
-<h3>20. IWorkspaceRunnable and IWorkspace.run</h3>
+<h3>20. Intermediate notifications during long-running workspace operations</h3>
 <p>It will no longer be guaranteed that all resource changes that occur during
 the dynamic scope of an <code>IWorkspaceRunnable</code> will be batched in a
 single notification. This mechanism can still be used for batching changes to
-avoid unnecessary builds and notifications, but the platform may now decide to
+avoid unnecessary builds and notifications, but the Platform may now decide to
 perform notifications during the operation. This API contract change is not
 likely to be a breaking change for existing clients. It is equivalent to the
-platform deciding to call <code>IWorkspace.checkpoint</code> periodically during
+Platform deciding to call <code>IWorkspace.checkpoint</code> periodically during
 a long running operations. The reason for this change is that it is now possible
 for multiple threads to be modifying the workspace concurrently. When one thread
 finishes modifying the workspace, a notification is required to prevent
 responsiveness problems, even if the other operation has not yet completed. This
 change also allows users to begin working on a set of resources before the
 operation completes. For example, a user can now begin browsing files in a
-project that is still in the process of being checked out. The new method <tt>IWorkspace.run(IWorkspaceRunnable,
-ISchedulingRule, int, IProgressMonitor)</tt> has an optional flag, <tt>AVOID_UPDATE</tt>,
+project that is still in the process of being checked out. The new method <code>IWorkspace.run(IWorkspaceRunnable,
+ISchedulingRule, int, IProgressMonitor)</code> has an optional flag, <code>AVOID_UPDATE</code>,
 that operations can use as a hint to the platform to specify whether periodic
 updates are desired.</p>
 <h3>21. Eclipse 3.0 is more concurrent</h3>
@@ -729,7 +731,7 @@ run concurrently with other threads, including the UI thread. All plug-ins whose
 code runs in a background thread must now be aware of the thread safety of their
 code.</p>
 <p>In addition to plug-ins that are explicitly running operations in the
-background using the <tt>org.eclipse.core.runtime.jobs</tt> API, there are
+background using the <code>org.eclipse.core.runtime.jobs</code> API, there are
 several platform API facilities and extension points that make use of background
 threads. Plug-ins that hook into these facilities need to ensure that their code
 is thread safe. The following table summarizes the API and extension points that
@@ -748,15 +750,15 @@ run some or all of their code in a background thread in Eclipse 3.0:</p>
   </tr>
   <tr>
     <td width="50%">org.eclipse.core.resources.IResourceChangeListener</td>
-    <td width="50%"><tt>AUTO_BUILD</tt> events now in background</td>
+    <td width="50%"><code>AUTO_BUILD</code> events now in background</td>
   </tr>
   <tr>
     <td width="50%">org.eclipse.core.resources.builders</td>
-    <td width="50%">Autobuild now in background</td>
+    <td width="50%">Auto-build now in background</td>
   </tr>
   <tr>
     <td width="50%">org.eclipse.core.resources.ISaveParticipant</td>
-    <td width="50%"><tt>SNAPSHOT</tt> now in background</td>
+    <td width="50%"><code>SNAPSHOT</code> now in background</td>
   </tr>
   <tr>
     <td width="50%">org.eclipse.ui.workbench.texteditor.quickdiffReferenceProvider</td>
@@ -784,7 +786,7 @@ run some or all of their code in a background thread in Eclipse 3.0:</p>
   </tr>
   <tr>
     <td width="50%">org.eclipse.jdt.core.IElementChangedListener</td>
-    <td width="50%"><tt>PRE_AUTO_BUILD</tt> now runs in background, <tt>POST_RECONCILE</tt>
+    <td width="50%"><code>ElementChangedEvent.PRE_AUTO_BUILD</code> now runs in background, <code>POST_RECONCILE</code>
       already ran in the background</td>
   </tr>
 </table>
@@ -792,41 +794,41 @@ run some or all of their code in a background thread in Eclipse 3.0:</p>
 solution is to ensure all work occurs in the UI thread, thus ensuring serialized
 execution. This is a common approach for UI plug-ins that are not doing
 CPU-intensive processing. When doing this, be aware of the deadlock risk
-inherent in <tt>Display.syncExec</tt>. <tt>Display.asyncExec</tt> is generally
+inherent in <code>Display.syncExec</code>. <code>Display.asyncExec</code> is generally
 safer as it does not introduce deadlock risk, at the expense of losing precise
 control over when the code is executed.</p>
 <p>Other techniques for making thread safe code included:
 <ul>
-  <li>Wrapping unsafe code in semaphores or java monitors. The new concurrency
-    infrastructure includes one such semaphore object: <tt>org.eclipse.core.runtime.jobs.ILock</tt>.
-    The advantage of <tt>ILock</tt> over generic locks is that they transfer
-    automatically to the UI thread when doing a <tt>syncExec</tt>, and there is
+  <li>Wrapping unsafe code in semaphores or Java monitors. The new concurrency
+    infrastructure includes one such semaphore object: <code>org.eclipse.core.runtime.jobs.ILock</code>.
+    The advantage of <code>ILock</code> over generic locks is that they transfer
+    automatically to the UI thread when doing a <code>syncExec</code>, and there is
     deadlock detection support built into their implementation that logs and
     then resolves deadlocks.</li>
   <li>Message queues. Code can be serialized by forwarding all processing to a
     message queue that is processed serially in a single thread. One such
-    example is the SWT deferred event queue (<tt>Display.asyncExec</tt>), which
+    example is the SWT deferred event queue (<code>Display.asyncExec</code>), which
     is processed entirely in the UI thread.</li>
   <li>Immutable objects. Make data structures immutable, and make new copies on
-    modification. This is the approach used to make data structures such as <tt>java.lang.String</tt>
-    and <tt>org.eclipse.core.runtime.IPath</tt> thread safe. The advantage of
+    modification. This is the approach used to make data structures such as <code>java.lang.String</code>
+    and <code>org.eclipse.core.runtime.IPath</code> thread safe. The advantage of
     immutable objects is extremely fast read access, at the cost of extra work
     on modification.</li>
 </ul>
-<h3>22. URL Stream Handler extensions</h3>
-<p><strong>Who is affected:</strong> Plug-ins that contribute extensions to the <tt>org.eclipse.core.runtime.urlHandlers</tt>
+<h3>22. URL stream handler extensions</h3>
+<p><strong>What is affected:</strong> Plug-ins that contribute extensions to the <code>org.eclipse.core.runtime.urlHandlers</code>
 extension point.</p>
-<p><strong>Description:</strong> The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt>
+<p><strong>Description:</strong> The contract for the <code>org.eclipse.core.runtime.urlHandlers</code>
 extension point was changed to use the URL Stream Handler service provided by
 OSGi. The OSGi support is superior to the one in Eclipse 2.1, and correctly
 handles dynamic handlers. Because of various design issues with the base Java
 URL handler mechanism, URLStreamHandlers registered with the OSGi handler
-service must implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>.</p>
+service must implement <code>org.osgi.service.url.URLStreamHandlerService</code>.</p>
 <p><strong>Action required:</strong> Formerly, the handler class had to
-implement <tt>java.net.URLStreamHandler</tt> and extend the urlHandlers
+implement <code>java.net.URLStreamHandler</code> and extend the urlHandlers
 extension point. The extension point is no longer supported and the handler must
-be updated to implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>
-interface. The OSGi framework provides an abstract base class (<tt>org.osgi.service.url.AbstractURLStreamHandlerService</tt>)
+be updated to implement <code>org.osgi.service.url.URLStreamHandlerService</code>
+interface. The OSGi framework provides an abstract base class (<code>org.osgi.service.url.AbstractURLStreamHandlerService</code>)
 that can be trivially subclassed to fill this role.</p>
 <p>Instead of registering the handler using an extension point, plug-ins must
 now do so by registering their handler as a service. For example,</p>
@@ -835,156 +837,158 @@ now do so by registering their handler as a service. For example,</p>
     String serviceClass = URLStreamHandlerService.class.getName();
     context.registerService(serviceClass, new MyHandler(), properties);
 </pre>
-<h3>23. Classload order</h3>
-<p><b>Who is affected:</b> Plug-ins which supply packages provided which are
+<h3>23. Class load order</h3>
+<p><b>What is affected:</b> Plug-ins which supply packages provided which are
 also supplied by other plug-ins. A very limited number of plug-ins are affected
 by this change and some of those affected will actually benefit (see below).</p>
-<p><b>Description:</b> In Eclipse 2.x, classloaders search for classes using the
-so-called <i>PSP</i> ordering. That is, a given classloader would first consult
-its <b>p</b>arent classloader (in practice this is the Java boot classloader),
-then its own classpath contents (i.e., <b>s</b>elf) and finally all of its <b>p</b>rerequisites
-in declared order. OSGi offers an optimization over this model, the so-called <i>PP|S</i>
-(read P, P or S) ordering. In this approach a classloader will consult its
-parent (again, effectively the Java boot classloader), then either a single
-prerequisite known to contribute classes in the package being queried then its
+<p><b>Description:</b> In Eclipse 2.x, class loaders search for classes in the
+following order: consult (1) parent class loader (in practice this is the Java boot
+class loader), then (2) its own classpath contents, and finally (3) all of its prerequisites
+in the order declared. OSGi offers an optimization over this model. In this approach a
+class loader will consult (1)
+parent class loader (again, effectively the Java boot classloader), then either
+(2a) a single
+prerequisite known to contribute classes in the package being queried or (2b) its
 own classpath entries for the desired class.</p>
-<p>The classloader determines whether to consult self or its prerequisites based
+<p>The class loader determines whether to consult self or its prerequisites based
 on its imported and required packages. This information is inferred from the
 plug-in content in the case of legacy plug-ins and directly specified in the
-case of new plug-ins. In either case, it is known <i>a priori</i> which
-classloaders will supply the classes for which packages. This offers performance
+case of new plug-ins. In either case, it is known <i>a priori</i> which class
+loaders will supply the classes for which packages. This offers performance
 improvements as well as a solution to the vexing problem of multiple
 prerequisites contributing the same classes.</p>
-<p>Take for example the case of Xerces and Xalan. Both contain various classes
-from org.xml packages. Under the PSP model, the Xerces plug-in would see its
+<p>Take for example the case of Xerces and Xalan, both of which contain various classes
+from org.xml packages. Using the first approach, the Xerces plug-in would see its
 copy of these classes while the Xalan plug-in would see their copy. Since these
-plug-ins need to communicate, ClassCastExceptions occur. Under the PP|S model,
+plug-ins need to communicate, ClassCastExceptions occur. Using the second
+approach,
 only one of the two plug-ins contributes the duplicate classes and both plug-ins
 see the same copies.</p>
 <p><b>Action required:</b> The action required depends on the particulars of the
 usecase. Affected developers need to review their classpath and resolve any
 conflicts which may be happening.</p>
 <h3>24. Class loader protection domain not set</h3>
-<p><b>Who is affected:</b> Plug-ins which expect the protection domain of their
+<p><b>What is affected:</b> Plug-ins that expect the protection domain of their
 class loader to be set at all times.</p>
 <p><b>Description:</b> In Eclipse 2.1 plug-in class loaders were
-SecureClassloaders. As such, they always had a protection domain set. In Eclipse
-3.0 classloaders do not extend SecureClassloader and only set the protection
+java.security.SecureClassloaders and, as such, always had a protection domain set. In Eclipse
+3.0, class loaders do not extend SecureClassloader and only set the protection
 domain if Java security is turned on (not the normal case).</p>
 <p><b>Action required:</b> The action required will depend on the scenario in
 which the plug-in is using the protection domain.</p>
-<h3>PluginModel object casting</h3>
-<p><b>Who is affected:</b> Plug-ins which cast objects of type IPlugin* to
-Plugin*Model. Even though the relationship between these interfaces and the
-model classes is not a specified part of the Eclipse 2.1 API we are explicitly
-calling out this change as we have found that PDE and a few others are currently
-take advantaging of the correlation in the 2.1 implementation.</p>
-<p><b>Description:</b> The Eclipse API provides a series of interfaces (e.g., <tt>IPluginDescriptor</tt>)
-and so-called &quot;model&quot; classes (e.g., <tt>PluginDescriptorModel</tt>)
+<h3>25. PluginModel object casting</h3>
+<p><b>What is affected:</b> Plug-ins which cast objects of type
+org.eclipse.core.runtime.IPlugin* to org.eclipse.core.runtime.model.Plugin*Model. Even though the relationship between these interfaces and the
+model classes is not specified in the Eclipse 2.1 API, we are explicitly
+calling out this change as we have found instances of plug-ins relying on this
+relationship in the 2.1 implementation.</p>
+<p><b>Description:</b> The Eclipse API provides a series of interfaces (e.g., <code>IPluginDescriptor</code>)
+and so-called &quot;model&quot; classes (e.g., <code>PluginDescriptorModel</code>)
 related to plug-ins and the plug-in registry. In the Eclipse 2.1 implementation
 it happens that the model classes implement the relevant interfaces. In the new
-runtime the plug-in registry has been significantly reworked to allow for a
-separation between the classloading and prerequisite aspects of plug-ins and the
-extension and extension-point aspects. As such the Eclipse 3.0 runtims is unable
+OSGi-based runtime, the plug-in registry has been significantly reworked to allow for a
+separation between the class loading and prerequisite aspects of plug-ins and the
+extension and extension-point aspects. As such the Eclipse 3.0 runtime is unable
 to maintain the implementation relationship present in 2.1.</p>
-<p><b>Action required:</b> Developers currently relying on this non-API
-relationship will need to rework their code according to their usecase. More
+<p><b>Action required:</b>  Plug-ins relying on this non-API
+relationship need to be reworked code according to their usecase. More
 information on this is given in the recommended changes section of this document
 and in the Javadoc for the related classes and methods.</p>
-<h3>25. ILibrary implementation incomplete</h3>
-<p><b>Who is affected:</b> User of <tt>org.eclipse.core.runtime.ILibrary</tt>.</p>
+<h3>26. ILibrary implementation incomplete</h3>
+<p><b>What is affected:</b> Plug-ins that use <code>org.eclipse.core.runtime.ILibrary</code>.</p>
 <p><b>Description:</b> The new runtime maintains the classpath entries in a
 different and incompatible form from Eclipse. As a result, the compatibility
 layer is unable to correctly model the underlying OSGi structures as ILibrary
 objects. The runtime's compatibility support creates ILibrary objects but must
 assume default values for everything except the library's path.</p>
 <p><b>Action required:</b> Users of ILibrary should consider accessing the
-desired header values (e.g., <tt>Bundle-Classpath</tt>) from the appropriate
-Bundle (see <tt>Bundle.getHeaders()</tt>) and using the <tt>ManifestElement</tt>
+desired header values (e.g., <code>Bundle-Classpath</code>) from the appropriate
+Bundle (see <code>Bundle.getHeaders()</code>) and using the <code>ManifestElement</code>
 helper class to interpret the entries. See the class Javadoc for more details.</p>
-<h3>26. Invalid assumptions regarding the form of URLs</h3>
-<p><b>Who is affected:</b> Plug-ins which make assumptions regarding their
+<h3>27. Invalid assumptions regarding the form of URLs</h3>
+<p><b>What is affected:</b> Plug-ins that make assumptions regarding their
 installation structure, location and the local file system layout.</p>
-<p><b>Description:</b> Methods such as <tt>IPluginDescriptor.getInstallURL()</tt>
+<p><b>Description:</b> Methods such as <code>IPluginDescriptor.getInstallURL()</code>
 return URLs of a particular form. Despite this form not being specified, various
-plug-ins make assumptions based on the current implementation. For example, they
-may expect to get a <tt>file:</tt> URL and use URL.getFile() and use <tt>java.io.File</tt>
-manipulation on the result. To date, this has been a workable but rather unsafe
+plug-ins are making assumptions based on the current implementation. For example, they
+may expect to get a <code>file:</code> URL and use URL.getFile() and use <code>java.io.File</code>
+manipulation on the result. To date, this has been a workable but rather fragile
 approach. For example, if a plug-in is installed on a web server, it is possible
-that an <tt>http:</tt> URL would be returned. The new Eclipse 3.0 runtime is
+that an <code>http:</code> URL would be returned. The new Eclipse 3.0 runtime is
 even more flexible and opens more possibilities for execution configurations
 (e.g., maintaining whole plug-ins in JARs rather than exploded in directories).
-That is , while new runtime does not actually break 2.1 API, it exposes more
+That is, while the new OSGi-based runtime does not actually break 2.1 API, it exposes more
 cases where assumptions made in current plug-ins are invalid.</p>
 <p><b>Action required:</b> Plug-in writers should ensure that the information to
-which they need access is available via <tt>getResource()</tt> (and is on the
+which they need access is available via <code>getResource()</code> (and is on the
 classpath) or use the relevant API for accessing the contents of a plug-in
-(e.g., <tt>Bundle.getEntry(String)</tt>).</p>
-<h3>27. BootLoader API methods moved/deleted</h3>
-<p><b>Who is affected:</b> Plug-ins which use certain API methods from the class
-<tt>org.eclipse.core.boot.BootLoader</tt>.</p>
-<p><b>Description:</b> Methods such as startup(), shutdown() and run() were
-moved from the BootLoader class (now supplied in the compatibility layer) to
-EclipseStarter which is part of the OSGi framework (i.e., org.eclipse.osgi).
+(e.g., <code>Bundle.getEntry(String)</code>).</p>
+<h3>28. BootLoader methods moved/deleted</h3>
+<p><b>What is affected:</b> Non-plug-in code that calls certain methods from the class
+<code>org.eclipse.core.boot.BootLoader</code>.</p>
+<p><b>Description:</b>  The static methods BootLoader.startup(), shutdown() and run() were
+moved to org.eclipse.core.runtime.adaptor.EclipseStarter, which is part of the OSGi framework.
 This API is the interface between the main() in startup.jar and the OSGi
-framework/Eclipse runtime. Given the restructuring of the runtime, these methods
-could not be left on BootLoader.</p>
-<p>The method BootLoader.getRunnable() has been removed as the runtime can no
-longer support the acquisition of individual applications. Rather users should
-indicate the application of interest when they start the platform.</p>
-<p><b>Action required:</b> In general this API is used by very few people. In
-the rare case that it is, users can adapt by using the new methods on
+framework/Eclipse runtime. The restructuring of the runtime did not permit these methods
+to remain on BootLoader. The old BootLoader class is now located in the runtime compatibility
+layer and is deprecated, and the moved methods are stubbed to do nothing.</p>
+<p>There is no replacement for the old BootLoader.getRunnable() as the runtime can no
+longer support the acquisition of individual applications. Rather, users must indicate the application of interest when they start the platform.</p>
+<p><b>Action required:</b> In general this API is used by very few people (it
+cannot be used from within an Eclipse plug-in). In
+the rare case that it is, the code must be adapted to use the corresponding methods on
 EclipseStarter.</p>
-<h3>28. Re-exporting runtime API</h3>
-<p><b>Who is affected:</b> Plug-ins which expose API that includes elements from
+<h3>29. Re-exporting runtime API</h3>
+<p><b>What is affected:</b> Plug-ins that expose API that includes elements from
 changed runtime API.</p>
 <p><b>Description:</b> Various plug-ins expose API that includes elements from
 the runtime API. With the changes to the Eclipse 3.0 runtime outlined here,
 client plug-ins must re-evaluate their use of runtime API in their API.</p>
-<p><b>Action required:</b> This scenario is quite quite rare are very little of
+<p><b>Action required:</b> This scenario is quite quite rare as very little of
 the Eclipse runtime API is changing. Depending on the scenario, clients may have
 to change their API or continue to rely on the the compatibility layer.</p>
-<h3>29. Plug-in parsing methods on Platform</h3>
-<p><b>Who is affected:</b> Users of <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
-Factory).</tt></p>
-<p><b>Description:</b> The method <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
-Factory)</tt> has been moved. The API associated with the Factory argument has
+<h3>30. Plug-in parsing methods on Platform</h3>
+<p><b>What is affected:</b> Plug-ins that use <code>org.eclipse.core.runtime.Platform.parsePlugins(...,
+Factory).</code></p>
+<p><b>Description:</b> The method <code>org.eclipse.core.runtime.Platform.parsePlugins(...,
+Factory)</code> has been moved. The API associated with the Factory argument has
 been moved from the org.eclipse.core.runtime plug-in up to the
 org.eclipse.core.runtime.compatibility plug-in (which depends on the runtime
 plug-in). As a result, the parsing method has been moved as well.</p>
 <p><b>Action required:</b> Users of this method should use the same method on
-the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
-<h3>30. Plug-in libraries supplied by fragments</h3>
-<p><strong>Who is affected:</strong> Plug-ins which specify code on their
-classpath but do not supply that code (i.e., it is supplied by a fragment).</p>
+the class <code>org.eclipse.core.runtime.model.PluginRegistryModel</code>.</p>
+<h3>31. Plug-in libraries supplied by fragments</h3>
+<p><b>What </b><strong> is affected:</strong> Plug-ins that specify code on their
+classpath but do not supply that code (i.e., the JAR is supplied by a fragment;
+for example, the org.eclipse.swt plug-in).</p>
 <p><strong>Description:</strong> The new runtime must convert plug.xml files to
-manifest.mf files. This is done through a straight mechanical transformation and
+manifest.mf files behind the scenes. This is done through a straight mechanical transformation and
 an analysis of the jars listed and supplied by the plug-in. In the case where a
 plug-in specifies a jar on its classpath but does not supply the jar, there is
 no code to analyze and the plug-in convertor cannot generate a correct
-manifest.mf. The SWT plug-in is in this situation.</p>
+manifest.mf.</p>
 <p><strong>Action required:</strong> Providers of such plug-ins must either
 change to supply the appropriate jar in the plug-in itself or hand
 craft/maintain a META-INF/MANIFEST.MF file for their plug-in. Typically this can
 be done using PDE to get the initial manifest and then adding in the appropriate
 Provide-Package header.</p>
-<h3>31. Changes to build scripts</h3>
-<p><b>Who is affected:</b> Developers maintaining scripts (e.g., Ant build.xml
+<h3>32. Changes to build scripts</h3>
+<p><b>What is affected:</b> Scripts (e.g., Ant build.xml
 files) which define classpaths containing runtime related jars and class
 directories.</p>
 <p><b>Description:</b> The new runtime contains a number of new plug-ins and
 jars. Their introduction was mandated by the refactoring of the runtime into
 configurable pieces. For most runtime situations these changes are transparent.
 However, if you have custom build.xml (or similar) scripts which currently
-compile code against <tt>org.eclipse.core.runtime</tt>, you will need to update
+compile code against <code>org.eclipse.core.runtime</code>, you will need to update
 them before they will function correctly. A typical script contains a classpath
-entry in a &lt;javac&gt; task that references the <tt>org.eclipse.core.runtime</tt>
+entry in a &lt;javac&gt; task that references the <code>org.eclipse.core.runtime</code>
 plug-in as follows:</p>
 <pre>    ../org.eclipse.core.runtime/bin;../org.eclipse.core.runtime/runtime.jar</pre>
 <p>The runtime plug-in continues to contain much of the original runtime code.
 However, various parts of the runtime which are there only for compatibility
-purposes are contained in a compatibility plug-in (<tt>org.eclispe.core.runtime.compatibility</tt>).
-Most of the new runtime code is contained in a collection of plug-ins (<tt>org.eclipse.osgi.*</tt>).</p>
+purposes are contained in a compatibility plug-in (<code>org.eclispe.core.runtime.compatibility</code>).
+Most of the new runtime code is contained in a collection of plug-ins (<code>org.eclipse.osgi.*</code>).</p>
 <p><b>Action required:</b> Developers should add the entries below as needed to
 eliminate compilation errors. While the complete set of jars supplied is listed
 below, typical uses require only a subset on the classpath at compile time. As
@@ -1002,12 +1006,12 @@ given here in logical groupings by supplying plug-in:</p>
     ../org.eclipse.osgi/eclipseAdaptor.jar; ../org.eclipse.osgi/console.jar</li>
 </ul>
 <p>While updating such scripts, you should also take the opportunity to clean up
-(i.e., remove) references to <tt>org.eclipse.core.boot</tt>. This plug-in is
+(i.e., remove) references to <code>org.eclipse.core.boot</code>. This plug-in is
 obsolete and longer contains any code. The entries can be left on the classpath
-but they serve no purpose and should be removed. Look to remove:<br>
+but they serve no purpose and should be removed. Look to remove:
 </p>
 <pre>    ../org.eclipse.core.boot/bin;../org.eclipse.core.boot/boot.jar</pre>
-<h3>32. Removal of install.ini</h3>
+<h3>33. Removal of install.ini</h3>
 <p>The install.ini file is no longer included. In its place is the new
 config.ini file in the configuration sub-directory. Products that used the
 install.ini file to specify a primary feature (e.g., to provide branding
@@ -1020,14 +1024,27 @@ to &quot;org.eclipse.ui.ide.workbench&quot;.</p>
 branding plug-in's directory. In 3.0 the location of the splash image is
 provided explicitly by the osgi.splashPath key in the config.ini file.</p>
 
-<h3>33. Changes to PDE build ant task</h3>
-<p><b>Who is affected:</b> Developers maintaining scripts (e.g., Ant build.xml
+<h3>34. Changes to PDE build Ant task</h3>
+<p><b>What is affected:</b> Scripts (e.g., Ant build.xml
 files) using the eclipse.buildScript task.</p>
-<p><b>Description:</b> PDE Build introduced a new property to the eclipse.buildScript task to control the generation of plug-ins build script. 
-This was mandated by the introduction of the new runtime.
-<p><b>Action required:</b> If you want to use eclipse 3.0 to build a 2.1 based product, 
-then introduce in eclipse.buildScript call the property "buildingOSGi" and set it to false.
+<p><b>Description:</b> PDE Build introduced a new property to the eclipse.buildScript task to control the generation of plug-ins build
+scripts. 
+This was mandated by the introduction of the new OSGi-based runtime.
+<p><b>Action required:</b> If you want to use Eclipse 3.0 to build a 2.1 based product, 
+then introduce in eclipse.buildScript the property "buildingOSGi" and set it to false.
 For example: <pre>&lt;eclipse.buildScript ... buildingOSGi=&quot;false&quot;/&gt;</pre>
+
+<h3>35. Plug-in export does not include the plug-in's JARs automatically</h3>
+<p><b>What </b><strong> is affected:</strong> All plug-ins.</p>
+<p><strong>Description:</strong> In Eclipse 2.1, a plug-in's bin.includes line 
+  from their build.properties did not have to contain the list of JARs from their 
+  library declaration in the plugin.xml file; these JARs were added for free. 
+  In Eclipse 3.0 the list of files in the bin.includes section of the build.properties 
+  is an exhaustive list and must include all files which plug-in developers intend 
+  to be included in their plug-in when building or exporting.</p>
+<p><strong>Action required:</strong> Ensure that the bin.includes line from the 
+  build.properties file includes all of the JARs listed in your plugin.xml file.</p>
+
 
 <p><a href="../notices.html"><img src="../cpy.gif" border="0" alt="Legal notices" width="324" height="14"></a></p>
 
