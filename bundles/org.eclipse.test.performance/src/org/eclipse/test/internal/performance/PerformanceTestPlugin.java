@@ -15,7 +15,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
-//import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.test.internal.performance.db.DB;
@@ -56,12 +55,6 @@ public class PerformanceTestPlugin extends Plugin {
 	    super();
 		fgPlugin= this;
 	}
-	
-//	public PerformanceTestPlugin(IPluginDescriptor descriptor) {
-//		super(descriptor);
-//		fgPlugin= this;
-//	}
-//	
 	
 	public void stop(BundleContext context) throws Exception {
 		DB.shutdown();
