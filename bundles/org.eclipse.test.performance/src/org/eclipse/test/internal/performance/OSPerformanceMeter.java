@@ -11,8 +11,6 @@
 
 package org.eclipse.test.internal.performance;
 
-import org.eclipse.perfmsr.core.BasePerformanceMonitor;
-import org.eclipse.perfmsr.core.IPerformanceMonitor0;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
@@ -28,7 +26,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	/**
 	 * The perfmsr plug-in's performance monitor
 	 */
-	private IPerformanceMonitor0 fPerformanceMonitor;
+	private BasePerformanceMonitor fPerformanceMonitor;
 	
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
 

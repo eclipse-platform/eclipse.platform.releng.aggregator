@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.perfmsr.core;
+package org.eclipse.test.internal.performance;
 
 /**
  * Constants that are used as environment variables and in the timer.xml file.

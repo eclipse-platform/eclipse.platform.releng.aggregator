@@ -8,11 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.perfmsr.core;
+package org.eclipse.test.internal.performance;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,13 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.eclipse.perfmsr.core.PerformanceMonitor;
+import org.eclipse.test.internal.performance.PerformanceMonitorLinux;
+import org.eclipse.test.internal.performance.PerformanceMonitorMac;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 
-public class BasePerformanceMonitor implements IPerformanceMonitor0 {
+public class BasePerformanceMonitor {
     
     protected HashMap fRunProperties;
     protected List fDataPoints;
@@ -37,7 +41,7 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
     private static BasePerformanceMonitor fgPerformanceMonitor;
 
     
-    public static IPerformanceMonitor0 getPerformanceMonitor(boolean shared) {
+    public static BasePerformanceMonitor getPerformanceMonitor(boolean shared) {
 		BasePerformanceMonitor pm;
 		if (!shared)
 		    pm= create();
@@ -57,7 +61,8 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
         fScenarioName= scenarioId;
     }
 
-    private boolean writeable() {
+    private boolean isEnabled() {
+    	// we are not filtering anything yet...
         return true;
     }
 
@@ -65,17 +70,17 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
      * @see org.eclipse.perfmsr.core.IPerformanceMonitor#snapshot(int)
      */
     public void snapshot(int step) {
-		if (writeable()) {
+		if (isEnabled()) {
 		    
 		    if (fRunProperties == null) {
 		        fRunProperties= new HashMap();
-		        writeRun(fRunProperties);
+		        collectRunInfo(fRunProperties);
 		    }
 		    
 		    if (fDataPoints == null)
 		        fDataPoints= new ArrayList();
 		    HashMap map= new HashMap();
-		    writeOperatingSystemCounters(map);
+		    collectOperatingSystemCounters(map);
 		    DataPoint dp= new DataPoint(Integer.toString(step), map);
 		    fDataPoints.add(dp);
 		}
@@ -84,16 +89,8 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
 	/**
 	 * Write out the run element if it hasn't been written out yet.
 	 */
-	protected void writeRun(HashMap runProperties) {
+	private void collectRunInfo(HashMap runProperties) {
 	    
-//		if (_unknownEnvironmentParms != null) {
-//			PrintWriter pw = getPrintWriter();
-//			pw.print("<!-- The following environment values were ignored (they probably are typo's): ");
-//			pw.print(_unknownEnvironmentParms.toString());
-//			pw.println(" -->");
-//			_unknownEnvironmentParms = null;
-//		}
-		
 	    runProperties.put("uuid", getUUID());
 	    runProperties.put("driver", "driver?");
 	    runProperties.put("driverdate", "driverdate?");
@@ -123,6 +120,8 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
 		b.append(" eclipse.commands=");
 		b.append(System.getProperty("eclipse.commands"));
 		runProperties.put("cmdArgs", b.toString());
+		
+		collectGlobalPerformanceInfo(runProperties);
 	}
 	
 	protected String getUUID() {
@@ -159,13 +158,14 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
         return null;
     }
 
-    protected void writeOperatingSystemCounters(Map scalars) {
+    protected void collectOperatingSystemCounters(Map scalars) {
         // default implementation just writes currentTimeMillis
         String dimName= PerfMsrDimensions.USER_TIME.getName();
         scalars.put(dimName, new Scalar(dimName, System.currentTimeMillis()));
     }
 
-	protected void writeGlobalPerformanceInfo(Map scalars) {
+	protected void collectGlobalPerformanceInfo(Map scalars) {
+		// no default implementation
 	}
 	
     /* (non-Javadoc)
@@ -190,5 +190,65 @@ public class BasePerformanceMonitor implements IPerformanceMonitor0 {
 		if (os.startsWith("Mac OS X"))
 		    return new PerformanceMonitorMac();
 		return new PerformanceMonitorLinux();
+	}
+	
+	//---- temporary, for debugging
+	
+	/**
+	 * Answer a formatted string for the elapsed time (minutes, hours or days) 
+	 * that is appropriate for the scale of the time.
+	 * 
+	 * @param diff time in milliseconds
+	 * 
+	 * I copied this from karasiuk.utility.TimeIt
+	 */
+	public static String formatedTime(long diff) {
+		if (diff < 0)diff *= -1;
+ 		if (diff < 1000)
+ 			return String.valueOf(diff) + " milliseconds";
+ 		
+ 		NumberFormat nf = NumberFormat.getInstance();
+ 		nf.setMaximumFractionDigits(1);
+		double d = diff / 1000.0;	
+		if (d < 60)
+			return nf.format(d) + " seconds";
+		
+		d = d / 60.0;
+		if (d < 60.0)
+			return nf.format(d) + " minutes";
+	
+		d = d / 60.0;
+		if (d < 24.0)
+			return nf.format(d) + " hours";
+	
+		d = d / 24.0;
+		return nf.format(d) + " days";
+	}
+	
+	/**
+	 * Answer a number formatted using engineering conventions, K thousands, M millions,
+	 * G billions and T trillions.
+	 * 
+	 * I copied this method from karasiuk.utility.Misc.
+	 */
+	public static String formatEng(long n) {
+		if (n < 1000)
+			return String.valueOf(n);
+		double d = n / 1000.0;
+		NumberFormat nf = NumberFormat.getInstance();
+		nf.setMaximumFractionDigits(1);
+		if (d < 1000.0)
+			return nf.format(d) + "K";
+		
+		d = d / 1000.0;
+		if ( d < 1000.0)
+			return nf.format(d) + "M";
+		
+		d = d / 1000.0;
+		if ( d < 1000.0)
+			return nf.format(d) + "G";
+		
+		d = d / 1000.0;
+		return nf.format(d) + "T";
 	}
 }

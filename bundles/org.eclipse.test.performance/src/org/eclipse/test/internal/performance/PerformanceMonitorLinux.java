@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.perfmsr.core;
+package org.eclipse.test.internal.performance;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,11 +16,12 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.test.internal.performance.data.Scalar;
+
 public class PerformanceMonitorLinux extends BasePerformanceMonitor {
     
     /**
      * The status values for a Linux process, that is the values that come from /proc/self/stat.
-     * 
      * The names of the variables match the man proc page.
      */
     static class LinuxProcStat {
@@ -47,7 +48,6 @@ public class PerformanceMonitorLinux extends BasePerformanceMonitor {
 
     /**
      * The status memory values values for a Linux process, that is the values that come from /proc/self/statm.
-     * 
      * The names of the variables match the man proc page.
      */
     static class LinuxProcStatM {
@@ -76,7 +76,7 @@ public class PerformanceMonitorLinux extends BasePerformanceMonitor {
 	/**
 	 * Write out operating system counters for Linux.
 	 */
-	protected void writeOperatingSystemCounters(Map scalars) {
+	protected void collectOperatingSystemCounters(Map scalars) {
 		synchronized(this) {
     		LinuxProcStat stat= new LinuxProcStat();
     		BufferedReader rdr= null;
@@ -131,36 +131,36 @@ public class PerformanceMonitorLinux extends BasePerformanceMonitor {
     		}
  			
 			long v = jiffiesToMilliseconds(stat.utime);
-			//writeValue(LoadValueConstants.What.userTime, v, "User time", formatedTime(v), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.userTime, v, "User time", formatedTime(v));
 			
 			v = jiffiesToMilliseconds(stat.stime);
-			//writeValue(LoadValueConstants.What.kernelTime, v, "Kernel time", formatedTime(v), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.kernelTime, v, "Kernel time", formatedTime(v));
 			
 			v = jiffiesToMilliseconds(stat.utime+stat.stime);
-			//writeValue(LoadValueConstants.What.cpuTime, v, "CPU time", formatedTime(v), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.cpuTime, v, "CPU time", formatedTime(v));
 			
 			int i = pagesToBytes(statm.resident);
-			//writeValue(LoadValueConstants.What.workingSet, i, "Working Set", formatEng(i), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.workingSet, i, "Working Set", formatEng(i));
 			
-			//writeValue(LoadValueConstants.What.softPageFaults, stat.minflt, "Soft Page Faults", formatEng(stat.minflt), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.softPageFaults, stat.minflt, "Soft Page Faults", formatEng(stat.minflt));
 			
-			//writeValue(LoadValueConstants.What.hardPageFaults, stat.majflt, "Hard Page Faults", formatEng(stat.majflt), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.hardPageFaults, stat.majflt, "Hard Page Faults", formatEng(stat.majflt));
 			
 			i = pagesToBytes(statm.trs);
-			//writeValue(LoadValueConstants.What.trs, i, "Text Size", formatEng(i), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.trs, i, "Text Size", formatEng(i));
 			
 			i = pagesToBytes(statm.drs);
-			//writeValue(LoadValueConstants.What.drs, i, "Data Size", formatEng(i), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.drs, i, "Data Size", formatEng(i));
 			
 			i = pagesToBytes(statm.lrs);
-			//writeValue(LoadValueConstants.What.lrs, i, "Library Size", formatEng(i), displayResults, b);
+			writeValue(scalars, LoadValueConstants.What.lrs, i, "Library Size", formatEng(i));
 		}
 	}
 	
 	/**
 	 * Write out the global machine counters for Linux.
 	 */
-	protected void writeGlobalPerformanceInfo(Map scalars) {
+	protected void collectGlobalPerformanceInfo(Map scalars) {
 		LinuxMemInfo mi= new LinuxMemInfo();
 		BufferedReader rdr= null;
 		try {
@@ -182,11 +182,11 @@ public class PerformanceMonitorLinux extends BasePerformanceMonitor {
 			} catch (IOException e) {
 			}
 		}
-//		writeValue(LoadValueConstants.What.physicalMemory, mi.total, "Physical Memory", formatEng(mi.total), displayResults, b);
-//		writeValue(LoadValueConstants.What.usedLinuxMemory, mi.used, "Used Memory", formatEng(mi.used), displayResults, b);
-//		writeValue(LoadValueConstants.What.freeLinuxMemory, mi.free, "Free Memory", formatEng(mi.free), displayResults, b);
-//		writeValue(LoadValueConstants.What.buffersLinux, mi.buffers, "Buffers Memory", formatEng(mi.buffers), displayResults, b);
-//		writeValue(LoadValueConstants.What.systemCache, mi.cache, "System Cache", formatEng(mi.cache), displayResults, b);
+		writeValue(scalars, LoadValueConstants.What.physicalMemory, mi.total, "Physical Memory", formatEng(mi.total));
+		writeValue(scalars, LoadValueConstants.What.usedLinuxMemory, mi.used, "Used Memory", formatEng(mi.used));
+		writeValue(scalars, LoadValueConstants.What.freeLinuxMemory, mi.free, "Free Memory", formatEng(mi.free));
+		writeValue(scalars, LoadValueConstants.What.buffersLinux, mi.buffers, "Buffers Memory", formatEng(mi.buffers));
+		writeValue(scalars, LoadValueConstants.What.systemCache, mi.cache, "System Cache", formatEng(mi.cache));
 	}
 	
 	/**
@@ -210,34 +210,8 @@ public class PerformanceMonitorLinux extends BasePerformanceMonitor {
 		return pages * 4096;
 	}
 	
-	/**
-	 * Write out a value element.
-	 * 
-	 * @param what the measurement type
-	 * @param result the value of the measurement
-	 * @param displayWhat the measurement type in a human readable form
-	 * @param displayResult the measurement in a human readable form
-	 * @param displayResults are the results going to be displayed?
-	 * @param b the buffer where the results will be displayed
-	 */
-//	private void writeValue(int what, long result, String displayWhat, String displayResult, 
-//			boolean displayResults, StringBuffer b) {
-//		PrintWriter pw = getPrintWriter();
-//		pw.print("<"+TimerXML.value+" "+TimerXML.what+"='");
-//		pw.print(what);
-//		pw.print("' "+TimerXML.result+"='");
-//		pw.print(result);
-//		pw.print("' "+TimerXML.displayWhat+"='");
-//		pw.print(displayWhat);
-//		pw.print("' "+TimerXML.displayResult+"='");
-//		pw.print(displayResult);
-//		pw.println("' />");
-//		
-//		if (displayResults) {
-//			b.append(displayWhat);
-//			b.append(" = ");
-//			b.append(displayResult);
-//			b.append("\n");
-//		}
-//	}
+    private void writeValue(Map scalars, int i, long l, String string, String object) {
+        //System.out.println(i + ": " + string + " " + object);
+        scalars.put("" + i, new Scalar("" + i, l));
+    }
 }

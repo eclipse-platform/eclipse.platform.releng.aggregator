@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import junit.framework.Assert;
-import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
+import org.eclipse.test.internal.performance.LoadValueConstants;
 import org.eclipse.test.internal.performance.PerfMsrConstants;
 import org.eclipse.test.internal.performance.data.PerformanceDataModel;
 import org.eclipse.test.internal.performance.data.Sample;

@@ -8,26 +8,27 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.perfmsr.core;
+package org.eclipse.test.internal.performance;
 
 import java.util.Map;
 
 /**
  * The Mac OS X version of the performance monitor.
+ * (Uses default implementation for now).
  */
 public class PerformanceMonitorMac extends BasePerformanceMonitor {
     
 	/**
 	 * Write out operating system counters for Mac OS X.
 	 */
-	protected void writeOperatingSystemCounters(Map scalars) {
-	    super.writeOperatingSystemCounters(scalars);
+	protected void collectOperatingSystemCounters(Map scalars) {
+	    super.collectOperatingSystemCounters(scalars);
 	}
 
 	/**
 	 * Write out the global machine counters for Mac OS X.
 	 */
-	protected void writeGlobalPerformanceInfo(Map scalars) {
-	    super.writeGlobalPerformanceInfo(scalars);
+	protected void collectGlobalPerformanceInfo(Map scalars) {
+	    super.collectGlobalPerformanceInfo(scalars);
 	}
 }

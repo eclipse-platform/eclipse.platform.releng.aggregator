@@ -10,9 +10,10 @@
  *******************************************************************************/
 package org.eclipse.perfmsr.core;
 
-import java.text.NumberFormat;
 import java.util.Map;
 
+import org.eclipse.test.internal.performance.BasePerformanceMonitor;
+import org.eclipse.test.internal.performance.LoadValueConstants;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 
@@ -22,152 +23,7 @@ import org.eclipse.test.internal.performance.data.Scalar;
  * which we cannot change right now). 
  */
 public class PerformanceMonitor extends BasePerformanceMonitor {
-    
-	private static CounterMap[]	_map = new CounterMap[] {
-	        new CounterMap(4, "Working Set", false),
-	        new CounterMap(8, "Working Set Peak", false),
-	        new CounterMap(9, "Elapsed Process", true),
-	        new CounterMap(10, "User time", true),
-	        new CounterMap(11, "Kernel time", true),
-	        new CounterMap(19, "Page Faults", false),
-	        new CounterMap(7, "Committed", false),
-	        new CounterMap(34, "GDI Objects", false),
-	        new CounterMap(35, "USER Objects", false),
-	        new CounterMap(36, "Open Handles", false),
-	        new CounterMap(38, "Read Count", false),
-	        new CounterMap(39, "Write Count", false),
-	        new CounterMap(40, "Bytes Read", false),
-	        new CounterMap(41, "Bytes Written", false)
-	};
-	
-	private interface WhatLabel {
-		String elapsed 			= "Elapsed";
-		String totalJavaHeap 	= "Total Java Heap";
-		String usedJavaHeap 	= "Used Java Heap";
-		String cpuTime 			= "CPU Time";
-	}
-	
-	/**
-	 * Index into the counters array.
-	 */
-	private interface WhatIdx {
-	
-		/** (3) The index into the counters array that holds the user time value. */
-		int userTime 	= 3;
-	
-		/** (4) The index into the counters array that holds the kernel time value. */
-		int kernelTime 	= 4;
-		
-		/** (6) The index into the counters array that holds the total committed number. */
-		int committed 	= 6;
-		
-		/** (9) The index into the counters array that holds the open handles number. */
-		int openHandles = 9;
-	}
-			
-
-    /**
-     * Map a native counter to a measurement.
-     */
-    private static class CounterMap {
-    	public int 		what;		// dimension
-    	public String	label;
-    	public boolean	isTime;
     	
-    	public CounterMap(int what, String label, boolean isTime) {
-    		this.what = what;
-    		this.label = label;
-    		this.isTime = isTime;
-    	}
-    }
-    
-    /**
-     * Hold some Window's global performance counters. This essentially wraps the
-     * PERFORMANCE_INFORMATION structure.
-     */
-    static class PerformanceInfo {
-        
-    	/** Index of the counter that holds the page size. */
-    	private static final int PAGE_SIZE_INDEX = 9;
-    	
-    	/** 
-    	 * Represent an individual performance value.
-    	 */
-    	public class PerformanceValue {
-    		/** 
-    		 * 0 - an invalid value that indicates that we could not get the real value for the counter. 
-    		 * We have to use zero rather than -1 because the C type is unsigned. 
-    		 */
-    		public final static long NO_COUNTER_VALUE = 0;
-    		
-    		/** index into the _counters array. */
-    		private int		_index;
-    		
-    		/** The corresponding whatid in the performance data base. */
-    		private int		_what;
-    		
-    		/** A description of the measurement. */
-    		private String	_label;
-    		
-    		private PerformanceValue(int index, int what, String label) {
-    			_index = index;
-    			_what = what;
-    			_label = label;
-    		}
-    		
-    		public String getLabel() {
-    			return _label;
-    		}
-    		
-    		public int getWhat() {
-    			return _what;
-    		}
-    		
-    		/**
-    		 * Answer the number of bytes. Since some of the counters hold pages instead of
-    		 * bytes they need to be multiplied by the page size to get the number of bytes.
-    		 * 
-    		 * For normal counters (like the number of threads) the counter is returned 
-    		 * without being modified.
-    		 * 
-    		 * The convention is to return NO_COUNTER_VALUE if the counter could not be determined.
-    		 */
-    		public long rawValue() {
-    			if (_counters[_index] == NO_COUNTER_VALUE)
-    			    return NO_COUNTER_VALUE;
-    			
-    			return _index < 9
-    						? _counters[_index] * _counters[PAGE_SIZE_INDEX]
-    						: _counters[_index];
-    		}
-    				
-    	}
-    	
-    	private long[]	_counters = new long[13];
-    	
-    	    	
-    	public final PerformanceValue COMMIT_TOTAL = 	new PerformanceValue(0, 37, "Commit Total"); 
-    	public final PerformanceValue COMMIT_LIMIT = 	new PerformanceValue(1, 22, "Commit Limit"); 
-    	public final PerformanceValue COMMIT_PEEK = 	new PerformanceValue(2, 23, "Commit Peak"); 
-    	public final PerformanceValue PHYSICAL_TOTAL = 	new PerformanceValue(3, 24, "Physical Total"); 
-    	public final PerformanceValue PHYSICAL_AVAILABLE = new PerformanceValue(4, 25, "Physical Available"); 
-    	public final PerformanceValue SYSTEM_CACHE = 	new PerformanceValue(5, 26, "System Cache"); 
-    	public final PerformanceValue KERNEL_TOTAL = 	new PerformanceValue(6, 27, "Kernel Total"); 
-    	public final PerformanceValue KERNEL_PAGED = 	new PerformanceValue(7, 28, "Kernel Paged"); 
-    	public final PerformanceValue KERNEL_NON_PAGED =new PerformanceValue(8, 29, "Kernel Nonpaged"); 
-    	public final PerformanceValue PAGE_SIZE = 		new PerformanceValue(9, 30, "page Size"); 
-    	public final PerformanceValue HANDLE_COUNT = 	new PerformanceValue(10, 31, "Handle Count"); 
-    	public final PerformanceValue PROCESS_COUNT = 	new PerformanceValue(11, 32, "Process Count"); 
-    	public final PerformanceValue THREAD_COUNT = 	new PerformanceValue(12, 33, "Thread Count"); 
-
-    	PerformanceValue[] values = {COMMIT_TOTAL, COMMIT_LIMIT, COMMIT_PEEK, PHYSICAL_TOTAL, PHYSICAL_AVAILABLE,
-    		SYSTEM_CACHE, KERNEL_TOTAL, KERNEL_PAGED, KERNEL_NON_PAGED, PAGE_SIZE, HANDLE_COUNT, PROCESS_COUNT,
-    		THREAD_COUNT};
-    }
-
-	//-----------------------------------
-
-
 	/** 
 	 * ivjperf - name of the library that implements the native methods.
 	 */
@@ -177,6 +33,8 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 	 * Is the native library loaded? 0-don't know, 1-no, 2-yes
 	 */
 	private static int fgIsLoaded= 0;
+	
+	private boolean fgNativeGetPerformanceInfoNotAvailable;
 
 	/**
 	 * Answer true if the native library for this class has been successfully
@@ -188,6 +46,7 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
+			    System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
 			    fgIsLoaded= 1;
 			}
 		}
@@ -221,24 +80,30 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 	 * some sort of problem. This method can also throw a Runtime exception if
 	 * any of the windows API calls returns an error.
 	 */
-    protected void writeOperatingSystemCounters(Map scalars) {
-		long[] counters = new long[_map.length];
+    protected void collectOperatingSystemCounters(Map scalars) {
 		synchronized(this) {
-			if (!isLoaded()) {
+			if (!isLoaded())
 			    return;
-			}
+			
+			long[] counters= new long[14];
 			if (nativeGetPerformanceCounters(counters)) {
-				for (int i= 0; i < _map.length; i++) {
-                	if ((i ==  WhatIdx.committed || i == WhatIdx.openHandles) && counters[i] == -1)
-                	    continue;
-                	
-                	writeValue(scalars, _map[i].what, counters[i], _map[i].label, 
-                		_map[i].isTime ? formatedTime(counters[i])
-                		        		: formatEng(counters[i]));
-                }
-                
-                long cpu= counters[WhatIdx.userTime] + counters[WhatIdx.kernelTime];
-                writeValue(scalars, LoadValueConstants.What.cpuTime, cpu, WhatLabel.cpuTime, formatedTime(cpu));
+				writeValue(scalars, 4, "Working Set", counters[0]);
+				writeValue(scalars, 8, "Working Set Peak", counters[1]);
+				writeValue(scalars, 9, "Elapsed Process", counters[2]);
+				writeValue(scalars, 10, "User time", counters[3]);
+				writeValue(scalars, 11, "Kernel time", counters[4]);
+				writeValue(scalars, 19, "Page Faults", counters[5]);
+				if (counters[6] != -1)
+					writeValue(scalars, 7, "Committed", counters[6]);
+				writeValue(scalars, 34, "GDI Objects", counters[7]);
+				writeValue(scalars, 35, "USER Objects", counters[8]);
+				if (counters[9] != -1)
+					writeValue(scalars, 36, "Open Handles", counters[9]);
+				writeValue(scalars, 38, "Read Count", counters[10]);
+				writeValue(scalars, 39, "Write Count", counters[11]);
+				writeValue(scalars, 40, "Bytes Read", counters[12]);
+				writeValue(scalars, 41, "Bytes Written", counters[13]);
+                writeValue(scalars, LoadValueConstants.What.cpuTime, "CPU Time", counters[3] + counters[4]);
 			}
 		}
     }
@@ -251,23 +116,33 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 	 * the Windows psapi.dll. This is available in XP but is usually not available
 	 * in Win/2000. If it is not available then this function throws an UnsupportedOperationException.
 	 */
-	protected void writeGlobalPerformanceInfo(Map scalars) {
+	protected void collectGlobalPerformanceInfo(Map scalars) {
+		if (fgNativeGetPerformanceInfoNotAvailable)
+			return;
 		synchronized(this) {
-		    PerformanceInfo pi= new PerformanceInfo();
-			if (!isLoaded()) {
-			    System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
+			if (!isLoaded())
 				return;
-			}
+			
+	    	long[] counters= new long[13];
 			try {
-				nativeGetPerformanceInfo(pi._counters);
+				nativeGetPerformanceInfo(counters);
+				long pageSize= counters[9];
+				writeValue(scalars, 37, "Commit Total", counters[0]*pageSize);
+				writeValue(scalars, 22, "Commit Limit", counters[1]*pageSize); 
+				writeValue(scalars, 23, "Commit Peak", counters[2]*pageSize);
+				writeValue(scalars, 24, "Physical Total", counters[3]*pageSize); 
+				writeValue(scalars, 25, "Physical Available", counters[4]*pageSize); 
+				writeValue(scalars, 26, "System Cache", counters[5]*pageSize);
+				writeValue(scalars, 27, "Kernel Total", counters[6]*pageSize); 
+				writeValue(scalars, 28, "Kernel Paged", counters[7]*pageSize); 
+				writeValue(scalars, 29, "Kernel Nonpaged", counters[8]*pageSize); 
+				writeValue(scalars, 30, "Page Size", counters[9]);
+				writeValue(scalars, 31, "Handle Count", counters[10]); 
+				writeValue(scalars, 32, "Process Count", counters[11]); 
+				writeValue(scalars, 33, "Thread Count", counters[12]);
 			} catch (Exception e) {
-			    System.err.println("Exception in writeGlobalPerformanceInfo: " + e.toString());
-				return;
-			}
-			for (int i= 0; i < pi.values.length; i++) {
-				PerformanceInfo.PerformanceValue v= pi.values[i];
-				long result = v.rawValue();
-				writeValue(scalars, v.getWhat(), result, v.getLabel(), formatEng(result));
+			    System.err.println("Exception in collectGlobalPerformanceInfo: " + e.toString());
+				fgNativeGetPerformanceInfoNotAvailable= true;
 			}
 		}
 	}
@@ -282,8 +157,11 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 		return super.getUUID();
 	}
 	
-	//----- natives
-	
+    private void writeValue(Map scalars, int id, String string, long value) {
+        System.out.println(id + ": " + string + " " + value);
+        scalars.put("" + id, new Scalar("" + id, value));
+    }
+
 	/**
 	 * Calls the Windows GetPerformanceInfo function
 	 * @param counters any array of counters that corresponds to the Windows
@@ -294,68 +172,4 @@ public class PerformanceMonitor extends BasePerformanceMonitor {
 	private static native boolean nativeGetPerformanceCounters(long[] counters);
 	
 	private static native String nativeGetUUID();
-	
-	//---- dummies
-	
-	/**
-	 * Answer a formatted string for the elapsed time (minutes, hours or days) 
-	 * that is appropriate for the scale of the time.
-	 * 
-	 * @param diff time in milliseconds
-	 * 
-	 * I copied this from karasiuk.utility.TimeIt
-	 */
-	public static String formatedTime(long diff)
-	{
-		if (diff < 0)diff *= -1;
- 		if (diff < 1000)
- 			return String.valueOf(diff) + " milliseconds";
- 		
- 		NumberFormat nf = NumberFormat.getInstance();
- 		nf.setMaximumFractionDigits(1);
-		double d = diff / 1000.0;	
-		if (d < 60)
-			return nf.format(d) + " seconds";
-		
-		d = d / 60.0;
-		if (d < 60.0)
-			return nf.format(d) + " minutes";
-	
-		d = d / 60.0;
-		if (d < 24.0)
-			return nf.format(d) + " hours";
-	
-		d = d / 24.0;
-		return nf.format(d) + " days";
-	}
-	
-
-	/**
-	 * Answer a number formatted using engineering conventions, K thousands, M millions,
-	 * G billions and T trillions.
-	 * 
-	 * I copied this method from karasiuk.utility.Misc.
-	 */
-	public static String formatEng(long n)
-	{
-		if (n < 1000)return String.valueOf(n);
-		double d = n / 1000.0;
-		NumberFormat nf = NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(1);
-		if (d < 1000.0)return nf.format(d) + "K";
-		
-		d = d / 1000.0;
-		if ( d < 1000.0)return nf.format(d) + "M";
-		
-		d = d / 1000.0;
-		if ( d < 1000.0)return nf.format(d) + "G";
-		
-		d = d / 1000.0;
-		return nf.format(d) + "T";
-	}
-	
-    private void writeValue(Map scalars, int i, long l, String string, String object) {
-        //System.out.println(i + ": " + string + " " + object);
-        scalars.put("" + i, new Scalar("" + i, l));
-    }
 }
