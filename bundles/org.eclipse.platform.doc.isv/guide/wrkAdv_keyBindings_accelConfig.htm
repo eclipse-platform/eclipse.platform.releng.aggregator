@@ -11,83 +11,102 @@ Accelerator configurations
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<h3>Accelerator configurations</h3>
+<h3>Key configurations</h3>
 
 
-<p><b>Accelerator configurations</b> are used to represent a general style or theme of
-accelerator sets. For example, the
-Workbench provides a &quot;Default&quot; accelerator configuration and an &quot;Emacs&quot; accelerator configuration.&nbsp;
-Only one accelerator configuration is active at any given time.&nbsp; End users
+<p><b>Key configurations</b> are used to represent a general style or theme of
+key bindings. For example, the
+Workbench provides a &quot;Standard&quot; key configuration and an &quot;Emacs&quot;
+key configuration.&nbsp;
+Only one key configuration is active at any given time.&nbsp; End users
 control which one is active using the workbench <b>Preferences</b> dialog.</p>
 
 
-<p><img alt="" border="0" src="images/keybindings.jpg" width="606" height="532"></p>
+<p><img border="0" src="images/keybindings.jpg" width="893" height="585"></p>
 
 
-<p>From an implementation point of view, accelerator configurations are simply
-named groupings of accelerator sets.&nbsp; An accelerator configuration won't
-accomplish anything on its own unless there are accelerator sets associated with
-it.&nbsp; In fact, an accelerator configuration won't be shown in the
-Preferences dialog if there is no accelerator set defined for it.</p>
+<p>From an implementation point of view, key configurations are simply
+named groupings of key bindings.&nbsp; A key configuration won't
+accomplish anything on its own unless there are key bindings associated with
+it.&nbsp;&nbsp;</p>
 
 
-<p>Let's look again at the workbench emacs accelerator set to see how it gets
-associated with an accelerator configuration:</p>
+<p>Let's look again at the workbench markup for <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a>
+</b>to find the key binding definitions and how a key configuration gets
+associated with a key binding.</p>
 
 
-<pre><font color="#4444CC">&lt;extension
-      point=&quot;org.eclipse.ui.acceleratorSets&quot;&gt;
-   &lt;acceleratorSet
-         scopeId=&quot;org.eclipse.ui.globalScope&quot;
-<b>         configurationId=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
-</b>      &lt;accelerator
-            key=&quot;Ctrl+F4||Ctrl+X Ctrl+K&quot;
-            id=&quot;org.eclipse.ui.file.close&quot;&gt;
-      &lt;/accelerator&gt;
-      &lt;accelerator
-            key=&quot;Ctrl+Shift+F4||Ctrl+X Ctrl+C&quot;
-            id=&quot;org.eclipse.ui.file.closeAll&quot;&gt;
-      &lt;/accelerator&gt;
-      &lt;accelerator
-            key=&quot;Ctrl+X Ctrl+S&quot;
-            id=&quot;org.eclipse.ui.file.save&quot;&gt;
-      &lt;/accelerator&gt;
-      ...</font></pre>
+<pre><font color="#4444CC">...
+&lt;keyBinding
+       string=&quot;Ctrl+S&quot;
+       scope=&quot;org.eclipse.ui.globalScope&quot;
+       <b>command=&quot;org.eclipse.ui.file.save&quot;</b>
+       <b>configuration=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;</b>
+&lt;/keyBinding&gt;
+...
+&lt;keyBinding
+       string=&quot;Ctrl+X Ctrl+S&quot;
+       scope=&quot;org.eclipse.ui.globalScope&quot;
+       <b>command=&quot;org.eclipse.ui.file.save&quot;</b>
+       <b>configuration=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;</b>
+&lt;/keyBinding&gt;
+...
+</font></pre>
 
 
-<p>When an accelerator set is defined, it specifies the <b>configurationID</b> of its associated
-accelerator configuration.&nbsp; The accelerator set will only be used if the
-user has chosen the accelerator configuration to which the set belongs.&nbsp; </p>
+<p>There are two different key bindings defined for the &quot;org.eclipse.ui.file.save&quot;
+command.&nbsp; Note that each one has a different <b>configuration</b>
+defined.&nbsp; When the standard configuration is active, the &quot;Ctrl+S&quot;
+key binding will invoke the command.&nbsp; When the emacs configuration is
+active, the sequence &quot;Ctrl+X Ctrl+S&quot; will invoke the command. </p>
 
 
-<h4>Defining new accelerator configurations </h4>
+<h4>Defining new key configurations </h4>
 
 
-<p>When a plug-in defines an accelerator set, it often assigns it to an existing
-accelerator configuration.&nbsp; However, your plug-in may want to define a
-completely new style of accelerators.&nbsp; If this is the case, you can define
-a new type of accelerator configuration using the <b><a href="../reference/extension-points/org_eclipse_ui_acceleratorConfigurations.html">org.eclipse.ui.acceleratorConfigurations</a></b>
-extension point.&nbsp; The workbench markup for its accelerator configurations
-is shown below:</p>
+<p>When your plug-in defines a key binding, it will most likely assign it to an existing
+key configuration.&nbsp; However, your plug-in may want to define a
+completely new style of key configurations.&nbsp; If this is the case, you can define
+a new type of key configuration inside the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a></b>
+definition.&nbsp; The workbench markup that defines the standard and emacs key
+configurations are shown below:</p>
 
 
-<pre><font color="#4444CC">&lt;extension
-   point=&quot;org.eclipse.ui.acceleratorConfigurations&quot;&gt;
-      &lt;acceleratorConfiguration
-            name=&quot;%DefaultAcceleratorConfiguration.name&quot;
-            description=&quot;%DefaultAcceleratorConfiguration.description&quot;
-            id=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;
-      &lt;/acceleratorConfiguration&gt;
-      &lt;acceleratorConfiguration
-            name=&quot;%EmacsAcceleratorConfiguration.name&quot;
-            description=&quot;%EmacsAcceleratorConfiguration.description&quot;
-            id=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
-      &lt;/acceleratorConfiguration&gt;
-&lt;/extension&gt;</font></pre>
+<pre><font color="#4444CC">...
+&lt;keyConfiguration
+       name=&quot;%keyConfiguration.standard.name&quot;
+       description=&quot;%keyConfiguration.standard.description&quot;
+       <b>id=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;</b>
+&lt;/keyConfiguration&gt;
+&lt;keyConfiguration
+       name=&quot;%keyConfiguration.emacs.name&quot;
+       parent=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;
+       description=&quot;%keyConfiguration.emacs.description&quot;
+       <b>id=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;</b>
+&lt;/keyConfiguration&gt;
+...</font></pre>
 
 
-<p>The <b>name</b> is used in the preferences page in the list of available
+<p>Note that the <b>name</b>  defined here is the one used in the preferences page in the list of
 configurations.</p>
+
+
+<h4>Activating a key configuration </h4>
+
+
+<p>The user controls the active configuration via the preferences page.&nbsp;
+However, you can define the default active configuration as part of the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a></b>
+definition.&nbsp; The workbench establishes the standard key configuration as
+the default when it defines the extension:</p>
+
+
+<pre><font color="#4444CC">
+&lt;extension
+         point=&quot;org.eclipse.ui.commands&quot;&gt;
+      <b>&lt;activeKeyConfiguration
+            value=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;
+      &lt;/activeKeyConfiguration&gt;</b>
+      ...</pre></font>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>

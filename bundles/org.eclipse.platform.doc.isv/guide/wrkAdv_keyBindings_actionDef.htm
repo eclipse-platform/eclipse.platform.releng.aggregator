@@ -5,61 +5,86 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Action definitions
+Commands
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<h3>Action definitions</h3>
+<h3>Commands</h3>
 
 
-<p>An <b>action definition</b> is the declaration of an action by <b>id</b>.&nbsp;
-Action definitions are used to declare semantic actions so that actions defined
+<p>A <b>command</b> is the declaration of a user action by <b>id</b>.&nbsp;
+Commands are used to declare semantic actions so that action implementations defined
 in action sets and editors can associate themselves with a particular semantic
-action definition.&nbsp; The separation of the action definition from the action
+command.&nbsp; The separation of the command from the action
 implementation allows multiple plug-ins to define actions that implement the
-same semantic action.&nbsp; The action definition is what gets associated with
-accelerator key combinations.</p>
+same semantic command.&nbsp; The command is what gets associated with a
+particular key binding.</p>
 
 
-<p>The workbench defines many common action definitions in its <b>plugin.xml</b>
+<p>The workbench defines many common commands in its <b>plugin.xml</b>
 file, and plug-ins are encouraged to associate their own actions with these
-definitions where it makes sense.&nbsp; In this way, semantically similar
+commands where it makes sense.&nbsp; In this way, semantically similar
 actions implemented in different plug-ins may share the same key binding.</p>
 
 
-<h4>Defining an action definition</h4>
+<h4>Defining a command</h4>
 
 
-<p>Action definitions are defined using the <b><a href="../reference/extension-points/org_eclipse_ui_actionDefinitions.html">org.eclipse.ui.actionDefinitions</a></b>
+<p>Commands are defined using the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a></b>
 extension point.&nbsp; The following comes from the workbench markup:</p>
 
 
 <pre><font color="#4444CC">&lt;extension
-         point=&quot;org.eclipse.ui.actionDefinitions&quot;&gt;
-      &lt;actionDefinition
+         point=&quot;org.eclipse.ui.commands&quot;&gt;
+      ...
+      &lt;command
+	    category=&quot;org.eclipse.ui.category.file&quot;
+            name=&quot;%command.close.name&quot;
+            description=&quot;%command.close.description&quot;
             id=&quot;org.eclipse.ui.file.close&quot;&gt;
-      &lt;/actionDefinition&gt;
-      &lt;actionDefinition
+      &lt;/command&gt;
+      &lt;command
+	    category=&quot;org.eclipse.ui.category.file&quot;
+            name=&quot;%command.closeAll.name&quot;
+            description=&quot;%command.closeAll.description&quot;
             id=&quot;org.eclipse.ui.file.closeAll&quot;&gt;
-      &lt;/actionDefinition&gt;
-      &lt;actionDefinition
+      &lt;/command&gt;
+      &lt;command
+	    category=&quot;org.eclipse.ui.category.file&quot;
+            name=&quot;%command.save.name&quot;
+            icon=&quot;icons/full/ctool16/save_edit.gif&quot;
+            description=&quot;%command.save.description&quot;
             id=&quot;org.eclipse.ui.file.save&quot;&gt;
-      &lt;/actionDefinition&gt;
-      ...</font></pre>
+      &lt;/command&gt;
+</font>      ...     </pre>
 
 
-<p>The definition itself is simple.&nbsp; It merely specifies an <b>id</b> for a
-semantic action.&nbsp; An action definition only becomes concrete when a plug-in
-associates its action with the definition.</p>
+<p>The command definition specifies a <b>name</b>, <b>description</b>, and <b>id</b> for
+the action.&nbsp;&nbsp; It also specifies a category for the command, which is
+used to group commands in the preferences dialog.&nbsp; The categories are also
+defined in the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a>
+</b>
+extension point:</p>
+<pre><font color="#4444CC">
+      ...
+      <font size="1">&lt;category
+            name=&quot;%category.file.name&quot;
+            description=&quot;%category.file.description&quot;
+            id=&quot;org.eclipse.ui.category.file&quot;&gt;
+      &lt;/category&gt;
+      ...
+</font></pre></font><p>Note that there is no implementation specified for a
+command.&nbsp; A command only becomes concrete when a plug-in
+associates its action with the command id.</p>
 
 
-<h4>Associating an action with an action definition</h4>
+<h4>Associating an action with a command</h4>
 
 
-<p>Actions can be associated with an action definition in code or in the <b>plugin.xml
-</b>for action sets..&nbsp;
+<p>Actions can be associated with a command in code or in the <b>plugin.xml
+</b>for action sets.&nbsp;
 Your choice depends on where the action is defined.</p>
 
 
@@ -80,8 +105,13 @@ uses this technique to initialize its actions.&nbsp;&nbsp; </p>
 	...</font></pre>
 
 
-<p>In this way, the implementation action (<b>SaveAction</b>) is associated with
-the action definition <b>saveActionDefId</b>.&nbsp; What is <b>saveActionDefId</b>?&nbsp;
+<p>(Note:&nbsp; The method name <b>setActionDefinitionID </b>could more
+appropriately be named <b>setCommandID</b>.&nbsp; The method name reflects the
+original implementation of key bindings and uses outdated terminology.)</p>
+
+
+<p>By invoking <b>setActionDefinitionID</b>, the implementation action (<b>SaveAction</b>) is associated with
+the command id <b>saveActionDefId</b>.&nbsp; What is <b>saveActionDefId</b>?&nbsp;
 A quick look at the static field definitions in <b>WorkbenchActionBuilder</b>
 shows the following:</p>
 
@@ -89,15 +119,16 @@ shows the following:</p>
 <pre><font color="#4444CC">private static final String saveActionDefId = &quot;org.eclipse.ui.file.save&quot;;</font></pre>
 
 
-<p>It is good practice to define constants for your action definitions so that
+<p>This constant defines the string ID that was used in the command definition
+markup.&nbsp; It is good practice to define constants for your action definitions so that
 they are easily referenced in code.&nbsp; </p>
 
 
 <p> If you define an
 action in an action set, then you typically do not need to
-instantiate it yourself.&nbsp; The workbench will do it for you when the user
+instantiate an action yourself.&nbsp; The workbench will do it for you when the user
 invokes your action from a menu or the keyboard.&nbsp; In this case, you can
-associate your action with an action definition in the XML markup.&nbsp; The
+associate your action with a command ID in your&nbsp; XML markup.&nbsp; The
 following shows a hypothetical markup for an action set:</p>
 
 
@@ -116,12 +147,11 @@ following shows a hypothetical markup for an action set:</p>
 		   ...
 	   &lt;/actionSet&gt;
    &lt;/extension&gt;</pre>
-</font><p>The <b>definitionID</b> attribute is used to declare an action
-definition id for the action.</p>
+</font><p>The <b>definitionID</b> attribute is used to declare a command ID for the action.</p>
 
 
-<p>Using either technique, associating your action with an action definition
-causes any key bindings that get defined for the action definition <b>org.eclipse.ui.file.save
+<p>Using either technique, associating your action with a command ID causes any key bindings that get defined for the
+command <b>org.eclipse.ui.file.save
 </b>to invoke your action when appropriate.&nbsp; </p>
 
 

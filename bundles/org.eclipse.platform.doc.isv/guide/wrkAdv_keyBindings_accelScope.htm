@@ -5,64 +5,60 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Accelerator scopes
+Scopes
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<h3>Accelerator scopes</h3>
+<h3>Scopes</h3>
 
 
-<p>An <b>accelerator scope</b> is used to define the appropriate context for
-accelerator keys.&nbsp; The workbench defines two accelerator scopes:</p>
+<p>A <b> scope</b> is used to define the appropriate context for a key binding.&nbsp; The workbench defines two
+key binding scopes:</p>
 
 
 <ul>
-  <li><b>Global scope</b> means an accelerator is appropriate throughout the
+  <li><b>Global scope</b> means a key binding is appropriate throughout the
     workbench UI.</li>
-  <li><b>Text editor </b>scope means the accelerator is only appropriate while a
+  <li><b>Text editor </b>scope means the key binding is only appropriate while a
     text editor is active.</li>
 </ul>
-<p>The scope dictates when an accelerator set (in the active accelerator
-configuration) is considered active.&nbsp; The scope is declared in the
-accelerator set markup:</p>
+<p>The scope dictates when a key binding (in the active key configuration) is considered active.&nbsp; The scope is declared in the
+key binding markup:</p>
 
 
-<pre><font color="#4444CC">&lt;extension
-      point=&quot;org.eclipse.ui.acceleratorSets&quot;&gt;
-   &lt;acceleratorSet
-<b>         scopeId=&quot;org.eclipse.ui.globalScope&quot;
-</b>         configurationId=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
-      &lt;accelerator
-            key=&quot;Ctrl+F4||Ctrl+X Ctrl+K&quot;
-            id=&quot;org.eclipse.ui.file.close&quot;&gt;
-      &lt;/accelerator&gt;
-      &lt;accelerator
-            key=&quot;Ctrl+Shift+F4||Ctrl+X Ctrl+C&quot;
-            id=&quot;org.eclipse.ui.file.closeAll&quot;&gt;
-      &lt;/accelerator&gt;
-      &lt;accelerator
-            key=&quot;Ctrl+X Ctrl+S&quot;
-            id=&quot;org.eclipse.ui.file.save&quot;&gt;
-      &lt;/accelerator&gt;
-      ...</font></pre>
+<pre><font color="#4444CC">...
+&lt;keyBinding
+       string=&quot;Ctrl+S&quot;
+       <b>scope=&quot;org.eclipse.ui.globalScope&quot;
+</b>       command=&quot;org.eclipse.ui.file.save&quot;
+       configuration=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;
+&lt;/keyBinding&gt;
+...
+&lt;keyBinding
+       string=&quot;Ctrl+X Ctrl+S&quot;
+       <b>scope=&quot;org.eclipse.ui.globalScope&quot;
+</b>       command=&quot;org.eclipse.ui.file.save&quot;
+       configuration=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
+&lt;/keyBinding&gt;
+</font></pre>
 
 
 <p>How is the current scope determined?&nbsp; By default, the workbench operates
 in a global scope.&nbsp; When a text editor becomes active, it is responsible
 for resetting the scope to the text editor scope.&nbsp; This is all handled by
 the workbench and text editor code.&nbsp; Most plug-ins need only determine the
-appropriate scope for their accelerator sets when defining them.&nbsp;&nbsp;</p>
+appropriate scope for their key bindings when defining them.&nbsp;&nbsp;</p>
 
 
-<h4>Defining new accelerator scopes </h4>
+<h4>Defining new scopes </h4>
 
 
-<p>When a plug-in defines an accelerator set, it usually assigns it to an
-existing accelerator scope.&nbsp;&nbsp; However, if your plug-in defines a new
+<p>When a plug-in defines a key binding, it usually assigns it to an
+existing scope.&nbsp;&nbsp; However, if your plug-in defines a new
 style of editor, it's possible that you'll also want to introduce a new scope
-for accelerator keys.&nbsp; For example, a multi-page editor may have different
+for key bindings.&nbsp; For example, a multi-page editor may have different
 scopes for each page in the editor.&nbsp;&nbsp;</p>
 
 
@@ -73,25 +69,26 @@ beyond the scope (pun intended!) of this documentation.&nbsp; Refer to <a href="
 and its implementors for more detail.&nbsp;&nbsp;</p>
 
 
-<p>Plug-ins define accelerator scopes using the <b><a href="../reference/extension-points/org_eclipse_ui_acceleratorConfigurations.html">org.eclipse.ui.acceleratorScopes</a></b>
-extension point.&nbsp; The workbench markup for the global and text editor accelerator configurations
-is shown below:</p>
+<p>Plug-ins define their scopes inside (where else?) the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a></b>
+extension point.&nbsp; The workbench markup for the global and text editor
+scopes is located at the bottom of the extension definition:</p>
 
 
 <pre><font color="#4444CC">&lt;extension
-    point=&quot;org.eclipse.ui.acceleratorScopes&quot;&gt;
-      &lt;acceleratorScope
-            name=&quot;%GlobalAcceleratorScope.name&quot;
-            description=&quot;%GlobalAcceleratorScope.description&quot;
-            id=&quot;org.eclipse.ui.globalScope&quot;&gt;
-      &lt;/acceleratorScope&gt;
-      &lt;acceleratorScope
-            name=&quot;%TextEditorAcceleratorScope.name&quot;
-            parentScope=&quot;org.eclipse.ui.globalScope&quot;
-            description=&quot;%TextEditorAcceleratorScope.description&quot;
-            id=&quot;org.eclipse.ui.textEditorScope&quot;&gt;
-      &lt;/acceleratorScope&gt;
-&lt;/extension&gt;</font></pre>
+         point=&quot;org.eclipse.ui.commands&quot;&gt;
+      ...
+      &lt;scope
+            name=&quot;%scope.global.name&quot;
+            description=&quot;%scope.global.description&quot;
+            <b>id=&quot;org.eclipse.ui.globalScope&quot;</b>&gt;
+      &lt;/scope&gt;
+      &lt;scope
+            name=&quot;%scope.text.name&quot;
+            parent=&quot;org.eclipse.ui.globalScope&quot;
+            description=&quot;%scope.text.description&quot;
+            <b>id=&quot;org.eclipse.ui.textEditorScope&quot;</b>&gt;
+      &lt;/scope&gt;
+   &lt;/extension&gt;</font></pre>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
