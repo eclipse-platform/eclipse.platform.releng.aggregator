@@ -1,0 +1,54 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Build path considerations</title>
+</head>
+
+<BODY BGCOLOR="#ffffff">
+
+<h3>Build Path Computation</h3>
+
+<p>By default, PDE updates the build path of a plug-in project every time you 
+change the list of dependencies in the manifest editor.&nbsp; If you turn off 
+that feature on the Plug-in Development-&gt;Java Build Path Control preference 
+page, you will have to be responsible for updating the build path every time you 
+make a change to the list of dependencies.</p>
+
+<p>You are not required to use PDE's manifest editor to take advantage of PDE's 
+build path computation feature.&nbsp; You can always use the 'Update Classpath...' 
+pop-up menu item available on all plugin.xml/fragment.xml files and Java plug-in 
+projects to explicitly update the build path of your plug-in.&nbsp; This will 
+cause a wizard to open:</p>
+<p align="center">
+<img border="0" src="images/classpath-update.gif" alt="&quot;Update class path&quot; wizard" width="438" height="556"></p>
+<p align="left">The checkbox list will contain all the plug-ins and fragments in 
+the workspace. Select the plug-ins/fragments whose build path you wish to update 
+and press 'Finish'.</p>
+<p> Note that when computing the build path, PDE recreates it from scratch.
+That means that you will lose any entries you have added manually to the build
+path.&nbsp; The build path is updated from scratch because PDE builds it
+recursively.&nbsp; Here's why:</p>
+<p>If a Java class is referenced by a plug-in at run time, its libraries
+will be searched first for the class, then the libraries of its required plug-ins, then the
+libraries of their required plug-ins, and so on. In order to recreate a similar
+lookup environment during design time, PDE updates the build path recursively.
+It's possible for several different plug-ins to depend on the same library. If you delete one of
+these plug-ins from your dependency list, it is not safe to remove libraries all
+the way up the chain because some of the plug-ins you still have on the list may
+be needing them. The only way to always maintain a valid build path is to create it
+from scratch.</p>
+<p>In order to provide for better sharing of projects on authoring servers, PDE
+adds all external libraries to the build path relative to the run-time platform location
+represented by 1 or more Java classpath variables whose suffix is <b>ECLIPSE_HOME</b>.&nbsp; This 
+way, you can have your code on the server and it will work regardless of the 
+location of your platform install. These variables are set and managed by PDE and you are not
+supposed to modify their values.</p>
+
+<p CLASS="BodyText"><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and
+others 2000, 2002" width="324" height="14"></a></p>
+
+</body>
+
+</html>
