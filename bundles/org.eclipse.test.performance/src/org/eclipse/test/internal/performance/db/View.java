@@ -10,57 +10,40 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.Date;
-
-import org.eclipse.test.internal.performance.InternalDimensions;
+import org.eclipse.test.internal.performance.data.Dim;
 
 public class View {
 
-    public static void main(String[] args) throws Exception {
-        
-        Connection conn= DB.getConnection();
-        
-        PreparedStatement query1= conn.prepareStatement(
-                "select SAMPLE.STARTTIME, SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG " + //$NON-NLS-1$
-            		"where " + //$NON-NLS-1$
-                 "SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and CONFIG.PLATFORM = ? and " + //$NON-NLS-1$
-          		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
-          		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " + //$NON-NLS-1$
-            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
-            		"SCALAR.DIM_ID = ? " + //$NON-NLS-1$
-            		"order by SAMPLE.STARTTIME"	//$NON-NLS-1$
-        			);
-       
-        String name= System.getProperty("os.name", "?"); //$NON-NLS-1$ //$NON-NLS-2$
-        String version= System.getProperty("os.version", "?"); //$NON-NLS-1$ //$NON-NLS-2$
-        String arch= System.getProperty("os.arch", "?"); //$NON-NLS-1$ //$NON-NLS-2$
-        String conf= name + '/' + version + '/' + arch;
+    public static void main(String[] args) {
 
-        
-        query1.setString(1, "localhost"); //$NON-NLS-1$
-        query1.setString(2, conf);
-        query1.setString(3, "org.eclipse.jdt.ui.tests.performance.views.StartupTest#testStartup()"); //$NON-NLS-1$
-        query1.setInt(4, InternalDimensions.ELAPSED_PROCESS.getId());
+        Scenario[] scenarios= DB.queryScenarios("%", "%", "%"); // get all Scenarios //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-        
-        
-        try {
-	        ResultSet rs= query1.executeQuery();
+        for (int s= 0; s < scenarios.length; s++) {
+            Scenario t= scenarios[s];
+            String scenarioName= t.getScenarioName();
+            System.out.println("Scenario: " + scenarioName); //$NON-NLS-1$
             
-	        for (int i= 0; rs.next(); i++) {
-	            BigDecimal bigDecimal= rs.getBigDecimal(1);
-	            Date d= new Date(bigDecimal.longValue());
-	    
-	            System.out.println(i + ": " + d + " " + rs.getString(2)); //$NON-NLS-1$ //$NON-NLS-2$
-	        }
-	        
-	        rs.close();
-        } finally {
-            query1.close();
+            Dim[] dimensions= t.getDimensions();
+            if (dimensions.length > 0) {
+	            TimeSeries ts= t.getTimeSeries(dimensions[0]);
+	           
+	            System.out.print("Builds:"); //$NON-NLS-1$
+	            for (int j= 0; j < ts.getLength(); j++)
+	                System.out.print('\t' + ts.getLabel(j));
+	            System.out.println();
+	                        
+	            for (int i= 0; i < dimensions.length; i++) {
+	                Dim dim= dimensions[i];
+	                System.out.print(dim.getName() + ": "); //$NON-NLS-1$
+	                
+	                ts= t.getTimeSeries(dim);
+	                int n= ts.getLength();
+	                for (int j= 0; j < n; j++)
+	                    System.out.print('\t' + dim.getDisplayValue(ts.getValue(j)));
+	                System.out.println();
+	            }
+            }
+            System.out.println();
         }
-    }
+     }
 }
