@@ -31,6 +31,7 @@ following entries describe the area that changed and provide instructions for mi
   <li><a href="#Workbench marker help registry"> Workbench marker help registry</a></li>
   <li><a href="#Text editor document providers"> Text editor document providers</a></li>
   <li><a href="#Text editors">Text editors</a></li>
+  <li><a href="#Headless annotation support">Headless annotation support</a></li>
   <li><a href="#Console view">Console view</a></li>
   <li><a href="#Java breakpoint listeners">Java breakpoint listeners</a></li>
   <li><a href="#Clipboard access in UI thread"> Clipboard access in UI thread</a></li>
@@ -54,6 +55,10 @@ following entries describe the area that changed and provide instructions for mi
   <li><a href="#Plug-in libraries supplied by fragments"> Plug-in libraries supplied by fragments</a></li>
   <li><a href="#Changes to build scripts"> Changes to build scripts</a></li>
   <li><a href="#Changes to PDE build Ant task"> Changes to PDE build Ant task</a></li>
+  <li><a href="#Changes to eclipse.buildScript Ant task">Changes to
+    eclipse.build Ant task</a></li>
+  <li><a href="#Changes to eclipse.fetch Ant task">Changes to eclipse.fetch Ant
+    task</a></li>
   <li><a href="#Replacement of install.ini">Replacement of install.ini</a></li>
 </ol>
 <hr>
@@ -552,8 +557,8 @@ implements the getOperationRunner method to always returns null. This means that
 subclasses of StorageDocumentProvider should
     not be affected by this change.</p>
 <p>The StorageDocumentProvider subclass org.eclipse.ui.editors.text.FileDocumentProvider
-implements the getOperationRunner method which executes the given DocumentProviderOperations
-    inside a WorkspaceModifyingOperation. Other changes to FileDocumentProvider
+implements the getOperationRunner method that returns an IRunnableContext for executing the given DocumentProviderOperations
+    inside a WorkspaceModifyOperation. Other changes to FileDocumentProvider
 are:</p>
 <ul>
   <li>resetDocument(Object) has been replaced by
@@ -567,13 +572,13 @@ are:</p>
   <li>The method IEditorPart.gotoMarker(IMarker marker) was removed from the
     IEditorPart interface because it was resource-specific. The default
     implementation provided by AbstractTextEditor has been removed from
-    AbstractTextEditor and has been moved to ExtendedTextEditor. Direct
+    AbstractTextEditor and has been moved to AbstractDecoratedTextEditor. Direct
     subclasses of AbstractTextEditor or StatusTextEditor that want to provide
     that functionality should follow the migration instructions for
     IEditorPart [ref Editor goto marker].</li>
-  <li>AbstractTextEditor no longer differentiates between between implicit and
+  <li>AbstractTextEditor no longer differentiates between implicit and
     explicit document providers as the concrete implementation was resource
-    specific. This functionality has been moved to ExtendedTextEditor. Direct
+    specific. This functionality has been moved to AbstractDecoratedTextEditor. Direct
     subclasses of AbstractTextEditor or StatusTextEditor must perform the
     following steps:
     <ul>
@@ -607,7 +612,7 @@ are:</p>
   <li>AbstractTextEditor.createActions no longer registers any actions under
     ITextEditorActionConstants.ADD_TASK and ITextEditorActionConstant.BOOKMARK
     as those actions are IDE-specific. The registration of these actions has
-    been moved to ExtendedTextEditor. Direct subclasses of AbstractTextEditor or
+    been moved to AbstractDecoratedTextEditor. Direct subclasses of AbstractTextEditor or
     StatusTextEditor should override the createActions method and add the
     following lines (accordingly adapted to their circumstances):</li>
   <li>
@@ -624,23 +629,40 @@ are:</p>
 <p>The AbstractTextEditor subclass org.eclipse.ui.texteditor.StatusTextEditor provides the predicate method isErrorStatus(IStatus).
     Subclasses may override in order to decide whether a given status must
     considered an error or not.</p>
-<p>Changes to org.eclipse.ui.editors.text.ExtendedTextEditor:</p>
+<p>Changes to org.eclipse.ui.editors.text.AbstractDecoratedTextEditor:</p>
 <ul>
   <li>The IEditorPart method gotoMarker(IMarker marker) has been deprecated to
     allow a future change of its visibility. Clients of this method must follow
     the migration instructions in the deprecation message.</li>
-  <li>ExtendedTextEditor returns an adapter for IGotoMarker.
-  <li>ExtendedTextEditor implements the concept of implicit/explicit document
+  <li>AbstractDecoratedTextEditor returns an adapter for IGotoMarker.
+  <li>AbstractDecoratedTextEditor implements the concept of implicit/explicit document
     providers previously provided by AbstractTextEditor, as discussed above.
 </ul>
-<h3> <a name="Console view"></a>13. Console view</h3>
+<h3><a name="Headless annotation support"></a>13. Headless annotation support</h3>
+<p>As part of the introduction of headless annotation support, the following changes to Annotation were made:</p>
+<ul>
+  <li>Removed static Annotation.drawImage methods, use org.eclipse.jface.text.source.ImageUtilities instead.</li>
+  <li>Removed setLayer, getLayer, and paint methods from Annotation, annotations which want to draw
+      themselves should implement IAnnotationPresentation.</li>
+  <li>MarkerAnnotation now directly implements the methods removed from Annotation (setLayer, getLayer, paint).</li>
+  <li>The following classes have been moved from the plug-in org.eclipse.jface.text to the plug-in 
+      org.eclipse.text, the package names remain the same and org.eclipse.jface.text rexports the classes from org.eclipse.jface.text,
+      such that this change is transparent to clients:</li>
+</ul>
+<pre>        org.eclipse.jface.text.source.Annotation 
+        org.eclipse.jface.text.source.AnnotationModel 
+        org.eclipse.jface.text.source.AnnotationModelEvent 
+        org.eclipse.jface.text.source.IAnnotationModel 
+        org.eclipse.jface.text.source.IAnnotationModelListener 
+        org.eclipse.jface.text.source.IAnnotationModelListenerExtension</pre>
+<h3> <a name="Console view"></a>14. Console view</h3>
 <p>Eclipse 3.0 has new generic console support. The generic console is available via the Window
 &gt; Show View &gt; Basic &gt; Console,
 and is used by the Eclipse debug and Ant integration.</p>
 <p>The view id for the console has changed from org.eclipse.debug.ui.ConsoleView
 to org.eclipse.ui.console.ConsoleView. 2.1 plug-ins that programmatically open
 the console will be unsuccessful because that the old view no longer exists.</p>
-<h3><a name="Java breakpoint listeners"></a>14. Java breakpoint listeners</h3>
+<h3><a name="Java breakpoint listeners"></a>15. Java breakpoint listeners</h3>
 <p>In 3.0, the return types for the methods org.eclipse.jdt.debug.core.IJavaBreakpointListener.breakpointHit(IJavaBreakpoint, IJavaThread) and
 installingBreakpoing(IJavaTarget, IJavaBreakpoint, IJavaType) changed from
 boolean to int to allow listeners to vote &quot;don't care&quot;. In releases
@@ -668,7 +690,7 @@ itself, save the one that reported the problem (<a href="https://bugs.eclipse.or
 code that implements the IJavaBreakpointListener interface. This code needs to
 be modified to return an appropriate int value before it will compile or run in
 3.0.</p>
-<h3><a name="Clipboard access in UI thread"></a>15. Clipboard access in UI thread</h3>
+<h3><a name="Clipboard access in UI thread"></a>16. Clipboard access in UI thread</h3>
 <p>Prior to 3.0, the methods on the SWT class org.eclipse.swt.dnd.Clipboard were tacitly permitted
 to run in threads other than the UI thread. This oversight resulted in failures
 on GTK where the operating system requires that all clipboard interactions be
@@ -682,7 +704,7 @@ components such as the text editor, which insulate many clients from this
 breaking change. Existing code that does make direct use of Clipboard should
 ensure that the API methods are called on the correct thread, using
 Display.asyncExec or syncExec as required to shift accesses into the UI thread.</p>
-<h3><a name="Key down events"></a>16. Key down events</h3>
+<h3><a name="Key down events"></a>17. Key down events</h3>
 <p>In 3.0, SWT reports key down events before the work is done in the OS. This
 is much earlier than it was prior to 3.0. This change was made to support key
 bindings in Eclipse which necessitates intercepting key events before any widget
@@ -694,7 +716,7 @@ have prior to 3.0). The recommended way to get the full text from the widget
 including the current key is to handle the higher-level SWT.Modify or SWT.Verify
 events rather than the low-level SWT.KeyDown event; code that does it this way
 is unaffected by this change.</p>
-<h3><a name="Tab traversal of custom controls"></a>17. Tab traversal of custom controls</h3>
+<h3><a name="Tab traversal of custom controls"></a>18. Tab traversal of custom controls</h3>
 <p>Prior to 3.0, when the focus was in the SWT class org.eclipse.swt.widgets.Canvas or one of its subclasses
 (including custom widgets), typing Ctrl+Tab, Shift+Tab, Ctrl+PgUp, or Ctrl+PgDn
 would automatically trigger traversal to the next/previous widget without
@@ -705,7 +727,7 @@ Eclipse key bindings in 3.0, the default behavior was changed so that Canvas now
 sees Ctrl+Tab, Shift+Tab, Ctrl+PgUp, and Ctrl+PgDn key events instead of
 traversing. If you use a raw Canvas or define a subclass of Canvas, ensure that
 that you register a traverse listener.</p>
-<h3><a name="Selection event order in SWT table and tree widgets"></a>18. Selection event order in SWT table and tree widgets</h3>
+<h3><a name="Selection event order in SWT table and tree widgets"></a>19. Selection event order in SWT table and tree widgets</h3>
 <p>Mouse selections of items in the SWT classes org.eclipse.swt.widgets.Table and Tree generate the event
 sequence MouseDown-Selection-MouseUp uniformly in all operating environments.
 Similarly, keyboard selections generate the event sequence
@@ -717,14 +739,14 @@ been changed to match the others. Existing code that was functioning correctly
 on {Windows, GTK} and on {Motif, Photon} is unlikely to be affected. But it is
 wise to check your code to ensure that it does not rely on an invalid event
 order.</p>
-<h3><a name="New severity level in status objects"></a>19. New severity level in status objects</h3>
+<h3><a name="New severity level in status objects"></a>20. New severity level in status objects</h3>
 <p><code>org.eclipse.core.runtime.IStatus</code> has a new severity constant, <code>IStatus.CANCEL</code>,
 that can be used to indicate cancelation. Callers of <code>IStatus.getSeverity()</code>
 that rely on the set of possible severities being limited to <code>IStatus.OK</code>,
 <code>INFO</code>, <code>WARNING</code>, and <code>ERROR</code> are affected by this addition. Callers of
 <code>getSeverity</code> should update 
 their code to include the new severity.</p>
-<h3><a name="Build-related resource change notifications"></a>20. Build-related resource change notifications</h3>
+<h3><a name="Build-related resource change notifications"></a>21. Build-related resource change notifications</h3>
 <p>In Eclipse 3.0, workspace auto-build now occurs in a background thread. This
 required an API contract change to <code>org.eclipse.core.resources.IResourceChangeEvent</code>. The contract
 of <code>IResourceChangeEvent</code> previously guaranteed the following ordering of
@@ -800,7 +822,7 @@ so it can never be sure about when resource change listeners will be called. The
 suggested fix for this breakage is to use <code>POST_CHANGE</code> instead of build
 listeners if it is necessary to have notification occur before the operation
 completes.</p>
-<h3><a name="Intermediate notifications during workspace operations"></a>21. Intermediate notifications during workspace operations</h3>
+<h3><a name="Intermediate notifications during workspace operations"></a>22. Intermediate notifications during workspace operations</h3>
 <p>It will no longer be guaranteed that all resource changes that occur during
 the dynamic scope of an <code>IWorkspaceRunnable</code> will be batched in a
 single notification. This mechanism can still be used for batching changes to
@@ -818,7 +840,7 @@ project that is still in the process of being checked out. The new method <code>
 ISchedulingRule, int, IProgressMonitor)</code> has an optional flag, <code>AVOID_UPDATE</code>,
 that operations can use as a hint to the platform to specify whether periodic
 updates are desired.</p>
-<h3><a name="URL stream handler extensions"></a>22. URL stream handler extensions</h3>
+<h3><a name="URL stream handler extensions"></a>23. URL stream handler extensions</h3>
 <p><strong>What is affected:</strong> Plug-ins that contribute extensions to the <code>org.eclipse.core.runtime.urlHandlers</code>
 extension point.</p>
 <p><strong>Description:</strong> The contract for the <code>org.eclipse.core.runtime.urlHandlers</code>
@@ -840,7 +862,7 @@ now do so by registering their handler as a service. For example,</p>
     String serviceClass = URLStreamHandlerService.class.getName();
     context.registerService(serviceClass, new MyHandler(), properties);
 </pre>
-<h3><a name="Class load order"></a>23. Class load order</h3>
+<h3><a name="Class load order"></a>24. Class load order</h3>
 <p><b>What is affected:</b> Plug-ins which supply packages provided which are
 also supplied by other plug-ins. A very limited number of plug-ins are affected
 by this change and some of those affected will actually benefit (see below).</p>
@@ -870,7 +892,7 @@ see the same copies.</p>
 <p><b>Action required:</b> The action required depends on the particulars of the
 usecase. Affected developers need to review their classpath and resolve any
 conflicts which may be happening.</p>
-<h3><a name="Class loader protection domain not set"></a>24. Class loader protection domain not set</h3>
+<h3><a name="Class loader protection domain not set"></a>25. Class loader protection domain not set</h3>
 <p><b>What is affected:</b> Plug-ins that expect the protection domain of their
 class loader to be set at all times.</p>
 <p><b>Description:</b> In Eclipse 2.1 plug-in class loaders were
@@ -879,7 +901,7 @@ java.security.SecureClassloaders and, as such, always had a protection domain se
 domain if Java security is turned on (not the normal case).</p>
 <p><b>Action required:</b> The action required will depend on the scenario in
 which the plug-in is using the protection domain.</p>
-<h3><a name="PluginModel object casting"></a>25. PluginModel object casting</h3>
+<h3><a name="PluginModel object casting"></a>26. PluginModel object casting</h3>
 <p><b>What is affected:</b> Plug-ins which cast objects of type
 org.eclipse.core.runtime.IPlugin* to org.eclipse.core.runtime.model.Plugin*Model. Even though the relationship between these interfaces and the
 model classes is not specified in the Eclipse 2.1 API, we are explicitly
@@ -897,7 +919,7 @@ to maintain the implementation relationship present in 2.1.</p>
 relationship need to be reworked code according to their usecase. More
 information on this is given in the recommended changes section of this document
 and in the Javadoc for the related classes and methods.</p>
-<h3><a name="ILibrary implementation incomplete"></a>26. ILibrary implementation incomplete</h3>
+<h3><a name="ILibrary implementation incomplete"></a>27. ILibrary implementation incomplete</h3>
 <p><b>What is affected:</b> Plug-ins that use <code>org.eclipse.core.runtime.ILibrary</code>.</p>
 <p><b>Description:</b> The new runtime maintains the classpath entries in a
 different and incompatible form from Eclipse. As a result, the compatibility
@@ -908,7 +930,7 @@ assume default values for everything except the library's path.</p>
 desired header values (e.g., <code>Bundle-Classpath</code>) from the appropriate
 Bundle (see <code>Bundle.getHeaders()</code>) and using the <code>ManifestElement</code>
 helper class to interpret the entries. See the class Javadoc for more details.</p>
-<h3><a name="Invalid assumptions regarding form of URLs"></a>27 Invalid assumptions regarding form of URLs</h3>
+<h3><a name="Invalid assumptions regarding form of URLs"></a>28 Invalid assumptions regarding form of URLs</h3>
 <p><b>What is affected:</b> Plug-ins that make assumptions regarding their
 installation structure, location and the local file system layout.</p>
 <p><b>Description:</b> Methods such as <code>IPluginDescriptor.getInstallURL()</code>
@@ -926,7 +948,7 @@ cases where assumptions made in current plug-ins are invalid.</p>
 which they need access is available via <code>getResource()</code> (and is on the
 classpath) or use the relevant API for accessing the contents of a plug-in
 (e.g., <code>Bundle.getEntry(String)</code>).</p>
-<h3><a name="BootLoader methods moved/deleted"></a>28. BootLoader methods moved/deleted</h3>
+<h3><a name="BootLoader methods moved/deleted"></a>29. BootLoader methods moved/deleted</h3>
 <p><b>What is affected:</b> Non-plug-in code that calls certain methods from the class
 <code>org.eclipse.core.boot.BootLoader</code>.</p>
 <p><b>Description:</b>  The static methods BootLoader.startup(), shutdown() and run() were
@@ -942,7 +964,7 @@ cannot be used from within an Eclipse plug-in). In
 the rare case that it is, the code must be adapted to use the corresponding methods on
 EclipseStarter.</p>
 
-<h3><a name="Plug-in export does not include the plug-in's JARs automatically"></a>29. Plug-in export does not include the
+<h3><a name="Plug-in export does not include the plug-in's JARs automatically"></a>30. Plug-in export does not include the
 plug-in's JARs automatically</h3>
 <p><b>What </b><strong> is affected:</strong> All plug-ins.</p>
 <p><strong>Description:</strong> In Eclipse 2.1, a plug-in's bin.includes line 
@@ -955,7 +977,7 @@ plug-in's JARs automatically</h3>
   build.properties file includes all of the JARs listed in your plugin.xml file.</p>
 
 
-<h3><a name="Re-exporting runtime API"></a>30. Re-exporting runtime API</h3>
+<h3><a name="Re-exporting runtime API"></a>31. Re-exporting runtime API</h3>
 <p><b>What is affected:</b> Plug-ins that expose API that includes elements from
 changed runtime API.</p>
 <p><b>Description:</b> Various plug-ins expose API that includes elements from
@@ -964,7 +986,7 @@ client plug-ins must re-evaluate their use of runtime API in their API.</p>
 <p><b>Action required:</b> This scenario is quite quite rare as very little of
 the Eclipse runtime API is changing. Depending on the scenario, clients may have
 to change their API or continue to rely on the the compatibility layer.</p>
-<h3><a name="Plug-in parsing methods on Platform"></a>31. Plug-in parsing methods on Platform</h3>
+<h3><a name="Plug-in parsing methods on Platform"></a>32. Plug-in parsing methods on Platform</h3>
 <p><b>What is affected:</b> Plug-ins that use <code>org.eclipse.core.runtime.Platform.parsePlugins(...,
 Factory).</code></p>
 <p><b>Description:</b> The method <code>org.eclipse.core.runtime.Platform.parsePlugins(...,
@@ -974,7 +996,7 @@ org.eclipse.core.runtime.compatibility plug-in (which depends on the runtime
 plug-in). As a result, the parsing method has been moved as well.</p>
 <p><b>Action required:</b> Users of this method should use the same method on
 the class <code>org.eclipse.core.runtime.model.PluginRegistryModel</code>.</p>
-<h3><a name="Plug-in libraries supplied by fragments"></a>32. Plug-in libraries supplied by fragments</h3>
+<h3><a name="Plug-in libraries supplied by fragments"></a>33. Plug-in libraries supplied by fragments</h3>
 <p><b>What </b><strong> is affected:</strong> Plug-ins that specify code on their
 classpath but do not supply that code (i.e., the JAR is supplied by a fragment;
 for example, the org.eclipse.swt plug-in).</p>
@@ -989,7 +1011,7 @@ change to supply the appropriate jar in the plug-in itself or hand
 craft/maintain a META-INF/MANIFEST.MF file for their plug-in. Typically this can
 be done using PDE to get the initial manifest and then adding in the appropriate
 Provide-Package header.</p>
-<h3><a name="Changes to build scripts"></a>33. Changes to build scripts</h3>
+<h3><a name="Changes to build scripts"></a>34. Changes to build scripts</h3>
 <p><b>What is affected:</b> Scripts (e.g., Ant build.xml
 files) which define classpaths containing runtime related jars and class
 directories.</p>
@@ -1028,8 +1050,7 @@ obsolete and longer contains any code. The entries can be left on the classpath
 but they serve no purpose and should be removed. Look to remove:
 </p>
 <pre>    ../org.eclipse.core.boot/bin;../org.eclipse.core.boot/boot.jar</pre>
-
-<h3><a name="Changes to PDE build Ant task"></a>34. Changes to PDE build Ant task</h3>
+<h3><a name="Changes to PDE build Ant task"></a>35. Changes to PDE build Ant task</h3>
 <p><b>What is affected:</b> Scripts (e.g., Ant build.xml
 files) using the eclipse.buildScript task.</p>
 <p><b>Description:</b> PDE Build introduced a new property to the eclipse.buildScript task to control the generation of plug-ins build
@@ -1039,7 +1060,35 @@ This was mandated by the introduction of the new OSGi-based runtime.
 then introduce in eclipse.buildScript the property "buildingOSGi" and set it to false.
 For example: <pre>&lt;eclipse.buildScript ... buildingOSGi=&quot;false&quot;/&gt;</pre>
 
-<h3><a name="Replacement of install.ini"></a>35. Replacement of install.ini</h3>
+<h3><a name="Changes to eclipse.buildScript Ant task"></a>36. Changes to
+eclipse.build Ant task</h3>
+<p><b>What is affected:</b> Scripts (e.g., Ant build.xml files) using the
+eclipse.buildScript task.</p>
+<p><b>Description:</b> PDE Build introduced a new property to the
+eclipse.buildScript task to control the generation of plug-ins build scripts.
+This was mandated by the introduction of the new OSGi-based runtime.
+<p><b>Action required:</b> If you want to use Eclipse 3.0 to build a 2.1 based
+product, then introduce in eclipse.buildScript the property &quot;buildingOSGi&quot;
+and set it to false. For example:
+<pre>&lt;eclipse.buildScript ... buildingOSGi=&quot;false&quot;/&gt;</pre>
+<h3><a name="Changes to eclipse.fetch Ant task"></a>37. Changes to eclipse.fetch
+Ant task</h3>
+<p><b>What is affected:</b> Scripts (e.g., Ant build.xml files) using the
+eclipse.buildScript task.</p>
+<p><b>Description:</b> PDE Build changed the behaviour of the eclipse.fetch task
+to ease building eclipse in an automated build style. The elements style now
+only support one entry at a time and the scriptName is always ignored.
+<p><b>Action required:</b> If you had a list of entries in the
+&quot;elements&quot; tag of an eclipse.fetch call, spread them out over several
+call to eclipse.fetch. If you use to set the scriptName, note that now the
+generated fetch script is always called &quot;fetch_{elementId}&quot;. For
+example:
+<pre>&lt;eclipse.fetch elements=&quot;plugin@org.eclipse.core.runtime, feature@org.eclipse.platform&quot; .../&gt;</pre>
+becomes
+<pre>&lt;eclipse.fetch elements=&quot;plugin@org.eclipse.core.runtime&quot; .../&gt;
+&lt;eclipse.fetch elements=&quot;feature@org.eclipse.platform&quot; .../&gt;</pre>
+
+<h3><a name="Replacement of install.ini"></a>38. Replacement of install.ini</h3>
 <p>The install.ini file is no longer included. In its place is the new
 config.ini file in the configuration sub-directory. Products that used the
 install.ini file to specify a primary feature (e.g., to provide branding
