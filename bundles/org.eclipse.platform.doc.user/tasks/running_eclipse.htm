@@ -48,10 +48,19 @@ directory to your workspace parent's directory and then running eclipse.exe.</p>
 
 <h3>Setting a specific location for the workspace with -data</h3>
 
-<p>To use the -data command line argument, simply add <code>-data <var>your_workspace_location</var></code>
+<p>To use the <code>-data</code> command line argument, simply add <code>-data <var>your_workspace_location</var></code>
  (for example, <code>-data c:\users\robert\myworkspace</code>)
 to the <b>Target</b> field in the shortcut properties, or include it explicitly on your
 command line.</p>
+
+<h3>Setting the java VM using -vm</h3>
+
+<p>It is recommended that you explicitly specify which Java VM to
+use when running Eclipse.  This is achieved with the <code>-vm</code> command line
+argument (for example, <code>-vm c:\jre\bin\javaw.exe</code>).  If you don't use 
+<code>-vm</code>, Eclipse will use the first Java VM found on the O/S path.  When you install other products, 
+they may change your path, resulting in a different Java VM being used when you next launch Eclipse.
+</p>
 
 <h2>Advanced Topics in Running Eclipse </h2>
 
@@ -76,68 +85,18 @@ The general form of running the Eclipse executable is:</p>
       <th width="33%"> 
         <b>Command</b></th>
       <th width="65%"><b>Description</b></th>
-      <TD width="2%">&nbsp;</TD>
+      <TD width="2%"><b>Since</b></TD>
     </tr>
     <tr> 
-      <TD vAlign=top width="33%"> 
-        <pre><b>-configuration</b> <var>configurationFileURL</var></pre>
-        </TD>
-      <TD width="65%">The location for the Eclipse Platform configuration file, 
-        expressed as a URL. The configuration file determines 
-        the location of the Eclipse platform, the set of available plug-ins, and 
-        the primary feature. Note that relative URLs are not allowed.  
-        The configuration file is written to this location when the Eclipse platform is 
-        installed or updated.
-        </TD>
+      <TD vAlign=top width="33%">
+<pre><b>-arch</b> <var>architecture</var></pre></TD>
+      <TD width="65%">Defines the processor architecture on which the Eclipse 
+        platform is running. The Eclipse platform ordinarily computes the optimal 
+        setting using the prevailing value of Java <code>os.arch</code> 
+        property. If specified here, this is the value that the Eclipse platform 
+        uses. The value specified here is available to plug-ins as BootLoader.getOSArch(). 
+        Example values: &quot;x86&quot;, &quot;sparc&quot;, &quot;PA-RISC&quot;, &quot;ppc&quot;.</TD>
       <TD width="2%">2.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<PRE><b>-data</b> <var>workspacePath</var></PRE></TD>
-      <TD width="65%">The path of the workspace on which to run the Eclipse platform. 
-        The workspace location is also the default location for projects. Relative 
-        paths are interpreted relative to the directory that Eclipse was started 
-        from.</TD>
-      <TD width="2%">1.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<PRE><b>-dev</b> [<var>classpathEntries</var>]</PRE></TD>
-      <TD width="65%">Puts the platform in development mode. The optional 
-        classpath entries (a comma separated list) are added to the runtime classpath 
-        of each plug-in. For example, when the workspace contains plug-ins being 
-        developed, specifying <code>-dev bin</code> adds a classpath 
-        entry for each plug-in project's directory named <code>bin</code>, 
-        allowing freshly generated class files to be found there. Redundant 
-        or non-existent classpath entries are eliminated.</TD>
-      <TD width="2%">1.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<pre><b>-feature</b> <i>featureId</i></pre></TD>
-      <TD width="65%" height="16">The ID of the primary feature. The primary feature 
-        gives the launched instance of Eclipse its product personality, and determines 
-        the product customization information used.</TD>
-      <TD width="2%" height="16">2.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<pre><b>-plugincustomization</b>
-	  <var>propertiesFile</var></pre></TD>
-      <TD width="65%">The location of a properties file containing default settings 
-        for plug-in preferences. These default settings override default settings 
-        specified in the primary feature. Relative paths are interpreted relative 
-        to the directory that eclipse was started from.</TD>
-      <TD width="2%">2.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<PRE><b>-vm</b> <var>vmPath</var></PRE></TD>
-      <TD width="65%">The location of Java Runtime Environment (JRE) to use to 
-        run the Eclipse platform. If not specified, the JRE is at <code>jre</code>, 
-        sibling of the Eclipse executable. Relative paths are interpreted relative 
-        to the directory that eclipse was started from.</TD>
-      <TD width="2%">1.0</TD>
     </tr>
     <TR> 
       <TD vAlign=top width="33%">
@@ -160,12 +119,44 @@ The general form of running the Eclipse executable is:</p>
       </TD>
       <TD width="2%">*1.0</TD>
     </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<pre><b>-classloaderproperties</b> <var>[file]</var></pre></TD>
+    <TD width="65%">Activates platform class loader enhancements using the class 
+      loader properties file at the given location, if specified. The file argument 
+      can be either a file path or a URL. Note that relative URLs are not allowed. 
+      Click <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-core-home/docs/classloader-properties/classloader_properties.html">here</a> 
+      for more details.</TD>
+    <TD width="2%">2.0.2</TD>
+    </tr>
+    <tr> 
+      <TD vAlign=top width="33%"> 
+        <pre><b>-configuration</b> <var>configurationFileURL</var></pre>
+        </TD>
+      <TD width="65%">The location for the Eclipse Platform configuration file, 
+        expressed as a URL. The configuration file determines 
+        the location of the Eclipse platform, the set of available plug-ins, and 
+        the primary feature. Note that relative URLs are not allowed.  
+        The configuration file is written to this location when the Eclipse platform is 
+        installed or updated.
+        </TD>
+      <TD width="2%">2.0</TD>
+    </tr>
     <TR> 
       <TD vAlign=top width="33%"><PRE><b>-consolelog</b></PRE></TD>
       <TD width="65%">Mirrors the Eclipse platform's error log to the console 
         used to run Eclipse. Handy when combined with <code>-debug</code>.</TD>
       <TD width="2%">1.0</TD>
     </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<PRE><b>-data</b> <var>workspacePath</var></PRE></TD>
+      <TD width="65%">The path of the workspace on which to run the Eclipse platform. 
+        The workspace location is also the default location for projects. Relative 
+        paths are interpreted relative to the directory that Eclipse was started 
+        from.</TD>
+      <TD width="2%">1.0</TD>
+    </tr>
     <TR> 
       <TD vAlign=top width="33%">
 <PRE><b>-debug</b> [<var>optionsFile</var>]</PRE></TD>
@@ -177,6 +168,34 @@ The general form of running the Eclipse executable is:</p>
         paths are allowed as file locations. </TD>
       <TD width="2%">1.0</TD>
     </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<PRE><b>-dev</b> [<var>classpathEntries</var>]</PRE></TD>
+      <TD width="65%">Puts the platform in development mode. The optional 
+        classpath entries (a comma separated list) are added to the runtime classpath 
+        of each plug-in. For example, when the workspace contains plug-ins being 
+        developed, specifying <code>-dev bin</code> adds a classpath 
+        entry for each plug-in project's directory named <code>bin</code>, 
+        allowing freshly generated class files to be found there. Redundant 
+        or non-existent classpath entries are eliminated.</TD>
+      <TD width="2%">1.0</TD>
+    </tr>
+    <TR> 
+      <TD vAlign=top width="33%" height="16"><pre><b>-endsplash</b> <var>params</var></pre></TD>
+      <TD width="65%" height="16">Internal option for taking down the splash screen 
+        when the Eclipse platform is up and running. This option has different 
+        syntax and semantics at various points along the splash screen processing 
+        chain.</TD>
+      <TD width="2%" height="16">2.0</TD>
+    </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<pre><b>-feature</b> <i>featureId</i></pre></TD>
+      <TD width="65%" height="16">The ID of the primary feature. The primary feature 
+        gives the launched instance of Eclipse its product personality, and determines 
+        the product customization information used.</TD>
+      <TD width="2%" height="16">2.0</TD>
+    </tr>
     <TR> 
       <TD vAlign=top width="33%">
 <pre><b>-keyring</b> <var>keyringFilePath</var></pre></TD>
@@ -186,6 +205,51 @@ The general form of running the Eclipse executable is:</p>
         relative to the directory that Eclipse was started from.</TD>
       <TD width="2%">1.0</TD>
     </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<pre><b>-nl</b> <var>locale</var></pre></TD>
+      <TD width="65%">Defines the name of the locale on which the Eclipse platform 
+        is running. The Eclipse platform ordinarily computes the optimal setting 
+        automatically. If specified here, this is the value that the Eclipse platform 
+        uses. The value specified here is available to plug-ins as BootLoader.getNL(). 
+        Example values: &quot;en_US&quot; and &quot;fr_FR_EURO&quot;.</TD>
+      <TD width="2%">2.0</TD>
+    </tr>
+    <tr> 
+      <TD vAlign=top width="33%">
+<pre><b>-nolazyregistrycacheloading</b></pre></TD>
+    <TD width="65%">Deactivates platform plug-in registry cache loading optimization. 
+    By default, extensions' configuration elements will be loaded from the registry cache 
+    (when available) only on demand, reducing memory footprint. This option will force the 
+    registry cache to be fully loaded at startup.</TD>
+    <TD width="2%">2.1</TD>
+    </tr>    
+    <TR> 
+      <TD vAlign=top width="33%">
+<pre><b>-noregistrycache</b></pre></TD>
+      <TD width="65%">Bypasses the reading and writing of an internal plug-in 
+        registry cache file.</TD>
+      <TD width="2%">2.0</TD>
+    </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<PRE><b>-nosplash</b></PRE></TD>
+      <TD width="65%">Runs the platform without putting up the splash screen.</TD>
+      <TD width="2%">1.0</TD>
+    </tr>
+    <tr> 
+      <TD vAlign=top width="33%">
+<PRE><b>-os</b> <var>operatingSystem</var></PRE></TD>
+      <TD width="65%">Defines the operating system on which the Eclipse platform 
+        is running. The Eclipse platform ordinarily computes the optimal setting 
+        using the prevailing value of Java <code>os.name</code> property. 
+        If specified here, this is the value that the Eclipse platform uses. The 
+        value specified here is available to plug-ins as BootLoader.getOS(), and 
+        used to resolve occurrences of the <code>$os$</code> variable in paths 
+        mentioned in the plug-in manifest file. Example values: &quot;win32&quot;, &quot;linux&quot;, 
+        &quot;hpux&quot;, &quot;solaris&quot;, &quot;aix&quot;.</TD>
+      <TD width="2%">1.0</TD>
+    </tr>
     <TR> 
       <TD vAlign=top width="33%">
 <pre><b>-password</b> <var>password</var></pre></TD>
@@ -193,6 +257,24 @@ The general form of running the Eclipse executable is:</p>
         with the <code>-keyring</code> option.</TD>
       <TD width="2%">1.0</TD>
     </TR>
+    <tr> 
+      <TD vAlign=top width="33%">
+<PRE><b>-perspective</b> <var>perspectiveId</var></PRE></TD>
+      <TD width="65%">The perspective to open in the active workbench
+      window on startup.  If this parameter is not specified, the perspective that
+      was active on shutdown will be opened.</TD>
+      <TD width="2%">1.0</TD>
+    </tr>
+    <tr> 
+      <TD vAlign=top width="33%">
+<pre><b>-plugincustomization</b>
+	  <var>propertiesFile</var></pre></TD>
+      <TD width="65%">The location of a properties file containing default settings 
+        for plug-in preferences. These default settings override default settings 
+        specified in the primary feature. Relative paths are interpreted relative 
+        to the directory that eclipse was started from.</TD>
+      <TD width="2%">2.0</TD>
+    </tr>
     <TR> 
       <TD vAlign=top width="33%" height="16"><pre><b>-plugins</b> <var>pluginsFileURL</var></pre></TD>
       <TD width="65%" height="16"><i>(Deprecated; replaced by -configuration; 
@@ -204,6 +286,13 @@ The general form of running the Eclipse executable is:</p>
         Note that relative URLs are not allowed. If specified, this option causes 
         the creation of a suitable temporary configuration.</TD>
       <TD width="2%" height="16">*1.0</TD>
+    </TR>
+    <TR> 
+      <TD vAlign=top width="33%" height="16"><pre><b>-refresh</b> </pre></TD>
+      <TD width="65%" height="16">Option for performing a global refresh of the workspace
+      on startup.  This will reconcile any changes that were made in the file system since
+      the platform was last run.  </TD>
+      <TD width="2%" height="16">1.0</TD>
     </TR>
     <TR> 
       <TD vAlign=top width="33%" height="16"><pre><b>-showlocation</b> </pre></TD>
@@ -220,38 +309,13 @@ The general form of running the Eclipse executable is:</p>
         processing chain.</TD>
       <TD width="2%" height="16">2.0</TD>
     </TR>
-    <TR> 
-      <TD vAlign=top width="33%" height="16"><pre><b>-endsplash</b> <var>params</var></pre></TD>
-      <TD width="65%" height="16">Internal option for taking down the splash screen 
-        when the Eclipse platform is up and running. This option has different 
-        syntax and semantics at various points along the splash screen processing 
-        chain.</TD>
-      <TD width="2%" height="16">2.0</TD>
-    </TR>
     <tr> 
       <TD vAlign=top width="33%">
-<PRE><b>-nosplash</b></PRE></TD>
-      <TD width="65%">Runs the platform without putting up the splash screen.</TD>
-      <TD width="2%">1.0</TD>
-    </tr>
-    <TR> 
-      <TD vAlign=top width="33%">
-<pre><b>-noregistrycache</b></pre></TD>
-      <TD width="65%">Bypasses the reading and writing of an internal plug-in 
-        registry cache file.</TD>
-      <TD width="2%">2.0</TD>
-    </TR>
-    <tr> 
-      <TD vAlign=top width="33%">
-<PRE><b>-os</b> <var>operatingSystem</var></PRE></TD>
-      <TD width="65%">Defines the operating system on which the Eclipse platform 
-        is running. The Eclipse platform ordinarily computes the optimal setting 
-        using the prevailing value of Java <code>os.name</code> property. 
-        If specified here, this is the value that the Eclipse platform uses. The 
-        value specified here is available to plug-ins as BootLoader.getOS(), and 
-        used to resolve occurrences of the <code>$os$</code> variable in paths 
-        mentioned in the plug-in manifest file. Example values: &quot;win32&quot;, &quot;linux&quot;, 
-        &quot;hpux&quot;, &quot;solaris&quot;, &quot;aix&quot;.</TD>
+<PRE><b>-vm</b> <var>vmPath</var></PRE></TD>
+      <TD width="65%">The location of Java Runtime Environment (JRE) to use to 
+        run the Eclipse platform. If not specified, the JRE is at <code>jre</code>, 
+        sibling of the Eclipse executable. Relative paths are interpreted relative 
+        to the directory that eclipse was started from.</TD>
       <TD width="2%">1.0</TD>
     </tr>
     <tr> 
@@ -267,46 +331,6 @@ The general form of running the Eclipse executable is:</p>
         &quot;win32&quot;, &quot;motif&quot;, &quot;gtk&quot;.</TD>
       <TD width="2%">1.0</TD>
     </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<pre><b>-arch</b> <var>architecture</var></pre></TD>
-      <TD width="65%">Defines the processor architecture on which the Eclipse 
-        platform is running. The Eclipse platform ordinarily computes the optimal 
-        setting using the prevailing value of Java <code>os.arch</code> 
-        property. If specified here, this is the value that the Eclipse platform 
-        uses. The value specified here is available to plug-ins as BootLoader.getOSArch(). 
-        Example values: &quot;x86&quot;, &quot;sparc&quot;, &quot;PA-RISC&quot;, &quot;ppc&quot;.</TD>
-      <TD width="2%">2.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<pre><b>-nl</b> <var>locale</var></pre></TD>
-      <TD width="65%">Defines the name of the locale on which the Eclipse platform 
-        is running. The Eclipse platform ordinarily computes the optimal setting 
-        automatically. If specified here, this is the value that the Eclipse platform 
-        uses. The value specified here is available to plug-ins as BootLoader.getNL(). 
-        Example values: &quot;en_US&quot; and &quot;fr_FR_EURO&quot;.</TD>
-      <TD width="2%">2.0</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<pre><b>-classloaderproperties</b> <var>[file]</var></pre></TD>
-    <TD width="65%">Activates platform class loader enhancements using the class 
-      loader properties file at the given location, if specified. The file argument 
-      can be either a file path or a URL. Note that relative URLs are not allowed. 
-      Click <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-core-home/docs/classloader-properties/classloader_properties.html">here</a> 
-      for more details.</TD>
-    <TD width="2%">2.0.2</TD>
-    </tr>
-    <tr> 
-      <TD vAlign=top width="33%">
-<pre><b>-nolazyregistrycacheloading</b></pre></TD>
-    <TD width="65%">Deactivates platform plug-in registry cache loading optimization. 
-    By default, extensions' configuration elements will be loaded from the registry cache 
-    (when available) only on demand, reducing memory footprint. This option will force the 
-    registry cache to be fully loaded at startup.</TD>
-    <TD width="2%">2.1</TD>
-    </tr>    
   </TBODY>
 </TABLE>
 
