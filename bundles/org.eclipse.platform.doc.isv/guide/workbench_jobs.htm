@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Workbench concurrency support</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2>
+Workbench concurrency support</h2>
+<P >
+We've seen that the JFace UI framework provides basic support for showing task progress in a dialog (see 
+<a href="jface_operations.htm">Long running operations</a> for details). In <a href="runtime_jobs.htm">Concurrency infrastructure</a>, 
+we reviewed the platform runtime support for concurrency and long running operations.  Now we will look at how
+the platform UI enhances this infrastructure in the <b><a href="../reference/api/org/eclipse/ui/progress/package-summary.html"> org.eclipse.ui.progress</a></b> 
+package.  This package supplies the UI for showing job progress in the workbench and defines additional support
+for jobs that run in the UI thread.  
+<h3>Progress service</h3>
+<p>
+The workbench progress service (<a href="../reference/api/org/eclipse/ui/progress/IProgressService.html"><b>IProgressService</b></a>)
+is the primary interface to the workbench progress support.  It can be obtained from the workbench and then used to show progress
+for both background operations and operations that run in the UI thread.  Where possible, long running operations should be run in the background using
+<b>busyCursorWhile</b>:
+<pre><font color="#4444CC">
+IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
+progressService.<b>busyCursorWhile</b>(new IRunnableWithProgress(){
+	public void run(IProgressMonitor monitor) {
+		//do non-UI work 
+	}});
+</font></pre>
+This method will initially put up a busy cursor, and replace it with a progress dialog if the operation
+lasts longer than a specified time threshhold.  If an operation must be run in the UI, then the <b>runInUI</b> 
+method may be used:
+<pre><font color="#4444CC">
+progressService.<b>runInUI</b>(
+	progressService(),
+	new IRunnableWithProgress(){
+		public void run(IProgressMonitor monitor) {
+			//do UI work 
+		}},
+	null);
+</font></pre>
+The third parameter can be null, or a scheduling rule for the operation. 
+</p>
+<p>
+<a href="../reference/api/org/eclipse/ui/progress/IWorkbenchSiteProgressService.html"><b>IWorkbenchSiteProgressService</b></a>
+adds API for scheduling jobs that change the appearance of a workbench part while the job is running.  It also
+allows you to supply an icon that should be used as the busy cursor for all jobs in a particular  job family.
+The progress service for a workbench part can be obtained from its site using the following pattern:
+<pre><font color="#4444CC">
+IWorkbenchSiteProgressService siteProgressService = 
+	(IWorkbenchSiteProgressService)view.getSite().getAdapter(IWorkbenchSiteProgressService.class);
+</font></pre>
+</p>
+<h3>Workbench jobs</h3>
+<p>
+Where possible, long running operations should be performed outside of the UI thread.  However, this can't be
+avoided when the long operation's purpose is to update the UI.  <a href="swt_threading.htm">SWT threading issues</a> explains
+how this can be done using the SWT <b><a href="../reference/api/org/eclipse/swt/widgets/Display.html"> Display</a></b>.
+The workbench defines a special job, <a href="../reference/api/org/eclipse/ui/progress/UIJob.html"><b>UIJob</b></a>, whose
+run method runs inside an SWT asyncExec.  Subclasses of <a href="../reference/api/org/eclipse/ui/progress/UIJob.html"><b>UIJob</b></a>
+should implement the method <b>runInUIThread</b> instead of the <b>run</b> method.
+</p>
+<p>
+<a href="../reference/api/org/eclipse/ui/progress/WorkbenchJob.html"><b>WorkbenchJob</b></a> extends
+<a href="../reference/api/org/eclipse/ui/progress/UIJob.html"><b>UIJob</b></a> so that the job can only be scheduled
+or run when the workbench is running.
+</p>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
+
+</BODY>
+</HTML>
