@@ -13,7 +13,7 @@ set arch=x86
 
 REM ****************************************************************
 REM
-REM Delete previous headless Eclipse installation and workspace
+REM Delete previous Eclipse installation and workspace
 REM
 REM ****************************************************************
 
@@ -22,7 +22,7 @@ if EXIST workspace rmdir /s /Q workspace
 
 REM ****************************************************************
 REM
-REM Install Eclipse plugins and startup.jar required to run Ant headless
+REM Install Eclipse and org.eclipse.test plugin
 REM
 REM ****************************************************************
 
