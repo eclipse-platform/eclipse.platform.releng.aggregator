@@ -13,32 +13,37 @@ Syntax highlighting
 <BODY BGCOLOR="#ffffff">
 <H2>Syntax highlighting</H2>
 <p>&lt;in progress&gt;</p>
-<p>Damager/repairer concept of presentation reconciler</p>
-<p>Rule-based damager/repairer for java code</p>
-<ul>
-  <li>create damager/repairers for each content type</li>
-  <li>create rule-based scanner and configure default damagerrepairer</li>
-  <li>see JavaSourceViewerConfiguration.getPresentationReconciler</li>
-</ul>
-<p>Create a presentation reconciler and configure damager/repairers for each
-content type (JavaSourceViewer ConfigurationgetPresentationReconciler)</p>
-<p>How to install it</p>
-<ul>
-  <li>explicitly - call IPresentationREconciler.install/uninstall</li>
-  <li>implicitly - override getPresentationReconciler in
-    JavaSourceViewerConfiguration.</li>
-</ul>
-<b><a href="../reference/api/org/eclipse/jface/text/presentation/package-summary.html">org.eclipse.jface.text.presentation</a></b>
-    defines a text viewer add-on which can control the <b>visual presentation</b>
-    (font, font style, colors) of the text shown in the text viewer.&nbsp; For
-    each change applied to a document, the presentation reconciler determines
+<p>Platform text uses a model of damage, repair, and reconciling&nbsp; to
+implement syntax coloring.&nbsp; For
+    each change applied to a document, a presentation reconciler determines
     which region of the visual presentation should be invalidated and how to
     repair it.&nbsp; Different strategies can be used for different partition
-    content types.
-<p><b><a href="../reference/api/org/eclipse/jface/text/reconciler/package-summary.html">org.eclipse.jface.text.reconciler</a></b>
-    defines a text viewer add-on that supports the <b>synchronization</b> of a
-    document with some external structure that may also be manipulating the
-    text.&nbsp;&nbsp;
+    content types.&nbsp; The package <b><a href="../reference/api/org/eclipse/jface/text/presentation/package-summary.html">org.eclipse.jface.text.presentation</a></b>
+ defines the support classes for syntax coloring.</p>
+<p>The java example provides syntax coloring for javadoc comments, multi-line
+comments, and java keywords.&nbsp; We know that the document has already been
+partitioned into javadoc, multi-line comments, and the rest.&nbsp; Let's look at
+the code to see how the highlighting is achieved.</p>
+<p>There is a damager and repairer established for each content type. Show code
+from JavaSourceViewerConfiguration.getPresentationReconciler</p>
+<p>Much like partitioners, these can be implemented in any way appropriate for
+your editor.&nbsp; A default DamagerRepairer is provided in the framework.&nbsp;
+It uses rule-based scanners for finding tokens inside a region.&nbsp; Note that
+the example need only provide scanners for java code and java partitions and the
+associated colors in order to implement syntax coloring.&nbsp;</p>
+<p>Go over each type, rules, and colors.&nbsp; Default content type is scanned
+as java code.&nbsp; The comments and javadoc are scanned as a partition.&nbsp;
+Look at the scanners briefly to explain how function is achieved.</p>
+<p>The framework handles the details of determining how much of the text must be
+redisplayed as the user manipulates the text.&nbsp; See the classes in <b><a href="../reference/api/org/eclipse/jface/text/reconciler/package-summary.html">org.eclipse.jface.text.reconciler</a></b>
+for implementation detail on the synchronization of a
+    document with external manipulation.&nbsp;</p>
+<p>Much like the other pluggable features, the presentation reconciler can be
+installed via the source configuration or dynamically.&nbsp; You can use
+IPresentationReconciler to install or uninstall dynamically.</p>
+&nbsp;defines a text viewer add-on which can control the <b>visual presentation</b>
+    (font, font style, colors) of the text shown in the text viewer.&nbsp;&nbsp;
+<p>&nbsp;
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 
