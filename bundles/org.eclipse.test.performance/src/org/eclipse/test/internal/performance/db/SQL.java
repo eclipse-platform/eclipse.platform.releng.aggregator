@@ -23,7 +23,7 @@ public class SQL {
     
     private Connection fConnection;
     private PreparedStatement fInsertConfig, fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
-    private PreparedStatement fQueryDatapoints2, fQueryScalars, fQueryVariation, fQueryScenario, fQueryAllScenarios, fQueryBuilds;
+    private PreparedStatement fQueryDatapoints2, fQueryScalars, fQueryVariation, fQueryScenario, fQueryAllScenarios, fQueryVariations;
     //private PreparedStatement fQueryDatapoints;
     //private PreparedStatement[] fQueries= new PreparedStatement[20];
     
@@ -91,11 +91,11 @@ public class SQL {
         fQueryVariation= fConnection.prepareStatement(
         		"select ID from VARIATION where KEYVALPAIRS = ?"); //$NON-NLS-1$
         fQueryAllScenarios= fConnection.prepareStatement(
-        		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE, VARIATION where " +	//$NON-NLS-1$
+        		"select distinct SCENARIO.NAME from SCENARIO, SAMPLE, VARIATION where " +	//$NON-NLS-1$
         		"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
-        fQueryBuilds= fConnection.prepareStatement(
+        fQueryVariations= fConnection.prepareStatement(
         		"select distinct VARIATION.KEYVALPAIRS from VARIATION, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
         		"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
@@ -270,8 +270,8 @@ public class SQL {
 //        return queryStatement.executeQuery();
 //    }
     
-    ResultSet queryDataPoints(String variations, String scenarioName) throws SQLException {
-     	fQueryDatapoints2.setString(1, variations);
+    ResultSet queryDataPoints(Variations variations, String scenarioName) throws SQLException {
+     	fQueryDatapoints2.setString(1, variations.toExactMatchString());
     	fQueryDatapoints2.setString(2, scenarioName);
     	return fQueryDatapoints2.executeQuery();
     }
@@ -281,25 +281,32 @@ public class SQL {
     	return fQueryScalars.executeQuery();
     }
 
-    ResultSet queryScenarios(String variationPattern, String scenarioPattern) throws SQLException {
-        fQueryAllScenarios.setString(1, variationPattern);
+    /*
+     * Returns SCENARIO.NAME
+     */
+    ResultSet queryScenarios(Variations variations, String scenarioPattern) throws SQLException {
+        fQueryAllScenarios.setString(1, variations.toQueryPattern());
         fQueryAllScenarios.setString(2, scenarioPattern);
         return fQueryAllScenarios.executeQuery();
     }
     
-    ResultSet queryBuildNames(String keyPattern, String scenarioPattern) throws SQLException {
-        fQueryBuilds.setString(1, keyPattern);
-        fQueryBuilds.setString(2, scenarioPattern);
-        return fQueryBuilds.executeQuery();
+    /*
+     * Returns VARIATION.KEYVALPAIRS
+     */
+    ResultSet queryVariations(String keyPattern, String scenarioPattern) throws SQLException {
+        fQueryVariations.setString(1, keyPattern);
+        fQueryVariations.setString(2, scenarioPattern);
+        return fQueryVariations.executeQuery();
     }
 
-    public int createVariations(String variation) throws SQLException {
-        fQueryVariation.setString(1, variation);
+    public int createVariations(Variations variations) throws SQLException {
+        String exactMatchString= variations.toExactMatchString();
+        fQueryVariation.setString(1, exactMatchString);
         ResultSet result= fQueryVariation.executeQuery();
         while (result.next())
             return result.getInt(1);
 
-        fInsertVariation.setString(1, variation);
+        fInsertVariation.setString(1, exactMatchString);
         return create(fInsertVariation);
     }
 }

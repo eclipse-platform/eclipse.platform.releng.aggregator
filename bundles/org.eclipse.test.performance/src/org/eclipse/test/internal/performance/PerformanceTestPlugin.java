@@ -10,15 +10,14 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance;
 
-import java.util.Arrays;
 import java.util.Properties;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.test.internal.performance.db.DB;
+import org.eclipse.test.internal.performance.db.Variations;
 import org.osgi.framework.BundleContext;
 
 
@@ -115,13 +114,9 @@ public class PerformanceTestPlugin extends Plugin {
 		if (dbloc != null) {
 		    Properties keys= new Properties();
 		    parsePairs(keys, ECLIPSE_PERF_DBLOC + '=' + dbloc);
-		    dbloc= keys.getProperty(ECLIPSE_PERF_DBLOC);
-		} else {
-		    dbloc= getOldStyleEnvironmentVariables().getProperty(DB_LOCATION);
+		    return keys.getProperty(ECLIPSE_PERF_DBLOC);
 		}
-        //dbloc= "net://localhost";
-		//dbloc= "/Users/weinand/Eclipse/cloudscape2";
-        return dbloc;
+		return getOldStyleEnvironmentVariables().getProperty(DB_LOCATION);
 	}
 
 	public static String getDBName() {
@@ -157,8 +152,8 @@ public class PerformanceTestPlugin extends Plugin {
 	/*
 	 * -Declipse.perf.config=<varname1>=<varval1>;<varname2>=<varval2>;...;<varnameN>=<varvalN>
 	 */
-	public static Properties getConfig() {
-	    Properties keys= new Properties();
+	public static Variations getVariations() {
+	    Variations keys= new Variations();
 		String configKey= System.getProperty(ECLIPSE_PERF_CONFIG);
 		if (configKey != null) {
 		    parsePairs(keys, configKey);
@@ -179,10 +174,10 @@ public class PerformanceTestPlugin extends Plugin {
 	 * -Declipse.perf.assertAgainst=<varname1>=<varval1>;<varname2>=<varval2>;...;<varnameN>=<varvalN>
 	 * Returns null if assertAgainst property isn't defined.
 	 */
-	public static Properties getAssertAgainst() {
-	    Properties keys= getConfig();
+	public static Variations getAssertAgainst() {
+	    Variations keys= getVariations();
 	    if (keys == null)
-	        keys= new Properties();
+	        keys= new Variations();
 		String assertKey= System.getProperty(ECLIPSE_PERF_ASSERTAGAINST);
 		if (assertKey != null) {
 		    parsePairs(keys, assertKey);
@@ -209,43 +204,6 @@ public class PerformanceTestPlugin extends Plugin {
 		}	    
 	}
 	
-	public static void parseVariations(Properties keys, String s) {
-		StringTokenizer st= new StringTokenizer(s, "|"); //$NON-NLS-1$
-		while (st.hasMoreTokens()) {
-			String token= st.nextToken();
-			int i= token.indexOf('=');
-			if (i < 1)
-			    throw new IllegalArgumentException("Key '" + token + "' in the environment variable " + ENV_PERF_CTRL + " is illformed"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			String value= token.substring(i+1);
-			token= token.substring(0,i);
-			//System.out.println(token + ": <" + value + ">");
-			keys.put(token, value);
-		}	    
-	}
-	
-	
-	/*
-	 * TODO: we need to escape '=' and ';' characters in key/values.
-	 */
-    public static String toVariations(Properties keyValues) {
-        Set set= keyValues.keySet();
-        String[] keys= (String[]) set.toArray(new String[set.size()]);
-        Arrays.sort(keys);
-        StringBuffer sb= new StringBuffer();
-        
-        for (int i= 0; i < keys.length; i++) {
-            String key= keys[i];
-            String value= keyValues.getProperty(key);
-            sb.append('|');
-            sb.append(key);
-            sb.append('=');
-            if (value != null)
-                sb.append(value);
-            sb.append('|');
-        }
-	    return sb.toString();
-    }
-
 	// logging
 		
 	public static void logError(String message) {

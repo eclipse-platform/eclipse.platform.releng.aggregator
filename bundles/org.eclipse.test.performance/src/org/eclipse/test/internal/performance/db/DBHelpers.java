@@ -14,9 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-
-import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
 
 
@@ -27,6 +24,16 @@ public class DBHelpers {
     PrintStream fPS;
 
     public static void main(String[] args) throws SQLException {
+               
+        /*
+         * -Declipse.perf.dbloc=/Users/weinand/Eclipse/cloudscape2
+         	-Declipse.perf.config=build=b0001
+         		-Declipse.perf.assertAgainst=build=base
+         */
+        //System.setProperty("eclipse.perf.dbloc", "/Users/weinand/Eclipse/cloudscape2;dbname=;dbuser=;dbpasswd=");
+        System.setProperty("eclipse.perf.dbloc", "testDBs;dbname=testDB;dbuser=testUser;dbpasswd=testPassword");
+        //System.setProperty("eclipse.perf.dbloc", "net://localhost");
+
         DBHelpers db= new DBHelpers();
         
 		String outFile= null;
@@ -44,11 +51,6 @@ public class DBHelpers {
         
 		long start= System.currentTimeMillis();
 		
-		/*
-		Properties p= new Properties();
-		PerformanceTestPlugin.parseVariations(p, "|abc=def||xyz=123|");
-		*/
-		
 		
 		/*
 		Properties p= new Properties();
@@ -63,12 +65,12 @@ public class DBHelpers {
 		
 		//db.convertVariations();
 		//db.listBuildnames();
-		db.countVariations();
-		db.addVariations2();
-		db.countVariations();
+		//db.countSamplesWithNullVariations();
+		//db.addVariations2();
+		//db.countVariations();
 		//db.selectVariations(ps);
         //db.dumpSizes();
-		//db.dumpAll(ps);
+		db.dumpAll(ps);
         //db.selectDistinctBuildNames(ps);
         //db.countScalars("N200409300010");
         //db.removeScenarios("%C:\\buildtest%");
@@ -121,10 +123,7 @@ public class DBHelpers {
         q.setString(2, scenario);
         */
         
-        Properties p= new Properties();
-        p.put(PerformanceTestPlugin.CONFIG, "relengbuildwin2");
-        p.put(PerformanceTestPlugin.BUILD, build);
-        String key= PerformanceTestPlugin.toVariations(p);
+        String key= new Variations("relengbuildwin2", build).toExactMatchString();
  
         PreparedStatement q= fConnection.prepareStatement("select DATAPOINT.ID from DATAPOINT, VARIATION, SAMPLE, SCENARIO where DATAPOINT.SAMPLE_ID = SAMPLE.ID and VARIATION.ID = SAMPLE.VARIATION_ID and SAMPLE.SCENARIO_ID = SCENARIO.ID and VARIATION.KEYVALPAIRS = ? and SCENARIO.NAME = ?");
         q.setString(1, key);
@@ -411,7 +410,7 @@ public class DBHelpers {
         if (deleteDatapoints != null) deleteDatapoints.close();
     }
 
-    private void dumpSizes() throws SQLException {
+    void dumpSizes() throws SQLException {
         if (fConnection == null)
             return;    
         dumpSize("CONFIG"); //$NON-NLS-1$
@@ -423,7 +422,7 @@ public class DBHelpers {
         dumpSize("SCALAR"); //$NON-NLS-1$
     }
     
-    private void dumpAll(PrintStream ps) throws SQLException {
+    void dumpAll(PrintStream ps) throws SQLException {
         if (fConnection == null)
             return;
 
@@ -444,6 +443,7 @@ public class DBHelpers {
 	        }
             ps.println();
             
+            /*
             ps.println("CONFIG_PROPERTIES(CONFIG_ID, NAME, VALUE):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT CONFIG_ID, NAME, VALUE FROM CONFIG_PROPERTIES"); //$NON-NLS-1$
  	        while (rs.next()) {
@@ -453,6 +453,7 @@ public class DBHelpers {
 	            ps.println();
 	        }
             ps.println();
+            */
             
             ps.println("VARIATION(ID, KEYVALPAIRS):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT ID, KEYVALPAIRS FROM VARIATION"); //$NON-NLS-1$
@@ -496,6 +497,7 @@ public class DBHelpers {
             }
             ps.println();
             
+            /*
             ps.println("SAMPLE_PROPERTIES(CONFIG_ID, KEY_ID, VALUE):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT SAMPLE_ID, NAME, VALUE FROM SAMPLE_PROPERTIES"); //$NON-NLS-1$
  	        while (rs.next()) {
@@ -505,6 +507,7 @@ public class DBHelpers {
 	            ps.println();
 	        }
             ps.println();
+            */
             
             ps.println("DATAPOINT(ID, SAMPLE_ID, SEQ, STEP):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT ID, SAMPLE_ID, SEQ, STEP FROM DATAPOINT"); //$NON-NLS-1$
@@ -568,7 +571,7 @@ public class DBHelpers {
         stmt.close();
     }
 
-    private void countVariations() throws SQLException {
+    private void countSamplesWithNullVariations() throws SQLException {
         Statement stmt= fConnection.createStatement();
         ResultSet rs= stmt.executeQuery("select count(*) from SAMPLE where SAMPLE.VARIATION_ID is null"); //$NON-NLS-1$
         while (rs.next()) {
@@ -599,14 +602,10 @@ public class DBHelpers {
             String lk= config + "/" + build;
             Integer i= (Integer) map.get(lk);
             if (i == null) {
-                Properties properties= new Properties();
-                properties.put(PerformanceTestPlugin.CONFIG, config); //$NON-NLS-1$
-                properties.put(PerformanceTestPlugin.BUILD, build); //$NON-NLS-1$
-                String variation= PerformanceTestPlugin.toVariations(properties);
-                int id= fSQL.createVariations(variation);
-                i= new Integer(id);
+                Variations v= new Variations(config, build);
+                i= new Integer(fSQL.createVariations(v));
                 map.put(lk, i);
-                System.out.println("   " + i + ": " + variation);
+                System.out.println("   " + i + ": " + v);
             }
             update.setInt(1, i.intValue());
             update.setInt(2, config_id);
@@ -639,14 +638,11 @@ public class DBHelpers {
             String lk= config + "/" + build;
             Integer i= (Integer) map.get(lk);
             if (i == null) {
-                Properties properties= new Properties();
-                properties.put(PerformanceTestPlugin.CONFIG, config); //$NON-NLS-1$
-                properties.put(PerformanceTestPlugin.BUILD, build); //$NON-NLS-1$
-                String variation= PerformanceTestPlugin.toVariations(properties);
-                int id= fSQL.createVariations(variation);
+                Variations v= new Variations(config, build);
+                int id= fSQL.createVariations(v);
                 i= new Integer(id);
                 map.put(lk, i);
-                System.out.println("   " + i + ": " + variation);
+                System.out.println("   " + i + ": " + v);
             }
             update.setInt(1, i.intValue());
             update.setInt(2, sample_id);
@@ -669,10 +665,9 @@ public class DBHelpers {
         while (rs.next()) {
             int id= rs.getInt(1);
             String variation= rs.getString(2);
-            Properties p= new Properties();
             try {
-                PerformanceTestPlugin.parseVariations(p, variation);
-                String s= PerformanceTestPlugin.toVariations(p);
+                Variations v= new Variations(variation);
+                String s= v.toExactMatchString();
                 System.out.println(s);
                 
                 update.setString(1, s);

@@ -49,28 +49,22 @@ public class DB {
     private boolean fIsEmbedded;
     
     
-    public static boolean store(Properties config, Sample sample) {
-        return getDefault().internalStore(config, sample);
+    public static boolean store(Variations variations, Sample sample) {
+        return getDefault().internalStore(variations, sample);
     }
     
     public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern, Dim[] dims) {
-        Properties key= new Properties();
-        if (configName != null)
-            key.put(PerformanceTestPlugin.CONFIG, configName); //$NON-NLS-1$
-        key.put(PerformanceTestPlugin.BUILD, buildPattern); //$NON-NLS-1$
-        return getDefault().internalQueryDataPoints(key, scenarioPattern, dims);
+        Variations variations= new Variations(configName, buildPattern);
+        return getDefault().internalQueryDataPoints(variations, scenarioPattern, dims);
     }
    
     public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern) {
-        Properties key= new Properties();
-        if (configName != null)
-            key.put(PerformanceTestPlugin.CONFIG, configName); //$NON-NLS-1$
-        key.put(PerformanceTestPlugin.BUILD, buildPattern); //$NON-NLS-1$
-        return getDefault().internalQueryDataPoints(key, scenarioPattern, null);
+        Variations variations= new Variations(configName, buildPattern);
+        return getDefault().internalQueryDataPoints(variations, scenarioPattern, null);
     }
    
-    public static DataPoint[] queryDataPoints(Properties keys, String scenarioPattern, Dim[] dims) {
-        return getDefault().internalQueryDataPoints(keys, scenarioPattern, dims);
+    public static DataPoint[] queryDataPoints(Variations variations, String scenarioPattern, Dim[] dims) {
+        return getDefault().internalQueryDataPoints(variations, scenarioPattern, dims);
     }
    
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
@@ -102,13 +96,8 @@ public class DB {
     }
 
     public static void queryBuildNames(List names, String configName, String buildPattern, String scenarioPattern) {
-        
-        Properties key= new Properties();
-        if (configName != null)
-            key.put(PerformanceTestPlugin.CONFIG, configName); //$NON-NLS-1$
-        key.put(PerformanceTestPlugin.BUILD, buildPattern); //$NON-NLS-1$
-        
-        getDefault().internalQueryBuildNames(names, key, scenarioPattern);
+        Variations variations= new Variations(configName, buildPattern);
+        getDefault().internalQueryBuildNames(names, variations, scenarioPattern);
     }
 
     public static Connection getConnection() {
@@ -170,13 +159,8 @@ public class DB {
         }
         return fConfigID;
     }
-        
-    private int getVariation(Properties config) throws SQLException {
-        String variation= PerformanceTestPlugin.toVariations(config);
-        return fSQL.createVariations(variation);
-    }
-        
-    private boolean internalStore(Properties config, Sample sample) {
+                
+    private boolean internalStore(Variations variations, Sample sample) {
         
         if (fSQL == null || sample == null)
             return false;
@@ -226,8 +210,8 @@ public class DB {
 		//System.out.println("store started..."); //$NON-NLS-1$
 	    try {
             //long l= System.currentTimeMillis();
-            int config_id= getConfig(config);
-            int variation_id= getVariation(config);
+            int config_id= getConfig(variations);
+            int variation_id= fSQL.createVariations(variations);
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
             int sample_id= fSQL.createSample(config_id, variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
@@ -271,16 +255,13 @@ public class DB {
     /*
      * fixed
      */
-    private DataPoint[] internalQueryDataPoints(Properties variations, String scenarioName, Dim[] dims) {
+    private DataPoint[] internalQueryDataPoints(Variations variations, String scenarioName, Dim[] dims) {
         if (fSQL == null)
             return null;
  
          ResultSet rs= null;
          try {
         	
-            //String configName= key.getProperty(PerformanceTestPlugin.CONFIG, LOCALHOST);
-            //String buildName= key.getProperty(PerformanceTestPlugin.BUILD);
-        	        	
             ArrayList dataPoints= new ArrayList();
             
             /* currently not needed
@@ -295,8 +276,7 @@ public class DB {
             */
             
             //rs= fSQL.queryDataPoints(configName, buildName, scenarioName);
-            String variationPattern= PerformanceTestPlugin.toVariations(variations);
-            rs= fSQL.queryDataPoints(variationPattern, scenarioName);
+            rs= fSQL.queryDataPoints(variations, scenarioName);
 	        while (rs.next()) {
 	            int datapoint_id= rs.getInt(1);
 	            int step= rs.getInt(2);
@@ -343,7 +323,7 @@ public class DB {
             return null;
         ResultSet result= null;
         try {
-            result= fSQL.queryScenarios("%|"+PerformanceTestPlugin.CONFIG+"="+configPattern+"|%", scenarioPattern);
+            result= fSQL.queryScenarios(new Variations(configPattern, null), scenarioPattern);
             ArrayList scenarios= new ArrayList();
             for (int i= 0; result.next(); i++)
 		        scenarios.add(result.getString(1));
@@ -366,17 +346,14 @@ public class DB {
     /*
      * fixed
      */
-    private void internalQueryBuildNames(List buildNames, Properties key, String scenarioPattern) {
+    private void internalQueryBuildNames(List buildNames, Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return;
-        String keyName= PerformanceTestPlugin.toVariations(key);
         ResultSet result= null;
         try {        	
-            result= fSQL.queryBuildNames(keyName, scenarioPattern);
+            result= fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
             for (int i= 0; result.next(); i++) {
-                String kvs= result.getString(1);
-                Properties p= new Properties();
-                PerformanceTestPlugin.parseVariations(p, kvs);
+                Variations p= new Variations(result.getString(1));
                 String build= p.getProperty(PerformanceTestPlugin.BUILD);
                 if (build != null && !buildNames.contains(build))
                     buildNames.add(build);
