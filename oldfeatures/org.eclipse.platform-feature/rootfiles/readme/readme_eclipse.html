@@ -619,62 +619,73 @@ support for List Views must be activated as follows:</i></p>
 do not apply to other repository providers. Additional information on how to use
 CVS from Eclipse can be found in the <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-vcm-home/docs/online/cvs_features2.0/cvs-faq.html">Eclipse
 CVS FAQ</a>.</p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] CVS server compatibility</i></h4>
-<p><i>The CVS plug-in parses messages returned from the CVS server. If the
-format of these messages is not as expected, some of the plug-in's functionality
-may be missing. The CVS plug-in is compatible with all stable 1.11.X builds of
-the CVS server, and should be compatible with future releases in that stream
-unless text message formats change. The plug-in is not compatible with 1.12.X
-builds. Basic functionality, such as Commit and Update, will work, but there are
-known problems with more advanced commands such as Synchronizing and Browsing
-the repository. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=49056">49056</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Cached authorization
-information lost when workspace is upgraded</i></h4>
-<p><i>The Platform's internal authorization database file format has changed for
-2.1. Because of this, authorization information cached with a workspace created
+<h4> CVS server compatibility</h4>
+<p>The CVS plug-in parses messages returned from the CVS server. If the format
+of these messages is not as expected, some of the plug-in's functionality may be
+missing. The CVS plug-in is compatible with all stable 1.11.X builds of the CVS
+server, and should be compatible with future releases in that stream unless text
+message formats change (the last tested server was 1.11.16). As for the 1.12.X
+feature releases of CVS, the Eclipse CVS client has been tested with builds up
+to 1.12.8. However, future releases could easily break the Eclipse CVS client.
+Basic functionality, such as Checkout, Commit, and Update, should always work,
+but there may be problems with more advanced commands such as Synchronizing and
+Browsing the repository. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67627">67627</a>)</p>
+<h4>Cached authorization information lost when workspace is upgraded</h4>
+<p>The Platform's internal authorization database file location has changed for
+3.0. Because of this, authorization information cached with a workspace created
 with an earlier version of Eclipse will be unusable, and the user will need to
-reauthenticate. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=32899">32899</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] &quot;extssh&quot; is not a
-supported command line method</i></h4>
-<p><i>Since the &quot;extssh&quot; connection method is not a supported command
-line method, you cannot use the command line tool when a project uses this
-method. Instead, use the Eclipse supported &quot;ext&quot; method and set the
-appropriate environment variables so that the command line tool will work. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=7943">7943</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Connection cannot be found
-after initially missing</i></h4>
-<p><i>If a connection initially fails due to a network problem, the connection
-may continue to fail even when the network problem is fixed. In order to
-establish the connection you must exit and restart Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=9295">9295</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] CVS meta-folders appear in
-some cases</i></h4>
-<p><i>There are some cases where CVS folders are not hidden from the UI as the
-user would expect. For instance, CVS folders will appear if a user imports a CVS
+reauthenticate.</p>
+<h4>Issues upgrading from 2.x to 3.0</h4>
+<p>In 2.x, CVS used markers to identify outgoing additions and outgoing
+deletions. In 3.0, these markers no longer exist because the Synchronize view
+can be used to show the same information. If CVS markers exist in a workspace
+that is upgraded to 3.0, they can be removed by performing a Project&gt;Clean.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=40593">40593</a>)</p>
+<h4>Issues upgrading from 1.0 to 3.0</h4>
+<p>In 1.0, CVS used a .vcm_meta file to store project configuration information.
+In 2.0, this file was replaced by the .project file but CVS still read the
+.vcm_meta file for backwards compatibilty. In 3.0, the .vcm_meta file is no
+longer read by CVS. Users who wish to upgrade from 1.0 to 3.0 must first upgrade
+to 2.x and then upgrade to 3.0 if they wich to keep there project configuration
+information (e.g. java project). (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=43296">43296</a>)</p>
+<h4>Connection cannot be found after initially missing</h4>
+<p>If a connection initially fails due to a network problem, the connection may
+continue to fail even when the network problem is fixed. In order to establish
+the connection you must exit and restart Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=9295">9295</a>)</p>
+<h4>CVS meta-folders appear in some cases</h4>
+<p>There are some cases where CVS folders are not hidden from the UI as the user
+would expect. For instance, CVS folders will appear if a user imports a CVS
 project into Eclipse before the CVS plug-in is loaded. To avoid this, open the
 CVS Repositories view (thus loading the CVS plug-in) before importing CVS
-projects into Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21128">21128</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] &quot;Received broken pipe
-signal&quot; error from server</i></h4>
-<p><i>Eclipse sometimes performs multiple commands within a single connection to
+projects into Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21128">21128</a>)</p>
+<h4>&quot;Received broken pipe signal&quot; error from server</h4>
+<p>Eclipse sometimes performs multiple commands within a single connection to
 the server. This may cause problems with CVS servers that are running server
 scripts in response to certain commands. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=23575">23575</a>
-and <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=23581">23581</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] &quot;Terminated with fatal
-signal 10&quot; error from server</i></h4>
-<p><i>There is a bug in the CVS server related to some compression levels. If
-you get this error, changing the compression level on the CVS preference page
-may help. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=15724">15724</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] &quot;Unknown response&quot;
-error using ext connection method</i></h4>
-<p><i>There are a few situations that can result in an &quot;Unknown
-response&quot; error messages when using the ext connection method. One
-situation involves using an external communications client (e.g. rsh or ssh)
-that adds CRs to the communications channel (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21180">21180</a>).
+and <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=23581">23581</a>)</p>
+<h4>&quot;Terminated with fatal signal 10&quot; error from server</h4>
+<p>There is a bug in the CVS server related to some compression levels. If you
+get this error, changing the compression level on the CVS preference page may
+help. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=15724">15724</a>)</p>
+<h4>&quot;Unknown response&quot; error using ext connection method</h4>
+<p>There are a few situations that can result in an &quot;Unknown response&quot;
+error messages when using the ext connection method. One situation involves
+using an external communications client (e.g. rsh or ssh) that adds CRs to the
+communications channel (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21180">21180</a>).
 Another involves Eclipse not properly reading the stderr output of the external
-communications tool (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=11633">11633</a>).</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] No way to update folder
-excluding subfolders</i></h4>
-<p><i>There is currently no way in Eclipse to run a non-recursive update on a
-folder (i.e., there is nothing equivalent to the cvs -l option). (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33210">33210</a>).</i></p>
+communications tool. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=11633">11633</a>)</p>
+<h4>No way to update folder excluding subfolders</h4>
+<p>There is currently no way in Eclipse to run a non-recursive update on a
+folder (i.e., there is nothing equivalent to the cvs -l option). (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33210">33210</a>)</p>
+<h4>A disabled CVS capability may not be auto-enabled in existing workspaces</h4>
+<p>New in 3.0 is the ability to disable capabilities and the CVS support in
+Eclipse can be disabled. However, for backwards compatibility the CVS capability
+is auto-enabled in existing workspaces that already contain CVS projects. The
+auto-enabling function may not run if the team support plugin is not loaded at
+startup. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66977">66977</a>)</p>
+<h4>Builder output files may appear as changed</h4>
+<p>When folders containing build output are shared they may get improperly
+marked as dirty when build output is generated. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=50965">50965</a>)</p>
 <h3>3.1.8 <a name="I-Platform-Install-Update">Platform - Install/Update</a></h3>
 <h4>Manually installing features and plugins on a FAT file system (Windows only)</h4>
 <p>When features and plug-ins are manually installed on top of an Eclipse-based
