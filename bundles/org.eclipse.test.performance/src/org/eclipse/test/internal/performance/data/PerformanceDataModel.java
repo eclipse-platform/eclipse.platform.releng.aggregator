@@ -28,8 +28,8 @@ public class PerformanceDataModel {
 	private final String fLocation;
 	
 	public synchronized Sample[] getMeteringSessions() {
-		if (fSessions == null)
-			reload();
+//		if (fSessions == null)
+//			reload();
 		return (Sample[]) fSessions.values().toArray(new Sample[fSessions.size()]);
 	}
 	
@@ -37,38 +37,38 @@ public class PerformanceDataModel {
 		fLocation= location;
 	}
 	
-	public synchronized void reload() {
-		PerformanceFileParser parser= new PerformanceFileParser();
-		Sample[] files= parser.parseLocation(fLocation);
-		Map map= new HashMap();
-		for (int i= 0; i < files.length; i++) {
-			map.put(files[i].getId(), files[i]);
-		}
-		fSessions= map;
-	}
+//	public synchronized void reload() {
+//		PerformanceFileParser parser= new PerformanceFileParser();
+//		Sample[] files= parser.parseLocation(fLocation);
+//		Map map= new HashMap();
+//		for (int i= 0; i < files.length; i++) {
+//			map.put(files[i].getId(), files[i]);
+//		}
+//		fSessions= map;
+//	}
 	
-	public synchronized void refresh() {
-		File dir= new File(fLocation);
-		if (!dir.isDirectory()) {
-			reload();
-			return;
-		}
-		
-		PerformanceFileParser parser= new PerformanceFileParser();
-		String[] files= dir.list();
-		for (int i= 0; i < files.length; i++) {
-			File file= new File(dir, files[i]);
-			try {
-				String path= file.getCanonicalPath();
-				if (fSessions.containsKey(path)) {
-					Sample xmlfile= parser.parse(new BufferedInputStream(new FileInputStream(file)));
-					fSessions.put(xmlfile.getId(), xmlfile);
-				}
-			} catch (IOException e) {
-				// ignore and continue
-			}
-		}
-	}
+//	public synchronized void refresh() {
+//		File dir= new File(fLocation);
+//		if (!dir.isDirectory()) {
+//			reload();
+//			return;
+//		}
+//		
+//		PerformanceFileParser parser= new PerformanceFileParser();
+//		String[] files= dir.list();
+//		for (int i= 0; i < files.length; i++) {
+//			File file= new File(dir, files[i]);
+//			try {
+//				String path= file.getCanonicalPath();
+//				if (fSessions.containsKey(path)) {
+//					Sample xmlfile= parser.parse(new BufferedInputStream(new FileInputStream(file)));
+//					fSessions.put(xmlfile.getId(), xmlfile);
+//				}
+//			} catch (IOException e) {
+//				// ignore and continue
+//			}
+//		}
+//	}
 
 	public static PerformanceDataModel getInstance(String string) {
 		if (fgModels == null)
