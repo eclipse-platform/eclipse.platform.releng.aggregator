@@ -233,14 +233,14 @@ that can be configured by views and editors to provide undo and redo support for
 action handler is created, a context is assigned to it so that the operations history is filtered in a way appropriate for
 that particular view.  The action handlers take care of updating the undo and redo labels to show the current
 operation in question, providing the appropriate progress monitor and UI info to the operation history, and
-pruning the history when the current operation is invalid.  
+optionally pruning the history when the current operation is invalid.  An action group that creates the action handlers
+and assigns them to the global undo and redo actions is provided for convenience.
 <pre><font color="#4444CC">
-IAction action = new UndoActionHandler(this.getSite().getWorkbenchWindow(), undoContext);
-IActionBars actionBars = getViewSite().getActionBars();
-actionBars.setGlobalActionHandler(ActionFactory.UNDO.getId(), action)
-action = new RedoActionHandler(this.getSite().getWorkbenchWindow(), undoContext);
-actionBars.setGlobalActionHandler(ActionFactory.REDO.getId(),action);
+new UndoRedoActionGroup(this.getSite(), undoContext, true);
 </font></pre>
+The last parameter is a boolean indicating whether the undo and redo histories for the specified context should
+be disposed when the operation currently available for undo or redo is not valid.  The setting for this parameter
+is related to the undo context provided and the validation strategy used by operations with that context.
 </p>
 <h3>Application undo models</h3>
 <p>
@@ -310,7 +310,8 @@ if (workspaceContext != null) {
 }
 
 </font></pre>
-</p>
+Action handlers that operate on the workspace undo context should typically be created with pruning
+enabled.</p>
 <p>Other plug-ins are encouraged to use this same technique for registering
 model-based undo contexts.
 </p>
