@@ -4,60 +4,83 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<title>Filtering resources from a release</title>
+<title>Version Control Life Cycle: Adding and Ignoring Resources</title>
 <meta name="keyword" content="team">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H1 CLASS="Head">
-Filtering resources from a release</H1>
-<p CLASS="Para" Label="Type">When synchronizing resources, often there are resources that you do not want to release to the stream.
-For example, external editors might create temporary files in your project, or
-compilation of .java files might create .class files, or some build operations
-might result in binary files. These generated files, when taken together, may be
-quite large. They may also be regenerated whenever a build is performed,
-resulting in many outgoing changes. Typically these are not files that one wants
-to persist in the repository or to share with other members of a team.
-&nbsp;&nbsp;</p>
-<P CLASS="Para" Label=Type>
-There are two &quot;ignore&quot; facilities that allow you to specify which
-resources should be excluded from catch up and release operations. The first is a global facility, provided by the
-workbench, which you can use for ignoring files that might appear anywhere in your project hierarchy.
-For example, if you create a global ignore for <samp>/bin</samp>, any resource that matches &quot;bin&quot; in any directory
-in the workbench will be ignored at release time. The second is the CVS ignore facility, which reads the contents of
-the file .cvsignore to determine what to ignore. This provides
-compatibility with the existing CVS ignore files and is used most often to
-ignore directories. The .cvsignore file only applies the pattern to resources in the
-<i> same</i> directory as the .cvsignore file itself. </P>
-
-
-<P CLASS="Para" Label=Type>
-<b>Tip</b>: Once a resource is under version control, it cannot easily be subsequently be
-ignored.&nbsp; A resource comes under version control in the first place when a
-synchronize operation is performed on a resource or any of its parent
-folders.&nbsp; You should consider, prior to performing your first&nbsp;
-synchronize operation, which files and directories you wish to ignore, and add
-them to the appropriate ignore facility.&nbsp; </P>
+<H1 CLASS="Head">Version Control Life Cycle: Adding and Ignoring Resources</H1>
+<p CLASS="Para" Label="Type">When committing resources, often there are resources 
+  that you do not want to store in the repository. For example, external editors 
+  might create temporary files in your project, compilation of .java files might 
+  create .class files, or some build operations might result in binary files. 
+  These generated files, when taken together, may be quite large. They may also 
+  be regenerated whenever a build is performed, resulting in many outgoing changes. 
+  Typically these are not files that one wants to persist in the repository or 
+  to share with other members of a team. </p>
+<p CLASS="Para" Label="Type">Team CVS has two related tasks that allow you to 
+  control which files conduct in the repository: adding a resource to version 
+  control, and ignoring a resource.</p>
+<h2 CLASS="Para" Label="Type">Adding a File to Version Control</h2>
+<p CLASS="Para" Label="Type">Team CVS does not automatically add files to version 
+  control. Rather, it's up to you the user to explicitly add files to version 
+  control. This is accomplished by selecting the <b>Team&gt;Add to Version Control</b> 
+  menu. </p>
+<p CLASS="Para" Label="Type">When performed on a file, it will add that file to 
+  version control. The result is that the CVS repository immediately creates an 
+  entry for it so that it can start maintaining history state for that file. This 
+  occurs even before you commit the file to the repository.</p>
+<p CLASS="Para" Label="Type">When adding a folder or project, the action will 
+  recursively descend into subfolders, adding those files it finds to version 
+  control, provided the files have not been explicitly ignored.</p>
+<p CLASS="Para" Label="Type"><b>Tip:</b> When you create a new file in a CVS project, 
+  a new task is created to remind you of the fact that that file is neither ignored 
+  nor under version control. The &quot;Quick Fix&quot; menu for the task will 
+  provide options for resolving it, such as either adding it to version control 
+  or adding it to the list of ignored resources.</p>
+<p CLASS="Para" Label="Type"><b>Tip:</b> When committing files from the Synchronization 
+  View, if the selection either directly or recursively contains files which have 
+  not been added to version control, you'll be prompted whether or not at that 
+  time you want them added. This is a convenience function to help ensure that 
+  you do not miss committing new resources which were unintentionally never added.</p>
+<h2 CLASS="Para" Label=Type> <i>How May I Ignore Thee, Let me Count the Ways</i></h2>
+<P CLASS="Para" Label=Type>There are several facilities that allow you to specify 
+  which resources should be excluded from version control:</P>
+<ol>
+  <li>There is a global preference which you can use for ignoring files and directories 
+    that match a certain filename pattern. For example, if you create a global 
+    ignore for <samp>/bin</samp>, and any resource that matches &quot;bin&quot; 
+    in any directory in the workspace will be ignored for version control. This 
+    preference can be found in <b>Window&gt;Preferences&gt;Team&gt;Ignored Resources</b>.</li>
+  <li>Any resource marked as <i>derived</i> will be automatically ignored for 
+    version management by Team CVS. Some builders, such as the Java builder, mark 
+    all of its build output (.class files, etc.) as derived.</li>
+  <li>CVS supports the creation of a special <i>.cvsignore</i> file whose contents 
+    described which files to ignore for version management. This provides compatibility 
+    with the existing CVS ignore files and is used most often to ignore directories. 
+    The .cvsignore file only applies the pattern to resources in the <i> same</i> 
+    directory as the .cvsignore file itself. </li>
+</ol>
+<P CLASS="Para" Label=Type> <b>Tip</b>: Once a resource is under version control, 
+  it cannot easily be subsequentlyignored.&nbsp; This is why adding to version 
+  control is an explicit operation performed by you the user.</P>
 
 
 <p><img border="0" src="../images/ngrelc.gif" alt="Related concepts" width="159" height="27"><br>
-<a href="../concepts/concepts-26.htm">Team programming</a> &nbsp;<a href="../concepts/concepts-27c.htm"><br>
-</a><a href="../concepts/concepts-27b.htm">
-Streams</a><a href="../reference/ref-51a.htm"><br>
-</a><a href="../concepts/concepts-30.htm">
-Team synchronization</a>&nbsp;</p>
+<a href="../concepts/concepts-26.htm">Team programming</a><br>
+<a href="../concepts/concepts-27c.htm">Repositories</a><br>
+<a href="../concepts/concepts-27b.htm">Branches</a><br>
+<a href="../concepts/concepts-30.htm">Team synchronization</a>
+</p>
 
 
-<p><img border="0" src="../images/ngrelt.gif" alt="Related tasks" width="159" height="27"><a href="tasks-115.htm"><br>
-Synchronizing with a stream</a><a href="tasks-114.htm"><br>
-Releasing resources to the stream</a><a href="tasks-100d.htm"><br>
-</a><a href="tasks-100d1.htm">
-Creating a global pattern to
-                filter resources from releasing</a> &nbsp;<a href="tasks-100d2.htm"><br>
-Adding a CVS ignore file to
-                filter resources from a release</a> &nbsp;<a href="tasks-100d3.htm"><br>
-Stopping resources from
-                releasing at synchronization time</a> &nbsp;<a href="tasks-100d1b.htm"><br>
-Overriding patterns that prevent resources from releasing</a></p>
+<p><img border="0" src="../images/ngrelt.gif" alt="Related tasks" width="159" height="27"><br>
+<a href="tasks-115.htm">Synchronizing with a stream</a><br>
+<a href="tasks-114.htm">Releasing resources to the stream</a><br>
+<a href="tasks-100d1.htm">Creating a global pattern to filter resources from releasing</a><br>
+<a href="tasks-100d2.htm">Authoring the CVS .ignore File</a><br>
+<a href="tasks-100d3.htm">Stopping resources from releasing at synchronization time</a><br>
+<a href="tasks-100d1b.htm">Overriding patterns that prevent resources from releasing</a>
+</p>
 
 <p>&nbsp;<br>
 <a href="../hglegal2002.htm"><img src = "../images/ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002" border="0"></a>
