@@ -18,8 +18,7 @@ Java .class files from source code. There is no direct API provided by the
 compiler. It is installed as a builder on Java projects. Compilation is triggered 
 using standard platform build mechanisms.</p>
 <p> The platform build mechanism is described in detail in <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_builders.htm" class="XRef">
- resource builders</a>
- .</p>
+ Incremental project builders</a> .</p>
 <h3> Compiling code</h3>
 <p> You can programmatically compile the Java source files in a project using 
 the build API.</p>
@@ -36,35 +35,46 @@ the designated output folder. In the case of a full batch build, all the
 files are found. Make sure that you place all your .class files, for which
 you do not have corresponding source files, in separate class file folders
 on the classpath  instead of the output folder.</p>
-<p> Additional resource files are also copied to the output folder. You can 
-control which resource files are copied using the resource filter. For example, 
-to filter files ending with '.ignore' and folders named 'META-INF', use:
+<p> Additional resource files are also copied to the output folder.&nbsp;<p>The
+incremental and batch builders can be configured with specialized options that
+control which resources are copied to the output folder and whether the output
+folder should be cleaned up after a full build.&nbsp; See <a href="jdt_api_options.htm##builder">JDT
+Core Builder Options</a> for a complete list of builder-related options.&nbsp;
+The following sample shows how to set up a resource filter so that files ending with '.ignore' and folders named 'META-INF',
+are not copied to the output folder:
 <font color="#4444cc">
-<pre>   Hashtable options = JavaCore.getOptions();<br>   options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, "*.ignore,META-INF/");<br>   JavaCore.setOptions(options);<br></pre>
-</font><p></p>
+<pre>   Hashtable options = JavaCore.getOptions();
+   options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, &quot;*.ignore,META-INF/&quot;);
+   JavaCore.setOptions(options);
+</pre>
+</font>
 <p> Filenames are filtered if they match one of the supplied patterns. Entire 
 folders are filtered if their name matches one of the supplied folder names 
 which end in a path separator.</p>
 <p> The incremental and batch builders can also be configured to only generate
  a single error when the .classpath file has errors. This option is set by
- default and eliminates numerous errors, all usually caused by a missing
-jar  file. See the CORE_JAVA_BUILD_INVALID_CLASSPATH option of <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">
- JavaCore</a>
-</b>. </p>
+ default and eliminates numerous errors. </p>
+<p>The compiler can also be configured using <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a>
+options.&nbsp; For example, you can define the severity that should be used for
+different kinds of problems that are found during compilation.&nbsp; See <a href="jdt_api_options.htm##compiler">JDT
+Core Compiler Options </a>for a complete list of compiler-related options. </p>
 <h3>Using the ant javac adapter</h3>
   The Eclipse compiler can be used inside an Ant script using the javac adapter. 
 In order to use the Eclipse compiler, you simply need to define the <b>build.compiler</b>
   property in your script. Here is a small example. <font color="#4444cc">
-<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;project name="compile" default="main" basedir="../."&gt;<br><br>	<b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project name=&quot;compile&quot; default=&quot;main&quot; basedir=&quot;../.&quot;&gt;
 
-	&lt;property name="root" value="${basedir}/src"/&gt;
+	<b>&lt;property name=&quot;build.compiler&quot; value=&quot;org.eclipse.jdt.core.JDTCompilerAdapter&quot;/&gt;</b>
 
-	&lt;property name="destdir" value="d:/temp/bin" /&gt;
+	&lt;property name=&quot;root&quot; value=&quot;${basedir}/src&quot;/&gt;
 
-	&lt;target name="main"&gt;
-		&lt;javac srcdir="${root}" destdir="${destdir}" debug="on" nowarn="on" extdirs="d:/extdirs" source="1.4"&gt;
+	&lt;property name=&quot;destdir&quot; value=&quot;d:/temp/bin&quot; /&gt;
+
+	&lt;target name=&quot;main&quot;&gt;
+		&lt;javac srcdir=&quot;${root}&quot; destdir=&quot;${destdir}&quot; debug=&quot;on&quot; nowarn=&quot;on&quot; extdirs=&quot;d:/extdirs&quot; source=&quot;1.4&quot;&gt;
 		    &lt;classpath&gt;
-		      &lt;pathelement location="${basedir}/../org.eclipse.jdt.core/bin"/&gt;
+		      &lt;pathelement location=&quot;${basedir}/../org.eclipse.jdt.core/bin&quot;/&gt;
 		    &lt;/classpath&gt;
 		&lt;/javac&gt;		
 	&lt;/target&gt;
@@ -79,12 +89,19 @@ be available when Ant 1.5 is released.
   ") to denote compilation problems. To programmatically discover problems
  detected by the compiler, the standard platform marker protocol should be
  used. See <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_markers.htm" class="XRef">
- resource markers</a>
+ Resource Markers</a>
   for an overview of using markers.</p>
 <p> The following snippet finds all Java problem markers in a compilation 
 unit.</p>
 <font color="#4444cc">
-<pre>   public IMarker[] findJavaProblemMarkers(ICompilationUnit cu) <br>      throws CoreException {<br>      IResource javaSourceFile = cu.getUnderlyingResource();<br>      IMarker[] markers = <br>         javaSourceFile.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,<br>            true, IResource.DEPTH_INFINITE);<br>   }<br></pre>
+<pre>   public IMarker[] findJavaProblemMarkers(ICompilationUnit cu) 
+      throws CoreException {
+      IResource javaSourceFile = cu.getUnderlyingResource();
+      IMarker[] markers = 
+         javaSourceFile.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,
+            true, IResource.DEPTH_INFINITE);
+   }
+</pre>
 </font>
 <p> Java problem markers are maintained by the Java project builder and are 
 removed automatically as problems are resolved and the Java source is recompiled.</p>
@@ -108,7 +125,7 @@ can use the <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#
   // create requestor for accumulating discovered problems
   IProblemRequestor problemRequestor = new IProblemRequestor() {
     public void acceptProblem(IProblem problem) {
-      System.out.println(problem.getID() + ": " + problem.getMessage());
+      System.out.println(problem.getID() + &quot;: &quot; + problem.getMessage());
     }
     public void beginReporting() {}
     public void endReporting() {}
@@ -117,7 +134,7 @@ can use the <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#
     
   // use working copy to hold source with error
   IWorkingCopy workingCopy = (IWorkingCopy)unit.getWorkingCopy(null, null, problemRequestor);
-  ((IOpenable)workingCopy).getBuffer().setContents("public class X extends Zork {}");
+  ((IOpenable)workingCopy).getBuffer().setContents(&quot;public class X extends Zork {}&quot;);
 
   // trigger reconciliation			
   workingCopy.reconcile(true, null);
