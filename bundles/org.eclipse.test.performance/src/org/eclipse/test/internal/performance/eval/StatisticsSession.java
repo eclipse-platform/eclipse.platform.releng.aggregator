@@ -11,7 +11,9 @@
 package org.eclipse.test.internal.performance.eval;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -68,28 +70,46 @@ public class StatisticsSession {
 		
 		Statistics stats= new Statistics();
 		
-		if (fDataPoints.length == 1) {
+		Set set= new HashSet();
+		for (int j= 0; j < fDataPoints.length; j++) {
+		    DataPoint dp= fDataPoints[j];
+		    set.add(new Integer(dp.getStep()));
+		}
+		
+		switch (set.size()) {
+		case 1:
 			// if there is only one DataPoint, we don't calculate the delta.
-			Scalar sc= fDataPoints[0].getScalar(dimension);
-			long magnitude= sc.getMagnitude();
-			stats.sum += magnitude;
-			stats.count++;
-			stats.average= stats.sum / stats.count;
-			stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
-		} else {
-			for (int i= 0; i < fDataPoints.length - 1; i += 2) {
+			for (int i= 0; i < fDataPoints.length; i++) {
+				Scalar sc= fDataPoints[i].getScalar(dimension);
+				if (sc != null) {
+					long magnitude= sc.getMagnitude();
+					stats.sum += magnitude;
+					stats.count++;
+					stats.average= stats.sum / stats.count;
+					stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
+				}
+			}
+			break;
+		case 2:
+			for (int i= 0; i < fDataPoints.length-1; i += 2) {
 				DataPoint before= fDataPoints[i];
-				Assert.assertTrue("order of datapoints makes no sense", before.getStep() == InternalPerformanceMeter.BEFORE); //$NON-NLS-1$
+				Assert.assertTrue("wrong order of steps", before.getStep() == InternalPerformanceMeter.BEFORE); //$NON-NLS-1$
 				DataPoint after= fDataPoints[i + 1];
-				Assert.assertTrue("order of datapoints makes no sense", after.getStep() == InternalPerformanceMeter.AFTER); //$NON-NLS-1$
+				Assert.assertTrue("wrong order of steps", after.getStep() == InternalPerformanceMeter.AFTER); //$NON-NLS-1$
 				
 				Scalar delta= getDelta(before, after, dimension);
-				long magnitude= delta.getMagnitude();
-				stats.sum += magnitude;
-				stats.count++;
-				stats.average= stats.sum / stats.count;
-				stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
+				if (delta != null) {
+					long magnitude= delta.getMagnitude();
+					stats.sum += magnitude;
+					stats.count++;
+					stats.average= stats.sum / stats.count;
+					stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
+				}
 			}
+			break;
+		default:
+			Assert.assertTrue("cannot handle more than two steps", false); //$NON-NLS-1$
+		    	break;
 		}
 		
 		stats.stddev= Math.sqrt(stats.stddev / stats.count - 1);

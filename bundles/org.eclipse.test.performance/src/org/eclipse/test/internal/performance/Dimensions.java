@@ -11,8 +11,8 @@ public interface Dimensions {
 //  Common:
 //		OS Counters:
     		Dimension
-				SYSTEM_TIME= new Dimension(2, Unit.SECOND, 1000), 		// System.currentTimeMillis. "System Time"
-				USED_JAVA_HEAP= new Dimension(3, Unit.BYTE), 			// Runtime.totalMemory() - Runtime.freeMemory()
+			SYSTEM_TIME= new Dimension(2, Unit.SECOND, 1000), 		// System.currentTimeMillis. "System Time"
+			USED_JAVA_HEAP= new Dimension(3, Unit.BYTE), 			// Runtime.totalMemory() - Runtime.freeMemory()
     			WORKING_SET= new Dimension(4, Unit.BYTE), 				// the working set (or on Linux the resident set). "Working Set"	
     			USER_TIME= new Dimension(10, Unit.SECOND, 1000),		// the amount of elapsed user time. "User time"
     			KERNEL_TIME= new Dimension(11, Unit.SECOND, 1000),		// the amount of elapsed kernel time. "Kernel time"
@@ -26,7 +26,7 @@ public interface Dimensions {
 //	Windows:
 //		OS Counters:
     		Dimension
-				COMITTED= new Dimension(7, Unit.BYTE),				// "Committed"
+			COMITTED= new Dimension(7, Unit.BYTE),				// "Committed"
     			WORKING_SET_PEAK= new Dimension(8, Unit.BYTE),		// "Working Set Peak"
     			ELAPSED_PROCESS= new Dimension(9, Unit.SECOND, 1000),	// "Elapsed Process"
     			PAGE_FAULTS= new Dimension(19), 					// "Page Faults"
@@ -55,7 +55,7 @@ public interface Dimensions {
 // Linux:
 //    	OS Counters:
     		Dimension
-				HARD_PAGE_FAULTS= new Dimension(42),	// the number of hard page faults. A page had to be fetched from disk. "Hard Page Faults"
+			HARD_PAGE_FAULTS= new Dimension(42),	// the number of hard page faults. A page had to be fetched from disk. "Hard Page Faults"
     			SOFT_PAGE_FAULTS= new Dimension(43),	// the number of soft page faults. A page was not fetched from disk. "Soft Page Faults"		
     			TRS= new Dimension(44, Unit.BYTE),		// the amount of memory in bytes occupied by text (i.e. code). "Text Size"	
     			DRS= new Dimension(45, Unit.BYTE),		// the amount of memory in bytes occupied by data or stack. "Data Size"

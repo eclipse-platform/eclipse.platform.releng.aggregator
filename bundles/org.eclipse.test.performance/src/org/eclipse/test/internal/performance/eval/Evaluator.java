@@ -51,7 +51,6 @@ public class Evaluator extends EmptyEvaluator {
 		    return;	// nothing to do
 
 	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID());
-	    //System.err.println(datapoints.length + " datapoints"); //$NON-NLS-1$
 	    if (datapoints == null)
 	    	return;
 	    if (datapoints.length == 0) {

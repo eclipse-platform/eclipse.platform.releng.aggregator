@@ -37,6 +37,7 @@ public class DB {
     private SQL fSQL;
     private int fTagID= -1;
     private int fConfigID;
+    private int fStoredSamples;
     
     
     public static boolean store(Sample sample) {
@@ -121,6 +122,7 @@ public class DB {
 	        int tag_id= getTag();
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
             int sample_id= fSQL.createSample(getConfig(), scenario_id, tag_id, sample.getStartTime());
+            fStoredSamples++;
             
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
@@ -174,8 +176,9 @@ public class DB {
                 if (DEBUG)
                 	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dimension.getDimension(dim_id).getName() + ' ' + value + ' ' + DATE_FORMAT.format(d));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
             }
-            
-            return (DataPoint[])dataPoints.toArray(new DataPoint[dataPoints.size()]);
+            int n= dataPoints.size();
+            System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
+            return (DataPoint[])dataPoints.toArray(new DataPoint[n]);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -253,6 +256,7 @@ public class DB {
     }
     
     private void disconnect() {
+        System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
         if (DEBUG) System.out.println("disconnecting from DB"); //$NON-NLS-1$
         if (fSQL != null) {
             try {
