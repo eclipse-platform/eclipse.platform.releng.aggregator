@@ -521,10 +521,11 @@ public class BuildTests extends TestCase {
 			String sniffFolder = Platform.getLocation().toOSString();
 		
 			try {
-				FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
+				if (zipFile.equals("")&&new File(sniffFolder,"eclipse").exists())
+					FileTool.unzip(getTrueFilter(), new File(sniffFolder));
+				else
+					FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
 			} catch (IOException e) {
-				
-				
 				fail(zipFile + ": " + sniffFolder  + ": " + "IOException unzipping Eclipse for chkpii");
 			}
 		

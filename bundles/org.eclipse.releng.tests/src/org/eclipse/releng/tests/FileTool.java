@@ -424,6 +424,57 @@ public class FileTool {
 		}
 	}
 	/**
+	 * Unzips the inner zip files in the given destination directory
+	 * extracting only those entries the pass through the given
+	 * filter.
+	 * 
+	 * @param filter filters out unwanted zip entries
+	 * @param dstDir the destination directory
+	 */
+	public static void unzip(IZipFilter filter, File dstDir) throws IOException {
+		unzip(filter, dstDir, dstDir, 0);
+	}
+	
+	private static void unzip(IZipFilter filter, File rootDstDir, File dstDir, int depth) throws IOException {
+	
+		File [] entries = rootDstDir.listFiles();
+	
+		try {
+			for(int i=0;i<entries.length;i++){
+				if(entries[i].isDirectory()){
+					unzip (filter,entries[i],dstDir,depth);
+				}
+				File entry = entries[i];
+
+				String entryName = entry.getName();
+				File file = new File(dstDir, FileTool.changeSeparator(entryName, '/', File.separatorChar));
+				if (entryName.endsWith(".zip") || entryName.endsWith(".jar"))  {
+					String fileName = file.getName();
+					String dirName = fileName.substring(0, fileName.length() - 4) + "_" + fileName.substring(fileName.length() - 3);
+					ZipFile innerZipFile = null;
+					try {
+						innerZipFile = new ZipFile(entry);
+						File innerDstDir = new File(entry.getParentFile(), dirName);
+						unzip(filter, innerZipFile, rootDstDir, innerDstDir, depth + 1);
+						//entry.delete();
+					} catch (IOException e) {
+						if(innerZipFile != null){
+							try {
+								innerZipFile.close();
+							} catch(IOException e2){
+							}
+						}
+						System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
+						e.printStackTrace();
+					}
+				
+				}
+			}
+		} catch(IOException e){
+			e.printStackTrace();
+		}	
+	}
+	/**
 	 * Zips the given directory to the given zip file.
 	 * Directories are zipped recursively. Inner zip files are
 	 * created for directories that end with "_zip" or "_jar".

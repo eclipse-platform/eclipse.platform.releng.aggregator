@@ -13,14 +13,10 @@
   <!-- should be done within the body of the suite target. -->
   <target name="init">
     <tstamp/>
-  	<!--determine if files are available to run startup performance tests-->
-  	<condition property="startupFrameworkAvailable">
-  		<and>
-  			<available file="${eclipse-home}/../../apt" />
-  			<isset property="performance"/>
-  		</and>
+  	<condition property="tar.gz">
+  		<equals arg1="${os}" arg2="linux" />
   	</condition>
-   </target>
+  </target>
 
   <!-- This target holds code to cleanup the testing environment after the tests -->
   <!-- have been run. You can use this to delete temporary files that are created. -->
@@ -28,9 +24,19 @@
     <delete dir="${location}" quiet="true"/>
   </target>
 
+<!--if file is a tar.gz file and not a zip, extract the SDK on which to execute chkpii before starting tests-->
+  <target name="setup" if="tar.gz">
+	<property name="archiveDir" value="${eclipse-home}/../.."/>
+	<delete dir="${location}" />
+	<mkdir dir="${location}" />
+	<exec dir="${location}" executable="tar">
+		<arg line="-xzf ${archiveDir}/eclipse-SDK-*.tar.gz"/>
+    </exec>
+  </target>
+	
   <!-- This target runs the test suite. Any actions that need to happen after all -->
   <!-- the tests have been run should go here. -->
-  <target name="run" depends="init,BuildTests,cleanup">
+  <target name="run" depends="init,BuildTests,cleanup,setup">
     <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
       <property name="includes" value="org*.xml"/>
       <property name="output-file" value="org.eclipse.releng.tests.xml"/>
@@ -45,8 +51,5 @@
       <property name="plugin-path" value="${eclipse-home}/plugins/${org.eclipse.releng.tests}"/>
     </ant>
   </target>
-
- <!--required.  Use for running performance tests.-->
-  <target name="performance" />
 
  </project>
