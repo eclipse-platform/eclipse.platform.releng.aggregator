@@ -16,15 +16,13 @@ import java.util.Properties;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.Dimensions;
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 public class DB {
     
     public static final String DB_NAME= "perfDB";
-    public static final String DB_PATH= "/tmp/cloudscape/";
-    
-    private static final String HOST= null; // "localhost:1527"
     
     private static DB fgDefault;
     
@@ -35,7 +33,7 @@ public class DB {
     public static DB getDefault() {
         if (fgDefault == null) {
             fgDefault= new DB();
-            fgDefault.connect(DB_NAME);
+            fgDefault.connect();
         }
         return fgDefault;
     }
@@ -43,14 +41,52 @@ public class DB {
     private DB() {
     }
     
-    private void connect(String dbname) {
+    /**
+     * dbloc=	embedd
+     * dbloc=/tmp/performance
+     * dbloc=net://localhost
+     * dbloc=net://www.eclipse.org
+     */
+    private void connect() {
+
         if (fConnection != null)
             return;
         
-        try {
-            System.out.println("Trying to connect...");
-            fConnection= connect2(dbname);
-            System.out.println("connected!");
+        Properties p= new Properties();
+        PerformanceTestPlugin.getEnvironmentVariables(p);
+        
+        String dbloc= p.getProperty("dbloc");
+        if (dbloc == null)
+            return;
+                
+        String dbname= p.getProperty("dbname", DB_NAME);
+        
+        try {            
+            if (dbloc.startsWith("net://")) {
+                // connect over network
+                System.out.println("Trying to connect over network...");
+                Class.forName("com.ibm.db2.jcc.DB2Driver");
+                String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
+                String dbuser= p.getProperty("dbuser", "guest");
+                String dbpassword= p.getProperty("dbpasswd", "guest");
+                fConnection= DriverManager.getConnection(url, dbuser, dbpassword);
+            } else {
+                // embedded
+                System.out.println("Loading embedded cloudscape...");
+                Class.forName("com.ihost.cs.jdbc.CloudscapeDriver");
+                File f;
+                if (dbloc.length() == 0) {
+                    String user_home= System.getProperty("user.home");
+                    if (user_home == null)
+                        return;
+                    f= new File(user_home, "cloudscape");
+                } else
+                    f= new File(dbloc);
+                String dbpath= new File(f, dbname).getAbsolutePath();
+                String url= "jdbc:cloudscape:" + dbpath + ";create=true";
+                fConnection= DriverManager.getConnection(url);
+            }
+            System.out.println("succeeded!");
  
             fSQL= new SQL(fConnection);
 
@@ -92,29 +128,6 @@ public class DB {
         return fSQL;
     }
     
-    private Connection connect2(String dbName) throws ClassNotFoundException, SQLException {
-        String url;
-        Properties p= new Properties();
-        if (HOST != null) {
-            // connect over network
-            Class.forName("com.ibm.db2.jcc.DB2Driver");
-            url="jdbc:cloudscape:net://" + HOST + "/" + dbName + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
-            p.setProperty("user", "foo");
-            p.setProperty("password", "bar");
-        } else {
-            // embedded
-            Class.forName("com.ihost.cs.jdbc.CloudscapeDriver");
-            String dbpath= null;
-            String user_home= System.getProperty("user.home");
-            if (user_home != null)
-            	dbpath= new File(user_home, "cloudscape/" + DB_NAME).getAbsolutePath();
-            if (dbpath == null)
-            	dbpath= DB_PATH + dbName;
-            url= "jdbc:cloudscape:" + dbpath + ";create=true";
-        }
-        return DriverManager.getConnection(url, p);
-    }
-
     private void doesDBexists() throws SQLException {
         Statement stmt= fConnection.createStatement();
         try {
@@ -134,7 +147,7 @@ public class DB {
         
         if (scenarioId == null || sample == null)
             return;
-        
+                
         DB db= getDefault();
         SQL sql= db.getSQL();
  

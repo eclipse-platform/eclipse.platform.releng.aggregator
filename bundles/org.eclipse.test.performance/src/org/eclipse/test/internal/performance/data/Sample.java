@@ -19,7 +19,7 @@ import java.util.Map;
 public class Sample {
 	Map fProperties;
 	DataPoint[] fDataPoints;
-	String fId;
+//	String fId;
 	
 	public Sample(Map properties, DataPoint[] dataPoints) {
 		fProperties= properties;
@@ -36,11 +36,12 @@ public class Sample {
 		return dataPoints;
 	}
 	
-	public String getId() {
-		return fId;
-	}
+//	public String getId() {
+//		return fId;
+//	}
 	
 	public String toString() {
-		return "MeteringSession [id= " + fId + ", #datapoints: " + fDataPoints.length + "]";
+//		return "MeteringSession [id= " + fId + ", #datapoints: " + fDataPoints.length + "]";
+		return "MeteringSession [#datapoints: " + fDataPoints.length + "]";
 	}
 }

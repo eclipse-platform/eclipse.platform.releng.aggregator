@@ -73,9 +73,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 	    
-	    if (false) {
-		    DB.store(getScenarioName(), getSample());
-	    }
+	    DB.store(getScenarioName(), getSample());
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 			printSample();
@@ -86,16 +84,10 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public Sample getSample() {
 	    
-	    PerformanceTestPlugin.processEnvironmentVariables();
-
 	    if (fDataPoints != null) {
-	            
 	        HashMap runProperties= new HashMap();
-	        
 	        collectRunInfo(runProperties);
-	        
-			fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
-			    
+	        fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
 	        return new Sample(runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
 	    }
 	    return null;

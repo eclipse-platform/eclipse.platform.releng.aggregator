@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance;
 
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IPluginDescriptor;
@@ -22,18 +23,13 @@ import org.eclipse.core.runtime.Plugin;
 public class PerformanceTestPlugin extends Plugin {
     
 	/** 
-	 * etools_perf_ctrl - Environment variable name that controls the performance instrumentation.
-	 * It is a semicolon separated set of values. See the class level of
-	 * documentation for TimerStep for it's valid values.
+	 * perf_ctrl - Environment variable name that controls the performance instrumentation.
+	 * It is a semicolon separated set of values.
 	 */
-	public static final String ENV_PERF_CTRL= "etools_perf_ctrl";
-
-	static {
-        processEnvironmentVariables();
-    }
+	public static final String ENV_PERF_CTRL= "perf_ctrl";
 
 	/**
-	 * The plug-in id
+	 * The plug-in ID
 	 */
     public static final String PLUGIN_ID= "org.eclipse.test.performance"; //$NON-NLS-1$
     
@@ -69,7 +65,7 @@ public class PerformanceTestPlugin extends Plugin {
 	/**
 	 * Process your environment variables.
 	 */
-	public static void processEnvironmentVariables() {
+	public static void getEnvironmentVariables(Properties properties) {
 		String ctrl= System.getProperty(ENV_PERF_CTRL);
 		if (ctrl != null) {
 			StringTokenizer st= new StringTokenizer(ctrl, ";");
@@ -80,7 +76,8 @@ public class PerformanceTestPlugin extends Plugin {
 				    throw new IllegalArgumentException("Key '" + token + "' in the environment variable " + ENV_PERF_CTRL + " is illformed");
 				String value= token.substring(i+1);
 				token= token.substring(0,i);
-				System.out.println(token + ": " + value);
+				//System.out.println(token + ": <" + value + ">");
+				properties.put(token, value);
 			}
 		}
 	}
