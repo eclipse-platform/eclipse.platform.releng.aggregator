@@ -6,38 +6,46 @@
  type="text/css">
 </head>
 <body>
+
 <h1>Performance Tests HowTo</h1>
+<p>
+By Christof Marti and Andr&eacute; Weinand, IBM OTI Labs<br>
 2004/10/15<br>
-<br>
+
+<p>
 The Eclipse performance test plugin (org.eclipse.test.performance)
 provides infrastructure for instrumenting programs
 to collect performance data and to assert that performance doesn't drop
 below a baseline. The infrastructure is supported on Windows, Linux,
-and MacOS X.<br>
-<br>
+and MacOS X.
+
+<p>
 The first part of this document describes how performance tests are
 written and executed, the <a href="#cloudscape">second part</a> explains how performance data is
 collected in a database and how this database is installed and
-configured.<br>
-<h2><br>
-</h2>
+configured.
+
 <h2>Writing Performance Tests</h2>
+
 <h3>Setting up the environment</h3>
+
 <ul>
   <li>check out the following plug-ins from dev.eclipse.org.</li>
   <ul>
     <li>org.eclipse.test.performance</li>
     <li>org.eclipse.test.performance.win32 (for Windows only)</li>
   </ul>
-  <li>add org.eclipse.test.performance to your test plug-in's
-dependencies</li>
+  <li>you need org.junit</li>
+  <li>add org.eclipse.test.performance to your test plug-in's dependencies</li>
 </ul>
+
 <h3>Writing a performance test case</h3>
+
+A performance test case is an ordinary JUnit test TestCase.
 <ul>
-  <li>also see below for <a href="#convert">converting test cases from
-earlier versions of this document</a></li>
-  <li>create a test case with test methods along the lines of:</li>
-<pre>public void testMyOperation() {
+<li>create a test case with test methods along the lines of:
+<pre>
+public void testMyOperation() {
 	Performance perf= Performance.getDefault();
 	PerformanceMeter performanceMeter= perf.<b>createPerformanceMeter</b>(perf.getDefaultScenarioId(this));
 	try {
@@ -53,10 +61,13 @@ earlier versions of this document</a></li>
  	}
  }
 </pre>
-  <li>or create a test case extending <code>PerformanceTestCase</code>
+</li>
+
+<li>or create a test case extending <code>PerformanceTestCase</code>
 which is a convenience class that makes the
 use of <code>PerformanceMeter</code> transparent:
-<pre>public class MyPerformanceTestCase extends PeformanceTestCase {
+<pre>
+public class MyPerformanceTestCase extends PeformanceTestCase {
 
 	public void testMyOperation() {
 		for (int i= 0; i &lt; 10; i++) {
@@ -69,29 +80,38 @@ use of <code>PerformanceMeter</code> transparent:
 	}
 }
 </pre>
-  </li>
+</li>
 </ul>
+
 Notes:
 <ul>
-  <li><code>Performance</code> is currently just a factory for <code>PerformanceMeter</code>s.
+<li>
+<code>Performance</code> is currently just a factory for <code>PerformanceMeter</code>s.
 The scenario id passed to <code>createPerformanceMeter(...)</code> has
-to be unique in a single test run and should be the same in each test
-run.</li>
-  <li>The <code>Peformance#getDefaultScenarioId(...)</code> methods
-are provided for convenice. </li>
-  <li><code>PerformanceMeter</code> is a general abstraction for
-measuring, that supports repeated measurements by multiple invocations
+to be unique in a single test run and should be the same across all test runs.
+</li>
+
+<li>
+The <code>Peformance#getDefaultScenarioId(...)</code> methods are provided for convenice.
+</li>
+
+<li>
+<code>PerformanceMeter</code> supports repeated measurements by multiple invocations
 of the <code>start()</code>, <code>stop()</code> sequence. The call
 to <code>commit()</code> is required before evaluation with <code>assertPerformance()</code>
-and <code>dispose()</code> is required before releasing the meter. </li>
-  <li>The number of runs will need some tuning, such that the last runs
+and <code>dispose()</code> is required before releasing the meter.
+</li>
+
+<li>The number of runs usually needs some tuning, such that the last runs
 are stable. In general the first runs will take more time because the
 code is not optimized by the JIT compiler yet. This deserves extra
 caution when other code is run before the measurements (e.g., if tests
-are added, removed, reordered). </li>
+are added, removed, reordered).
+</li>
 </ul>
-<h3>Participating in the performance summary (aka "Performance
-Fingerprint")</h3>
+
+<h3>Participating in the performance summary (aka "Performance Fingerprint")</h3>
+
 If the number of performance tests grows large, it becomes harder to
 get a good overview of the performance characteristics of a build. A
 solution for this problem is a&nbsp; performance summary graph that
@@ -100,25 +120,32 @@ that fits onto a single page. Every Eclipse component can mark one or
 two tests for inclusion in this performance summary. The bar graph
 shows the performance development of about 20 tests relative to a
 reference build in an easy to grasp red/green presentation.<br>
-<br>
-<img style="width: 800px; height: 282px;" alt="summary graph"
- src="FP_I200409240800_I200410050800.jpeg"><br>
-<br>
+<p>
+<img style="width: 800px; height: 282px;" alt="summary graph" src="FP_I200409240800_I200410050800.jpeg">
+<p>
 Marking a test for inclusion is done by passing a performance meter
 into the method Performance.tagAsGlobalSummary(...). This method should
 be called outside of start/stop calls but it must be called before the
-the call to commit().<br>
-<pre>// ....<br>Performance perf= Performance.getDefault();<br>PerformanceMeter pm= perf.createPerformanceMeter(perf.getDefaultScenarioId(this));<br>perf.<span
- style="font-weight: bold;">tagAsGlobalSummary</span>(pm, "A Short Name", Dimension.CPU_TIME);<br>try {<br>	// ...<br></pre>
+the call to commit().
+<pre>
+// ....
+Performance perf= Performance.getDefault();
+PerformanceMeter pm= perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
+perf.<b>tagAsGlobalSummary</b>(pm, "A Short Name", Dimension.CPU_TIME);
+try {
+	// ...
+</pre>
 In order to keep the overview graph small, only a single dimension of
 the test's data is shown and only a short name is used to label the
 data (instead of the rather long scenario ID). Both the short label as
 well as one (or more) dimensions must be supplied in the call to
-tagAsGlobalSummary.<br>
-<br>
+tagAsGlobalSummary.
+
+<p>
 The PerformanceTestCase provides a similar method that must be called
-before startMeasuring(): <br>
-<pre>public class MyPerformanceTestCase extends PeformanceTestCase {
+before startMeasuring():
+<pre>
+public class MyPerformanceTestCase extends PeformanceTestCase {
 
 	public void testMyOperation() {
 		<b>tagAsGlobalSummary</b>("A Short Name", Dimension.CPU_TIME);
@@ -131,36 +158,61 @@ before startMeasuring(): <br>
 		assertPerformance();
 	}
 }</pre>
+
 <h3>Running a performance test case (from a launch configuration)</h3>
+
 <ul>
-  <li>create a new JUnit Plug-in Test launch configuration for the test
-case</li>
-  <li>add "-Xms250M -Xmx250M" or similar to the VM arguments to avoid
-memory pressure during the measurements</li>
+  <li>create a new JUnit Plug-in Test launch configuration for the test case</li>
+  <li>add "-Xms250M -Xmx250M" or similar to the VM arguments to avoid memory pressure during the measurements</li>
   <li>run the launch configuration</li>
-  <li>by default&nbsp;the measured averages of the performance monitor
+  <li>by default the measured averages of the performance monitor
 are written to the console on <code>commit()</code>. This is
 surpressed if performance tests are configured to store data in the
-database (see below).<br>
+database (see below).
   </li>
 </ul>
-<h3>Running a performance test case (within the Automated Testing
-Framework on each build)</h3>
-<ul>
-  <li>if the <code>test.xml</code> of your test plug-in already exists
+
+<h3>Running a performance test case (within the Automated Testing Framework on each build)</h3>
+
+If the <code>test.xml</code> of your test plug-in already exists
 and looks similar to the <code>jdt.text.tests</code>' one, add targets
-similar to:</li>
-  <pre>&lt;!-- This target defines the performance tests that need to be run. --&gt;<br>&lt;target name="performance-suite"&gt;<br>  &lt;property name="your-performance-folder" value="${eclipse-home}/your_performance_folder"/&gt;<br>  &lt;delete dir="${your-performance-folder}" quiet="true"/&gt;<br>  &lt;ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}"&gt;<br>    &lt;property name="data-dir" value="${your-performance-folder}"/&gt;<br>    &lt;property name="plugin-name" value="${plugin-name}"/&gt;<br>    &lt;property name="classname" value="<em>&lt;your fully qualified test case class name&gt;</em>"/&gt;<br>  &lt;/ant&gt;<br>&lt;/target&gt;<br><br>&lt;!-- This target runs the performance test suite. Any actions that need to happen --&gt;<br>&lt;!-- after all the tests have been run should go here. --&gt;<br>&lt;target name="performance" depends="init,performance-suite,cleanup"&gt;<br>  &lt;ant target="collect" antfile="${library-file}" dir="${eclipse-home}"&gt;<br>    &lt;property name="includes" value="org*.xml"/&gt;<br>    &lt;property name="output-file" value="${plugin-name}.xml"/&gt;<br>  &lt;/ant&gt;<br>&lt;/target&gt;<br></pre>
-</ul>
+similar to:
+<pre>
+&lt;!-- This target defines the performance tests that need to be run. --&gt;
+&lt;target name="performance-suite"&gt;
+  &lt;property name="your-performance-folder" value="${eclipse-home}/your_performance_folder"/&gt;
+  &lt;delete dir="${your-performance-folder}" quiet="true"/&gt;
+  &lt;ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}"&gt;
+     &lt;property name="data-dir" value="${your-performance-folder}"/&gt;
+     &lt;property name="plugin-name" value="${plugin-name}"/&gt;
+     &lt;property name="classname" value="<em>&lt;your fully qualified test case class name&gt;</em>"/&gt;
+  &lt;/ant&gt;
+&lt;/target&gt;
+                    
+&lt;!-- This target runs the performance test suite. Any actions that need to happen --&gt;
+&lt;!-- after all the tests have been run should go here. --&gt;
+&lt;target name="performance" depends="init,performance-suite,cleanup"&gt;
+  &lt;ant target="collect" antfile="${library-file}" dir="${eclipse-home}"&gt;
+    &lt;property name="includes" value="org*.xml"/&gt;
+    &lt;property name="output-file" value="${plugin-name}.xml"/&gt;
+  &lt;/ant&gt;
+&lt;/target&gt;
+</pre>
+
 Notes:
 <ul>
-  <li>Performance measurements are run on a dedicated performance
-measurement machine of the Releng team.</li>
-  <li>If you have created a new source folder, do not forget to include
-it in the build (add it to the "build.properties" file).</li>
+<li>
+Performance measurements are run on a dedicated performance measurement machine of the Releng team.
+</li>
+  
+<li>
+If you have created a new source folder, do not forget to include
+it in the build (add it to the "build.properties" file).
+</li>
 </ul>
-<h3>Running a performance test case (within the Automated Testing
-Framework, locally)</h3>
+
+<h3>Running a performance test case (within the Automated Testing Framework, locally)</h3>
+
 <ul>
   <li>modify <code>test.xml</code> as described above </li>
   <li>download a build and its accompanying Automated Testing Framework</li>
@@ -200,60 +252,10 @@ delete the old 3.0.0 test plug-in and rename yours to *_3.0.0)</li>
 JRE&gt;</em>\bin\java.exe <em>&lt;your test target&gt;</em><code></code></code></li>
   </ul>
 </ul>
-<h3><a name="convert">Converting test cases from earlier versions of
-this document</a></h3>
-You can skip the following list if you just start writing performance
-tests and don't have to convert "legacy" code.<br>
-<ul>
-  <li>replace the use of any <code>PerformanceMeterFactory</code> with
-    <code>org.eclipse.test.performance.Performance#createPerformanceMeter(...)</code>,
-maybe in combination with one of the <code>Performance#getDefaultScenarioId(...)</code>
-methods </li>
-  <li>replace the use of any old <code>PerformanceMeter</code> with
-org.eclipse.test.performance.PerformanceMeter:</li>
-  <ul>
-    <li>add a call to <code>Performance.assertPerformance(performanceMeter)</code>
-after the call to <code>commit()</code></li>
-    <li>surround the use of the <code>PerformanceMeter</code> with a
-try-block and add a call to <code>performanceMeter.dispose()</code> in
-the finally-block</li>
-  </ul>
-  <li>remove <code>org.eclipse.perfmsr.core</code> and <code>org.eclipse.jdt.text.tests</code>
-from your test plug-in's dependencies</li>
-  <li>for running a performance test from a launch configuration:</li>
-  <ul>
-    <li>remove the <code>etools_perf_ctrl</code> system property from
-your launch configuration's VM arguments</li>
-    <li>instead add the <code>-DInternalPrintPerformanceResults</code>
-to your launch configuration's VM arguments, this option is a
-provisional solution for providing access to the measurements, it lets
-the <code>PerformanceMeter</code> print the measured averages to the
-console on <code>commit()</code> and will be removed as soon as the
-new backend is in place</li>
-  </ul>
-  <li>for running a performance test within the Automated Testing
-Framework on each build (if your <code>test.xml</code> looks similar
-to the <code>jdt.text.tests</code>' one):</li>
-  <ul>
-    <li>remove any <code>if="performance"</code> and <code>unless="performance"</code>
-attributes</li>
-    <li>remove the dependency of the <code>run</code> target on the <code>performance-suite</code>
-target</li>
-    <li>duplicate the <code>run</code> target, rename the copy to <code>performance</code>
-and make it dependent on <code>performance-suite</code> instead of <code>suite</code></li>
-  </ul>
-  <li>for running a performance test locally within the Automated
-Testing Framework (instructions for Windows):</li>
-  <ul>
-    <li>when running <code>runtests.bat</code>, remove the <code>eclipse-testing.properties</code>
-file and omit the <code>-properties ../eclipse-testing.properties</code>
-option</li>
-  </ul>
-</ul>
-<h2><br>
-</h2>
+
 <h2><a name="cloudscape">Setting up the Cloudscape database</h2>
-<p>Performance tests are only valuable if measured data can be
+
+Performance tests are only valuable if measured data can be
 monitored over time and compared against reference data. For this
 functionality the Eclipse performance plugin makes use of IBM's <a
  href="http://www-306.ibm.com/software/data/cloudscape/">Cloudscape</a>
@@ -267,23 +269,30 @@ as a network server. <br>
 <p>This section describes how to install Cloudscape and how to
 configure
 the performance test plugin to use Cloudscape.
-</p>
-<p> </p>
+
 <h3>Getting and installing Cloudscape</h3>
-<p>The performance plugin has an optional prereq for a "Cloudspace"
+
+The performance infrastructure does not include Cloudscape. If you want to leverage Cloudscape
+you need to download and install it.
+
+<p>
+The performance plugin has an optional prereq for a "Cloudspace"
 library project. Since it is optional, you won't see any compile time
 errors when loading the performance plugin from the Eclipse repository
 and the Cloudscape project is not available in your workspace. However
 you'll see runtime errors when running the tests and trying to access
 the database.<br>
-</p>
+
+<p>
 If you have access to the following repository you can get the
-"Cloudscape" library project from there:<br>
-<pre>  :pserver:anonymous@ottcvs1.ott.oti.com:/home/cvs/zrheclipse<br></pre>
+"Cloudscape" library project from there:
+<pre>
+  :pserver:anonymous@ottcvs1.ott.oti.com:/home/cvs/zrheclipse
+</pre>
 Otherwise get Cloudscape from
-<a
- href="http://www-106.ibm.com/developerworks/db2/library/techarticle/dm-0408cline/index.html">here</a>.
-Unpack the archive to any directory.<br>
+<a href="http://www-106.ibm.com/developerworks/db2/library/techarticle/dm-0408cline/index.html">here</a>.
+Unpack the archive to any directory.
+<br>
 To create a library project for Cloudscape, open the Java project
 wizard and enter "Cloudscape" as the project's name. Go to the next
 page and select the "Libraries" tab. Remove the JRE and add the five
@@ -317,30 +326,33 @@ Cloudscape project and paste the following contents into it:<br>
 &nbsp;&nbsp; &lt;/runtime&gt;
 &lt;/plugin&gt;
 </pre>
-<p>In addition you'll need to load the performance plugin
+
+In addition you'll need to load the performance plugin
 (org.eclipse.test.performance) and if you are running
-on Windows the associated fragment
-(org.eclipse.test.performance.win32).<br>
-</p>
-<h3>Configuring the performance plugin for using Cloudscape<br>
-</h3>
+on Windows the associated fragment (org.eclipse.test.performance.win32).
+
+
+<h3>Configuring the performance plugin for using Cloudscape</h3>
+
 The performance test plugin is configured via the three Java properties
-eclipse.perf.dbloc, eclipse.perf.config, and eclipse.perf.assertAgainst.<br>
-<br>
+eclipse.perf.dbloc, eclipse.perf.config, and eclipse.perf.assertAgainst.
+<p>
 The eclipse.perf.dbloc specifies where the Cloudscape DB is located.
 If no value is given
 <pre>
 	-Declipse.perf.dbloc=
 </pre>
 Cloudscape runs in embedded mode (not as a separate server)
-and the DB will live in your home directory.<br>
+and the DB will live in your home directory.
+<p>
 If an absolute or relative path is given, Cloudscape uses or creates
 the DB in that location. E.g. with
 <pre>
 	-Declipse.perf.dbloc=/tmp/cloudscape
 </pre>
 Cloudscape runs in embedded mode and creates the database under
-/tmp/cloudscape.<br>
+/tmp/cloudscape.
+<p>
 To connect to a cloudscape server running locally or remotely use the
 following:
 <pre>
@@ -350,16 +362,16 @@ With the properties eclipse.perf.config and eclipse.perf.assertAgainst
 you specify the name under which performance data is stored in the
 database and the name of the reference data to compare against. This
 "name" is not a single string but a set of key/value pairs separated by
-semicolons:<br>
+semicolons:
 <pre>
 	-Declipse.perf.config=<i>key1</i>=<i>value1</i>;<i>key2</i>=<i>value2</i>;...;<i>keyn</i>=<i>valuen</i>
 	-Declipse.perf.assertAgainst=<i>key1</i>=<i>value1</i>;<i>key2</i>=<i>value2</i>;...;<i>keyn</i>=<i>valuen</i>
 </pre>
-<p>The key/value pairs can be used to associate the collected
+The key/value pairs can be used to associate the collected
 performance data with information about the configuration that was used
 to generate the data. Typically this includes the name of the build,
 the system on which the test were run, or the used Java VM. So in this
-example: </p>
+example:
 <pre>
 	-Declipse.perf.config=build=N20040914;host=relengwin;jvm=j9
 </pre>
@@ -371,8 +383,8 @@ old data but is added under the same name. Programs that visualize the
 data are expected
 to aggregate the data for example by calculating the average of all
 tests.
-<br>
-<br>
+
+<p>
 To assert that performance data collected for another build does not
 degrade with respect to some reference data the assertAgainst property
 is used similarly:
@@ -383,8 +395,8 @@ This property enables any "assertPerformance" calls in your performance
 tests and compares the newly measured data against the data specified
 by the three key/value pairs. Please note that the order of the pairs
 does not matter when looking up the data in the database. However, the
-number of key/value pairs must be identical.<br>
-<br>
+number of key/value pairs must be identical.
+<p>
 Because in most cases you want to store newly collected data as well as
 assert against other reference data at the same time you'll need to
 specify both properties. In this case only those key/value pairs must
@@ -398,11 +410,11 @@ So in the example from above the new performance data is stored in the
 database under the build name
 "N20040914" and the host "relengwin" and the "assertPerformance"
 compares this data against data tagged with a build name of "R3.0" and
-an implicitely specified host "relengwin".<br>
-<br>
+an implicitely specified host "relengwin".
+<p>
 If you want to assert the average of multiple runs (instead of the data
 of a single run)
-against the reference data, do the following:<br>
+against the reference data, do the following:
 <pre>
 	// Run program 4 times to collect data under build name "I20040914"
 	... -Declipse.perf.config=build=I20040914
@@ -414,14 +426,15 @@ against the reference data, do the following:<br>
 	// and assert the average of 5 runs of I20040914 against some baseline data
 	... -Declipse.perf.config=build=I20040914 -Declipse.perf.assertAgainst=build=R3.0
 </pre>
+
 <h3>Viewing the data</h3>
+
 Since we do not (yet) have fancy visualization tools, the performance
 test plugin provides two classes
 that can be run as standalone programs for "dumping" the data contained
 in the database.
 For both programs you need to specify the database location via the <code>eclipse.perf.dbloc</code>
-property
-(most easily done via a launch configuration).
+property (most easily done via a launch configuration).
 <ul>
   <li>To view the data in a tabular format use the class <code>org.eclipse.test.internal.performance.db.View</code>.
 It produces the following output:
@@ -434,20 +447,25 @@ User time:        240 ms [0]    305 ms [45]  270 ms [0]  270 ms [0]  260 ms [0] 
 System Time:      325 ms [0]  491 ms [94.5]  358 ms [0]  296 ms [0]  316 ms [0]  304 ms [19.6]
 CPU Time:         270 ms [0]    315 ms [55]  270 ms [0]  270 ms [0]  280 ms [0]   253 ms [4.7]
 </pre>
+
 If you don't want to see all data in the database you can modify the
 three SQL wildcards ("%") in the call to <code>DB.queryScenarios</code>.
-    <p> </p>
-  </li>
-  <li>To dump the (quite voluminous) contents of all database tables
-run <code>org.eclipse.test.internal.performance.db.DB</code>. </li>
+</li>
+
+<li>To dump the (quite voluminous) contents of all database tables
+run <code>org.eclipse.test.internal.performance.db.DB</code>.
+</li>
 </ul>
+
 <h3>How to setup a Cloudscape server (on Linux and MacOS X)</h3>
+
 <ul>
-  <li>Either get Cloudscape from the repository or from <a
+
+<li>Either get Cloudscape from the repository or from <a
  href="http://www-106.ibm.com/developerworks/db2/library/techarticle/dm-0408cline/index.html">here</a>.
-    <p> </p>
-  </li>
-  <li>Get the (Bourne) shell script "cs.sh" from the scripts folder of <code>org.eclipse.test.performance</code>
+</li>
+
+<li>Get the (Bourne) shell script "cs.sh" from the scripts folder of <code>org.eclipse.test.performance</code>
 and install it on the server
 (rename it to "cs" and make it executable; if you've checked out the
 file on Windows and copied it to Linux,
@@ -455,16 +473,20 @@ it might be necessary to convert line delimiters with the dos2unix
 tool).
 The script simplifies the usage of the Cloudscape tools - especially
 starting and stopping the server - because
-it sets the correct classpath and some important properties. </li>
-  <li>Edit the script and adapt the variables <code>CSLIB</code>, <code>DBROOT</code>,
+it sets the correct classpath and some important properties.
+</li>
+ 
+<li>Edit the script and adapt the variables <code>CSLIB</code>, <code>DBROOT</code>,
 and <code>JAVA</code>
 to your installation. <code>CSLIB</code> should point to the directory
 containing the Cloudscape jars.
 If you've used the Cloudscape installer, then this is the lib directory
 inside the Cloudscape 10.0 directory.
 If you are using the Cloudscape project from the repository, then this
-is just the project folder. </li>
-  <li>in a Shell execute
+is just the project folder.
+</li>
+
+<li>in a Shell execute
 <pre>
 	cs start &amp;
 </pre>
@@ -473,13 +495,15 @@ stdout:
 <pre>
 	Server is ready to accept connections on port 1527.
 </pre>
-to the console. </li>
-  <p> </p>
-  <li>stop the server with
+to the console.
+</li>
+
+<li>stop the server with
 <pre>
 	cs stop
 </pre>
-  </li>
+</li>
 </ul>
+
 </body>
 </html>
