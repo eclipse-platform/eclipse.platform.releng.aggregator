@@ -9,6 +9,7 @@
 		<property name="temp.folder" value="${basedir}/temp.folder"/>
 		<property name="plugin.destination" value="${basedir}"/>
 		<property name="build.result.folder" value="${basedir}"/>
+		<available file="${destination.temp.folder}/${full.name}/doc.zip" property="doc.zip.present"/>
 	</target>
 
 	<target name="build.update.jar" depends="init">
@@ -22,7 +23,7 @@
 		<delete dir="${temp.folder}"/>
 	</target>
 
-	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+	<target name="gather.bin.parts" depends="init" if="destination.temp.folder" unless="doc.zip.present">
 		<ant antfile="buildDoc.xml" />
 		<mkdir dir="${destination.temp.folder}/${full.name}"/>
 		<zip zipfile="${destination.temp.folder}/${full.name}/doc.zip"
