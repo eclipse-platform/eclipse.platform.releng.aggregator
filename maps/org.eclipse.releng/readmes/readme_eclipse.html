@@ -12,7 +12,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p><b>DRAFT </b>Pre-release 2.1.0<br>
-Last revised March 19, 2003</p>
+Last revised March 21, 2003</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -194,7 +194,7 @@ been tested, but is not product quality in this release.</p>
       <td height="15">Primary</td>
     </tr>
     <tr>
-      <td width="42%" height="16">SuSE Linux 8.1 x86 (GTK 2.2 required for DBCS)</td>
+      <td width="42%" height="16">SuSE Linux 8.1 x86 (Latin-1 only)</td>
       <td width="19%" height="16">Primary</td>
     </tr>
     <tr>
@@ -406,10 +406,18 @@ existing clients that explicitly check for the <code>SWT.CONTROL</code>
 modifier. In most cases, they should instead check for <code>SWT.MOD1</code> so
 that they work appropriately on both Macs and non-Macs. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=24393">24393</a>)</p>
 <h4>OLE variant type exceptions</h4>
-<p><code>SWTError</code> exceptions are now thrown when a Java type is requested
+<p>An <code>SWTError</code>  exception is now thrown when a Java type is requested
 from an empty variant type (<code>VT_EMPTY</code>). Since existing clients
 should already be handling <code>SWTError</code> exceptions as per the spec for <code>Variant.getInt()</code>,
 etc., this change should not affect existing clients. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=24402">24402</a>)</p>
+<h4>Multiple drag and drop adapters</h4>
+<p>An <code>SWTError</code>  exception is now thrown if you create a second <code>DragSource</code>
+(or <code>DropTarget</code>) for a widget. Across various window systems, the
+results of creating multiple drag source or drop target objects were at best
+indeterminate. The exception makes it clear that this is not supported. Since existing clients
+should already be handling <code>SWTError</code> exceptions as per the spec for
+the <code>DragSource</code> and <code>DropTarget</code> constructors, this change should not
+impact existing clients. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35214">35214</a>)</p>
 <h3>Platform - Install/Update</h3>
 <p>None.</p>
 <h3>Platform - Ant</h3>
@@ -422,7 +430,7 @@ etc., this change should not affect existing clients. (bug <a href="http://dev.e
 should report inexact matches. The user can set this via the <b>Workbench &gt;
 Search </b>preference page. The new API method <code>SearchUI.arePotentialMatchesIgnored</code>
 should be used to query the preference setting. Existing clients that contribute
-particular search engine (or search page) should consider whether the notion of
+a particular search engine (or search page) should consider whether the notion of
 an inexact match is meaningful in their particular context, and honor this
 preference if it is. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20663">20663</a>)</p>
 <h3>Platform - Text</h3>
@@ -618,6 +626,13 @@ the command line:</p>
   <p><code>eclipse -vmargs -XdoCloseWithReadPending</code></p>
 </blockquote>
 <p>(<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=18321">bug 18321</a>)</p>
+<h4>DBCS support on Linux GTK (Linux GTK only)</h4>
+<p>The versions of GTK included with RedHat Linux 8.0 and SuSE Linux 8.1 that we
+tested support Latin-1 locales but not DCBS. The DCBS support in GTK 2.2 should
+be sufficient, and in principle Eclipse should work on any recent Linux with GTK
+2.2. We have verified that Eclipse DBCS support works with RedHat Linux 8.0 and
+GTK 2.2. However, we were unable to get Eclipse working with SuSE Linux 8.1 and
+and GTK 2.2, so this remains an open issue. (bug <font color="#FF0000">MISSING</font>)</p>
 <h3>3.1.1 <a name="I-Platform - Core">Platform - Core</a></h3>
 <h4>Declaring package name prefixes improves plug-in class loading speed</h4>
 <p>A significant (10-15%) speed increase in the time to load a plug-in's classes
