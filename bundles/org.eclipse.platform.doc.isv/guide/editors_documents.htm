@@ -13,61 +13,118 @@ Documents and partitions
 <BODY BGCOLOR="#ffffff">
 <H2>Documents and partitions</H2>
 <p>The platform text support
-    defines a generic <b>document</b> model for text and provides a viewer that
+    defines a generic document model for text and provides a viewer that
     displays text using this model.&nbsp;We will start by looking at the Java
-editor example and how it structures its information.</p>
+editor example and how it structures its information.&nbsp; We will not focus on
+the basic mechanics of registering an editor extension, since we've already seen
+this in the section discussing <a href="workbench_basicext_editors.htm"><b>org.eclipse.ui.editors</b></a>.&nbsp;
+Instead, we'll look at the specifics of how the editor class is implemented.</p>
 <h3>Document providers and documents</h3>
-<p>In the workbench, an editor is typically opened by selecting a domain element
+<p>In the workbench, an editor is typically opened when the user selects a domain element
 (such as a file or an element stored inside an archive file) and opening
-it.&nbsp; When the editor is created, it is associated with an <b>editor input</b>,
+it.&nbsp; When the editor is created, it is associated with an editor input (<a href="../reference/api/org/eclipse/ui/IEditorInput.html"><b>IEditorInput</b></a>),
 which describes the object being edited.</p>
-<p>The object that is opened can be a file in the file system (<a href="../reference/api/org/eclipse/ui/IFileEditorInput.html"><b>IFileEditorInput</b></a>),
-a file located inside a file archive, such as ZIP file (<a href="../reference/api/org/eclipse/ui/IStorageEditorInput.html"><b>IStorageEditorInput</b></a>),
-or something specialized for your editor.&nbsp; The platform text framework
+<p>The Java editor example opens when the user opens a file with the &quot;*.jav&quot;
+extension.&nbsp; In this case, the input to the editor is an <a href="../reference/api/org/eclipse/ui/IFileEditorInput.html"><b>IFileEditorInput</b></a>.&nbsp;
+The platform text framework
 assumes little about the editor input itself.&nbsp; It is concerned with
-providing a definition for the presentation model of the input.</p>
-<p>In order to effectively display and manipulate different kinds of elements, a
-generic presentation model must be defined.&nbsp; Your editor must provide a way
+defining a definition for the presentation model of the input, so that it can
+effectively display and manipulate different sections of the text.</p>
+<p>This means that your editor must provide a way
 to map from its expected domain model (the editor input) to the presentation
-model.&nbsp; This mapping is defined by you in a <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocumentProvider</b></a>.&nbsp;
-Given an editor input, a document provider will supply an appropriate <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>.</p>
-<p>For example...&lt;java editor&gt;</p>
-<p>The document provider instance should be shared between editors.&nbsp; That
-is, only one instance of the provider should be used to perform this
-mapping.&nbsp; You can manage the reference to this provider in your plug-in
-class (example?).&nbsp; You can also specify your document provider in the XML
-markup and the workbench will manage your provider instance for you.&nbsp; (show
-the markup in the JavaEditor).</p>
+model.&nbsp; This mapping is defined by you in <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocumentProvider</b></a><b>.createDocument</b>.&nbsp;
+Given an editor input, the document provider returns an appropriate <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>.</p>
+<p>For example, the Java editor example defines a <b>JavaDocumentProvider</b>
+which returns the appropriate document.&nbsp; How is the relationship between
+the appropriate document provider and the &quot;*.jav&quot; extension
+established?&nbsp; In the <b><a href="../reference/extension-points/org_eclipse_ui_documentProviders.html">org.eclipse.ui.documentProviders</a></b>
+extension.&nbsp; This extension is used to define mappings between file types
+and document providers.&nbsp; The example defines its document provider as
+follows:</p>
+<font SIZE="2">
+<pre><font color="#4444CC">&lt;extension
+      point=&quot;org.eclipse.ui.documentProviders&quot;&gt;
+   &lt;provider
+         extensions=&quot;%javaFileExtension&quot;
+         class=&quot;org.eclipse.ui.examples.javaeditor.JavaDocumentProvider&quot;
+         id=&quot;org.eclipse.ui.examples.javaeditor.JavaDocumentProvider&quot;&gt;
+   &lt;/provider&gt;
+&lt;/extension&gt;</font></pre>
+</font><p>The workbench manages the details of creating the necessary document
+provider instance when the user opens a file of the appropriate extension.&nbsp;
+Note that the document provider instance is shared among different editors.</p>
+<p>Another way to associate a document provider with an editor is to let the
+plug-in itself manage the document provider.&nbsp; This is usually done in the
+plug-in class.&nbsp; When an an input element is set into an editor, the editor
+asks its plug-in class for the appropriate document provider.&nbsp; The plug-in
+can manage the creation and reference to the document provider.&nbsp; This
+technique may be preferable when there is special initialization or other
+processing involved with the document provider.&nbsp; See <b>ClassFileEditor</b>
+in the JDT tooling for an example.&nbsp;</p>
+<p>Once the proper document provider is associated with an editor, its main task
+is to create a document from the file input and configure an appropriate object
+for dividing the document up into <b>partitions</b>.&nbsp;&nbsp;</p>
 <h3>Partitions</h3>
-<p>Documents are divided into
-    non-overlapping <b>partitions</b>, which can be useful when the text
-    represents multiple elements with different behaviors (such as methods and
-    comments inside a Java file).&nbsp;&nbsp;</p>
-<p> (Elaborate on what partitions exist in
-the example...how the document is connected with a partitioner -
-JavaDocumentProvider.createDocument)</p>
-<p>Each partitions is assigned a <b>content type</b>
-    which is used to identify regions in the document where different behavior should be
-    assigned.&nbsp; Document <b>positions</b> can be used to
-    define text regions that remain updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
-<p><b><a href="../reference/api/org/eclipse/jface/text/formatter/package-summary.html">org.eclipse.jface.text.formatter</a></b>
-    defines a text viewer add-on which can be configured with different <b>formatting</b> 
-    behavior per partition content type.&nbsp; Formatting is achieved by
-    manipulating white spaces and delimiters in order to present the text in a
-    structured fashion.&nbsp; Formatting is most commonly used when editing code and is
-    often driven by user preference.&nbsp; The JDT source code editor uses this
-    support to provide user-driven Java code formatting.&nbsp; (show example)</p>
+<p>Let's look at documents and partitions in the <b>JavaDocumentProvider</b>.&nbsp;
+When a document is created, an <a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>IDocumentPartitioner</b></a>
+is created and set into the document.&nbsp;&nbsp;</p>
+<pre><font color="#4444CC">protected IDocument createDocument(Object element) throws CoreException {
+	IDocument document= super.createDocument(element);
+	if (document != null) {
+		<b>IDocumentPartitioner partitioner= createJavaPartitioner();
+		document.setDocumentPartitioner(partitioner);</b>
+		partitioner.connect(document);
+	}
+	return document;
+}</font></pre>
+<p>The partitioner is responsible for dividing the document into
+    non-overlapping partitions, or regions.&nbsp; In the case of the Java editor
+example, the document is divided into partitions that represent the javadoc
+comments, multi line comments, and everything else.&nbsp; Each partition is assigned a
+content type and document positions are remembered so that the text partitions
+can be updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
 <h3>Rule based document partitioning</h3>
-<p><b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
-    provides <b>rule-based document scanning</b>.&nbsp; Plug-ins can use rules
-    to distinguish tokens such as line delimiters, white space, and generic
-    patterns when scanning a document.&nbsp; This package also provides support
-    for rule-driven presentation reconciling and document partitioning.&nbsp;&nbsp;
-<p> The Java editor example uses this package to parse Java
-    code.&nbsp;&nbsp;
-<p> JavaDocumentProvider.createJavaPartitioner.&nbsp; Configure a
-default partitioner.
+<p>It is up to each editor to determine the appropriate implementation for a
+document partitioner.&nbsp; Support is provided in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
+ for rule-based document scanning.&nbsp; Using a scanner allows an editor to use
+the <a href="../reference/api/org/eclipse/jface/text/DefaultPartitioner.html"><b>DefaultPartitioner</b></a>
+provided by the framework.<pre><font color="#4444CC">private IDocumentPartitioner createJavaPartitioner() {
+	return new <b>DefaultPartitioner(getJavaPartitionScanner(), TYPES)</b>;
+}</font></pre>
+<p><a href="../reference/api/org/eclipse/jface/text/rules/RuleBasedPartitionScanner.html"><b>RuleBasedPartitionScanner</b></a><b>
+</b>is the superclass for rule based scanners.&nbsp; Subclasses are responsible
+for enumerating and implementing the rules that should be used to distinguish
+tokens such as line delimiters, white space, and generic
+    patterns when scanning a document.&nbsp; The example's <b>JavaPartitionScanner</b>
+defines rules for distinguishing single line comments, constants, javadoc, multi
+line comments, and&nbsp; words.&nbsp; This is done in the scanner's constructor:
 <p>&nbsp;</p>
+<pre><font color="#4444CC">public JavaPartitionScanner() {
+	super();
+	IToken javaDoc= new Token(JAVA_DOC);
+	IToken comment= new Token(JAVA_MULTILINE_COMMENT);
+
+	List rules= new ArrayList();
+	// Add rule for single line comments.
+	rules.add(new EndOfLineRule(&quot;//&quot;, Token.UNDEFINED)); 
+
+	// Add rule for strings and character constants.
+	rules.add(new SingleLineRule(&quot;\&quot;&quot;, &quot;\&quot;&quot;, Token.UNDEFINED, '\\')); 
+	rules.add(new SingleLineRule(&quot;'&quot;, &quot;'&quot;, Token.UNDEFINED, '\\')); 
+
+	// Add special case word rule.
+	rules.add(new WordPredicateRule(comment));
+
+	// Add rules for multi-line comments and javadoc.
+	rules.add(new MultiLineRule(&quot;/**&quot;, &quot;*/&quot;, javaDoc, (char) 0, true)); 
+	rules.add(new MultiLineRule(&quot;/*&quot;, &quot;*/&quot;, comment, (char) 0, true)); 
+
+	IPredicateRule[] result= new IPredicateRule[rules.size()];
+	rules.toArray(result);
+	setPredicateRules(result);
+}</font></pre>
+<p>See the classes in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
+ for a complete discussion of the rules classes and API.</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 
