@@ -1,5 +1,8 @@
 @echo off
 
+REM default java executable
+set vm=java
+
 REM reset list of ant targets in test.xml to execute
 set tests=
 
@@ -49,6 +52,7 @@ if x%1==x-os set os =%2 && shift && shift && goto processcmdlineargs
 if x%1==x-arch set arch=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-noclean set installmode=noclean && shift && goto processcmdlineargs
 if x%1==x-properties set properties=-propertyfile %2 && shift && shift && goto processcmdlineargs
+if x%1==x-vm set vm=%2 && shift && shift && goto processcmdlineargs
 
 set tests=%tests% %1 && shift && goto processcmdlineargs
 
@@ -65,9 +69,9 @@ REM	and the script rerun with the same parameter settings. **
 REM
 REM ****************************************************************
 
-if NOT EXIST test-eclipse\eclipse java -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml setup -Dws=%ws% -Dos=%os% -Darch=%arch% -Dclean=true
+if NOT EXIST test-eclipse\eclipse %vm% -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml setup -Dws=%ws% -Dos=%os% -Darch=%arch% -Dclean=true
 
-if %installmode%==noclean java -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml setup -Dws=%ws% -Dos=%os% -Darch=%arch% "-D%installmode%=true" -logger org.apache.tools.ant.DefaultLogger
+if %installmode%==noclean %vm% -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml setup -Dws=%ws% -Dos=%os% -Darch=%arch% "-D%installmode%=true" -logger org.apache.tools.ant.DefaultLogger
 goto run
 
 
@@ -75,7 +79,8 @@ goto run
 REM ***************************************************************************
 REM	Run tests by running Ant in Eclipse on the test.xml script
 REM ***************************************************************************
-java -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% %properties%  "-D%installmode%=true" -logger org.apache.tools.ant.DefaultLogger
+
+%vm% -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% %properties%  "-D%installmode%=true" -logger org.apache.tools.ant.DefaultLogger
 goto end
 
 :end
