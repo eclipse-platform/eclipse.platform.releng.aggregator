@@ -19,6 +19,7 @@ import org.eclipse.test.internal.performance.OSPerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
+import org.eclipse.test.internal.performance.eval.AbsoluteBandChecker;
 import org.eclipse.test.internal.performance.eval.AssertChecker;
 import org.eclipse.test.internal.performance.eval.Evaluator;
 import org.eclipse.test.internal.performance.eval.IEvaluator;
@@ -97,6 +98,25 @@ public class Performance {
 	    Evaluator e= new Evaluator();
 		e.setAssertCheckers(new AssertChecker[] {
 		        new RelativeBandChecker((Dim) dim, 1.0+(lowerPercentage / 100.0), 1.0+(upperPercentage / 100.0)),
+		});
+		e.evaluate(performanceMeter);
+	}
+
+	/**
+	 * Asserts that the measurement specified by the dimension captured in the given
+	 * performance meter is within a certain range with respect to some reference value.
+	 * If the performance meter doesn't provide the specified dimension, the call has no effect.
+	 * 
+	 * @param performanceMeter the performance meter
+	 * @param dim the Dimension to check
+	 * @param lowerBand a negative number indicating the absolute amount the measured value is allowed to be smaller than some reference value
+	 * @param upperBand a positive number indicating the absolute amount the measured value is allowed to be greater than some reference value
+	 * @throws RuntimeException if the properties do not hold
+	 */
+	public void assertPerformanceInAbsoluteBand(PerformanceMeter performanceMeter, Dimension dim, int lowerBand, int upperBand) {
+	    Evaluator e= new Evaluator();
+		e.setAssertCheckers(new AssertChecker[] {
+		        new AbsoluteBandChecker((Dim) dim, lowerBand, upperBand),
 		});
 		e.evaluate(performanceMeter);
 	}

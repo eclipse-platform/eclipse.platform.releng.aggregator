@@ -30,6 +30,16 @@ public class AbsoluteBandChecker extends AssertChecker {
 	
 	public boolean test(StatisticsSession reference, StatisticsSession measured, StringBuffer message) {
 		Dim dimension= getDimension();
+
+		if (!measured.contains(dimension)) {
+			System.err.println("Warning: collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+			return true;
+		}
+		if (!reference.contains(dimension)) {
+			System.err.println("Warning: reference data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+			return true;
+		}
+		
 		double actual= measured.getAverage(dimension);
 		double test= reference.getAverage(dimension);
 		
