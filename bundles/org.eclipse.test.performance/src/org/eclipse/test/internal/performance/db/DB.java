@@ -19,8 +19,10 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.test.internal.performance.Constants;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
@@ -204,48 +206,55 @@ public class DB {
 		if (n <= 0)
 		    return false;
 
+		Scalar[] sc= null;
+		long[] averages= null;
+	    if (AGGREGATE) {
+
+		    sc= dataPoints[0].getScalars();
+		    averages= new long[sc.length];
+
+			Set set= new HashSet();
+			for (int j= 0; j < dataPoints.length; j++) {
+			    DataPoint dp= dataPoints[j];
+			    set.add(new Integer(dp.getStep()));
+			}
+			switch (set.size()) {
+			case 2:	// BEFORE/AFTER pairs -> calculate deltas
+				for (int i= 0; i < dataPoints.length-1; i+= 2) {
+				    Scalar[] s1= dataPoints[i].getScalars();
+				    Scalar[] s2= dataPoints[i+1].getScalars();
+				    for (int j= 0; j < sc.length; j++)
+				        averages[j] += s2[j].getMagnitude() - s1[j].getMagnitude();
+				}
+				n= n/2;
+				break;
+				
+			case 1:	// single values
+				for (int i= 0; i < dataPoints.length; i++) {
+				    Scalar[] s= dataPoints[i].getScalars();
+				    for (int j= 0; j < sc.length; j++)
+				        averages[j] += s[j].getMagnitude();
+				}
+				break;
+				
+			default:	// not expected
+	            PerformanceTestPlugin.logError("DB.internalStore: too many steps in DataPoint"); //$NON-NLS-1$
+			    return false;
+			}
+	    }
+		
 		//System.out.println("store started..."); //$NON-NLS-1$
 	    try {
+            //long l= System.currentTimeMillis();
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
             int sample_id= fSQL.createSample(getConfig(), scenario_id, new Timestamp(sample.getStartTime()));
-            
-            //long l= System.currentTimeMillis();
-		    if (AGGREGATE) {
 
-			    Scalar[] sc= dataPoints[0].getScalars();
-			    long[] averages= new long[sc.length];
-
-			    // calculate deltas
-		        boolean twoPoints= false;
-				for (int i= 0; i < dataPoints.length; i++) {
-				    DataPoint dp= dataPoints[i];
-				    if (dp.getStep() > 0) {
-				        twoPoints= true;
-				        break;
-				    }
-				}
-				if (twoPoints) {
-					for (int i= 0; i < dataPoints.length; i+= 2) {
-					    Scalar[] s1= dataPoints[i].getScalars();
-					    Scalar[] s2= dataPoints[i+1].getScalars();
-					    for (int j= 0; j < sc.length; j++)
-					        averages[j] += s2[j].getMagnitude() - s1[j].getMagnitude();
-					}
-					n= n/2;
-				} else {
-					for (int i= 0; i < dataPoints.length; i+= 2) {
-					    Scalar[] s1= dataPoints[i].getScalars();
-					    for (int j= 0; j < sc.length; j++)
-					        averages[j] += s1[j].getMagnitude();
-					}
-				}
-				
+            if (sc != null) {
 	            int datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
 				for (int k= 0; k < sc.length; k++) {
 			        int dim_id= sc[k].getDimension().getId();
 					fSQL.insertScalar(datapoint_id, dim_id, averages[k] / n);
-				}				    
-		        
+				}
 		    } else {
 				for (int i= 0; i < dataPoints.length; i++) {
 				    DataPoint dp= dataPoints[i];
@@ -465,7 +474,7 @@ public class DB {
         
         String dbloc= env.getProperty(Constants.DB_LOCATION);
         //dbloc= "net://localhost";
-        //dbloc= "/Users/weinand/Eclipse/cloudscape2";
+        dbloc= "/Users/weinand/Eclipse/cloudscape2";
         if (dbloc == null)
             return;
                 
