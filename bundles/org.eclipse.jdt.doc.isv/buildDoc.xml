@@ -1,18 +1,35 @@
 <project name="Jdt Doc Isv Build" default="all"  basedir="." >
 
 <target name="all">
-	<antcall target="extensionPointDocCopy" />
+	<antcall target="extensionPointDoc" />
 	<antcall target="examplesDocCopy" />
 	<antcall target="generateJavadoc" />	
 </target>
 
 
-<target name="extensionPointDocCopy" >
-	<copy todir="reference/extension-points">
+<target name="extensionPointDoc">
+	<antcall target="extensionPointDocCopy" />
+	<antcall target="convertSchemaToHtml" />
+</target>
+
+<target name="extensionPointDocCopy" unless="eclipse.running">
+	<copy todir="reference/extension-points" failonerror="false">
     	<fileset dir="../org.eclipse.jdt.debug.ui/doc"/>
     	<fileset dir="../org.eclipse.jdt.launching/doc"/>
     	<fileset dir="../org.eclipse.jdt.ui/doc"/>
     </copy>
+</target>
+
+<target name="convertSchemaToHtml">
+	<property name="dest" value="reference/extension-points" />
+	    <record name="jdtconvert.txt" action="start"/>
+   
+   	    <pde.convertSchemaToHTML manifest="../org.eclipse.jdt.debug.ui/plugin.xml" destination="${dest}" />
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.jdt.launching/plugin.xml" destination="${dest}" />
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.jdt.ui/plugin.xml" destination="${dest}" />
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.jdt.core/plugin.xml" destination="${dest}" />
+	
+	    <record name="jdtconvert.txt" action="stop"/>
 </target>
 
 <target name="examplesDocCopy" >
