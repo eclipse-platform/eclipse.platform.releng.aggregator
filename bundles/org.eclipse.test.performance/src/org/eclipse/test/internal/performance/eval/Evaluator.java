@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import junit.framework.Assert;
+
+import org.eclipse.test.internal.performance.Dimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.data.PerformanceDataModel;
 import org.eclipse.test.internal.performance.data.Sample;
@@ -42,8 +44,8 @@ public class Evaluator implements IEvaluator {
 		Sample reference= getReferenceSession(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY), session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY));
 		Assert.assertTrue("reference metering session is null", reference != null); //$NON-NLS-1$
 		
-		StatisticsSession referenceStats= new StatisticsSession(reference);
-		StatisticsSession measuredStats= new StatisticsSession(session);
+		StatisticsSession referenceStats= new StatisticsSession(reference.getDataPoints());
+		StatisticsSession measuredStats= new StatisticsSession(session.getDataPoints());
 		
 		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to driver '" + reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY) + "' from " + reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY) + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
@@ -115,11 +117,12 @@ public class Evaluator implements IEvaluator {
 //				timestamp= Platform.getDebugOption(PLUGIN_ID + TIMESTAMP_OPTION);
 //			
 //			fgDefaultEvaluator.setReferenceFilterProperties(driver, timestamp);
-//			
-//			AssertChecker cpu= new RelativeBandChecker(PerfMsrDimensions.CPU_TIME, 0.0F, 1.0F);
-//			AssertChecker mem= new RelativeBandChecker(PerfMsrDimensions.WORKING_SET, 0.0F, 1.0F);
-//			
-//			fgDefaultEvaluator.setAssertCheckers(new AssertChecker[] { cpu, mem });
+			
+			AssertChecker cpu= new RelativeBandChecker(Dimensions.CPU_TIME, 0.0F, 1.0F);
+			//AssertChecker mem= new RelativeBandChecker(Dimensions.USED_JAVA_HEAP, 0.0F, 1.0F);
+			//AssertChecker mem= new RelativeBandChecker(Dimensions.WORKING_SET, 0.0F, 1.0F);
+			
+			fgDefaultEvaluator.setAssertCheckers(new AssertChecker[] { cpu /*, mem */ });
 		}
 
 		return fgDefaultEvaluator;

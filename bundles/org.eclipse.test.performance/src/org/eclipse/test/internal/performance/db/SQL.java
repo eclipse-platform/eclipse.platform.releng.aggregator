@@ -66,7 +66,7 @@ public class SQL {
             		"CONFIG.HOST = ? and " +
             		"CONFIG.PLATFORM = ?");
         fQuery2= fConn.prepareStatement(
-                "select SAMPLE.ID,DATAPOINT.SEQ, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, SESSION " +
+                "select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, SESSION " +
             		"where SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
             		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " +
             		"SAMPLE.SCENARIO_ID = SCENARIO.ID and " +
@@ -76,7 +76,7 @@ public class SQL {
             		"SESSION.CONFIG_ID = CONFIG.ID and " +
             		"CONFIG.HOST = ? and " +
             		"CONFIG.PLATFORM = ? " +
-            		"order by SAMPLE.STARTTIME, DATAPOINT.SEQ, DATAPOINT.STEP");
+            		"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP");
     }
     
     void initialize() throws SQLException {

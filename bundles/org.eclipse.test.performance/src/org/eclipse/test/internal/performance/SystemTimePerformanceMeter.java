@@ -94,6 +94,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 
 	public Sample getSample() {
 		Assert.isTrue(fStartTime.size() == fStopTime.size());
+		
 		Map properties= new HashMap();
 		properties.put(DRIVER_PROPERTY, getBuildId());
 		properties.put(HOSTNAME_PROPERTY, getHostName());

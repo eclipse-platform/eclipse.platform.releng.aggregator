@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
-import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 import junit.framework.Assert;
@@ -32,17 +31,13 @@ public class StatisticsSession {
 		public double stddev;
 	}
 	
-	private final Sample fSession;
+	private final DataPoint[] fDataPoints;
 	private final Map fStatistics= new HashMap();
 
-	public StatisticsSession(Sample session) {
-		fSession= session;
+	public StatisticsSession(DataPoint[] datapoints) {
+	    fDataPoints= datapoints;
 	}
 	
-	public Sample getSession() {
-		return fSession;
-	}
-
 	public double getAverage(Dimension dimension) {
 		return getStats(dimension).average;
 	}
@@ -70,13 +65,12 @@ public class StatisticsSession {
 
 	private Statistics computeStats(Dimension dimension) {
 		
-		DataPoint[] datapoints= fSession.getDataPoints();
 		Statistics stats= new Statistics();
 		
-		for (int i= 0; i < datapoints.length - 1; i += 2) {
-			DataPoint before= datapoints[i];
+		for (int i= 0; i < fDataPoints.length - 1; i += 2) {
+			DataPoint before= fDataPoints[i];
 			Assert.assertTrue("order of datapoints makes no sense", before.getStep() == 0); //$NON-NLS-1$
-			DataPoint after= datapoints[i + 1];
+			DataPoint after= fDataPoints[i + 1];
 			Assert.assertTrue("order of datapoints makes no sense", after.getStep() == 1); //$NON-NLS-1$
 			
 			Scalar delta= getDelta(before, after, dimension);

@@ -12,6 +12,8 @@ package org.eclipse.test.internal.performance.db;
 
 import java.io.File;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -101,23 +103,41 @@ public class DB {
         }
     }
 
-    public void query(String scenarioID, String refID) {
+    public DataPoint[] query(String scenarioID, String refID) {
         if (fSQL == null) 
-            return;
+            return null;
  
+        Sample sample= null;
         ResultSet result= null;
         try {
             result= fSQL.query2("burano", "MacOS X", refID, scenarioID);
+            ArrayList dataPoints= new ArrayList();
+            int lastDataPointId= 0;
+            DataPoint dp= null;
+            HashMap map= null;
             for (int i= 0; result.next(); i++) {
-		        int sample= result.getInt(1);
-		        int seq= result.getInt(2);
+                
+		        int sample_id= result.getInt(1);
+		        int datapoint_id= result.getInt(2);
 		        int step= result.getInt(3);
                 int dim_id= result.getInt(4);
                 long value= result.getBigDecimal(5).longValue();
                 Date d= new Date(result.getBigDecimal(6).longValue());
-                System.out.println(i + ": " + sample+","+seq +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());
+                
+                if (datapoint_id != lastDataPointId) {
+                    map= new HashMap();
+                    dp= new DataPoint(step, map);
+                    dataPoints.add(dp);
+                    lastDataPointId= datapoint_id;
+                }
+                Dimension dim= Dimension.getDimension(dim_id);
+                if (dim != null)
+                    map.put(dim, new Scalar(dim, value));
+                
+                // System.out.println(i + ": " + sample+","+datapoint_id +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());                
             }
-            result.close();
+            
+            return (DataPoint[])dataPoints.toArray(new DataPoint[dataPoints.size()]);
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -127,6 +147,7 @@ public class DB {
                 } catch (SQLException e1) {
                 }
         }
+        return null;
     }
 
     //---- private implementation
