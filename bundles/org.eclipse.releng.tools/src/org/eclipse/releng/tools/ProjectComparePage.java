@@ -26,8 +26,8 @@ import org.eclipse.swt.widgets.*;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-import org.eclipse.team.internal.ccvs.ui.subscriber.ChangeLogModelManager;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
+import org.eclipse.team.internal.ui.synchronize.ChangeSetModelManager;
 import org.eclipse.team.ui.synchronize.*;
 import org.eclipse.ui.part.PageBook;
 
@@ -144,7 +144,7 @@ public class ProjectComparePage extends WizardPage{
 		configuration.setMenuGroups(ISynchronizePageConfiguration.P_TOOLBAR_MENU, new String[] { 
 				ISynchronizePageConfiguration.NAVIGATE_GROUP,  
 				ISynchronizePageConfiguration.LAYOUT_GROUP,
-				ChangeLogModelManager.COMMIT_SET_GROUP});
+				ChangeSetModelManager.CHANGE_SET_GROUP});
 		configuration.setMenuGroups(ISynchronizePageConfiguration.P_CONTEXT_MENU, new String[0]);
 		
 		CompareConfiguration cc = new CompareConfiguration();

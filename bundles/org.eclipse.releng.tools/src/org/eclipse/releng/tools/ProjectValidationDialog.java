@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.ui.subscriber.ChangeLogModelManager;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
+import org.eclipse.team.internal.ui.synchronize.ChangeSetModelManager;
 import org.eclipse.team.ui.SaveablePartAdapter;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
@@ -55,7 +55,7 @@ public class ProjectValidationDialog extends ParticipantPageDialog {
 		configuration.setMenuGroups(ISynchronizePageConfiguration.P_TOOLBAR_MENU, new String[] { 
 				ISynchronizePageConfiguration.NAVIGATE_GROUP,  
 				ISynchronizePageConfiguration.LAYOUT_GROUP,
-				ChangeLogModelManager.COMMIT_SET_GROUP});
+				ChangeSetModelManager.CHANGE_SET_GROUP});
 		configuration.setMenuGroups(ISynchronizePageConfiguration.P_CONTEXT_MENU, new String[0]);
 		
 		CompareConfiguration cc = new CompareConfiguration();
