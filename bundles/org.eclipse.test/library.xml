@@ -20,7 +20,14 @@
   
 	
   <target name="eclipse-test">
-    <tstamp>
+	<!-- 
+	Parameters to this target:
+	data-dir		- the directory for Eclipse to write its data
+	plugin-name		- the name of the plugin to test
+	classname		- the name of the test class
+	vmargs			- a string containing arguments to pass to the VM - defaults to ""
+	-->
+  	<tstamp>
         <format property="TIMENOW" pattern="HHmmssSSSS"/>
     </tstamp>
 
@@ -31,43 +38,32 @@
 	<property name="plugin-path" value="" />
 	<property name="timeout" value="3600000" />
   	
- 	<antcall target="junit" />
-  </target>
-	
-  <target name="junit">
-	<!-- 
-	Parameters to this target:
-	data-dir		- the directory for Eclipse to write its data
-	plugin-name		- the name of the plugin to test
-	classname		- the name of the test class
-	vmargs			- a string containing arguments to pass to the VM - defaults to ""
-	-->
-  		<!--Load value for eclipse.buildId from the config.ini file-->
- 		<property file="${eclipse-home}/configuration/config.ini" />
-	    <property name="etools_perf_ctrl" value="testname=${classname};log=${eclipse-home};driver=${eclipse.buildId};driverdate=${timestamp};driverstream=3.0.0;driverlabel=${eclipse.buildId};uploadhost=${perf.host};uploadport=${perf.port};uploaduserid=${perf.id}" />
+
+  	<!--Load value for eclipse.buildId from the config.ini file-->
+ 	<property file="${eclipse-home}/configuration/config.ini" />
+	<property name="etools_perf_ctrl" value="testname=${classname};log=${eclipse-home};driver=${eclipse.buildId};driverdate=${timestamp};driverstream=3.0.0;driverlabel=${eclipse.buildId};uploadhost=${perf.host};uploadport=${perf.port};uploaduserid=${perf.id}" />
 	  	
-	    <echo message="Running ${classname}"/>
+	<echo message="Running ${classname}"/>
 
-	    <!-- Produces the file '${default-filename}' -->
-	    <java classname="${launcher}" fork="true" dir="." timeout="${timeout}">
-	      <classpath>
-	        <pathelement location="startup.jar"/>
-	      </classpath>
-	      <arg line="-application ${application}"/>
-	      <arg line="-dev bin -data ${data-dir}"/>
-	      <arg line="formatter=${formatter},${classname}.xml"/>
-	      <arg line="-testPluginName ${plugin-name}"/>
-	      <arg line="-className ${classname}"/>
-	      <arg line="-os ${os}"/>
-	      <arg line="-ws ${ws}"/>
-	      <arg line="-arch ${arch}"/>
-	      <jvmarg line="${vmargs} ${extraVMargs}"/>
-	      <sysproperty key="PLUGIN_PATH" value="${plugin-path}"/> 
-	      <sysproperty key="etools_perf_ctrl" value="${etools_perf_ctrl}"/> 
-	    </java>
-
+	<!-- Produces the file '${default-filename}' -->
+	<java classname="${launcher}" fork="true" dir="." timeout="${timeout}">
+		<classpath>
+	    	<pathelement location="startup.jar"/>
+	    </classpath>
+	    <arg line="-application ${application}"/>
+	    <arg line="-dev bin -data ${data-dir}"/>
+	    <arg line="formatter=${formatter},${classname}.xml"/>
+	    <arg line="-testPluginName ${plugin-name}"/>
+	    <arg line="-className ${classname}"/>
+	    <arg line="-os ${os}"/>
+	    <arg line="-ws ${ws}"/>
+	    <arg line="-arch ${arch}"/>
+	    <jvmarg line="${vmargs} ${extraVMargs}"/>
+	    <sysproperty key="PLUGIN_PATH" value="${plugin-path}"/> 
+	    <sysproperty key="etools_perf_ctrl" value="${etools_perf_ctrl}"/> 
+	</java>
   </target>
-	
+
   <target name="collect">
 <!-- 
 Parameters to this target:
