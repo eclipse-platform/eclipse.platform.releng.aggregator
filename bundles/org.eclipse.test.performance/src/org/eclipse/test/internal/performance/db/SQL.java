@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 public class SQL {
     
@@ -67,7 +68,7 @@ public class SQL {
     		return null;
     	if (fQueries[n] == null) {
     		StringBuffer sb= new StringBuffer(
-    				"select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
+    				"select SAMPLE.ID, DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
 					"where " + //$NON-NLS-1$
 					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST LIKE ? and " + //$NON-NLS-1$
 					"SAMPLE.TAG_ID = TAG.ID and TAG.NAME LIKE ? and " + //$NON-NLS-1$
@@ -132,7 +133,7 @@ public class SQL {
 					"CONFIG_ID int not null," + //$NON-NLS-1$
 					"SCENARIO_ID int not null," + //$NON-NLS-1$
 					"TAG_ID int," + //$NON-NLS-1$
-					"STARTTIME bigint" + //$NON-NLS-1$
+					"STARTTIME timestamp" + //$NON-NLS-1$
 				")" //$NON-NLS-1$
         );           
         stmt.executeUpdate(
@@ -220,11 +221,11 @@ public class SQL {
         return create(fInsertScenario);
     }
     
-    int createSample(int config_id, int scenario_id, int tag_id, long starttime) throws SQLException {
+    int createSample(int config_id, int scenario_id, int tag_id, Timestamp starttime) throws SQLException {
         fInsertSample.setInt(1, config_id);
         fInsertSample.setInt(2, scenario_id);
         fInsertSample.setInt(3, tag_id);
-        fInsertSample.setBigDecimal(4, new BigDecimal(starttime));
+        fInsertSample.setTimestamp(4, starttime);
         return create(fInsertSample);
     }
         

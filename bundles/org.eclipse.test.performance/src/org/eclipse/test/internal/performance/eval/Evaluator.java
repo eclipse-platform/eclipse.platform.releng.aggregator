@@ -42,16 +42,17 @@ public class Evaluator extends EmptyEvaluator {
 		if (fCheckers == null)
 		    return;	// nothing to do
 		
-	    if (!(performanceMeter instanceof InternalPerformanceMeter))
-	        return;
-        InternalPerformanceMeter ipm= (InternalPerformanceMeter) performanceMeter;
-        
-	    Sample session= ipm.getSample();
-		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
-		
+		// get reference data tag
 		String refTag= PerformanceTestPlugin.getEnvironment("refTag"); //$NON-NLS-1$
 		if (refTag == null)
 		    return;	// nothing to do
+
+	    if (!(performanceMeter instanceof InternalPerformanceMeter))
+	        return;
+        InternalPerformanceMeter ipm= (InternalPerformanceMeter) performanceMeter;
+	    Sample session= ipm.getSample();
+		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
+	    String scenarioName= session.getScenarioID();
 		
 		// determine all dimensions we need
 		HashSet allDimensions= new HashSet();
@@ -62,8 +63,20 @@ public class Evaluator extends EmptyEvaluator {
 				allDimensions.add(dims[j]);
 		}
 		Dim[] allDims= (Dim[]) allDimensions.toArray(new Dim[allDimensions.size()]);
+		
+		// get data for this session
+		DataPoint[] sessionDatapoints= null;
+		String sessionTag= PerformanceTestPlugin.getEnvironment("sessionTag"); //$NON-NLS-1$
+		if (sessionTag != null) {
+		    sessionDatapoints= DB.query(null, sessionTag, scenarioName, allDims);
+		    if (sessionDatapoints == null)
+		    	return;
+	        System.out.println("no session data with tag '" + sessionTag + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
+		} else {
+			sessionDatapoints= session.getDataPoints();
+		}
 
-	    DataPoint[] datapoints= DB.query(null, refTag, session.getScenarioID(), allDims);
+		DataPoint[] datapoints= DB.query(null, refTag, scenarioName, allDims);
 	    if (datapoints == null)
 	    	return;
 	    if (datapoints.length == 0) {
@@ -73,8 +86,8 @@ public class Evaluator extends EmptyEvaluator {
 	    Sample reference= new Sample(datapoints);
 				
 		StatisticsSession referenceStats= new StatisticsSession(reference.getDataPoints());
-		StatisticsSession measuredStats= new StatisticsSession(session.getDataPoints());
-	    
+		StatisticsSession measuredStats= new StatisticsSession(sessionDatapoints);
+
 		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refTag + "':"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {

@@ -11,15 +11,21 @@
 package org.eclipse.test.internal.performance.db;
 
 import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
-import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
+import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
@@ -91,6 +97,14 @@ public class DB {
         return getDefault().fConnection;
     }
     
+    public static void dump() {
+        try {
+            getDefault().internalDump();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static boolean isActive() {
         return fgDefault != null && fgDefault.getSQL() != null;
     }
@@ -137,6 +151,8 @@ public class DB {
     private int getTag() throws SQLException {
         if (fTagID < 0) {
             String tag= PerformanceTestPlugin.getEnvironment("setTag"); //$NON-NLS-1$
+            if (tag == null)
+                tag= PerformanceTestPlugin.getEnvironment("sessionTag"); //$NON-NLS-1$
             if (tag != null)
                 fTagID= fSQL.getTag(tag);
             else
@@ -167,7 +183,7 @@ public class DB {
 	    try {
 	        int tag_id= getTag();
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
-            int sample_id= fSQL.createSample(getConfig(), scenario_id, tag_id, sample.getStartTime());
+            int sample_id= fSQL.createSample(getConfig(), scenario_id, tag_id, new Timestamp(sample.getStartTime()));
             fStoredSamples++;
             
             //System.err.println(PerformanceTestPlugin.getBuildId());
@@ -230,7 +246,6 @@ public class DB {
 		        int step= result.getInt(3);
                 int dim_id= result.getInt(4);
                 long value= result.getBigDecimal(5).longValue();
-                Date d= new Date(result.getBigDecimal(6).longValue());
                 
                 if (datapoint_id != lastDataPointId) {
                     map= new HashMap();
@@ -243,7 +258,7 @@ public class DB {
                     map.put(dim, new Scalar(dim, value));
                 
                 if (DEBUG)
-                	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value + ' ' + DATE_FORMAT.format(d));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+                	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value);                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
             }
             int n= dataPoints.size();
             if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -396,9 +411,9 @@ public class DB {
     private void doesDBexists() throws SQLException {
         Statement stmt= fConnection.createStatement();
         try {
-	        ResultSet rs= stmt.executeQuery("select count(*) from sys.systables"); //$NON-NLS-1$
+	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' ");
 	        while (rs.next())
-	            if (rs.getInt(1) > 16)
+	            if (rs.getInt(1) >= 6)
 	                return;
 	        if (DEBUG) System.out.println("initialising DB"); //$NON-NLS-1$
 	        fSQL.initialize();
@@ -406,5 +421,74 @@ public class DB {
         } finally {
             stmt.close();
         }
+    }
+    
+    private void internalDump() throws SQLException {
+        if (fConnection == null)
+            return;
+        Statement stmt= fConnection.createStatement();
+        try {
+            System.out.println("CONFIG(ID, HOST, PLATFORM):");
+	        ResultSet rs= stmt.executeQuery("SELECT ID, HOST, PLATFORM FROM CONFIG");
+ 	        while (rs.next()) {
+	            System.out.print(" " + rs.getInt(1));
+	            System.out.print(" " + rs.getString(2));
+	            System.out.print(" " + rs.getString(3));
+	            System.out.println();
+	        }
+            System.out.println();
+            System.out.println("SCENARIO(ID, NAME):");
+	        rs= stmt.executeQuery("SELECT ID, NAME FROM SCENARIO");
+ 	        while (rs.next()) {
+	            System.out.print(" " + rs.getInt(1));
+	            System.out.print(" " + rs.getString(2));
+	            System.out.println();
+	        }
+            System.out.println();
+            System.out.println("SAMPLE(ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME):");
+	        rs= stmt.executeQuery("SELECT ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME FROM SAMPLE");
+ 	        while (rs.next()) {
+	            System.out.print(" " + rs.getInt(1));
+	            System.out.print(" " + rs.getInt(2));
+	            System.out.print(" " + rs.getInt(3));
+	            System.out.print(" " + rs.getInt(4));
+	            System.out.print(" " + rs.getTimestamp(5));
+	            System.out.println();
+	        }
+            System.out.println();
+            System.out.println("TAG(ID, NAME):");
+	        rs= stmt.executeQuery("SELECT ID, NAME FROM TAG");
+ 	        while (rs.next()) {
+	            System.out.print(" " + rs.getInt(1));
+	            System.out.print(" " + rs.getString(2));
+	            System.out.println();
+	        }
+            System.out.println();
+            System.out.println("DATAPOINT(ID, SAMPLE_ID, SEQ, STEP):");
+	        rs= stmt.executeQuery("SELECT ID, SAMPLE_ID, SEQ, STEP FROM DATAPOINT");
+ 	        while (rs.next()) {
+	            System.out.print(" " + rs.getInt(1));
+	            System.out.print(" " + rs.getInt(2));
+	            System.out.print(" " + rs.getInt(3));
+	            System.out.print(" " + rs.getInt(4));
+	            System.out.println();
+	        }
+            System.out.println();
+            System.out.println("SCALAR(DATAPOINT_ID, DIM_ID, VALUE):");
+	        rs= stmt.executeQuery("SELECT DATAPOINT_ID, DIM_ID, VALUE FROM SCALAR");
+ 	        while (rs.next()) {
+	            System.out.print(" " + rs.getInt(1));
+	            System.out.print(" " + rs.getInt(2));
+	            System.out.print(" " + rs.getBigDecimal(3));
+	            System.out.println();
+	        }
+            System.out.println();
+        } finally {
+            stmt.close();
+        }
+    }
+    
+    public static void main(String args[]) {
+        DB.dump();
     }
 }
