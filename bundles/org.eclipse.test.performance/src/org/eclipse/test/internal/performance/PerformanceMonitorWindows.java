@@ -80,7 +80,7 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 					addScalar(scalars, Dimensions.PROCESS_COUNT, counters[11]); 
 					addScalar(scalars, Dimensions.THREAD_COUNT, counters[12]);
 				} catch (Exception e) {
-				    System.err.println("Native function GetPerformanceInfo() not available on this version of Windows"); //$NON-NLS-1$
+				    System.err.println("Warning: Nnative function GetPerformanceInfo() not available on this version of Windows"); //$NON-NLS-1$
 					fgNativeGetPerformanceInfoNotAvailable= true;
 				}
 			}

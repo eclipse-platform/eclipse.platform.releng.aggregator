@@ -35,6 +35,10 @@ public class DataPoint {
 	    return (Dimension[]) set.toArray(new Dimension[set.size()]);
 	}
 	
+	public boolean contains(Dimension dimension) {
+		return fScalars.containsKey(dimension);
+	}
+	
 	public Scalar[] getScalars() {
 		return (Scalar[]) fScalars.values().toArray(new Scalar[fScalars.size()]);
 	}

@@ -51,6 +51,7 @@ public class Evaluator extends EmptyEvaluator {
 		    return;	// nothing to do
 
 	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID());
+	    //System.err.println(datapoints.length + " datapoints"); //$NON-NLS-1$
 	    if (datapoints == null)
 	    	return;
 	    if (datapoints.length == 0) {
@@ -65,7 +66,8 @@ public class Evaluator extends EmptyEvaluator {
 		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refTag + "':"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
-			pass &= fCheckers[i].test(referenceStats, measuredStats, failMesg);
+			AssertChecker chk= fCheckers[i];
+			pass &= chk.test(referenceStats, measuredStats, failMesg);
 		}
 		Assert.assertTrue(failMesg.toString(), pass);
 	}

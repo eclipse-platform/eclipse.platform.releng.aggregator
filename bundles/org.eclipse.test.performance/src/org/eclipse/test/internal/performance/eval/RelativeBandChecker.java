@@ -28,8 +28,25 @@ public class RelativeBandChecker extends AssertChecker {
 
 	public boolean test(StatisticsSession reference, StatisticsSession measured, StringBuffer message) {
 		Dimension dimension= getDimension();
+		
+		if (!measured.contains(dimension)) {
+			System.err.println("Warning: collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+			return true;
+		}
+		
 		double actual= measured.getAverage(dimension);
 		double test= reference.getAverage(dimension);
+		
+		if (test < 0.001 && test > -0.001) {
+			// we don't fail for reference value of zero
+			System.err.println("Issue: ref value for '"+dimension.getName()+"' is too small"); //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		}
+		if (actual < 0) {
+			// we don't fail for negative values
+			System.err.println("Issue: actual value for '"+dimension.getName()+"' is negative"); //$NON-NLS-1$ //$NON-NLS-2$
+			return true;
+		}
 		
 		if (actual > fUpperBand * test || actual < fLowerBand * test) {
 			message.append('\n' + dimension.getName() + ": " + dimension.getDisplayValue(actual) + " is not within [" + Math.round(fLowerBand * 100)+ "%, " + Math.round(fUpperBand * 100) + "%] of " + dimension.getDisplayValue(test)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

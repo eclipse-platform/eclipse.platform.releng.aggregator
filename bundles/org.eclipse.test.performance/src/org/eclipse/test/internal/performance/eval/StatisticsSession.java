@@ -97,4 +97,10 @@ public class StatisticsSession {
 		Scalar delta= new Scalar(one.getDimension(), two.getMagnitude() - one.getMagnitude());
 		return delta;
 	}
+
+	public boolean contains(Dimension dimension) {
+		if (fDataPoints.length > 0)
+			return fDataPoints[0].contains(dimension);
+		return false;
+	}
 }

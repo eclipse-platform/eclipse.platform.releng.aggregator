@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -37,9 +39,6 @@ public class PerformanceTestPlugin extends Plugin {
 	 */
     public static final String PLUGIN_ID= "org.eclipse.test.performance"; //$NON-NLS-1$
     
-	private static final String VERSION_SUFFIX= "-runtime"; //$NON-NLS-1$
-	private static final String BUILDID_PROPERTY= "eclipse.buildId"; //$NON-NLS-1$
-	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk"; //$NON-NLS-1$
 
 	/**
 	 * The shared instance.
@@ -100,6 +99,10 @@ public class PerformanceTestPlugin extends Plugin {
 		}
 	}
 	
+	private static final String VERSION_SUFFIX= "-runtime"; //$NON-NLS-1$
+	private static final String BUILDID_PROPERTY= "eclipse.buildId"; //$NON-NLS-1$
+	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk"; //$NON-NLS-1$
+
 	public static String getBuildId() {
 		String buildId= System.getProperty(BUILDID_PROPERTY);
 		if (buildId != null)
@@ -112,5 +115,19 @@ public class PerformanceTestPlugin extends Plugin {
 					return groups[j].getVersion() + VERSION_SUFFIX;
 		}
 		return null;
+	}
+
+	private static final String LOCALHOST= "localhost"; //$NON-NLS-1$
+
+	/**
+	 * Answer the name of the host that we are running on.
+	 * @return the hostname
+	 */
+	public static String getHostName() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			return LOCALHOST;
+		}
 	}
 }

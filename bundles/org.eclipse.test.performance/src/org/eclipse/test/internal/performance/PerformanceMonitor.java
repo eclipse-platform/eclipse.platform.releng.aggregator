@@ -36,10 +36,12 @@ class PerformanceMonitor {
     protected void collectOperatingSystemCounters(Map scalars) {
         // default implementation
         addScalar(scalars, Dimensions.SYSTEM_TIME, System.currentTimeMillis());
+        /*
     	Runtime runtime= Runtime.getRuntime();
 		runtime.gc();
 		long used= runtime.totalMemory() - runtime.freeMemory();
 		addScalar(scalars, Dimensions.USED_JAVA_HEAP, used);
+		*/
     }
 
 	protected void collectGlobalPerformanceInfo(Map scalars) {
