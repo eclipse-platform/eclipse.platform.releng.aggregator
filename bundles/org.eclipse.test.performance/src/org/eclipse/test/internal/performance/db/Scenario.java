@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -85,16 +86,24 @@ public class Scenario {
             return;
         InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
         
-        fBuildNames= DB.queryBuildNames(fConfigPattern, fBuildPattern, fScenarioName);
-        fSessions= new StatisticsSession[fBuildNames.length];
+        String[] names= DB.queryBuildNames(fConfigPattern, fBuildPattern, fScenarioName);
+        ArrayList sessions= new ArrayList();
+        ArrayList names2= new ArrayList();
         
         Set dims= new HashSet();
-        for (int t= 0; t < fBuildNames.length; t++) {
-            DataPoint[] dps= DB.queryDataPoints(fConfigPattern, fBuildNames[t], fScenarioName, fQueryDimensions);
-            if (dps.length > 0)
+        for (int t= 0; t < names.length; t++) {
+            DataPoint[] dps= DB.queryDataPoints(fConfigPattern, names[t], fScenarioName, fQueryDimensions);
+            if (dps.length > 0) {
             	dims.addAll(dps[0].getDimensions2());
-            fSessions[t]= new StatisticsSession(dps);
+            	StatisticsSession ss= new StatisticsSession(dps);
+            	sessions.add(ss);
+            	names2.add(names[t]);
+            }
         }
+        
+        fSessions= (StatisticsSession[]) sessions.toArray(new StatisticsSession[sessions.size()]);
+        fBuildNames= (String[]) names2.toArray(new String[sessions.size()]);
+        
         fDimensions= (Dim[]) dims.toArray(new Dim[dims.size()]);
         Arrays.sort(fDimensions,
             new Comparator() {
