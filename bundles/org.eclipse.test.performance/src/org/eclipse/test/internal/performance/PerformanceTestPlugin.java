@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance;
 
-import java.util.Properties;
-import java.util.StringTokenizer;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
@@ -33,7 +30,6 @@ public class PerformanceTestPlugin extends Plugin {
 	private static final String DEFAULT_DB_USER= "guest"; //$NON-NLS-1$
 	private static final String DEFAULT_DB_PASSWORD= "guest"; //$NON-NLS-1$
 	
-	private static final String DB_LOCATION= "dbloc"; //$NON-NLS-1$
 	private static final String DB_NAME= "dbname"; //$NON-NLS-1$
 	private static final String DB_USER= "dbuser"; //$NON-NLS-1$
 	private static final String DB_PASSWD= "dbpasswd"; //$NON-NLS-1$
@@ -44,19 +40,6 @@ public class PerformanceTestPlugin extends Plugin {
     private static final String ECLIPSE_PERF_DBLOC= "eclipse.perf.dbloc"; //$NON-NLS-1$
     private static final String ECLIPSE_PERF_ASSERTAGAINST= "eclipse.perf.assertAgainst"; //$NON-NLS-1$
     private static final String ECLIPSE_PERF_CONFIG= "eclipse.perf.config"; //$NON-NLS-1$
-
-    /*
-	 * Old property subkeys
-	 */
-	private static final String OLD_ASSERT_AGAINST= "assertAgainst"; //$NON-NLS-1$
-	private static final String OLD_BUILD= "build"; //$NON-NLS-1$
-	private static final String OLD_CONFIG= "config"; //$NON-NLS-1$
-
-    /** 
-	 * perf_ctrl - Environment variable name that controls the performance instrumentation.
-	 * It is a semicolon separated set of values.
-	 */
-	public static final String ENV_PERF_CTRL= "perf_ctrl"; //$NON-NLS-1$
 
 	/**
 	 * The plug-in ID
@@ -70,9 +53,7 @@ public class PerformanceTestPlugin extends Plugin {
 	 * The shared instance.
 	 */
 	private static PerformanceTestPlugin fgPlugin;
-	
-	private static Properties fgEnvironmentVariables;
-	
+		
 	/**
 	 * The constructor.
 	 */
@@ -92,61 +73,48 @@ public class PerformanceTestPlugin extends Plugin {
 	public static PerformanceTestPlugin getDefault() {
 		return fgPlugin;
 	}
-	
-	/*
-	 * returns the "perf_ctrl" property split into separate key/value pairs
-	 */
-    private static Properties getOldStyleEnvironmentVariables() {
-        if (fgEnvironmentVariables == null) {
-            fgEnvironmentVariables= new Properties();
-            String ctrl= System.getProperty(ENV_PERF_CTRL);
-            if (ctrl != null)
-                parsePairs(fgEnvironmentVariables, ctrl);
-        }
-        return fgEnvironmentVariables;
-     }
-    
+	    
 	/*
 	 * -Declipse.perf.dbloc=net://localhost
 	 */
 	public static String getDBLocation() {
 		String dbloc= System.getProperty(ECLIPSE_PERF_DBLOC);
 		if (dbloc != null) {
-		    Properties keys= new Properties();
-		    parsePairs(keys, ECLIPSE_PERF_DBLOC + '=' + dbloc);
+		    Variations keys= new Variations();
+		    keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
 		    return keys.getProperty(ECLIPSE_PERF_DBLOC);
 		}
-		return getOldStyleEnvironmentVariables().getProperty(DB_LOCATION);
+		return null;
 	}
 
 	public static String getDBName() {
 		String dbloc= System.getProperty(ECLIPSE_PERF_DBLOC);
 		if (dbloc != null) {
-		    Properties keys= new Properties();
-		    parsePairs(keys, ECLIPSE_PERF_DBLOC + '=' + dbloc);
+		    Variations keys= new Variations();
+		    keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
 		    return keys.getProperty(DB_NAME, DEFAULT_DB_NAME);
 		} 
-	    return getOldStyleEnvironmentVariables().getProperty(DB_NAME, DEFAULT_DB_NAME);
+	    return DEFAULT_DB_NAME;
 	}
 
 	public static String getDBUser() {
 		String dbloc= System.getProperty(ECLIPSE_PERF_DBLOC);
 		if (dbloc != null) {
-		    Properties keys= new Properties();
-		    parsePairs(keys, ECLIPSE_PERF_DBLOC + '=' + dbloc);
+		    Variations keys= new Variations();
+		    keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
 		    return keys.getProperty(DB_USER, DEFAULT_DB_USER);
 		} 
-	    return getOldStyleEnvironmentVariables().getProperty(DB_USER, DEFAULT_DB_USER);
+	    return DEFAULT_DB_USER;
 	}
 
 	public static String getDBPassword() {
 		String dbloc= System.getProperty(ECLIPSE_PERF_DBLOC);
 		if (dbloc != null) {
-		    Properties keys= new Properties();
-		    parsePairs(keys, ECLIPSE_PERF_DBLOC + '=' + dbloc);
+		    Variations keys= new Variations();
+		    keys.parsePairs(ECLIPSE_PERF_DBLOC + '=' + dbloc);
 		    return keys.getProperty(DB_PASSWD, DEFAULT_DB_PASSWORD);
 		} 
-	    return getOldStyleEnvironmentVariables().getProperty(DB_PASSWD, DEFAULT_DB_PASSWORD);
+	    return DEFAULT_DB_PASSWORD;
 	}
 	
 	/*
@@ -155,18 +123,8 @@ public class PerformanceTestPlugin extends Plugin {
 	public static Variations getVariations() {
 	    Variations keys= new Variations();
 		String configKey= System.getProperty(ECLIPSE_PERF_CONFIG);
-		if (configKey != null) {
-		    parsePairs(keys, configKey);
-		} else {
-			String build= getOldStyleEnvironmentVariables().getProperty(OLD_BUILD);
-		    if (build == null)
-		        return null;
-		    keys.put(BUILD, build);
-
-		    String configName= getOldStyleEnvironmentVariables().getProperty(OLD_CONFIG);
-		    if (configName != null)
-		        keys.put(CONFIG, configName);
-		}
+		if (configKey != null)
+		    keys.parsePairs(configKey);
 	    return keys;
 	}
 
@@ -179,29 +137,9 @@ public class PerformanceTestPlugin extends Plugin {
 	    if (keys == null)
 	        keys= new Variations();
 		String assertKey= System.getProperty(ECLIPSE_PERF_ASSERTAGAINST);
-		if (assertKey != null) {
-		    parsePairs(keys, assertKey);
-		} else {
-		    String refBuild= getOldStyleEnvironmentVariables().getProperty(OLD_ASSERT_AGAINST);
-		    if (refBuild == null)
-		        return null;
-		    keys.put(BUILD, refBuild);
-		}
+		if (assertKey != null)
+		    keys.parsePairs(assertKey);
 	    return keys;
-	}
-	
-	private static void parsePairs(Properties keys, String s) {
-		StringTokenizer st= new StringTokenizer(s, ";"); //$NON-NLS-1$
-		while (st.hasMoreTokens()) {
-			String token= st.nextToken();
-			int i= token.indexOf('=');
-			if (i < 1)
-			    throw new IllegalArgumentException("Key '" + token + "' in the environment variable " + ENV_PERF_CTRL + " is illformed"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			String value= token.substring(i+1);
-			token= token.substring(0,i);
-			//System.out.println(token + ": <" + value + ">");
-			keys.put(token, value);
-		}	    
 	}
 	
 	// logging
