@@ -14,13 +14,14 @@ Resources and the local file system
 <H2>
 Resources and the local file system</H2>
 <P >
-When the platform core is running and the resources plug-in is active, the workspace is represented by an instance of
-<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b>, which provides protocol for accessing the resources it contains.  An
-<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b> instance
-represents an associated collection of files and directories in the local file system.  You can access the workspace from the
-resources plug-in class in <b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>. </P>
+When the platform is running and the resources plug-in is active, the workspace is represented by an instance of
+<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b>, which provides 
+protocol for accessing the resources it contains.  An <b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b> 
+instance represents an associated collection of files and directories in the local file system.  You can access the 
+workspace from the resources plug-in class (defined in 
+<b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>). </P>
 <font color='#4444CC'><pre>
-   ResourcesPlugin.getWorkspace(); 
+   IWorkspace workspace = ResourcesPlugin.getWorkspace(); 
 </pre></font>
 <P >
 When the resources plug-in is not running, the workspace exists solely in the local file system and is viewed or manipulated by the user
@@ -30,13 +31,11 @@ resources plug-in API. </P>
 <H3>
 Our sample tree on disk</H3>
 <P >
-When you installed the platform SDK, you unzipped the files into a directory of
-your choosing.&nbsp; We will call this directory the platform root directory.
-This is the directory that contains the
-<b> plugins</b> directory, among others.  Inside the platform root directory, there
-is a <b>workspace</b> directory which is used to hold
-the resources that are created and manipulated by the platform.&nbsp; If you
-look in your <b>workspace</b> directory, you'll see separate subdirectories for each project that exists in the workspace.  Within these subdirectories are the folders and files that
+When you installed the platform SDK, you unzipped the files into a directory of your choosing.  We will call this 
+directory the platform root directory.  This is the directory that contains the <b> plugins</b> directory, among others.  
+Inside the platform root directory, there is a <b>workspace</b> directory which is used to hold the resources that are 
+created and manipulated by the platform. If you look in your <b>workspace</b> directory, you'll see separate subdirectories 
+for each project that exists in the workspace.  Within these subdirectories are the folders and files that
 each project contains.  </P>
 <P >
 If the SDK in our example is installed in <b> c:\MySDK</b>, then inside
@@ -44,7 +43,8 @@ the <b>c:\MySDK\workspace</b> directory we find subdirectories named after the w
 <b> MyWeb</b> and <b>MyServlet</b>.  These are called the projects' content directories.
 Content directories are created by the platform when the user creates a project.</P>
 <P >
-Inside each directory, we find the files and folders within the project, laid out exactly the same as they are in the workspace's resource tree.  All file names are the same, and the files' contents are the same
+Inside each directory, we find the files and folders within the project, laid out exactly the same as they are in the 
+workspace's resource tree.  All file names are the same, and the files' contents are the same
 whether accessed from the file system or from the workspace. The only surprise
 is the <b>.project</b> file, explained in a moment.</P>
 <font color='#4444CC'><pre>
@@ -63,7 +63,8 @@ is the <b>.project</b> file, explained in a moment.</P>
             main.class</pre></font>
 <P >
 The platform has a special <b>.metadata</b> directory for holding platform internal information.  The
-<b>.metadata</b> directory of a workspace is considered to be a &quot;black box.&quot;  Important information about the workspace structure, such as a project's references or a resource's properties,
+<b>.metadata</b> directory of a workspace is considered to be a &quot;black box.&quot;  Important information about the 
+workspace structure, such as a project's references or a resource's properties,
 is stored in the metadata portion of the workspace and should only be accessed by tools through the
 platform API.&nbsp; These files should never be edited or manipulated using
 generic file system API. </P>
@@ -77,7 +78,8 @@ utilities.&nbsp; The only issue is that the user must be careful when editing
 these files both in the workbench and externally.&nbsp; (This is no
 different than when a user edits a file using two independent stand-alone
 tools.)&nbsp; The workbench provides refresh operations to reconcile the
-workspace view of resources with the actual state in the file system. </P>
+workspace view of resources with the actual state in the file system and periodically refreshes
+the workspace based on the state of the file system.</P>
 
 
 <H3>
@@ -213,17 +215,23 @@ When we use the resources API to modify our workspace's resource tree, the files
 are changed in the file system in addition to updating our resource objects.  What about changes to
 resource files that happen outside of the platform's API?  </P>
 <P >
-External changes to resources will not be reflected in the workspace and resource objects until detected by the resources plug-in.
-Clients can use resource API to reconcile workspace and resource objects with
-the local file system quietly and without user intervention.&nbsp; The user can
-always explicitly force a refresh&nbsp; in the resource navigator view of the
-workbench.  </P>
-<i><blockquote>
-Note:&nbsp; Many of the methods in the resource APIs include a force parameter which specifies how resources that
-are out of sync with the file system should be handled.  The API Reference for
-each method provides specific information about this parameter. Additional methods in the API allow programmatic control of file system refresh, such as
-<b> IResource.refreshLocal(int depth, IProgressMonitor monitor)</b>. See <b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
-for information on correct usage and costs.</blockquote></i>
+External changes to resources will not be reflected in the workspace and resource objects until 
+detected by the resources plug-in.  The resources plug-in also uses a mechanism appropriate for
+each particular native operating system for discovering external changes made in the file system.
+In addition, clients can use resource API to 
+reconcile workspace and resource objects with the local file system quietly and without user intervention.
+The user can also explicitly force a refresh in the resource navigator view of the workbench.  </P>
+<p>Many of the methods in the resource APIs include a force parameter which specifies how resources that
+are out of sync with the file system should be handled.  The API Reference for each method provides specific information 
+about this parameter. Additional methods in the API allow programmatic control of file system refresh, such as
+<b>IResource.refreshLocal(int depth, IProgressMonitor monitor)</b>. See 
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
+for information on correct usage and costs.</p>
+<p>
+Plug-ins that wish to supply their own mechanism for periodically refreshing the workspace based on
+the state of the external file system may do so using the
+<a href="../reference/extension-points/org_eclipse_core_resources_refreshProviders.html"><b>org.eclipse.core.resources.refreshProviders</b></a> 
+extension point.  See <a href="resAdv_refresh.htm">Refresh providers</a> for more information. </p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 

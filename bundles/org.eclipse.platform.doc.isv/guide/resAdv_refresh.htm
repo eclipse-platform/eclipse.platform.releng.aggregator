@@ -14,7 +14,32 @@ Refresh providers
 <H2>
 Refresh providers</H2>
 <P >
-[This document is under construction]</P>
+The <a href="../reference/extension-points/org_eclipse_core_resources_refreshProviders.html"><b>org.eclipse.core.resources.refreshProviders</b></a> 
+extension point allows plug-ins to register and implement their own mechanisms for monitoring the external file system
+and refreshing the workspace appropriately.  This extension point is intended for plug-ins that implement
+specialized, often native, schemes for monitoring file system changes.</P>
+<p>
+The plug-in fragment <b>org.eclipse.core.resources.win32</b> implements a native refresh monitor based on
+file system callbacks.  A more naive refresh monitor based on polling is defined for other platforms.
+</p>
+<p>The following snippet shows the definition for this extension in the <b>org.eclipse.core.resources.win32</b>
+fragment.
+<font color='#4444CC'><pre>
+   &lt;extension
+         id="win32"
+         point="org.eclipse.core.resources.refreshProviders"&gt;
+      &lt;refreshProvider
+            name="%win32MonitorFactoryName"
+            <b>class="org.eclipse.core.internal.resources.refresh.win32.Win32RefreshProvider"</b>&gt;
+      &lt;/refreshProvider&gt;
+   &lt;/extension&gt;
+</pre></font>
+The <b>class</b> attribute must be a class that extends 
+<b><a href="../reference/api/org/eclipse/core/resources/refresh/RefreshProvider.html">RefreshProvider</a></b>.
+This class is responsible for installing a monitor on a specific resource and its resource subtree if it is a 
+project or folder.  The monitor must implement 
+<b><a href="../reference/api/org/eclipse/core/resources/refresh/IRefreshMonitor.html">IRefreshMonitor</a></b>.
+</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
