@@ -110,7 +110,7 @@ line arguments. </p>
   <dd>specifies the command to use to show the splash screen. Typically supplied
     by the Eclipse executable.</dd>
   <dt></dt>
-  <dt>-userArea &lt;location&gt; (OSGi) <em>NEW</em></dt>
+  <dt>-user &lt;location&gt; (OSGi) <em>NEW</em></dt>
   <dd>equivalent to setting <a href="#osgiuserarea">osgi.user.area</a> to &lt;location&gt;</dd>
   <dt>-vm &lt;path to java executable&gt;    (Executable, Main) <em>NEW</em></dt>
   <dd>when passed to the Eclipse executable, this option is used to locate the
@@ -328,7 +328,7 @@ Handy for investigating
   <dt><a name="osgisplashpath"></a>osgi.splashPath</dt>
   <dd>a comma separated list of URLs to search for a file called splash.bmp.
   This property is overriden by any value set in <a href="#osgisplashlocation">osgi.splashLocation</a>.</dd>
-  <dt><a name="osgiuserarea"></a>osgi.user.area </dt>
+  <dt><a name="osgiuserarea"></a>osgi.user.area {-user}</dt>
   <dd>the location of the user area. The user area contains data (e.g.,
     preferences) specific to the OS user and independent of any Eclipse install,
   configuration or instance. See the section on <a href="#locations">locations</a> for more details.</dd>
@@ -346,7 +346,7 @@ Handy for investigating
   of location:</p>
 <dl>
   <dl>
-    <dt>User (-user ???) {osgi.user.area} [@none, @noDefault, @user.home, @user.dir,
+    <dt>User (-user) {<a href="#osgiuserarea">osgi.user.area</a>} [@none, @noDefault, @user.home, @user.dir,
       filepath, url]</dt>
     <dd>User locations are specific to, go figure, users. Typically the user
       location is based on the value of the Java <code>user.home</code> system
@@ -397,23 +397,33 @@ Handy for investigating
     <dd>Indicates that the corresponding location should never be set either
       explicitly or to its default value. For example, an RCP style application
       which has no user data may use osgi.instance.area=@none to prevent
-      extraneous files being written to disk.</dd>
+      extraneous files being written to disk. @none must not be followed by any
+      additional path segments.</dd>
     <dt>@noDefault</dt>
     <dd>Forces a location to be undefined or explicitly defined (i.e., Eclipse
       will not automatically compute a default value). This is useful where you
       want to allow for data in the corresponding location but the Eclipse default
-      value is not appropriate.</dd>
+      value is not appropriate. @noDefault must not be followed by any
+      additional path segments.</dd>
     <dt>@user.home</dt>
     <dd>Directs Eclipse to compute a location value relative to the user's home
-      directory. The resultant location is qualified by the identifier and version
-      number for the product being run and the type of location. For example,
-      setting osgi.configuration.area=@user.home results in a value of
-      file:/users/bob/.eclipse/org.eclipse.platform_3.0.0/configuration.</dd>
+      directory. @user.home can be followed
+      by additional path segments. In all cases, the string &quot;@user.home&quot; is
+      simply replaced with the value of the Java &quot;user.home&quot; System
+      property. For example, setting<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;osgi.instance.area=@user.home/myWorkspace<br>
+      results in a value of
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;file:/users/bob/myWorkspace</dd>
     <dt>@user.dir</dt>
     <dd>Directs Eclipse to compute a location value relative to the current working
-      directory. The resultant location is qualified by the the type of location.
-      For example, setting osgi.configuration.area=@user.dir results in
-      a value of file:c:/eclipse/configuration.</dd>
+      directory. @user.dir can be followed
+      by additional path segments. In all cases, the string &quot;@user.dir&quot; is
+      simply replaced with the value of the Java &quot;user.dir&quot; System
+      property. For example, setting<br>
+&nbsp;&nbsp;&nbsp;&nbsp;osgi.instance.area=@user.dir/myWorkspace<br>
+results in a value of <br>
+&nbsp;&nbsp;&nbsp;&nbsp;file:/usr/share/eclipse/myWorkspace</dd>
   </dl>
 </dl>
 <table width="100%" border="0" bgcolor="#FFFFFF">

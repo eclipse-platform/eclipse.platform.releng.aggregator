@@ -1,120 +1,15 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML><HEAD><TITLE>Using the class loader properties file</TITLE>
 <meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
-<META content="MSHTML 6.00.2800.1126" name=GENERATOR></HEAD>
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+</HEAD>
 <BODY>
 <H1>Using the class loader enhancements</H1>
-<EM>Last update: December 9, 2002</EM> 
-<P>Eclipse 2.1 includes many performance enhancements, including some in the area 
-  of classloading. In order to help out with this, mark-up has been added to the 
-  plug-in manifest file and this file explains its use. 
-<P>
-<UL>
-  <LI><A href="#activation">Activation</A> 
-  <LI><A href="#format">Format</A> 
-  <LI><A href="#classloader.properties">Use with the Classloader Properties file</A>
-  <LI><A href="#trouble">Trouble-Shooting</A> 
-  <LI><A href="#known issues">Known Issues</A>
-</UL>
-<P>
-<H2><A name=activation></A>Activation</H2>
-The classloader performance enhancements are automatically enabled by default. 
-If the user wishes to override this behaviour and disable them, then they may 
-pass the <CODE>-noPackagePrefixes</CODE> command-line argument to the Eclipse 
-executable. 
-<P>
-<H2><A name=format></A>Format</H2>
-<p>Declaration of the package prefixes in the plug-in manifest file is indicated 
-  by a <code>packages</code> element for each library which is declared in the 
-  file. The <code>packages</code> element has a <code>prefixes</code> attrbute 
-  which lists the package prefixes for that library.</p>
-<p>It is quite common for jar files to contain code which reside in multiple packages. 
-  For instance, the <CODE>org.eclipse.core.runtime</CODE> plug-in contains code 
-  in the following packages:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.core.runtime<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.core.internal.runtime,<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.core.internal.plugins<BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.core.runtime.model</CODE>. </p>
-<P>In this case, the <code>plugin.xml</code> specifies: 
-<P> 
-<code>&nbsp;&nbsp;&nbsp;&nbsp;&lt;runtime&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;library name=&quot;runtime.jar&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;export name=&quot;*&quot;/&gt;<br>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;packages 
-  prefixes=&quot;org.eclipse.core&quot;/&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/library&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&lt;/runtime&gt;
-</code>
-
-<P>Notice that <CODE>org.eclipse.core</CODE> is a common prefix for all packages 
-in the plug-in. The alternative is to declare all 4 prefixes in the file as a 
-comma-separated list. In this case one must weigh the trade-off between the 
-number of checks required against multiple entries and a prefix which may 
-include false hits. Depending on the way that your code is structured, it might 
-be best to list as many as 5-10 package prefixes rather than going with a more 
-general prefix. For instance, if all your code across multiple plug-ins contains 
-the same prefix (e.g. <CODE>com.mycompany</CODE>) then you will not be taking 
-full advantage of all benefits if you list only the single prefix 
-"com.mycompany" in the file. 
-<P>When a plug-in contains multiple library declarations, each one should account 
-  for the package prefixes from its jar. 
-<P>If you choose not to include any <code>packages</code> elements in your plug-in 
-  manifest your code will still work but you will not be taking advantage of the 
-  class loading optimization. Note that your list of package prefixes <b>must</b> 
-  be complete for all the packages in all the libraries in your plug-in. If this 
-  list is not complete then your code will not work.
-<H2><A name=classloader.properties>Use with the class loader properties file</A></H2>
- 
-<p>In Eclipse 2.0.2 and early Eclipse 2.1 Integration builds, a feature was added 
-  which allowed the user to specify a class loader properties file which contained 
-  the package prefixes to enable the classloader enhancements. Use of this file 
-  is specified <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-core-home/docs/classloader-properties/classloader_properties.html">here</a>. 
-</p>
-<p>Eclipse 2.1 is fully backwards compatible with the class loader properties 
-  file and, in fact, it can be used in conjunction with the package prefix declarations 
-  in the plug-in manifest. This section describes the behaviour of the interaction 
-  between these two mechanisms.</p>
-<p><em>Default behaviour: </em>(no command-line arguments) The package prefixes 
-  will be read from the <code>plugin.xml</code> file and applied to the class 
-  loading strategy. The <code>classloader.properties</code> file is not accessed 
-  or considered.
-<p><em>Using -classloaderProperties: </em>The package prefixes are read from the 
-  <code>plugin.xml</code> file and then the <code>classloader.properties</code> 
-  file is read. If there is an entry in the classloader properties file for a 
-  plug-in which had prefixes defined in the manifest file, the entry in the properties 
-  file will over-ride and take precedence. (the results are NOT merged) If the 
-  entry in the properties file does not contain a value (e.g. <code>org.eclipse.core.runtime=</code>) 
-  then any prefixes declared in the manifest file will be removed and the class 
-  loading strategy will default to not using the enhancements. 
-<p><em>Using -noPackagePrefixes: </em>Any package prefixes declared in the plug-in 
-  manifest file are ignored and the class loader properties file is also not taken 
-  into consideration. The class loading strategy defaults to not using the prefix 
-  enhancements. 
-<p><em>Using both -classloaderProperties and -noPackagePrefixes: </em>Any package declarations 
-  in the plug-in manifest file are ignored. The class loader properties file is 
-  read and any declarations defined within it are taken into consideration when 
-  in class loading.
-<P><h2><A name=trouble>Trouble-shooting</a></h2>
-<p>If you get a <CODE>java.lang.ClassNotFoundException</CODE> then that is an 
-  indication that there might be a problem with your entries in the manifest or 
-  properties files. Try running Eclipse with the <code>-noPackagePrefixes</code> 
-  command-line argument and do NOT use the <code>-classloaderProperties</code> 
-  argument. This will disable all class loading enhancements with respect to the 
-  package prefixes. </p>
-<p>If your code runs fine after doing this, then the files could have the correct 
-  syntax, but the package prefixes in the comma-separated list might be missing 
-  some entries. To verify this is the problem, comment out the appropriate lines 
-  in the file. Use a number sign (#) to comment out the line of the offending 
-  plug-in in the properties file or use HTML comment characters (&lt;!-- ... --&gt;) 
-  to comment out the packages declaration in the offending <code>plugin.xml</code> 
-  file. </p>
-
-<H2><A name="known issues">Known issues</A></H2>
-If a plug-in manifest file declares the list of package prefixes, then all fragments 
-which contribute to it must also list their package prefixes. If they don't then 
-it will result in a <code>NoClassDefFoundError</code> problem. This can be resolved 
-either by using the <code>-noPackagePrefixes</code> command-line argument to turn 
-off the classloader enhancements, or by adding the appropriate package prefix 
-entries to the plug-in and all its fragments. 
+<EM>Last update: June 18, 2004</EM> 
+<P>Eclipse 2.1 included several performance enhancements in the area of classloading.
+  The new runtime/classloader design in Eclipse 3.0 supercedes these enhancements.
+  As such, the 2.1 &lt;package-prefixes&gt; mechanism and related command line options
+  (i.e., -noPackagePrefixes and -classloaderProperties) are no longer used or
+interpreted. 
+<p><a href="hglegal.htm"><img src="ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2004." border="0" width="250" height="12"></a></p>
 </BODY></HTML>
-<p><a href="hglegal.htm"><img src="ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="250" height="12"></a></p>
