@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   <title>Updating a running infocenter from command line</title>
+</head>
+<body>
+
+<h1>Updating a running infocenter from command line</h1>
+In addition to the start and shutdown commands supported by the infocenter and documented in
+<a href="help_infocenter.html">Installing the help system as an infocenter</a>
+, infocenter supports set of command
+for invoking update manager operations in running eclipse.
+You can install, update, enable, disable features, or list installed features,
+or features available on an update site, or adding an extension site to the running
+infocenter.  In effect, you can change set of running documentation plug-ins without
+ a need for shutting the infocenter down or restarting it.
+<br>
+ <br>
+Start infocenter as explained in
+<a href="help_infocenter.html">Installing the help system as an infocenter</a>.
+  If you are running minimal set of plug-ins, add org.eclipse.update.core plug-in to the list of plug-ins before launching infocenter using the start command.<br>
+Launch infocenter update commands as follows, where [ ] means optional argument and arguments in italics must be provided by the user.<br>
+After performing updates as needed, apply the changes by issuing the apply command
+ as the last step.  It reflects the changes in the current session.
+ If you do not call apply command, the changes will take
+effect the next time infocenter is started.<br>
+	<br>
+<b>Installing a feature from a remote site</b>:<br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command install <br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; -from <i>remote_site_url</i> <br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+	<p>
+	<b>Example:</b> <code>java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter -command install  -from http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-update-home/optionalSite/ -featureId com.example.root -version 1.0.0</code>
+	</p>
+ <br>
+<b>Updating an existing feature or all features</b>:<br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command update<br>
+ &nbsp;&nbsp;&nbsp; [-featureId <i>feature_id </i>]<br>
+  &nbsp;&nbsp;&nbsp; [-version <i>version </i>]<br>
+<br>
+<b>Enabling (configuring) a specified feature:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command enable<br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+<br>
+<b>Disabling (unconfiguring) a specified feature:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command disable<br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+<br>
+<b>Uninstalling a specified feature:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command uninstall<br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+<br>
+In all the above commands where the -to target_site_dir is specified, corresponding
+configured target site at given directory will be used. If it is not specified,
+then the default local product site is used.<br>
+<br>
+If you only need to verify if the operation would succeed, in the above commands, (i.e. it satisfies the constraints), without actually performing it,
+then add <b><em>-verifyOnly=true</em></b> to the list of arguments.<br>
+
+<br><b>Searching a remote site, listing all available features for install:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command search<br>
+ &nbsp;&nbsp;&nbsp; -from <i>remote_site_url</i> <br>
+
+<br><b>Listing installed features:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command listFeatures<br>
+ &nbsp;&nbsp;&nbsp; -from <i>local_site_dir</i> <br>
+ <br>
+ The features are listed as:
+ <br>
+ <code>
+ Site: <em>site url </em><br>
+  &nbsp;&nbsp;Feature: <em>id version</em>  enabled (or disabled)
+ </code>
+ <br>
+
+<br><b>Adding a local site with more features:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command addSite<br>
+ &nbsp;&nbsp;&nbsp; -from <i>local_site_dir</i> <br>
+
+<br><b>Removing a local site:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command removeSite<br>
+ &nbsp;&nbsp;&nbsp; -to <i>local_site_dir</i> <br>
+ 
+<br><b>Applying the changes:</b><br>
+ java -cp plugins/org.eclipse.help.base_3.0.1/helpbase.jar org.eclipse.help.standalone.Infocenter<br>
+ &nbsp;&nbsp;&nbsp; -command apply<br> 
+<br>
+</body>
+</html>
