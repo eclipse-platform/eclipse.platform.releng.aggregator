@@ -70,7 +70,12 @@ class Report {
                 String s= getCell(x, y);
                 if (s == null)
                     s= ""; //$NON-NLS-1$
-                int www= ww-s.length()+fGap;
+                
+                if (x > 0)
+                    for (int g= 0; g < fGap; g++)
+                        ps.print(' ');
+   
+                int www= ww-s.length();
                 String align= (String) fAlignment.get(x + "/" + y); //$NON-NLS-1$
                 if (LEFT.equalsIgnoreCase(align))
                     ps.print(s);

@@ -24,8 +24,7 @@ public class SQL {
     private PreparedStatement fInsertSample, fInsertDataPoint;
     private PreparedStatement fQueryConfig, fInsertConfig;
     private PreparedStatement fQueryScenario, fQueryAllScenarios, fInsertScenario;
-    private PreparedStatement fQueryTag, fQueryTags, fInsertTag;
-    private PreparedStatement[] fInsertScalar= new PreparedStatement[20];
+    private PreparedStatement fQueryTag, fQueryTags, fInsertTag, fInsertScalar;
     private PreparedStatement[] fQueries= new PreparedStatement[20];
     
 
@@ -35,13 +34,6 @@ public class SQL {
     
     public void dispose() throws SQLException {
     	// TODO: close all prepared statements
-    	if (fInsertScalar != null) {
-    		for (int i= 0; i < fInsertScalar.length; i++) {
-    			if (fInsertScalar[i] != null)
-    				fInsertScalar[i].close();
-    		}
-    		fInsertScalar= null;
-    	}
     	if (fQueries != null) {
     		for (int i= 0; i < fQueries.length; i++) {
     			if (fQueries[i] != null)
@@ -49,18 +41,6 @@ public class SQL {
     		}
     		fQueries= null;
     	}
-    }
-    
-    PreparedStatement getScalarInsertStatement(int n) throws SQLException {
-    	if (n < 1 || n > 20)
-    		return null;
-    	if (fInsertScalar[n-1] == null) {
-    		StringBuffer sb= new StringBuffer("insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
-    		for (int i= 1; i < n; i++)
-    			sb.append(", (?, ?, ?)"); //$NON-NLS-1$
-            fInsertScalar[n-1]= fConnection.prepareStatement(sb.toString());
-    	}
-    	return fInsertScalar[n-1];
     }
     
     PreparedStatement getQueryStatement(int n) throws SQLException {
@@ -104,6 +84,8 @@ public class SQL {
                 "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertDataPoint= fConnection.prepareStatement(
                 "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
+        fInsertScalar= fConnection.prepareStatement(
+                "insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
 
         fQueryTag= fConnection.prepareStatement(
         		"select ID from TAG where NAME = ?"); //$NON-NLS-1$
@@ -234,6 +216,13 @@ public class SQL {
         fInsertDataPoint.setInt(2, seq);
         fInsertDataPoint.setInt(3, step);
         return create(fInsertDataPoint);
+    }
+    
+    void insertScalar(int datapoint_id, int dim_id, long value) throws SQLException {
+		fInsertScalar.setInt(1, datapoint_id);
+		fInsertScalar.setInt(2, dim_id);
+		fInsertScalar.setLong(3, value);
+		fInsertScalar.executeUpdate();
     }
     
     ResultSet query(String hostPattern, String tagPattern, String scenario, int[] dim_ids) throws SQLException {

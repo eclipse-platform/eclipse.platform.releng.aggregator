@@ -13,7 +13,6 @@ package org.eclipse.test.internal.performance.db;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -190,32 +189,12 @@ public class DB {
 			for (int i= 0; i < dataPoints.length; i++) {
 			    DataPoint dp= dataPoints[i];
 	            int datapoint_id= fSQL.createDataPoint(sample_id, i, dp.getStep());
-			    Scalar[] scalars= dp.getScalars();
-			    
-			    if (true) {
-					PreparedStatement is= fSQL.getScalarInsertStatement(1);
-				    for (int j= 0; j < scalars.length; j++) {
-				        Scalar scalar= scalars[j];
-				        int id= scalar.getDimension().getId();
-				        long value= scalar.getMagnitude();
-						is.setInt(1, datapoint_id);
-						is.setInt(2, id);
-						is.setLong(3, value);
-						SQL.create(is);
-				    }
-			    } else {
-					PreparedStatement is= fSQL.getScalarInsertStatement(scalars.length);
-					int col= 1;
-				    for (int j= 0; j < scalars.length; j++) {
-				        Scalar scalar= scalars[j];
-				        int id= scalar.getDimension().getId();
-				        long value= scalar.getMagnitude();
-						is.setInt(col, datapoint_id);
-						is.setInt(col+1, id);
-						is.setLong(col+2, value);
-						col+= 3;
-	                }
-				    SQL.create(is);
+			    Scalar[] scalars= dp.getScalars();		    
+			    for (int j= 0; j < scalars.length; j++) {
+			        Scalar scalar= scalars[j];
+			        int dim_id= scalar.getDimension().getId();
+			        long value= scalar.getMagnitude();					
+					fSQL.insertScalar(datapoint_id, dim_id, value);
 			    }
 			}
 			//System.err.println(System.currentTimeMillis()-l);
