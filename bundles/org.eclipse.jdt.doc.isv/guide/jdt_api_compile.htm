@@ -98,11 +98,34 @@ can changed according to the default locale. The contants defined in <b><a href=
   Working copies can be reconciled with problem detection if a <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">
  IProblemRequestor</a>
 </b> has been supplied for the working copy creation. To achieve this, you 
-can use the method <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean, org.eclipse.core.runtime.IProgressMonitor)">
- reconcile(boolean forceProblemDetection, IProgressMonitor monitor)</a>
-</b>. Here is an example: <font color="#4444cc">
-<pre>   unit.getBuffer().setContents("public class X extends Zork {}");<br>   IProblemRequestor problemRequestor = new IProblemRequestor() {<br>      public void acceptProblem(IProblem problem) {}<br>      public void beginReporting() {}<br>      public void endReporting() {}<br>      public boolean isActive() {return true;}<br>   };<br>   IJavaElement workingCopy = unit.getWorkingCopy(null, null, problemRequestor);<br>   ((IWorkingCopy)workingCopy).reconcile(true, null);<br></pre>
-</font> You can add an action on the reported problems in the acceptProblem(IProblem) 
+can use the <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean, org.eclipse.core.runtime.IProgressMonitor)">
+ reconcile</a></b> method. Here is an example: <font color="#4444cc">
+<pre>
+  ICompilationUnit unit;
+  IWorkingCopy workingCopy;
+  try {
+    unit = ..; // get some compilation unit
+			
+    // create requestor for accumulating discovered problems
+    IProblemRequestor problemRequestor = new IProblemRequestor() {
+      public void acceptProblem(IProblem problem) {
+        System.out.println(problem.getID() + ": " + problem.getMessage());
+      }
+      public void beginReporting() {}
+      public void endReporting() {}
+      public boolean isActive() {	return true; } // will detect problems if active
+    };
+    
+    // use working copy to hold source with error
+    workingCopy = (IWorkingCopy)unit.getWorkingCopy(null, null, problemRequestor);
+    ((IOpenable)workingCopy).getBuffer().setContents("public class X extends Zork {}");
+
+	// trigger reconciliation			
+    workingCopy.reconcile(true, null);
+			
+  } catch (JavaModelException e) {
+  }
+</pre></font> You can add an action on the reported problems in the acceptProblem(IProblem) 
 method. In this example, the reported problem will be that <b>Zork cannot 
 be resolved or is not a valid superclass</b> and its id is <b>IProblem.SuperclassNotFound</b>
  . </p>
