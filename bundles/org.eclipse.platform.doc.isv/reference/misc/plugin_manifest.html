@@ -14,8 +14,8 @@
 <h1> Eclipse Platform<br>
 Plug-in Manifest</h1>
 
-<p class=MsoNormal><span style='font-size:10.0pt'>Version 2.0 - Last revised June
-20, 2002</span></p>
+<p class=MsoNormal><span style='font-size:10.0pt'>Version 2.0 - Last revised March
+17, 2003</span></p>
 
 <p>The manifest markup definitions below make use of various naming tokens and
 identifiers. To eliminate ambiguity, here are some production rules for these [are
@@ -159,8 +159,8 @@ definition of one or more libraries that make up the plug-in runtime. The
 referenced libraries are used by the platform execution mechanisms (the plug-in
 class loader) to load and execute the correct code required by the plug-in. </p>
 
-<pre>&lt;!ELEMENT runtime (library+)&gt;&nbsp;
-&lt;!ELEMENT library (export*)&gt;
+  <pre>&lt;!ELEMENT runtime (library+)&gt;&nbsp;
+&lt;!ELEMENT library (export*, packages?)&gt;
 &lt;!ATTLIST library&nbsp;
   name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
 <span style="mso-spacerun: yes">&nbsp; </span>type<span style="mso-spacerun: yes">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span>(code | resource) &quot;code&quot;
@@ -168,6 +168,10 @@ class loader) to load and execute the correct code required by the plug-in. </p>
 &lt;!ELEMENT export EMPTY&gt;&nbsp;
 &lt;!ATTLIST export
 &nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED&nbsp;
+&gt;
+&lt;!ELEMENT packages EMPTY&gt;
+&lt;!ATTLIST packages
+  prefixes           CDATA #REQUIRED
 &gt;</pre>
 
 <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
@@ -226,7 +230,20 @@ exported. The export rules are specified as a set of export masks. By default
      qualified java class name</li>
 </ul>
 
-<p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
+Each library can also specify the package prefixes. These are used to enhance 
+  the classloading performance for the plug-in and/or fragment. If the &lt;packages&gt; 
+  element is not specified, then by default the classloading enhancements are 
+  not used. The &lt;packages&gt; element has the following attribute: <p></p>
+  <ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l5 level1 lfo12;tab-stops:list .5in'><b>prefixes - </b>a comma-separated
+	 list of package prefixes for the runtime library</li>
+</ul>
+
+More detailed information about package prefixes can be found 
+<a href="plugin_package_prefixes.html">here</a>.
+
+  <p class=MsoNormal style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'>The
 platform's architecture is based on the notion of configurable extension
 points. The platform itself predefines a set of extension points that cover the
 task of extending the platform and desktop (for example, adding menu actions,
@@ -327,9 +344,8 @@ style='font-size:10.0pt;font-family:"Courier New"'>ANY</span></tt> rule. This
 means that any well-formed XML can be specified within the extension
 configuration section (between &lt;extension&gt; and &lt;/extension&gt; tags). </p>
 
-<pre><p></p></pre><pre><span
-style='font-size:12.0pt;mso-bidi-font-size:10.0pt;font-family:"Times New Roman";
-mso-bidi-font-family:"Courier New"'>Fragments are used to increase the scope of a plug-in.<span style="mso-spacerun: yes">&nbsp; </span>An example would be to incorporate data such as messages or labels in another language.<p></p></span></pre><pre><p></p></pre><pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;&nbsp;
+<p></p>Fragments are used to increase the scope of a plug-in.<span style="mso-spacerun: yes">&nbsp; </span>An example would be to incorporate data such as messages or labels in another language.<p></p>
+<pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;&nbsp;
 &lt;!ELEMENT fragment (requires?, runtime?, extension-point*, extension*)&gt;
 &lt;!ATTLIST fragment
 &nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED
