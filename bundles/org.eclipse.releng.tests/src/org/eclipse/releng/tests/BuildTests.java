@@ -892,8 +892,7 @@ public class BuildTests extends TestCase {
 		return false;
 	}
 	
-	private boolean testDirectory(File aDirectory, String[] requiredFiles, String requiredSuffix) {
-		if (aDirectory.getName().endsWith(".jar")){
+	private boolean testPluginJar(File aDirectory, String[] requiredFiles){
 			ArrayList list = new ArrayList();
 			try {
 				ZipFile jarredPlugin=new ZipFile(aDirectory);
@@ -911,6 +910,11 @@ public class BuildTests extends TestCase {
 			if (!list.containsAll(Arrays.asList(requiredFiles))) {
 				return false;
 			}
+			return true;
+	}
+	private boolean testDirectory(File aDirectory, String[] requiredFiles, String requiredSuffix) {
+		if (aDirectory.getName().endsWith(".jar")){
+			return testPluginJar(aDirectory,requiredFiles);
 		} else {
 			if (!Arrays.asList(aDirectory.list()).containsAll(
 					Arrays.asList(requiredFiles))) {
@@ -937,47 +941,54 @@ public class BuildTests extends TestCase {
 	
 
 	private boolean testBundleDirectory(File aDirectory, String[] requiredFiles, String manifestFile, String requiredSuffix) {
-		if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
-			return false;
+		if (aDirectory.getName().endsWith(".jar")) {
+			return testPluginJar(aDirectory, requiredFiles);
+		} else {
+			if (!Arrays.asList(aDirectory.list()).containsAll(
+					Arrays.asList(requiredFiles))) {
+				return false;
+			}
+
+			int index = aDirectory.getName().indexOf('_');
+			if (index == -1) {
+				index = aDirectory.getName().length();
+			}
+
+			String plainName = aDirectory.getName().substring(0, index);
+
+			File metaDir = new File(aDirectory, "META-INF");
+
+			String[] metaFiles = metaDir.list();
+			if (metaFiles == null) {
+				return (false);
+			} else {
+				for (int i = 0; i < metaFiles.length; i++) {
+					String filename = metaFiles[i];
+					if (filename == manifestFile) {
+						return true;
+					}
+				}
+			}
+
+			if (!metaDir.exists()) {
+				return false;
+			}
+
+			if (requiredSuffix.equals("")
+					|| Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+				return true;
+			} else if (aDirectory
+					.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
+				return false;
+			}
 		}
-		
-		int index = aDirectory.getName().indexOf('_');
-		if (index == -1) {
-			index = aDirectory.getName().length();
-		}	
-		
-		String plainName = aDirectory.getName().substring(0, index);
-				
-		File metaDir = new File(aDirectory, "META-INF");	    
-			
-		String[] metaFiles = metaDir.list();
-	    if (metaFiles == null) {
-		        return(false);
-	    } else {
-	       for (int i=0; i < metaFiles.length; i++) {		            
-	            String filename = metaFiles[i];
-	            if (filename == manifestFile) {
-	            	return true;
-	            }
-	        }
-	    }
-		
-		if (! metaDir.exists()){
-			return false;
-		}
-						
-		if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
-			return true;
-		} else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
-			return false;
-		}
-					
 		return true;
 	}
 
 	/**
-	 * Return true if the receiver is a source plugin, false otherwise
-	 * A separate method because this is a little tricky.
+	 * Return true if the receiver is a source plugin, false otherwise A
+	 * separate method because this is a little tricky.
+	 * 
 	 * @param aPlugin
 	 * @return boolean
 	 */
