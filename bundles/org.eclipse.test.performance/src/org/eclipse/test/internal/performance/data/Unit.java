@@ -114,7 +114,7 @@ public class Unit {
 			return String.valueOf(diff) + " ms"; //$NON-NLS-1$
 		
 		NumberFormat nf= NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(1);
+		nf.setMaximumFractionDigits(2);
 		double d = diff / 1000.0;	
 		if (d < 60)
 			return nf.format(d) + " s"; //$NON-NLS-1$
