@@ -23,6 +23,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.team.core.TeamException;
+import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
@@ -172,6 +173,12 @@ public class ProjectComparePage extends WizardPage{
 		CompareParticipant participant = (CompareParticipant)input.getParticipant();
 		CVSCompareSubscriber subscriber = (CVSCompareSubscriber)participant.getSubscriber();
 		subscriber.resetRoots(projects, tags);
+		try {
+			subscriber.primeRemoteTree();
+		} catch (CVSException e) {
+			// Log and ignore
+			RelEngPlugin.log(e);
+		}
 		participant.refreshNow(projects, "", monitor);
 		IResource[] r = participant.getSyncInfoSet().members(ResourcesPlugin.getWorkspace().getRoot());
 		return r;
