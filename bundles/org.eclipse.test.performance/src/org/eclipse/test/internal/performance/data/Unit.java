@@ -145,7 +145,7 @@ public class Unit {
 			return String.valueOf(n);
 		double d = n / TSD;
 		NumberFormat nf = NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(1);
+		nf.setMaximumFractionDigits(2);
 		if (d < TSD)
 			return nf.format(d) + "K"; //$NON-NLS-1$
 		

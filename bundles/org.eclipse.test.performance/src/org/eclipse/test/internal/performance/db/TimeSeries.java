@@ -13,11 +13,13 @@ package org.eclipse.test.internal.performance.db;
 public class TimeSeries {
     
     private String[] fBuildNames;
-    private double[] fValues;
+    private double[] fAverages;
+    private double[] fStddev;
     
-    TimeSeries(String[] tags, double[] ds) {
+    TimeSeries(String[] tags, double[] averages, double[] stddev) {
         fBuildNames= tags;
-        fValues= ds;
+        fAverages= averages;
+        fStddev= stddev;
     }
     
     /**
@@ -34,7 +36,16 @@ public class TimeSeries {
      * @return value at given index
      */
     public double getValue(int ix) {
-        return fValues[ix];
+        return fAverages[ix];
+    }
+    
+    /**
+     * Returns std dev at given index.
+     * @param ix 
+     * @return std dev at given index
+     */
+    public double getStddev(int ix) {
+        return fStddev[ix];
     }
     
     /**

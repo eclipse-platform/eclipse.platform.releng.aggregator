@@ -61,9 +61,12 @@ public class Scenario {
         TimeSeries ts= (TimeSeries) fSeries.get(dim);
         if (ts == null) {
             double[] ds= new double[fSessions.length];
-            for (int i= 0; i < ds.length; i++)
+            double[] sd= new double[fSessions.length];
+           for (int i= 0; i < ds.length; i++) {
                 ds[i]= fSessions[i].getAverage(dim);
-            ts= new TimeSeries(fBuildNames, ds);
+                sd[i]= fSessions[i].getStddev(dim);                
+            }
+            ts= new TimeSeries(fBuildNames, ds, sd);
             fSeries.put(dim, ts);
         }
         return ts;

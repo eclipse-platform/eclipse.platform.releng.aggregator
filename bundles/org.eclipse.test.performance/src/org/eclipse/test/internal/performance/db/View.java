@@ -10,12 +10,17 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
+import java.text.NumberFormat;
+
 import org.eclipse.test.internal.performance.data.Dim;
 
 public class View {
     
     public static void main(String[] args) {
-    
+
+		NumberFormat nf= NumberFormat.getInstance();
+		nf.setMaximumFractionDigits(1);
+
         // get all Scenarios 
         Scenario[] scenarios= DB.queryScenarios("%", "%", "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     
@@ -37,8 +42,13 @@ public class View {
                 
                 TimeSeries ts= t.getTimeSeries(dim);
                 int n= ts.getLength();
-                for (int j= 0; j < n; j++)
-                    r.addCellRight(dim.getDisplayValue(ts.getValue(j)));
+                for (int j= 0; j < n; j++) {
+                    String sdd= ""; //$NON-NLS-1$
+                    double sd= ts.getStddev(j);
+                    if (! Double.isNaN(sd))
+                		sdd= " [" + nf.format(sd) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+                    r.addCellRight(dim.getDisplayValue(ts.getValue(j)) + sdd);
+                }
                 r.nextRow();
             }
             r.print(System.out);

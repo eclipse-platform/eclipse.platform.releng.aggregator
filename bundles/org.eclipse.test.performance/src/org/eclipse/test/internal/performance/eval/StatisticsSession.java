@@ -76,6 +76,7 @@ public class StatisticsSession {
 		    set.add(new Integer(dp.getStep()));
 		}
 		
+		long mags[]= new long[fDataPoints.length];
 		switch (set.size()) {
 		case 1:
 			// if there is only one DataPoint, we don't calculate the delta.
@@ -83,11 +84,14 @@ public class StatisticsSession {
 				Scalar sc= fDataPoints[i].getScalar(dimension);
 				if (sc != null) {
 					long magnitude= sc.getMagnitude();
+					mags[i]= magnitude;
 					stats.sum += magnitude;
 					stats.count++;
-					stats.average= stats.sum / stats.count;
-					stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
 				}
+			}
+			stats.average= stats.sum / stats.count;
+			for (int i= 0; i < fDataPoints.length; i++) {
+				stats.stddev+= (stats.average - mags[i]) * (stats.average - mags[i]);
 			}
 			break;
 		case 2:
@@ -98,21 +102,22 @@ public class StatisticsSession {
 				Assert.assertTrue("wrong order of steps", after.getStep() == InternalPerformanceMeter.AFTER); //$NON-NLS-1$
 				
 				Scalar delta= getDelta(before, after, dimension);
-				if (delta != null) {
-					long magnitude= delta.getMagnitude();
-					stats.sum += magnitude;
-					stats.count++;
-					stats.average= stats.sum / stats.count;
-					stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
-				}
+				long magnitude= delta.getMagnitude();
+				mags[i]= magnitude;
+				stats.sum += magnitude;
+				stats.count++;
+			}
+			stats.average= stats.sum / stats.count;
+			for (int i= 0; i < fDataPoints.length-1; i += 2) {
+				stats.stddev+= (stats.average - mags[i]) * (stats.average - mags[i]);
 			}
 			break;
 		default:
 			Assert.assertTrue("cannot handle more than two steps", false); //$NON-NLS-1$
-		    	break;
+		    break;
 		}
 		
-		stats.stddev= Math.sqrt(stats.stddev / stats.count - 1);
+		stats.stddev= Math.sqrt(stats.stddev / stats.count);
 
 		return stats;
 	}
@@ -124,8 +129,7 @@ public class StatisticsSession {
 		Scalar two= after.getScalar(dimension);
 		Assert.assertTrue("reference has no value for dimension " + dimension, two != null); //$NON-NLS-1$
 		
-		Scalar delta= new Scalar(one.getDimension(), two.getMagnitude() - one.getMagnitude());
-		return delta;
+		return new Scalar(one.getDimension(), two.getMagnitude() - one.getMagnitude());
 	}
 
 	public boolean contains(Dim dimension) {
