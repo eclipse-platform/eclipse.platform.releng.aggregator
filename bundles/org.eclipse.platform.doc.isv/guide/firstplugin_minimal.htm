@@ -14,7 +14,8 @@ A minimal plug-in
 <H2>
 A minimal plug-in</H2>
 <P >
-We all know what &quot;Hello World&quot; looks like in plain old Java without using any user interface or other framework.</P>
+We all know what &quot;Hello World&quot; looks like in plain old Java without using any user interface frameworks or
+other specialized libraries.</P>
 <font color='#4444CC'><pre>
    public class HelloWorld {
       public static void main(String[] args) {
@@ -28,6 +29,12 @@ What happens to this old standard in the context of the Eclipse platform?  Inste
 When we get deeper into the platform user interface components, we'll do an exhaustive review of the ways that you can extend and customize the workbench
 UI. For now, let's start with one of the simplest workbench extensions - a view.&nbsp;</P>
 
+<i><blockquote>
+Note:&nbsp; For simplicity, we'll create a plug-in that extends the IDE workbench as it comes "out of the box"
+in the SDK.  <a HREF="rcp_hello.htm">Revisiting hello world</a> shows how to develop this application in a minimal workbench using the subset of plug-ins
+known as the <a HREF="arch_rcp.htm">Rich Client Platform</a>.</blockquote></i>
+
+
 <p>You can think of the workbench window as a frame that presents various visual
 parts. These parts fall into two major categories: views and editors.&nbsp; We
 will look at editors later.&nbsp; <b>Views</b>
@@ -40,9 +47,9 @@ Hello world view</H3>
 <P >
 For our hello world plug-in, we will implement our own view to greet the user with &quot;Hello World.&quot;</P>
 <P >
-The package <b><a href="../reference/api/org/eclipse/ui/package-summary.html"> org.eclipse.ui</a></b>
-and its sub packages contain the public interfaces that define the workbench
-user interface (UI) API. Many of these interfaces have
+The plug-in <b>org.eclipse.ui.workbench</b> defines most of the public interfaces that make up the workbench
+user interface (UI) API. These interfaces can be found in the package <b><a href="../reference/api/org/eclipse/ui/package-summary.html"> org.eclipse.ui</a></b>
+and its sub packages.  Many of these interfaces have
 default implementation classes that you can extend to provide simple modifications to the system. In our hello world example, we will extend a workbench view to provide a label that says hello.</P>
 <P >
 The interface of interest is <b><a href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart</a></b>, which defines the methods that must be implemented to contribute a view to the workbench. The class
@@ -60,10 +67,10 @@ The interface of interest is <b><a href="../reference/api/org/eclipse/ui/IViewPa
   However, there are some IDE logistics for getting started.</P>
 <h4 >Setting up your environment</h4>
 <p >If you are starting with a clean environment, you will need to ensure that 
-  your code has access to the plug-ins <b><a href="../reference/api/org/eclipse/ui/package-summary.html"> 
-  org.eclipse.ui</a></b>. Import this plug-in and any plug-ins it requires into 
+  your code has access to the plug-in <b>org.eclipse.ui.ide</b>. This is the plug-in that supplies
+  the default platform workbench.  Import this plug-in and any plug-ins it requires into 
   your run-time workbench instance by performing the steps below. If you already 
-  have these plug-ins in your workbench instance, proceed to the section &quot;Creating 
+  have these plug-ins loaded in your workspace, proceed to the section &quot;Creating 
   your plug-in project&quot;.</p>
 <ol>
   <li>From the resource perspective, use <strong>File &gt; Import... &gt; External 
@@ -71,9 +78,10 @@ The interface of interest is <b><a href="../reference/api/org/eclipse/ui/IViewPa
   <li>Continue clicking on the <strong>Next &gt;</strong> buttons until you get 
     to the screen called <strong>Selection</strong>. This screen will contain 
     a list of all of the plug-ins in your host workbench instance.</li>
-  <li>Select org.eclipse.ui and then click the button <strong>Add Required Plug-ins</strong>.</li>
+  <li>Select <b>org.eclipse.ui.ide</b> and then click the button <strong>Add<strong>.</li>
+  <li>Click on the button <strong>Required Plug-ins</strong>.  The list on the right should fill up with all the plug-ins that org.eclipse.ide requires.</li>
   <li>Click on the <strong>Finish</strong> button. Your Navigator view should 
-    contain org.eclipse.ui and all of the plug-ins it requires (including org.eclipse.swt).</li>
+    contain org.eclipse.ui.ide and all of the plug-ins it requires (such as org.eclipse.ui, org.eclipse.swt, etc.).</li>
 </ol>
 <p>For a complete discussion of setting up host and run-time workbench instances 
   consult the PDE Guide.</p>
@@ -84,28 +92,29 @@ The interface of interest is <b><a href="../reference/api/org/eclipse/ui/IViewPa
     and choose <b>Plug-in Project </b>from the <b>Plug-in Development</b> category.&nbsp; 
     This will set up your project for writing Java code and give you a default 
     plug-in manifest file (explained in a moment.)&nbsp; Use <b>org.eclipse.examples.helloworld</b> 
-    as the name for your project. By default, the wizard sets <strong>org.eclipse.examples.helloworld</strong> 
-    as the id as well.&nbsp; The wizard gives you the option of generating code 
-    for different kinds of plug-ins, but we want to keep this simple.&nbsp; For 
-    now, be sure to choose <b>Create a blank plug-in project </b>on the <strong>Plug-in 
-    Code Generators</strong> page.</li>
+    as the name for your project and click <strong>Next</strong>.</li>
+  <li>On the <strong>Plug-in Project Structure</strong> page, click <strong>Next</strong> to
+   accept the defaults (creation of a Java project).</li>
+  <li>On the <strong>Plug-in Content</strong> page, look at the default settings.  The wizard sets <strong>org.eclipse.examples.helloworld</strong> 
+    as the id of the plug-in.&nbsp; The wizard will also generate a plug-in class for your plug-in.  These defaults are
+    acceptable, so click <strong>Next</strong>.  </li>
+  <li>On the <strong>Templates</strong> page, check the box for <strong>Create a plug-in using one of the templates</strong>.  Then
+    select the <strong>Plug-in with a view</strong> template.  Click <strong>Next</strong>.  </li>
+  <li>On the <strong>Main View Settings</strong> page, check the box for <strong>Create a plug-in using one of the templates</strong>.  Then
+    select the <strong>Plug-in with a view</strong> template.  Click <strong>Next</strong>.  </li>
   <li>When asked if you would like to switch to the Plug-in Development perspective, 
     answer <strong>Yes</strong>.</li>
-  <li>Create a package <b>org.eclipse.examples.helloworld</b> underneath the <b>src</b> 
-    directory for the project. To do this, double click on the project <strong>org.eclipse.examples.helloworld</strong> 
-    in the Package Explorer view. This expands the project and shows you the <strong>src</strong> 
-    directory. Right click on the <strong>src</strong> directory to get the context 
-    menu. Use <strong>New &gt; Package</strong> to create a new package and give 
-    it the name <b>org.eclipse.examples.helloworld</b></li>
+  <li>Navigate to your new project and notice that you now have a package <b>org.eclipse.examples.helloworld</b> underneath the <b>src</b> 
+    directory for the project. </li>
   <li>Create a new class called <b>HelloWorldView</b> in this package. Right click 
-    on the package you just created in the previous step to get the context menu. 
+    on the package to get the context menu. 
     Use <strong>New &gt; Class</strong> to create your new class with the name 
     <b>HelloWorldView</b>.</li>
 </ol>
 <h4>Writing the code</h4>
 <P >Now we're ready to study some code.&nbsp; Here is everything you need in
 your <b>HelloWorldView</b>.&nbsp; (You can copy the contents below into the
-class you created.)&nbsp;</P>
+class you created, replacing any auto-generated content.)&nbsp;</P>
 <font color='#4444CC'><pre>
    package org.eclipse.examples.helloworld;
 
@@ -160,25 +169,17 @@ How do we run the code and add this view to the workbench?</P>
 <H3>
 The hello world plug-in</H3>
 <P >
-We need to inform the platform that we want to contribute our view. This is done by extending the
+We need to inform the platform that we want to contribute our view. 
+The plug-in <b>org.eclipse.ui</b> defines most of the extension points that can be used
+to contribute to the workbench UI.  Our view is added by extending the
 <b><a href="../reference/extension-points/org_eclipse_ui_views.html"> org.eclipse.ui.views</a></b> extension point. We register our extension by providing a manifest file,<b>
 plugin.xml</b>, which describes our plug-in, including where its code is located, and the extension
 we are adding.</P>
 <P >
 (If you are still following along, you can copy this information into the <b>plugin.xml
-</b>that was generated when you created the project.)</P>
+</b>that was generated when you created the project.  Click on the <strong>plugin.xml</strong> tab
+inside the plugin.xml editor and copy the following information just before the <strong>&lt;/plugin&gt</strong>.)</P>
 <font color='#4444CC'><pre>
-   &lt;?xml version=&quot;1.0&quot; ?&gt;
-   &lt;plugin
-      name=&quot;Hello World Example&quot; 
-      id=&quot;org.eclipse.examples.helloworld&quot;
-      version=&quot;1.0&quot;&gt;
-      &lt;requires&gt;
-         &lt;import plugin=&quot;org.eclipse.ui&quot; /&gt;
-      &lt;/requires&gt;
-      &lt;runtime&gt;
-         &lt;library name=&quot;helloworld.jar&quot; /&gt;
-      &lt;/runtime&gt;
       &lt;extension point=&quot;org.eclipse.ui.views&quot;&gt;
          &lt;category 
             id=&quot;org.eclipse.examples.helloworld.hello&quot;
@@ -189,12 +190,11 @@ we are adding.</P>
             category=&quot;org.eclipse.examples.helloworld.hello&quot;
             class=&quot;org.eclipse.examples.helloworld.HelloWorldView&quot; /&gt;
       &lt;/extension&gt;
-   &lt;/plugin&gt;
 </pre></font>
 <P >
-In this file, we define the <b>name</b>, <b>id</b>, and <b>version</b> for our plug-in. </P>
+The wizard automatically generated a <b>name</b>, <b>id</b>, and <b>version</b> for our plug-in. </P>
 <P >
-We also list our required plug-ins. Since we use workbench and SWT API in our
+It required plug-ins. Since we use workbench and SWT API in our
 plug-in, we must list
 <b>org.eclipse.ui</b>. We must also describe where our executable code is located.
 We intend to package the code in
