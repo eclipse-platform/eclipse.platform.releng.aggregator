@@ -283,45 +283,70 @@ the command line:</p>
 </blockquote>
 <p>(bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=18321">18321</a>)</p>
 <h3>3.1.1 <a name="I-Platform-Core">Platform - Core</a></h3>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Declaring package name
-prefixes improves plug-in class loading speed</i></h4>
-<p><i>A significant (10-15%) speed increase in the time to load a plug-in's
-classes can be obtained simply by declaring the package name prefixes found in
-that plug-in's runtime library JARs. This is done in the new Package Prefixes
-section of the Runtime page in the PDE plug-in manifest editor. (Further
-information <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/docs/package-prefixes/prefixes.html">here</a>.)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] </i><b><i>Invalid characters
-in install directory prevents Eclipse from starting</i></b></h4>
-<p><i>Eclipse will fail to launch if installed in a directory whose path
+<h4>Eclipse fails to start on some file systems</h4>
+<p>Java sometimes has difficulty detecting whether a file system is writable. In
+particular, the method java.io.File.canWrite() appears to return true in
+unexpected cases (e.g., using Windows drive sharing where the share is a
+read-only Samba drive). The Eclipse runtime generally needs a writable
+configuration area and as a result of this problem, may erroneously detect the
+current configuration location as writable. The net result is that Eclipse will
+fail to start and depending on the circumstances, may fail to write a log file
+with any details. To work around this, we suggest users experiencing this
+problem set their configuration area explicitly using the -configuration command
+line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719">67719</a>)</p>
+<h4>XML files with UTF-8 byte order mark fail to have content type detected</h4>
+<p>Eclipse will fail to detect the proper content type for XML files that have a
+UTF-8 byte order mark if Crimson is the XML parser (as it is on Sun 1.4 JRE). This
+problem will prevent actions normally available when files of the affected
+content types are selected from being presented to the user. The workaround is
+to ensure the default XML parser supports UTF-8 BOMs (such as Xerces does). (bug
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67048">67048</a>)</p>
+<h4>No branding with old config.ini</h4>
+<p>If you have an old config.ini file and use it with a new Eclipse build, you
+may not get the correct product branding. This is because the id of the standard
+Eclipse product changed. Users in shared install scenarios may end up in this
+situation as previous builds of Eclipse automatically generated config.ini files
+in some cases. The work around is either to delete the local config.ini or
+update the eclipse.product line to read eclipse.product=org.eclipse.platform.ide.</p>
+<h4><b>Changing the charset for a resource causes inconsistencies</b></h4>
+<p>Changing the charset for a resource (or the whole workspace) does not trigger resource change events or auto builds. The result is that 
+builders and listeners that maintain state derived from the affected resources will not have a chance to run, causing
+inconsistencies (such as compiler errors not going away and searching for references not working properly). The workaround 
+consists to clean (Project > Clean...), close, and then re-open the affected projects
+(bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=59899">59899</a>,
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67884">67884</a>).</p>
+
+<h4><b>Invalid characters
+in install directory prevents Eclipse from starting</b></h4>
+<p>Eclipse will fail to launch if installed in a directory whose path
 contains certain invalid characters, including :%#&lt;&gt;&quot;!. The
 workaround is to install Eclipse in a directory whose path does not contain
 invalid characters. (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3109">3109</a>
-and <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=17281">17281</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] </i><b><i>Problems with
-classloaders in created threads</i></b></h4>
-<p><i>There is a known issue with trying to load classes from a newly-created
+and <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=17281">17281</a>)</p>
+<h4>Problems with
+classloaders in created threads</h4>
+<p>There is a known issue with trying to load classes from a newly-created
 thread using a class loader different from the plug-in class loader. The result
 will be a <code>ClassNotFoundException</code>. As a workaround, do the
-following:</i></p>
+following:</p>
 <ol>
-  <li><i>Create a thread in which to run your code.</i>
-  <li><i>Send yourThread.setContextClassLoader(yourClassLoader); // you can find
-    your classloader by grabbing a class it loaded
-    (YourPluginClass.class.getClassLoader())</i>
-  <li><i>Run your code in the newly created thread.</i></li>
+  <li>Create a thread in which to run your code.
+  <li>Send yourThread.setContextClassLoader(yourClassLoader); // you can find
+    your classloader by grabbing a class it loaded (YourPluginClass.class.getClassLoader())
+  <li>Run your code in the newly created thread.</li>
 </ol>
-<p><i>If you set the context class loader for the current thread, you are
+<p>If you set the context class loader for the current thread, you are
 competing with other users of the thread (all of Eclipse), so the results will
 be unpredictable. However, there should be no problem in practice provided you
 reset the context class loader back to its original value when your use in the
-current thread is&nbsp;complete. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8907">8907</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Deadlock creating executable
-extension in Plugin.startup</i></h4>
-<p><i>If <code>Plugin.startup</code> code is too complex and performs tasks such
+current thread is&nbsp;complete. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8907">8907</a>)</p>
+<h4> Deadlock creating executable
+extension in Plugin.startup</h4>
+<p>If <code>Plugin.startup</code> code is too complex and performs tasks such
 as creating an executable extension, a deadlock situation can be created. Only
 simple bookkeeping tasks should be performed in <code>Plugin.startup</code>
 code. (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=12827">12827</a>,
-<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>, <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=16141">16141</a>)</i></p>
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>)</p>
 <h3>3.1.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
 <h4>UTF-8 encoded buildfiles with Byte Order Mark</h4>
 <p>UTF-8 encoded buildfiles with byte order marks will fail to be parsed correctly depending on the XML parser being used for the build. Therefore a valid buildfile will fail to build with an error message similar to: "BUILD FAILED: C:\workspace\bom.xml:1: Document root element is missing.". To succeed in building with these files, ensure to include Xerces jars on the Ant runtime classpath so that the Xerces parser is used to parse the XML. As well the context menu for these files in the Navigator or Package Explorer will not have the run shortcuts for Ant builds. (bug
