@@ -25,7 +25,9 @@ public class Sample {
 	long fStartTime;
 	Map fProperties;
 	DataPoint[] fDataPoints;
+	
 	boolean fIsSummary;
+	boolean fSummaryIsGlobal;
 	String fShortName;
 	Dimension[] fSummaryDimensions;
 	
@@ -41,8 +43,9 @@ public class Sample {
         fDataPoints= dataPoints;
     }
     
-    public void tagAsSummary(String shortName, Dimension[] summaryDimensions) {
+    public void tagAsSummary(boolean global, String shortName, Dimension[] summaryDimensions) {
         fIsSummary= true;
+        fSummaryIsGlobal= global;
         fShortName= shortName;
         fSummaryDimensions= summaryDimensions;
     }
@@ -81,7 +84,7 @@ public class Sample {
     }
     
     public boolean isGlobal() {
-        return true;
+        return fSummaryIsGlobal;
     }
     
     public String getShortname() {

@@ -29,7 +29,7 @@ public class SQL {
     
     private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryVariation, fQueryVariations, fQueryScenario, fQueryAllScenarios, fQueryDatapoints, fQueryScalars;
-    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntry, fQuerySummaryEntries;
+    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntry, fQueryGlobalSummaryEntries, fQuerySummaryEntries;
     
 
     SQL(Connection con) throws SQLException {
@@ -77,6 +77,7 @@ public class SQL {
         if (fQueryScenario != null) fQueryScenario.close();
         if (fQueryAllScenarios != null) fQueryAllScenarios.close();
         if (fQueryVariations != null) fQueryVariations.close();
+        if (fQueryGlobalSummaryEntries != null) fQueryGlobalSummaryEntries.close();
         if (fQuerySummaryEntries != null) fQuerySummaryEntries.close();
     }
         
@@ -352,16 +353,28 @@ public class SQL {
         fUpdateScenarioShortName.executeUpdate();
     }   
 
-    ResultSet querySummaryEntries(Variations variations, boolean global) throws SQLException {
+    ResultSet queryGlobalSummaryEntries(Variations variations) throws SQLException {
+        if (fQueryGlobalSummaryEntries == null)
+            fQueryGlobalSummaryEntries= fConnection.prepareStatement(
+            		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
+            		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
+            		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
+            		"SUMMARYENTRY.IS_GLOBAL = 1"	//$NON-NLS-1$
+            ); 
+        fQueryGlobalSummaryEntries.setString(1, variations.toExactMatchString());
+        return fQueryGlobalSummaryEntries.executeQuery();
+    }
+
+    ResultSet querySummaryEntries(Variations variations, String scenarioPattern) throws SQLException {
         if (fQuerySummaryEntries == null)
             fQuerySummaryEntries= fConnection.prepareStatement(
             		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
             		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
             		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
-            		"SUMMARYENTRY.IS_GLOBAL = ?"	//$NON-NLS-1$
+            		"SCENARIO.NAME like ?"	//$NON-NLS-1$
             ); 
         fQuerySummaryEntries.setString(1, variations.toExactMatchString());
-        fQuerySummaryEntries.setInt(2, global ? 1 : 0);
+        fQuerySummaryEntries.setString(2, scenarioPattern);
         return fQuerySummaryEntries.executeQuery();
     }
 }

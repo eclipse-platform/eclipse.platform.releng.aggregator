@@ -83,8 +83,19 @@ public class DB {
     }
     
     // fingerprints
+    /**
+     * @deprecated Use queryGlobalSummaries instead
+     */
     public static SummaryEntry[] querySummaries(Variations variationPatterns, boolean global) {
-        return getDefault().internalQuerySummaries(variationPatterns, global);
+        return getDefault().internalQuerySummaries(variationPatterns, null);
+    }
+
+    public static SummaryEntry[] queryGlobalSummaries(Variations variationPatterns) {
+        return getDefault().internalQuerySummaries(variationPatterns, null);
+    }
+
+    public static SummaryEntry[] querySummaries(Variations variationPatterns, String scenarioPattern) {
+        return getDefault().internalQuerySummaries(variationPatterns, scenarioPattern);
     }
 
     /**
@@ -358,13 +369,17 @@ public class DB {
         }
     }
     
-    private SummaryEntry[] internalQuerySummaries(Variations variationPatterns, boolean global) {
+    private SummaryEntry[] internalQuerySummaries(Variations variationPatterns, String scenarioPattern) {
         if (fSQL == null)
             return null;
         ResultSet result= null;
         try {
             List fingerprints= new ArrayList();
-            ResultSet rs= fSQL.querySummaryEntries(variationPatterns, global);
+            ResultSet rs;
+            if (scenarioPattern != null)
+                rs= fSQL.querySummaryEntries(variationPatterns, scenarioPattern);
+            else
+                rs= fSQL.queryGlobalSummaryEntries(variationPatterns);
             while (rs.next()) {
                 String scenarioName= rs.getString(1);
                 String shortName= rs.getString(2);

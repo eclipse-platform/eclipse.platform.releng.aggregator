@@ -69,7 +69,7 @@ public class PerformanceTestCase extends TestCase {
 
 	/**
 	 * Mark the scenario of this test case
-	 * to be included into the global performance summary. The summary shows
+	 * to be included into the global and the component performance summary. The summary shows
 	 * the given dimension of the scenario and labels the scenario with the short name.
 	 * 
 	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
@@ -82,7 +82,7 @@ public class PerformanceTestCase extends TestCase {
 
 	/**
 	 * Mark the scenario represented by the given PerformanceMeter
-	 * to be included into the global performance summary. The summary shows
+	 * to be included into the global and the component performance summary. The summary shows
 	 * the given dimensions of the scenario and labels the scenario with the short name.
 	 * 
 	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
@@ -91,6 +91,32 @@ public class PerformanceTestCase extends TestCase {
 	public void tagAsGlobalSummary(String shortName, Dimension[] dimensions) {
 		Performance performance= Performance.getDefault();
 		performance.tagAsGlobalSummary(fPerformanceMeter, shortName, dimensions );
+	}
+	
+	/**
+	 * Mark the scenario of this test case
+	 * to be included into the component performance summary. The summary shows
+	 * the given dimension of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 */
+	public void tagAsSummary(String shortName, Dimension dimension) {
+		Performance performance= Performance.getDefault();
+		performance.tagAsSummary(fPerformanceMeter, shortName, new Dimension[] { dimension } );
+	}
+
+	/**
+	 * Mark the scenario represented by the given PerformanceMeter
+	 * to be included into the component performance summary. The summary shows
+	 * the given dimensions of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimensions an array of dimensions to show in the summary
+	 */
+	public void tagAsSummary(String shortName, Dimension[] dimensions) {
+		Performance performance= Performance.getDefault();
+		performance.tagAsSummary(fPerformanceMeter, shortName, dimensions );
 	}
 	
 	/**

@@ -204,7 +204,7 @@ public class Performance {
 	
 	/**
 	 * Mark the scenario represented by the given PerformanceMeter
-	 * to be included into the global performance summary. The summary shows
+	 * to be included into the global and the component performance summary. The summary shows
 	 * the given dimension of the scenario and labels the scenario with the short name.
 	 * 
 	 * @param pm the PerformanceMeter
@@ -217,7 +217,7 @@ public class Performance {
 
 	/**
 	 * Mark the scenario represented by the given PerformanceMeter
-	 * to be included into the global performance summary. The summary shows
+	 * to be included into the global and the component performance summary. The summary shows
 	 * the given dimensions of the scenario and labels the scenario with the short name.
 	 * 
 	 * @param pm the PerformanceMeter
@@ -227,7 +227,37 @@ public class Performance {
 	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension[] dimensions) {
 	    if (pm instanceof InternalPerformanceMeter) {
 	        InternalPerformanceMeter ipm= (InternalPerformanceMeter) pm;
-	        ipm.tagAsGlobalSummary(shortName, dimensions);
+	        ipm.tagAsSummary(true, shortName, dimensions);
+	    }
+	}
+
+	
+	/**
+	 * Mark the scenario represented by the given PerformanceMeter
+	 * to be included into the component performance summary. The summary shows
+	 * the given dimension of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param pm the PerformanceMeter
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 */
+	public void tagAsSummary(PerformanceMeter pm, String shortName, Dimension dimension) {
+	    tagAsSummary(pm, shortName, new Dimension[] { dimension } );
+	}
+
+	/**
+	 * Mark the scenario represented by the given PerformanceMeter
+	 * to be included into the component performance summary. The summary shows
+	 * the given dimensions of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param pm the PerformanceMeter
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimensions an array of dimensions to show in the summary
+	 */
+	public void tagAsSummary(PerformanceMeter pm, String shortName, Dimension[] dimensions) {
+	    if (pm instanceof InternalPerformanceMeter) {
+	        InternalPerformanceMeter ipm= (InternalPerformanceMeter) pm;
+	        ipm.tagAsSummary(false, shortName, dimensions);
 	    }
 	}
 }
