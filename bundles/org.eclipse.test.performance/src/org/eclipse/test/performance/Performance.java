@@ -202,14 +202,32 @@ public class Performance {
 		return new OSPerformanceMeterFactory();
 	}
 	
-	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension dim) {
-	    tagAsGlobalSummary(pm, shortName, new Dimension[] { dim } );
+	/**
+	 * Mark the scenario represented by the given PerformanceMeter
+	 * to be included into the global performance summary. The summary shows
+	 * the given dimension of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param pm the PerformanceMeter
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 */
+	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension dimension) {
+	    tagAsGlobalSummary(pm, shortName, new Dimension[] { dimension } );
 	}
 
-	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension[] dims) {
+	/**
+	 * Mark the scenario represented by the given PerformanceMeter
+	 * to be included into the global performance summary. The summary shows
+	 * the given dimensions of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param pm the PerformanceMeter
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimensions an array of dimensions to show in the summary
+	 */
+	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension[] dimensions) {
 	    if (pm instanceof InternalPerformanceMeter) {
 	        InternalPerformanceMeter ipm= (InternalPerformanceMeter) pm;
-	        ipm.tagAsGlobalSummary(shortName, dims);
+	        ipm.tagAsGlobalSummary(shortName, dimensions);
 	    }
 	}
 }
