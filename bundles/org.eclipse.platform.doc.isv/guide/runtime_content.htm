@@ -14,8 +14,9 @@ Content types</H2>
 <p>
 <p>
 The <b><a href="../reference/api/org/eclipse/core/runtime/content/package-summary.html">org.eclipse.core.runtime.content</a></b>
-package provides support for defining content-types for data streams.  A content type is used
-when deciding what kind of editor to open on a particular data stream.  A central content registry 
+package provides support for defining content-types for data streams.  Content types are used by several
+content-sensitive features of Eclipse, such as automatic encoding determination, comparison editor selection, and
+menu contributions.  A central content registry 
 managed by an <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b>
 allows plug-ins to define content types and specify a class that knows how to read and describe the content.
 In order to contribute content types, a basic understanding of the content framework is necessary.
@@ -30,9 +31,9 @@ that the content is located in the file system.
 contributed by the platform resources plug-in.</blockquote></i>
 <h3>Defining and describing content</h3>
 <p>
-The platform defines content types for text and XML data streams.  These content types are defined the same way
-as those contributed by other plug-ins.  We'll look at how the platform defines the text content type in order
-to better understand the content type framework.
+The platform defines some fundamental content types, such as plain text and XML data streams.  These content types 
+are defined the same way as those contributed by other plug-ins.  We'll look at how the platform defines the text 
+content type in order to better understand the content type framework.
 </p>
 <p>Plug-ins define content types by contributing an extension for the extension point
 <b><a href="../reference/extension-points/org_eclipse_runtime_core_contentTypes.html">org.eclipse.runtime.core.contentTypes</b></a>.
@@ -61,8 +62,8 @@ with information about the data.
 </p>
 <p>
 The <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescription.html">IContentDescription</a></b>
-stores content-specific attributes in key/value pairs.  The platform's text content description
-defines attributes representing the character set and byte order of a text file.  
+stores content-specific attributes in key/value pairs.  These attributes are specific to the particular content type.
+The platform specifies attributes for the character set and the byte order of a text file, but others can be defined.
 </p>
 <h3>Finding out about content types</h3>
 <p>
@@ -72,15 +73,15 @@ other content types in the system.
 <ul>
 <li><b>findContentType...</b> methods allow clients to obtain the content type (or types) for a stream and file-name pattern.</li>
 <li><b>getAllContentTypes</b> allows clients to get all of the content types defined in the platform.  </li>
-<li><b>getContentType</b> allows clients to obtain a content type by name.  </li>
+<li><b>getContentType</b> allows clients to obtain a content type by its unique identifier.  </li>
 <li><b>getDescriptionFor...</b> methods allow clients to obtain a content description for a given stream and file-name pattern.</li>
 </ul>
 </p>
 <p>
 Content types are represented by 
 <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentType.html">IContentType</a></b>.
-This class represents a unique content type that can be queried for information such as its content description and
-character set.  Content types are hierarchical in nature.  For example, a content type for XML data is considered a
+This class represents a unique content type that knows how to read a data stream and interpret content type-specific
+information.  Content types are hierarchical in nature.  For example, a content type for XML data is considered a
 child of the text content type.  
 </p>
 <font color='#4444CC'><pre>
@@ -98,11 +99,10 @@ content types.
 </p>
 <h4>Character sets</h4>
 <p>
-The XML content type demonstrates another important aspect of the content type system.  Different content types
-can specify a different character set to be used for encoding their data.  The platform text content type does not
-define a character set for text content.  It relies on the default encoding specified in the platform 
-preferences.  Children of the text content type are free to specify different character sets (such as UTF-8) when
-appropriate.</p>
+The platform text content type does not define a character set for text content.  Children of the text content type
+are free to specify different default character sets when appropriate, as the XML content type does.  The default
+character set for XML streams is UTF-8, which means that when an XML file does not have its encoding explicitly stated
+in its contents, its encoding will be deemed as UTF-8.</p>
 <h4>Content type collisions</h4>
 <p>
 It is conceivable that two independent plug-ins contribute a content type for the same kind of content.  In this case,
