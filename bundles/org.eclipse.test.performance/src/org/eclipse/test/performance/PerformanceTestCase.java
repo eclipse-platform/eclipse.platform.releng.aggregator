@@ -44,6 +44,7 @@ public class PerformanceTestCase extends TestCase {
 
 	/**
 	 * Constructs a performance test case with the given name.
+	 * @param name the name of the performance test case
 	 */
 	public PerformanceTestCase(String name) {
 		super(name);
@@ -51,6 +52,7 @@ public class PerformanceTestCase extends TestCase {
 	
 	/**
 	 * Overidden to create a default performance meter for this test case.
+	 * @throws Exception
 	 */
 	protected void setUp() throws Exception {
 		Performance performance= Performance.getDefault();
@@ -59,6 +61,7 @@ public class PerformanceTestCase extends TestCase {
 
 	/**
 	 * Overidden to disposee of the performance meter.
+	 * @throws Exception
 	 */
 	protected void tearDown() throws Exception {
 		fPerformanceMeter.dispose();

@@ -20,11 +20,12 @@ import java.sql.Statement;
 public class SQL {
     
     private Connection fConn;
-    private PreparedStatement fInsertSample, fInsertDataPoint, fInsertScalar;
+    private PreparedStatement fInsertSample, fInsertDataPoint;
     private PreparedStatement fQueryConfig, fInsertConfig;
     private PreparedStatement fQueryScenario, fInsertScenario;
     private PreparedStatement fQueryTag, fInsertTag;
-    private PreparedStatement fQuery1, fQuery3;
+    private PreparedStatement[] fInsertScalar= new PreparedStatement[20];
+    private PreparedStatement[] fQueries= new PreparedStatement[20];
     
 
     SQL(Connection con) {
@@ -33,6 +34,62 @@ public class SQL {
     
     public void dispose() throws SQLException {
     	// TODO: close prepared statements
+    	if (fInsertScalar != null) {
+    		for (int i= 0; i < fInsertScalar.length; i++) {
+    			if (fInsertScalar[i] != null)
+    				fInsertScalar[i].close();
+    		}
+    		fInsertScalar= null;
+    	}
+    	if (fQueries != null) {
+    		for (int i= 0; i < fQueries.length; i++) {
+    			if (fQueries[i] != null)
+    				fQueries[i].close();
+    		}
+    		fQueries= null;
+    	}
+    }
+    
+    PreparedStatement getScalarInsertStatement(int n) throws SQLException {
+    	if (n < 1 || n > 20)
+    		return null;
+    	if (fInsertScalar[n-1] == null) {
+    		StringBuffer sb= new StringBuffer("insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
+    		for (int i= 1; i < n; i++)
+    			sb.append(", (?, ?, ?)"); //$NON-NLS-1$
+            fInsertScalar[n-1]= fConn.prepareStatement(sb.toString());
+    	}
+    	return fInsertScalar[n-1];
+    }
+    
+    PreparedStatement getQueryStatement(int n) throws SQLException {
+    	if (n < 0 || n > 20)
+    		return null;
+    	if (fQueries[n] == null) {
+    		StringBuffer sb= new StringBuffer(
+    				"select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
+					"where " + //$NON-NLS-1$
+					"SAMPLE.CONFIG_ID = ? and " + //$NON-NLS-1$
+					"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
+					"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
+					"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
+					"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
+			);
+    		
+    		if (n > 0) {
+				sb.append("and (SCALAR.DIM_ID = ?"); //$NON-NLS-1$
+    			for (int i= 1; i < n; i++)
+    				sb.append(" or SCALAR.DIM_ID = ?"); //$NON-NLS-1$
+				sb.append(") "); //$NON-NLS-1$
+    		}
+    		
+			sb.append(
+					"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP" //$NON-NLS-1$
+    		);    		
+    		
+			fQueries[n]= fConn.prepareStatement(sb.toString());
+    	}
+    	return fQueries[n];
     }
     
     void createPreparedStatements() throws SQLException {
@@ -46,36 +103,13 @@ public class SQL {
                 "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertDataPoint= fConn.prepareStatement(
                 "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
-        fInsertScalar= fConn.prepareStatement(
-                "insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
 
         fQueryTag= fConn.prepareStatement(
-        			"select ID from TAG where NAME = ?"); //$NON-NLS-1$
+        		"select ID from TAG where NAME = ?"); //$NON-NLS-1$
         fQueryConfig= fConn.prepareStatement(
                 "select ID from CONFIG where HOST = ? and PLATFORM = ?"); //$NON-NLS-1$
         fQueryScenario= fConn.prepareStatement(
                 "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
-        
-        fQuery1= fConn.prepareStatement(
-                "select SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
-            		"where " + //$NON-NLS-1$
-                 "SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and CONFIG.PLATFORM = ? and " + //$NON-NLS-1$
-          		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
-          		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
-            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
-            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " + //$NON-NLS-1$
-            		"SCALAR.DIM_ID = ?" //$NON-NLS-1$
-        			);
-        fQuery3= fConn.prepareStatement(
-                "select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
-            		"where " + //$NON-NLS-1$
-                 "SAMPLE.CONFIG_ID = ? and " + //$NON-NLS-1$
-         		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
-         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
-            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
-            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID " + //$NON-NLS-1$
-            		"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP" //$NON-NLS-1$
-            		);
     }
     
     void initialize() throws SQLException {
@@ -127,7 +161,7 @@ public class SQL {
         stmt.close();
     }
     
-    private static int create(PreparedStatement stmt) throws SQLException {
+    static int create(PreparedStatement stmt) throws SQLException {
         stmt.executeUpdate();
         ResultSet rs= stmt.getGeneratedKeys();
         if (rs != null) {
@@ -189,27 +223,15 @@ public class SQL {
         fInsertDataPoint.setInt(3, step);
         return create(fInsertDataPoint);
     }
-
-    void createScalar(int dataPoint_id, int dim_id, long value) throws SQLException {
-        fInsertScalar.setInt(1, dataPoint_id);
-        fInsertScalar.setInt(2, dim_id);
-        fInsertScalar.setLong(3, value);
-        create(fInsertScalar);
-    }
     
-    ResultSet query1(String host, String platform, String version, String scenario, int dim_id) throws SQLException {
-        fQuery1.setInt(1, dim_id);
-        fQuery1.setString(2, scenario);
-        fQuery1.setString(3, version);
-        fQuery1.setString(4, host);
-        fQuery1.setString(5, platform);
-        return fQuery1.executeQuery();
-    }
-    
-    ResultSet query3(int config_id, String tag, String scenario) throws SQLException {
-        fQuery3.setInt(1, config_id);
-        fQuery3.setString(2, tag);
-        fQuery3.setString(3, scenario);
-        return fQuery3.executeQuery();
+    ResultSet query(int config_id, String tag, String scenario, int[] dim_ids) throws SQLException {
+    	PreparedStatement queryStatement= getQueryStatement(dim_ids.length);
+    	queryStatement.setInt(1, config_id);
+    	queryStatement.setString(2, tag);
+    	queryStatement.setString(3, scenario);
+    	int j= 4;
+    	for (int i= 0; i < dim_ids.length; i++)
+    		queryStatement.setInt(j++, dim_ids[i]);
+        return queryStatement.executeQuery();
     }
 }

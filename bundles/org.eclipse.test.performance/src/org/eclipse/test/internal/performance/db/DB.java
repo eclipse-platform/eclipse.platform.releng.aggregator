@@ -45,8 +45,8 @@ public class DB {
         return getDefault().internalStore(sample);
     }
     
-    public static DataPoint[] query(String refTag, String scenarioID) {
-        return getDefault().internalQuery(refTag, scenarioID);
+    public static DataPoint[] query(String refTag, String scenarioID, Dim[] dims) {
+        return getDefault().internalQuery(refTag, scenarioID, dims);
     }
     
     public static Connection getConnection() {
@@ -125,6 +125,7 @@ public class DB {
         
         fStoreCalled= true;
         
+        //System.out.println("store started..."); //$NON-NLS-1$
 	    try {
 	        int tag_id= getTag();
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
@@ -133,30 +134,48 @@ public class DB {
             
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
+		        // System.out.println(" dp " + i); //$NON-NLS-1$ //$NON-NLS-2$
 			    DataPoint dp= dataPoints[i];
 	            int datapoint_id= fSQL.createDataPoint(sample_id, i, dp.getStep());
 			    Scalar[] scalars= dp.getScalars();
+				PreparedStatement is= fSQL.getScalarInsertStatement(scalars.length);
+				int col= 1;
 			    for (int j= 0; j < scalars.length; j++) {
 			        Scalar scalar= scalars[j];
-			        long value= scalar.getMagnitude();
 			        int id= scalar.getDimension().getId();
-			        fSQL.createScalar(datapoint_id, id, value);
+			        long value= scalar.getMagnitude();
+					is.setInt(col, datapoint_id);
+					is.setInt(col+1, id);
+					is.setLong(col+2, value);
+					col+= 3;
                 }
+			    SQL.create(is);
 			}
             
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        //System.out.println("store ended..."); //$NON-NLS-1$
         return true;
     }
 
-    private DataPoint[] internalQuery(String refTag, String scenarioID) {
-        if (fSQL == null) 
+    private DataPoint[] internalQuery(String refTag, String scenarioID, Dim[] dims) {
+        if (fSQL == null)
             return null;
  
         ResultSet result= null;
         try {
-            result= fSQL.query3(getConfig(), refTag, scenarioID);
+        	
+        	int[] dim_ids= null;
+        	if (dims != null) {
+        		dim_ids= new int[dims.length];
+        		for (int i= 0; i < dims.length; i++)
+        			dim_ids[i]= dims[i].getId();
+        	}
+        	if (dim_ids == null)
+        		dim_ids= new int[0];
+            result= fSQL.query(getConfig(), refTag, scenarioID, dim_ids);
+            
             ArrayList dataPoints= new ArrayList();
             int lastDataPointId= 0;
             DataPoint dp= null;
@@ -184,7 +203,7 @@ public class DB {
                 	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value + ' ' + DATE_FORMAT.format(d));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
             }
             int n= dataPoints.size();
-            System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
+            if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
             return (DataPoint[])dataPoints.toArray(new DataPoint[n]);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -263,7 +282,7 @@ public class DB {
     }
     
     private void disconnect() {
-        if (fStoreCalled)
+        if (DEBUG && fStoreCalled)
             System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
         if (DEBUG) System.out.println("disconnecting from DB"); //$NON-NLS-1$
         if (fSQL != null) {

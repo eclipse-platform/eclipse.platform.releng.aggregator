@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.eval;
 
+import java.util.HashSet;
+
 import junit.framework.Assert;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -49,8 +52,18 @@ public class Evaluator extends EmptyEvaluator {
 		String refTag= PerformanceTestPlugin.getEnvironment("refTag"); //$NON-NLS-1$
 		if (refTag == null)
 		    return;	// nothing to do
+		
+		// determine all dimensions we need
+		HashSet allDimensions= new HashSet();
+		for (int i= 0; i < fCheckers.length; i++) {
+			AssertChecker chk= fCheckers[i];
+			Dim[] dims= chk.getDimensions();
+			for (int j= 0; j < dims.length; j++)
+				allDimensions.add(dims[j]);
+		}
+		Dim[] allDims= (Dim[]) allDimensions.toArray(new Dim[allDimensions.size()]);
 
-	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID());
+	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID(), allDims);
 	    if (datapoints == null)
 	    	return;
 	    if (datapoints.length == 0) {

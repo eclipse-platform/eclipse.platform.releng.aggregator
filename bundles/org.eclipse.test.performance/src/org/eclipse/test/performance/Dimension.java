@@ -25,5 +25,10 @@ public interface Dimension {
      * The elapsed time this process is running.
      */
     public Dimension ELAPSED_PROCESS= InternalDimensions.ELAPSED_PROCESS;
-    
+
+    /**
+     * Runtime.totalMemory() - Runtime.freeMemory().
+     */
+    public Dimension USED_JAVA_HEAP= InternalDimensions.USED_JAVA_HEAP;
+
 }
