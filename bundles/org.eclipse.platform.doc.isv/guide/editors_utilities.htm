@@ -44,39 +44,45 @@ Editors</b> and <b>Workbench &gt; Editors &gt; Text Editor</b> preference pages.
   method <b>handlePreferenceStoreChanged()</b> which is triggered whenever a preference 
   is updated.</p>
 <h3>Key bindings</h3>
-<p><a href="wrkAdv_keyBindings_accelScope.htm">Key binding scopes</a> are useful
-for establishing a lookup order for key bindings.&nbsp; Having contextual scopes
+<p><a href="wrkAdv_keyBindings_contexts.htm">Key binding contexts</a> are useful
+for establishing a lookup order for key bindings. Having contextual key bindings
 reduces the chances of different plug-ins contributing conflicting key
-sequences.&nbsp; By default, the workbench operates
-in a global scope.&nbsp; When a text editor becomes active, it is responsible
-for resetting the scope to the text editor scope, so that editor specific key
+sequences.  By default, the workbench operates in a generic context for working with 
+windows or dialogs.  When a text editor becomes active, it is responsible
+for resetting the context to the text editing context, so that editor specific key
 bindings will be active.</p>
-<p>In the platform text framework, each text editor instance has an associated 
-  key binding scope.&nbsp; It is responsible for setting this scope when it becomes 
-  active.&nbsp; <a href="../reference/api/org/eclipse/ui/texteditor/TextEditor.html"><b>TextEditor</b></a> 
-  defines this scope and takes care of making it active.&nbsp; The scope is assigned 
+
+<p>In the platform text framework, each text editor instance has an associated array of
+key binding scopes. It is responsible for setting the correct scopes when it becomes 
+  active. <a href="../reference/api/org/eclipse/ui/texteditor/TextEditor.html"><b>TextEditor</b></a> 
+  defines this scope and takes care of making it active. The scope is assigned 
   in a method that is called from the constructor:</p>
 
 <pre><font color="#4444CC">protected void initializeKeyBindingScopes() {
 	setKeyBindingScopes(new String[] { &quot;org.eclipse.ui.textEditorScope&quot; });  
 }</font></pre>
 
-<p>The argument to the method is an array of string key binding scope ids.&nbsp;
-If you want your editor to define its own key binding scope, then you can
+<p>The argument to the method is an array of ids that have been defined for contexts.
+If you want your editor to define its own key binding context, then you can
 override this method in your editor class, or set the scope dynamically using <b>setKeybindingScopes</b>.</p>
-<p>The scope itself must be defined with the corresponding id in the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a></b>
- extension point.&nbsp; The following is the definition for the text editor
-scope.</p>
-<pre><font color="#4444CC">&lt;extension
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.ui.commands&quot;&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;scope
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name=&quot;%scope.text.name&quot;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent=&quot;org.eclipse.ui.globalScope&quot;
-	    description=&quot;%scope.text.description&quot;
-            <b>id=&quot;org.eclipse.ui.textEditorScope&quot;</b>&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/scope&gt;
-&nbsp;&nbsp; &lt;/extension&gt;</font> </pre>
+<p>The context itself must be defined with the corresponding id in the <b><a href="../reference/extension-points/org_eclipse_ui_contexts.html">org.eclipse.ui.contexts</a></b>
+extension point. The following is the definition for the text editing context.
+<pre><font color="#4444CC">
+&lt;extension
+	point="org.eclipse.ui.contexts"&gt;
+	&lt;context
+		name="%context.editingText.name"
+		description="%context.editingText.description"
+		id="org.eclipse.ui.textEditorScope"
+		parentId="org.eclipse.ui.contexts.window"&gt;
+	&lt;/context&gt;
+	...
+</font></pre>
+</p>
+<p>(Note:&nbsp; We use the terms <b>scope</b> and <b>context</b> interchangeably in this
+discussion.  The method names in the text classes still refer to key binding contexts
+as scopes.  These method names reflect the original implementation of contexts as scopes 
+and use outdated terminology.)</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." width="324" height="14"></a></p>
 
