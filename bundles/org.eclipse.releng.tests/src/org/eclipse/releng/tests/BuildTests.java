@@ -104,7 +104,7 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 
-	public void ztestCopyright() {  // Not ready for primetime yet.
+	private void testCopyright() {  // Not ready for primetime yet.
 		
 		boolean result = false;
 		
@@ -172,7 +172,7 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 	
-	public void ztestCVSKTag() {
+	public void testCVSKTag() {
 		
 		boolean result = false;
 		
