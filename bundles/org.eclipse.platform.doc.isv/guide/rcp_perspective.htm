@@ -20,17 +20,22 @@ This perspective must be identified in the application's workbench advisor class
 <b>BrowserAdvisor</b> class:
 <font color='#4444CC'><pre>
 	public String getInitialWindowPerspectiveId() {
-		return BrowserApp.PLUGIN_ID + ".browserPerspective"; 
+		return BrowserApp.BROWSER_PERSPECTIVE_ID; 
 	}
+</pre></font> 
+While <b>BrowserApp</b> defines:
+<font color='#4444CC'><pre>
+	public static final String PLUGIN_ID = "org.eclipse.ui.examples.rcp.browser";
+	public static final String BROWSER_PERSPECTIVE_ID = PLUGIN_ID + ".browserPerspective";
 </pre></font> 
 The corresponding perspective is defined in the browser plug-in's manifest:
 <font color='#4444CC'><pre>
    &lt;extension
          point="org.eclipse.ui.perspectives"&gt;
       &lt;perspective
+            id="org.eclipse.ui.examples.rcp.browser.browserPerspective"
             name="%perspectives.browser.name"
             class="<b>org.eclipse.ui.examples.rcp.browser.BrowserPerspectiveFactory</b>"
-            id="org.eclipse.ui.examples.rcp.browser.browserPerspective"
             fixed="true"/&gt;
    &lt;/extension&gt;
 </pre></font> 
@@ -41,7 +46,6 @@ The <b>BrowserPerspectiveFactory</b> is responsible for laying out the views app
 		layout.addPlaceholder(BrowserApp.HISTORY_VIEW_ID, IPageLayout.LEFT, .3f, IPageLayout.ID_EDITOR_AREA); 
 		IViewLayout historyLayout = layout.getViewLayout(BrowserApp.HISTORY_VIEW_ID);
 		historyLayout.setCloseable(true);
-		historyLayout.setMoveable(true);
 		layout.setEditorAreaVisible(false);
 	}
 </pre></font>
