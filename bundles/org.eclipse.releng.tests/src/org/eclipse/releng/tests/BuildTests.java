@@ -831,7 +831,7 @@ public class BuildTests extends TestCase {
 		File[] plugins = pluginDir.listFiles();
 		for (int i = 0; i < plugins.length; i++) {
 			File aPlugin = plugins[i];
-			if (aPlugin.getName().indexOf("test") == -1) {
+			if ((aPlugin.getName().indexOf("test") == -1) && (aPlugin.getName().indexOf(".jar")== -1)) {
 				if (!testPluginFile(aPlugin)) {
 					result.add(aPlugin.getPath());
 				}
