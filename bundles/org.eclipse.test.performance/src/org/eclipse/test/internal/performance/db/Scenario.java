@@ -133,7 +133,7 @@ public class Scenario {
                 buildNames.add(fBuildPatterns[i]);
         }
         String[] names= (String[])buildNames.toArray(new String[buildNames.size()]);
-        if (DEBUG) System.err.println("names: " + (System.currentTimeMillis()-start));
+        if (DEBUG) System.err.println("names: " + (System.currentTimeMillis()-start)); //$NON-NLS-1$
        
         ArrayList sessions= new ArrayList();
         ArrayList names2= new ArrayList();
@@ -142,7 +142,7 @@ public class Scenario {
         Set dims= new HashSet();
         for (int t= 0; t < names.length; t++) {
             DataPoint[] dps= DB.queryDataPoints(fConfigName, names[t], fScenarioName);
-            if (DEBUG) System.err.println("  dps length: " + dps.length);
+            if (DEBUG) System.err.println("  dps length: " + dps.length); //$NON-NLS-1$
             if (dps.length > 0) {
             	dims.addAll(dps[0].getDimensions2());
             	StatisticsSession ss= new StatisticsSession(dps);
@@ -150,7 +150,7 @@ public class Scenario {
             	names2.add(names[t]);
             }
         }
-        if (DEBUG) System.err.println("data: " + (System.currentTimeMillis()-start));
+        if (DEBUG) System.err.println("data: " + (System.currentTimeMillis()-start)); //$NON-NLS-1$
 
         fSessions= (StatisticsSession[]) sessions.toArray(new StatisticsSession[sessions.size()]);
         fBuildNames= (String[]) names2.toArray(new String[sessions.size()]);

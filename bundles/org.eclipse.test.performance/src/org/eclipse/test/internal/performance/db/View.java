@@ -37,7 +37,7 @@ public class View {
         // get all Scenarios 
         Dim[] qd= null; // new Dim[] { InternalDimensions.CPU_TIME };
         //Scenario[] scenarios= DB.queryScenarios("relengbuildwin2", "%", "%", qd); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-        Scenario[] scenarios= DB.queryScenarios("relengbuildwin2", "N%", "%testPerfFullBuild%");
+        Scenario[] scenarios= DB.queryScenarios("relengbuildwin2", "%", "%", qd); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         ps.println();
         

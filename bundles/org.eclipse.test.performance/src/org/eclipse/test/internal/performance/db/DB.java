@@ -69,8 +69,8 @@ public class DB {
 
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern, Dim[] dimensions) {
         
-        if ("%".equals(configName)) {
-            System.err.println("Warning: DB.queryScenarios no longer supports config patters; returning empty array");
+        if ("%".equals(configName)) { //$NON-NLS-1$
+            System.err.println("Warning: DB.queryScenarios no longer supports config patters; returning empty array"); //$NON-NLS-1$
             return new Scenario[0];
         }
         
