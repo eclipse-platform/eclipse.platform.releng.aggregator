@@ -1,0 +1,214 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Lab User">
+   <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+   <title>Update server site map</title>
+</head>
+<body>
+
+<h1>
+Update server site map</h1>
+The default Eclipse update server is any URL-accessible server. The default
+implementation assumes a fixed-layout server. The content of the server
+(in terms of available features and plug-ins) is described in a site map
+file, <i>site.xml</i>. This file can be manually maintained, or can be
+dynamically computed by the server.
+<h3>
+Site Map</h3>
+The update server URL can be specified as a full URL to the site map file,
+or a URL of a directory path containing the site map file (similar to index.html
+processing). The site map site.xml format is defined by the following dtd:
+<p><tt>&lt;?xml encoding="ISO-8859-1"?></tt>
+<p><tt>&lt;!ELEMENT site (description?, feature*, archive*, category-def*)></tt>
+<br><tt>&lt;!ATTLIST site</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED</tt>
+<br><tt>></tt>
+<p><tt>&lt;!ELEMENT description (#PCDATA)></tt>
+<br><tt>&lt;!ATTLIST description</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED</tt>
+<br><tt>></tt>
+<p><tt>&lt;!ELEMENT feature (category*)></tt>
+<br><tt>&lt;!ATTLIST feature</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt>
+<br><tt>></tt>
+<p><tt>&lt;!ELEMENT archive EMPTY></tt>
+<br><tt>&lt;!ATTLIST archive</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt>
+<br><tt>></tt>
+<p><tt>&lt;!ELEMENT category EMPTY></tt>
+<br><tt>&lt;!ATTLIST category</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt>
+<br><tt>></tt>
+<p><tt>&lt;!ELEMENT category-def (description?)></tt>
+<br><tt>&lt;!ATTLIST category-def</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt>
+<br><tt>></tt>
+<p>The element and attribute definitions are as follows:
+<ul>
+<li>
+&lt;site> - defines the site map</li>
+
+<ul>
+<li>
+type - optional site type specification. The value refers to a type string
+registered via the install framework extension
+point. If not specified, the type is assumed to be the default Eclipse
+site type (as specified in this document).</li>
+
+<li>
+url - optional URL defining the update site baseline URL (used to determine
+individual &lt;feature> and &lt;archive> location).&nbsp; Can be relative
+or absolute. If relative, is relative to site.xml. If not specified, the
+default is the URL location of the site.xml file.</li>
+</ul>
+
+<li>
+&lt;description> - brief description as simple text. Intended to be translated.</li>
+
+<ul>
+<li>
+url - optional URL for the full description as HTML. The URL can be specified
+as absolute of relative. If relative, If relative, is relative to site.xml.</li>
+
+<br>Note, that for NL handling the URL value should be separated to allow
+alternate URLs to be specified for each national language.</ul>
+
+<li>
+&lt;feature> - identifies referenced feature archive</li>
+
+<ul>
+<li>
+type - optional feature type specification. The value refers to a type
+string registered via the install framework extension
+point. If not specified, the type is assumed to be the default feature
+type for the site. If the site type is the default Eclipse site type, the
+default feature type is the packaged feature type (as specified in this
+document).</li>
+
+<li>
+id - optional feature identifier. The information is used as a performance
+optimization to speed up searches for features. Must match the identifier
+specified in the feature.xml of the referenced archive (the url attribute).
+If specified, the version attribute must also be specified.</li>
+
+<li>
+version - optional feature version. The information is used as a performance
+optimization to speed up searches for features. Must match the version
+specified in the feature.xml of the referenced archive (the url attribute).
+If specified, the id attribute must also be specified.</li>
+
+<li>
+url - required URL reference to the feature archive. Can be relative or
+absolute. If relative, it is relative to the location of the site.xml file.
+<b>Note</b>:
+the default site implementation allows features to be accessed without
+being explicitly declared using a &lt;feature> entry. By default, an undeclared
+features reference is interpreted as "features/&lt;id>_&lt;version>.jar"</li>
+</ul>
+
+<li>
+&lt;archive> - identifies referenced "storage" archive (the actual files
+referenced via the <tt>&lt;plugin></tt> or <tt>&lt;data></tt> elements
+in the feature manifest). The site simply manages archives as a path-to-URL
+map. The default Eclipse site implementation does not require the &lt;archive>
+section to be included in the site map (site.xml). Any archive reference
+not explicitly defined as part of an &lt;archive> section is assumed to
+be mapped to a url in the form "&lt;archivePath>" relative to the location
+of the site.xml file.</li>
+
+<ul>
+<li>
+path - required archive path identifier. This is a string that is determined
+by the feature referencing
+this archive and is not otherwise interpreted by the site (other than as
+a lookup token).</li>
+
+<li>
+url - required URL reference to the archive. Can be relative or absolute.
+If relative, it is relative to the location of the site.xml file.</li>
+</ul>
+
+<li>
+&lt;category-def> - an optional definition of a category that can be used
+by installation and update support to hierarchicaly organize features</li>
+
+<ul>
+<li>
+name - category name. Is specified as a path of name tokens separated by
+/</li>
+
+<li>
+label - displayable label. Intended to be translated.</li>
+</ul>
+
+<li>
+&lt;category> - actual category specification for a feature entry</li>
+
+<ul>name - category name</ul>
+</ul>
+Note, that in general the feature.xml&nbsp; manifest documents should specify
+UTF-8 encoding. For example
+<p><tt>&lt;?xml version="1.0" encoding="UTF-8"?></tt>
+<p>Translatable text contained in the site.xml can be separated into site&lt;_locale>.properties
+files using Java property bundle conventions. Note that the translated
+strings are used at installation time (ie. do not employ the plug-in fragment
+runtime mechanism). The property bundles are located relative to the site.xml
+location.
+<h3>
+Default Site Layout</h3>
+<tt>&lt;site root>/</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; site.xml</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; features/</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; feature archives&nbsp;&nbsp;
+(eg. org.eclipse.javatools_1.0.1.jar)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;featureId>_&lt;featureVersion>/&nbsp;&nbsp;&nbsp;
+(optional)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+non-plug-in files for feature</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; plugins/</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plug-in argives&nbsp;&nbsp;&nbsp;
+(eg. org.eclipse.ui_1.0.3.jar)</tt>
+<h3>
+Controlling Access</h3>
+The default Eclipse site implementation provides support for http access
+with basic user authentication (userid and password).
+<p>Custom access control mechanisms can be added to base Eclipse in one
+of 2 ways:
+<ul>
+<li>
+by supplying server-side logic on the update server (eg. implementing servlets
+that compute the site.xml map, and control access to individual archives
+based on some user criteria)</li>
+
+<li>
+by supplying a custom concrete implementation of the site object (installed
+on the client machine, update server specified <tt>&lt;site type=""></tt>).
+The custom concrete site implementation, together with any server-side
+logic support the required control mechanisms.</li>
+</ul>
+Eclipse provides an example demonstrating an implementation of an access
+mechanism based on feature key files.
+<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" BORDER=0 height=12 width=250></a>
+</p>
+</body>
+</html>
