@@ -28,7 +28,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
     public static final int BEFORE= 0;
     public static final int AFTER= 1;
     
-    private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults"; //$NON-NLS-1$
+    protected static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults"; //$NON-NLS-1$
 
 	private String fScenarioId;
 	
