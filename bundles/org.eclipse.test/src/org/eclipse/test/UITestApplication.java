@@ -74,7 +74,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 		// If no application is specified, the 3.0 default workbench application
 		// is returned.
 		IExtension extension =
-		Platform.getPluginRegistry().getExtension(
+		Platform.getExtensionRegistry().getExtension(
 				Platform.PI_RUNTIME,
 				Platform.PT_APPLICATIONS,
 				getApplicationToRun(args));
@@ -83,7 +83,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 		// for the pre-3.0 default workbench application, i.e. org.eclipse ui.workbench
 		// Set the deprecated flag to true
 		if (extension == null) {
-			extension = Platform.getPluginRegistry().getExtension(
+			extension = Platform.getExtensionRegistry().getExtension(
 					Platform.PI_RUNTIME,
 					Platform.PT_APPLICATIONS,
 					DEFAULT_APP_PRE_3_0);

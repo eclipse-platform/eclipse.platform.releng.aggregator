@@ -279,18 +279,8 @@ public class EclipseTestRunner implements TestListener {
 	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		if (fTestPluginName == null)
 			return Class.forName(suiteClassName);
-		ClassLoader loader= getPluginClassLoader(fTestPluginName);
-		return loader.loadClass(suiteClassName);
-	}
-	
-	/**
-	 * Returns the Plugin class loader of the plugin containing the test.
-	 */
-	public ClassLoader getPluginClassLoader(String pluginName) {
-		if (Platform.getPluginRegistry().getPluginDescriptor(pluginName) != null)
-			return Platform.getPluginRegistry().getPluginDescriptor(pluginName).getPluginClassLoader();	
-		else
-			throw new IllegalArgumentException("No ClassLoader found for testplugin: " + pluginName);
+		Class loader= Platform.getBundle(fTestPluginName).loadClass(suiteClassName);
+		return loader;
 	}
 	
 	public void run() {
