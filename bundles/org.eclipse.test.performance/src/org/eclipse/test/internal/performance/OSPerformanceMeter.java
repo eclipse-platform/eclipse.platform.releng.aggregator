@@ -11,12 +11,8 @@
 
 package org.eclipse.test.internal.performance;
 
-import java.util.StringTokenizer;
-
 import org.eclipse.perfmsr.core.IPerformanceMonitor;
-import org.eclipse.perfmsr.core.LoadValueConstants;
 import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
-import org.eclipse.perfmsr.core.Upload;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
@@ -34,11 +30,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	private IPerformanceMonitor fPerformanceMonitor;
 	
-	/**
-	 * The log file
-	 */
-	private String fLogFile;
-
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
 
 	private String fScenarioId;
@@ -48,8 +39,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public OSPerformanceMeter(String scenarioId) {
 		fPerformanceMonitor= PerfMsrCorePlugin.getPerformanceMonitor(false);
-		fLogFile= getLogFile(scenarioId);
-		fPerformanceMonitor.setLogFile(fLogFile);
 		fPerformanceMonitor.setTestName(scenarioId);
 		fScenarioId= scenarioId;
 	}
@@ -72,10 +61,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
 	 */
 	public void commit() {
-		Upload.Status status= fPerformanceMonitor.upload(null);
-		if (status.fileRenamed)
-			fLogFile= status.message.substring(status.message.indexOf("Measurement file has been renamed to: ") + 38);
-		System.out.println(status.message);
+		fPerformanceMonitor.upload();
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
 			System.out.println(fScenarioId + ":");
@@ -104,7 +90,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void dispose() {
 		fPerformanceMonitor= null;
-		fLogFile= null;
 	}
 
 	/*
@@ -114,37 +99,5 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	    if (fPerformanceMonitor != null)
 	        return fPerformanceMonitor.getSample();
 	    return null;
-
-//		Sample[] parsed= new PerformanceFileParser().parseLocation(fLogFile);
-//		if (parsed.length > 0)
-//			return parsed[0];
-//		else
-//			return null;
-	}
-	
-	/**
-	 * Returns the log file name including its path.
-	 * 
-	 * @param scenarioId the scenario id
-	 * @return the log file name
-	 */
-	private String getLogFile(String scenarioId) {
-		String logFile= "timer.xml-" + scenarioId;
-		String ctrl= System.getProperty(LoadValueConstants.ENV_PERF_CTRL);
-		if (ctrl == null)
-			return logFile;
-		
-		StringTokenizer st= new StringTokenizer(ctrl, ";");
-		while(st.hasMoreTokens()) {
-			String token= st.nextToken();
-			int i= token.indexOf('=');
-			if (i < 1)
-				continue;
-			String value= token.substring(i+1);
-			String parm= token.substring(0,i);
-			if (parm.equals(LoadValueConstants.PerfCtrl.log))
-				return value + "/" + logFile;
-		}
-		return logFile;
 	}
 }

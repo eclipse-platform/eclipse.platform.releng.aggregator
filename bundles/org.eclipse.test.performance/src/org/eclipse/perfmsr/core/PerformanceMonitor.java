@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.eclipse.perfmsr.core.Upload.Status;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
@@ -176,8 +175,7 @@ public abstract class PerformanceMonitor implements IPerformanceMonitor {
     /* (non-Javadoc)
      * @see org.eclipse.perfmsr.core.IPerformanceMonitor#upload(java.lang.Object)
      */
-    public Status upload(Object object) {
-        return new Upload.Status();
+    public void upload() {
     }
 
 	/**

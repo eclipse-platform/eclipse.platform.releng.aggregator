@@ -10,15 +10,9 @@
  *******************************************************************************/
 package org.eclipse.perfmsr.core;
 
-import org.eclipse.perfmsr.core.Upload.Status;
 import org.eclipse.test.internal.performance.data.Sample;
 
 public interface IPerformanceMonitor {
-
-    /**
-     * @param logFile
-     */
-    void setLogFile(String logFile);
 
     /**
      * @param scenarioId
@@ -31,14 +25,12 @@ public interface IPerformanceMonitor {
     void snapshot(int i);
 
     /**
-     * @param object
      * @return
      */
-    Status upload(Object object);
+    void upload();
 
     /**
      * @return
      */
     Sample getSample();
-
 }
