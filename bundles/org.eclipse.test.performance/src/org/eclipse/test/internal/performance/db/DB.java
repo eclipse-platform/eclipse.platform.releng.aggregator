@@ -74,7 +74,7 @@ public class DB {
         try {
             getDefault().internalDump();
         } catch (SQLException e) {
-            e.printStackTrace();
+	        PerformanceTestPlugin.log(e);
         }
     }
 
@@ -190,8 +190,6 @@ public class DB {
             */
             fStoredSamples++;
             
-            //System.err.println(PerformanceTestPlugin.getBuildId());
-            
             //long l= System.currentTimeMillis();
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
@@ -209,9 +207,8 @@ public class DB {
 			fConnection.commit();
             
         } catch (SQLException e) {
-            e.printStackTrace();
+            PerformanceTestPlugin.log(e);
         }
-        //System.out.println("store ended..."); //$NON-NLS-1$
         return true;
     }
 
@@ -263,8 +260,10 @@ public class DB {
             int n= dataPoints.size();
             if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
             return (DataPoint[])dataPoints.toArray(new DataPoint[n]);
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            PerformanceTestPlugin.log(e);
+
         } finally {
             if (result != null)
                 try {
@@ -289,8 +288,10 @@ public class DB {
             for (int i= 0; result.next(); i++)
 		        scenarios.add(result.getString(1));
             return (String[])scenarios.toArray(new String[scenarios.size()]);
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+        } catch (SQLException e) {    
+	        PerformanceTestPlugin.log(e);
+
         } finally {
             if (result != null)
                 try {
@@ -312,8 +313,10 @@ public class DB {
             for (int i= 0; result.next(); i++)
                 buildNames.add(result.getString(1));
             return (String[])buildNames.toArray(new String[buildNames.size()]);
+
         } catch (SQLException e) {
-            e.printStackTrace();
+	        PerformanceTestPlugin.log(e);
+
         } finally {
             if (result != null)
                 try {
@@ -383,11 +386,10 @@ public class DB {
             if (DEBUG) System.out.println("finish with prepared statements"); //$NON-NLS-1$
                          
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            System.err.print("SQLException: "); //$NON-NLS-1$
-            System.err.println(ex.getMessage());
+	        PerformanceTestPlugin.log(ex);
+
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+	        PerformanceTestPlugin.log(e);
         }
     }
     
@@ -399,7 +401,7 @@ public class DB {
             try {
                 fSQL.dispose();
             } catch (SQLException e1) {
-                e1.printStackTrace();
+    	        PerformanceTestPlugin.log(e1);
             }
             fSQL= null;
         }
@@ -407,12 +409,12 @@ public class DB {
             try {
                 fConnection.commit();
             } catch (SQLException e) {
-                e.printStackTrace();
+    	        PerformanceTestPlugin.log(e);
             }
             try {
                  fConnection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+    	        PerformanceTestPlugin.log(e);
             }
             fConnection= null;
         }

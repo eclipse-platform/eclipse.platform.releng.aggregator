@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.eval;
 
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
 
 /**
@@ -30,11 +31,11 @@ public class RelativeBandChecker extends AssertChecker {
 		Dim dimension= getDimension();
 		
 		if (!measured.contains(dimension)) {
-			System.err.println("Warning: collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+		    PerformanceTestPlugin.logWarning("collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
 			return true;
 		}
 		if (!reference.contains(dimension)) {
-			System.err.println("Warning: reference data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+		    PerformanceTestPlugin.logWarning("reference data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
 			return true;
 		}
 		
@@ -43,12 +44,12 @@ public class RelativeBandChecker extends AssertChecker {
 		
 		if (test < 0.001 && test > -0.001) {
 			// we don't fail for reference value of zero
-			System.err.println("Issue: ref value for '"+dimension.getName()+"' is too small"); //$NON-NLS-1$ //$NON-NLS-2$
+		    PerformanceTestPlugin.logWarning("ref value for '"+dimension.getName()+"' is too small"); //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
 		}
 		if (actual < 0) {
 			// we don't fail for negative values
-			System.err.println("Issue: actual value for '"+dimension.getName()+"' is negative"); //$NON-NLS-1$ //$NON-NLS-2$
+		    PerformanceTestPlugin.logWarning("actual value for '"+dimension.getName()+"' is negative"); //$NON-NLS-1$ //$NON-NLS-2$
 			return true;
 		}
 		

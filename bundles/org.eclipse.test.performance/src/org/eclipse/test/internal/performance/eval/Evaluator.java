@@ -73,13 +73,13 @@ public class Evaluator extends EmptyEvaluator {
 		else
 			sessionDatapoints= session.getDataPoints();
 	    if (sessionDatapoints == null || sessionDatapoints.length == 0) {
-	        System.out.println("Warning: no session data for build '" + build + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
+	        PerformanceTestPlugin.logWarning("no session data for build '" + build + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
 	    	return;
 	    }
 
 		DataPoint[] datapoints= DB.queryDataPoints(null, refBuild, scenarioName, allDims);
 	    if (datapoints == null || datapoints.length == 0) {
-	        System.out.println("no reference data for build '" + refBuild + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
+	        PerformanceTestPlugin.logWarning("no reference data for build '" + refBuild + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
 	        return;
 	    }
 				

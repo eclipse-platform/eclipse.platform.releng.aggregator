@@ -41,6 +41,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
+			    PerformanceTestPlugin.log(e);
 			    //System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
 			    fgIsLoaded= 1;
 			}

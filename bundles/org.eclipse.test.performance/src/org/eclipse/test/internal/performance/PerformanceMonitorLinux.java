@@ -120,7 +120,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 			    rdr.readLine();	// throw away the heading line
 			return new StringTokenizer(rdr.readLine());
 		} catch (IOException e) {
-			// TODO: should be logged
+		    PerformanceTestPlugin.log(e);
 		} finally {
 			try {
 			    if (rdr != null)
@@ -141,7 +141,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 			    rdr.readLine();	// throw away the heading line
 			return new StringTokenizer(rdr.readLine());
 		} catch (IOException e) {
-			// TODO: should be logged
+		    PerformanceTestPlugin.log(e);
 		} finally {
 			try {
 			    if (rdr != null)

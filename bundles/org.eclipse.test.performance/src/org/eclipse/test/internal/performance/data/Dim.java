@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.data;
 
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.performance.Dimension;
 
 /**
@@ -43,9 +44,8 @@ public class Dim implements Dimension {
 		    if (fgRegisteredDimensions[id] == null) {
 		        fgRegisteredDimensions[id]= this;
 		    } else
-		        System.err.println("Dimension with id " + id + " already registered"); //$NON-NLS-1$ //$NON-NLS-2$
+			    PerformanceTestPlugin.logError("dimension with id '" + id + "' already registered"); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
-
 		fId= id;
 		fUnit= unit;
 		fMultiplier= multiplier;

@@ -74,7 +74,7 @@ public class Performance {
 		if (fDefaultEvaluator == null) {
 			fDefaultEvaluator= new Evaluator();
 			fDefaultEvaluator.setAssertCheckers(new AssertChecker[] {
-			        new RelativeBandChecker(InternalDimensions.CPU_TIME, 0.0f, 1.05f),
+			        new RelativeBandChecker(InternalDimensions.CPU_TIME, 0.0f, 1.10f),
 			        //new RelativeBandChecker(InternalDimensions.WORKING_SET, 0.0f, 3.00f),
 			        //new RelativeBandChecker(InternalDimensions.USED_JAVA_HEAP, 0.0f, 2.00f),
 			        //new RelativeBandChecker(InternalDimensions.SYSTEM_TIME, 0.0f, 1.10f)
@@ -185,13 +185,13 @@ public class Performance {
 				Class c= PerformanceTestPlugin.getDefault().getBundle().loadClass(className);
 				instance= (PerformanceMeterFactory) c.newInstance();
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+		        PerformanceTestPlugin.log(e);
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+		        PerformanceTestPlugin.log(e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+		        PerformanceTestPlugin.log(e);
 			} catch (ClassCastException e) {
-				e.printStackTrace();
+		        PerformanceTestPlugin.log(e);
 			}
 		}
 		return instance;

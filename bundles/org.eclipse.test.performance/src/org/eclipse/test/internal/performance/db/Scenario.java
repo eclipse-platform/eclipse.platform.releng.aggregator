@@ -62,7 +62,7 @@ public class Scenario {
         if (ts == null) {
             double[] ds= new double[fSessions.length];
             double[] sd= new double[fSessions.length];
-           for (int i= 0; i < ds.length; i++) {
+            for (int i= 0; i < ds.length; i++) {
                 ds[i]= fSessions[i].getAverage(dim);
                 sd[i]= fSessions[i].getStddev(dim);                
             }

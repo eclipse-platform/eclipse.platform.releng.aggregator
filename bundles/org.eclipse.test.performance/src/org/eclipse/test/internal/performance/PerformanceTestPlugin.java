@@ -17,8 +17,10 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IBundleGroup;
 import org.eclipse.core.runtime.IBundleGroupProvider;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.test.internal.performance.db.DB;
 import org.osgi.framework.BundleContext;
 
@@ -39,6 +41,8 @@ public class PerformanceTestPlugin extends Plugin {
 	 */
     public static final String PLUGIN_ID= "org.eclipse.test.performance"; //$NON-NLS-1$
     
+	/** Status code describing an internal error */
+	public static final int INTERNAL_ERROR= 1;
 
 	/**
 	 * The shared instance.
@@ -129,5 +133,39 @@ public class PerformanceTestPlugin extends Plugin {
 		} catch (UnknownHostException e) {
 			return LOCALHOST;
 		}
+	}
+	
+	public static void logError(String message) {
+		if (message == null)
+			message= ""; //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR, message, null));
+	}
+
+	public static void logWarning(String message) {
+		if (message == null)
+			message= ""; //$NON-NLS-1$
+		log(new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message, null));
+	}
+
+	public static void log(Throwable e) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR, "Internal Error", e)); //$NON-NLS-1$
+	}
+	
+	public static void log(IStatus status) {
+	    if (fgPlugin != null) {
+	        fgPlugin.getLog().log(status);
+	    } else {
+	        switch (status.getSeverity()) {
+	        case IStatus.ERROR:
+		        System.err.println("Error: " + status.getMessage()); //$NON-NLS-1$
+	            break;
+	        case IStatus.WARNING:
+		        System.err.println("Warning: " + status.getMessage()); //$NON-NLS-1$
+	            break;
+	        }
+	        Throwable exception= status.getException();
+	        if (exception != null)
+	            exception.printStackTrace(System.err);
+	    }
 	}
 }
