@@ -142,7 +142,7 @@ public class Scenario {
         Set dims= new HashSet();
         for (int t= 0; t < names.length; t++) {
             DataPoint[] dps= DB.queryDataPoints(fConfigName, names[t], fScenarioName);
-            System.err.println("  dps length: " + dps.length);
+            if (DEBUG) System.err.println("  dps length: " + dps.length);
             if (dps.length > 0) {
             	dims.addAll(dps[0].getDimensions2());
             	StatisticsSession ss= new StatisticsSession(dps);

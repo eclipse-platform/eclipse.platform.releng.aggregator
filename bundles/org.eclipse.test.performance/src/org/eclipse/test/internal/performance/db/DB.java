@@ -63,17 +63,23 @@ public class DB {
         return getDefault().internalQueryDataPoints(configName, buildPattern, scenarioPattern);
     }
    
-    public static Scenario[] queryScenarios(String configPattern, String buildPattern, String scenarioPattern) {
-        return queryScenarios(configPattern, buildPattern, scenarioPattern, null);
+    public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
+        return queryScenarios(configName, buildPattern, scenarioPattern, null);
     }
 
-    public static Scenario[] queryScenarios(String configPattern, String buildPattern, String scenarioPattern, Dim[] dimensions) {
-        String[] scenarios= getDefault().internalQueryScenarioNames(configPattern, scenarioPattern); // get all Scenario names
+    public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern, Dim[] dimensions) {
+        
+        if ("%".equals(configName)) {
+            System.err.println("Warning: DB.queryScenarios no longer supports config patters; returning empty array");
+            return new Scenario[0];
+        }
+        
+        String[] scenarios= getDefault().internalQueryScenarioNames(configName, scenarioPattern); // get all Scenario names
         if (scenarios == null)
             return new Scenario[0];
         Scenario[] tables= new Scenario[scenarios.length];
         for (int i= 0; i < scenarios.length; i++)
-            tables[i]= new Scenario(configPattern, buildPattern, scenarios[i], dimensions);
+            tables[i]= new Scenario(configName, buildPattern, scenarios[i], dimensions);
         return tables;
     }
 
