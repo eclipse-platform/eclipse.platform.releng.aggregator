@@ -597,7 +597,7 @@ public class DB {
                 info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
                 info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-                url= dbloc + "/" + dbname;  //$NON-NLS-1$//$NON-NLS-2$
+                url= dbloc + "/" + dbname + ";create=true";  //$NON-NLS-1$//$NON-NLS-2$
             } else {
                 
                 // workaround for Derby issue: http://nagoya.apache.org/jira/browse/DERBY-1
@@ -622,8 +622,8 @@ public class DB {
                 } else
                     f= new File(dbloc);
                 url= new File(f, dbname).getAbsolutePath();
+                info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
             }
-            info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
             try {
                 fConnection= DriverManager.getConnection("jdbc:" + fDBType + ":" + url, info); //$NON-NLS-1$ //$NON-NLS-2$
             } catch (SQLException e) {
