@@ -350,39 +350,6 @@ The modifying API allows to modify directly the AST:
    // update of the compilation unit
    cu.getBuffer().setContents(newSource);
 </pre></font>
-<H3>
-Generic source code modification</h3>
-
-<P>
-Some source code modifications are not provided via the Java element API. A more general way to edit source code (such as changing the source code for existing elements) is accomplished using the compilation unit's raw source code and the Java DOM.</P>
-<P>
-These techniques include the following:</P>
-<font color='#4444CC'><pre>
-   // get the source for a compilation unit
-   String contents = myCompilationUnit.getBuffer().getContents();
-
-   // Create an editable JDOM
-   myJDOM = new DOMFactory();
-   myDOMCompilationUnit = myJDOM.createCompilationUnit(contents, &quot;MyClass&quot;);
-
-   // Navigate and edit the compilation unit structure using 
-   // JDOM node protocol. 
-   ...
-   // Once modififications have been made to all of the nodes 
-   // get the source back from the compilation unit DOM node.
-   String newContents = myDOMCompilationUnit.getContents();
-
-   // Set this code back into the compilation unit element
-   myCompilationUnit.getBuffer().setContents(newContents);
-
-   // Save the buffer to the file.
-   myCompilationUnit.save(null, false);
-</pre></font>
-<P>
-This technique can result in problem markers being associated with incorrect line numbers, since the Java elements were not updated directly.</P>
-<P>
-The Java element model does not go any finer than methods and fields. The abstract syntax tree used by the compiler is not available as API, so the techniques used by the JDT to parse source into programmatic structures are not currently available as API.</P>
-
 
 <H3>
 <a name="javadeltas">
