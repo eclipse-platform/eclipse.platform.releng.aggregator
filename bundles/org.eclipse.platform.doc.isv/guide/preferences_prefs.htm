@@ -22,16 +22,13 @@ The <b><a href="../reference/extension-points/org_eclipse_ui_preferencePages.htm
 (<b>Window-&gt;Preferences</b>) dialog. The preferences dialog presents a hierarchical list of user preference entries. Each entry displays a corresponding preference page when selected.</P>
 <P >
 The readme tool uses this extension point to add the Readme Example preferences page.</P>
-<font color='#4444CC'><pre>
-   &lt;extension
+<font color='#4444CC'><pre>   &lt;extension
       point = &quot;org.eclipse.ui.preferencePages&quot;&gt;
-      &lt;page 
-         id=&quot;org.eclipse.ui.examples.readmetool.Page1&quot;
-         class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;
-         name=&quot;Readme Example&quot;&gt;
-      &lt;/page&gt;
-   &lt;/extension&gt;
-</pre></font>
+       &lt;page id=&quot;org.eclipse.ui.examples.readmetool.Page1&quot;
+	    class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;
+            name=&quot;%PreferencePage.name&quot;&gt;
+       &lt;/page&gt;
+   &lt;/extension&gt;</pre></font>
 <P >
 This markup defines a preference page named &quot;Readme Example&quot; which is implemented by the class
 <b>ReadmePreferencePage</b>. The class must implement the
@@ -41,7 +38,7 @@ This markup defines a preference page named &quot;Readme Example&quot; which is 
 Your plug-in's contribution to the preferences dialog (the &quot;Readme
 Example&quot; entry on the left) is shown before any of your code is run. </P>
 <P >
-<img border="0" src="images/preferences.jpg" width="599" height="531"></P>
+<img border="0" src="images/preferences.jpg" width="606" height="532"></P>
 <P >
 The &quot;Readme Example&quot; preference is added to the top level of the
 preference tree on the left.&nbsp; Why? Because a preference page contribution will be added as a root of the tree unless a
@@ -55,7 +52,7 @@ specifies the id (or a sequence of ids from the root) of the parent page. For ex
       &lt;page
          id=&quot;org.eclipse.ui.examples.readmetool.Page1&quot;
          class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;
-         name=&quot;Readme Example&quot;&gt;
+         name=&quot;%PreferencePage.name&quot;&gt;
       &lt;/page&gt;
       &lt;page
          id=&quot;org.eclipse.ui.examples.readmetool.Page2&quot;
@@ -84,35 +81,49 @@ Implementing a preference page is similar to creating a page for a wizard. The p
 <b> createContents</b> method that creates the SWT controls representing the page content and adds listeners for any events of interest. The page is responsible for creating and returning the composite that will parent all of the controls in the page.&nbsp;
 The following snippet shows the highlights:</P>
 <font color='#4444CC'><pre>
-   protected Control createContents(Composite parent) {
-      ...
-      //composite_textField &lt;&lt; parent
-      Composite composite_textField = createComposite(parent, 2);
-      Label label_textField = createLabel(composite_textField, &quot;Text Field&quot;); 
-      textField = createTextField(composite_textField);
-      pushButton_textField = createPushButton(composite_textField, &quot;Change&quot;);
+protected Control createContents(Composite parent)
+{
+	...
+	//composite_textField &lt;&lt; parent
+	Composite composite_textField = createComposite(parent, 2);
+	Label label_textField = createLabel(composite_textField, MessageUtil.getString(&quot;Text_Field&quot;));	 
+	textField = createTextField(composite_textField);
+	pushButton_textField = createPushButton(composite_textField, MessageUtil.getString(&quot;Change&quot;)); 
 
-      //composite_tab &lt;&lt; parent
-      Composite composite_tab = createComposite(parent, 2);
-      Label label1 = createLabel(composite_tab, &quot;Radio Button Options&quot;);
+	//composite_tab &lt;&lt; parent
+	Composite composite_tab = createComposite(parent, 2);
+	Label label1 = createLabel(composite_tab, MessageUtil.getString(&quot;Radio_Button_Options&quot;)); 
 
-      tabForward(composite_tab);
-      //radio button composite &lt;&lt; tab composite
-      Composite composite_radioButton = createComposite(composite_tab, 1);
-      radioButton1 = createRadioButton(composite_radioButton, &quot;Radio button 1&quot;);
-      radioButton2 = createRadioButton(composite_radioButton, &quot;Radio button 2&quot;);
-      radioButton3 = createRadioButton(composite_radioButton, &quot;Radio button 3&quot;);
-      ...
-      initializeValues();
-      ...
-      return new Composite(parent, SWT.NULL);
-   }
-</pre></font>
+	//
+	tabForward(composite_tab);
+	//radio button composite &lt;&lt; tab composite
+	Composite composite_radioButton = createComposite(composite_tab, 1);
+	radioButton1 = createRadioButton(composite_radioButton, MessageUtil.getString(&quot;Radio_button_1&quot;)); 
+	radioButton2 = createRadioButton(composite_radioButton, MessageUtil.getString(&quot;Radio_button_2&quot;)); 
+	radioButton3 = createRadioButton(composite_radioButton, MessageUtil.getString(&quot;Radio_button_3&quot;)); 
+
+
+	//composite_tab2 &lt;&lt; parent
+	Composite composite_tab2 = createComposite(parent, 2);
+	Label label2 = createLabel(composite_tab2, MessageUtil.getString(&quot;Check_Box_Options&quot;)); //$NON-NLS-1$
+
+	//
+	tabForward(composite_tab2);
+	//composite_checkBox &lt;&lt; composite_tab2
+	Composite composite_checkBox = createComposite(composite_tab2, 1);
+	checkBox1 = createCheckBox(composite_checkBox, MessageUtil.getString(&quot;Check_box_1&quot;)); 
+	checkBox2 = createCheckBox(composite_checkBox, MessageUtil.getString(&quot;Check_box_2&quot;)); 
+	checkBox3 = createCheckBox(composite_checkBox, MessageUtil.getString(&quot;Check_box_3&quot;)); 
+
+	initializeValues();
+
+	return new Composite(parent, SWT.NULL);
+}</pre></font>
 <P >
  Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.&nbsp;
 Here is what the corresponding page looks like:</P>
 <P >
-<img border="0" src="images/readmepreferences.jpg" width="599" height="531"></P>
+<img border="0" src="images/readmepreferences.jpg" width="606" height="532"></P>
 <P >
 The other primary responsibility of a preference page is to react to the <b> performOk</b> message. Typically, this method
 updates and stores the user preferences and, if necessary, updates any other plug-in objects to reflect the change in preferences.</P>
@@ -136,19 +147,19 @@ The following code in the <b> ReadmePreferencePage</b> obtains the preference st
 </pre></font>
 <P >
 Because <b> ReadmePlugin</b> extends the <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> class, it automatically inherits a preference store. This preference store is initialized from a preferences file stored in the
-plug-in's directory.&nbsp; The only thing the <b> ReadmePlugin</b> has to do is implement a method that initializes the preferences to their default values. These values are used the first time the preference page is shown or when the user presses the
+plug-in's directory.&nbsp; The only thing the <b> ReadmePlugin</b> has to do is implement a method that initializes the
+preference controls to their default values. These values are used the first time the preference page is shown or when the user presses the
 <b>Defaults</b> button in the preferences page.</P>
 <font color='#4444CC'><pre>
-   protected void initializeDefaultPreferences(IPreferenceStore store) {
-      // These settings will show up when Preference dialog
-      // opens up for the first time.
-      store.setDefault(IReadmeConstants.PRE_CHECK1, true);
-      store.setDefault(IReadmeConstants.PRE_CHECK2, true);
-      store.setDefault(IReadmeConstants.PRE_CHECK3, false);
-      store.setDefault(IReadmeConstants.PRE_RADIO_CHOICE, 2);
-      store.setDefault(IReadmeConstants.PRE_TEXT, &quot;Default text&quot;);
-   }
-</pre></font>
+protected void initializeDefaultPreferences(IPreferenceStore store) {
+	// These settings will show up when Preference dialog
+	// opens up for the first time.
+	store.setDefault(IReadmeConstants.PRE_CHECK1, true);
+	store.setDefault(IReadmeConstants.PRE_CHECK2, true);
+	store.setDefault(IReadmeConstants.PRE_CHECK3, false);
+	store.setDefault(IReadmeConstants.PRE_RADIO_CHOICE, 2);
+	store.setDefault(IReadmeConstants.PRE_TEXT, MessageUtil.getString(&quot;Default_text&quot;)); //$NON-NLS-1$
+}</pre></font>
 
 
 <i><blockquote>
@@ -165,29 +176,26 @@ Preference pages are responsible for initializing the values of their controls u
 process is similar to initializing dialog control values from dialog settings. The
 <b> ReadmePreferencePage</b> initializes all of its controls in a single method,
 <b>initializeValues</b>, which is called from its <b> createContents</b> method.</P>
-<font color='#4444CC'><pre>
-   private void initializeValues() {
-      IPreferenceStore store = getPreferenceStore();
-      checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));
-      checkBox2.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK2));
-      checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));
-      ...
-   }
-</pre></font>
+<font color='#4444CC'><pre>private void initializeValues() {
+	IPreferenceStore store = getPreferenceStore();
+	checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));
+	checkBox2.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK2));
+	checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));
+	...
+}</pre></font>
 <P >
 When the <b>OK</b> (or <b>Apply</b>) button is pressed, the current values of the controls on the preference page should be stored back into the
 preference store. The
 <b> ReadmePreferencePage</b> implements this logic in a separate method,
 <b>storeValues</b>.</P>
 <font color='#4444CC'><pre>
-   private void storeValues() {
-      IPreferenceStore store = getPreferenceStore();
-      store.setValue(IReadmeConstants.PRE_CHECK1, checkBox1.getSelection());
-      store.setValue(IReadmeConstants.PRE_CHECK2, checkBox2.getSelection());
-      store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());
-      ...
-   }
-</pre></font>
+private void storeValues() {
+	IPreferenceStore store = getPreferenceStore();
+	store.setValue(IReadmeConstants.PRE_CHECK1, checkBox1.getSelection());
+	store.setValue(IReadmeConstants.PRE_CHECK2, checkBox2.getSelection());
+	store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());
+	...
+}</pre></font>
 <P >
 When the user presses the <b>Defaults</b> button, the platform will restore all preference store values to the default values specified in the plug-in class. However, your preference page is responsible for reflecting these default values
 in the controls on the preference page. The
@@ -216,19 +224,21 @@ retrieve the values of the controls. The
  <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> implements a
 page that uses these field editors to display and store the preference values on the page.</P>
 <P >
-Instead of creating SWT controls to fill its contents, a <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> creates field editors to display the contents.</P>
-<font color='#4444CC'><pre>
-   public void createFieldEditors() {
-      // The first string is the preference key name
-      // The second string is the label shown next to the widget 
-      addField(new BooleanFieldEditor(USE_OLD_MODE, &quot;Use old mode&quot;,
-         getFieldEditorParent()));
-      addField(new StringFieldEditor(APPLICATION_NAME, &quot;Application Name&quot;,
-         getFieldEditorParent()));
-      addField(new ColorFieldEditor(COLOR, &quot;Text Color&quot;, getFieldEditorParent()));
-      ...
-   }
-</pre></font>
+Instead of creating SWT controls to fill its contents, a <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> 
+subclass creates field editors to display the contents.&nbsp; The following is a
+snippet from the debug UI preferences page:</P>
+<font color='#4444CC'><pre>protected void createFieldEditors() {
+	addField(new BooleanFieldEditor(IDebugUIConstants.PREF_BUILD_BEFORE_LAUNCH, 
+		DebugPreferencesMessages.getString(&quot;DebugPreferencePage.auto_build_before_launch&quot;), 
+		SWT.NONE, getFieldEditorParent())); 
+	...	
+	String[][] perspectiveNamesAndIds = getPerspectiveNamesAndIds();
+	addField(new ComboFieldEditor(IDebugUIConstants.PREF_SHOW_DEBUG_PERSPECTIVE_DEFAULT,
+		DebugPreferencesMessages.getString(&quot;DebugPreferencePage.Default_perspective_for_Debug_2&quot;), //$NON-NLS-1$
+		perspectiveNamesAndIds,
+		getFieldEditorParent()));
+	...
+}</pre></font>
 <P >
 Each field editor is assigned the name of its corresponding preference key and the text label for the SWT
 control that it will create. The kind of control created depends on the type of field editor. For example, a boolean field editor creates a checkbox.</P>
