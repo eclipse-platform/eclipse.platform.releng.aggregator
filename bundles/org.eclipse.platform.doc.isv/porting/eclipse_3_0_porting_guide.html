@@ -13,8 +13,8 @@
 <body>
 
 <h1>Eclipse 3.0 Porting Guide</h1>
-<p>Draft for 3.0 M7<br>
-Last revised January 30, 2004</p>
+<p>Draft for 3.0 M8<br>
+  Last revised February 12, 2004</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -843,15 +843,19 @@ in the plug-in manifest. The org.eclipse.core.runtime.compatibility plug-in
 re-exports the API from org.eclipse.core.runtime, so this declaration makes the
 old and new API available. Explicit references to the org.eclipse.core.boot
 plug-in should be deleted from the plug-in manifest.</p>
-<p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the
-absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest)
-and automatically compensates for these changes to the Platform Runtime. This
-should be viewed as a stopgap measure to allow existing plug-in that explicitly
-or implicitly depends on org.eclipse.core.runtime or org.eclipse.core.boot to
-work in 3.0. However, when porting the existing plug-in to 3.0, the plug-in's
-manifest needs to be updated to reflect the new structure of the Eclipse
-Platform Runtime plug-ins. The PDE plug-in manifest migration tool will add a
-dependency to org.eclipse.core.runtime.compatibility if required.</p>
+<p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the 
+  absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest) 
+  and automatically compensates for these changes to the Platform Runtime. This 
+  should be viewed as a stopgap measure to allow existing plug-in that explicitly 
+  or implicitly depends on org.eclipse.core.runtime or org.eclipse.core.boot to 
+  work in 3.0. However, when porting the existing plug-in to 3.0, the plug-in's 
+  manifest needs to be updated to reflect the new structure of the Eclipse Platform 
+  Runtime plug-ins. The PDE plug-in manifest migration tool will add a dependency 
+  to org.eclipse.core.runtime.compatibility if required.</p>
+<p>Note also that if you mark you plug-in as 3.0 (using &lt;?eclipse...?&gt;) 
+  and your plug-in defines a Plugin class, you must either explicitly &lt;import 
+  plugin=&quot;org.eclipse.core.runtime.compatibility&quot;/&gt; in the plug-in 
+  manifest or ensure that the Plugin class defines the default constructor.</p>
 <h3>URL Stream Handler extensions</h3>
 <p>The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension
 point was changed to use the URL Stream Handler service provided by OSGi. The
@@ -971,13 +975,14 @@ classpath) or use the relevant API for accessing the contents of a plug-in
 <h3>BootLoader API methods deleted</h3>
 <p><b>Who is affected:</b> Plug-ins which use certain API methods from the class
 <tt>org.eclipse.core.boot.BootLoader</tt>.</p>
-<p><b>Description:</b> Methods such as getRunnable(), startup(), shutdown() and
-run() were removed from the BootLoader class (now supplied in the compatibility
-layer).</p>
-<p><b>Action required:</b> In general this API is used by very few people. It is
-intended as the interface between the main() in startup.jar and the Eclipse
-runtime. Having said that, in some cases this removal was too eager and the API
-should be added back. This is under investigation.</p>
+<p><b>Description:</b> Methods such as getRunnable(), startup(), shutdown() and 
+  run() were removed from the BootLoader class (now supplied in the compatibility 
+  layer). This API is the interface between the main() in startup.jar and the 
+  OSGi framework/Eclipse runtime. With the restructuring of the runtime, these 
+  interactions are no longer relevant.</p>
+<p><b>Action required:</b> In general this API is used by very few people. In 
+  the rare case that it is, users should reconsider their usecases and use some 
+  of the alternatives provided in the new structure.</p>
 <h3>Re-exporting runtime API</h3>
 <p><b>Who is affected:</b> Plug-ins which expose API that includes elements from
 changed runtime API.</p>
@@ -990,13 +995,13 @@ to change their API or continue to rely on the the compatibility layer.</p>
 <h3>Plug-in parsing methods on Platform</h3>
 <p><b>Who is affected:</b> Users of <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
 Factory).</tt></p>
-<p><b>Description:</b> The method <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
-Factory)</tt> has been deleted. The API associated with the Factory argument has
-been deprecated and moved from the org.eclipse.core.runtime plug-in up to the
-org.eclipse.core.runtime.compatibility plug-in (which depends on the runtime
-plug-in).</p>
-<p><b>Action required:</b> Users of the deleted method can use the same method
-on the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
+<p><b>Description:</b> The method <tt>org.eclipse.core.runtime.Platform.parsePlugins(..., 
+  Factory)</tt> has been moved. The API associated with the Factory argument has 
+  been moved from the org.eclipse.core.runtime plug-in up to the org.eclipse.core.runtime.compatibility 
+  plug-in (which depends on the runtime plug-in). As a result, the parsing method 
+  has been moved as well.</p>
+<p><b>Action required:</b> Users of this method should use the same method on 
+  the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
 <h3>Changes to build scripts</h3>
 <p><b>Who is affected:</b> Developers maintaining scripts (e.g., Ant build.xml
 files) which define classpaths containing runtime related jars and class
