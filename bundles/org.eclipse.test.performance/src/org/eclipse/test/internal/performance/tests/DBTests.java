@@ -28,6 +28,7 @@ import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 public class DBTests extends TestCase {
@@ -35,6 +36,7 @@ public class DBTests extends TestCase {
     private static final String CONFIG= "c"; //$NON-NLS-1$
     private static final String BUILD= "b"; //$NON-NLS-1$
     
+    private static final String SCENARIO_NAME_0= "bar.testScenario0"; //$NON-NLS-1$
     private static final String SCENARIO_NAME_1= "bar.testScenario1"; //$NON-NLS-1$
     private static final String SCENARIO_NAME_2= "bar.testScenario2"; //$NON-NLS-1$
     private static final String SCENARIO_NAME_3= "foo.testScenario3"; //$NON-NLS-1$
@@ -44,6 +46,7 @@ public class DBTests extends TestCase {
     private static final String SHORT_NAME_4= "ShortName4"; //$NON-NLS-1$
 
     private static final String DBLOC= "testDBs"; //$NON-NLS-1$
+    //private static final String DBLOC= "net://localhost"; //$NON-NLS-1$
     private static String DBNAME;
     private static final String DBUSER= "testUser"; //$NON-NLS-1$
     private static final String DBPASSWD= "testPassword"; //$NON-NLS-1$
@@ -53,7 +56,7 @@ public class DBTests extends TestCase {
         super.setUp();
         
         // generate a unique DB name
-        DBNAME= "testDB_" + (new Date().getTime()/1000); //$NON-NLS-1$
+        DBNAME= "testDB_" + new Date().getTime(); //$NON-NLS-1$
         
         System.setProperty("eclipse.perf.dbloc", DBLOC + ";dbname=" + DBNAME + ";dbuser=" + DBUSER + ";dbpasswd=" + DBPASSWD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
         System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"=b0001;jvm=sun142"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -64,8 +67,7 @@ public class DBTests extends TestCase {
         super.tearDown();
     }
     
-    public void testSimple() throws SQLException {
-        
+    public void testPropertyGetters() {
         assertEquals(DBLOC, PerformanceTestPlugin.getDBLocation());
         assertEquals(DBNAME, PerformanceTestPlugin.getDBName());
         assertEquals(DBUSER, PerformanceTestPlugin.getDBUser());
@@ -73,6 +75,45 @@ public class DBTests extends TestCase {
         
         assertEquals("|"+BUILD+"=b0001||"+CONFIG+"=test||jvm=sun142|", PerformanceTestPlugin.getVariations().toExactMatchString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         assertEquals("|"+BUILD+"=base||"+CONFIG+"=test||jvm=sun142|", PerformanceTestPlugin.getAssertAgainst().toExactMatchString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    }
+    
+    public void testAssertPerformance() throws SQLException {
+
+        Performance perf= Performance.getDefault();
+        
+        // set the variation for the reference data
+        System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"=ref"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
+        // store a reference value
+		PerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_0);
+		pm1.start();
+		pm1.stop();
+		pm1.commit();
+		pm1.dispose();
+		
+		
+        // set the variation for the this run
+        System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"=001"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        // assert that this run's values are compared against reference data
+        System.setProperty("eclipse.perf.assertAgainst", BUILD+"=ref"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+        // store a reference value
+        TestPerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_0);
+		pm2.start();
+		pm2.adjust(TestPerformanceMeter.TESTDIM1, 100);
+		pm2.stop();
+		pm2.commit();
+		boolean failed= false;
+		try {
+            perf.assertPerformanceInRelativeBand(pm2, TestPerformanceMeter.TESTDIM1, -5, +5);
+        } catch (AssertionFailedError e) {
+            failed= true;
+        }
+        assertTrue(failed);
+		pm2.dispose();
+    }
+
+    public void testBasicDBFunctionality() {
         
         Performance perf= Performance.getDefault();
         
@@ -139,7 +180,7 @@ public class DBTests extends TestCase {
 		List buildNames= new ArrayList();
 		Variations v2= new Variations();
 		v2.put(CONFIG, "%"); //$NON-NLS-1$
-		v2.put(BUILD, "%"); //$NON-NLS-1$
+		v2.put(BUILD, "b%"); //$NON-NLS-1$
 		DB.queryDistinctValues(buildNames, BUILD, v2, "%"); //$NON-NLS-1$
 		assertEquals(1, buildNames.size());
 		assertEquals("b0001", buildNames.get(0)); //$NON-NLS-1$
@@ -171,4 +212,5 @@ public class DBTests extends TestCase {
 	    assertEquals(SHORT_NAME_4, fps2[1].shortName);
 	    assertEquals(Dimension.USED_JAVA_HEAP, fps2[1].dimension);
     }
+    
 }

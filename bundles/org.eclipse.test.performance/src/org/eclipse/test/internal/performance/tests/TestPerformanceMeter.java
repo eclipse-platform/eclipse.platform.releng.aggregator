@@ -14,6 +14,7 @@ package org.eclipse.test.internal.performance.tests;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -32,7 +33,8 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
     static Dim TESTDIM2= new Dim(99, Unit.BYTE);
 	
 	private long fStartTime;
-	private List fDataPoints= new ArrayList();    
+	private List fDataPoints= new ArrayList();
+	private Map fAdjustments= new HashMap();
 	
 	/**
 	 * @param scenarioId the scenario id
@@ -41,7 +43,7 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
 	    super(scenarioId);
 		fStartTime= System.currentTimeMillis();
 	}
-	
+		
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
 	 */
@@ -69,13 +71,24 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
 	    fDataPoints.add(new DataPoint(BEFORE, scalars));
 	}
 	
-	/*
+    public void adjust(Dim dimension, long adjustment) {
+        fAdjustments.put(dimension, new Long(adjustment));
+    }
+
+    /*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
 	public void stop() {
 	    HashMap scalars= new HashMap();
-	    scalars.put(TESTDIM1, new Scalar(TESTDIM1, 1000));
-	    scalars.put(TESTDIM2, new Scalar(TESTDIM2, 2000));
+	    scalars.put(TESTDIM1, new Scalar(TESTDIM1, 1000+adjustment(TESTDIM1)));
+	    scalars.put(TESTDIM2, new Scalar(TESTDIM2, 2000+adjustment(TESTDIM2)));
 	    fDataPoints.add(new DataPoint(AFTER, scalars));
+	}
+	
+	private long adjustment(Dim dimension) {
+	    Long adjustment= (Long) fAdjustments.get(dimension);
+	    if (adjustment != null)
+	        return adjustment.longValue();
+	    return 0;
 	}
 }
