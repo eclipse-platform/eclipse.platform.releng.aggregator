@@ -162,7 +162,9 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 				if (cvsFile != null) {
 					// get the log entry for the revision loaded in the workspace
 					ILogEntry entry = ((ICVSRemoteFile) cvsFile).getLogEntry(new SubProgressMonitor(monitor, 100));
-					return entry.getDate().getYear() + 1900;
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(entry.getDate());
+					return calendar.get(Calendar.YEAR);
 				}
 			} catch (TeamException e) {
 				// do nothing

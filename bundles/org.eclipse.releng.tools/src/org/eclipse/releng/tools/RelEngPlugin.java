@@ -17,7 +17,6 @@ import java.util.ResourceBundle;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -41,8 +40,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	/**
 	 * The constructor.
 	 */
-	public RelEngPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public RelEngPlugin() {
 		plugin = this;
 		try {
 			resourceBundle= ResourceBundle.getBundle(ID + Messages.getString("RelEngPlugin.3")); //$NON-NLS-1$
