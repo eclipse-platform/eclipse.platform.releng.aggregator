@@ -38,6 +38,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 	
 	private boolean fInDeprecatedMode = false;
 	private TestableObject fTestableObject;
+	private int fTestRunnerResult = -1;
 	
 	
 	/* (non-Javadoc)
@@ -49,10 +50,17 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 		
 		Assert.assertNotNull(application);
 		
-		if (fInDeprecatedMode)
-			return runDeprecatedApplication(application, args);
-		
-		return runApplication(application, args);
+		Object result;
+		if (fInDeprecatedMode) {
+			result = runDeprecatedApplication(application, args);
+		}
+		else {
+			result = runApplication(application, args);
+		}
+		if (!IPlatformRunnable.EXIT_OK.equals(result)) {
+			System.err.println("UITestRunner: Unexpected result from running application " + application + ": " + result);
+		}
+		return new Integer(fTestRunnerResult);
 	}
 	
 	
@@ -151,7 +159,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 					public void run() {
 						started[0] = true;
 						try {
-							EclipseTestRunner.main((String[]) args);
+							fTestRunnerResult = EclipseTestRunner.run((String[]) args);
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -177,7 +185,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 		fTestableObject.runTest(new Runnable() {
 			public void run() {
 				try {
-					EclipseTestRunner.main(Platform.getCommandLineArgs());
+					fTestRunnerResult = EclipseTestRunner.run(Platform.getCommandLineArgs());
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
