@@ -1,226 +1,153 @@
-<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
 <html>
 <head>
-   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta http-equiv="Content-Style-Type" content="text/css">
-   <meta name="GENERATOR" content="Mozilla/4.76 [en] (Windows NT 5.0; U) [Netscape]">
-   <title>Extract method errors</title>
-<link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<meta content="text/html; charset=iso-8859-1">
+<meta content="text/css">
+<meta name="GENERATOR" content="Mozilla/4.76 [en] (Windows NT 5.0; U) [Netscape]">
+<title>Extract method errors</title>
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
 </head>
 <body bgcolor="#FFFFFF">
+<h1 class="Head">Extract method errors</h1>
 
-<h1 CLASS="Head">
-Extract method errors</h1>
+<div class="Para">When you attempt to extract a method, you may get one or more of the following common errors:</div>
 
-<div CLASS="Para">When you attempt to extract a method, you may get one
-or more of the following common errors.</div>
+<br>
+<ul>
+<li><code>Selected block references a local type declared outside the selection</code><br>
+A local type declaration is not part of the selection but is referenced by one of the statements selected for extraction. Either extend the selection that it includes the local type declaration or
+reduce the selection that no reference to the local type declaration is selected.<br>
+<br>
+</li>
+
+<li><code>A local type declared in the selected block is referenced outside the selection</code><br>
+The selection covers a local type declaration but the type is also referenced outside the selected statements. Either extend the selection that is includes all references to the local type or reduce
+the selection that the local type declaration isn't selected.<br>
+<br>
+</li>
+
+<li><code>Ambiguous return value: selected block contains more than one assignment to local variable</code><br>
+More than one assignment to a local variable was found inside the selected block. Either reduce the selection that only one assignment is selected or extend the selection that at least all reference
+except of one to the local variables are covered by the selection too.<br>
+<br>
+</li>
+
+<li><code>Ambiguous return value: more than one reference to selected local declaration found</code><br>
+More than one variable declared inside the selection is also reference outside the selection. Either reduce the selection that only one variable declaration is selected or extend the selection that
+at least all references except of one to the selected variable declarations are covered by the selection too.<br>
+<br>
+</li>
+
+<li><code>Ambiguous return value: assignment to local variable and reference to a selected local declaration found</code><br>
+The selected block contains an assignment to a local variable. Additionally a variable declared inside the selection is also referenced outside the selection. Reduce the selection that either the
+assignment or the local declaration is selected. Or extend the selection so that either all references to a local variable or all variable declarations are covered by the selection too.<br>
+<br>
+</li>
+
+<li><code>Ambiguous return value: selection contains return statement and a value must be returned from the extracted method</code><br>
+The selected block contains a return statement. Additionally a value must be returned from the extracted method because either a assignment to a local variable or a local declaration is selected too.
+Either exclude the return statement from the selection or exclude all assignments to local variables and all local type declarations from the selection.<br>
+<br>
+</li>
+
+<li><code>Ambiguous return value: expression has return type and a value must be returned from extracted method</code><br>
+The selected statement is an expression (for example the condition part of an if-then-else statement) which must return a boolean. Additionally a value must be returned from the extracted method
+because an assignment to a local variable is selected too. To remedy the problem select the whole statement not only the condition part.<br>
+<br>
+</li>
+
+<li><code>Selection contains a break statement but the corresponding break target isn't selected</code><br>
+To remedy the problem either extend the selection to include the break / continue target or reduce the selection that the break / continue statement isn't covered by the selection.<br>
+<br>
+</li>
+
+<li><code>Selection contains a continue statement but the corresponding continue target isn't selected</code><br>
+To remedy the problem either extend the selection to include the break / continue target or reduce the selection that the break / continue statement isn't covered by the selection.<br>
+<br>
+</li>
+
+<li><code>Cannot extract new method from selection. Only statements from the body of a top level method can be extracted</code><br>
+This is a generic error message shown whenever we encounter a problem but don't really know what the problem actual is. Typical scenarios where this error message is shown are: 
 
 <ul>
-<pre>Selected block references a local type declared outside the selection</pre>
-</ul>
+<li>a whole method is selected not only parts of a method body</li>
 
-<div CLASS="Para">A local type declaration is not part of the selection
-but is referenced by one of the statements selected for extraction. Either
-extend the selection that it includes the local type declaration or reduce
-the selection that no reference to the local type declaration is selected.</div>
+<li>the selection only covers parts of a statement. Statements in the extract method sense are separated by semicolons. Below a few examples where the selection doesn't mark a set of statements and
+therefore can't be extracted: 
 
 <ul>
-<pre>A local type declared in the selected block is referenced outside the selection</pre>
+<li>foo().bar().baz();<br>
+to remedy the problem select whole message send chain</li>
+
+<li>int i= foo();<br>
+extend the selection to cover the whole declaration</li>
+</ul>
+</li>
+</ul>
+</li>
+
+<li><code>Selection starts inside a comment</code><br>
+Parts of a comment cannot be extracted. Either extend the selection that it covers the whole comment or reduce the selection that the comment isn't covered at all.<br>
+<br>
+</li>
+
+<li><code>Selection ends inside a comment</code><br>
+Parts of a comment can't be extracted. Either extend the selection that it covers the whole comment or reduce the selection that the comment isn't covered at all.<br>
+<br>
+</li>
+
+<li><code>Cannot extract selection that ends in the middle of a statement</code><br>
+Adjust selection so that it fully covers a set of statements. Statements in the extract method sense are separated by semicolons.</li>
 </ul>
 
-<div CLASS="Para">The selection covers a local type declaration but the
-type is also referenced outside the selected statements. Either extend
-the selection that is includes all references to the local type or reduce
-the selection that the local type declaration isn't selected.</div>
+<h2 class="Head">Other Problems</h2>
+
+<div class="Para">The following problems are fairly self-explanatory.</div>
 
 <ul>
-<pre>Ambiguous return value: selected block contains more than one assignment to local variable</pre>
+<li class="Item"><tt>Cannot extract a single return statement.</tt></li>
+
+<li class="Item"><tt>Can only extract void return statement.</tt></li>
+
+<li class="Item"><tt>Selection starts or ends in the middle of a type declaration. Select whole declaration or statements of a method body.</tt></li>
+
+<li class="Item"><tt>Cannot determine return type of the expression to be extracted.</tt></li>
+
+<li class="Item"><tt>Cannot extract the selected statement(s) from the condition part of an if-then-else statement.</tt></li>
+
+<li class="Item"><tt>Cannot extract the selected statement(s) from the condition part of a do-while statement.</tt></li>
+
+<li class="Item"><tt>Cannot extract the selected statement(s) from the condition part of a while statement.</tt></li>
+
+<li class="Item"><tt>Selection may not start right after the do keyword.</tt></li>
+
+<li class="Item"><tt>Selection must either cover whole do-while statement or parts of the action block.</tt></li>
+
+<li class="Item"><tt>Selection must either cover whole if-then-else statement or parts of then, or else block.</tt></li>
+
+<li class="Item"><tt>Cannot extract to new method since selection contains a return statement at line...</tt></li>
+
+<li class="Item"><tt>Selection must either cover whole switch statement or parts of a single case block.</tt></li>
+
+<li class="Item"><tt>Selection must either cover whole synchronized statement or parts of the synchronized block.</tt></li>
+
+<li class="Item"><tt>Selection must either cover whole try statement or parts of try, catch, or finally block.</tt></li>
 </ul>
 
-<div CLASS="Para">More than one assignment to a local variable was found
-inside the selected block. Either reduce the selection that only one assignment
-is selected or extend the selection that at least all reference except
-of one to the local variables are covered by the selection too.</div>
+<img src="../images/ngrelc.gif" alt="Related concepts" border="0" height="27" width="159">
+<p><a href="../concepts/concepts-1.htm">Java development tools (JDT)</a></p>
 
-<ul>
-<pre>Ambiguous return value: more than one reference to selected local declaration found</pre>
-</ul>
+<p><img src="../images/ngrelt.gif" alt="Related tasks" border="0" height="27" width="159"></p>
 
-<div CLASS="Para">More than one variable declared inside the selection
-is also reference outside the selection. Either reduce the selection that
-only one variable declaration is selected or extend the selection that
-at least all references except of one to the selected variable declarations
-are covered by the selection too.</div>
+<p><a href="../tasks/tasks-87.htm">Extracting a method</a></p>
 
-<ul>
-<pre>Ambiguous return value: assignment to local variable and reference to a selected local declaration found</pre>
-</ul>
+<p><img src="../images/ngrelr.gif" alt="Related reference" border="0" height="27" width="159"></p>
 
-<div CLASS="Para">The selected block contains an assignment to a local
-variable. Additionally a variable declared inside the selection is also
-referenced outside the selection. Reduce the selection that either the
-assignment or the local declaration is selected. Or extend the selection
-so that either all references to a local variable or all variable declarations
-are covered by the selection too.</div>
+<p><a href="rprobpg.htm">Method extraction troubleshooting</a><br>
+&nbsp;</p>
 
-<ul>
-<pre>Ambiguous return value: selection contains return statement and a value must be returned from the extracted method</pre>
-</ul>
-
-<div CLASS="Para">The selected block contains a return statement. Additionally
-a value must be returned from the extracted method because either a assignment
-to a local variable or a local declaration is selected too. Either exclude
-the return statement from the selection or exclude all assignments to local
-variables and all local type declarations from the selection.</div>
-
-<ul>
-<pre>Ambiguous return value: expression has return type and a value must be returned from extracted method</pre>
-</ul>
-
-<div CLASS="Para">The selected statement is an expression (for example
-the condition part of an if-then-else statement) which must return a boolean.
-Additionally a value must be returned from the extracted method because
-an assignment to a local variable is selected too. To remedy the problem
-select the whole statement not only the condition part.</div>
-
-<ul>
-<pre>Selection contains a break statement but the corresponding break target isn't selected</pre>
-</ul>
-
-<div CLASS="Para">To remedy the problem either extend the selection to
-include the break / continue target or reduce the selection that the break
-/ continue statement isn't covered by the selection.</div>
-
-<ul>
-<pre CLASS="Head">Selection contains a continue statement but the corresponding continue target isn't selected</pre>
-</ul>
-
-<div CLASS="Para">To remedy the problem either extend the selection to
-include the break / continue target or reduce the selection that the break
-/ continue statement isn't covered by the selection.</div>
-
-<ul>
-<pre CLASS="Head">Cannot extract new method from selection. Only statements from the body of a top level method can be extracted</pre>
-</ul>
-
-<div CLASS="Para">This is a generic error message shown whenever we encounter
-a problem but don't really know what the problem actual is. Typical scenarios
-where this error message is shown are:</div>
-
-<ul>
-<li CLASS="Item">
-a whole method is selected not only parts of a method body</li>
-
-<li CLASS="Item">
-the selection only covers parts of a statement. Statements in the extract
-method sense are separated by semicolons. Below a few examples where the
-selection doesn't mark a set of statements and therefore can't be extracted:</li>
-
-<ul CLASS="UnorderedList">
-<li CLASS="Item">
-foo().bar().baz();</li>
-
-<br>To remedy the problem select whole message send chain
-<li CLASS="Item">
-int i= foo();</li>
-
-<br>extend the selection to cover the whole declaration</ul>
-
-<li CLASS="Item">
-Additionally to statements, the whole condition part of an if-then-else
-statement can be extracted too. So the following selection is valid:</li>
-
-<br>if (i &lt; 10 &amp;&amp; j &lt; 20)
-<br>Select whole condition part to remedy the problem.
-<br>whereas the selection "if (i &lt; 10 &amp;&amp; j &lt; 20)" is not.
-<pre CLASS="Head">Selection starts inside a comment</pre>
-</ul>
-
-<div CLASS="Para">Parts of a comment cannot be extracted. Either extend
-the selection that it covers the whole comment or reduce the selection
-that the comment isn't covered at all.</div>
-
-<ul>
-<pre CLASS="Head">Selection ends inside a comment</pre>
-</ul>
-
-<div CLASS="Para">Parts of a comment can't be extracted. Either extend
-the selection that it covers the whole comment or reduce the selection
-that the comment isn't covered at all.</div>
-
-<ul>
-<pre CLASS="Head">Cannot extract selection that ends in the middle of a statement</pre>
-</ul>
-
-<div CLASS="Para">Adjust selection so that it fully covers a set of statements.
-Statements in the extract method sense are separated by semicolons.</div>
-
-<h2 CLASS="Head">
-Other Problems</h2>
-
-<div CLASS="Para">The following problems are fairly self-explanatory.</div>
-
-<ul>
-<li CLASS="Item">
-<tt>Cannot extract a single return statement.</tt></li>
-
-<li CLASS="Item">
-<tt>Can only extract void return statement.</tt></li>
-
-<li CLASS="Item">
-<tt>Selection starts or ends in the middle of a type declaration. Select
-whole declaration or statements of a method body.</tt></li>
-
-<li CLASS="Item">
-<tt>Cannot determine return type of the expression to be extracted.</tt></li>
-
-<li CLASS="Item">
-<tt>Cannot extract the selected statement(s) from the condition part of
-an if-then-else statement.</tt></li>
-
-<li CLASS="Item">
-<tt>Cannot extract the selected statement(s) from the condition part of
-a do-while statement.</tt></li>
-
-<li CLASS="Item">
-<tt>Cannot extract the selected statement(s) from
-the condition part of
-a while statement.</tt></li>
-
-<li CLASS="Item">
-<tt>Selection may not start right after the do keyword.</tt></li>
-
-<li CLASS="Item">
-<tt>Selection must either cover whole do-while statement or parts of the
-action block.</tt></li>
-
-<li CLASS="Item">
-<tt>Selection must either cover whole if-then-else statement or parts of
-then, or else block.</tt></li>
-
-<li CLASS="Item">
-<tt>Cannot extract to new method since selection contains a return statement
-at line...</tt></li>
-
-<li CLASS="Item">
-<tt>Selection must either cover whole switch statement or parts of a single
-case block.</tt></li>
-
-<li CLASS="Item">
-<tt>Selection must either cover whole synchronized statement or parts of
-the synchronized block.</tt></li>
-
-<li CLASS="Item">
-<tt>Selection must either cover whole try statement or parts of try, catch,
-or finally block.</tt></li>
-</ul>
-<img SRC="ngrelc.gif" ALT="Related concepts" BORDER=0 height=27 width=159>
-<p><a href="../concepts/concepts-1.htm">Java development tools (JDT)</a>
-<p><img SRC="ngrelt.gif" ALT="Related tasks" BORDER=0 height=27 width=159>
-<p><a href="../tasks/tasks-87.htm">Extracting a method</a>
-<p><img SRC="ngrelr.gif" ALT="Related reference" BORDER=0 height=27 width=159>
-<p><a href="rprobpg.htm">Method extraction troubleshooting</a>
-<br>&nbsp;
-<p><img SRC="ngibmcpy.gif" height=12 width=250>
+<p><br>
+&nbsp;<a href="../hglegal2002.htm"><img src="../images/ngibmcpy2002.gif" alt="Copyright IBM Corporation 2000, 2002. All Rights Reserved." border="0" width="324" height="14"></a></p>
 </body>
 </html>
+
