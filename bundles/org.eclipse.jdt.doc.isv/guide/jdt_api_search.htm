@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Using the Java search engine</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Using the Java search engine</H2>
+<P>
+Your plug-in can use the JDT API to search Java projects in the workspace for java elements, such as method references, field declarations, implementors of an interface, etc. </P>
+<P>
+The entry point for java search is the <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html">SearchEngine</a></b> class. Factory methods on this class such
+as <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createSearchPattern(org.eclipse.jdt.core.IJavaElement, int)">createSearchPattern</a></b> - that creates
+a search pattern - or <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createJavaSearchScope(org.eclipse.jdt.core.IJavaElement[], boolean)">createJavaSearchScope</a></b>
+- that creates a java search scope - are used by the <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#search(org.eclipse.core.resources.IWorkspace, org.eclipse.jdt.core.search.ISearchPattern, org.eclipse.jdt.core.search.IJavaSearchScope, org.eclipse.jdt.core.search.IJavaSearchResultCollector)">search</a></b>
+method, which reports results to an  <b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html">IJavaSearchResultCollector</a></b> that you must implement. </P>
+
+<H3>
+Preparing for search</h3>
+
+<H4>
+Creating a java search pattern
+</h4>
+<P>
+A search pattern defines how search results are found. You can either create a search pattern from a java element (see
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createSearchPattern(org.eclipse.jdt.core.IJavaElement, int)">createSearchPattern(IJavaElement, int)</a></b>) 
+or from a string (see <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createSearchPattern(java.lang.String, int, int, boolean)">createSearchPattern(String, int, int, boolean)</a></b>.)
+The last method supports wildcard (i.e. '*') and can be used to widen the search results.</P>
+<P>
+For example, creating a search pattern for searching for references to a given method is done as follows:</P>
+<font color='#4444CC'><pre>
+   // Get the method
+   IMethod method = ...;
+
+   // Create search pattern
+   ISearchPattern pattern = SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
+</pre></font>
+<P>
+Or creating a search pattern for searching for declarations of all types starting with "Obj" is done as follows:</P>
+<font color='#4444CC'><pre>
+   // Create search pattern
+   ISearchPattern pattern = SearchEngine.createSearchPattern("Obj*", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, true);
+</pre></font>
+
+<H4>
+Creating a java search scope
+</h4>
+<P>
+If you are interested in search results in a given project or even in a given package, or if you know that search results
+can be only in a hierarchy of a given type, you can create the appropriate search scope using 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createJavaSearchScope(org.eclipse.jdt.core.IJavaElement[])">createJavaSearchScope(IJavaElement[])</a></b>
+or <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createHierarchyScope(org.eclipse.jdt.core.IType)">createHierarchyScope(IType)</a></b>.</P>
+
+
+<H3>
+Searching</h3>
+
+
+<H3>
+Accurate versus Inaccurate matches</h3>
+
+<P>&nbsp;<a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation 2000, 2002. All Rights Reserved." border="0"></a>
+</P>
+
+</BODY>
+</HTML>
