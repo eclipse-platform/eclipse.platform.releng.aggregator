@@ -69,8 +69,8 @@ public class SQL {
     		StringBuffer sb= new StringBuffer(
     				"select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
 					"where " + //$NON-NLS-1$
-					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and " + //$NON-NLS-1$
-					"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
+					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST LIKE ? and " + //$NON-NLS-1$
+					"SAMPLE.TAG_ID = TAG.ID and TAG.NAME LIKE ? and " + //$NON-NLS-1$
 					"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
 					"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
 					"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
@@ -112,14 +112,14 @@ public class SQL {
                 "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
         fQueryAllScenarios= fConn.prepareStatement(
         		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE, CONFIG where " +	//$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and " +	//$NON-NLS-1$
-        		"SAMPLE.SCENARIO_ID = SCENARIO.ID"	//$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST LIKE ? and " +	//$NON-NLS-1$
+        		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
         fQueryTags= fConn.prepareStatement(
         		"select DISTINCT TAG.NAME from TAG, CONFIG, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and " +	//$NON-NLS-1$
-        		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +	//$NON-NLS-1$
-        		"SAMPLE.TAG_ID = TAG.ID"	//$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST LIKE ? and " +	//$NON-NLS-1$
+        		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME LIKE ? and " +	//$NON-NLS-1$
+        		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
     }
     
@@ -210,13 +210,13 @@ public class SQL {
         return create(fInsertConfig);
     }
     
-    int getScenario(String name) throws SQLException {
-        fQueryScenario.setString(1, name);
+    int getScenario(String scenarioPattern) throws SQLException {
+        fQueryScenario.setString(1, scenarioPattern);
         ResultSet result= fQueryScenario.executeQuery();
         while (result.next())
             return result.getInt(1);
 
-        fInsertScenario.setString(1, name);
+        fInsertScenario.setString(1, scenarioPattern);
         return create(fInsertScenario);
     }
     
@@ -235,10 +235,10 @@ public class SQL {
         return create(fInsertDataPoint);
     }
     
-    ResultSet query(String host, String tag, String scenario, int[] dim_ids) throws SQLException {
+    ResultSet query(String hostPattern, String tagPattern, String scenario, int[] dim_ids) throws SQLException {
     	PreparedStatement queryStatement= getQueryStatement(dim_ids.length);
-    	queryStatement.setString(1, host);
-    	queryStatement.setString(2, tag);
+    	queryStatement.setString(1, hostPattern);
+    	queryStatement.setString(2, tagPattern);
     	queryStatement.setString(3, scenario);
     	int j= 4;
     	for (int i= 0; i < dim_ids.length; i++)
@@ -246,14 +246,16 @@ public class SQL {
         return queryStatement.executeQuery();
     }    
 
-    ResultSet queryScenarios(String host) throws SQLException {
-        fQueryAllScenarios.setString(1, host);
+    ResultSet queryScenarios(String hostPattern, String scenarioPattern) throws SQLException {
+        fQueryAllScenarios.setString(1, hostPattern);
+        fQueryAllScenarios.setString(2, scenarioPattern);
         return fQueryAllScenarios.executeQuery();
     }
     
-    ResultSet queryTags(String host, String scenario) throws SQLException {
-        fQueryTags.setString(1, host);
-        fQueryTags.setString(2, scenario);
+    ResultSet queryTags(String hostPattern, String tagPattern, String scenarioPattern) throws SQLException {
+        fQueryTags.setString(1, hostPattern);
+        fQueryTags.setString(2, tagPattern);
+        fQueryTags.setString(3, scenarioPattern);
         return fQueryTags.executeQuery();
     }
 }

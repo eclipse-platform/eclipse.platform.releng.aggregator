@@ -51,21 +51,35 @@ public class DB {
         return getDefault().internalQuery(host, refTag, scenarioID, dims);
     }
    
-    public static Scenario[] queryScenarios(String host, String buildTypeFilter) {
+    /*
+     * @deprecated use queryScenarios(host, tag, scenario) instead
+     */
+    public static Scenario[] queryScenarios(String hostPattern) {
+    	return queryScenarios(hostPattern, "%", "%"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+
+    /*
+     * @deprecated use queryScenarios(host, tag, scenario) instead
+     */
+    public static Scenario[] queryScenarios(String hostPattern, String ignored) {
+    	return queryScenarios(hostPattern, "%", "%"); //$NON-NLS-1$ //$NON-NLS-2$
+    }
+    
+    public static Scenario[] queryScenarios(String host, String tagPattern, String scenarioPattern) {
     	if (host == null)
     		host= LOCALHOST;
-        String[] scenarios= getDefault().internalQueryScenarios(host); // get all Scenario names
+        String[] scenarios= getDefault().internalQueryScenarios(host, scenarioPattern); // get all Scenario names
         Scenario[] tables= new Scenario[scenarios.length];
         for (int i= 0; i < scenarios.length; i++) {
-            String scenario= scenarios[i];
-            if (DEBUG) System.out.println(i + ": " + scenario); //$NON-NLS-1$
-            tables[i]= new Scenario(host, scenario);
+            String scenarioName= scenarios[i];
+            if (DEBUG) System.out.println(i + ": " + scenarioName); //$NON-NLS-1$
+            tables[i]= new Scenario(host, tagPattern, scenarioName);
         }
         return tables;
     }
 
-    public static String[] queryTags(String host, String scenario) {
-        return getDefault().internalQueryTags(host, scenario);
+    public static String[] queryTags(String hostPattern, String tagPattern, String scenarioPattern) {
+        return getDefault().internalQueryTags(hostPattern, tagPattern, scenarioPattern);
     }
 
     public static Connection getConnection() {
@@ -151,7 +165,7 @@ public class DB {
             int sample_id= fSQL.createSample(getConfig(), scenario_id, tag_id, sample.getStartTime());
             fStoredSamples++;
             
-            System.err.print(PerformanceTestPlugin.getBuildId());
+            //System.err.println(PerformanceTestPlugin.getBuildId());
             
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
@@ -180,15 +194,15 @@ public class DB {
         return true;
     }
 
-    private DataPoint[] internalQuery(String host, String refTag, String scenarioID, Dim[] dims) {
+    private DataPoint[] internalQuery(String hostPattern, String tagPattern, String scenario, Dim[] dims) {
         if (fSQL == null)
             return null;
  
         ResultSet result= null;
         try {
         	
-        	if (host == null)
-        		host= LOCALHOST;
+        	if (hostPattern == null)
+        		hostPattern= LOCALHOST;
         	
         	int[] dim_ids= null;
         	if (dims != null) {
@@ -198,7 +212,7 @@ public class DB {
         	}
         	if (dim_ids == null)
         		dim_ids= new int[0];
-            result= fSQL.query(host, refTag, scenarioID, dim_ids);
+            result= fSQL.query(hostPattern, tagPattern, scenario, dim_ids);
             
             ArrayList dataPoints= new ArrayList();
             int lastDataPointId= 0;
@@ -242,12 +256,12 @@ public class DB {
         return null;
     }
     
-    private String[] internalQueryScenarios(String host) {
+    private String[] internalQueryScenarios(String hostPattern, String scenarioPattern) {
         if (fSQL == null)
             return null;
         ResultSet result= null;
         try {        	
-            result= fSQL.queryScenarios(host);
+            result= fSQL.queryScenarios(hostPattern, scenarioPattern);
             ArrayList scenarios= new ArrayList();
             for (int i= 0; result.next(); i++)
 		        scenarios.add(result.getString(1));
@@ -265,12 +279,12 @@ public class DB {
         return null;
     }
     
-    private String[] internalQueryTags(String host, String scenario) {
+    private String[] internalQueryTags(String hostPattern, String tagPattern, String scenarioPattern) {
         if (fSQL == null)
             return null;
         ResultSet result= null;
         try {        	
-            result= fSQL.queryTags(host, scenario);
+            result= fSQL.queryTags(hostPattern, tagPattern, scenarioPattern);
             ArrayList tags= new ArrayList();
             for (int i= 0; result.next(); i++)
                 tags.add(result.getString(1));
