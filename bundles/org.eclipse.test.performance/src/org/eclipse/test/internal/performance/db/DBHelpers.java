@@ -20,13 +20,7 @@ public class DBHelpers {
     
     
     public static void main(String[] args) throws SQLException {
-                
-        //System.setProperty("eclipse.perf.dbloc", "net://localhost"); //$NON-NLS-1$ //$NON-NLS-2$
-        //System.setProperty("eclipse.perf.dbloc", "/Volumes/Stuff/Eclipse/Dani2/cloudscape");
-        //System.setProperty("eclipse.perf.config", "config=awtest;build=b0");
-
-        //System.setProperty("perf_ctrl", "dbloc=net://relengbuildserv.ottawa.ibm.com;config=awtest;build=b0");
-        
+                        
         DBHelpers db= new DBHelpers();
         
 		String outFile= null;
@@ -44,36 +38,7 @@ public class DBHelpers {
 
 		long start= System.currentTimeMillis();
 		
-		//db.dumpTable(ps, "SUMMARYENTRY", 1000);
-		//db.dumpSummaries("relengbuildwin2", "N200410192000", "org.eclipse.jdt.text.%");
-		
-		//db.count(ps);
-		db.countAllDimensions(ps);
-		//db.removeDimension(InternalDimensions.SYSTEM_TIME);
-		
-		//db.countSamples(ps, new Variations("relengbuildwin2", "3.0.0_200410130800"));
-		//db.countDatapoints(ps, new Variations("relengbuildwin2", "3.0.0_200410130800"));
-		//db.countScalars(ps, new Variations("relengbuildwin2", "3.0.0_200410130800"));
-		
-		//db.removeSamples(ps, new Variations("awtest", "b0"));		
-		//db.test();
-		//db.view(ps, "localhost", "%", "%");	//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		//db.view(ps, "relengbuildwin2", "3%", "%OpenJava%2%");	//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		//db.dumpTable(ps, "VARIATION", 1000);
-		//db.dumpScenarios(ps, "test_scenario%"); //$NON-NLS-1$
-		//db.countSamplesWithNullVariations();
-        //db.dumpSizes(ps);
-		//db.dumpAll(ps, 100);
-		
-		
-//		Variations v= new Variations("relengbuildwin2", "3.1M1_200409212000");
-//		Set set= new HashSet();
-//		set.add(Dimension.CPU_TIME);
-//		DataPoint[] points= DB.queryDataPoints(v, "org.eclipse.jdt.text.tests.performance.RevertJavaEditorTest#testRevertJavaEditor()", null); //$NON-NLS-1$ //$NON-NLS-2$
-//		//DataPoint[] points= DB.queryDataPoints("localhost", "R3.0", "%OpenJava%2%", new Dim[] {InternalDimensions.CPU_TIME}); //$NON-NLS-1$ //$NON-NLS-2$
-//		//DataPoint[] points= DB.queryDataPoints("localhost", "R3.0", "org.eclipse.jdt.text.tests.performance.OpenJavaEditorTest#testOpenJavaEditor2()", dims); //$NON-NLS-1$ //$NON-NLS-2$
-//		System.out.println("dps: " + points.length);
-				
+        db.dumpSizes(ps);			
 		
         System.out.println("time: " + ((System.currentTimeMillis()-start)/1000.0)); //$NON-NLS-1$
         
@@ -83,12 +48,6 @@ public class DBHelpers {
 
     public DBHelpers() {
         fConnection= DB.getConnection();
-    }
-    
-    void test() throws SQLException {
-        Statement stmt= fConnection.createStatement();
-        //stmt.execute("drop table CONFIG_ORG"); //$NON-NLS-1$
-        stmt.close(); 
     }
     
     void dumpSummaries(String config, String build, String scenarioPattern) {
