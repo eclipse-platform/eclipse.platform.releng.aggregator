@@ -30,6 +30,7 @@ public class TimeSeries {
     
     /**
      * Returns value at given index.
+     * @param ix 
      * @return value at given index
      */
     public double getValue(int ix) {
@@ -38,6 +39,7 @@ public class TimeSeries {
     
     /**
      * Returns label at given index.
+     * @param ix
      * @return label at given index
      */
     public String getLabel(int ix) {

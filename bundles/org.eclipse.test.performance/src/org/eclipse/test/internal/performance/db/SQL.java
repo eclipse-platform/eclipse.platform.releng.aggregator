@@ -69,7 +69,7 @@ public class SQL {
     		StringBuffer sb= new StringBuffer(
     				"select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
 					"where " + //$NON-NLS-1$
-					"SAMPLE.CONFIG_ID = ? and " + //$NON-NLS-1$
+					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and " + //$NON-NLS-1$
 					"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
 					"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
 					"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
@@ -111,13 +111,13 @@ public class SQL {
         fQueryScenario= fConn.prepareStatement(
                 "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
         fQueryAllScenarios= fConn.prepareStatement(
-        		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE where " +	//$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = ? and " +	//$NON-NLS-1$
+        		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE, CONFIG where " +	//$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID"	//$NON-NLS-1$
         ); 
         fQueryTags= fConn.prepareStatement(
-        		"select TAG.NAME from TAG, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = ? and " +	//$NON-NLS-1$
+        		"select DISTINCT TAG.NAME from TAG, CONFIG, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +	//$NON-NLS-1$
         		"SAMPLE.TAG_ID = TAG.ID"	//$NON-NLS-1$
         ); 
@@ -235,9 +235,9 @@ public class SQL {
         return create(fInsertDataPoint);
     }
     
-    ResultSet query(int config_id, String tag, String scenario, int[] dim_ids) throws SQLException {
+    ResultSet query(String host, String tag, String scenario, int[] dim_ids) throws SQLException {
     	PreparedStatement queryStatement= getQueryStatement(dim_ids.length);
-    	queryStatement.setInt(1, config_id);
+    	queryStatement.setString(1, host);
     	queryStatement.setString(2, tag);
     	queryStatement.setString(3, scenario);
     	int j= 4;
@@ -246,13 +246,13 @@ public class SQL {
         return queryStatement.executeQuery();
     }    
 
-    ResultSet queryScenarios(int config_id) throws SQLException {
-        fQueryAllScenarios.setInt(1, config_id);
+    ResultSet queryScenarios(String host) throws SQLException {
+        fQueryAllScenarios.setString(1, host);
         return fQueryAllScenarios.executeQuery();
     }
     
-    ResultSet queryTags(int config_id, String scenario) throws SQLException {
-        fQueryTags.setInt(1, config_id);
+    ResultSet queryTags(String host, String scenario) throws SQLException {
+        fQueryTags.setString(1, host);
         fQueryTags.setString(2, scenario);
         return fQueryTags.executeQuery();
     }

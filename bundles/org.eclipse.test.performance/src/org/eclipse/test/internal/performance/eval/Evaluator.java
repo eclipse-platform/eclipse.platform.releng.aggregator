@@ -63,7 +63,7 @@ public class Evaluator extends EmptyEvaluator {
 		}
 		Dim[] allDims= (Dim[]) allDimensions.toArray(new Dim[allDimensions.size()]);
 
-	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID(), allDims);
+	    DataPoint[] datapoints= DB.query(null, refTag, session.getScenarioID(), allDims);
 	    if (datapoints == null)
 	    	return;
 	    if (datapoints.length == 0) {

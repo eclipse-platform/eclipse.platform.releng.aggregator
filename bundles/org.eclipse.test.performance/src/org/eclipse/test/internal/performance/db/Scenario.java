@@ -23,6 +23,7 @@ import org.eclipse.test.internal.performance.eval.StatisticsSession;
  */
 public class Scenario {
 
+	private String fHost;
     private String fScenarioName;
     private String[] fTags;
     private StatisticsSession[] fSessions;
@@ -30,7 +31,8 @@ public class Scenario {
     private Map fSeries= new HashMap();
 
     
-    Scenario(String scenario) {
+    Scenario(String host, String scenario) {
+    	fHost= host;
         fScenarioName= scenario;
     }
     
@@ -40,6 +42,8 @@ public class Scenario {
 
     public Dim[] getDimensions() {
         load();
+        if (fDimensions == null)
+        	return new Dim[0];
         return fDimensions;
     }
     
@@ -61,14 +65,14 @@ public class Scenario {
     private void load() {
         if (fTags != null)
             return;
-        int xxxx= InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
+        InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
         
-        fTags= DB.queryTags(fScenarioName);
+        fTags= DB.queryTags(fHost, fScenarioName);
         fSessions= new StatisticsSession[fTags.length];
 
         for (int t= 0; t < fTags.length; t++) {
             String tag= fTags[t];
-            DataPoint[] dps= DB.query(tag, fScenarioName, null);
+            DataPoint[] dps= DB.query(fHost, tag, fScenarioName, null);
             if (fDimensions == null && dps.length > 0)
                 fDimensions= dps[0].getDimensions();
 
