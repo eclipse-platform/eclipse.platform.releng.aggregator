@@ -14,7 +14,44 @@ Project-scoped preferences
 <H2>
 Project-scoped preferences</H2>
 <P >
-[This document is under construction]</P>
+In <a href="runtime_preferences.htm">Runtime preferences</a>, we looked at the infrastructure for defining and 
+storing preferences with different scopes.  We also saw that the
+<a href="../reference/extension-points/org_eclipse_runtime_core_preferences.html"><b>org.eclipse.runtime.core.preferences</b></a> 
+extension can be used to define additional scopes for preferences.  The platform resources plug-in defines its own
+preference scope, called &quot;Project,&quot; in order to define project-scoped preferences.  Project-scoped preferences are stored in a file located
+inside the project.  This makes it easy to store a set of preferences and exchange them with other users using 
+resource-oriented mechanisms such as a version control system.
+</p>
+<h3>Project-scoped preference nodes</h3>
+<p>
+Since the project scope for preferences is not one of the standard runtime scopes, the node representing a project-level
+preference must be obtained specifically.  From the root preference node, you must navigate to the project-scoped
+preference.  This can be achieved using the <b>ProjectScope</b>:
+<font color='#4444CC'><pre>
+	IScopeContext projectScope = new ProjectScope(MyProject);
+</pre></font>
+</p>
+<p>
+Once the project scope for a particular is project is found, the preference values can
+be obtained using the same mechanisms seen earlier.  Preferences are named using the string name of the 
+preference.  The names are qualified with another string (often a plug-in id) that qualifies the namespace
+of the preference.  The following snippet gets a preference node from the project scope.  You'll notice that once
+the correct scope is obtained, working with the nodes is no different than with nodes from other scopes.</p>
+<font color='#4444CC'><pre>
+	...
+	Preferences projectNode = projectScope.node(&quot;org.mycompany.myplugin&quot;);
+	if (projectNode != null) {
+		value = node.getBoolean(&quot;MyPreference&quot;, &quot;true&quot;);
+		//do something with the value.
+	}
+	...
+</pre></font> 
+<p>To save the value to a file in the project, the node is flushed.  The resources plug-in handles the logistics
+for managing the project-level preferences file.</p>
+
+<font color='#4444CC'><pre>
+	projectNode.flush();
+</pre></font> 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
