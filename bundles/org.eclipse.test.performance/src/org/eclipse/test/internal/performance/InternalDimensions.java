@@ -26,7 +26,8 @@ public interface InternalDimensions {
     			WORKING_SET= new Dim(4, Unit.BYTE), 				// the working set (or on Linux the resident set). "Working Set"	
 //    			USER_TIME= new Dim(10, Unit.SECOND, 1000),			// the amount of elapsed user time. "User time"
     			KERNEL_TIME= new Dim(11, Unit.SECOND, 1000),		// the amount of elapsed kernel time. "Kernel time"
-    			CPU_TIME= new Dim(20, Unit.SECOND, 1000); 			// the amount of CPU time we have used so far. "CPU Time"
+    			CPU_TIME= new Dim(20, Unit.SECOND, 1000), 			// the amount of CPU time we have used so far. "CPU Time"
+    			INVOCATION_COUNT= new Dim(52, Unit.INVOCATION, 1);	// the number of method invocations. "Invocation Count"
 
 //  	OS Info:
     		Dim

@@ -21,6 +21,7 @@ public class Unit {
 	public static final Unit SECOND= new Unit("s", "second", false);  //$NON-NLS-1$ //$NON-NLS-2$
 	public static final Unit BYTE= new Unit("byte", "byte", true);  //$NON-NLS-1$ //$NON-NLS-2$
 	public static final Unit CARDINAL= new Unit("", "", false);  //$NON-NLS-1$ //$NON-NLS-2$
+	public static final Unit INVOCATION= new Unit("invoc.", "invocation", false);  //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final int T_DECIMAL= 1000;
 	private static final int T_BINARY= 1024;
