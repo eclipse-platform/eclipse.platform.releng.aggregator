@@ -28,9 +28,26 @@ together.&nbsp; The CVS markup for the main preferences page looks like this:</p
 category.</p>
 <p><img border="0" src="images/teamprefs.jpg" width="641" height="532"></p>
 <p>&nbsp;</p>
-<p>Properties are added as described by <a href="../reference/extension-points/org_eclipse_ui_propertyPages.html">org.eclipse.ui.propertyPages</a>.&nbsp;
+<p>Properties are added as described by <a href="../reference/extension-points/org_eclipse_ui_propertyPages.html"><b>org.eclipse.ui.propertyPages</b></a>.&nbsp;
 There is no special team category for properties, since a resource can only be
-configured for one repository provider at a time.</p>
+configured for one repository provider at a time.&nbsp; However, you must set up
+your property page to filter on the team project persistent property (similar to
+the way we filtered resources for popup menu actions.)</p>
+<pre><font color="#4444CC">
+  &lt;extension
+    point=&quot;org.eclipse.ui.propertyPages&quot;&gt;
+     &lt;page
+           objectClass=&quot;org.eclipse.core.resources.IFile&quot;
+           adaptable=&quot;true&quot;
+           name=&quot;%CVS&quot;
+           class=&quot;org.eclipse.team.internal.ccvs.ui.CVSFilePropertiesPage&quot;
+           id=&quot;org.eclipse.team.ccvs.ui.propertyPages.CVSFilePropertiesPage&quot;&gt;
+        &lt;filter
+<b>              name=&quot;projectPersistentProperty&quot;
+              value=&quot;org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature&quot;&gt;
+</b>        &lt;/filter&gt;
+     &lt;/page&gt;
+     ...</font></pre>
 <p>
    &nbsp;
 </p>
