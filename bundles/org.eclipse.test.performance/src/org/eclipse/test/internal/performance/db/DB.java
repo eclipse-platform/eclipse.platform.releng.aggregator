@@ -48,6 +48,7 @@ public class DB {
     private int fStoredSamples;
     private boolean fStoreCalled;
     private boolean fIsEmbedded;
+    private String fDBType;	// either "derby" or "cloudscape"
     
     
     // Datapaoints
@@ -233,7 +234,7 @@ public class DB {
 
     synchronized static DB getDefault() {
         if (fgDefault == null) {
-            fgDefault= new DB();       
+            fgDefault= new DB();
             fgDefault.connect();
             if (PerformanceTestPlugin.getDefault() == null) {
             	// not started as plugin
@@ -411,7 +412,7 @@ public class DB {
     }
     
     /*
-     * Returns array of scenario names
+     * Returns array of scenario names matching the given pattern.
      */
     private String[] internalQueryScenarioNames(Variations variations, String scenarioPattern) {
         if (fSQL == null)
@@ -432,7 +433,7 @@ public class DB {
                 try {
                     result.close();
                 } catch (SQLException e1) {
-                	// ignored
+                    // ignored
                 }
         }
         return null;
@@ -571,17 +572,19 @@ public class DB {
 
         if (fConnection != null)
             return;
-        
+               
         String dbloc= PerformanceTestPlugin.getDBLocation();
         if (dbloc == null)
             return;
-                
+                   
         String dbname= PerformanceTestPlugin.getDBName();
         String url= null;
         java.util.Properties info= new java.util.Properties();
         
         try {            
             if (dbloc.startsWith("net://")) { //$NON-NLS-1$
+                // remote
+                fIsEmbedded= false;
                 info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
                 info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 // connect over network
@@ -589,28 +592,35 @@ public class DB {
                 Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
                 info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
                 url= dbloc + "/" + dbname;  //$NON-NLS-1$//$NON-NLS-2$
+                fDBType= "cloudscape"; //$NON-NLS-1$
             } else {
                 // embedded
                 fIsEmbedded= true;
-                if (DEBUG) System.out.println("Loading embedded cloudscape..."); //$NON-NLS-1$
-                Class.forName("com.ihost.cs.jdbc.CloudscapeDriver"); //$NON-NLS-1$
+                try {
+                    Class.forName("org.apache.derby.jdbc.EmbeddedDriver"); //$NON-NLS-1$
+                    fDBType= "derby"; //$NON-NLS-1$
+                } catch (ClassNotFoundException e) {
+                    Class.forName("com.ihost.cs.jdbc.CloudscapeDriver"); //$NON-NLS-1$
+                    fDBType= "cloudscape"; //$NON-NLS-1$
+                }
+                if (DEBUG) System.out.println("Loaded embedded " + fDBType); //$NON-NLS-1$
                 File f;
                 if (dbloc.length() == 0) {
                     String user_home= System.getProperty("user.home"); //$NON-NLS-1$
                     if (user_home == null)
                         return;
-                    f= new File(user_home, "cloudscape"); //$NON-NLS-1$
+                    f= new File(user_home, fDBType);
                 } else
                     f= new File(dbloc);
                 url= new File(f, dbname).getAbsolutePath();
             }
             info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-            fConnection= DriverManager.getConnection("jdbc:cloudscape:" + url, info); //$NON-NLS-1$
-            if (DEBUG) System.out.println("succeeded!"); //$NON-NLS-1$
+            fConnection= DriverManager.getConnection("jdbc:" + fDBType + ':' + url, info); //$NON-NLS-1$
+            if (DEBUG) System.out.println("connect succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
             fSQL= new SQL(fConnection);            
-			fConnection.commit();
+            fConnection.commit();
 
         } catch (SQLException ex) {
             PerformanceTestPlugin.logError(ex.getMessage());
@@ -648,9 +658,10 @@ public class DB {
         
         if (fIsEmbedded) {
 	        try {
-	            DriverManager.getConnection("jdbc:cloudscape:;shutdown=true"); //$NON-NLS-1$
+	            DriverManager.getConnection("jdbc:" + fDBType + ":;shutdown=true"); //$NON-NLS-1$ //$NON-NLS-2$
 	        } catch (SQLException e) {
-	            if (! "Cloudscape system shutdown.".equals(e.getMessage())) //$NON-NLS-1$
+	            String message= e.getMessage();
+	            if (message.indexOf("system shutdown.") < 0) //$NON-NLS-1$
 	                e.printStackTrace();
 	        }
         }
