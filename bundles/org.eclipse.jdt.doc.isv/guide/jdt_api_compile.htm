@@ -30,7 +30,29 @@ In the case of a full project build, all the .class files in the output folder a
 <P >
 Additional resource files are also copied to the output folder. You can control which resource files are copied using the resource filter (see Preferences->Java->Compiler->Other). Filenames are filtered if they match one of the supplied patterns. Entire folders are filtered if their name matches one of the supplied folder names which end in a slash. </P>
 
+<h3>Using the ant javac adapter</h3>
+The Eclipse compiler can be used inside an Ant script using the javac adapter. In order to use the Eclipse compiler, you
+simply need to define the <b>build.compiler</b> property in your script. Here is a small example.
+<font color='#4444CC'><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project name="compile" default="main" basedir="../."&gt;
 
+	<b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
+
+	&lt;property name="root" value="${basedir}/src"/&gt;
+
+	&lt;property name="destdir" value="d:/temp/bin" /&gt;
+
+	&lt;target name="main"&gt;
+		&lt;javac srcdir="${root}" destdir="${destdir}" debug="on" nowarn="on" extdirs="d:/extdirs" source="1.4"&gt;
+		    &lt;classpath&gt;
+		      &lt;pathelement location="${basedir}/../org.eclipse.jdt.core/bin"/&gt;
+		    &lt;/classpath&gt;
+		&lt;/javac&gt;		
+	&lt;/target&gt;
+&lt;/project&gt;
+</pre></font>
+The syntax used for the javac Ant task can be found in the <a href="http://jakarta.apache.org/ant/manual/CoreTasks/javac.html">Ant javac task documentation</a>.
 <h3>
 Problem determination</h3>
 <P >
@@ -51,6 +73,12 @@ The following snippet finds all Java problem markers in a compilation unit.</P>
 </pre></font>
 <P >
 Java problem markers are maintained by the Java incremental project builder and will be removed automatically as problems are resolved and the Java source is recompiled.</P>
+
+<P>The marker ID value is set by one of the constants in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">IProblem</a></b>.
+</P>
+<P>An implementation of <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> should be defined to collect the problems discovered during a Java operation.
+An example of such an implementor is the member class <b>CompilationUnitAnnotationModel</b> of the class <b>org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider</b>.</P>
+
 <P >
 <a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></P>
 
