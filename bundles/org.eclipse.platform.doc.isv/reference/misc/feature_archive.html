@@ -122,9 +122,6 @@ optional&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true | false)
 &quot;false&quot;<br>
 &nbsp;&nbsp;&nbsp; search-location&nbsp;&nbsp; (root | self | both)
 &quot;root&quot;<br>
-&nbsp;&nbsp;&nbsp;
-match&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-(perfect | equivalent | compatible | greaterOrEqual) &quot;compatible&quot;<br>
 ></tt>
 <p><tt>&lt;!ELEMENT requires (import+)></tt>
 <p><tt>&lt;!ELEMENT import EMPTY></tt>
@@ -398,17 +395,8 @@ name properly. This attribute can be used as a 'place holder' to allow Eclipse
 to render the name of the optional feature when it is not installed.</li>
 
 <li>
-match (new in 2.1) - if a feature is included with match=&quot;perfect&quot;
-(the default), the exact version must exist in order to satisfy the reference.
-In contrast, other values (&quot;compatible&quot;, &quot;equivalent&quot; etc.)
-allow some flexibility. Setting this attribute to something other than
-&quot;perfect&quot; is crucial if you want to allow branches to be updated or to
-be patched.</li>
-
-<li>
-search-location (new in 2.1) - if match is set to something else than
-&quot;perfect&quot;, an included feature can be updated within the limits set by
-the &quot;match&quot; attribute. By default, search location is &quot;root&quot;
+search-location (new in 2.1) - an included feature can be updated by patches. 
+By default, search location is &quot;root&quot;
 which means that URL specified in the &quot;update&quot; element within the
 &quot;url&quot; element of the parent will be considered. If an included feature
 has its own &quot;update&quot; element defined, it will be ignored by default.
@@ -474,17 +462,14 @@ patch (new in 2.1) - if &quot;true&quot;, this constraint declares the enclosing
 feature to be a patch for the referenced feature. Certain rules must be followed
 when this attribute is set:
 <ul>
-  <li>feature attribute must be used to express patch dependency</li>
+  <li>feature attribute must be used to identifier of feature being patched</li>
   <li>version attribute must be set</li>
   <li>match attribute should not be set and &quot;perfect&quot; value will be
     assumed.</li>
 </ul>
-<p>A patch is a feature that carries newer versions of features in the hierarchy
-of the feature it is patching. A patch carries these new feature version by
-inclusion. Patched feature must be ready to accept patches by including its
-children using &quot;match&quot; attribute that is set to something else than
-&quot;perfect&quot;. This is crucial since it will allow the patched feature to
-pick up newer versions of its children after the patch has been installed.</li>
+<p>A patch is a special feature that carries newer versions of plug-ins for
+ the feature it is patching.  It does not replace the feature.  A patch can also
+ carry other patches by inclusion.</li>
 </ul>
 </ul>
 
