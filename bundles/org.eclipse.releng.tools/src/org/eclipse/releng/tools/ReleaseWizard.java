@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.*;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Rectangle;
@@ -268,7 +269,7 @@ public class ReleaseWizard extends Wizard {
 	protected IProject[] performPrompting(IProject[] projects)  {
 		IResource[] resources;
 		PromptingDialog prompt = new PromptingDialog(getShell(), projects,
-			getPromptCondition(projects), Policy.bind("TagAction.uncommittedChangesTitle"));//$NON-NLS-1$
+			getPromptCondition(projects), CVSUIMessages.TagAction_uncommittedChangesTitle);//$NON-NLS-1$
 		try {
 			 resources = prompt.promptForMultiple();
 		} catch(InterruptedException e) {
@@ -292,7 +293,7 @@ public class ReleaseWizard extends Wizard {
 				return CVSLightweightDecorator.isDirty(resource);
 			}
 			public String promptMessage(IResource resource) {
-				return Policy.bind("TagAction.uncommittedChanges", resource.getName());//$NON-NLS-1$
+				return NLS.bind(CVSUIMessages.TagAction_uncommittedChanges, new String[] { resource.getName() });//$NON-NLS-1$
 			}
 		};
 	}
