@@ -16,39 +16,66 @@ Boolean expressions and action filters</H2>
 <p>
 When a plug-in contributes an action to the workbench UI using one of the menu
 extension points, it can specify the conditions under which the menu item is
-visible and/or enabled in the menu.&nbsp; In addition to supplying simple enabling
+visible and/or enabled in the menu. In addition to supplying simple enabling
 conditions, such as selection counts and selection classes, plug-ins can use <b>boolean
-expressions</b>  to make an action visible or enabled.</p>
+expressions</b> for more flexibility in determining when an action should be visible or enabled.</p>
 
 
-<h3>
-Boolean expressions</h3>
-
-
-<P CLASS="CellBody">
-The boolean expressions can contain simple boolean operators (NOT, AND, OR) and predefined expressions that
-can evaluate the following conditions:</P>
+<h3>Boolean expressions</h3>
+<p>Boolean expressions can contain the boolean operators (NOT, AND, OR) combined with a predefined syntax
+for evaluating certain conditions.  Many of these conditions test a particular object.  The identity of the
+"object in focus" (the object being tested) depends upon the specific context of the enablement expression:
+<ul>
+<li><b>instanceof</b> tests whether the type of the object in focus is a subtype of the specified type name.</li>
+<li><b>test</b> tests whether the value of a named property of the object in focus matches the specified value.</li>
+<li><b>systemTest</b> tests whether the value of a named system property matches the specified value. </li>
+<li><b>equals</b> tests whether the object in focus is equal to the specified value.</li>
+<li><b>count</b> tests the number of elements in a list.</li>
+<li><b>with</b> changes the object in focus to the object referenced by a supplied variable.</li>
+<li><b>resolve</b> changes the object in focus to the object referenced by a supplied variable, supplying additional
+arguments with the variable.</li>
+<li><b>adapt</b> adapts the object in focus to the type specified.</li>
+<li><b>iterate</b> iterates over a variable that is a collection and combines the boolean value of each value using AND or OR.</li>
+</ul>
+</p>
+<p>
+When specifying a value to be tested against any of these expressions, the value is assumed to be a string except for when
+the following conversions are successful:
+<ul>
+<li>the string "true" is converted into Boolean.TRUE</li>
+<li>the string "false" is converted into Boolean.FALSE</li>
+<li>if the string contains a dot, the interpreter tries to convert the value into a Float object</li>
+<li>if the string only consists of numbers, the interpreter converts the value into an Integer object</li>
+<li>the conversion into a Boolean, Float, or Integer can be suppressed by surrounding the string with single quotes.</li>
+</ul>
+</p>
+<p>A complete definition of enablement XML syntax can be found in theh extension point reference documentation for any
+extension that defines an <b>enablement</b> element.
+</p>
+<p>Prior to R3.0, these generalized boolean expressions were not available.  The following predefined expressions were used to
+evaluate certain conditions without building a general expression.  Note that any of these expressions could now be expressed with
+the more generalized syntax.  The predefined expressions can still be used as follows:</p>
 <ul>
   <li>
-    <p CLASS="CellBody"><b>objectClass</b> - true if each object in the
+    <p><b>objectClass</b> - true if each object in the
     selection subclasses or implements the class.</p>
   </li>
   <li>
-    <p CLASS="CellBody"><b>objectState</b> - true if the named attribute equals the specified value.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IActionFilter.html">IActionFilter</a>
+    <p><b>objectState</b> - true if the named attribute equals the specified value.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IActionFilter.html">IActionFilter</a>
     </b>assists in evaluating the expression.&nbsp; An action filter dynamically computes the enablement
 criteria for an action based on the target selection and the value of named
 attributes.</p>
   </li>
   <li>
-    <p CLASS="CellBody"><b>systemProperty</b> - true if the named system
+    <p><b>systemProperty</b> - true if the named system
     property equals the specified value.</p>
   </li>
   <li>
-    <p CLASS="CellBody"><b>pluginState</b> - specifies whether the specified
+    <p><b>pluginState</b> - specifies whether the specified
     plugin (by <b>id</b>) should be <b>installed</b> or <b>activated</b> </p>
   </li>
 </ul>
-    <p CLASS="CellBody">For example, the following snippets represent enablement
+    <p>For example, the following snippets represent enablement
     expressions that could be used on a hypothetical action in an action set: </p>
     <pre><font color="#4444CC">&lt;action id=&quot;org.eclipse.examples.actionEnablement.class&quot; 
        label=&quot;Red Element&quot; 
@@ -77,8 +104,8 @@ attributes.</p>
            <b>&lt;pluginState id=&quot;x.y.z.anotherPlugin&quot; value=&quot;installed&quot;/&gt; </b>
        &lt;/enablement&gt; 
 &lt;/action&gt; </font></pre>
-<p CLASS="CellBody">See the reference documentation of the extension points
-below for more elaborate samples of these expressions and a complete description of
+<p>See the reference documentation of the extension points
+for more elaborate samples of these expressions and a complete description of
 the XML.</p>
 
 
@@ -92,82 +119,82 @@ affect enablement.</p>
 <TR>
 <TH ROWSPAN="1" COLSPAN="1" width="118">
 <P CLASS="CellHeading">
-Extension point name</P>
+Extension point name</p>
 </TH>
 <TH ROWSPAN="1" COLSPAN="1" width="359">
 <P CLASS="CellHeading">
-Attributes affecting enablement</P>
+Attributes affecting enablement</p>
 </TH>
 <TH ROWSPAN="1" COLSPAN="1" width="335">
 <P CLASS="CellHeading">
-Boolean expressions</P>
+Boolean expressions</p>
 </TH>
 </TR>
 <TR>
 <TD width="118">
-<P CLASS="CellBody">
+<p>
 <b>
 <a href="../reference/extension-points/org_eclipse_ui_viewActions.html">
-viewActions</a></b>,</P>
-<P CLASS="CellBody"><b><a href="../reference/extension-points/org_eclipse_ui_editorActions.html">editorActions</a></b>,</P>
-<P CLASS="CellBody"><b><a href="../reference/extension-points/org_eclipse_ui_actionSets.html">actionSets</a></b></P>
+viewActions</a></b>,</p>
+<p><b><a href="../reference/extension-points/org_eclipse_ui_editorActions.html">editorActions</a></b>,</p>
+<p><b><a href="../reference/extension-points/org_eclipse_ui_actionSets.html">actionSets</a></b></p>
 </TD>
 <TD width="359">
-<P CLASS="CellBody">
+<p>
 <b>enablesFor</b> - specifies the selection count that must be met for the
-action to be enabled</P>
-<P CLASS="CellBody">
+action to be enabled</p>
+<p>
 <b>selection</b> <b>class</b> - the class that the selected objects must
-subclass or implement in order for the action to be enabled</P>
-<P CLASS="CellBody">
+subclass or implement in order for the action to be enabled</p>
+<p>
 <b>selection</b> <b>name</b> - a wild card filter that can be applied to the
-objects in the selection.</P>
+objects in the selection.</p>
 </TD>
 <TD width="335">
-<P CLASS="CellBody">
+<p>
 <b>visibility</b> - a boolean expression.&nbsp; Controls whether the menu item
-is visible in the menu.</P>
-<P CLASS="CellBody">
+is visible in the menu.</p>
+<p>
 <b>enablement</b> - a boolean expression.&nbsp; Controls whether the menu item
 is enabled in the menu.&nbsp; The <b>enablesFor</b>  attribute and the <b>selection</b> <b>class</b>
 and <b>name</b>, and must be
-satisfied before applying the enablement expression.</P>
+satisfied before applying the enablement expression.</p>
 </TD>
 </TR>
 <TR>
 <TD width="118">
-<P CLASS="CellBody">
+<p>
 <b>
 <a href="../reference/extension-points/org_eclipse_ui_popupMenus.html">
-popupMenus</a></b></P>
+popupMenus</a></b></p>
 </TD>
 <TD width="359">
-<P CLASS="CellBody">
-(For object contributions only.)</P>
-<P CLASS="CellBody">
+<p>
+(For object contributions only.)</p>
+<p>
 <b>objectClass</b> - specifies the class that objects in the selection must
-subclass or implement</P>
-<P CLASS="CellBody">
-(For both object and viewer contributions)</P>
-<P CLASS="CellBody">
+subclass or implement</p>
+<p>
+(For both object and viewer contributions)</p>
+<p>
 <b>enablesFor</b> - specifies the selection count that must be met for the
-action to be enabled</P>
-<P CLASS="CellBody">
+action to be enabled</p>
+<p>
 <b>selection</b> <b>class</b> - the class that the selected objects must
-subclass or implement to enable the action</P>
-<P CLASS="CellBody">
+subclass or implement to enable the action</p>
+<p>
 <b>selection</b> <b>name</b> - a wild card filter that can be applied to the
-objects in the selection.</P>
-<P CLASS="CellBody">
-&nbsp;</P>
+objects in the selection.</p>
+<p>
+&nbsp;</p>
 </TD>
 <TD width="335">
-<P CLASS="CellBody">
-(For both object and viewer contributions)</P>
-<P CLASS="CellBody">
+<p>
+(For both object and viewer contributions)</p>
+<p>
 <b>visibility</b> - a boolean expression.&nbsp; Controls whether the menu item
-is visible in the menu.</P>
-<p CLASS="CellBody"><b>enablement</b> - a boolean expression.&nbsp; Controls
+is visible in the menu.</p>
+<p><b>enablement</b> - a boolean expression.&nbsp; Controls
 whether the menu item is enabled in the menu.&nbsp;
 The <b>enablesFor</b>  attribute and the <b>selection</b> <b>class</b> and <b>name</b>, and must be
 satisfied before applying the enablement expression.
