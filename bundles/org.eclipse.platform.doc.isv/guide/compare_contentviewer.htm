@@ -13,67 +13,61 @@
 Implementing a Content Viewer</H2>
 
 
-The <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>
+<p>The compare plug-in provides substantial support for implementing your own
+content viewer:</p>
+
+
+<h3>Content merge viewers</h3>
+
+
+<p> <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>
 is an abstract compare and merge viewer
 with two side-by-side content areas and an optional content area for a
 common ancestor (for three-way compare). Because the implementation makes
 no assumptions about the content type it is a subclass responsibility to
-deal with a specific type. Its subclass <b>ImageMergeViewer</b> in
-package org.eclipse.compare.internal shows how to base a simple
-mergeviewer for images on a <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>.
-<p>
-
+deal with a specific type. <b>ImageMergeViewer</b> in <b> org.eclipse.compare.internal</b> shows how to
+implement a simple merge viewer for images using a <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>.&nbsp;
 A <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a> 
 accesses its model by means of a content
 provider which must implement the
-<a href="../reference/api/org/eclipse/compare/contentmergeviewer/IMergeViewerContentProvider.html"><b>IMergeViewerContentProvider</b></a> interface.
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/IMergeViewerContentProvider.html"><b>IMergeViewerContentProvider</b></a> interface.</p>
+<h3>Text merge viewers</h3>
 <p>
-
-The
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
 is the standard concrete subclass of
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>
-for comparing and merging text content.
-<br>
-A text merge viewer uses the
+for comparing and merging text content.&nbsp; A text merge viewer uses the
 <a href="../reference/api/org/eclipse/compare/rangedifferencer/RangeDifferencer.html"><b>RangeDifferencer</b></a>
 to perform a textual, line-by-line comparison of two (or three) input documents.
-For text lines that differ the
+For text lines that differ, the
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
 uses an
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ITokenComparator.html"><b>ITokenComparator</b></a>
-to find longest sequences of matching and non-matching tokens.
+to find the longest sequences of matching and non-matching tokens.
 The 
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>'s
-default token compare works on characters separated by whitespace. If a
+default token compare works on characters separated by white space. If a
 different strategy is needed (for example, Java tokens in a Java-aware
 merge viewer), clients can create their own token comparators by implementing
 the
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ITokenComparator.html"><b>ITokenComparator</b></a>
-interface.
-<p>The
-<a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
-not only works on whole documents but on
-subranges of documents too. In this case the viewer's input must be an
+interface.&nbsp; <a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
+ works on whole documents and on sub ranges of documents. For partial documents,
+the viewer's input must be an
 <a href="../reference/api/org/eclipse/compare/contentmergeviewer/IDocumentRange.html"><b>IDocumentRange</b></a>
 instead of an
 <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>.
-<p>
-
-The class 
+<h3>Range differencer</h3>
+<p> 
 <a href="../reference/api/org/eclipse/compare/rangedifferencer/RangeDifferencer.html"><b>RangeDifferencer</b></a>
-finds longest sequences of matching and
+ finds the longest sequences of matching and
 non-matching comparable entities. Its implementation is based on
 an objectified version of the algorithm described in:
 <i>A File Comparison Program,</i> by Webb Miller and Eugene W. Myers,
-Software Practice and Experience, Vol. 15, Nov. 1985.
-<p>
-
-Clients must supply the input to the differencer as an implementation
+Software Practice and Experience, Vol. 15, Nov. 1985.&nbsp; Clients must supply the input to the differencer as an implementation
 of the
 <a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b></a>
 interface.
-A
 <a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b></a>
 breaks the input data into a sequence
 of entities and provides a method for comparing
@@ -81,13 +75,13 @@ one entity with the entity in another
 <a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b></a>.
 <p>
 
-For example, to compare two text documents and find longest common
+For example, to compare two text documents and find the longest common
 sequences of matching and non-matching lines,
 the implementation of
 <a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b> </a>
 must break the document into lines and provide a method for testing
 whether two lines are considered equal.
-See <b>org.eclipse.compare.internal.DocLineComparator</b> for how this can be done.
+See <b>org.eclipse.compare.internal.DocLineComparator</b> for an example of how this can be done.
 <p>
 
 The differencer returns the differences among these sequences as an
