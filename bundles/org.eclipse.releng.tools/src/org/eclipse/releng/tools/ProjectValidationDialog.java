@@ -13,6 +13,7 @@ package org.eclipse.releng.tools;
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
@@ -41,7 +42,9 @@ public class ProjectValidationDialog extends ParticipantPageDialog {
 			if (!participant.getSyncInfoSet().isEmpty()) {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
-						openValidationFailedDialog(shell, participant);
+                        if (MessageDialog.openQuestion(shell, "Workspace Differs From Released",
+                                "The local workspace contents do not match what is released. There is a good chance that the release failed. Do you want to see the difference?"))
+                            openValidationFailedDialog(shell, participant);
 					}
 				});	
 			}

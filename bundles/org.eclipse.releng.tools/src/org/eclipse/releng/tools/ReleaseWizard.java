@@ -186,7 +186,9 @@ public class ReleaseWizard extends Wizard {
 						// Let the user know of the failure
 						IStatus[] errors = operation.getErrors();
 						IStatus status;
-						if (errors.length == 1) {
+                        if (errors.length == 0) {
+                            status = new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "Map file was not committed", null);
+                        } else if (errors.length == 1) {
 							status = errors[0];
 						} else {
 							status = new MultiStatus(RelEngPlugin.ID, 0, errors, "Errors occurred during release", null);
