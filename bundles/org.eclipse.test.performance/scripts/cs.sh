@@ -2,7 +2,7 @@
 
 # 
 # This script makes it easier to launch various cloudscape tools
-# Usage: "cs <command>"
+# Usage: "sh cs.sh <command>"
 #     where <command> is one of "start, stop, ij, look"
 #
 
