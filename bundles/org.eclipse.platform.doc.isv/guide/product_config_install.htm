@@ -10,12 +10,10 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h2>Product installation guidelines</h2>
-<p>Product developers are free to use their favorite packaging and install tool
-to deliver and install Eclipse based products.&nbsp; In theory, you can use any
-directory structure and installation procedure that you deem suitable for your
-product.&nbsp; However, if you want to use the standard platform tools for
-updating and extending products, you should follow the platform guidelines for
-installing your product.&nbsp; This will allow your product to peacefully
+<p>The platform provides standard tools for updating and extending
+products.&nbsp; In order to participate in the platform mechanisms for updating
+and extending products, your packaged product should follow the following
+guidelines.&nbsp; This will allow your product to peacefully
 coexist with, or even enhance, other Eclipse based products.</p>
 <p>Consider again the sample directory structure for the acmeweb product:</p>
 <pre><font color="#4444CC">acmeweb/
@@ -85,9 +83,12 @@ by doing the following:</p>
     the name, id, and version of the product.</li>
   <li>store any necessary install info (user, license, date) that is to be shown
     in the about dialog in <b>acmeweb/eclipse/plugins/com.example.acmefeature_1.0.0/about.mappings</b></li>
-  <li>ensure that the product shortcut or executable invokes eclipse.exe with
-    the <b>-feature</b> option specifying <b>com.example.acme.acmefeature</b> as
-    the primary feature</li>
+  <li>install a suitable<b> install.ini</b> file that sets the property <b>feature.default.id
+    </b>to the product's primary feature</li>
+  <li>invoke the product executable using the <b>-initialize</b> option.&nbsp;
+    This causes the platform to quietly perform all time-consuming first-time
+    processing and cache the results, so that when the user starts the product
+    it comes up promptly in an open-for-business state.</li>
 </ul>
 <h3>Multi-user issues</h3>
 <p>When a product is installed for the intention of allowing multiple users,
@@ -98,8 +99,8 @@ directory) from the shared product install directory.</p>
 <ul>
   <li><b>all</b> files in the <b>eclipse/features</b> and <b>eclipse/plugins</b>
     directories should be removed, even if they weren't originally installed by
-    the installation program.&nbsp; This ensures that files added by other
-    parties (such as the update manager) are removed when the product is
+    the installation program.&nbsp; This ensures that files added by the
+    platform update manager are removed when the product is
     removed.</li>
   <li>except for the point above, <b>only</b> those files installed by the
     installation program in other directories should be removed.&nbsp; It is
