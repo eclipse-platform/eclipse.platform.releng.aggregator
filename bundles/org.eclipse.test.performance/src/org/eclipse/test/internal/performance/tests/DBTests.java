@@ -32,11 +32,16 @@ import junit.framework.TestCase;
 
 public class DBTests extends TestCase {
     
-    private static final String SCENARIO_NAME_1= "testScenario1"; //$NON-NLS-1$
-    private static final String SCENARIO_NAME_2= "testScenario2"; //$NON-NLS-1$
-    private static final String SCENARIO_NAME_3= "testScenario3"; //$NON-NLS-1$
+    private static final String CONFIG= "c"; //$NON-NLS-1$
+    private static final String BUILD= "b"; //$NON-NLS-1$
+    
+    private static final String SCENARIO_NAME_1= "bar.testScenario1"; //$NON-NLS-1$
+    private static final String SCENARIO_NAME_2= "bar.testScenario2"; //$NON-NLS-1$
+    private static final String SCENARIO_NAME_3= "foo.testScenario3"; //$NON-NLS-1$
+    private static final String SCENARIO_NAME_4= "foo.testScenario4"; //$NON-NLS-1$
     private static final String SHORT_NAME_2= "ShortName2"; //$NON-NLS-1$
     private static final String SHORT_NAME_3= "ShortName3"; //$NON-NLS-1$
+    private static final String SHORT_NAME_4= "ShortName4"; //$NON-NLS-1$
 
     private static final String DBLOC= "testDBs"; //$NON-NLS-1$
     private static String DBNAME;
@@ -51,8 +56,8 @@ public class DBTests extends TestCase {
         DBNAME= "testDB_" + (new Date().getTime()/1000); //$NON-NLS-1$
         
         System.setProperty("eclipse.perf.dbloc", DBLOC + ";dbname=" + DBNAME + ";dbuser=" + DBUSER + ";dbpasswd=" + DBPASSWD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-        System.setProperty("eclipse.perf.config", "config=test;build=b0001;jvm=sun142"); //$NON-NLS-1$ //$NON-NLS-2$
-        System.setProperty("eclipse.perf.assertAgainst", "build=base"); //$NON-NLS-1$ //$NON-NLS-2$
+        System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"=b0001;jvm=sun142"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        System.setProperty("eclipse.perf.assertAgainst", BUILD+"=base"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     protected void tearDown() throws Exception {
@@ -66,8 +71,8 @@ public class DBTests extends TestCase {
         assertEquals(DBUSER, PerformanceTestPlugin.getDBUser());
         assertEquals(DBPASSWD, PerformanceTestPlugin.getDBPassword());
         
-        assertEquals("|build=b0001||config=test||jvm=sun142|", PerformanceTestPlugin.getVariations().toExactMatchString()); //$NON-NLS-1$
-        assertEquals("|build=base||config=test||jvm=sun142|", PerformanceTestPlugin.getAssertAgainst().toExactMatchString()); //$NON-NLS-1$
+        assertEquals("|"+BUILD+"=b0001||"+CONFIG+"=test||jvm=sun142|", PerformanceTestPlugin.getVariations().toExactMatchString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        assertEquals("|"+BUILD+"=base||"+CONFIG+"=test||jvm=sun142|", PerformanceTestPlugin.getAssertAgainst().toExactMatchString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         
         Performance perf= Performance.getDefault();
         
@@ -85,15 +90,24 @@ public class DBTests extends TestCase {
 		pm2.dispose();
 
 		PerformanceMeter pm3= new TestPerformanceMeter(SCENARIO_NAME_3);
-		perf.tagAsGlobalSummary(pm3, SHORT_NAME_3, Dimension.CPU_TIME );
+		perf.tagAsGlobalSummary(pm3, SHORT_NAME_3, Dimension.CPU_TIME);
 		pm3.start();
 		pm3.stop();
 		pm3.commit();
 		pm3.dispose();
 
+		PerformanceMeter pm4= new TestPerformanceMeter(SCENARIO_NAME_4);
+		perf.tagAsSummary(pm4, SHORT_NAME_4, Dimension.USED_JAVA_HEAP);
+		pm4.start();
+		pm4.stop();
+		pm4.commit();
+		pm4.dispose();
+
 		//
 		
-		Variations v= new Variations("test", "b0001"); //$NON-NLS-1$ //$NON-NLS-2$
+		Variations v= new Variations();
+		v.put(CONFIG, "test"); //$NON-NLS-1$
+		v.put(BUILD, "b0001"); //$NON-NLS-1$
 		v.put("jvm", "sun142"); //$NON-NLS-1$ //$NON-NLS-2$
 		DataPoint[] points= DB.queryDataPoints(v, SCENARIO_NAME_1, null);
 		assertEquals(1, points.length);
@@ -123,23 +137,38 @@ public class DBTests extends TestCase {
 		
 		//
 		List buildNames= new ArrayList();
-		DB.queryBuildNames(buildNames, new Variations("%", "%"), "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		Variations v2= new Variations();
+		v2.put(CONFIG, "%"); //$NON-NLS-1$
+		v2.put(BUILD, "%"); //$NON-NLS-1$
+		DB.queryDistinctValues(buildNames, BUILD, v2, "%"); //$NON-NLS-1$
 		assertEquals(1, buildNames.size());
 		assertEquals("b0001", buildNames.get(0)); //$NON-NLS-1$
 		
-	    SummaryEntry[] fps= DB.querySummaries(PerformanceTestPlugin.getVariations(), true);
+	    SummaryEntry[] fps= DB.queryGlobalSummaries(PerformanceTestPlugin.getVariations());
 	    assertEquals(3, fps.length);
 	    
 	    assertEquals(SCENARIO_NAME_2, fps[0].scenarioName);
 	    assertEquals(SHORT_NAME_2, fps[0].shortName);
-	    assertEquals(Dimension.CPU_TIME, fps[0].dimension);
+	    assertEquals(Dimension.USED_JAVA_HEAP, fps[0].dimension);
 
 	    assertEquals(SCENARIO_NAME_2, fps[1].scenarioName);
 	    assertEquals(SHORT_NAME_2, fps[1].shortName);
-	    assertEquals(Dimension.USED_JAVA_HEAP, fps[1].dimension);
+	    assertEquals(Dimension.CPU_TIME, fps[1].dimension);
 
 	    assertEquals(SCENARIO_NAME_3, fps[2].scenarioName);
 	    assertEquals(SHORT_NAME_3, fps[2].shortName);
 	    assertEquals(Dimension.CPU_TIME, fps[2].dimension);
+	    
+	    
+	    SummaryEntry[] fps2= DB.querySummaries(PerformanceTestPlugin.getVariations(), "foo.%");
+	    assertEquals(2, fps2.length);
+	    
+	    assertEquals(SCENARIO_NAME_3, fps2[0].scenarioName);
+	    assertEquals(SHORT_NAME_3, fps2[0].shortName);
+	    assertEquals(Dimension.CPU_TIME, fps2[0].dimension);
+
+	    assertEquals(SCENARIO_NAME_4, fps2[1].scenarioName);
+	    assertEquals(SHORT_NAME_4, fps2[1].shortName);
+	    assertEquals(Dimension.USED_JAVA_HEAP, fps2[1].dimension);
     }
 }
