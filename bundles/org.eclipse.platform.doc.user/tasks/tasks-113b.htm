@@ -11,60 +11,81 @@
 <H1 CLASS="Head">
 Resolving conflicts </H1>
 <DIV CLASS="Topic">
-<P CLASS="Para">
-When catching up or releasing you may encounter
-conflicts.&nbsp; A conflict occurs when you have locally modified a resource for
-which a more recent version is available in the stream.&nbsp;Specifically, the
-stream will contain a version newer than the base version of your resource. In this situation
-you can choose to do one of the following:</P>
+  <P CLASS="Para"> When updating or committing you may encounter conflicts.&nbsp; 
+    A conflict occurs when you have locally modified a resource for which a more 
+    recent revision is available in the branch.&nbsp;Specifically, the branch 
+    will contain a revision newer than the base revision of your resource. In 
+    this situation you can choose to do one of the following:</P>
 <ul>
   <li>
-    <p CLASS="Para">You can take the change from the stream (catch up to it),
-    discarding your local work. This could occur if you have made unintended
-    changes locally, or if you realize that the version in the stream is better
-    than yours. Overwriting your local changes should be done with caution since
-    you are in essence throwing work out.</li>
+      <p CLASS="Para">You can take the change from the branch, discarding your 
+        local work. This could occur if you have made unintended changes locally, 
+        or if you realize that the reversion in the branch is better than yours. 
+        Overwriting your local changes should be done with caution since you are 
+        in essence throwing work out.
+    </li>
   <li>
-    <p CLASS="Para">You can release your change, overwriting the version in the
-    stream. This should be done with great caution since you are in essence
-    throwing away someone else's work.&nbsp; In particular, the change you are
-    overwriting may have other dependencies in the stream (for example there may be
-    other incoming changes which depend on the conflict).</li>
+      <p CLASS="Para">You can commit your change, overwriting the reversion in 
+        the branch. This should be done with great caution since you are in essence 
+        throwing away someone else's work.&nbsp; In particular, the change you 
+        are overwriting may have other dependencies in the branch (for example 
+        there may be other incoming changes which depend on the conflict).
+    </li>
   <li>
-    <p CLASS="Para">You can merge your work and the stream resource, saving
-    locally the merged resource. You may then later choose to release this
-    merged result.</li>
+      <p CLASS="Para">You can merge your work and the branch resource, saving 
+        locally the merged resource. You may then later choose to commit this 
+        merged result.
+    </li>
 </ul>
 <P CLASS="Para">
 Typically, you will want to take the third option, that is to merge, because of the loss of work issues
 with the other two choices.</P>
-<h2>
-<a name="MergingChanges">Merging changes</a></h2>
-<P CLASS="Para">The Synchronize View indicates those resources which are in
-conflict with stream. For a given resource in conflict, typically you will want
-to merge your changes with changes in the stream's resource.</P>
-<P CLASS="Para">For example, let us assume that both you and another team member
-have modified the same html page.&nbsp; Selecting that resource in the
-Synchronize view will display a comparison of the local resource and the stream
-version.&nbsp; By cycling through and merging the individual changes, you can decide for each change whether to accept the incoming change, reject it, or merge it with
-your local changes.&nbsp; When you are finished merging, you save your changes.
-This overwrites your local resource with the result of the merge.&nbsp; You can
-subsequently release this merged resource.</P>
-<P CLASS="Para">
-You can merge differences in the Catch Up/Release view on two levels:&nbsp;</P>
-<ul>
-  <li>
-    <p CLASS="Para"><b>Whole Document.</b>
-In the Structure Compare editor, select the resource
-that you want to merge, so that the resource is displayed in the Text Compare editor. In the Text Compare editor, click the Copy whole
-document from right to left button to entirely replace the text in your local
-editor with the contents of the stream resource.</li>
-  <li>
-    <p CLASS="Para"><b>Current Change. </b>In the Text Compare editor, either use the Select Next Change and Select Previous Change buttons to navigate to the change that you want to merge,
-or simply click in either source pane somewhere in the desired change difference fragment. Click the Copy current
-change from right to left button as needed to overwrite the highlighted fragment either
-with the corresponding modification in the stream.</li>
-</ul>
+  <h2> <a name="MergingChanges">Manually Merging Changes</a></h2>
+  <P CLASS="Para">The Synchronize View indicates those resources which are in 
+    conflict with the branch. For a given resource in conflict, typically you 
+    will want to merge your changes with changes in the branch's resource.</P>
+  <P CLASS="Para">For example, let us assume that both you and another team member 
+    have modified the same html page.&nbsp; Selecting that resource in the Synchronize 
+    view will display a comparison of the local resource and the branch reversion.&nbsp; 
+    By cycling through and merging the individual changes, you can decide for 
+    each change whether to accept the incoming change, reject it, or merge it 
+    with your local changes.&nbsp; When you are finished merging, you save your 
+    changes. This overwrites your local resource with the result of the merge.&nbsp; 
+    You can subsequently commit this merged resource.</P>
+  <P CLASS="Para">When merging changes, it is often convenient to be able to distinguish 
+    which files you have completed merging. When you're done merging a file, you 
+    can pick <b>Mark as Merged</b> from the context menu. This will change the 
+    status of the file from being a conflict to being an outgoing change.</P>
+  <P CLASS="Para"> You can merge differences in the Synchronization View on two 
+    levels:&nbsp;</P>
+  <ul>
+    <li> 
+      <p CLASS="Para"><b>Whole Document.</b> In the Structure Compare editor, 
+        select the resource that you want to merge, so that the resource is displayed 
+        in the Text Compare editor. In the Text Compare editor, click the Copy 
+        whole document from right to left button to entirely replace the text 
+        in your local editor with the contents of the branch resource.
+    </li>
+    <li> 
+      <p CLASS="Para"><b>Current Change. </b>In the Text Compare editor, either 
+        use the Go to Next Difference and Go to Previous Difference buttons to 
+        navigate to the change that you want to merge, or simply click in either 
+        source pane somewhere in the desired change difference fragment. Click 
+        the Copy current change from right to left button as needed to overwrite 
+        the highlighted fragment either with the corresponding modification in 
+        the branch.
+    </li>
+  </ul>
+  <h2> <a name="AutoMergingChanges">Auto Merging Changes</a></h2>
+  <p>It is also possible to have your changes automatically merged for you. For 
+    any resource marked as ASCII, performing a <b>Team&gt;Update</b> will automatically 
+    merge into your local resource differences with the branch resource. This 
+    works fine provided there are no lines with conflicting changes. If there 
+    are, CVS inserts special markup in the file to indicate those lines which 
+    could not be merged.</p>
+  <p>Updating from within the Synchronization View works a bit differently. In 
+    the case of a conflict, updating will prompt you to either emerge in the changes 
+    or replace the entire file contents with those of the remote.</p>
 </DIV>
 <P>&nbsp;<img border="0" src="../images/ngrelc.gif" alt="Related concepts" width="159" height="27"><br>
 <a href="../concepts/concepts-26.htm">Team programming</a> &nbsp;<a href="../concepts/concepts-27c.htm"><br>
