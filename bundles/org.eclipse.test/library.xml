@@ -31,42 +31,10 @@
 	<property name="plugin-path" value="" />
 	<property name="timeout" value="3600000" />
   	
-  	<!--run one of the following targets depending on the setting of the Ant property, performance-->
-	<antcall target="junit" />
-	<antcall target="performance" />
+ 	<antcall target="junit" />
   </target>
 	
-  <target name="junit" unless="performance">
-<!-- 
-Parameters to this target:
-data-dir		- the directory for Eclipse to write its data
-plugin-name		- the name of the plugin to test
-classname		- the name of the test class
-vmargs			- a string containing arguments to pass to the VM - defaults to ""
--->
-	
-	<echo message="Running ${classname}"/>
-
-    <!-- Produces the file '${default-filename}' -->
-    <java classname="${launcher}" fork="true" dir="." timeout="${timeout}">
-      <classpath>
-        <pathelement location="startup.jar"/>
-      </classpath>
-      <arg line="-application ${application}"/>
-      <arg line="-dev bin -data ${data-dir}"/>
-      <arg line="formatter=${formatter},${classname}.xml"/>
-      <arg line="-testPluginName ${plugin-name}"/>
-      <arg line="-className ${classname}"/>
-      <arg line="-os ${os}"/>
-      <arg line="-ws ${ws}"/>
-      <arg line="-arch ${arch}"/>
-      <jvmarg line="${vmargs} ${extraVMargs}"/>
-      <sysproperty key="PLUGIN_PATH" value="${plugin-path}"/> 
-     </java>
-
-  </target>
-
-  <target name="performance" if="performance">
+  <target name="junit">
 	<!-- 
 	Parameters to this target:
 	data-dir		- the directory for Eclipse to write its data
