@@ -74,7 +74,13 @@ or if the type of icon is determined dynamically, you can use a non-declarative 
 must be defined.&nbsp; The designated class is responsible for supplying a prefix,
 suffix, and overlay image at runtime which are applied to the label.&nbsp; The mechanics of
 concatenating the prefix and suffix with the label text and performing the overlay
-are handled by the workbench code.&nbsp; The following markup shows how the CVS
+are handled by the workbench code in a background thread.&nbsp; Thus, any work
+performed by your plug-in in its <a href="../reference/api/org/eclipse/jface/viewers/ILightweightLabelDecorator.html"><b>ILightweightLabelDecorator</b></a>
+implementation must be UI-thread safe.&nbsp; (See <a href="swt_threading.htm#syncExec">Executing
+code from a non-UI thread</a> for more details.)</p>
+
+
+<p>&nbsp; The following markup shows how the CVS
 client defines its decorator using this technique:</p>
 
 
@@ -96,7 +102,16 @@ client defines its decorator using this technique:</p>
 &lt;/extension&gt;</pre></font>
 
 
-<p>Finally, your plug-in can choose to do all of the image and label management
+<p>Decorators are ultimately controlled by the user via the workbench <b>Label
+Decorations</b> preferences page.&nbsp;
+Individual decorators can be turned on and off.&nbsp; Even so, it is a good idea
+to design your decorators so that they do not overlap or conflict with existing
+platform SDK decorators.&nbsp;If multiple plug-ins contribute lightweight
+decorators to the same quadrant, the conflicts are resolved
+non-deterministically.&nbsp;&nbsp;</p>
+
+
+<p>Your plug-in may also do all of the image and label management
 itself.&nbsp; In this case, the <b>lightweight</b> attribute should be set to
 false and the <b>class </b>attribute should name a class that implements <a href="../reference/api/org/eclipse/jface/viewers/ILabelDecorator.html"><b>ILabelDecorator</b></a>.&nbsp;
 This class allows you to decorate the original label's image and text with your
@@ -111,15 +126,9 @@ preferences dialog.&nbsp; The <b>objectClass</b> names the class of objects to
 which the decorator should be applied.&nbsp; The <b>enablement</b> attribute
 allows you to describe the conditions under which the object should be
 decorated.&nbsp;&nbsp; The <b>adaptable</b> flag indicates
-whether objects that adapt to the class should also be decorated.&nbsp; The <b>
+whether objects that adapt to <b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
+should also be decorated.&nbsp; The <b>
 state</b> flag controls whether the decorator is visible by default.</p>
-
-
-<p>Decorators are ultimately controlled by the user via the workbench <b>Label
-Decorations</b> preferences page.&nbsp;
-Individual decorators can be turned on and off.&nbsp; Even so, it is a good idea
-to design your decorators so that they do not overlap or conflict with existing
-platform SDK decorators.&nbsp;&nbsp;</p>
 
 
 <p> If your decorators include information that is
