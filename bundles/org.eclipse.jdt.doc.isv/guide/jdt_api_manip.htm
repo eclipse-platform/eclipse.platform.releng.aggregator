@@ -135,8 +135,8 @@ working copy, and client 2 trying to retrieve the shared working copy notices it
 
 <H3>Code modification using the DOM/AST API</h3>
 
-There are two ways to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b>. The first one is to use an existing compilation unit. The second
-is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b> (Abstract Syntax Tree).
+There are three ways to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b>. The first one is to use an existing compilation unit. The second is 
+to use an existing class file. The third is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b> (Abstract Syntax Tree).
 <h4>
 Creating an AST from an existing compilation unit
 </h4>
@@ -155,6 +155,19 @@ the binding resolution.
 </li>
 </ul>
 All these methods will properly set the positions for each node in the resulting tree. The resolution of bindings has to be requested
+before the creation of the tree. Resolving the bindings is a costly operation and should be done only when necessary. As soon as the tree has been modified, all positions and
+bindings are lost.
+
+<h4>
+Creating an AST from an existing class file
+</h4>
+This is achieved with the parse method on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>:
+<ul>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(org.eclipse.jdt.core.IClassFile, boolean)">parseCompilationUnit(IClassFile classFile, boolean resolveBindings)</a>. This method can be used to create a
+<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from an existing <b><a href="../reference/api/org/eclipse/jdt/core/IClassFile.html">IClassFile</a></b>.
+</li>
+</ul>
+This method will properly set the positions for each node in the resulting tree. The resolution of bindings has to be requested
 before the creation of the tree. Resolving the bindings is a costly operation and should be done only when necessary. As soon as the tree has been modified, all positions and
 bindings are lost.
 
