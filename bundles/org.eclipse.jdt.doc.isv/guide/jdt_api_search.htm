@@ -15,14 +15,14 @@ of an interface, etc. </p>
 <p>
 The entry point for Java search is the <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html">SearchEngine</a></b> class. You can search for particular
 patterns inside a Java element and scope the search to specific elements.&nbsp;
-Search patterns can be created using <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createSearchPattern(org.eclipse.jdt.core.IJavaElement, int)">createSearchPattern</a></b>.&nbsp;
+Search patterns can be created using <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(org.eclipse.jdt.core.IJavaElement, int)">createPattern</a></b>.&nbsp;
 A pattern is scoped using <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createJavaSearchScope(org.eclipse.jdt.core.IJavaElement[])">createJavaSearchScope</a></b>.&nbsp;
-Once a pattern and scope are defined, the <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#search(org.eclipse.core.resources.IWorkspace, org.eclipse.jdt.core.search.ISearchPattern, org.eclipse.jdt.core.search.IJavaSearchScope, org.eclipse.jdt.core.search.IJavaSearchResultCollector)">search</a></b>
+Once a pattern and scope are defined, the <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#search(org.eclipse.jdt.core.search.SearchPattern, org.eclipse.jdt.core.search.SearchParticipant[], org.eclipse.jdt.core.search.IJavaSearchScope, org.eclipse.jdt.core.search.SearchRequestor, org.eclipse.core.runtime.IProgressMonitor)">search</a></b>
  method is used to collect the results. </p>
 
 <p>
-Search results are reported to an  <b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html">IJavaSearchResultCollector</a></b> which you must
-implement in order to access the results. </p>
+Search results are reported to a  <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html">SearchRequestor</a></b> which you must
+extend in order to access the results. </p>
 
 <h3>
 Preparing for search</h3>
@@ -34,8 +34,8 @@ Creating a Java search pattern
 </h4>
 <p>
 A search pattern defines how search results are found. You can either create a search pattern from a Java element (see
-<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createSearchPattern(org.eclipse.jdt.core.IJavaElement, int)">createSearchPattern(IJavaElement, int)</a></b>) 
-or from a string (see <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createSearchPattern(java.lang.String, int, int, boolean)">createSearchPattern(String, int, int, boolean)</a></b>.)
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(org.eclipse.jdt.core.IJavaElement, int)">createPatternPattern(IJavaElement, int)</a></b>) 
+or from a string (see <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(java.lang.String, int, int, int)">createPattern(String, int, int, int)</a></b>.)
 The last method supports wildcards (i.e. '*') and can be used to widen the search results.</p>
 <p>
 For example, creating a search pattern for searching for references to a given method is done as follows:</p>
@@ -44,13 +44,13 @@ For example, creating a search pattern for searching for references to a given m
     IMethod method = ...;
     
     // Create search pattern
-    ISearchPattern pattern = SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
+    SearchPattern pattern = SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES);
 </pre></font>
 <p>
 Or creating a search pattern for searching for declarations of all types starting with "Obj":</p>
 <font color="#4444cc"><pre>
     // Create search pattern
-    ISearchPattern pattern = SearchEngine.createSearchPattern(&quot;Obj*&quot;, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, true);
+    SearchPattern pattern = SearchPattern.createPattern(&quot;Obj*&quot;, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
 </pre></font>
 <p>
 The following search patterns are supported:
@@ -67,7 +67,7 @@ The following search patterns are supported:
 <li>Field read accesses</li>
 <li>Method (and constructor) references</li>
 <li>Combinations of the above patterns using the OR pattern (see
-<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createOrSearchPattern(org.eclipse.jdt.core.search.ISearchPattern, org.eclipse.jdt.core.search.ISearchPattern)">createOrSearchPattern</a></b>)</li>
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createOrPattern(org.eclipse.jdt.core.search.SearchPattern, org.eclipse.jdt.core.search.SearchPattern)">createOrPattern</a></b>)</li>
 </ul>
 
 
@@ -107,49 +107,48 @@ Finally, you can create a search scope on the entire workspace:</p>
 <h3>
 Searching</h3>
 <p>
-Once you have created a search pattern and a search scope, and you have implemented 
-<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html">IJavaSearchResultCollector</a></b>,
+Once you have created a search pattern and a search scope, and you have extended 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html">SearchRequestor</a></b>,
 you can start a search query as follows: </p>
 <font color="#4444cc"><pre>
     // Get the search pattern
-    ISearchPattern pattern = ...;
+    SearchPattern pattern = ...;
 
     // Get the search scope
     IJavaSearchScope scope = ...;
 
-    // Get the search result collector
-    IJavaSearchResultCollector collector = ...;
+    // Get the search requestor
+    SearchRequestor requestor = ...;
 
     // Search
     SearchEngine searchEngine = new SearchEngine();
-    searchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+    searchEngine.search(pattern, new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()}, scope, requestor, null);
 </pre></font>
 <p>
-A notification that the search starts is sent to your search result collector using the
-<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#aboutToStart()">aboutToStart</a></b>
+A notification that the search starts is sent to your search requestor using the
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#beginReporting()">beginReporting</a></b>
 method. &nbsp;Then, each search result is reported using the 
-<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)">accept</a></b>
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)">acceptSearchMatch</a></b>
 method. Finally 
-<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#done()">done</a></b>
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#endReporting()">endReporting</a></b>
 indicates that the search has ended.</p>
 
 <h3>
 Collecting search results</h3>
 <p>
 Search results are reported using the 
-<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)">accept</a></b>
-method. Paragraphs below detail each argument to this method. </p>
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)">acceptSearchMatch</a></b>
+method. Paragraphs below detail the search match. </p>
 
 <h4>
 Resources and Java elements</h4>
 <p>
 A search result can correspond to a Java element (e.g. a type declaration) or it can be contained in a Java element
 (e.g. a reference to a type inside a method). The search engine always tries to find the innermost Java element that
-corresponds to or that contains the search result. For example, searching for type declarations by name could find
-a local type declaration. Since the Java model doesn't represent local types, the method that contains this local type 
-declaration is given to the result collector. </p>
+corresponds to or that contains the search result. For example, searching for references to a method could find
+such a reference in an initializer. The initializer that contains this method reference is the element of the search match. </p>
 <p>
-The search engine also tries to give the resource that contains the Java element to the result collector. So if the Java
+The search engine also tries to find the resource that contains the Java element. So if the Java
 element is a method in a compilation unit, the resource is the corresponding 
 <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a>. 
 If the element is contained in a .jar file, the resource is the .jar file, if this .jar file is in the workspace. If it is an external 
