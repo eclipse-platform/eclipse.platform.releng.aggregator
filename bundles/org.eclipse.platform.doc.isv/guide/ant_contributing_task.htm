@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Contributing Ant tasks and types
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H1>
+Contributing Ant tasks and types</H1>
+<p>Plug-ins can use <a href="arch.htm">extension points</a> to contribute new
+<a href="../reference/extension-points/org_eclipse_ant_core_antTasks.html">tasks</a> 
+and <a href="../reference/extension-points/org_eclipse_ant_core_antTypes.html">
+types</a> to Eclipse. These tasks and types have access to all classes available 
+for the plug-in contributing them. For example, the <code>eclipse.refreshLocal</code> task 
+contributed by the <code>org.eclipse.core.resources</code> plug-in is 
+a wrapper to the
+<a href="../reference/api/org/eclipse/core/resources/IResource.html#refreshLocal(int, org.eclipse.core.runtime.IProgressMonitor)">
+IResource.refreshLocal()</a> method.</p>
+<h2>
+How to contribute</h2>
+<p>Tasks and types contributed by plug-ins must not be placed in any of the 
+plug-in libraries. They have to be in a separate JAR. The consequences are that 
+plug-in classes do not have access to the tasks and types provided by the 
+plug-in (for more information about it look at the topic: 
+<a href="#Why a separate JAR for tasks and types">Why a separate JAR for tasks and types</a>?). The
+<a href="../reference/extension-points/org_eclipse_ant_core_antTasks.html">
+antTask</a> extension point provides an example of how to specify the new task 
+in the <code>plugin.xml</code> file.</p>
+
+
+<A NAME="monitor"></A><h3>
+Progress Monitors</h3>
+<P >
+The Eclipse Ant support provides access to a <a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">
+IProgressMonitor</a> if one is passed to the AntRunner. One of the advantages of having access to a progress
+monitor is that a long-running tasks could check if the user has requested its cancellation. The progress
+monitor object is through the Ant project as a reference. Note that a monitor is only made available if
+the method <a href="../reference/api/org/eclipse/ant/core/AntRunner.html#run(org.eclipse.core.runtime.IProgressMonitor)">
+AntRunner.run(IProgressMonitor)</a> was called with a valid progress monitor. The following code snippet
+illustrates how to use it:
+</P>
+<pre><code>
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+import org.eclipse.ant.core.AntCorePlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+public class CoolTask extends Task {
+
+public void execute() throws BuildException {
+	IProgressMonitor monitor = (IProgressMonitor) getProject().getReferences().get(AntCorePlugin.ECLIPSE_PROGRESS_MONITOR);
+	if (monitor == null) {
+		...
+	} else {
+		...
+	}
+}
+}
+</code></pre>
+
+
+<A NAME="native"></A><h3>
+Special care to native libraries</h3>
+<P >
+Every time an Ant script runs in Eclipse a new classloader is created. Since a library can only be
+loaded by one classloader in Java, tasks making use of native libraries could run into problems during
+multiple script runs. If the previous classloader has not been garbage collected at the time the new
+classloader tries to load the native library, an exception is thrown indicating the problem and the
+script execution fails. One way of avoiding this problem is having the library load be handled by
+a class inside a plug-in library. The task can make use of that class for accessing native
+methods. Doing so, the library is loaded by the plug-in classloader and it does not run into the
+load library conflict.
+</P>
+
+
+<A NAME="rules"></A><h3>
+Important rules when contributing tasks and types</h3>
+
+
+<p>
+The following should work as a checklist for plug-in developers:</p>
+<ul>
+  <li>The JAR containing the tasks must not be a plug-in library (declared in 
+  &lt;library&gt;&lt;/library&gt;).</li>
+  <li>The task or type can reference any class available for the plug-in but 
+  plug-in classes must not access the tasks or types.</li>
+  <li>Native libraries should be loaded by the plug-in library classes and not tasks or types.</li>
+</ul>
+
+
+<a name="Why a separate JAR for tasks and types"/>
+<h3>Why a separate JAR for tasks and types?</h3>
+<p>
+There are basically two requirements for running Ant in Eclipse that do not fit
+the plug-in model very well:
+<ul>
+  <li>Change the Ant classpath at runtime.</li>
+  <li>Change the Ant version at runtime.</li>
+</ul>
+</p>
+<p>
+During runtime plug-in classloaders cannot have their classpaths expanded and
+plug-ins cannot change their dependencies. At the same time having separate
+JARs for the tasks and types is a good isolation from the plug-in classloading
+mechanism, having these extra JARs declared by a plug-in permits adding the
+contributing plug-in to the Ant classpath as well.
+</p>
+
+<p>
+&nbsp;</p>
+
+&nbsp;<a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></BODY></HTML>
