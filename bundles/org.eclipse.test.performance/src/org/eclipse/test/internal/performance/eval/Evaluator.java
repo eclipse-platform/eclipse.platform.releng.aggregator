@@ -23,6 +23,7 @@ import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.performance.PerformanceMeter;
 
 /**
+ * The default implementation of an evaluator backed by a database.
  * @since 3.1
  */
 public class Evaluator extends EmptyEvaluator {
@@ -48,7 +49,8 @@ public class Evaluator extends EmptyEvaluator {
 		    return;	// nothing to do
 		
 	    if (!(performanceMeter instanceof InternalPerformanceMeter))
-	        return;
+	        return;	// we cannot handle this.
+	    
         InternalPerformanceMeter ipm= (InternalPerformanceMeter) performanceMeter;
 	    Sample session= ipm.getSample();
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
@@ -72,9 +74,10 @@ public class Evaluator extends EmptyEvaluator {
 			sessionDatapoints= session.getDataPoints();
 	    if (sessionDatapoints == null || sessionDatapoints.length == 0) {
 	        PerformanceTestPlugin.logWarning("no session data named '" + config + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
-	    	return;
+	        return;
 	    }
 
+		// get reference data
 		DataPoint[] datapoints= DB.queryDataPoints(refKeys, scenarioName, allDimensions);
 	    if (datapoints == null || datapoints.length == 0) {
 	        PerformanceTestPlugin.logWarning("no reference data named '" + refKeys + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -91,6 +94,12 @@ public class Evaluator extends EmptyEvaluator {
 			AssertChecker chk= fCheckers[i];
 			pass &= chk.test(referenceStats, measuredStats, failMesg);
 		}
-		Assert.assertTrue(failMesg.toString(), pass);
+		
+		if (!pass) {
+//		    if (config != null)
+//		        DB.markAsFailed(config, session, failMesg.toString());
+//		    else
+		        Assert.assertTrue(failMesg.toString(), false);
+		}
 	}
 }
