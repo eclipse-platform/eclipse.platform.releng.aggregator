@@ -14,7 +14,6 @@
 
 <h2>Other Recommended Changes when Migrating Plug-ins to 3.0</h2>
 <p>This section describes other recommend changes that we be made when porting existing plug-ins to 3.0.</p>
-<h3>Changes to API classes and interfaces (by package)</h3>
 <h4>IWorkspaceRunnable and IWorkspace.run (org.eclipse.core.runtime)</h4>
 <p>Clients of the <tt>IWorkspace.run(IWorkspaceRunnable,IProgressMonitor)</tt>
 method should revisit their uses of this method and consider using the richer
@@ -298,6 +297,97 @@ the workspace this is often the easiest and most concurrency-friendly solution.
     BasicTextEditorActionContributor. See migration notes for
     BasicTextEditorActionContributor.</li>
 </ul>
+<h4>annotationTypes extension point (plug-in org.eclipse.ui.editors)</h4>
+<p>
+There is now the explicit notion of an annotation type. See Annotation.getType() and Annotation.setType().
+The type of an annotation can change over it's lifetime. A new extension point has been added for the declaration
+of annotation types: "org.eclipse.ui.editors.annotationTypes". An annotation type has a name and can be declared 
+as being a subtype of another declared annotation type. An annotation type declaration may also use the attributes 
+"markerType" and "markerSeverity" in order to specify that markers of a given type and a given severity should be 
+represented in text editors as annotations of a particular annotation type. The attributes "markerType" and 
+"markerSeverity" in the "org.eclipse.ui.editors.markerAnnotationSpecification" should no longer be used. Marker 
+annotation specifications are thus becoming independent from markers and the name thus misleading. However, the 
+name is kept in order to ensure backward compatibility.
+</p><p>
+Instances of subclasses of AbstractMarkerAnnotationModel automatically detect and set the correct  annotation 
+types for annotations they create from markers. In order to programmatically retrieve the annotation type for 
+a given marker or a given pair of markerType and markerSeverity use org.eclipse.ui.texteditor.AnnotationTypeLookup.
+</p><p>
+Access to the hierarchy of annotation types is provided by IAnnotationAccessExtension. For a given annotation type 
+you can get the chain of super types and check whether an annotation type is a subtype of another annotation type.
+DefaultMarkerAnnotationAccess implements this interface.
+</p>
+<h4>markerAnnotationSpecification extension point (plug-in org.eclipse.ui.editors)</h4>
+<p>
+The annotation type is the key with which to find the associated marker annotation specification. As annotation 
+types can extend other annotation types, there is an implicit relation between marker annotation specifications 
+as well. Therefore a marker annotation specification for a given annotation type is completed by the marker 
+annotation specifications given for the super types of the given annotation type. Therefore, marker annotation 
+specification do not have to be complete as this was required before. Marker annotation specifications are 
+retrieved by AnnotationPreferences. By using org.eclipse.ui.texteditor.AnnotationPreferenceLookup, you can retrieve 
+an annotation preference for a given annotation type that transparently performs the completion of the preference 
+along the annotation super type chain.
+</p><p>
+Marker annotation specification has been extended with three additional attributes in order to allow the definition 
+of custom appearances of a given annotation type in the vertical ruler. These attributes are: "icon", "symbolicIcon", 
+and "annotationImageProvider". The value for "icon" is the path to a file containing the icon image. The value of 
+"symbolicIcon" can be one of "error", "warning", "info", "task", "bookmark". The attribute "symbolicIcon" is used 
+to tell the platform that annotation should be depicted with the same images that are used by the platform to 
+present errors, warnings, infos, tasks, and bookmarks respectively. The value of "annotationImageProvider" is a 
+class implementing org.eclipse.ui.texteditor.IAnnotationImageProvider that allows for a full custom annotation 
+presentation.
+</p><p>
+The vertical ruler uses it's associated IAnnotationAccess/IAnnotationAccessExtension to draw annotations. 
+The vertical ruler does not call Annotation.paint any longer. In general, Annotations are no longer supposed 
+to draw themselves. The "paint" and "getLayer" methods have been deprecated in order to make annotation eventually 
+UI independent. DefaultMarkerAnnotationAccess serves as default implementation of IAnnotationAccess/IAnnotationAccessExtension. 
+DefaultMarkerAnnotationAccess implements the following strategy for painting annotations: If an annotation implements 
+IAnnotationPresentation, IAnnotationPresentation.paint is called. If not, the annotation image provider is looked up 
+in the annotation preference. The annotation image provider is only available if specified and if the plug-in defining 
+the enclosing marker annotation specification has already been loaded. If there is an annotation image provider, the 
+call is forwarded to it. If not, the specified "icon" is looked up. "symbolicIcon" is used as the final fallback. For 
+drawing annotations, the annotation presentation layer is relevant. DefaultMarkerAnnotationAccess looks up the presentation 
+layer using the following strategy: If the annotation preference specifies a presentation layer, the specified layer is 
+used. If there is no layer and the annotation implements IAnnotationPresentation, IAnnotationPresentation.getLayer is used 
+otherwise the default presentation layer (which is 0) is returned.
+</p>
+<h4>Migration to annotationTypes extension point (plug-in org.eclipse.ui.editors)</h4>
+<p>
+The following annotation types are declared by the org.eclipse.ui.editors plug-in:
+</p>
+<pre>
+   &lt;extension point="org.eclipse.ui.editors.annotationTypes"&gt;
+      &lt;type
+         name="org.eclipse.ui.workbench.texteditor.error"
+         markerType="org.eclipse.core.resources.problemmarker"
+         markerSeverity="2"&gt;
+      &lt;/type&gt;
+      &lt;type
+         name="org.eclipse.ui.workbench.texteditor.warning"
+         markerType="org.eclipse.core.resources.problemmarker"
+         markerSeverity="1"&gt;
+      &lt;/type&gt;
+      &lt;type
+         name="org.eclipse.ui.workbench.texteditor.info"
+         markerType="org.eclipse.core.resources.problemmarker"
+         markerSeverity="0"&gt;
+      &lt;/type&gt;
+      &lt;type
+         name="org.eclipse.ui.workbench.texteditor.task"
+         markerType="org.eclipse.core.resources.taskmarker"&gt;
+      &lt;/type&gt;
+      &lt;type
+         name="org.eclipse.ui.workbench.texteditor.bookmark"
+         markerType="org.eclipse.core.resources.bookmark"&gt;
+      &lt;/type&gt;
+   &lt;/extension&gt;
+</pre>
+<p>
+The defined markerAnnotationSpecification extension no longer provide "markerType" and "markerSeverity" 
+attributes. They define the "symbolicIcon" attribute with the according value. Thus, MarkerAnnotation.paint 
+and MarkerAnnotation.getLayer are not called any longer, i.e. overriding these methods does not have 
+any effect. Affected clients should implement IAnnotationPresentation.
+</p>
 <h4>ILaunchConfigurationType (package org.eclipse.debug.core)</h4>
 <p>With the introduction of extensible launch modes in 3.0, more than one launch
 delegate can exist for a launch configuration type. Releases prior to 3.0 only
@@ -387,7 +477,7 @@ added are:</p>
 a complete path equivalent to that of the three new attributes. However, <code>VMRunners</code>
 that support the new boot path options should take advantage of the new
 attributes.</p>
-<h3>[JDT only] Improved support for working copies (package org.eclipse.jdt.core)</h3>
+<h4>[JDT only] Improved support for working copies (package org.eclipse.jdt.core)</h4>
 <p>The Java model working copy facility has been reworked in 3.0 to provide
 greatly increased functionality. Prior to 3.0, the Java model allowed creation
 of individual working copies of compilation units. Changes could be made to the
@@ -702,7 +792,7 @@ the deprecations are as follows:</p>
     </ul>
   </li>
 </ul>
-<h3>Restructuring of org.eclipse.help plug-in</h3>
+<h4>Restructuring of org.eclipse.help plug-in</h4>
 <p>The org.eclipse.help plug-in, which used to hold APIs and extension points
 for contributing to and extending help system, as well as displaying help, now
 contains just APIs and extension points for contributing and accessing help
@@ -730,15 +820,15 @@ completeness:</p>
     org.eclipse.ui.helpSupport extension point. The contract for this extension
     point changed as well (see entry for IHelp).</li>
 </ul>
-<h3>New Search UI API</h3>
+<h4>New Search UI API</h4>
 <P>A new API for implmenting custom searches has been added in 3.0. The original API is deprecated in 3.0 and we recommend that cllients port to the new API in the packages org.eclipse.search.ui and org.eclipse.search.ui.text.
 </P>
 <P>Clients will have to create implementations of <CODE>ISearchQuery</CODE>, <CODE>ISearchResult</CODE> and <CODE>ISearchResultPage</CODE>. The <CODE>ISearchResultPage</CODE> implementation must then be contributed into the new <CODE>org.eclipse.search.searchResultViewPages</CODE> extension point. </P>
 <P>Default implementations for <CODE>ISearchResult</CODE> and <CODE>ISearchResultPage</CODE> are provided in the package<CODE>
 org.eclipse.search.ui.text</CODE>.</P>
 
-<h3>null messages in MessageBox and DirectoryDialog (package
-org.eclipse.swt.widgets)</h3>
+<h4>null messages in MessageBox and DirectoryDialog (package
+org.eclipse.swt.widgets)</h4>
 <p>Prior to 3.0, calling SWT's DirectoryDialog.setMessage(String string) or
 MessageBox.setMessage(String string) with a null value for string would result
 in a dialog with no text in the title. This behavior was unspecified (passing
@@ -749,7 +839,7 @@ been changed to state this, bringing it into line with the method on their
 superclass Dialog.setMessage. If you use Dialog.setMessage, ensure that that the
 string passed in is never null. Simply pass an empty string if you want a dialog
 with no text in the title.</p>
-<h3>Improving modal progress feedback</h3>
+<h4>Improving modal progress feedback</h4>
 <p>Supporting concurrent operations requires more sophisticated ways to show
 modal progress. As part of the responsiveness effort additional progress support
 was implemented in the class IProgressService. The existing way to show progress
@@ -758,7 +848,7 @@ experience we recommend migrating to the new IProgressService.</p>
 <p>The document <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/documents/plan_concurrency_modal_progress.html">Showing
 Modal Progress in Eclipse 3.0</a> describes how to migrate to the new
 IProgressService.</p>
-<h3>Debug Action Groups removed</h3>
+<h4>Debug Action Groups removed</h4>
 <p>The Debug Action Groups extension point
 (org.eclipse.debug.ui.debugActionGroups) has been removed. In Eclipse 3.0, the
 workbench introduced support for Activities via the
@@ -771,7 +861,7 @@ simply be ignored. Product vendors are encouraged to use the workbench
 Activities support to associate language-specific debugger actions with
 language-specific activities (for example, C++ debugging actions might be
 associated with an activity called &quot;Developing C++&quot;).</p>
-<h3>BreakpointManager can be disabled</h3>
+<h4>BreakpointManager can be disabled</h4>
 <p>IBreakpointManager now defines the methods setEnabled(boolean) and
 isEnabled(). When the breakpoint manager is disabled, debuggers should ignore
 all registered breakpoints. The debug platform also provides a new listener
@@ -781,6 +871,53 @@ view calls this API from a new toggle action that allows the user to &quot;Skip
 All Breakpoints.&quot; Debuggers which do not honor the breakpoint manager's
 enablement will thus appear somewhat broken if the user tries to use this
 feature.</p>
+<h4>[JDT only] Java search participants (package org.eclipse.jdt.core.search)</h4>
+<p>Languages close to Java (such as JSP, SQLJ, JWS, etc.) should be able to
+participate in Java searching. In particular, implementors of such languages
+should be able to:
+<ul>
+  <li>index their source by converting it into Java equivalent source, and
+    feeding it to the Java indexer
+  <li>index their source by parsing it themselves, but record Java index entries
+  <li>locate matches in their source by converting it into Java equivalent
+    source, and feeding it to the Java match locator
+  <li>locate matches in their source by matching themselves, and return Java
+    matches</li>
+</ul>
+<p>&nbsp;</p>
+<p>Such an implementor is called a search participant. It extends the
+SearchParticipant class. Search participants are passed to search queries (see
+SearchEngine.search(SearchPattern, SearchParticipant[], IJavaSearchScope,
+SearchRequestor, IProgressMonitor)).</p>
+<p>For either indexing or locating matches, a search participant needs to define
+a subclass of SearchDocument that can retrieve the contents of the document by
+overriding either getByteContents() or getCharContents(). An instance of this
+subclass is returned in getDocument(String).</p>
+<p>A search participant wishing to index some document will use
+SearchParticipant.scheduleDocumentIndexing(SearchDocument, IPath) to schedule
+the indexing of the given document in the given index. Once the document is
+ready to be indexed, the underlying framework calls
+SearchParticipant.indexDocument(SearchDocument, IPath). The search participant
+then gets the document's content, parses it and adds index entries using
+SearchDocument.addIndexEntry(char[], char[]).</p>
+<p>Once indexing is done, one can then query the indexes and locate matches
+using SearchEngine.search(SearchPattern, SearchParticipant[], IJavaSearchScope,
+SearchRequestor, IProgressMonitor). This first asks each search participant for
+the indexes needed by this query using
+SearchParticipant.selectIndexes(SearchPattern, IJavaSearchScope). For each index
+entry that matches the given pattern, a search document is created by asking the
+search participant (see getDocument(String)). All these documents are passed to
+the search participant so that it can locate matches using
+locateMatches(SearchDocument[], SearchPattern, IJavaSearchScope, SearchRequestor,
+IProgressMonitor). The search participant notifies the SearchRequestor of search
+matches using acceptSearchMatch(SearchMatch) and passing an instance of a
+subclass of SearchMatch.</p>
+<p>A search participant can delegate part of its work to the default Java search
+participant. An instance of this default participant is obtained using
+SearchEngine.getDefaultSearchParticipant(). For example when asked to locate
+matches, an SQLJ participant can create documents .java documents from its .sqlj
+documents and delegate the work to the default participant passing it the .java
+documents.</p>
 <p><a href="../notices.html"><img src="../cpy.gif" border="0" alt="Legal notices" width="324" height="14"></a></p>
 
 </body>
