@@ -42,4 +42,17 @@ public class VariationsTests extends TestCase {
         v3.put("abc", "xyz"); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals(v3, new Variations(v3.toExactMatchString()));
     }
+    
+//    public void testMaxLength() {
+//        StringBuffer sb= new StringBuffer();
+//        for (int i= 0; i < 1000; i++)
+//            sb.append("0123456789"); //$NON-NLS-1$
+//        Variations v= new Variations(sb.toString(), null);
+//        
+//        String s1= v.toExactMatchString();
+//        assertTrue(s1.length() == 10000);
+//        
+//        String s2= v.toQueryPattern();
+//        assertTrue(s2.length() == 10000);
+//    }
 }
