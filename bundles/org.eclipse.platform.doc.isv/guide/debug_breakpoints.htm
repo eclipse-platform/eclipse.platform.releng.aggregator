@@ -11,25 +11,33 @@
 <BODY BGCOLOR="#ffffff">
 <h3>Breakpoints </h3>
 <p>Breakpoints allow users to suspend the execution of a program at a particular
-location.&nbsp; Breakpoints are typically shown in the UI along with the source
-code.&nbsp; You can add an <a href="../reference/api/org/eclipse/debug/core/IBreakpointListener.html"><b>IBreakpointListener</b></a>
-to an <a href="../reference/api/org/eclipse/debug/core/IBreakpointManager.html"><b>IBreakpointManager</b></a>
-in order to be notified as breakpoints are added and removed.&nbsp; When a
-breakpoint is encountered during execution of a program, the program suspends
+location. Breakpoints are typically shown in the UI along with the source
+code. When a breakpoint is encountered during execution of a program, the program suspends
 and triggers a <b>SUSPEND</b> debug event with <b>BREAKPOINT</b> as the
-reason.&nbsp; </p>
+reason.</p>
+<p>If your plug-in needs to show breakpoints in its UI, you can add an 
+<a href="../reference/api/org/eclipse/debug/core/IBreakpointListener.html"><b>IBreakpointListener</b></a>
+to the <a href="../reference/api/org/eclipse/debug/core/IBreakpointManager.html"><b>IBreakpointManager</b></a>.
+The <a href="../reference/api/org/eclipse/debug/core/IBreakpointManager.html"><b>IBreakpointManager</b></a> is the
+central authority over all breakpoints.  Breakpoints are added and removed using the breakpoint manager, which in
+turn informs any listeners about breakpoint activity.  The operation of breakpoints can be enabled or disabled
+using the breakpoint manager.  The breakpoint manager can be obtained from the 
+<a href="../reference/api/org/eclipse/debug/core/DebugPlugin.html"><b>DebugPlugin</b></a>:</p>
+<pre><font color="#4444CC">
+IBreakpointManager mgr = DebugPlugin.getDefault().getBreakpointManager();
+</font></pre>
 <p>Plug-ins that define their own debug models and launch configurations often
-need to define their own breakpoint types.&nbsp; You can implement breakpoints
-for your particular debug model by defining a class that implements <a href="../reference/api/org/eclipse/debug/core/model/IBreakpoint.html"><b>IBreakpoint</b></a>.&nbsp;
-</p>
-<p>Breakpoints are implemented using <a href="resAdv_markers.htm">resource markers</a>.&nbsp; 
-  Recall that resource markers allow you to associate meta information about a 
-  resource in the form of named attributes.&nbsp; By implementing a breakpoint 
-  using markers, the debug model can make use of all the existing marker function 
-  such as persistence, searching, adding, deleting, and displaying in editors.</p>
+need to define their own breakpoint types. You can implement breakpoints
+for your particular debug model by defining a class that implements 
+<a href="../reference/api/org/eclipse/debug/core/model/IBreakpoint.html"><b>IBreakpoint</b></a>.</p>
+<p>Breakpoints are implemented using <a href="resAdv_markers.htm">resource markers</a>.
+Recall that resource markers allow you to associate meta information about a 
+resource in the form of named attributes. By implementing a breakpoint 
+using markers, the debug model can make use of all the existing marker function 
+such as persistence, searching, adding, deleting, and displaying in editors.</p>
 <p>Why is it important to know about markers when using breakpoints?&nbsp; When
 you create a breakpoint type, you must also specify an associated marker
-type.&nbsp; Every extension of <a href="../reference/extension-points/org_eclipse_debug_core_breakpoints.html"><b>org.eclipse.debug.core.breakpoints</b></a>
+type. Every extension of <a href="../reference/extension-points/org_eclipse_debug_core_breakpoints.html"><b>org.eclipse.debug.core.breakpoints</b></a>
 should be accompanied by an extension of <a href="../reference/extension-points/org_eclipse_core_resources_markers.html"><b>org.eclipse.core.resources.markers</b></a>.&nbsp;
 This is best demonstrated by looking at the extensions defined by the Java
 tooling for Java breakpoints.</p>
@@ -51,21 +59,21 @@ tooling for Java breakpoints.</p>
 		class=&quot;org.eclipse.jdt.internal.debug.core.breakpoints.JavaExceptionBreakpoint&quot;&gt;
 	&lt;/breakpoint&gt;
 &lt;/extension&gt;</font></pre>
-<p>The debug plug-in defines a special type of marker, <font SIZE="2"><b>org.eclipse.debug.core.breakpointMarker</b>.&nbsp; 
-  When you define a marker, you should declare it using this marker as a super 
-  type.&nbsp; This allows the debug model to find all possible breakpoints within 
-  a source file by searching for subtypes of its marker.&nbsp; In the example 
-  above, the <b>javaExceptionBreakpointMarker</b> has a super type, <b>javaBreakpointMarker</b>, 
-  whose super type is the <b>breakpointMarker</b>.&nbsp; The <b>javaExceptionBreakpoint</b>&nbsp; 
-  (defined in the breakpoint extension) designates the <b>javaExceptionBreakpointMarker</b> 
-  as its marker.</font></p>
-<p><font size="2">What does all of this mean?&nbsp; When the debug code obtains
-a source code resource, it can search for all markers whose super type is <b>org.eclipse.debug.core.breakpointMarker</b>.&nbsp;
-Having found all of the markers, it can then use the plug-in registry to map the
-markers to their associated breakpoint classes.&nbsp; In this way, the platform
-debug code can generically find all breakpoint types that have been set on a
-particular source file. </font></p>
-<p>&nbsp;</p>
+<p>The debug plug-in defines a special type of marker, <b>org.eclipse.debug.core.breakpointMarker</b>.
+When you define a breakpoint marker for your debugger, you should declare it using this marker as a super 
+type. This allows the debug model to find all possible breakpoints within 
+a source file by searching for subtypes of its marker. In the example 
+above, the <b>javaExceptionBreakpointMarker</b> has a super type, <b>javaBreakpointMarker</b>, 
+whose super type is the <b>breakpointMarker</b>. The <b>javaExceptionBreakpoint</b> 
+(defined in the breakpoint extension) designates the <b>javaExceptionBreakpointMarker</b> 
+as its marker.</p>
+<p>What does all of this mean? When the debug code obtains
+a source code file, it can search for all markers whose super type is 
+<b>org.eclipse.debug.core.breakpointMarker</b>. Having found all of the markers, it can then 
+use the extension registry to map the markers to their associated breakpoint classes.
+In this way, the platform debug code can generically find all breakpoint types that have been set on a
+particular source file. </p>
+
 <p><a href="../notices.html"><img border="0" src="../cpy.gif" alt="Legal notices." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
