@@ -111,24 +111,24 @@ public class Unit {
 		if (diff < 0)
 		    diff *= -1;
 		if (diff < 1000)
-			return String.valueOf(diff) + " milliseconds"; //$NON-NLS-1$
+			return String.valueOf(diff) + " ms"; //$NON-NLS-1$
 		
 		NumberFormat nf= NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(1);
 		double d = diff / 1000.0;	
 		if (d < 60)
-			return nf.format(d) + " seconds"; //$NON-NLS-1$
+			return nf.format(d) + " s"; //$NON-NLS-1$
 		
 		d = d / 60.0;
 		if (d < 60.0)
-			return nf.format(d) + " minutes"; //$NON-NLS-1$
+			return nf.format(d) + " m"; //$NON-NLS-1$
 	
 		d = d / 60.0;
 		if (d < 24.0)
-			return nf.format(d) + " hours"; //$NON-NLS-1$
+			return nf.format(d) + " h"; //$NON-NLS-1$
 	
 		d = d / 24.0;
-		return nf.format(d) + " days"; //$NON-NLS-1$
+		return nf.format(d) + " d"; //$NON-NLS-1$
 	}
 	
 	/**

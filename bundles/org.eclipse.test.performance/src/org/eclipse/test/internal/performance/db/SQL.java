@@ -22,8 +22,8 @@ public class SQL {
     private Connection fConn;
     private PreparedStatement fInsertSample, fInsertDataPoint;
     private PreparedStatement fQueryConfig, fInsertConfig;
-    private PreparedStatement fQueryScenario, fInsertScenario;
-    private PreparedStatement fQueryTag, fInsertTag;
+    private PreparedStatement fQueryScenario, fQueryAllScenarios, fInsertScenario;
+    private PreparedStatement fQueryTag, fQueryTags, fInsertTag;
     private PreparedStatement[] fInsertScalar= new PreparedStatement[20];
     private PreparedStatement[] fQueries= new PreparedStatement[20];
     
@@ -33,7 +33,7 @@ public class SQL {
     }
     
     public void dispose() throws SQLException {
-    	// TODO: close prepared statements
+    	// TODO: close all prepared statements
     	if (fInsertScalar != null) {
     		for (int i= 0; i < fInsertScalar.length; i++) {
     			if (fInsertScalar[i] != null)
@@ -110,6 +110,17 @@ public class SQL {
                 "select ID from CONFIG where HOST = ? and PLATFORM = ?"); //$NON-NLS-1$
         fQueryScenario= fConn.prepareStatement(
                 "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
+        fQueryAllScenarios= fConn.prepareStatement(
+        		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE where " +	//$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = ? and " +	//$NON-NLS-1$
+        		"SAMPLE.SCENARIO_ID = SCENARIO.ID"	//$NON-NLS-1$
+        ); 
+        fQueryTags= fConn.prepareStatement(
+        		"select TAG.NAME from TAG, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = ? and " +	//$NON-NLS-1$
+        		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +	//$NON-NLS-1$
+        		"SAMPLE.TAG_ID = TAG.ID"	//$NON-NLS-1$
+        ); 
     }
     
     void initialize() throws SQLException {
@@ -117,7 +128,7 @@ public class SQL {
         
         stmt.executeUpdate(
         		"create table SAMPLE (" + //$NON-NLS-1$
-                		"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+        			"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
 					"CONFIG_ID int not null," + //$NON-NLS-1$
 					"SCENARIO_ID int not null," + //$NON-NLS-1$
 					"TAG_ID int," + //$NON-NLS-1$
@@ -233,5 +244,16 @@ public class SQL {
     	for (int i= 0; i < dim_ids.length; i++)
     		queryStatement.setInt(j++, dim_ids[i]);
         return queryStatement.executeQuery();
+    }    
+
+    ResultSet queryScenarios(int config_id) throws SQLException {
+        fQueryAllScenarios.setInt(1, config_id);
+        return fQueryAllScenarios.executeQuery();
+    }
+    
+    ResultSet queryTags(int config_id, String scenario) throws SQLException {
+        fQueryTags.setInt(1, config_id);
+        fQueryTags.setString(2, scenario);
+        return fQueryTags.executeQuery();
     }
 }

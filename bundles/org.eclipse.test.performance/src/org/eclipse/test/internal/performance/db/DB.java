@@ -48,7 +48,22 @@ public class DB {
     public static DataPoint[] query(String refTag, String scenarioID, Dim[] dims) {
         return getDefault().internalQuery(refTag, scenarioID, dims);
     }
-    
+   
+    public static Scenario[] queryScenarios(String buildTypeFilter) {
+        String[] scenarios= getDefault().internalQueryScenarios(); // get all Scenario names
+        Scenario[] tables= new Scenario[scenarios.length];
+        for (int i= 0; i < scenarios.length; i++) {
+            String scenario= scenarios[i];
+            if (DEBUG) System.out.println(i + ": " + scenario);
+            tables[i]= new Scenario(scenario);
+        }
+        return tables;
+    }
+
+    public static String[] queryTags(String scenario) {
+        return getDefault().internalQueryTags(scenario);
+    }
+
     public static Connection getConnection() {
         return getDefault().fConnection;
     }
@@ -131,6 +146,8 @@ public class DB {
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
             int sample_id= fSQL.createSample(getConfig(), scenario_id, tag_id, sample.getStartTime());
             fStoredSamples++;
+            
+            System.err.print(PerformanceTestPlugin.getBuildId());
             
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
@@ -218,6 +235,53 @@ public class DB {
         return null;
     }
     
+    private String[] internalQueryScenarios() {
+        if (fSQL == null)
+            return null;
+        ResultSet result= null;
+        try {        	
+            result= fSQL.queryScenarios(getConfig());
+            ArrayList scenarios= new ArrayList();
+            for (int i= 0; result.next(); i++)
+		        scenarios.add(result.getString(1));
+            return (String[])scenarios.toArray(new String[scenarios.size()]);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (result != null)
+                try {
+                    result.close();
+                } catch (SQLException e1) {
+                	// ignored
+                }
+        }
+        return null;
+    }
+    
+    private String[] internalQueryTags(String scenario) {
+        if (fSQL == null)
+            return null;
+        ResultSet result= null;
+        try {        	
+            result= fSQL.queryTags(getConfig(), scenario);
+            ArrayList tags= new ArrayList();
+            for (int i= 0; result.next(); i++)
+                tags.add(result.getString(1));
+            return (String[])tags.toArray(new String[tags.size()]);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (result != null)
+                try {
+                    result.close();
+                } catch (SQLException e1) {
+                	// ignored
+                }
+        }
+        return null;
+    }
+    
+
     /**
      * dbloc=						embed in home directory
      * dbloc=/tmp/performance			embed given location
