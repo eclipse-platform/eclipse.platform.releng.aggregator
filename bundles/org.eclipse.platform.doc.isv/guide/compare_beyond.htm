@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Beyond the basics</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Beyond the basics</H2>
+
+This section gives an overview of the API provided by the compare plugin. 
+
+<h3>Writing compare operations</h3>
+
+A compare operation must be implemented as a subclass of
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>.
+A
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>
+runs a (potentially lengthy) compare operation
+under progress monitor control, creates a UI for drilling-down into the
+compare results, tracks the dirty state of the result in case of merge,
+and saves any changes that occured during a merge.
+<p>
+
+The class
+<a href="../reference/api/org/eclipse/compare/CompareUI.html"><b>CompareUI</b></a>
+defines the entry point to initiate a configurable
+compare operation on arbitrary resources. The result of the compare is
+opened into a compare editor where the details can be browsed and edited
+in dynamically selected structure and content viewers.
+<p>
+
+The
+<a href="../reference/api/org/eclipse/compare/NavigationAction.html"><b>NavigationAction</b></a>
+is used to navigate (step) through the individual
+differences of a 
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>.
+<p>
+
+An instance of
+<a href="../reference/api/org/eclipse/compare/CompareConfiguration.html"><b>CompareConfiguration</b></a>
+configures various UI aspects
+of compare/merge viewers like title labels and images, or whether a side
+of a merge viewer is editable. It is passed to the
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>
+on creation.
+<p>
+
+When implementing a hierarchical compare operation as a subclass of
+<a href="../reference/api/org/eclipse/compare/CompareEditorInput.html"><b>CompareEditorInput</b></a>
+clients have to provide a tree of objects where each
+node implements the interface
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>.
+This interface is used by the hierarchical differencing engine
+(<a href="../reference/api/org/eclipse/compare/structuremergeviewer/Differencer.html"><b>Differencer</b></a>) to walk the tree.
+<br>
+In addition every leaf of the tree must implement the
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+interface in order to give the differencing engine access to its stream content.
+<p>
+
+The abstract class
+<a href="../reference/api/org/eclipse/compare/BufferedContent.html"><b>BufferedContent</b></a>
+provides a default implementation
+for the
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b></a>
+and
+<a href="../reference/api/org/eclipse/compare/IContentChangeNotifier.html"><b>IContentChangeNotifier</b></a>
+interfaces.
+Its subclass
+<a href="../reference/api/org/eclipse/compare/ResourceNode.html"><b>ResourceNode</b></a>
+adds an implementation for the
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/IStructureComparator.html"><b>IStructureComparator</b></a>
+and
+<a href="../reference/api/org/eclipse/compare/ITypedElement.html"><b>ITypedElement</b></a>
+interfaces
+based on Eclipse workbench resources
+(<a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>). 
+It can be used without modification as the input to the differencing engine.
+<p>
+
+
+<h3>Compare functionality outside of compare editors</h3>
+
+If you want to use compare functionality outside of the standard Compare editor, 
+for example in a dialog or wizard the compare plugin provides additional helper
+classes:
+<p>
+
+The
+<a href="../reference/api/org/eclipse/compare/CompareViewerPane.html"><b>CompareViewerPane</b></a>
+is a convenience class which provides
+a label and local toolbar for a compare viewer (or any other subclass of a JFace <b>Viewer</b>).
+<br>
+Its abstract subclass
+<a href="../reference/api/org/eclipse/compare/CompareViewerSwitchingPane.html"><b>CompareViewerSwitchingPane</b></a>
+supports <i>dynamic viewer switching</i>, that is the viewer installed in the pane is dynamically 
+determined by the pane's input object.
+<p>
+
+The
+<a href="../reference/api/org/eclipse/compare/EditionSelectionDialog.html"><b>EditionSelectionDialog</b></a>
+is a simple selection dialog where
+one input element can be compared against a list of historic variants (<i>editions</i>)
+of the same input element. The dialog is used to implement functions
+like <i>"Replace with Local History"</i> on workbench resources.
+<p>
+
+In addition it is possible to specify a subsection of the input element
+(e.g. a method in a Java source file) by means of a <i>path</i>. In this
+case the dialog compares only the subsection (as specified by the path)
+with the corresponding subsection in the list of editions. This functionality
+can be used to implement <i>"Replace with Element from Local History"</i> for 
+Java Elements.
+<p>
+
+The
+<a href="../reference/api/org/eclipse/compare/EditionSelectionDialog.html"><b>EditionSelectionDialog</b></a>
+requires that the editions implement the
+<a href="../reference/api/org/eclipse/compare/IStreamContentAccessor.html"><b>IStreamContentAccessor</b><a/>
+and
+<a href="../reference/api/org/eclipse/compare/IModificationDate.html"><b>IModificationDate</b></a>
+interfaces.
+The
+<a href="../reference/api/org/eclipse/compare/HistoryItem.html"><b>HistoryItem</b></a>
+is a convenience class that implements these interfaces for
+<a href="../reference/api/org/eclipse/core/resources/IFileState.html"><b>IFileState</b></a>
+objects.
+<p>
+&nbsp;
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002."width="250" height="12"></a></p>
+</BODY>
+</HTML>
