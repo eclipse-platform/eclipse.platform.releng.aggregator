@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Workbench action filters
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Workbench action filters</H2>
+<p>
+When a plug-in contributes an action to the workbench UI using one of the menu
+extension points, it can specify conditions under which the menu item is enabled
+(or visible) in the menu.&nbsp; Action filters (<b><a href="../reference/api/org/eclipse/ui/IActionFilter.html">IActionFilter</a></b>)
+allow an object in a view or editor to further refine the enablement criteria
+for an action.&nbsp; An action filter dynamically computes the enablement
+criteria for an action based on the target selection and the value of named
+attributes.</p>
+
+
+<p>
+First, let's look at the extension points that contribute actions, the
+attributes in the XML markup that affect enablement, and how action filters
+extend the capability to compute the enablement criteria:</p>
+
+
+<TABLE BORDER="1" width="671">
+<TR>
+<TH ROWSPAN="1" COLSPAN="1" width="118">
+<P CLASS="CellHeading">
+Extension point name</P>
+</TH>
+<TH ROWSPAN="1" COLSPAN="1" width="359">
+<P CLASS="CellHeading">
+Attributes affecting enablement</P>
+</TH>
+<TH ROWSPAN="1" COLSPAN="1" width="335">
+<P CLASS="CellHeading">
+Action filter attributes</P>
+</TH>
+</TR>
+<TR>
+<TD width="118">
+<P CLASS="CellBody">
+<b>
+viewActions</b></P>
+</TD>
+<TD width="359">
+<P CLASS="CellBody">
+<b>enablesFor</b> - specifies the selection count that must be met for the
+action to be enabled</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>class</b> - the class that the selected objects must
+subclass or implement to enable the action</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>name</b> - a wild card filter that can be applied to the
+objects in the selection.</P>
+</TD>
+<TD width="335">
+<P CLASS="CellBody">
+<b>enablement</b> - a boolean expression.</P>
+<P CLASS="CellBody">
+The <b>selection</b> <b>class</b>, <b>name</b>, and <b>enablesFor</b> must be
+satisfied before applying the enablement expression.</P>
+</TD>
+</TR>
+<TR>
+<TD width="118">
+<P CLASS="CellBody"><b>editorActions</b></P>
+</TD>
+<TD width="359">
+<P CLASS="CellBody">
+<b>enablesFor</b> - specifies the selection count that must be met for the
+action to be enabled</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>class</b> - the class that the selected objects must
+subclass or implement to enable the action</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>name</b> - a wild card filter that can be applied to the
+objects in the selection.</P>
+<P CLASS="CellBody">
+&nbsp;</P>
+</TD>
+<TD width="335">
+<P CLASS="CellBody">
+<b>enablement</b> - a boolean expression.</P>
+<P CLASS="CellBody">
+The <b>selection</b> <b>class</b>, <b>name</b>, and <b>enablesFor</b> must be
+satisfied before applying the enablement expression.</P>
+</TD>
+</TR>
+<TR>
+<TD width="118">
+<P CLASS="CellBody">
+<b>
+popupMenus</b></P>
+</TD>
+<TD width="359">
+<P CLASS="CellBody">
+(For object contributions only.)</P>
+<P CLASS="CellBody">
+<b>objectClass</b> - specifies the class that objects in the selection must
+subclass or implement</P>
+<P CLASS="CellBody">
+(For object and viewer contributions)</P>
+<P CLASS="CellBody">
+<b>enablesFor</b> - specifies the selection count that must be met for the
+action to be enabled</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>class</b> - the class that the selected objects must
+subclass or implement to enable the action</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>name</b> - a wild card filter that can be applied to the
+objects in the selection.</P>
+<P CLASS="CellBody">
+&nbsp;</P>
+</TD>
+<TD width="335">
+<P CLASS="CellBody">
+<b>visibility</b> - a boolean expression.</P>
+<P CLASS="CellBody">
+The <b>selection</b> <b>class</b>, <b>name</b>, and <b>enablesFor</b> must be
+satisfied before applying the enablement expression.</P>
+<P CLASS="CellBody">
+&nbsp;</P>
+</TD>
+</TR>
+<TR>
+<TD width="118">
+<P CLASS="CellBody">
+<b>
+actionSets</b></P>
+</TD>
+<TD width="359">
+<P CLASS="CellBody">
+<b>enablesFor</b> - specifies the selection count that must be met for the
+action to be enabled</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>class</b> - the class that the selected objects must
+subclass or implement to enable the action</P>
+<P CLASS="CellBody">
+<b>selection</b> <b>name</b> - a wild card filter that can be applied to the
+objects in the selection.</P>
+<P CLASS="CellBody">
+&nbsp;</P>
+</TD>
+<TD width="335">
+<P CLASS="CellBody">
+<b>enablement</b> - a boolean expression.</P>
+<P CLASS="CellBody">
+The <b>selection</b> <b>class</b>, <b>name</b>, and <b>enablesFor</b> must be
+satisfied before applying the enablement expression.</P>
+<P CLASS="CellBody">
+&nbsp;</P>
+</TD>
+</TR>
+</TABLE>
+
+
+<h3>
+Boolean expressions</h3>
+
+
+<P CLASS="CellBody">
+The <b>enablement</b> and <b>visibility</b> expressions consist of boolean
+expressions containing simple boolean operators (NOT, AND, OR) and predefined
+boolean expressions that evaluate the following conditions:</P>
+<ul>
+  <li>
+    <p CLASS="CellBody"><b>objectClass</b> - true if each object in the
+    selection subclasses or implements the class.</p>
+  </li>
+  <li>
+    <p CLASS="CellBody"><b>objectState</b> - true if the named attribute meets
+    the specified value.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IActionFilter.html">IActionFilter</a>
+    </b>assists in evaluating the expression.</p>
+  </li>
+  <li>
+    <p CLASS="CellBody"><b>systemProperty</b> - true if the named system
+    property meets the specified value.</p>
+  </li>
+  <li>
+    <p CLASS="CellBody"><b>pluginState</b> - specifies whether the specified
+    plugin (by <b>id</b>) should be <b>installed</b> or <b>activated</b> </p>
+  </li>
+</ul>
+<p CLASS="CellBody">See <a href="../reference/extension-points/actionExpressions.html">action
+expressions </a>for samples of these expressions and a complete description of
+the XML.</p>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
+
+
+</BODY>
+</HTML>
