@@ -24,21 +24,21 @@ object, which describes the changes.</P>
 Resource change processing</H3>
 <P >
 To track changes to resources, you must register a resource change listener with the workspace.</P>
-<P CLASS="Code">
-IResourceChangeListener listener = new MyResourceChangeReporter();<br>
-ResourcesPlugin.getWorkspace().addResourceChangeListener(<br>
-&nbsp;&nbsp;&nbsp;listener, IResourceChangeEvent.POST_CHANGE);
-</P>
+<font color='#4444CC'><pre>
+   IResourceChangeListener listener = new MyResourceChangeReporter();
+   ResourcesPlugin.getWorkspace().addResourceChangeListener(
+      listener, IResourceChangeEvent.POST_CHANGE);
+</pre></font>
 <P >
 Your listener will be notified after modifications to the workspace resources
 have been made. Resource API methods that modify resources trigger these events as part of their documented behavior. The
 method comment for a resource API method explicitly states whether or not it triggers a resource change event. For example, the following is included in the
 <b> IFile.createContents()</b> comment:</P>
-<P CLASS="Code">
-This method changes resources; these changes will be reported in a subsequent<br>
-resource change event, including an indication that this file's content have<br>
-been changed.
-</P>
+<font color='#4444CC'><pre>
+   This method changes resources; these changes will be reported in a subsequent
+   resource change event, including an indication that this file's content have
+   been changed.
+</pre></font>
 <P >
 Methods that create, delete, or change a resource typically trigger these events. Methods that read, but do not write, resources typically do not trigger these events.</P>
 
@@ -75,8 +75,8 @@ Files that have been modified. Changed files are identified in the resource delt
 To traverse a resource delta tree, you may implement the <b><a href="../reference/api/org/eclipse/core/resources/IResourceDeltaVisitor.html"> IResourceDeltaVisitor</a></b> 
 interface or traverse the tree explicitly using <b>IResource.getAffectedChildren</b>. Resource delta visitors implement a
 <b> visit</b> method that is called by the resource delta as it enumerates each change in the tree.</P>
-<P CLASS="Note">
-Note:&nbsp; Changes made to resource session properties or resource persistent properties are not identified in the resource delta.</P>
+<i><blockquote>
+Note:&nbsp; Changes made to resource session properties or resource persistent properties are not identified in the resource delta.</blockquote></i>
 
 
 <H3>
@@ -97,12 +97,12 @@ Description</P>
 </TH>
 </TR>
 <TR>
-<TD COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 <b>
 PRE_CLOSE</b></P>
 </TD>
-<TD COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 Notifies listeners that a project is about to be closed. This event can be used to extract and save necessary information from the in-memory representation
 (e.g., session properties) of a project before it is closed. (When a project is closed, the in-memory representation is disposed). The workspace is locked (no resources can be updated) during this event. The
@@ -110,12 +110,12 @@ Notifies listeners that a project is about to be closed. This event can be used 
 </TD>
 </TR>
 <TR>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 <b>
 PRE_DELETE</b></P>
 </TD>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 Notifies listeners that a project is about to deleted. This event can be used to
 perform clean-up operations, such as removing any saved state that is related to
@@ -123,10 +123,10 @@ the project from your plug-in's directory.&nbsp; The workspace is locked (no res
 </TD>
 </TR>
 <TR>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody"><b>PRE_AUTOBUILD</b></P>
 </TD>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 Notifies listeners before any auto-building occurs.&nbsp; This event is
 broadcast when the platform detects an auto-build needs to occur, regardless of
@@ -135,12 +135,12 @@ whether auto-building is actually enabled.&nbsp; The workspace is <b> not</b> lo
 </TD>
 </TR>
 <tr>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 <b>
 POST_AUTOBUILD</b></P>
 </TD>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 Notifies listeners after any auto-building has occurred. This event is broadcast
 after the platform would have performed an auto-build, regardless of whether
@@ -149,12 +149,12 @@ auto-building is actually enabled.&nbsp; The workspace is <b> not</b> locked dur
 </TD>
 </tr>
 <tr>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 <b>
 POST_CHANGE</b></P>
 </TD>
-<TD ROWSPAN="1" COLSPAN="1">
+<TD>
 <P CLASS="CellBody">
 Describes a set of changes that have occurred to the workspace since the last <b> POST_CHANGE</b> event was reported. Triggered after a resource change API is used individually or in a batched set of workspace changes. Also triggered after any
 <b>PRE_AUTOBUILD</b> or <b>POST_AUTOBUILD</b>
@@ -171,15 +171,15 @@ locked (no resources can be updated) during this event.</P>
 Implementing a resource change listener</a></H3>
 <P >
 The following example implements a console-based resource change listener. A resource change listener is registered for specific types of events and information about these events is printed to the console:</P>
-<P CLASS="Code">
-IResourceChangeListener listener = new MyResourceChangeReporter();<br>
-ResourcesPlugin.getWorkspace().addResourceChangeListener(listener,<br>
-&nbsp;&nbsp;&nbsp;IResourceChangeEvent.PRE_CLOSE<br>
-&nbsp;&nbsp;&nbsp;| IResourceChangeEvent.PRE_DELETE<br>
-&nbsp;&nbsp;&nbsp;| IResourceChangeEvent.PRE_AUTO_BUILD<br>
-&nbsp;&nbsp;&nbsp;| IResourceChangeEvent.POST_AUTO_BUILD<br>
-&nbsp;&nbsp;&nbsp;| IResourceChangeEvent.POST_CHANGE);
-</P>
+<font color='#4444CC'><pre>
+   IResourceChangeListener listener = new MyResourceChangeReporter();
+   ResourcesPlugin.getWorkspace().addResourceChangeListener(listener,
+      IResourceChangeEvent.PRE_CLOSE
+      | IResourceChangeEvent.PRE_DELETE
+      | IResourceChangeEvent.PRE_AUTO_BUILD
+      | IResourceChangeEvent.POST_AUTO_BUILD
+      | IResourceChangeEvent.POST_CHANGE);
+</pre></font>
 <P >
 The listener checks for each event type and reports information about the resource that was changed and the kinds of changes that occurred.&nbsp;
 Although this example is designed to show a general listener that handles all
@@ -187,105 +187,105 @@ the types of resource events, a typical listener would register for just one
 type of event.</P>
 <P >
 The implementation for <b> POST_CHANGE </b> uses another class that can be used to visit the changes in the resource delta.</P>
-<P CLASS="Code">
-import org.eclipse.resources.*;<br>
-import org.eclipse.runtime.*;<br>
-<br>
-public class MyResourceChangeReporter implements IResourceChangeListener {<br>
-&nbsp;&nbsp;&nbsp;public void resourceChanged(IResourceChangeEvent event) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IResource res = event.getResource();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (event.getType()) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceChangeEvent.PRE_CLOSE:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(&quot;Project &quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(res.getFullPath());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot; is about to close.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceChangeEvent.PRE_DELETE:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(&quot;Project &quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(res.getFullPath());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot; is about to be deleted.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceChangeEvent.POST_CHANGE:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;Resources have changed.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event.getDelta().accept(new DeltaPrinter());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceChangeEvent.PRE_AUTO_BUILD:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;Auto build about to run.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event.getDelta().accept(new DeltaPrinter());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceChangeEvent.POST_AUTO_BUILD:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;Auto build complete.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;event.getDelta().accept(new DeltaPrinter());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;}<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   import org.eclipse.resources.*;
+   import org.eclipse.runtime.*;
+
+   public class MyResourceChangeReporter implements IResourceChangeListener {
+      public void resourceChanged(IResourceChangeEvent event) {
+         IResource res = event.getResource();
+         switch (event.getType()) {
+            case IResourceChangeEvent.PRE_CLOSE:
+               System.out.print(&quot;Project &quot;);
+               System.out.print(res.getFullPath());
+               System.out.println(&quot; is about to close.&quot;);
+               break;
+            case IResourceChangeEvent.PRE_DELETE:
+               System.out.print(&quot;Project &quot;);
+               System.out.print(res.getFullPath());
+               System.out.println(&quot; is about to be deleted.&quot;);
+               break;
+            case IResourceChangeEvent.POST_CHANGE:
+               System.out.println(&quot;Resources have changed.&quot;);
+               event.getDelta().accept(new DeltaPrinter());
+               break;
+            case IResourceChangeEvent.PRE_AUTO_BUILD:
+               System.out.println(&quot;Auto build about to run.&quot;);
+               event.getDelta().accept(new DeltaPrinter());
+               break;
+            case IResourceChangeEvent.POST_AUTO_BUILD:
+               System.out.println(&quot;Auto build complete.&quot;);
+               event.getDelta().accept(new DeltaPrinter());
+               break;
+         }
+      }
+   }
+</pre></font>
 <P >
 The <b> DeltaPrinter</b> class implements the <b><a href="../reference/api/org/eclipse/core/resources/IResourceDeltaVisitor.html">IResourceDeltaVisitor</a></b> interface to interrogate the resource delta. The
 <b> visit()</b> method is called for each resource change in the resource delta. The visitor uses a return value to indicate whether
 deltas for child resoruces should be visited. </P>
-<P CLASS="Code">
-class DeltaPrinter implements IResourceDeltaVisitor {<br>
-&nbsp;&nbsp;&nbsp;public boolean visit(IResourceDelta delta) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IResource res = delta.getResource();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (delta.getKind()) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.ADDED:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(&quot;Resource &quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(res.getFullPath());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot; was added.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.REMOVED&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(&quot;Resource &quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(res.getFullPath());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot; was removed.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.CHANGED:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(&quot;Resource &quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(res.getFullPath());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot; has changed.&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return true; // visit the children<br>
-&nbsp;&nbsp;&nbsp;}<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   class DeltaPrinter implements IResourceDeltaVisitor {
+      public boolean visit(IResourceDelta delta) {
+         IResource res = delta.getResource();
+         switch (delta.getKind()) {
+            case IResourceDelta.ADDED:
+               System.out.print(&quot;Resource &quot;);
+               System.out.print(res.getFullPath());
+               System.out.println(&quot; was added.&quot;);
+               break;
+            case IResourceDelta.REMOVED&quot;
+               System.out.print(&quot;Resource &quot;);
+               System.out.print(res.getFullPath());
+               System.out.println(&quot; was removed.&quot;);
+               break;
+            case IResourceDelta.CHANGED:
+               System.out.print(&quot;Resource &quot;);
+               System.out.print(res.getFullPath());
+               System.out.println(&quot; has changed.&quot;);
+               break;
+         }
+         return true; // visit the children
+      }
+   }
+</pre></font>
 <P >
 Further information can be obtained from the supplied resource delta. The following snippet shows how
 the <b>IResourceDelta.CHANGED</b> case could be implemented to further describe the resource changes.</P>
-<P CLASS="Code">
-...<br>
-case IResourceDelta.CHANGED:<br>
-&nbsp;&nbsp;&nbsp;System.out.print(&quot;Resource &quot;);<br>
-&nbsp;&nbsp;&nbsp;System.out.print(delta.getFullPath());<br>
-&nbsp;&nbsp;&nbsp;System.out.println(&quot; has changed.&quot;);<br>
-&nbsp;&nbsp;&nbsp;switch (delta.getFlags()) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.CONTENT:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;--&gt; Content Change&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.REPLACED:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;--&gt; Content Replaced&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.REMOVED:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;--&gt; Removed&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case IResourceDelta.MARKERS:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;--&gt; Marker Change&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IMarkerDelta[] markers = delta.getMarkerDeltas();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// if interested in markers, check these deltas<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;break;<br>
-...
-</P>
+<font color='#4444CC'><pre>
+   ...
+   case IResourceDelta.CHANGED:
+      System.out.print(&quot;Resource &quot;);
+      System.out.print(delta.getFullPath());
+      System.out.println(&quot; has changed.&quot;);
+      switch (delta.getFlags()) {
+         case IResourceDelta.CONTENT:
+            System.out.println(&quot;--&gt; Content Change&quot;);
+            break;
+         case IResourceDelta.REPLACED:
+            System.out.println(&quot;--&gt; Content Replaced&quot;);
+            break;
+         case IResourceDelta.REMOVED:
+            System.out.println(&quot;--&gt; Removed&quot;);
+            break;
+         case IResourceDelta.MARKERS:
+            System.out.println(&quot;--&gt; Marker Change&quot;);
+            IMarkerDelta[] markers = delta.getMarkerDeltas();
+            // if interested in markers, check these deltas
+            break;
+      }
+      break;
+   ...
+</pre></font>
 <P >
 For a complete description of resource deltas, visitors, and marker deltas, consult the
 API specification for <b><a href="../reference/api/org/eclipse/core/resources/IResourceDelta.html">IResourceDelta</a></b>,
 <b><a href="../reference/api/org/eclipse/core/resources/IResourceDeltaVisitor.html">IResourceDeltaVisitor</a></b>, and
 <b><a href="../reference/api/org/eclipse/core/resources/IMarkerDelta.html">IMarkerDelta</a></b>.</P>
-<P CLASS="Note">
+<i><blockquote>
 Note:&nbsp; Resource change listeners are useful for tracking changes that occur to resources while your plug-in is activated. If your plug-in registers a resource change listener during its startup code, it's possible that many resource change events have been triggered before the activation of your plug-in. The resource delta contained in the first resource change event received by your plug-in will not contain all of the changes made since your plug-in was last activated. If you need to track changes made between activations of your plug-in, you should use the support provided for workspace saving. This is described in
-<a HREF="resAdv_saving.htm" CLASS="XRef"> Workspace save participation</a>.</P>
+<a HREF="resAdv_saving.htm" CLASS="XRef"> Workspace save participation</a>.</blockquote></i>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 

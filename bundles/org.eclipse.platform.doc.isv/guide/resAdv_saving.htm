@@ -25,48 +25,48 @@ Implementing a save participant</H3>
 <P >
 To participate in workspace saving, you must add a save participant to the workspace. This is typically done during your plug-in's startup method.&nbsp;
 Let's look at a simple plug-in which will demonstrate the save process.</P>
-<P class="Code" >
-package com.example.saveparticipant;<br>
-<br>
-import org.eclipse.core.runtime.*;<br>
-import org.eclipse.core.resources.*;<br>
-import java.io.File;<br>
-import java.util.*;<br>
-<br>
-public class MyPlugin extends Plugin {<br>
-&nbsp;&nbsp;&nbsp;private static MyPlugin plugin;<br>
-<br>
-&nbsp;&nbsp;&nbsp;public MyPlugin(IPluginDescriptor descriptor) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super(descriptor);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plugin = this;<br>
-&nbsp;&nbsp;&nbsp;}<br>
-<br>
-&nbsp;&nbsp;&nbsp;public static MyPlugin getDefault() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return plugin;<br>
-&nbsp;&nbsp;&nbsp;}<br>
-<br>
-&nbsp;&nbsp;&nbsp;protected void readStateFrom(File target) {<br>
-&nbsp;&nbsp;&nbsp;}<br>
-<br>
-&nbsp;&nbsp;&nbsp;public void startup() throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super.startup();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ISavedState lastState =<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ResourcesPlugin.getWorkspace().addSaveParticipant(this, saveParticipant);</b><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (lastState == null)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>IPath location = lastState.lookup(new Path(&quot;save&quot;));</b><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (location == null)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// the plugin instance should read any important state from the file.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>File f = getStateLocation().append(location).toFile();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readStateFrom(f);</b><br>
-&nbsp;&nbsp;&nbsp;}<br>
-<br>
-&nbsp;&nbsp;&nbsp;protected void writeImportantState(File target) {<br>
-&nbsp;&nbsp;&nbsp;}<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   package com.example.saveparticipant;
+
+   import org.eclipse.core.runtime.*;
+   import org.eclipse.core.resources.*;
+   import java.io.File;
+   import java.util.*;
+
+   public class MyPlugin extends Plugin {
+      private static MyPlugin plugin;
+
+      public MyPlugin(IPluginDescriptor descriptor) {
+         super(descriptor);
+         plugin = this;
+      }
+
+      public static MyPlugin getDefault() {
+         return plugin;
+      }
+
+      protected void readStateFrom(File target) {
+      }
+
+      public void startup() throws CoreException {
+         super.startup();
+         <b>ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
+         ISavedState lastState =
+            ResourcesPlugin.getWorkspace().addSaveParticipant(this, saveParticipant);</b>
+         if (lastState == null)
+            return;
+         <b>IPath location = lastState.lookup(new Path(&quot;save&quot;));</b>
+         if (location == null)
+            return;
+         // the plugin instance should read any important state from the file.
+         <b>File f = getStateLocation().append(location).toFile();
+         readStateFrom(f);</b>
+      }
+
+      protected void writeImportantState(File target) {
+      }
+   }
+</pre></font>
 <P >
 To participate in workspace saving, you must add a save participant to the
 workspace.&nbsp; This is typically done during your plug-ins <b>startup</b>
@@ -84,42 +84,42 @@ implements each of these steps.</P>
 prepareToSave</b> notifies the participant that the workspace is about to be saved and that it should suspend normal operation until further notice.&nbsp;
 Our save particpant does nothing here.</li>
 </ul>
-<p class="Code">
-&nbsp;&nbsp;&nbsp;public void prepareToSave(ISaveContext context) throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;}
-</p>
+<font color='#4444CC'><pre>
+      public void prepareToSave(ISaveContext context) throws CoreException {
+      }
+</pre></font>
 <ul>
   <li>
 <b>
 saving</b> tells the participant to save its important state.</li>
 </ul>
-<p class="Code">
-&nbsp;&nbsp;&nbsp;public void saving(ISaveContext context) throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;switch (context.getKind()) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case ISaveContext.FULL_SAVE:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyPlugin myPluginInstance = MyPlugin.getDefault();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// save the plug-in state<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>int saveNumber = context.getSaveNumber();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String saveFileName = "save-" + Integer.toString(saveNumber);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>// if we fail to write, an exception is thrown and we do not update the path<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>myPluginInstance.writeImportantState(f);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context.map(new Path("save"), new Path(saveFileName));<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;context.needSaveNumber();</b><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case ISaveContext.PROJECT_SAVE:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// get the project related to this save operation<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IProject project = context.getProject();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// save its information, if necessary<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case ISaveContext.SNAPSHOT:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// This operation needs to be really fast because<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// snapshots can be requested frequently by the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// workspace.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;}
-</p>
+<font color='#4444CC'><pre>
+      public void saving(ISaveContext context) throws CoreException {
+         switch (context.getKind()) {
+            case ISaveContext.FULL_SAVE:
+               MyPlugin myPluginInstance = MyPlugin.getDefault();
+               // save the plug-in state
+               <b>int saveNumber = context.getSaveNumber();
+               String saveFileName = "save-" + Integer.toString(saveNumber);
+               File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
+               </b>// if we fail to write, an exception is thrown and we do not update the path
+               <b>myPluginInstance.writeImportantState(f);
+               context.map(new Path("save"), new Path(saveFileName));
+               context.needSaveNumber();</b>
+               break;
+            case ISaveContext.PROJECT_SAVE:
+               // get the project related to this save operation
+               IProject project = context.getProject();
+               // save its information, if necessary
+               break;
+            case ISaveContext.SNAPSHOT:
+               // This operation needs to be really fast because
+               // snapshots can be requested frequently by the
+               // workspace.
+               break;
+         }
+      }
+</pre></font>
 <blockquote>
   <p>The <a href="../reference/api/org/eclipse/core/resources/ISaveContext.html"><b> ISaveContext</b></a> describes information about the save operation.&nbsp;
 There are three kinds of save operations:&nbsp; <b>FULL_SAVE</b>,
@@ -133,9 +133,9 @@ in the event of a crash will slow down the platform.</p>
 A save number is used to create data save files that are named using sequential numbers (<b>save-1</b>,
 <b>save-2</b>, etc.)&nbsp; Each save file is mapped to a logical file name (<b>save</b>) that is independent of the save number. Plug-in data is written to the corresponding file and can be retrieved later without knowing the specific save number of the last successful save operation.&nbsp;
 Recall that we saw this technique in our&nbsp; plug-in's startup code:</P>
-<P class="Code" >
-<b>IPath location = lastState.lookup(new Path(&quot;save&quot;));</b><br>
-</P>
+<font color='#4444CC'><pre>
+<b>IPath location = lastState.lookup(new Path(&quot;save&quot;));</b>
+</pre></font>
 <P >
 After we have saved our data and mapped the file name, we call <b>needSaveNumber</b> 
 to indicate that we have actively participated in a workspace save and want to assign a number to the save activity.
@@ -148,17 +148,17 @@ The save numbers can be used to create data files as above.&nbsp;</P>
 <b>
 doneSaving</b> notifies the participant that the workspace has been saved and the participant can continue normal operation.</li>
 </ul>
-<p class="Code">
-&nbsp;&nbsp;&nbsp;public void doneSaving(ISaveContext context) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyPlugin myPluginInstance = MyPlugin.getDefault();<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// delete the old saved state since it is not necessary anymore<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int previousSaveNumber = <b>context.getPreviousSaveNumber()</b>;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String oldFileName = "save-" + Integer.toString(previousSaveNumber);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File f = myPluginInstance.getStateLocation().append(oldFileName).toFile();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f.delete();<br>
-&nbsp;&nbsp;&nbsp;}
-</p>
+<font color='#4444CC'><pre>
+      public void doneSaving(ISaveContext context) {
+         MyPlugin myPluginInstance = MyPlugin.getDefault();
+
+         // delete the old saved state since it is not necessary anymore
+         int previousSaveNumber = <b>context.getPreviousSaveNumber()</b>;
+         String oldFileName = "save-" + Integer.toString(previousSaveNumber);
+         File f = myPluginInstance.getStateLocation().append(oldFileName).toFile();
+         f.delete();
+      }
+</pre></font>
 <blockquote>
   <p>Here, we clean up the save information from the previous save
   operation.&nbsp; We use <b>getPreviousSaveNumber</b> 
@@ -173,17 +173,17 @@ doneSaving</b> notifies the participant that the workspace has been saved and th
 <b>
 rollback</b> tells the participant to rollback the important state because the save operation has failed.</li>
 </ul>
-<p class="Code">
-&nbsp;&nbsp;&nbsp;public void rollback(ISaveContext context) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyPlugin myPluginInstance = MyPlugin.getDefault();<br>
-<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// since the save operation has failed, delete the saved state we have just written<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;int saveNumber = context.getSaveNumber();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String saveFileName = "save-" + Integer.toString(saveNumber);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f.delete();<br>
-&nbsp;&nbsp;&nbsp;}
-</p>
+<font color='#4444CC'><pre>
+      public void rollback(ISaveContext context) {
+         MyPlugin myPluginInstance = MyPlugin.getDefault();
+
+         // since the save operation has failed, delete the saved state we have just written
+         int saveNumber = context.getSaveNumber();
+         String saveFileName = "save-" + Integer.toString(saveNumber);
+         File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
+         f.delete();
+      }
+</pre></font>
 <blockquote>
   <p>Here, we delete the state that we just saved.&nbsp; Note that we use the
   current save number to construct the file name of the file we just saved.&nbsp;
@@ -214,18 +214,18 @@ object can be used to access information from the previous save file (using the 
 Accessing the save files</H4>
 <P >
 If a file map was used to save logically named files according to the save number, this same map can be used to retrieve the data from the last known save state.</P>
-<P CLASS="Code">
-ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();<br>
-ISavedState lastState =<br>
-&nbsp;&nbsp;&nbsp;ResourcesPlugin.getWorkspace().addSaveParticipant(myPluginInstance, saveParticipant);<br>
-<br>
-if (lastState != null) {<br>
-&nbsp;&nbsp;&nbsp;String saveFileName = lastState.lookup(new Path(&quot;save&quot;)).toString();<br>
-&nbsp;&nbsp;&nbsp;File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();<br>
-&nbsp;&nbsp;&nbsp;// the plugin instance should read any important state from the file.<br>
-&nbsp;&nbsp;&nbsp;myPluginInstance.readStateFrom(f);<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
+   ISavedState lastState =
+      ResourcesPlugin.getWorkspace().addSaveParticipant(myPluginInstance, saveParticipant);
+
+   if (lastState != null) {
+      String saveFileName = lastState.lookup(new Path(&quot;save&quot;)).toString();
+      File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
+      // the plugin instance should read any important state from the file.
+      myPluginInstance.readStateFrom(f);
+   }
+</pre></font>
 
 
 <H4>
@@ -235,28 +235,28 @@ Recall that any number of resource change events could occur in the workspace be
 deactivated, you can use the save mechanism to do so, even if you don't need to save any other data.</P>
 <P >
 The save participant must request that the platform keep a resource delta on its behalf. This is done as part of the save operation.</P>
-<P CLASS="Code">
-public void saving(ISaveContext context) throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;// no state to be saved by the plug-in, but request a<br>
-&nbsp;&nbsp;&nbsp;// resource delta to be used on next activation.<br>
-&nbsp;&nbsp;&nbsp;context.needDelta();<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   public void saving(ISaveContext context) throws CoreException {
+      // no state to be saved by the plug-in, but request a
+      // resource delta to be used on next activation.
+      context.needDelta();
+   }
+</pre></font>
 <P >
 During plug-in startup, the previous saved state can be accessed and change events will be created for all changes that have occurred since the last save.</P>
-<P CLASS="Code">
-ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();<br>
-ISavedState lastState =<br>
-&nbsp;&nbsp;&nbsp;ResourcesPlugin.getWorkspace().addSaveParticipant(myPluginInstance, saveParticipant);<br>
-if (lastState != null) {<br>
-&nbsp;&nbsp;&nbsp;lastState.processResourceChangeEvents(new MyResourceChangeReporter());<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
+   ISavedState lastState =
+      ResourcesPlugin.getWorkspace().addSaveParticipant(myPluginInstance, saveParticipant);
+   if (lastState != null) {
+      lastState.processResourceChangeEvents(new MyResourceChangeReporter());
+   }
+</pre></font>
 <P >
 The provided class must implement <a href="../reference/api/org/eclipse/core/resources/IResourceChangeListener.html"><b>IResourceChangeListener</b></a>, as described in
 <a HREF="resAdv_events.htm" CLASS="XRef"> Tracking resource changes</a>.&nbsp; The changes since the last save are reported as part of the <b> POST_AUTO_BUILD</b> resource change event.</P>
-<P CLASS="Note">
-Note:&nbsp; Marker changes are not reported in the change events stored in an <b> ISavedState</b>. You must assume that any or all markers have changed since your last state was saved.</P>
+<i><blockquote>
+Note:&nbsp; Marker changes are not reported in the change events stored in an <b> ISavedState</b>. You must assume that any or all markers have changed since your last state was saved.</blockquote></i>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>

@@ -29,47 +29,47 @@ workbench), you must understand more about SWT's application structure.</P>
 A typical stand-alone SWT application has the following structure:</P>
 <ul>
   <li>
-    <p >
+    
 Create a <b><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></b>
 which represents an SWT session.</li>
   <li>
-    <p >
+    
 Creates one or more <b><a href="../reference/api/org/eclipse/swt/widgets/Shell.html"> Shell</a>s</b> which
 serve as the main window(s) for the application.</li>
   <li>
-    <p >
+    
 Create any other widgets needed inside the shell.</li>
   <li>
-    <p >
+    
 Initialize the sizes and other necessary state for the widgets. Register listeners
 for widget events that need to be handled.</li>
   <li>
-    <p >
+    
 Open the shell window.</li>
   <li>
-    <p >
+    
 Run the event dispatching loop until an exit condition occurs (typically when
     the main shell window is closed by the user).</li>
   <li>
-    <p >
+    
 Dispose the display.</li>
 </ul>
 <P >
 The following code snippet is adapted from the <b> org.eclipse.swt.examples.helloworld.HelloWorld2</b> application. Since the application only displays the string &quot;Hello World,&quot; it does not need to register for any widget events.</P>
-<P CLASS="Code">
-public static void main (String [] args) {<br>
-&nbsp;&nbsp;&nbsp;Display display = new Display ();<br>
-&nbsp;&nbsp;&nbsp;Shell shell = new Shell (display);<br>
-&nbsp;&nbsp;&nbsp;Label label = new Label (shell, SWT.CENTER);<br>
-&nbsp;&nbsp;&nbsp;label.setText (&quot;Hello_world&quot;);<br>
-&nbsp;&nbsp;&nbsp;label.setBounds (shell.getClientArea ());<br>
-&nbsp;&nbsp;&nbsp;shell.open ();<br>
-&nbsp;&nbsp;&nbsp;while (!shell.isDisposed ()) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (!display.readAndDispatch ()) display.sleep ();<br>
-&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;display.dispose ();<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   public static void main (String [] args) {
+      Display display = new Display ();
+      Shell shell = new Shell (display);
+      Label label = new Label (shell, SWT.CENTER);
+      label.setText (&quot;Hello_world&quot;);
+      label.setBounds (shell.getClientArea ());
+      shell.open ();
+      while (!shell.isDisposed ()) {
+         if (!display.readAndDispatch ()) display.sleep ();
+      }
+      display.dispose ();
+   }
+</pre></font>
 
 <H4>
 Display</H4>
@@ -140,21 +140,21 @@ that you explicitly free any OS resources that you have allocated. In SWT, the <
 The rule of thumb is that if you create the object, you must dispose of it. Here are some specific ground rules that further explain this philosophy:</P>
 <ul>
   <li>
-    <p >
+    
 If you create a widget or graphic object using a constructor, you must dispose of it manually when you are finished using it.</li>
   <li>
-    <p >
+    
 If you get a widget or graphic object without using a constructor, you must not dispose of it manually since you did not allocate it.</li>
   <li>
-    <p >
+    
 If you pass a reference to your widget or graphic object to another object, you must take care not to dispose of it while it is still being used. (We saw this rule in practice earlier in
 <a HREF="jface_resources.htm#jface_resources_patterns" CLASS="XRef"> Plug-in patterns for using images</a>.)</li>
   <li>
-    <p >
+    
 When the user closes a <a href="../reference/api/org/eclipse/swt/widgets/Shell.html"><b>Shell</b></a>, the shell and all of its
 child widgets are recursively disposed. In this case, you do not need to dispose of the widgets themselves. However, you must free any graphics resources allocated in conjunction with those widgets.</li>
   <li>
-    <p >
+    
 If you create a graphic object for use during the lifetime of one of your widgets, you must dispose of the
 graphic object when the widget is disposed. This can be done by registering a dispose listener for your widget and freeing the
 graphic object when the <b> dispose</b> event is received.</p>

@@ -50,27 +50,27 @@ Generic source code modification</h3>
 Some source code modifications are not provided via the Java element API. A more general way to edit source code (such as changing the source code for existing elements) is accomplished using the compilation unit's raw source code and the Java DOM.</P>
 <P>
 These techniques include the following:</P>
-<P class="Code">
-// get the source for a compilation unit<BR>
-String contents = myCompilationUnit.getBuffer().getContents();<br>
-<BR>
-// Create an editable JDOM<BR>
-myJDOM = new DOMFactory();<BR>
-myDOMCompilationUnit = myJDOM.createCompilationUnit(contents, &quot;MyClass&quot;);<br>
-<BR>
-// Navigate and edit the compilation unit structure using <BR>
-// JDOM node protocol.&nbsp;<br>
-...<br>
-// Once modififications have been made to all of the nodes <BR>
-// get the source back from the compilation unit DOM node.<BR>
-String newContents = myDOMCompilationUnit.getContents();<br>
-<BR>
-// Set this code back into the compilation unit element<BR>
-myCompilationUnit.getBuffer().setContents(newContents);<br>
-<BR>
-// Save the buffer to the file.<BR>
-myCompilationUnit.save();
-</P>
+<font color='#4444CC'><pre>
+   // get the source for a compilation unit
+   String contents = myCompilationUnit.getBuffer().getContents();
+
+   // Create an editable JDOM
+   myJDOM = new DOMFactory();
+   myDOMCompilationUnit = myJDOM.createCompilationUnit(contents, &quot;MyClass&quot;);
+
+   // Navigate and edit the compilation unit structure using 
+   // JDOM node protocol. 
+   ...
+   // Once modififications have been made to all of the nodes 
+   // get the source back from the compilation unit DOM node.
+   String newContents = myDOMCompilationUnit.getContents();
+
+   // Set this code back into the compilation unit element
+   myCompilationUnit.getBuffer().setContents(newContents);
+
+   // Save the buffer to the file.
+   myCompilationUnit.save();
+</pre></font>
 <P>
 This technique can result in problem markers being associated with incorrect line numbers, since the Java elements were not updated directly.</P>
 <P>
@@ -83,24 +83,24 @@ Responding to changes in Java elements</h3>
 If your plug-in needs to know about changes to Java elements after the fact, you can register a Java
 <a href="../reference/api/org/eclipse/jdt/core/IElementChangedListener.html"><b> IElementChangedListener</b></a> with
 <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a>.</P>
-<P CLASS="Code">
-JavaCore.addElementChangedListener(new MyJavaElementChangeReporter());
-</P>
+<font color='#4444CC'><pre>
+   JavaCore.addElementChangedListener(new MyJavaElementChangeReporter());
+</pre></font>
 <P>
 Java element change listeners are similar conceptually to resource change listeners
 (described in
 <a HREF="../../org.eclipse.platform.doc.isv/guide/resAdv_events.htm" CLASS="XRef">tracking resource changes</a>). The following snippet implements a Java element change reporter that prints the element deltas to the system console.</P>
-<P CLASS="Code">
-public class MyJavaElementChangeReporter implements IElementChangedListener {<BR>
-&nbsp;&nbsp;&nbsp;public void elementChanged(ElementChangedEvent event) {<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IJavaElementDelta delta= event.getDelta();<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (delta != null) {<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.println(&quot;delta received: &quot;);<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;System.out.print(delta);<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<BR>
-&nbsp;&nbsp;&nbsp;}<BR>
-}
-</P>
+<font color='#4444CC'><pre>
+   public class MyJavaElementChangeReporter implements IElementChangedListener {
+      public void elementChanged(ElementChangedEvent event) {
+         IJavaElementDelta delta= event.getDelta();
+         if (delta != null) {
+            System.out.println(&quot;delta received: &quot;);
+            System.out.print(delta);
+         }
+      }
+   }
+</pre></font>
 <P>
 The <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html"><b> IJavaElementDelta</b></a> includes the element that was
 changed and flags describing the kind of change that occurred.

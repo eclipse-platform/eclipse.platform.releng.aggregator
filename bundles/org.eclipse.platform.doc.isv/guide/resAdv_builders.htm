@@ -26,11 +26,11 @@ Java project and recompiles any other files affected by the change. </P>
 The platform defines two types of builds:</P>
 <ul>
   <li>
-    <p >
+    
 A <b> full build </b> performs a build from scratch. It treats all resources in
 the projects as if they have never been seen by the builder.</li>
   <li>
-    <p >
+    
 An <b> incremental build</b> uses a &quot;last build state,&quot; maintained internally by the builder,
 to do an optimized
 build based on the changes since the last build.</li>
@@ -84,55 +84,55 @@ The <a href="../reference/extension-points/org_eclipse_core_resources_builders.h
 incremental project builder to the platform. The following markup shows how the hypothetical plug-in
 <b> com.example.builders</b> could contribute an
 incremental project builder.</P>
-<P class="Code" >
-&lt;extension<br>
-&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.builders&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp;&lt;builder<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id=&quot;com.example.builders&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name=&quot;MyBuilder&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;run&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class=&quot;com.example.builders.BuilderExample&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;parameter name=&quot;optimize&quot; value=&quot;true&quot; /&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;parameter name=&quot;comment&quot; value=&quot;Builder comment&quot; /&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/run&gt;<br>
-&nbsp;&nbsp;&nbsp;&lt;/builder&gt;<br>
-&lt;/extension&gt;
-</P>
+<font color='#4444CC'><pre>
+   &lt;extension
+      point=&quot;org.eclipse.core.resources.builders&quot;&gt;
+      &lt;builder
+         id=&quot;com.example.builders&quot;
+         name=&quot;MyBuilder&quot;&gt;
+         &lt;run 
+            class=&quot;com.example.builders.BuilderExample&quot;&gt;
+            &lt;parameter name=&quot;optimize&quot; value=&quot;true&quot; /&gt;
+            &lt;parameter name=&quot;comment&quot; value=&quot;Builder comment&quot; /&gt;
+         &lt;/run&gt;
+      &lt;/builder&gt;
+   &lt;/extension&gt;
+</pre></font>
 <P >
 The class identified in the extension point must extend the platform class <b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>. </P>
-<P CLASS="Code">
-public class BuilderExample extends IncrementalProjectBuilder {<br>
-&nbsp;&nbsp;&nbsp;IProject[] build(int kind, Map args, IProgressMonitor monitor)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// add your build logic here<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return null;<br>
-&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;protected void startupOnInitialize() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// add builder init logic here<br>
-&nbsp;&nbsp;&nbsp;}<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   public class BuilderExample extends IncrementalProjectBuilder {
+      IProject[] build(int kind, Map args, IProgressMonitor monitor)
+            throws CoreException {
+         // add your build logic here
+         return null;
+      }
+      protected void startupOnInitialize() {
+         // add builder init logic here
+      }
+   }
+</pre></font>
 <P >
 Build processing begins with the <b> build()</b> method, which includes information about the kind of build that has been requested,
 <b>FULL_BUILD</b>, <b>INCREMENTAL_BUILD</b>, or
 <b>AUTO_BUILD</b>. If an incremental build has been requested, a resource delta is provided to describe the changes in the project's resources since the last build. The following snippet further refines the
 <b> build() </b> method.</P>
-<P CLASS="Code">
-protected IProject[] build(int kind, Map args, IProgressMonitor monitor<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;if (kind == IncrementalProjectBuilder.FULL_BUILD) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fullBuild(monitor);<br>
-&nbsp;&nbsp;&nbsp;} else {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IResourceDelta delta = getDelta(getProject());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (delta == null) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fullBuild(monitor);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;incrementalBuild(delta, monitor);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;return null;<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   protected IProject[] build(int kind, Map args, IProgressMonitor monitor
+         throws CoreException {
+      if (kind == IncrementalProjectBuilder.FULL_BUILD) {
+         fullBuild(monitor);
+      } else {
+         IResourceDelta delta = getDelta(getProject());
+         if (delta == null) {
+            fullBuild(monitor);
+         } else {
+            incrementalBuild(delta, monitor);
+         }
+      }
+      return null;
+   }
+</pre></font>
 
 <P>It sometimes happens that when building project &quot;X,&quot; a builder
 needs information about changes in some other project &quot;Y.&quot;&nbsp; (For
@@ -150,24 +150,24 @@ Full build</H4>
 The logic required to process a full build request is specific to the plug-in. It may involve visiting every resource in the project (if the build was triggered for a project) or
 even examining other projects if there are dependencies between projects.&nbsp; The following snippet
 suggests how a full build might be implemented.</P>
-<P CLASS="Code">
-protected void fullBuild(final IProgressMonitor monitor) throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;try {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getProject().accept(new MyBuildVisitor());<br>
-&nbsp;&nbsp;&nbsp;} catch (CoreException e) { }<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
+      try {
+         getProject().accept(new MyBuildVisitor());
+      } catch (CoreException e) { }
+   }
+</pre></font>
 <P >
 The build visitor would perform the build for the specific resource (and answer true to continue visiting all child resources).</P>
-<P CLASS="Code">
-class MyBuildVisitor implements IResourceVisitor {<br>
-&nbsp;&nbsp;&nbsp;public boolean visit(IResource res) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//build the specified resource.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//return true to continue visiting children.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return true;<br>
-&nbsp;&nbsp;&nbsp;}<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   class MyBuildVisitor implements IResourceVisitor {
+      public boolean visit(IResource res) {
+         //build the specified resource.
+         //return true to continue visiting children.
+         return true;
+      }
+   }
+</pre></font>
 <P >
 The visit process continues until the full resource tree has been traveled.</P>
 
@@ -177,13 +177,13 @@ Incremental build</H4>
 <P >
 When performing an incremental build, you work with a resource change delta instead of the
 whole project.</P>
-<P CLASS="Code">
-protected void incrementalBuild(IResourceDelta delta,&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IProgressMonitor monitor) throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;// the visitor does the work.<br>
-&nbsp;&nbsp;&nbsp;delta.accept(new MyBuildDeltaVisitor());<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   protected void incrementalBuild(IResourceDelta delta, 
+         IProgressMonitor monitor) throws CoreException {
+      // the visitor does the work.
+      delta.accept(new MyBuildDeltaVisitor());
+   }
+</pre></font>
 <P >
 Note that for an incremental build, the build visitor works with a resource delta tree instead of a complete resource tree. </P>
 <P >
@@ -203,30 +203,30 @@ To make a builder available for a given project, it must be included in the buil
 incremental project builder. </P>
 <P >
 The following snippet adds a new builder as the first builder in the existing list of builders.</P>
-<P CLASS="Code">
-IProjectDescription desc = project.getDescription();<br>
-ICommand[] commands = desc.getBuildSpec();<br>
-boolean found = false;<br>
-<br>
-for (int i = 0; i &lt; commands.length; ++i) {<br>
-&nbsp;&nbsp;&nbsp;if (commands[i].getBuilderName().equals(BUILDER_ID)) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;found = true;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
-&nbsp;&nbsp;&nbsp;}<br>
-}<br>
-if (!found) {&nbsp;<br>
-&nbsp;&nbsp;&nbsp;//add builder to project<br>
-&nbsp;&nbsp;&nbsp;ICommand command = desc.newCommand();<br>
-&nbsp;&nbsp;&nbsp;command.setBuilderName(BUILDER_ID);<br>
-&nbsp;&nbsp;&nbsp;ICommand[] newCommands = new ICommand[commands.length + 1];<br>
-<br>
-&nbsp;&nbsp;&nbsp;// Add it before other builders.<br>
-&nbsp;&nbsp;&nbsp;System.arraycopy(commands, 0, newCommands, 1, commands.length);<br>
-&nbsp;&nbsp;&nbsp;newCommands[0] = command;<br>
-&nbsp;&nbsp;&nbsp;desc.setBuildSpec(newCommands);<br>
-&nbsp;&nbsp;&nbsp;project.setDescription(desc, null);<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   IProjectDescription desc = project.getDescription();
+   ICommand[] commands = desc.getBuildSpec();
+   boolean found = false;
+
+   for (int i = 0; i &lt; commands.length; ++i) {
+      if (commands[i].getBuilderName().equals(BUILDER_ID)) {
+         found = true;
+         break;
+      }
+   }
+   if (!found) { 
+      //add builder to project
+      ICommand command = desc.newCommand();
+      command.setBuilderName(BUILDER_ID);
+      ICommand[] newCommands = new ICommand[commands.length + 1];
+
+      // Add it before other builders.
+      System.arraycopy(commands, 0, newCommands, 1, commands.length);
+      newCommands[0] = command;
+      desc.setBuildSpec(newCommands);
+      project.setDescription(desc, null);
+   }
+</pre></font>
 <P >
 Configuring a project's builder is done just once, usually as the project is being created.</P>
 

@@ -35,19 +35,19 @@ The <b>ReadmeEditor</b> overrides a few methods in <a href="../reference/api/org
 to supply its own outliner.&nbsp;&nbsp;</P>
 <P >The outliner for an editor is specified when the workbench requests an
 adapter of type <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/IContentOutlinePage.html">IContentOutlinePage</a></b>.</P>
-<P class="Code">
-public Object getAdapter(Class key) {<br>
-&nbsp;&nbsp;&nbsp;if (key.equals(IContentOutlinePage.class)) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IEditorInput input = getEditorInput();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if (input instanceof IFileEditorInput) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;page = new ReadmeContentOutlinePage(<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;((IFileEditorInput)input).getFile());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return page;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;}<br>
-&nbsp;&nbsp;&nbsp;return super.getAdapter(key);<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   public Object getAdapter(Class key) {
+      if (key.equals(IContentOutlinePage.class)) {
+         IEditorInput input = getEditorInput();
+         if (input instanceof IFileEditorInput) {
+            page = new ReadmeContentOutlinePage(
+               ((IFileEditorInput)input).getFile());
+            return page;
+         }
+      }
+      return super.getAdapter(key);
+   }
+</pre></font>
 <P >When a <b>ReadmeEditor</b> is opened (on a <b>.readme</b>
 file), the corresponding readme outliner is displayed (if the workbench user is
 showing the <b>Outline</b> view.)</P>
@@ -86,16 +86,16 @@ input element in the constructor.&nbsp; This input can often be passed directly
 to the outline page's viewer, as is done below.</P>
 
 
-<P class="Code" >
-public void createControl(Composite parent) {<br>
-&nbsp;&nbsp;&nbsp;...<br>
-&nbsp;&nbsp;&nbsp;TreeViewer viewer = getTreeViewer();<br>
-&nbsp;&nbsp;&nbsp;viewer.setContentProvider(new WorkbenchContentProvider());<br>
-&nbsp;&nbsp;&nbsp;viewer.setLabelProvider(new WorkbenchLabelProvider());<br>
-&nbsp;&nbsp;&nbsp;viewer.setInput(getContentOutline(input));<br>
-&nbsp;&nbsp;&nbsp;...<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   public void createControl(Composite parent) {
+      ...
+      TreeViewer viewer = getTreeViewer();
+      viewer.setContentProvider(new WorkbenchContentProvider());
+      viewer.setLabelProvider(new WorkbenchLabelProvider());
+      viewer.setInput(getContentOutline(input));
+      ...
+   }
+</pre></font>
 
 
 <P >The tree viewer creation is inherited from <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a></b>.&nbsp;
@@ -104,11 +104,11 @@ are used here, and the outline for the content is constructed using the same <b>
 that constructed the sections for the view.</P>
 
 
-<P class="Code" >
-private IAdaptable getContentOutline(IAdaptable input) {<br>
-&nbsp;&nbsp;&nbsp;return ReadmeModelFactory.getInstance().getContentOutline(input);<br>
-}
-</P>
+<font color='#4444CC'><pre>
+   private IAdaptable getContentOutline(IAdaptable input) {
+      return ReadmeModelFactory.getInstance().getContentOutline(input);
+   }
+</pre></font>
 
 
 <P >That's all there is to it!</P>
