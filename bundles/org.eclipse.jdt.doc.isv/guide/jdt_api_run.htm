@@ -21,7 +21,7 @@ Launching a compiled Java program</h3>
 Java programs that have been compiled in a Java project can be run by getting the appropriate
 <a href="../reference/api/org/eclipse/jdt/launching/IVMRunner.html"><b>IVMRunner</b></a>
 for the Java project and running the class by name. The following code snippet shows how the class
-<b>MyClass</b> inside <b> myJavaProject</b> can be launched.</P>
+<b>MyClass</b> inside <b>myJavaProject</b> can be launched.</P>
 <font color='#4444CC'><pre>
    IVMInstall vmInstall = JavaRuntime.getVMInstall(myJavaProject);
    if (vmInstall == null)
@@ -43,6 +43,21 @@ for the Java project and running the class by name. The following code snippet s
    }
 </pre></font>
 
+<p>
+Another way to launch a Java program is to create a <b>Java application</b> launch configuration,
+and launch it. The following snippet shows hot the class <b>MyClass</b> inside <b> myJavaProject</b>
+can be launched using a simple launch configuration. By default, the resulting running application
+will use the JRE and classpath associated with <b>myJavaProject</b>.
+</p>
+<font color='#4444CC'><pre>
+   ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+   ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
+   ILaunchConfigurationWorkingCopy wc = type.newInstance(null, "SampleConfig");
+   wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "myJavaProject");
+   wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "myClass");
+   ILaunchConfiguration config = wc.doSave();	
+   config.launch(ILaunchManager.RUN_MODE, null);
+</pre></font>
 
 <P><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 </BODY>
