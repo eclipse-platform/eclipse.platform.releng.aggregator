@@ -21,6 +21,7 @@ import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
 import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
+import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
 
 public class MapProject implements IResourceChangeListener {
 	
@@ -123,7 +124,7 @@ public class MapProject implements IResourceChangeListener {
 	
 	public void commitMapProject(String comment, IProgressMonitor  monitor) throws CoreException{;
 		try {
-			new CommitOperation(null, new IResource[] { project }, new Command.LocalOption[0], comment).run(monitor);
+			new CommitOperation(null, RepositoryProviderOperation.asResourceMappers(new IResource[] { project }), new Command.LocalOption[0], comment).run(monitor);
 		} catch (InvocationTargetException e) {
 			throw TeamException.asTeamException(e);
 		} catch (InterruptedException e) {

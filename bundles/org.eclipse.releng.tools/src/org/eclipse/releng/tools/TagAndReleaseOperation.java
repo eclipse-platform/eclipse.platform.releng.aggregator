@@ -15,10 +15,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.operations.TagOperation;
+import org.eclipse.ui.IWorkbenchPart;
 
 /**
  *  This class overrides the basic tag operation in order to update and possibly commit
@@ -31,8 +31,8 @@ public class TagAndReleaseOperation extends TagOperation {
 	private String comment;
 	private MapProject mapProject;
 	
-	public TagAndReleaseOperation(Shell shell, MapProject mapProject, IResource[] resources, CVSTag t, String c) {
- 		super(shell, resources);
+	public TagAndReleaseOperation(IWorkbenchPart part, MapProject mapProject, IResource[] resources, CVSTag t, String c) {
+ 		super(part, asResourceMappers(resources));
 		selectedProjects = new IResource[resources.length];
 		System.arraycopy(resources,0,selectedProjects,0,resources.length);
 		this.tag = t;
@@ -47,12 +47,13 @@ public class TagAndReleaseOperation extends TagOperation {
 	public IStatus tag(
 		CVSTeamProvider provider,
 		IResource[] resources,
+        boolean recurse,
 		IProgressMonitor progress)
 		throws CVSException {
 		
 		// Tag the resource
 		progress.beginTask("Releasing project " + provider.getProject().getName(), 100);
-		IStatus status = super.tag(provider, resources, new SubProgressMonitor(progress, 95));
+		IStatus status = super.tag(provider, resources, recurse, new SubProgressMonitor(progress, 95));
 		if (status.getSeverity() == IStatus.ERROR) return status;
 		progress.done();
 		return status;

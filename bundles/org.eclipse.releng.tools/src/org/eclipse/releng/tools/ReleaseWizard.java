@@ -169,7 +169,7 @@ public class ReleaseWizard extends Wizard {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					CVSTag tag = new CVSTag(tagPage.getTagString(), CVSTag.VERSION);
-					TagAndReleaseOperation operation = new TagAndReleaseOperation(getShell(), mapProject, 
+					TagAndReleaseOperation operation = new TagAndReleaseOperation(null, mapProject, 
 							selectedProjects, tag,commentPage.getComment() );
 					if (tagPage.isMoveButtonSelected()) {
 						operation.moveTag();
