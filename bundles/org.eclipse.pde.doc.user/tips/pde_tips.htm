@@ -15,7 +15,32 @@
 <h2>Tips and Tricks</h2>
 
 <p>&nbsp;</p>
-<table border="1" cellpadding="10" cellspacing="0" width="600" style="border-collapse: collapse" bordercolor="#111111">
+<table border="1" cellpadding="10" cellspacing="0" width="600" style="border-collapse: collapse" bordercolor="#111111" height="1033">
+  <tr>
+    <td valign="top" align="right" width="20%" height="345"><b>Support for feature-based self-hosting</b></td>
+    <td valign="top" align="left" width="80%" height="345">The current method of self-hosting in Eclipse
+      is plug-in-based. PDE launches a second run-time workbench instance by
+      passing an array of plug-ins that it should load. A regular Eclipse
+      product is feature-based: during startup, it checks all the features that
+      should be active, computes plug-ins that belong to those features, and
+      passes the result for loading.
+      <p>This difference in behavior makes it complicated to self-host in
+      scenarios where a full startup that involves features is required. PDE now
+      supports this scenario if care is taken with the setup:</p>
+      <ol>
+        <li>The workspace needs to be &lt;work-area&gt;/plugins.</li>
+        <li>Features must be imported into the workspace using the new 'Feature
+          Import' wizard (they will be created in &lt;work-area&gt;/features).</li>
+        <li>All plug-ins must be in the workspace (either in source or imported
+          as binary projects WITHOUT linking).</li>
+        <li>When launching, Run-time Workbench launcher must be configured to
+          use features (in Plug-ins and Fragments tab).</li>
+      </ol>
+      <p>If all these conditions are met, the runtime Eclipse instance will be
+      launched in a way that is the closest possible approximation of a normal
+      Eclipse startup. This facilitates testing About dialogs and other aspects
+      that may depend on the set of installed features.</td>
+  </tr>
   <tr>
     <td valign="top" align="right" width="20%"><b>Importing with linking</b></td>
     <td valign="top" align="left" width="80%">Importing external plug-ins and 
@@ -32,56 +57,8 @@
     resources.</td>
   </tr>
   <tr>
-    <td valign="top" align="right" width="20%"><b>Exporting plug-ins, fragments 
-    and features</b></td>
-    <td valign="top" align="left" width="80%">You no longer need to build 
-    plug-ins, fragments, and features manually in your workspace and pollute 
-    your workspace with build by-products.&nbsp; As of 2.1, using PDE's export 
-    wizards, you can cleanly build and export plug-ins, fragments, and features 
-    to a destination external to the workspace.&nbsp; You will be shielded from 
-    the internal process of building, such as creating Ant scripts, running 
-    targets, cleaning up, etc.</td>
-  </tr>
-  <tr>
-    <td valign="top" align="right" width="20%"><b>More robust build paths</b></td>
-    <td valign="top" align="left" width="80%">If you have found that sharing .classpath 
-    files among team members is very difficult, as every developer has a 
-    different workspace, then PDE's classpath container option is the answer.&nbsp; 
-    Go to the <b>Plug-in Development-&gt;Java Build Path Control</b>, and check the 
-    'use classpath containers' option.&nbsp; You will need to update build paths 
-    of your project in order to see the changes applied. Once you switch to 
-    classpath containers, you can use either external plug-ins or import binary 
-    plug-in projects, or a mix of both. Whatever you do, classpath container 
-    will keep up with the changes and adapt.</td>
-  </tr>
-  <tr>
-    <td valign="top" align="right" width="20%"><b>Support for feature-based self-hosting</b></td>
-    <td valign="top" align="left" width="80%">The current method of self-hosting in Eclipse
-      is plug-in-based. PDE launches a second run-time workbench instance by
-      passing an array of plug-ins that it should load. A regular Eclipse
-      product is feature-based: during startup, it checks all the features that
-      should be active, computes plug-ins that belong to those features, and
-      passes the result for loading.
-      <p>This difference in behavior makes it complicated to self-host in
-      scenarios where a full startup that involves features is required. PDE now
-      supports this scenario if care is taken with the setup:</p>
-      <ol>
-        <li>The workspace needs to be &lt;work-area&gt;/plugins.</li>
-        <li>Features must be imported into the workspace using the new 'Feature
-          Import' wizard (they will be created in &lt;work-area&gt;/features).</li>
-        <li>All plug-ins must be in the workspace (either in source or imported
-          as binary projects).</li>
-        <li>When launching, Run-time Workbench launcher must be configured to
-          use features (in Plug-ins and Fragments tab).</li>
-      </ol>
-      <p>If all these conditions are met, the runtime Eclipse instance will be
-      launched in a way that is the closest possible approximation of a normal
-      Eclipse startup. This facilitates testing About dialogs and other aspects
-      that may depend on the set of installed features.</td>
-  </tr>
-  <tr>
-    <td valign="top" align="right" width="20%"><b>Templates</b></td>
-    <td valign="top" align="left" width="80%">For a quick start, PDE provides 
+    <td valign="top" align="right" width="20%" height="112"><b>Templates</b></td>
+    <td valign="top" align="left" width="80%" height="112">For a quick start, PDE provides 
     several template plug-ins that will generate a plug-in with one or more 
     fully-working extensions.&nbsp; In addition, if at any point, you would like 
     to add a new extension from the template list (without having to generate a 
@@ -91,17 +68,19 @@
     the left pane and choose the template of choice in the right pane.</td>
   </tr>
   <tr>
-    <td width="20%" valign="top" align="right"><b>Plug-in dependency extent</b></td>
-    <td width="80%" valign="top" align="left">If you have ever looked at the 
+    <td width="20%" valign="top" align="right" height="280"><b>Plug-in dependency extent</b></td>
+    <td width="80%" valign="top" align="left" height="280">If you have ever looked at the 
     list of plug-ins that your plug-in depends on and wondered why your plug-in 
-    needs a particular plug-in X, now you can easily find out why.&nbsp; The <b>Compute Dependency Extent </b>operation
+    needs a particular plug-in X, now you can easily find out why.&nbsp; 
+    <p>The <b>Compute Dependency Extent </b>operation
       found on the context menu in several contexts (including manifest file
       Dependencies page and Dependencies view) performs a combined Java and
       plug-in search to find all Java types and extension points provided by 
     plug-in X which are referenced
       by your plug-in. The results will be displayed in the Search view.&nbsp; When a type is selected in the Search results view, the <b>References
       in <i>MyPlugIn</i></b> action in the context menu searches for the places
-      in the plug-in where the selected type is referenced.&nbsp;<p>If the 
+      in the plug-in where the selected type is referenced.&nbsp;</p>
+    <p>If the 
     search returns 0 results, you should definitely remove plug-in X from your 
     list of dependencies, as it is not being used at all, and it would just slow 
     class loading.</p>
@@ -110,8 +89,8 @@
     desirable.</td>
   </tr>
   <tr>
-    <td width="20%" valign="top" align="right"><b>Finding Unused Dependencies</b></td>
-    <td width="80%" valign="top" align="left">Minimizing a plug-in's number of 
+    <td width="20%" valign="top" align="right" height="112"><b>Finding Unused Dependencies</b></td>
+    <td width="80%" valign="top" align="left" height="112">Minimizing a plug-in's number of 
     dependencies is certain to improve performance.&nbsp; As your plug-in 
     evolves, its list of dependencies might become stale, as it might be still 
     containing references to plug-ins that it no longer needs.&nbsp; A quick way 
@@ -121,38 +100,16 @@
     manifest editor.</td>
   </tr>
   <tr>
-    <td width="20%" valign="top" align="right"><b>Plug-in searches</b></td>
-    <td width="80%" valign="top" align="left">If you would like to find a 
-    plug-in, fragment, extension, or extension point in your workspace or in an 
-    external plug-in, you could use the new Plug-in Search tab on the Search 
-    dialog.</td>
-  </tr>
-  <tr>
-    <td width="20%" valign="top" align="right"><b>Searching other plug-ins</b></td>
-    <td width="80%" valign="top" align="left">Java Search is limited to projects 
+    <td width="20%" valign="top" align="right" height="80"><b>Extending the Java 
+    search scope</b></td>
+    <td width="80%" valign="top" align="left" height="80">Java Search is limited to projects 
     in your workspace and external jars that these projects reference.&nbsp; If 
     you would like to add more libraries from external plug-ins into the search: 
     open the Plug-ins View, select a plug-in and choose <b>Add to Java Search</b> 
     from the context menu. This is handy for remaining
       aware of other plug-ins that depend on ones you're working on.</td>
   </tr>
-  <tr>
-    <td width="20%" valign="top" align="right"><b>Plug-in dependencies view</b></td>
-    <td width="80%" valign="top" align="left">If you would like to view all the 
-    plug-ins required before your plug-in is activated, use the Plug-in 
-    Dependencies view.&nbsp; This view can be opened by
-      selecting a plug-in manifest file (<code>plugin.xml</code>) and choosing <b>Open
-      Dependencies</b> from the context menu. It allows you to browse the
-      plug-ins it requires, the ones they require, and so on.</td>
-  </tr>
-  <tr>
-    <td width="20%" valign="top" align="right"><b>Log View</b></td>
-    <td width="80%" valign="top" align="left">You don't have to search for the 
-    .log file on your file system anymore.&nbsp; The Log view is a more 
-    convenient way to view the contents of the log.<p>
-    <img src="../guide/images/errorLog.gif" width=573 height=131 border="0" alt="Log View"></td>
-  </tr>
-</table>
+  </table>
 <p>
    <a href="../notices.html"><img src="../cpy.gif" border="0" alt="Legal notices" width="324" height="14"></a>
 </p>
