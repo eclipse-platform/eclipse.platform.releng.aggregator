@@ -1,17 +1,256 @@
 package org.eclipse.releng.tests;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import org.eclipse.core.boot.BootLoader;
 
 import junit.framework.TestCase;
 
 public class BuildTests extends TestCase {
+	private static final int HTML = 0;
+	private static final int PROPERTIES = 1;
+	private static final int XML = 2;
+	
+	private static FileTool.IZipFilter getTrueFilter() {
+		return new FileTool.IZipFilter() {
+			public boolean shouldExtract(String fullEntryName, String entryName, int depth) {return true;}
+			public boolean shouldUnzip(String fullEntryName, String entryName, int depth) {
+				return true;
+			}
+		};
+	}
+	/**
+	 * Method hasErrors.
+	 * @param string
+	 * @return boolean
+	 */
+	private boolean hasErrors(String string) {
+		
+		boolean result = false;
+		BufferedReader aReader = null;
+		
+		try {
+			aReader = new BufferedReader(new InputStreamReader(new FileInputStream(string)));
+			String aLine = aReader.readLine();
+			while (aLine != null) {
+				int aNumber = parseLine(aLine);
+				if (aNumber > 0) {
+					result = true;
+					break;
+				}
+				aLine = aReader.readLine();
+			}
+		} catch (FileNotFoundException e) {
+			System.out.println("Could not open log file: " + string);
+			result = true;
+		} catch (IOException e) {
+			System.out.println("Error reading log file: " + string);
+			result = true;
+		} finally {
+			if (aReader != null) {
+				try {
+					aReader.close();
+				} catch (IOException e) {
+					result = true;
+				}
+			}
+		}
+		
+		return result;
+	}
+		public void testChkpii() {
+			
+			String zipFile = locateEclipseZip();
+			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder";
+		
+			try {
+				FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
+			} catch (IOException e) {
+				
+				
+				fail(zipFile + ": " + sniffFolder  + ": " + "IOException unzipping Eclipse for chkpii");
+			}
+		
+			boolean result1  = testChkpii(HTML);
+			boolean result2 = testChkpii(XML);
+			boolean result3 = testChkpii(PROPERTIES);
+			assertTrue("Translation errors in files.  See the chkpii logs linked from the test results page for details.", (result1 && result2 && result3));
+		}
+		
+		private boolean testChkpii(int type) {
+			Runtime aRuntime = Runtime.getRuntime();
+			String chkpiiString = getChkpiiString(type);
+			System.out.println(chkpiiString);
+			try {
+				Process aProcess = aRuntime.exec(chkpiiString);
+				BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
+				String line = null;
+				while ( (line = aBufferedReader.readLine()) != null) {
+				}
+				aProcess.waitFor();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			} catch (InterruptedException e) {
+				return false;
+			}
+			return !hasErrors(getOutputFile(type));
+		}
+		
+		/**
+		 * Method getChkpiiString.
+		 * @param HTML
+		 * @return String
+		 */
+		private String getChkpiiString(int type) {
+			return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S";
+		}
+		/**
+		 * Method locateEclipseZip.
+		 * @return String
+		 */
+		private String locateEclipseZip() {
+			
+			String installDir = BootLoader.getInstallURL().getPath() + ".." + File.separator + "..";  // Only one .. for debug
+			File aFile = new File(installDir);
+			if (aFile == null) {
+				System.out.println("File is null");
+			}
+			System.out.println(installDir);
+			
+			File[] files = aFile.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				File file = files[i];
+				String fileName = file.getName();
+				if (fileName.startsWith("eclipse-SDK-") && fileName.endsWith(".zip")) {
+					return file.getPath();
+				}
+			}
+			
+			return "";
+		}
+		
+		/**
+		 * Method getExcludeFiles.
+		 * @return String
+		 */
+		private String getExcludeFile() {
+			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "ignoreFiles.txt";
+			return new File(aString).getPath();
+		}
+		
+		/**
+		 * Method getOutputFile.
+		 * @param HTML
+		 * @return String
+		 */
+		
+		private String getOutputFile(int type) {
+			String aString = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
+//			String aString = BootLoader.getInstallURL().getPath() + "..\\results\\chkpii";
+			new File(aString).mkdirs();
+			aString = aString + File.separator + "org.eclipse.nls.";
+			aString = new File(aString).getPath();
+
+			switch (type) {
+				case HTML :
+					return aString + "html.txt";
+				case PROPERTIES :
+					return aString + "properties.txt";
+				
+				case XML : 
+					return aString + "xml.txt";
+
+				default :
+					return aString + "other.txt";
+			}
+		}
+		
+		/**
+		 * Method getFilesToTest.
+		 * @param HTML
+		 * @return String
+		 */
+		
+		private String getFilesToTest(int type) {
+			
+			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder" + File.separator;
+			String aString = new File(sniffFolder).getPath() + File.separator;
+			
+			switch (type) {
+				case HTML :
+					return aString + "*.htm*";
+				case PROPERTIES :
+					return aString + "*.properties";
+							
+				case XML : 
+					return aString + "*.xml";
+			
+				default :
+					return aString + "*.*";
+			}
+		}
+		
+		/**
+		 * Method getExec.
+		 * @return String
+		 */
+		
+		private String getExec() {
+//			String os = BootLoader.getOS();
+//			String exeName;
+//			if (os.equals(BootLoader.OS_UNKNOWN)) {
+//				exeName = "chkpw501.exe";
+//			} else {
+//				exeName = "chkpl501.exe";
+//			}
+//			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + exeName;
+			
+			return new File("chkpw501.exe").getPath();
+		}
+		
+		/**
+		 * Method getExcludeErrors.
+		 */
+		private String getExcludeErrors() {
+			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "ignoreErrors.txt";
+			return new File(aString).getPath();
+		}
+	/**
+	 * Method parseLine.
+	 * @param aLine
+	 * @return -1 if not an error or warning line or the number of errors or
+	 * warnings.
+	 */
+	private int parseLine(String aLine) {
+		int index = aLine.indexOf("Files Contain Error");
+		
+		if (index == -1) {
+			index = aLine.indexOf("Files Contain Warning");
+		}
+		
+		if (index == -1) {
+			index = aLine.indexOf("Files Could Not Be Processed");
+		}
+		
+		if (index == -1) {
+			return index;
+		}
+		
+		String aString = aLine.substring(0, index).trim();
+		return Integer.parseInt(aString);
+	}
 	
 	public class FileSuffixFilter implements FilenameFilter {
 
