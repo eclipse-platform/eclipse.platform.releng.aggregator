@@ -64,7 +64,7 @@ in the JDT tooling for an example.&nbsp;</p>
 <p>Once the proper document provider is associated with an editor, its main task
 is to create a document from the file input and configure an appropriate object
 for dividing the document up into <b>partitions</b>.&nbsp;&nbsp;</p>
-<h3>Partitions</h3>
+<h4>Partitions</h4>
 <p>Let's look at documents and partitions in the <b>JavaDocumentProvider</b>.&nbsp;
 When a document is created, an <a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>IDocumentPartitioner</b></a>
 is created and set into the document.&nbsp;&nbsp;</p>
@@ -83,11 +83,11 @@ example, the document is divided into partitions that represent the javadoc
 comments, multi line comments, and everything else.&nbsp; Each partition is assigned a
 content type and document positions are remembered so that the text partitions
 can be updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
-<h3>Rule based document partitioning</h3>
+<h4>Rule based document partitioning</h4>
 <p>It is up to each editor to determine the appropriate implementation for a
 document partitioner.&nbsp; Support is provided in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
- for rule-based document scanning.&nbsp; Using a scanner allows an editor to use
-the <a href="../reference/api/org/eclipse/jface/text/DefaultPartitioner.html"><b>DefaultPartitioner</b></a>
+ for rule-based document scanning.&nbsp; Using a rule-based scanner allows an editor to use
+the <a href="../reference/api/org/eclipse/jface/text/rules/DefaultPartitioner.html"><b>DefaultPartitioner</b></a>
 provided by the framework.<pre><font color="#4444CC">private IDocumentPartitioner createJavaPartitioner() {
 	return new <b>DefaultPartitioner(getJavaPartitionScanner(), TYPES)</b>;
 }</font></pre>
@@ -98,7 +98,6 @@ tokens such as line delimiters, white space, and generic
     patterns when scanning a document.&nbsp; The example's <b>JavaPartitionScanner</b>
 defines rules for distinguishing single line comments, constants, javadoc, multi
 line comments, and&nbsp; words.&nbsp; This is done in the scanner's constructor:
-<p>&nbsp;</p>
 <pre><font color="#4444CC">public JavaPartitionScanner() {
 	super();
 	IToken javaDoc= new Token(JAVA_DOC);
@@ -125,6 +124,14 @@ line comments, and&nbsp; words.&nbsp; This is done in the scanner's constructor:
 }</font></pre>
 <p>See the classes in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
  for a complete discussion of the rules classes and API.</p>
+
+<h4>Annotation models</h4>
+
+<p>Besides providing an appropriate document for an editor input, another
+important task of a document provider is to provide an appropriate <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
+for an editor input.&nbsp; This model is used for annotating the text in the
+editor as appropriate for its content.&nbsp;&nbsp; We'll look at annotations and
+how they are presented more closely in the next section.</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 
