@@ -690,12 +690,9 @@ public class BuildTests extends TestCase {
 	 * warnings.
 	 */
 	private int parseLine(String aLine) {
+		
 		int index = aLine.indexOf("Files Contain Error");
-		
-		if (index == -1) {
-			index = aLine.indexOf("Files Contain Warning");
-		}
-		
+				
 		if (index == -1) {
 			index = aLine.indexOf("Files Could Not Be Processed");
 		}
