@@ -693,7 +693,9 @@ public class BuildTests extends TestCase {
 		if (index ==-1){
 			index=aLine.indexOf("Files Contain Error");
 		}
-		
+		if (index ==-1){
+			index=aLine.indexOf("Files Contain Warnings Only");
+		}
 		if (index==-1){
 			return -1;
 		} else {		
