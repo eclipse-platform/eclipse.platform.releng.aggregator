@@ -47,16 +47,12 @@ public class TagMap extends TagInRepositoryAction {
 				String[] strings = LoadMap.readReferenceStrings((IFile)resource);
 				identifiers.addAll(Arrays.asList(strings));
 			} catch (CoreException e) {
-				addStatus(CVSException.wrapException(e).getStatus());
+				RelEngPlugin.log(e);
 			}
 		}
 		return getCVSResourcesFor((String[]) identifiers.toArray(new String[identifiers.size()]));
 	}
 
-	/**
-	 * @param strings
-	 * @return
-	 */
 	private ICVSRemoteResource[] getCVSResourcesFor(String[] referenceStrings) {
 		Map previouslySelectedRepositories = new HashMap();
 		int size = referenceStrings.length;
@@ -86,7 +82,7 @@ public class TagMap extends TagInRepositoryAction {
 				}
 				result.add(location.getRemoteFolder(module, tag));
 			} catch (CVSException e) {
-				addStatus(e	.getStatus());
+			    RelEngPlugin.log(e);
 			}
 		}
 		return (ICVSRemoteResource[]) result.toArray(new ICVSRemoteResource[result.size()]);
