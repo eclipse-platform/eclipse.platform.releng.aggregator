@@ -59,7 +59,7 @@ public class Unit {
 
 	public String getDisplayValue1(double magnitude) {
 	    
-	    if ("s".equals(fShortName)) //$NON-NLS-1$
+	    if (this == SECOND)
 	        return formatedTime((long) (magnitude*1000.0));
 	    return formatEng((long) (magnitude));
 	    
@@ -142,7 +142,7 @@ public class Unit {
 	    int TSD= fIsBinary ? T_BINARY : T_DECIMAL;
 		if (n < TSD)
 			return String.valueOf(n);
-		double d = n / TSD;
+		double d = ((double)n) / TSD;
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(2);
 		if (d < TSD)
