@@ -18,7 +18,8 @@ The platform runtime plug-in defines infrastructure for defining and discovering
 streams.  (See <a href="runtime_content.htm">Content types</a> for an overview of the content framework.)  
 An important part of the content type system is the ability to specify different encodings (character sets)
 for different kinds of content.  The resources API further allows default character sets to be established for 
-projects and folders, and explicit character sets to be established for a particular file.
+projects, folders, and files.  These default character sets are consulted if the content of the file itself
+does not define a particular encoding inside its data stream.
 </P>
 <h3>
 Setting a character set
@@ -31,11 +32,12 @@ for content types.  More fine-grained control is provided by the resources API.
 <b><a href="../reference/api/org/eclipse/core/resources/IContainer.html">IContainer</a></b> 
 defines protocol for setting the default character set for a particular project or folder.  This gives 
 plug-ins (and ultimately the user) more freedom in determining an appropriate character set for a set of files when
-the derived character sets may not be appropriate.</p>
+the default character sets from the content type may not be appropriate.</p>
 <p>
 <b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b> defines API for setting
-the character set for a particular file.  This character set will take precedence over any other character set
-derived from the file's content type, folder, or project.
+the default character set for a particular file.  If no encoding is specified inside the file contents,
+then this character set will be used.  The file's default character set takes precedence over any default
+character set specified in the file's folder, project, or content type.
 </p>
 <p>
 Both of these features are available to the end-user in the properties page for a resource.
@@ -55,10 +57,11 @@ returns null if no character set was set explicitly on myFile.  However,
 <font color='#4444CC'><pre>
 	String charset = myFile.getCharset(true);
 </pre></font> 
-will check the file's containing folders and projects for a character set if there is no explicit character set
-established for the file.  If none is found, the character set defined for the content type will be checked.  
-If the content type does not specify a character set, the platform default character set will be returned.  The
-convenience method <b>getCharset()</b> is the same as using <b>getCharset(true)</b>.
+will first check for a character set that was set explicitly on the file.  If none is found, then the content of the file
+will be checked for a description of the character set.  If none is found, then the file's containing folders and projects 
+will be checked for a default character set.  If none is found, the default character set defined for the content type 
+itself will be checked.  And finally, the platform default character set will be returned if there is no other designation
+of a default character set.  The convenience method <b>getCharset()</b> is the same as using <b>getCharset(true)</b>.
 </p>
 
  
