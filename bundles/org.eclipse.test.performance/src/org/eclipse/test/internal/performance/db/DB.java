@@ -38,6 +38,7 @@ public class DB {
     private int fTagID= -1;
     private int fConfigID;
     private int fStoredSamples;
+    private boolean fStoreCalled;
     
     
     public static boolean store(Sample sample) {
@@ -46,6 +47,10 @@ public class DB {
     
     public static DataPoint[] query(String refTag, String scenarioID) {
         return getDefault().internalQuery(refTag, scenarioID);
+    }
+    
+    public static Connection getConnection() {
+        return getDefault().fConnection;
     }
     
     public static boolean isActive() {
@@ -117,6 +122,8 @@ public class DB {
         
         if (fSQL == null || sample == null)
             return false;
+        
+        fStoreCalled= true;
         
 	    try {
 	        int tag_id= getTag();
@@ -256,7 +263,8 @@ public class DB {
     }
     
     private void disconnect() {
-        System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
+        if (fStoreCalled)
+            System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
         if (DEBUG) System.out.println("disconnecting from DB"); //$NON-NLS-1$
         if (fSQL != null) {
             try {

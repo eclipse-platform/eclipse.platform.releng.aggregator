@@ -83,7 +83,7 @@ public class SQL {
         
         stmt.executeUpdate(
         		"create table SAMPLE (" + //$NON-NLS-1$
-                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+                		"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
 					"CONFIG_ID int not null," + //$NON-NLS-1$
 					"SCENARIO_ID int not null," + //$NON-NLS-1$
 					"TAG_ID int," + //$NON-NLS-1$
