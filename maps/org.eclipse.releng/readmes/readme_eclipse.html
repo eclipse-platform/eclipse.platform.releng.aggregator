@@ -1466,6 +1466,29 @@ with shared metadata. However, when some developers are working in Eclipse 2.1
 while others are working in Eclipse 2.0, there are no such guarantees. This
 section provides advice for what to do and to not do. It addresses the specific
 issues with the Eclipse SDK.</p>
+<p>The typical failure mode is noticed by the 2.1 user. 2.1 metadata is lost
+when a 2.0 user saves changes and then commits the updated metadata files to the
+repository.</p>
+<p>Here's how things typically go awry:</p>
+<ul>
+  <li>A user working in Eclipse 2.1 creates or modifies a project in a way that
+    results in changes to a shared metadata file that rely on 2.1-specific
+    information. The user then commits the updated project files, including the
+    shared metadata file, to the shared repository.</li>
+  <li>Another user working in Eclipse 2.0 shares this project from the same
+    repository. The 2.1-specific information in the shared metadata file is not
+    understood by Eclipse 2.0, and is generally discarded or ignored without
+    warning. The user modifies the project in a way that results in changes to
+    the shared metadata file, causing the shared metadata file to be rewritten
+    without any of the 2.1-specific information. The user commits the updated
+    project files, including the shared metadata file, to the shared repository.
+    The user is generally unaware that shared information has just been lost as
+    a result of their actions.</li>
+  <li>A user working in Eclipse 2.1 picks up the changes to a project from the
+    shared repository, including the updated shared metadata file. The user may
+    be unaware that they have just taken a retrograde step until later, when
+    things start to malfunction.</li>
+</ul>
 <p>Things to watch out for when the project is to be shared with 2.0:</p>
 <ol>
   <li>Linked folders and files. This support was added in 2.1. Information about
@@ -1490,14 +1513,15 @@ issues with the Eclipse SDK.</p>
     anything other than the default (project-wide) output folder.&nbsp; Better
     still, disable multiple output locations via the<b> Java &gt; Compiler &gt;
     Build Path</b>&nbsp; preference page.</li>
-  <li>Source attachment root path.&nbsp; There is a UI for setting the source
-    root path for a JAR in 2.0 (e.g. &quot;src/&quot;).&nbsp; This value is
-    inferred in 2.1, and not recorded in the project's <code>.classpath</code>
-    file.&nbsp; Therefore, a 2.0 workspace (possibly) not find the attached
-    source. Recommendation: Use 2.0 to specify the source attachment root
-    path.&nbsp; There is additional source attachment flexibility provided in
-    2.1: you can provide a folder instead of a JAR or zip as a source
-    attachment, and you can attach source to a class file folder; this
+  <li>Source attachment root path. When attaching a source ZIP to a library JAR
+    on the Java build path, the source root path prefix is inferred
+    automatically. This has changed from 2.0, where it could be explicitly set
+    via the UI and explicitly recorded in the project's <code>.classpath</code>
+    file. Consequently, a Java project created in a 2.1 workspace might not find
+    the attached source. Recommendation: Use 2.0 to specify the source
+    attachment root path. There is additional source attachment flexibility
+    provided in 2.1: you can provide a folder instead of a JAR or zip as a
+    source attachment, and you can attach source to a class file folder; this
     functionality is not available in 2.0 (where the 2.1 information is
     ignored).&nbsp; Recommendation: Use 2.0 to specify the source attachment.</li>
   <li>PDE classpath containers for dependent plug-ins. PDE's use of classpath
@@ -1508,7 +1532,7 @@ issues with the Eclipse SDK.</p>
     will not produce the expected results. Recommendation: Ensure that the
     setting on the <b>Plug-in Development &gt; Java Build Path Control </b>preference
     page for using classpath containers is disabled before creating any plug-in
-    (or fragment) projects.&nbsp;</li>
+    (or fragment) projects.</li>
 </ol>
 <h4>Using Eclipse 2.1 to develop plug-ins that work in Eclipse 2.0</h4>
 <p>It is also possible (and reasonable) to use Eclipse 2.1 to develop a plug-in
