@@ -30,14 +30,14 @@
 
   <!-- This target runs the test suite. Any actions that need to happen after all -->
   <!-- the tests have been run should go here. -->
-  <target name="run" depends="init,suite,cleanup">
+  <target name="run" depends="init,BuildTests,cleanup">
     <ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
       <property name="includes" value="org*.xml"/>
       <property name="output-file" value="org.eclipse.releng.tests.xml"/>
     </ant>
   </target>
 
-  <target name="BuildTests" depends="init,cleanup" unless="performance">
+  <target name="BuildTests" depends="init,cleanup">
     <ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="data-dir" value="${location}"/>
       <property name="plugin-name" value="org.eclipse.releng.tests"/>
@@ -46,24 +46,7 @@
     </ant>
   </target>
 
-  <target name="benchmark" depends="init,cleanup" if="performance">
-    <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
-      <property name="data-dir" value="performance"/>
-      <property name="plugin-name" value="org.eclipse.releng.tests"/>
-      <property name="classname" value="org.eclipse.releng.tests.perfms.UITest"/>
-      <property name="plugin-path" value="${eclipse-home}/plugins/${org.eclipse.releng.tests}"/>
-    </ant>
-  </target>
+ <!--required.  Use for running performance tests.-->
+  <target name="performance" />
 
-  <target name="startupTest" depends="init,cleanup" if="startupFrameworkAvailable">
-	  <exec dir="${eclipse-home}/../../apt/bin" executable="cmd">
-  		<arg line="/c autorun.bat" />
-	  </exec>
-  	  <copy todir="${results}/performance">
-  	  	<fileset dir="${eclipse-home}" includes="timer*" />
-  	  </copy>	
-  </target>
-	
-  <!-- This target defines the tests that need to be run. -->
-  <target name="suite" depends="startupTest,BuildTests"/>
  </project>
