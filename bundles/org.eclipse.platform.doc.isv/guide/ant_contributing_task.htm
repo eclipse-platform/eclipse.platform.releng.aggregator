@@ -5,48 +5,50 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Contributing Ant tasks and types
+Contributing tasks and types
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H1>
-Contributing Ant tasks and types</H1>
-<p>Plug-ins can use <a href="arch.htm">extension points</a> to contribute new
-<a href="../reference/extension-points/org_eclipse_ant_core_antTasks.html">tasks</a> 
-and <a href="../reference/extension-points/org_eclipse_ant_core_antTypes.html">
-types</a> to Eclipse. These tasks and types have access to all classes available 
-for the plug-in contributing them. For example, the <code>eclipse.refreshLocal</code> task 
-contributed by the <code>org.eclipse.core.resources</code> plug-in is 
-a wrapper to the
-<a href="../reference/api/org/eclipse/core/resources/IResource.html#refreshLocal(int, org.eclipse.core.runtime.IProgressMonitor)">
-IResource.refreshLocal()</a> method.</p>
 <h2>
-How to contribute</h2>
+Contributing tasks and types</h2>
+<p>When your plug-in contributes Ant tasks and types, the tasks and types have access to all
+if the classes inside the contributing plug-in. For example, the <b>eclipse.refreshLocal</b> task 
+contributed by <b>org.eclipse.core.resources</b> plug-in is 
+a wrapper for the
+<a href="../reference/api/org/eclipse/core/resources/IResource.html#refreshLocal(int, org.eclipse.core.runtime.IProgressMonitor)">
+<b>
+IResource.refreshLocal()</b></a> method.</p>
+
+
 <p>Tasks and types contributed by plug-ins must not be placed in any of the 
-plug-in libraries. They have to be in a separate JAR. The consequences are that 
+plug-in libraries. They have to be in a separate JAR. This means that the
 plug-in classes do not have access to the tasks and types provided by the 
-plug-in (for more information about it look at the topic: 
-<a href="#Why a separate JAR for tasks and types">Why a separate JAR for tasks and types</a>?). The
-<a href="../reference/extension-points/org_eclipse_ant_core_antTasks.html">
-antTask</a> extension point provides an example of how to specify the new task 
-in the <code>plugin.xml</code> file.</p>
+plug-in.&nbsp; (See 
+<a href="#Why a separate JAR for tasks and types">Why a separate JAR for tasks and types</a>?
+for more information.)</p>
+
+
+<p> The <b><a href="../reference/extension-points/org_eclipse_ant_core_antTasks.html">org.eclipse.ant.core.antTask</a></b> extension point provides an example of how to specify
+a new task 
+in the <b>plugin.xml</b> file.</p>
 
 
 <A NAME="monitor"></A><h3>
 Progress Monitors</h3>
 <P >
 The Eclipse Ant support provides access to a <a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">
-IProgressMonitor</a> if one is passed to the AntRunner. One of the advantages of having access to a progress
-monitor is that a long-running tasks could check if the user has requested its cancellation. The progress
-monitor object is through the Ant project as a reference. Note that a monitor is only made available if
+<b>
+IProgressMonitor</b></a> if one is passed when invoking the AntRunner. One of the advantages of having access to a progress
+monitor is that a long-running task can check to see if the user has requested its cancellation. The progress
+monitor object is obtained from the Ant project's references.&nbsp; Note that a monitor is only made available if
 the method <a href="../reference/api/org/eclipse/ant/core/AntRunner.html#run(org.eclipse.core.runtime.IProgressMonitor)">
-AntRunner.run(IProgressMonitor)</a> was called with a valid progress monitor. The following code snippet
-illustrates how to use it:
+<b>
+AntRunner.run(IProgressMonitor)</b></a> was called with a valid progress monitor. The following code snippet
+shows how to obtain a progress monitor from the task's project.
 </P>
-<pre><code>
-import org.apache.tools.ant.BuildException;
+<pre ><font color="#4444CC">import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.eclipse.ant.core.AntCorePlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,32 +56,19 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public class CoolTask extends Task {
 
 public void execute() throws BuildException {
-	IProgressMonitor monitor = (IProgressMonitor) getProject().getReferences().get(AntCorePlugin.ECLIPSE_PROGRESS_MONITOR);
-	if (monitor == null) {
+<b>	IProgressMonitor monitor = 
+		(IProgressMonitor) getProject().getReferences().get(AntCorePlugin.ECLIPSE_PROGRESS_MONITOR);
+</b>	if (monitor == null) {
 		...
 	} else {
 		...
 	}
 }
 }
-</code></pre>
+</font></pre>
 
 
-<A NAME="native"></A><h3>
-Special care to native libraries</h3>
-<P >
-Every time an Ant script runs in Eclipse a new classloader is created. Since a library can only be
-loaded by one classloader in Java, tasks making use of native libraries could run into problems during
-multiple script runs. If the previous classloader has not been garbage collected at the time the new
-classloader tries to load the native library, an exception is thrown indicating the problem and the
-script execution fails. One way of avoiding this problem is having the library load be handled by
-a class inside a plug-in library. The task can make use of that class for accessing native
-methods. Doing so, the library is loaded by the plug-in classloader and it does not run into the
-load library conflict.
-</P>
-
-
-<A NAME="rules"></A><h3>
+<h3 >
 Important rules when contributing tasks and types</h3>
 
 
@@ -103,7 +92,6 @@ the plug-in model very well:
   <li>Change the Ant classpath at runtime.</li>
   <li>Change the Ant version at runtime.</li>
 </ul>
-</p>
 <p>
 During runtime plug-in classloaders cannot have their classpaths expanded and
 plug-ins cannot change their dependencies. At the same time having separate
@@ -115,8 +103,5 @@ contributing plug-in to the Ant classpath as well.
 <p>
 &nbsp;</p>
 
-&nbsp;
-<a href="../hglegal2002.htm"><img src="../images/ngibmcpy2002.gif" alt=
-"Copyright IBM Corp. and others 2000, 2002. All Rights Reserved." border=
-"0"></a>
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
 </BODY></HTML>
