@@ -4,24 +4,27 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>Reporting and listening to progress</TITLE>
+<TITLE>Reporting progress</TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H3>
-Reporting and listening to progress</H3>
+Reporting progress</H3>
 <p>
-Long running jobs (those lasting more than a second) should report progress to the <tt>IProgressMonitor</tt> passed to the
-job's <tt>run</tt> method.  The workbench progress view will
-show all progress messages and units of completed work given
-to this monitor.  The supplied progress monitor is also used to respond to
-cancelation requests made from the progress view.  When a user
-(or plug-in) attempts to cancel a job, the method <tt>IProgressMonitor.isCanceled</tt>
-will return <tt>true</tt>. When this occurs, it is the job's responsibility to
-respond to the cancelation by exiting the <tt>run</tt> method as soon as possible.
-Here is a sample <tt>run</tt> method from a job that reports progress and responds 
-to cancelation:
+Long running jobs (those lasting more than a second) should report progress to the
+<b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b>
+that is passed to the job's <b>run</b> method.  The workbench progress view will
+show all progress messages and units of completed work given to this monitor.  
+</p>
+
+<p>The supplied progress monitor should also be used to check for cancellation requests made from 
+the progress view.  When a user (or plug-in using job API) attempts to cancel a job, the 
+<b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b>
+method <b>isCanceled()</b> will return <tt>true</tt>. It is the job's responsibility to frequently
+check the cancellation status of a job and respond to a cancellation by exiting the <b>run</b> method 
+as soon as possible once it detects a cancellation.  The following <b>run</b> method reports progress
+and responds to job cancellation:
 <font color='#4444CC'><pre>
    public IStatus run(IProgressMonitor monitor) {
       final int ticks = 6000;
@@ -40,22 +43,23 @@ to cancelation:
       return Status.OK_STATUS;
    }
 </pre></font>
-In the progress view, the string supplied to <tt>beginTask</tt> will appear
-after the job name, and the <tt>subTask</tt> messages will appear as
-a child in the progress tree. The progress view will calculate and display a 
-percent completion based on the number of <tt>worked</tt> calls that
-have occurred.  Here is a snapshot of the progress view while the above
-job is running:
+The <b>beginTask</b> method is used to name the task in the corresponding progress view and to
+establish the total amount of work to be done so that the view can compute progress.  The
+<b>subTask</b> messages will appear as a child in the progress tree as work is done. 
+The progress view will calculate and display a percent completion based on the amount of work
+reported in the <b>worked</b> calls.  
 </p>
 <P ><img src="images/job-progress.jpg" alt="Job progress view" ></P>
-
+<h3>Progress monitors and the UI</h3>
 <p>
-If your job is an implementation detail that you do not want to show to users,
-you can flag your job as a <i>system job</i>.  A system job is just like any
-other job, except it does not appear in the progress view or cause the progress
-busy indicator in the status line to animate.  If your job is not either directly
+As you can see, the <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b>
+class is designed with corresponding UI support in mind.  The platform's UI plug-in provides support so that
+the workbench can show progress for jobs that are running.  But what if your job is a low-level implementation detail
+that you don't want to show to users?  You can flag your job as a <i>system job</i>.  A system job is just like
+any other job, except the corresponding UI support will not set up a progress view or show any other UI
+affordances associated with running a job.  If your job is not either directly
 initiated by a user, or a periodic task that can be configured by a user, then your
-job should be a system job.  Making your job a system job is easy as pie:
+job should be a system job.  The protocol for setting a system job is simple:
 <font color='#4444CC'><pre>
    class TrivialJob extends Job {
       public TrivialJob() {
@@ -65,20 +69,30 @@ job should be a system job.  Making your job a system job is easy as pie:
       ...
    }
 </pre></font>
-<p>
-[The remainder of this document is under construction]<br>
-
-Other topics to be covered in this section:
-<ul>
-<li>progress groups</li>
-<li>job state</li>
-<li>job change listeners</li>
-
-</ul>
 </p>
-
-
-
+<h3>Progress groups</h3>
+<p>
+<i>Progress groups</i> are another mechanism that can be used to influence the way that a job is shown in the 
+UI.  When it is more appropriate to show the aggregate progress of several related jobs in the UI, a special
+<b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b> that represents
+a group of related jobs can be created.  This monitor is created using 
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+protocol.  The following snippet shows how to create a progress group and associate it with a job.
+<font color='#4444CC'><pre>
+   ...
+   IJobManager jobMan = Platform.getJobManager();
+   myGroup = jobMan.createProgressGroup();
+   job.setProgressGroup(myGroup, 600);  // specify the units of work the job needs to show.
+   job.schedule()
+   ...
+</pre></font>
+The group facility allows plug-ins to break tasks into multiple jobs if needed, but to report them to the user as if
+they are a single task.  The progress group monitor will handle the details for computing the percentage completion
+relative to all of the jobs in the group.
+</p>
+<p>A job must be placed into the progress group before it is scheduled.  After a job finishes running, its 
+reference to the progress group is lost.  If the job is to be scheduled again, it must be set into the group
+once again before it is scheduled.</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
