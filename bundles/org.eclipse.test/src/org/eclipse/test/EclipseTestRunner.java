@@ -42,6 +42,9 @@ import org.eclipse.core.runtime.Platform;
  */
 public class EclipseTestRunner implements TestListener {
 	class TestFailedException extends Exception {
+
+		private static final long serialVersionUID = 6009335074727417445L;
+
 		TestFailedException(String message) {
 			super(message);
 		}
@@ -185,8 +188,8 @@ public class EclipseTestRunner implements TestListener {
 
         // Add/overlay system properties on the properties from the Ant project
         Hashtable p= System.getProperties();
-        for (Enumeration enum = p.keys(); enum.hasMoreElements(); ) {
-            Object key = enum.nextElement();
+        for (Enumeration _enum = p.keys(); _enum.hasMoreElements(); ) {
+            Object key = _enum.nextElement();
             props.put(key, p.get(key));
         }
         t.setProperties(props);
