@@ -13,71 +13,80 @@
 <p>Your plug-in can add launch configuration types to the platform using the <a href="../reference/extension-points/org_eclipse_debug_core_launchConfigurationTypes.html"><b>org.eclipse.debug.core.launchConfigurationTypes</b></a>
 extension point.&nbsp; This extension point allows you to declare a
 configuration type using a unique id.&nbsp; You must provide a corresponding
-implementation of <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate.html"><b>ILaunchConfigurationDelegate</b></a>
-in your plug-in.&nbsp; You can also specify which modes (run and/or debug) are
-supported by your launcher and a name that should be used when showing launchers
+implementation of <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate.html"><b>ILaunchConfigurationDelegate</b></a>.
+The delegate is responsible for launching its launch configuration in a specified mode.  
+Optionally, you can implement <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate2.html"><b>ILaunchConfigurationDelegate2</b></a>,
+which enhances the delegate interface to allow your delegate to abort a launch, build relevant projects in the workspace
+before a launch, and control the creation of the launch object that is used in a launch.
+</p>
+<p>
+In addition to defining the delegate, you can specify which launch modes are supported
+by your delegate, and a name that should be used when showing launchers
 of this type to the user.</p>
 <p>The following markup shows how the Java tools declare a Java launch
 configuration for launching local Java programs:</p>
 <pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.core.launchConfigurationTypes&quot;&gt;
    &lt;launchConfigurationType
    	   id=&quot;org.eclipse.jdt.launching.localJavaApplication&quot;
-	   name=&quot;%localJavaApplication&quot;
+	   <b>name=&quot;%localJavaApplication&quot;
 	   delegate=&quot;org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate&quot;
-	   modes= &quot;run, debug&quot;&gt;
+	   modes= &quot;run, debug&quot;</b>
+	   sourceLocatorId=&quot;org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector&quot;
+       sourcePathComputerId=&quot;org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer&quot;&gt;
    &lt;/launchConfigurationType&gt;
 &lt;/extension&gt;</font></pre>
-<h4>Defining source locators</h4>
-<p>For each type of launch configuration that supports debug mode, it is
-important to define a way to find the source code that corresponds with the
-current execution point in the code.&nbsp; <a href="../reference/api/org/eclipse/debug/core/model/ISourceLocator.html"><b>ISourceLocator</b></a>
-and <a href="../reference/api/org/eclipse/debug/core/model/IPersistableSourceLocator.html"><b>IPersistableSourceLocator</b></a>
-define an interface for mapping from an executing program back to the source
-code. </p>
-<p>Source locators are typically implemented to work with a corresponding launch
-configuration and launch configuration delegate.&nbsp; Since launch
-configurations can be persisted, source locators may also be stored
-with the launch configuration.&nbsp; This is accomplished by setting an
-attribute of the launch configuration to an id of a source locator.&nbsp; When a
-launch configuration is read from disk, the id of the source locator must be
-mapped back to the implementation class.&nbsp; This is achieved using the <a href="../reference/extension-points/org_eclipse_debug_core_sourceLocators.html"><b>org.eclipse.debug.core.sourceLocators</b></a>
-extension point.&nbsp;</p>
-<p>The extension point allows you to register your class that implements <a href="../reference/api/org/eclipse/debug/core/model/IPersistableSourceLocator.html"><b>IPersistableSourceLocator</b></a>
-and associate it with an id that will be stored with the launch
-configuration.&nbsp; This allows the debug plug-in to look up source locator
-classes by id when it's time to instantiate a launch configuration.</p>
-<p>The following markup is from the Java tooling:</p>
-<pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.core.sourceLocators&quot;&gt;
-	&lt;sourceLocator
-		id = &quot;org.eclipse.jdt.debug.ui.javaSourceLocator&quot;
-	   	class=&quot;org.eclipse.jdt.debug.ui.JavaUISourceLocator&quot;
-	   	name=&quot;%javaSourceLocator&quot;/&gt;
-&lt;/extension&gt;</font></pre>
-<h4>Comparing launch configurations</h4>
-<p>Plug-ins use named attributes and values to store important data with a
-launch configuration.&nbsp; Since the interpretation of any attribute is not known by the platform, an extension point is provided
-that allows you to supply a comparator for a specific attribute.&nbsp; This
-comparator is used to determine whether attributes of the specified name are
-equal.&nbsp; In many cases, the simple string compare provided by
-java.lang.Object.equals(Object) is suitable for comparing attributes.&nbsp; This
-method will
-be used if no comparator has been provided.&nbsp; However, some attribute values
-may require special handling, such as stripping white space values from text
-before comparing for equality. </p>
-<p>Comparators are contributed using the <a href="../reference/extension-points/org_eclipse_debug_core_launchConfigurationComparators.html"><b>org.eclipse.debug.core.launchConfigurationComparators</b></a>
-extension point.&nbsp; </p>
-<p>The Java tools supply launch configuration comparators for comparing program
-source paths and class paths.</p>
-<pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.core.launchConfigurationComparators&quot;&gt;
-	&lt;launchConfigurationComparator
-		id = &quot;org.eclipse.jdt.launching.classpathComparator&quot;
-		class = &quot;org.eclipse.jdt.internal.launching.RuntimeClasspathEntryListComparator&quot;
-		attribute = &quot;org.eclipse.jdt.launching.CLASSPATH&quot;/&gt;
-	&lt;launchConfigurationComparator
-		id = &quot;org.eclipse.jdt.launching.sourcepathComparator&quot;
-		class = &quot;org.eclipse.jdt.internal.launching.RuntimeClasspathEntryListComparator&quot;
-		attribute = &quot;org.eclipse.jdt.launching.SOURCE_PATH&quot;/&gt;		
-&lt;/extension&gt;</font></pre>
+<p>This extension defines a launch configuration delegate that can be used to run or debug programs that
+are launched using the local Java launch configuration.</p>
+<h4>Defining new launch modes</h4>
+<p>We mentioned previously that the platform defines launch modes for running, debugging, or profiling
+a program.  These modes are defined using the <a href="../reference/extension-points/org_eclipse_debug_core_launchModes.html"><b>org.eclipse.debug.core.launchModes</b></a>
+extension point. This extension point allows you to declare a launch mode by defining its string mode
+name and the label that should be shown to the user to describe the mode.  The following markup shows 
+the definition of the platform's three standard launch modes:</p>
+<pre><font color="#4444CC">
+&lt;extension point="org.eclipse.debug.core.launchModes"&gt;
+	&lt;launchMode
+		label="%run"
+		mode="run"&gt;
+	&lt;/launchMode&gt;
+	&lt;launchMode
+		label="%debug"
+		mode="debug"&gt;
+	&lt;/launchMode&gt;
+	&lt;launchMode
+		label="%profile"
+		mode="profile"&gt;
+	&lt;/launchMode&gt;
+&lt;/extension&gt;
+</font></pre>
+<p>Note that the mode is not associated with any particular launch configuration type.  As shown earlier, that association
+occurs when a launch delegate is specified for a configuration type.  </p>
+<h4>Defining launch delegates</h4>
+<p>Since launch modes can be specified independently of launch configuration types, it's possible that new modes
+are defined that are not implemented by the original delegate for a launch configuration.  In this case, a plug-in
+may define a launch delegate that implements a particular mode for a particular launch configuration type.
+This can be done using the <a href="../reference/extension-points/org_eclipse_debug_core_launchDelegates.html"><b>org.eclipse.debug.core.launchDelegates</b></a>
+extension point. This extension point allows you to define a launch delegate that implements the specified modes
+for a given configuration type.  The following markup shows how you could define a delegate for profiling
+a local Java application:</p>
+<pre><font color="#4444CC">
+&lt;extension point="org.eclipse.debug.core.launchDelegates"&gt;
+  &lt;launchDelegate
+   id=&quot;com.example.MyJavaProfileDelegate&quot;
+   delegate=&quot;com.example.MyJavaProfileDelegate&quot;
+   type=&quot;org.eclipse.jdt.launching.localJavaApplication&quot;
+   modes=&quot;profile&quot;&gt;
+  &lt;/launchDelegate&gt;
+ &lt;/extension&gt;
+</font></pre>
+<p>The specification of the delegate is similar to the way it is done when defining a launch configuration
+type, except that in this case the type of launch configuration is specified along with the supported
+modes.  As seen previously, the delegate must implement <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate.html"><b>ILaunchConfigurationDelegate</b></a>,
+and can optionally implement <a href="../reference/api/org/eclipse/debug/core/model/ILaunchConfigurationDelegate2.html"><b>ILaunchConfigurationDelegate2</b></a> for
+more control over the launch sequence.</p>
+<h4>Other references</h4>
+<p><a href="http://www.eclipse.org/articles/Article-Launch-Framework/launch.html">We Have Lift-off: The Launching Framework in Eclipse</a> 
+provides a start to finish example for defining your own launch type.</p>
 <p><a href="../notices.html"><img border="0" src="../cpy.gif" alt="Legal notices." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
