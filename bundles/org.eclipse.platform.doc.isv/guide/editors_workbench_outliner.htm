@@ -13,8 +13,6 @@
 
 <h2>
 Content outliners</h2>
-<P >&lt;in progress.&nbsp; update to show the outliner provided by the
-JavaEditor example.)</P>
 <P >
 Editors often have corresponding <b>content outliners</b> that provide a
 structured view of the editor contents and assist the user in navigating through
@@ -31,33 +29,22 @@ shown below, doesn't
 do much.</P>
 <P ><img border="0" src="images/genericoutliner.jpg" width="271" height="292" alt="Default content outliner"></P>
 <P >&nbsp;</P>
-<P >Plug-ins can extend <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b> TextEditor</b></a><b>
-</b>for the sole purpose of adding a custom content outliner page to the
-outline view.&nbsp;&nbsp; This approach is used in the workbench readme tool example.&nbsp;
-The <b>ReadmeEditor</b> overrides a few methods in <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b> TextEditor</b></a>
-to supply its own outliner.&nbsp;&nbsp;</P>
-<P >The outliner for an editor is specified when the workbench requests an
+<P >Editors in the text framework can supply their own content outliner page to the
+outline view.&nbsp; The outliner for an editor is specified when the workbench requests an
 adapter of type <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/IContentOutlinePage.html">IContentOutlinePage</a></b>.</P>
 <font color='#4444CC'><pre>
-   public Object getAdapter(Class key) {
-      if (key.equals(IContentOutlinePage.class)) {
-         IEditorInput input = getEditorInput();
-         if (input instanceof IFileEditorInput) {
-            page = new ReadmeContentOutlinePage(
-               ((IFileEditorInput)input).getFile());
-            return page;
-         }
-      }
-      return super.getAdapter(key);
-   }
+public Object getAdapter(Class required) {
+	if (IContentOutlinePage.class.equals(required)) {
+		if (fOutlinePage == null) {
+			fOutlinePage= new J<b>avaContentOutlinePage</b>(getDocumentProvider(), this);
+			if (getEditorInput() != null)
+				fOutlinePage.setInput(getEditorInput());
+		}
+		return fOutlinePage;
+	}
+	return super.getAdapter(required);
+}
 </pre></font>
-<P >When a <b>ReadmeEditor</b> is opened (on a <b>.readme</b>
-file), the corresponding readme outliner is displayed (if the workbench user is
-showing the <b>Outline</b> view.)</P>
-
-
-<P >
-<img border="0" src="images/readmeoutliner.jpg" width="274" height="294" alt="Readme content outliner"></P>
 
 
 <P >A content outliner page must implement <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/IContentOutlinePage.html">IContentOutlinePage</a></b>.&nbsp;
@@ -66,93 +53,80 @@ with the behavior of being a page in a view (<a href="../reference/api/org/eclip
 Content outliners are typically implemented using JFace viewers.&nbsp; The
 default implementation of a content outliner (<b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a></b>)
 uses a JFace tree viewer to display a hierarchical representation of the
-outline.&nbsp; This representation is suitable for many structured outliners, including <b>ReadmeContentOutlinePage</b>.</P>
+outline.&nbsp; This representation is suitable for many structured outliners, including
+<b>JavaContentOutlinePage</b>.</P>
 
 
-<P >The <b>ReadmeContentOutlinePage</b> is similar in
-appearance to the readme sections view, shown below,&nbsp; that we saw when we
-implemented the <a href="workbench_basicext_views.htm">readme views extension</a>.</P>
+<P >Let's take a look at the highlights of the page implementation.</P>
 
 
-<P ><img border="0" src="images/readmeview.jpg" width="277" height="191" alt="Readme sections dialog"></P>
-
-
-<P >In fact, the only real difference is that the outliner displays a
-hierarchical view of the sections, while the readme sections view displays a flat list of the
-sections.&nbsp; It should be no great surprise that the implementation of the
-outliner is very similar to that of the view.&nbsp; The only difference is that
-the outliner uses a tree viewer instead of a list viewer.</P>
-
-
-<P >When the outline page was created by the editor, it was passed the editor's
-input element in the constructor.&nbsp; This input can often be passed directly
+<P >When the outline page is created by the editor in the snippet above, its
+input element is set to the editor's input element.&nbsp; This input can often be passed directly
 to the outline page's viewer, as is done below.</P>
 
 
 <font color='#4444CC'><pre>
-   public void createControl(Composite parent) {
-      ...
-      TreeViewer viewer = getTreeViewer();
-      viewer.setContentProvider(new WorkbenchContentProvider());
-      viewer.setLabelProvider(new WorkbenchLabelProvider());
-      viewer.setInput(getContentOutline(input));
-      ...
-   }
-</pre></font>
+public void createControl(Composite parent) {
+
+	super.createControl(parent);
+
+	TreeViewer viewer= getTreeViewer();
+	viewer.setContentProvider(new ContentProvider());
+	viewer.setLabelProvider(new LabelProvider());
+	viewer.addSelectionChangedListener(this);
+
+	if (fInput != null)
+		viewer.setInput(fInput);
+}</pre></font>
 
 
 <P >The tree viewer creation is inherited from <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a></b>.&nbsp;
-The same content and label providers that were used in the readme sections view
-are used here, and the outline for the content is constructed using the same <b>ReadmeModelFactory</b>
-that constructed the sections for the view.</P>
+The standard content and label providers are used. </P>
 
 
-<font color='#4444CC'><pre>
-   private IAdaptable getContentOutline(IAdaptable input) {
-      return ReadmeModelFactory.getInstance().getContentOutline(input);
-   }
-</pre></font>
+<P >Whenver the editor input is set (or changed),&nbsp; <b>JavaContentOutlinePage</b>
+obtains a document for the editor input and parses the text.</P>
 
 
-<P >That's all there is to it!</P>
+<font color='#4444CC'><pre>public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+	...
+	if (newInput != null) {
+		IDocument document= fDocumentProvider.getDocument(newInput);
+		if (document != null) {
+			document.addPositionCategory(SEGMENTS);
+			document.addPositionUpdater(fPositionUpdater);
+
+			parse(document);
+		}
+	}
+}</pre>
 
 
-<P >Of course, the outliner itself doesn't provide any interesting
-behavior.&nbsp; Selecting the sections does not navigate the text in the editor!&nbsp; What
-good is this content outliner anyway?&nbsp; You could argue that the content
-outliner doesn't provide any behavior (besides the hierarchical
-representation) that we didn't already see in the sections view.&nbsp; Couldn't
-we have just used a tree viewer in the sections view instead of providing an
-outliner that doesn't do anything?&nbsp; </P>
+<P >The text is parsed into ranges, called segments, within the document.&nbsp;
+These segments are displayed by name in the outline view.&nbsp; When the
+selection changes, the selected segment is retrieved.&nbsp; Its offsets are used
+to set the highlight range in the editor.</P>
 
 
-<P ><b>It's just an example!</b>&nbsp; Actually, the <b>ReadmeContentOutlinePage</b>
-is provided to demonstrate how a content outliner can be customized for a text
-editor.&nbsp; It is not a good example of a content outliner itself.&nbsp; Users
-expect content outliners to assist them in the navigation of the editor content,
-so it would be a better decision to use the sections view if the only purpose is
-to display the structure of the content.</P>
+<pre>public void selectionChanged(SelectionChangedEvent event) {
 
+	super.selectionChanged(event);
 
-<P >Where can you find more interesting content outliners?&nbsp; Look at the subclasses of <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a>
-</b>and their corresponding editors.&nbsp; The more typical pattern is that
-an editor supplies an outline page and registers selection events on it.&nbsp; As
-items are selected in the content outline, the editor updates itself
-appropriately.</P>
-
-
-<P >The Java source code editor (provided in the JDT) demonstrates an interesting content outliner.&nbsp; The Java outliner presents a structured view
-of Java source code and allows the user to navigate through declarations,
-methods, and fields in the corresponding editor.&nbsp; As the outliner reports
-selection events, the Java editor updates its vertical ruler to show where the
-elements in the outliner are located in the source code.</P>
-
-
-<P >
-<img border="0" src="images/javacontentoutline.jpg" width="659" height="384" alt="Java editor with content outliner"></P>
-
-
-<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
+	ISelection selection= event.getSelection();
+	if (selection.isEmpty())
+		fTextEditor.resetHighlightRange();
+	else {
+		Segment segment= (Segment) ((IStructuredSelection) selection).getFirstElement();
+		int start= segment.position.getOffset();
+		int length= segment.position.getLength();
+		try {
+			fTextEditor.setHighlightRange(start, length, true);
+		} catch (IllegalArgumentException x) {
+			fTextEditor.resetHighlightRange();
+		}
+	}
+}
+</font></pre><pre><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></pre>
 
 </BODY>
 </HTML>
