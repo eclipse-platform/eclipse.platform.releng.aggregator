@@ -34,7 +34,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	private PerformanceMonitor fPerformanceMonitor;
 	private long fStartTime;
 	private List fDataPoints= new ArrayList();
-	private DB fDB;
     
 	
 	/**
@@ -52,7 +51,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	public void dispose() {
 	    fPerformanceMonitor= null;
 	    fDataPoints= null;
-	    DB.release(fDB);
 	    super.dispose();
 	}
 
@@ -75,8 +73,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 	    
-	    fDB= DB.acquire();
-	    fDB.store(getSample());
+	    DB.store(getSample());
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 			printSample();

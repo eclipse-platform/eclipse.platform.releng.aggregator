@@ -11,83 +11,93 @@
 package org.eclipse.test.internal.performance.eval;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import junit.framework.Assert;
 
 import org.eclipse.test.internal.performance.Dimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
-import org.eclipse.test.internal.performance.data.PerformanceDataModel;
+import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.performance.PerformanceMeter;
 
 /**
  * @since 3.1
  */
 public class Evaluator implements IEvaluator {
-
-//	private static final String PLUGIN_ID= JdtTextTestPlugin.PLUGIN_ID;
-//	private static final String DRIVER_OPTION= "/option/driver"; //$NON-NLS-1$
-//	private static final String TIMESTAMP_OPTION= "/option/timestamp"; //$NON-NLS-1$
-//	
-//	private static final String DRIVER_SYSTEM_PROPERTY= "eclipse.performance.reference.driver"; //$NON-NLS-1$
-//	private static final String TIMESTAMP_SYSTEM_PROPERTY= "eclipse.performance.reference.timestamp"; //$NON-NLS-1$
 	
 	private static IEvaluator fgDefaultEvaluator;
 	
 	private Map fFilterProperties;
 	private AssertChecker[] fCheckers;
 
-	public void evaluate(PerformanceMeter performanceMeter) {
-		Sample session= ((InternalPerformanceMeter) performanceMeter).getSample();
+	/*
+	 * @see org.eclipse.test.internal.performance.eval.IEvaluator#evaluate(org.eclipse.jdt.ui.tests.performance.PerformanceMeter)
+	 */
+	public void evaluate(PerformanceMeter performanceMeter) throws RuntimeException {
+	    
+		if (fCheckers == null)
+		    return;	// nothing to do
+
+	    if (!(performanceMeter instanceof InternalPerformanceMeter))
+	        return;
+        InternalPerformanceMeter ipm= (InternalPerformanceMeter) performanceMeter;
+        
+	    Sample session= ipm.getSample();
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
-		Sample reference= getReferenceSession(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY), session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY));
-		Assert.assertTrue("reference metering session is null", reference != null); //$NON-NLS-1$
+		
+        String refTag= "3.1"; // reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY);
+        String refDate= "0824"; // reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY);
+
+//		Sample reference= getReferenceSession(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY), session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY));
+		Sample reference= getReferenceSession(ipm.getScenarioName(), "this");
 		
 		StatisticsSession referenceStats= new StatisticsSession(reference.getDataPoints());
 		StatisticsSession measuredStats= new StatisticsSession(session.getDataPoints());
-		
-		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to driver '" + reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY) + "' from " + reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY) + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	    
+		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refTag + "' from " + refDate + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
 			pass &= fCheckers[i].test(referenceStats, measuredStats, failMesg);
 		}
-		
 		Assert.assertTrue(failMesg.toString(), pass);
 	}
 
-	private Sample getReferenceSession(String testname, String hostname) {
-		String specificHost= (String) fFilterProperties.get(InternalPerformanceMeter.HOSTNAME_PROPERTY);
-		boolean useSessionsHostname= true;
-		if (specificHost != null)
-			useSessionsHostname= false;
-		
-		PerformanceDataModel model= getDataModel();
-		Sample[] sessions= model.getMeteringSessions();
-		for (int i= 0; i < sessions.length; i++) {
-			Sample session= sessions[i];
-			boolean match= true;
-			
-			// check filter properties
-			for (Iterator it= fFilterProperties.keySet().iterator(); match && it.hasNext();) {
-				String property= (String) it.next();
-				String value= session.getProperty(property);
-				String filterValue= (String) fFilterProperties.get(property);
-				if (!value.equals(filterValue))
-					match= false;
-			}
-			// check properties by specific hostname
-			if (match 
-					&& testname.equals(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY))
-					&& (!useSessionsHostname || hostname.equals(session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY))))
-				return session;
-		}
-		return null;
+	private Sample getReferenceSession(String scenarioName, String hostname) {
+        String refTag= "3.1"; // reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY);
+        String refDate= "0824"; // reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY);
+	    DataPoint[] datapoints= DB.query(scenarioName, refTag);
+	    return new Sample(datapoints);
 	}
-
-	protected PerformanceDataModel getDataModel() {
-		return PerformanceDataModel.getInstance(null);
-	}
+	
+//	private Sample getReferenceSession(String testname, String hostname) {
+//		String specificHost= (String) fFilterProperties.get(InternalPerformanceMeter.HOSTNAME_PROPERTY);
+//		boolean useSessionsHostname= true;
+//		if (specificHost != null)
+//			useSessionsHostname= false;
+//		
+//		PerformanceDataModel model= getDataModel();
+//		Sample[] sessions= model.getMeteringSessions();
+//		for (int i= 0; i < sessions.length; i++) {
+//			Sample session= sessions[i];
+//			boolean match= true;
+//			
+//			// check filter properties
+//			for (Iterator it= fFilterProperties.keySet().iterator(); match && it.hasNext();) {
+//				String property= (String) it.next();
+//				String value= session.getProperty(property);
+//				String filterValue= (String) fFilterProperties.get(property);
+//				if (!value.equals(filterValue))
+//					match= false;
+//			}
+//			// check properties by specific hostname
+//			if (match 
+//					&& testname.equals(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY))
+//					&& (!useSessionsHostname || hostname.equals(session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY))))
+//				return session;
+//		}
+//		return null;
+//	}
 
 	public void setAssertCheckers(AssertChecker[] asserts) {
 		fCheckers= asserts;
@@ -103,10 +113,8 @@ public class Evaluator implements IEvaluator {
 	
 	public static synchronized IEvaluator getDefaultEvaluator() {
 		if (fgDefaultEvaluator == null) {
-			fgDefaultEvaluator= new DBEvaluator();
+			fgDefaultEvaluator= new Evaluator();
 			
-//			fgDefaultEvaluator= new Evaluator();
-//			
 //			String driver= System.getProperty(DRIVER_SYSTEM_PROPERTY);
 //			if (driver == null)
 //				driver= Platform.getDebugOption(PLUGIN_ID + DRIVER_OPTION);
@@ -127,5 +135,4 @@ public class Evaluator implements IEvaluator {
 
 		return fgDefaultEvaluator;
 	}
-
 }

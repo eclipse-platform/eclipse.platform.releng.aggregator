@@ -17,8 +17,6 @@ import java.util.Set;
 import org.eclipse.test.internal.performance.data.Assert;
 import org.eclipse.test.internal.performance.data.Dimension;
 
-
-
 /**
  * @since 3.1
  */

@@ -27,9 +27,10 @@ public class DB {
     
     public static final String DB_NAME= "perfDB";	// default db name
     
+    private static final boolean DEBUG= false;
+    
     private static DB fgDefault;
     
-    private int fRefCount;
     private Connection fConnection;
     private SQL fSQL;
     
@@ -37,46 +38,56 @@ public class DB {
     private int fSessionID;
     
     
-    public synchronized static DB acquire() {
-        if (fgDefault == null) {
-            fgDefault= new DB();          
-            fgDefault.connect();
-        }
-        fgDefault.fRefCount++;
-        return fgDefault;
-    }
-   
-    public synchronized static void release(DB db) {
-        if (db == null)
-            return;
-        if (db != fgDefault)
-            System.err.println("DB.release: stale db");
-        db.fRefCount--;
-        if (db.fRefCount <= 0) {
-            db.disconnect();
-            if (db == fgDefault)
-                fgDefault= null;
-        }
-    }
-
-    public SQL getSQL() {
-        return fSQL;
-    }
-
     private int getConfig(Sample sample) throws SQLException {
         if (fConfigID == 0)
             fConfigID= fSQL.getConfig("burano", "MacOS X");
         return fConfigID;
     }
     
-
     private int getSession(Sample sample) throws SQLException {
         if (fSessionID == 0)
             fSessionID= fSQL.addSession("3.1", getConfig(sample));
         return fSessionID;
     }
     
-    public void store(Sample sample) {
+    public static void store(Sample sample) {
+        getDefault().internalStore(sample);
+    }
+    
+    public static DataPoint[] query(String scenarioID, String refID) {
+        return getDefault().internalQuery(scenarioID, refID);   
+    }
+    
+    //---- private implementation
+    
+    private DB() {
+        // empty implementation
+    }
+
+    private synchronized static DB getDefault() {
+        if (fgDefault == null) {
+            fgDefault= new DB();       
+            fgDefault.connect();
+            Runtime.getRuntime().addShutdownHook(
+                new Thread() {
+                    public void run() {
+                        if (DEBUG) System.out.println("shutdownhook");
+                        if (fgDefault != null) {
+                            fgDefault.disconnect();
+                            fgDefault= null;
+                        }
+                    }
+                }
+            );
+        }
+        return fgDefault;
+    }
+   
+    private SQL getSQL() {
+        return fSQL;
+    }
+
+    private void internalStore(Sample sample) {
         
         if (fSQL == null || sample == null)
             return;
@@ -103,7 +114,7 @@ public class DB {
         }
     }
 
-    public DataPoint[] query(String scenarioID, String refID) {
+    private DataPoint[] internalQuery(String scenarioID, String refID) {
         if (fSQL == null) 
             return null;
  
@@ -150,12 +161,6 @@ public class DB {
         return null;
     }
 
-    //---- private implementation
-    
-    private DB() {
-        // empty implementation
-    }
-
     /**
      * dbloc=						embed in home directory
      * dbloc=/tmp/performance			embed given location
@@ -179,7 +184,7 @@ public class DB {
         try {            
             if (dbloc.startsWith("net://")) {
                 // connect over network
-                System.out.println("Trying to connect over network...");
+                if (DEBUG) System.out.println("Trying to connect over network...");
                 Class.forName("com.ibm.db2.jcc.DB2Driver");
                 String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
                 String dbuser= p.getProperty("dbuser", "guest");
@@ -187,7 +192,7 @@ public class DB {
                 fConnection= DriverManager.getConnection(url, dbuser, dbpassword);
             } else {
                 // embedded
-                System.out.println("Loading embedded cloudscape...");
+                if (DEBUG) System.out.println("Loading embedded cloudscape...");
                 Class.forName("com.ihost.cs.jdbc.CloudscapeDriver");
                 File f;
                 if (dbloc.length() == 0) {
@@ -201,15 +206,15 @@ public class DB {
                 String url= "jdbc:cloudscape:" + dbpath + ";create=true";
                 fConnection= DriverManager.getConnection(url);
             }
-            System.out.println("succeeded!");
+            if (DEBUG) System.out.println("succeeded!");
  
             fSQL= new SQL(fConnection);
 
             doesDBexists();
 
-            System.out.println("start prepared statements");
+            if (DEBUG) System.out.println("start prepared statements");
             fSQL.createPreparedStatements();
-            System.out.println("finish with prepared statements");
+            if (DEBUG) System.out.println("finish with prepared statements");
                          
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -221,7 +226,7 @@ public class DB {
     }
     
     private void disconnect() {
-        System.out.println("disconnecting from DB");
+        if (DEBUG) System.out.println("disconnecting from DB");
         if (fSQL != null) {
             try {
                 fSQL.dispose();
@@ -247,9 +252,9 @@ public class DB {
 	        while (rs.next())
 	            if (rs.getInt(1) > 16)
 	                return;
-	        System.out.println("initialising DB");
+	        if (DEBUG) System.out.println("initialising DB");
 	        fSQL.initialize();
-	        System.out.println("end initialising DB");
+	        if (DEBUG) System.out.println("end initialising DB");
         } finally {
             stmt.close();
         }
@@ -259,7 +264,7 @@ public class DB {
     
     public static void main(String args[]) throws Exception {
         
-        DB db= DB.acquire();
+        DB db= DB.getDefault();
         
         try {            
             
@@ -296,7 +301,5 @@ public class DB {
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }
-        
-        DB.release(db);       
     }
 }
