@@ -515,7 +515,7 @@ public class BuildTests extends TestCase {
 		return (String[]) list.toArray(new String[0]);
 	}
 	
-	public void ztestChkpii() {
+	public void testChkpii() {
 			
 			String zipFile = locateEclipseZip();
 //			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder";
