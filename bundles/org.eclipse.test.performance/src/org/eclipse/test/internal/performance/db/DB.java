@@ -441,15 +441,16 @@ public class DB {
     /*
      * 
      */
-    private void internalQueryDistinctValues(List values, String key, Variations variations, String scenarioPattern) {
+    private void internalQueryDistinctValues(List values, String seriesKey, Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return;
         ResultSet result= null;
         try {        	
             result= fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
             for (int i= 0; result.next(); i++) {
-                Variations p= new Variations(result.getString(1));
-                String build= p.getProperty(key);
+                Variations v= new Variations();
+                v.parseDB(result.getString(1));
+                String build= v.getProperty(seriesKey);
                 if (build != null && !values.contains(build))
                     values.add(build);
             }

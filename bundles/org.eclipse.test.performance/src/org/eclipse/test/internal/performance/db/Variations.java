@@ -19,8 +19,8 @@ import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 
 /**
  * The <code>Variations</code> class represents a set of key/value pairs
- * that are used to tag data stored in the performance database and to
- * query for data from the databse. 
+ * and is used to tag data stored in the performance database and when
+ * querying for data from the database. 
  */
 public class Variations extends Properties {
     
@@ -34,25 +34,28 @@ public class Variations extends Properties {
     }
 
     /**
-     * Creates a set of key/value pairs that consists
-     * @param config
-     * @param build
+     * Creates a Variations object that is populated with a "config" and a "build" key/value pair.
+     * @param configValue a value to store under the config key
+     * @param buildValue a value to store under the build key
      * @deprecated Use the default constructor instead and fill in key/value pairs explicitely.
      */
-    public Variations(String config, String build) {
-        if (config != null)
-            put(PerformanceTestPlugin.CONFIG, config);
-        if (build != null)
-            put(PerformanceTestPlugin.BUILD, build);
+    public Variations(String configValue, String buildValue) {
+        if (configValue != null)
+            put(PerformanceTestPlugin.CONFIG, configValue);
+        if (buildValue != null)
+            put(PerformanceTestPlugin.BUILD, buildValue);
     }
 
     /**
      * Creates a set of key/value pairs by parsing the given string.
-     * The strings format is an implementation detail of the database.
-     * @param dbRepresentation
+     * The format of the string must be:
+     * <pre>
+     *   key1=value1;key2=value2; .... ; keyn=valuen
+     * </pre>
+     * @param keyValuePairs
      */
-    public Variations(String dbRepresentation) {
-        parse(this, dbRepresentation);
+    public Variations(String keyValuePairs) {
+        parsePairs(keyValuePairs);
     }
 
     public String toExactMatchString() {
@@ -63,20 +66,34 @@ public class Variations extends Properties {
         return toDB(this, true);
     }
 
-    private static void parse(Properties keys, String s) {
-		StringTokenizer st= new StringTokenizer(s, "|"); //$NON-NLS-1$
+	public void parsePairs(String keyvaluepairs) {
+        parse(keyvaluepairs, ";"); //$NON-NLS-1$
+	}
+
+	public void parseDB(String keyvaluepairs) {
+        parse(keyvaluepairs, "|"); //$NON-NLS-1$
+	}
+
+    /**
+     * parsing the given string as key/value pairs and stores them in Variations.
+     * The string's format is an implementation detail of the database.
+     * @param keyvaluepairs
+     * @param separator
+     */
+    private void parse(String keyvaluepairs, String separator) {
+		StringTokenizer st= new StringTokenizer(keyvaluepairs, separator); //$NON-NLS-1$
 		while (st.hasMoreTokens()) {
 			String token= st.nextToken();
 			int i= token.indexOf('=');
 			if (i < 1)
-			    throw new IllegalArgumentException("Key '" + token + "' is illformed"); //$NON-NLS-1$ //$NON-NLS-2$
+			    throw new IllegalArgumentException("kev/value pair '" + token + "' is illformed"); //$NON-NLS-1$ //$NON-NLS-2$
 			String value= token.substring(i+1);
 			token= token.substring(0, i);
 			//System.out.println(token + ": <" + value + ">");
-			keys.put(token, value);
+			put(token, value);
 		}	    
 	}
-	
+    
 	/*
 	 * TODO: we need to escape '=' and ';' characters in key/values.
 	 */

@@ -17,9 +17,21 @@ import java.io.PrintStream;
 
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 
+/**
+ * Dumps performance data to stdout.
+ */
 public class View {
 
     public static void main(String[] args) {
+        
+        Variations variations= PerformanceTestPlugin.getVariations();
+        variations.put("config", "relengbuildwin2");  //$NON-NLS-1$//$NON-NLS-2$
+        variations.put("build", "I%");  //$NON-NLS-1$//$NON-NLS-2$
+        
+        String scenarioPattern= "%RevertJavaEditorTest%"; //$NON-NLS-1$
+
+        String seriesKey= "build"; //$NON-NLS-1$
+
 
         String outFile= null;
         // outfile= "/tmp/dbdump"; //$NON-NLS-1$
@@ -34,10 +46,7 @@ public class View {
         if (ps == null)
             ps= System.out;
 
-        Variations v= new Variations();
-        v.put(PerformanceTestPlugin.CONFIG, "relengbuildwin2"); //$NON-NLS-1$
-        v.put(PerformanceTestPlugin.BUILD, "3%"); //$NON-NLS-1$
-        Scenario[] scenarios= DB.queryScenarios(v, "%RevertJavaEditorTest%", PerformanceTestPlugin.BUILD, null); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        Scenario[] scenarios= DB.queryScenarios(variations, scenarioPattern, seriesKey, null);
         ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         ps.println();
 

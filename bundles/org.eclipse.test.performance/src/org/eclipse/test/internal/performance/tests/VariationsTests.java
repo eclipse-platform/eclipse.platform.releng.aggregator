@@ -39,18 +39,25 @@ public class VariationsTests extends TestCase {
     public void testParseVariations() {
         Variations v1= new Variations();
         v1.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals(v1, new Variations(v1.toExactMatchString()));
+        
+        Variations v= new Variations();
+        v.parseDB(v1.toExactMatchString());
+        assertEquals(v1, v);
         
         Variations v2= new Variations();
         v2.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
         v2.put("k2", "bar"); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals(v2, new Variations(v2.toExactMatchString()));
+        v= new Variations();
+        v.parseDB(v2.toExactMatchString());
+        assertEquals(v2, v);
 
         Variations v3= new Variations();
         v3.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
         v3.put("k2", "bar"); //$NON-NLS-1$ //$NON-NLS-2$
         v3.put("k3", "xyz"); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals(v3, new Variations(v3.toExactMatchString()));
+        v= new Variations();
+        v.parseDB(v3.toExactMatchString());
+        assertEquals(v3, v);
     }
     
 //    public void testMaxLength() {
