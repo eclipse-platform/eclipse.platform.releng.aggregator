@@ -4,240 +4,64 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<title>Ignoring Resources from Release</title>
-
+<title>Filtering resources from a release</title>
+<meta name="keyword" content="team">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H1 CLASS="Head">
-Ignoring Resources from Release</H1>
-<P CLASS="Para" Label=Type>When synchronizing resources, often there are resources that you do not want to release to the stream.
-There are two ignore facilities provided that allow you to specify which
-resources should be excluded from catch up and release operations.</P>
-<P CLASS="Para" Label=Type>The first is a global ignore facility, provided by the
-workbench. The second is the CVS ignore facility, which reads the contents of
-the file .<i>cvsignore</i> to determine what to ignore. Use the global ignore for ignoring files that can
-appear anywhere in your project hierarchy. The CVS ignore facility provides
+Filtering resources from a release</H1>
+<p CLASS="Para" Label="Type">When synchronizing resources, often there are resources that you do not want to release to the stream.
+For example, external editors might create temporary files in your project, or
+compilation of .java files might create .class files, or some build operations
+might result in binary files. These generated files, when taken together, may be
+quite large. They may also be regenerated whenever a build is performed,
+resulting in many outgoing changes. Typically these are not files that one wants
+to persist in the repository or to share with other members of a team.
+&nbsp;&nbsp;</p>
+<P CLASS="Para" Label=Type>
+There are two &quot;ignore&quot; facilities that allow you to specify which
+resources should be excluded from catch up and release operations. The first is a global facility, provided by the
+workbench, which you can use for ignoring files that might appear anywhere in your project hierarchy.
+For example, if you create a global ignore for <samp>/bin</samp>, any resource that matches &quot;bin&quot; in any directory
+in the workbench will be ignored at release time. The second is the CVS ignore facility, which reads the contents of
+the file .cvsignore to determine what to ignore. This provides
 compatibility with the existing CVS ignore files and is used most often to
-ignore directories.</P>
+ignore directories. The .cvsignore file only applies the pattern to resources in the
+<i> same</i> directory as the .cvsignore file itself. </P>
 
-<h2>
-Option 1: Adding a global ignore </h2>
-<TABLE BORDER="0" cellspacing="0" cellpadding="3">
-<TR>
-<TD COLSPAN="1">
-<P CLASS="Para">
-<b>1.</b>
-</P>
-</TD>
-<TD COLSPAN="1">
-<P CLASS="Para">
-From the workbench, select the Window &gt; Preferences menu item.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>2.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-In the left pane of the preferences dialog, expand the Team category and select
-Ignored Resources.&nbsp;</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>3.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Click the Add... button and enter the following
-pattern <i>*.obj</i>.&nbsp; Click OK on the dialog.&nbsp; The ignore pattern will be
-enabled by default.&nbsp;All object files with extension
-<i> *.obj</i>
-will be excluded from release operations.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>4.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Click the OK button of the preferences dialog.</P>
-</TD>
-</TR>
-</TABLE>
 
-<h2>
-Option 2: Adding a CVS ignore file </h2>
-<P> The Eclipse CVS client recognizes a file named <i>.cvsignore</i> in each directory
-of a project. This is a standard CVS facility and many existing CVS projects may
-already contain several of these files.
-This text file consists of a list of files, directories, or patterns.&nbsp; In a similar way
-to the global ignore facility, the wildcards "*" and "?" may be present in any entry in the
-.cvsignore
-file.&nbsp; Any file or subdirectory <i> in the current directory</i> that matches any one of the patterns
-will be ignored. </P>
-<P> For example, add a .cvsignore file to ignore the entire Project/bin directory: </P>
-<TABLE BORDER="0" cellspacing="0" cellpadding="3">
-<TR>
-<TD COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>1.</b>
-</P>
-</TD>
-<TD COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Select a project that contains a /bin directory
-from the Navigator. From the context menu select New &gt; File. The bin
-directory will commonly contain the projects build output; these are files that
-are generated from the project's source files and are usually not version
-controlled.&nbsp;</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>2.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Enter <i>.cvsignore</i> <b> </b>as the file name, then
-press Finish. The file will be created in your project's root
-directory. You should see it in the Navigator.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>3.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Double click on the file in the Navigator to edit
-the file.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>4.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Enter <i>bin</i>  in the .cvsignore file and save
-it.</P>
-</TD>
-</TR>
-<TR>
-<TD COLSPAN="1" valign="top" align="left">
-<P CLASS="SALastPara">
-<b>
-5.</b></P>
-</TD>
-<TD COLSPAN="1" valign="top" align="left">
-<P CLASS="SALastParaText">
-Select the project.&nbsp; From the context menu, select the Team &gt;
-Synchronize with Stream menu item.&nbsp; Notice that the bin
-directory does not show as an outgoing addition. It is ignored.</P>
-</TD>
-</TR>
-</TABLE>
+<P CLASS="Para" Label=Type>
+<b>Tip</b>: Once a resource is under version control, it cannot easily be subsequently be
+ignored.&nbsp; A resource comes under version control in the first place when a
+synchronize operation is performed on a resource or any of its parent
+folders.&nbsp; You should consider, prior to performing your first&nbsp;
+synchronize operation, which files and directories you wish to ignore, and add
+them to the appropriate ignore facility.&nbsp; </P>
 
-<h2>
-Option 3: Ignoring Resources that Appear in the Synchronize View</h2>
-<p>Let's say that the first time you synchronize your project with a stream,
-without adding ignore patterns first, you notice&nbsp;the bin/*.obj files and *.ba~ files appearing as outgoing additions.&nbsp; But
-you do not want these files to be synchronized. Here is how to ignore them once
-they already appear as outgoing additions:</p>
-<TABLE BORDER="0" cellspacing="0" cellpadding="3">
-<TR>
-<TD COLSPAN="1">
-<P CLASS="Para">
-<b>1.</b>
-</P>
-</TD>
-<TD COLSPAN="1">
-<P CLASS="Para">
-From the Navigator view, delete the /bin directory and all the
-*.ba~
-    files.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>2.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Create a <i> .cvsignore</i> file (File &gt; New &gt; File) in the parent directory of
-    /bin, and add 'bin' to the file.&nbsp; Save the <i> .cvsignore</i> file.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>3.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Create a global ignore entry (Window &gt; Preferences &gt;
-Team &gt; Ignored
-    Resources) with the following patterns *.ba~.</P>
-</TD>
-</TR>
-<TR>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-<b>4.</b>
-</P>
-</TD>
-<TD ROWSPAN="1" COLSPAN="1" valign="top" align="left">
-<P CLASS="Para">
-Rebuild the project.&nbsp; From the workbench window, select the Project &gt; Rebuild
-All menu item.</P>
-</TD>
-</TR>
-<TR>
-<TD COLSPAN="1">
-<P CLASS="SALastPara">
-<b>
-5.</b></P>
-</TD>
-<TD COLSPAN="1">
-<P CLASS="SALastParaText">
-Synchronize with the stream.&nbsp; In the context menu of the Navigator, select
-the Team
-    &gt; Synchronize with Stream menu item. The /bin directory and the *.ba~ files
-will not appear as outgoing additions. The <i> .cvsignore</i> file should be released to the stream.&nbsp; Others in your team will want
-    to share this setting.</P>
-</TD>
-</TR>
-</TABLE>
+
+<p><img border="0" src="../images/ngrelc.gif" alt="Related concepts" width="159" height="27"><br>
+<a href="../concepts/concepts-26.htm">Team programming</a> &nbsp;<a href="../concepts/concepts-27c.htm"><br>
+</a><a href="../concepts/concepts-27b.htm">
+Streams</a><a href="../reference/ref-51a.htm"><br>
+</a><a href="../concepts/concepts-30.htm">
+Team synchronization</a>&nbsp;</p>
+
+
+<p><img border="0" src="../images/ngrelt.gif" alt="Related tasks" width="159" height="27"><a href="tasks-115.htm"><br>
+Synchronizing with a stream</a><a href="tasks-114.htm"><br>
+Releasing resources to the stream</a><a href="tasks-100d.htm"><br>
+</a><a href="tasks-100d1.htm">
+Creating a global pattern to
+                filter resources from releasing</a> &nbsp;<a href="tasks-100d2.htm"><br>
+Adding a CVS ignore file to
+                filter resources from a release</a> &nbsp;<a href="tasks-100d3.htm"><br>
+Stopping resources from
+                releasing at synchronization time</a> &nbsp;<a href="tasks-100d1b.htm"><br>
+Overriding patterns that prevent resources from releasing</a></p>
 
 
 <P>
-If you use a global ignore for /bin, any resource that matches &quot;bin&quot; in any directory
-in the workbench will be ignored. Alternatively, the <i> .cvsignore</i> file will only apply the pattern to resources in the same directory as the
-<i>
-.cvsignore</i> file itself.
-</P>
-
-
-<P>
-<img align="texttop" src = ../ngibmcpy.gif width="195" height="12">
+<img align="texttop" src = "../images/ngibmcpy.gif" alt="Copyright IBM Corp. 2000,2001" width="195" height="12">
 </P>
 
 
