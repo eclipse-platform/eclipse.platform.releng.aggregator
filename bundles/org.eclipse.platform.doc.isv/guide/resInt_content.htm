@@ -14,8 +14,54 @@ File encoding and content types
 <H2>
 File encoding and content types</H2>
 <P >
-[This document is under construction]</P>
+The platform runtime plug-in defines infrastructure for defining and discovering <b>content types</b> for data
+streams.  (See <a href="runtime_content.htm">Content types</a> for an overview of the content framework.)  
+An important part of the content type system is the ability to specify different encodings (character sets)
+for different kinds of content.  The resources API further allows default character sets to be established for 
+projects and folders, and explicit character sets to be established for a particular file.
+</P>
+<h3>
+Setting a character set
+</h3>
+<p>
+We've seen in <a href="runtime_content.htm">Content types</a> that default file encodings can be established
+for content types.  More fine-grained control is provided by the resources API.
+</p>
+<p>
+<b><a href="../reference/api/org/eclipse/core/resources/IContainer.html">IContainer</a></b> 
+defines protocol for setting the default character set for a particular project or folder.  This gives 
+plug-ins (and ultimately the user) more freedom in determining an appropriate character set for a set of files when
+the derived character sets may not be appropriate.</p>
+<p>
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b> defines API for setting
+the character set for a particular file.  This character set will take precedence over any other character set
+derived from the file's content type, folder, or project.
+</p>
+<p>
+Both of these features are available to the end-user in the properties page for a resource.
+</p>
+<h3>
+Querying the character set
+</h3>
+<p>
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b> also defines API for
+querying the character set of a file.  A boolean flag specifies whether only the character set explicitly 
+defined for the file should be returned, or whether an implied character set should be returned.  For example:
+<font color='#4444CC'><pre>
+	String charset = myFile.getCharset(false);
+</pre></font> 
+returns null if no character set was set explicitly on myFile.  However, 
 
+<font color='#4444CC'><pre>
+	String charset = myFile.getCharset(true);
+</pre></font> 
+will check the file's containing folders and projects for a character set if there is no explicit character set
+established for the file.  If none is found, the character set defined for the content type will be checked.  
+If the content type does not specify a character set, the platform default character set will be returned.  The
+convenience method <b>getCharset()</b> is the same as using <b>getCharset(true)</b>.
+</p>
+
+ 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
