@@ -34,14 +34,13 @@ class PerformanceMonitor {
     }
 
     protected void collectOperatingSystemCounters(Map scalars) {
-        // default implementation
-        addScalar(scalars, InternalDimensions.SYSTEM_TIME, System.currentTimeMillis());
-        /*
-    	Runtime runtime= Runtime.getRuntime();
-		runtime.gc();
-		long used= runtime.totalMemory() - runtime.freeMemory();
-		addScalar(scalars, Dimensions.USED_JAVA_HEAP, used);
-		*/
+        if (true) {
+            addScalar(scalars, InternalDimensions.SYSTEM_TIME, System.currentTimeMillis());
+        } else {
+            Runtime runtime= Runtime.getRuntime();
+            //runtime.gc();
+            addScalar(scalars, InternalDimensions.USED_JAVA_HEAP, runtime.totalMemory() - runtime.freeMemory());
+        }
     }
 
 	protected void collectGlobalPerformanceInfo(Map scalars) {
