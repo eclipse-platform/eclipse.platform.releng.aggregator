@@ -21,19 +21,15 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.*;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-import org.eclipse.team.internal.ccvs.ui.Policy;
+import org.eclipse.team.internal.ccvs.ui.*;
+import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
-import org.eclipse.team.ui.ISharedImages;
 
 
 public class ReleaseWizard extends Wizard {
@@ -77,38 +73,38 @@ public class ReleaseWizard extends Wizard {
 		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage",
 				"Map Project Selection",
 				section,
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE));
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
 		mapSelectionPage.setDescription("Specify a map project to release projects");
 		addPage(mapSelectionPage);
 		
 		projectSelectionPage = new ProjectSelectionPage(Messages.getString("ReleaseWizard.5"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.6"), 
 				section, 
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE));
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
 		projectSelectionPage.setDescription(Messages.getString("ReleaseWizard.7")); //$NON-NLS-1$
 		addPage(projectSelectionPage);
 		
 		tagPage = new TagPage(Messages.getString("ReleaseWizard.8"), 
 				Messages.getString("ReleaseWizard.9"), 
 				section, 
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$ //$NON-NLS-2$
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$ //$NON-NLS-2$
 		tagPage.setDescription(Messages.getString("ReleaseWizard.10")); //$NON-NLS-1$
 		addPage(tagPage);
 		
 		projectComparePage = new ProjectComparePage(Messages.getString("ReleaseWizard.11"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.12"), 
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
 		projectComparePage.setDescription(Messages.getString("ReleaseWizard.13")); //$NON-NLS-1$
 		addPage(projectComparePage);
 		
 		mapComparePage = new MapFileComparePage(Messages.getString("ReleaseWizard.14"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.15"), 
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
 		mapComparePage.setDescription(Messages.getString("ReleaseWizard.16")); //$NON-NLS-1$
 		addPage(mapComparePage);
 		
 		commentPage = new CommitCommentPage(parentDialog, Messages.getString("ReleaseWizard.17"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.18"), TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE), Messages.getString("ReleaseWizard.19")); //$NON-NLS-1$ //$NON-NLS-2$
+				Messages.getString("ReleaseWizard.18"), TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE), Messages.getString("ReleaseWizard.19")); //$NON-NLS-1$ //$NON-NLS-2$
 		addPage(commentPage);
 	}
 	/**
