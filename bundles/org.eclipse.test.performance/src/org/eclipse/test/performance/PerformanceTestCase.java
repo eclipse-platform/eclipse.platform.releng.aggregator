@@ -68,6 +68,32 @@ public class PerformanceTestCase extends TestCase {
 	}
 
 	/**
+	 * Mark the scenario of this test case
+	 * to be included into the global performance summary. The summary shows
+	 * the given dimension of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimension the dimension to show in the summary
+	 */
+	public void tagAsGlobalSummary(String shortName, Dimension dimension) {
+		Performance performance= Performance.getDefault();
+		performance.tagAsGlobalSummary(fPerformanceMeter, shortName, new Dimension[] { dimension } );
+	}
+
+	/**
+	 * Mark the scenario represented by the given PerformanceMeter
+	 * to be included into the global performance summary. The summary shows
+	 * the given dimensions of the scenario and labels the scenario with the short name.
+	 * 
+	 * @param shortName a short (shorter than 40 characters) descritive name of the scenario
+	 * @param dimensions an array of dimensions to show in the summary
+	 */
+	public void tagAsGlobalSummary(String shortName, Dimension[] dimensions) {
+		Performance performance= Performance.getDefault();
+		performance.tagAsGlobalSummary(fPerformanceMeter, shortName, dimensions );
+	}
+	
+	/**
 	 * Called from within a test case immediately before the code to measure is run.
 	 * It starts capturing of performance data.
 	 * Must be followed by a call to {@link PerformanceTestCase#stopMeasuring()} before subsequent calls
