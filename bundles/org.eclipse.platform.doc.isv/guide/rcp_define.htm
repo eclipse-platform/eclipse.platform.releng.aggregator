@@ -13,13 +13,74 @@ Defining a rich client application
 <BODY BGCOLOR="#ffffff">
 <H2>
 Defining a rich client application</H2>
+<p>
+The definition of a rich client application plug-in starts out similarly to the other plug-ins we've been
+studying.  The only difference in the first part of the markup is that the list of required plug-ins is much
+smaller than we've been used to!
+<font color='#4444CC'><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;?eclipse version="3.0"?&gt;
+&lt;plugin
+   id="org.eclipse.ui.examples.rcp.browser"
+   name="%pluginName"
+   version="3.0.0"
+   provider-name="%providerName"&gt;
+
+   &lt;runtime&gt;
+      &lt;library name="browser.jar"&gt;
+      &lt;/library&gt;
+   &lt;/runtime&gt;
+   &lt;requires&gt;
+      &lt;import plugin="org.eclipse.ui"/&gt;
+   &lt;/requires&gt;
+</pre></font>
+</p>
 <P>
-[This document is under construction.]  Topics to be covered:
-<ul>
-<li>basic markup</li>
-<li>required plugins</li>
-<li>BrowserApp</li>
-</ul>
+Up to now, we've contributed function to the platform workbench by declaring extensions that
+add elements to the workbench.  In all of the <tt>plugin.xml</tt> content that we've reviewed so far,
+we've only looked at individual contributions to a workbench that is assumed to be there.  On the rich
+client platform, there is no application already defined.  Your rich client plug-in is the one
+responsible for specifying the class that should be executed when the platform is started.  This 
+is done in the <b><a href="../reference/extension-points/org_eclipse_runtime_core_applications.html">org.eclipse.runtime.core.applications</b></a>
+extension.
+<font color='#4444CC'><pre>
+   &lt;extension
+         id="app"
+         name="%appName"
+         point="org.eclipse.core.runtime.applications"&gt;
+      &lt;application&gt;
+         &lt;run
+            class="org.eclipse.ui.examples.rcp.browser.BrowserApp"&gt;
+         &lt;/run&gt;
+      &lt;/application&gt;
+   &lt;/extension&gt;
+</pre></font> 
+In this extension, we specify the class that should be run when the platform is first started.
+This class must implement <b><a href="../reference/api/org/eclipse/core/runtime/IPlatformRunnable.html">IPlatformRunnable</a></b>,
+which simply means that it must implement a <b>run</b> method.  The run method is responsible for creating the SWT display and
+starting up a workbench.  The class <b><a href="../reference/api/org/eclipse/ui/PlatformUI.html">PlatformUI</a></b>
+implements convenience methods for performing these tasks. 
+<font color='#4444CC'><pre>
+	public Object run(Object args) throws Exception {
+		Display display = PlatformUI.createDisplay();
+		try {
+			int code = PlatformUI.createAndRunWorkbench(display,
+					<b>new BrowserAdvisor()</b>);
+			// exit the application with an appropriate return code
+			return code == PlatformUI.RETURN_RESTART
+					? EXIT_RESTART
+					: EXIT_OK;
+		} finally {
+			if (display != null)
+				display.dispose();
+		}
+	}
+</pre></font> 
+The call to <b>createAndRunWorkbench</b> will not return until the application is closed.  The SWT event loop and other
+low-level logistics are handled inside this method.  At this stage, it's not so important
+that you understand the underlying mechanics in running an SWT application.  This code can be copied to your rich client
+application with minimal changes.  In fact, the hook for you to add your own functionality is the <b>BrowserAdvisor</b> that
+is passed as an argument when the workbench is created.  Let's take a closer look.
 </p>
 
 <p><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></p>
