@@ -8,16 +8,22 @@
 <link rel="stylesheet" type="text/css" href="../book.css">
 </head>
 <body>
-<h2>Manipulating code with a preview in a Java editor</h2>
-<p>The JDT Core plugin provides several mechanisms to programmatically create, 
+<h2>Previewing Java code manipulations</h2>
+<p>The JDT Core plug-in provides API that allows you to programmatically create, 
   delete and modify Java elements. See <a href="jdt_api_manip.htm">manipulating 
-  Java code</a> for an introduction to the API provided by JDT Core. </p>
-<p>In a UI world it is often useful to have the user confirm a preview before 
-  changes are saved. This can be achieved by opening a Java editor on the compilation 
-  unit to be modified. The user can then either save the Java editor's content 
-  to disk or revert it back to its original content. Below is a code snippet that 
-  opens a compilation unit in an editor and then uses the working copy created 
-  by the editor to perform the changes:</p>
+  Java code</a> for an introduction to the API provided by JDT Core.&nbsp;&nbsp; </p>
+<p>An important concept in the Java model is the use of an in-memory copy of a
+compilation unit, called a &quot;working copy&quot; (<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html">IWorkingCopy</a></b>).&nbsp;
+Using a working copy allows you to perform significant changes on a compilation
+unit before committing the changes to the underlying resource. </p>
+<p>In the Java user interface, a parallel concept is to allow the user to
+extensively edit a resource before committing the working copy to the file
+system.&nbsp; This is achieved by opening a Java editor on a working copy rather
+than its associated resource.&nbsp; The user can then either save the Java editor's content 
+  to disk or revert it back to its original content.&nbsp; </p>
+<p> Below is a code snippet that 
+  opens a compilation unit in an editor and then uses a working copy as the
+input so that the changes are made to the copy rather than the resource: </p>
 <pre><font color="#4444CC">    void modifyCompilationUnit(ICompilationUnit cunit) throws PartInitException, CoreException {
         IEditorPart editor= JavaUI.openInEditor(cunit);
         IEditorInput input= editor.getEditorInput();
