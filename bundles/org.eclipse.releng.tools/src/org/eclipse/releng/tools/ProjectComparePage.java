@@ -11,12 +11,9 @@
 package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
@@ -26,10 +23,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.*;
 import org.eclipse.team.core.TeamException;
-import org.eclipse.team.core.synchronize.SyncInfoTree;
+import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-import org.eclipse.team.ui.synchronize.TreeViewerAdvisor;
+import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
+import org.eclipse.team.ui.synchronize.*;
 import org.eclipse.ui.part.PageBook;
 
 /**
@@ -39,11 +37,12 @@ import org.eclipse.ui.part.PageBook;
  */
 public class ProjectComparePage extends WizardPage{
 
-	private ProjectComparePageTreeInput compareEditorInput;
 	private PageBook pageBook;
 	private Control compareView;
 	private Label noneChangeMessage;
 	private MapProject mapProject;
+	private ISynchronizePageConfiguration configuration;
+	private ParticipantPageSaveablePart input;
 
 	public ProjectComparePage(String pageName, 
 			String title, 
@@ -66,24 +65,10 @@ public class ProjectComparePage extends WizardPage{
 		composite.setLayout(new GridLayout());
 		pageBook.setLayoutData(new GridData(GridData.FILL_BOTH));
 		pageBook.setFont(font);
-					
-		CompareConfiguration compareConfig = new CompareConfiguration();
-		SyncInfoTree set = new SyncInfoTree();
-		TreeViewerAdvisor viewerAdvisor = new TreeViewerAdvisor(null, null, set);
-		compareEditorInput = new ProjectComparePageTreeInput(compareConfig, viewerAdvisor){
-			public String getTitle() {
-				return Messages.getString("ProjectComparePage.0"); //$NON-NLS-1$
-			}
-		};
-		try {
-			// Preparing the input should be fast since we haven't started the collector
-			compareEditorInput.run(new NullProgressMonitor());
-		} catch (InterruptedException e) {
-			CVSUIPlugin.openError(getShell(), null, null, e);
-		} catch (InvocationTargetException e) {
-			CVSUIPlugin.openError(getShell(), null, null, e);
-		}
-		compareView = compareEditorInput.createContents(pageBook);
+		
+		input = createCompareInput();
+		input.createPartControl(pageBook);
+		compareView = input.getControl();
 		compareView.setFont(font);
 		compareView.setLayoutData(data);
 		
@@ -118,7 +103,7 @@ public class ProjectComparePage extends WizardPage{
 						IResource[] r = null;
 						if(projects != null && projects.length != 0){
 							try {
-								r = compareEditorInput.getOutOfSyncProjects(projects, tags, monitor);
+								r = getOutOfSyncProjects(projects, tags, monitor);
 								wizard.setSelectedProjects(r);
 							} catch (TeamException e) {
 								throw new InvocationTargetException(e);
@@ -152,5 +137,43 @@ public class ProjectComparePage extends WizardPage{
 		mapProject = m;
 	}
 	
+	private ParticipantPageSaveablePart createCompareInput() {	
+		ISynchronizeParticipant participant = new CompareParticipant(new CVSCompareSubscriber(new IResource[0], new CVSTag[0], "RelEng Release"));
+		configuration = participant.createPageConfiguration();
+		configuration.setMenuGroups(ISynchronizePageConfiguration.P_TOOLBAR_MENU, new String[] { 
+				ISynchronizePageConfiguration.NAVIGATE_GROUP,  
+				ISynchronizePageConfiguration.LAYOUT_GROUP });
+		configuration.setMenuGroups(ISynchronizePageConfiguration.P_CONTEXT_MENU, new String[0]);
+		
+		CompareConfiguration cc = new CompareConfiguration();
+		cc.setLeftEditable(false);
+		cc.setRightEditable(false);
+		ParticipantPageSaveablePart part = new ParticipantPageSaveablePart(getShell(), cc, configuration, participant);
+		
+		setPageComplete(false);
+		
+		return part;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+		input.dispose();
+	}
+	
+	/**
+	 * Return the list of projects that are out-of-sync
+	 */
+	public IResource[] getOutOfSyncProjects(IProject[] projects, CVSTag[] tags, IProgressMonitor monitor) throws TeamException {
+		CompareParticipant participant = (CompareParticipant)input.getParticipant();
+		CVSCompareSubscriber subscriber = (CVSCompareSubscriber)participant.getSubscriber();
+		subscriber.resetRoots(projects, tags);
+		subscriber.refresh(projects, IResource.DEPTH_INFINITE, monitor);
+		participant.getSubscriberSyncInfoCollector().waitForCollector(monitor);
+		IResource[] r = participant.getSyncInfoSet().members(ResourcesPlugin.getWorkspace().getRoot());
+		return r;
+	}
 }
 
