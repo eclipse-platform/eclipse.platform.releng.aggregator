@@ -1,0 +1,102 @@
+<h2><font face="Arial">PDE Dynamic Classpaths FAQ</font></h2>
+<p>The following list of frequently asked questions is compiled for the benefit 
+of Eclipse plug-in developers that would like to try out the new PDE dynamic 
+classpaths while self-hosting.</p>
+<p><b>Q: What is classpath stability?<br>
+A:</b> Classpath stability is a measure of classpath change with respect to the 
+self-hosting choice made by a developer. Ideally, classpaths should not change 
+regardless of the complement of source projects in the workspace. Binary project 
+self-hosting offers good classpath stability, where all classpaths contain only 
+project references. External plug-in self-hosting provides less stable 
+classpaths. They are still stable with respect to the local install location of 
+the external libraries, but the list of plug-ins as source projects must remain 
+constant for all the members of a team in order to share them via a repository.</p>
+<p>Since 2.0, added plug-in version to the plug-in location on the file system 
+further reduced the classpath stability when external plug-ins were used.</p>
+<p><b>Q: If binary projects offer better classpath stability, why not use them 
+all the time?<br>
+A: </b>Self-hosting using imported binary projects is a good choice as long the 
+number of imported plug-ins is reasonably small (a few dozen). For large 
+products with hundreds of plug-ins, a wholesale import is not an option. 
+Typically, their developers self-host with a few source projects, a few dozen 
+directly related binary projects, and everything else as external plug-ins. From 
+the purely theoretical point of view, it seems strange to waste time and 
+resources to import dozens and dozens of external plug-ins to be able to compile 
+a few source projects.</p>
+<p><b>Q: I think that (binary projects/external plug-ins) self-hosting method is 
+better. What is wrong with my team using it if we do it together?<br>
+A:</b> Static classpaths (either using binary projects or external plug-ins) 
+cast in stone your self-hosting method of choice and force everybody else to use 
+it as well.</p>
+<p><b>Q: What are dynamic classpaths?</b><br>
+<b>A:</b> <b>Dynamic classpaths </b>is a PDE feature whereby a portion of the 
+plug-in project classpath that is related to plug-in dependencies is computed 
+dynamically using JDT classpath container technology. The resolution of the dynamic classpaths is performed 'just in 
+time' and is always up to date with the conditions in your workspace. 
+Furthermore, the dynamic nature of the classpath resolution allows PDE to adapt 
+to changes and always have the correct classpath regardless of your method of 
+self-hosting.</p>
+<p><b>Q: What is the classpath stability of dynamic classpaths?<br>
+A:</b> Ultimate. Since all the entries for the required plug-ins are replaced 
+with one classpath container entry, your classpath is always the same.</p>
+<p><b>Q: How can dynamic classpaths help me?</b><br>
+<b>A: </b>With dynamic classpaths, there is no need to make upfront decisions 
+with respect to the self-hosting style. If binary projects are present, dynamic 
+classpaths will resolve to project references. If not, they will resolve to 
+external plug-in JARS. As binary projects are added or removed, dynamic 
+classpaths will track the changes and adapt. You will not need to update your 
+classpath ever again. In addition, other teams that want to take one or more of 
+your projects from CVS and get them to compile don't have to use your personal 
+self-hosting style to do so.</p>
+<p><b>Q: Since PDE Core is resolving the dynamic classpaths, does it mean that I 
+will be dependent on PDE to do the right thing?<br>
+A: </b>In a word, yes. Being dynamic, your classpath will always be computed on 
+the fly, not hard-coded in the .classpath file (that was the whole idea, 
+right?). But consider this: PDE has a sophisticated algorithm for computing the 
+classpath that strives to get you as close as possible to the run-time 
+conditions. What the JDT compiler 'sees' at development time should be as close 
+as possible to what class loaders will see at run time. PDE Core is more capable 
+of keeping your classpath up to date than yourself most of the time. If you need 
+to manually tweak the classpath in order to compile, something is most likely 
+wrong with your setup and there is a strong chance your plug-in will not run 
+correctly (SWT team being an exception).</p>
+<p><b>Q: My team uses binary projects for self-hosting exclusively. Will I loose 
+anything by switching to dynamic classpaths?<br>
+A:</b> No. Dynamic classpaths do not dictate your personal choice of self-hosting 
+arrangements. It simply resolves your plug-in dependencies in the given context. 
+If you continue to import external plug-ins as binary projects, dynamic 
+classpaths will resolve to project references as before.</p>
+<p><b>Q: What do I need to activate dynamic classpaths?<br>
+A: </b>Open Preferences&gt;Plug-in Development&gt;Java Build Path Control and check 
+'Use classpath containers for dependent plug-ins' (this label will change to 
+'Use dynamic classpaths for ...' in newer builds). After that, update classpaths 
+of all your plug-ins. You will notice that classpaths are now shorter and all 
+the dependent plug-in references are now replaced with one container entry. You 
+can continue to work. Make sure to check the source projects into the 
+repository, including the changed .classpath files.</p>
+<p><b>Q: I have extra classpath entries so that I can compile my Ant tasks/servlets/JSPs.<br>
+A:</b> As part of the classpath computation, PDE takes 'jars.extra.classpath' 
+property from build.properties file into account. If you are set up correctly 
+for building, PDE will generate the correct classpath.</p>
+<p><b>Q: How do I manipulate the dynamically computed classpath entries?<br>
+A:</b> In the unlikely event you need to manipulate your dynamic classpath 
+entries, you can do so from Properties&gt;Java Build Path&gt;Libraries tab. Expand the 
+'Required plug-in entries' object and manipulate the entries there.</p>
+<p><b>Q: Some of the computed entries for libraries don't have source 
+attachments. Can I add them manually?<br>
+A:</b> PDE computes source attachments for most of the libraries. There are some 
+odd cases where automatic source attachments may fail due to source zips not 
+following naming conventions. You can attach sources manually for these entries 
+in the build path properties dialog.</p>
+<p><b>Q: Will my manual source attachments be wiped out the next time PDE 
+computes the classpath dynamically?<br>
+A: </b>No. PDE keeps track of these manual cases and reapplies them after 
+dynamic computation as long as the library paths didn't change.</p>
+<p><b>Q: I am an SWT developer. Can I use dynamic classpaths?<br>
+A: </b>Sadly, no. SWT team has a unique self-hosting setup whereby classpaths for 
+various environments are saved in the repository and renamed into .classpath in 
+the project depending on the platform they are working on. They will have to 
+continue to use their self-hosting methods.</p>
+<p>
+   <a href="../notices.html"><img src="../cpy.gif" border="0" alt="Legal notices" width="324" height="14"></a>
+</p>
