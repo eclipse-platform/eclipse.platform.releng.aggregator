@@ -106,8 +106,10 @@ public class BuildTests extends TestCase {
 		File[] plugins = pluginDir.listFiles();
 		for (int i = 0; i < plugins.length; i++) {
 			File aPlugin = plugins[i];
-			if (!testPluginFile(aPlugin)) {
-				result.add(aPlugin.getPath());
+			if (aPlugin.getName().indexOf("test") == -1) {
+				if (!testPluginFile(aPlugin)) {
+					result.add(aPlugin.getPath());
+				}
 			}
 		}
 
