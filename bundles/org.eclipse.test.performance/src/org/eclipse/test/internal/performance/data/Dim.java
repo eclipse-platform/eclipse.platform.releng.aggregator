@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.data;
 
+import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.performance.Dimension;
 
@@ -26,6 +27,7 @@ public class Dim implements Dimension {
 	private final boolean fLargerIsBetter= false;	// true indicates that larger values are better
 	
 	public static Dim getDimension(int id) {
+        InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
 	    if (id >= 0 && id < fgRegisteredDimensions.length)
 	        return fgRegisteredDimensions[id];
 	    return null;
