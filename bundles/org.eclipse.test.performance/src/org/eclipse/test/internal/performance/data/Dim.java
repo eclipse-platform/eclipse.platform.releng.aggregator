@@ -23,6 +23,7 @@ public class Dim implements Dimension {
     private final int fId;
 	private final Unit fUnit;
 	private final int fMultiplier;
+	private final boolean fLargerIsBetter= false;	// true indicates that larger values are better
 	
 	public static Dim getDimension(int id) {
 	    if (id >= 0 && id < fgRegisteredDimensions.length)
@@ -63,6 +64,10 @@ public class Dim implements Dimension {
 		return fMultiplier;
 	}
 
+	public boolean largerIsBetter() {
+	    return fLargerIsBetter;
+	}
+	
 	public String getName() {
 		return DimensionMessages.getString(fId);
 	}
