@@ -11,13 +11,13 @@
 <body>
 
 <h1>The Eclipse runtime options</h1>
-<p>Last modified 11:15 Monday June 14, 2004</p>
+<p>Last modified 23:15 Monday June 14, 2004</p>
 <p>The Eclipse platform is highly configurable. Configuration input takes the
   form of command line arguments and System property settings. In many cases
   the command line arguments are simply short cuts for setting the related System
   properties. In fact, there are many more System property settings than command
 line arguments. </p>
-<h3>Command line arguments </h3>
+<h2><a name="commandline"></a>Command line arguments </h2>
 <p>Listed below are the command line arguments processed by various parts of
   the Eclipse runtime. Many of these values can also be specified using System
   properties either on the command line using -D VM arguments or by specifying
@@ -29,128 +29,110 @@ line arguments. </p>
   argument is processed (in ()). This is useful for people replacing parts of
   the runtime to suit special needs.</p>
 <dl>
-  <dt>-application &lt;id&gt; {<a href="#eclipseapplication">eclipse.application</a>}
-    (Runtime)</dt>
-  <dt>-arch &lt;architecture&gt; {<a href="#osgiarch">osgi.arch</a>} (OSGi) </dt>
-  <dt>-configuration &lt;location&gt; {<a href="#osgiconfigurationarea">osgi.configuration.area</a>}
-    (Main)</dt>
-  <dd>sets the configuration location for this run of the platform. The configuration
-    determines what plug-ins will run as well as various other system settings.
-    See the sections on <a href="#locations">locations</a> and <a href="#configurations">configurations</a> for
-    more details.</dd>
-  <dt>-console [port] {<a href="#osgiconsole">osgi.console</a>} (OSGi) <em>NEW</em></dt>
-  <dd>enables the OSGi console. Handy for investigating the state of the system.
-    If the port is specified, the console listens and directs its output to the
-    given port</dd>
+  <dt>-application &lt;id&gt; (Runtime)</dt>
+  <dd>equivalent to setting  <a href="#eclipseapplication">eclipse.application</a>
+    to &lt;id&gt;</dd>
+  <dt>-arch &lt;architecture&gt; (OSGi) </dt>
+  <dd>equivalent to setting <a href="#osgiarch">osgi.arch</a> to &lt;architecture&gt;</dd>
+  <dt>-configuration &lt;location&gt;   (Main)</dt>
+  <dd>equivalent to setting <a href="#osgiconfigurationarea">osgi.configuration.area</a>
+    to &lt;location&gt;</dd>
+  <dt>-console [port] (OSGi) <em>NEW</em></dt>
+  <dd>equivalent to setting <a href="#osgiconsole">osgi.console</a> to [port]
+    or the empty string if the default port is to be used (i.e., when the port
+    is not specified)</dd>
   <dt>-consoleLog (Runtime)</dt>
-  <dd>directs any log output to Java's System.out (typically back to the command
-    shell if any). Handy when combined with -debug </dd>
-  <dt>-data &lt;location&gt; {<a href="#osgiinstancearea">osgi.instance.area</a>}
-    (OSGi)<br>
+  <dd>equivalent to setting <a href="#eclipseconsolelog">eclispe.consoleLog</a> to
+    &quot;true&quot;</dd>
+  <dt>-data &lt;location&gt;    (OSGi)<br>
   </dt>
-  <dd>sets the instance data location for this session. Plug-ins use this location
-    to store their data. For example, the Resources plug-in uses this as the
-    default location for projects (aka the workspace). See the section on <a href="#locations">locations</a> for
-    more details.</dd>
-  <dt>-debug [options file] {<a href="#osgidebug">osgi.debug</a>} (OSGi)</dt>
-  <dd> turns on debug mode for the platform and optionally specifies a location
-    for the .options file. This file indicates what debug points are available
-    for a plug-in and whether or not they are enabled. If a location is not specified,
-    the platform searches for the .options file under the install directory. </dd>
-  <dt>-dev [entries] {<a href="#osgidev">osgi.dev</a>} (OSGi)</dt>
-  <dd>turns on dev mode and optionally specifies comma-separated class path entries
-    which are added to the class path of each plug-in </dd>
+  <dd>equivalent to setting <a href="#osgiinstancearea">osgi.instance.area</a>
+    to &lt;location&gt;</dd>
+  <dt>-debug [options file] (OSGi)</dt>
+  <dd> equivalent to setting <a href="#osgidebug">osgi.debug</a> to [options
+    file] or the empty string to simply enable debug (i.e., if the options file
+    location is not specified)</dd>
+  <dt>-dev [entries] (OSGi)</dt>
+  <dd>equivalent to setting <a href="#osgidev">osgi.dev</a> to [entries] or
+    the empty string to simply enable dev mode (i.e., if entries are not specified)</dd>
   <dt></dt>
   <dt></dt>
   <dt>-endSplash &lt;command&gt; (Main)</dt>
   <dd>specifies the command to use to take down the splash screen. Typically
     supplied by the Eclipse executable.</dd>
-  <dt>-feature &lt;feature id&gt; {<a href="#eclipseproduct">eclipse.product</a>}
-    (Runtime)</dt>
-  <dd>this is analogous to -product where the feature/product id is the id of
-    the primary feature to run.</dd>
-  <dt>-framework &lt;location&gt; {<a href="#osgiframework">osgi.framework</a>}
-    (Main) <em>NEW</em></dt>
-  <dd>sets the URL location of the OSGi framework. Useful if the Eclipse install
-    is disjoint. See the section on <a href="#locations">locations</a> for more
-    details.</dd>
+  <dt>-feature &lt;feature id&gt;    (Runtime)</dt>
+  <dd>equivalent to setting  <a href="#eclipseproduct">eclipse.product</a>
+    to &lt;feature id&gt;</dd>
+  <dt>-framework &lt;location&gt; (Main) <em>NEW</em></dt>
+  <dd>equivalent to setting  <a href="#osgiframework">osgi.framework</a> to
+    &lt;location&gt;</dd>
   <dt>-initialize (Main)</dt>
-  <dd>restores the configuration being run to its original state. The base runtime
-    ignores any installed plug-ins but configuration data for these plug-ins
-    is not purged</dd>
-  <dt>-install &lt;location&gt; {osgi.install.area} (Main)</dt>
-  <dd>sets the install location of the platform. This setting indicates the locaiton
-    of the basic Eclipse plug-ins and is useful if the Eclipse install is disjoint.
-    See the section on <a href="#locations">locations</a> for more details.</dd>
+  <dd>initializes the configuration being run. All runtime related data structures
+    and caches are refreshed. Any user/plug-in defined configuration data is
+    not purged. No application is run, any product specifications are ignored
+    and no UI is presented (e.g., the splash screen is not drawn)</dd>
+  <dt>-install &lt;location&gt; (Main)</dt>
+  <dd>equivalent to setting  <a href="osgiinstallarea">osgi.install.area</a> to
+    &lt;location&gt;</dd>
   <dt>-keyring &lt;location&gt; (Runtime)</dt>
   <dd>the location of the authorization database on disk. This argument has to
     be used together with the -password argument. </dd>
   <dt></dt>
-  <dt>-nl &lt;locale&gt; {<a href="#osginl">osgi.nl</a>} (OSGi)</dt>
-  <dd>sets the name of the locale on which Eclipse platform will run </dd>
+  <dt>-nl &lt;locale&gt; (OSGi)</dt>
+  <dd>equivalent to setting <a href="#osginl">osgi.nl</a> to &lt;locale&gt;</dd>
   <dt></dt>
   <dt></dt>
-  <dt>-noLazyRegistryCacheLoading {<a href="#eclipsenolazyregistrycacheloading">eclipse.noLazyRegistryCacheLoading</a>}
+  <dt>-noLazyRegistryCacheLoading (Runtime) </dt>
+  <dd>equivalent to setting <a href="#eclipsenolazyregistrycacheloading">eclipse.noLazyRegistryCacheLoading</a>
+    to &quot;true&quot;</dd>
+  <dt>-noRegistryCache
     (Runtime) </dt>
-  <dd>deactivates platform plug-in registry cache loading optimization. By default,
-    configuration elements are loaded from the registry cache (when available)
-    only on demand, reducing memory footprint. This option forces the registry
-    cache to be fully loaded at startup. </dd>
-  <dt>-noRegistryCache {<a href="#eclipsenoregistrycache">eclipse.noRegistryCache</a>}
-    (Runtime) </dt>
-  <dd>bypasses the reading and writing of an internal plug-in registry cache
-    file </dd>
+  <dd>equivalent to setting  <a href="#eclipsenoregistrycache">eclipse.noRegistryCache</a>
+  to &quot;true&quot;</dd>
   <dt></dt>
   <dt></dt>
   <dt>-noSplash (Executable, Main)</dt>
   <dd>controls whether or not the splash screen is shown</dd>
-  <dt>-os &lt;operating system&gt; {<a href="#osgios">osgi.os</a>} (OSGi) </dt>
-  <dd>sets the operating system value </dd>
+  <dt>-os &lt;operating system&gt; (OSGi) </dt>
+  <dd>equivalent to setting  <a href="#osgios">osgi.os</a> to &lt;operating system&gt;</dd>
   <dt></dt>
   <dt>-password &lt;password&gt; (Runtime) </dt>
   <dd>the password for the authorization database </dd>
   <dt> </dt>
   <dt></dt>
-  <dt> -pluginCustomization &lt;location&gt; {<a href="#eclipseplugincustomization">eclipse.pluginCustomization</a>}
-    (Runtime) </dt>
-  <dd>the file system location of a properties file containing default settings
-    for plug-in preferences. These default settings override default settings
-    specified in the primary feature. Relative paths are interpreted relative
-    to the directory that eclipse was started from. </dd>
-  <dt> -product &lt;id&gt; {<a href="#eclipseproduct">eclipse.product</a>} (OSGi) <em>NEW</em></dt>
-  <dd>sets the identifier of the product being run. This controls various branding
-    information and what application is used.</dd>
+  <dt> -pluginCustomization &lt;location&gt; (Runtime) </dt>
+  <dd>equivalent to setting <a href="#eclipseplugincustomization">eclipse.pluginCustomization</a> to
+  &lt;location&gt;</dd>
+  <dt> -product &lt;id&gt; (OSGi) <em>NEW</em></dt>
+  <dd>equivalent to setting  <a href="#eclipseproduct">eclipse.product</a> to
+  &lt;id&gt;</dd>
   <dt>-showSplash &lt;command&gt; (Main)</dt>
   <dd>specifies the command to use to show the splash screen. Typically supplied
     by the Eclipse executable.</dd>
   <dt></dt>
-  <dt>-userArea &lt;URL&gt; {<a href="#osgiws">osgi.ws</a>} (OSGi) <em>NEW</em></dt>
-  <dd>sets the location of the user area. The user area contains data (e.g.,
-    preferences) specific to the OS user and independent of any Eclipse install,
-    configuration or instance. See the section on <a href="#locations">locations</a> for
-    more details.</dd>
-  <dt>-vm &lt;file system path to java executable&gt; {<a href="#eclipsevm">eclipse.vm</a>}(Executable,
+  <dt>-userArea &lt;location&gt; (OSGi) <em>NEW</em></dt>
+  <dd>equivalent to setting <a href="#osgiuserarea">osgi.user.area</a> to &lt;location&gt;</dd>
+  <dt>-vm &lt;path to java executable&gt;    (Executable, Main) <em>NEW</em></dt>
+  <dd>when passed to the Eclipse executable, this option is used to locate the
+    Java VM to use to run Eclipse. It must be the full filesystem path to an
+    appropriate Java executable. If not specified, the Eclipse executable uses
+    a search
+    algorithm to locate a suitable VM. In any event, the executable then passes
+    the path to the actual VM used to Java Main using the -vm argument. Java
+    Main then stores this value in <a href="#eclipsevm">eclipse.vm</a>.</dd>
+  <dt>-vmargs [vmargs*] (Executable,
     Main) <em>NEW</em></dt>
-  <dd>gives the path to the Java executable used to run Eclipse. The Eclipse
-    executable uses this argument to override its normal VM searching mechanism.
-    The location must be the full file path to the executable to use. On running
-    the VM, the executable passes in this argument (even when not specified on
-    the original command line) to tell Eclipse itself which VM is being used
-    to run it. This information is in turn used by people needing to construct
-    a relaunch command line.</dd>
-  <dt>-vmargs [vmargs*] {<a href="#eclipsevmargs">eclipse.vmargs</a>} (Executable,
-    Main) <em>NEW</em></dt>
-  <dd>lists the VM arguments used to run Eclipse. The listed values are passed
-    by the Eclipse executable to the Java virtual machine as VM arguments. If
+  <dd>when passed to the Eclipse, this option is used to customize the operation
+    of the Java VM to use to run Eclipse. If
     specified, this option must come at the end of the command line. Even if
-    not specified on the original command line, the executable will automatically
-    the relevant arguments (including the class being launched) to the command
-    line passed into Java. This information is in turn used by people needing
-    to construct a relaunch command line. </dd>
-  <dt>-ws &lt;window system&gt; {<a href="#osgiws">osgi.ws</a>} (OSGi) </dt>
-  <dd>sets the window system value</dd>
+    not specified on the executable command line, the executable will automatically
+    add the relevant arguments (including the class being launched) to the command
+    line passed into Java using the -vmargs argument.
+    Java Main then stores this value in <a href="#eclipsevmargs">eclipse.vmargs</a>.</dd>
+  <dt>-ws &lt;window system&gt; (OSGi) </dt>
+  <dd>equivalent to setting  <a href="#osgiws">osgi.ws</a> to &lt;window system&gt;</dd>
 </dl>
-<h4>Obsolete command line arguments </h4>
+<h3>Obsolete command line arguments </h3>
 <p>The following command line arguments are no longer relevant or have been superceded
   and are consumed by the runtime and not passed on to the application being
   run to maintain backward compatibility. .</p>
@@ -178,7 +160,7 @@ line arguments. </p>
   <dt>-update</dt>
   <dd>no longer relevant</dd>
 </dl>
-<h4>Others</h4>
+<h3>Others</h3>
 <p>The following command line arguments are defined by various Eclipse plug-ins
   and are only supported if the defining plug-in is installed, resolved and activated.</p>
 <dl>
@@ -193,13 +175,19 @@ line arguments. </p>
   <dt>-allowDeadlock</dt>
   <dd>&lt;description&gt;</dd>
 </dl>
-<h3>System properties</h3>
+<h2>System properties</h2>
 <p>The following System properties are used by the Eclipse runtime. Note that
   those starting with &quot;osgi&quot; are specific to the OSGi framework implementation
   while those starting with &quot;eclipse&quot; are particular to the Eclipse
   runtime layered on top of the OSGi framework. </p>
-<p>Many of these properties have command line equivalents. Users are free to
-  choose either method of setting the value. Properties can be set in the following
+<p>Many of these properties have command line equivalents (see the <a href="#commandline">command
+    line arguments</a> section and the value in braces {}). Users are free to
+    use either command line or property settings to specify a value. Properties
+    can
+    be set
+  in
+  the
+  following
   ways:</p>
 <ul>
   <li>use -DpropName=propValue as a VM argument to the Java VM</li>
@@ -207,93 +195,301 @@ line arguments. </p>
     area (see <a href="#configurations">Configurations</a>)</li>
 </ul>
 <dl>
-  <dt>eclipse.application {-application}</dt>
+  <dt><a name="eclipseapplication" id="eclipseapplication"></a>eclipse.application {-application}</dt>
   <dd>the identifier of the application to run. The value given here overrides
-    any application defined by the product (see -product) being run</dd>
-  <dt>eclipse.commands</dt>
+    any application defined by the product (see <a href="#eclipseproduct">eclipse.product</a>) being run</dd>
+  <dt><a name="eclipsecommands" id="eclipsecommands"></a>eclipse.commands</dt>
   <dd>sdf</dd>
-  <dt>eclipse.consoleLog</dt>
-  <dd>sdfs</dd>
-  <dt>eclipse.exitcode</dt>
+  <dt><a name="eclipseconsolelog" id="eclipseconsolelog"></a>eclipse.consoleLog</dt>
+  <dd>if &quot;true&quot;, any log output is also sent to Java's System.out (typically
+    back to the command shell if any). Handy when combined with -debug </dd>
+  <dt><a name="eclipsedebugstartuptime" id="eclipsedebugstartuptime"></a>eclipse.debug.startupTime</dt>
+  <dd>the time in milliseconds when the Java VM for this session was started</dd>
+  <dt><a name="eclipseexitcode" id="eclipseexitcode"></a>eclipse.exitcode</dt>
   <dd>&lt;description&gt;</dd>
   <dt><strong></strong></dt>
-  <dt>eclipse.exitdata</dt>
+  <dt><a name="eclipseexitdata" id="eclipseexitdata"></a>eclipse.exitdata</dt>
   <dd>&lt;description&gt;</dd>
   <dt><strong></strong></dt>
-  <dt>eclipse.noLazyRegistryCacheLoading {-noLazyRegistryCacheLoading}</dt>
-  <dd>sdfs</dd>
-  <dt>eclipse.noRegistryCache {-noRegistryCache}</dt>
-  <dd>sdf</dd>
-  <dt>eclipse.pluginCustomization {-pluginCustomization}</dt>
-  <dd>fds</dd>
-  <dt>eclipse.product {-product}</dt>
-  <dd>&lt;description&gt;</dd>
-  <dt>eclipse.vm {-vm}</dt>
-  <dd>dsf</dd>
-  <dt>eclipse.vmargs {-vmargs}</dt>
-  <dd>sdf</dd>
-  <dt>eclipse.debug.startupTime</dt>
-  <dd>&lt;description&gt;</dd>
-  <dt>eclipse.manifestConverter</dt>
-  <dd>&lt;description&gt; must fix the casing in the code</dd>
-  <dt>eclipse.noExtensionMunging</dt>
-  <dd>&lt;private?&gt; Will this stay?</dd>
-</dl>
-<dl>
+  <dt><a name="eclipsemanifestconverter" id="eclipsemanifestconverter"></a>eclipse.manifestConverter</dt>
+  <dd>the class name of the manifest converter class to use when converting legacy
+    plugin.xml files to manifest.mf files</dd>
+  <dt><a name="eclipsenoextensionmunging" id="eclipsenoextensionmunging"></a>eclipse.noExtensionMunging</dt>
+  <dd>if &quot;true&quot;, legacy registry extension are left as-is. By default such extensions
+    are updated to use the new extension point ids found in Eclipse 3.0.</dd>
+  <dt><a name="eclipsenolazyregistrycacheloading" id="eclipsenolazyregistrycacheloading"></a>eclipse.noLazyRegistryCacheLoading {-noLazyRegistryCacheLoading}</dt>
+  <dd>if &quot;true&quot;, the platform's plug-in registry cache loading optimization is
+      deactivated. By default, configuration elements are loaded from the registry
+      cache (when available)
+      only on demand, reducing memory footprint. This option forces the registry
+  cache to be fully loaded at startup. </dd>
+  <dt><a name="eclipsenoregistrycache" id="eclipsenoregistrycache"></a>eclipse.noRegistryCache {-noRegistryCache}</dt>
+  <dd>if &quot;true&quot;, the internal extension registry cache is neither read or written</dd>
+  <dt><a name="eclipseplugincustomization" id="eclipseplugincustomization"></a>eclipse.pluginCustomization {-pluginCustomization}</dt>
+  <dd>the file system location of a properties file containing default settings
+      for plug-in preferences. These default settings override default settings
+      specified in the primary feature. Relative paths are interpreted relative
+  to the current working directory for eclipse itself.</dd>
+  <dt><a name="eclipseproduct" id="eclipseproduct"></a>eclipse.product {-product}</dt>
+  <dd>the identifier of the product being run. This controls various branding
+  information and what application is used.</dd>
+  <dt><a name="eclipsevm" id="eclipsevm"></a>eclipse.vm {-vm}</dt>
+  <dd>the path to the Java executable used to run Eclipse. This information is
+  used to construct relaunch command lines.</dd>
+  <dt><a name="eclipsevmargs" id="eclipsevmargs"></a>eclipse.vmargs {-vmargs}</dt>
+  <dd>lists the VM arguments used to run Eclipse. This
+      information is used to construct relaunch command
+  lines.</dd>
   <dt><a name="osgiadaptor"></a>osgi.adaptor</dt>
-  <dd>sdf</dd>
+  <dd>the class name of the OSGi framework adaptor to use.</dd>
   <dt><a name="osgiarch"></a>osgi.arch {-arch}</dt>
-  <dd>the processor architecture value </dd>
+  <dd>see -arch</dd>
   <dt><a name="osgibaseconfigurationarea"></a>osgi.baseConfiguration.area</dt>
   <dd>asf</dd>
   <dt><a name="osgibundles"></a>osgi.bundles</dt>
-  <dd>A comma-separated list of bundles to install in the framework at startup.
-    These are installed before the runtime and any other Eclipse plugins are
-    installed. Each entry in the list is of the form:<br>
-        <pre>    &lt;url to bundle&gt;[@&lt;start-level&gt;]</pre>
-  </dd>
+  <dd>The comma-separated list of bundles which are automatically installed
+    and optionally started
+     once the system is up and running. Each entry is of the form:<br>
+	 <pre>    &lt;URL | simple bundle location&gt;[@ [&lt;start-level&gt;] [&quot;:start&quot;]]</pre>
+     If the start-level (&gt;0 integer) is omitted then the framework will use the
+     default start level for the bundle. If the &quot;start&quot; tag is added
+     then the bundle will be marked as started after being installed.
+     Simple bundle locations are interepreted as relative to the framework's
+    parent directory.
+     The start-level indicates the OSGi start level at which the bundle should
+  run. If this value is not set, the system computes an appropriate default.  </dd>
   <dt><a name="osgiconfigurationcascaded"></a>osgi.configuration.cascaded</dt>
-  <dd>sdf</dd>
+  <dd>if set to &quot;true&quot;, this configuration is cascaded to a parent configuration.
+    See the sections on <a href="#locations">locations</a> and <a href="#configurations">configurations</a> for
+    more details.</dd>
   <dt><a name="osgiconfigurationarea"></a>osgi.configuration.area {-configuration}</dt>
-  <dd>The URL location of the configuration being run</dd>
-  <dt><a name="osgiconsole"/>osgi.console [port] {-console} </dt>
-  <dd>enables the OSGi console. Handy for investigating the state of the system.
-    If the port is specified, the console listens and directs its output to the
-    given port</dd>
+  <dd>the configuration location for this run of the platform. The configuration
+    determines what plug-ins will run as well as various other system settings.
+    See the sections on <a href="#locations">locations</a> and <a href="#configurations">configurations</a> for
+  more details.</dd>
+  <dt><a name="osgiconsole"/>osgi.console {-console} </dt>
+  <dd>if set to a non-null value, the OSGi console (if installed) is enabled.
+    If the value is a suitable integer, it is interpreted as the port on which
+    the console listens and directs its output
+    to the
+    given port.
+Handy for investigating
+  the state of the system.   </dd>
   <dt></dt>
   <dt><a name="osgiconsoleclass"/>osgi.console.class</dt>
-  <dd>sdf</dd>
+  <dd>the class name of the console to run if requested</dd>
   <dt><a name="osgidebug"></a>osgi.debug {-debug}</dt>
-  <dd>The URL of the debug .options file to use. Equivalent to -debug &lt;url&gt;.</dd>
+  <dd>if set to a non-null value, the platform is put in debug mode. If the value
+    is a string it is interpreted as the location of the
+    .options file. This file indicates what debug
+    points are
+    available
+    for a plug-in and whether or not they are enabled. If a location is not specified,
+  the platform searches for the .options file under the install directory.</dd>
   <dt><a name="osgidev"></a>osgi.dev {-dev}</dt>
-  <dd>the development time classpath for plug-ins. This is equivalent to the
-    -dev command line argument.</dd>
+  <dd>if set to the empty string, dev mode is simply turned on. This property
+    may also be set to a comma-separated class path entries
+    which are added to
+    the class
+    path of each
+    plug-in or a URL to a Java properties file containing custom classpath additions
+    for a set of plug-ins. For each plug-in requiring a customized dev time classpath
+    the file will contain an entry of the form<br>
+<pre>    &lt;plug-in id&gt;=&lt;comma separated list of classpath entries to add&gt;</pre>
+    where plug-in id &quot;*&quot; matches any plug-in not otherwise mentioned.</dd>
   <dt><a name="osgiframework"></a>osgi.framework</dt>
-  <dd>=file:d:/i0203/eclipse/plugins/org.eclipse.osgi_3.0.0/</dd>
+  <dd>the URL location of the OSGi framework. Useful if the Eclipse install
+  is disjoint. See the section on <a href="#locations">locations</a> for more details. </dd>
   <dt><a name="osgiframeworkclasspath"></a>osgi.frameworkClassPath</dt>
-  <dd>=core.jar, console.jar, osgi.jar, resolver.jar, defaultAdaptor.jar, eclipseAdaptor.jar</dd>
+  <dd>a comma separated list of classpath entries for the OSGi framework implementation.
+    Relative locations are interpreted as relateve to the framework location
+    (see <a href="#osgiframework">osgi.framework</a>)</dd>
   <dt><a name="osgiinstallarea" id="osgiinstallarea"></a>osgi.install.area {-install}</dt>
-  <dd>&lt;description&gt;</dd>
+  <dd>the install location of the platform. This setting indicates the location
+    of the basic Eclipse plug-ins and is useful if the Eclipse install is disjoint.
+  See the section on <a href="#locations">locations</a> for more details. </dd>
   <dt><a name="osgiinstancearea"></a>osgi.instance.area {-data}</dt>
-  <dd>&lt;xxx description&gt;</dd>
+  <dd>the instance data location for this session. Plug-ins use this location
+    to store their data. For example, the Resources plug-in uses this as the
+  default location for projects (aka the workspace). See the section on <a href="#locations">locations</a>  for more details.</dd>
   <dt><a name="osgimanifestcache"></a>osgi.manifest.cache</dt>
-  <dd>&lt;xxx description&gt;</dd>
+  <dd>the location where generated manifests are discovered and generated. The
+    default is in the configuration area but the manifest cache can be stored
+    separately.</dd>
   <dt><a name="osginl"></a>osgi.nl {-nl}</dt>
-  <dd>sdf</dd>
+  <dd>the name of the locale on which Eclipse platform will run. NL values should
+    follow the standard Java locale naming conventions.</dd>
   <dt><a name="osgios"></a>osgi.os {-os}</dt>
-  <dd>The OS on which the current platform is running. This is equivalent to
-    the -os command line argument. <br>
-&lt;xxx more data on how the value is derived&gt;</dd>
+  <dd>the operating system value. The value should be one of the Eclipse processor
+    architecture names known to Eclipse (e.g., x86, sparc, ...).</dd>
   <dt><a name="osgisplashlocation"></a>osgi.splashLocation</dt>
-  <dd>=d:\i0203\eclipse\plugins\org.eclipse.platform_3.0.0\splash.bmp</dd>
+  <dd>the absolute URL location of the splash screen (.bmp file) to to show while
+    starting Eclipse. This property overrides any value set in <a href="#osgisplashpath">osgi.splashPath</a>.</dd>
   <dt><a name="osgisplashpath"></a>osgi.splashPath</dt>
-  <dd>=platform:/base/plugins/org.eclipse.platform</dd>
+  <dd>a comma separated list of URLs to search for a file called splash.bmp.
+  This property is overriden by any value set in <a href="#osgisplashlocation">osgi.splashLocation</a>.</dd>
   <dt><a name="osgiuserarea"></a>osgi.user.area </dt>
-  <dd>The URL location of the user data area to use</dd>
+  <dd>the location of the user area. The user area contains data (e.g.,
+    preferences) specific to the OS user and independent of any Eclipse install,
+  configuration or instance. See the section on <a href="#locations">locations</a> for more details.</dd>
   <dt><a name="osgiws"></a>osgi.ws {-ws}</dt>
-  <dd>sdf</dd>
+  <dd>the window system value. The value should be one of the Eclipse window
+    system names known to Eclipse (e.g., win32, motif, ...).</dd>
   <dt><a name="osgisyspath"></a>osgi.syspath</dt>
   <dd>&lt;xxx still used? fix the name&gt;</dd>
 </dl>
+<h2><a name="locations"></a>Locations
+</h2>
+<p>The Eclipse runtime defines a number of <i>locations</i> which give plug-in
+  developers context for reading/storing data and Eclipse users a control over
+  the scope of data sharing and visibility. Eclipse defines the following notions
+  of location:</p>
+<dl>
+  <dl>
+    <dt>User (-user ???) {osgi.user.area} [@none, @noDefault, @user.home, @user.dir,
+      filepath, url]</dt>
+    <dd>User locations are specific to, go figure, users. Typically the user
+      location is based on the value of the Java <code>user.home</code> system
+      property but this can be overridden. Information such as user scoped preferences
+      and login information may be found in the user location.</dd>
+    <dt>Install (-install) {osgi.install.area} [@user.home, @user.dir, filepath,
+      url]</dt>
+    <dd>An install location is where Eclipse itself is installed. In practice
+      this location is the directory (typically &quot;eclipse&quot;) which is
+      the parent of the startup.jar or eclipse.exe being run. This location should
+      be considered read-only to normal users as an install may be shared by
+      many users. It is possible to set the install location and decouple startup.jar
+      from the rest of Eclipse.</dd>
+    <dt>Configuration (-configuration) {osgi.configuration.area} [@none, @noDefault,
+      @user.home, @user.dir, filepath, url]</dt>
+    <dd>Configuration locations contain files which identify and manage the (sub)set
+      of an install to run. As such, there may be many configurations per install.
+      Installs may come with a default configuration area but typical startup
+      scenarios involve the runtime attempting to find a more writable configuration
+      location. </dd>
+    <dt>Instance (-data) {osgi.instance.area} [@none, @noDefault, @user.home,
+      @user.dir, filepath, url]</dt>
+    <dd>Instance locations contain user-defined data artifacts. For example,
+      the Resources plug-in uses the instance area as the workspace location
+      and thus the default home for projects. Other plugins are free to write
+      whatever files they like in this location.</dd>
+  </dl>
+</dl>
+<p>While users can set any of these locations, Eclipse will compute reasonable
+  defaults if values are not given. The most common usecase for setting location
+  is the instance area or, in the IDE context, the workspace. To run the default
+  Eclipse configuration on a specific data set you can specify:</p>
+<pre>    eclipse -data c:\mydata</pre>
+<h3>More detail</h3>
+<p>Locations are URLs. For simplicity, file paths are also accepted and automatically
+  converted to file: URLs. For better control and convenience, there are also
+  a number of predefined symbolic locations which can be used. Note that not
+  all combinations of location type and symbolic value are valid. A table below
+  details which combinations are possible. Since the default case is for all
+  locations to be set, valid and writable, some plug-ins may fail in other setups
+  even if they are listed as possible. For example, it is unreasonable to expect
+  a plugin focused on user data (e.g., the Eclipse Resources plug-in) to do much
+  if the instance area is not defined. It is up to plug-in developers to choose
+  the setups they support and design their function accordingly.</p>
+<dl>
+  <dl>
+    <dt>@none</dt>
+    <dd>Indicates that the corresponding location should never be set either
+      explicitly or to its default value. For example, an RCP style application
+      which has no user data may use osgi.instance.area=@none to prevent
+      extraneous files being written to disk.</dd>
+    <dt>@noDefault</dt>
+    <dd>Forces a location to be undefined or explicitly defined (i.e., Eclipse
+      will not automatically compute a default value). This is useful where you
+      want to allow for data in the corresponding location but the Eclipse default
+      value is not appropriate.</dd>
+    <dt>@user.home</dt>
+    <dd>Directs Eclipse to compute a location value relative to the user's home
+      directory. The resultant location is qualified by the identifier and version
+      number for the product being run and the type of location. For example,
+      setting osgi.configuration.area=@user.home results in a value of
+      file:/users/bob/.eclipse/org.eclipse.platform_3.0.0/configuration.</dd>
+    <dt>@user.dir</dt>
+    <dd>Directs Eclipse to compute a location value relative to the current working
+      directory. The resultant location is qualified by the the type of location.
+      For example, setting osgi.configuration.area=@user.dir results in
+      a value of file:c:/eclipse/configuration.</dd>
+  </dl>
+</dl>
+<table width="100%" border="0" bgcolor="#FFFFFF">
+  <tr bgcolor="#CCCCCC">
+    <td width="10%">location/value</td>
+    <td width="17%"><div align="center">file/URL</div>
+    </td>
+    <td width="17%"><div align="center">@none</div>
+    </td>
+    <td width="17%"><div align="center">@noDefault</div>
+    </td>
+    <td width="17%"><div align="center">@user.home</div>
+    </td>
+    <td width="17%"><div align="center">@user.dir</div>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="#CCCCCC"><div align="center">instance</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes (default)</div>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="#CCCCCC"><div align="center">configuration</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes*</div>
+    </td>
+    <td><div align="center">yes*</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="#CCCCCC"><div align="center">install</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">no</div>
+    </td>
+    <td><div align="center">no</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="#CCCCCC"><div align="center">user</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+    <td><div align="center">yes</div>
+    </td>
+  </tr>
+</table>
+<p>* indicates that this setup is technically possible but pragmatically quite
+  difficult to manage. In particular, without a configuration location the Eclipse
+  runtime may only get as far as starting the OSGi framework.</p>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 </body>
