@@ -15,7 +15,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +28,7 @@ import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
+import org.eclipse.test.performance.Dimension;
 
 public class DB {
     
@@ -72,6 +72,11 @@ public class DB {
 
     public static Scenario queryScenario(String config, String[] builds, String scenarioName) {
         return new Scenario(config, builds, scenarioName, null);
+    }
+    
+    // fingerprints
+    public static SummaryEntry[] querySummaries(Variations variationPatterns, boolean global) {
+        return getDefault().internalQuerySummaries(variationPatterns, global);
     }
 
     // build names
@@ -183,6 +188,16 @@ public class DB {
             //long l= System.currentTimeMillis();
             int variation_id= fSQL.getVariations(variations);
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
+            if (sample.isSummary()) {
+                boolean isGlobal= sample.isGlobal();
+                Dimension[] summaryDimensions= sample.getSummaryDimensions();
+                for (int i= 0; i < summaryDimensions.length; i++) {
+                    Dimension dimension= summaryDimensions[i];
+                    if (dimension instanceof Dim)
+                        fSQL.createSummaryEntry(variation_id, scenario_id, ((Dim)dimension).getId(), isGlobal);
+                }
+                fSQL.setScenarioShortName(scenario_id, sample.getShortname());
+            }
             int sample_id= fSQL.createSample(variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
             if (sc != null) {
@@ -323,6 +338,33 @@ public class DB {
         }
     }
     
+    private SummaryEntry[] internalQuerySummaries(Variations variationPatterns, boolean global) {
+        if (fSQL == null)
+            return null;
+        ResultSet result= null;
+        try {
+            List fingerprints= new ArrayList();
+            ResultSet rs= fSQL.querySummaryEntries(variationPatterns, global);
+            while (rs.next()) {
+                String scenarioName= rs.getString(1);
+                String shortName= rs.getString(2);
+                int dim_id= rs.getInt(3);
+                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id)));
+            }
+            return (SummaryEntry[])fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
+        } catch (SQLException e) {
+	        PerformanceTestPlugin.log(e);
+
+        } finally {
+            if (result != null)
+                try {
+                    result.close();
+                } catch (SQLException e1) {
+                	// ignored
+                }
+        }
+        return null;
+    }
 
     /**
      * dbloc=						embed in home directory
@@ -372,10 +414,9 @@ public class DB {
             if (DEBUG) System.out.println("succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
-            fSQL= new SQL(fConnection);
+            fSQL= new SQL(fConnection);            
+			fConnection.commit();
 
-            doesDBexists();
-            
         } catch (SQLException ex) {
             PerformanceTestPlugin.logError(ex.getMessage());
 
@@ -417,21 +458,6 @@ public class DB {
 	            if (! "Cloudscape system shutdown.".equals(e.getMessage())) //$NON-NLS-1$
 	                e.printStackTrace();
 	        }
-        }
-    }
-    
-    private void doesDBexists() throws SQLException {
-        Statement stmt= fConnection.createStatement();
-        try {
-	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' "); //$NON-NLS-1$
-	        if (rs.next() && rs.getInt(1) >= 5)
-	            return;
-	        if (DEBUG) System.out.println("initialising DB"); //$NON-NLS-1$
-	        fSQL.initialize();
-			fConnection.commit();
-	        if (DEBUG) System.out.println("end initialising DB"); //$NON-NLS-1$
-        } finally {
-            stmt.close();
         }
     }
 }

@@ -23,10 +23,13 @@ public class SQL {
     private Connection fConnection;
     private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryVariation, fQueryVariations, fQueryScenario, fQueryAllScenarios, fQueryDatapoints, fQueryScalars;
+    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntries, fTableExistsQuery;
     
 
-    SQL(Connection con) {
+    SQL(Connection con) throws SQLException {
         fConnection= con;
+	    initialize();
+        upgradeDB();
     }
     
     public void dispose() throws SQLException {
@@ -35,15 +38,21 @@ public class SQL {
         if (fInsertSample != null) fInsertSample.close();
         if (fInsertDataPoint != null) fInsertDataPoint.close();
         if (fInsertScalar != null) fInsertScalar.close();
+        if (fInsertSummaryEntry != null) fInsertSummaryEntry.close();
+        if (fUpdateScenarioShortName != null) fUpdateScenarioShortName.close();
         if (fQueryDatapoints != null) fQueryDatapoints.close();
         if (fQueryScalars != null) fQueryScalars.close();
         if (fQueryVariation != null) fQueryVariation.close();
         if (fQueryScenario != null) fQueryScenario.close();
         if (fQueryAllScenarios != null) fQueryAllScenarios.close();
         if (fQueryVariations != null) fQueryVariations.close();
+        if (fQuerySummaryEntries != null) fQuerySummaryEntries.close();
+        if (fTableExistsQuery != null) fTableExistsQuery.close();
     }
         
-    void initialize() throws SQLException {
+    private void initialize() throws SQLException {
+        if (tableExists("VARIATION"))  //$NON-NLS-1$
+            return;
         Statement stmt= null;
         try {
             stmt= fConnection.createStatement();
@@ -56,7 +65,8 @@ public class SQL {
 	        stmt.executeUpdate(
 	        		"create table SCENARIO (" + //$NON-NLS-1$
 	                	"ID int unique not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
-						"NAME varchar(256) not null" + //$NON-NLS-1$
+						"NAME varchar(256) not null," + //$NON-NLS-1$
+						"SHORT_NAME varchar(40)" + //$NON-NLS-1$
 					")" //$NON-NLS-1$
 	        );
 	        stmt.executeUpdate(
@@ -82,6 +92,14 @@ public class SQL {
 						"VALUE bigint" + //$NON-NLS-1$
 					")" //$NON-NLS-1$
 	        );
+	        stmt.executeUpdate(
+	        		"create table SUMMARYENTRY (" + //$NON-NLS-1$
+	                	"VARIATION_ID int not null," + //$NON-NLS-1$
+						"SCENARIO_ID int not null," + //$NON-NLS-1$
+						"DIM_ID int not null," + //$NON-NLS-1$
+						"IS_GLOBAL smallint not null" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
 	        
 	        // Primary/unique
 	        stmt.executeUpdate("alter table VARIATION add constraint VA_KVP primary key (KEYVALPAIRS)"); //$NON-NLS-1$
@@ -98,6 +116,42 @@ public class SQL {
 	        		"foreign key (SAMPLE_ID) references SAMPLE (ID)"); //$NON-NLS-1$
 	        stmt.executeUpdate("alter table SCALAR add constraint SCALAR_CONSTRAINT " + //$NON-NLS-1$
 	        		"foreign key (DATAPOINT_ID) references DATAPOINT (ID)"); //$NON-NLS-1$
+
+	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT " + //$NON-NLS-1$
+					"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT2 " + //$NON-NLS-1$
+					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
+
+	        fConnection.commit();
+	        
+        } finally {
+            stmt.close();
+        }
+    }
+
+    private void upgradeDB() throws SQLException {
+        
+        if (tableExists("SUMMARYENTRY")) //$NON-NLS-1$
+            return;
+
+        Statement stmt= null;
+        try {
+            stmt= fConnection.createStatement();
+
+	        stmt.executeUpdate(
+	        		"create table SUMMARYENTRY (" + //$NON-NLS-1$
+	                	"VARIATION_ID int not null," + //$NON-NLS-1$
+						"SCENARIO_ID int not null," + //$NON-NLS-1$
+						"DIM_ID int not null," + //$NON-NLS-1$
+						"IS_GLOBAL smallint not null" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
+	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT " + //$NON-NLS-1$
+				"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT2 " + //$NON-NLS-1$
+				"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
+
+            stmt.executeUpdate("alter table SCENARIO add column SHORT_NAME varchar(40)"); //$NON-NLS-1$
 
 	        fConnection.commit();
 	        
@@ -222,15 +276,68 @@ public class SQL {
     /*
      * Returns VARIATION.KEYVALPAIRS
      */
-    ResultSet queryVariations(String keyPattern, String scenarioPattern) throws SQLException {
+    ResultSet queryVariations(String variations, String scenarioPattern) throws SQLException {
         if (fQueryVariations == null)
             fQueryVariations= fConnection.prepareStatement(
         		"select distinct VARIATION.KEYVALPAIRS from VARIATION, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
         		"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
             ); 
-        fQueryVariations.setString(1, keyPattern);
+        fQueryVariations.setString(1, variations);
         fQueryVariations.setString(2, scenarioPattern);
         return fQueryVariations.executeQuery();
+    }
+    
+    int createSummaryEntry(int variation_id, int scenario_id, int dim_id, boolean isGlobal) throws SQLException {
+        if (fInsertSummaryEntry == null)
+            fInsertSummaryEntry= fConnection.prepareStatement(
+                "insert into SUMMARYENTRY (VARIATION_ID, SCENARIO_ID, DIM_ID, IS_GLOBAL) values (?, ?, ?, ?)"); //$NON-NLS-1$
+        fInsertSummaryEntry.setInt(1, variation_id);
+        fInsertSummaryEntry.setInt(2, scenario_id);
+        fInsertSummaryEntry.setInt(3, dim_id);
+        fInsertSummaryEntry.setShort(4, (short) (isGlobal ? 1 : 0));
+        return fInsertSummaryEntry.executeUpdate();
+    }
+
+    public void setScenarioShortName(int scenario_id, String shortName) throws SQLException {
+        if (shortName.length() >= 40)
+            shortName= shortName.substring(0, 40);
+        if (fUpdateScenarioShortName == null)
+            fUpdateScenarioShortName= fConnection.prepareStatement(
+        		"update SCENARIO set SHORT_NAME = ? where SCENARIO.ID = ?");	//$NON-NLS-1$
+        fUpdateScenarioShortName.setString(1, shortName);
+        fUpdateScenarioShortName.setInt(2, scenario_id);
+        fUpdateScenarioShortName.executeUpdate();
+    }   
+
+    ResultSet querySummaryEntries(Variations variations, boolean global) throws SQLException {
+        if (fQuerySummaryEntries == null)
+            fQuerySummaryEntries= fConnection.prepareStatement(
+            		"select SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
+            		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
+            		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
+            		"SUMMARYENTRY.IS_GLOBAL = ?"	//$NON-NLS-1$
+            ); 
+        fQuerySummaryEntries.setString(1, variations.toExactMatchString());
+        fQuerySummaryEntries.setInt(2, global ? 1 : 0);
+        return fQuerySummaryEntries.executeQuery();
+    }
+    
+    boolean tableExists(String tableName) throws SQLException {
+        if (fTableExistsQuery == null)
+            fTableExistsQuery= fConnection.prepareStatement(
+                    "select count(*) from sys.systables where sys.systables.tablename = ?" //$NON-NLS-1$
+            );
+        fTableExistsQuery.setString(1, tableName);
+        ResultSet rs= null;
+        try {
+	        rs= fTableExistsQuery.executeQuery();
+	        if (rs.next() && rs.getInt(1) == 1)
+	            return true;
+        } finally {
+	        if (rs != null)
+	            rs.close();
+        }
+        return false;
     }
 }

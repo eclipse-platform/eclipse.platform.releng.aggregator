@@ -18,6 +18,7 @@ import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
+import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 
@@ -30,6 +31,9 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
     private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults"; //$NON-NLS-1$
 
 	private String fScenarioId;
+	
+	private String fShortName;
+	private Dimension[] fSummaryDimensions;
 
 	
 	public InternalPerformanceMeter(String scenarioId) {
@@ -56,6 +60,8 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 	public void commit() {
 	    Sample sample= getSample();
 	    if (sample != null) {
+	        if (fSummaryDimensions != null)
+	            sample.tagAsSummary(fShortName, fSummaryDimensions);
 	        Variations variations= PerformanceTestPlugin.getVariations();
 	        if (variations != null)
 	            DB.store(variations, sample);
@@ -80,4 +86,9 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 		}
 		ps.println();
 	}
+
+    public void tagAsGlobalSummary(String shortName, Dimension[] dims) {
+        fShortName= shortName;
+        fSummaryDimensions= dims;
+     }
 }

@@ -22,6 +22,11 @@ import org.eclipse.test.internal.performance.InternalDimensions;
 public interface Dimension {
 
     /**
+     * The amount of CPU time used so far.
+     */
+    public Dimension CPU_TIME= InternalDimensions.CPU_TIME;
+    
+    /**
      * The elapsed time this process is running.
      */
     public Dimension ELAPSED_PROCESS= InternalDimensions.ELAPSED_PROCESS;

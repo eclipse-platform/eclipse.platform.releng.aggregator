@@ -13,6 +13,8 @@ package org.eclipse.test.internal.performance.data;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.test.performance.Dimension;
+
 import junit.framework.Assert;
 
 /**
@@ -23,6 +25,9 @@ public class Sample {
 	long fStartTime;
 	Map fProperties;
 	DataPoint[] fDataPoints;
+	boolean fIsSummary;
+	String fShortName;
+	Dimension[] fSummaryDimensions;
 	
 	public Sample(String scenarioID, long starttime, Map properties, DataPoint[] dataPoints) {
 		Assert.assertTrue("scenarioID is null", scenarioID != null); //$NON-NLS-1$
@@ -34,6 +39,12 @@ public class Sample {
 	
     public Sample(DataPoint[] dataPoints) {
         fDataPoints= dataPoints;
+    }
+    
+    public void tagAsSummary(String shortName, Dimension[] summaryDimensions) {
+        fIsSummary= true;
+        fShortName= shortName;
+        fSummaryDimensions= summaryDimensions;
     }
     
 	public String getScenarioID() {
@@ -64,4 +75,20 @@ public class Sample {
 	public String toString() {
 	    return "MeteringSession [scenarioID= " + fScenarioID + ", #datapoints: " + fDataPoints.length + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
+
+    public boolean isSummary() {
+        return fIsSummary;
+    }
+    
+    public boolean isGlobal() {
+        return true;
+    }
+    
+    public String getShortname() {
+        return fShortName;
+    }
+    
+    public Dimension[] getSummaryDimensions() {
+        return fSummaryDimensions;
+    }
 }

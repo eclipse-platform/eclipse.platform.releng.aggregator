@@ -15,6 +15,7 @@ import junit.framework.TestCase;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
+import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.OSPerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
@@ -199,5 +200,16 @@ public class Performance {
 
 	private PerformanceMeterFactory createDefaultPerformanceMeterFactory() {
 		return new OSPerformanceMeterFactory();
+	}
+	
+	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension dim) {
+	    tagAsGlobalSummary(pm, shortName, new Dimension[] { dim } );
+	}
+
+	public void tagAsGlobalSummary(PerformanceMeter pm, String shortName, Dimension[] dims) {
+	    if (pm instanceof InternalPerformanceMeter) {
+	        InternalPerformanceMeter ipm= (InternalPerformanceMeter) pm;
+	        ipm.tagAsGlobalSummary(shortName, dims);
+	    }
 	}
 }
