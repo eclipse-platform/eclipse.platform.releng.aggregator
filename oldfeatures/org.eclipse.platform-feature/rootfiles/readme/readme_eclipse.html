@@ -311,8 +311,19 @@ update the eclipse.product line to read eclipse.product=org.eclipse.platform.ide
 <h4><b>Changing the charset for a resource causes inconsistencies</b></h4>
 <p>Changing the charset for a resource (or the whole workspace) does not trigger resource change events or auto builds. The result is that 
 builders and listeners that maintain state derived from the affected resources will not have a chance to run, causing
-inconsistencies (such as compiler errors not going away and searching for references not working properly). The workaround 
-consists to clean (Project > Clean...), close, and then re-open the affected projects
+inconsistencies (such as compiler errors not going away and searching for references not working properly).
+To avoid the problem, create the project and set its charset before creating (or
+importing) any files in it. However, if you do need to make a project consistent
+again, try the following steps (in order):</p>
+
+<ol>
+  <li>Close all projects.</li>
+  <li>Exit Eclipse.</li>
+  <li>Restart Eclipse.</li>
+  <li>Re-open all projects.</li>
+  <li>Project &gt; Clean all projects.</li>
+</ol>
+<p>
 (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=59899">59899</a>,
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67884">67884</a>).</p>
 
@@ -744,18 +755,6 @@ New Folder...&gt;Advanced&gt;. Then a folder name can be associated with an
 arbitrary file system location by checking &quot;Link to folder on the file
 system). Once mounted, the linked class folder can normally be referenced on a
 build path, and from thereon programs can be compiled against it. (bug 67631)</p>
-<h4>File encoding change not honored</h4>
-<p>The Eclipse platform does not refresh properly when the encoding of a
-resource is being modified after the fact. As a consequence, JDT may become
-inconsistent, and in order to make it consistent again, the following actions
-need to be performed in this exact order:</p>
-<ol>
-  <li>Close all projects using navigator 'close project' menu action.</li>
-  <li>Exit and restart Eclipse.</li>
-  <li>Open all projects using navigator 'open project' menu action.</li>
-  <li>Manually trigger a clean build of entire workspace</li>
-</ol>
-<p>(bug 59899)</p>
 <h4>Package Explorer not asking for filter removal</h4>
 <p>Show In &gt; Package Explorer normally asks for removal of filters when the
 compilation unit to be shown in the Package Explorer is filtered out. However,
