@@ -12,7 +12,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Draft Pre-release 3.0<br>
-Last revised June 22, 2004</p>
+Last revised June 23, 2004</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -502,18 +502,20 @@ cause Eclipse to also crash (Windows only)</i></h4>
 <p><i>If an OLE document crashes, Eclipse can crash, or the workbench menus can
 become inconsistent.</i></p>
 <h3>3.1.5 <a name="I-Platform-Text">Platform - Text</a></h3>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Overwrite mode cannot be
-disabled for AbstractTextEditor and subclasses</i></h4>
-<p><i>When removing the key binding for the &quot;Toggle Overwrite Mode&quot;
-command on the <b>Workbench &gt; Keys</b> preference page, the mode is still
-toggled when pressing the &quot;Insert&quot; key. The mode indication in the
-editor's status line is then out of sync with the actual mode. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35248">35248</a>)</i></p>
+<h4>Problems opening external files</h4>
+<p><b>File &gt; Open External File</b> can fail when the editor opened for the external
+file (as determined by <b>Workbench &gt; File Associations</b> preferences) cannot not deal with
+external files. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58179">58179</a>)</p>
+<h4>Text editors does not show vertical ruler for external files</h4>
+<p>A text editor opened on a file external to the workspace does not show a vertical ruler.
+So if you set breakpoints in the file, you won't see the breakpoints in the
+editor (the breakpoints only show up in the Breakpoints view). (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=54900">54900</a>)</p>
 <h3>3.1.6 <a name="I-Platform-SWT">Platform - SWT</a></h3>
-<h4>Eclipse hangs when copy-pasting from an unresponsive application (GTK only)</h4>
+<h4>Eclipse hangs when pasting from an unresponsive application (GTK only)</h4>
 <p>If the application that is supplying the clipboard material is unresponsive,
 the paste operation hangs Eclipse for several minutes. This situation can be
-encountered when pasting from an Eclipse target workbench that is stuck at a
-breakpoint into the hosting Eclipse workbench. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44915">44915</a>)</p>
+encountered when copying from an Eclipse target workbench, suspending the target
+workbench at a breakpoint and pasting into the hosting Eclipse workbench. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44915">44915</a>)</p>
 <h4>Drag and drop on Mac (Mac OS X Carbon only)</h4>
 <p>The Mac OS X Carbon implementation of SWT does not support dragging from an SWT application to another application. (bug
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=68212">68212</a>)</p>
@@ -689,8 +691,45 @@ section.)</p>
 <h3>3.1.10 <a name="I-Platform-Compare">Platform - Compare</a></h3>
 <p>None.</p>
 <h3>3.2 <a name="I-JDT">Java Development Tools (JDT)</a></h3>
+<h4>Package Explorer not asking for filter removal</h4>
+<p>Show In &gt; Package Explorer normally asks for removal of filters when the
+compilation unit to be shown in the Package Explorer is filtered out. However,
+this currently is not happening if only a single filter is selected. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67814">67814</a>)</p>
+<h4>Hierarchical layout and inclusion filters</h4>
+<p>Packages explicitly included on the build path using inclusion filters will
+not be visible in either the Package Explorer or Packages views when the views
+are set to hierarchical layout mode. Use flat layout mode when using inclusion
+filters. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=65240">65240</a>)</p>
+<h4>Problems after moving a compilation unit</h4>
+<p>Moving a compilation unit can cause an editor open on that file to behave
+strangely. Closing and re-opening the editor fixes the problem. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67046">67046</a>)</p>
+<h4>Stale spell check errors</h4>
+<p>Adding a new word to the spell checking dictionary does not correct the
+corresponding spelling errors. The spelling errors do go away the next time you
+change the file's content. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=68282">68282</a>)</p>
+<h4> Javadoc hover in the Java
+editor</h4>
+<p>The Javadoc hover help shown when hovering over identifiers in the Java
+editor does not handle links inside of Javadoc comments properly. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20644">20644</a>)</p>
+<h4> Cut, copy, paste not working
+for linked resources in views showing Java elements</h4>
+<p>The cut, copy, and paste actions do not work for linked files and folders
+appearing in views that show Java elements, including the Package Explorer. The
+workaround is to use these actions from the Navigator view instead. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34568">34568</a>)</p>
+<h4> Java working sets not
+working correctly for elements from JRE system library container</h4>
+<p>Appling a working set consisting entirely of elements from the JRE System
+library container as a filter to the packages view might result in an empty
+Package Explorer. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35395">35395</a>)</p>
+<h4> Cannot generate Javadoc for
+packages with GB18030 characters in the name</h4>
+<p>Most class libraries do not properly support the creation of a system
+process (via <code>java.lang.Runtime.exec(...)</code>) when the specified
+command line contains GB18030 characters. Since Javadoc is created using the
+Javadoc executable provided with the JDK, generating Javadoc fails if the
+package or class name contains GB18030 characters. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32215">32215</a>)</p>
 <b>
-<p>Side effects of Step into Selection and Run to Line</p>
+<h4>Side effects of Step into Selection and Run to Line</h4>
 </b>
 <p>The actions &quot;Step into Selection&quot; and &quot;Run to Line&quot;
 optimistically set breakpoints on the line the user has chosen to step into or
@@ -699,21 +738,21 @@ reach the chosen line. The breakpoints set by the underlying implementation are
 not visible to the user and can cause execution to suspend unexpectedly at a
 later time, when the associated line is actually executed. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=51507">51507</a>)</p>
 <b>
-<p>Default locale initialization incorrect</p>
+<h4>Default locale initialization incorrect</h4>
 </b>
 <p>The default locale is generally initialized from the settings in the
 operating system when a target VM is launched. However, when using javaw.exe on
 JDK1.4.2, Windows XP, the default locale is incorrectly initialized to en_US, no
 matter what the operating system settings are. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=65945">65945</a>)</p>
 <b>
-<p>Suspend on uncaught exception overrides exception breakpoint location filters</p>
+<h4>Suspend on uncaught exception overrides exception breakpoint location filters</h4>
 </b>
 <p>Exception breakpoints can be configured with location filters (inclusive and
 exclusive). When an unchecked exception is configured to <b>not</b> suspend
 execution in a specific class, execution will still suspend when the user
 preference to suspend on uncaught exceptions is on. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66770">66770</a>)</p>
 <b>
-<p>Multiple references to the same object do not update in Variables view</p>
+<h4>Multiple references to the same object do not update in Variables view</h4>
 </b>
 <p>When more than one variable references the same object in the Variables view,
 only one variable will update while stepping through source code. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58768">58768</a>)</p>
