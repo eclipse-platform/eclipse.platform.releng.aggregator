@@ -17,7 +17,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -25,11 +24,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.team.core.IProjectSetSerializer;
-import org.eclipse.team.core.Team;
+import org.eclipse.team.core.ProjectSetCapability;
+import org.eclipse.team.core.RepositoryProviderType;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
 import org.eclipse.team.internal.ccvs.ui.actions.CVSAction;
+import org.eclipse.team.internal.ui.UIProjectSetSerializationContext;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 public class LoadMap extends CVSAction {
@@ -38,13 +38,14 @@ public class LoadMap extends CVSAction {
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
 	 */
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
-		run(new WorkspaceModifyOperation() {
+		run(new WorkspaceModifyOperation(null) {
 			public void execute(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					IResource[] resources = getSelectedResources();
 					String[] referenceStrings = getReferenceStrings(resources);
-					IProjectSetSerializer serializer = Team.getProjectSetSerializer(CVSProviderPlugin.getTypeId());
-					serializer.addToWorkspace(referenceStrings, null, getShell(), monitor);
+					RepositoryProviderType type = RepositoryProviderType.getProviderType(CVSProviderPlugin.getTypeId());
+					ProjectSetCapability c = type.getProjectSetCapability();
+					c.addToWorkspace(referenceStrings, new UIProjectSetSerializationContext(getShell()), monitor);
 				} catch (TeamException e) {
 					throw new InvocationTargetException(e);
 				} catch (CoreException e) {

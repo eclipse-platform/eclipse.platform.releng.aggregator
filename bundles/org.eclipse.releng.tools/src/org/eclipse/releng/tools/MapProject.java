@@ -9,12 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.releng.tools;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -28,8 +28,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
+import org.eclipse.team.internal.ccvs.core.client.Command;
+import org.eclipse.team.internal.ccvs.core.client.Commit;
+import org.eclipse.team.internal.ccvs.core.client.Command.LocalOption;
+import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
 
 public class MapProject implements IResourceChangeListener {
 	
@@ -131,9 +136,16 @@ public class MapProject implements IResourceChangeListener {
 	}
 	
 	public void commitMapProject(String comment, IProgressMonitor  monitor) throws CoreException{
-		CVSTeamProvider provider = getProvider(project);
-		provider.setComment(comment);		
-		provider.checkin(new IResource[] { project }, IResource.DEPTH_INFINITE, monitor);
+		List localOptions = new ArrayList();
+		localOptions.add(Commit.makeArgumentOption(Command.MESSAGE_OPTION, comment));
+		LocalOption[] commandOptions = (LocalOption[])localOptions.toArray(new LocalOption[localOptions.size()]);
+		try {
+			new CommitOperation(null, new IResource[] { project }, commandOptions).run(monitor);
+		} catch (InvocationTargetException e) {
+			throw TeamException.asTeamException(e);
+		} catch (InterruptedException e) {
+			// Ignore;
+		}
 	}
 
 	private  CVSTeamProvider getProvider(IResource resource) {
