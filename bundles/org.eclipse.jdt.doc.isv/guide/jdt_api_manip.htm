@@ -131,40 +131,41 @@ working copy, and client 2 trying to retrieve the shared working copy notices it
 
 <H3>Code modification using the DOM/AST API</h3>
 
-There are three ways to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b>. The first one is to use an existing compilation unit. The second is 
-to use an existing class file. The third is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b> (Abstract Syntax Tree).
-<h4>
-Creating an AST from an existing compilation unit
-</h4>
-This is achieved with the parse methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>:
-<ul>
-<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(char[])">parseCompilationUnit(char[])</a> This method should be used if you simply
-want to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> without any binding resolution. Only syntax errors are
-reported using this method.
-</li>
-<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(char[], java.lang.String, org.eclipse.jdt.core.IJavaProject)">parseCompilationUnit(char[] source, String unitName, IJavaProject project)</a>. This method can be used to create a
-<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from a byte array. If the IJavaProject is specified, the bindings can be resolved. In this case, the name of the compilation unit is used for
-the binding resolution. 
-</li>
-<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(org.eclipse.jdt.core.ICompilationUnit, boolean)">parseCompilationUnit(ICompilationUnit unit, boolean resolveBindings)</a>. This method can be used to create a
-<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from an existing <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html">ICompilationUnit</a></b>.
-</li>
-</ul>
-All these methods will properly set the positions for each node in the resulting tree. The resolution of bindings has to be requested
-before the creation of the tree. Resolving the bindings is a costly operation and should be done only when necessary. As soon as the tree has been modified, all positions and
-bindings are lost.
+
+There are three ways to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b>.
+The first one is to use <b><a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html">ASTParser</a></b>.
+The second is to use <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)">ICompilationUnit#reconcile(...)</a></b>.
+The third is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b> (Abstract Syntax Tree).
 
 <h4>
-Creating an AST from an existing class file
+Creating an AST from existing source code
 </h4>
-This is achieved with the parse method on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>:
+
+An instance of <b><a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html">ASTParser</a></b> must be created with <a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html#ASTParser.newParser(int)">ASTParser.newParser(int)</a>.<br>
+<br>
+The source code is given to the <b><a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html">ASTParser</a></b> with one of the following methods:
 <ul>
-<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(org.eclipse.jdt.core.IClassFile, boolean)">parseCompilationUnit(IClassFile classFile, boolean resolveBindings)</a>. This method can be used to create a
-<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from an existing <b><a href="../reference/api/org/eclipse/jdt/core/IClassFile.html">IClassFile</a></b>.
-</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html#setSource(char[])">setSource(char[])</a>: to create the AST from source code</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html#setSource(org.eclipse.jdt.core.IClassFile)">setSource(IClassFile)</a>: to create the AST from a classfile</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html#setSource(org.eclipse.jdt.core.ICompilationUnit)">setSource(ICompilationUnit)</a>: to create the AST from a compilation unit</li>
 </ul>
-This method will properly set the positions for each node in the resulting tree. The resolution of bindings has to be requested
-before the creation of the tree. Resolving the bindings is a costly operation and should be done only when necessary. As soon as the tree has been modified, all positions and
+
+Then the AST is created by calling <a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html#createAST(org.eclipse.core.runtime.IProgressMonitor)">createAST(IProgressMonitor)</a>.<br>
+<br>
+The result is an AST with correct source positions for each node.
+The resolution of bindings has to be requested before the creation of the tree with <a href="../reference/api/org/eclipse/jdt/core/dom/ASTParser.html#setResolveBindings(boolean)">setResolveBindings(boolean)</a>.
+Resolving the bindings is a costly operation and should be done only when necessary.
+As soon as the tree has been modified, all positions and bindings are lost.
+
+<h4>
+Creating an AST by reconciling a working copy
+</h4>
+If a working copy is not consistent (has been modified) then an AST can be created by calling the method <a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)">reconcile(int, boolean, WorkingCopyOwner, IProgressMonitor)</a>.
+To request AST creation, call the <a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)">reconcile(...)</a>
+ method with <a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#JLS2">AST.JLS2</a> as first parameter.<br>
+<br>
+Its bindings are computed only if the problem requestor is active, or if the problem detection is forced.
+Resolving the bindings is a costly operation and should be done only when necessary. As soon as the tree has been modified, all positions and
 bindings are lost.
 
 <h4>
@@ -270,8 +271,88 @@ Each token has a specific value that is defined in the <b><a href="../reference/
 fairly simple to iterate and retrieve the right token. We also recommend that you use the scanner if you want to find the 
 position of the <i>super</i> keyword in a 
 <b><a href="../reference/api/org/eclipse/jdt/core/dom/SuperMethodInvocation.html">SuperMethodInvocation</a></b>.
+
+<h4>Source code modifcations</h4>
+
+<P>
+Some source code modifications are not provided via the Java element API.
+A more general way to edit source code (such as changing the source code for existing elements) is accomplished using the compilation unit's raw source code and the rewrite API of the DOM/AST.</P>
+<P>
+To perform DOM/AST rewriting, there two set of API: the descriptive rewriting and the modifying rewriting.
+
+<p>
+The descriptive API does not modify the AST but use <b><a href="../reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html">ASTRewrite</a></b> API to generate the descritions of modifications.
+The AST rewriter collects descriptions of modifications to nodes and translates these descriptions into text edits that can then be applied to the original source.
+
+<font color='#4444CC'><pre>
+   // creation of a Document
+   ICompilationUnit cu = ... ; // content is "public class X {\n}"
+   String source = cu.getBuffer().getContents();
+   Document document= new Document(source);
+
+   // creation of DOM/AST from a ICompilationUnit
+   ASTParser parser = ASTParser.newParser(AST.JLS2);
+   parser.setSource(cu);
+   CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+
+   // creation of ASTRewrite
+   ASTRewrite rewrite = new ASTRewrite(astRoot.getAST());
+
+   // description of the change
+   SimpleName oldName = ((TypeDeclaration)astRoot.types().get(0)).getName();
+   SimpleName newName = astRoot.getAST().newSimpleName("Y");
+   rewrite.replace(oldName, newName, null);
+
+   // computation of the text edits
+   TextEdit edits = rewrite.rewriteAST(document, cu.getJavaProject().getOptions(true));
+
+   // computation of the new source code
+   edits.apply(document);
+   String newSource = document.get();
+
+   // update of the compilation unit
+   cu.getBuffer().setContents(newSource);
+</pre></font>
+
+<p>
+The modifying API allows to modify directly the AST:
+<ul>
+<li>Request the recording of modifications (<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html#recordModifications()">CompilationUnit.recordModifications()</a></b>).</li>
+<li>Perform the modifications on the AST Nodes.</li>
+<li>And when the modifications are finished, generate text edits that can then be applied to the original source (<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html#rewriteAST(org.eclipse.jface.text.IDocument, java.util.Map)">CompilationUnit.rewriteAST(...)</a></b>).</li>
+</ul>
+<font color='#4444CC'><pre>
+   // creation of a Document
+   ICompilationUnit cu = ... ; // content is "public class X {\n}"
+   String source = cu.getBuffer().getContents();
+   Document document= new Document(source);
+
+   // creation of DOM/AST from a ICompilationUnit
+   ASTParser parser = ASTParser.newParser(AST.JLS2);
+   parser.setSource(cu);
+   CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
+
+   // start record of the modifications
+   astRoot.recordModifications();
+
+   // modify the AST
+   TypeDeclaration typeDeclaration = (TypeDeclaration)astRoot.types().get(0)
+   SimpleName newName = astRoot.getAST().newSimpleName("Y");
+   typeDeclaration.setName(newName);
+
+   // computation of the text edits
+   TextEdit edits = astRoot.rewriteAST(document, cu.getJavaProject().getOptions(true));
+
+   // computation of the new source code
+   edits.apply(document);
+   String newSource = document.get();
+
+   // update of the compilation unit
+   cu.getBuffer().setContents(newSource);
+</pre></font>
 <H3>
 Generic source code modification</h3>
+
 <P>
 Some source code modifications are not provided via the Java element API. A more general way to edit source code (such as changing the source code for existing elements) is accomplished using the compilation unit's raw source code and the Java DOM.</P>
 <P>
