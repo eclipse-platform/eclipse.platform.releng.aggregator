@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Running the command-line CVS client with Eclipse</title>
+<meta name="keyword" content="team">
+</HEAD>
+
+<BODY BGCOLOR="#ffffff">
+<H1 CLASS="Head">Running the CVS command-line client outside of Eclipse</H1>
+<h3>Compatibility</h3>
+<p> Eclipse implements it's own CVS client in Java that talks directly to the 
+  server using the documented CVS protocol. No external CVS client is required. 
+  However, the CVS Eclipse client stores it's metadata in a format that is compatible 
+  with the command-line client. The metadata is stored in CVS/ subdirectories 
+  but you rarely see these CVS/ folders within Eclipse. They are marked as private 
+  which causes them to be hidden from view. If you open a (non-Eclipse) file explorer 
+  you will see that these directories and their contents appear on the file system.</p>
+<p> Since the Eclipse CVS plugin stores its meta information in a format that 
+  is compatible with the command-line CVS client you should be able to use a CVS 
+  command line client against Eclipse workspace files on disk.</p>
+
+
+<h3>Don't forget to refresh!</h3>
+<p>Whenever you use external tools to modify workspace files, you must perform 
+  a <strong>Refresh</strong> from within Eclipse to make the workspace aware of 
+  the changes. If you get a <em>resource out of sync</em> error in Eclipse it 
+  is a sign that there are resources in Eclipse that have been modified outside 
+  of Eclipse. One solution is to perform a refresh (available from a resource's 
+  popup menu) on any resources or projects that where modified outside of Eclipse. 
+  There is also an <em>auto-refresh</em> plugin available from <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-core-home/dev.html">Platform 
+  Core</a> web site.</p>
+<h3>Caveats</h3>
+<p><strong>1. Deleted folders</strong></p>
+<p>You may encounter unexpected behavior when using the command-line CVS client 
+  in conjunction with deleted folders. Eclipse's CVS support keeps track of deleted 
+  folders and their contents so that, on the next synchronization, the Synchronize 
+  view can properly report on the changes. This information is kept outside of 
+  the CVS meta folder structure. This is because in CVS you normally inform the 
+  repository of deletions prior to deleting them locally, which is a different 
+  workflow than we like to support in the Synchronization view. Thus it is recommended 
+  that you do not use the command-line CVS client while you have pending deletions 
+  to commit. In some circumstances it could cause the Synchronize view to display 
+  incorrect contents, although it will not cause any lost work. </p>
+<p><strong>2. CVS directories appear in the workbench</strong></p>
+<p>When you use the command-line CVS the CVS folders can sometimes appear in the 
+  Navigator View? There are some cases where CVS folders are not hidden from the 
+  UI as the user would expect. For instance, CVS folders will appear if a user 
+  imports a CVS project into Eclipse before the CVS plug-in is loaded. To avoid 
+  this, open the CVS Repositories view (thus loading the CVS plug-in) before importing 
+  CVS projects into Eclipse. </p>
+<p><strong>3. The 'extssh' connection method</strong></p>
+<p>The <em>extssh</em> connection method is unique to Eclipse CVS and doesn't 
+  exist in the command-line CVS client. If you are using <em>extssh</em> to connect 
+  to a SSH1 repository and would like to use the command line client for some 
+  CVS operations you have to create a new location in Eclipse that uses a compatible 
+  connection method:</p>
+<ol>
+  <li>Create a new repository location that uses a CVS command line client compatible 
+    connection method (e.g. <em>pserver</em> or <em>ext</em>). The repository 
+    path, host, and user should be identical to those in the <em>extssh</em> location.</li>
+  <li>Select the project that is shared with the <em>extssh</em> location and 
+    open the CVS properties page. This is the project that you wanted to run external 
+    CVS commands on.</li>
+  <li>Select the <strong>Change Sharing...</strong> button and select the new 
+    location that uses either the 'ext' or 'pserver'.</li>
+  <li>Next, you can run command line operations and then return to Eclipse. Don't 
+    forget to refresh!</li>
+</ol>
+<p><img border="0" src="../images/ngrelt.gif" alt="Related tasks" width="159" height="27"><br>
+<a href="tasks-95.htm">Changing the properties of a CVS repository location</a><br>
+<a href="tasks-92.htm">Creating a CVS repository location</a><br>
+<a href="tasks-117a.htm">Using projects checked out with another CVS tool</a>
+</p>
+<a href="../hglegal2003.htm"><img src="../images/ngibmcpy2003.gif" alt="Copyright IBM Corporation and others 2000, 2003" border="0" width="324" height="14"></a>
+</p>
+
+</BODY>
+</HTML>
