@@ -133,8 +133,82 @@ can be useful to isolate the decision making regarding image creation in a separ
 
 
 
-<H3>
-Font registry</H3>
+<H3> ImageCache</H3>
+<P >Managing images in applications can be a complex task. Because there is a 
+  limit on the number of images that can be in memory at any one time, improper 
+  usage of images can greatly harm an application's performance. There are several 
+  ways to handle image resources issues, such as using a global image registry. 
+  However, the image registry will only dispose the images when the SWT Display 
+  that creates them is disposed, potentially on shutdown. This implies that images 
+  might be kept in the registry longer than needed. For large scale applications, 
+  this can be a problem. </P>
+<P >The ImageCache is a weakly referenced cache of equivalent image descriptors 
+  to arrays of image instances, representing normal, gray and disabled images. 
+  The cache is used to hold images in memory while their corresponding image descriptors 
+  are defined. When the image descriptors become weakly referred to, a cleaner 
+  thread disposes the corresponding images in the array of images. </P>
+<P >The goal of the ImageCache is to partially remove the burden from the user 
+  to clean-up the images they request. The key concept behind the ImageCache is 
+  to rely on the garbage collector for image clean-up. The idea is to map weakly 
+  referenced image descriptors to images and dispose images when their corresponding 
+  image descriptors are not referenced anymore. The disposal of the images is 
+  performed by a cleaner thread and not by the user. The ImageCache is a centralized 
+  cache of shared images that will ensure uniqueness of images, as well as guaranteed 
+  image clean-up, either when the garbage collector determines that the image 
+  descriptors are no longer referenced, or on shut down by calling the ImageCache's 
+  <strong>dispose()</strong>.</P>
+<P >It is recommended to use this class as a singleton, since it creates a thread 
+  for image clean-up. Requesting images and disposing the ImageCache should be 
+  done via the UI Thread. Upon request of a disabled or gray image, the normal 
+  image will be created as well, if it was not already in the cache, in order 
+  to create the disabled or gray version of the image. <br>
+</P>
+<P > The ImageCache serves two main purposes: image retrieval and image clean-up. 
+  The image retrieval is performed by the <strong>getImage()</strong> methods 
+  that query the image map for the requested images. The image clean-up is performed 
+  by the image cleaner thread and the <strong>dispose()</strong> method when it 
+  is invoked. </P>
+<ul>
+  <li><strong>Image Retrieval:</strong> The ImageCache maps a set of weak references 
+    to equivalent image descriptors to the corresponding array of images (disabled, 
+    gray and regular images). When an image is requested for a particular image 
+    descriptor, the image map is queried for the corresponding equivalence set. 
+    <ul>
+      <li>If no equivalence set for that image descriptor exists in the image 
+        map, the equivalence set, with the weak reference to the image descriptor 
+        added to the set, and the requested image are created and added to the 
+        image map. The newly created image is returned. </li>
+    </ul>
+    <ul>
+      <li>If an equivalence set corresponding to the passed image descriptor is 
+        found, a weak reference to that image descriptor is added to the set if 
+        a weak reference to the same image descriptor did not already exist. The 
+        requested image for the corresponding array of images is returned or is 
+        created if it had not been previously created. The image, newly created 
+        or from the cache, is returned. </li>
+    </ul>
+  </li>
+  <li><strong>Image Clean-Up:</strong> The cleaner thread is started in the ImageCache's 
+    constructor. The thread monitors the reference queue for potential images 
+    to clean-up. When a weak reference is put into the reference queue, it is 
+    removed from its corresponding equivalence set in the image map. Once the 
+    equivalence set becomes empty, it is removed from the image map and the created 
+    images in its corresponding array of images are disposed. </li>
+</ul>
+
+<p><strong>Note:</strong> It is the responsibility of the user to ensure that 
+  the image descriptors are kept around as long as the images are needed, since 
+  the images will be disposed of with no warning when all descriptors associated 
+  with a particular array of images become weakly referenced. To avoid duplicate 
+  images, the user should ensure that equivalency in their implementation of image 
+  descriptors are properly defined. The users of this cache should not explicitly 
+  dispose the images themselves since they could be shared by other objects. This 
+  cache makes no guarantees on how long the cleaning process will take, or when 
+  exactly it will occur since it is dependent on when the garbage collector will 
+  run. It is, however, guaranteed that upon calling the ImageCache's dispose(), 
+  all images in the cache will be disposed immediately.<br>
+</p>
+<H3> Font registry</H3>
 <P >
 Fonts are another limited resource in platform operating systems. The creation and disposal issues are the same for fonts as
 for images, requiring similar speed/space tradeoffs. In general, fonts are allocated in SWT by requesting a font with a platform dependent font name.</P>
