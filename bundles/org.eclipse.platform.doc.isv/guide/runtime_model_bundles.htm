@@ -12,29 +12,19 @@
 <H3>
 Plug-ins and bundles</H3>
 <p>
-The mechanics of a plug-in are implemented using the <a href="http://www.osgi.org">OSGi</a> open services architecture.  From this
+The mechanics for supporting plug-ins are implemented using the <a href="http://www.osgi.org">OSGi</a> framework.  From this
 standpoint, a plug-in is the same thing as an OSGi <b>bundle</b>.  The bundle and its associated classes specify and implement
 the process for Java class-loading, prequisite management, and the bundle's life-cycle.  For the rest of this discussion, we use
-the terms <b>plug-in</b> and <b>bundle</b> interchangeably, unless discussing a particular class in the framework.
+the terms <b>plug-in</b> and <b>bundle</b> interchangeably, unless discussing a particular class in the framework.  
 </p>
-<h4>Bundles</h4>
+<h4>Plugin</h4>
 <p>
-The <b><a href="../reference/osgi/org/osgi/framework/Bundle.html">Bundle</a></b> is the OSGi unit of modularity.  Fundamentally, a 
-bundle is just a collection of files (resources and code) in a JAR file installed in the 
-platform.  The bundle class represents the life-cycle aspects of a plug-in.  Each bundle has its own Java
-class loader, and includes protocol for starting, stopping, and uninstalling itself.  From the Eclipse platform 
-point of view, <b><a href="../reference/osgi/org/osgi/framework/Bundle.html">Bundle</a></b> is merely an implementation 
-class.   Plug-in developers do not extend the bundle class, but use related classes to provide 
-bundle/plug-in specific behavior.</p>
-<h4>Bundle Activator</h4>
-<p>
-The <b><a href="../reference/osgi/org/osgi/framework/BundleActivator.html">BundleActivator</a></b> interface 
-is of interest to plug-in developers and is used to manage life-cycle code specific to a particular plug-in.
-This interface is implemented by the Eclipse class <b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">
-Plugin</a></b>.  The protocol gives plug-ins a chance to implement function associated with the <b>start</b> and <b>stop</b>
-aspects of the life-cycle.  Each life-cycle method includes a reference to a  
-<b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">BundleContext</a></b> from which
-specific information about the particular bundle/plug-in can be obtained.</p>
+The <b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">Plugin</a></b> class represents a plug-in that
+is running in the platform.  It is a convenient place to centralize the life-cycle aspects and overall 
+semantics of a plug-in.  A plug-in can implement specialized function for the <b>start</b> and <b>stop</b>
+aspects of its life-cycle.  Each life-cycle method includes a reference to a  
+<b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">BundleContext</a></b> which can supply
+additional information.</p>
 <p>
 The <b>start</b> portion of the life-cycle is worth particular discussion.  We've seen already that information 
 about a plug-in can be obtained from the plug-in's manifest file without ever running any of the 
@@ -61,9 +51,11 @@ in the start-up code.  This ensures that large data structures are not built unt
 </p>
 <h4>Bundle Context</h4>
 <p>
-When your plug-in is started, it is given a reference to a <b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">
-BundleContext</b></a> from which it can obtain information related to your particular plug-in and information about other
-bundles/plug-ins in the system.
+Life-cycle management is where the OSGi &quot;bundle&quot; terminology and the platform's 
+&quot;plug-in&quot; terminology meet.  When your plug-in is started, it is given a reference to a <b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">
+BundleContext</b></a> from which it can obtain information related to the plug-in.  The
+<b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">BundleContext</a></b>
+can also be used to find out about other bundles/plug-ins in the system.  
 </p>
 <p>
 <b>BundleContext.getBundles()</b> can be used to obtain an array of all bundles in the system.  Listeners for
@@ -79,27 +71,30 @@ it could be queried for the plug-in descriptors of all plug-ins in the system.  
 used for this purpose.  The platform registry is now used exclusively for information about extensions 
 and extension points.
 </blockquote></i>
-<h4>Plugin</h4>
+<h4>Bundle Activator</h4>
 <p>
-A plug-in developer has complete freedom to implement the interfaces for
-<b><a href="../reference/osgi/org/osgi/framework/BundleActivator.html">BundleActivator</a></b> and
-<b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">BundleContext</a></b> in any classes
-appropriate to the plug-in design.  In fact, you need not implement these interfaces at all if you
-do not have specific life-cycle management needs.  Historically, life-cycle management
-code has been implemented using the <b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">
-Plugin</a></b> class.
-</p>
+The <b><a href="../reference/osgi/org/osgi/framework/BundleActivator.html">BundleActivator</a></b> interface defines
+the start and stop behavior implemented in 
+<b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">Plugin</a></b>.  Although the
+<b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">Plugin</a></b> class is a convenient place
+to implement this function, a plug-in developer has complete freedom to implement the interface for
+<b><a href="../reference/osgi/org/osgi/framework/BundleActivator.html">BundleActivator</a></b> in any class
+appropriate for the plug-in's design.  In fact, your plug-in need not implement this interface at all if it
+does not have specific life-cycle management needs.  </p>
+<h4>Bundles</h4>
 <p>
-The plug-in class is a convenient place to centralize the life-cycle aspects and overall 
-semantics of a plug-in.  Most of the platform plug-ins still define their own plug-in class for this
-reason.  Thus, <b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">Plugin</a></b> 
-implements the interface <b><a href="../reference/osgi/org/osgi/framework/BundleActivator.html">BundleActivator</a></b> 
-and its life-cycle methods reference the <b><a href="../reference/osgi/org/osgi/framework/BundleContext.html">BundleContext</a></b>.  
-Life-cycle management (of a plug-in itself or information about another plug-in's lifecycle) is the place where the 
-OSGi &quot;bundle-oriented&quot; terminology and the platform's 
-&quot;plug-in&quot; terminology meet.  
-</p>
+Underneath every plug-in lies an OSGi bundle managed by the framework.
+The <b><a href="../reference/osgi/org/osgi/framework/Bundle.html">Bundle</a></b> is the OSGi unit of modularity.  Fundamentally, a 
+bundle is just a collection of files (resources and code) installed in the 
+platform.  Each bundle has its own Java
+class loader, and includes protocol for starting, stopping, and uninstalling itself.  From the Eclipse platform 
+point of view, <b><a href="../reference/osgi/org/osgi/framework/Bundle.html">Bundle</a></b> is merely an implementation 
+class.   Plug-in developers do not extend the bundle class, but use <b><a href="../reference/api/org/eclipse/core/runtime/Plugin.html">Plugin</a></b>
+or other <b><a href="../reference/osgi/org/osgi/framework/BundleActivator.html">BundleActivator</a></b> implementations
+to represent the plug-in.</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
+
+
