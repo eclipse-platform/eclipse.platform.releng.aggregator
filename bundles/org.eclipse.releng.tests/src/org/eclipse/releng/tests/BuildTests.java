@@ -209,6 +209,12 @@ public class BuildTests extends TestCase {
 		
 		private String getExec() {
 //			String os = BootLoader.getOS();
+//			if (os == null) {
+//				System.out.println("OS IS NULL");
+//			} else {
+//				System.out.println("OS: " + os);
+//			}
+			
 //			String exeName;
 //			if (os.equals(BootLoader.OS_UNKNOWN)) {
 //				exeName = "chkpw501.exe";
@@ -224,9 +230,20 @@ public class BuildTests extends TestCase {
 		 * Method getExcludeErrors.
 		 */
 		private String getExcludeErrors() {
-			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "ignoreErrors.txt";
+			
+			String os = BootLoader.getOS();
+			String fileName;
+			
+			if (os.equals(BootLoader.OS_WIN32)) {
+				fileName = "ignoreErrorsWindows.txt";
+			} else {
+				fileName = "ignoreErrorsUnix.txt";
+			}
+			
+			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + fileName;
 			return new File(aString).getPath();
 		}
+		
 	/**
 	 * Method parseLine.
 	 * @param aLine
