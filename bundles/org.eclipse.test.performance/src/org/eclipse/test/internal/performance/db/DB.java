@@ -13,6 +13,8 @@ package org.eclipse.test.internal.performance.db;
 import java.sql.*;
 import java.util.Properties;
 
+import org.eclipse.test.internal.performance.data.Sample;
+
 public class DB {
     
     public static final String DB_NAME= "perfDB";
@@ -20,7 +22,73 @@ public class DB {
     
     private static final String HOST= null; // "localhost:1527"
     
-    static Connection connect(String dbName) throws ClassNotFoundException, SQLException {
+    private static DB fgDefault;
+    
+    private Connection fConnection;
+    private SQL fSQL;
+    
+    
+    public static DB getDefault() {
+        if (fgDefault == null) {
+            fgDefault= new DB();
+            fgDefault.connect(DB_NAME);
+        }
+        return fgDefault;
+    }
+    
+    private DB() {
+    }
+    
+    private void connect(String dbname) {
+        if (fConnection != null)
+            return;
+        
+        try {
+            System.out.println("Trying to connect...");
+            fConnection= connect2(dbname);
+            System.out.println("connected!");
+ 
+            fSQL= new SQL(fConnection);
+
+            doesDBexists();
+
+            System.out.println("start prepared statements");
+            fSQL.createPreparedStatements();
+            System.out.println("finish with prepared statements");
+                         
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            System.err.print("SQLException: ");
+            System.err.println(ex.getMessage());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void disconnect() {
+        if (fSQL != null) {
+            try {
+                fSQL.dispose();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            fSQL= null;
+        }
+        if (fConnection != null) {
+            try {
+                 fConnection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            fConnection= null;
+        }
+    }
+    
+    public SQL getSQL() {
+        return fSQL;
+    }
+    
+    private Connection connect2(String dbName) throws ClassNotFoundException, SQLException {
         String url;
         Properties p= new Properties();
         if (HOST != null) {
@@ -37,21 +105,35 @@ public class DB {
         return DriverManager.getConnection(url, p);
     }
 
-    public static void main(String args[]) throws Exception {
-
+    private void doesDBexists() throws SQLException {
+        Statement stmt= fConnection.createStatement();
         try {
-            System.out.println("Trying to connect...");
-            Connection conn= connect(DB_NAME);
-            System.out.println("connected!");
- 
-            SQL sql= new SQL(conn);
+	        ResultSet rs= stmt.executeQuery("select count(*) from sys.systables");
+	        while (rs.next())
+	            if (rs.getInt(1) > 16)
+	                return;
+	        System.out.println("initialising DB");
+	        fSQL.initialize();
+	        System.out.println("end initialising DB");
+        } finally {
+            stmt.close();
+        }
+    }
+    
+    public void store(Sample sample) {
+        
+        
+    }
 
-            doesDBexists(conn, sql);
-
-            System.out.println("start prepared statements");
-            sql.createPreparedStatements();
-            System.out.println("finish with prepared statements");
+    //---- test --------
+    
+    public static void main(String args[]) throws Exception {
+        
+        DB db= DB.getDefault();
+        
+        try {            
             
+            SQL sql= db.getSQL();
             
             System.out.println("adding to DB");
             int config_id= sql.getConfig("burano", "MacOS X");
@@ -78,29 +160,12 @@ public class DB {
                 System.out.println(i + ": " + result.getString(1));
             result.close();
              
-            conn.close();
-            
         } catch (SQLException ex) {
             ex.printStackTrace();
             System.err.print("SQLException: ");
             System.err.println(ex.getMessage());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
-    }
-
-    private static void doesDBexists(Connection conn, SQL sql) throws SQLException {
-        Statement stmt= conn.createStatement();
-        try {
-	        ResultSet rs= stmt.executeQuery("select count(*) from sys.systables");
-	        while (rs.next())
-	            if (rs.getInt(1) > 16)
-	                return;
-	        System.out.println("initialising DB");
-	        sql.initialize();
-	        System.out.println("end initialising DB");
-        } finally {
-            stmt.close();
-        }
+        
+        db.disconnect();        
     }
 }

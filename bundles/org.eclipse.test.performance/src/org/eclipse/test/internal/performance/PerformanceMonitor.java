@@ -24,6 +24,7 @@ import java.util.Random;
 import org.eclipse.test.internal.performance.PerformanceMonitorLinux;
 import org.eclipse.test.internal.performance.PerformanceMonitorMac;
 import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.DimensionMessages;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
@@ -158,25 +159,18 @@ class PerformanceMonitor {
 
     protected void collectOperatingSystemCounters(Map scalars) {
         // default implementation just writes currentTimeMillis
-        String dimName= PerfMsrDimensions.USER_TIME.getName();
-        scalars.put(dimName, new Scalar(dimName, System.currentTimeMillis()));
+        addScalar(scalars, Dimensions.USER_TIME, System.currentTimeMillis());
     }
 
 	protected void collectGlobalPerformanceInfo(Map scalars) {
 		// no default implementation
 	}
 	
-    void addScalar(Map scalars, int id, String string, long value) {
-        //System.out.println(id + ": " + string + " " + value);
+    void addScalar(Map scalars, int id, long value) {
+        System.out.println(id + ": " + DimensionMessages.getString(id) + " " + value);
         scalars.put("" + id, new Scalar("" + id, value));
     }
     
-    /* (non-Javadoc)
-     * @see org.eclipse.perfmsr.core.IPerformanceMonitor#upload(java.lang.Object)
-     */
-    public void upload() {
-    }
-
 	/**
 	 * In the normal case, only a single PerformanceMonitor would be allocated, so
 	 * plug-ins need to be careful that any one plugin doesn't allocated

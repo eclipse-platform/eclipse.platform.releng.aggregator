@@ -13,20 +13,22 @@ package org.eclipse.test.internal.performance.data;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.test.internal.performance.Dimensions;
+
 
 /**
  * @since 3.1
  */
 public class PerfMsrDimensions {
-	public static final Dimension WORKING_SET= new Dimension(DimensionMessages.getString("PerfMsrDimensions.WorkingSet.name"), Unit.BYTE); //$NON-NLS-1$
-	public static final Dimension USER_TIME= new Dimension(DimensionMessages.getString("PerfMsrDimensions.UserTime.name"), Unit.SECOND, 1000); //$NON-NLS-1$
-	public static final Dimension KERNEL_TIME= new Dimension(DimensionMessages.getString("PerfMsrDimensions.KernelTime.name"), Unit.SECOND, 1000); //$NON-NLS-1$
-	public static final Dimension CPU_TIME= new Dimension(DimensionMessages.getString("PerfMsrDimensions.CPUTime.name"), Unit.SECOND, 1000); //$NON-NLS-1$
-	public static final Dimension HARD_PAGE_FAULTS= new Dimension(DimensionMessages.getString("PerfMsrDimensions.HardPageFaults.name"), Unit.CARDINAL); //$NON-NLS-1$
-	public static final Dimension SOFT_PAGE_FAULTS= new Dimension(DimensionMessages.getString("PerfMsrDimensions.SoftPageFaults.name"), Unit.CARDINAL); //$NON-NLS-1$
-	public static final Dimension TEXT_SIZE= new Dimension(DimensionMessages.getString("PerfMsrDimensions.TextSize.name"), Unit.BYTE); //$NON-NLS-1$
-	public static final Dimension DATA_SIZE= new Dimension(DimensionMessages.getString("PerfMsrDimensions.DataSize.name"), Unit.BYTE); //$NON-NLS-1$
-	public static final Dimension LIBRARY_SIZE= new Dimension(DimensionMessages.getString("PerfMsrDimensions.LibrarySize.name"), Unit.BYTE); //$NON-NLS-1$
+	public static final Dimension WORKING_SET= new Dimension(Dimensions.WORKING_SET, Unit.BYTE); //$NON-NLS-1$
+	public static final Dimension USER_TIME= new Dimension(Dimensions.USER_TIME, Unit.SECOND, 1000); //$NON-NLS-1$
+	public static final Dimension KERNEL_TIME= new Dimension(Dimensions.KERNEL_TIME, Unit.SECOND, 1000); //$NON-NLS-1$
+	public static final Dimension CPU_TIME= new Dimension(Dimensions.CPU_TIME, Unit.SECOND, 1000); //$NON-NLS-1$
+	public static final Dimension HARD_PAGE_FAULTS= new Dimension(Dimensions.HARD_PAGE_FAULTS, Unit.CARDINAL); //$NON-NLS-1$
+	public static final Dimension SOFT_PAGE_FAULTS= new Dimension(Dimensions.SOFT_PAGE_FAULTS, Unit.CARDINAL); //$NON-NLS-1$
+	public static final Dimension TEXT_SIZE= new Dimension(Dimensions.TRS, Unit.BYTE); //$NON-NLS-1$
+	public static final Dimension DATA_SIZE= new Dimension(Dimensions.DRS, Unit.BYTE); //$NON-NLS-1$
+	public static final Dimension LIBRARY_SIZE= new Dimension(Dimensions.LRS, Unit.BYTE); //$NON-NLS-1$
 
 	private static final Map fgRegisteredDimensions;
 	private static final Map fgIdMap;
@@ -62,5 +64,4 @@ public class PerfMsrDimensions {
 	public static String getPerfMsrId(Dimension dimension) {
 		return (String) fgIdMap.get(dimension);
 	}
-	
 }

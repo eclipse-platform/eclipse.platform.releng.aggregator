@@ -20,6 +20,7 @@ import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
+import org.eclipse.test.internal.performance.db.DB;
 
 
 /**
@@ -63,7 +64,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
 	 */
 	public void commit() {
-		fPerformanceMonitor.upload();
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 			printSample();

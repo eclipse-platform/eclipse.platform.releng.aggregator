@@ -17,13 +17,17 @@ import java.util.ResourceBundle;
 /**
  * @since 3.1
  */
-class DimensionMessages {
+public class DimensionMessages {
 
 	private static final String BUNDLE_NAME= "org.eclipse.test.internal.performance.data.DimensionMessages";//$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
 
 	private DimensionMessages() {}
+	
+	public static String getString(int id) {
+	    return getString("Dimension." + id);
+	}
 
 	public static String getString(String key) {
 		try {

@@ -31,6 +31,10 @@ public class SQL {
         fConn= con;
     }
     
+    public void dispose() throws SQLException {
+        fInsertSession.close();
+    }
+    
     void createPreparedStatements() throws SQLException {
         fInsertSession= fConn.prepareStatement(
                 "insert into SESSION (VERSION, CONFIG_ID) values (?, ?)", Statement.RETURN_GENERATED_KEYS);

@@ -16,22 +16,22 @@ package org.eclipse.test.internal.performance.data;
  * @since 3.1
  */
 public class Dimension {
-	private final String fName;
+    private final int fId;
 	private final Unit fUnit;
 	private final int fMultiplier;
 	
-	public Dimension(String name, Unit unit) {
-		this(name, unit, 1);
+	public Dimension(int id, Unit unit) {
+		this(id, unit, 1);
 	}
 
-	public Dimension(String name, Unit unit, int multiplier) {
-		fName= name;
+	public Dimension(int id, Unit unit, int multiplier) {
+		fId= id;
 		fUnit= unit;
 		fMultiplier= multiplier;
 	}
 
 	public String getName() {
-		return fName;
+		return DimensionMessages.getString(fId);
 	}
 	
 	public Unit getUnit() {
@@ -39,7 +39,7 @@ public class Dimension {
 	}
 	
 	public String toString() {
-		return "Dimension [name=" + fName + ", " + fUnit + "]";
+		return "Dimension [name=" + getName() + ", " + fUnit + "]";
 	}
 	
 	public int getMultiplier() {
