@@ -303,10 +303,7 @@ public class DB {
 	            int datapoint_id= rs.getInt(1);
 	            int step= rs.getInt(2);
 
-	            HashMap map= new HashMap();
-	            DataPoint dp= new DataPoint(step, map);
-                dataPoints.add(dp);
-
+	            HashMap map= new HashMap();      
 	            ResultSet rs2= fSQL.queryDataPoints(datapoint_id);
 		        while (rs2.next()) {
 	                int dim_id= rs2.getInt(1);
@@ -315,6 +312,9 @@ public class DB {
 	                if (dim != null)
 	                    map.put(dim, new Scalar(dim, value));
 		        }
+		        if (map.size() > 0)
+		            dataPoints.add(new DataPoint(step, map));
+		        
 	            rs2.close();
 	        }			       
 	        rs.close();
@@ -473,6 +473,8 @@ public class DB {
         Properties env= PerformanceTestPlugin.getEnvironmentVariables();
         
         String dbloc= env.getProperty(Constants.DB_LOCATION);
+        //dbloc= "net://localhost";
+        //dbloc= "/Users/weinand/Eclipse/cloudscape2";
         if (dbloc == null)
             return;
                 

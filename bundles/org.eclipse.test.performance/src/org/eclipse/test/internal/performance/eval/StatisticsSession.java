@@ -89,9 +89,11 @@ public class StatisticsSession {
 					stats.count++;
 				}
 			}
-			stats.average= stats.sum / stats.count;
-			for (int i= 0; i < fDataPoints.length; i++) {
-				stats.stddev+= (stats.average - mags[i]) * (stats.average - mags[i]);
+			if (stats.count > 0) {
+				stats.average= stats.sum / stats.count;
+				for (int i= 0; i < fDataPoints.length; i++) {
+					stats.stddev+= (stats.average - mags[i]) * (stats.average - mags[i]);
+				}
 			}
 			break;
 		case 2:
@@ -107,9 +109,11 @@ public class StatisticsSession {
 				stats.sum += magnitude;
 				stats.count++;
 			}
-			stats.average= stats.sum / stats.count;
-			for (int i= 0; i < fDataPoints.length-1; i += 2) {
-				stats.stddev+= (stats.average - mags[i]) * (stats.average - mags[i]);
+			if (stats.count > 0) {
+				stats.average= stats.sum / stats.count;
+				for (int i= 0; i < fDataPoints.length-1; i += 2) {
+					stats.stddev+= (stats.average - mags[i]) * (stats.average - mags[i]);
+				}
 			}
 			break;
 		default:
