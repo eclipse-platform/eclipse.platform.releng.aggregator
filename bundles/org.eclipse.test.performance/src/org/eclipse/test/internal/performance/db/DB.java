@@ -25,22 +25,21 @@ import org.eclipse.test.internal.performance.data.Scalar;
 
 public class DB {
     
-    public static final String DB_NAME= "perfDB";	// default db name
+    public static final String DB_NAME= "perfDB";	// default db name //$NON-NLS-1$
     
-    private static final boolean DEBUG= true;
+    private static final boolean DEBUG= false;
     
     private static DB fgDefault;
     
     private Connection fConnection;
     private SQL fSQL;
-    private Properties fProperties;
     private int fTagID= -1;
     private int fConfigID;
     
     
     private int getTag() throws SQLException {
         if (fTagID < 0) {
-            String tag= PerformanceTestPlugin.getEnvironment("setTag");
+            String tag= PerformanceTestPlugin.getEnvironment("setTag"); //$NON-NLS-1$
             if (tag != null)
                 fTagID= fSQL.getTag(tag);
             else
@@ -76,7 +75,7 @@ public class DB {
             Runtime.getRuntime().addShutdownHook(
                 new Thread() {
                     public void run() {
-                        if (DEBUG) System.out.println("shutdownhook");
+                        if (DEBUG) System.out.println("shutdownhook"); //$NON-NLS-1$
                         if (fgDefault != null) {
                             fgDefault.disconnect();
                             fgDefault= null;
@@ -150,7 +149,7 @@ public class DB {
                 if (dim != null)
                     map.put(dim, new Scalar(dim, value));
                 
-                //System.out.println(i + ": " + sample_id+","+datapoint_id +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());                
+                if (DEBUG) System.out.println(i + ": " + sample_id+","+datapoint_id +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             }
             
             return (DataPoint[])dataPoints.toArray(new DataPoint[dataPoints.size()]);
@@ -161,6 +160,7 @@ public class DB {
                 try {
                     result.close();
                 } catch (SQLException e1) {
+                	// ignored
                 }
         }
         return null;
@@ -179,50 +179,50 @@ public class DB {
         
         Properties env= PerformanceTestPlugin.getEnvironmentVariables();
         
-        String dbloc= env.getProperty("dbloc");
+        String dbloc= env.getProperty("dbloc"); //$NON-NLS-1$
         if (dbloc == null)
             return;
                 
-        String dbname= env.getProperty("dbname", DB_NAME);
+        String dbname= env.getProperty("dbname", DB_NAME); //$NON-NLS-1$
         
         try {            
-            if (dbloc.startsWith("net://")) {
+            if (dbloc.startsWith("net://")) { //$NON-NLS-1$
                 // connect over network
-                if (DEBUG) System.out.println("Trying to connect over network...");
-                Class.forName("com.ibm.db2.jcc.DB2Driver");
-                String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
-                String dbuser= env.getProperty("dbuser", "guest");
-                String dbpassword= env.getProperty("dbpasswd", "guest");
+                if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
+                Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
+                String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+                String dbuser= env.getProperty("dbuser", "guest"); //$NON-NLS-1$ //$NON-NLS-2$
+                String dbpassword= env.getProperty("dbpasswd", "guest"); //$NON-NLS-1$ //$NON-NLS-2$
                 fConnection= DriverManager.getConnection(url, dbuser, dbpassword);
             } else {
                 // embedded
-                if (DEBUG) System.out.println("Loading embedded cloudscape...");
-                Class.forName("com.ihost.cs.jdbc.CloudscapeDriver");
+                if (DEBUG) System.out.println("Loading embedded cloudscape..."); //$NON-NLS-1$
+                Class.forName("com.ihost.cs.jdbc.CloudscapeDriver"); //$NON-NLS-1$
                 File f;
                 if (dbloc.length() == 0) {
-                    String user_home= System.getProperty("user.home");
+                    String user_home= System.getProperty("user.home"); //$NON-NLS-1$
                     if (user_home == null)
                         return;
-                    f= new File(user_home, "cloudscape");
+                    f= new File(user_home, "cloudscape"); //$NON-NLS-1$
                 } else
                     f= new File(dbloc);
                 String dbpath= new File(f, dbname).getAbsolutePath();
-                String url= "jdbc:cloudscape:" + dbpath + ";create=true";
+                String url= "jdbc:cloudscape:" + dbpath + ";create=true"; //$NON-NLS-1$ //$NON-NLS-2$
                 fConnection= DriverManager.getConnection(url);
             }
-            if (DEBUG) System.out.println("succeeded!");
+            if (DEBUG) System.out.println("succeeded!"); //$NON-NLS-1$
  
             fSQL= new SQL(fConnection);
 
             doesDBexists();
 
-            if (DEBUG) System.out.println("start prepared statements");
+            if (DEBUG) System.out.println("start prepared statements"); //$NON-NLS-1$
             fSQL.createPreparedStatements();
-            if (DEBUG) System.out.println("finish with prepared statements");
+            if (DEBUG) System.out.println("finish with prepared statements"); //$NON-NLS-1$
                          
         } catch (SQLException ex) {
             ex.printStackTrace();
-            System.err.print("SQLException: ");
+            System.err.print("SQLException: "); //$NON-NLS-1$
             System.err.println(ex.getMessage());
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -230,7 +230,7 @@ public class DB {
     }
     
     private void disconnect() {
-        if (DEBUG) System.out.println("disconnecting from DB");
+        if (DEBUG) System.out.println("disconnecting from DB"); //$NON-NLS-1$
         if (fSQL != null) {
             try {
                 fSQL.dispose();
@@ -252,13 +252,13 @@ public class DB {
     private void doesDBexists() throws SQLException {
         Statement stmt= fConnection.createStatement();
         try {
-	        ResultSet rs= stmt.executeQuery("select count(*) from sys.systables");
+	        ResultSet rs= stmt.executeQuery("select count(*) from sys.systables"); //$NON-NLS-1$
 	        while (rs.next())
 	            if (rs.getInt(1) > 16)
 	                return;
-	        if (DEBUG) System.out.println("initialising DB");
+	        if (DEBUG) System.out.println("initialising DB"); //$NON-NLS-1$
 	        fSQL.initialize();
-	        if (DEBUG) System.out.println("end initialising DB");
+	        if (DEBUG) System.out.println("end initialising DB"); //$NON-NLS-1$
         } finally {
             stmt.close();
         }
@@ -297,11 +297,11 @@ public class DB {
             
             ResultSet result= sql.query1("burano", "MacOS X", "3.1", "aFirstTest", Dimensions.USER_TIME.getId());
             for (int i= 0; result.next(); i++)
-                System.out.println(i + ": " + result.getString(1));
+                System.out.println(i + ": " + result.getString(1)); //$NON-NLS-1$
             result.close();
              
         } catch (SQLException ex) {
-            System.err.print("SQLException: ");
+            System.err.print("SQLException: "); //$NON-NLS-1$
             System.err.println(ex.getMessage());
             ex.printStackTrace();
         }

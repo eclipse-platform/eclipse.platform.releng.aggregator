@@ -52,6 +52,8 @@ public class Evaluator implements IEvaluator {
 		    return;	// nothing to do
 
 	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID());
+	    if (datapoints == null)
+	    	return;
 	    if (datapoints.length == 0) {
 	        System.out.println("no data with tag '" + refTag + "' found");
 	        return;
@@ -126,11 +128,11 @@ public class Evaluator implements IEvaluator {
 //			
 //			fgDefaultEvaluator.setReferenceFilterProperties(driver, timestamp);
 			
-			AssertChecker cpu= new RelativeBandChecker(Dimensions.CPU_TIME, 0.0F, 1.0F);
+			AssertChecker cpu= new RelativeBandChecker(Dimensions.CPU_TIME, 0.0F, 1.05F);
 			//AssertChecker mem= new RelativeBandChecker(Dimensions.USED_JAVA_HEAP, 0.0F, 1.0F);
-			//AssertChecker mem= new RelativeBandChecker(Dimensions.WORKING_SET, 0.0F, 1.0F);
+			AssertChecker mem= new RelativeBandChecker(Dimensions.WORKING_SET, 0.0F, 1.0F);
 			
-			fgDefaultEvaluator.setAssertCheckers(new AssertChecker[] { cpu /*, mem */ });
+			fgDefaultEvaluator.setAssertCheckers(new AssertChecker[] { cpu, mem });
 		}
 
 		return fgDefaultEvaluator;
