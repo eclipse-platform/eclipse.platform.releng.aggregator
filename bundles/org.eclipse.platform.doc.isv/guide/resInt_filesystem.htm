@@ -60,9 +60,7 @@ is the <b>.project</b> file, explained in a moment.</P>
          src\
             main.java
          bin\
-            main.class
-            main$$1.class
-</pre></font>
+            main.class</pre></font>
 <P >
 The platform has a special <b>.metadata</b> directory for holding platform internal information.  The
 <b>.metadata</b> directory of a workspace is considered to be a &quot;black box.&quot;  Important information about the workspace structure, such as a project's references or a resource's properties,
@@ -121,17 +119,16 @@ internally and open projects participate in various resource lifecycle events
 (such as building) which can be lengthy.&nbsp; In general, closed projects
 cannot be accessed and will appear empty even though the resources are still present in the file system.</P>
 <P >
-You'll notice that many of these resource examples pass a null parameter when manipulating resources.
+You'll notice that many of these resource examples pass a <b> null</b> parameter when manipulating resources.
 Many resource operations are potentially heavyweight enough to warrant progress reporting and
-user cancelation.  If your code has a user interface, you will typically pass an <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html"> IProgressMonitor</a></b>,
+user cancellation.  If your code has a user interface, you will typically pass an <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html"> IProgressMonitor</a></b>,
 which allows the
 resources plug-in to report progress as the resource is manipulated and allows the user to cancel the operation if desired.&nbsp;
 For now, we simply pass <b>null</b>, indicating no
 progress monitor.</P>
 <P >
 Once we have an open project, we can access its folders and files, as well as create additional ones.&nbsp;
-In the following example we create a file resource from the contents of an
-external file
+In the following example we create a file resource from the contents of a file
 located outside of our workspace.  </P>
 <font color='#4444CC'><pre>
    IFolder imagesFolder = myWebProject.getFolder(&quot;images&quot;);
@@ -141,7 +138,7 @@ located outside of our workspace.  </P>
       FileInputStream fileStream = new FileInputStream(
          &quot;c:/MyOtherData/newLogo.gif&quot;);
       newLogo.create(fileStream, false, null);
-      fileStream.close();
+      // create closes the file stream, so no worries.   
    }
 </pre></font>
 <P >
@@ -177,9 +174,10 @@ Finally, we'll create another images folder and move the newly created file to i
 
 
 <P>Many of the resource API methods include a <b>force</b>
-boolean flag which the specifies whether resources that are out of sync with the
-corresponding files in the local file system will be updated.&nbsp; See <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>
-for more information.</P>
+boolean flag which specifies whether resources that are out of synch with the
+corresponding files in the local file system will be updated anyway.&nbsp; See <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>
+for more information.&nbsp; You can also use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a><b>.isSynchronized()
+</b>to determine whether a particular resource is in synch with the file system.</P>
 
 
 <H3>
@@ -197,12 +195,14 @@ by using the workbench and plug-ins, or by directly using file system based tool
 based on the project's location (usually the <b>workspace</b>
 directory).&nbsp; To obtain the full file system path to a resource, you must query its location using
 <b>
-<a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.getLocation().</b></P>
-<P >You can determine the file system location of a particular resource by querying its location using
-<b>getLocation().</b>&nbsp; Howevever, you cannot use
+<a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.getLocation().&nbsp;
+</b>Howevever, you cannot use
 <b> <a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html">IProjectDescription</a>.setLocation
 </b>to change its location, because that method is just a simple setter for a
-data structure.&nbsp;&nbsp; </P>
+data structure.&nbsp;&nbsp;</P>
+<P>Conversely, if you want to get the corresponding resource object given a file
+system path, you can use <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>.<b>getFileForLocation</b>
+or <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>.<b>getContainerForLocation</b>.</P>
 
 
 <H3>
