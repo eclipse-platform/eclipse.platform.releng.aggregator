@@ -98,7 +98,9 @@ public class ProjectSelectionPage extends WizardPage {
 		
 		viewer = new ContainerCheckedTreeViewer(topContainer, SWT.SINGLE | SWT.H_SCROLL
 				| SWT.V_SCROLL | SWT.BORDER);
-		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		gd.heightHint= viewer.getTree().getItemHeight() * 15;
+		viewer.getTree().setLayoutData(gd);
 		viewer.getTree().setFont(font);
 		viewer.setLabelProvider(new MapFileLabelProvider());
 		viewer.setContentProvider(getContentProvider());

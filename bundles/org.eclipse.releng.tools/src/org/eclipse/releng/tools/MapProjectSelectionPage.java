@@ -91,7 +91,9 @@ public class MapProjectSelectionPage extends WizardPage {
 
 	protected TreeViewer createTree(Composite parent) {
 		Tree tree = new Tree(parent, SWT.SINGLE | SWT.BORDER);
-		tree.setLayoutData(new GridData(GridData.FILL_BOTH));	
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		gd.heightHint= tree.getItemHeight() * 15;
+		tree.setLayoutData(gd);
 		TreeViewer result = new TreeViewer(tree);
 		result.setContentProvider(new WorkbenchContentProvider());
 		result.setLabelProvider(new WorkbenchLabelProvider());

@@ -150,7 +150,8 @@ public class ProjectComparePage extends WizardPage{
 		cc.setRightEditable(false);
 		ParticipantPageSaveablePart part = new ParticipantPageSaveablePart(getShell(), cc, configuration, participant);
 		
-		setPageComplete(false);
+		// will be reset when setVisible is called
+		setPageComplete(true);
 		
 		return part;
 	}
