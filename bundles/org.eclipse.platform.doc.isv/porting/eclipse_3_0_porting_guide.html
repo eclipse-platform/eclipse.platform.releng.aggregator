@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M9<br>
-Last revised April 19, 2004</p>
+Last revised May 14, 2004</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -27,7 +27,6 @@ organized as follows:</p>
 <ul>
   <li><a href="#Required Changes for 3.0">Required Changes</a></li>
   <li><a href="#Recommended Changes for 3.0">Recommended Changes</a></li>
-  <li><a href="#Proposed Changes for 3.0">Proposed Changes</a></li>
   <li><a href="#PDE Plug-in Migration Tool">PDE Plug-in Migration Tool</a></li>
   <li><a href="#General Information on Compatibility">General Information on
     Compatibility</a></li>
@@ -50,15 +49,15 @@ similar):</p>
 </u>&lt;plugin ...&gt;<br>
 &nbsp;&nbsp;&nbsp; ...<br>
 &lt;/plugin&gt;</code>
-<p>When porting to 3.0, add the indicated line to the manifest of existing plug-ins 
-  and plug-in fragments. (The PDE plug-in migration tool adds this line.)</p>
-<p>If you do add this directive to a plugin.xml (manually or using PDE), the file 
-  must also be updated to explicitly list the plug-ins on which it depends. For 
-  example, prior to Eclipse 3.0 dependencies on org.eclipse.core.runtime and org.eclipse.core.boot 
-  were implicit. With 3.0, org.eclipse.core.boot is no longer needed and developers 
-  must choose org.eclipse.core.runtime or org.eclipse.core.runtime.compatibility 
-  (or neither) as appropriate.</p>
-<p></p>
+<p>When porting to 3.0, add the indicated line to the manifest of existing
+plug-ins and plug-in fragments. (The PDE plug-in migration tool adds this line.)</p>
+<p>If you do add this directive to a plugin.xml (manually or using PDE), the
+file must also be updated to explicitly list the plug-ins on which it depends.
+For example, prior to Eclipse 3.0 dependencies on org.eclipse.core.runtime and
+org.eclipse.core.boot were implicit. With 3.0, org.eclipse.core.boot is no
+longer needed and developers must choose org.eclipse.core.runtime or
+org.eclipse.core.runtime.compatibility (or neither) as appropriate.</p>
+<p>&nbsp;</p>
 <h3>Restructuring of org.eclipse.ui plug-in</h3>
 <p>The org.eclipse.ui plug-in, which used to be the main Platform UI plug-in,
 now provides just the API and extension points for the generic (i.e.,
@@ -834,44 +833,45 @@ control over when the code is executed.</p>
 <p>The Eclipse 3.0 Platform Runtime is based on OSGi, necessitating changes to
 the structure of the two Platform Runtime plug-ins, org.eclipse.core.runtime and
 org.eclipse.core.boot.</p>
-<p>A new org.eclipse.core.runtime.compatibility plug-in provides an implementation 
-  bridge between the old and new APIs, and is the new home for some of the obsolete 
-  APIs formerly found in org.eclipse.core.runtime and org.eclipse.core.boot. Obsolete 
-  API will be deprecated in a future release in favor of the OSGi-based API, once 
-  these new APIs have stabilized and matured. The new OSGi-based Eclipse Runtime 
-  API is available in the org.eclipse.core.runtime plug-in for early adopters 
-  wishing to take advantage of its new capabilities. Platform Runtime extension 
-  points were not affected by the restructuring.</p>
-<p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the 
-  absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest) 
-  and automatically compensates for these changes to the Platform Runtime. This 
-  should be viewed as a stopgap measure to allow existing plug-in that explicitly 
-  or implicitly depends on org.eclipse.core.runtime or org.eclipse.core.boot to 
-  work in 3.0. However, when porting the existing plug-in to 3.0, the plug-in's 
-  manifest needs to be updated to reflect the new structure of the Eclipse Platform 
-  Runtime plug-ins. The PDE plug-in manifest migration tool will add a dependency 
-  to org.eclipse.core.runtime.compatibility if required.</p>
-<p>Note also that if you mark you plug-in as 3.0 (using &lt;?eclipse...?&gt;) 
-  and your plug-in defines a Plugin class, you must either explicitly &lt;import 
-  plugin=&quot;org.eclipse.core.runtime.compatibility&quot;/&gt; in the plug-in 
-  manifest or ensure that the Plugin class defines the default constructor.</p>
+<p>A new org.eclipse.core.runtime.compatibility plug-in provides an
+implementation bridge between the old and new APIs, and is the new home for some
+of the obsolete APIs formerly found in org.eclipse.core.runtime and
+org.eclipse.core.boot. Obsolete API will be deprecated in a future release in
+favor of the OSGi-based API, once these new APIs have stabilized and matured.
+The new OSGi-based Eclipse Runtime API is available in the
+org.eclipse.core.runtime plug-in for early adopters wishing to take advantage of
+its new capabilities. Platform Runtime extension points were not affected by the
+restructuring.</p>
+<p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the
+absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest)
+and automatically compensates for these changes to the Platform Runtime. This
+should be viewed as a stopgap measure to allow existing plug-in that explicitly
+or implicitly depends on org.eclipse.core.runtime or org.eclipse.core.boot to
+work in 3.0. However, when porting the existing plug-in to 3.0, the plug-in's
+manifest needs to be updated to reflect the new structure of the Eclipse
+Platform Runtime plug-ins. The PDE plug-in manifest migration tool will add a
+dependency to org.eclipse.core.runtime.compatibility if required.</p>
+<p>Note also that if you mark you plug-in as 3.0 (using &lt;?eclipse...?&gt;)
+and your plug-in defines a Plugin class, you must either explicitly &lt;import
+plugin=&quot;org.eclipse.core.runtime.compatibility&quot;/&gt; in the plug-in
+manifest or ensure that the Plugin class defines the default constructor.</p>
 <h3>URL Stream Handler extensions</h3>
-<p><strong>Who is affected:</strong> Plug-ins that contribute extensions to
-the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension point. </p>
-<p><strong>Description:</strong> The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension
-  point was changed to use the URL Stream Handler service provided by OSGi. The
-  OSGi support is superior to the one in Eclipse 2.1, and correctly handles
-  dynamic handlers. Because of various design issues with the base Java URL
-  handler mechanism, URLStreamHandlers registered with the OSGi handler service
-  must implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>.</p>
-<p><strong>Action required:</strong> Formerly, the handler class had to implement <tt>java.net.URLStreamHandler</tt> and
-  extend the urlHandlers extension point. The extension point is no longer supported
-  and the handler must be updated to implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>
+<p><strong>Who is affected:</strong> Plug-ins that contribute extensions to the <tt>org.eclipse.core.runtime.urlHandlers</tt>
+extension point.</p>
+<p><strong>Description:</strong> The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt>
+extension point was changed to use the URL Stream Handler service provided by
+OSGi. The OSGi support is superior to the one in Eclipse 2.1, and correctly
+handles dynamic handlers. Because of various design issues with the base Java
+URL handler mechanism, URLStreamHandlers registered with the OSGi handler
+service must implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>.</p>
+<p><strong>Action required:</strong> Formerly, the handler class had to
+implement <tt>java.net.URLStreamHandler</tt> and extend the urlHandlers
+extension point. The extension point is no longer supported and the handler must
+be updated to implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>
 interface. The OSGi framework provides an abstract base class (<tt>org.osgi.service.url.AbstractURLStreamHandlerService</tt>)
-that can be trivially subclassed to fill this role. </p>
-<p>Instead of registering the
-  handler using an extension point, plug-ins must now do so by registering their
-  handler as a service. For example, </p>
+that can be trivially subclassed to fill this role.</p>
+<p>Instead of registering the handler using an extension point, plug-ins must
+now do so by registering their handler as a service. For example,</p>
 <pre>    Hashtable properties = new Hashtable(1);
     properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {MyHandler.PROTOCOL});
     String serviceClass = URLStreamHandlerService.class.getName();
@@ -931,15 +931,15 @@ extension and extension-point aspects. As such the Eclipse 3.0 runtims is unable
 to maintain the implementation relationship present in 2.1.</p>
 <p><b>Action required:</b> Developers currently relying on this non-API
 relationship will need to rework their code according to their usecase. More
-information on this is given in the recommended changes section of this
-document and in the Javadoc for the related classes and methods.</p>
+information on this is given in the recommended changes section of this document
+and in the Javadoc for the related classes and methods.</p>
 <h3>ILibrary implementation incomplete</h3>
 <p><b>Who is affected:</b> User of <tt>org.eclipse.core.runtime.ILibrary</tt>.</p>
 <p><b>Description:</b> The new runtime maintains the classpath entries in a
 different and incompatible form from Eclipse. As a result, the compatibility
 layer is unable to correctly model the underlying OSGi structures as ILibrary
 objects. The runtime's compatibility support creates ILibrary objects but must
-  assume default values for everything except the library's path.</p>
+assume default values for everything except the library's path.</p>
 <p><b>Action required:</b> Users of ILibrary should consider accessing the
 desired header values (e.g., <tt>Bundle-Classpath</tt>) from the appropriate
 Bundle (see <tt>Bundle.getHeaders()</tt>) and using the <tt>ManifestElement</tt>
@@ -965,18 +965,18 @@ classpath) or use the relevant API for accessing the contents of a plug-in
 <h3>BootLoader API methods moved/deleted</h3>
 <p><b>Who is affected:</b> Plug-ins which use certain API methods from the class
 <tt>org.eclipse.core.boot.BootLoader</tt>.</p>
-<p><b>Description:</b> Methods such as startup(), shutdown() and 
-  run() were moved from the BootLoader class (now supplied in the compatibility
-  layer) to EclipseStarter which is part of the OSGi framework (i.e., org.eclipse.osgi).
-  This API is the interface between the main() in startup.jar and the OSGi framework/Eclipse
-  runtime. Given the
-  restructuring
-  of the runtime, these methods could not be left on BootLoader.</p>
-<p> The method BootLoader.getRunnable() has been removed as the runtime  can
-  no longer support the acquisition of individual applications. Rather users
-  should indicate the application of interest when they start the platform.</p>
+<p><b>Description:</b> Methods such as startup(), shutdown() and run() were
+moved from the BootLoader class (now supplied in the compatibility layer) to
+EclipseStarter which is part of the OSGi framework (i.e., org.eclipse.osgi).
+This API is the interface between the main() in startup.jar and the OSGi
+framework/Eclipse runtime. Given the restructuring of the runtime, these methods
+could not be left on BootLoader.</p>
+<p>The method BootLoader.getRunnable() has been removed as the runtime can no
+longer support the acquisition of individual applications. Rather users should
+indicate the application of interest when they start the platform.</p>
 <p><b>Action required:</b> In general this API is used by very few people. In
-  the rare case that it is, users can adapt by using the new methods on EclipseStarter.</p>
+the rare case that it is, users can adapt by using the new methods on
+EclipseStarter.</p>
 <h3>Re-exporting runtime API</h3>
 <p><b>Who is affected:</b> Plug-ins which expose API that includes elements from
 changed runtime API.</p>
@@ -989,27 +989,27 @@ to change their API or continue to rely on the the compatibility layer.</p>
 <h3>Plug-in parsing methods on Platform</h3>
 <p><b>Who is affected:</b> Users of <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
 Factory).</tt></p>
-<p><b>Description:</b> The method <tt>org.eclipse.core.runtime.Platform.parsePlugins(..., 
-  Factory)</tt> has been moved. The API associated with the Factory argument has 
-  been moved from the org.eclipse.core.runtime plug-in up to the org.eclipse.core.runtime.compatibility 
-  plug-in (which depends on the runtime plug-in). As a result, the parsing method 
-  has been moved as well.</p>
-<p><b>Action required:</b> Users of this method should use the same method on 
-  the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
+<p><b>Description:</b> The method <tt>org.eclipse.core.runtime.Platform.parsePlugins(...,
+Factory)</tt> has been moved. The API associated with the Factory argument has
+been moved from the org.eclipse.core.runtime plug-in up to the
+org.eclipse.core.runtime.compatibility plug-in (which depends on the runtime
+plug-in). As a result, the parsing method has been moved as well.</p>
+<p><b>Action required:</b> Users of this method should use the same method on
+the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
 <h3>Plug-in libraries supplied by fragments</h3>
-<p><strong>Who is affected:</strong>
-  Plug-ins which specify code on their classpath but do not supply that code (i.e.,
-it is supplied by a fragment).  </p>
-<p><strong>Description:</strong> The new runtime must convert plug.xml files
-  to manifest.mf files. This is done through a straight mechanical transformation
-  and an analysis of the jars listed and supplied by the plug-in. In the case
-  where a plug-in specifies a jar on its classpath but does not supply the jar,
-  there is no code to analyze and the plug-in convertor cannot generate a correct
-  manifest.mf. The SWT plug-in is in this situation.</p>
-<p><strong>Action required:</strong> Providers of such plug-ins must either change to supply the
-  appropriate jar in the plug-in itself or hand craft/maintain a META-INF/MANIFEST.MF
-  file for their plug-in. Typically this can be done using PDE to get the initial
-  manifest and then adding in the appropriate Provide-Package header.</p>
+<p><strong>Who is affected:</strong> Plug-ins which specify code on their
+classpath but do not supply that code (i.e., it is supplied by a fragment).</p>
+<p><strong>Description:</strong> The new runtime must convert plug.xml files to
+manifest.mf files. This is done through a straight mechanical transformation and
+an analysis of the jars listed and supplied by the plug-in. In the case where a
+plug-in specifies a jar on its classpath but does not supply the jar, there is
+no code to analyze and the plug-in convertor cannot generate a correct
+manifest.mf. The SWT plug-in is in this situation.</p>
+<p><strong>Action required:</strong> Providers of such plug-ins must either
+change to supply the appropriate jar in the plug-in itself or hand
+craft/maintain a META-INF/MANIFEST.MF file for their plug-in. Typically this can
+be done using PDE to get the initial manifest and then adding in the appropriate
+Provide-Package header.</p>
 <h3>Changes to build scripts</h3>
 <p><b>Who is affected:</b> Developers maintaining scripts (e.g., Ant build.xml
 files) which define classpaths containing runtime related jars and class
@@ -1049,6 +1049,14 @@ obsolete and longer contains any code. The entries can be left on the classpath
 but they serve no purpose and should be removed. Look to remove:<br>
 </p>
 <pre>    ../org.eclipse.core.boot/bin;../org.eclipse.core.boot/boot.jar</pre>
+<h3>org.apache.xerces plug-in</h3>
+<p>The org.eclipse.xerces plug-in is no longer included. Basic XML parsing
+support is built in to J2SE 1.4, and the presence of the Xerces plug-in creates
+class loader conflicts. The javax.xml.parsers, org.w3c.dom.*, and org.xml.sax.*
+API packages formerly provided by the org.eclipse.xerces plug-in are now
+available from J2SE.</p>
+<p>If your plug-in requires org.eclipse.xerces, you must change your plug-in
+manifest to remove this dependency. </p>
 <h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
 <p>This section describes other changes that we recommend be made when porting
 an existing plug-in to 3.0.</p>
@@ -1806,13 +1814,15 @@ been changed to state this, bringing it into line with the method on their
 superclass Dialog.setMessage. If you use Dialog.setMessage, ensure that that the
 string passed in is never null. Simply pass an empty string if you want a dialog
 with no text in the title.</p>
-<h2><a name="Proposed Changes for 3.0">Proposed Changes for 3.0</a></h2>
-<p>The following proposals are under discussion for inclusion in Eclipse 3.0.
-They are mentioned here because the proposed changes impact existing plug-ins
-being ported to 3.0.</p>
-<ul>
-  <li><b>Remove dependency on org.eclipse.xerces plug-in</b> (plan item <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37696">37696</a>)</li>
-</ul>
+<h3>Improving modal progress feedback</h3>
+<p>Supporting concurrent operations requires more sophisticated ways to show
+modal progress. As part of the responsiveness effort additional progress support
+was implemented in the class IProgressService. The existing way to show progress
+with the ProgressMonitorDialog is still working. However, to improve the user
+experience we recommend migrating to the new IProgressService.</p>
+<p>The document <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/documents/plan_concurrency_modal_progress.html">Showing
+Modal Progress in Eclipse 3.0</a> describes how to migrate to the new
+IProgressService.</p>
 <h2><a name="PDE Plug-in Migration Tool">PDE Plug-in Migration Tool</a></h2>
 <p>PDE provides a special wizard for converting 2.1 plug-in manifest to 3.0,
 found at <b>PDE Tools &gt; Migrate to 3.0</b>. on the context menu for the
