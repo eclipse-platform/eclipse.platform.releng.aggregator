@@ -11,7 +11,7 @@
 package org.eclipse.test;
 
 import java.io.IOException;
-import org.eclipse.core.boot.IPlatformRunnable;
+import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.Platform;
 
 /**
