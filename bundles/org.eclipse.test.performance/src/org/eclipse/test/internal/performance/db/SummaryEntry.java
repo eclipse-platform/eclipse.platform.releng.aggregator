@@ -17,14 +17,16 @@ public class SummaryEntry {
     public String scenarioName;
     public String shortName;
     public Dim dimension;
+    public boolean isGlobal;
     
-    SummaryEntry(String scenarioName, String shortName, Dim dimension) {
+    SummaryEntry(String scenarioName, String shortName, Dim dimension, boolean isGlobal) {
         this.scenarioName= scenarioName;
         this.shortName= shortName;
         this.dimension= dimension;
+        this.isGlobal= isGlobal;
     }
     
     public String toString() {
-        return "SummaryEntry: <" + scenarioName + "> <" + shortName + "> <" + dimension + '>'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        return "SummaryEntry("+isGlobal+"): <" + scenarioName + "> <" + shortName + "> <" + dimension + '>'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     }
 }

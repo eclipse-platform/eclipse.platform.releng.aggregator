@@ -144,7 +144,7 @@ public class DBTests extends TestCase {
 		assertEquals(1, buildNames.size());
 		assertEquals("b0001", buildNames.get(0)); //$NON-NLS-1$
 		
-	    SummaryEntry[] fps= DB.queryGlobalSummaries(PerformanceTestPlugin.getVariations());
+	    SummaryEntry[] fps= DB.querySummaries(PerformanceTestPlugin.getVariations(), null);
 	    assertEquals(3, fps.length);
 	    
 	    assertEquals(SCENARIO_NAME_2, fps[0].scenarioName);
@@ -160,7 +160,7 @@ public class DBTests extends TestCase {
 	    assertEquals(Dimension.CPU_TIME, fps[2].dimension);
 	    
 	    
-	    SummaryEntry[] fps2= DB.querySummaries(PerformanceTestPlugin.getVariations(), "foo.%");
+	    SummaryEntry[] fps2= DB.querySummaries(PerformanceTestPlugin.getVariations(), "foo.%"); //$NON-NLS-1$
 	    assertEquals(2, fps2.length);
 	    
 	    assertEquals(SCENARIO_NAME_3, fps2[0].scenarioName);

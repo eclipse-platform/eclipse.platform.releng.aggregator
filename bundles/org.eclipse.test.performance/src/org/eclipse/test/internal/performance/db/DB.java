@@ -111,13 +111,9 @@ public class DB {
      * @param variationPatterns
      * @param global
      * @return
-     * @deprecated Use queryGlobalSummaries instead
+     * @deprecated Use querySummaries(Variations, null) instead
      */
     public static SummaryEntry[] querySummaries(Variations variationPatterns, boolean global) {
-        return getDefault().internalQuerySummaries(variationPatterns, null);
-    }
-
-    public static SummaryEntry[] queryGlobalSummaries(Variations variationPatterns) {
         return getDefault().internalQuerySummaries(variationPatterns, null);
     }
 
@@ -417,7 +413,8 @@ public class DB {
                 String scenarioName= rs.getString(1);
                 String shortName= rs.getString(2);
                 int dim_id= rs.getInt(3);
-                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id)));
+                boolean isGlobal= rs.getShort(4) == 1;
+                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id), isGlobal));
             }
             return (SummaryEntry[])fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
         } catch (SQLException e) {

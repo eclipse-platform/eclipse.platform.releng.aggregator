@@ -356,11 +356,11 @@ public class SQL {
     ResultSet queryGlobalSummaryEntries(Variations variations) throws SQLException {
         if (fQueryGlobalSummaryEntries == null)
             fQueryGlobalSummaryEntries= fConnection.prepareStatement(
-            		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
+            		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID, SUMMARYENTRY.IS_GLOBAL from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
             		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
             		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
             		"SUMMARYENTRY.IS_GLOBAL = 1 " + //$NON-NLS-1$
-            		"order by SCENARIO.NAME"
+            		"order by SCENARIO.NAME" //$NON-NLS-1$
             ); 
         fQueryGlobalSummaryEntries.setString(1, variations.toExactMatchString());
         return fQueryGlobalSummaryEntries.executeQuery();
@@ -369,11 +369,11 @@ public class SQL {
     ResultSet querySummaryEntries(Variations variations, String scenarioPattern) throws SQLException {
         if (fQuerySummaryEntries == null)
             fQuerySummaryEntries= fConnection.prepareStatement(
-            		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
+            		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID, SUMMARYENTRY.IS_GLOBAL from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
             		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
             		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
             		"SCENARIO.NAME like ? " + //$NON-NLS-1$
-            		"order by SCENARIO.NAME"
+            		"order by SCENARIO.NAME" //$NON-NLS-1$
             ); 
         fQuerySummaryEntries.setString(1, variations.toExactMatchString());
         fQuerySummaryEntries.setString(2, scenarioPattern);
