@@ -27,6 +27,7 @@ processing). The site map site.xml format is defined by the following dtd:
 CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; mirrorsURL&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
 <br><tt>></tt>
 <p><tt>&lt;!ELEMENT description (#PCDATA)></tt>
 <br><tt>&lt;!ATTLIST description</tt>
@@ -86,6 +87,11 @@ url - optional URL defining the update site baseline URL (used to determine
 individual &lt;feature> and &lt;archive> location).&nbsp; Can be relative
 or absolute. If relative, is relative to site.xml. If not specified, the
 default is the URL location of the site.xml file.</li>
+
+<li>
+mirrorsURL - optional URL pointing to a file that contains update site mirror 
+definitions. This URL can be absolute or relative to this site. The mirrors file 
+is described later in this document.</li>
 </ul>
 
 <li>
@@ -236,6 +242,30 @@ non-plug-in files for feature</tt>
 <br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; plug-in archives&nbsp;&nbsp;&nbsp;
 (eg. org.eclipse.ui_1.0.3.jar)</tt>
 <h3>
+Mirrors File</h3>
+<p>The update mirrors file (the one pointed at by the mirrorsURL attribute of 
+&lt;site&gt;) contains definition for update site mirrors. It format is defined by the following dtd:
+</p>
+<p><tt>&lt;?xml encoding="ISO-8859-1"?></tt>
+<p><tt>&lt;!ELEMENT mirrors (mirror*))></tt>
+<br>&nbsp;<p><tt>&lt;!ELEMENT mirror EMPTY&gt;</tt>
+<br><tt>&lt;!ATTLIST mirror</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt> <tt>&nbsp;&nbsp;&nbsp;  </tt>
+<br><tt>&nbsp;&nbsp;&nbsp; label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED</tt>
+<br><tt>></tt>
+<ul>
+<li>
+&lt;mirrors&gt; - defines the available update site mirrors<li>
+&lt;mirror> -&nbsp; defines a mirror site</li>
+
+<ul>
+<li>
+url - the URL of the mirror site<li>
+label - displayable label. Intended to be translated.</ul>
+
+</ul>
+<h3>
 Controlling Access</h3>
 The default Eclipse site implementation provides support for http access
 with basic user authentication (userid and password).
@@ -255,7 +285,8 @@ logic support the required control mechanisms.</li>
 </ul>
 Eclipse provides an example demonstrating an implementation of an access
 mechanism based on feature key files.
-<p><a href="../../notices.html"><img src="../../cpy.gif" alt="Legal notices." border="0" ></a>
+<p><a href="../../notices.html">
+<img src="../../cpy.gif" alt="Legal notices." border="0" width="324" height="14" ></a>
 </p>
 </body>
 </html>
