@@ -52,6 +52,10 @@ public class DB {
     // Scenarios
     /**
      * Return all Scenarios that match the given config, build, and scenario name.
+     * @param configName
+     * @param buildPattern
+     * @param scenarioPattern
+     * @return array of scenarios
      * @deprecated Use the Variations based form of this method.
      */
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
@@ -60,6 +64,11 @@ public class DB {
 
     /**
      * Return the specified Dimensions of all Scenarios that match the given config, build, and scenario name.
+     * @param configName
+     * @param buildPatterns
+     * @param scenarioPattern
+     * @param dimensions
+     * @return array of scenarios
      * @deprecated Use the Variations based form of this method.
      */
     public static Scenario[] queryScenarios(String configName, String[] buildPatterns, String scenarioPattern, Dim[] dimensions) {
@@ -69,21 +78,39 @@ public class DB {
             return new Scenario[0];
         }
         
-        String[] scenarios= getDefault().internalQueryScenarioNames(configName, scenarioPattern); // get all Scenario names
+        Variations v= new Variations();
+        v.put(PerformanceTestPlugin.CONFIG, configName);
+        String[] scenarios= getDefault().internalQueryScenarioNames(v, scenarioPattern); // get all Scenario names
         if (scenarios == null)
             return new Scenario[0];
         Scenario[] tables= new Scenario[scenarios.length];
-        for (int i= 0; i < scenarios.length; i++)
-            tables[i]= new Scenario(configName, buildPatterns, scenarios[i], dimensions);
+        for (int i= 0; i < scenarios.length; i++) {
+            Variations v2= new Variations();
+            v2.put(PerformanceTestPlugin.CONFIG, configName);
+            tables[i]= new Scenario(v2, PerformanceTestPlugin.BUILD, buildPatterns, scenarios[i], dimensions);
+        }
         return tables;
     }
 
+    /**
+     * 
+     * @param config
+     * @param builds
+     * @param scenarioName
+     * @return Scenario
+     * @deprecated 
+     */
     public static Scenario queryScenario(String config, String[] builds, String scenarioName) {
-        return new Scenario(config, builds, scenarioName, null);
+        Variations v= new Variations();
+        v.put(PerformanceTestPlugin.CONFIG, config);
+        return new Scenario(v, PerformanceTestPlugin.BUILD, builds, scenarioName, null);
     }
     
     // fingerprints
     /**
+     * @param variationPatterns
+     * @param global
+     * @return
      * @deprecated Use queryGlobalSummaries instead
      */
     public static SummaryEntry[] querySummaries(Variations variationPatterns, boolean global) {
@@ -99,14 +126,17 @@ public class DB {
     }
 
     /**
-     * Adds 
      * @param names
      * @param variationPatterns
      * @param scenarioPattern
-     * 
+     * @deprecated Use queryDistinctValues instead
      */
     public static void queryBuildNames(List names, Variations variationPatterns, String scenarioPattern) {
-        getDefault().internalQueryBuildNames(names, variationPatterns, scenarioPattern);
+        getDefault().internalQueryDistinctValues(names, PerformanceTestPlugin.BUILD, variationPatterns, scenarioPattern);
+    }
+
+    public static void queryDistinctValues(List values, String key, Variations variationPatterns, String scenarioPattern) {
+        getDefault().internalQueryDistinctValues(values, key, variationPatterns, scenarioPattern);
     }
 
     /**
@@ -319,12 +349,12 @@ public class DB {
     /*
      * Returns array of scenario names
      */
-    private String[] internalQueryScenarioNames(String configPattern, String scenarioPattern) {
+    private String[] internalQueryScenarioNames(Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return null;
         ResultSet result= null;
         try {
-            result= fSQL.queryScenarios(new Variations(configPattern, null), scenarioPattern);
+            result= fSQL.queryScenarios(variations, scenarioPattern);
             ArrayList scenarios= new ArrayList();
             for (int i= 0; result.next(); i++)
 		        scenarios.add(result.getString(1));
@@ -344,7 +374,10 @@ public class DB {
         return null;
     }
     
-    private void internalQueryBuildNames(List buildNames, Variations variations, String scenarioPattern) {
+    /*
+     * 
+     */
+    private void internalQueryDistinctValues(List values, String key, Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return;
         ResultSet result= null;
@@ -352,9 +385,9 @@ public class DB {
             result= fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
             for (int i= 0; result.next(); i++) {
                 Variations p= new Variations(result.getString(1));
-                String build= p.getProperty(PerformanceTestPlugin.BUILD);
-                if (build != null && !buildNames.contains(build))
-                    buildNames.add(build);
+                String build= p.getProperty(key);
+                if (build != null && !values.contains(build))
+                    values.add(build);
             }
         } catch (SQLException e) {
 	        PerformanceTestPlugin.log(e);
