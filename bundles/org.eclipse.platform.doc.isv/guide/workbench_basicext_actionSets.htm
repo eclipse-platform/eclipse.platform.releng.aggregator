@@ -18,11 +18,13 @@ Your plug-in can contribute menus, menu items, and tool bar items to the workben
 extension point. In order to reduce the clutter of having every plug-in's menu contributions shown at once, the contributions are grouped into action sets which can be made visible by user preference.</P>
 <P >
 You can see which action sets have been contributed to your workbench by choosing
-<b> Perspective-&gt;Customize...</b> from the workbench menu. This will show you a dialog that lists all of the available action sets. A checkmark by the action set means that the menu and tool bar actions are visible in the workbench. You can select the name of the action set to see the list of available actions on the right. The figure below shows the
+<b>Window-&gt;Customize Perspective...</b> from the workbench menu. This will show you a dialog that lists
+the shortcuts and action sets that are available to the current
+perspective.&nbsp; Action sets are listed under <b>Other</b>.&nbsp; A checkmark by the action set means that the menu and tool bar actions are visible in the workbench. You can select the name of the action set to see the list of available actions on the right. The figure below shows the
 list of action sets available in our workbench.&nbsp; (Your workbench may look different depending on which plug-ins you have
 installed and which perspective is active.)</P>
 
-<img border="0" src="images/actionsets.jpg" width="389" height="340">
+<img border="0" src="images/actionsets.jpg" width="669" height="450">
 
 
 <P >
@@ -30,40 +32,35 @@ The readme tool uses an action set to contribute the &quot;Open Readme
 Browser&quot; action to the workbench menu.&nbsp; (We contributed a similar
 action to the popup menu of the resource navigator.)&nbsp; The markup follows:</P>
 <font color='#4444CC'><pre>
-   &lt;extension 
-      point = &quot;org.eclipse.ui.actionSets&quot;&gt;
-      &lt;actionSet
-         id=&quot;org_eclipse_ui_examples_readmetool_actionSet&quot;
-         label=&quot;ReadMe Actions&quot;
-         visible=&quot;true&quot;&gt;
-         &lt;menu
-            id=&quot;org_eclipse_ui_examples_readmetool&quot;
-            label=&quot;Readme &amp;amp;File Editor&quot;
-            path=&quot;window/additions&quot;&gt; 
-            &lt;separator name=&quot;slot1&quot;/&gt;
-            &lt;separator name=&quot;slot2&quot;/&gt;
-            &lt;separator name=&quot;slot3&quot;/&gt;
-         &lt;/menu&gt;
-         &lt;action
-            id=&quot;org_eclipse_ui_examples_readmetool_readmeAction&quot;
-            menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;
-            toolbarPath=&quot;readme&quot;
-            label=&quot;&amp;amp;Open Readme Browser@Ctrl+R&quot;
-            tooltip=&quot;Open Readme Browser&quot;
-            helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
-            icon=&quot;icons/basic/ctool16/openbrwsr.gif&quot;
-            class=&quot;org.eclipse.ui.examples.readmetool.WindowActionDelegate&quot;
-            enablesFor=&quot;1&quot;&gt;
-            &lt;selection
-               class=&quot;org.eclipse.core.resources.IFile&quot;
-               name=&quot;*.readme&quot;&gt;
-            &lt;/selection&gt;
-         &lt;/action&gt;
-      &lt;/actionSet&gt;
-   &lt;/extension&gt;
-</pre></font>
+&lt;extension point = &quot;org.eclipse.ui.actionSets&quot;&gt;
+	   &lt;actionSet id=&quot;org_eclipse_ui_examples_readmetool_actionSet&quot;
+		   label=&quot;%ActionSet.name&quot;
+		   visible=&quot;true&quot;&gt;
+		   &lt;menu id=&quot;org_eclipse_ui_examples_readmetool&quot;
+			   label=&quot;%ActionSet.menu&quot;
+			   path=&quot;window/additions&quot;&gt; 
+			   &lt;separator name=&quot;slot1&quot;/&gt;
+			   &lt;separator name=&quot;slot2&quot;/&gt;
+			   &lt;separator name=&quot;slot3&quot;/&gt;
+		   &lt;/menu&gt;
+		   &lt;action id=&quot;org_eclipse_ui_examples_readmetool_readmeAction&quot;
+			   menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;
+			   toolbarPath=&quot;readme&quot;
+			   label=&quot;%ReadmeAction.label&quot;
+			   tooltip=&quot;%ReadmeAction.tooltip&quot;
+			   helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
+			   icon=&quot;icons/ctool16/openbrwsr.gif&quot;
+			   class=&quot;org.eclipse.ui.examples.readmetool.WindowActionDelegate&quot;
+			   enablesFor=&quot;1&quot;&gt;
+			   &lt;selection class=&quot;org.eclipse.core.resources.IFile&quot;
+					name=&quot;*.readme&quot;&gt;
+			   &lt;/selection&gt;
+		   &lt;/action&gt;
+		   ...
+	   &lt;/actionSet&gt;
+   &lt;/extension&gt;</pre></font>
 <P >
-Wow, there's a lot going on here!&nbsp; Let's take it a step at a time.</P>
+Wow, there's a lot going on here!&nbsp; Let's take it a step at a time.&nbsp;&nbsp;</P>
 <P >
 First, the action set is declared and given a <b>label</b>.&nbsp;
 The label &quot;ReadMe Actions&quot; is used to display the action set in the
@@ -71,10 +68,9 @@ dialog shown above.&nbsp; Since we set <b> visible</b> to true, the workbench wi
 check marked in the action set list and the actions will be visible.</P>
 <P >
 The rest of the action set declaration is concerned with defining the menu in
-which the action appears and the action itself.</P>
+which the actions appears and the actions themselves.</P>
 <P >
-We define a menu whose <b>label</b> (&quot;Readme
-&amp;File Editor&quot;) appears in the workbench menus.&nbsp; The menu's <b>path</b>
+We define a menu whose <b>label</b> appears in the workbench menus.&nbsp; The menu's <b>path</b>
 tells the workbench to place the new menu in the <b>additions</b>
 slot of the <b>window</b> menu.&nbsp; (For a discussion
 of menu paths and slots, see
@@ -85,32 +81,32 @@ specific locations in our menu.</P>
 This alone is enough to cause the menu to appear in the workbench <b>Window</b>
 menu.</P>
 <P >
-<img border="0" src="images/readmeactionset.jpg" width="138" height="89"></P>
+<img border="0" src="images/readmeactionset.jpg" width="232" height="335"></P>
 <P >
-Next, we define the action itself.&nbsp; The action definition (<b>id</b>,
+Next, we define the actions themselves.&nbsp; (We've omitted all but the first
+action in the example above, but we'll look at the other actions in a
+moment.)&nbsp;&nbsp;</P>
+<P >
+The action definition (<b>id</b>,
 <b>label</b>, <b>icon</b>, <b>class</b>) is
 similar to the other actions we've seen in views, editors, and popups.&nbsp;
 We'll focus here on what's different:&nbsp; where does the action go?&nbsp; We
 use&nbsp; <b>menubarPath</b> and <b>toolbarPath</b>
-to indicate the location.&nbsp; First, we add the action to a slot in the menu
+to indicate the location.&nbsp; First, we add the actions to a slot in the menu
 that we just defined.&nbsp;&nbsp;</P>
 <P >
-<img border="0" src="images/readmeactionsetmenu.jpg" width="348" height="89"></P>
+<img border="0" src="images/readmeactionsetmenu.jpg" width="569" height="75"></P>
 <P >
-Then, we define a new toolbarPath to insert our action in the workbench tool
+Then, we define a new toolbarPath to insert our actions in the workbench tool
 bar.&nbsp; Since it's a new tool path, the workbench will decide where it goes
 relative to other plug-in's toolbar contributions.</P>
 <P >
-<img border="0" src="images/readmeactionsettoolbar.jpg" width="267" height="93"></P>
+<img border="0" src="images/readmeactionsettoolbar.jpg" width="248" height="55"></P>
 <P >
-Note that enabling conditions are also supplied for this action.&nbsp; Our new
-menu item and tool bar item will only be enabled when a single (<b>enablesFor=&quot;1&quot;</b>)
-readme file (<b>selectionClass =&quot;org.eclipse.core.resources.IFile&quot;
-name=&quot;*.readme&quot;</b>) is selected.</P>
-<P >These menu and tool bar items appear and enable based solely on the markup
-in the <b>plugin.xml</b> file.&nbsp; None of the
-plug-in code will execute until the user chooses the action and the workbench
-runs the action <b>class</b>.</P>
+What happens when the action is selected by the user?&nbsp; Most actions in an
+action set are locally implemented.&nbsp; That is, they are implemented by the
+plug-in that defines the action, using the class specified in the <b>class</b>
+attribute.&nbsp; The <b>readmeAction</b> is defined this way.&nbsp;&nbsp;</P>
 <P >
 The action <b> class</b> must implement
 <b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindowActionDelegate.html"> IWorkbenchWindowActionDelegate</a></b>,
@@ -122,6 +118,76 @@ This class is similar to <b>ObjectActionDelegate</b>.&nbsp;
 It launches the readme sections dialog when the user chooses the action.&nbsp;
 We'll see the sections dialog in <a href="dialogs_applications.htm">Application
 dialogs</a>.</P>
+
+
+<P >
+This action also supplies enabling conditions for its menu item and tool bar
+item.&nbsp; They will only be enabled when a single (<b>enablesFor=&quot;1&quot;</b>)
+readme file (<b>selectionClass =&quot;org.eclipse.core.resources.IFile&quot;
+name=&quot;*.readme&quot;</b>) is selected.&nbsp; This action's menu and toolbar
+item appear and enable based solely on the markup
+in the <b>plugin.xml</b> file.&nbsp; None of the
+plug-in code will execute until the user chooses the action and the workbench
+runs the action <b>class</b>.</P>
+
+
+<P >
+<b>Retargeted actions</b></P>
+
+
+<P >Occasionally, a plug-in defines an action that may be implemented
+differently by different parts.&nbsp; This is called a retargeted action.&nbsp;
+The readme markup includes two actions that are retargeted, <b>readmeRetargetAction</b>
+and <b>readmeRetargetRelabelAction</b>.</P>
+
+
+<pre ><font color='#4444CC'>...
+&lt;action id=&quot;org_eclipse_ui_examples_readmetool_readmeRetargetAction&quot;
+   menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;
+   toolbarPath=&quot;readme&quot;
+   label=&quot;%ReadmeRetargetAction.label&quot;
+   tooltip=&quot;%ReadmeRetargetAction.tooltip&quot;
+   helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
+   icon=&quot;icons/ctool16/openbrwsr.gif&quot;
+   <b>retarget=&quot;true&quot;</b>&gt;
+&lt;/action&gt;
+&lt;action id=&quot;org_eclipse_ui_examples_readmetool_readmeRelabelRetargetAction&quot;
+   menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;
+   toolbarPath=&quot;readme&quot;
+   label=&quot;%ReadmeRelabelRetargetAction.label&quot;
+   tooltip=&quot;%ReadmeRelabelRetargetAction.tooltip&quot;
+   helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
+   icon=&quot;icons/ctool16/openbrwsr.gif&quot;
+   <b>retarget=&quot;true&quot;	</b>
+   <b>allowLabelUpdate=&quot;true&quot;</b>&gt;
+&lt;/action&gt;
+...
+</font></pre>
+
+
+<P >Retargeted actions do not specify an implementing class.&nbsp; Instead, any
+part that wants to implement the action must register a global handler (<a href="../reference/api/org/eclipse/ui/IActionBars.html">IActionBars</a>.<b>setGlobalActionHandler</b>),
+specifying the id of the retargeted action.&nbsp; When the part becomes active, its
+handler will be used as the implementation for the action.&nbsp; Plug-ins should
+specify <b>retarget=&quot;true&quot; </b>when supplying retargeted actions.&nbsp; The <b>allowLabelUpdate</b> attribute determines whether the
+action handlers should be allowed to set a different label on the action when
+their part becomes active.&nbsp;&nbsp;</P>
+
+
+<P >The readme tool sets these global actions in its <b>ReadmeEditorActionBarContributor</b>.&nbsp;
+This means that the actions will be shown in the action set when the readme file
+editor is active.&nbsp; Sure enough, these actions become visible when the
+editor is active and the <b>readmeRelabelRetargetAction</b> has been renamed,
+since <b>allowLabelUpdate</b> was indicated.</P>
+
+
+<P ><img border="0" src="images/readmeretargeted.jpg" width="493" height="78"></P>
+
+
+<P >For more detail, browse the code in <b>ReadmeEditorActionBarContributor</b>.</P>
+
+
+<P >&nbsp;</P>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
