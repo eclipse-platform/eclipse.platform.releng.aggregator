@@ -82,9 +82,37 @@ the following markup specifies the root dialog and window context as the context
 </font></pre>
 </p>
 <h4>
-Using context API</h4>
+Using Context API</h4>
 <p>
-This section is under construction
+The workbench context support includes an API for working with the defined contexts and defining
+criteria under which a particular context should become enabled.  Most plug-ins need not be 
+concerned with this API, but it is useful when defining specialized views or editors that define
+new contexts.  
+</p>
+<p>
+The starting point for working with contexts in the workbench is <a href="../reference/api/org/eclipse/ui/contexts/IWorkbenchContextSupport.html"><b>IWorkbenchContextSupport</b></a>.
+Plug-ins can obtain the context support instance from the workbench.  
+<font color='#4444CC'><pre>
+IWorkbenchContextSupport workbenchContextSupport = PlatformUI.getWorkbench().getContextSupport();
+</pre></font>
+The workbench context support API can be used to add or remove an 
+<a href="../reference/api/org/eclipse/ui/contexts/EnabledSubmission.html"><b>EnabledSubmission</b></a>,
+which describes criteria that should cause a particular context to become enabled.  Criteria include
+information such as the active part or active shell.  The workbench support also provides access to an
+<a href="../reference/api/org/eclipse/ui/contexts/IContextManager.html"><b>IContextManager</b></a>.
+<font color='#4444CC'><pre>
+IContextManager contextManager = workbenchContextSupport.getContextManager();
+</pre></font>
+</p>
+<p>
+<a href="../reference/api/org/eclipse/ui/contexts/IContextManager.html"><b>IContextManager</b></a> defines
+protocol for getting all defined or enabled context ids, and for getting the associated 
+<a href="../reference/api/org/eclipse/ui/contexts/IContext.html"><b>IContext</b></a> for a particular id.
+These objects can be used to traverse the definition for a context in API, such as getting the
+id, name, or id of the parent context.  Listeners can be registered on the context manager or on the contexts 
+themselves to detect changes in the definition of a particular context or in the context manager
+itself.  See the package <b><a href="../reference/api/org/eclipse/ui/contexts/package-summary.html">org.eclipse.ui.contexts</a></b>
+for more information.
 </p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
