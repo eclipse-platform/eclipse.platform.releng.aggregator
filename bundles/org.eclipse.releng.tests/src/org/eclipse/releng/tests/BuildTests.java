@@ -597,7 +597,7 @@ public class BuildTests extends TestCase {
 		 */
 		private String getExcludeFile() {
 			String aString = System.getProperty("PLUGIN_PATH");
-			return aString+File.pathSeparator+"ignoreFiles.txt";
+			return aString+File.separator+"ignoreFiles.txt";
 		}
 		
 		/**
