@@ -58,7 +58,8 @@ one can modify an in-memory copy of the compilation unit called a working copy. 
 <P>
 A working copy is obtained from a compilation unit using the 
 <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getWorkingCopy()">getWorkingCopy</a></b>
-method.  Whoever creates such a working copy is responsible for destroying it when not needed any longer using the
+method. (Note that the compilation unit does not need to exist in the Java model
+in order for a working copy to be created.)&nbsp; Whoever creates such a working copy is responsible for destroying it when not needed any longer using the
 <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#destroy()">destroy</a></b>
 method. </P>
 <P>
@@ -74,7 +75,7 @@ method.  </P>
 <P>
 Finally a working copy can be saved to disk (replacing the original compilation unit) using the
 <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#commit(boolean, org.eclipse.core.runtime.IProgressMonitor)">commit</a></b>
-method. </P>
+method.&nbsp;&nbsp; </P>
 <P>
 For example the following code snippet creates a working copy on a compilation unit using a custom buffer factory. The snippet
 modifies the buffer, reconciles the changes, commits the changes to disk and finally destroys the working copy. </P>
@@ -90,7 +91,7 @@ modifies the buffer, reconciles the changes, commits the changes to disk and fin
     
     // Modify buffer and reconcile
     IBuffer buffer = ((IOpenable)workingCopy).getBuffer();
-    buffer.append("class X {}");
+    buffer.append(&quot;class X {}&quot;);
     workingCopy.reconcile();
     
     // Commit changes
@@ -109,10 +110,10 @@ method. A shared working copy is thus keyed on the original compilation unit and
 The following shows how client 1 creates a shared working copy, client 2 retrieves this working copy, client 1 destroys the
 working copy, and client 2 trying to retrieve the shared working copy notices it does not exist any longer: </P>
 <font color='#4444CC'><pre>
-    // Client 1 & 2: Get original compilation unit
+    // Client 1 &amp; 2: Get original compilation unit
     ICompilationUnit originalUnit = ...;
     
-    // Client 1 & 2: Get buffer factory
+    // Client 1 &amp; 2: Get buffer factory
     IBufferFactory factory = ...;
     
     // Client 1: Create shared working copy
@@ -169,7 +170,7 @@ These method names start with <b>new...</b>. The following is an example that cr
 	import java.util.*;
 	public class HelloWorld {
 		public static void main(String[] args) {
-			System.out.println("Hello" + " world");
+			System.out.println(&quot;Hello&quot; + &quot; world&quot;);
 		}
 	}
 </pre></font>
@@ -179,45 +180,45 @@ These method names start with <b>new...</b>. The following is an example that cr
 		AST ast = new AST();
 		CompilationUnit unit = ast.newCompilationUnit();
 		PackageDeclaration packageDeclaration = ast.newPackageDeclaration();
-		packageDeclaration.setName(ast.newSimpleName("example"));
+		packageDeclaration.setName(ast.newSimpleName(&quot;example&quot;));
 		unit.setPackage(packageDeclaration);
 		ImportDeclaration importDeclaration = ast.newImportDeclaration();
 		QualifiedName name = 
 			ast.newQualifiedName(
-				ast.newSimpleName("java"),
-				ast.newSimpleName("util"));
+				ast.newSimpleName(&quot;java&quot;),
+				ast.newSimpleName(&quot;util&quot;));
 		importDeclaration.setName(name);
 		importDeclaration.setOnDemand(true);
 		unit.imports().add(importDeclaration);
 		TypeDeclaration type = ast.newTypeDeclaration();
 		type.setInterface(false);
 		type.setModifiers(Modifier.PUBLIC);
-		type.setName(ast.newSimpleName("HelloWorld"));
+		type.setName(ast.newSimpleName(&quot;HelloWorld&quot;));
 		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setConstructor(false);
 		methodDeclaration.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
-		methodDeclaration.setName(ast.newSimpleName("main"));
+		methodDeclaration.setName(ast.newSimpleName(&quot;main&quot;));
 		methodDeclaration.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
 		SingleVariableDeclaration variableDeclaration = ast.newSingleVariableDeclaration();
 		variableDeclaration.setModifiers(Modifier.NONE);
-		variableDeclaration.setType(ast.newArrayType(ast.newSimpleType(ast.newSimpleName("String"))));
-		variableDeclaration.setName(ast.newSimpleName("args"));
+		variableDeclaration.setType(ast.newArrayType(ast.newSimpleType(ast.newSimpleName(&quot;String&quot;))));
+		variableDeclaration.setName(ast.newSimpleName(&quot;args&quot;));
 		methodDeclaration.parameters().add(variableDeclaration);
 		org.eclipse.jdt.core.dom.Block block = ast.newBlock();
 		MethodInvocation methodInvocation = ast.newMethodInvocation();
 		name = 
 			ast.newQualifiedName(
-				ast.newSimpleName("System"),
-				ast.newSimpleName("out"));
+				ast.newSimpleName(&quot;System&quot;),
+				ast.newSimpleName(&quot;out&quot;));
 		methodInvocation.setExpression(name);
-		methodInvocation.setName(ast.newSimpleName("println")); 
+		methodInvocation.setName(ast.newSimpleName(&quot;println&quot;)); 
 		InfixExpression infixExpression = ast.newInfixExpression();
 		infixExpression.setOperator(InfixExpression.Operator.PLUS);
 		StringLiteral literal = ast.newStringLiteral();
-		literal.setLiteralValue("Hello");
+		literal.setLiteralValue(&quot;Hello&quot;);
 		infixExpression.setLeftOperand(literal);
 		literal = ast.newStringLiteral();
-		literal.setLiteralValue(" world");
+		literal.setLiteralValue(&quot; world&quot;);
 		infixExpression.setRightOperand(literal);
 		methodInvocation.arguments().add(infixExpression);
 		ExpressionStatement expressionStatement = ast.newExpressionStatement(methodInvocation);
@@ -353,24 +354,24 @@ The following example method traverses a delta and prints the elements that have
     void traverseAndPrint(IJavaElementDelta delta) {
         switch (delta.getKind()) {
             case IJavaElementDelta.ADDED:
-                System.out.println(delta.getElement() + " was added");
+                System.out.println(delta.getElement() + &quot; was added&quot;);
                 break;
             case IJavaElementDelta.REMOVED:
-                System.out.println(delta.getElement() + " was removed");
+                System.out.println(delta.getElement() + &quot; was removed&quot;);
                 break;
             case IJavaElementDelta.CHANGED:
-                System.out.println(delta.getElement() + " was changed");
-                if ((delta.getFlags() & IJavaElementDelta.F_CHILDREN) != 0) {
-                    System.out.println("The change was in its children");
+                System.out.println(delta.getElement() + &quot; was changed&quot;);
+                if ((delta.getFlags() &amp; IJavaElementDelta.F_CHILDREN) != 0) {
+                    System.out.println(&quot;The change was in its children&quot;);
                 }
-                if ((delta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
-                    System.out.println("The change was in its content");
+                if ((delta.getFlags() &amp; IJavaElementDelta.F_CONTENT) != 0) {
+                    System.out.println(&quot;The change was in its content&quot;);
                 }
                 /* Others flags can also be checked */
                 break;
         }
         IJavaElementDelta[] children = delta.getAffectedChildren();
-        for (int i = 0; i < children.length; i++) {
+        for (int i = 0; i &lt; children.length; i++) {
             traverseAndPrint(children[i]);
         }
     }
@@ -398,36 +399,34 @@ Several kinds of operations can trigger a Java element change notification. Here
       project's classpath, e.g. using <b>IFile.setContents</b> (the delta indicates that a compilation unit was changed, but 
       <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_FINE_GRAINED">no finer-grained information</a>
       is provided as this was not done through a Java Model operation)</li>
-</ul><p></P>
-<P>
-As for 
-<a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IResourceDelta.html"><b>IResourceDelta</b></a> 
+</ul><P>Similar to <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IResourceDelta.html"><b>IResourceDelta</b></a> 
 the Java element deltas can be batched using an 
 <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IWorkspaceRunnable.html"><b>IWorkspaceRunnable</b></a>. 
-The deltas resulting from several Java Model operations that are run inside a <b>IWorkspaceRunnable</b> are merged and reported at once. </P>
+The deltas resulting from several Java Model operations that are run inside a <b>IWorkspaceRunnable</b> are merged and reported at once.&nbsp;&nbsp; </P>
+<P><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a><b>
+</b>provides a <b>run</b> method for batching Java element changes. </P>
 <P>
-For example the following will trigger 2 Java element change events: </P>
+For example, the following code fragment will trigger 2 Java element change events: </P>
 <font color='#4444CC'><pre>
     // Get package
     IPackageFragment pkg = ...;
     
     // Create 2 compilation units
-    ICompilationUnit unitA = pkg.createCompilationUnit("A.java", "public class A {}", false, null);
-    ICompilationUnit unitB = pkg.createCompilationUnit("B.java", "public class B {}", false, null);
+    ICompilationUnit unitA = pkg.createCompilationUnit(&quot;A.java&quot;, &quot;public class A {}&quot;, false, null);
+    ICompilationUnit unitB = pkg.createCompilationUnit(&quot;B.java&quot;, &quot;public class B {}&quot;, false, null);
 </pre></font>
 <P>
-Whereas the following will trigger 1 Java element change event: </P>
+Whereas the following code fragment will trigger 1 Java element change event: </P>
 <font color='#4444CC'><pre>
     // Get package
     IPackageFragment pkg = ...;
     
     // Create 2 compilation units
-    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-    workspace.run(
+    JavaCore.run(
         new IWorkspaceRunnable() {
  	        public void run(IProgressMonitor monitor) throws CoreException {
- 	            ICompilationUnit unitA = pkg.createCompilationUnit("A.java", "public class A {}", false, null);
- 	            ICompilationUnit unitB = pkg.createCompilationUnit("B.java", "public class B {}", false, null);
+ 	            ICompilationUnit unitA = pkg.createCompilationUnit(&quot;A.java&quot;, &quot;public class A {}&quot;, false, null);
+ 	            ICompilationUnit unitB = pkg.createCompilationUnit(&quot;B.java&quot;, &quot;public class B {}&quot;, false, null);
  	        }
         },
         null);
