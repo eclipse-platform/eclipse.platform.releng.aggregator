@@ -1,0 +1,191 @@
+<project name="Automated Eclipse Testing" default="all"  basedir="." >
+
+	<!--properties file containing the plugin directory name including version number-->
+	<property file="test.properties" />
+
+	<!--default directory where test-eclipse will be installed-->
+	<property name="install" value="${basedir}/test-eclipse" />
+	
+	<!--name that can be added to report name to identify which platform tests results come from-->
+	<property name="platform" value="" />
+
+	<!-- The root of the eclipse installation -->
+	<property name="eclipse-home" value="${install}/eclipse" />
+
+	<!-- The directory that will contain the xml and html results from the tests that are run -->
+ 	<property name="results" value="${basedir}/results" />
+
+	<target name="init">
+	<!--  necessary condition for running org.eclipse.swt.tests--> 
+	  <condition property="win32">
+			<and>
+	      			<os family="windows" />
+    			</and>
+		</condition>
+		
+	<!--  necessary condition for running jdt core tests-->
+    	<condition property="jvm14">
+			<and>
+	      		<equals arg1="${ant.java.version}" arg2="1.4" />
+    		</and>
+		</condition>
+	</target>
+
+	<target name="setup" if="clean" description="Reinstall the test Eclipse installation if specified by user">
+		<delete dir="${install}" />
+		<mkdir dir="${install}" />
+		<exec dir="." executable="unzip">
+			<arg line="-o -qq eclipse-SDK-*.zip -d ${install}"/>
+	    	</exec>
+	
+		<exec dir="." executable="unzip">
+			<arg line="-o -qq eclipse-junit-tests-*.zip -d ${install}"/>
+    		</exec>
+	</target>
+
+
+
+	<target name="runtests" depends="setup" description="Runs ant on the test.xml for a specified plugin.  Requires a property value setting for testPlugin only if test.properties is not available.  The property testPlugin represents a directory name made up of the plugin id and plugin version.  This directory must contain a valid test.xml.">
+
+		<ant antfile="${eclipse-home}/plugins/${testPlugin}/test.xml" dir="${eclipse-home}" />
+		<copy file="${eclipse-home}/${report}.xml" tofile="${results}/xml/${report}${platform}.xml" />
+
+	</target>
+
+
+	<target name="core" description="Runs the org.eclipse.core.tests.harness test.xml">
+		<antcall target="runtests">
+			<param name="testPlugin" value="${org.eclipse.core.tests.harness}" />
+			<param name="report" value="org.eclipse.core.tests" />
+		</antcall>
+	</target>
+
+
+	<target name="help" description="Runs the org.eclipse.help.tests test.xml">      
+       		<antcall target="runtests" >
+    	   		<param name="testPlugin" value="${org.eclipse.help.tests}" />
+			<param name="report" value="org.eclipse.help.tests" />
+       		</antcall>
+	</target>
+	
+	<target name="jdtcorecompiler" if="jvm14" depends="init">
+		<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.compiler}" />
+			<param name="report" value="org.eclipse.jdt.core.tests.compiler" />
+		</antcall>
+	</target>
+	
+   <target name="jdtcorebuilder" if="jvm14" depends="init">
+		<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.builder}" />
+			<param name="report" value="org.eclipse.jdt.core.tests.builder" />
+		</antcall>
+	</target>
+
+	<target name="jdtcoremodel" if="jvm14" depends="init">
+		<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.model}" />
+			<param name="report" value="org.eclipse.jdt.core.tests.model" />
+		</antcall>
+	</target>
+
+	<target name="jdtdebug" description="Runs the org.eclipse.jdt.debug.tests test.xml">
+		<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.jdt.debug.tests}" />
+			<param name="report" value="org.eclipse.jdt.debug.tests" />
+		</antcall>
+	</target>
+
+
+	<target name="jdtui" description="Runs the org.eclipse.jdt.ui.tests test.xml">
+		<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests}" />
+			<param name="report" value="org.eclipse.jdt.ui.tests" />
+		</antcall>
+	</target>
+
+
+	<target name="jdtuirefactoring" description="Runs the org.eclipse.jdt.ui.tests.refactoring test.xml">
+		<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests.refactoring}" />
+			<param name="report" value="org.eclipse.jdt.ui.tests.refactoring" />
+		</antcall>
+	</target>
+
+	
+	<target name="swt" depends="init" if="win32" description="Runs the org.eclipse.swt.tests test.xml but only on windows.">
+		<!--run swt automated tests on windows only-->
+       		<antcall target="runtests" >
+       			<param name="testPlugin" value="${org.eclipse.swt.tests}" />
+			<param name="report" value="org.eclipse.swt.tests" />
+       		</antcall>
+ 	</target>
+
+
+	<target name="teamcore" description="Runs the org.eclipse.team.tests.core test.xml">      
+    		<antcall target="runtests" >
+    	  		<param name="testPlugin" value="${org.eclipse.team.tests.core}" />
+			<param name="report" value="org.eclipse.team.tests.core" />
+    		</antcall>
+	</target>
+
+
+	<target name="teamcvs" description="Runs the org.eclipse.team.tests.cvs.core test.xml.  This test requires additional setup.  See documentation in org.eclipse.team.tests.cvs.core">
+		<!--  Need to setup Eclipse first because of text replacement in a properties file  -->
+		<antcall target="setup" />
+
+		<!-- Fill in cvs repository information -->
+		<replace file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties" token="@user@" value="${user}"/>
+		<replace file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties" token="@password@" value="${password}"/>
+		<replace file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties" token="@host@" value="${host}"/>
+		<replace file="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/repository.properties" token="@root@" value="${root}"/>
+
+		<ant antfile="${eclipse-home}/plugins/${org.eclipse.team.tests.cvs.core}/test.xml" dir="${eclipse-home}" />
+
+		<copy file="${eclipse-home}/org.eclipse.team.tests.cvs.xml" tofile="${results}/xml/org.eclipse.team.tests.cvs${platform}.xml" />
+
+   	</target>
+
+
+	<target name="ui" description="Runs the org.eclipse.ui.tests test.xml">
+		<antcall target="runtests">
+			<param name="testPlugin" value="${org.eclipse.ui.tests}" />
+			<param name="report" value="org.eclipse.ui.tests" />
+		</antcall>
+	</target>
+
+	<target name="update" description="Runs the org.eclipse.update.tests.core test.xml">
+	    	<antcall target="runtests" >
+			<param name="testPlugin" value="${org.eclipse.update.tests.core}" />
+			<param name="report" value="org.eclipse.update.tests.core" />
+      		</antcall>
+	</target>
+
+
+	<target name="all">
+		<antcall target="core" />
+		<antcall target="help" />
+		<antcall target="jdtdebug" />
+		<antcall target="jdtui" />
+		<antcall target="jdtuirefactoring" />
+		<antcall target="swt" />
+		<antcall target="teamcvs" />
+		<antcall target="teamcore" />
+		<antcall target="ui" />
+		<antcall target="update" />
+		<antcall target="genHtml" />
+	</target>
+	
+	<target name="all14">
+		<antcall target="jdtcorebuilder" />
+		<antcall target="jdtcorecompiler" />
+		<antcall target="jdtcoremodel" />
+		<antcall target="genHtml" />
+	</target>
+
+	<target name="genHtml" description="Generates HTML results with provided JUNIT.XSL provided">
+		<style style="JUNIT.XSL" basedir="${results}/xml" destdir="${results}/html" />
+	</target>
+
+
+</project>

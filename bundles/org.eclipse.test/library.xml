@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+
+<project name="Library" default="init" basedir=".">
+
+  <target name="init">
+    <tstamp/>
+  </target>
+
+  <target name="core-test">
+    <antcall target="eclipse-test">
+      <param name="application" value="org.eclipse.test.coretestapplication"/>
+    </antcall>
+  </target>
+
+  <target name="ui-test">
+    <antcall target="eclipse-test">
+      <param name="application" value="org.eclipse.test.uitestapplication"/>
+    </antcall>
+  </target>
+  
+  <target name="eclipse-test">
+<!-- 
+Parameters to this target:
+data-dir		- the directory for Eclipse to write its data
+plugin-name		- the name of the plugin to test
+classname		- the name of the test class
+vmargs			- a string containing arguments to pass to the VM - defaults to ""
+-->
+    <!-- Specify the default value for ${vmargs} -->
+
+    <tstamp>
+        <format property="TIMENOW" pattern="HHmmssSSSS"/>
+    </tstamp>
+
+    <property name="vmargs" value=""/>
+    <property name="launcher" value="org.eclipse.core.launcher.Main"/>
+    <property name="formatter" value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter"/>
+
+    <echo message="Running ${classname}"/>
+    <!-- Produces the file '${default-filename}' -->
+    <java classname="${launcher}" fork="true" dir=".">
+      <classpath>
+        <pathelement location="startup.jar"/>
+      </classpath>
+      <arg line="-application ${application}"/>
+      <arg line="-dev bin -data ${data-dir}"/>
+      <arg line="formatter=${formatter},${classname}.xml"/>
+      <arg line="-testPluginName ${plugin-name}"/>
+      <arg line="-className ${classname}"/>
+      <arg line="-noupdate"/>
+      <arg line="-os ${os}"/>
+      <arg line="-ws ${ws}"/>
+      <arg line="-arch ${arch}"/>
+      <jvmarg line="${vmargs}"/>
+    </java>
+
+  </target>
+
+  <target name="collect">
+<!-- 
+Parameters to this target:
+includes		- the names of the files to include
+output-file		- the name of the output file to produce
+-->
+    <junitreport todir="." tofile="${output-file}">
+      <fileset dir=".">
+        <include name="${includes}"/>
+      </fileset>
+    </junitreport>
+  </target>
+
+<!-- 
+WARNING: This task will not work correctly until org.eclipse.ant.core
+         upgrades to Ant 1.4 or higher. There are problems with absolute
+         paths and the style task.
+-->
+  <target name="test-regressions">
+<!--
+Parameters to this target:
+oldfile			- the name of the baseline XML file to test against
+newfile			- the name of the XML file containing most recent test results
+outfile			- the name of the file produced
+-->
+
+    <echo message="Running Regression Tests"/>
+    <property name="test-plugin-dir" value="${basedir}/fragments/org.eclipse.test"/>
+    <property name="rt-stylesheet" value="${test-plugin-dir}/regression-test.xsl"/>
+    <property name="rt-classname" value="org.eclipse.test.RegressionTest"/>
+
+    <!-- Ensure that the file exists, and give sensible behaviour if not -->
+    <style style="${rt-stylesheet}" in="${newfile}" out="${newfile}.tmp"/>
+    <style style="${rt-stylesheet}" in="${oldfile}" out="${oldfile}.tmp"/>
+    <java classname="${rt-classname}">
+      <classpath>
+        <pathelement location="${test-plugin-dir}/bin"/>
+      </classpath>
+      <arg value="${oldfile}.tmp"/>
+      <arg value="${newfile}.tmp"/>
+      <arg value="${outfile}"/>
+    </java>
+
+    <delete file="${oldfile}.tmp"/>
+    <delete file="${newfile}.tmp"/>
+  </target>
+
+  <target name="notfiy">
+<!--
+Parameters to this target:
+infile			- the name of the file that contains the message body
+address			- the e-mail address to notify
+-->
+
+    <echo message="Sending Notification"/>
+    <property name="email-from" value="Eclipse Automated Test@oti.com"/>
+    <property name="email-subject" value="Nightly Build Report"/>
+    <property name="email-server" value="mail.ott.oti.com"/>
+
+    <mail from="${email-from}" tolist="${address}"
+          subject="${email-subject}" files="${infile}"
+          mailhost="${email-server}"/>
+
+  </target>
+
+</project>
