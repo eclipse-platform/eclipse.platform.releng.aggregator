@@ -51,14 +51,19 @@ public class DB {
         return getDefault().internalQuery(host, refTag, scenarioID, dims);
     }
    
-    /*
+    /**
+     * @param hostPattern
+     * @return
      * @deprecated use queryScenarios(host, tag, scenario) instead
      */
     public static Scenario[] queryScenarios(String hostPattern) {
     	return queryScenarios(hostPattern, "%", "%"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    /*
+    /**
+     * @param hostPattern
+     * @param ignored
+     * @return
      * @deprecated use queryScenarios(host, tag, scenario) instead
      */
     public static Scenario[] queryScenarios(String hostPattern, String ignored) {
