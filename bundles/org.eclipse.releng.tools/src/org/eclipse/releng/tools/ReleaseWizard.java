@@ -17,23 +17,40 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.*;
+
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.ui.*;
+import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
+import org.eclipse.team.internal.ccvs.ui.Policy;
 import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
 
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
+
 
 public class ReleaseWizard extends Wizard {
 
+	// Dialog store constants
+	private static final String BOUNDS_HEIGHT= "bounds.height"; //$NON-NLS-1$
+	private static final String BOUNDS_WIDTH= "bounds.width"; //$NON-NLS-1$
+	private static final String BOUNDS_Y= "bounds.y"; //$NON-NLS-1$
+	private static final String BOUNDS_X= "bounds.x"; //$NON-NLS-1$
+	
 	private MapProjectSelectionPage mapSelectionPage;
 	private ProjectSelectionPage projectSelectionPage;
 	private TagPage tagPage;
@@ -57,7 +74,42 @@ public class ReleaseWizard extends Wizard {
 			section = settings.addNewSection("ReleaseWizard");//$NON-NLS-1$
 		}
 		setDialogSettings(section);
-	}	
+	}
+	
+	/*
+	 * @see org.eclipse.jface.wizard.Wizard#createPageControls(org.eclipse.swt.widgets.Composite)
+	 * @since 3.1
+	 */
+	public void createPageControls(Composite pageContainer) {
+		super.createPageControls(pageContainer);
+
+		if (getDialogSettings().get(BOUNDS_X) != null) {
+			int x= getDialogSettings().getInt(BOUNDS_X);
+			int y= getDialogSettings().getInt(BOUNDS_Y);
+			int width= getDialogSettings().getInt(BOUNDS_WIDTH);
+			int height= getDialogSettings().getInt(BOUNDS_HEIGHT);
+			getShell().setBounds(x, y, width, height);
+		}
+		
+		getShell().addControlListener(new ControlListener() {
+
+			public void controlMoved(ControlEvent e) {
+				storeBounds(e);
+			}
+
+			public void controlResized(ControlEvent e) {
+				storeBounds(e);
+			}
+			
+			private void storeBounds(ControlEvent e) {
+				Rectangle bounds= getShell().getBounds();
+				getDialogSettings().put(BOUNDS_X, bounds.x);
+				getDialogSettings().put(BOUNDS_Y, bounds.y);
+				getDialogSettings().put(BOUNDS_WIDTH, bounds.width);
+				getDialogSettings().put(BOUNDS_HEIGHT, bounds.height);
+			}
+		});
+	}
 
 	public boolean execute(Shell shell) {
 		setNeedsProgressMonitor(true);
