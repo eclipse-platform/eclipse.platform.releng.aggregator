@@ -597,7 +597,7 @@ public class BuildTests extends TestCase {
 		 * @return String
 		 */
 		private String getExcludeFile() {
-			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "ignoreFiles.txt";
+			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_3.0.0" + File.separator + "ignoreFiles.txt";
 			return new File(aString).getPath();
 		}
 		
@@ -679,7 +679,7 @@ public class BuildTests extends TestCase {
 				fileName = "ignoreErrorsUnix.txt";
 			}
 			
-			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + fileName;
+			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_3.0.0" + File.separator + fileName;
 			return new File(aString).getPath();
 		}
 		
