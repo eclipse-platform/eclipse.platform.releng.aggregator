@@ -12,7 +12,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Draft Pre-release 3.0<br>
-Last revised June 23, 2004</p>
+Last revised June 24, 2004</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -703,6 +703,59 @@ section.)</p>
 <h3>3.1.10 <a name="I-Platform-Compare">Platform - Compare</a></h3>
 <p>None.</p>
 <h3>3.2 <a name="I-JDT">Java Development Tools (JDT)</a></h3>
+<h4>Searching for constant field references</h4>
+<p>Search does not find references to constant fields inside binaries because
+the Java Language Specification mandates that constant field values be inlined
+in the class file's bytecodes, leaving no trace of a field reference.&nbsp;(bug
+12044)</p>
+<h4>Using an installed JRE 1.5</h4>
+<p>JDT does not yet support 1.5 JREs other than for running or debugging
+programs against them. The Eclipse Java compiler is either 1.3 or 1.4 compliant;
+and until it become 1.5 compliant, all tooling will not be able to handle the
+1.5 language additions. You may still compile 1.4 programs against 1.5
+libraries, since we ensured that our compiler would tolerate them, with the
+exception of covariance scenario (which was forbidden under JLS 2nd edition).
+Note that J2SE 1.5 language features are still being finalized, and will be
+covered by forthcoming JLS 3rd edition. In parallel to the present release, JDT
+is working on a preview of J2SE 1.5 support which is posted on eclipse.org
+update site. You may find more information about it on the Cheetah
+page.&nbsp;(bug 36938)</p>
+<h4>Missing secondary types in editor</h4>
+<p>When referencing a secondary type defined in another compilation unit (i.e. a
+toplevel type which name does not match its file name), the editor may
+incorrectly report it to be missing. When building however, the compiler has no
+problem. The only workaround is to avoid defining secondary types, and rather
+have all types defined in their own file.</p>
+<h4>Java indexing crash recovery</h4>
+<p>JDT is indexing in background all modified Java files. Under some rare
+circumstances, the indexer may crash, in which case it will silently recover
+automatically by restarting and rebuilding the affected indexes. When crash
+recovery occurs, an entry is added into the .log file, to keep track of it. It
+is simply informative and should not cause any harm to subsequent search
+operations. (bug 68189)</p>
+<h4>Classpath entry denoting external class folder is now properly rejected</h4>
+<p>Though external class folder (i.e. folder containing .class files and located
+outside workspace) were not supported by the JDT law, no problem was reported
+when constructing such a build path. JDT now properly diagnoses a problem in
+this situation. In order to still beneficiate from external .class files, a
+class folder must be mounted as a linked folder in Eclipse workspace (in project
+properties, select Java Build Path&gt;Libraries&gt;Add Class Folder&gt;Create
+New Folder...&gt;Advanced&gt;. Then a folder name can be associated with an
+arbitrary file system location by checking &quot;Link to folder on the file
+system). Once mounted, the linked class folder can normally be referenced on a
+build path, and from thereon programs can be compiled against it. (bug 67631)</p>
+<h4>File encoding change not honored</h4>
+<p>The Eclipse platform does not refresh properly when the encoding of a
+resource is being modified after the fact. As a consequence, JDT may become
+inconsistent, and in order to make it consistent again, the following actions
+need to be performed in this exact order:</p>
+<ol>
+  <li>Close all projects using navigator 'close project' menu action.</li>
+  <li>Exit and restart Eclipse.</li>
+  <li>Open all projects using navigator 'open project' menu action.</li>
+  <li>Manually trigger a clean build of entire workspace</li>
+</ol>
+<p>(bug 59899)</p>
 <h4>Package Explorer not asking for filter removal</h4>
 <p>Show In &gt; Package Explorer normally asks for removal of filters when the
 compilation unit to be shown in the Package Explorer is filtered out. However,
