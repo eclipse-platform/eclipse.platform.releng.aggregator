@@ -34,8 +34,6 @@ import org.apache.tools.ant.taskdefs.optional.junit.FormatterElement;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.perfmsr.core.IPerformanceMonitor;
-import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters
