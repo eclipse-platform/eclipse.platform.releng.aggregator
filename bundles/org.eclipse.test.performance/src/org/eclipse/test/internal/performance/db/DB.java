@@ -185,25 +185,41 @@ public class DB {
             
             //System.err.println(PerformanceTestPlugin.getBuildId());
             
+            //long l= System.currentTimeMillis();
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
-		        // System.out.println(" dp " + i); //$NON-NLS-1$ //$NON-NLS-2$
 			    DataPoint dp= dataPoints[i];
 	            int datapoint_id= fSQL.createDataPoint(sample_id, i, dp.getStep());
 			    Scalar[] scalars= dp.getScalars();
-				PreparedStatement is= fSQL.getScalarInsertStatement(scalars.length);
-				int col= 1;
-			    for (int j= 0; j < scalars.length; j++) {
-			        Scalar scalar= scalars[j];
-			        int id= scalar.getDimension().getId();
-			        long value= scalar.getMagnitude();
-					is.setInt(col, datapoint_id);
-					is.setInt(col+1, id);
-					is.setLong(col+2, value);
-					col+= 3;
-                }
-			    SQL.create(is);
+			    
+			    if (true) {
+					PreparedStatement is= fSQL.getScalarInsertStatement(1);
+				    for (int j= 0; j < scalars.length; j++) {
+				        Scalar scalar= scalars[j];
+				        int id= scalar.getDimension().getId();
+				        long value= scalar.getMagnitude();
+						is.setInt(1, datapoint_id);
+						is.setInt(2, id);
+						is.setLong(3, value);
+						SQL.create(is);
+				    }
+			    } else {
+					PreparedStatement is= fSQL.getScalarInsertStatement(scalars.length);
+					int col= 1;
+				    for (int j= 0; j < scalars.length; j++) {
+				        Scalar scalar= scalars[j];
+				        int id= scalar.getDimension().getId();
+				        long value= scalar.getMagnitude();
+						is.setInt(col, datapoint_id);
+						is.setInt(col+1, id);
+						is.setLong(col+2, value);
+						col+= 3;
+	                }
+				    SQL.create(is);
+			    }
 			}
+			//System.err.println(System.currentTimeMillis()-l);
+			fConnection.commit();
             
         } catch (SQLException e) {
             e.printStackTrace();
@@ -366,6 +382,7 @@ public class DB {
             }
             if (DEBUG) System.out.println("succeeded!"); //$NON-NLS-1$
  
+            fConnection.setAutoCommit(false);
             fSQL= new SQL(fConnection);
 
             doesDBexists();
@@ -397,6 +414,11 @@ public class DB {
         }
         if (fConnection != null) {
             try {
+                fConnection.commit();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
                  fConnection.close();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -414,6 +436,7 @@ public class DB {
 	                return;
 	        if (DEBUG) System.out.println("initialising DB"); //$NON-NLS-1$
 	        fSQL.initialize();
+			fConnection.commit();
 	        if (DEBUG) System.out.println("end initialising DB"); //$NON-NLS-1$
         } finally {
             stmt.close();
@@ -428,55 +451,55 @@ public class DB {
             System.out.println("CONFIG(ID, HOST, PLATFORM):"); //$NON-NLS-1$
 	        ResultSet rs= stmt.executeQuery("SELECT ID, HOST, PLATFORM FROM CONFIG"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(' ' + rs.getInt(1));
-	            System.out.print(' ' + rs.getString(2));
-	            System.out.print(' ' + rs.getString(3));
+	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getString(3)); //$NON-NLS-1$
 	            System.out.println();
 	        }
             System.out.println();
             System.out.println("SCENARIO(ID, NAME):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT ID, NAME FROM SCENARIO"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(' ' + rs.getInt(1));
-	            System.out.print(' ' + rs.getString(2));
+	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
 	            System.out.println();
 	        }
             System.out.println();
             System.out.println("SAMPLE(ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME FROM SAMPLE"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(' ' + rs.getInt(1));
-	            System.out.print(' ' + rs.getInt(2));
-	            System.out.print(' ' + rs.getInt(3));
-	            System.out.print(' ' + rs.getInt(4));
-	            System.out.print(' ' + rs.getTimestamp(5).toString());
+	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(2)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(3)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(4)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getTimestamp(5).toString()); //$NON-NLS-1$
 	            System.out.println();
 	        }
             System.out.println();
             System.out.println("TAG(ID, NAME):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT ID, NAME FROM TAG"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(' ' + rs.getInt(1));
-	            System.out.print(' ' + rs.getString(2));
+	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
 	            System.out.println();
 	        }
             System.out.println();
             System.out.println("DATAPOINT(ID, SAMPLE_ID, SEQ, STEP):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT ID, SAMPLE_ID, SEQ, STEP FROM DATAPOINT"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(' ' + rs.getInt(1));
-	            System.out.print(' ' + rs.getInt(2));
-	            System.out.print(' ' + rs.getInt(3));
-	            System.out.print(' ' + rs.getInt(4));
+	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(2)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(3)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(4)); //$NON-NLS-1$
 	            System.out.println();
 	        }
             System.out.println();
             System.out.println("SCALAR(DATAPOINT_ID, DIM_ID, VALUE):"); //$NON-NLS-1$
 	        rs= stmt.executeQuery("SELECT DATAPOINT_ID, DIM_ID, VALUE FROM SCALAR"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(' ' + rs.getInt(1));
-	            System.out.print(' ' + rs.getInt(2));
-	            System.out.print(' ' + rs.getBigDecimal(3).toString());
+	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getInt(2)); //$NON-NLS-1$
+	            System.out.print(" " + rs.getBigDecimal(3).toString()); //$NON-NLS-1$
 	            System.out.println();
 	        }
             System.out.println();

@@ -20,7 +20,7 @@ import java.sql.Timestamp;
 
 public class SQL {
     
-    private Connection fConn;
+    private Connection fConnection;
     private PreparedStatement fInsertSample, fInsertDataPoint;
     private PreparedStatement fQueryConfig, fInsertConfig;
     private PreparedStatement fQueryScenario, fQueryAllScenarios, fInsertScenario;
@@ -30,7 +30,7 @@ public class SQL {
     
 
     SQL(Connection con) {
-        fConn= con;
+        fConnection= con;
     }
     
     public void dispose() throws SQLException {
@@ -58,7 +58,7 @@ public class SQL {
     		StringBuffer sb= new StringBuffer("insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
     		for (int i= 1; i < n; i++)
     			sb.append(", (?, ?, ?)"); //$NON-NLS-1$
-            fInsertScalar[n-1]= fConn.prepareStatement(sb.toString());
+            fInsertScalar[n-1]= fConnection.prepareStatement(sb.toString());
     	}
     	return fInsertScalar[n-1];
     }
@@ -88,35 +88,35 @@ public class SQL {
 					"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP" //$NON-NLS-1$
     		);    		
     		
-			fQueries[n]= fConn.prepareStatement(sb.toString());
+			fQueries[n]= fConnection.prepareStatement(sb.toString());
     	}
     	return fQueries[n];
     }
     
     void createPreparedStatements() throws SQLException {
-        fInsertTag= fConn.prepareStatement(
+        fInsertTag= fConnection.prepareStatement(
                 "insert into TAG (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
-        fInsertConfig= fConn.prepareStatement(
+        fInsertConfig= fConnection.prepareStatement(
                 "insert into CONFIG (HOST, PLATFORM) values (?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
-        fInsertScenario= fConn.prepareStatement(
+        fInsertScenario= fConnection.prepareStatement(
                 "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
-        fInsertSample= fConn.prepareStatement(
+        fInsertSample= fConnection.prepareStatement(
                 "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
-        fInsertDataPoint= fConn.prepareStatement(
+        fInsertDataPoint= fConnection.prepareStatement(
                 "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
 
-        fQueryTag= fConn.prepareStatement(
+        fQueryTag= fConnection.prepareStatement(
         		"select ID from TAG where NAME = ?"); //$NON-NLS-1$
-        fQueryConfig= fConn.prepareStatement(
+        fQueryConfig= fConnection.prepareStatement(
                 "select ID from CONFIG where HOST = ? and PLATFORM = ?"); //$NON-NLS-1$
-        fQueryScenario= fConn.prepareStatement(
+        fQueryScenario= fConnection.prepareStatement(
                 "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
-        fQueryAllScenarios= fConn.prepareStatement(
+        fQueryAllScenarios= fConnection.prepareStatement(
         		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE, CONFIG where " +	//$NON-NLS-1$
         		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
-        fQueryTags= fConn.prepareStatement(
+        fQueryTags= fConnection.prepareStatement(
         		"select DISTINCT TAG.NAME from TAG, CONFIG, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
         		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME LIKE ? and " +	//$NON-NLS-1$
@@ -125,7 +125,7 @@ public class SQL {
     }
     
     void initialize() throws SQLException {
-        Statement stmt= fConn.createStatement();
+        Statement stmt= fConnection.createStatement();
         
         stmt.executeUpdate(
         		"create table SAMPLE (" + //$NON-NLS-1$

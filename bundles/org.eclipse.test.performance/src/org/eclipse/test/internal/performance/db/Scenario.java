@@ -49,6 +49,13 @@ public class Scenario {
         return fDimensions;
     }
     
+    public String[] getTimeSeriesLabels() {
+        load();
+        if (fTags == null)
+        	return new String[0];
+        return fTags;
+    }
+    
     public TimeSeries getTimeSeries(Dim dim) {
         load();
         TimeSeries ts= (TimeSeries) fSeries.get(dim);
