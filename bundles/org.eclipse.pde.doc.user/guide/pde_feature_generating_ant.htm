@@ -23,7 +23,7 @@ script files in the right order (defined by the plug-in dependency chain). Each
 build file has the same name (<b>build.xml</b>) and is created as a sibling of the manifest
 files in the corresponding projects.</p>
 
-<p>Since Ant scripts use the replacement variables in <b>build.properties</b>, you can typically use them &quot;as is,&quot; without
+<p>Since Ant scripts use the replacement variables in <b>build.properties</b>, you can typically use them &quot;as is&quot;, without
 modifying the generated scripts. If you do modify them, you must not recreate the
 scripts every time you want to rebuild the component. </p>
 
@@ -39,6 +39,7 @@ the newly generated script file is selected, the following wizard will open:</p>
 <p align="left">The standard Ant wizard allows customization in two ways: by
 providing the execution arguments and by selecting one or more build targets.</p>
 
+<h4>Properties</h4>
 <p align="left">Ant arguments are typically used to provide property values that
 override default values and control the build process. Arguments are set using
 &quot;-Dproperty=value&quot;. The following properties are recognized:</p>
@@ -54,66 +55,56 @@ override default values and control the build process. Arguments are set using
     the temporary files for the update JAR creation should be placed.
     These files are usually the plug-in library JARs.</li>
   <li><b>plugin.destination</b> - where
-    plug-in and fragment's update JARs should be put. These JARs represent
-    entire plug-ins and fragments in format suitable for publishing on an
+    plug-in and fragment update JARs should be put. These JARs represent
+    entire plug-ins and fragments in a format suitable for publishing on an
     Install/Update server and referencing by a feature. The typical layout of an
     Update site is to have all the plug-in and fragment JARs in one place and
-    all the feature in another. This argument is useful to place plug-ins and
+    all the features in another. This argument is useful for placing plug-ins and
     fragment directly into the desired directory (or the staging place on the
     local machine before pushing the features onto the remote server).</li>
   <li><b>feature.destination</b> - where
-    feature's update JARs should be put.</li>
+    feature update JARs should be put.</li>
 </ul>
 To adapt the behavior of the compiler, the following properties are recognized:</p>
 <ul>
-<li><b>javaFailOnError</b></li> - stop the build when an error occurs when set to true. Default is false.
-<li><b>javacDebufInfo</b></li> - compile source with debug information when set to true. Default is true.
+<li><b>javacFailOnError</b></li> - stop the build when an error occurs when set to true. Default is false.
+<li><b>javacDebugInfo</b></li> - compile source with debug information when set to true. Default is true.
 <li><b>javacVerbose</b></li> - produce verbose output when set to true. Default is true.
 </ul>
+
+<h4>Targets</h4>
 
 <p>When executing feature build scripts, the
 following targets are used to call individual targets of plug-ins or fragments.
 In order to specify what target to execute, the property <b>target</b> should be
-set (e.g. -Dtarget=refresh):</p>
+set (e.g. -Dtarget=refresh). One of the <b>all.*</b> targets serves as an iterator, whereas
+the actual target to execute is specified via the property <b>target</b>.</p>
 <ul>
   <li><b>all.plugins</b> - for all listed plug-ins</li>
   <li><b>all.fragments</b> - for all listed fragments</li>
   <li><b>all.children</b> - for all listed plug-ins and fragments</li>
-</ul>
-<p>In this scenario, one of the <b>all.*</b> targets serves as iterator, whereas
-the actual target to execute is specified via the property <b>target</b> as
-shown above.</p>
-<p>The following targets build JARs and sources
-for all feature children:</p>
-<ul>
-  <li><b>build.jars</b></li>
-  <li><b>build.sources</b></li>
-</ul>
-<p>Target <b>build.update.jar</b> can be selected
-to generate a feature JAR in the format used by the install/update mechanism.
-The above mentioned property <b>feature.destination</b> can be used to define
-where to put the JAR and <b>plugin.destination</b> controls where to put
-individual update JARs for plug-ins and fragments.</p>
-<p>Target <b>zip.distribution</b> creates a zip
+  <li><b>build.jars</b> - build JARs for all feature children;</li>
+  <li><b>build.sources</b> - build source for all feature children;</li>
+  <li><b>build.update.jar</b> - generate a feature JAR in the format used by the install/update mechanism.
+	The above mentioned property <b>feature.destination</b> can be used to define
+	where to put the JAR;</li>
+  <li><b>zip.distribution</b> - creates a zip
 file with the feature and its plug-ins and fragments in an SDK-like structure
-but does not include source code. Source can be generated with the <b>zip.sources</b>
-target.</p>
-<p>Use <b>clean</b> target to delete everything
-produced by running any of the targets. Finally, the <b>refresh</b> target
-performs a &quot;Refresh&quot; action in the current project, thus making the
-newly generated resources visible in the Navigator or Package Explorer.</p>
-<p>When executing build scripts for individual
-plug-ins and fragments, an additional target called zip.plugin can be used. It
-creates a zip file with the binary and source contents of a plug-in with the
-following structure:</p>
-<blockquote>
-  <p>id_version/<br>
+but does not include source code;</li>
+  <li><b>zip.sources</b> - creates a zip file with the feature and its plug-ins and fragments in an SDK-like structure which only includes the source;</li>
+  <li><b>clean</b> - delete everything produced by running any of the target;</li>
+  <li><b>refresh</b> - performs a &quot;Refresh&quot; action in the current project, thus making the
+newly generated resources visible in the Navigator or Package Explorer.</li>
+  <li><b>zip.plugin</b> - creates a zip file with the binary and source contents of a plug-in with the following structure:
+  <blockquote>
+  id_version/<br>
   &nbsp;&nbsp;&nbsp; contents</p>
-</blockquote>
-<p>where 'id' is the plug-in unique identifier
+</blockquote>where 'id' is the plug-in unique identifier
 and 'version' is the plug-in version. This zip file can be directly unzipped
-into the Eclipse installation directory as a form of a quick manual deployment.</p>
-<p>&nbsp;</p>
+into the Eclipse installation directory as a form of a quick manual deployment.</li>
+</ul>
+
+
 
 <p>&nbsp;<br>
 <a href="../hglegal2003.htm">
