@@ -56,10 +56,10 @@ can use to launch infocenter from a command line. The command line
 arguments syntax is:</P>
 <PRE><EM><SPAN style="font-style: normal">-command start | shutdown | [-eclipsehome eclipseInstallPath] [-host helpServerHost] [-port helpServerPort] [platform options] [-vmargs JavaVMarguments]</SPAN></EM></PRE>
 <P>To start an infocenter on port 8081 issue a start command by running</P>
-<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Infocenter -command start -eclipsehome d:\myApp\eclipse -port 8081</PRE>
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.1.0\help.jar org.eclipse.help.standalone.Infocenter -command start -eclipsehome d:\myApp\eclipse -port 8081</PRE>
 <P>To shut the infocenter down issue a shutdown command by running</P>
 
-<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Infocenter -command shutdown -eclipsehome d:\myApp\eclipse</PRE>
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.1.0\help.jar org.eclipse.help.standalone.Infocenter -command shutdown -eclipsehome d:\myApp\eclipse</PRE>
 <h2>Using the infocenter</h2>
 <p>Start the web server. Point a web browser to the path &quot;help&quot; web 
 application running on a port specified when starting the infocenter.&nbsp; On the machine the infocenter is installed, this would be 
@@ -67,7 +67,7 @@ http://localhost:8081/help/. </p>
 <H2><B>How to start or stop infocenter from Java</B></H2>
 <P>When including infocenter as part of another application, it may be more convenient to start it and stop using Java APIs instead of using system commands. Follow the steps if it is the case:</P>
 <OL>
-	<LI>Make sure <EM><SPAN style="font-style: normal">d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar</SPAN></EM>
+	<LI>Make sure <EM><SPAN style="font-style: normal">d:\myApp\eclipse\plugins\org.eclipse.help_2.1.0\help.jar</SPAN></EM>
 	is on your app classpath. The class you use to start, and shut
 	down the infocenter isorg.eclipse.help.standalone.Infocenter.</LI>
 	<LI>Create an array of String containing options that you want to pass
@@ -84,9 +84,13 @@ http://localhost:8081/help/. </p>
 </OL>
 <H2>Making infocenter available on the web</H2>
 <P>Eclipse contains a complete infocenter and does not require other server software to run. However, in unsecure environment like Internet, it is recommended infocenter is not accessed directly by clients, but is made available through an HTTP server or an application server. Most servers come with
-modules or servlets for delegating certain request to other web resources. For example, one may configure a proxy module to redirect requests made to http://mycompany/myproduct/infocenter to  http://internalserver:8081/help that runs an infocenter.</P>
-<P></P>
+modules or servlets for delegating certain request to other web resources. For example, one may configure a proxy module of Apache HTTP Server to redirect requests made to <I>http://mycompany.com/myproduct/infocenter</I> to  <I>http://internalserver:8081/help</I> that runs an infocenter. Adding the  lines
+<pre>LoadModule proxy_module modules/ApacheModuleProxy.dll
+ProxyPass /myproduct http://internalserver:8081/help
+ProxyPassReverse /myproduct http://internalserver:8081/help
+</pre> to conf/httpd.conf file of Apache server running mycompany web site accomplishes this.
 
+</P>
 
 <a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. and others 2000, 2002." BORDER=0 height=12 width=250></a>
 
