@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
+import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
@@ -71,6 +72,12 @@ public class CompareLocalToMap extends WorkspaceAction {
 
 		// Create the synchronize view participant
 		CVSCompareSubscriber s = new CVSCompareSubscriber(resources, tags, "RelEng Map"); //$NON-NLS-1$
+		try {
+			s.primeRemoteTree();
+		} catch (CVSException e) {
+			// Log and ignore
+			RelEngPlugin.log(e);
+		}
 		CompareParticipant participant = new CompareParticipant(s);
 		TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[]{participant});
 		participant.refresh(resources, "Refreshing", "Refreshing", getTargetPart().getSite());
