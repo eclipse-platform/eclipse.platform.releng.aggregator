@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Team and linked resources</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Team and linked resources</h3>
+<p>A project in Eclipse may contain resources that are not located within the 
+  project's directory in the local file system. These resources are referred to 
+  as <em>linked resources</em>. Eclipse supports linking files or folders only 
+  as root elements in a project (i.e. a link must be a direct child of the project).</p>
+<p>Linked resources may be dangerous for repository providers because they are 
+  members of a project but do not exists within the project's corresponding directory 
+  in the local file system. Older repository provider implementations (i.e. those 
+  implemented for Eclipse 2.0) may depend on the local file system structure matching 
+  that of the project in Eclipse. To avoid possible problems, linked resources 
+  can not be added projects that are mapped to a 2.0 repository provider and projects 
+  that contain linked resources can not be shared with a 2.0 repository provider.</p>
+<p>Repository provider implementations can be upgraded to support linked resources 
+  by overriding the <b><font color="#4444CC"><b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b></font>.canHandleLinkedResources()</b> 
+  method to return <strong>true</strong>. Once this is done, linked resources 
+  will be allowed to exist in projects shared with that repository provider. However, 
+  the repository provider must take steps to ensure that linked resources are 
+  handled properly. It is strongly suggested that repository providers ignore 
+  all linked resources. This means that linked resources (and their children) 
+  should be excluded from the actions supported by the repository provider and 
+  the repository provider should use the default move and delete behavior for 
+  linked resources if the repository provider implementation overrides the default 
+  <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>.</p>
+<p>Team providers can use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>.<b>isLinked() 
+  </b>to determine if a resource is a link. However, this method only returns 
+  true for the root of a link. The following code segment can be used to determine 
+  if a resource is the child of a link.</p>
+<pre><font color="#4444CC">String linkedParentName = resource.getProjectRelativePath().segment(0);
+IFolder linkedParent = resource.getProject().getFolder(linkedParentName);
+boolean isLinked = linkedParent.isLinked();</font></pre>
+<p>Repository providers should ignore any resource for which the above code evaluates 
+  to <strong>true</strong>.</p>
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
+</BODY>
+</HTML>
