@@ -41,9 +41,9 @@ public class View {
         String conf= name + '/' + version + '/' + arch;
 
         
-        query1.setString(1, "localhost");
+        query1.setString(1, "localhost"); //$NON-NLS-1$
         query1.setString(2, conf);
-        query1.setString(3, "org.eclipse.jdt.ui.tests.performance.views.StartupTest#testStartup()");
+        query1.setString(3, "org.eclipse.jdt.ui.tests.performance.views.StartupTest#testStartup()"); //$NON-NLS-1$
         query1.setInt(4, InternalDimensions.ELAPSED_PROCESS.getId());
 
         
@@ -55,7 +55,7 @@ public class View {
 	            BigDecimal bigDecimal= rs.getBigDecimal(1);
 	            Date d= new Date(bigDecimal.longValue());
 	    
-	            System.out.println(i + ": " + d + " " + rs.getString(2));
+	            System.out.println(i + ": " + d + " " + rs.getString(2)); //$NON-NLS-1$ //$NON-NLS-2$
 	        }
 	        
 	        rs.close();

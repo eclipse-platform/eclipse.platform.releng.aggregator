@@ -71,7 +71,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 					//addScalar(scalars, Dimensions.HARD_PAGE_FAULTS, counters[9]);
 				}
 			}
-		    String st= System.getProperty("eclipse.startTime");
+		    String st= System.getProperty("eclipse.startTime"); //$NON-NLS-1$
 		    if (st != null) {
 		        long s= Long.parseLong(st);
 		        long e= System.currentTimeMillis();
