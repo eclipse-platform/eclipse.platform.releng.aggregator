@@ -30,7 +30,10 @@ The locations for inserting new menus and menu items are defined using named gro
 a named group as a slot or placeholder that allows you to insert your menu items
 at certain points in a menu bar or pulldown menu.</P>
 <P >
-The workbench defines all of its group slot names in the class <b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>. For each workbench menu, named groups are placed in the menu at locations where it is expected that
+The workbench defines all of its group slot names in the classes <b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>
+and <b><a href="../reference/api/org/eclipse/ui/ide/IIDEActionConstants.html">IIDEActionConstants</a></b>. 
+(Two different classes are used since resource-related menu items are factored out of the generic workbench).
+For each workbench menu, named groups are placed in the menu at locations where it is expected that
 plug-ins will insert new actions.</P>
 <P >
 The following description of the help menu is adapted from the <a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html"><b> IWorkbenchActionConstants</b></a>
@@ -39,49 +42,53 @@ class definition.</P>
    Standard Help menu actions
    Start group - HELP_START - &quot;start&quot;
    End group - HELP_END - &quot;end&quot;
-   About action - ABOUT - &quot;About&quot;
 </pre></font>
 <P >
-The standard workbench help menu consists of a named group called &quot;<b>start</b>,&quot; followed by a named group called &quot;<b>end</b>,&quot; followed by the &quot;<b>About</b>&quot; action.
-Defining two groups gives plug-ins more control over where their contributed
-items will be positioned within the help menu.&nbsp; When you define a menu, you can define as many slots as you like. Adding more slots gives other plug-ins more control over where their contributions appear relative to existing contributions. </P>
+The standard workbench help menu defines a named group called &quot;<b>start</b>,&quot; followed by a named group called &quot;<b>end</b>,&quot;.
+Defining two groups gives plug-ins a little more control over where their contributed
+items will be positioned within the help menu.&nbsp; When you define a menu, you can define as many slots as you like. Adding more slots gives 
+other plug-ins more control over where their contributions appear relative to existing contributions. </P>
 <P >
-But wait!&nbsp; We know that there are other menu items on the Help menu.&nbsp;
-These are added by plug-ins.&nbsp; For example, the help plug-in adds an action
-set containing the &quot;Help Contents&quot; menu to the workbench.&nbsp; Here's
-the markup from the <b>org.eclipse.help.ui</b> plug-in's
+Plug-ins that add a menu item to the help menu can use these group names to decide where their
+menu item will go.  For example, the cheatsheet plug-in adds an action
+set containing the &quot;Cheat Sheets...&quot; menu to the workbench.&nbsp; Here's
+the markup from the <b>org.eclipse.ui.cheatsheets</b> plug-in's
 <b>plugin.xml</b>. </P>
 <font color='#4444CC'><pre>
-&lt;extension point=&quot;org.eclipse.ui.actionSets&quot;&gt;
+&lt;extension
+	point="org.eclipse.ui.actionSets"&gt;
 	&lt;actionSet
-		id=&quot;org.eclipse.help.internal.ui.HelpActionSet&quot;
-		label=&quot;%help&quot;
-		visible=&quot;true&quot;&gt;
-			
-	&lt;action id=&quot;org.eclipse.help.internal.ui.HelpAction&quot;
-		<b>menubarPath=&quot;help/helpEnd&quot;</b>
-		label=&quot;%helpcontents&quot;
-		class=&quot;org.eclipse.help.ui.internal.HelpContentsAction&quot;
-		icon=&quot;icons/view.gif&quot;
-		helpContextId=&quot;org.eclipse.help.ui.helpContentsMenu&quot;
-		tooltip=&quot;%openhelpcontents&quot;/&gt;
-	...
+		label="%CHEAT_SHEETS"
+		visible="true"
+		id="org.eclipse.ui.cheatsheets.actionSet"&gt;
+		&lt;action
+			label="%CHEAT_SHEETS_MENU"
+			class="org.eclipse.ui.internal.cheatsheets.actions.CheatSheetHelpMenuAction"
+			<b>menubarPath="help/helpStart"</b>
+			id="org.eclipse.ui.cheatsheets.actions.CheatSheetHelpMenuAction"&gt;
+		&lt;/action&gt;
+	&lt;/actionSet&gt;
+&lt;/extension&gt;
 </pre></font>
 <P >
-The new help action will be placed in the help menu, inside the <b> helpEnd</b> group. If no other plug-in has contributed to the help menu, this means the &quot;Help Contents&quot; menu item will appear as the first item in the menu above the &quot;About&quot; item. If another plug-in wanted to contribute an item that always appeared above the &quot;Help Contents&quot; item, then it could specify the
-<b> helpStart</b> group on its path.&nbsp;&nbsp;</P>
+The new help action will be placed in the help menu, inside the <b>helpStart</b> group.</P>
 
 
 <H4>
 Fully qualified menu paths</H4>
 <P >
  A complete menu path is simply &quot;menu name/group
- name.&quot;&nbsp; Menu names for the workbench are defined in
-<b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>. This
- class is used to find that the fully qualified path name for our help action is
+ name.&quot;&nbsp; Most menu names for the workbench are defined in
+<b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>. 
+(Resource-related menu names are defined in <b><a href="../reference/api/org/eclipse/ui/ide/IIDEActionConstants.html">IIDEActionConstants</a></b>.)
+If we look for the name of the help menu in this class, we'll find
+that the fully qualified path name for our help action is
  &quot;<b>help/helpEnd</b>.&quot; </P>
 <P >
-Some menus have nested submenus. This is where longer paths come into play. If the help menu had defined a submenu called &quot;<b>submenu</b>&quot; with a named group called &quot;<b>submenuStart</b>,&quot; then the fully qualified menu path for an action in the new submenu would be &quot;<b>help/submenu/submenuStart</b>.&quot;</P>
+Some menus have nested submenus. This is where longer paths come into play. If the help menu had defined a submenu 
+called &quot;<b>submenu</b>&quot; with a named group called &quot;<b>submenuStart</b>,&quot; 
+then the fully qualified menu path for an action in the new submenu would be 
+&quot;<b>help/submenu/submenuStart</b>.&quot;</P>
 
 
 <H4>
@@ -90,12 +97,10 @@ Externalizing UI labels</a></H4>
 <p>The example above demonstrates a technique for externalizing strings
 that appear in the UI.&nbsp; Externalized strings are used to make translating the plug-in's UI to
 other languages simpler.&nbsp; We can externalize the strings in our <b>plugin.xml
-</b>files by replacing the string with a key (e.g. <b>%help,
-%helpcontents</b>) and creating entries in the <b>plugin.properties</b>
+</b>files by replacing the string with a key (<b>%CHEAT_SHEETS_MENU</b>) and creating entries in the <b>plugin.properties</b>
 file of the form:</p>
 <font color='#4444CC'><pre>
-   help = &quot;Help&quot;
-   helpContents = &quot;Help Contents&quot;
+	CHEAT_SHEETS_MENU = Cheat Sheets...
 </pre></font>
 <P >
 The <b>plugin.properties</b> file can be
