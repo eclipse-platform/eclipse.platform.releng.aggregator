@@ -13,16 +13,74 @@
 Describing and packaging infopop content</h3>
 
 
-<p>
-Show the markup of context ID's and links</p>
+<p>Infopops are described by associating the context id declared in the UI code
+with a description and list of links to related topics in the online help.&nbsp;
+These associations are made inside an XML file.&nbsp; You can create any number
+of XML files containing infopop associations for each plug-in.&nbsp; The
+description and links for each context id is made inside <b>&lt;context&gt;</b>
+elements in the XML file.&nbsp; Each context element can have an optional <b>&lt;description&gt;</b>
+element which is used to describe the UI object and any number of <b>&lt;topic&gt;</b>
+elements which link to the on-line documentation.<font color="#000080"><br>
+</font></p>
+<pre><font color="#4444CC">&lt;contexts&gt;
+	&lt;context id=&quot;panic_button&quot;&gt;
+		&lt;description&gt;This is the panic button.&lt;/description&gt;
+		&lt;topic href=&quot;tasks/pushing_the_panic_button.htm&quot; label=&quot;Pushing the panic button&quot;/&gt;
+		&lt;topic href=&quot;reference/panic_button.htm&quot; label=&quot;Panic Button Reference&quot;/&gt;
+	&lt;/context&gt;
+	...
+&lt;/contexts&gt;</font></pre>
+<p>Once the contexts have been described in the XML file (or files), you are
+ready to refer to the context files in your plug-in manifest.&nbsp; Note that
+the context id is not fully qualified above.&nbsp; This is allowed, as long as
+the context file is contributed in the manifest of the plug-in that defined the
+context id.&nbsp; In other words, the context id is resolved to the id of the
+plug-in that contributed the XML file.&nbsp;&nbsp;</p>
+<p>A plug-in contributes context files using the <b><a href="../reference/extension-points/org_eclipse_help_contexts.html">org.eclipse.help.contexts</a></b>
+extension point.&nbsp;&nbsp;</p>
+<font color="#4444CC">
+<pre>   &lt;extension point=&quot;org.eclipse.help.contexts&quot;&gt;
+      &lt;contexts name=&quot;myInfopops.xml&quot;  /&gt;
+   &lt;/extension&gt;</pre>
+</font>
+<p>You can reference context files from other plug-ins by including the <b>plugin</b>
+attribute.&nbsp; This allows you to group all of your documentation, including
+infopops, in one plug-in, and refer to it from the UI code plug-in or some other
+related plug-in.</p>
+<font color="#4444CC">
+<pre>   &lt;extension point=&quot;org.eclipse.help.contexts&quot;&gt;
+      &lt;contexts name=&quot;myInfopops.xml&quot; <b>plugin</b>=&quot;com.example.helpExample&quot;  /&gt;
+   &lt;/extension&gt;</pre>
+</font>
+<p>As you can see, you have a lot of flexibility in organizing your infopops
+into one or more files contained in one or more plug-ins.&nbsp; The main
+consideration is that the context ids in the files resolve correctly.&nbsp; If
+you do not fully qualify a context id, then you must contribute the context XML
+files in the plug-in that declared the context ids.&nbsp; If you use fully
+qualified context ids in your context XML file, then you have complete
+flexibility in the location of your XML files and which plug-in contributes the
+contexts.</p>
 
 
 <h4>
 Infopops from multiple plug-ins</h4>
 
 
-<p>
-Describe the merging/appending of hrefs in an infopop</p>
+<p>Another level of flexibility is the ability to contribute infopops for the
+same context id from different plug-ins.&nbsp; This is useful, for example, if
+there are different sets of documentation plug-ins that may or may not be
+installed in a user's configuration.&nbsp; This allows each documentation
+plug-in to declare its contexts independently.&nbsp; The end user will see the
+merged infopop content for all plug-ins that contributed contexts for the
+widget's id.</p>
+
+
+<p>Note that the fully
+qualified context id for the widget must be used, since none of the documentation plug-ins
+declared the context id.&nbsp; When multiple plug-ins contribute infopops for
+the same context ID, the content defined in the plug-in that declared the
+context (the UI plug-in) is shown first.&nbsp; Additional descriptions and links
+are appended in no guaranteed order.</p>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
