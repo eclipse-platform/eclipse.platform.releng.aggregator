@@ -17,10 +17,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import junit.framework.Assert;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
@@ -140,6 +146,61 @@ public class DB {
 
     public static void queryDistinctValues(List values, String key, Variations variationPatterns, String scenarioPattern) {
         getDefault().internalQueryDistinctValues(values, key, variationPatterns, scenarioPattern);
+    }
+ 
+    public static String[] querySeriesValues(String scenarioName, Variations v, String seriesKey) {
+        return getDefault().internalQuerySeriesValues(v, scenarioName, seriesKey);
+    }
+    
+    public static Scenario getScenarioSeries(String scenarioName, Variations v, String seriesKey, String startBuild, String endBuild, Dim[] dims) {
+        
+        v= (Variations) v.clone();
+        v.put(seriesKey, new String[] { startBuild, endBuild });
+        Scenario scenario= new Scenario(scenarioName, v, seriesKey, dims);
+        TimeSeries ts= scenario.getTimeSeries(dims[0]);
+        if (ts.getLength() < 2) {
+            v.put(seriesKey, "%"); //$NON-NLS-1$
+            String[] names= DB.querySeriesValues(scenarioName, v, seriesKey);
+            if (names.length >= 2) {
+                String start= findClosest(names, startBuild);
+                String end= findClosest(names, endBuild);
+                v.put(seriesKey, new String[] { start, end });
+                scenario= new Scenario(scenarioName, v, seriesKey, dims);
+            }
+        }
+        return scenario;
+    }
+    
+    private static String findClosest(String[] names, String name) {
+        for (int i= 0; i < names.length; i++)
+            if (names[i].equals(name))
+                return name;
+            
+        Pattern pattern= Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
+        Matcher matcher= pattern.matcher(name); //$NON-NLS-1$
+        
+        if (!matcher.find())
+            return name;
+            
+        int x= Integer.parseInt(name.substring(matcher.start(), matcher.end()));
+        int ix= -1;
+        int mind= 0;
+            
+        for (int i= 0; i < names.length; i++) {
+            matcher.reset(names[i]);
+            if (matcher.find()) {
+                int y= Integer.parseInt(names[i].substring(matcher.start(), matcher.end()));
+                int d= Math.abs(y-x);
+                if (ix < 0 || d < mind) {
+                    mind= d;
+                    ix= i;
+                }
+            }
+         }
+        
+        if (ix >= 0)
+            return names[ix];
+        return name;
     }
 
     /**
@@ -436,6 +497,67 @@ public class DB {
                 }
         }
         return null;
+    }
+    
+    private String[] internalQuerySeriesValues(Variations v, String scenarioName, String seriesKey) {
+        
+        boolean isCloned= false;
+        
+        String[] seriesPatterns= null;        
+        Object object= v.get(seriesKey);
+        if (object instanceof String[])
+            seriesPatterns= (String[]) object;
+        else if (object instanceof String)
+            seriesPatterns= new String[] { (String) object };
+        else
+            Assert.assertTrue(false);
+        
+        ArrayList values= new ArrayList();
+        for (int i= 0; i < seriesPatterns.length; i++) {
+            if (seriesPatterns[i].indexOf('%') >= 0) {
+                if (! isCloned) {
+                    v= (Variations) v.clone();
+                    isCloned= true;
+                }
+                v.put(seriesKey, seriesPatterns[i]);
+                internalQueryDistinctValues(values, seriesKey, v, scenarioName);
+            } else
+                values.add(seriesPatterns[i]);
+        }
+        
+        String[] names= (String[])values.toArray(new String[values.size()]);
+        
+        boolean sort= true;
+        Pattern pattern= Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
+        final Matcher matcher= pattern.matcher(""); //$NON-NLS-1$
+        for (int i= 0; i < names.length; i++) {
+            matcher.reset(names[i]);
+            if (! matcher.find()) {
+                sort= false;
+                break;
+            }
+        }
+        if (sort) {
+	        Arrays.sort(names,
+	            new Comparator() {
+	            	public int compare(Object o1, Object o2) {
+	            	    String s1= (String)o1;
+	            	    String s2= (String)o2;
+	            	    
+	            	    matcher.reset(s1);
+	            	    if (matcher.find())
+	            	        s1= s1.substring(matcher.start());
+
+		            	matcher.reset(s2);
+		            	if (matcher.find())
+		            	    s2= s2.substring(matcher.start());
+
+	            	    return s1.compareTo(s2);
+	            	}
+	        	}
+	        );
+        }
+        return names;
     }
 
     /**
