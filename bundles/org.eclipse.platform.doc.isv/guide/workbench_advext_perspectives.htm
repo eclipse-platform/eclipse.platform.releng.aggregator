@@ -13,19 +13,6 @@
 <H3>
 org.eclipse.ui.perspectives</H3>
 <P >
-We've already seen some ways the workbench allows the user to control the appearance of plug-in functionality. Views can be hidden or shown using the
-<b>Window-&gt;Show View</b> menu. Action sets can be hidden or shown using the <b>Window-&gt;Customize
-Perspective...</b> menu. These features help the user organize the workbench. </P>
-
-<H4>
-Perspectives</H4>
-<P >
-<b>
-Perspectives</b> provide an additional layer of organization inside a workbench
-window. Users can switch between perspectives as they move across tasks. A perspective defines
-a collection of views, a layout for the views, and the visible action sets that
-should be used when the user first opens the perspective.</P>
-<P >
 The platform itself defines one perspective, the <b> Resource</b> perspective. Other platform plug-ins, such as
 the help system and the Java tooling, define additional perspectives. Your plug-in can define its own
 perspective by contributing to the <b><a href="../reference/extension-points/org_eclipse_ui_perspectives.html">org.eclipse.ui.perspectives</a></b>
@@ -46,51 +33,6 @@ The specification of the perspective in the <b> plugin.xml</b> is straightforwar
 A plug-in must supply an <b> id</b> and <b> name</b> for the perspective, along with the name of the
 <b> class</b> that implements the perspective. An <b> icon</b> can also be specified. The perspective class should implement
 <b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>.</P>
-<P >
-We can see from the markup that the real work must be happening in the code. The interface for the perspective factory is straightforward. Implementors of
-<b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>
-are expected to configure an <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b> with information that describes the
-perspective and its perspective page layout. </P>
-
-
-<H4>
-Workbench part layout</H4>
-<P >
-One of the main jobs of an <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b>
-is to describe the placement of the editor and the views in the workbench window. Note that these layouts are different than the
-<a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a> class in SWT. Although
-<b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b>
-and <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a>
-solve a similar problem (sizing and positioning widgets within a larger area), you do not have to understand SWT layouts in order to supply a
-perspective page layout.</P>
-<P >
-A perspective page layout is initialized with one area for displaying an editor. The perspective factory is responsible for adding additional views relative to the
-editor. Views are added to the layout relative to (top, bottom, left, right) another part. Placeholders (empty space) can also be added for
-items that are not initially shown.</P>
-<P >
-To organize related views and reduce clutter, you can use <a href="../reference/api/org/eclipse/ui/IFolderLayout.html"><b>IFolderLayout</b></a> to group views into tabbed folders. For example, the Resource perspective
-places the resource navigator inside a folder at the top left corner of the
-workbench.&nbsp; Placeholders are commonly used with folder layouts.
-The Resource perspective defines a placeholder for the bookmarks view in the
-same folder as the resource navigator. If the user shows the bookmarks view, it will appear in the same folder with the
-navigator, with a tab for each view.</P>
-<P >
- <b><a href="../reference/api/org/eclipse/ui/IPageLayout.html"> IPageLayout</a></b>
-also allows you to define the available actions and shortcuts inside a
-perspective.&nbsp;&nbsp; </P>
-
-
-
-<ul>
-  <li><b>addActionSet</b> is used to add action sets to a perspective.&nbsp;&nbsp;</li>
-  <li><b>addNewWizardShortcut</b> adds a new entry to the <b>File-&gt;New</b> menu for a perspective.</li>
-  <li><b>addShowViewShortcut</b> adds the names of
- views that should appear in the <b>Window-&gt;Show View</b>  menu when the
- perspective is active.&nbsp;&nbsp;</li>
-  <li><b>addPerspectiveShortcut</b> adds the names of
- perspectives that should appear in the <b>Window-&gt;Open Perspective</b> menu when
- the perspective is active.</li>
-</ul>
 
 
 
