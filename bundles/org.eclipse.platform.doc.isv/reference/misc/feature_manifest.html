@@ -3,13 +3,13 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-   <title>Feature Archives</title>
+   <title>Feature Manifest</title>
 </head>
 <body>
 
 <h1>
 Eclipse platform feature manifest</h1>
-<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.0 - Last revised XXXX, 2004</span></p>
+<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.0 - Last revised June 22, 2004</span></p>
 
 <p>The feature manifest format is defined by the following dtd:
 <p><tt>&lt;?xml encoding="ISO-8859-1"?></tt>
@@ -228,16 +228,16 @@ as a primary feature. Default if <i>false</i>
 application - optional identifier of the Eclipse application that is to
 be used during startup when the declaring feature is the primary feature. The application identifier must represent a valid application
 registered in the <tt>org.eclipse.core.runtime.applications</tt> extension
-point. Default is <tt>org.eclipse.ui.workbench</tt>.</li>
+point. Default is <tt>org.eclipse.ui.ide.workbench</tt>.</li>
 
-    <li> plugin (new in 2.1) - optional identifier that represents the id of the plug-in 
-      listed in the feature that is used to carry attribution information for 
+    <li> plugin - optional identifier that represents the id of the plug-in 
+      listed in the feature that is used to carry branding information for 
       the feature (images, translations, splash screens in case of primary feature 
       etc.). If not specified, the assumption will be made the attribution plug-in 
       has the same id as the feature.</li>
 
 <li>
-exclusive (new in 2.1) - optional flag that, if &quot;true&quot;, indicates that
+exclusive  - optional flag that, if &quot;true&quot;, indicates that
 the feature cannot be installed in a group with other features.</li>
 </ul>
 
@@ -263,8 +263,10 @@ of an extension registered in the <i>org.eclipse.update.installHandlers</i>
 extension point. In either case, the resulting class must implement the
 <i>IInstallHandler</i>
 interface. The class is dynamically loaded and called at specific points
-during feature processing. The handler has visibility to the API classes
-from the update plug-in, and Eclipse plug-ins required by the update plugin.</li>
+during feature processing. When the handler is specified as a class, it has visibility to the API classes
+from the org.eclipse.update.core plug-in, and Eclipse plug-ins required by this 
+plug-in; otherwise, when is specified as extension, it has access to all the 
+classes as the plug-in defining the extension.</li>
 </ul>
 
 <li>
@@ -298,7 +300,7 @@ to be translated. It is displayed in a standard dialog with [Accept] [Reject]
 actions during the download/ installation process. Note, that click-through
 license must be specified for any feature that will be selected for installation
 or update using the Eclipse update manager. When using nested features,
-only the nesting parent (ie. the feature selected for installation or update)
+only the nesting parent (i.e. the feature selected for installation or update)
 must have click-through license text defined. The license text is required
 even if the optional <i>url</i> attribute is specified.</li>
 
@@ -360,24 +362,25 @@ update site as this feature</li>
 
 <ul>
 <li>
-id - required nested feature identifier</li>
+id - required nested feature identifier. If the feature is a patch (see the 
+&lt;requires&gt; section below), this must be the id of another patch.</li>
 
 <li>
 version - required nested feature version</li>
 
 <li>
-optional (new in 2.1) - it is possible to include a feature as optional when
+optional&nbsp; - it is possible to include a feature as optional when
 this attribute is &quot;true&quot;. Users are allowed to not install optional
 features, disable them if they are installed, and install them later. A missing
 optional feature is not treated as an error.</li>
 
 <li>
-name (new in 2.1) - if an optional feature is missing, Eclipse cannot render its
+name&nbsp; - if an optional feature is missing, Eclipse cannot render its
 name properly. This attribute can be used as a 'place holder' to allow Eclipse
 to render the name of the optional feature when it is not installed.</li>
 
 <li>
-search-location (new in 2.1) - an included feature can be updated by patches. 
+search-location - an included feature can be updated by patches. 
 By default, search location is &quot;root&quot;
 which means that URL specified in the &quot;update&quot; element within the
 &quot;url&quot; element of the parent will be considered. If an included feature
@@ -479,7 +482,7 @@ at the version specified, or at a higher service, minor or major level.</li>
 </ul>
 
 <li>
-patch (new in 2.1) - if &quot;true&quot;, this constraint declares the enclosing
+patch&nbsp; - if &quot;true&quot;, this constraint declares the enclosing
 feature to be a patch for the referenced feature. Certain rules must be followed
 when this attribute is set:
 <ul>
@@ -487,6 +490,7 @@ when this attribute is set:
   <li>version attribute must be set</li>
   <li>match attribute should not be set and &quot;perfect&quot; value will be
     assumed.</li>
+  <li>if other features are &lt;include&gt;'ed, they must also be patches.</li>
 </ul>
 <p>A patch is a special feature that carries newer versions of plug-ins for
  the feature it is patching.  It does not replace the feature.  A patch can also
@@ -646,9 +650,10 @@ UTF-8 encoding. For example
 <p><tt>&lt;?xml version="1.0" encoding="UTF-8"?></tt>
 <p>Translatable text contained in the feature.xml can be separated into
 feature&lt;_locale>.properties files using Java property bundle conventions.
-Note that the translated strings are used at installation time (ie. do
+Note that the translated strings are used at installation time (i.e. do
 not employ the plug-in fragment runtime mechanism).&nbsp;
-<p><a href="../../hglegal.htm"><img src="../../cpy.gif" alt="Copyright IBM Corporation and others 2000, 2004." border="0" ></a>
+<p><a href="../../hglegal.htm">
+<img src="../../cpy.gif" alt="Copyright IBM Corporation and others 2000, 2004." border="0" width="324" height="14" ></a>
 </p>
 </body>
 </html>
