@@ -293,7 +293,7 @@ public class EclipseTestRunner implements TestListener {
 	}
 	
 	public void run() {
-		IPerformanceMonitor pm = PerfMsrCorePlugin.getPerformanceMonitor(true);
+//		IPerformanceMonitor pm = PerfMsrCorePlugin.getPerformanceMonitor(true);
 		
         fTestResult= new TestResult();
         fTestResult.addListener(this);
@@ -318,10 +318,10 @@ public class EclipseTestRunner implements TestListener {
             fSystemOut= new PrintStream(outStrm);
 
             try {
-            	pm.snapshot(1); // before
+//            	pm.snapshot(1); // before
                 fSuite.run(fTestResult);
             } finally {
-            	pm.snapshot(2); // after  	
+ //           	pm.snapshot(2); // after  	
                 fSystemError.close();
                 fSystemError= null;
                 fSystemOut.close();
@@ -339,7 +339,7 @@ public class EclipseTestRunner implements TestListener {
             fRetCode = FAILURES;
         }
         
-        pm.upload(getClass().getName());
+//        pm.upload(getClass().getName());
     }
 	
     /**
