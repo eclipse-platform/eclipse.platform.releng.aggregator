@@ -116,7 +116,7 @@ public class DB {
         // empty implementation
     }
 
-    private synchronized static DB getDefault() {
+    synchronized static DB getDefault() {
         if (fgDefault == null) {
             fgDefault= new DB();       
             fgDefault.connect();
@@ -142,7 +142,7 @@ public class DB {
         }
     }
    
-    private SQL getSQL() {
+    SQL getSQL() {
         return fSQL;
     }
     
