@@ -105,7 +105,6 @@ public class MapProject implements IResourceChangeListener {
 	}
  
 	public MapFile[] getValidMapFiles(){
-		if(mapFiles == null || mapFiles.length == 0) return null;
 		List list = new ArrayList();
 		for (int i = 0; i <mapFiles.length; i++){
 			IProject[] projects = mapFiles[i].getAccessibleProjects(); 
@@ -178,28 +177,38 @@ public class MapProject implements IResourceChangeListener {
 	 * @see IResourceChangeListener#resourceChanged(IResourceChangeEvent)
 	 */
 	public void resourceChanged(IResourceChangeEvent event) {
-		IResourceDelta root = event.getDelta();		
+		IResourceDelta root = event.getDelta();
+		
+		//TODO: Need to add code to handle map project deletion, addition and rename			
 		IResourceDelta folderDelta = root.findMember(getMapFolder().getFullPath());
 		if (folderDelta == null) return;
+		
+		//Handle map files deletion, addition and rename
 		IResourceDelta[] deltas = folderDelta.getAffectedChildren();
 		if(deltas == null || deltas.length == 0) return;
 		for (int i = 0; i < deltas.length; i++) {
 			IResourceDelta delta = deltas[i];
 			if(delta.getResource().getType() == IResource.FILE){				
 				try{
-					MapFile mFile = getMapFileFor((IFile)(delta.getResource()));	
-					// Handle content change
-					if(delta.getKind() == IResourceDelta.CHANGED){											
-						
-						mFile.loadEntries();	
-					}
-					// Handle deletion
-					if(delta.getKind() == IResourceDelta.REMOVED ){
-						removeMapFile(mFile);
-					}
-					// Handle addition
-					if(delta.getKind() == IResourceDelta.ADDED ){
-						addMapFile(mFile);
+					IFile aFile = (IFile)(delta.getResource());
+					MapFile mFile = null;
+					if(isMapFile(aFile)){
+						// Handle content change
+						if(delta.getKind() == IResourceDelta.CHANGED){	
+							mFile = getMapFileFor(aFile);
+							mFile.loadEntries();	
+						}
+						//Handle deletion. We cannot simply remove the map file directly bacause we have to call
+						//getMapFileFor(IFile) in order to do so. But the IFile is already deleted. So we have to 
+						//reconstuct the map files.
+						if(delta.getKind() == IResourceDelta.REMOVED ){
+							loadMapFiles();
+						}
+						// Handle addition
+						if(delta.getKind() == IResourceDelta.ADDED ){
+							mFile = getMapFileFor(aFile);
+							addMapFile(mFile);
+						}
 					}
 				} catch (CoreException e) {
 					RelEngPlugin.log(e);
@@ -213,7 +222,10 @@ public class MapProject implements IResourceChangeListener {
 	}
 	private void loadMapFiles() throws CoreException {
 		IFolder folder = project.getFolder(RelEngPlugin.MAP_FOLDER);
-		if(!folder.exists()) return;
+		if(!folder.exists()) {
+			mapFiles = new MapFile[0];
+			return;
+		}
 		IResource[] resource = folder.members();
 		if (resource != null) {
 			List list = new ArrayList();
@@ -221,9 +233,7 @@ public class MapProject implements IResourceChangeListener {
 				//In case there are some sub folders
 				if(resource[i].getType() == IResource.FILE){
 					IFile file = (IFile) resource[i];
-					String extension = file.getFileExtension();
-					//In case file has no extension name or is not validate map file
-					if( extension != null && extension.equals(MapFile.MAP_FILE_EXTENSION)){
+					if(isMapFile(file)){
 						list.add(new MapFile(file));
 					}
 				}
@@ -235,7 +245,6 @@ public class MapProject implements IResourceChangeListener {
 	}
 	
 	private MapFile getMapFileFor(IFile file) throws CoreException{
-		if(mapFiles == null || mapFiles.length == 0) return null;
 		for(int i = 0; i < mapFiles.length; i++){
 			if (mapFiles[i].getFile().equals(file))
 				return mapFiles[i];
@@ -254,9 +263,13 @@ public class MapProject implements IResourceChangeListener {
 		}	
 	}
 	private void addMapFile(MapFile aFile){
-		if(mapFiles == null || mapFiles.length == 0) return;
 		Set set = new HashSet(Arrays.asList(mapFiles));
 		set.add(aFile);
 		mapFiles = (MapFile[])set.toArray(new MapFile[set.size()]); 
+	}
+	private boolean isMapFile(IFile aFile){
+		String extension = aFile.getFileExtension();
+		//In case file has no extension name or is not validate map file
+		return ( extension != null && extension.equals(MapFile.MAP_FILE_EXTENSION)); 
 	}
 }

@@ -71,4 +71,7 @@ public class MapFileComparePage extends WizardPage {
 	public void setTag(String t) {
 		this.tag = t;
 	}
+	public void updateMapProject(MapProject m){
+		input.updateMapProject(m);
+	}
 }

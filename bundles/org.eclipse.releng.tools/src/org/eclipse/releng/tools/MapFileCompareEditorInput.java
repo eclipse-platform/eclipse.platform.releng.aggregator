@@ -38,6 +38,7 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 	private MapContentDocument[] documents;
 	private DiffNode root;
 	private Viewer viewer;
+	private MapProject mapProject;
 	
 	private IProject[] selectedProjects;
 	private String tag;	//The proposed tag
@@ -51,6 +52,7 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 				return true;
 			}
 		};
+		mapProject = null;
 	}
 
 	/* (non-Javadoc)
@@ -81,6 +83,9 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 		return viewer;
 	}
 	
+	public void updateMapProject(MapProject m){
+		mapProject = m;
+	}
 
 	private void setDocuments(MapContentDocument[] docs) {
 		this.documents = docs;
@@ -123,19 +128,16 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 		if (selectedProjects == null || selectedProjects.length == 0)
 			return null;
 		List projectList = new ArrayList();
-		CVSTag[] tags = getMapProject().getTagsFor(selectedProjects );
+		CVSTag[] tags = mapProject.getTagsFor(selectedProjects );
 		for(int i = 0; i < selectedProjects.length; i++){
 			if(!tags[i].getName().equals(tag)){
 				projectList.add(selectedProjects[i]);
 			}
 		}
 		IProject [] projects = (IProject[])projectList.toArray(new IProject[projectList.size()]);
-		return getMapProject().getMapFilesFor(projects);
+		return mapProject.getMapFilesFor(projects);
 	}
 	
-	private MapProject getMapProject() {
-		return MapProject.getDefaultMapProject();
-	}
 
 	//Construct the document as the diffNode. 
 	private MapContentDocument [] constructDocuments(){
@@ -168,5 +170,4 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 	private void setTag(String t) {
 		this.tag = t;
 	}
-
 }

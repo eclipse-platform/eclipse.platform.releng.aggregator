@@ -47,11 +47,8 @@ public class ProjectComparePage extends WizardPage{
 
 	public ProjectComparePage(String pageName, 
 			String title, 
-			ImageDescriptor image,
-			MapProject mProject) {
+			ImageDescriptor image) {
 		super(pageName, title, image);
-		mapProject = mProject;
-
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -151,7 +148,9 @@ public class ProjectComparePage extends WizardPage{
 			setPageComplete(true);
 		}
 	}
-	
+	public void updateMapProject(MapProject m){
+		mapProject = m;
+	}
 	
 }
 

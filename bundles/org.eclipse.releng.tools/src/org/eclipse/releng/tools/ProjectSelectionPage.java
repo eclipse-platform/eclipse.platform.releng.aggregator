@@ -75,11 +75,9 @@ public class ProjectSelectionPage extends WizardPage {
 	public ProjectSelectionPage(String pageName, 
 			String title, 
 			IDialogSettings settings, 
-			ImageDescriptor image,
-			MapProject mProject) {
+			ImageDescriptor image) {
 		super(pageName, title, image);
 		this.settings = settings;
-		mapProject = mProject;
 	}
 	
 	/*
@@ -263,5 +261,10 @@ public class ProjectSelectionPage extends WizardPage {
 			getViewer().setCheckedElements(projects);	
 		}
 	}
-	
+	public void updateMapProject(MapProject m){
+		mapProject = m;
+		if(viewer != null){
+			viewer.setInput(mapProject);
+		}
+	}
 }

@@ -21,10 +21,14 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.*;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.ui.*;
+import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
+import org.eclipse.team.internal.ccvs.ui.Policy;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
@@ -33,6 +37,7 @@ import org.eclipse.team.ui.ISharedImages;
 
 public class ReleaseWizard extends Wizard {
 
+	private MapProjectSelectionPage mapSelectionPage;
 	private ProjectSelectionPage projectSelectionPage;
 	private TagPage tagPage;
 	private ProjectComparePage projectComparePage;
@@ -47,7 +52,7 @@ public class ReleaseWizard extends Wizard {
 	private IProject[] selectedProjects;
 	
 
-	public ReleaseWizard(MapProject mProject) {
+	public ReleaseWizard() {
 		setWindowTitle("Release"); //$NON-NLS-1$
 		IDialogSettings settings = RelEngPlugin.getDefault().getDialogSettings();
 		section = settings.getSection("ReleaseWizard");//$NON-NLS-1$
@@ -55,7 +60,6 @@ public class ReleaseWizard extends Wizard {
 			section = settings.addNewSection("ReleaseWizard");//$NON-NLS-1$
 		}
 		setDialogSettings(section);
-		mapProject = mProject;
 	}	
 
 	public boolean execute(Shell shell) {
@@ -69,11 +73,17 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.IWizard#addPages()
 	 */
 	public void addPages() {
+		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage",
+				"Map Project Selection",
+				section,
+				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE));
+		mapSelectionPage.setDescription("Specify a map project to release projects");
+		addPage(mapSelectionPage);
+		
 		projectSelectionPage = new ProjectSelectionPage(Messages.getString("ReleaseWizard.5"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.6"), 
 				section, 
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE),
-				mapProject);
+				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE));
 		projectSelectionPage.setDescription(Messages.getString("ReleaseWizard.7")); //$NON-NLS-1$
 		addPage(projectSelectionPage);
 		
@@ -86,8 +96,7 @@ public class ReleaseWizard extends Wizard {
 		
 		projectComparePage = new ProjectComparePage(Messages.getString("ReleaseWizard.11"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.12"), 
-				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE),
-				mapProject); //$NON-NLS-1$
+				TeamUIPlugin.getImageDescriptor(ISharedImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
 		projectComparePage.setDescription(Messages.getString("ReleaseWizard.13")); //$NON-NLS-1$
 		addPage(projectComparePage);
 		
@@ -127,6 +136,7 @@ public class ReleaseWizard extends Wizard {
 					}
 				}
 			});
+			mapSelectionPage.saveSettings();
 			projectSelectionPage.saveSettings();
 			tagPage.saveSettings();
 			return true;
@@ -149,6 +159,9 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
 	 */
 	public IWizardPage getNextPage(IWizardPage page) {
+		if (page == mapSelectionPage){
+			return projectSelectionPage;
+		}
 		if (page == projectSelectionPage) {
 			IProject[] projects = projectSelectionPage.getCheckedProjects();
 			if (projects != null && projects.length > 0){
@@ -274,5 +287,15 @@ public class ReleaseWizard extends Wizard {
 			}
 		}
 		return super.canFinish();
+	}
+
+	public MapProject getMapProject(){
+		return mapProject;
+	}
+	public void boadcastMapProjectChange(MapProject m){
+		mapProject = m;
+		projectSelectionPage.updateMapProject(m);
+		projectComparePage.updateMapProject(m);
+		mapComparePage.updateMapProject(m);
 	}
 }
