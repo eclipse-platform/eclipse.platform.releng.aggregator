@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M6<br>
-Last revised December 4, 2003</p>
+Last revised December 9, 2003</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -548,6 +548,36 @@ particular perspective that contained reference to the old view id. The
 equivalent view id is now: &quot;org.eclipse.ui.console.ConsoleView&quot;.<br>
 The generic console is available via the Window&gt;Show View&gt;Basic&gt;Console
 and is used by the Eclipse debug and Ant integration.</p>
+<h3>[JDT only] IJavaBreakpointListener (package org.eclipse.jdt.debug.core)</h3>
+<p>In 3.0, the return types for the methods
+IJavaBreakpointListener.breakpointHit(IJavaBreakpoint, IJavaThread) and
+installingBreakpoing(IJavaTarget, IJavaBreakpoint, IJavaType) changed from
+boolean to int to allow listeners to vote &quot;don't care&quot;. In releases
+prior to 3.0, listeners could only vote &quot;suspend&quot; or &quot;don't
+suspend&quot; when a breakpoint was hit, and &quot;install&quot; or &quot;don't
+install&quot; when a breakpoint was about to be installed. In 3.0, listeners can
+also vote &quot;don't care&quot; for either of these notifications. This allows
+clients to only make a decisive vote in situations that they care about. For
+&quot;breakpoint hit&quot; notifications, the breakpoint will suspend if any
+listeners vote &quot;suspend&quot;, or all listeners vote &quot;don't
+care&quot;; and it will not suspend if at least one listener votes &quot;don't
+suspend&quot; and no listeners vote &quot;suspend&quot;. Similarly, for
+&quot;breakpoint installing&quot; notifications, the breakpoint will be
+installed if any listeners vote to install, or all listeners vote &quot;don't
+care&quot;; and it will not be installed if at least one listener votes
+&quot;don't install&quot; and no listeners vote &quot;install&quot;. In general,
+implementors should return DONT_CARE unless they have a strong opinion one way
+or the other. It is important to keep in mind, for example, that voting
+&quot;suspend&quot; will override any other listener's vote of &quot;don't
+suspend&quot;.</p>
+<p>The IJavaBreakpointListener interface is implemented by clients that create
+or react to breakpoints in Java code. There are likely few clients beyond JDT
+itself, save the one that reported the problem (<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37760">bug
+37760</a>) that this change remedies. This is a breaking change for existing
+code that implements the IJavaBreakpointListener interface. This code needs to
+be modified to return an appropriate int value before it will compile or run in
+3.0.</p>
+
 <h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
 <p>This section describes other changes that we recommend be made when porting
 an existing plug-in to 3.0.</p>
