@@ -57,33 +57,50 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 	 * 
 	 * @return the selected resources
 	 */
-	protected IResource[] getSelectedResources() {
+	protected IFile[] getSelectedResources() {
 		ArrayList resources = null;
 		if (!selection.isEmpty()) {
 			resources = new ArrayList();
 			Iterator elements = selection.iterator();
 			while (elements.hasNext()) {
 				Object next = elements.next();
-				if (next instanceof IResource) {
-					resources.add(next);
-					continue;
-				}
-				if (next instanceof IAdaptable) {
-					IAdaptable a = (IAdaptable) next;
-					Object adapter = a.getAdapter(IResource.class);
-					if (adapter instanceof IResource) {
-						resources.add(adapter);
-						continue;
-					}
+				IResource resource = (IResource) next;
+				switch(resource.getType()) {
+					case IResource.FILE :
+						resources.add((IFile) resource);
+						break;
+					case IResource.FOLDER :
+					case IResource.PROJECT :
+						addMembers((IContainer) resource, resources);
+						break;
 				}
 			}
 		}
 		if (resources != null && !resources.isEmpty()) {
-			IResource[] result = new IResource[resources.size()];
+			IFile[] result = new IFile[resources.size()];
 			resources.toArray(result);
 			return result;
 		}
-		return new IResource[0];
+		return new IFile[0];
+	}
+
+	private void addMembers(IContainer container, List list) {
+		try {
+			IResource[] resources = container.members();
+			for (int i = 0, max = resources.length; i < max; i++) {
+				IResource resource = resources[i];
+				switch(resource.getType()) {
+					case IResource.FOLDER :
+					case IResource.PROJECT :
+						addMembers((IContainer) resource, list);
+						break;
+					case IResource.FILE :
+						list.add((IFile) resource);
+				}
+			}
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -96,29 +113,22 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
-
 		log = new HashMap();
 		try {
+			final IResource[] results = getSelectedResources();
 			PlatformUI.getWorkbench().getProgressService().run(true, /* fork */
 			true, /* cancellable */
 			new WorkspaceModifyOperation() {
 				protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 					try {
-						monitor.beginTask("Fixing copyrights...", IProgressMonitor.UNKNOWN);
-
+						monitor.beginTask("Fixing copyrights...", results.length);
 						System.out.println("Start Fixing Copyrights");
-						IResource[] results = getSelectedResources();
 						System.out.println("Resources selected: " + results.length);
 						for (int i = 0; i < results.length; i++) {
 							IResource resource = results[i];
-							System.out.println(resource.getName());
-							try {
-								MyInnerClass myInnerClass = new MyInnerClass();
-								myInnerClass.monitor = monitor;
-								resource.accept(myInnerClass);
-							} catch (CoreException e1) {
-								e1.printStackTrace();
-							}
+							System.out.println("Resource selected: " + resource.getName());
+							processFile((IFile) resource, monitor);
+							monitor.worked(1);
 						}
 
 						writeLogs();
@@ -131,10 +141,8 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 				}
 			});
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -267,9 +275,9 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 
 		// either replace old copyright or put the new one at the top of the file
 		ibmCopyright.setRevisionYear(lastMod);
-		if (copyrightComment == null)
+		if (copyrightComment == null) {
 			aSourceFile.insert(ibmCopyright.getCopyrightComment());
-		else {
+		} else {
 			if (!copyrightComment.atTop())
 				warn(file, copyrightComment, "Old copyright not at start of file, new copyright replaces old in same location"); //$NON-NLS-1$
 			aSourceFile.replace(copyrightComment, ibmCopyright.getCopyrightComment());

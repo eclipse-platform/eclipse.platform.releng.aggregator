@@ -23,7 +23,7 @@ public class IBMCopyrightComment {
     public static final int JAVA_COMMENT = 1;
     public static final int PROPERTIES_COMMENT = 2;
 
-    private static final int DEFAULT_CREATION_YEAR = 2004;
+    private static final int DEFAULT_CREATION_YEAR = 2005;
 
     private int commentStyle = 0;
     private int creationYear = -1;
@@ -70,22 +70,23 @@ public class IBMCopyrightComment {
    	    String endStr = comma == -1 ? null : yearRange.substring(comma + 1);
 
    	    int startYear = -1;
-   	    if (startStr != null)
+   	    if (startStr != null) {
 	   	    try {
 	   	        startYear = Integer.parseInt(startStr.trim());
 	   	    } catch(NumberFormatException e) {
 	   	        // do nothing
 	   	    }
+   	    }
 
    	    int endYear = -1;
-   	    if (endStr != null)
+   	    if (endStr != null) {
    	        try {
    	            endYear = Integer.parseInt(endStr.trim());
    	        } catch(NumberFormatException e) {
    	            // do nothing
    	        }
+   	    }
 
-   	    
    	    String contribComment = body.substring(contrib);
    	    StringTokenizer tokens = new StringTokenizer(contribComment, "\r\n"); //$NON-NLS-1$
    	    tokens.nextToken();
@@ -96,9 +97,11 @@ public class IBMCopyrightComment {
    	        if (contributor.indexOf("***********************************") == -1 //$NON-NLS-1$
    	         && contributor.indexOf("###################################") == -1) { //$NON-NLS-1$
    	            int c = contributor.indexOf(linePrefix);
-   	            if (c != -1)
+   	            if (c == 0) {
+					// it has to be at the beginning of the line
    	                contributor = contributor.substring(c + linePrefix.length());
-   	            contributors.add(contributor.trim());
+   	            }
+   	            contributors.add(contributor);
    	        }
    	    }
 
@@ -116,12 +119,12 @@ public class IBMCopyrightComment {
 
     private static String getLinePrefix(int commentStyle) {
         switch(commentStyle) {
-        case JAVA_COMMENT:
-            return " * ";  //$NON-NLS-1$
-        case PROPERTIES_COMMENT:
-            return "# "; //$NON-NLS-1$
-        default:
-            return null;
+	        case JAVA_COMMENT:
+	            return " *";  //$NON-NLS-1$
+	        case PROPERTIES_COMMENT:
+	            return "#"; //$NON-NLS-1$
+	        default:
+	            return null;
         }
 	}
 
@@ -140,7 +143,6 @@ public class IBMCopyrightComment {
 			writeLegal(writer, linePrefix);
 			writeContributions(writer, linePrefix);
 		    writeCommentEnd(writer);
-
 			return out.toString();
 		} finally {
 		    writer.close();
@@ -159,27 +161,37 @@ public class IBMCopyrightComment {
 	}
 
 	private void writeLegal(PrintWriter writer, String linePrefix) {
-		writer.print(linePrefix + "Copyright (c) " + creationYear); //$NON-NLS-1$
+		writer.print(linePrefix + " Copyright (c) " + creationYear); //$NON-NLS-1$
 		if (revisionYear != -1 && revisionYear != creationYear)
 	        writer.print(", " + revisionYear); //$NON-NLS-1$
 		writer.println(" IBM Corporation and others."); //$NON-NLS-1$
 
-		writer.println(linePrefix + "All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
-		writer.println(linePrefix + "are made available under the terms of the Eclipse Public License v1.0"); //$NON-NLS-1$
-		writer.println(linePrefix + "which accompanies this distribution, and is available at"); //$NON-NLS-1$
-		writer.println(linePrefix + "http://www.eclipse.org/legal/epl-v10.html"); //$NON-NLS-1$
+		writer.println(linePrefix + " All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
+		writer.println(linePrefix + " are made available under the terms of the Eclipse Public License v1.0"); //$NON-NLS-1$
+		writer.println(linePrefix + " which accompanies this distribution, and is available at"); //$NON-NLS-1$
+		writer.println(linePrefix + " http://www.eclipse.org/legal/epl-v10.html"); //$NON-NLS-1$
 	}
 
 	private void writeContributions(PrintWriter writer, String linePrefix) {
 		writer.println(linePrefix);
-		writer.println(linePrefix + "Contributors:"); //$NON-NLS-1$
+		writer.println(linePrefix + " Contributors:"); //$NON-NLS-1$
 
 		if (contributors == null || contributors.size() <= 0)
-		    writer.println(linePrefix + "    IBM Corporation - initial API and implementation"); //$NON-NLS-1$
+		    writer.println(linePrefix + "     IBM Corporation - initial API and implementation"); //$NON-NLS-1$
 		else {
 			Iterator i = contributors.iterator();
-			while (i.hasNext())
-			    writer.println(linePrefix + "    " + (String)i.next());  //$NON-NLS-1$
+			while (i.hasNext()) {
+				String contributor = (String) i.next();
+				if (contributor.length() > 0) {
+					if (Character.isWhitespace(contributor.charAt(0))) {
+					    writer.println(linePrefix + contributor);  //$NON-NLS-1$
+					} else {
+					    writer.println(linePrefix + " " + contributor);  //$NON-NLS-1$
+					}
+				} else {
+				    writer.println(linePrefix);  //$NON-NLS-1$
+				}
+			}
 		}
 	}
 
