@@ -1,11 +1,16 @@
 <project name="Platform Doc Isv Build" default="all"  basedir="." >
 
 <target name="all">
-	<antcall target="extensionPointDocCopy" />	<antcall target="examplesDocCopy" />	<antcall target="generateJavadoc" />	
+	<antcall target="extensionPointDoc" />	<antcall target="examplesDocCopy" />	<antcall target="generateJavadoc" />	
 </target>
 
-<target name="extensionPointDocCopy">
-	<copy todir="reference/extension-points">    	<fileset dir="../org.eclipse.ant.core/doc"/>    	<fileset dir="../org.eclipse.compare/doc"/>    	<fileset dir="../org.eclipse.search/doc"/>
+<target name="extensionPointDoc">
+	<antcall target="extensionPointDocCopy" />
+	<antcall target="convertSchemaToHtml" />
+</target>
+
+<target name="extensionPointDocCopy" unless="eclipse.running">
+	<copy todir="reference/extension-points" failonerror="false">    	<fileset dir="../org.eclipse.ant.core/doc"/>    	<fileset dir="../org.eclipse.compare/doc"/>    	<fileset dir="../org.eclipse.search/doc"/>
     	<fileset dir="../org.eclipse.core.resources/doc"/>    	<fileset dir="../org.eclipse.core.runtime/doc"/>     	<fileset dir="../org.eclipse.help/doc"/>
      	<fileset dir="../org.eclipse.help.ui/doc"/>
     	<fileset dir="../org.eclipse.ui/doc"/>    	<fileset dir="../org.eclipse.debug.core/doc"/>
@@ -14,6 +19,24 @@
     	<fileset dir="../org.eclipse.team.ui/doc"/>
     	<fileset dir="../org.eclipse.update.core/doc"/>
     </copy>
+</target>
+
+<target name="convertSchemaToHtml" if="eclipse.running">
+	<property name="dest" value="reference/extension-points" />
+
+    <pde.convertSchemaToHTML manifest="../org.eclipse.ant.core/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.compare/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.search/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.core.resources/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.core.runtime/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.help/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.help.ui/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.ui/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.debug.core/plugin.xml" destination="${dest}" />
+ 	<pde.convertSchemaToHTML manifest="../org.eclipse.debug.core/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.debug.ui/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.team.core/plugin.xml" destination="${dest}" />
+    <pde.convertSchemaToHTML manifest="../org.eclipse.update.core/plugin.xml" destination="${dest}" />
 </target>
 
 <target name="examplesDocCopy" >
