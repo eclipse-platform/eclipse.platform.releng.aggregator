@@ -10,8 +10,72 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h2>Product extensions</h2>
-<p>Define extension and show example of dir structure.</p>
-<p>Link files and where they go.</p>
+<p>An <b>extension</b> is a set of Eclipse features and plug-ins that are
+designed to extend the functionality of already-installed Eclipse based
+products.&nbsp; Extensions are installed separately, but used only in
+conjunction with other products.&nbsp; This means that an extension does not
+need to install a JRE, the Eclipse platform, or a primary feature.&nbsp; The
+suggested directory structure for extensions allows a single installation to be
+used with multiple Eclipse based products.</p>
+<p>The following directory structure shows how an extension for a hypothetical
+product, <b>betterwebs</b>, could be used to extend the function of the <b>acmeweb</b>
+product.</p>
+<pre><font color="#4444CC">betterwebs/
+</font>	<font color="#4444CC">eclipse/</font>			(directory for installed Eclipse files)
+		<font color="#4444CC">.eclipseextension</font>	(marker file)
+		<font color="#4444CC">eclipse.exe	
+		features/</font>		(installed features)
+			<font color="#4444CC">com.example.betterwebs.betterfeature_1.0.0/
+				feature.xml
+		plugins/
+			com.example.betterwebs.betterfeature_1.0.0/
+				plugin.xml
+				about.html
+			com.example.betterwebs.betterwebsupport_1.0.0/
+</font></pre>
+
+<p>The relationship between an extension and the product that it is designed to
+enhance is set up in the <b>links</b> directory of the original product.&nbsp;
+Recall the following directory in the acmeweb product:</p>
+<pre><font color="#4444CC">acmeweb/
+</font>	...
+	<font color="#4444CC">eclipse/</font>		(directory for installed Eclipse files)
+		<font color="#4444CC">...
+		jre/
+		features/</font>	(installed features)
+<font color="#4444CC">			...
+		plugins/
+			...
+<b>		links/
+</b>			com.example.betterwebs.betterfeature.link</font></pre>
+
+<p>When an extension is installed, it creates a link file in the <b>links</b>
+directory of any product that it is intending to extend.&nbsp; This link file
+makes the original product aware of the existence of the extension.</p>
+
+<h3>Installing and uninstalling extensions</h3>
+
+<p>The install process for extensions is similar to that for products except for
+the following differences:</p>
+
+<ul>
+  <li>Determine which already-installed product is to be extended (by asking the
+    user or searching the computer for the appropriate marker file)</li>
+  <li>Create an <b>.eclipseextension</b> marker file (instead of an <b>.eclipseproduct</b>
+    marker file).&nbsp; The format and content are similar to the product
+    markers.</li>
+  <li>Create a link file for the extension and write it into the <b>links</b>
+    directory of the associated product.&nbsp; The link file has the same name
+    as the extension's feature directory without the version suffix.&nbsp; The
+    link file is a <b>java.io.Properties </b>format file which defines the path
+    to the installed extension.</li>
+</ul>
+<p>The uninstall process for extensions is similar to that for products except
+that the uninstall must remove the link file from any products where it added
+one. </p>
+<p>Additional information on installing extensions can be found in <a href="../reference/misc/eclipse_install.html">How
+to write an Eclipse installer</a>.</p>
+
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
 </BODY>
 </HTML>
