@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+org.eclipse.ui.newWizards
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<H3>
+org.eclipse.ui.newWizards</H3>
+<P >
+You can add a wizard to the <b> File-&gt;New </b> menu option in the workbench using the
+<a href="../reference/extension-points/org_eclipse_ui_newWizards.html"><b> org.eclipse.ui.newWizards</b></a> extension point. The readme
+tool example uses this extension point definition to add the Readme File wizard:</P>
+<P class="Code" >
+   &lt;extension<br>
+&nbsp;&nbsp;&nbsp; point = &quot;org.eclipse.ui.newWizards&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;category<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id = &quot;org.eclipse.ui.examples.readmetool.new&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="Example Creation Wizards"><br>
+&nbsp;&nbsp;&nbsp; &lt;/category><br>
+&nbsp;&nbsp;&nbsp; &lt;wizard<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id = &quot;org.eclipse.ui.examples.readmetool.wizards.new.file&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name = "Readme File"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.ui.examples.readmetool.ReadmeCreationWizard&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; category=&quot;org.eclipse.ui.examples.readmetool.new&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; icon=&quot;icons/basic/obj16/newreadme_wiz.gif&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;description>An example of a wizard that creates sample Readme
+file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/description><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;selection class=&quot;org.eclipse.core.resources.IResource&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/wizard><br>
+   &lt;/extension></P>
+<P >
+The <b> category</b> describes where the wizard will be grouped when the wizard selection dialog is used to find and launch a wizard. The category
+<b> name</b> (&quot;Example Creation Wizards&quot;)
+defines the label that is used in the wizard.&nbsp; The wizard itself is
+assigned to the category.&nbsp;&nbsp; Its <b>name</b>, <b>icon</b>,
+and <b>description</b> all show up in the new wizard
+selection dialog shown below.</P>
+<P >
+<img border="0" src="images/newwizardlist.jpg" width="500" height="500"></P>
+<P >
+All of this appears based on the markup in the <b>plugin.xml
+</b>file.&nbsp; None of the plug-in code runs
+until the user chooses the <b>Next</b> button.&nbsp; Once this happens, the
+workbench will instantiate the wizard <b>class</b>
+specified in the markup and pass it an expected selection <b>class</b>.</P>
+<P >
+The class identified in this extension (<b>ReadmeCreationWizard</b>) must
+implement the
+<a href="../reference/api/org/eclipse/ui/INewWizard.html"> <b> INewWizard</b></a> interface.&nbsp;
+Most wizards do so by extending the platform
+<a href="../reference/api/org/eclipse/jface/wizard/Wizard.html"> <b> Wizard</b></a> class
+although this is an implementation mechanism and not required by the extension
+point.</P>
+<P >
+The wizard itself does little but create the pages inside of it. Let's look at the implementation of the page first, and then come back to the wizard.</P>
+
+<H4>
+Pages</H4>
+<P >
+The workbench provides base wizard page classes that support the type of processing performed for each wizard extension point. You can use these pages, or extend them to add additional processing.</P>
+<P >
+The goal of the <b> ReadmeCreationWizard</b> is to create a new file, add the required content to the file, and as an option, open an editor on the file. Our page needs to define the controls that let the user specify what content goes in the file and whether an editor should be launched.</P>
+<P >
+We create the wizard page, <b>CreateReadmePage1</b>, by extending
+<a href="../reference/api/org/eclipse/ui/dialogs/WizardNewFileCreationPage.html"><b>WizardNewFileCreationPage</b></a>. The controls for a wizard page are defined in a fashion
+similar to the definition of the controls for a view or an editor. The page implements a
+<b> createControl</b> method, creating the necessary SWT widgets as children of the supplied
+<a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><b>Composite</b></a>. Since the superclass already adds widgets that support new file processing, we need only extend the
+<b> createControl</b> method in our wizard page to add the additional checkboxes that control generation of sections and opening of the editor.</P>
+<P class="Code" >
+public void createControl(Composite parent) {<br>
+&nbsp;&nbsp;&nbsp; // inherit default container and name specification widgets<br>
+&nbsp;&nbsp;&nbsp; super.createControl(parent);<br>
+&nbsp;&nbsp;&nbsp; Composite composite = (Composite)getControl();<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; // sample section generation group<br>
+&nbsp;&nbsp;&nbsp; Group group = new Group(composite,SWT.NONE);<br>
+&nbsp;&nbsp;&nbsp; group.setLayout(new GridLayout());<br>
+&nbsp;&nbsp;&nbsp; group.setText("Automatic sample section generation");<br>
+&nbsp;&nbsp;&nbsp; group.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL |<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GridData.HORIZONTAL_ALIGN_FILL));<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; // sample section generation checkboxes<br>
+&nbsp;&nbsp;&nbsp; sectionCheckbox = new Button(group,SWT.CHECK);<br>
+&nbsp;&nbsp;&nbsp; sectionCheckbox.setText("Generate sample section titles");<br>
+&nbsp;&nbsp;&nbsp; sectionCheckbox.setSelection(true);<br>
+&nbsp;&nbsp;&nbsp; sectionCheckbox.addListener(SWT.Selection,this);<br>
+<br>
+&nbsp;&nbsp;&nbsp; subsectionCheckbox = new Button(group,SWT.CHECK);<br>
+&nbsp;&nbsp;&nbsp; subsectionCheckbox.setText("Generate sample subsection titles");<br>
+&nbsp;&nbsp;&nbsp; subsectionCheckbox.setSelection(true);<br>
+&nbsp;&nbsp;&nbsp; subsectionCheckbox.addListener(SWT.Selection,this);<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; // open file for editing checkbox<br>
+&nbsp;&nbsp;&nbsp; openFileCheckbox = new Button(composite,SWT.CHECK);<br>
+&nbsp;&nbsp;&nbsp; openFileCheckbox.setText("Open file for editing when done");<br>
+&nbsp;&nbsp;&nbsp; openFileCheckbox.setSelection(true);<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+}</P>
+<P >
+You should be able to follow this code if you understand the concepts in
+<a HREF="swt.htm" CLASS="XRef">Standard Widget Toolkit</a>.</P>
+<P >
+The basic patterns for implementing a page include:</P>
+<ul>
+  <li>
+    <p >
+Add listeners to any controls that affect dynamic behavior of the page. For example, if selecting an item in a list or checking a box affects the state of other controls of the page, add a listener so you can change the state of the page.</li>
+  <li>
+    <p >
+Populate the controls with data based on the current selection when the wizard was launched. Some of the data may depend on the values in other controls. Some of the controls may use dialog settings to initialize their
+values.&nbsp;&nbsp;</li>
+  <li>
+    <p >
+Use <b>setPageComplete(true)</b> when enough information is provided by the user to exit the page (and move to the next page or finish the wizard.)</li>
+</ul>
+<P >
+The <b>ReadmeCreationPage</b> class inherits a lot of this behavior from the
+<a href="../reference/api/org/eclipse/ui/dialogs/WizardNewFileCreationPage.html"><b>WizardNewFileCreationPage</b></a>.&nbsp;
+Browse the implementation of these classes for further information.</P>
+<P >
+Now that we understand what a page does, let's look again at the wizard.</P>
+
+
+<H4>
+Wizard</H4>
+<P >
+The wizard is responsible for creating the pages and providing the &quot;finish&quot; logic.</P>
+<P >
+The basic patterns for implementing a wizard include:</P>
+<ul>
+  <li>
+    <p >
+Implement the <b>init</b> method to set up local variables for context information such as the workbench and the current selection.</li>
+</ul>
+    <p class="Code" >
+public void init(IWorkbench workbench,IStructuredSelection selection) {<br>
+&nbsp;&nbsp;&nbsp; this.workbench = workbench;<br>
+&nbsp;&nbsp;&nbsp; this.selection = selection;<br>
+&nbsp;&nbsp;&nbsp; setWindowTitle("New Readme File");<br>
+&nbsp;&nbsp;&nbsp;
+setDefaultPageImageDescriptor(ReadmeImages.README_WIZARD_BANNER);<br>
+}
+<ul>
+  <li>
+    <p >
+Implement <b> addPages</b> by creating instances of the pages.</li>
+</ul>
+    <p class="Code" >
+public void addPages() {<br>
+&nbsp;&nbsp;&nbsp; mainPage = new ReadmeCreationPage(workbench, selection);<br>
+&nbsp;&nbsp;&nbsp; addPage(mainPage);<br>
+}
+<ul>
+  <li>
+    <p >
+Implement <b> performFinish</b> to finish the task.</li>
+
+
+  <p>Multi-page wizards typically handle the finish logic in the wizard itself, since each page will contribute information that determines how the task is implemented. Single page wizards can implement the logic in the wizard or ask the page to finish the job.
+The approach you take largely depends on where your important state is kept.&nbsp;
+In the case of the readme wizard, we are going to ask our page to handle the finish processing.&nbsp;</p>
+</ul>
+<P class="Code" >
+public boolean performFinish() {<br>
+&nbsp;&nbsp;&nbsp; return mainPage.finish();<br>
+}</P>
+<P >
+The completed wizard looks like this:</P>
+<P >
+<img border="0" src="images/readmewizard.jpg" width="500" height="535"></P>
+
+
+
+<P CLASS="Code">
+&nbsp;</P>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+
+</BODY>
+</HTML>

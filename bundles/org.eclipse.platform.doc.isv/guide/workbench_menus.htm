@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Workbench menu contributions
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Workbench menu contributions</H2>
+<P >
+We've seen several different extension points that contribute to various menus and toolbars in the workbench. How do you know which one to use? The following table summarizes the various menu contributions and their use.</P>
+<TABLE BORDER="1" width="671">
+<TR>
+<TH ROWSPAN="1" COLSPAN="1" width="118">
+<P CLASS="CellHeading">
+Extension point name</P>
+</TH>
+<TH ROWSPAN="1" COLSPAN="1" width="359">
+<P CLASS="CellHeading">
+Location of Actions</P>
+</TH>
+<TH ROWSPAN="1" COLSPAN="1" width="335">
+<P CLASS="CellHeading">
+Details</P>
+</TH>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1" width="118">
+<P CLASS="CellBody">
+<b>
+viewActions</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="359">
+<P CLASS="CellBody">
+Actions appear in a specific view's local toolbar and local pulldown menu.</P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="335">
+<P CLASS="CellBody">
+Contribute an action class that implements <b><a href="../reference/api/org/eclipse/ui/IViewActionDelegate.html">IViewActionDelegate</a></b>. Specify the id of the contribution and the id of the target view that should show the action. The label and image
+dictate the appearance of the action in the UI. The path specifies the location relative to the view's menu and toolbar items.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1" width="118">
+<P CLASS="CellBody"><b>editorActions</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="359">
+<P CLASS="CellBody">
+Actions are associated with an editor and appear in the workbench menu and/or tool bar.</P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="335">
+<P CLASS="CellBody">
+Contribute an action class that implements <b><a href="../reference/api/org/eclipse/ui/IEditorActionDelegate.html">IEditorActionDelegate</a></b>. Specify the id of the contribution and the id of the target editor that causes the action to be shown. The label and image specify the appearance of the action in the UI. Separate menu and toolbar paths specify the existence and location of the contribution in the workbench menu and toolbar.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1" width="118">
+<P CLASS="CellBody">
+<b>
+popupMenu</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="359">
+<P CLASS="CellBody">
+Actions appear in the popup menu of an editor or view. Actions associated with an object type show up in all popups of views
+and editors that show the object type. Actions associated with a specific popup menu appear only in that popup menu.</P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="335">
+<P CLASS="CellBody">
+<b>
+Object contributions</b> specify the type of object for which the action should appear in a popup menu. The action will be shown in all view
+and editor popups
+that contain the object type.&nbsp; Provide an action class that implements <b><a href="../reference/api/org/eclipse/ui/IObjectActionDelegate.html">IObjectActionDelegate</a></b>.&nbsp;<BR>
+<b>
+Viewer contributions</b> specify the id of the target popup menu in which the menu item should appear.&nbsp;
+Provide an action class that implements <b><a href="../reference/api/org/eclipse/ui/IEditorActionDelegate.html">IEditorActionDelegate</a></b>
+or <b><a href="../reference/api/org/eclipse/ui/IViewActionDelegate.html">IViewActionDelegate</a></b>.&nbsp;</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1" width="118">
+<P CLASS="CellBody">
+<b>
+actionSets</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="359">
+<P CLASS="CellBody">
+Actions appear in the workbench main menus and toolbar. Actions are grouped into action sets. All actions in an action set will show up in the workbench menus and toolbars according to the user's selection of action sets and the current perspective shown in the workbench.</P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1" width="335">
+<P CLASS="CellBody">
+Contribute an action class that implements <b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindowActionDelegate.html"> IWorkbenchWindowActionDelegate</a></b> or
+<b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindowPulldownDelegate.html">IWorkbenchWindowPulldownDelegate</a></b>. Specify the
+<b> name</b> and <b> id</b> of the action set. Enumerate all of the actions that are defined for that action set. For each action, separate menu and toolbar paths specify the existence and location of the contribution in the workbench menu and toolbar.</P>
+</TD>
+</TR>
+</TABLE>
+
+<H3>
+<a name="workbench_menus_paths">Menu and toolbar paths</a></H3>
+<P >
+We've seen many action contributions that specify the path for the location of their action. Let's take a close look at what these paths mean.&nbsp;
+We'll look at paths by looking at the workbench <b>Help</b> menu.</P>
+
+<H4>
+Named groups</H4>
+<P >
+The locations for inserting new menus, menu items, or tool bar items are defined using named groups. You can think of
+a named group as a slot or placeholder that allows you to insert your menu and toolbar contributions at certain points in a menu or
+toolbar.</P>
+<P >
+The workbench defines all of its group slot names in the class <b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>. For each workbench menu, named groups are placed in the menu at locations where it is expected that
+plug-ins will insert new actions.</P>
+<P >
+The following description of the help menu is adapted from the <a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html"><b> IWorkbenchActionConstants</b></a>
+class definition.</P>
+<P CLASS="Code">
+Standard Help menu actions<br>
+Start group HELP_START &quot;start&quot;<br>
+End group HELP_END &quot;end&quot;<br>
+About action ABOUT &quot;About&quot;</P>
+<P >
+The standard workbench help menu consists of a named group called &quot;<b>start</b>,&quot; followed by a named group called &quot;<b>end</b>,&quot; followed by the &quot;<b>About</b>&quot; action. Why two groups? To provide some control for plug-ins for how far down they appear in the help menu. When you define a menu, you can define as many slots as you like. Adding more slots gives other plug-ins more control over where their contributions appear relative to existing contributions. </P>
+<P >
+But wait!&nbsp; We know that there are other menu items on the Help menu.&nbsp;
+These are added by plug-ins.&nbsp; For example, the help plug-in adds an action
+set containing the &quot;Help Contents&quot; menu to the workbench.&nbsp; Here's
+the markup from the <b>org.eclipse.help.ui</b> plug-in's
+<b>plugin.xml</b>. </P>
+<P class="Code" >
+   &lt;extension&nbsp;<br>
+&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.ui.actionSets&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;actionSet<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.help.internal.ui.HelpActionSet&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label="%help"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; visible="true"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;action id=&quot;org.eclipse.help.internal.ui.HelpAction&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; menubarPath=&quot;help/helpEnd&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label=&quot;%helpcontents&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.help.internal.ui.ShowHelp&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/actionSet&gt;<br>
+ &lt;/extension></P>
+<P >
+The new help action will be placed in the help menu, inside the <b> helpEnd</b> group. If no other plug-in has contributed to the help menu, this means the &quot;Help Contents&quot; menu item will appear as the first item in the menu above the &quot;About&quot; item. If another plug-in wanted to contribute an item that always appeared above the &quot;Help Contents&quot; item, then it could specify the
+<b> helpStart</b> group on its path.</P>
+<P >
+Toolbar paths work similarly. Whenever a path is specified, it must end with the name of a group in the toolbar.</P>
+
+
+<H4>
+Fully qualified menu and tool paths</H4>
+<P >
+ A complete menu or toolbar path is simply a list of menu name and named group pairs. Menu names for the workbench are also defined in
+<b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>. This is how we knew that the fully qualified path name for our help action was &quot;<b>help/helpEnd</b>.&quot; </P>
+<P >
+Some menus have nested submenus. This is where longer paths come into play. If the help menu had defined a submenu called &quot;<b>submenu</b>&quot; with a named group called &quot;<b>submenuStart</b>,&quot; then the fully qualified menu path for an action in the new submenu would be &quot;<b>help/submenu/submenuStart</b>.&quot;</P>
+
+
+<H4>
+<a name="workbench_menus_nls">
+Externalizing UI labels</a></H4>
+<p>The example above also demonstrates a technique for externalizing strings
+that appear in the UI.&nbsp; This is useful for translating the plug-in's UI to
+other languages.&nbsp; We can externalize the strings in our <b>plugin.xml
+</b>files by replacing the string with a key (e.g. <b>%help,
+%helpcontents</b>) and creating entries in the <b>plugin.properties</b>
+file of the form:</p>
+<p CLASS="Code">help = &quot;Help&quot;<br>
+helpContents = &quot;Help Contents&quot;</p>
+<P >
+This way, the <b>plugin.properties</b> file can be
+translated for different languages and the <b>plugin.xml</b>
+will not need to be modified.</P>
+
+
+<H4>
+Adding new menus and groups</H4>
+<P >
+In many of the examples we've seen so far, the actions contributed by the sample plug-ins have been added to existing named groups within menus and toolbars.</P>
+<P >
+The <b><a href="../reference/extension-points/org_eclipse_ui_actionSets.html">actionSets</a></b>,
+<b><a href="../reference/extension-points/org_eclipse_ui_viewActions.html">viewActions</a></b>,
+<b><a href="../reference/extension-points/org_eclipse_ui_editorActions.html">editorActions</a></b>, and
+<b><a href="../reference/extension-points/org_eclipse_ui_popupMenus.html"> popupMenus</a></b> extension points also allow you to define new menus and groups within your contribution. This means that you can define new submenus or new
+pull-down menus and contribute your actions to these new menus. In this case, the path for your new action will contain the name of your newly defined menu. </P>
+<P class="Code" >
+We saw this technique when the readme tool defined a new menu for its action
+set.&nbsp; Let's look at the markup one more time now that we've looked at menu
+paths in more detail. </P>
+<P class="Code" >
+&lt;extension&nbsp;<br>
+&nbsp;&nbsp;&nbsp; point = &quot;org.eclipse.ui.actionSets&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;actionSet id=&quot;org_eclipse_ui_examples_readmetool_actionSet&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label=&quot;ReadMe Actions&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; visible=&quot;true&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;menu id=&quot;org_eclipse_ui_examples_readmetool&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+label=&quot;Readme &amp;amp;File Editor&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+path=&quot;window/additions&quot;&gt;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;separator
+name=&quot;slot1&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;separator
+name=&quot;slot2&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;separator
+name=&quot;slot3&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/menu&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;action id=&quot;org_eclipse_ui_examples_readmetool_readmeAction&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; menubarPath=&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; toolbarPath=&quot;readme&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+label=&quot;&amp;amp;Open Readme Browser@Ctrl+R&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tooltip=&quot;Open
+Readme Browser&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+icon=&quot;icons/basic/ctool16/openbrwsr.gif&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.ui.examples.readmetool.WindowActionDelegate&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; enablesFor=&quot;1&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;selection
+class=&quot;org.eclipse.core.resources.IFile&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+name=&quot;*.readme&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/selection&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/action&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/actionSet&gt;<br>
+&lt;/extension&gt; </P>
+<P >We added a new menu called&nbsp; &quot;<b>org_eclipse_ui_examples_readmetool</b>.&quot; Its label is the string &quot;<b>Readme
+&amp;File Editor</b>.&quot; Within this menu, we define three named
+groups:&nbsp; &quot;<b>slot1</b>,&quot; &quot;<b>slot2</b>,&quot;
+and &quot;<b>slot3</b>.&quot;&nbsp; We add this new
+menu to the path &quot;<b>window/additions</b>.&quot;</P>
+<P >If we go back to <b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>,
+we see this definition of the window menu in the javadoc:</P>
+<P class="Code" >* &lt;h3&gt;Standard Window menu actions&lt;/h3><br>
+ * &lt;ul><br>
+ *   &lt;li>Extra Window-like action group (&lt;code>WINDOW_EXT&lt;/code>)&lt;/li>&nbsp;</P>
+<P >
+If we look further at the class definition, we will see these related
+definitions: </P>
+
+
+<P class="Code" >
+public static final String MENU_PREFIX = "";<br>
+...<br>
+    public static final String M_WINDOW = MENU_PREFIX+&quot;window&quot;;<br>
+...<br>
+public static final String MB_ADDITIONS = "additions";  // Group.<br>
+...<br>
+public static final String WINDOW_EXT = MB_ADDITIONS;   // Group. </P>
+
+
+<P >
+From this information, we can piece together the path for adding something to
+the workbench &quot;Window&quot; menu.&nbsp; The menu itself is called &quot;<b>window</b>&quot;
+and it defines one slot called &quot;<b>additions</b>.&quot;&nbsp;
+We use the path &quot;<b>window/additions</b>&quot; to
+add our new menu. </P>
+
+
+<P >
+In the action set declaration, we add an action to our newly defined menu, using
+the path &quot;<b>window/org_eclipse_ui_examples_readmetool/slot1</b>.&quot; </P>
+
+
+<P >
+<img border="0" src="images/readmeactionsetmenu.jpg" width="348" height="89"> </P>
+
+
+<P >Other plug-ins could add to our menu by using this same path (or perhaps one
+of the other slots) to add one of their own menus.&nbsp;&nbsp; </P>
+
+
+<P >In general, it's not good practice to contribute to another plug-in's menu
+or tool bar by deriving the path name from the <b>plugin.xml</b>.&nbsp;
+It's possible that a future version of the plug-in could change the names of the
+paths.&nbsp; The recommended practice is to define a public interface (much like <b><a href="../reference/api/org/eclipse/ui/IWorkbenchActionConstants.html">IWorkbenchActionConstants</a></b>)
+which specifies exactly which menus, tool bar groups, and slots are considered
+fair game for use by other plug-ins. </P>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+
+</BODY>
+</HTML>

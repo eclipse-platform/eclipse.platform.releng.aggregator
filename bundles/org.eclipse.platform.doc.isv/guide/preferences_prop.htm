@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Property pages
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>
+ Property pages</h2>
+<P >
+Property pages are very similar to preference pages. The primary difference is that property pages are associated with a particular resource, while preferences are associated with the plug-in itself.</P>
+
+<H3>org.eclipse.ui.propertyPages</H3>
+<P >
+You can contribute a property page for a resource by using the
+<a href="../reference/extension-points/org_eclipse_ui_propertyPages.html"> <b> org.eclipse.ui.propertyPages</b></a> extension point.
+A resource's property page is invoked using the <b>Properties </b>menu in the
+resource navigator view.&nbsp; This menu is available when a single resource is
+selected.&nbsp;</P>
+<P >The readme tool contributes two property pages.</P>
+<P class="Code" >
+  &lt;extension<br>
+&nbsp;&nbsp;&nbsp; point = &quot;org.eclipse.ui.propertyPages&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;page<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.ui.examples.readmetool.FilePage&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="Readme Tool"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; objectClass=&quot;org.eclipse.core.resources.IFile&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.ui.examples.readmetool.ReadmeFilePropertyPage&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nameFilter=&quot;*.readme&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/page><br>
+&nbsp;&nbsp;&nbsp; &lt;page<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="org.eclipse.ui.examples.readmetool.FilePage2"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="More Readme Info"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; objectClass=&quot;org.eclipse.core.resources.IFile&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class="org.eclipse.ui.examples.readmetool.ReadmeFilePropertyPage2"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nameFilter=&quot;*.readme&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;/page><br>
+  &lt;/extension></P>
+<P >
+Both pages are contributed for objects of type <b><a href="../reference/api/org/eclipse/core/resources/IFile.html"> IFile</a></b> with a
+<b>.readme</b> file extension. </P>
+<P >
+Property pages look a lot like preference pages, except there is no hierarchy or categorization of property pages. In the dialog below, both readme property pages appear in the main list of pages.</P>
+<P >
+<img border="0" src="images/readmeproperties.jpg" width="668" height="531"></P>
+
+
+<H3>
+Properties page</H3>
+<P >
+When the workbench creates and launches a properties page, it sets the selected resource into the page. The page can use the
+<b> getElement()</b> method to obtain its element, an <b><a href="../reference/api/org/eclipse/core/runtime/IAdaptable.html">IAdaptable</a></b>. </P>
+<P >
+The pattern for creating property pages is similar to that of preference pages, so we will only focus on what is different. Property pages show information about their element. This information can be obtained
+by accessing the element in order to query or compute the relevant
+information.&nbsp; The information can also be stored and retrieved from the
+resource's properties.</P>
+<P >
+The <b> ReadmeFilePropertyPage</b> computes most of its information using its element. The following snippet shows how the number of sections is computed and displayed in a label.</P>
+<P CLASS="Code">
+...<br>
+IResource resource = (IResource) getElement();<br>
+...<br>
+IAdaptable sections = getSections(resource);<br>
+if (sections instanceof AdaptableList) {<br>
+&nbsp;&nbsp;&nbsp; AdaptableList list = (AdaptableList)sections;<br>
+&nbsp;&nbsp;&nbsp; label = createLabel(panel, String.valueOf(list.size()));<br>
+...</P>
+<P >
+When a property is computed, there is no need for corresponding logic to save the value, since the user cannot update this value.</P>
+<P >
+Properties pages are commonly used for viewing and for setting the
+application-specific&nbsp; properties of a resource.
+(See <a HREF="resInt_properties.htm" CLASS="XRef">Resource properties</a>  for a
+discussion of session and persistent properties.)&nbsp;
+Since the property page knows its resource, the resources API can be used in the page to initialize control values or
+to set new property values based on user selections in the properties page.</P>
+<P >
+The following snippet shows a checkbox value being initialized from a property on a property page's element.</P>
+<P CLASS="Code">
+private void initializeValues() {<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; IResource resource = (IResource) getElement();<br>
+&nbsp;&nbsp;&nbsp; label.setText(resource.getPersistentProperty(&quot;MyProperty&quot;));<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+}</P>
+<P >
+The corresponding code for saving the checkbox value back into the property looks like this:</P>
+<P CLASS="Code">
+private void storeValues() {<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; IResource resource = (IResource) getElement();<br>
+&nbsp;&nbsp;&nbsp; resource.setPersistentProperty(&quot;MyProperty&quot;,
+label.getText());<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+}</P>
+
+<p CLASS="Code"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>

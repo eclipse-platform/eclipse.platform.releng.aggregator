@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Wiring actions</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Wiring actions</H2>
+
+<P >
+The actions file contains scripting actions to be performed on topics and infoviews. Currently there is only one kind of action, the
+<b> insert</b> action, which is used to insert topics into infoviews at
+specified locations called<b> insertion points</b>.&nbsp; Infoviews and topics
+can both be used as an insertion point.&nbsp; Only topics that define an
+optional id can be used as an insertion point.&nbsp; (Infoviews must always have
+ids.) </P>
+<P >
+When defining an insert action, the <b>to</b> attribute specifies the target insertion point. The topic specified
+in the
+<b>from</b> attribute is the topic being inserted.&nbsp;&nbsp; </P>
+<P >
+Following are some possible ways to insert a topic: </P>
+<ul>
+  <li>
+    <p >
+As a child of the insertion point (the most common)</li>
+  <li>
+    <p >
+As the first child of the insertion point</li>
+  <li>
+    <p >
+As the last child of the insertion point</li>
+  <li>
+    <p >
+As the previous sibling of the insertion point (just before the insertion point at the same level in the navigation tree)</li>
+  <li>
+    <p >
+As the next sibling of the insertion point (just after the insertion point at the same level in the navigation tree)</li>
+</ul>
+<P >
+Insert actions can be nested to define &quot;alternate&quot; insert actions that
+should be performed if the parent insert action fails.&nbsp; This can be useful
+when insertion points are located in other plug-ins that may or may not be
+installed.&nbsp; You can insert your topic to another plug-in's topic, and if
+the insert action files (because the other plug-in is not installed) you can
+install the topic somehwere else.&nbsp;&nbsp; Once an insertion point has been satisfied,
+the nested insert actions are ignored.</P>
+
+
+<P >
+Actions files always apply their actions to a single infoview. If you want to wire
+your topics into different infoviews, you will need an actions file for each.&nbsp;
+A topic may only be used once within a
+particular infoview.&nbsp;&nbsp; If you need to reference a topic twice within
+one infoview, you will need to create another topic element (different <b>id</b>) that
+uses the same <b> label</b> and <b>href</b>. </P>
+
+
+<H3>
+Integrating the topics</H3>
+<P >
+The time has come to finally integrate our topics into the top-level topics of the &quot;Contents&quot;
+infoview. To do this we need another actions file that we will call <b> actions_All.xml</b> (since it integrates all of our topics). </P>
+
+<H4>
+actions_All.xml</H4>
+<P CLASS="Code">
+&lt;actions infoview=&quot;com.example.helpexample.view_Contents&quot;&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;insert </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; from=&quot;com.example.helpexample.conceptsAll&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; to=&quot;com.example.helpexample.conceptsRoot&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; as=&quot;child&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;insert </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; from=&quot;com.example.helpexample.refAll&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; to=&quot;com.example.helpexample.refRoot&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; as=&quot;child&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;insert </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; from=&quot;com.example.helpexample.plainTasks&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; to=&quot;com.example.helpexample.tasksRoot&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; as=&quot;child&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;insert </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; from=&quot;com.example.helpexample.funTasks&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; to=&quot;com.example.helpexample.funRoot&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; as=&quot;child&quot;/&gt; &lt;/actions&gt;</P>
+<P >
+Recall that we had a number of task related html files, and the structure/navigation of these files was defined by
+<b> topics_tasks.xml </b> as follows: </P>
+
+
+<H4>
+topics_tasks.xml</H4>
+<P CLASS="Code">
+&lt;topics id=&quot;tasksAll&quot;&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;topic id=&quot;plainTasks&quot; label=&quot;Plain Stuff&quot;&gt; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;topic label=&quot;Task1&quot; href=&quot;doc/tasks/task1.html&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;topic label=&quot;Task2&quot; href=&quot;doc/tasks/task2.html&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;/topic&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;topic id=&quot;funTasks&quot; label=&quot;Fun Stuff&quot; &gt; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;topic label=&quot;Task3_1&quot; href=&quot;doc/tasks/task3_1.html&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;topic label=&quot;Task3_2&quot; href=&quot;doc/tasks/task3_2.html&quot;/&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;/topic&gt; </P>
+<P CLASS="Code">
+&lt;/topics&gt;</P>
+<P >
+In the above actions file we use the insert as child action to take the topic with
+id <b>com.example.helpexample.plainTasks</b> and insert it and its subtopics under the topic with id
+<b> com.example.helpexample..tasksRoot</b> </P>
+<P CLASS="Code">
+&lt;insert </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; from=&quot;com.example.helpexample.plainTasks&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; to=&quot;com.example.helpexample.tasksRoot&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; as=&quot;child&quot;/&gt;</P>
+<P >
+The actions file also takes some of our more entertaining tasks and inserts them into the &quot;Fun Things&quot; area of the web using the following action. </P>
+<P CLASS="Code">
+&lt;insert </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; from=&quot;com.example.helpexample.funTasks&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; to=&quot;com.example.helpexample.funRoot&quot; </P>
+<P CLASS="Code">
+&nbsp;&nbsp;&nbsp;&nbsp; as=&quot;child&quot;/&gt;</P>
+
+
+<P CLASS="Code">
+&nbsp;</P>
+
+
+<p CLASS="Code"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+
+</BODY>
+</HTML>

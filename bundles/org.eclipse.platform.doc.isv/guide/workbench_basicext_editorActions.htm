@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>org.eclipse.ui.editorActions</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H3>
+org.eclipse.ui.editorActions</H3>
+
+<P >
+We've just seen how editors
+can contribute their own actions to the workbench menus and tool bar when they
+are active.&nbsp; The <b><a href="../reference/extension-points/org_eclipse_ui_editorActions.html">org.eclipse.ui.editorActions</a></b> extension
+point allows a plug-in to add
+to the workbench menus and tool bar when another plug-in's editor becomes active.</P>
+<P >
+In the readme example, the plug-in uses the <b>editorActions</b>
+extension point to contribute additional actions to the menu contributed by the
+readme editor. The definition in our
+<b> plugin.xml</b> should look pretty familiar by now.</P>
+<P class="Code" >
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp; point = &quot;org.eclipse.ui.editorActions&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;editorContribution&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="org.eclipse.ui.examples.readmetool.ec1"&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; targetID=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;&gt;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;action id="org.eclipse.ui.examples.readmetool.ea1"&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+label="&amp;amp;Readme Editor Extension"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+toolbarPath=&quot;ReadmeEditor&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+icon=&quot;icons/basic/obj16/editor.gif&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+tooltip=&quot;Run Readme Editor Extension"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+class=&quot;org.eclipse.ui.examples.readmetool.EditorActionDelegate&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/>&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/editorContribution&gt;<br>
+ &lt;/extension></P>
+<P >Similar to a view action, the extension must specify the <b> targetID</b> of the
+editor to which it is contributing actions.&nbsp; The action itself is very
+similar to a view action (<b>id</b>, <b>label</b>, and
+<b>toolbarPath</b>), except that the specified class
+must implement <b><a href="../reference/api/org/eclipse/ui/IEditorActionDelegate.html">IEditorActionDelegate</a></b>.&nbsp;&nbsp;</P>
+<P >Note that a menu bar path is not specified in this markup.&nbsp; This means
+that the action will appear in the workbench tool bar when the editor is active,
+but not in the workbench menu bar.&nbsp; (See
+<a HREF="workbench_menus.htm#workbench_menus_paths" CLASS="XRef"> Menu and toolbar paths</a> for a discussion of toolbar and menu paths.)</P>
+<P >Sure enough, when the editor is active, we see our editor action on the tool
+bar next to the actions that were contributed by the editor itself.</P>
+<P ><img border="0" src="images/editorAction.jpg" width="405" height="101"></P>
+<P >
+The readme tool supplies <b> EditorActionDelegate</b>
+to implement the action.&nbsp; This is very similar to the view action delegate
+we saw earlier.</P>
+
+<p class="Code">public void run(IAction action) {<br>
+&nbsp;&nbsp;&nbsp; MessageDialog.openInformation(editor.getSite().getShell(),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Readme Editor",&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "Editor Action executed");<br>
+}</p>
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>

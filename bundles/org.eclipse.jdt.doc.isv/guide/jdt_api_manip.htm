@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Manipulating Java code</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Manipulating Java code</H2>
+<P>
+Your plug-in can use the JDT API to create classes or interfaces, add methods to existing types, or alter the methods for types. </P>
+<P>
+The simplest way to alter Java objects is to use the Java element API. More general techniques can be used to work with the raw source code for a Java element.</P>
+
+<H3>
+Code modification using Java elements</h3>
+
+<H4>
+Generating a compilation unit
+</h4>
+<P>
+The easiest way to programmatically generate a compilation unit is to use <b>IPackageFragment.createCompilationUnit</b>. You specify the name and contents of the compilation unit. The compilation unit will be created inside the package and the new
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html"> ICompilationUnit</a></b> will be returned. </P>
+<P>
+A compilation unit can be created generically by creating a file resource whose extension is &quot;<b>.java&quot;</b> in the appropriate folder that corresponds to the package directory. Using generic resource API goes &quot;behind the back&quot; of the Java tooling, so the Java model is not updated until the generic resource change listeners are
+notified and the JDT listeners update the Java model with the new compilation unit.</P>
+
+
+<H4>
+Modifying a compilation unit
+</h4>
+<P>
+Most simple modifications of Java source can be done using the Java element API.</P>
+<P>
+For example, you can query a type from a compilation unit. Once you have the <a href="../reference/api/org/eclipse/jdt/core/IType.html"><b>IType</b></a>, you can use protocol such as
+<b>createField</b>, <b>createInitializer</b>,
+<b>createMethod</b>, or <b> createType</b> to add source code members to the type. The source code and information about the location of the member is supplied in these methods.</P>
+<P>
+The <b><a href="../reference/api/org/eclipse/jdt/core/ISourceManipulation.html"> ISourceManipulation</a></b> interface defines common source manipulations for java elements. This includes methods for renaming, moving, copying, or deleting a type's member. </P>
+
+
+
+<H3>
+Generic source code modification</h3>
+<P>
+Some source code modifications are not provided via the Java element API. A more general way to edit source code (such as changing the source code for existing elements) is accomplished using the compilation unit's raw source code and the Java DOM.</P>
+<P>
+These techniques include the following:</P>
+<P class="Code">
+// get the source for a compilation unit<BR>
+String contents = myCompilationUnit.getBuffer().getContents();<br>
+<BR>
+// Create an editable JDOM<BR>
+myJDOM = new DOMFactory();<BR>
+myDOMCompilationUnit = myJDOM.createCompilationUnit(contents, &quot;MyClass&quot;);<br>
+<BR>
+// Navigate and edit the compilation unit structure using <BR>
+// JDOM node protocol.&nbsp;<br>
+...<br>
+// Once modififications have been made to all of the nodes <BR>
+// get the source back from the compilation unit DOM node.<BR>
+String newContents = myDOMCompilationUnit.getContents();<br>
+<BR>
+// Set this code back into the compilation unit element<BR>
+myCompilationUnit.getBuffer().setContents(newContents);<br>
+<BR>
+// Save the buffer to the file.<BR>
+myCompilationUnit.save();</P>
+<P>
+This technique can result in problem markers being associated with incorrect line numbers, since the Java elements were not updated directly.</P>
+<P>
+The Java element model does not go any finer than methods and fields. The abstract syntax tree (AST) used by the compiler is not available as API, so the techniques used by the JDT to parse source into programmatic structures are not currently available as API.</P>
+
+
+<H3>
+Responding to changes in Java elements</h3>
+<P>
+If your plug-in needs to know about changes to Java elements after the fact, you can register a Java
+<a href="../reference/api/org/eclipse/jdt/core/IElementChangedListener.html"><b> IElementChangedListener</b></a> with
+<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a>.</P>
+<P CLASS="Code">JavaCore.addElementChangedListener(new
+MyJavaElementChangeReporter());.</P>
+<P>
+Java element change listeners are similar conceptually to resource change listeners
+(described in
+<a HREF="../../org.eclipse.platform.doc.isv/guide/resAdv_events.htm" CLASS="XRef">tracking resource changes</a>). The following snippet implements a Java element change reporter that prints the element deltas to the system console.</P>
+<P CLASS="Code">
+public class MyJavaElementChangeReporter implements IElementChangedListener {<BR>
+
+&nbsp;&nbsp;&nbsp; public void elementChanged(ElementChangedEvent event) {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IJavaElementDelta delta= event.getDelta();<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (delta != null) {<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println(&quot;delta received: &quot;);<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+System.out.print(delta);<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<BR>
+&nbsp;&nbsp;&nbsp; }<BR>
+)</P>
+<P>
+The <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html"><b> IJavaElementDelta</b></a> includes the element that was
+changed and flags describing the kind of change that occurred.
+</P>
+
+<P><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+</BODY>
+</HTML>

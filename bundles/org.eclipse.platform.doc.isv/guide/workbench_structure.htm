@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Workbench under the covers
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Workbench under the covers</H2>
+<P >
+An extensive set of classes and interfaces is available for building complex user interfaces. Fortunately you don't need to understand them all to do something simple. We'll start by looking at some concepts that are exposed in the workbench user interface
+and their corresponding structure under the covers.</P>
+
+<H3>
+Workbench</H3>
+<P >
+We've been using the term <b> workbench</b> loosely to refer to &quot;that window that opens when you start the platform.&quot; Let's drill down a little and look at some of the visual components that make up
+the workbench.</P>
+
+<img border="0" src="images/workbench_decomposed.jpg" width="480" height="578">
+<P >
+For the rest of this discussion, when we use the term workbench, we will be referring to the workbench window
+(<b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindow.html">IWorkbenchWindow</a></b>). The workbench window is the top-level window in a workbench. It is the frame that holds the menu bar,
+tool bar, status line, short cut bar, and pages. In general, you don't need to program to the workbench window. You just want to know that it's there.</P>
+<P class="Note" >
+Note:&nbsp; You can open multiple workbench windows using
+<b> Perspective-&gt;Open. </b>By default, new perspectives are opened in the
+same workbench window.&nbsp; Other options are available (see the workbench
+preference page for details).&nbsp; Each workbench window is a self-contained world of editors and views,
+so we'll just focus on a single workbench
+window.</P>
+<P >
+From the user's point of view, a workbench contains views and editors. There are a few other classes used to implement the workbench window.&nbsp; </P>
+
+
+
+<H3>
+Page</H3>
+<P >
+Inside the workbench window, you'll find one or more pages (<b><a href="../reference/api/org/eclipse/ui/IWorkbenchPage.html">IWorkbenchPage</a></b>) that in turn contain parts. Pages are an implementation mechanism for grouping parts. You typically don't need to program to the page, but you'll see it in the context of programming and debugging. </P>
+<P CLASS="Note">
+Note:&nbsp; Pages are used in the implementation of Perspectives. They allow workbench parts to be placed in an outer container without concern for whether the perspective is opened in the same workbench window or a new workbench window.</P>
+
+
+<H3>
+<a name="views_and_editors">
+Views and editors</a></H3>
+<P >
+Views and editors are where we move beyond implementation details into some common plug-in programming. When you add a visual component to the workbench, you must decide whether you want to implement a view or
+an editor. How do you decide this?</P>
+<ul>
+  <li>A <b>view</b> is typically used to navigate a hierarchy of information,
+    open an editor, or display properties for the active editor.&nbsp; For
+    example, the <b>navigator</b> view allows you to navigate the workspace
+    hierarchy.&nbsp; The <b>properties</b> and <b>outline</b> views show
+    information about an object in the active editor.&nbsp; Any modifications
+    that can be made in a view (such as changing a property value) are saved
+    immediately.</li>
+  <li>An <b>editor</b> is typically used to edit or browse a document or input
+    object.&nbsp; Modifications made in an editor follow an open-save-close
+    model, much like an external file system editor.&nbsp; The platform text
+    editor and Java editor are good examples of editors.</li>
+</ul>
+<P >
+In either case, you will be building your view or editor according to a common lifecycle. </P>
+<ul>
+  <li>
+    <p >
+You implement a <b> createPartControl</b> method to create the SWT widgets that represent your visual component. You must determine which widgets to use and allocate any related UI resources needed to display your view or editor.</li>
+  <li>
+    <p >
+When your view or editor is given focus, you'll receive a <b> setFocus</b> notification so that you can set the focus to the correct widget.</li>
+  <li>
+    <p >
+When the view or editor is closed, you will receive a <b> dispose</b>
+ message to signify that the view or editor is being closed.&nbsp; At this point
+the controls allocated in <b>createPartControl</b>
+ have already been disposed for you, but you must dispose of any graphics resources (such
+as cursors, icons, or fonts) that you allocated while creating the controls or
+responding to widget events.</li>
+</ul>
+<P >
+Throughout this lifecycle, events will fire from the containing workbench page to notify interested parties about the opening, activation, deactivation, and closing of the
+views and editors.</P>
+<P >
+Seem simple?&nbsp; It can be. That's the beauty of workbench views and editors. They're just widget holders, and can be as simple or complex as you need them to be. We saw the simplest of views earlier when we built a hello world view. Here it is again now that we've explained a bit better what's going on.</P>
+<P CLASS="Code">
+package org.eclipse.examples.helloworld;<br>
+<br>
+import org.eclipse.swt.widgets.Composite;<br>
+import org.eclipse.swt.widgets.Label;<br>
+import org.eclipse.swt.SWT;
+</P>
+<P CLASS="Code">
+import org.eclipse.ui.part.ViewPart;</P>
+<P CLASS="Code">
+<br>
+<br>
+public class HelloWorldView extends ViewPart {<br>
+&nbsp;&nbsp;&nbsp; Label label;<br>
+&nbsp;&nbsp;&nbsp; public HelloWorldView() {<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; public void createPartControl(Composite parent) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label = new Label(parent, SWT.WRAP);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label.setText(&quot;Hello World&quot;);<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; public void setFocus() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // set focus to my widget.&nbsp; For
+a label, this doesn't<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // make much sense, but for more
+complex sets of widgets<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // you would decide which one gets
+the focus.<br>
+&nbsp;&nbsp;&nbsp; }</P>
+<P CLASS="Code">
+}</P>
+<P >
+Notice that we didn't have to implement a <b> dispose()</b> method since we didn't do anything but create a label in the
+<b> createPartControl(parent)</b> method. If we had allocated any UI resources, such as images or fonts, we would have disposed of them here. Since we extended the
+<b><a href="../reference/api/org/eclipse/ui/part/ViewPart.html"> ViewPart</a></b> class, we inherit the &quot;do nothing&quot; implementation of
+<b>dispose()</b>.</P>
+
+<P >
+<a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></P>
+
+</BODY>
+</HTML>

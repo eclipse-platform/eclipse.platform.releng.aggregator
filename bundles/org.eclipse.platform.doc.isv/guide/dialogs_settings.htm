@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+<TITLE>Dialog settings</TITLE>
+
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+
+<h2>
+Dialog settings</h2>
+<P >
+The <a href="../reference/api/org/eclipse/jface/dialogs/package-summary.html"> <b> org.eclipse.jface.dialogs</b></a> package provides a utility class,
+<a href="../reference/api/org/eclipse/jface/dialogs/DialogSettings.html"><b>DialogSettings</b></a>, for storing and retrieving keyed values. You can use this class to save and retrieve primitive data types and string values that you associate with key names. The settings are loaded and saved using an XML file.</P>
+<P ><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"><b>AbstractUIPlugin</b></a> provides support for plug-in wide dialog settings stored in an XML file in your plug-in's directory. If a dialog settings file is not found in your plug-in directory, an empty
+<a href="../reference/api/org/eclipse/jface/dialogs/DialogSettings.html"> <b> DialogSettings</b></a> will be created for you. When the plug-in is shut down, any settings that were added to it will be saved in an XML file and retrieved the next time the plug-in is started up.</P>
+<P >
+You can access your dialog settings anywhere in your plug-in code. The following snippet shows how you could obtain the dialog settings for the readme tool.</P>
+<P CLASS="Code">IDialogSettings settings =
+ReadmePlugin.getDefault().getDialogSettings();</P>
+<P >
+Values are stored and retrieved using get and put methods. The get methods are named after the type of primitive that is being accessed. You can store and retrieve
+boolean, long, double, float, int, array, and string values. The following snippet shows how we could use dialog settings to initialize control values in a dialog.</P>
+<P CLASS="Code">
+protected Control createDialogArea(Composite parent) {<br>
+&nbsp;&nbsp;&nbsp; IDialogSettings settings =
+ReadmePlugin.getDefault().getDialogSettings();<br>
+&nbsp;&nbsp;&nbsp; checkbox = new Button(parent,SWT.CHECK);<br>
+&nbsp;&nbsp;&nbsp; checkbox.setText(&quot;Generate sample section titles&quot;);<br>
+&nbsp;&nbsp;&nbsp; // initialize the checkbox according to the dialog settings<br>
+&nbsp;&nbsp;&nbsp; checkbox.setSelection(settings.getBoolean(&quot;GenSections&quot;));<br>
+}</P>
+<P >
+The value of the setting can be stored later when the ok button is pressed.</P>
+<P CLASS="Code">
+protected void okPressed() {<br>
+&nbsp;&nbsp;&nbsp; IDialogSettings settings =
+ReadmePlugin.getDefault().getDialogSettings();<br>
+&nbsp;&nbsp;&nbsp; // store the value of the generate sections checkbox<br>
+&nbsp;&nbsp;&nbsp; settings.put(&quot;GenSections&quot;, checkbox.getSelection());<br>
+&nbsp;&nbsp;&nbsp; super.okPressed();<br>
+}</P>
+<P CLASS="Code">&nbsp;</P>
+
+<p CLASS="Code"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>

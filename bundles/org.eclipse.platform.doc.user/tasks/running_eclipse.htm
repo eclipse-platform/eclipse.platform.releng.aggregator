@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Running Eclipse</title>
+</head>
+
+<BODY BGCOLOR="#ffffff">
+
+<h1>Running Eclipse</h1>
+<p>After installing (unzipping) the Eclipse install into a directory (e.g., c:\eclipse),
+the workbench is started by running the Eclipse executable found in the
+top-level install directory.&nbsp; The file is <tt>eclipse.exe</tt> on Windows
+systems and simply <tt>eclipse</tt> on Linux systems. Note, the following
+discussion details the setup on Windows systems.&nbsp; The Linux setup is
+analogous. </p>
+
+<p>If you don't specify differently, the platform creates a default workspace
+directory as a sibling of the executable (e.g., c:\eclipse\workspace).&nbsp;
+This workspace directory is used as the default content area for your projects
+as well as for holding any required metadata.&nbsp; For shared or
+multi-workspace installs you should explicitly state the location of your
+workspace rather than using the default.&nbsp; There are two ways to control the
+location of your workspace; using the current working directory or using the
+-data command line argument.</p>
+
+<p>Perhaps the easiest way of using the current working directory is to create a
+shortcut using the following steps:</p>
+
+<ol>
+  <li>Navigate to eclipse.exe in the Windows Explorer and using a right button drag, create a shortcut
+    to eclipse.exe.</li>
+  <li>Edit the properties of the shortcut such that the &quot;Start in:&quot;
+    box identifies the location of your workspace (e.g., c:\myworkspace).</li>
+  <li>Close the properties dialog and double-click on the shortcut.</li>
+</ol>
+<p>Of course you can get the same effect using a command prompt by changing
+directory to your workspace directory and then running eclipse.exe.</p>
+
+<p>To use the -data command line argument, simply add <tt>-data &lt;your workspace
+location&gt;</tt> (e.g., -data c:\myworkspace)
+to the &quot;Target:&quot; line in the shortcut or include it explicitly on your
+command prompt command line.&nbsp;</p>
+
+<h2>Advanced topics in running Eclipse </h2>
+
+<p>The Eclipse executable and the platform itself offers a number of execution
+options of interest to people developing or debugging parts of Eclipse.&nbsp;
+The general form of running the Eclipse executable is:</p>
+
+<blockquote>
+
+<p><tt>eclipse [platform options] [-vmargs [Java VM arguments]]</tt></p>
+
+</blockquote>
+
+<p>where the valid platform options are:</p>
+
+<div align="center">
+  <center>
+
+<table border="0" width="90%">
+  <tr>
+    <td width="25%" valign="top">-application &lt;app id&gt;</td>
+    <td width="75%">Identifies the application to run.&nbsp; If not specified,
+      the Eclipse workbench is run.&nbsp; Applications are declared by plug-ins
+      supplying extensions to the org.eclipse.core.runtime.applications
+      extension point.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-boot &lt;boot code path&gt;</td>
+    <td width="75%">Defines the path to the boot plug-in code (i.e., boot.jar).&nbsp;
+      Only required when changing the relative location of startup.jar and
+      boot.jar.&nbsp;&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-consolelog</td>
+    <td width="75%">Mirrors the platform's error log to the console used to run
+      Eclipse.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-data &lt;workspace path&gt;</td>
+    <td width="75%">Defines the path of the workspace on which to run the
+      platform.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-debug [options file path]</td>
+    <td width="75%">Puts the platform in debug mode and loads the debug options
+      in the specified file.&nbsp; If a file path is not given, the platform
+      looks in the platform install directory and in the workspace's metadata
+      directory for a file called &quot;.options&quot;.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-dev [classpath entries]</td>
+    <td width="75%">Puts the platform in development mode.&nbsp; The optional
+      classpath entries (a comma-separated list) are added to each plug-in's classpath.&nbsp; For
+      example, when developing plug-ins, use &quot;-dev bin&quot; to add the
+      Java tooling's bin directory for each plug-in.&nbsp; Redundant or non-existant
+      classpath entries are eliminated.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-nosplash</td>
+    <td width="75%">Runs the platform without putting up the splash screen.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-os &lt;os-id&gt;</td>
+    <td width="75%">Defines the operating system on which the platform is
+      running.&nbsp; Typically the platform can detect the OS but some
+      situations may require explicit specification.&nbsp; The value specified
+      here is related to Platform.getOS().</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-vm &lt;vm path&gt;</td>
+    <td width="75%">Specifies the Java VM to use to run the platform.&nbsp; If
+      not specified, a Java VM is located relative to the Eclipse executable.</td>
+  </tr>
+  <tr>
+    <td width="25%" valign="top">-ws &lt;ws-id&gt;</td>
+    <td width="75%">Defines the window system on which the platform is
+      running.&nbsp; In many cases the platform can detect the window system but
+      some situations may require explicit specification.&nbsp; The value
+      specified here is related to Platform.getWS().</td>
+  </tr>
+</table>
+
+  </center>
+</div>
+
+<p>All arguments following (but not including) the -vmargs entry are passed
+directly through to the indicated Java VM as virtual machine arguments (i.e.,
+before the class to run).&nbsp; All arguments preceding the -vmargs entry (with
+the exception of -vm and -nosplash) are passed directly through to the platform
+for interpretation.</p>
+
+<h2>Running on Different VMs&nbsp;</h2>
+<h3>Running Eclipse on J9</h3>
+
+When running Eclipse on J9, it is recommended that you use the following VM
+options.&nbsp; Please refer to the J9 VM documentation and help for further
+information:
+<blockquote>
+  <pre>eclipse.exe [eclipse arguments] -vm &lt;path to j9w.exe&gt; 
+            -vmargs -ms:20 -jit -mo:32000 -mx:200000</pre>
+
+</blockquote>
+<p><b>NOTE: </b>the -vmargs flag and the actual vm arguments must come at the
+end of the line.</p>
+
+<h3>Running Eclipse on the IBM Developer Kit, Java(TM) Technology Edition VM</h3>
+
+<p>The default vm settings for IBM Developer Kit, Java(TM) Technology Edition 1.3 Linux work well for initial exploration, but
+are not sufficient for larger scale development. For large-scale development you
+should&nbsp; modify your vm arguments
+to make more heap available:&nbsp;</p>
+
+<blockquote>
+
+<pre>-vmargs -Xmx256M </pre>
+
+</blockquote>
+
+<p> will allow the Java heap to grow
+to 256MB.</p>
+
+<P><br>
+<img align="texttop" src = ../ngibmcpy.gif width="195" height="12">
+</P>
+
+
+</body>
+
+</html>

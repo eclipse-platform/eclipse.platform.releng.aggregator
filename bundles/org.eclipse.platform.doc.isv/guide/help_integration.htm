@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Documentation integration 
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Documentation integration </H2>
+<P >
+What if we expect that our plug-in will sometimes be installed by itself, and in other cases it will be installed as part of a larger component or product?</P>
+<P >
+When we are a free floating plug-in we want to ensure that our document infoset is
+visible in the Help Contents view. When our topics are integrated into a larger web, it probably doesn't make sense for our standalone book to show up anymore.
+Instead, we may be part of the larger web's infoset.&nbsp;&nbsp; </P>
+<P >To support non-integrated or loosely integrated documentation, a plug-in can define
+its infoset and actions with the &quot;<b>standalone=true</b>&quot;
+attribute.&nbsp; An insert operation will be executed for a standalone action
+only if the action's topic has not been contributed elsewhere.&nbsp; A
+standalone infoset will not appear in the help contents view if it is
+empty.&nbsp; An infoset will not appear in the help contents combo box if all of
+the following conditions are met: </P>
+<ul>
+  <li>the infoset is standalone</li>
+  <li>all of the infoset's actions are standalone</li>
+  <li>all of the action's topics have been contributed to other info sets</li>
+</ul>
+<P >
+Setting standalone attributes on actions and infosets is useful when providing a &quot;Catch all&quot; scenario. Documentation that doesn't successfully contribute to another infoset will still appear somewhere.</P>
+<P >
+To support this mode of operation, we need to make the following additions to our infoset and action
+<b>.xml </b> files. The addition is marked in bold.</P>
+<h4 >infoset_Guide.xml </h4>
+<P CLASS="Code">
+&lt;infoset id=&quot;infoset_SampleGuide&quot; label=&quot;Online Help Sample&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp; href=&quot;doc/splash.html&quot; <b> standalone=&quot;true&quot;</b>&gt; </P>
+<h4 >actions_All.xml</h4>
+<P CLASS="Code">
+&lt;actions infoview=&quot;com.example.helpexample.view_Contents&quot; <b> standalone=&quot;true&quot;</b>&gt; </P>
+<h4 >actions_View_Contents.xml</h4>
+<P CLASS="Code">
+&lt;actions infoview=&quot;com.example.helpexample.view_Contents&quot; <b> standalone=&quot;true&quot;</b>&gt; </P>
+<P >
+If another plug-in's infoset includes all of our topics, then our actions will not be used, and consequently our infoset will be empty. The infoset will not show up in the help contents view combo box. </P>
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+</BODY>
+</HTML>

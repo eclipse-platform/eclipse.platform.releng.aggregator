@@ -1,0 +1,169 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+A minimal plug-in
+</TITLE>
+
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+A minimal plug-in</H2>
+<P >
+We all know what &quot;Hello World&quot; looks like in plain old Java without using any user interface or other framework.</P>
+<P CLASS="Code">
+public class HelloWorld {<br>
+&nbsp;&nbsp;&nbsp; public static void main(String[] args) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; System.out.println(&quot;Hello World&quot;);<br>
+&nbsp;&nbsp;&nbsp; }<br>
+}</P>
+<P >
+What happens to this old standard in the context of the Eclipse platform?  Instead of thinking of Hello World as a self-contained program, we recast it as an extension of the platform. Since we want to say hello to the world, we need to figure out how to extend the workbench to include our greeting.</P>
+<P >
+When we get deeper into the platform user interface components, we'll do an exhaustive review of the ways that you can extend and customize the workbench
+UI. For now, let's start with one of the simplest workbench extensions - a view.&nbsp;</P>
+
+<p>You can think of the workbench window as a frame that presents various visual
+parts. These parts fall into two major categories: views and editors.&nbsp; We
+will look at editors later.&nbsp; <b>Views</b>
+provide information about some object that the user is working with in the
+workbench. Views often change their content as the user selects different
+objects in the workbench.</p>
+
+<H3>
+Hello world view</H3>
+<P >
+For our hello world plug-in, we will implement our own view to greet the user with &quot;Hello World.&quot;</P>
+<P >
+The package <b><a href="../reference/api/org/eclipse/ui/package-summary.html"> org.eclipse.ui</a></b>
+and its sub packages contain the public interfaces that define the workbench
+user itnerface (UI) API. Many of these interfaces have
+default implementation classes that you can extend to provide simple modifications to the system. In our hello world example, we will extend a workbench view to provide a label that says hello.</P>
+<P >
+The interface of interest is <b><a href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart</a></b>, which defines the methods that must be implemented to contribute a view to the workbench. The class
+<b><a href="../reference/api/org/eclipse/ui/part/ViewPart.html">ViewPart</a></b> provides a default implementation of this interface. In a nutshell, a view part is responsible for creating the widgets needed to show the view.</P>
+<P >
+The standard views in the workbench often display some information about an object that the user has selected or is navigating.
+Views update their contents based on actions that occur in the workbench. In our case, we are just saying hello, so our view is quite simple.</P>
+<P CLASS="Code">
+package org.eclipse.examples.helloworld;<br>
+<br>
+import org.eclipse.swt.widgets.Composite;<br>
+import org.eclipse.swt.widgets.Label;<br>
+import org.eclipse.swt.SWT;
+</P>
+<P CLASS="Code">
+import org.eclipse.ui.part.ViewPart;</P>
+<P CLASS="Code">
+<br>
+<br>
+public class HelloWorldView extends ViewPart {<br>
+&nbsp;&nbsp;&nbsp; Label label;<br>
+&nbsp;&nbsp;&nbsp; public HelloWorldView() {<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; public void createPartControl(Composite parent) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label = new Label(parent, SWT.WRAP);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label.setText(&quot;Hello World&quot;);<br>
+&nbsp;&nbsp;&nbsp; }<br>
+&nbsp;&nbsp;&nbsp; public void setFocus() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // set focus to my widget.&nbsp; For
+a label, this doesn't<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // make much sense, but for more
+complex sets of widgets<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // you would decide which one gets
+the focus.<br>
+&nbsp;&nbsp;&nbsp; }</P>
+<P CLASS="Code">
+}</P>
+<P >
+The view part creates the widgets that will represent it in the <b> createPartControl</b> method. In this example, we create an SWT label and set the &quot;Hello World&quot; text into it.&nbsp;</P>
+<P >
+We're done with the coding part!&nbsp; We can compile our new class (don't
+forget to make sure that the platform JAR files are visible in your IDE or
+compiler environment so that you can compile the plug-in), but we still have to
+figure out how to run our new view.&nbsp;</P>
+
+<p>Our new view should look something like this:</p>
+<p>
+
+<img border="0" src="images/hello.jpg" width="281" height="173">
+</p>
+<P >
+How do we add this view to the platform?</P>
+
+
+
+<H3>
+The hello world plug-in</H3>
+<P >
+We need to inform the platform that we want to contribute a view. This is done by extending the org.eclipse.ui.views extension point. We register our extension by providing a manifest file,<b>
+plugin.xml</b>, which describes our plug-in, including where its code is located, and the extension
+we are adding.</P>
+<P class="Code" >
+&lt;?xml version="1.0" ?><br>
+&lt;plugin<br>
+&nbsp;&nbsp;&nbsp; name="Hello World Example"&nbsp;<br>
+&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.examples.helloworld&quot;<br>
+&nbsp;&nbsp;&nbsp; version="1.0"<br>
+&nbsp;&nbsp;&nbsp; provider-name="Object Technology International, Inc."><br>
+&nbsp;&nbsp;&nbsp; &lt;requires><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;import plugin="org.eclipse.ui" /><br>
+&nbsp;&nbsp;&nbsp; &lt;/requires><br>
+&nbsp;&nbsp;&nbsp; &lt;runtime><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="helloworld.jar" /><br>
+&nbsp;&nbsp;&nbsp; &lt;/runtime><br>
+&nbsp;&nbsp;&nbsp; &lt;extension point="org.eclipse.ui.views"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;category&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.examples.helloworld.hello&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="Hello" /><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;view&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;org.eclipse.examples.helloworld.helloworldview&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="Hello Greetings"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+category=&quot;org.eclipse.examples.helloworld.hello&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.examples.helloworld.HelloWorldView&quot; /><br>
+&nbsp;&nbsp;&nbsp; &lt;/extension><br>
+&lt;/plugin&gt;</P>
+<P >
+In this file, we define the <b>name</b>, <b>id</b>,
+<b>version</b>, and <b>provider-name</b> for our plug-in. </P>
+<P >
+We also list our required plug-ins. Since we use workbench and SWT API in our
+plug-in, we must list
+<b>org.eclipse.ui</b>. We must also describe where our executable code is located. In our case, we will package the code in
+<b>helloworld.jar</b>.</P>
+<P >
+Finally, we declare what extension point our plug-in is contributing. The <b><a href="../reference/extension-points/org_eclipse_ui_views.html"> org.eclipse.ui.views</a></b> extension has several different configuration parameters. Let's review the parameters we have specified in our manifest.</P>
+<P >
+We first declare a <b> category</b> for our view extension. Categories can be used to group related views together in the workbench
+<b> Show View</b> dialog. We define our own category, &quot;Hello,&quot; so that it will display in its own group.</P>
+<P >
+We declare a unique <b> id</b> for our view and specify the name of the
+<b> class</b> that provides the implementation of the view. We also specify a
+<b> name</b> for the view, &quot;Hello Greetings&quot; which will be shown in the Show View dialog and in our view's title bar.</P>
+
+<h4 >
+<a name="firstplugin_minimal_pluginid">Plug-in ids</a></h4>
+<P>
+There are many ids used in a plug-in manifest file. Individual extension points often define configuration parameters that require ids (such as the category id used above for the views extension point). We also define a plug-in id. In general, you should use Java package name prefixes for all of your ids in order to ensure uniqueness among all the
+installed plug-ins.&nbsp;</P>
+
+<P>
+ The specific name that you use after the prefix is completely up to you.
+However, if your plug-in id prefix is exactly the same name as one of your packages, you
+should avoid using class names from that package.&nbsp;&nbsp; Otherwise it will become difficult to tell whether you are looking at an id name or a class name.&nbsp;</P>
+
+<P>
+ You should also avoid using the same id for different extension configuration parameters.
+In the above manifest, we have used a common id prefix (<b>org.eclipse.examples.helloworld</b>)
+but all of our ids are unique.&nbsp; This naming approach helps us to read the
+file and see which ids are related.&nbsp; </P>
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>

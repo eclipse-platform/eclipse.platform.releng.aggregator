@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Creating the infoset</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Creating the infoset</H2>
+
+<P >
+Now that we have defined topics from our content files, we will create the infoset. An information set (infoset) is a documentation web or book. The platform can display any number of
+infosets. </P>
+<P >
+An infoset contains one or more infoviews. An infoview provides a high-level semantic grouping within the infoset. Infoviews
+can be used to create multiple views onto the document web. For example, we can use them to create an integrated view of documentation
+that is supplied by many components.&nbsp; We can also use infoviews to create separate views for
+our various help topics.&nbsp; Or, as we will shortly do, we can create one infoview to show
+all of our help topics. The term <b> infoview</b> is used to avoid collision/confusion with the term
+<b> view</b> in the platform's user interface.</P>
+<P >
+Each infoview contains a collection of topics. Sometimes a higher-level component or product team is responsible for weaving together the documentation and topics supplied by a number of its component teams. For now we assume that our plug-in should supply both the topics and the book that integrates the topics. </P>
+<P >
+The following infoset has the id <b>infoset_SampleGuide</b> and declares one infoview whose id is
+<b>view_Contents</b>. The id of the infoview will become important as we start wiring in the high level structure for the infoview, and ultimately wiring in the topics we defined earlier. </P>
+
+<H4>
+infoset_SampleGuide.xml</H4>
+<P CLASS="Code">
+&lt;infoset id=&quot;infoset_SampleGuide&quot; label=&quot;Online Help Sample&quot; href=&quot;doc/splash.html&quot;&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;infoview label=&quot;Content&quot; id=&quot;view_Contents&quot; /&gt; </P>
+<P CLASS="Code">
+&lt;/infoset&gt;</P>
+<P >
+When the user selects the book called &quot;Online Help Sample&quot; he/she will see one possible infoview called &quot;Content&quot;. The splash page contained in
+<b> splash.html </b> is also displayed. </P>
+
+
+
+<H3>
+Top level wiring</H3>
+<P >
+Now we need to define the top-level structure that a user will see within our &quot;Contents&quot; infoview. We start by creating the following topics file for the top-level topics: </P>
+
+<H4>
+topics_view_Contents.xml</H4>
+<P CLASS="Code">
+&lt;topics id=&quot;topics_view_Contents&quot;&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;topic id=&quot;conceptsRoot&quot; label=&quot;Concepts&quot; /&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;topic id=&quot;tasksRoot&quot; label=&quot;Tasks&quot; /&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;topic id=&quot;funRoot&quot; label=&quot;Fun Things&quot; /&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;topic id=&quot;refRoot&quot; label=&quot;Reference&quot; /&gt; </P>
+<P CLASS="Code">
+&lt;/topics&gt;</P>
+<P >
+Now we need to &quot;wire in&quot; these topics into our &quot;Contents&quot; infoview. Once we've done that we can then proceed to wire in all of our other topics underneath the above top-level topics. We start wiring in the top-level topics using the following actions file. </P>
+
+
+<H4>
+actions_view_Contents.xml</H4>
+<P CLASS="Code">
+&lt;actions infoview=&quot;com.example.helpexample.view_Contents&quot;&gt; </P>
+<P CLASS="Code">
+&nbsp;&lt;insert </P>
+<P CLASS="Code">
+&nbsp;from=&quot;com.example.helpexample.topics_view_Contents&quot; </P>
+<P CLASS="Code">
+&nbsp;to=&quot;com.example.helpexample.view_Contents&quot; </P>
+<P CLASS="Code">
+&nbsp;as=&quot;child&quot;/&gt; </P>
+<P CLASS="Code">
+&lt;/actions&gt;</P>
+<P >The fully qualified topic id of the <b> topics</b>
+element &quot;<b>topics_view_Contents</b>&quot;&nbsp;in
+the topics file above is <b>com.example.helpexample.topics_view_Contents</b>. In the above actions file we
+take this <b>topics</b> element&nbsp; and wire it into the infoview with id
+<b>com.example.helpexample.view_Contents</b>. </P>
+<P >
+The figure below shows what our infoset (Online Help Sample) will look like as a result of wiring in these top-level topics. The title (label) of the infoset is only displayed in the combo box if there is more than one
+infoset. </P>
+<P >
+&nbsp;<img border="0" src="images/toplevel.jpg" width="197" height="99"></P>
+
+&nbsp;
+
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+
+
+</BODY>
+</HTML>

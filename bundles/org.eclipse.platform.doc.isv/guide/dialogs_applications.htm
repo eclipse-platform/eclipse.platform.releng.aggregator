@@ -1,0 +1,102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+<TITLE>
+Application dialogs
+</TITLE>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+
+<h2>
+Application dialogs</h2>
+<P >
+When a standard dialog is too simple for your plug-in, you can build your own dialog using the
+<a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b> Dialog</b></a> class. Earlier, we saw how the readme tool contributed an &quot;Open Readme Browser&quot;
+action in an action set.&nbsp; This action set is shown in the workbench tool bar
+and <b>Window-&gt;Readme File Editor</b> menu.&nbsp;&nbsp;</P>
+
+<P >
+Now we are ready to look at the implementation of this action in the readme
+tool's <b>WindowActionDelegate</b>.</P>
+
+<P class="Code" >
+public void run(IAction action) {<br>
+&nbsp;&nbsp;&nbsp; SectionsDialog dialog = new SectionsDialog(window.getShell(),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ReadmeModelFactory.getInstance().getSections(selection));<br>
+&nbsp;&nbsp;&nbsp; dialog.open();<br>
+}</P>
+
+<P >
+The window action delegate for the action set uses the current selection in the resource navigator view (the
+<b> .readme</b> file) to get a list of sections in the readme file. This list and the
+workbench window's shell are passed to the
+<b>SectionsDialog</b>.&nbsp;</P>
+
+<P >
+When the user selects the action, the <b>SectionsDialog</b>
+is opened.</P>
+
+<img border="0" src="images/readmedialog.jpg" width="181" height="161">
+
+
+<P >
+ The <b> SectionsDialog</b> is implemented in the readme tool plug-in by subclassing the
+<b><a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"> Dialog</a>
+</b> class in the <b><a href="../reference/api/org/eclipse/jface/dialogs/package-summary.html"> org.eclipse.jface.dialogs</a>
+package.</b></P>
+<P >
+The <a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b> Dialog</b></a> class provides basic support for building a dialog shell window, creating the common dialog buttons, and launching the dialog. The subclasses are responsible for handling the content of the dialog itself:</P>
+<ul>
+  <li><b>createDialogArea</b> creates the SWT controls that represent the dialog contents. This is similar to creating the controls for a view or
+    editor.
+<P >
+The <b> SectionsDialog</b> creates an SWT list to display the list of sections. It uses a JFace viewer to populate the list. (We'll look at JFace viewers in
+<a HREF="jface_viewers.htm" CLASS="XRef"> Viewers</a>.) Note that our dialog does not have to create any of the buttons for the dialog since this is done by our
+superclass.</P>
+<P CLASS="Code">
+protected Control createDialogArea(Composite parent) {<br>
+&nbsp;&nbsp;&nbsp; Composite composite = (Composite)super.createDialogArea(parent);<br>
+&nbsp;&nbsp;&nbsp; List list = new List(composite, SWT.BORDER);<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; ListViewer viewer = new ListViewer(list);<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp; return composite;</P>
+<P CLASS="Code">
+}</P>
+  </li>
+  <li><b>configureShell</b> is overridden to set an appropriate title for the shell window.<br>
+    &nbsp;
+<P CLASS="Code">
+protected void configureShell(Shell newShell) {<br>
+&nbsp;&nbsp;&nbsp; super.configureShell(newShell);<br>
+&nbsp;&nbsp;&nbsp; newShell.setText(&quot;Readme Sections&quot;);<br>
+&nbsp;&nbsp;&nbsp; ...<br>
+}</P>
+  </li>
+  <li>
+<b>
+okButtonPressed</b> is overridden to perform whatever action is necessary when the user presses the OK button. (You can also override
+<b> cancelButtonPressed</b> or <b> buttonPressed(int)</b> depending on the design of your dialog.)&nbsp;&nbsp;
+  </li>
+<P ><b>SectionsDialog</b> does not implement an <b> okButtonPressed</b> method. It inherits the &quot;do-nothing&quot; implementation from
+
+<a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b>Dialog</b></a>. This is not typical. Your dialog usually performs some processing in response to one of the dialog buttons being pressed.
+</ul>
+<P >
+Dialogs can be as simple or as complicated as necessary. When you implement a dialog, most of your dialog code is concerned with creating the SWT controls that represent its content area and handling any events necessary while the dialog is up. Once a button is pressed by the user, the dialog can query the state of the various controls (or viewers) that make up the dialog to determine what to do.</P>
+
+
+
+<P >
+<a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></P>
+
+
+
+</BODY>
+</HTML>

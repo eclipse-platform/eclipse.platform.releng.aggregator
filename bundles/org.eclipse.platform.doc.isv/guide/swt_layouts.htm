@@ -1,0 +1,375 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Layouts
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Layouts</H2>
+<P >
+We've seen some simple examples that show how to size or position child widgets based on the size of the parent. So far,
+this kind of computation has occurred in response to a resize listener. This is often the best way to handle simple widget positioning. However, there are common patterns used by applications when placing widgets. These patterns can be structured as configurable layout algorithms that can be reused by many different applications.</P>
+<P >
+SWT defines <b> layouts</b> that provide general purpose positioning and sizing of child widgets in a composite. Layouts are subclasses of the abstract class
+<b><a href="../reference/api/org/eclipse/swt/widgets/Layout.html">Layout</a></b>. The SWT standard layouts can be found in the
+<b><a href="../reference/api/org/eclipse/swt/layout/package-summary.html"> org.eclipse.swt.layout</a></b> package.</P>
+
+<H3>
+Widget layout concepts</H3>
+<P >
+You should understand some general definitions when resizing and positioning
+widgets. </P>
+<ul>
+  <li>The <b>location</b> of a widget is its x,y coordinate location within its
+    parent widget.</li>
+  <li>The <b>preferred size</b> of a widget is the minimum size needed to show
+    its content. This is computed differently for each kind of widget.&nbsp; In
+    the case of a composite, the preferred size is the minimum size that
+    contains the composite and all of its children at their preferred size.</li>
+  <li>The <b>clientArea</b> is the size of a widget's content area.</li>
+  <li>The <b>trim</b> is the distance between a widget's client Area and its
+    actual border.&nbsp; Trim is occupied by the widget's borders or extra space
+    at the edge of a widget.&nbsp; The size and appearance of the trim is widget
+    and platform dependent.</li>
+</ul>
+<P >
+These concepts are relevant for applications regardless of whether a layout is used. You can think of a layout as a convenient way to package resize functionality for reuse. </P>
+<P >
+Some additional concepts are introduced by layouts. </P>
+<ul>
+  <li>Some layouts support&nbsp; <b>spacing </b>between widgets in the
+    layout.&nbsp;&nbsp;</li>
+  <li>Some layouts support a <b>margin</b> between the edge of the layout and
+    the widget adjacent to the edge.</li>
+</ul>
+<P >
+See <a href="http://www.eclipse.org/articles/Article-Understanding%20Layouts/Understanding%20Layouts.htm">Understanding
+Layouts in SWT</a>&nbsp; for further discussion and pictures demonstrating these concepts. </P>
+<P >
+The following code snippet shows the simple case of an application using a resize callback to size a label to the size of its parent shell.</P>
+<P CLASS="Code">Display display = new Display ();<br>
+Shell shell = new Shell (display);<br>
+Label label = new Label (shell, SWT.CENTER);<br>
+shell.addControlListener(new ControlAdapter() {<br>
+&nbsp;&nbsp;&nbsp; public void controlResized(ControlEvent e) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label.setBounds (shell.getClientArea ());<br>
+&nbsp;&nbsp;&nbsp; }<br>
+});</P>
+<P >
+The next snippet uses a layout to achieve the same effect:</P>
+<P CLASS="Code">
+Display display = new Display ();<br>
+Shell shell = new Shell (display);<br>
+Label label = new Label (shell, SWT.CENTER);<br>
+shell.setLayout(new FillLayout());</P>
+<P >
+Even for this simple example, using a layout reduces the application code. For more complex layouts, the simplification is much greater.</P>
+<P >
+SWT provides three default layout classes that can be used for many situations.</P>
+
+
+<H3>
+Fill Layout</H3>
+<P >
+<b><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">
+FillLayout</a></b> is the simplest layout class. It lays out widgets in a single row or column, forcing them to be the same size. Initially, the widgets will all be as tall as the tallest widget, and as wide as the widest.
+<b><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">
+FillLayout</a></b> does not wrap, and you cannot specify margins or spacing. </P>
+<P >
+You might use a <b><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">
+FillLayout</a></b> to lay out buttons in a task bar or tool bar, or to stack checkboxes in a
+<b><a href="../reference/api/org/eclipse/swt/widgets/Group.html">Group</a></b>.&nbsp;&nbsp;
+<b><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">FillLayout</a></b>
+can also be used when a <b><a href="../reference/api/org/eclipse/swt/widgets/Composite.html">Composite</a></b>
+only has one child. In the example above, the <b><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">
+FillLayout</a></b> causes the label to completely the fill its parent shell.</P>
+
+
+<H3>
+RowLayout</H3>
+<P >
+<a href="../reference/api/org/eclipse/swt/layout/RowLayout.html"><b>
+RowLayout</b></a> also lays out widgets in rows, but is more flexible than <b><a href="../reference/api/org/eclipse/swt/layout/FillLayout.html">
+FillLayout</a></b>. It can wrap the widgets, creating as many rows as needed to display them. It also provides configurable margins on each edge of the layout, and configurable spacing between widgets in the layout. You can pack a
+<a href="../reference/api/org/eclipse/swt/layout/RowLayout.html"><b>
+RowLayout</b></a>, which will force all widgets to be the same size. If you justify a
+<a href="../reference/api/org/eclipse/swt/layout/RowLayout.html"><b>
+RowLayout</b></a>, extra space remaining in the <b><a href="../reference/api/org/eclipse/swt/widgets/Composite.html">Composite</a>
+</b>will be allocated as margins between the widgets.</P>
+<P >
+The height and width of each widget in a <a href="../reference/api/org/eclipse/swt/layout/RowLayout.html"><b>
+RowLayout</b></a> can be specified in a <a href="../reference/api/org/eclipse/swt/layout/RowData.html"><b> RowData</b></a> object which should be set in the widget using
+<b>setLayoutData</b>.</P>
+
+
+<H3>
+Grid Layout</H3>
+<P >
+<a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><b>
+GridLayout</b></a> is the most powerful (and most complex) layout. <a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><b>
+GridLayout</b></a> lays out widgets in a grid, providing many configurable parameters that control the behavior of the grid rows and columns when the composite is resized.</P>
+<P >
+The <a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><b>
+GridLayout</b></a> defines API that controls the overall strategy of the layout. The most important attribute is
+<b>numColumns</b>, which determines the horizontal size of the grid. Typically you decide on this value when you first design your window's appearance. The order of the widgets in the grid is the same as the order in which you create them. To change the order of the widgets in the grid, you can use the
+<b><a href="../reference/api/org/eclipse/swt/widgets/Control.html"> Control</a></b> methods
+<b> moveAbove(Control)</b> and <b> moveBelow(Control).</b> These methods allow widgets to be inserted before or after each other in the layout. (The &quot;above&quot; and &quot;below&quot; refer to the widget Z ordering, not the location in the grid itself.)</P>
+<P >
+The following table summarizes the configurable parameters for a <a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><b>
+GridLayout</b></a>.</P>
+<TABLE BORDER="1">
+<TR>
+<TH ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellHeading">
+Attribute</P>
+</TH>
+<TH ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellHeading">
+Description</P>
+</TH>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+horizontalSpacing</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Number of pixels between the right edge of one cell and the left edge of its neighboring cell.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+makeColumnsEqualWidth</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies whether all columns should be forced to the same width.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+marginWidth</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Number of pixels used for margin on the right and left edge of the grid.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+marginHeight</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Number of pixels used for margin on the top and bottom edge of the grid.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+numColumns</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Number of columns that should be used to make the grid.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+verticalSpacing</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Number of pixels between the bottom edge of one cell and the top edge of its neighboring cell.</P>
+</TD>
+</TR>
+</TABLE>
+<P ><a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><b>
+GridLayout</b></a> supports many other layout parameters for each widget in the grid. These properties are specified in
+a <a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b>GridData</b></a>
+ object. You must set a <a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a>
+as the <b> layoutData</b> for each widget in the grid.</P>
+<P >
+The <a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a> class defines style constants that
+let you specify commonly used combinations of layout parameters in the
+<a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a>
+constructor. You can also set these attributes individually using the public methods in
+<a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a>.</P>
+<P >
+You can achieve some highly dynamic and complex layouts using the <a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a>. Tweaking these values for different widgets in the grid can produce many different combinations of layouts. Even the most complex dialog layouts can be specified using the
+<a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a>. The ability to allow widgets to span across cells produces many layouts that don't even look like a grid.</P>
+<P >
+The following table summarizes the configurable parameters for <a href="../reference/api/org/eclipse/swt/layout/GridData.html"><b> GridData</b></a>.&nbsp;&nbsp;
+See&nbsp;<a href="http://www.eclipse.org/articles/Article-Understanding%20Layouts/Understanding%20Layouts.htm">Understanding
+Layouts in SWT</a>
+for further description and example screen captures using the various grid
+parameters.</P>
+<TABLE BORDER="1">
+<TR>
+<TH ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellHeading">
+Attribute</P>
+</TH>
+<TH ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellHeading">
+Description</P>
+</TH>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+grabExcessHorizontalSpace</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies whether a cell should grow to use any extra horizontal space available in the grid. After the cell sizes in the grid are calculated based on the widgets and
+their grid data, any extra space remaining in the Composite will be allocated to those cells that grab excess space.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+grabExcessVerticalSpace</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies whether a cell should grow to use any extra vertical space available in the grid.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+heightHint</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies a minimum height for the widget (and therefore for the row that contains it).</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+horizontalAlignment</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Can be one of <b>BEGINNING</b>, <b>CENTER</b>,
+<b>END</b>, <b>FILL</b>. <b> FILL</b> means that the widget will be sized to take up the entire width of its grid cell.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+horizontalIndent</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Number of pixels between the widget and the left edge of its grid cell.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+horizontalSpan</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies the number of columns in the grid that the widget should span. By default, a widget takes up one cell in the grid. It can take additional cells horizontally by increasing this value.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+verticalAlignment</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Can be one of <b>BEGINNING</b>, <b>CENTER</b>,
+<b>END</b>, <b>FILL</b>. <b> FILL</b> means that the widget will be sized to take up the entire height of its grid cell.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+verticalSpan</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies the number of rows in the grid that the widget should span. By default, a widget takes up one
+cell in the grid. It can take additional cells vertically by increasing this value.</P>
+</TD>
+</TR>
+<TR>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+<b>
+widthHint</b></P>
+</TD>
+<TD ROWSPAN="1" COLSPAN="1">
+<P CLASS="CellBody">
+Specifies a minimum width for the widget (and therefore the column that contains it).</P>
+</TD>
+</TR>
+</TABLE>
+
+
+<H3>
+Custom layouts</H3>
+<P >
+Occasionally, you may need to write your own custom <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a> class. This is most appropriate when you have a complex layout that is used
+in many different places in your application. It may be appropriate when you can optimize layout using application specific knowledge. Before building a custom layout, consider the following:</P>
+<ul>
+  <li>Can the layout be achieved with an existing layout such as <a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><b>
+GridLayout</b></a><b> </b>or by nesting several different layouts?</li>
+  <li>Can the layout be isolated into a common resize listener?</li>
+  <li>Are you defining a general layout algorithm with programmer supplied configuration parameters or just positioning widgets specifically for your application?</li>
+</ul>
+<P >
+Unless you are writing a very generic layout that will be used by several <b><a href="../reference/api/org/eclipse/swt/widgets/Composite.html"> Composite</a></b> widgets, it is often simpler and easier to calculate sizes and position children in a resize listener. Many of the SWT custom widgets were written this way. Although a new widget can be implemented as a
+<b>Composite</b>/<b>Layout </b> pair, implementing it as a
+<b><a href="../reference/api/org/eclipse/swt/widgets/Composite.html"> Composite</a></b>
+that does its layout in a resize listener and computes its preferred size in <b> computeSize</b> is clearer, and does not involve writing an extra class.</P>
+<P >
+If you still believe you need a custom layout class, it is a good idea to first implement the layout algorithm in a resize listener. This makes for simpler debugging of the algorithm itself. Be sure to test the various cases for layout: resizing smaller, larger, wrapping, and clipping.&nbsp;
+Once you have the algorithm working, the code can be refactored into a subclass of
+<a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a>.&nbsp;</P>
+<P >
+ Layouts are responsible for implementing two methods:</P>
+<ul>
+  <li>&nbsp;<b>computeSize</b> calculates the width and height of a rectangle that encloses all of the composite's children once they have been sized and placed according to the layout algorithm. The hint parameters allow the width and/or height to be constrained. For example, a layout may choose to grow in one dimension if constrained in another.</li>
+  <li>&nbsp;<b>layout</b> positions and sizes the composite's children. A layout can choose to cache layout-related information, such as the preferred extent of each of the children. The
+    <b> flushCache</b> parameter tells the <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><b> Layout</b></a>
+    to flush cached data, which is necessary when other factors besides the size of the composite have changed (such as the creation of removal of children, or a change in the widget's font, etc.)</li>
+</ul>
+<p>Further discussion of custom layouts can be found in <a href="http://www.eclipse.org/articles/Article-Understanding%20Layouts/Understanding%20Layouts.htm">Understanding
+Layouts in SWT</a>.</p>
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>

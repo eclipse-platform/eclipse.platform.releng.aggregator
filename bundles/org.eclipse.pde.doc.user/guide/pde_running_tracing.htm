@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Running with tracing</title>
+</head>
+
+<BODY BGCOLOR="#ffffff">
+
+<h2>Running with tracing</h2>
+<p>The platform provides a mechanism for tracking the activity of your plug-in at runtime
+without full debugging. It allows you to use tracing flags that will cause
+tracing information to be printed on the standard output (or Console view). These flags are defined in files named
+&quot;<b>.options</b>&quot; and have the following syntax:</p>
+<p class="Code">&lt;plug-in Id&gt;/debug = true/false&nbsp; (master switch)<br>
+&lt;plug-in Id&gt;/&lt;tracing flag&gt; = &lt;value&gt;</p>
+<p>The first entry represents master switch for tracing your plug-in. If you
+call the method <b>isDebugging</b> in your plug-in class, it will
+return true if the value of this tracing variable is true. Other tracing flags
+are defined by you and their value can be obtained by using</p>
+<p class="Code">&nbsp;&nbsp;&nbsp; Platform.getDebugOption(optionName)&quot;;</p>
+<p>Most of the platform plug-ins define tracing flags, particularly the platform
+core. For a
+new plug-in developer, the most interesting set of tracing flags are those
+related to class loading, because they can allow tracing of plug-in loading
+problems.&nbsp;</p>
+<p> In order to support tracing without the need to edit the tracing <b>.options</b> files, PDE provides a
+&quot;Runtime Tracing&quot; preference page that allows you to set the tracing flags
+and name filters related to loading.</p>
+<p align="center"><img border="0" src="images/runtime-tracing.jpg" width="599" height="531"></p>
+<p align="left">Runtime class load tracing is treated specially since it is general
+and useful for most plug-in developers. PDE also provides a generic dialog for controlling
+other tracing flags.&nbsp; The Advanced Tracing preference page shows all of the plug-ins that support tracing.&nbsp;
+When a plug-in is selected, its supported tracing options are shown in the property
+sheet. You can change the values of these tracing options for workspace and
+external plug-ins.</p>
+<p align="left">If you add tracing support to the plug-in under development,
+these tracing values will show up in this page.</p>
+<p align="center"><img border="0" src="images/advanced-tracing.jpg" width="599" height="531"></p>
+<p> PDE provides a variant of the &quot;Runtime Workbench&quot; launcher
+called &quot;Runtime Workbench With Tracing.&quot; This launcher will create the
+consolidated <b> .options</b> file based on tracing settings from the Preferences and
+pass it to the run-time platform instance. All the tracing output will show up in
+the Console view.</p>
+<h4>Example:&nbsp; Adding tracing support to your plug-in</h4>
+<p>In order to allow other developers to control your plug-in's tracing flags,
+you need to make these options known.&nbsp; This is typically done by placing a <b>.options</b> file in your plug-in.&nbsp; The file lists all the supported flags as well as their default values.
+PDE will immediately detect this file and include it in the list of
+&quot;Workspace Plug-ins&quot; on the advanced tracing preference page.</p>
+<p>We will now define a template <b> .options</b> file with a
+few tracing flags for our new plug-in.</p>
+<p>Select the <b>com.example.xyz</b> project created earlier and create a new file
+.<b>options</b>. When
+the default text editor opens, add the following entries:</p>
+<blockquote>
+  <blockquote>
+    <p class="Code">com.example.xyz/debug = true<br>
+    com.example.xyz/debug/flag = true<br>
+    com.example.xyz/debug/filter = *</p>
+  </blockquote>
+</blockquote>
+<p>When this file is saved, open the <b>Preferences-&gt;Advanced Tracing </b> page. Our
+plug-in should now show up under &quot;Workspace Plug-ins&quot;. When selected,
+it should show the newly defined flags with their default values.</p>
+<p align="center"><img border="0" src="images/xyz-tracing.jpg" width="599" height="531"></p>
+<p>Creating the <b>.options</b> file only defines the availability flags,
+allowing other plug-in developers to define the values of the tracing
+properties.&nbsp; You will still need to check the values of your tracing
+properties in your plug-in code using <b>Platform.getDebugOption()</b><b>.</b></p>
+<p CLASS="BodyText"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</body>
+
+</html>

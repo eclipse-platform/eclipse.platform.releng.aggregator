@@ -1,0 +1,55 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Compiling Java code</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Compiling Java code</H2>
+<P>
+The JDT plug-ins include an incremental and batch Java compiler for building Java .class files from source code. There is no direct API provided by the compiler. It is installed as an incremental builder on Java projects. Compilation is triggered using standard platform build mechanisms.</P>
+<P>
+The platform build mechanism is described in detail in <a HREF="../../org.eclipse.platform.doc.isv/guide/resAdv_builders.htm" CLASS="XRef">resource builders</a>.</P>
+
+<h3>
+Compiling code</h3>
+<P >
+You can programmatically compile the Java source files in a project using the build API.</P>
+<P CLASS="Code">
+IProgressMonitor myProgressMonitor;<br>
+myProject.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, myProgressMonitor);</P>
+<P >
+For a Java project, this will invoke the Java incremental project builder (along with any other incremental project builders that have been added to the project's build spec). </P>
+
+
+<h3>
+Problem determination</h3>
+<P >
+The JDT core defines a specialized marker (marker type &quot;<b>org.eclipse.jdt.core.problem</b>&quot;) to denote compilation problems. To programmatically discover problems detected by the compiler, the standard platform marker protocol should be used. See
+<a HREF="../../org.eclipse.platform.doc.isv/guide/resAdv_markers.htm" CLASS="XRef">resource
+markers</a> for an overview of using markers.</P>
+<P >
+The following snippet finds all Java problem markers in a compilation unit.</P>
+
+<P CLASS="Code">
+public IMarker[] findJavaProblemMarkers(ICompilationUnit cu)&nbsp;<br>
+&nbsp;&nbsp;&nbsp; throws CoreException {<BR>
+&nbsp;&nbsp;&nbsp; IResource javaSourceFile = cu.getUnderlyingResource();<BR>
+&nbsp;&nbsp;&nbsp; IMarker[] markers =&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+javaSourceFile.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; true,
+IResource.DEPTH_INFINITE);<BR>
+}</P>
+<P >
+Java problem markers are maintained by the Java incremental project builder and will be removed automatically as problems are resolved and the Java source is recompiled.</P>
+<P >
+<a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></P>
+
+</BODY>
+</HTML>

@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>org.eclipse.ui.viewActions</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H3>
+org.eclipse.ui.viewActions</H3>
+
+<P >
+It is common for plug-ins to contribute behavior to views that already exist in the workbench. This is done through the
+<b><a href="../reference/extension-points/org_eclipse_ui_viewActions.html"> org.eclipse.ui.viewActions</a></b> 
+extension point. This extension point allows plug-ins to contribute menu items, submenus and tool bar entries to an
+existing view's local
+pull-down menu and local tool bar. </P>
+<P >
+You may have noticed an item in the navigator view's local tool bar that becomes
+enabled whenever a readme file is selected. This item also appears in the view's local
+pull-down menu. These actions appear because the readme tool plug-in contributes
+them using the
+<b> viewActions</b> extension.</P>
+
+<img border="0" src="images/readmeviewaction.jpg" width="187" height="140">
+<P >
+The relevant <b> plugin.xml</b> contribution is below.</P>
+<P class="Code" >
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp; point = "org.eclipse.ui.viewActions"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;viewContribution&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="org.eclipse.ui.examples.readmetool.vc1"&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; targetID=&quot;org.eclipse.ui.views.ResourceNavigator&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;action id="org.eclipse.ui.examples.readmetool.va1"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+label="&amp;amp;Readme View Extension"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+menubarPath=&quot;additions&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+toolbarPath=&quot;additions&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+icon=&quot;icons/basic/obj16/editor.gif&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+tooltip=&quot;Run Readme View Extension"&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+helpContextId=&quot;org.eclipse.ui.examples.readmetool.view_action_context&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+class=&quot;org.eclipse.ui.examples.readmetool.ViewActionDelegate&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+enablesFor=&quot;1&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;selection class=&quot;org.eclipse.core.resources.IFile&quot; name="*.readme"/><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/action><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/viewContribution&gt;<br>
+ &lt;/extension> </P>
+<P >
+A view contribution with a unique id is specified. The view to which we are adding
+the action is specified in the
+<b> targetID</b>. We are contributing to the resource
+navigator view's menu.&nbsp; We specify the label along with the menu bar and
+tool bar locations for the new action.&nbsp; (For a complete discussion of menu and toolbar locations, see
+<a HREF="workbench_menus.htm#workbench_menus_paths" CLASS="XRef"> Menu and toolbar paths</a>). </P>
+<P >
+We also specify the conditions under which the action should be enabled. You can see that this action will be enabled when there is one selection of type
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b>, whose name has
+&quot;<b>.readme</b>&quot; in the file extension. Sure enough, that's exactly what happens when you click around in the resource navigator.&nbsp;&nbsp;</P>
+<P >
+The information in the <b> plugin.xml</b> is all that's needed to populate the appropriate menus and tool bars. No plug-in code will run until the action is actually selected from the menu or toolbar.
+The implementation class specified in the
+<b> plugin.xml</b> must implement the <b><a href="../reference/api/org/eclipse/ui/IViewActionDelegate.html"> IViewActionDelegate</a></b> interface. </P>
+<P >
+In this example, the readme plug-in supplies <b> ViewActionDelegate</b> to implement the action. If you browse this class you will see that it includes methods for handling selection changes, invoking the action, and
+remembering what view it was created for.</P>
+<P >
+The action itself simply launches a dialog that announces that the view action was executed. </P>
+<P CLASS="Code">
+public void run(org.eclipse.jface.action.IAction action) {<br>
+&nbsp;&nbsp;&nbsp; MessageDialog.openInformation(view.getSite().getShell(),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;Readme Editor&quot;,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;View Action executed&quot;);<br>
+}</P>
+<P >
+Although this action is simple, we can imagine how using selections and more
+functional dialogs could make this action do something more interesting.</P>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+
+</BODY>
+</HTML>

@@ -1,0 +1,81 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Using extension point schema</title>
+</head>
+
+<BODY BGCOLOR="#ffffff">
+
+<h2>Using extension point schema</h2>
+<p>Extension points defined by the plug-ins in your workspace are readily available
+to your own plug-in and other plug-ins. If an extension point schema has been
+defined for it, PDE can provide assistance when creating new extensions.
+This assistance includes:</p>
+<ul>
+  <li>Providing choices for the <b>New</b> pop-up menu so that only valid child elements
+    are added</li>
+  <li>Providing attribute information for the property sheet so that only valid
+    attributes are set</li>
+  <li>Providing correct attribute property editors that match the attribute types (boolean,
+    string, and enumeration).</li>
+  <li>Providing additional support for special attribute types (&quot;java&quot;
+    and &quot;resource&quot;).</li>
+  <li>Using the status line to show the first sentence of the documentation
+    snippet for attributes when selected in the property sheet.</li>
+</ul>
+<h3>Example: Using the &quot;Sample Parsers&quot; extension point</h3>
+<p>Before trying to use the extension point we defined before, we still need to
+define the expected interface. Select the <b>com.example.xyz</b> project in the Navigator
+and press the &quot;Create a Java interface&quot; tool bar button.&nbsp; Be sure
+to set the package name to <b>com.example.xyz</b> and interface name to
+<b>IParser</b> before pressing <b>Finish</b>.&nbsp; Edit the interface to look like this:</p>
+<font SIZE="2" COLOR="#7f0055">
+<blockquote>
+<p class="Code">package </font><font SIZE="2" COLOR="#000000">com.example.xyz;</p>
+</font><font SIZE="2" COLOR="#7f0055">
+<p class="Code">public interface </font><font SIZE="2" COLOR="#000000">IParser {<br>
+</font><font SIZE="2" COLOR="#3f7f5f">/**<br>
+</font> &nbsp; <font SIZE="2" COLOR="#3f7f5f">* Run the parser using the
+provided mode<br>
+</font> &nbsp; <font SIZE="2" COLOR="#3f7f5f">*/<br>
+</font>   &nbsp;&nbsp;   <font SIZE="2" COLOR="#7f0055">public void </font><font SIZE="2" COLOR="#000000">parse(</font><font SIZE="2" COLOR="#7f0055">int </font><font SIZE="2" COLOR="#000000">mode);<br>
+}</font></p>
+</blockquote>
+<p>We now have the extension point, an XML schema for it, and the required
+interface. Be sure to save all of your open editors.&nbsp; Everything is now
+ready for our own plug-in or other plug-ins to
+contribute to the extension point.</p>
+<ol>
+  <li>Open the manifest editor for the <b>com.example.xyz</b> plug-in.</li>
+  <li>Switch to the Extensions page and press <b>New-&gt;Schema-based Extensions</b>.</li>
+  <li>You should have &quot;Sample Parsers&quot; available as a choice. Select
+    it and press <b>Finish</b>.</li>
+  <li>Select the newly added &quot;Sample Parsers&quot; element and popup the <b>New-&gt;parser
+    </b>menu. (We specified that our extension point can accommodate any
+    number of&nbsp; &quot;parser&quot; elements.)</li>
+  <li>Select the new element and go to the Properties view. It should show four
+    attributes: <b>id</b>, <b>name</b>, <b> class</b> and <b>mode</b>. Note how the status line shows the
+    short information about attributes as you select them. This information
+    comes directly from the extension point schema.</li>
+  <li>Change the <b> name</b> to &quot;Default Parser&quot;. Change the <b>mode</b> to
+    &quot;manual.&quot;&nbsp;</li>
+  <li>Select the <b>class</b> attribute. This property cannot be edited
+    directly.&nbsp; Open the properties dialog.</li>
+  <li>Choose to create a new class. Select &quot;XYZ Plugin&quot; as the source
+    folder, <b>com.example.xyz</b> as the package and <b> DefaultParser</b> as the class name.
+    Press <b>Finish</b>.</li>
+  <li>You should now be in the Java editor for the <b> DefaultParser</b> class. Notice
+    how it has implemented the right interface (<b>IParser</b>) and already has the stub
+    implementation of the &quot;parse&quot; method.</li>
+</ol>
+<p>As you can see, when you provide a complete XML schema for your extension
+point, it will help all your potential users by letting PDE to assist them and
+prevent them from making errors.</p>
+<p align="center"><font SIZE="2" COLOR="#3f7f5f"><img border="0" src="images/schema-usage.jpg" width="563" height="271"></font></p>
+<p CLASS="BodyText"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</body>
+
+</html>

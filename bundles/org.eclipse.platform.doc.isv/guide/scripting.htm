@@ -1,0 +1,331 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="home">
+   
+   <LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   <title>Scripting a user interface</title>
+</head>
+<body>
+
+<h1>
+Scripting a user interface</h1>
+The platform scripting plug-in allows you to develop various workbench
+extensions using JavaScript.&nbsp; This support is provided using the Rhino
+JavaScript engine.&nbsp; You can use JavaScript to contribute the following to
+the workbench:
+<ul>
+<li>actions (actionSets)</li>
+
+<li>
+editors</li>
+
+<li>
+wizards (newWizards, exportWizards, importWizards)</li>
+
+<li>popup menus</li>
+
+<li>
+preference pages</li>
+</ul>
+
+<p>The following sections assume you have a working knowledge of JavaScript,
+workbench extensions, and SWT.</p>
+
+<h2>
+Concepts</h2>
+Scripts are managed within the workbench as regular project files. You
+typically create a separate project to contain your scripts.&nbsp; A specialized
+editor is provided for editing the scripts.
+<p>There are two types of scripts supported by the platform:
+<ol>
+<li>
+<b>Batch</b> <b> scripts</b> use JavaScript to call methods on
+various workbench objects and manipulate the results. These scripts are well-suited
+for creating new, repetitive actions that are not part of the basic workbench
+function.</li>
+
+<li>
+<b>
+UI scripts</b> resemble a client-side HTML page with scripted UI events. These
+scripts are well-suited for creating scripts that require more
+elaborate interaction with the user.</li>
+</ol>
+Script writers gain access to the workbench environment through several platform
+objects that are exposed as local JavaScript variables. Scripts can also use the facilities
+of JavaScript to create Java objects and call their methods.<p>Once a file containing the script is created, it can be registered with
+the workbench through the preferences dialog (<b>Window-&gt;Preferences-&gt;Scripts</b>).
+Expanding this entry in the preferences page will reveal a list of the workbench
+extension points that can be scripted.&nbsp; Scripts are added to each
+extension point by selecting it in the preferences tree and pressing the corresponding
+<b> Add</b> button in the preference page.&nbsp;<p>The
+workbench must be restarted the first time each script is registered.
+Once registered, the script can be modified and immediately executed without
+restarting the workbench.
+<p>All console output from scripts, as well as any errors detected while
+running scripts are written to the script console. You can add the script
+console view to any other perspective, or you can always run your scripts
+from the Scripting perspective (includes the console view by default).
+<h2>
+Limitations of scripts</h2>
+<p>
+Scripts that are added to the workbench may only access the API methods defined
+in the following plug-ins:</p>
+<ul>
+  <li><b>org.eclipse.core.runtime</b></li>
+  <li><b>org.eclipse.core.boot</b></li>
+  <li><b>org.eclipse.core.resources</b></li>
+  <li><b>org.eclipse.ui</b></li>
+  <li><b>org.eclipse.swt</b></li>
+  <li><b>org.eclipse.scripting</b></li>
+</ul>
+<p>Future releases will lift this restriction so that arbitrary plug-ins can be
+scripted.</p>
+<h2>
+Writing a batch script</h2>
+A "batch" script is simply a collection of JavaScript statements that work with
+platform objects by invoking their API methods and manipulating
+the results. There are three platform objects exposed to script writers:
+<ol>
+<li>
+<b><b>toolkit</b></b> - a utility object that
+implements <a href="../reference/api/org/eclipse/scripting/IToolkit.html"><b>org.eclipse.scripting.IToolkit</b></a>. It provides convenience methods for
+basic workspace resource manipulations, prompting, and loading of persisted script state.</li>
+
+<li>
+<b><b>plugin</b></b> - a default instance of <a href="../reference/api/org/eclipse/core/runtime/Plugin.html"><b>org.eclipse.core.runtime.Plugin</b></a>.
+It provides access to plug-in methods. All user scripts
+execute as part of a single plug-in managed by the platform scripting
+support.</li>
+
+<li>
+<b><b>platform</b></b> - a convenience object with methods corresponding
+to <a href="../reference/api/org/eclipse/core/runtime/Platform.html"><b>org.eclipse.core.runtime.Platform</b></a>. It provides
+access to general platform functions.</li>
+</ol>
+The method <b>toolkit.print(String)</b> is used to write output
+to the
+script console.
+<p>In addition to the predefined local variables, the JavaScript language
+allows you to create Java objects and use their public API.&nbsp; The JavaScript property
+<b>Packages</b> can be used for
+this purpose.&nbsp; The following snippet uses the <b>Packages</b>
+property to obtain the install URL and the splash&nbsp;bitmap object.
+<p>&nbsp;
+<p class="Code">var install =
+Packages.org.eclipse.core.boot.BootLoader.getInstallURL();<br>
+var splash = new Packages.java.net.URL(install,"splash.bmp");
+<h2>
+Writing user interface scripts</h2>
+ SWT-based user
+interfaces can be created with the platform scripting support.&nbsp; The resulting scripts are very similar to client-side
+HTML pages with a few exceptions:
+<ul>
+<li>
+only a subset of html elements and attributes is used</li>
+
+<li>
+the resulting html must be well formed <b>xhtml</b></li>
+
+<li>
+several "non-html" elements and attributes are defined</li>
+</ul>
+A scripting editor is provided by the scripting plug-in.&nbsp; This editor supports a source
+view and a preview that shows how the source page will be
+rendered when executed. The editor makes use of the <b> Outline</b> view
+and the <b> Properties</b> view, so you should show these views when editing UI
+scripts.
+<p>The UI script editor is registered as the default editor for files of
+type <b>xhtml</b>.&nbsp;
+<p>UI scripts are best understood by example.&nbsp; See the <a href="../samples/org.eclipse.scripting.examples/doc-html/script_ex.html">Scripting
+Examples</a> for specific techniques.&nbsp; The following roadmap describes the
+elements that can be used in scripts and their supported attributes and event
+blocks.
+<h4>Body</h4>
+<ul>
+  <li><b>
+body</b> - <b> id, onload, onunload</b>. Defines the body of the UI definition.</li>
+</ul>
+<h4>Form</h4>
+<ul>
+  <li><b>
+form</b> - <b> id, onreset, onsubmit, title</b>.&nbsp;
+    Defines the major UI group (typically
+rendered as a separate page).</li>
+</ul>
+<h4>
+UI elements</h4>
+<ul>
+  <li><b>
+label</b> - <b>id</b>, <b>value.&nbsp;</b>
+    The value is the string label.</li>
+  <li><b>
+entry field</b> (<b>&lt;input type=&quot;text&quot;&gt;</b>) -
+    <b> id, onblur, onchange, onfocus, onkeypress, value</b>.&nbsp;
+    Defines a text entry field.</li>
+  <li><b>
+textarea</b> - <b> id, onblur, onchange, onfocus, onkeypress</b>.&nbsp;
+    Defines a text area.</li>
+  <li><b>
+push button</b> (<b>&lt;input
+    type=&quot;button&quot;&gt;</b>) - <b> id, onpush,
+    value</b>.&nbsp; Defines a push
+button.</li>
+  <li><b>
+radio button</b> (<b>&lt;input
+    type=&quot;radio&quot;&gt;</b>) - <b> id, checked, onclick,
+    value</b>. Defines
+a radio button.</li>
+  <li><b>
+check-box</b> (<b>&lt;input type="checkbox&quot;&gt;</b>) -
+    <b> id, checked, onclick, value</b>. Defines
+a check box.</li>
+  <li><b>
+combo-box</b> (<b>&lt;select size=&quot;1&quot;&gt;</b>) -
+    <b> id, onchange</b>. Defines a combo-box.</li>
+  <li><b>
+list-box </b> (<b>&lt;select size=&quot;3&quot;&gt;</b>) -
+    <b> id, onchange</b>. Defines a list-box.</li>
+  <li><b>
+image</b> - <b> id, source</b>. Allows placement of an image as a user interface element.</li>
+</ul>
+<h4>Layout controls</h4>
+<ul>
+
+<li>
+<b>
+group box</b> (<b>&lt;fieldset&gt;</b>) - <b> id,
+title</b>. Allows grouping of individual UI
+elements</li>
+
+  <li><b>
+table</b> - <b>id</b>. Creates a table
+    <p><b>
+table row</b>
+    <p><b>
+table data</b> - <b> colspan, rowspan</b>. Defines a table cell.</li>
+  <li><b>
+line break</b></li>
+  <li><b>
+horizontal rule</b></li>
+</ul>
+<h4>Scripting</h4>
+<ul>
+
+<li>
+<b>
+script</b></li>
+</ul>
+In general, all UI elements can specify an <b> id</b> attribute. This
+will define a local script variable of the same name.&nbsp; The script can
+manipulate the UI elements through these local variables. The available
+methods are typically those of the equivalent SWT widget.
+<p>Simple UI layout can be most effectively performed by inserting line
+breaks<b> &lt;br /></b> between groups of UI elements to start the new layout
+row. The script rendering support performs default layout which will be
+sufficient in most simple cases.
+<p>More complex layout can be achieved by using tables to control placement
+of UI elements. In addition, separate UI elements can be grouped using
+the <b> &lt;fieldset></b> element (valid HTML but not frequently used in web page
+design).
+<p>The actual script function bodies are defined using the <b> &lt;script>
+</b>
+element(s). The functions are triggered as a result of calls specified
+within the &quot;<b>onXXX</b>&quot; attributes (e.g., <b>onload</b>,
+<b>onreset</b>) of the corresponding UI elements (just as
+in html pages).
+<p>For UI scripts, the <b>toolkit</b> local variable is an object
+instance of the <a href="../reference/api/org/eclipse/scripting/IToolkitUI.html"><b>org.eclipse.scripting.IToolkitUI</b></a>
+interface. It contains additional methods that are not available in the <b>toolkit</b> object exposed to
+batch scripts.
+<h2>
+Registering scripts with the workbench</h2>
+Once created as workbench resources, the scripts can be registered into
+the appropriate workbench extension point using the workbench preferences
+dialog.
+<p><img border="0" src="images/script.jpg" width="600" height="532">
+<p>Scripts are added using the <b> Add</b> dialog. The dialog prompts for the following
+information:
+<ul>
+<li>
+display name of the script</li>
+
+<li>
+script location (as a workbench resource)</li>
+
+<li>
+icon (optional)</li>
+
+<li>
+ whether to register as batch script or UI script.&nbsp; Some extension
+points allow either.</li>
+
+<li>
+ file extension for which to register the script.&nbsp; Some extension points
+require a file extension.</li>
+</ul>
+<h2>
+Using UI scripting with Java</h2>
+The UI scripting facility will support Java as its scripting language instead of
+JavaScript.&nbsp; When Java is used as the scripting language, you must create
+an instance of <a href="../reference/api/org/eclipse/scripting/Renderer.html"><b>org.eclipse.scripting.Renderer</b></a>.
+This object will be used to render the UI and can
+be associated with one or more event handler objects, also written in Java.&nbsp;
+Use the <b> addObject(String,Object)</b> method of the
+renderer to add an event handler.<p>The JavaScript event model is used even when scripting with Java. The
+various &quot;<b>onXXX</b>&quot; clauses are specified as before.
+In this case, they are implemented as reflective callbacks to methods on the registered event handlers,
+rather than as calls to "inline" JavaScript functions.
+<h2>
+Explicit use of script adapters</h2>
+We've seen how scripts can be added and managed by the workbench user.&nbsp;
+Scripts can also be supplied as extensions by plug-ins.&nbsp; This is done by specifying script adapters in place
+of implementation classes as the <b>class</b> attribute
+in the extension definition.&nbsp; The adapter specification includes the name of the actual script to execute.&nbsp;
+For example, the following markup from the scripting examples <b>plugin.xml
+</b>contributes an action set and specifies a <a href="../reference/api/org/eclipse/scripting/ScriptAdapterWorkbenchAction.html"><b>ScriptAdapterWorkbenchAction</b></a>
+with the script name as the <b>class</b>.&nbsp; The
+relevant markup is in bold.
+<p class="Code"><br>
+   &lt;extension point = &quot;org.eclipse.ui.actionSets&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp; &lt;actionSet&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id=&quot;scriptActionSet&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label=&quot;%S_Script_Examples&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; visible="true"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;action id          = "scriptaction1"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; menubarPath =
+&quot;window/org_eclipse_scripting_examples/slot1&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; toolbarPath =
+&quot;%S_Script_Examples&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; label       =
+&quot;%S_Scripted_Action_Example&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tooltip     =
+&quot;%S_Perform_Scripted_JavaScript_Action&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; icon        =
+&quot;icons/full/ctool16/script_scp.gif&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>class=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;org.eclipse.scripting/org.eclipse.scripting.ScriptAdapterWorkbenchAction:file=platform:/plugin/org.eclipse.scripting.examples/excalibur.js
+language=javascript&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </b>&lt;/action><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...</p>
+<p>Standard
+script adapters can be referenced directly as part of the <b> plugin.xml</b> specification
+of any plug-in. The list of supported adapters can be found in the <a href="../reference/api/org/eclipse/scripting/package-summary.html"><b>org.eclipse.scripting</b></a>
+package.<p>The <a href="../samples/org.eclipse.scripting.examples/doc-html/script_ex.html">Scripting
+Examples</a> show additional uses of these adapters.&nbsp; The script example plug-in
+implements each of the script
+extensions by using the predefined adapters.&nbsp; Refer to the&nbsp; <b>plugin.xml</b> file for additional details.
+<h2>
+References</h2>
+The API Specification for <a href="../reference/api/org/eclipse/scripting/package-summary.html"><b>org.eclipse.scripting</b></a>
+contains additional information about scripting support.&nbsp; 
+<p>The scripting examples also provide descriptions and usage information.&nbsp;
+See <a href="../samples/org.eclipse.scripting.examples/doc-html/script_ex.html">Scripting
+Examples</a> for further information.</p>
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</body>
+</html>

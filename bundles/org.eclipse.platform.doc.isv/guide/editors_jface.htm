@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Text editors and JFace text
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2 CLASS="Heading2">Text editors and JFace text</H2>
+<p>The workbench package <b><a href="../reference/api/org/eclipse/ui/editors/text/package-summary.html">org.eclipse.ui.editors.text</a></b>
+implements the default text editor for the platform.&nbsp; It uses the text
+editor framework in <a href="../reference/api/org/eclipse/ui/texteditor/package-summary.html"><b>org.eclipse.ui.texteditor</b></a>
+ for its implementation.</p>
+<p>The text editor framework provides a domain-model independent editor that
+supports the following features:</p>
+<ul>
+  <li>Standard text editing operations such as cut/copy/paste, find/replace</li>
+  <li>Visual presentation of resource markers adjacent to the text editing area</li>
+  <li>Automatic update of resource markers as the user edits text</li>
+  <li>Context menu management</li>
+  <li>Responses to user actions in the workbench, such as refreshing resources
+    from the file system, closing projects, or removal of the editor's input
+    element resource</li>
+</ul>
+<p><a href="../reference/api/org/eclipse/ui/texteditor/ITextEditor.html"><b>ITextEditor</b></a>
+is defined as a text specific extension of <a href="../reference/api/org/eclipse/ui/IEditorPart.html"><b>IEditorPart</b></a>.&nbsp;
+The default implementation of this interface is provided by <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>.&nbsp;</p>
+<p><a href="../reference/api/org/eclipse/ui/texteditor/IDocumentProvider.html"><b>IDocumentProvider</b></a>
+is used to establish the link between a domain model and an <a href="../reference/api/org/eclipse/ui/texteditor/ITextEditor.html"><b>ITextEditor</b></a>.&nbsp;
+The document provider manages the text presentation of the domain model and can
+be shared between multiple editors.</p>
+<p>The workbench text editing framework is built on top of JFace text.&nbsp; The
+Java editor example in <b>org.eclipse.ui.examples.javaeditor</b>
+is a good place to start learning about the text editor framework and JFace
+text.&nbsp; It shows how complex features like text coloring, hover help, and
+automatic indenting can be implemented.</p>
+<h3>JFace text</h3>
+<p>The package <b><a href="../reference/api/org/eclipse/jface/text/package-summary.html">org.eclipse.jface.text</a></b>
+and its sub-packages support the implementation of robust text editors such as
+the workbench text
+editor and the JDT Java editor.&nbsp;&nbsp;</p>
+<p>The following roadmap gives an overview of the support in JFace text.</p>
+<ul>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/package-summary.html">org.eclipse.jface.text</a></b>
+    defines a generic <b>document</b> model for text and provides a viewer that
+    displays text using this model.&nbsp; Documents can be divided into
+    non-overlapping <b>partitions</b>, which can be useful when the text
+    represents multiple elements with different meanings (such as methods and
+    comments inside a Java file).&nbsp; Partitions have <b>content types</b>
+    which are used to identify places where different behavior should be
+    assigned for different kinds of content.&nbsp; Document <b>positions</b> can be used to
+    define text regions that remain updated as the user edits text.&nbsp;&nbsp; <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>
+    and <b><a href="../reference/api/org/eclipse/jface/text/TextViewer.html">TextViewer</a></b>
+    are good places to begin learning about this package.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/formatter/package-summary.html">org.eclipse.jface.text.formatter</a></b>
+    defines a text viewer add-on which can be configured with different <b>formatting</b> 
+    behavior per partition content type.&nbsp; Formatting is achieved by
+    manipulating white spaces and delimiters in order to present the text in a
+    structured fashion.&nbsp; Formatting is most commonly used when editing code and is
+    often driven by user preference.&nbsp; The JDT source code editor uses this
+    support to provide user-driven Java code formatting.&nbsp; </li>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/contentassist/package-summary.html">org.eclipse.jface.text.contentassist</a>
+    </b>defines a text viewer add-on that provides user-driven <b>text completion</b> 
+    support.&nbsp; Popup windows are used to propose possible text choices to
+    complete a phrase.&nbsp; The user can select these choices for automatic
+    insertion in the text.&nbsp; Content assist also
+    supports contextual popups for providing the user with information that is
+    related to the current position in the document.&nbsp; <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>
+    is a good place to begin learning about this package.&nbsp; It can be
+    configured with different phrase completion strategies for different
+    partition content types.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/presentation/package-summary.html">org.eclipse.jface.text.presentation</a></b>
+    defines a text viewer add-on which can control the <b>visual presentation</b>
+    (font, font style, colors) of the text shown in the text viewer.&nbsp; For
+    each change applied to a document, the presentation reconciler determines
+    which region of the visual presentation should be invalidated and how to
+    repair it.&nbsp; Different strategies can be used for different partition
+    content types.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/reconciler/package-summary.html">org.eclipse.jface.text.reconciler</a></b>
+    defines a text viewer add-on that supports the <b>synchronization</b> of a
+    document with some external structure that may also be manipulating the
+    text.&nbsp;&nbsp;</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
+    provides <b>rule-based document scanning</b>.&nbsp; Plug-ins can use rules
+    to distinguish tokens such as line delimiters, white space, and generic
+    patterns when scanning a document.&nbsp; This package also provides support
+    for rule-driven presentation reconciling and document partitioning.&nbsp; The Java editor example uses this package to parse Java
+    code.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/text/source/package-summary.html">org.eclipse.jface.text.source</a></b>
+    defines a <b>source viewer</b>.&nbsp; A source viewer extends a text viewer
+    in order to support visual text annotations.&nbsp;&nbsp;&nbsp; These
+    annotations are used in the JDT source code editor to annotate Java
+    source code with problem descriptions and breakpoints. </li>
+</ul>
+<p>The SWT <a href="../reference/api/org/eclipse/swt/custom/StyledText.html"><b>StyledText</b></a>
+widget is used by the JFace text support.&nbsp; </p>
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>

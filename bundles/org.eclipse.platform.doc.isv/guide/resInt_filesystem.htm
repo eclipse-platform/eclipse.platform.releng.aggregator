@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="isvGuide.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Resources and the local file system
+</TITLE>
+
+<link rel="stylesheet" type="text/css" href="isvGuide.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Resources and the local file system</H2>
+<P >
+When the platform core is running and the resources plug-in is active, the workspace is represented by an instance of
+<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b>, which provides protocol for accessing the resources it contains.  An
+<b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b> instance
+represents an associated collection of files and directories in the local file system.  You can access the workspace from the
+resources plug-in class in <b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>. </P>
+<P CLASS="Code">
+ResourcesPlugin.getWorkspace();</P>
+<P >
+When the resources plug-in is not running, the workspace exists solely in the local file system and is viewed or manipulated by the user
+via standard file-based tools. Let's look at what a workspace looks like on disk as we explain the
+resources plug-in API. </P>
+
+<H3>
+Our sample tree on disk</H3>
+<P >
+When you installed the platform SDK, you unzipped the files into a directory of
+your choosing.&nbsp; We will call this directory the platform root directory.
+This is the directory that contains the
+<b> plugins</b> directory, among others.  Inside the platform root directory, there
+is a <b>workspace</b> directory which is used to hold
+the resources that are created and manipulated by the platform.&nbsp; If you
+look in your <b>workspace</b> directory, you'll see separate subdirectories for each project that exists in the workspace.  Within these subdirectories are the folders and files that
+each project contains.  </P>
+<P >
+If the SDK in our example is installed in <b> c:\MySDK</b>, then inside
+the <b>c:\MySDK\workspace</b> directory we find subdirectories named after the workspace's projects,
+<b> MyWeb</b> and <b>MyServlet</b>.  These are called the projects' content directories.
+Content directories are created by the platform when the user creates a project.</P>
+<P >
+Inside each directory, we find the files and folders within the project, laid out exactly the same as they are in the workspace's resource tree.  All file names are the same, and the files' contents are the same
+whether accessed from the file system or from the workspace.  No surprises.</P>
+<P CLASS="Code">
+C:\MySDK\workspace&nbsp; (workspace root)<br>
+&nbsp;&nbsp;&nbsp; .metadata\ (platform metadata directory<br>
+&nbsp;&nbsp;&nbsp; MyWeb\ (project content directory for MyWeb)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; index.html<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; images\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; logo.gif<br>
+&nbsp;&nbsp;&nbsp; MyServlet\ (project content directory for MyServlet)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; src\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; main.java<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bin\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; main.class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; main$$1.class </P>
+<P >
+The platform has a special <b>.metadata</b> directory for holding platform internal information.  The
+<b>.metadata</b> directory of a workspace is considered to be a &quot;black box.&quot;  Important information about the workspace structure, such as a project's references or a resource's properties,
+is stored in the metadata portion of the workspace and should only be accessed by tools through the
+platform API.&nbsp; These files should never be edited or manipulated using
+generic file system API. </P>
+<P >Apart from the <b>.metadata</b> directory, the folders and files in the workspace directory are fair game for other
+tools.&nbsp; The files and folders can be manipulated by non-integrated tools, such as text editors and file system
+utilities.&nbsp; The only issue is that the user must be careful when editing
+these files both in the workbench and externally.&nbsp; (This is no
+different than when a user edits a file using two independent stand-alone
+tools.)&nbsp; The workbench provides refresh operations to reconcile the
+workspace view of resources with the actual state in the file system. </P>
+
+
+<H3>
+Our sample tree in code</H3>
+<P >
+The resource API allows us to manipulate this resource tree in code.  Here we will look at some code snippets for a quick taste of the resource
+API.  The resource API is defined in a series of interfaces in
+<b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>.  There are interfaces for all of the resource types, such as
+<b><a href="../reference/api/org/eclipse/core/resources/IProject.html">IProject</a></b>,
+<b><a href="../reference/api/org/eclipse/core/resources/IFolder.html">IFolder</a></b>, and
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b>.  Extensive common protocol is defined in
+<b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>.  We also make use of the
+<b><a href="../reference/api/org/eclipse/core/runtime/package-summary.html">org.eclipse.core.runtime</a></b> interface
+<b><a href="../reference/api/org/eclipse/core/runtime/IPath.html">IPath</a></b>, which represents segmented paths such as resource or file system paths.</P>
+<P >
+Manipulating resources is very similar to manipulating files using <b> java.io.File</b>.&nbsp;
+The API is based on <b>handles</b>.&nbsp; When you use API like <b>getProject</b>
+or <b>getFolder</b>, you are returned a handle to the
+resource.&nbsp;&nbsp; There is no guarantee or requirement that the resource itself exists
+until you try to do something with the handle.&nbsp; If you expect a resource to
+exist, you can use <b>exists()</b>  protocol to ensure
+this is the case.&nbsp;&nbsp;  </P>
+<P >
+To navigate the workspace from a plug-in, we must first obtain the <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>, which represents the top of the resource hierarchy in the workspace.</P>
+<P CLASS="Code">
+IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();</P>
+<P >
+Once we have a workspace root, we can access the projects in the workspace. </P>
+<P CLASS="Code">IProject myWebProject = myWorkspaceRoot.getProject(&quot;MyWeb&quot;);<br>
+// open if necessary<br>
+if (myWebProject.exists() &amp;&amp; !myWebProject.isOpen())<br>
+&nbsp;&nbsp;&nbsp; myWebProject.open(null);</P>
+<P >
+Before we can manipulate a project, we must open it.  Opening the project reads the project's
+structure from disk and creates the in-memory object representation of the project's resource tree.  Opening a project is an explicit operation since each open project consumes memory to represent the resource tree
+internally and open projects participate in various resource lifecycle events
+(such as building) which can be lengthy.&nbsp; In general, closed projects
+cannot be accessed and will appear empty even though the resources are still present in the file system.</P>
+<P >
+You'll notice that many of these resource examples pass a null parameter when manipulating resources.
+Many resource operations are potentially heavyweight enough to warrant progress reporting and
+user cancelation.  If your code has a user interface, you will typically pass an <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html"> IProgressMonitor</a></b>,
+which allows the
+resources plug-in to report progress as the resource is manipulated and allows the user to cancel the operation if desired.&nbsp;
+For now, we simply pass <b>null</b>, indicating no
+progress monitor.</P>
+<P >
+Once we have an open project, we can access its folders and files, as well as create additional ones.&nbsp;
+In the following example we create a file resource from the contents of an
+external file
+located outside of our workspace.  </P>
+<P CLASS="Code">
+IFolder imagesFolder = myWebProject.getFolder(&quot;images&quot;);<br>
+if (imagesFolder.exists()) {<br>
+&nbsp;&nbsp;&nbsp; // create a new file<br>
+&nbsp;&nbsp;&nbsp; IFile newLogo = imagesFolder.getFile(&quot;newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp; FileInputStream fileStream = new FileInputStream(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;c:/MyOtherData/newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp; newLogo.create(fileStream, false, null);<br>
+&nbsp;&nbsp;&nbsp; fileStream.close();<br>
+}</P>
+<P >
+ In the example above, the
+first line obtains a handle to the images folder.&nbsp; We must check that the
+folder <b>exists</b> before we can do anything
+interesting with it.&nbsp; Likewise, when we get the file <b>newLogo</b>,
+the handle does not represent a real file until we create the file in the last
+line.&nbsp; In this example, we create the file by populating it with the
+contents of <b>logo.gif</b>.  </P>
+<P >
+The next snippet is similar to the previous one, except that it copies the <b> newLogo</b> file from the original logo rather than create a new
+one from its contents.</P>
+<P CLASS="Code">
+IFile logo = imagesFolder.getFile(&quot;logo.gif&quot;);<br>
+if (logo.exists()) {<br>
+&nbsp;&nbsp;&nbsp; IPath newLogoPath = new Path(&quot;newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp; logo.copy(newLogoPath,
+false, null);<br>
+&nbsp;&nbsp;&nbsp; IFile newLogo = imagesFolder.getFile(&quot;newLogo.gif&quot;);<br>
+...<br>
+}</P>
+<P >
+Finally, we'll create another images folder and move the newly created file to it.  We rename the file as a side effect of moving it.</P>
+<P CLASS="Code">
+...<br>
+IFolder newImagesFolder = myWebProject.getFolder(&quot;newimages&quot;);<br>
+newImagesFolder.create(false, true, null);<br>
+IPath renamedPath = newImagesFolder.getFullPath().append(&quot;renamedLogo.gif&quot;);<br>
+newLogo.move(renamedPath, false, null);<br>
+IFile renamedLogo = newImagesFolder.getFile(&quot;renamedLogo.gif&quot;);</P>
+
+
+<P CLASS="Code">
+&nbsp;</P>
+
+
+<P>Many of the resource API methods include a <b>force</b>
+boolean flag which the specifies whether resources that are out of sync with the
+corresponding files in the local file system will be updated.&nbsp; See <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>
+for more information.</P>
+
+
+<H3>
+Mapping resources to disk locations</H3>
+<P >
+  In the sample resource tree, we've assumed that all of the project content directories are
+in the <b>workspace</b> directory underneath the platform root
+directory (<b>C:\MySDK\workspace)</b>.  This is the default configuration
+for projects.&nbsp; However, a project's content directory can be remapped to any arbitrary directory in the file system, perhaps on a different disk drive.</P>
+<P >
+The ability to map the location of a project independent of other projects allows the user to
+store the contents of a project in a place that makes sense for the project and the project team.  A project's content directory should be considered &quot;out in the open.&quot;  This means that users can create, modify, and delete resources
+by using the workbench and plug-ins, or by directly using file system based tools and editors.</P>
+<P> Resource path names are not complete file system paths.  Resource paths are always
+based on the project's location (usually the <b>workspace</b>
+directory).&nbsp; To obtain the full file system path to a resource, you must query its location using
+<b>
+<a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.getLocation().</b></P>
+<P >You can determine the file system location of a particular resource by querying its location using
+<b>getLocation().</b>&nbsp; Howevever, you cannot use
+<b> <a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html">IProjectDescription</a>.setLocation
+</b>to change its location, because that method is just a simple setter for a
+data structure.&nbsp;&nbsp; </P>
+
+
+<H3>
+Resource API and the file system</H3>
+<P >
+When we use the resources API to modify our workspace's resource tree, the files
+are changed in the file system in addition to updating our resource objects.  What about changes to
+resource files that happen outside of the platform's API?  </P>
+<P >
+External changes to resources will not be reflected in the workspace and resource objects until detected by the resources plug-in.
+Clients can use resource API to reconcile workspace and resource objects with
+the local file system quietly and without user intervention.&nbsp; The user can
+always explicitly force a refresh&nbsp; in the resource navigator view of the
+workbench.  </P>
+<P CLASS="Note">
+Note:&nbsp; Many of the methods in the resource APIs include a force parameter which specifies how resources that
+are out of sync with the file system should be handled.  The API Reference for
+each method provides specific information about this parameter. Additional methods in the API allow programmatic control of file system refresh, such as
+<b> IResource.refreshLocal(int depth, IProgressMonitor monitor)</b>. See <b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
+for information on correct usage and costs.</P>
+
+<p CLASS="Note"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+
+</BODY>
+</HTML>
