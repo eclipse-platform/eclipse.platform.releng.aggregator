@@ -23,8 +23,8 @@ to run on multiple operating systems while providing robust integration with
 each underlying OS.&nbsp; Plug-ins can program to the Eclipse portable APIs and
 run unchanged on any of the supported operating systems.&nbsp;</P>
 <P >
-At the core of Eclipse is an architecture for dynamic discovery of plug-ins. The
-platform handles the logistics of the base environment and provides a standard
+At the core of Eclipse is an architecture for dynamic discovery, loading, and running of plug-ins. The
+platform handles the logistics of finding and running the right code.  The platform UI provides a standard
 user navigation model.&nbsp; Each plug-in can then focus on doing a small number of tasks well. What
 kinds of tasks? Defining, testing, animating, publishing, compiling, debugging,
 diagramming...the
@@ -37,11 +37,10 @@ The Eclipse platform defines an open architecture so that each plug-in developme
 repository experts build the back ends and the usability experts build the end user tools. If the platform is designed well, significant new features and levels of integration can be added without impact to other tools.</P>
 <P >
 The Eclipse platform uses the model of a common workbench to integrate the tools from the end user's point of view. Tools that you develop can
-plug into the workbench using well defined hooks called extension points.</P>
+plug into the workbench using well defined hooks called <b>extension points</b>.</P>
 <P >
-The underlying platform runtime uses the same extension model to allow plug-in developers to add support for additional
-file types and customized installations, such as web servers, workgroup servers,
-and repositories.&nbsp; The artifacts for each tool, such as files and other data, are coordinated by a common platform resource model.&nbsp;&nbsp;&nbsp;</P>
+The platform itself is built in layers of plug-ins, each one implementing extension points defined in lower-level plug-ins, and in turn defining their own extension points for further customization.  This extension model allows plug-in developers to add 
+a variety of function to the basic tooling platform.&nbsp; The artifacts for each tool, such as files and other data, are coordinated by a common platform resource model.&nbsp;&nbsp;&nbsp;</P>
 <P >
 The platform gives the users a common way to work with the tools, and provides integrated management of the resources they create with plug-ins.&nbsp;&nbsp;</P>
 <P >Plug-in developers also gain from this architecture.&nbsp; The platform
@@ -56,13 +55,13 @@ integration issues.</P>
 Platform structure</H3>
 <P >
 The Eclipse platform itself is structured as subsystems which are implemented in
-one or more plug-ins.&nbsp; The subsystems are built on top of a small runtime engine.&nbsp; </P>
+one or more plug-ins.&nbsp; The subsystems are built on top of a small runtime engine.&nbsp;The figure below depicts a simplified view.   </P>
 
 <P >
-<img src="images/arch-npi.jpg" alt="" border="0" width="312" height="312"> </P>
+<img src="images/arch-npi.jpg" alt="Platform runtime base with groups of plug-ins adding function" border="0" width="312" height="312"> </P>
 
 <P >
-The subsystems define extension points for adding behavior to the
+The plug-ins that make up a subsystem define extension points for adding behavior to the
 platform.&nbsp; The following table describes the major runtime components of the platform that
 are implemented as one or more plug-ins. </P>
 
@@ -73,9 +72,9 @@ are implemented as one or more plug-ins. </P>
 <H4>
 Platform runtime</H4>
     </td>
-    <td width="71%">Defines the extension point and plug-in model. It dynamically discovers plug-ins and maintains information in a platform registry.&nbsp;
+    <td width="71%">Defines the extension point and plug-in model. It dynamically discovers plug-ins and maintains information about the plug-ins and their extension points in a platform registry.&nbsp;
       Plug-ins are started up when required according to user operation of the
-      platform.</td>
+      platform.  The runtime is implemented using the OSGi services model.</td>
   </tr>
   <tr>
     <td width="29%">
@@ -89,9 +88,11 @@ Platform runtime</H4>
 <H4>
 Workbench UI</H4>
     </td>
-    <td width="71%">Implements the user cockpit for navigating the resources and using the tool plug-ins. It defines extension points for adding UI components such as views or menu actions.&nbsp;
-      It includes additional toolkits (JFace and SWT) for building user
-      interfaces.</td>
+    <td width="71%">Implements the user cockpit for navigating the platform. It defines extension points for adding UI components such as views or menu actions.&nbsp;
+      It supplies additional toolkits (JFace and SWT) for building user
+      interfaces. The UI services are structured so that a subset of the UI plug-ins can be used to build rich client applications that are
+      independent of the resource management and workspace model.  IDE-centric plug-ins define additional function for 
+      navigating and manipulating resources.</td>
   </tr>
   <tr>
     <td width="29%">
@@ -119,6 +120,14 @@ Help system</H4>
     </td>
     <td width="60%">Defines a language independent debug model and UI classes
       for building debuggers and launchers.</td>
+  </tr>
+  <tr>
+    <td width="40%">
+  
+<h4>Other utilities</h4>
+    </td>
+    <td width="60%">Other utility plug-ins supply function such as searching and comparing resources, performing builds using XML configuration files,
+    and dynamically updating the platform from a server.</td>
   </tr>
 </table>
 
