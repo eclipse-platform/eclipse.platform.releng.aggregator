@@ -1095,47 +1095,21 @@ becomes blocked until the background operation completes, or until one of the
 operations is canceled.</p>
 <p>The suggested solution is to switch all references to old <tt>IWorkspace.run</tt>
 to use the new method with a scheduling rule parameter. The scheduling rule
-should be the most fine-grained resource that encompasses all changes by that
-operation. If desired, a <tt>MultiRule</tt> can be used to specify multiple
-resource rules. If the operation tries to modify resources outside of the scope
-of the scheduling rule, a runtime exception will occur. The following table
-summarizes what scheduling rule is required for each of the different types of
-resource operations:</p>
-<table cellspacing="2" cellpadding="2" border="1">
-  <tbody>
-    <tr>
-      <th>Type of operation</th>
-      <th>Rule required</th>
-    <tr>
-      <td>Create, modify, or delete file or folder</td>
-      <td>Parent resource</td>
-    </tr>
-    <tr>
-      <td>Create, delete, open or close project</td>
-      <td>Project</td>
-    </tr>
-    <tr>
-      <td>Change project description</td>
-      <td>Workspace root</td>
-    </tr>
-    <tr>
-      <td>Refresh local</td>
-      <td>Resource</td>
-    </tr>
-    <tr>
-      <td>Create, delete, or modify marker</td>
-      <td><tt>null</tt></td>
-    </tr>
-    <tr>
-      <td>Create, delete or modify sync info</td>
-      <td>Resource</td>
-    </tr>
-    <tr>
-      <td>Build workspace or project</td>
-      <td>Workspace root</td>
-    </tr>
-  </tbody>
-</table>
+should be the most fine-grained rule that encompasses the rules for all changes by that
+operation. If the operation tries to modify resources outside of the scope
+of the scheduling rule, a runtime exception will occur. The precise scheduling rule
+required by a given workspace operation is not specified, and may change depending
+on the installed repository provider on a given project. The factory 
+<code>IResourceRuleFactory</code> should be used to obtain the scheduling
+rule for a resource-changing operation. If desired, a <tt>MultiRule</tt> can be used 
+to specify multiple resource rules, and the <tt>MultiRule.combine</tt> convenience 
+method can be used to combine rules from various resource-changing operations.
+<p>
+If no locking is required, a scheduling rule of <tt>null</tt> can be used. This will
+allow the runnable to modify all resources in the workspace, but will not prevent other
+threads from also modifying the workspace concurrently. For simple changes to 
+the workspace this is often the easiest and most concurrency-friendly solution.
+</p>
 <h4>IWorkbenchPage (package org.eclipse.ui)</h4>
 <ul>
   <li>The constant EDITOR_ID_ATTR is now deprecated. This is an IMarker
