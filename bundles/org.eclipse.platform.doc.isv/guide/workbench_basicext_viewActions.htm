@@ -25,29 +25,28 @@ pull-down menu. These actions appear because the readme tool plug-in contributes
 them using the
 <b> viewActions</b> extension.</P>
 
-<img border="0" src="images/readmeviewaction.jpg" width="187" height="140">
+<img border="0" src="images/readmeviewaction.jpg" width="179" height="161">
 <P >
 The relevant <b> plugin.xml</b> contribution is below.</P>
 <font color='#4444CC'><pre>
-   &lt;extension
-      point = &quot;org.eclipse.ui.viewActions&quot;&gt;
+&lt;extension
+    point = &quot;org.eclipse.ui.viewActions&quot;&gt;
       &lt;viewContribution 
          id=&quot;org.eclipse.ui.examples.readmetool.vc1&quot; 
-         targetID=&quot;org.eclipse.ui.views.ResourceNavigator&quot;&gt;
-         &lt;action
-            id=&quot;org.eclipse.ui.examples.readmetool.va1&quot;
-            label=&quot;&amp;amp;Readme View Extension&quot;
-            menubarPath=&quot;additions&quot;
-            toolbarPath=&quot;additions&quot; 
-            icon=&quot;icons/basic/obj16/editor.gif&quot; 
-            tooltip=&quot;Run Readme View Extension&quot; 
-            helpContextId=&quot;org.eclipse.ui.examples.readmetool.view_action_context&quot;
-            class=&quot;org.eclipse.ui.examples.readmetool.ViewActionDelegate&quot;
-            enablesFor=&quot;1&quot;&gt;
-            &lt;selection class=&quot;org.eclipse.core.resources.IFile&quot; name=&quot;*.readme&quot;/&gt;
-         &lt;/action&gt;
+         targetID=&quot;org.eclipse.ui.views.ResourceNavigator&quot;&gt;        
+	   &lt;action id=&quot;org.eclipse.ui.examples.readmetool.va1&quot; 
+              label=&quot;%PopupMenu.ResourceNav.label&quot; 
+	      menubarPath=&quot;additions&quot;
+              toolbarPath=&quot;additions&quot; 
+              icon=&quot;icons/obj16/editor.gif&quot; 
+              tooltip=&quot;%PopupMenu.ResourceNav.tooltip&quot; 
+   	      helpContextId=&quot;org.eclipse.ui.examples.readmetool.view_action_context&quot;
+              class=&quot;org.eclipse.ui.examples.readmetool.ViewActionDelegate&quot; 
+              enablesFor=&quot;1&quot;&gt; 
+		&lt;selection class=&quot;org.eclipse.core.resources.IFile&quot; name=&quot;*.readme&quot;/&gt; 
+	   &lt;/action&gt;
       &lt;/viewContribution&gt;
-   &lt;/extension&gt;
+ &lt;/extension&gt;
 </pre></font>
 <P >
 A view contribution with a unique id is specified. The view to which we are adding
@@ -57,9 +56,11 @@ navigator view's menu.&nbsp; We specify the label along with the menu bar and
 tool bar locations for the new action.&nbsp; (For a complete discussion of menu and toolbar locations, see
 <a HREF="workbench_menupaths.htm" CLASS="XRef"> Menu and toolbar paths</a>). </P>
 <P >
-We also specify the conditions under which the action should be enabled. You can see that this action will be enabled when there is one selection of type
-<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b>, whose name has
-&quot;<b>.readme</b>&quot; in the file extension. Sure enough, that's exactly what happens when you click around in the resource navigator.&nbsp;&nbsp;</P>
+We also specify the conditions under which the action should be enabled. You can see that this action will be enabled when there is one selection
+(<b>enablesFor=&quot;1&quot;</b>) of type
+<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a>
+(class=&quot;org.eclipse.core.resources.IFile&quot;)</b>, whose name has
+&quot;<b>.readme</b>&quot; in the file extension (<b>name=&quot;*.readme&quot;</b>). Sure enough, that's exactly what happens when you click around in the resource navigator.&nbsp;&nbsp;</P>
 <P >
 The information in the <b> plugin.xml</b> is all that's needed to populate the appropriate menus and tool bars. No plug-in code will run until the action is actually selected from the menu or toolbar.
 The implementation class specified in the
@@ -70,12 +71,11 @@ remembering what view it was created for.</P>
 <P >
 The action itself simply launches a dialog that announces that the view action was executed. </P>
 <font color='#4444CC'><pre>
-   public void run(org.eclipse.jface.action.IAction action) {
-      MessageDialog.openInformation(view.getSite().getShell(),
-         &quot;Readme Editor&quot;, 
-         &quot;View Action executed&quot;);
-   }
-</pre></font>
+public void run(org.eclipse.jface.action.IAction action) {
+	MessageDialog.openInformation(view.getSite().getShell(),
+		MessageUtil.getString(&quot;Readme_Editor&quot;),  
+		MessageUtil.getString(&quot;View_Action_executed&quot;)); 
+}</pre></font>
 <P >
 Although this action is simple, we can imagine how using selections and more
 functional dialogs could make this action do something more interesting.</P>

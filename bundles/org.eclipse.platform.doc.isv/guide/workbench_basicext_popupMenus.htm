@@ -21,32 +21,35 @@ You can contribute an action to a specific popup menu by its id (<b>viewerContri
 an action for an object
 type (<b>objectContribution</b>).&nbsp;</P>
 <ul>
-  <li>A <b>viewerContribution</b> will cause the menu
-    item to appear in the popup menu of a view or editor specified by id in the
-    markup.&nbsp;&nbsp;</li>
   <li>An <b>objectContribution</b> will cause the menu
     item to appear in all popup menus for views or editors that have objects of
     the specified type selected.</li>
+  <li>A <b>viewerContribution</b> will cause the menu
+    item to appear in the popup menu of a view or editor specified by id in the
+    markup.&nbsp;&nbsp;</li>
 </ul>
 <P >
-The readme tool defines an <b>objectContribution</b>. The markup looks like this.</P>
+The readme tool defines both. Let's look at the object contribution
+first.&nbsp;&nbsp;</P>
 <font color='#4444CC'><pre>
-   &lt;extension point = &quot;org.eclipse.ui.popupMenus&quot;&gt;
-      &lt;objectContribution
-         id=&quot;org.eclipse.ui.examples.readmetool&quot;
-         objectClass=&quot;org.eclipse.core.resources.IFile&quot;
-         nameFilter=&quot;*.readme&quot;&gt;
-         &lt;action id=&quot;org.eclipse.ui.examples.readmetool.action1&quot;
-            label=&quot;Show Readme Action&quot;
-            icon=&quot;icons/basic/ctool16/openbrwsr.gif&quot;
-            menuBarPath=&quot;additions&quot;
-            helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
-            class=&quot;org.eclipse.ui.examples.readmetool.PopupMenuActionDelegate&quot; 
-            enablesFor=&quot;1&quot;&gt;
-         &lt;/action&gt;
-      &lt;/objectContribution&gt;
-   &lt;/extension&gt;
-</pre></font>
+&lt;extension point = &quot;org.eclipse.ui.popupMenus&quot;&gt;
+     &lt;objectContribution
+        id=&quot;org.eclipse.ui.examples.readmetool&quot;
+        objectClass=&quot;org.eclipse.core.resources.IFile&quot;
+	    nameFilter=&quot;*.readme&quot;&gt;
+	    &lt;action id=&quot;org.eclipse.ui.examples.readmetool.action1&quot;
+	       label=&quot;%PopupMenus.action&quot;
+	       icon=&quot;icons/ctool16/openbrwsr.gif&quot;
+	       menubarPath=&quot;additions&quot;
+	       helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
+	       class=&quot;org.eclipse.ui.examples.readmetool.PopupMenuActionDelegate&quot;	
+	       enablesFor=&quot;1&quot;&gt;
+	    &lt;/action&gt;
+	 &lt;/objectContribution&gt;
+ 	 ...
+</pre><h4>
+   Object contribution
+</h4></font>
 <P >
 The action &quot;Show Readme Action&quot; is contributed for the object class <a href="../reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a>. This means that any view containing
 <a href="../reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a>
@@ -70,32 +73,29 @@ The action is implemented in <b>PopupMenuActionDelegate</b>.&nbsp;&nbsp;</P>
 <P >
 We can see the popup menu contribution when we select a readme file from the resource navigator.</P>
 
-<img border="0" src="images/readmepopupmenu.jpg" width="618" height="477">
-<P >
-The other type of pop-up menu contribution is called a <b>viewerContribution</b>. </P>
+<img border="0" src="images/readmepopupmenu.jpg" width="360" height="530">
+<h4>Viewer contribution</h4>
+<p>
+A viewer contribution is used to contribute to a specific view or editor's popup menu using its id.
+Here is the readme tool's viewer contribution:</p>
+<pre><font color='#4444CC'>      ...
+      &lt;viewerContribution
+        id=&quot;org.eclipse.ui.examples.readmetool2&quot;
+        targetID=&quot;org.eclipse.ui.examples.readmetool.outline&quot;&gt;
+	    &lt;action id=&quot;org.eclipse.ui.examples.readmetool.action1&quot;
+	       label=&quot;%PopupMenus.action&quot;
+	       icon=&quot;icons/ctool16/openbrwsr.gif&quot;
+	       menubarPath=&quot;additions&quot;
+	       helpContextId=&quot;org.eclipse.ui.examples.readmetool.open_browser_action_context&quot;
+	       class=&quot;org.eclipse.ui.examples.readmetool.ViewActionDelegate&quot;&gt;	
+	    &lt;/action&gt;
+       &lt;/viewerContribution&gt;
+&lt;/extension&gt;</font></pre>
 <i><blockquote>
 Note:&nbsp; The name <b> viewerContribution</b> is somewhat misleading, as it does not relate to JFace viewers. A better name would
 be <b>popupMenuContribution</b>  .</blockquote></i>
 <P >
-A viewer contribution is used to contribute to a specific view or editor's popup menu using its id. The following markup shows how a plug-in could register a specific action in the workbench task list popup menu.</P>
-<font color='#4444CC'><pre>
-   &lt;extension point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
-      &lt;viewerContribution
-         id=&quot;com.example.C2&quot;
-         targetID=&quot;org.eclipse.ui.views.TaskList&quot;&gt;
-         &lt;action
-            id=&quot;com.example.showExample&quot;
-            label=&quot;&amp;amp;Show Example&quot;
-            menubarPath=&quot;additions&quot;
-            icon=&quot;icons/showExample.gif&quot;
-            helpContextId=&quot;com.example.show_action_context&quot;
-            class=&quot;com.example.actions.ExampleShowActionDelegate&quot;&gt;
-         &lt;/action&gt;
-      &lt;/viewerContribution&gt;
-   &lt;/extension&gt;
-</pre></font>
-<P >
-If the extension is a <b>viewerContribution</b>, the
+When the extension is a <b>viewerContribution</b>, the
 supplied class must implement the
 <b><a href="../reference/api/org/eclipse/ui/IEditorActionDelegate.html"> IEditorActionDelegate</a></b> or
 <b><a href="../reference/api/org/eclipse/ui/IViewActionDelegate.html"> IViewActionDelegate</a></b> interface, depending on whether the
@@ -103,15 +103,21 @@ action is contributed to an editor's or view's popup menu.&nbsp;</P>
 
 
 <P >
-In this example, we specify the <b> id</b> of the popup and
-the <b>path</b> within the popup for our contribution.</P>
+The <b>targetID</b> specifies the view whose popup menu will be altered.&nbsp; In this
+case, we are adding an action to one of the readme tool views, the
+outliner.&nbsp; The action itself is similar to others that we've seen.&nbsp; We specify the <b> id</b>,
+<b>label</b>, and <b>icon</b> of the action, and
+the <b>path</b> within the popup for our contribution.&nbsp; The action will be
+shown only in the readme outline view's popup.</P>
 
 
-<i><blockquote>
-Note:&nbsp; The interfaces required for a <b>viewerContribution</b>
+<P >
+<img border="0" src="images/readmeoutlinerpopup.jpg" width="262" height="94"></P>
+
+
+ The interfaces required for a <b>viewerContribution</b>
 to the <b> popupMenus</b> extension
-point are the same as those required by the <b> viewActions</b> and
-<b> editorActions</b> extension points. If you want to contribute the same action to the popup menu and the local menu of a view or editor, you can use the same class for both extensions.</blockquote></i>
+point are the same as those required by the <b> viewActions</b> and <b> editorActions</b> extension points. If you want to contribute the same action to the popup menu and the local menu of a view or editor, you can use the same class for both extensions.
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>

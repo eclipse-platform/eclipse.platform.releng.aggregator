@@ -50,59 +50,65 @@ workbench outline view.&nbsp;&nbsp;</P>
 <P >
  The configuration for the editor extension is defined as follows.</P>
 <font color='#4444CC'><pre>
-   &lt;extension
-      point = &quot;org.eclipse.ui.editors&quot;&gt;
-      &lt;editor
-         id = &quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
-         name=&quot;Readme File Editor&quot;
-         icon=&quot;icons/basic/obj16/editor.gif&quot;
-         class=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
-         extensions=&quot;readme&quot;
-         contributorClass=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditorActionBarContributor&quot;&gt;
-      &lt;/editor&gt;
-   &lt;/extension&gt;
-</pre></font>
+&lt;extension
+    point = &quot;org.eclipse.ui.editors&quot;&gt;
+	&lt;editor
+  	   id = &quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
+  	   name=&quot;%Editors.ReadmeEditor&quot;
+      	   icon=&quot;icons/obj16/editor.gif&quot;
+      	   class=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
+	   extensions=&quot;readme&quot;
+           contributorClass=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditorActionBarContributor&quot;&gt;
+	&lt;/editor&gt;
+&lt;/extension&gt;</pre></font>
 <P >
 We see the familiar configuration markup for <b>id</b>,
 <b>name</b>,
-<b>icon</b>, and <b>class</b>. There is also something
-new - a
-<b>contributorClass</b>.</P>
+<b>icon</b>, and <b>class</b>.&nbsp;&nbsp; The <b>extensions</b> attribute
+describes the file types that the editor understands.&nbsp; (You could also
+specify <b>filenames</b> if you need to be more specific.)&nbsp; The <b>class</b>
+implements the editor, and the <b>contributorClass</b> is responsible for
+providing editor-related actions.&nbsp; Let's look at the contributor in more
+detail.</P>
 
 <H4>
 Editor action contributors</H4>
 <P >
-The contributor class adds editor related actions to the workbench menu and toolbar. It must implement the
-<b><a href="../reference/api/org/eclipse/ui/IEditorActionBarContributor.html"> IEditorActionBarContributor</a></b> interface. The contributor is separated from the editor itself since any given workbench page can have multiple editors of the same type. Rather than have each instance of an editor type create actions and images, a single contributor is shared by all the editors of a specific type.&nbsp;</P>
+The contributor class adds editor-related actions to the workbench menu and toolbar. It must implement the
+<b><a href="../reference/api/org/eclipse/ui/IEditorActionBarContributor.html"> IEditorActionBarContributor</a></b> interface. The contributor is separated from the editor itself since any given workbench page can have multiple editors of the same type. Rather than have each instance of an editor create actions and images, a single contributor is shared by all the editors of a specific type.&nbsp;</P>
 <P >
 In <b>ReadmeEditorActionBarContributor</b>, we contribute three actions,
 &quot;Editor Action1,&quot; &quot;Editor Action2,&quot; and &quot;Editor Action3.&quot;&nbsp;&nbsp;
 These are set up in the constructor.</P>
 <font color='#4444CC'><pre>
    public ReadmeEditorActionBarContributor() {
-      ...
-      action1 = new EditorAction(&quot;&amp;Editor Action1&quot;);
-      action1.setToolTipText(&quot;Readme Editor Action1&quot;);
-      action1.setImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE);
-      ...
-      action2 = new EditorAction(&quot;&amp;Editor Action2&quot;);
-      action2.setToolTipText(&quot;Readme Editor Action2&quot;);
-      action2.setImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE);
-      ...
-      action3 = new EditorAction(&quot;&amp;Editor Action3&quot;);
-      action3.setToolTipText(&quot;Readme Editor Action3&quot;);
-      action3.setImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE);
-      ...
+      	...
+	action1 = new EditorAction(MessageUtil.getString(&quot;Editor_Action1&quot;)); 
+	action1.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action1&quot;)); 
+	action1.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE_DISABLE);
+	action1.setImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE_ENABLE);
+	...	
+	action2 = new RetargetAction(IReadmeConstants.RETARGET2, MessageUtil.getString(&quot;Editor_Action2&quot;)); 
+	action2.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action2&quot;)); 
+	action2.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE_DISABLE);
+	action2.setImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE_ENABLE);
+	...
+	action3 = new LabelRetargetAction(IReadmeConstants.LABELRETARGET3, MessageUtil.getString(&quot;Editor_Action3&quot;));
+	action3.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE_DISABLE);
+	action3.setImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE_ENABLE);
+	...   
    }
 </pre></font>
 <P >
 The names and icons for the actions are set up in the code rather than in the <b>plugin.xml</b>.&nbsp;
-Note how similar this information is to the
+(We'll ignore the differences in the action classes for now until we look at the
+readme action set.)&nbsp;&nbsp;</P>
+<P >Note how similar the action information is to the
 <b> viewActions</b> information we saw in the markup
 for the view action.&nbsp; The actions are set up in code since we have to
 manage the sharing of the actions among different instances of the same editor.</P>
 <P >
-As they are created in the constructor, the actions are independent of any particular
+When they are created in the constructor, the actions are independent of any particular
 instance of the editor.&nbsp; When an editor becomes active and the actions need
 to be installed in the workbench menus and tool bar, the <b>setActiveEditor
 </b>message is sent to the contributor.&nbsp; The contributor connects the editor actions to a specific editor.&nbsp;&nbsp;</P>
@@ -110,8 +116,6 @@ to be installed in the workbench menus and tool bar, the <b>setActiveEditor
    public void setActiveEditor(IEditorPart editor) {
       ...
       action1.setActiveEditor(editor);
-      action2.setActiveEditor(editor);
-      action3.setActiveEditor(editor);
       ...
    }
 </pre></font>
@@ -122,14 +126,7 @@ As you can see, the actions show up in the workbench menu and tool bar when a re
 
 
 
-<h5>
-Readme editor contributions to workbench menu bar</h5>
-<img border="0" src="images/editortoolbar.jpg" width="404" height="100">
-
-
-
-<h5>
-Readme editor contributions to workbench tool bar</h5>
+<p><img border="0" src="images/editortoolbar.jpg" width="483" height="103">
 <P >
 These menu and tool bar items are only shown when the editor is active. The location for the menu and tool bar items can be specified as described in
 <a HREF="workbench_menupaths.htm" CLASS="XRef">Menu and toolbar paths</a>.</P>
@@ -143,7 +140,7 @@ Editors and content outliners
 The readme editor itself, <b>ReadmeEditor</b>, is not very complicated. It extends the
 <b><a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"> TextEditor</a></b> class so that it can contribute a customized content outliner page
 to the outline view when a readme file is being edited. It does not change any behavior inside the text editor.</P>
-<p><img border="0" src="images/readmeoutliner.jpg" width="482" height="275"></p>
+<p><img border="0" src="images/readmeoutliner.jpg" width="274" height="294"></p>
 <P >
 Editors often have corresponding content outliners that provide a structured
 view of the editor's contents and assist the user in navigating through the
