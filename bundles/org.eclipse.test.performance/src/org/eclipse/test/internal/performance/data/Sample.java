@@ -31,10 +31,10 @@ public class Sample {
 		fDataPoints= dataPoints;
 	}
 	
-	public Sample(DataPoint[] dataPoints) {
-		fDataPoints= dataPoints;
-	}
-	
+    public Sample(DataPoint[] dataPoints) {
+        fDataPoints= dataPoints;
+    }
+    
 	public String getScenarioID() {
 	    return fScenarioID;
 	}

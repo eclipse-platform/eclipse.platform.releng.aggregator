@@ -16,6 +16,7 @@ import junit.framework.Assert;
 
 import org.eclipse.test.internal.performance.Dimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.db.DB;
@@ -38,7 +39,7 @@ public class Evaluator implements IEvaluator {
 	    
 		if (fCheckers == null)
 		    return;	// nothing to do
-
+		
 	    if (!(performanceMeter instanceof InternalPerformanceMeter))
 	        return;
         InternalPerformanceMeter ipm= (InternalPerformanceMeter) performanceMeter;
@@ -46,15 +47,21 @@ public class Evaluator implements IEvaluator {
 	    Sample session= ipm.getSample();
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
 		
-        String refTag= "3.1"; // reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY);
-        String refDate= "0824"; // reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY);
+		String refTag= PerformanceTestPlugin.getEnvironment("refTag");
+		if (refTag == null)
+		    return;	// nothing to do
 
-//		Sample reference= getReferenceSession(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY), session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY));
-		Sample reference= getReferenceSession(ipm.getScenarioName(), "this");
-		
+	    DataPoint[] datapoints= DB.query(refTag, session.getScenarioID());
+	    if (datapoints.length == 0) {
+	        System.out.println("no data with tag '" + refTag + "' found");
+	        return;
+	    }
+	    Sample reference= new Sample(datapoints);
+				
 		StatisticsSession referenceStats= new StatisticsSession(reference.getDataPoints());
 		StatisticsSession measuredStats= new StatisticsSession(session.getDataPoints());
 	    
+		String refDate= "???";
 		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refTag + "' from " + refDate + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
@@ -63,13 +70,6 @@ public class Evaluator implements IEvaluator {
 		Assert.assertTrue(failMesg.toString(), pass);
 	}
 
-	private Sample getReferenceSession(String scenarioName, String hostname) {
-        String refTag= "3.1"; // reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY);
-        String refDate= "0824"; // reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY);
-	    DataPoint[] datapoints= DB.query(scenarioName, refTag);
-	    return new Sample(datapoints);
-	}
-	
 //	private Sample getReferenceSession(String testname, String hostname) {
 //		String specificHost= (String) fFilterProperties.get(InternalPerformanceMeter.HOSTNAME_PROPERTY);
 //		boolean useSessionsHostname= true;

@@ -27,35 +27,40 @@ public class DB {
     
     public static final String DB_NAME= "perfDB";	// default db name
     
-    private static final boolean DEBUG= false;
+    private static final boolean DEBUG= true;
     
     private static DB fgDefault;
     
     private Connection fConnection;
     private SQL fSQL;
-    
+    private Properties fProperties;
+    private int fTagID= -1;
     private int fConfigID;
-    private int fSessionID;
     
     
-    private int getConfig(Sample sample) throws SQLException {
+    private int getTag() throws SQLException {
+        if (fTagID < 0) {
+            String tag= PerformanceTestPlugin.getEnvironment("setTag");
+            if (tag != null)
+                fTagID= fSQL.getTag(tag);
+            else
+                fTagID= 0;
+        }
+        return fTagID;
+    }
+    
+    private int getConfig() throws SQLException {
         if (fConfigID == 0)
             fConfigID= fSQL.getConfig("burano", "MacOS X");
         return fConfigID;
-    }
-    
-    private int getSession(Sample sample) throws SQLException {
-        if (fSessionID == 0)
-            fSessionID= fSQL.addSession("3.1", getConfig(sample));
-        return fSessionID;
     }
     
     public static void store(Sample sample) {
         getDefault().internalStore(sample);
     }
     
-    public static DataPoint[] query(String scenarioID, String refID) {
-        return getDefault().internalQuery(scenarioID, refID);   
+    public static DataPoint[] query(String refTag, String scenarioID) {
+        return getDefault().internalQuery(refTag, scenarioID);
     }
     
     //---- private implementation
@@ -91,10 +96,11 @@ public class DB {
         
         if (fSQL == null || sample == null)
             return;
-                
+        
 	    try {
+	        int tag_id= getTag();
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
-            int sample_id= fSQL.createSample(getSession(sample), scenario_id, sample.getStartTime());
+            int sample_id= fSQL.createSample(getConfig(), scenario_id, tag_id, sample.getStartTime());
             
 			DataPoint[] dataPoints= sample.getDataPoints();
 			for (int i= 0; i < dataPoints.length; i++) {
@@ -114,14 +120,13 @@ public class DB {
         }
     }
 
-    private DataPoint[] internalQuery(String scenarioID, String refID) {
+    private DataPoint[] internalQuery(String refTag, String scenarioID) {
         if (fSQL == null) 
             return null;
  
-        Sample sample= null;
         ResultSet result= null;
         try {
-            result= fSQL.query2("burano", "MacOS X", refID, scenarioID);
+            result= fSQL.query3(getConfig(), refTag, scenarioID);
             ArrayList dataPoints= new ArrayList();
             int lastDataPointId= 0;
             DataPoint dp= null;
@@ -145,7 +150,7 @@ public class DB {
                 if (dim != null)
                     map.put(dim, new Scalar(dim, value));
                 
-                // System.out.println(i + ": " + sample+","+datapoint_id +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());                
+                //System.out.println(i + ": " + sample_id+","+datapoint_id +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());                
             }
             
             return (DataPoint[])dataPoints.toArray(new DataPoint[dataPoints.size()]);
@@ -160,7 +165,7 @@ public class DB {
         }
         return null;
     }
-
+    
     /**
      * dbloc=						embed in home directory
      * dbloc=/tmp/performance			embed given location
@@ -172,14 +177,13 @@ public class DB {
         if (fConnection != null)
             return;
         
-        Properties p= new Properties();
-        PerformanceTestPlugin.getEnvironmentVariables(p);
+        Properties env= PerformanceTestPlugin.getEnvironmentVariables();
         
-        String dbloc= p.getProperty("dbloc");
+        String dbloc= env.getProperty("dbloc");
         if (dbloc == null)
             return;
                 
-        String dbname= p.getProperty("dbname", DB_NAME);
+        String dbname= env.getProperty("dbname", DB_NAME);
         
         try {            
             if (dbloc.startsWith("net://")) {
@@ -187,8 +191,8 @@ public class DB {
                 if (DEBUG) System.out.println("Trying to connect over network...");
                 Class.forName("com.ibm.db2.jcc.DB2Driver");
                 String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
-                String dbuser= p.getProperty("dbuser", "guest");
-                String dbpassword= p.getProperty("dbpasswd", "guest");
+                String dbuser= env.getProperty("dbuser", "guest");
+                String dbpassword= env.getProperty("dbpasswd", "guest");
                 fConnection= DriverManager.getConnection(url, dbuser, dbpassword);
             } else {
                 // embedded

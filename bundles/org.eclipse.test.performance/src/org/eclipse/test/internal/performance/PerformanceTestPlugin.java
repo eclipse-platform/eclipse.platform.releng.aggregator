@@ -37,7 +37,8 @@ public class PerformanceTestPlugin extends Plugin {
 	 * The shared instance.
 	 */
 	private static PerformanceTestPlugin fgPlugin;
-
+	
+	private static Properties fgEnvironmentVariables;
 	
 	/**
 	 * The constructor.
@@ -62,6 +63,18 @@ public class PerformanceTestPlugin extends Plugin {
 		return fgPlugin;
 	}
 	
+    public static Properties getEnvironmentVariables() {
+        if (fgEnvironmentVariables == null) {
+            fgEnvironmentVariables= new Properties();
+            PerformanceTestPlugin.getEnvironmentVariables(fgEnvironmentVariables);
+        }
+        return fgEnvironmentVariables;
+     }
+    
+    public static String getEnvironment(String key) {
+        return getEnvironmentVariables().getProperty(key);
+    }
+
 	/**
 	 * Process your environment variables.
 	 */

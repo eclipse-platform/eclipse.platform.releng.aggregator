@@ -20,10 +20,11 @@ import java.sql.Statement;
 public class SQL {
     
     private Connection fConn;
-    private PreparedStatement fInsertSession, fInsertSample, fInsertDataPoint, fInsertScalar;
+    private PreparedStatement fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryConfig, fInsertConfig;
     private PreparedStatement fQueryScenario, fInsertScenario;
-    private PreparedStatement fQuery1, fQuery2;
+    private PreparedStatement fQueryTag, fInsertTag;
+    private PreparedStatement fQuery1, fQuery3;
     
 
     SQL(Connection con) {
@@ -31,85 +32,76 @@ public class SQL {
     }
     
     public void dispose() throws SQLException {
-        fInsertSession.close();
     }
     
     void createPreparedStatements() throws SQLException {
-        fInsertSession= fConn.prepareStatement(
-                "insert into SESSION (VERSION, CONFIG_ID) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+        fInsertTag= fConn.prepareStatement(
+                "insert into TAG (NAME) values (?)", Statement.RETURN_GENERATED_KEYS);
         fInsertConfig= fConn.prepareStatement(
                 "insert into CONFIG (HOST, PLATFORM) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
         fInsertScenario= fConn.prepareStatement(
                 "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS);
         fInsertSample= fConn.prepareStatement(
-                "insert into SAMPLE (SESSION_ID, SCENARIO_ID, STARTTIME) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         fInsertDataPoint= fConn.prepareStatement(
                 "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         fInsertScalar= fConn.prepareStatement(
                 "insert into SCALAR values (?, ?, ?)");
 
+        fQueryTag= fConn.prepareStatement(
+        			"select ID from TAG where NAME = ?");
         fQueryConfig= fConn.prepareStatement(
                 "select ID from CONFIG where HOST = ? and PLATFORM = ?");
         fQueryScenario= fConn.prepareStatement(
                 "select ID from SCENARIO where NAME = ?");
         
         fQuery1= fConn.prepareStatement(
-                "select SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, SESSION " +
-            		"where SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
-            		"SCALAR.DIM_ID = ? and " +
+                "select SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " +
+            		"where " +
+                 "SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and CONFIG.PLATFORM = ? and " +
+          		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " +
+          		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +
+            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
             		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " +
-            		"SAMPLE.SCENARIO_ID = SCENARIO.ID and " +
-            		"SCENARIO.NAME = ? and " +
-            		"SAMPLE.SESSION_ID = SESSION.ID and " +
-            		"SESSION.VERSION = ? and " +
-            		"SESSION.CONFIG_ID = CONFIG.ID and " +
-            		"CONFIG.HOST = ? and " +
-            		"CONFIG.PLATFORM = ?");
-        fQuery2= fConn.prepareStatement(
-                "select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, SESSION " +
-            		"where SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
-            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " +
-            		"SAMPLE.SCENARIO_ID = SCENARIO.ID and " +
-            		"SCENARIO.NAME = ? and " +
-            		"SAMPLE.SESSION_ID = SESSION.ID and " +
-            		"SESSION.VERSION = ? and " +
-            		"SESSION.CONFIG_ID = CONFIG.ID and " +
-            		"CONFIG.HOST = ? and " +
-            		"CONFIG.PLATFORM = ? " +
-            		"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP");
+            		"SCALAR.DIM_ID = ?"
+        			);
+        fQuery3= fConn.prepareStatement(
+                "select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " +
+            		"where " +
+                 "SAMPLE.CONFIG_ID = ? and " +
+         		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " +
+         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +
+            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
+            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID " +
+            		"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP"
+            		);
     }
     
     void initialize() throws SQLException {
         Statement stmt= fConn.createStatement();
         
         stmt.executeUpdate(
-            "create table SESSION (" +
-                "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                "VERSION varchar(40) not null," +
-                "CONFIG_ID int not null" +
-            ")"
-        );
-        stmt.executeUpdate(
-            "create table CONFIG (" +
-                "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                "HOST varchar(40)," +
-                "PLATFORM varchar(20)" +
-            ")"
-        );
-        stmt.executeUpdate(
-            "create table TAG (" +
-                "ID varchar(40) not null primary key," +
-                "SESSION_ID int not null" +
-            ")"
-        );
-        stmt.executeUpdate(
             "create table SAMPLE (" +
                 "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                "SESSION_ID int not null," +
+                "CONFIG_ID int not null," +
                 "SCENARIO_ID int not null," +
+                "TAG_ID int," +
                 "STARTTIME bigint" +
             ")"
         );           
+        stmt.executeUpdate(
+                "create table CONFIG (" +
+                    "ID int not null GENERATED ALWAYS AS IDENTITY," +
+                    "HOST varchar(40)," +
+                    "PLATFORM varchar(20)" +
+                ")"
+            );
+        stmt.executeUpdate(
+                "create table TAG (" +
+                		"ID int not null GENERATED ALWAYS AS IDENTITY," +
+                		"NAME varchar(255)" +
+                ")"
+            );
         stmt.executeUpdate(
             "create table SCENARIO (" +
                 "ID int not null GENERATED ALWAYS AS IDENTITY," +
@@ -150,12 +142,16 @@ public class SQL {
         return 0;
 	}
 
-    int addSession(String version, int config_id) throws SQLException {
-        fInsertSession.setString(1, version);
-        fInsertSession.setInt(2, config_id);
-        return create(fInsertSession);
+    public int getTag(String tag)  throws SQLException {
+        fQueryTag.setString(1, tag);
+        ResultSet result= fQueryTag.executeQuery();
+        while (result.next())
+            return result.getInt(1);
+        
+        fInsertTag.setString(1, tag);
+        return create(fInsertTag);
     }
-    
+
     int getConfig(String host, String platform) throws SQLException {
         fQueryConfig.setString(1, host);
         fQueryConfig.setString(2, platform);
@@ -178,10 +174,11 @@ public class SQL {
         return create(fInsertScenario);
     }
     
-    int createSample(int session_id, int scenario_id, long starttime) throws SQLException {
-        fInsertSample.setInt(1, session_id);
+    int createSample(int config_id, int scenario_id, int tag_id, long starttime) throws SQLException {
+        fInsertSample.setInt(1, config_id);
         fInsertSample.setInt(2, scenario_id);
-        fInsertSample.setBigDecimal(3, new BigDecimal(starttime));
+        fInsertSample.setInt(3, tag_id);
+        fInsertSample.setBigDecimal(4, new BigDecimal(starttime));
         return create(fInsertSample);
     }
         
@@ -208,11 +205,10 @@ public class SQL {
         return fQuery1.executeQuery();
     }
     
-    ResultSet query2(String host, String platform, String version, String scenario) throws SQLException {
-        fQuery2.setString(1, scenario);
-        fQuery2.setString(2, version);
-        fQuery2.setString(3, host);
-        fQuery2.setString(4, platform);
-        return fQuery2.executeQuery();
+    ResultSet query3(int config_id, String tag, String scenario) throws SQLException {
+        fQuery3.setInt(1, config_id);
+        fQuery3.setString(2, tag);
+        fQuery3.setString(3, scenario);
+        return fQuery3.executeQuery();
     }
 }
