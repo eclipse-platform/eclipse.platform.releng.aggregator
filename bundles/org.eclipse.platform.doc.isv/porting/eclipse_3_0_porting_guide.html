@@ -13,15 +13,8 @@
 <body>
 
 <h1>Eclipse 3.0 Porting Guide</h1>
-<p>Draft for 3.0 RC1<br>
+<p>Draft for 3.0 RC3<br>
 Last revised June 18, 2004</p>
-<p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
-Porting Guide is being included with each milestone build to facilitate climbing
-aboard the 3.0 release wagon at an early stage, or to estimate the amount of
-effort that will be involved in eventually porting existing plug-ins to 3.0.
-While we will continue to improve and refine this porting guide and to document
-any further areas requiring attention, the significant breaking changes to the
-Eclipse APIs are now behind us.</i></p>
 <p>This porting guide describes how to port existing 2.1 plug-ins to 3.0. It is
 organized as follows:</p>
 <ul>
@@ -1816,6 +1809,29 @@ experience we recommend migrating to the new IProgressService.</p>
 <p>The document <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/documents/plan_concurrency_modal_progress.html">Showing
 Modal Progress in Eclipse 3.0</a> describes how to migrate to the new
 IProgressService.</p>
+<h3>Debug Action Groups removed</h3>
+<p>The Debug Action Groups extension point
+(org.eclipse.debug.ui.debugActionGroups) has been removed. In Eclipse 3.0, the
+workbench introduced support for Activities via the
+org.eclipse.platform.ui.activities extension point. This support provides
+everything that Debug Action Groups provided and is also easier to use (it
+supports patterns instead of specifying all actions exhaustively) and has a
+programmatic API to support it. Failing to remove references to the old
+extension point won't cause any failures. References to the extension point will
+simply be ignored. Product vendors are encouraged to use the workbench
+Activities support to associate language-specific debugger actions with
+language-specific activities (for example, C++ debugging actions might be
+associated with an activity called &quot;Developing C++&quot;).</p>
+<h3>BreakpointManager can be disabled</h3>
+<p>IBreakpointManager now defines the methods setEnabled(boolean) and
+isEnabled(). When the breakpoint manager is disabled, debuggers should ignore
+all registered breakpoints. The debug platform also provides a new listener
+mechanism, IBreakpointManagerListener which allows clients to register with the
+breakpoint manager to be notified when its enablement changes. The Breakpoints
+view calls this API from a new toggle action that allows the user to &quot;Skip
+All Breakpoints.&quot; Debuggers which do not honor the breakpoint manager's
+enablement will thus appear somewhat broken if the user tries to use this
+feature.</p>
 <h2><a name="PDE Plug-in Migration Tool">PDE Plug-in Migration Tool</a></h2>
 <p>PDE provides a special wizard for converting 2.1 plug-in manifest to 3.0,
 found at <b>PDE Tools &gt; Migrate to 3.0</b>. on the context menu for the
