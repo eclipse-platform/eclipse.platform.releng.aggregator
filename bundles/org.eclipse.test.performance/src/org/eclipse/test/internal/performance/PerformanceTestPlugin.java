@@ -147,13 +147,15 @@ public class PerformanceTestPlugin extends Plugin {
 	 * Returns null if assertAgainst property isn't defined.
 	 */
 	public static Variations getAssertAgainst() {
-	    Variations keys= getVariations();
-	    if (keys == null)
-	        keys= new Variations();
 		String assertKey= System.getProperty(ECLIPSE_PERF_ASSERTAGAINST);
-		if (assertKey != null)
+		if (assertKey != null) {
+		    Variations keys= getVariations();
+		    if (keys == null)
+		        keys= new Variations();
 		    keys.parsePairs(assertKey);
-	    return keys;
+		    return keys;
+		}
+	    return null;
 	}
 	
 	// logging
