@@ -26,7 +26,6 @@ import org.eclipse.test.internal.performance.db.SummaryEntry;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
@@ -85,7 +84,10 @@ public class DBTests extends TestCase {
         System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"=ref"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
         // store a reference value
-		PerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_0);
+        TestPerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_0);
+		pm1.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
+		pm1.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+
 		pm1.start();
 		pm1.stop();
 		pm1.commit();
@@ -99,8 +101,10 @@ public class DBTests extends TestCase {
 		
         // store a reference value
         TestPerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_0);
+		pm2.addPair(TestPerformanceMeter.TESTDIM1, 100, 1100);
+		pm2.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		
 		pm2.start();
-		pm2.adjust(TestPerformanceMeter.TESTDIM1, 100);
 		pm2.stop();
 		pm2.commit();
 		boolean failed= false;
@@ -117,27 +121,35 @@ public class DBTests extends TestCase {
         
         Performance perf= Performance.getDefault();
         
-		PerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_1);
+        TestPerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_1);
+		pm1.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
+		pm1.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
 		pm1.start();
 		pm1.stop();
 		pm1.commit();
 		pm1.dispose();
 		
-		PerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_2);
+		TestPerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_2);
+		pm2.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
+		pm2.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
 		perf.tagAsGlobalSummary(pm2, SHORT_NAME_2, new Dimension[] { Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP } );
 		pm2.start();
 		pm2.stop();
 		pm2.commit();
 		pm2.dispose();
 
-		PerformanceMeter pm3= new TestPerformanceMeter(SCENARIO_NAME_3);
+		TestPerformanceMeter pm3= new TestPerformanceMeter(SCENARIO_NAME_3);
+		pm3.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
+		pm3.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
 		perf.tagAsGlobalSummary(pm3, SHORT_NAME_3, Dimension.CPU_TIME);
 		pm3.start();
 		pm3.stop();
 		pm3.commit();
 		pm3.dispose();
 
-		PerformanceMeter pm4= new TestPerformanceMeter(SCENARIO_NAME_4);
+		TestPerformanceMeter pm4= new TestPerformanceMeter(SCENARIO_NAME_4);
+		pm4.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
+		pm4.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
 		perf.tagAsSummary(pm4, SHORT_NAME_4, Dimension.USED_JAVA_HEAP);
 		pm4.start();
 		pm4.stop();
