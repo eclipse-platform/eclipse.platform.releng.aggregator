@@ -43,17 +43,14 @@ public class Scenario {
 
     
     public Scenario(String configName, String buildPattern, String scenario, Dim[] dimensions) {
-        fConfigName= configName;
-    	fBuildPatterns= new String[] { buildPattern };
-        fScenarioName= scenario;
-        fQueryDimensions= dimensions;
+        this(configName, new String[] { buildPattern }, scenario, dimensions);
     }
     
-    public Scenario(String configName, String[] buildPatterns, String scenario) {
+    public Scenario(String configName, String[] buildPatterns, String scenario, Dim[] dimensions) {
     	fConfigName= configName;
     	fBuildPatterns= buildPatterns;
         fScenarioName= scenario;
-        fQueryDimensions= null;
+        fQueryDimensions= dimensions;
     }
     
    public String getScenarioName() {

@@ -69,6 +69,11 @@ public class DB {
 
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern, Dim[] dimensions) {
         
+        return queryScenarios(configName, new String[] { buildPattern }, scenarioPattern, dimensions);
+    }
+
+    public static Scenario[] queryScenarios(String configName, String[] buildPatterns, String scenarioPattern, Dim[] dimensions) {
+        
         if ("%".equals(configName)) { //$NON-NLS-1$
             System.err.println("Warning: DB.queryScenarios no longer supports config patters; returning empty array"); //$NON-NLS-1$
             return new Scenario[0];
@@ -79,12 +84,12 @@ public class DB {
             return new Scenario[0];
         Scenario[] tables= new Scenario[scenarios.length];
         for (int i= 0; i < scenarios.length; i++)
-            tables[i]= new Scenario(configName, buildPattern, scenarios[i], dimensions);
+            tables[i]= new Scenario(configName, buildPatterns, scenarios[i], dimensions);
         return tables;
     }
 
     public static Scenario queryScenario(String config, String[] builds, String scenarioName) {
-        return new Scenario(config, builds, scenarioName);
+        return new Scenario(config, builds, scenarioName, null);
     }
 
     public static void queryBuildNames(List names, String configName, String buildPattern, String scenarioPattern) {

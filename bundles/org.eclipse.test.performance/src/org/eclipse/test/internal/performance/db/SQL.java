@@ -24,7 +24,7 @@ public class SQL {
     private Connection fConnection;
     private PreparedStatement fInsertConfig, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fInsertConfigProperty, fInsertSampleProperty;
-    private PreparedStatement fQueryScenario, fQueryAllScenarios, fQueryBuilds, fTestQuery, fQueryDatapoints;
+    private PreparedStatement fQueryScenario, fQueryAllScenarios, fQueryBuilds, fQueryDatapoints;
     private PreparedStatement fQueryScalars;
     private PreparedStatement[] fQueries= new PreparedStatement[20];
     
@@ -102,7 +102,7 @@ public class SQL {
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
         fQueryDatapoints= fConnection.prepareStatement(
-        		"select DATAPOINT.ID, DATAPOINT.STEP  from CONFIG, SCENARIO, SAMPLE, DATAPOINT " + //$NON-NLS-1$
+        		"select DATAPOINT.ID, DATAPOINT.STEP from CONFIG, SCENARIO, SAMPLE, DATAPOINT " + //$NON-NLS-1$
         		"where " + //$NON-NLS-1$
         		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME = ? and CONFIG.BUILD = ? and " + //$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
@@ -114,30 +114,8 @@ public class SQL {
         		"where " + //$NON-NLS-1$
 				"SCALAR.DATAPOINT_ID = ?" //$NON-NLS-1$
         );
-        
-        fTestQuery= fConnection.prepareStatement(
-				"select DATAPOINT.ID from SCALAR, DATAPOINT " + //$NON-NLS-1$
-				"where " + //$NON-NLS-1$
-				// "SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
-				"CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
-				"SAMPLE.CONFIG_ID = CONFIG.ID and SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ? " //$NON-NLS-1$
-				+ " and DATAPOINT.SAMPLE_ID = SAMPLE.ID" //$NON-NLS-1$
-               /*
-				"select Count(*) from SAMPLE, SCENARIO, CONFIG " + //$NON-NLS-1$
-				"where " + //$NON-NLS-1$
-				"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
-				"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? " //$NON-NLS-1$
-				*/
-        ); 
     }
     
-    ResultSet queryTest(String configPattern, String buildPattern, String scenarioPattern) throws SQLException {
-        fTestQuery.setString(1, configPattern);
-        fTestQuery.setString(2, buildPattern);
-        fTestQuery.setString(3, scenarioPattern);
-        return fTestQuery.executeQuery();
-    }
-
     void initialize() throws SQLException {
         Statement stmt= fConnection.createStatement();
         
