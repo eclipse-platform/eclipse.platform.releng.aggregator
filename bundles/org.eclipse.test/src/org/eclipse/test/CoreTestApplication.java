@@ -12,6 +12,7 @@ package org.eclipse.test;
 
 import java.io.IOException;
 import org.eclipse.core.boot.IPlatformRunnable;
+import org.eclipse.core.runtime.Platform;
 
 /**
  * A an application that launches tests once it is started.
@@ -26,7 +27,7 @@ public class CoreTestApplication implements IPlatformRunnable {
 	 * @see IPlatformRunnable
 	 */
 	public Object run(Object arguments) throws Exception {
-		String[] args= processCommandLine((String[]) arguments);
+		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
 		return new Integer(runTests(args));
 	}
 
