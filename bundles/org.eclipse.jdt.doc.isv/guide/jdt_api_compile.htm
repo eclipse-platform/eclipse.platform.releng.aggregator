@@ -101,28 +101,24 @@ can changed according to the default locale. The contants defined in <b><a href=
 can use the <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean, org.eclipse.core.runtime.IProgressMonitor)">
  reconcile</a></b> method. Here is an example: <font color="#4444cc">
 <pre>
-  try {
-    ICompilationUnit unit = ..; // get some compilation unit
+  ICompilationUnit unit = ..; // get some compilation unit
 			
-    // create requestor for accumulating discovered problems
-    IProblemRequestor problemRequestor = new IProblemRequestor() {
-      public void acceptProblem(IProblem problem) {
-        System.out.println(problem.getID() + ": " + problem.getMessage());
-      }
-      public void beginReporting() {}
-      public void endReporting() {}
-      public boolean isActive() {	return true; } // will detect problems if active
-    };
+  // create requestor for accumulating discovered problems
+  IProblemRequestor problemRequestor = new IProblemRequestor() {
+    public void acceptProblem(IProblem problem) {
+      System.out.println(problem.getID() + ": " + problem.getMessage());
+    }
+    public void beginReporting() {}
+    public void endReporting() {}
+    public boolean isActive() {	return true; } // will detect problems if active
+  };
     
-    // use working copy to hold source with error
-    IWorkingCopy workingCopy = (IWorkingCopy)unit.getWorkingCopy(null, null, problemRequestor);
-    ((IOpenable)workingCopy).getBuffer().setContents("public class X extends Zork {}");
+  // use working copy to hold source with error
+  IWorkingCopy workingCopy = (IWorkingCopy)unit.getWorkingCopy(null, null, problemRequestor);
+  ((IOpenable)workingCopy).getBuffer().setContents("public class X extends Zork {}");
 
-	// trigger reconciliation			
-    workingCopy.reconcile(true, null);
-			
-  } catch (JavaModelException e) {
-  }
+  // trigger reconciliation			
+  workingCopy.reconcile(true, null);
 </pre></font> You can add an action on the reported problems in the acceptProblem(IProblem) 
 method. In this example, the reported problem will be that <b>Zork cannot 
 be resolved or is not a valid superclass</b> and its id is <b>IProblem.SuperclassNotFound</b>
