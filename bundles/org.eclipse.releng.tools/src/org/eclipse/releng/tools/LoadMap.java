@@ -45,7 +45,7 @@ public class LoadMap extends CVSAction {
 					String[] referenceStrings = getReferenceStrings(resources);
 					RepositoryProviderType type = RepositoryProviderType.getProviderType(CVSProviderPlugin.getTypeId());
 					ProjectSetCapability c = type.getProjectSetCapability();
-					c.addToWorkspace(referenceStrings, new UIProjectSetSerializationContext(getShell()), monitor);
+					c.addToWorkspace(referenceStrings, new UIProjectSetSerializationContext(getShell(), null), monitor);
 				} catch (TeamException e) {
 					throw new InvocationTargetException(e);
 				} catch (CoreException e) {
