@@ -13,6 +13,7 @@ package org.eclipse.test.internal.performance;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -90,7 +91,8 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 		    /**
 		     * The meminfo values for a Linux machine, that is the values that come from /proc/meminfo.
 		     */
-		    StringTokenizer st= readTokens("/proc/meminfo", true); //$NON-NLS-1$
+			// /proc/meminfo is formatted on linux - use byte-counted output from free
+		    StringTokenizer st= readOutput("free -b", true); //$NON-NLS-1$
 		    if (st != null) {
 				st.nextToken();		// throw away label
 				long total= Long.parseLong(st.nextToken());
@@ -114,6 +116,27 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
         BufferedReader rdr= null;
 		try {
 			rdr= new BufferedReader(new FileReader(procPath));
+			if (skipFirst)
+			    rdr.readLine();	// throw away the heading line
+			return new StringTokenizer(rdr.readLine());
+		} catch (IOException e) {
+			// TODO: should be logged
+		} finally {
+			try {
+			    if (rdr != null)
+			        rdr.close();
+			} catch (IOException e) {
+				// silently ignored
+			}
+		}
+		return null;
+    }
+    
+    private StringTokenizer readOutput(String cmd, boolean skipFirst) {
+        BufferedReader rdr= null;
+		try {
+			Process process= Runtime.getRuntime().exec(cmd);
+			rdr= new BufferedReader(new InputStreamReader(process.getInputStream()));
 			if (skipFirst)
 			    rdr.readLine();	// throw away the heading line
 			return new StringTokenizer(rdr.readLine());
