@@ -12,12 +12,47 @@
 <H3>
 Extension points and the registry</H3>
 <p>
-We've seen that bundle API can be used to find out what bundles are installed on the system, what bundles
-they require, etc.  This information may be important for tools that manipulate the runtime, but a more
-common case is to find out what extension points have been made available by plug-ins and what extensions are
-contributed by plug-ins.  For example, when the workbench shows the list of
-available views, it needs to know about all views that might have been registered by plug-ins, so that it can show the
-views in the list without having to start up each plug-in.  There is API....
+While the "bundle" aspects of a plug-in may be interesting to the runtime plug-in and runtime tools,
+it is much more common that a plug-in is concerned with what extension points have been defined
+by plug-ins and what extensions are contributed by plug-ins.  This information is provided 
+by the platform extension registry, <b><a href="../reference/api/org/eclipse/core/runtime/IExtensionRegistry.html">
+IExtensionRegistry</a></b>.
+</p>
+<p>Why might a plug-in want to know what extensions are present?  A concrete example will help show
+the need for this information and the protocol for getting it.</p>
+<p>Recall the workbench <b>Show View</b> dialog which shows all of the available views that have
+been installed in the platform.</p>
+<img src="images/showview.gif" alt="Show View dialog with Hello entry" border="0">
+<p>
+We know that the category names and view names of all contributed views are specified in the
+<b>plugin.xml</b> file for any plug-in that contributes an extension for <b>org.eclipse.ui.views</b>.
+But how does the workbench find out this information?  From the platform extension registry.  The following 
+code is a simplified snippet based on the workbench implementation of the <b>Show View</b> dialog:
+</p>
+<font color='#4444CC'><pre>
+	...
+	IExtensionRegistry registry = <b>Platform.getExtensionRegistry()</b>;
+	IExtensionPoint point = <b>registry.getExtensionPoint(&quot;org.eclipse.ui.views&quot;)</b>;
+	if (point == null) return;
+	IExtension[] extensions = <b>point.getExtensions()</b>;
+	for (int i = 0; i &lt; extensions.length; i++)
+		readExtension(extensions[i]);  //get the information about each extension
+	...
+</pre></font>
+<p>
+We see above that the registry can be obtained from the <b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">
+Platform</a></b> class.  The protocol in <b><a href="../reference/api/org/eclipse/core/runtime/IExtensionRegistry.html">
+IExtensionRegistry</a></b> is used to find the extension point named <b>org.eclipse.ui.views</b>.  Information in the registry
+about particular extension points or extensions can be found using protocol defined in
+<b><a href="../reference/api/org/eclipse/core/runtime/IExtensionRegistry.html">IExtensionRegistry</a></b>,
+<b><a href="../reference/api/org/eclipse/core/runtime/IExtensionPoint.html">IExtensionPoint</a></b>,
+and <b><a href="../reference/api/org/eclipse/core/runtime/IExtension.html">IExtension</a></b>.  
+The javadoc for these classes provides detailed information about the registry protocol.
+</p>
+<p>
+Once the extension definition of interest has been found, protocol in 
+<b><a href="../reference/api/org/eclipse/core/runtime/IConfigurationElement.html">IConfigurationElement</a></b>
+can be used to examine the individual attributes of an extension.
 </p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
