@@ -13,77 +13,74 @@
 Incremental project builders</H2>
 <P >
 An <b>incremental project builder</b> is an object that manipulates the resources in a project in
-a fashion that is defined by the builder itself.
-Incremental project builders are often used to apply a
+a particular way.  Incremental project builders are often used to apply a
 transformation on a resource to produce a resource or artifact of another kind.</P>
 <P >
-Plug-ins contribute incremental project builders to the platform in order to implement specialized resource transformations. For example, the Java development tooling (JDT)
-plug-in that is provided
-with the platform SDK defines an
-incremental project builder that compiles a Java source file into a class file any time a file is added or modified in a
-Java project and recompiles any other files affected by the change. </P>
+Plug-ins contribute incremental project builders to the platform in order to implement specialized resource 
+transformations. For example, the Java development tools (JDT)define an incremental project builder that compiles
+a Java source file into a class file any time a file is added or modified in a Java project.  It also
+keeps track of dependent files and recompiles them when necessary. </P>
 <P >
-The platform defines two types of builds:</P>
+From an API point of view, the platform defines two basic types of builds:
 <ul>
-  <li>
-    
-A <b> full build </b> performs a build from scratch. It treats all resources in
-the projects as if they have never been seen by the builder.</li>
-  <li>
-    
-An <b> incremental build</b> uses a &quot;last build state,&quot; maintained internally by the builder,
-to do an optimized
-build based on the changes since the last build.</li>
+<li>A <b> full build </b> performs a build from scratch. It treats all resources in a project
+as if they have never been seen by the builder.</li>
+<li>An <b> incremental build</b> uses a &quot;last build state,&quot; maintained internally by the builder,
+to do an optimized build based on the changes in the project since the last build.</li>
 </ul>
+</P>
+
 <P >
-Incremental builds are seeded with a resource change delta. The delta reflects the net effect of all resource changes since the builder last built the project.
-This delta is similar to the one used inside resource change events.</P>
+Incremental builds are seeded with a resource change delta. The delta reflects the net effect of all resource 
+changes since the builder last built the project.  This delta is similar to the one used inside resource change events.</P>
+<p>
+Projects can be periodically <b>cleaned</b> by the user in order to force a rebuild of a complete project
+the next time an incremental build is performed on that project.  Cleaning a project removes build information
+such as problem markers and class files.
+</p>
 <P >
-Builders are best understood by example. The Java development tooling (JDT) provides a Java compiler
-which is driven by a Java incremental project builder to recompile files that
-are affected by changes. When a full build is triggered, all of the
-<b> .java</b> files in the project are compiled.&nbsp; Any compile problems encountered are added as problem markers on the affected
-<b> .java</b> files. When an incremental build is triggered, the builder selectively recompiles
-the added, changed, or otherwise affected
-<b> .java</b> files that are described in the resource delta and updates the problem markers as necessary. Any
-<b> .class</b> files or markers that are no longer appropriate are removed.</P>
+Builders are best understood by example. The JDT Java compiler is driven by a Java incremental project builder 
+which recompiles the files in a project that are affected by changes. When a full build is triggered, (or an incremental
+build after a clean), all of the <b> .java</b> files in the project are compiled. Any compile problems encountered 
+are added as problem markers on the affected <b> .java</b> files. When an incremental build is triggered, the builder 
+selectively recompiles the added, changed, or otherwise affected <b>.java</b> files that are described in the 
+resource delta and updates the problem markers as necessary. Any <b>.class</b> files or markers that are no 
+longer appropriate are removed.</P>
 <P >
-Incremental building has obvious performance benefits for projects with hundreds or thousands of resources, most of which are unchanging at any given point in time.</P>
+Incremental building has obvious performance benefits for projects with hundreds or thousands of resources, 
+most of which are unchanging at any given point in time.</P>
 <P >
 The technical challenge for incremental building is to determine exactly what needs to be rebuilt. For example, the
 internal state maintained by the Java builder includes things like a dependency
-graph and a list of compilation problems reported.&nbsp;
-This information is used during an incremental build to identify which classes
-need to be recompiled in response to a change in a Java resource. </P>
+graph and a list of compilation problems reported.  This information is used during an incremental build to 
+identify which classes need to be recompiled in response to a change in a Java resource. </P>
 <P >
-Although the basic structure for building is defined in the platform, the real work is done in your plug-in. Patterns for implementing complex incremental builders are beyond the scope of this discussion, since the implementation is dependent on the specific builder design. </P>
+Although the basic structure for building is defined in the platform, the real work is done in the builder
+code.  Patterns for implementing complex incremental builders are beyond the scope of this discussion, since the 
+implementation is dependent on the specific builder design. </P>
 
 <H3>
 Invoking a build</H3>
 <P >
-A builder can be invoked explicitly in one of the following ways:</P>
+A builder can be invoked explicitly in one of the following ways:
 <ul>
-  <li>
-<b>
-IProject.build()</b> runs the build processing on the receiving project.</li>
-  <li>
-<b>
-IWorkspace.build()</b> runs the build processing on all open projects in the workspace.</li>
+<li><b>IProject.build()</b> runs the build processing on the receiving project according to the build
+method's arguments.</li>
+<li><b>IWorkspace.build()</b> runs the build processing on all open projects in the workspace.</li>
 </ul>
+</p>
 <P >
-In practice, the workbench user triggers a build by selecting the corresponding commands in the resource navigator menu.</P>
+In practice, the workbench user triggers a build by selecting corresponding commands in the resource 
+navigator menu.</P>
 <P >
 Incremental project builders are also invoked implicitly by the platform during an auto-build.
 If enabled, auto-builds run whenever the workspace is changed.</P>
-
-
 <H3>
 Defining an incremental project builder</H3>
 <P >
 The <a href="../reference/extension-points/org_eclipse_core_resources_builders.html"> <b> org.eclipse.core.resources.builders</b></a> extension point is used to contribute an
 incremental project builder to the platform. The following markup shows how the hypothetical plug-in
-<b> com.example.builders</b> could contribute an
-incremental project builder.</P>
+<b> com.example.builders</b> could contribute an incremental project builder.</P>
 <font color='#4444CC'><pre>
    &lt;extension
       id=&quot;mybuilder&quot; name=&quot;My Sample Builder&quot; point=&quot;org.eclipse.core.resources.builders&quot;&gt;
@@ -97,7 +94,8 @@ incremental project builder.</P>
    &lt;/extension&gt;
 </pre></font>
 <P >
-The <b> class</b> identified in the extension point must extend the platform class <b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>. </P>
+The <b> class</b> identified in the extension point must extend the platform class 
+<b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>. </P>
 <font color='#4444CC'><pre>
    public class BuilderExample extends IncrementalProjectBuilder {
       IProject[] build(int kind, Map args, IProgressMonitor monitor)
@@ -108,12 +106,22 @@ The <b> class</b> identified in the extension point must extend the platform cla
       protected void startupOnInitialize() {
          // add builder init logic here
       }
+      protected void clean(IProgressMonitor monitor) {
+         // add builder clean logic here
+      }
    }
 </pre></font>
 <P >
-Build processing begins with the <b> build()</b> method, which includes information about the kind of build that has been requested,
-<b>FULL_BUILD</b>, <b>INCREMENTAL_BUILD</b>, or
-<b>AUTO_BUILD</b>. If an incremental build has been requested, a resource delta is provided to describe the changes in the project's resources since the last build. The following snippet further refines the
+Build processing begins with the <b> build()</b> method, which includes information about the kind of build that 
+has been requested.  The build is one of the following values:
+<ul>
+<li><b>FULL_BUILD</b> indicates that all resources in the project should be built.</li>
+<li><b>INCREMENTAL_BUILD</b> indicates that the build is incremental.</li>
+<li><b>AUTO_BUILD</b> indicates that an incremental build is being triggered automatically because a
+resource has changed and the autobuild feature is on.</li>
+</ul>
+If an incremental build has been requested, a resource delta is provided to describe the changes in the 
+resources since the last build. The following snippet further refines the
 <b> build() </b> method.</P>
 <font color='#4444CC'><pre>
    protected IProject[] build(int kind, Map args, IProgressMonitor monitor
@@ -138,16 +146,16 @@ example, if a Java class in X implements an interface provided in Y.)&nbsp;
 While building X, a delta for Y is available by calling <b>getDelta(Y)</b>.&nbsp;
 To ensure that the platform can provide such deltas, X's builder must have
 declared the dependency between X and Y by returning an array containing Y from
-a previous <b>build()</b> call.&nbsp; If a builder has
-no dependencies, it can simply return null.&nbsp; See <b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>
+a previous <b>build()</b> call.&nbsp; If a builder has no dependencies, it can simply return null.
+See <b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>
 for further information.</P>
 
 <H4>
 Full build</H4>
 <P >
-The logic required to process a full build request is specific to the plug-in. It may involve visiting every resource in the project (if the build was triggered for a project) or
-even examining other projects if there are dependencies between projects.&nbsp; The following snippet
-suggests how a full build might be implemented.</P>
+The logic required to process a full build request is specific to the plug-in. It may involve visiting every 
+resource in the project or even examining other projects if there are dependencies between projects.
+The following snippet suggests how a full build might be implemented.</P>
 <font color='#4444CC'><pre>
    protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
       try {
@@ -156,7 +164,8 @@ suggests how a full build might be implemented.</P>
    }
 </pre></font>
 <P >
-The build visitor would perform the build for the specific resource (and answer true to continue visiting all child resources).</P>
+The build visitor would perform the build for the specific resource (and answer true to continue visiting all 
+child resources).</P>
 <font color='#4444CC'><pre>
    class MyBuildVisitor implements IResourceVisitor {
       public boolean visit(IResource res) {
@@ -173,8 +182,8 @@ The visit process continues until the full resource tree has been traveled.</P>
 <H4>
 Incremental build</H4>
 <P >
-When performing an incremental build, you work with a resource change delta instead of the
-whole project.</P>
+When performing an incremental build, the builder works with a resource change delta instead of a complete
+resource tree.</P>
 <font color='#4444CC'><pre>
    protected void incrementalBuild(IResourceDelta delta, 
          IProgressMonitor monitor) throws CoreException {
@@ -183,21 +192,26 @@ whole project.</P>
    }
 </pre></font>
 <P >
-Note that for an incremental build, the build visitor works with a resource delta tree instead of a complete resource tree. </P>
-<P >
 The visit process continues until the complete resource delta tree has been traveled. The specific nature of changes
 is similar to that described in
 <a HREF="resAdv_events.htm#resAdv_events_listener" CLASS="XRef">Implementing a resource change listener</a>.&nbsp;
-One important difference is that with incremental project builders, you are working with a resource delta based on a particular project, not the
-entire workspace.</P>
+One important difference is that with incremental project builders, you are working with a resource delta based 
+on a particular project, not the entire workspace.</P>
 
-
+<H4>
+Cleaning before a build</H4>
+<P>
+The workbench allows users to <b>clean</b> a project or set of projects before initiating a build.  This feature
+allows the user to force a rebuild from scratch on only certain projects.  Builders should implement 
+this method to clean up any problem markers and derived resources in the project.
+</P>
 
 <H3>
 Associating an incremental project builder with a project</H3>
 <P >
-To make a builder available for a given project, it must be included in the build spec for the project. A project's build spec is a list of commands to run, in sequence, when the project is built. Each command names a single
-incremental project builder. </P>
+To make a builder available for a given project, it must be included in the build spec for the project. 
+A project's build spec is a list of commands to run, in sequence, when the project is built. Each command 
+names a single incremental project builder. </P>
 <P >
 The following snippet adds a new builder as the first builder in the existing list of builders.</P>
 <font color='#4444CC'><pre>
