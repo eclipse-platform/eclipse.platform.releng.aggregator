@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   <title>Running update manager from command line</title>
+</head>
+<body>
+
+<h1>Running update manager from command line</h1>
+In addition to the install wizard and configuration dialog, it is possible to perform
+update manager operations by running eclipse in a command line mode. You can install, update, enable, disable features,
+or list installed features, or features available on an update site, or adding an extension product site to the local install, etc.
+<br>
+You can also, mirror chosen features from an update site to a local update site location.<br>
+ <br>
+Launch eclipse as follows, where [ ] means optional argument and arguments in italics must be provided by the user.<br>
+	<br>
+<b>Installing a feature from a remote site</b>:<br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command install <br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; -from <i>remote_site_url</i> <br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+	<p>
+	<b>Example:</b> <code>java -cp startup.jar org.eclipse.core.launcher.Main -application org.eclipse.update.core.standaloneUpdate -command install  -from http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-update-home/optionalSite/ -featureId com.example.root -version 1.0.0</code>
+	</p>
+ <br>
+<b>Updating an existing feature or all features</b>:<br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command update<br>
+ &nbsp;&nbsp;&nbsp; [-featureId <i>feature_id </i>]<br>
+  &nbsp;&nbsp;&nbsp; [-version <i>version </i>]<br>
+<br>
+<b>Enabling (configuring) a specified feature:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command enable<br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+<br>
+<b>Disabling (unconfiguring) a specified feature:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command disable<br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+<br>
+<b>Uninstalling a specified feature:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command uninstall<br>
+ &nbsp;&nbsp;&nbsp; -featureId <i>feature_id </i><br>
+ &nbsp;&nbsp;&nbsp; -version <i>version </i><br>
+ &nbsp;&nbsp;&nbsp; [-to <i>target_site_dir</i>] <br>
+<br>
+In all the above commands where the -to target_site_dir is specified, corresponding
+configured target site at given directory will be used. If it is not specified,
+then the default local product site is used.<br>
+<br>
+If you only need to verify if the operation would succeed, in the above commands, (i.e. it satisfies the constraints), without actually performing it,
+then add <b><em>-verifyOnly=true</em></b> to the list of arguments.<br>
+
+<br><b>Searching a remote site, listing all available features for install:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command search<br>
+ &nbsp;&nbsp;&nbsp; -from <i>remote_site_url</i> <br>
+
+<br><b>Listing installed features:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command listFeatures<br>
+ &nbsp;&nbsp;&nbsp; -from <i>local_site_dir</i> <br>
+ <br>
+ The features are listed as:
+ <br>
+ <code>
+ Site: <em>site url </em><br>
+  &nbsp;&nbsp;Feature: <em>id version</em>  enabled (or disabled)
+ </code>
+ <br>
+
+<br><b>Adding a local site with more features:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command addSite<br>
+ &nbsp;&nbsp;&nbsp; -from <i>local_site_dir</i> <br>
+
+<br><b>Removing a local site:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command removeSite<br>
+ &nbsp;&nbsp;&nbsp; -to <i>local_site_dir</i> <br>
+ 
+<br>
+<b>Mirroring feature(s) from a remote site:</b><br>
+ java -cp startup.jar org.eclipse.core.launcher.Main <br>
+ &nbsp;&nbsp;&nbsp; -application&nbsp; org.eclipse.update.core.standaloneUpdate<br>
+ &nbsp;&nbsp;&nbsp; -command mirror<br>
+ &nbsp;&nbsp;&nbsp; -from <i>remote_site_url</i> <br>
+ &nbsp;&nbsp;&nbsp; -to <i>target_site_dir</i><br>
+ &nbsp;&nbsp;&nbsp; [-featureId <i>feature_id</i>]<br>
+ &nbsp;&nbsp;&nbsp; [-version <i>version</i>]<br>
+ &nbsp;&nbsp;&nbsp; [-mirrorURL <i>mirror_site_url</i>]<br>
+<br>
+If -mirrorURL is specified, an update policy will be generated in
+&lt;target_site_dir&gt;/policy.xml file.  The resulting policy.xml
+maps all features from the mirror site to the specified URL.
+The policy.xml can be used as is, or its fragments
+can be included into custom designed policy file.
+<br>
+<br>
+The return code for each command is either 0 (success) or 1 (failure).<br>
+<br>
+Additionally, most <A
+	href="http://dev.eclipse.org/help21/topic/org.eclipse.platform.doc.user/tasks/running_eclipse.htm">options
+	accepted by Eclipse executable</A> can be passed. They are especially
+	useful during debugging and for specifying target environment for installed features.
+	For example, passing option
+	<code>-data some_path</code> will set the workspace to some_path.<br>
+</body>
+</html>
