@@ -10,23 +10,39 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
-import java.text.NumberFormat;
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 
 import org.eclipse.test.internal.performance.data.Dim;
 
 public class View {
     
     public static void main(String[] args) {
-
-		NumberFormat nf= NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(1);
-
+		
+		String outFile= null;
+		// outfile= "/tmp/dbdump";	//$NON-NLS-1$
+		PrintStream ps= null;
+		if (outFile != null) {
+		    try {
+                ps= new PrintStream(new BufferedOutputStream(new FileOutputStream(outFile)));
+            } catch (FileNotFoundException e) {
+                System.err.println("can't create output file"); //$NON-NLS-1$
+            }
+		}
+		if (ps == null)
+		    ps= System.out;
+		
         // get all Scenarios 
-        Scenario[] scenarios= DB.queryScenarios("%", "%", "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    
+        Dim[] qd= null; // new Dim[] { InternalDimensions.CPU_TIME };
+        Scenario[] scenarios= DB.queryScenarios("%", "%", "%", qd); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
+        ps.println();
+        
         for (int s= 0; s < scenarios.length; s++) {
             Scenario t= scenarios[s];
-            System.out.println("Scenario: " + t.getScenarioName()); //$NON-NLS-1$
+            ps.println("Scenario " + s + ": " + t.getScenarioName()); //$NON-NLS-1$ //$NON-NLS-2$
             Report r= new Report(2);
             
             String[] timeSeriesLabels= t.getTimeSeriesLabels();
@@ -43,16 +59,15 @@ public class View {
                 TimeSeries ts= t.getTimeSeries(dim);
                 int n= ts.getLength();
                 for (int j= 0; j < n; j++) {
-                    String sdd= ""; //$NON-NLS-1$
-                    double sd= ts.getStddev(j);
-                    if (! Double.isNaN(sd))
-                		sdd= " [" + nf.format(sd) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-                    r.addCellRight(dim.getDisplayValue(ts.getValue(j)) + sdd);
+                    String stddev= " [" + dim.getDisplayValue(ts.getStddev(j)) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+                    r.addCellRight(dim.getDisplayValue(ts.getValue(j)) + stddev);
                 }
                 r.nextRow();
             }
-            r.print(System.out);
-            System.out.println();
+            r.print(ps);
+            ps.println();
         }
+        if (ps != System.out)
+            ps.close();
     }
 }

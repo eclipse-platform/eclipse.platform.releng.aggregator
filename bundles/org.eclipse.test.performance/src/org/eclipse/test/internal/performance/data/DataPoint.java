@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.data;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +36,11 @@ public class DataPoint {
 	    return (Dim[]) set.toArray(new Dim[set.size()]);
 	}
 	
-	public boolean contains(Dim dimension) {
+    public Collection getDimensions2() {
+	    return fScalars.keySet();
+    }
+
+    public boolean contains(Dim dimension) {
 		return fScalars.containsKey(dimension);
 	}
 	

@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -29,13 +33,15 @@ public class Scenario {
     private String[] fBuildNames;
     private StatisticsSession[] fSessions;
     private Dim[] fDimensions;
+    private Dim[] fQueryDimensions;
     private Map fSeries= new HashMap();
 
     
-    Scenario(String configPattern, String buildPattern, String scenario) {
+    Scenario(String configPattern, String buildPattern, String scenario, Dim[] dimensions) {
     	fConfigPattern= configPattern;
     	fBuildPattern= buildPattern;
         fScenarioName= scenario;
+        fQueryDimensions= dimensions;
     }
     
     public String getScenarioName() {
@@ -81,12 +87,23 @@ public class Scenario {
         
         fBuildNames= DB.queryBuildNames(fConfigPattern, fBuildPattern, fScenarioName);
         fSessions= new StatisticsSession[fBuildNames.length];
-
+        
+        Set dims= new HashSet();
         for (int t= 0; t < fBuildNames.length; t++) {
-            DataPoint[] dps= DB.queryDataPoints(fConfigPattern, fBuildNames[t], fScenarioName, null);
-            if (fDimensions == null && dps.length > 0)
-                fDimensions= dps[0].getDimensions();
+            DataPoint[] dps= DB.queryDataPoints(fConfigPattern, fBuildNames[t], fScenarioName, fQueryDimensions);
+            if (dps.length > 0)
+            	dims.addAll(dps[0].getDimensions2());
             fSessions[t]= new StatisticsSession(dps);
-        }        
+        }
+        fDimensions= (Dim[]) dims.toArray(new Dim[dims.size()]);
+        Arrays.sort(fDimensions,
+            new Comparator() {
+            	public int compare(Object o1, Object o2) {
+            	    Dim d1= (Dim)o1;
+            	    Dim d2= (Dim)o2;
+            	    return d1.getName().compareTo(d2.getName());
+            	}
+        	}
+        );
     }
 }

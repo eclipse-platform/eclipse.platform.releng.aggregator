@@ -55,12 +55,16 @@ public class DB {
     }
    
     public static Scenario[] queryScenarios(String configPattern, String buildPattern, String scenarioPattern) {
+        return queryScenarios(configPattern, buildPattern, scenarioPattern, null);
+    }
+
+    public static Scenario[] queryScenarios(String configPattern, String buildPattern, String scenarioPattern, Dim[] dimensions) {
         String[] scenarios= getDefault().internalQueryScenarioNames(configPattern, scenarioPattern); // get all Scenario names
         if (scenarios == null)
             return new Scenario[0];
         Scenario[] tables= new Scenario[scenarios.length];
         for (int i= 0; i < scenarios.length; i++)
-            tables[i]= new Scenario(configPattern, buildPattern, scenarios[i]);
+            tables[i]= new Scenario(configPattern, buildPattern, scenarios[i], dimensions);
         return tables;
     }
 
@@ -234,6 +238,7 @@ public class DB {
         		dim_ids= new int[0];
             result= fSQL.queryDataPoints(configPattern, buildPattern, scenario, dim_ids);
             
+            long lastValue= 0;
             ArrayList dataPoints= new ArrayList();
             int lastDataPointId= 0;
             DataPoint dp= null;
@@ -256,8 +261,13 @@ public class DB {
                 if (dim != null)
                     map.put(dim, new Scalar(dim, value));
                 
-                if (DEBUG)
-                	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value);                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+                if (DEBUG) {
+                    if (step == 1) {
+                        //System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value);                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+                        System.out.println(i + ": " + sample_id+','+datapoint_id +' '+ Dim.getDimension(dim_id).getName() + ' ' + (value-lastValue));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+                    } else
+                        lastValue= value;
+                }
             }
             int n= dataPoints.size();
             if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -512,7 +522,7 @@ public class DB {
             stmt.close();
         }
     }
-    
+
     public static void main(String args[]) {
         DB.dump();
     }

@@ -60,9 +60,7 @@ public class Unit {
 	    
 	    if ("s".equals(fShortName)) //$NON-NLS-1$
 	        return formatedTime((long) (magnitude*1000.0));
-	    if ("byte".equals(fShortName)) //$NON-NLS-1$
-	        return formatEng((long) (magnitude));
-	    return Double.toString(magnitude);
+	    return formatEng((long) (magnitude));
 	    
 	    /*
 		int div= fIsBinary ? T_BINARY : T_DECIMAL;
