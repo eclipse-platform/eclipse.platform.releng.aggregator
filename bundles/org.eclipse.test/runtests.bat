@@ -6,17 +6,22 @@ set tests=
 REM default switch to determine if eclipse should be reinstalled between running of tests
 set installmode=clean
 
+REM default for testvmargs
+set j9vmargs=
+
 REM default values for os, ws and arch
 set os=win32
 set ws=win32
 set arch=x86
+
+REM reset ant command line args
+set ANT_CMD_LINE_ARGS=
 
 REM ****************************************************************
 REM
 REM Delete previous Eclipse installation and workspace
 REM
 REM ****************************************************************
-
 if EXIST eclipse rmdir /S /Q eclipse
 if EXIST workspace rmdir /s /Q workspace
 
@@ -43,7 +48,10 @@ if x%1==x-ws set ws=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-os set os =%2 && shift && shift && goto processcmdlineargs
 if x%1==x-arch set arch=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-noclean set installmode=noclean && shift && goto processcmdlineargs
+if x%1==x-j9 set j9vmargs="-Dj9vmargs=-Xj9 -Xdebug -Xprod" && shift && goto processcmdlineargs
+
 set tests=%tests% %1 && shift && goto processcmdlineargs
+
 
 :setup
 REM ****************************************************************
@@ -67,7 +75,7 @@ goto run
 REM ***************************************************************************
 REM	Run tests by running Ant in Eclipse on the test.xml script
 REM ***************************************************************************
-java -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% "-D%installmode%=true" -logger org.apache.tools.ant.DefaultLogger
+java -cp eclipse\startup.jar org.eclipse.core.launcher.Main -noupdate -ws %ws% -os %os% -arch %arch% -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch% %j9vmargs%  "-D%installmode%=true" -logger org.apache.tools.ant.DefaultLogger
 goto end
 
 :end
