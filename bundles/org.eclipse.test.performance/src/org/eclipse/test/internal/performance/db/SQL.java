@@ -30,13 +30,14 @@ public class SQL {
     private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryVariation, fQueryVariations, fQueryScenario, fQueryAllScenarios, fQueryDatapoints, fQueryScalars;
     private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntry, fQueryGlobalSummaryEntries, fQuerySummaryEntries;
-    
+    private PreparedStatement fInsertFailure;
 
     SQL(Connection con) throws SQLException {
         fConnection= con;
         
         boolean needsUpgrade= true;
         boolean needsInitialization= true;
+        boolean needsFailures= true;
         
         Statement statement= fConnection.createStatement();
         ResultSet rs= statement.executeQuery("select SYS.SYSTABLES.TABLENAME from SYS.SYSTABLES where SYS.SYSTABLES.TABLENAME not like 'SYS%'"); //$NON-NLS-1$
@@ -48,6 +49,8 @@ public class SQL {
                 fCompatibility= true;
             else if ("VARIATION".equals(tablename)) //$NON-NLS-1$
                 needsInitialization= false;
+            else if ("FAILURES".equals(tablename)) //$NON-NLS-1$
+                needsFailures= false;
         }
         if (!fCompatibility) {
             // check whether table SAMPLE still has the CONFIG_ID column
@@ -59,8 +62,12 @@ public class SQL {
 
         if (needsInitialization)
             initialize();
-        else if (needsUpgrade)
-	    	upgradeDB();
+        else {
+            if (needsUpgrade)
+                upgradeDB();
+            else if (needsFailures)
+                adddFailureTable();   
+        }
     }
     
     public void dispose() throws SQLException {
@@ -70,6 +77,7 @@ public class SQL {
         if (fInsertDataPoint != null) fInsertDataPoint.close();
         if (fInsertScalar != null) fInsertScalar.close();
         if (fInsertSummaryEntry != null) fInsertSummaryEntry.close();
+        if (fInsertFailure != null) fInsertFailure.close();
         if (fUpdateScenarioShortName != null) fUpdateScenarioShortName.close();
         if (fQueryDatapoints != null) fQueryDatapoints.close();
         if (fQueryScalars != null) fQueryScalars.close();
@@ -129,6 +137,13 @@ public class SQL {
 						"IS_GLOBAL smallint not null" + //$NON-NLS-1$
 					")" //$NON-NLS-1$
 	        );
+//	        stmt.executeUpdate(
+//	        		"create table FAILURE (" + //$NON-NLS-1$
+//	                	"VARIATION_ID int not null," + //$NON-NLS-1$
+//						"SCENARIO_ID int not null," + //$NON-NLS-1$
+//						"NAME varchar(1000) not null" + //$NON-NLS-1$
+//					")" //$NON-NLS-1$
+//	        );
 	        
 	        // Primary/unique
 	        stmt.executeUpdate("alter table VARIATION add constraint VA_KVP primary key (KEYVALPAIRS)"); //$NON-NLS-1$
@@ -151,7 +166,12 @@ public class SQL {
 	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT2 " + //$NON-NLS-1$
 					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
 
-	        fConnection.commit();
+//	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT " + //$NON-NLS-1$
+//					"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
+//	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT2 " + //$NON-NLS-1$
+//					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
+
+			fConnection.commit();
 	        
         } finally {
             stmt.close();
@@ -185,6 +205,19 @@ public class SQL {
         }
     }
 
+    private void adddFailureTable() throws SQLException {
+        Statement stmt= null;
+        try {
+            stmt= fConnection.createStatement();
+
+
+	        fConnection.commit();
+	        
+        } finally {
+            stmt.close();
+        }        
+    }
+    
     static int create(PreparedStatement stmt) throws SQLException {
         stmt.executeUpdate();
         ResultSet rs= stmt.getGeneratedKeys();
@@ -378,5 +411,14 @@ public class SQL {
         fQuerySummaryEntries.setString(1, variations.toExactMatchString());
         fQuerySummaryEntries.setString(2, scenarioPattern);
         return fQuerySummaryEntries.executeQuery();
+    }
+    
+    void insertFailure(int datapoint_id, int dim_id, long value) throws SQLException {
+        if (fInsertFailure == null)
+            fInsertFailure= fConnection.prepareStatement("insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
+        fInsertFailure.setInt(1, datapoint_id);
+        fInsertFailure.setInt(2, dim_id);
+        fInsertFailure.setLong(3, value);
+        fInsertFailure.executeUpdate();
     }
 }

@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
 
@@ -20,6 +22,11 @@ public class DBHelpers {
     
     
     public static void main(String[] args) throws SQLException {
+        
+        //System.setProperty("eclipse.perf.dbloc", "net://relengbuildserv.ottawa.ibm.com");
+        System.setProperty("eclipse.perf.dbloc", "net://bachlnx.ottawa.ibm.com");
+        //System.setProperty("eclipse.perf.dbloc", "net://9.26.193.84");
+        //System.setProperty("eclipse.perf.dbloc", "net://localhost");
                         
         DBHelpers db= new DBHelpers();
         
@@ -38,7 +45,21 @@ public class DBHelpers {
 
 		long start= System.currentTimeMillis();
 		
-        db.dumpSizes(ps);			
+		
+		db.dumpSizes(ps);
+		//db.renameVariation("|build=3.0.0_200410130800||config=relengbuildwin2|", "|build=3.0.0_200406251208_200410130800||config=relengbuildwin2|");
+		//db.dumpTable(ps, "VARIATION", 1000); //$NON-NLS-1$
+		//db.countSamplesWithNullVariations();
+        
+		//Variations v= new Variations();
+		//v.put(PerformanceTestPlugin.CONFIG, "relengbuildwin2"); //$NON-NLS-1$
+		//v.put(PerformanceTestPlugin.BUILD, "I20041104%"); //$NON-NLS-1$
+		
+		//db.dumpSummaries(v, null);
+        	//db.removeSamples(v);
+		//db.countSamples(ps, v);
+        	//db.view(ps, v, "org.eclipse.jdt.core.tests.performance.FullSourceWorkspaceTests#testPerfFullBuild()");
+        
 		
         System.out.println("time: " + ((System.currentTimeMillis()-start)/1000.0)); //$NON-NLS-1$
         
@@ -50,15 +71,18 @@ public class DBHelpers {
         fConnection= DB.getConnection();
     }
     
-    void dumpSummaries(String config, String build, String scenarioPattern) {
-        Variations variations= new Variations();
-        variations.put(PerformanceTestPlugin.CONFIG, config);
-        variations.put(PerformanceTestPlugin.BUILD, build);
+    void renameVariation(String oldName, String newName) throws SQLException {
+        PreparedStatement update= fConnection.prepareStatement("update VARIATION set KEYVALPAIRS = ? where KEYVALPAIRS = ? "); //$NON-NLS-1$
+        update.setString(1, newName); //$NON-NLS-1$
+        update.setString(2, oldName); //$NON-NLS-1$
+        update.executeUpdate();
+        update.close();
+    }
+    
+    void dumpSummaries(Variations variations, String scenarioPattern) {
         SummaryEntry[] summries= DB.querySummaries(variations, scenarioPattern);
-        for (int i= 0; i < summries.length; i++) {
-            SummaryEntry entry= summries[i];
-            System.out.println(entry);
-        }
+        for (int i= 0; i < summries.length; i++)
+            System.out.println(summries[i]);
     }
     
     void count(PrintStream ps) throws SQLException {
@@ -88,12 +112,15 @@ public class DBHelpers {
         }
     }
 
-    void countSamples(PrintStream ps, Variations v) throws SQLException {
+    int countSamples(PrintStream ps, Variations v) throws SQLException {
         PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID"); //$NON-NLS-1$
         stmt.setString(1, v.toExactMatchString());
         ResultSet set= stmt.executeQuery();
+        int n= 0;
         if (set.next())
-            ps.println("samples with variation " + v + ": " + set.getInt(1)); //$NON-NLS-1$ //$NON-NLS-2$
+            n= set.getInt(1);
+        ps.println("samples with variation " + v + ": " + n); //$NON-NLS-1$ //$NON-NLS-2$
+        return n;
     }
     
     void countDatapoints(PrintStream ps, Variations v) throws SQLException {
@@ -112,13 +139,12 @@ public class DBHelpers {
             ps.println("scalars with variation " + v + ": " + set.getInt(1)); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
-    void removeSamples(PrintStream ps, Variations v) throws SQLException {
+    void removeSamples(Variations v) throws SQLException {
         
-        int sample_cnt= 0, dp_cnt= 0, scenario_cnt= 0;
         boolean delete= true;
         
-        ps.println("removing:"); //$NON-NLS-1$
-        
+        int n= countSamples(System.out, v);
+                
         int variation_id= 0;
         PreparedStatement stmt= fConnection.prepareStatement("select ID from VARIATION where KEYVALPAIRS = ?"); //$NON-NLS-1$
         stmt.setString(1, v.toExactMatchString());
@@ -130,8 +156,8 @@ public class DBHelpers {
         
         if (variation_id <= 0) {
             System.err.println("nothing found for variation " + v); //$NON-NLS-1$
-        	return;
-    	}
+        		return;
+    		}
 
         PreparedStatement iterSamples= fConnection.prepareStatement("select SAMPLE.ID, SAMPLE.SCENARIO_ID from SAMPLE where SAMPLE.VARIATION_ID = ?"); //$NON-NLS-1$
         PreparedStatement iterDatapoints= fConnection.prepareStatement("select DATAPOINT.ID from DATAPOINT where DATAPOINT.SAMPLE_ID = ?"); //$NON-NLS-1$
@@ -147,25 +173,25 @@ public class DBHelpers {
         while (samples.next()) {
             int sample_id= samples.getInt(1);
             int scenario_id= samples.getInt(2);
-            ps.println(" sample: " + sample_id); //$NON-NLS-1$
+            System.out.print(n + ": sample(" + sample_id + "):"); //$NON-NLS-1$ //$NON-NLS-2$
             iterDatapoints.setInt(1, sample_id);
 	        datapoints= iterDatapoints.executeQuery();
 	        int dps= 0;
 	        while (datapoints.next()) {
 	            int dp_id= datapoints.getInt(1);
-	            ps.println("  dp: " + dp_id); //$NON-NLS-1$
+	            //ps.println("  dp: " + dp_id); //$NON-NLS-1$
 	            if (delete) {
 	                deleteScalars.setInt(1, dp_id);
 	                try {
                         deleteScalars.executeUpdate();
     		            fConnection.commit();
-    		            dp_cnt++;
     		            dps++;
                     } catch (SQLException e) {
                         System.err.println("removing scalars: " + e); //$NON-NLS-1$
                     }
 	            }
 	        }
+            System.out.println(" dps: " + dps); //$NON-NLS-1$        
 	        if (delete) {
 	            deleteDatapoints.setInt(1, sample_id);
 	            try {
@@ -179,7 +205,6 @@ public class DBHelpers {
 	            try {
                     deleteSamples.executeUpdate();
                     fConnection.commit();
-                    sample_cnt++;
                 } catch (SQLException e) {
                     System.err.println("removing sample: " + e); //$NON-NLS-1$
                 }
@@ -188,11 +213,11 @@ public class DBHelpers {
 	            try {
 	                deleteScenario.executeUpdate();
                     fConnection.commit();
-                    scenario_cnt++;
                 } catch (SQLException e) {
-                    System.err.println("removing scenario: " + e); //$NON-NLS-1$
+                    // System.err.println("removing scenario: " + e); //$NON-NLS-1$
                 }
 	        }
+	        n--;
         }
         if (delete) {
             PreparedStatement deleteSummaries= fConnection.prepareStatement("delete from SUMMARYENTRY where VARIATION_ID = ?"); //$NON-NLS-1$
@@ -202,14 +227,14 @@ public class DBHelpers {
             
             PreparedStatement deleteVariation= fConnection.prepareStatement("delete from VARIATION where ID = ?"); //$NON-NLS-1$
             deleteVariation.setInt(1, variation_id);
-            deleteVariation.executeUpdate();
+            try {
+                deleteVariation.executeUpdate();
+            } catch (SQLException e) {
+                System.err.println("removing variation: " + e); //$NON-NLS-1$
+            }
             deleteVariation.close();
-            
         }
-        ps.println("  samples: " + sample_cnt); //$NON-NLS-1$
-        ps.println("  scenarios: " + scenario_cnt); //$NON-NLS-1$
-        ps.println("  datapoints: " + dp_cnt); //$NON-NLS-1$
-        
+
         if (configs != null) configs.close();
         if (samples != null) samples.close();
         if (datapoints != null) datapoints.close();
@@ -229,8 +254,6 @@ public class DBHelpers {
         while (rs.next()) {
             int config_id= rs.getInt(1);
             System.out.println("samples with NULL variation: " + config_id); //$NON-NLS-1$
-            //System.out.println(" " + rs.getString(2));
-            //removeSamples(config_id);
         }
         rs.close();
         stmt.close();
@@ -314,10 +337,7 @@ public class DBHelpers {
         select.close();
     }
 
-    void view(PrintStream ps, String config, String buildPattern, String scenarioPattern) throws SQLException {
-        Variations v= new Variations();
-        v.put(PerformanceTestPlugin.CONFIG, config);
-        v.put(PerformanceTestPlugin.BUILD, buildPattern);
+    void view(PrintStream ps, Variations v, String scenarioPattern) throws SQLException {
         Scenario[] scenarios= DB.queryScenarios(v, scenarioPattern, PerformanceTestPlugin.BUILD, null);
         ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         ps.println();
