@@ -22,7 +22,6 @@ import java.util.Set;
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
-//import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
 
 /**
@@ -32,7 +31,8 @@ public class Scenario {
     
     final static boolean DEBUG= false;
 
-	private String fConfigName;
+    private String fBuildKey;
+    private Variations fVariations;
 	private String[] fBuildPatterns;
     private String fScenarioName;
     private String[] fBuildNames;
@@ -41,14 +41,11 @@ public class Scenario {
     private Set fQueryDimensions;
     private Map fSeries= new HashMap();
 
-    
-    public Scenario(String configName, String buildPattern, String scenario, Dim[] dimensions) {
-        this(configName, new String[] { buildPattern }, scenario, dimensions);
-    }
-    
-    public Scenario(String configName, String[] buildPatterns, String scenario, Dim[] dimensions) {
-    	fConfigName= configName;
-    	fBuildPatterns= buildPatterns;
+   
+    public Scenario(Variations v, String key, String[] patterns, String scenario, Dim[] dimensions) {
+        fVariations= v;
+        fBuildKey= key;
+    	fBuildPatterns= patterns;
         fScenarioName= scenario;
         if (dimensions != null && dimensions.length > 0) {
             fQueryDimensions= new HashSet();
@@ -56,8 +53,8 @@ public class Scenario {
                 fQueryDimensions.add(dimensions[i]);
         }
     }
-    
-   public String getScenarioName() {
+
+    public String getScenarioName() {
         return fScenarioName;
     }
 
@@ -133,8 +130,8 @@ public class Scenario {
         ArrayList buildNames= new ArrayList();
         for (int i= 0; i < fBuildPatterns.length; i++) {
             if (fBuildPatterns[i].indexOf('%') >= 0) {
-                Variations variations= new Variations(fConfigName, fBuildPatterns[i]);
-                DB.queryBuildNames(buildNames, variations, fScenarioName);
+                fVariations.put(fBuildKey, fBuildPatterns[i]);
+                DB.queryDistinctValues(buildNames, fBuildKey, fVariations, fScenarioName);
             } else
                 buildNames.add(fBuildPatterns[i]);
         }
@@ -147,8 +144,8 @@ public class Scenario {
         if (DEBUG) start= System.currentTimeMillis();
         Set dims= new HashSet();
         for (int t= 0; t < names.length; t++) {
-            Variations variations= new Variations(fConfigName, names[t]);
-            DataPoint[] dps= DB.queryDataPoints(variations, fScenarioName, fQueryDimensions);
+            fVariations.put(fBuildKey, names[t]);
+            DataPoint[] dps= DB.queryDataPoints(fVariations, fScenarioName, fQueryDimensions);
             if (DEBUG) System.err.println("  dps length: " + dps.length); //$NON-NLS-1$
             if (dps.length > 0) {
             	dims.addAll(dps[0].getDimensions2());
