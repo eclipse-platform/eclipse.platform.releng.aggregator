@@ -691,10 +691,37 @@ code. (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=12827">12827</a
 <h3>3.1.2 <a name="I-Platform - Ant">Platform - Ant</a></h3>
 <h4>Xerces JARs no longer required on runtime Ant classpath</h4>
 <p>Explicitly adding the Xerces JARs to the runtime Ant classpath is no longer
-required and can cause problems. The Xerces classes are loaded from the
-org.apache.xerces plug-in provided with Eclipse. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33664">33664</a>,
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33117">33117</a>)</p>
-<p>[TBD]</p>
+required and can cause problems. The Xerces classes are loaded from the <code>org.apache.xerces</code>
+plug-in provided with Eclipse. <font face="Times New Roman">For most Ant
+distributions, the Xerces JARs cannot even be in the same physical location as
+the <code>ant.jar</code> and <code>optional.jar</code>. This results from the
+Ant JARs containing manifest files which contain classpath entries pointing to
+the Xerces JARs. </font>(bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33664">33664</a>,
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33117">33117</a>, <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34151">34151</a>)</p>
+<font face="Times New Roman">
+<h4>Custom Ant tasks and Ant types must be separate from plug-in library JARs</h4>
+<p>Including the class files for custom Ant tasks or Ant types in the regular
+code JAR for your plug-in causes problems. These class files must be provided in
+a separate JAR that is contributed to the <code>org.eclipse.ant.core.antTasks</code>
+or <code>antTypes</code> extension point (and not declared as a library in the
+plug-in's manifest). This ensures that the Ant tasks and types are loaded by the
+special Ant class loader and not by a plug-in classloader. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34466">34466</a>).</p>
+<h4>Concurrent Ant builds not supported</h4>
+<p>Eclipse runs Ant in the same JVM as the rest of Eclipse. Several aspects of
+Ant and its use of global Java resources (such as System.out and System.err),
+make it unsafe to run more than one Ant build concurrent. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24129">24129</a>).</p>
+<h4>Running certain Ant tasks cause memory leakage</h4>
+<p>Certain Ant tasks are known to leak memory. Please see the bug report for
+details, patches, and possible workarounds. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24448">24448</a>)</p>
+</font>
+<h4>Tasks that require input lock up workspace</h4>
+<p>As with using Ant from the command line, prompts for input from the console
+is not handled. This is not the same as making use of the &lt;input&gt; task,
+which works correctly within Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21748">21748</a>)</p>
+<h4>Ant Editor code completion based on Ant 1.5</h4>
+<p>Code completion provided by the Ant editor does not respect to the
+user-specified version of <code>org.eclipse.ant.core</code> plug-in or ANT_HOME.
+Code completion proposals are always based on Ant 1.5. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=30886">30886</a>).</p>
 <h3><font color="#000000">3.1.3 <a name="I-Platform - Help">Platform - Help</a></font></h3>
 <h4><font color="#000000">Help documents not displayed in a browser or very slow
 document loading (Windows only)</font></h4>
@@ -757,15 +784,13 @@ either crash, or to have workbench menus become inconsistent.</font></p>
 <h4><font color="#00FF00">Minimum display resolution</font></h4>
 <p><font color="#00FF00">A number of dialogs in Eclipse, such as the Preferences
 dialog, require a minimum display resolution of at least 800 x 600. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5549">5549</a>)</font></p>
-<h4><font color="#00FF00">External Tools will automatically quote path variables
-containing spaces</font></h4>
-<p><font color="#00FF00">When an external tool is launched, expanded path
-variables that contain spaces will be enclosed in double quotes ( &quot; ).
-While it is typical for Windows executables to expect paths containing spaces to
-be quoted, this is known to cause problems on platforms such as Linux which do
-not expect these quotes. A workaround is to make the external tool a script
-which strips off the quotes before launching the executable with those
-parameters. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20599">20599</a>)</font></p>
+<h4>External Tools will automatically quote path variables containing spaces</h4>
+<p>When an external tool is launched, expanded path variables that contain
+spaces will be enclosed in double quotes ( &quot; ). While it is typical for
+Windows executables to expect paths containing spaces to be quoted, this is
+known to cause problems on platforms such as Linux which do not expect these
+quotes. A workaround is to make the external tool a script which strips off the
+quotes before launching the executable with those parameters. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20599">20599</a>)</p>
 <h4><font color="#00FF00">Default text file encoding may be detected incorrectly
 (Windows XP/2000 only)</font></h4>
 <p><font color="#00FF00">The &quot;Text file encoding&quot; value displayed in
