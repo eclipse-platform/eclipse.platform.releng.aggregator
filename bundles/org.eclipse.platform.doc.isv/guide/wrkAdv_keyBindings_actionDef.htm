@@ -79,20 +79,20 @@ Your choice depends on where the action is defined.</p>
 
 <p>Actions that are instantiated in code can also be associated with an action
 definition using <a href="../reference/api/org/eclipse/jface/action/IAction.html"><b>IAction</b></a>
-protocol.&nbsp; This is typically done when the action is created.&nbsp; The <b>WorkbenchActionBuilder</b>
-uses this technique to initialize its actions.&nbsp;&nbsp; </p>
+protocol.&nbsp; This is typically done when the action is created.&nbsp; The <b>SaveAction</b>
+uses this technique when it initializes itself. </p>
 
 
-<pre><font color="#4444CC">private void makeActions() {
+<pre><font color="#4444CC">
+public SaveAction(IWorkbenchWindow window) {
 	...
-	saveAction = new SaveAction(window);
-	saveAction.setImageDescriptor(WorkbenchImages.getImageDescriptor(IWorkbenchGraphicConstants.IMG_CTOOL_SAVE_EDIT));
-	saveAction.setHoverImageDescriptor(WorkbenchImages.getImageDescriptor(IWorkbenchGraphicConstants.IMG_CTOOL_SAVE_EDIT_HOVER));
-	saveAction.setDisabledImageDescriptor(WorkbenchImages.getImageDescriptor(IWorkbenchGraphicConstants.IMG_CTOOL_SAVE_EDIT_DISABLED));
-	partService.addPartListener(saveAction);
-	<b>saveAction.setActionDefinitionId(saveActionDefId);</b>
-	...</font></pre>
-
+	setText...
+	setToolTipText...
+	setImageDescriptor...
+	<b>setActionDefinitionId(&quot;org.eclipse.ui.file.save&quot;)</b>; 
+}
+	
+</font></pre>
 
 <p>(Note:&nbsp; The method name <b>setActionDefinitionID </b>could more
 appropriately be named <b>setCommandID</b>.&nbsp; The method name reflects the
@@ -100,18 +100,8 @@ original implementation of key bindings and uses outdated terminology.)</p>
 
 
 <p>By invoking <b>setActionDefinitionID</b>, the implementation action (<b>SaveAction</b>) is associated with
-the command id <b>saveActionDefId</b>.&nbsp; What is <b>saveActionDefId</b>?&nbsp;
-A quick look at the static field definitions in <b>WorkbenchActionBuilder</b>
-shows the following:</p>
-
-
-<pre><font color="#4444CC">private static final String saveActionDefId = &quot;org.eclipse.ui.file.save&quot;;</font></pre>
-
-
-<p>This constant defines the string ID that was used in the command definition
-markup.&nbsp; It is good practice to define constants for your action definitions so that
-they are easily referenced in code.&nbsp; </p>
-
+the command id that was used in the command definition markup. It is good practice to define constants for your action definitions so that
+they are easily referenced in code. </p>
 
 <p> If you define an
 action in an action set, then you typically do not need to
