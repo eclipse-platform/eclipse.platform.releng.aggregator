@@ -11,7 +11,11 @@
 package org.eclipse.test.internal.performance.tests;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -26,6 +30,7 @@ import junit.framework.TestCase;
 public class DBTests extends TestCase {
     
     private static final String SCENARIO_NAME_1= "testScenario1"; //$NON-NLS-1$
+    private static final String SCENARIO_NAME_2= "testScenario2"; //$NON-NLS-1$
     private static final String DBLOC= "testDBs"; //$NON-NLS-1$
     private static String DBNAME;
     private static final String DBUSER= "testUser"; //$NON-NLS-1$
@@ -35,6 +40,7 @@ public class DBTests extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
+        // generate a unique DB name
         DBNAME= "testDB_" + (new Date().getTime()/1000); //$NON-NLS-1$
         
         System.setProperty("eclipse.perf.dbloc", DBLOC + ";dbname=" + DBNAME + ";dbuser=" + DBUSER + ";dbpasswd=" + DBPASSWD); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -56,22 +62,26 @@ public class DBTests extends TestCase {
         assertEquals("|build=b0001||config=test||jvm=sun142|", PerformanceTestPlugin.getVariations().toExactMatchString()); //$NON-NLS-1$
         assertEquals("|build=base||config=test||jvm=sun142|", PerformanceTestPlugin.getAssertAgainst().toExactMatchString()); //$NON-NLS-1$
         
-		PerformanceMeter pm= new TestPerformanceMeter(SCENARIO_NAME_1);
+		PerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_1);
+		pm1.start();
+		pm1.stop();
+		pm1.commit();
+		pm1.dispose();
 		
-		pm.start();
-		pm.stop();
-		pm.commit();
+		PerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_2);
+		pm2.start();
+		pm2.stop();
+		pm2.commit();
+		pm2.dispose();
 		
-		pm.dispose();
+		//
 		
 		Variations v= new Variations("test", "b0001"); //$NON-NLS-1$ //$NON-NLS-2$
 		v.put("jvm", "sun142"); //$NON-NLS-1$ //$NON-NLS-2$
 		DataPoint[] points= DB.queryDataPoints(v, SCENARIO_NAME_1, null);
-		
 		assertEquals(1, points.length);
 		
 		DataPoint dp= points[0];
-		
 		Dim[] dimensions= dp.getDimensions();
 		assertEquals(2, dimensions.length);
 		
@@ -82,5 +92,22 @@ public class DBTests extends TestCase {
 		Scalar s2= dp.getScalar(TestPerformanceMeter.TESTDIM2);
 		assertNotNull(s2);	
 		assertEquals(1000, s2.getMagnitude());
+
+		//
+		Set dims= new HashSet();
+		dims.add(TestPerformanceMeter.TESTDIM2);
+		points= DB.queryDataPoints(v, SCENARIO_NAME_1, dims);
+		assertEquals(1, points.length);
+		dimensions= points[0].getDimensions();
+		assertEquals(1, dimensions.length);
+		Scalar s= points[0].getScalar(TestPerformanceMeter.TESTDIM2);
+		assertNotNull(s);	
+		assertEquals(1000, s.getMagnitude());
+		
+		//
+		List buildNames= new ArrayList();
+		DB.queryBuildNames(buildNames, new Variations("%", "%"), "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		assertEquals(1, buildNames.size());
+		assertEquals("b0001", buildNames.get(0)); //$NON-NLS-1$
     }
 }
