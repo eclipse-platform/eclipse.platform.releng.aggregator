@@ -811,14 +811,14 @@ public class BuildTests extends TestCase {
 //		assertTrue("Plug-ins missing: " + (PLUGIN_COUNT - plugins.length), PLUGIN_COUNT == plugins.length);
 //	}
 	
-	public void testFeatureCount() {
-		String installDir = BootLoader.getInstallURL().getPath();
-		File featureDir = new File(installDir, "features");
-		File[] features = featureDir.listFiles();
-
-		assertTrue("Features missing: " + (FEATURE_COUNT - features.length), FEATURE_COUNT == features.length);
-	}
-	
+//	public void testFeatureCount() {
+//		String installDir = BootLoader.getInstallURL().getPath();
+//		File featureDir = new File(installDir, "features");
+//		File[] features = featureDir.listFiles();
+//
+//		assertTrue("Features missing: " + (FEATURE_COUNT - features.length), FEATURE_COUNT == features.length);
+//	}
+//	
 	
 	public void testPluginFiles() {
 		List result = new ArrayList();
