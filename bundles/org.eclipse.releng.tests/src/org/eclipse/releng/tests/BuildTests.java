@@ -1,14 +1,13 @@
-/******************************************************************************
- * Copyright (c) 2003 IBM Corporation and others.
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
- * are made available under the terms of the Common Public License v1.0 
+ * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- ******************************************************************************/
-
+ *******************************************************************************/
 package org.eclipse.releng.tests;
 
 import java.io.BufferedReader;
@@ -49,7 +48,7 @@ public class BuildTests extends TestCase {
 	private static final String DEFAULT_CVS_TYPE = "-kkv";
 	
 	private Map cvsTypes;
-	private String[] copyrightLines;
+	private String[] javaCopyrightLines;
 	private long goodCopyrights = 0;
 	private long badCopyrights = 0;
 	private static final int HTML = 0;
@@ -104,11 +103,10 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 
-	private void testCopyright() {  // Not ready for primetime yet.
+	public void bogusTestCopyright() {  // Not ready for primetime yet.
 		
 		boolean result = false;
-		
-		initializeCopyrightLines();
+		initializeJavaCopyright();
 		
 		// String to use when running as an automated test.
 		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
@@ -128,7 +126,6 @@ public class BuildTests extends TestCase {
 		 String sourceDirectoryName = "d:\\sourceFetch";
 		
 		try {
-
 			BufferedWriter aLog = new BufferedWriter(new FileWriter(logFileName));
 			File rootDirectory = new File(sourceDirectoryName);
 			result = scanCopyrights(rootDirectory, aLog);
@@ -230,32 +227,20 @@ public class BuildTests extends TestCase {
 		cvsTypes.put("tif", CVS_BINARY);
 		cvsTypes.put("xls", CVS_BINARY);
 		cvsTypes.put("rsc", CVS_BINARY);
+		cvsTypes.put("jnilib", CVS_BINARY);
+		cvsTypes.put("a", CVS_BINARY);
 	}
 	
-	private void initializeCopyrightLines() {
-//		copyrightLines = new String[8];
-//		copyrightLines[0] = "/*******************************************************************************";
-//		copyrightLines[1] = " * Copyright (c) 2003 IBM Corporation and others.";
-//		copyrightLines[2] = " * All rights reserved. This program and the accompanying materials";
-//		copyrightLines[3] = " * are made available under the terms of the Common Public License v1.0";//		copyrightLines[4] = " * which accompanies this distribution, and is available at";
-//		copyrightLines[5] = " * http://www.eclipse.org/legal/cpl-v10.html";//		copyrightLines[6] = " *";
-//		copyrightLines[7] = " * Contributors:";
-		
-//		copyrightLines = new String[8];
-//		copyrightLines[0] = "/**********************************************************************";
-//		copyrightLines[1] = " * Copyright (c) 2000,2002 IBM Corporation and others.";
-//		copyrightLines[2] = " * All rights reserved.   This program and the accompanying materials";
-//		copyrightLines[3] = " * are made available under the terms of the Common Public License v0.5";
-//		copyrightLines[4] = " * which accompanies this distribution, and is available at";
-//		copyrightLines[5] = " * http://www.eclipse.org/legal/cpl-v05.html";
-//		copyrightLines[6] = " * ";
-//		copyrightLines[7] = " * Contributors: ";
-
-		copyrightLines = new String[4];
-		copyrightLines[0] = "/*";
-		copyrightLines[1] = " * (c) Copyright IBM Corp. 2000, 2001.";
-		copyrightLines[2] = " * All Rights Reserved.";
-		copyrightLines[3] = " */";
+	private void initializeJavaCopyright() {
+		javaCopyrightLines = new String[8];
+		javaCopyrightLines[0]="/*******************************************************************************";
+		javaCopyrightLines[0]=" * Copyright (c) 2000, 2003 IBM Corporation and others.";
+		javaCopyrightLines[0]=" * All rights reserved. This program and the accompanying materials ";
+		javaCopyrightLines[0]=" * are made available under the terms of the Common Public License v1.0";
+		javaCopyrightLines[0]=" * which accompanies this distribution, and is available at";
+		javaCopyrightLines[0]=" * http://www.eclipse.org/legal/cpl-v10.html";
+		javaCopyrightLines[0]=" * ";
+		javaCopyrightLines[0]=" * Contributors:";
 	}
 	
 	private boolean scanCVSKTag(File aDirectory, BufferedWriter aLog) {
@@ -322,10 +307,10 @@ public class BuildTests extends TestCase {
 		LineNumberReader aReader;
 		try {
 			aReader = new LineNumberReader(new FileReader(aFile));
-			for (int i = 0; i < copyrightLines.length; i++) {
+			for (int i = 0; i < javaCopyrightLines.length; i++) {
 				String aLine = aReader.readLine();
 				if (i > -1) {
-					if (!aLine.trim().toLowerCase().equals(copyrightLines[i].trim().toLowerCase())) {
+					if (!aLine.trim().toLowerCase().equals(javaCopyrightLines[i].trim().toLowerCase())) {
 						result = true;
 						aLog.write(aFile.getPath());
 						aLog.newLine();
