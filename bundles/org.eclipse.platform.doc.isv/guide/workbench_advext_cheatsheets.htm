@@ -13,9 +13,189 @@
 <h3>
 Cheat sheets</h3>
 <P >
-[This document is under construction.]
+Cheat sheets are special views that help guide the user through a series of complex tasks to achieve
+an overall goal.  For example, a cheat sheet could be used to help guide the user through all the steps needed to
+create, compile, and run a simple Java program.  Cheat sheets are defined using the
+<b><a href="../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetContent.html">org.eclipse.ui.cheatsheets.cheatSheetContent</a></b>
+extension point.  The cheat sheet content itself is defined in a separate file so that it can be more easily
+translated into other languages.
 </P>
-
+<h4>
+Contributing a cheat sheet</h4>
+<p>Contributing a cheat sheet is pretty straightforward.  Let's look at a cheat sheet contributed by the
+JDT for building a simple Java application.
+<pre><font color="#4444CC">
+&lt;extension point="org.eclipse.ui.cheatsheets.cheatSheetContent"&gt;
+	&lt;cheatsheet
+		name="%cheatsheet.helloworld.name"
+		contentFile="$nl$/cheatsheets/HelloWorld.xml"
+		id="org.eclipse.jdt.helloworld"&gt;
+		&lt;description>%cheatsheet.helloworld.desc&lt;/description&gt;
+	&lt;/cheatsheet>
+	...
+</font></pre>
+Much like other workbench contributions, a name, description, and id can be specified for the cheat
+sheet.  The name and description are shown when the user accesses the
+<b>Help&gt;Cheat Sheets...</b> list.  A category for the cheat sheet can also be defined if you want 
+to place several cheat sheets into a logical grouping.  
+</p>
+<p><img border="0" src="images/cheatsheet.jpg" alt="Cheat sheet dialog" border="0"></p>
+<h4>Cheat sheet items</h4>
+<p>
+The real work for cheat sheets is done in the content file.  The content file is an XML file that
+gives some overview information about the cheat sheet and then describes each step (called an <i>item</i> that
+the user will perform.  At its simplest, an item is just a detailed description of the step that the user should
+take.  However, an item can also specify an action that can be run to perform the step on behalf of the
+user.  Let's look at the content file (<tt>HelloWorld.xml</tt>) 
+for the Java cheat sheet.
+<pre><font color="#4444CC">
+&lt;?xml version="1.0" encoding="UTF-8" ?&gt; 
+&lt;cheatsheet title="Simple Java Application"&gt;
+	&lt;intro 
+		href="/org.eclipse.ui.cheatsheets.doc/tasks/tcheatst.htm"&gt;
+		&lt;description&gt;
+Welcome to the Hello, World Java tutorial.
+It will help you build the famous "hello world" application and try it out. You will create a java project, and a java class that will print "hello world" in the console when run.
+Let's get started!
+		&lt;/description&gt;
+&lt;/intro&gt;
+	&lt;item
+		href="/org.eclipse.platform.doc.user/concepts/concepts-4.htm"
+		title="Open the Java Perspective"&gt;
+		<b>&lt;action
+			pluginId="org.eclipse.ui.cheatsheets"
+			class="org.eclipse.ui.internal.cheatsheets.actions.OpenPerspective"
+			param1="org.eclipse.jdt.ui.JavaPerspective"/&gt;</b>
+		&lt;description&gt;
+Select Window-&gt;Open Perspective-&gt;Java in the menubar at the top of the workbench.
+This step changes the perspective to set up the Eclipse workbench for Java development.
+You can click the "Click to Perform" button to have the "Java" perspective opened automatically.
+		&lt;/description&gt;
+&lt;/item&gt;
+...
+</font></pre>
+The title and intro information are shown at the top of the cheat sheet.  Then, the items are described. 
+The first item for this cheat sheet describes how to open the Java perspective.  Better still, the <b>action</b>
+attribute specifies a class that can be used to run the action on behalf of the user.  The class must
+implement <a href="../reference/api/org/eclipse/jface/action/IAction.html"><b>IAction</b></a>.  This is rather
+convenient, as it allows you to reuse the action classes written for menu or toolbar contributions.
+Any necessary parameters can be passed to the action's run method using the <b>param<i>N</i></b> attributes.
+</p>
+<p>
+If your action needs to be aware of the cheat sheet and its state, you can specify a class that implements
+<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetAction.html"><b>ICheatSheetAction</b></a>.  
+In this case, the action will be passed a reference to the 
+<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetManager.html"><b>ICheatSheetManager</b></a>
+so that it can request additional information about the cheat sheet.
+</p>
+<p>
+Items do not have to define actions.  If your item must be performed manually by the user, you need not
+specify an action at all.  Below is the third step of the Java cheat sheet, which merely
+tells the user how to code the simple application.  When no action is specified, the item description
+must instruct the user to press the appropriate button after the task has been completed.
+<pre><font color="#4444CC">
+&lt;item
+	href="/org.eclipse.jdt.doc.user/tasks/tasks-54.htm"
+	title="Add a System.out.println line in your main method"&gt;
+	&lt;description&gt;
+Now that you have your HelloWorld class,
+In the "public static void main" method, add the following statement:  System.out.println("Hello world!"); and save your changes.  Press the "click when done" button below when finished.
+	&lt;/description&gt;
+&lt;/item&gt;
+</font></pre>
+Additional attributes control whether the item can be skipped completely and what document should be
+launched if the user requests help during the step.  See the 
+<b><a href="../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetContent.html">org.eclipse.ui.cheatsheets.cheatSheetContent</a></b>
+extension point documentation for a description of all of the attributes that can be defined inside
+a cheat sheet.
+</p>
+<h5>Subitems</h5>
+<p>
+Subitems may be defined to further organize the presentation of an item.  Unlike items, subitems do not have to
+be visited in any particular order.  Subitems may also define actions that automatically perform the subtask for
+the user.  Subitem actions are similar to item actions.
+</p>
+<h5>Conditional expressions and cheat sheet variables</h5>
+<p>
+Conditional expressions can be used to define cheat sheet elements whose content or behavior depends upon a
+particular condition being true.  Conditions are described in the <b>condition</b> element of a subitem
+using arbitrary string values that are matched
+against the <b>when</b> attribute for each choice.  Conditions typically reference cheat sheet
+variables using the form  <tt>${<i>var</i>}</tt>, where <i>var</i> refers to the name of a cheet sheet variable.
+A few simple examples will help demonstrate how conditional expressions work.
+</p>
+<p>
+<b>Conditional subitems</b> can be used to chose one subitem from a list of possible subitems.
+Only those subitems whose <b>when</b> attribute matches the condition attribute are included in the
+cheat sheet.  For example:
+<pre><font color="#4444CC">
+&lt;item ...&gt;
+	&lt;conditional-subitem condition="${v1}"&gt;
+		&lt;subitem when="a" label="Step for A." /&gt;
+		&lt;subitem when="b" label="Step for B." /&gt;
+	&lt;/conditional-subitem&gt;
+&lt;/item&gt;
+</pre></font>
+This item specifies two possible subitems that depend on the value of the variable <tt>v1</tt>.
+If the variable value is <tt>a</tt>, then the first subitem will be included.  If the variable value
+is <tt>b</tt>, then the second subitem will be included.  If the variable is neither value, it is considered
+an error.
+</p>
+<p>
+<b>Conditional actions</b> are similar to conditional subitems.  The <b>perform-when</b> element specifies
+a condition for performing one action among a list of possible actions.  The condition is described the same way,
+using an arbitrary string that often references a variable.  The action whose <b>when</b> attribute
+matches the condition is the one that will be performed.   For example:
+<pre><font color="#4444CC">
+&lt;item ...&gt;
+	&lt;perform-when condition="${v1}"&gt;
+		&lt;action when="a" class="com.example.actionA" pluginId-"com.example" /&gt;
+		&lt;action when="b" class="com.example.actionB" pluginId-"com.example" /&gt;
+	&lt;/perform-when&gt;
+&lt;/item&gt;
+</pre></font>
+The action to be performed is chosen based on the value of the <tt>v1</tt> variable.  If the variable
+value is neither <tt>a</tt> aor <tt>b</tt>, it is considered an error.
+</p>
+<h5>Repeated subitems</h5>
+<p><b>Repeated subitems</b> describe a subitem that can can expand into 0, 1, or more similar substeps.  The
+substeps are individualized using the special variable <tt>${this}</tt>.  This variable will be replaced by
+the values specified in the <b>values</b> attribute.  The values attribute is a string of values that are separated
+by commas.  A variable that expands into a list of values may be used in the values attribute.
+For example:
+<pre><font color="#4444CC">
+&lt;item ...&gt;
+	&lt;repeated-subitem values="${v1}"&gt;
+		&lt;subitem label="Step ${this}" /&gt;
+	&lt;/repeated-subitem&gt;
+&lt;/item&gt;
+</pre></font>
+If the value of the variable is <tt>1,b,three</tt>, then three subitems will appear in the cheat sheet, each
+having a unique label ("Step 1," "Step b," "Step three").  The variable can be used anywhere in the
+subitem description, such as the action class or parameter value.
+</p>
+<h4>
+Cheat sheet listeners</h4>
+<p>
+In some cases, you may want to keep another part of your UI up to date with the progress that is being
+made in a cheat sheet.  For example, you may have an editor that changes its position based on the
+user's current step in the cheat sheet.  In this case, a <b>listener</b> can be specified as an attribute of
+the cheatsheet.  The listener attribute must be the fully qualified name of a Java class that
+subclasses
+<a href="../reference/api/org/eclipse/ui/cheatsheets/CheatSheetListener.html"><b>CheatSheetListener</b></a>.  
+Listeners will receive notifications along with an 
+<a href="../reference/api/org/eclipse/ui/cheatsheets/ICheatSheetEvent.html"><b>ICheatSheetEvent</b></a> when there
+is a change in the cheat sheet's life cycle, such as when it opens, closes, or completes.  
+</p>
+<h4>
+Contributing attributes to an existing cheat sheet</h4>
+<p>
+The <b><a href="../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetItemExtension.html">org.eclipse.ui.cheatsheets.cheatSheetItemExtension</a></b>
+extension can be used to contribute arbitrary attributes to a pre-existing cheat sheet.  To use this mechanism, you can
+define any arbitrary attribute inside an item definition in the cheat sheet XML file.  The attribute name will be matched against any
+attributes contributed in extensions to <b><a href="../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetItemExtension.html">org.eclipse.ui.cheatsheets.cheatSheetItemExtension</a></b>.
+See the extension point documentation for more detail.
+</p>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 
 </BODY>
