@@ -13,7 +13,7 @@ package org.eclipse.test.internal.performance.db;
 import java.io.PrintStream;
 import java.util.HashMap;
 
-class Report {
+public class Report {
     
     private static final String LEFT= "l";  //$NON-NLS-1$
     private static final String RIGHT= "r";  //$NON-NLS-1$
