@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Implementing a search page</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Implementing a search page</H2>
+
+
+<p>When the user selects a resource and chooses the search command, the search
+plug-in launches a dialog containing pages for different kinds of content
+searches.&nbsp; These pages are contributed using the <a href="../reference/extension-points/org_eclipse_search_searchPages.html"><b>org.eclipse.search.searchPages</b></a>
+extension point.<p>The markup for contributing a search page is
+straightforward.&nbsp; The following example is the JDT plug-in's contribution
+of the Java search page:
+<pre><font color="#4444CC">&lt;extension point=&quot;org.eclipse.search.searchPages&quot;&gt;
+   &lt;page id=&quot;org.eclipse.jdt.ui.JavaSearchPage&quot;
+         icon=&quot;icons/full/obj16/jsearch_obj.gif&quot;
+         label=&quot;%JavaSearchPage.label&quot;
+         sizeHint=&quot;460,160&quot;
+	 extensions=&quot;java:90, jav:90&quot;
+	 showScopeSection=&quot;true&quot;
+	 <b>class</b>=&quot;org.eclipse.jdt.internal.ui.search.JavaSearchPage&quot;&gt;
+   &lt;/page&gt;
+&lt;/extension&gt;
+</pre></font>
+<p>The <b>class</b> that implements the
+search page must be specified.&nbsp; This class must implement the <a href="../reference/api/org/eclipse/search/ui/ISearchPage.html"><b>ISearchPage</b></a><b>
+</b>interface and typically extends <a href="../reference/api/org/eclipse/jface/dialogs/DialogPage.html"><b>DialogPage</b></a>.&nbsp;
+The <b>label</b> and <b>icon</b> that can be
+used to describe the search in the search dialog are also specified.&nbsp;
+Additional parameters control the size of the page and the location of the page
+within the search dialog.<p>The <b>extensions</b> attribute specifies the
+resources on which the search page can operate.&nbsp; It is formatted as a comma
+separated list of file extensions.&nbsp; Each file extension should be followed
+by a numeric weight value, where 0 is the lowest weight, separated by a
+colon.&nbsp; The weight value is a relative value used to allow the search
+infrastructure to find the search page most appropriate for a given resource.<p>If
+a search page can search all possible resources then &quot;*&quot; can be used.
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
+</BODY>
+</HTML>
