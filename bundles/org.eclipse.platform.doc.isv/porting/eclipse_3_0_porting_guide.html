@@ -50,8 +50,15 @@ similar):</p>
 </u>&lt;plugin ...&gt;<br>
 &nbsp;&nbsp;&nbsp; ...<br>
 &lt;/plugin&gt;</code>
-<p>When porting to 3.0, add the indicated line to the manifest of existing
-plug-ins and plug-in fragments. (The PDE plug-in migration tool adds this line.)</p>
+<p>When porting to 3.0, add the indicated line to the manifest of existing plug-ins 
+  and plug-in fragments. (The PDE plug-in migration tool adds this line.)</p>
+<p>If you do add this directive to a plugin.xml (manually or using PDE), the file 
+  must also be updated to explicitly list the plug-ins on which it depends. For 
+  example, prior to Eclipse 3.0 dependencies on org.eclipse.core.runtime and org.eclipse.core.boot 
+  were implicit. With 3.0, org.eclipse.core.boot is no longer needed and developers 
+  must choose org.eclipse.core.runtime or org.eclipse.core.runtime.compatibility 
+  (or neither) as appropriate.</p>
+<p></p>
 <h3>Restructuring of org.eclipse.ui plug-in</h3>
 <p>The org.eclipse.ui plug-in, which used to be the main Platform UI plug-in,
 now provides just the API and extension points for the generic (i.e.,
@@ -827,22 +834,14 @@ control over when the code is executed.</p>
 <p>The Eclipse 3.0 Platform Runtime is based on OSGi, necessitating changes to
 the structure of the two Platform Runtime plug-ins, org.eclipse.core.runtime and
 org.eclipse.core.boot.</p>
-<p>A new org.eclipse.core.runtime.compatibility plug-in provides an
-implementation bridge between the old and new APIs, and is the new home for some
-of the obsolete APIs formerly found in org.eclipse.core.runtime and
-org.eclipse.core.boot. Obsolete API will be deprecated in a future release in
-favor of the OSGi-based API, once the OSGi-based APIs have stabilized and
-matured. The new OSGi-based Eclipse Runtime API is available in the
-org.eclipse.core.runtime plug-in for early adopters wishing to take advantage of
-its new capabilities. Platform Runtime extension points were not affected by the
-restructuring.</p>
-<p>For 3.0, all plug-ins that reference API classes in the
-org.eclipse.core.runtime or org.eclipse.core.runtime.compatibility plug-ins must
-explicitly include &lt;import plugin=&quot;org.eclipse.core.runtime.compatibility&quot;/&gt;
-in the plug-in manifest. The org.eclipse.core.runtime.compatibility plug-in
-re-exports the API from org.eclipse.core.runtime, so this declaration makes the
-old and new API available. Explicit references to the org.eclipse.core.boot
-plug-in should be deleted from the plug-in manifest.</p>
+<p>A new org.eclipse.core.runtime.compatibility plug-in provides an implementation 
+  bridge between the old and new APIs, and is the new home for some of the obsolete 
+  APIs formerly found in org.eclipse.core.runtime and org.eclipse.core.boot. Obsolete 
+  API will be deprecated in a future release in favor of the OSGi-based API, once 
+  these new APIs have stabilized and matured. The new OSGi-based Eclipse Runtime 
+  API is available in the org.eclipse.core.runtime plug-in for early adopters 
+  wishing to take advantage of its new capabilities. Platform Runtime extension 
+  points were not affected by the restructuring.</p>
 <p>N.B. The Eclipse 3.0 runtime automatically detects pre-3.0 plug-ins (by the 
   absence of the aforementioned &lt;?eclipse...?&gt; line in the plug-in manifest) 
   and automatically compensates for these changes to the Platform Runtime. This 
