@@ -1,0 +1,201 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Setting the Java classpath</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Setting the Java build path</H2>
+<P>
+
+This section describes how to set the Java build path, i.e. the classpath used for building <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html">Java project</a></b>.
+A classpath is an array of <b><a href="../reference/api/org/eclipse/jdt/core/IClasspathEntry.html">classpath entries</a></b> accounting for available types either in source 
+or binary form, which are used in order to find available types. The ordering of these entries defines the precedence of the available types.
+
+<P>
+The Java build path also governs the structure of a Java project element, since all <b><a href="../reference/api/org/eclipse/jdt/core/IPackageFragmentRoot.html">package fragment roots</a></b>
+directly derived from the Java build path (each entry maps to one or more package fragment roots, see <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#getPackageFragmentRoots(org.eclipse.jdt.core.IClasspathEntry)">
+getPackageFragmentRoots</a></b>).
+
+<P>
+This section does not cover the Java runtime path which can be defined separately, see related section on how to <b><a href="../guide/jdt_api_run">run Java programs</a></b>.
+
+<h3>
+Changing the build path</h3>
+<P>
+You can programmatically change a project's build path using <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setRawClasspath(org.eclipse.jdt.core.IClasspathEntry[], org.eclipse.core.runtime.IProgressMonitor)>setRawClasspath">
+setRawClasspath</a></b> on the corresponding project Java element, e.g.
+
+	<font color='#4444CC'><pre>
+	IProject project = ... // get some project resource
+	IJavaProject javaProject = JavaCore.create(project);
+	IClasspathEntry[] newClasspath = ...;
+	javaProject.setRawClasspath(newClasspath, someProgressMonitor);
+	</pre></font>
+	
+<P>
+Note that also exists a variant of <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setRawClasspath(org.eclipse.jdt.core.IClasspathEntry[], org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)">setRawClasspath</a></b>
+which allows to define both at the same time, the Java build path and the project <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#getOutputLocation()">output location</a></b>.
+
+<P>
+The Java build path is persisted into a file named '.classpath' under the project location. The purpose of this file is to provide a mean for sharing Java build path settings with others through 
+some source code repository. In particular, this file should not be manually edited, since it may get corrupted.
+ 
+<H3>
+Classpath entries</H3>
+<P>
+Classpath entries can be defined using factory methods defined on <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">JavaCore</a></b>, so as to reference 
+any of the following:
+
+<ul>
+<li><b>a source folder</b> - 
+a folder containing source compilation units organized under their corresponding package directory structure. Source folders are used to better structure 
+sources in large projects, and may only be referenced within the containing project. The corresponding factory method is 
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#newSourceEntry(org.eclipse.core.runtime.IPath)">newSourceEntry</a></b>.
+<P>
+Inside a given source folder, each compilation unit is expected to be nested in the appropriate folder structure according to its package statement, e.g. unit 'X.java' in package 'p1' 
+must be located inside subfolder 'p1' of a source folder.
+<P>
+It is possible to use multiple source folders, as long as they don't overlap. When a build action occurs, all generated classfiles are generated into the project output location (also see 
+b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setOutputLocation(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)">setOutputLocation</a></b>).
+
+<P>
+<br>
+<P>
+e.g. entry denoting the source folder 'src' of project 'MyProject':
+	<font color='#4444CC'><pre>
+  IClassPathEntry srcEntry = JavaCore.newSourceEntry(new Path( "/MyProject/src");
+	</pre></font>
+</li>
+<li><b>a binary library</b> - either a class file folder (contained inside the workspace) or a class file archive file (contained either inside or outside the workspace).
+Archive libraries can be attached source archives, which will then be automatically extracted when asking a class file element  for
+<b><a href="../reference/api/org/eclipse/jdt/core/ISourceReference.html#getSource()">getSource</a></b>.
+The factory method for libraries is 
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#newLibraryEntry(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, boolean)">newLibraryEntry</a></b>.
+<P>
+<br>
+<P>
+e.g. entry denoting the class file folder 'lib' of  'MyProject':
+	<font color='#4444CC'><pre>
+  IClassPathEntry libEntry = JavaCore.newLibraryEntry(
+    new Path( "/MyProject/lib"), 
+    null, //no source
+    null, //no source
+    false); //not exported
+	</pre></font>
+e.g. entry denoting an external JAR with source attachment:
+	<font color='#4444CC'><pre>
+  IClassPathEntry libEntry = JavaCore.newLibraryEntry(
+    new Path( "d:/lib/foo.jar"), // library location
+    new Path("d:/lib/foo_src.zip"), //source archive location
+    new Path("src"), //source archive root path
+    true); //exported
+	</pre></font>
+</li>
+<li><b>a prerequisite project</b> - another Java project as a whole. A given project always contribute its source folders to dependent projects (i.e. projects which are prerequisiting the given project on their
+classpath). It can also optionally contribute any of its classpath entries which are tagged as exported (see factory methods supporting extra boolean argument 'isExported').
+This means that in addition to contributing its source to its dependents, a project will also export all classpath entries tagged as such, and thus better hide its internals to dependents. 
+For instance, a given project may choose to switch from using a source folder to instead exporting a library without requiring dependent projects to change their classpath in consequence.
+The factory method for project prerequisite is 
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#newProjectEntry(org.eclipse.core.runtime.IPath, boolean)">newProjectEntry</a></b>.
+<P>
+<br>
+<P>
+e.g. entry denoting a prereq project 'MyFramework', implicitly exported to further dependent projects:
+	<font color='#4444CC'><pre>
+  IClassPathEntry prjEntry = JavaCore.newProjectEntry(new Path( "/MyFramework"), true); //exported
+	</pre></font>
+</li>
+<li><b>an indirect reference to a project or library, using some classpath variable</b> - can target either projects or libraries, which location is dynamically resolved relatively to a
+classpath variable, which is specified as the first segment of the entry path. The rest of the entry path is then appended to the resolved variable path.
+The factory method for project prerequisite is 
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#newVariableEntry(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath)">newVariableEntry</a></b>.
+<P>
+Classpath variables are global to the workspace, and can be rmanipulated through JavaCore methods 
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getClasspathVariable(java.lang.String)">getClasspathVariable</a></b> and
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathVariable(java.lang.String, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"> setClasspathVariable </a></b>.
+<P>
+It is possible to register an automatic <b><a href="../reference/api/org/eclipse/jdt/core/ClasspathVariableInitializer.html">classpath variable initializer</a></b>
+which will be lazily invoked through the extension point "org.eclipse.jdt.core.classpathVariableInitializer" when the variable need to be bound.
+<P>
+<br>
+<P>
+e.g. entry denoting a library indirectly referred to using a variable 'HOME', where source attachment is also defined using variables 'SRC_HOME' and 'SRC_ROOT' :
+	<font color='#4444CC'><pre>
+  IClassPathEntry varEntry = JavaCore.newVariableEntry(
+    new Path("HOME/foo.jar"), // library location
+    new Path("SRC_HOME/foo_src.zip"), //source archive location
+    new Path("SRC_ROOT"), //source archive root path
+    true); //exported	
+  JavaCore.setClasspathVariable("HOME", new Path("d:/myInstall"), null); // no progress
+	 </pre></font>
+</li>
+<li><b>entry denoting a classpath container</b> - an indirect reference to a structured set of project or libraries. Like classpath variables, 
+<b><a href="../reference/api/org/eclipse/jdt/core/IClasspathContainer.html">classpath containers</a></b>
+are dynamically resolved, but they can also have distinct values per project and provide additional information about what they represent (name, kind, description, ...).
+<P>
+Classpath containers are intended to be used to describe more complex project and library aggregates.
+<P>
+Classpath containers have project specific values, and can be rmanipulated through JavaCore methods 
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getClasspathContainer(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)">getClasspathContainer</a></b> and
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathVariable(java.lang.String, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"> setClasspathVariable </a></b>.
+<P>
+It is possible to register an automatic <b><a href="../reference/api/org/eclipse/jdt/core/ClasspathContainerInitializer.html">classpath container initializer</a></b>
+which will be lazily invoked through the extension point "org.eclipse.jdt.core.classpathContainerInitializer" when the container need to be bound.
+
+<P>
+<br>
+<P>
+e.g. entry denoting a system class library container:
+	<font color='#4444CC'><pre>
+  IClassPathEntry varEntry = JavaCore.newContainerEntry(
+    new Path("JDKLIB/default"), // container 'JDKLIB' + hint 'default'
+    false); //not exported	
+	                             
+  JavaCore.setClasspathContainer(
+    new Path("JDKLIB/default"), 
+    new IJavaProject[]{ myProject }, // value for 'myProject'
+      new IClasspathContainer[] {
+        new IClasspathContainer() {
+          public IClasspathEntry[] getClasspathEntries() {
+            return new IClasspathEntry[]{ 
+              JavaCore.newLibraryEntry(new Path("d:/rt.jar"), null, null, false);
+             }; 
+          }
+          public String getDescription() { return "Basic JDK library container"; }
+          public int getKind() { return IClasspathContainer.K_SYSTEM; }
+          public IPath getPath() { return new Path("JDKLIB/basic"); }
+		}			
+      }
+    }, 
+    null);	                             
+	 </pre></font>
+</li>
+</ul>
+
+<P>
+
+<H2>
+Classpath resolution</H2>
+
+Due to the presence of dynamically bound entries (classpath variables and containers), JDT Core distinguishes the notion of raw and resolved classpath. The raw classpath is the one originally
+set on the Java project using 
+<b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setRawClasspath(org.eclipse.jdt.core.IClasspathEntry[], org.eclipse.core.runtime.IProgressMonitor)">setRawClasspath</a></b>,
+and can be further queried by asking the project for
+<b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#getRawClasspath()">getRawClasspath</a></b>.
+
+<P>
+It is also possible to query for the resolved classpath of a project, using 
+<b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#getResolvedClasspath(boolean)">getResolvedClasspath</a></b>. 
+This operation will automatically trigger initialization of involved variable(s) and/or container(s)  if necessary. Note that many Java Model operations
+will implicitly cause the Java build path to be resolved, e.g. computing a project package fragment roots requires the build path to be resolved.
+
+<P>&nbsp;<a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved." border="0"></a>
+</P>
+</BODY>
+</HTML>
