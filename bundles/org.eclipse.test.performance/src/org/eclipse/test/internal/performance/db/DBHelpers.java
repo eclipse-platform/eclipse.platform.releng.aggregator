@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.eclipse.test.internal.performance.InternalDimensions;
+import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 
 
@@ -40,14 +42,19 @@ public class DBHelpers {
         //db.dumpSizes();
 		//db.dumpAll(ps);
         //db.selectDistinctBuildNames(ps);
-        db.countScalars("N200409300010");
+        //db.countScalars("N200409300010");
         //db.removeScenarios("%C:\\buildtest%");
         //db.selectScenarios(ps, "%C:\\buildtest%");
         //db.removeBuild("N200409162014");
-		//db.removeDimension(InternalDimensions.USER_OBJECTS);
+		//db.removeDimension(InternalDimensions.BYTES_READ);
 		//db.countDimension(InternalDimensions.USER_TIME);
-		//db.getRefData("3.1M1_200409212000", "org.eclipse.jdt.text.tests.performance.RevertJavaEditorTest#testRevertJavaEditor()");
-        
+//		db.getRefData("3.1M1_200409212000", "org.eclipse.jdt.text.tests.performance.RevertJavaEditorTest#testRevertJavaEditor()");
+//		System.out.println("time: " + ((System.currentTimeMillis()-start)/1000.0));
+//		
+//		start= System.currentTimeMillis();
+		DataPoint[] points= DB.queryDataPoints("relengbuildwin2", "3.1M1_200409212000", "org.eclipse.jdt.text.tests.performance.RevertJavaEditorTest#testRevertJavaEditor()", new Dim[] {InternalDimensions.CPU_TIME}); //$NON-NLS-1$ //$NON-NLS-2$
+		System.out.println("dps: " + points.length);
+		
         System.out.println("time: " + ((System.currentTimeMillis()-start)/1000.0));
         
         if (ps != System.out)
@@ -55,7 +62,7 @@ public class DBHelpers {
     }
 
     private void removeDimension(Dim dim) throws SQLException {
-        PreparedStatement q= fConnection.prepareStatement("delete from SCALAR where SCALAR.DIM_ID = ? and SCALAR.DATAPOINT_ID < 55000 "); //$NON-NLS-1$
+        PreparedStatement q= fConnection.prepareStatement("delete from SCALAR where SCALAR.DIM_ID = ?"); //$NON-NLS-1$
         q.setInt(1, dim.getId());
         q.executeUpdate();
         q.close();
@@ -71,6 +78,7 @@ public class DBHelpers {
     }
     
     private void getRefData(String build, String scenario) throws SQLException {
+        
         /*
         PreparedStatement q= fConnection.prepareStatement("select ID from SCENARIO where NAME = ?");
         q.setString(1, scenario);
@@ -78,7 +86,7 @@ public class DBHelpers {
         
         /*
         PreparedStatement q= fConnection.prepareStatement("select count(*) from SAMPLE where SCENARIO_ID = ?");
-        q.setInt(1, 403);
+        q.setInt(1, 373);
         */
         
         /*
@@ -97,16 +105,33 @@ public class DBHelpers {
         q.setString(1, build);
         q.setString(2, scenario);
         */
+        
+        /*
         PreparedStatement q= fConnection.prepareStatement("select count(*) from SCALAR, DATAPOINT, CONFIG, SAMPLE, SCENARIO where SCALAR.DATAPOINT_ID = DATAPOINT.ID and DATAPOINT.SAMPLE_ID = SAMPLE.ID and CONFIG.ID = SAMPLE.CONFIG_ID and SAMPLE.SCENARIO_ID = SCENARIO.ID and CONFIG.BUILD = ? and SCENARIO.NAME = ?");
         q.setString(1, build);
         q.setString(2, scenario);
-       
+        */
+        
+        PreparedStatement q= fConnection.prepareStatement("select DATAPOINT.ID from DATAPOINT, CONFIG, SAMPLE, SCENARIO where DATAPOINT.SAMPLE_ID = SAMPLE.ID and CONFIG.ID = SAMPLE.CONFIG_ID and SAMPLE.SCENARIO_ID = SCENARIO.ID and CONFIG.BUILD = ? and SCENARIO.NAME = ?");
+        q.setString(1, build);
+        q.setString(2, scenario);
+
+        PreparedStatement q2= fConnection.prepareStatement("select SCALAR.DIM_ID, SCALAR.VALUE from SCALAR where SCALAR.DATAPOINT_ID = ?");
 
         ResultSet set= q.executeQuery();
         while (set.next()) {
-            System.out.println(" " + set.getInt(1));
+            int datapoint_id= set.getInt(1);
+            q2.setInt(1, datapoint_id);
+            ResultSet set2= q2.executeQuery();
+            while (set2.next()) {
+                //System.out.print(set2.getInt(1));
+                //System.out.println(" " + set2.getBigDecimal(2));
+            }
+            set2.close();
         }
-        
+        set.close();
+        q.close();
+        q2.close();
     }
 
     private void countScalars(String build) throws SQLException {
