@@ -15,7 +15,7 @@ Documents and partitions
 <p>The platform text support
     defines a generic document model for text and provides a viewer that
     displays text using this model.&nbsp;We will start by looking at the Java
-editor example and how it structures its information.&nbsp; We will not focus on
+editor example and how it uses this model.&nbsp; We will not focus on
 the basic mechanics of registering an editor extension, since we've already seen
 this in the section discussing <a href="workbench_basicext_editors.htm"><b>org.eclipse.ui.editors</b></a>.&nbsp;
 Instead, we'll look at the specifics of how the editor class is implemented.</p>
@@ -27,8 +27,9 @@ which describes the object being edited.</p>
 <p>The Java editor example opens when the user opens a file with the &quot;*.jav&quot;
 extension.&nbsp; In this case, the input to the editor is an <a href="../reference/api/org/eclipse/ui/IFileEditorInput.html"><b>IFileEditorInput</b></a>.&nbsp;
 The platform text framework
-assumes little about the editor input itself.&nbsp; It is concerned with
-defining a definition for the presentation model of the input, so that it can
+assumes little about the editor input itself.&nbsp; It works with a presentation model,
+an <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>,
+for the input, so that it can
 effectively display and manipulate different sections of the text.</p>
 <p>This means that your editor must provide a way
 to map from its expected domain model (the editor input) to the presentation
@@ -50,12 +51,13 @@ follows:</p>
          id=&quot;org.eclipse.ui.examples.javaeditor.JavaDocumentProvider&quot;&gt;
    &lt;/provider&gt;
 &lt;/extension&gt;</font></pre>
-</font><p>The workbench manages the details of creating the necessary document
-provider instance when the user opens a file of the appropriate extension.&nbsp;
-Note that the document provider instance is shared among different editors.</p>
-<p>Another way to associate a document provider with an editor is to let the
-plug-in itself manage the document provider.&nbsp; This is usually done in the
-plug-in class.&nbsp; When an an input element is set into an editor, the editor
+</font><p>When the user opens a file with the specified extension, the workbench manages the details of creating the necessary document
+provider instance.&nbsp; The workbench creates a document provider instance only
+once and shares this instance among different editors.</p>
+<p>It is not required that your plug-in use this extension point to register its
+document provider.&nbsp; Rather, it is a convenience.&nbsp; Another way to associate a document provider with an editor is to let
+your plug-in itself manage the document provider.&nbsp; This is usually done in
+your plug-in class.&nbsp; When an input element is set into your editor, the editor
 asks its plug-in class for the appropriate document provider.&nbsp; The plug-in
 can manage the creation and reference to the document provider.&nbsp; This
 technique may be preferable when there is special initialization or other
@@ -63,7 +65,7 @@ processing involved with the document provider.&nbsp; See <b>ClassFileEditor</b>
 in the JDT tooling for an example.&nbsp;</p>
 <p>Once the proper document provider is associated with an editor, its main task
 is to create a document from the file input and configure an appropriate object
-for dividing the document up into <b>partitions</b>.&nbsp;&nbsp;</p>
+for dividing the document up into partitions.&nbsp;&nbsp;</p>
 <h4>Partitions</h4>
 <p>Let's look at documents and partitions in the <b>JavaDocumentProvider</b>.&nbsp;
 When a document is created, an <a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>IDocumentPartitioner</b></a>
@@ -78,11 +80,13 @@ is created and set into the document.&nbsp;&nbsp;</p>
 	return document;
 }</font></pre>
 <p>The partitioner is responsible for dividing the document into
-    non-overlapping partitions, or regions.&nbsp; In the case of the Java editor
+    non-overlapping partitions, or regions.&nbsp; A region (<a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>ITypedRegion</b></a>)
+is useful for treating different sections of the document differently with
+respect to features like syntax highlighting or formatting.</p>
+<p> In the case of the Java editor
 example, the document is divided into partitions that represent the javadoc
-comments, multi line comments, and everything else.&nbsp; Each partition is assigned a
-content type and document positions are remembered so that the text partitions
-can be updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
+comments, multi line comments, and everything else.&nbsp; Each region is assigned a
+content type and its position in the document.&nbsp; Positions are updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
 <h4>Rule based document partitioning</h4>
 <p>It is up to each editor to determine the appropriate implementation for a
 document partitioner.&nbsp; Support is provided in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
@@ -128,9 +132,11 @@ line comments, and&nbsp; words.&nbsp; This is done in the scanner's constructor:
 <h4>Annotation models</h4>
 
 <p>Besides providing an appropriate document for an editor input, another
-important task of a document provider is to provide an appropriate <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
-for an editor input.&nbsp; This model is used for annotating the text in the
-editor as appropriate for its content.&nbsp;&nbsp; We'll look at annotations and
+important task of a document provider is to supply an appropriate <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
+ to use with an editor input.&nbsp; This model is used to display annotations
+about the text in a vertical ruler.&nbsp; By letting the document provider
+supply the model, your editor can use a model appropriate for the type of
+content.&nbsp; We'll look at annotations and
 how they are presented more closely in the next section.</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
