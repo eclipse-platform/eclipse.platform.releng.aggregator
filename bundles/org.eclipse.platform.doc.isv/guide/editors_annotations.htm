@@ -12,26 +12,29 @@ Source viewers
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H2>Source viewers</H2>
-&lt;in progress&gt;
-<p>describe a source viewer configuration, source viewers.&nbsp; Their primary
-purpose is to allow you to define and display annotations for your text....</p>
+The platform text framework provides user interface utilities that correspond to
+its document presentation model.&nbsp; Most of the configuration for the
+presentation occurs inside the editor itself and its corresponding text viewer
+(see <a href="jface_viewers.htm">Viewers</a> if you are not familiar with the
+concept of a viewer.) A <b><a href="../reference/api/org/eclipse/jface/text/TextViewer.html">TextViewer</a></b>
+handles all of the low level details of mapping the document model and its
+partitions into the colored and formatted text that a user sees.
+<p>For source code style editors, the framework provides a <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>.&nbsp;
+A source viewer introduces the notion of a vertical ruler on the left side of
+the text that displays annotations for the text.&nbsp; This viewer is used
+throughout the <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>
+hierarchy.&nbsp; The package <b><a href="../reference/api/org/eclipse/jface/text/source/package-summary.html">org.eclipse.jface.text.source</a></b>
+ defines this viewer and the other classes supporting annotation presentation.</p>
 <h3>Annotations and rulers</h3>
-<p>We've seen that a document provider is responsible for supplying an
-appropriate <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
-for its documents.&nbsp; Let's look at some of the classes in the <b><a href="../reference/api/org/eclipse/jface/text/source/package-summary.html">org.eclipse.jface.text.source</a></b>
-package that provide support for annotations.</p>
-<p>A specialized text viewer, called a source viewer, is provided in order to
-support visual text annotations in a vertical ruler to the left of the source
-code.</p>
-<p><a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
-- defines a generic model used by a ruler to show annotations.&nbsp; The model
-holds annotations, knows their text position, and listens for changes &nbsp;&nbsp;</p>
+<p>A document provider provides a model for the annotations, <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
+in addition to a document&nbsp; its documents.&nbsp; The model is in charge of
+keeping the annotations, enumerating them on request, and listening for text
+changes in order to keep the annotations up to date with the text.&nbsp;&nbsp;</p>
 <p><b><a href="../reference/api/org/eclipse/ui/texteditor/MarkerAnnotationModel.html"> MarkerAnnotationModel</a></b>
-- defines a model for annotations that represent a marker on a resource in the
+ defines a model for annotations that represent a marker on a resource in the
 workspace.&nbsp; (See <a href="resAdv_markers.htm">Resource markers</a> for more
-information on markers.)</p>
-<h4>Text annotations </h4>
-<p>SourceViewerDecorationSupport takes care of this.</p>
+information on markers.)&nbsp; This is best understood by examining the Java
+editor example and its use of rulers and annotations.</p>
 <h4>Vertical ruler</h4>
 <p>override createVerticalRuler in edtior class (explain TextEditor
 implementation)</p>
@@ -39,10 +42,28 @@ implementation)</p>
 <p>override createSourceViewer - explain TextEditor impl.&nbsp;
 IAnnotationAccess provides info about annotations.&nbsp; Must be
 extended/replaced if a custom annotation model is used.</p>
+<h4>Text annotations </h4>
+<p>SourceViewerDecorationSupport takes care of this.</p>
 <h4>Registering new annotations</h4>
 <p>other plug-ins can contribute extensions (see plugin.xml of the text
 editor).&nbsp; AnnotationPreference implements the set of annotations that can
 be extended.&nbsp; Can override this if not interested.</p>
+<h3>Source viewer configurations</h3>
+<p><b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+implements all of the details for presenting the rulers and keeping annotations
+up to date.&nbsp; The framework is designed so that you do not need to
+understand these details and thus should not subclass <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>.&nbsp;
+Instead, you focus on deciding which pluggable editing functionality should be
+provided by your viewer.&nbsp; This is done using a <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a></b>.&nbsp;
+</p>
+<p>A source viewer configuration is responsible for providing the implementation
+objects for pluggable and configurable functionality, such as text formatting,
+syntax highlighting, and text hover.&nbsp;&nbsp; Your editor need only supply
+its own configuration class.</p>
+<p>In the Java editor example....</p>
+<p>Now we will look at some of these pluggable functions and how they are
+customized for a particular editor.</p>
+<p>&nbsp;</p>
 <p>&nbsp; </p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
