@@ -13,8 +13,8 @@
 <body>
 
 <h1>Eclipse 3.0 Porting Guide</h1>
-<p>Draft for 3.0 M8<br>
-  Last revised February 26, 2004</p>
+<p>Draft for 3.0 M9<br>
+Last revised April 19, 2004</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -856,17 +856,27 @@ org.eclipse.core.boot.</p>
   plugin=&quot;org.eclipse.core.runtime.compatibility&quot;/&gt; in the plug-in 
   manifest or ensure that the Plugin class defines the default constructor.</p>
 <h3>URL Stream Handler extensions</h3>
-<p>The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension
-point was changed to use the URL Stream Handler service provided by OSGi. The
-OSGi support is superior to the one in Eclipse 2.1, and correctly handles
-dynamic handlers. Because of various design issues with the base Java URL
-handler mechanism, URLStreamHandlers registered with the OSGi handler service
-must implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>.</p>
-<p>The change affects plug-ins that contribute extensions to the <tt>org.eclipse.core.runtime.urlHandlers</tt>
-extension point. Formerly, the main class had to implement <tt>java.net.URLStreamHandler</tt>.
-It needs to be updated to implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>
+<p><strong>Who is affected:</strong> Plug-ins that contribute extensions to
+the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension point. </p>
+<p><strong>Description:</strong> The contract for the <tt>org.eclipse.core.runtime.urlHandlers</tt> extension
+  point was changed to use the URL Stream Handler service provided by OSGi. The
+  OSGi support is superior to the one in Eclipse 2.1, and correctly handles
+  dynamic handlers. Because of various design issues with the base Java URL
+  handler mechanism, URLStreamHandlers registered with the OSGi handler service
+  must implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>.</p>
+<p><strong>Action required:</strong> Formerly, the handler class had to implement <tt>java.net.URLStreamHandler</tt> and
+  extend the urlHandlers extension point. The extension point is no longer supported
+  and the handler must be updated to implement <tt>org.osgi.service.url.URLStreamHandlerService</tt>
 interface. The OSGi framework provides an abstract base class (<tt>org.osgi.service.url.AbstractURLStreamHandlerService</tt>)
-that can be subclassed.</p>
+that can be trivially subclassed to fill this role. </p>
+<p>Instead of registering the
+  handler using an extension point, plug-ins must now do so by registering their
+  handler as a service. For example, </p>
+<pre>    Hashtable properties = new Hashtable(1);
+    properties.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] {MyHandler.PROTOCOL});
+    String serviceClass = URLStreamHandlerService.class.getName();
+    context.registerService(serviceClass, new MyHandler(), properties);
+</pre>
 <h3>Classload order</h3>
 <p><b>Who is affected:</b> Plug-ins which supply packages provided which are
 also supplied by other plug-ins. A very limited number of plug-ins are affected
@@ -905,26 +915,6 @@ SecureClassloaders. As such, they always had a protection domain set. In Eclipse
 domain if Java security is turned on (not the normal case).</p>
 <p><b>Action required:</b> The action required will depend on the scenario in
 which the plug-in is using the protection domain.</p>
-<h3>Default package content cannot be shared</h3>
-<p><b>Who is affected:</b> Plug-ins which expect to use types or resources in
-the default package of another plug-in. The use of the default package is very
-rare. The only uses we have seen is where test suites use the default package
-and <tt>getResource()</tt> to access test data.</p>
-<p><b>Description:</b> The new Eclipse runtime allows plug-ins to contribute
-more classpath information. This information is used to optimize class loading
-such that searching arbitrarily long prerequisite chains is not required. The
-technique used for specifying this information does not allow for the sharing of
-the default package. As such, a plug-in's class loader is able to see the
-default package in its own classpath but not in that of its prerequisite
-plug-ins.</p>
-<p><b>Action required:</b> Plug-in developers should address this by moving such
-files to non-root directories on their classpath. Note that moving them to say <tt>icons/</tt>
-in the jar does not particularly help because the package &quot;icons&quot;
-would typically be exported and would surely conflict with some other plug-in
-doing the same. Also note that Java package naming rules do not allow for
-package segments which contain whitespace. The best approach is to put the files
-in a real, unique, package (or remove such files from the classpath and access
-them via the new <tt>Bundle.getEntry()</tt> API).</p>
 <h3>PluginModel object casting</h3>
 <p><b>Who is affected:</b> Plug-ins which cast objects of type IPlugin* to
 Plugin*Model. Even though the relationship between these interfaces and the
@@ -942,17 +932,18 @@ to maintain the implementation relationship present in 2.1.</p>
 <p><b>Action required:</b> Developers currently relying on this non-API
 relationship will need to rework their code according to their usecase. More
 information on this is given in the recommended changes section of this
-document.</p>
+document and in the Javadoc for the related classes and methods.</p>
 <h3>ILibrary implementation incomplete</h3>
 <p><b>Who is affected:</b> User of <tt>org.eclipse.core.runtime.ILibrary</tt>.</p>
 <p><b>Description:</b> The new runtime maintains the classpath entries in a
 different and incompatible form from Eclipse. As a result, the compatibility
 layer is unable to correctly model the underlying OSGi structures as ILibrary
-objects.</p>
+objects. The runtime's compatibility support creates ILibrary objects but must
+  assume default values for everything except the library's path.</p>
 <p><b>Action required:</b> Users of ILibrary should consider accessing the
 desired header values (e.g., <tt>Bundle-Classpath</tt>) from the appropriate
 Bundle (see <tt>Bundle.getHeaders()</tt>) and using the <tt>ManifestElement</tt>
-helper class to interpret the entries.</p>
+helper class to interpret the entries. See the class Javadoc for more details.</p>
 <h3>Invalid assumptions regarding the form of URLs</h3>
 <p><b>Who is affected:</b> Plug-ins which make assumptions regarding their
 installation structure, location and the local file system layout.</p>
@@ -1005,6 +996,20 @@ Factory).</tt></p>
   has been moved as well.</p>
 <p><b>Action required:</b> Users of this method should use the same method on 
   the class <tt>org.eclipse.core.runtime.model.PluginRegistryModel</tt>.</p>
+<h3>Plug-in libraries supplied by fragments</h3>
+<p><strong>Who is affected:</strong>
+  Plug-ins which specify code on their classpath but do not supply that code (i.e.,
+it is supplied by a fragment).  </p>
+<p><strong>Description:</strong> The new runtime must convert plug.xml files
+  to manifest.mf files. This is done through a straight mechanical transformation
+  and an analysis of the jars listed and supplied by the plug-in. In the case
+  where a plug-in specifies a jar on its classpath but does not supply the jar,
+  there is no code to analyze and the plug-in convertor cannot generate a correct
+  manifest.mf. The SWT plug-in is in this situation.</p>
+<p><strong>Action required:</strong> Providers of such plug-ins must either change to supply the
+  appropriate jar in the plug-in itself or hand craft/maintain a META-INF/MANIFEST.MF
+  file for their plug-in. Typically this can be done using PDE to get the initial
+  manifest and then adding in the appropriate Provide-Package header.</p>
 <h3>Changes to build scripts</h3>
 <p><b>Who is affected:</b> Developers maintaining scripts (e.g., Ant build.xml
 files) which define classpaths containing runtime related jars and class
