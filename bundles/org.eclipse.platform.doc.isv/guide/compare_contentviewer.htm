@@ -26,49 +26,63 @@ Simple content viewers</h3>
 A <b>content viewer</b> is used in places where only a single input is available and therefore
 no compare is necessary.&nbsp; A typical example for this is the &quot;<b>Restore from Local
 History</b>&quot; function.&nbsp; The <a href="../reference/extension-points/org_eclipse_compare_contentViewers.html"><b>org.eclipse.compare.contentViewers</b></a>
- extension point allows you to define a specialized content viewer that does not
-compare its inputs.</p>
-
-
-<h3>
-Content merge viewers</h3>
-
-
-<p>
-	A <b> content merge viewer </b> performs a two-way or three-way compare of its inputs
-and presents the result
-	side-by-side or in any other suitable way.&nbsp; The viewer lets the user merge between the inputs.
-    Content merge viewers are common for text or images.</p>
-
-
-<p>If the standard merge viewers are not appropriate for your plug-in's
-function, you may choose to implement your own content viewer.&nbsp; Your
-content viewer should be registered with the platform using the
-	<a href="../reference/extension-points/org_eclipse_compare_contentMergeViewers.html"><b>org.eclipse.compare.contentMergeViewers</b></a>
-<b> </b>extension point.&nbsp; The following markup shows
-the definition of specialized content merge viewers for viewing Java and
-properties files in the Java IDE:</p>
-
-
-<pre><font color="#4444CC">&lt;extension
-	point=&quot;org.eclipse.compare.contentMergeViewers&quot;&gt;
+extension point allows you to define a specialized content viewer that does not
+compare its inputs.
+<pre><font color="#4444CC">
+&lt;extension
+	point="org.eclipse.compare.contentViewers"&gt;
 	&lt;viewer
-		id=&quot;org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator&quot;
-		extensions=&quot;java,java2&quot;
-		class=&quot;org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator&quot;&gt;
+		extensions="java,java2"
+		class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"
+		id="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"&gt;
 	&lt;/viewer&gt;
-	&lt;viewer
-		id=&quot;org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator&quot;
-		extensions=&quot;properties&quot;
-		class=&quot;org.eclipse.jdt.internal.ui.compare.TextMergeViewerCreator&quot;&gt;
-	&lt;/viewer&gt;
+	&lt;contentTypeBinding
+		contentTypeId="org.eclipse.jdt.core.javaSource"
+		contentViewerId="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"&gt;
+	&lt;/contentTypeBinding&gt;
 &lt;/extension&gt;
 </pre></font>
-
-
-<p> In the markup, you specify the <b>id </b>of the viewer, the <b>class</b> that
-creates it, and the file <b>extension</b>
-for which the content viewer should be used.&nbsp;&nbsp;</p>
+<p>Specialized viewers contributed by your plug-in are designated in the
+<b>viewer</b> element.  You must specify the <b>id </b>of the viewer and the <b>class</b> that
+creates it.  You may also specify any file <b>extensions</b> for which the content viewer should be used.&nbsp;&nbsp;</p>
+<p>You may also use the <b>contentTypeBinding</b> element to associate a <a href="runtime_content.htm">content type</a> 
+with a content viewer.  
+</p>
+<h3>Content merge viewers</h3>
+<p>	A <b> content merge viewer </b> performs a two-way or three-way compare of its inputs
+and presents the result side-by-side or in any other suitable way.&nbsp; The viewer lets the user 
+merge between the inputs.  Content merge viewers are common for text or images.</p>
+<p>If the standard merge viewers are not appropriate for your plug-in's
+function, you may choose to implement your own content merge viewer.&nbsp; Your
+content merge viewer should be registered with the platform using the
+<a href="../reference/extension-points/org_eclipse_compare_contentMergeViewers.html"><b>org.eclipse.compare.contentMergeViewers</b></a>
+extension point.&nbsp; The following markup shows
+the definition of specialized content merge viewers for viewing Java files and
+properties files in the Java IDE:
+<pre><font color="#4444CC">
+&lt;extension
+	point="org.eclipse.compare.contentMergeViewers"&gt;
+	&lt;viewer
+		extensions="java,java2"
+		class="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"
+		id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"&gt;
+	&lt;/viewer&gt;
+	&lt;contentTypeBinding
+		contentTypeId="org.eclipse.jdt.core.javaProperties"
+		contentMergeViewerId="org.eclipse.compare.TextMergeViewerCreator"&gt;
+	&lt;/contentTypeBinding&gt;
+	&lt;contentTypeBinding
+		contentTypeId="org.eclipse.jdt.core.javaSource"
+		contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"&gt;
+	&lt;/contentTypeBinding&gt;
+&lt;/extension&gt;
+</pre></font>
+Similar to content viewers, specialized merge viewers contributed by your plug-in are designated in the
+<b>viewer</b> element.  You must specify the <b>id </b>of the viewer and the <b>class</b> that
+creates it.  You may also specify any file <b>extensions</b> for which the content merge viewer should be used.&nbsp;&nbsp;</p>
+<p>Also similar to content viewers, you can use <b>contentTypeBinding</b> to associate a <a href="runtime_content.htm">content type</a> 
+with a merge viewer.  The JDT plug-in binds content merge viewers to two different content types:  Java source and Java properties files.
+</p>
 
 
 <p> <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>
