@@ -10,11 +10,59 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h3>Adding launchers to the platform</h3>
-<p>launchConfigTypes extension is used to add new types.</p>
-<p>Attributes of a launch configuration, the ability to persist and share them.</p>
-<p>status handlers and error handling.</p>
-<p>comparators and why you might need one.</p>
-<p>&nbsp;</p>
+<p>Your plug-in can add launch configuration types to the platform using the <a href="../reference/extension-points/org_eclipse_debug_core_launch_configuration_types.html">org.eclipse.debug.core.launchConfigurationTypes</a>
+extension point.&nbsp; This extension point allows you to declare a
+configuration type using a unique id.&nbsp; You must provide a corresponding
+implementation of <a href="../reference/api/org/eclipse/debug/core/ILaunchConfigurationDelegate.html">ILaunchConfigurationDelegate</a>
+in your plug-in.&nbsp; You can also specify which modes (run, debug) are
+supported by your launcher and a name that should be used when showing launchers
+of this type to the user.</p>
+<p>The following markup shows how the Java tools declare a Java launch
+configuration for launching local Java programs:</p>
+<pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.core.launchConfigurationTypes&quot;&gt;
+   &lt;launchConfigurationType
+   	   id=&quot;org.eclipse.jdt.launching.localJavaApplication&quot;
+	   name=&quot;%localJavaApplication&quot;
+	   delegate=&quot;org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate&quot;
+	   modes= &quot;run, debug&quot;&gt;
+	   &lt;fileExtension
+	   		extension=&quot;java&quot;
+	   		default=&quot;true&quot;/&gt;
+	   &lt;fileExtension
+	   		extension=&quot;class&quot;
+	   		default=&quot;true&quot;/&gt;
+   &lt;/launchConfigurationType&gt;
+&lt;/extension&gt;</font></pre>
+<p>As shown above, you can also specify file extensions with which the launch
+configuration can be used.&nbsp; In this example, the launch configuration is
+set as the default launcher for files with the &quot;java&quot; or
+&quot;class&quot; extension.</p>
+<h4>Comparing launch configurations</h4>
+<p>Launch configurations store a collection of named attributes and values,
+allowing plug-ins to store any kind of data appropriate for the launch
+configuration type that they define.&nbsp; Since the possible values, their
+types, and meaning are not known by the platform, an extension point is provided
+that allows you to supply a comparator for a specific attribute.&nbsp; The
+comparator is used to determine whether attributes of the specifed name are
+equal.&nbsp; In many cases, the default behavior provided by
+java.lang.Object.equals(Object) is suitable for comparing attributes, and will
+be used if no comparator has been provided.&nbsp; However, some attribute values
+may require special handling, such as stripping white space values in certain
+text attributes.&nbsp; </p>
+<p>Comparators are contributed using the <a href="../reference/extension-points/org_eclipse_debug_core_launch_configuration_comparators.html">org.eclipse.debug.core.launchConfigurationComparators</a>
+extension point.&nbsp; </p>
+<p>The Java tools supply launch configuration comparators for comparing program
+source paths and class paths.</p>
+<pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.core.launchConfigurationComparators&quot;&gt;
+	&lt;launchConfigurationComparator
+		id = &quot;org.eclipse.jdt.launching.classpathComparator&quot;
+		class = &quot;org.eclipse.jdt.internal.launching.RuntimeClasspathEntryListComparator&quot;
+		attribute = &quot;org.eclipse.jdt.launching.CLASSPATH&quot;/&gt;
+	&lt;launchConfigurationComparator
+		id = &quot;org.eclipse.jdt.launching.sourcepathComparator&quot;
+		class = &quot;org.eclipse.jdt.internal.launching.RuntimeClasspathEntryListComparator&quot;
+		attribute = &quot;org.eclipse.jdt.launching.SOURCE_PATH&quot;/&gt;		
+&lt;/extension&gt;</font></pre>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
 </BODY>
 </HTML>
