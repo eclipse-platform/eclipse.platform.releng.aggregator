@@ -43,7 +43,11 @@ public class BlockComment {
 		commentEnd = commentEndString;
 		contents = comment;
 	}
-	
+
+	public String getContents() {
+	    return contents;
+	}
+
 	/**
 	 * @return boolean
 	 */
