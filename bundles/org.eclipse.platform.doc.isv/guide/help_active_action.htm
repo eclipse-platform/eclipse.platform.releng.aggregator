@@ -34,56 +34,43 @@ this method to do nothing.&nbsp; This method is called before <b>run()</b>.</li>
 </ul>
 
 
-<p>Here is a simple implementation of a live help action that opens the
-preferences dialog.  Since the action that invokes the preference dialog is
-already implemented, our live help action is merely a wrapper for that
-action.&nbsp; We don't need any information from the JavaScript, so the
+<p>Here is a simple implementation of a live help action that opens a message
+dialog. We don't need any information from the JavaScript, so the
 initialization data is ignored.</p>
 
 
-<blockquote>
-
-
-<p><i>Note:&nbsp; The class OpenPreferencesAction is internal to the
-workbench.&nbsp; In this example, we are using it at our own risk since it could
-change in the future.</i></p>
-
-
-</blockquote>
-
-
-<pre><font color="#4444CC">package org.eclipse.platform.doc.isv.activeHelp;
-
-import org.eclipse.help.ILiveHelpAction;
-import org.eclipse.ui.internal.OpenPreferencesAction;
-import org.eclipse.swt.widgets.Display;
-
-
-/**
- * Sample Active Help action.  
- * Note:  This action refers to internal workbench actions in order to
- * open the preferences page.  
+<pre><font color="#4444CC">/**
+ * Sample Active Help action.
  */
-public class ActiveHelpOpenPreferencesAction implements ILiveHelpAction {
-	String str;
-	
-	public void setInitializationString(String data) {
-		// ignore the data.  We do not use any javascript parameters.
-	}
-	
-	public void run() {
-		// Active help does not run on the UI thread, so we must use syncExec
-		Display.getDefault().syncExec(new Runnable() {
-							public void run() {
-								new OpenPreferencesAction().run();
-							}
-		});		
-	}
-}
-</font></pre>
+public class ActiveHelpOpenDialogAction implements ILiveHelpAction {
 
+     public void setInitializationString(String data) {
+          // ignore the data.  We do not use any javascript parameters.
+     }
 
-<p>&nbsp;</p>
+     public void run() {
+          // Active help does not run on the UI thread, so we must use syncExec
+          Display.getDefault().syncExec(new Runnable() {
+               public void run() {
+                    IWorkbenchWindow window =
+                         PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                    if (window != null) {
+                         // Bring the Workbench window to the top of other windows;
+                         // On some Windows systems, it will only flash the Workbench
+                         // icon on the task bar
+                         Shell shell = window.getShell();
+                         shell.setMinimized(false);
+                         shell.forceActive();
+                         // Open a message dialog
+                         MessageDialog.openInformation(
+                              window.getShell(),
+                              &quot;Hello World.&quot;,
+                              &quot;Hello World.&quot;);
+                    }
+               }
+          });
+     }
+}</font></pre>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002."width="250" height="12"></a></p>
