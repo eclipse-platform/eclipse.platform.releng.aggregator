@@ -34,17 +34,17 @@ The last method supports wildcard (i.e. '*') and can be used to widen the search
 <P>
 For example, creating a search pattern for searching for references to a given method is done as follows:</P>
 <font color='#4444CC'><pre>
-   // Get the method
-   IMethod method = ...;
+    // Get the method
+    IMethod method = ...;
 
-   // Create search pattern
-   ISearchPattern pattern = SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
+    // Create search pattern
+    ISearchPattern pattern = SearchEngine.createSearchPattern(method, IJavaSearchConstants.REFERENCES);
 </pre></font>
 <P>
 Or creating a search pattern for searching for declarations of all types starting with "Obj" is done as follows:</P>
 <font color='#4444CC'><pre>
-   // Create search pattern
-   ISearchPattern pattern = SearchEngine.createSearchPattern("Obj*", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, true);
+    // Create search pattern
+    ISearchPattern pattern = SearchEngine.createSearchPattern("Obj*", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, true);
 </pre></font>
 
 <H4>
@@ -55,14 +55,70 @@ If you are interested in search results in a given project or even in a given pa
 can be only in a hierarchy of a given type, you can create the appropriate search scope using 
 <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createJavaSearchScope(org.eclipse.jdt.core.IJavaElement[])">createJavaSearchScope(IJavaElement[])</a></b>
 or <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createHierarchyScope(org.eclipse.jdt.core.IType)">createHierarchyScope(IType)</a></b>.</P>
+<P>
+For example, creating a search scope on a given package is done as follows:</P>
+<font color='#4444CC'><pre>
+    // Get the package
+    IPackageFragment pkg = ...;
 
+    // Create search scope
+    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {pkg});
+</pre></font>
+<P>
+Creating a search scope on the hierarchy of a given type is done as follows:</P>
+<font color='#4444CC'><pre>
+    // Get the type
+    IType type = ...;
+
+    // Create search scope
+    IJavaSearchScope scope = SearchEngine.createHierarchyScope(type);
+</pre></font>
+<P>
+Finally, you can create a search scope on the entire workspace:</P>
+<font color='#4444CC'><pre>
+    // Create search scope
+    IJavaSearchScope scope = SearchEngine.createWorkspaceScope();
+</pre></font>
 
 <H3>
 Searching</h3>
-
+<P>
+Once you have created a search pattern and a search scope, and you have implemented 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html">IJavaSearchResultCollector</a></b>,
+you can start a search query as follows: </P>
+<font color='#4444CC'><pre>
+    // Get the search pattern
+    ISearchPattern pattern = ...;
+    
+    // Get the search scope
+    IJavaSearchScope scope = ...;
+    
+    // Get the search result collector
+    IJavaSearchResultCollector collector = ...;
+    
+    // Search
+    SearchEngine searchEngine = new SearchEngine();
+    searchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+</pre></font>
+A notification that the search starts is notified to your search result collector using the
+<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#aboutToStart()">aboutToStart</a></b>
+method, then each search result is reported using the 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)">accept</a></b>
+method, finally 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#done()">done</a></b>
+indicates that the search has ended.
 
 <H3>
-Accurate versus Inaccurate matches</h3>
+Collecting search results</h3>
+
+<H4>
+Resources and Java elements<h4>
+
+<H4>
+Source positions<h4>
+
+<H4>
+Accurate versus inaccurate search results</h4>
 
 <P>&nbsp;<a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved." border="0"></a>
 </P>
