@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.team.internal.ccvs.core.*;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.operations.TagOperation;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -30,6 +29,7 @@ public class TagAndReleaseOperation extends TagOperation {
 	private CVSTag tag;
 	private String comment;
 	private MapProject mapProject;
+	private boolean mapFileUpdated;
 	
 	public TagAndReleaseOperation(IWorkbenchPart part, MapProject mapProject, IResource[] resources, CVSTag t, String c) {
  		super(part, asResourceMappers(resources));
@@ -68,13 +68,14 @@ public class TagAndReleaseOperation extends TagOperation {
 		super.execute(new SubProgressMonitor(monitor, 95));
 		
 		if (!errorsOccurred()) {
+			monitor.subTask("Updating and committing map files");
 			updateMapFile();
 			try {
-				monitor.subTask("Committing changed map files");
 				mapProject.commitMapProject(comment,monitor);
 			} catch (CoreException e) {
 				throw CVSException.wrapException(e);
 			}
+			mapFileUpdated = true;
 		}
 		monitor.done();
 	}
@@ -99,16 +100,20 @@ public class TagAndReleaseOperation extends TagOperation {
 		}
 	}
 	
-	private void updateMapFile(){
+	private void updateMapFile() throws CVSException{
 		for (int i = 0; i < selectedProjects.length; i++) {
 			if(selectedProjects[i] instanceof IProject){
-				try {
-					updateTagsInMapFile((IProject)selectedProjects[i], tag.getName());
-				} catch (CVSException e1) {
-					CVSUIPlugin.openError(getShell(), null, null, e1);
-				}
+				updateTagsInMapFile((IProject)selectedProjects[i], tag.getName());
 			}
 		}
 	}
 
+	public boolean isMapFileUpdated() {
+		return mapFileUpdated;
+	}
+	
+	protected IStatus[] getErrors() {
+		return super.getErrors();
+	}
+	
 }

@@ -15,32 +15,25 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.*;
+import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.*;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
-import org.eclipse.team.internal.ccvs.ui.Policy;
+import org.eclipse.team.internal.ccvs.ui.*;
 import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 
 
 public class ReleaseWizard extends Wizard {
@@ -176,16 +169,31 @@ public class ReleaseWizard extends Wizard {
 					}
 					monitor.beginTask("Releasing", 100);
 					operation.run(new SubProgressMonitor(monitor, 90));
-					try {						
-						if(tagPage.isValidateButtonSelected()){
-							try {
-								validateRelease(new SubProgressMonitor(monitor, 10));
-							} catch (TeamException e) {
-								throw new InvocationTargetException(e);
+					if (operation.isMapFileUpdated()) {
+						try {						
+							if(tagPage.isValidateButtonSelected()){
+								try {
+									validateRelease(new SubProgressMonitor(monitor, 10));
+								} catch (TeamException e) {
+									throw new InvocationTargetException(e);
+								}
 							}
+						} finally {
+							monitor.done();
 						}
-					} finally {
-						monitor.done();
+					} else {
+						// The map file update didn't occur and no exception was thrown.
+						// Let the user know of the failure
+						IStatus[] errors = operation.getErrors();
+						IStatus status;
+						if (errors.length == 1) {
+							status = errors[0];
+						} else {
+							status = new MultiStatus(RelEngPlugin.ID, 0, errors, "Errors occurred during release", null);
+						}
+						ErrorDialog.openError(getShell(), "Release Failed", 
+								"There were errors reported during the release. The map files have not been updated", 
+								status, IStatus.ERROR | IStatus.WARNING);
 					}
 				}
 			});
