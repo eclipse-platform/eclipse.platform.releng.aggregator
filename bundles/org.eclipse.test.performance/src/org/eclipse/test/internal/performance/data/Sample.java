@@ -12,16 +12,19 @@ package org.eclipse.test.internal.performance.data;
 
 import java.util.Map;
 
+import junit.framework.Assert;
 
 /**
  * @since 3.1
  */
 public class Sample {
+	String fScenarioID;
 	Map fProperties;
 	DataPoint[] fDataPoints;
-//	String fId;
 	
-	public Sample(Map properties, DataPoint[] dataPoints) {
+	public Sample(String scenarioID, Map properties, DataPoint[] dataPoints) {
+		Assert.assertTrue("scenarioID is null", scenarioID != null); //$NON-NLS-1$
+		fScenarioID= scenarioID;
 		fProperties= properties;
 		fDataPoints= dataPoints;
 	}
@@ -36,12 +39,11 @@ public class Sample {
 		return dataPoints;
 	}
 	
-//	public String getId() {
-//		return fId;
-//	}
+	public String getScenarioID() {
+	    return fScenarioID;
+	}
 	
 	public String toString() {
-//		return "MeteringSession [id= " + fId + ", #datapoints: " + fDataPoints.length + "]";
-		return "MeteringSession [#datapoints: " + fDataPoints.length + "]";
+	    return "MeteringSession [scenarioID= " + fScenarioID + ", #datapoints: " + fDataPoints.length + "]";
 	}
 }

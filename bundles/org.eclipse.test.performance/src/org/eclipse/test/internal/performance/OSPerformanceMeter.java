@@ -33,9 +33,8 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 
 	private PerformanceMonitor fPerformanceMonitor;
 	private List fDataPoints= new ArrayList();
+	private DB fDB;
     
-	private static Runtime fgRuntime= Runtime.getRuntime();
-
 	
 	/**
 	 * @param scenarioId the scenario id
@@ -51,7 +50,8 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	public void dispose() {
 	    fPerformanceMonitor= null;
 	    fDataPoints= null;
-		super.dispose();
+	    DB.release(fDB);
+	    super.dispose();
 	}
 
 	/*
@@ -73,7 +73,8 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 	    
-	    DB.store(getScenarioName(), getSample());
+	    fDB= DB.acquire();
+	    fDB.store(getSample());
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 			printSample();
@@ -88,7 +89,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	        HashMap runProperties= new HashMap();
 	        collectRunInfo(runProperties);
 	        fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
-	        return new Sample(runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
+	        return new Sample(getScenarioName(), runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
 	    }
 	    return null;
 	}
@@ -99,8 +100,9 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	    HashMap map= new HashMap();
 	    
 	    if (true) {
-			fgRuntime.gc();
-			long used= fgRuntime.totalMemory() - fgRuntime.freeMemory();
+	    		Runtime runtime= Runtime.getRuntime();
+			runtime.gc();
+			long used= runtime.totalMemory() - runtime.freeMemory();
 			addScalar(map, Dimensions.USED_JAVA_HEAP, used);
 		}
 
@@ -162,6 +164,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 			b.append(System.getProperty("eclipse.vmargs"));
 		b.append(" eclipse.commands=");
 			b.append(System.getProperty("eclipse.commands"));
-		runProperties.put("cmdArgs", b.toString());		
+		runProperties.put("cmdArgs", b.toString());
 	}	
 }

@@ -22,30 +22,103 @@ import org.eclipse.test.internal.performance.data.Scalar;
 
 public class DB {
     
-    public static final String DB_NAME= "perfDB";
+    public static final String DB_NAME= "perfDB";	// default db name
     
     private static DB fgDefault;
     
+    private int fRefCount;
     private Connection fConnection;
     private SQL fSQL;
     
     
-    public static DB getDefault() {
+    public synchronized static DB acquire() {
         if (fgDefault == null) {
-            fgDefault= new DB();
+            fgDefault= new DB();          
             fgDefault.connect();
         }
+        fgDefault.fRefCount++;
         return fgDefault;
     }
-    
-    private DB() {
+   
+    public synchronized static void release(DB db) {
+        if (db == null)
+            return;
+        if (db != fgDefault)
+            System.err.println("DB.release: stale db");
+        db.fRefCount--;
+        if (db.fRefCount <= 0) {
+            db.disconnect();
+            if (db == fgDefault)
+                fgDefault= null;
+        }
+    }
+
+    public SQL getSQL() {
+        return fSQL;
     }
     
+    public void store(Sample sample) {
+        
+        if (fSQL == null || sample == null)
+            return;
+                
+	    try {
+            int config_id= fSQL.getConfig("burano", "MacOS X");
+            int session_id= fSQL.addSession("3.1", config_id);
+            int scenario_id= fSQL.getScenario(sample.getScenarioID());
+            int sample_id= fSQL.createSample(session_id, scenario_id, 0);
+            int draw_id= fSQL.createDraw(sample_id);
+            int datapoint_id= fSQL.createDataPoint(draw_id);
+            
+			DataPoint[] dataPoints= sample.getDataPoints();
+			for (int i= 0; i < dataPoints.length; i++) {
+			    DataPoint dp= dataPoints[i];
+			    Scalar[] scalars= dp.getScalars();
+			    for (int j= 0; j < scalars.length; j++) {
+			        Scalar scalar= scalars[j];
+			        long value= scalar.getMagnitude();
+			        int id= scalar.getDimension().getId();
+			        fSQL.createScalar(datapoint_id, id, value);
+                }
+			}
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void query(String scenarioID, String refID) {
+        if (fSQL == null) 
+            return;
+ 
+        ResultSet result= null;
+        try {
+            result= fSQL.query("burano", "MacOS X", refID, scenarioID, Dimensions.USER_TIME.getId());
+            for (int i= 0; result.next(); i++)
+                System.out.println(i + ": " + result.getString(1));
+            result.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (result != null)
+                try {
+                    result.close();
+                } catch (SQLException e1) {
+                }
+        }
+    }
+
+    //---- private implementation
+    
+    private DB() {
+        // empty implementation
+    }
+
     /**
-     * dbloc=	embedd
-     * dbloc=/tmp/performance
-     * dbloc=net://localhost
-     * dbloc=net://www.eclipse.org
+     * dbloc=						embed in home directory
+     * dbloc=/tmp/performance			embed given location
+     * dbloc=net://localhost			connect to local server
+     * dbloc=net://www.eclipse.org	connect to remove server
      */
     private void connect() {
 
@@ -106,6 +179,7 @@ public class DB {
     }
     
     private void disconnect() {
+        System.out.println("disconnecting from DB");
         if (fSQL != null) {
             try {
                 fSQL.dispose();
@@ -124,10 +198,6 @@ public class DB {
         }
     }
     
-    public SQL getSQL() {
-        return fSQL;
-    }
-    
     private void doesDBexists() throws SQLException {
         Statement stmt= fConnection.createStatement();
         try {
@@ -143,50 +213,11 @@ public class DB {
         }
     }
     
-    public static void store(String scenarioId, Sample sample) {
-        
-        if (scenarioId == null || sample == null)
-            return;
-                
-        DB db= getDefault();
-        SQL sql= db.getSQL();
- 
-        if (sql == null)
-            return;
-
-	    try {
-            int config_id= sql.getConfig("burano", "MacOS X");
-            int session_id= sql.addSession("3.1", config_id);
-            int scenario_id= sql.getScenario(scenarioId);
-            int sample_id= sql.createSample(session_id, scenario_id, 0);
-            int draw_id= sql.createDraw(sample_id);
-            int datapoint_id= sql.createDataPoint(draw_id);
-            
-			DataPoint[] dataPoints= sample.getDataPoints();
-			for (int i= 0; i < dataPoints.length; i++) {
-			    DataPoint dp= dataPoints[i];
-			    Scalar[] scalars= dp.getScalars();
-			    for (int j= 0; j < scalars.length; j++) {
-			        Scalar scalar= scalars[j];
-			        long value= scalar.getMagnitude();
-			        int id= scalar.getDimension().getId();
-			        sql.createScalar(datapoint_id, id, value);
-                }
-			}
-            
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            db.disconnect();
-        }
-    }
-
     //---- test --------
     
     public static void main(String args[]) throws Exception {
         
-        DB db= DB.getDefault();
+        DB db= DB.acquire();
         
         try {            
             
@@ -219,11 +250,11 @@ public class DB {
             result.close();
              
         } catch (SQLException ex) {
-            ex.printStackTrace();
             System.err.print("SQLException: ");
             System.err.println(ex.getMessage());
+            ex.printStackTrace();
         }
         
-        db.disconnect();        
+        DB.release(db);       
     }
 }

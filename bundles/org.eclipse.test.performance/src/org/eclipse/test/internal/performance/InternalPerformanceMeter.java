@@ -53,7 +53,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 	/**
 	 * Answer the scenario id.
 	 */
-	String getScenarioName() {
+	public String getScenarioName() {
 		return fScenarioId;
 	}
 

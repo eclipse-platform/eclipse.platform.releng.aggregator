@@ -104,7 +104,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 			data[2*i + 1]= createDataPoint(AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
 		}
 		
-		return new Sample(properties, data);
+		return new Sample(getScenarioName(), properties, data);
 	}
 
 	private DataPoint createDataPoint(String kind, Dimension dimension, long value) {

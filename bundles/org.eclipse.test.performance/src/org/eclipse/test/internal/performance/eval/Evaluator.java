@@ -13,11 +13,8 @@ package org.eclipse.test.internal.performance.eval;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.StringTokenizer;
-
 import junit.framework.Assert;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
-import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.PerformanceDataModel;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -87,25 +84,7 @@ public class Evaluator implements IEvaluator {
 	}
 
 	protected PerformanceDataModel getDataModel() {
-		return PerformanceDataModel.getInstance(getXMLDir());
-	}
-
-	private String getXMLDir() {
-		String ctrl= System.getProperty(PerformanceTestPlugin.ENV_PERF_CTRL);
-		if (ctrl != null) {
-			StringTokenizer st= new StringTokenizer(ctrl, ";");
-			while(st.hasMoreTokens()) {
-				String token= st.nextToken();
-				int i= token.indexOf('=');
-				if (i < 1)
-					continue;
-				String value= token.substring(i+1);
-				String parm= token.substring(0,i);
-				if (parm.equals("log"))
-					return value;
-			}
-		}
-		return System.getProperty("user.home"); //$NON-NLS-1$
+		return PerformanceDataModel.getInstance(null);
 	}
 
 	public void setAssertCheckers(AssertChecker[] asserts) {
@@ -122,7 +101,8 @@ public class Evaluator implements IEvaluator {
 	
 	public static synchronized IEvaluator getDefaultEvaluator() {
 		if (fgDefaultEvaluator == null) {
-			fgDefaultEvaluator= new EmptyEvaluator();
+			fgDefaultEvaluator= new DBEvaluator();
+			
 //			fgDefaultEvaluator= new Evaluator();
 //			
 //			String driver= System.getProperty(DRIVER_SYSTEM_PROPERTY);
