@@ -12,8 +12,73 @@
 <h3>
    Adding team actions
 </h3>
-<p>Show object contributions to the team menu, discuss the slot and groups that
-are predefined</p>
+<p>The team UI plug-in defines a popup menu extension in order to consolidate
+all team-related actions in one place.&nbsp; The team menu includes many
+subgroup slots so that team provider plug-ins can contribute actions and have
+some amount of control over the order of items in the menu.&nbsp; The following
+markup is from the team UI's plug-in manifest:</p>
+<pre><font color="#4444CC">&lt;extension
+     point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
+	&lt;objectContribution
+       	   id=&quot;org.eclipse.team.ui.ResourceContributions&quot;
+           objectClass=&quot;org.eclipse.core.resources.IResource&quot; adaptable=&quot;true&quot;&gt;
+		&lt;menu
+			id=&quot;<b>team.main</b>&quot;
+			path=&quot;additions&quot;
+			label=&quot;%TeamGroupMenu.label&quot;&gt;
+			<b>&lt;separator name=&quot;group1&quot;/&gt;
+			&lt;separator name=&quot;group2&quot;/&gt;
+			&lt;separator name=&quot;group3&quot;/&gt;
+			&lt;separator name=&quot;group4&quot;/&gt;
+			&lt;separator name=&quot;group5&quot;/&gt;
+			&lt;separator name=&quot;group6&quot;/&gt;
+			&lt;separator name=&quot;group7&quot;/&gt;
+			&lt;separator name=&quot;group8&quot;/&gt;
+			&lt;separator name=&quot;group9&quot;/&gt;
+			&lt;separator name=&quot;group10&quot;/&gt;</b>
+			&lt;separator name=&quot;targetGroup&quot;/&gt;
+			&lt;separator name=&quot;projectGroup&quot;/&gt;
+		&lt;/menu&gt;
+	... 
+&lt;/extension&gt;</font></pre>
+<p>A team menu is added to the popup menu of all views that show resources (or
+objects that adapt to resources.)&nbsp; Your plug-in can use the id of this menu
+and the separator groups in order to add your own menu items.&nbsp; There is
+nothing to keep you from defining your own popup menus, action sets, or view and
+editor actions.&nbsp; However, adding your actions to the predefined team menu
+makes it easier for the end user to find your actions.</p>
+<p>Let's look at a CVS action that demonstrates some interesting points:</p>
+<pre><font color="#4444CC">&lt;extension
+     point=&quot;org.eclipse.ui.popupMenus&quot;&gt;
+  &lt;objectContribution
+        objectClass=&quot;org.eclipse.core.resources.IFile&quot;
+        adaptable=&quot;true&quot;
+        id=&quot;org.eclipse.team.ccvs.ui.IFileContributions&quot;&gt;
+     &lt;filter
+           <b>name=&quot;projectNature&quot;
+          value=&quot;org.eclipse.team.cvs.core.cvsnature&quot;</b>&gt;
+     &lt;/filter&gt;
+     &lt;action
+           label=&quot;%IgnoreAction.label&quot;
+           tooltip=&quot;%IgnoreAction.tooltip&quot;
+           class=&quot;org.eclipse.team.internal.ccvs.ui.actions.IgnoreAction&quot;
+           <b>menubarPath=&quot;team.main/group3&quot;</b>
+           id=&quot;org.eclipse.team.ccvs.ui.ignore&quot;&gt;
+     &lt;/action&gt;
+   ...</font></pre>
+<p>Note that the action is contributed using the <a href="../reference/extension-points/org_eclipse_ui_popupMenus.html">org.eclipse.ui.popupMenus
+</a>workbench extension point.&nbsp; Here are some team-specific things
+happening in the markup:</p>
+<ul>
+  <li>the action is filtered by the project nature defined by the CVS
+    plug-in.&nbsp; This ensures that the CVS popup menu items only appear for
+    files that appear in projects with the CVS project nature.</li>
+  <li>the action is added to a group in the menu that was specified above in the
+    team UI plug-in</li>
+</ul>
+<p>The implementation of an action is largely dependent on your specific
+provider.</p>
+<p>&nbsp;</p>
 <p>
    &nbsp;
 </p>
