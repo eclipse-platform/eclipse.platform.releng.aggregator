@@ -46,5 +46,14 @@ public class CommitCommentPage extends CVSWizardPage {
 		return commitCommentArea.getComment();
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		super.setVisible(visible);
+		if (visible) {
+			commitCommentArea.setFocus();
+		}
+	}
 }
 
