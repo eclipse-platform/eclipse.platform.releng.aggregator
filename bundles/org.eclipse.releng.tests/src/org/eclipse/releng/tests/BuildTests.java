@@ -21,6 +21,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 //import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +49,9 @@ public class BuildTests extends TestCase {
 	private static final String DEFAULT_CVS_TYPE = "-kkv";
 	
 	private Map cvsTypes;
+	private String[] copyrightLines;
+	private long goodCopyrights = 0;
+	private long badCopyrights = 0;
 	private static final int HTML = 0;
 	private static final int PROPERTIES = 1;
 	private static final int XML = 2;
@@ -97,6 +101,74 @@ public class BuildTests extends TestCase {
 			}
 		}
 		
+		return result;
+	}
+
+	private void testCopyright() {  // Not ready for primetime yet.
+		
+		boolean result = false;
+		
+		initializeCopyrightLines();
+		
+		// String to use when running as an automated test.
+		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
+
+		// String to use when running in an Eclipse runtime
+//		 String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
+
+		new File(logFileName).mkdirs();
+		logFileName = logFileName + File.separator + "copyrightLog.txt";
+
+		// Source location when running in an automated test.  This is really bad form
+		// but we really don't want to recheck out all the source.
+//		String sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
+		
+		// Source location when running locally.  Run a source build to get it.
+		// TODO Put back correct source location
+		 String sourceDirectoryName = "d:\\sourceFetch";
+		
+		try {
+
+			BufferedWriter aLog = new BufferedWriter(new FileWriter(logFileName));
+			File rootDirectory = new File(sourceDirectoryName);
+			result = scanCopyrights(rootDirectory, aLog);
+			aLog.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Total copyrights: " + (goodCopyrights + badCopyrights));
+		System.out.println("Good copyrights: " + goodCopyrights);
+		System.out.println("Bad copyrights: " + badCopyrights);
+		
+		assertFalse("Copyright errors.  See the releng test logs linked from the test results page for details.", result);
+	}
+
+
+	
+	/**
+	 * @param rootDirectory
+	 * @param aLog
+	 * @return boolean
+	 */
+	private boolean scanCopyrights(File aDirectory, BufferedWriter aLog) {
+		
+		boolean result = false;
+		
+		File[] files = aDirectory.listFiles();
+		
+		if (files == null) {
+			return result;
+		}
+		
+		for (int i = 0; i < files.length; i++) {
+			File aFile = files[i];
+			if (aFile.isDirectory()) {
+				result = result | scanCopyrights(aFile, aLog);
+			} else {
+				result = result | validateCopyright(aFile, aLog);;
+			}
+		}
 		return result;
 	}
 	
@@ -157,6 +229,33 @@ public class BuildTests extends TestCase {
 		cvsTypes.put("tiff", CVS_BINARY);
 		cvsTypes.put("tif", CVS_BINARY);
 		cvsTypes.put("xls", CVS_BINARY);
+		cvsTypes.put("rsc", CVS_BINARY);
+	}
+	
+	private void initializeCopyrightLines() {
+//		copyrightLines = new String[8];
+//		copyrightLines[0] = "/*******************************************************************************";
+//		copyrightLines[1] = " * Copyright (c) 2003 IBM Corporation and others.";
+//		copyrightLines[2] = " * All rights reserved. This program and the accompanying materials";
+//		copyrightLines[3] = " * are made available under the terms of the Common Public License v1.0";//		copyrightLines[4] = " * which accompanies this distribution, and is available at";
+//		copyrightLines[5] = " * http://www.eclipse.org/legal/cpl-v10.html";//		copyrightLines[6] = " *";
+//		copyrightLines[7] = " * Contributors:";
+		
+//		copyrightLines = new String[8];
+//		copyrightLines[0] = "/**********************************************************************";
+//		copyrightLines[1] = " * Copyright (c) 2000,2002 IBM Corporation and others.";
+//		copyrightLines[2] = " * All rights reserved.   This program and the accompanying materials";
+//		copyrightLines[3] = " * are made available under the terms of the Common Public License v0.5";
+//		copyrightLines[4] = " * which accompanies this distribution, and is available at";
+//		copyrightLines[5] = " * http://www.eclipse.org/legal/cpl-v05.html";
+//		copyrightLines[6] = " * ";
+//		copyrightLines[7] = " * Contributors: ";
+
+		copyrightLines = new String[4];
+		copyrightLines[0] = "/*";
+		copyrightLines[1] = " * (c) Copyright IBM Corp. 2000, 2001.";
+		copyrightLines[2] = " * All Rights Reserved.";
+		copyrightLines[3] = " */";
 	}
 	
 	private boolean scanCVSKTag(File aDirectory, BufferedWriter aLog) {
@@ -206,6 +305,49 @@ public class BuildTests extends TestCase {
 		
 		return result;
 		
+	}
+
+	/**
+	 * 
+	 * @param aFile
+	 * @return boolean - true if the copyright is NOT valid.
+	 */	
+	private boolean validateCopyright(File aFile, BufferedWriter aLog) {
+		boolean result = false;
+		
+		if (!aFile.getName().endsWith(".java")) {
+			return result;
+		}
+		
+		LineNumberReader aReader;
+		try {
+			aReader = new LineNumberReader(new FileReader(aFile));
+			for (int i = 0; i < copyrightLines.length; i++) {
+				String aLine = aReader.readLine();
+				if (i > -1) {
+					if (!aLine.trim().toLowerCase().equals(copyrightLines[i].trim().toLowerCase())) {
+						result = true;
+						aLog.write(aFile.getPath());
+						aLog.newLine();
+//						System.out.println("Error in line: " + i);
+//						System.out.println(aLine);
+//						System.out.println(copyrightLines[i]);
+						break;
+					}
+				}
+			}
+			aReader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (result) {
+			badCopyrights++;
+		} else {
+			goodCopyrights++;
+		}
+		return result;
 	}
 	
 	private boolean validateEntry(File aDirectory, String aLine, BufferedWriter aLog) {
