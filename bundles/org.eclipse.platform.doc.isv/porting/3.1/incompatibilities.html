@@ -22,6 +22,8 @@ following entries describe the areas that changed and provide instructions for
 <ol>
   <li><a href="#Preference Store">Plug-in Preferences</a></li>
   <li><a href="#IPath Changes">Changes to IPath constraints</a></li>
+  <li><a href="#Extension Registry">Extension registry</a></li>
+  
 </ol>
 <hr>
 
@@ -98,6 +100,42 @@ In Eclipse 3.1, this method uses operating-system specific device and segment
 delimiters to interpret the provided path string.  For example, calling <tt>append("a\\b")</tt>
 on Unix platforms will now append a single segment, whereas on Windows it will
 continue to append two segments.
+
+<h2><a name="Extension Registry"></a>3. Extension registry</h2>
+
+<p><b>What is affected:</b> Plug-ins that manipulate or retain <code>IExtensionPoint</code>,
+<code>IExtension</code>, and <code>IConfigurationElement </code>objects from the
+Eclipse Platform's plug-in or extension registry.</p>
+<p><b>Description: </b>Prior to 3.0, all objects obtained from the extension
+registry (of the former plug-in registry) were good forever. Changes were made
+in Eclipse 3.0 that allowed plug-ins to be dynamically added or removed without
+having to restart Eclipse. When a plug-in is removed without restarting, its
+entries in the extension registry necessarily become invalid. This means that
+another plug-in holding on to an object obtained previously from the deleted
+plug-in's extension registry entry would be left holding an invalid object. The
+only hint that a client could get would be from listening to <code>IRegistryChangeEvent</code>.
+The problem has existed since Eclipse 3.0, but is rarely encountered in practice
+because it is highly unusual for a plug-in to be removed without restarting
+Eclipse.</p>
+<p>This problem has been addressed in 3.1 by:</p>
+<ul>
+  <li>Existing methods on these <code>IExtensionPoint</code>, <code>IExtension</code>,
+    and <code>IConfigurationElement</code> now specify that <code>InvalidRegistryObjectException</code>
+    will be thrown when the object is invalid. The exception is unchecked so
+    that dynamic unaware clients are not forced to check it.</li>
+  <li>A new <code>isValid()</code> method was added to these interfaces so that
+    a client can determine whether an object is still valid.</li>
+  <li>Recommendations were added to the specs to make it clear that hanging on
+    to objects obtained from the extension registry is not recommended.</li>
+</ul>
+<p><b>Action required:</b> If your plug-in needs to be dynamic-aware (i.e.
+capable of dealing with the on-the-fly addition or removal of plug-ins), the
+code that deals with <code>IExtensionPoint</code>, <code>IExtension</code>, and <code>IConfigurationElement</code>
+object sourced from some other plug-in must be changed to catch <code>IRegistryChangeEvent</code>,
+exactly as if it were a checked exception. Catching the exception (rather than
+an <code>isValid()</code> pre-check) is the only surefire way to deal with the
+case of a plug-in being removed by a concurrent thread (which, if it happens, it
+almost certainly will be).</p>
 
 
 
