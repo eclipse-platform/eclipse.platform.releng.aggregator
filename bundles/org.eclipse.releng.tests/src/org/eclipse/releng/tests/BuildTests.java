@@ -562,7 +562,7 @@ public class BuildTests extends TestCase {
 		 * @return String
 		 */
 		private String getChkpiiString(int type) {
-			return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S";
+			return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X " + getExcludeFile () + " -S /jsq";
 		}
 		/**
 		 * Method locateEclipseZip.
