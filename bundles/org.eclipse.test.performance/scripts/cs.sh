@@ -6,10 +6,10 @@
 #     where <command> is one of "start, stop, ij, look"
 #
 
-# the root of the Cloudscape directory 
-CLOUDSCAPE_INSTALL=/Volumes/Stuff/Java/Cloudscape_10.0
+# where the Cloudscape libraries reside
+CSLIB=/Volumes/Stuff/Java/Cloudscape_10.0/lib
 
-# where DB live
+# where the DBs live
 DBROOT=/tmp/cloudscape
 
 # name of the default DB
@@ -18,11 +18,9 @@ DBNAME=perfDB
 # the Java VM
 JAVA=/usr/bin/java
 
-
-CSL=${CLOUDSCAPE_INSTALL}/lib
 NSC="$JAVA -Dcloudscape.system.home=$DBROOT com.ihost.cs.drda.NetworkServerControl"
 
-export CLASSPATH="${CSL}/cs.jar:${CSL}/cstools.jar:${CSL}/csnet.jar:${CLASSPATH}"
+export CLASSPATH="${CSLIB}/cs.jar:${CSLIB}/cstools.jar:${CSLIB}/csnet.jar:${CLASSPATH}"
 
 case $1 in
 	start )
