@@ -13,13 +13,14 @@
 org.eclipse.ui.actionSets</H3>
 
 <P >
-Your plug-in can contribute menus, menu items, and tool bar items to the workbench menus and toolbar using the
+Your plug-in can contribute menus, menu items, and tool bar items to the workbench menus and toolbar
+by using the
 <a href="../reference/extension-points/org_eclipse_ui_actionSets.html"><b> org.eclipse.ui.actionSets</b></a> 
-extension point. In order to reduce the clutter of having every plug-in's menu contributions shown at once, the contributions are grouped into action sets which can be made visible by user preference.</P>
+extension point. In order to reduce the clutter that would be caused by having every plug-in's menu contributions shown at once, the contributions are grouped into action sets which can be made visible by user preference.</P>
 <P >
 You can see which action sets have been contributed to your workbench by choosing
-<b>Window-&gt;Customize Perspective...</b> from the workbench menu. This will show you a dialog that lists
-the shortcuts and action sets that are available to the current
+<b>Window-&gt;Customize Perspective...</b> from the workbench menu. This option will show you a dialog that lists
+the shortcuts and action sets that are available for the current
 perspective.&nbsp; Action sets are listed under <b>Other</b>.&nbsp; A checkmark by the action set means that the menu and tool bar actions are visible in the workbench. You can select the name of the action set to see the list of available actions on the right. The figure below shows the
 list of action sets available in our workbench.&nbsp; (Your workbench may look different depending on which plug-ins you have
 installed and which perspective is active.)</P>
@@ -64,10 +65,10 @@ Wow, there's a lot going on here!&nbsp; Let's take it a step at a time, looking
 only at the first action for now.&nbsp;&nbsp;</P>
 <P >
 First, the action set is declared and given a <b>label</b>.&nbsp;
-The label &quot;ReadMe Actions&quot; (defined for <b> %ActionSet.name</b> in the plug-in's
+The label &quot;ReadMe Actions&quot; (defined for <b> %ActionSet.name</b>  key in the plug-in's
 properties file) is used to display the action set in the
 dialog shown above.&nbsp; Since we set <b> visible</b> to true, the workbench will initially have the action set
-check marked in the action set list and the actions will be visible.</P>
+checked in the action set list and the actions will be visible.</P>
 <P >
 The rest of the action set declaration is concerned with defining the menu in
 which the actions appears and the actions themselves.</P>
@@ -76,10 +77,9 @@ We define a menu whose <b>label</b> appears in the workbench menus.&nbsp; The me
 tells the workbench to place the new menu in the <b>additions</b>
 slot of the <b>window</b> menu.&nbsp; (For a discussion
 of menu paths and slots, see <a HREF="workbench_menupaths.htm" CLASS="XRef"> Menu and toolbar paths</a>.)&nbsp;
-We define some slots in our new menu that can be used to insert actions in
-specific locations in our menu.</P>
+We also define some slots in our new menu so that actions can be inserted at specific locations in our menu.</P>
 <P >
-This alone is enough to cause the menu to appear in the workbench <b>Window</b>
+This markup alone is enough to cause the menu to appear in the workbench <b>Window</b>
 menu.</P>
 <P >
 <img border="0" src="images/readmeactionset.jpg" width="229" height="329"></P>
@@ -91,7 +91,8 @@ The action definition (<b>id</b>,
 similar to the other actions we've seen in views, editors, and popups.&nbsp;
 We'll focus here on what's different:&nbsp; where does the action go?&nbsp; We
 use&nbsp; <b>menubarPath</b> and <b>toolbarPath</b>
-to indicate the location.&nbsp; First, we set the <b>menubarPath</b> to add the actions to a slot in the menu
+to indicate its location.&nbsp; First, we define the <b>menubarPath</b> to add the
+action to a slot in the menu
 that we just defined (&nbsp;<b>&quot;window/org_eclipse_ui_examples_readmetool/slot1&quot;</b>).</P>
 <P >
 <img border="0" src="images/readmeactionsetmenu.jpg" width="569" height="75"></P>
@@ -102,26 +103,26 @@ relative to other plug-in's toolbar contributions.</P>
 <P >
 <img border="0" src="images/readmeactionsettoolbar.jpg" width="248" height="55"></P>
 <P >
-What happens when the action is selected by the user?&nbsp; Most actions in an
-action set are locally implemented.&nbsp; That is, they are implemented by the
-plug-in that defines the action, using the class specified in the <b>class</b>
+What happens when the action is selected by the user?&nbsp; The action is
+implemented by the class specified in the <b>class</b>
 attribute.&nbsp; The action <b> class</b> must implement
 <b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindowActionDelegate.html"> IWorkbenchWindowActionDelegate</a></b>,
 or
 <b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindowPulldownDelegate.html"> IWorkbenchWindowPulldownDelegate</a></b> 
-if the action set is shown as a pull-down in a tool bar.&nbsp; Since we are not
-creating a tool bar pull-down, we provide <b>WindowActionDelegate</b>.&nbsp;
+if the action will be shown as a pull-down tool item in the tool bar.&nbsp; Since we are not
+creating a pull-down tool item, we provide <b>WindowActionDelegate</b>.&nbsp;
 This class is similar to <b>ObjectActionDelegate</b>.&nbsp;
-It launches the readme sections dialog when the user chooses the action.&nbsp; (We'll see the sections dialog in <a href="dialogs_applications.htm">Application
+It launches the readme sections dialog when the user chooses the action.&nbsp; (We'll
+discuss the sections dialog in <a href="dialogs_applications.htm">Application
 dialogs</a>.)</P>
 
 
 <P >
-Finally, the action supplies enabling conditions for its menu item and tool bar
-item.&nbsp; They will only be enabled when a single (<b>enablesFor=&quot;1&quot;</b>)
+The action also supplies enabling conditions for its menu item and tool bar
+item.&nbsp; The menu and tool bar items will only be enabled when a single (<b>enablesFor=&quot;1&quot;</b>)
 readme file (<b>selectionClass =&quot;org.eclipse.core.resources.IFile&quot;
 name=&quot;*.readme&quot;</b>) is selected.&nbsp; This action's menu and toolbar
-item appear and enable based solely on the markup
+item appear and are enabled by virtue of the markup
 in the <b>plugin.xml</b> file.&nbsp; None of the
 plug-in code will execute until the user chooses the action and the workbench
 runs the action <b>class</b>.</P>

@@ -13,25 +13,25 @@
 org.eclipse.ui.views</H3>
 
 <P >A view is a workbench part that can navigate a hierarchy of information or display properties for an
-object.&nbsp; Views are often provided to support a corresponding editor.&nbsp;
+object.&nbsp; Only one instance of any given view
+is open in a workbench page.&nbsp; When the user makes selections or other changes in a view,
+those changes are immediately reflected in the workbench. Views are often provided to support a corresponding editor.&nbsp;
 For example, an <b>outline</b> view shows a structured view of the information
 in an editor.&nbsp; A <b>properties</b> view shows the properties of an object
 that is currently being edited.</P>
 
 <P >
- When the user makes selections or otherwise makes changes in a view, the changes are reflected immediately in other related parts of the user interface. Only one instance of any given view
-is open in a workbench page.</P>
-<P >
 The extension point <b><a href="../reference/extension-points/org_eclipse_ui_views.html">org.eclipse.ui.views</a></b>
 allows plug-ins to add views to the workbench. Plug-ins that contribute a view must register the view in their
-<b> plugin.xml </b> file, along with configuration information about the view, such as its implementation class, the category (or group) of views to which it belongs, and the name and icon that should be used to describe the view in menus and labels.</P>
+<b> plugin.xml </b> file and provide&nbsp; configuration information about the view, such as its implementation class, the category (or group) of views to which it belongs, and the name and icon that should be used to describe the view in menus and labels.</P>
 <P >
 The interface for views is defined in <b><a href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart</a></b>, but plug-ins
 can choose to extend the
 <b><a href="../reference/api/org/eclipse/ui/part/ViewPart.html"> ViewPart</a></b> class rather than implement an
 <b><a href="../reference/api/org/eclipse/ui/IViewPart.html"> IViewPart</a></b> from scratch.</P>
 <P >
-We implemented a minimal view extension in the hello world example. Now we'll look at one that is aware of other workbench views and responds to user navigation and selection in the workbench. First,
+We implemented a minimal view extension in the hello world example. Now we'll look at one that is aware of other workbench views and responds to user navigation and selection
+changes in the workbench. First,
 let's take a look at the declaration of the extension in the <b>plugin.xml</b>.</P>
 <font color='#4444CC'><pre>&lt;extension 
    point=&quot;org.eclipse.ui.views&quot;&gt;
@@ -59,11 +59,13 @@ Let's look at the <b>ReadmeSectionsView</b>. You can show any view in the
 workbench by choosing <b>Window-&gt;Show View-&gt;Other... </b> and selecting the view from the <b> Show View</b> list.</P>
 <P >
 When we show the <b>ReadmeSectionsView</b>, a view with a list in it pops up.
-The list is empty unless we click on a file with extension <b>.readme</b>, in which case it populates the list with sections from the readme file.</P>
+The list is empty unless we click on a file with an extension of <b>.readme</b>, in which case
+the list is populated with sections from the readme file.</P>
 
 <img border="0" src="images/readmeview.jpg" width="277" height="191">
 <P >
-How does the plug-in know about selection changes and how did it recognize the readme file? If we can track this down in the code, we are well on our way to understanding how to build integrated workbench plug-ins.</P>
+How does the plug-in recognize the readme file and how did it know about selection changes? If we can track down
+the answers to these questions, we are well on our way to understanding how to build integrated workbench plug-ins.</P>
 <P >
 We'll start with the familiar <b>createPartControl</b>
 method.&nbsp; As we saw in the Hello World example, this is where the widgets
@@ -83,7 +85,8 @@ started.</P>
 <P >
 The view creates and stores a ListViewer and registers itself as a selection listener
 on its page. It obtains the page from an
-<b><a href="../reference/api/org/eclipse/ui/IViewSite.html">IViewSite</a></b>, which contains information about the view's context, such as its workbench window, containing page, and plug-in. When we are notified of a selection change, what happens?&nbsp;
+<b><a href="../reference/api/org/eclipse/ui/IViewSite.html">IViewSite</a></b>, which contains information about the view's context, such as its workbench window,
+its containing page, and its plug-in. When we are notified of a selection change, what happens?&nbsp;
 The following code is executed:</P>
 <font color='#4444CC'><pre>
    public void selectionChanged(IWorkbenchPart part, ISelection sel) {
@@ -93,16 +96,16 @@ The following code is executed:</P>
    }
 </pre></font>
 <P >
-It looks like the <b> ReadmeModelFactory</b> class is involved in turning the selection into readme sections, which are understood to be input for
+It looks like the <b> ReadmeModelFactory</b> class is responsible for turning the selection into readme
+sections and these sections are input for
 the viewer that we created in the <b>createPartControl</b>
 method.</P>
 <P >
-We know that the view registered its interest in selection changes. Somehow the selection got converted into appropriate input for our viewer. And the viewer did some magic to populate
-a list widget.</P>
+But how did the viewer populate its list widgets?&nbsp; For now, let's assume that once the viewer was told its input element, it knew how to populate
+its list widget with the information - it is a ListViewer, after all.&nbsp; If you must know right now what this viewer is all about, go to <a HREF="jface_viewers.htm" CLASS="XRef">Viewers</a>.&nbsp;</P>
 <P >
-If you must know right now what this viewer is all about, go to <a HREF="jface_viewers.htm" CLASS="XRef">Viewers</a>. For now we'll just say that once the viewer was told its input element, it knew how to populate a list widget with the information.&nbsp;
-(It is a ListViewer, after all.)&nbsp; But how did we know when we had a readme file and where did the
-section information for the viewer come from? A quick look at the
+We still do not know how readme files are detected or where the file's section
+information comes from.&nbsp; A quick look at the
 <b> ReadmeModelFactory</b> sheds some light.</P>
 <font color='#4444CC'><pre>
    public AdaptableList getSections(ISelection sel) {
@@ -134,7 +137,7 @@ parse the sections.&nbsp;&nbsp; You can browse the rest of <b>ReadmeModelFactory
 <b>MarkElement</b>, and <b> DefaultSectionsParser</b> for the
 details about the file parsing. </P>
 <P >
-We've covered a lot of common workbench concepts by studying this extension. Now we'll move on to some other workbench extensions and examine how your plug-in can contribute further to the workbench UI. </P>
+We've covered a lot of common workbench concepts by studying this extension. Now we'll move on to some other workbench extensions and examine how your plug-in can further contribute to the workbench UI. </P>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>

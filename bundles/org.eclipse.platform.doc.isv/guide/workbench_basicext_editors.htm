@@ -14,15 +14,16 @@ org.eclipse.ui.editors</H3>
 
 <P >
 An editor is a workbench part that allows a user to edit an object (often a
-file). Editors operate in a similar manner to file system editing tools, except that they are tightly integrated into the platform workbench UI. An editor is always associated with an input object
-(<a href="../reference/api/org/eclipse/ui/IEditorInput.html"><b>IEditorInput</b></a>). You can think of the input object as a document or file that is edited. Changes made in an editor are not
+file). Editors operate in a manner similar to file system editing tools, except that they are tightly integrated into the platform workbench UI. An editor is always associated with an input object
+(<a href="../reference/api/org/eclipse/ui/IEditorInput.html"><b>IEditorInput</b></a>). You can think of the input object as
+the document or file that is being edited. Changes made in an editor are not
 committed until the user saves them. </P>
 <P >
 Only one editor can be open for any particular editor input in a workbench page. For example, if the user is editing
 <b> readme.txt</b> in the workbench, opening it again
 in the same perspective will activate the same editor. (You can open another
 editor on the same file from a different workbench window or perspective).&nbsp;
-Unlike views, however, the same editor type (such as a text editor) may be open
+Unlike views, however, the same editor type, such as a text editor, may be open
 many times
 within one workbench page for different inputs.</P>
 <P >
@@ -31,9 +32,9 @@ is used by plug-ins to add editors to the workbench. Plug-ins that contribute an
 extension in their <b>plugin.xml </b> file, along with configuration information
 for the editor. Some
 of the editor information, such as the implementation <b> class</b> and the
-<b> name</b> and <b> icon</b> used in the workbench menus and
+<b> name</b> and the <b>icon</b>  to be used in the workbench menus and
 labels, is similar to the view information. In addition, editor extensions specify the file extensions or file name patterns of the file types that the editor understands. Editors can also define a
-<b> contributorClass</b>, a class that adds actions to workbench menus and tool bars when the editor is active.</P>
+<b> contributorClass</b>, which is a class that adds actions to workbench menus and tool bars when the editor is active.</P>
 <P >
 The interface for editors is defined in <b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>, but plug-ins
 can choose to extend the
@@ -41,8 +42,9 @@ can choose to extend the
 <b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>
 from scratch.</P>
 <i><blockquote>
-Note:&nbsp; Editor extensions can also be configured to launch an external program to edit a file, or to provide a launcher class
-that is used to call pre-existing java code as the editor. In this discussion, we are focusing on those editors that are actually tightly integrated with the workbench and implemented using
+Note:&nbsp; An editor extension can also be configured to launch an external program
+or to call pre-existing java code. In this discussion, we are focusing on those editors that are actually tightly integrated with the workbench and
+are implemented using
 <b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>.</blockquote></i>
 <P >
 The readme tool provides a custom editor primarily for the purpose of contributing its own content outliner page to the
@@ -75,7 +77,10 @@ detail.</P>
 Editor action contributors</H4>
 <P >
 The contributor class adds editor-related actions to the workbench menu and toolbar. It must implement the
-<b><a href="../reference/api/org/eclipse/ui/IEditorActionBarContributor.html"> IEditorActionBarContributor</a></b> interface. The contributor is separated from the editor itself since any given workbench page can have multiple editors of the same type. Rather than have each instance of an editor create actions and images, a single contributor is shared by all the editors of a specific type.&nbsp;</P>
+<b><a href="../reference/api/org/eclipse/ui/IEditorActionBarContributor.html"> IEditorActionBarContributor</a></b> interface. The contributor is
+separate from the editor itself since any given workbench page can have multiple editors of the same type.
+A single contributor is shared by all the editors of a specific type, rather than
+having each instance of an editor create actions and images.&nbsp;</P>
 <P >
 In <b>ReadmeEditorActionBarContributor</b>, we contribute three actions,
 &quot;Editor Action1,&quot; &quot;Editor Action2,&quot; and &quot;Editor Action3.&quot;&nbsp;&nbsp;
@@ -106,11 +111,11 @@ actions</a>.)&nbsp;&nbsp;</P>
 <P >Note how similar the action information is to the
 <b> viewActions</b> information we saw in the markup
 for the view action.&nbsp; The actions are set up in code since we have to
-manage the sharing of the actions among different instances of the same editor.</P>
+manage the sharing of the actions among different instances of the same editor.&nbsp;
+When the actions are created in the constructor, they are independent of any
+particular instance of the editor.</P>
 <P >
-When they are created in the constructor, the actions are independent of any particular
-instance of the editor.&nbsp; When an editor becomes active and the actions need
-to be installed in the workbench menus and tool bar, the <b>setActiveEditor
+ When an editor becomes active and it has actions that need to be installed in the workbench menus and tool bar, the <b>setActiveEditor
 </b>message is sent to the contributor.&nbsp; The contributor connects the editor actions to a specific editor.&nbsp;&nbsp;</P>
 <font color='#4444CC'><pre>
    public void setActiveEditor(IEditorPart editor) {

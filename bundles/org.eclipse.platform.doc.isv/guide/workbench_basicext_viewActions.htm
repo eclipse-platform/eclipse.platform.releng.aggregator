@@ -19,8 +19,9 @@ extension point. This extension point allows plug-ins to contribute menu items, 
 existing view's local
 pull-down menu and local tool bar. </P>
 <P >
-You may have noticed an item in the navigator view's local tool bar that becomes
-enabled whenever a readme file is selected. This item also appears in the view's local
+You may have noticed an item in the navigator's local tool bar that becomes
+enabled whenever a readme file is selected. This item also appears in the
+navigator's local
 pull-down menu. These actions appear because the readme tool plug-in contributes
 them using the
 <b> viewActions</b> extension.</P>
@@ -52,7 +53,7 @@ The relevant <b> plugin.xml</b> contribution is below.</P>
 A view contribution with a unique id is specified. The view to which we are adding
 the action is specified in the
 <b> targetID</b>. We are contributing to the resource
-navigator view's menu.&nbsp; We specify the label along with the menu bar and
+navigator's menu.&nbsp; We specify the label and the menu bar and
 tool bar locations for the new action.&nbsp; (For a complete discussion of menu and toolbar locations, see
 <a HREF="workbench_menupaths.htm" CLASS="XRef"> Menu and toolbar paths</a>). </P>
 <P >
@@ -62,14 +63,14 @@ We also specify the conditions under which the action should be enabled. You can
 (class=&quot;org.eclipse.core.resources.IFile&quot;)</b>, whose name has
 &quot;<b>.readme</b>&quot; in the file extension (<b>name=&quot;*.readme&quot;</b>). Sure enough, that's exactly what happens when you click around in the resource navigator.&nbsp;&nbsp;</P>
 <P >
-The information in the <b> plugin.xml</b> is all that's needed to populate the appropriate menus and tool bars. No plug-in code will run until the action is actually selected from the menu or toolbar.
-The implementation class specified in the
+The information in the <b> plugin.xml</b> is all that's needed to add items to menus and tool
+bars since plug-in code will only run when the action is actually selected from the menu or toolbar.
+To provide the action behavior, the implementation class specified in the
 <b> plugin.xml</b> must implement the <b><a href="../reference/api/org/eclipse/ui/IViewActionDelegate.html"> IViewActionDelegate</a></b> interface. </P>
 <P >
-In this example, the readme plug-in supplies <b> ViewActionDelegate</b> to implement the action. If you browse this class you will see that it includes methods for handling selection changes, invoking the action, and
-remembering what view it was created for.</P>
-<P >
-The action itself simply launches a dialog that announces that the view action was executed. </P>
+In this example, the readme plug-in supplies <b> ViewActionDelegate</b> to implement the action. If you browse this class you will see that it includes methods for
+remembering its view, handling selection changes, and invoking its action.&nbsp;
+When invoked the action itself simply launches a dialog that announces it was executed.</P>
 <font color='#4444CC'><pre>
 public void run(org.eclipse.jface.action.IAction action) {
 	MessageDialog.openInformation(view.getSite().getShell(),

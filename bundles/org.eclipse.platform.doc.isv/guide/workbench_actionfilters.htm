@@ -15,10 +15,10 @@ Boolean expressions and action filters
 Boolean expressions and action filters</H2>
 <p>
 When a plug-in contributes an action to the workbench UI using one of the menu
-extension points, it can specify conditions under which the menu item is enabled
+extension points, it can specify the conditions under which the menu item is enabled
 (or visible) in the menu.&nbsp; In addition to supplying simple enabling
-conditions such as selection counts and selection classes, plug-ins can use <b>boolean
-expressions</b> that give more refined control over the enablement of an action.</p>
+conditions, such as selection counts and selection classes, plug-ins can use <b>boolean
+expressions</b>  to enable an action.</p>
 
 
 <h3>
@@ -26,36 +26,66 @@ Boolean expressions</h3>
 
 
 <P CLASS="CellBody">
-The boolean expressions can contain simple boolean operators (NOT, AND, OR) and predefined expressions that evaluate the following conditions:</P>
+The boolean expressions can contain simple boolean operators (NOT, AND, OR) and predefined expressions that
+can evaluate the following conditions:</P>
 <ul>
   <li>
     <p CLASS="CellBody"><b>objectClass</b> - true if each object in the
     selection subclasses or implements the class.</p>
   </li>
   <li>
-    <p CLASS="CellBody"><b>objectState</b> - true if the named attribute meets
-    the specified value.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IActionFilter.html">IActionFilter</a>
+    <p CLASS="CellBody"><b>objectState</b> - true if the named attribute equals the specified value.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IActionFilter.html">IActionFilter</a>
     </b>assists in evaluating the expression.&nbsp; An action filter dynamically computes the enablement
 criteria for an action based on the target selection and the value of named
 attributes.</p>
   </li>
   <li>
     <p CLASS="CellBody"><b>systemProperty</b> - true if the named system
-    property meets the specified value.</p>
+    property equals the specified value.</p>
   </li>
   <li>
     <p CLASS="CellBody"><b>pluginState</b> - specifies whether the specified
     plugin (by <b>id</b>) should be <b>installed</b> or <b>activated</b> </p>
   </li>
 </ul>
+    <p CLASS="CellBody">For example, the following snippets represent enablement
+    expressions that could be used on a hypothetical action in an action set: </p>
+    <pre><font color="#4444CC">&lt;action id=&quot;org.eclipse.examples.actionEnablement.class&quot; 
+       label=&quot;Red Element&quot; 
+       menubarPath=&quot;additions&quot; 
+       class=&quot;org.eclipse.examples.actionEnablement.ObjectTestAction&quot;&gt; 
+       &lt;enablement&gt; 
+<b>	 &lt;and&gt;
+	   &lt;objectClass name=&quot;org.eclipse.examples.actionEnablement.TestElement&quot;/&gt; 
+           &lt;objectState name=&quot;name&quot; value=&quot;red&quot;/&gt; 
+	 &lt;/and&gt;
+</b>       &lt;/enablement&gt; 
+&lt;/action&gt; </font></pre>
+    <pre><font color="#4444CC">&lt;action id=&quot;org.eclipse.examples.actionEnablement.property&quot; 
+       label=&quot;Property&quot; 
+       menubarPath=&quot;additions&quot; 
+       class=&quot;org.eclipse.examples.actionEnablement.PropertyTestAction&quot;&gt; 
+       &lt;enablement&gt; 
+<b>           &lt;systemProperty name=&quot;MyTestProperty&quot; value=&quot;puppy&quot;/&gt; 
+</b>       &lt;/enablement&gt; 
+&lt;/action&gt; </font></pre>
+    <pre><font color="#4444CC">&lt;action id=&quot;org.eclipse.examples.actionEnablement.pluginState&quot; 
+       label=&quot;Installed&quot; 
+       menubarPath=&quot;additions&quot; 
+       class=&quot;org.eclipse.examples.actionEnablement.PluginTestAction&quot;&gt; 
+       &lt;enablement&gt; 
+           <b>&lt;pluginState id=&quot;x.y.z.anotherPlugin&quot; value=&quot;installed&quot;/&gt; </b>
+       &lt;/enablement&gt; 
+&lt;/action&gt; </font></pre>
 <p CLASS="CellBody">See <a href="../reference/extension-points/actionExpressions.html">action
-expressions </a>for samples of these expressions and a complete description of
+expressions </a>for more elaborate samples of these expressions and a complete description of
 the XML.</p>
 
 
 <p>
-The following table summarizes extension points that contribute actions, the
-attributes in the XML markup that affect enablement, and how expressions extend the capability to compute the enablement criteria:</p>
+The following table lists extension points that contribute actions and
+summarizes how XML markup attributes and boolean expressions can be used to
+affect enablement.</p>
 
 
 <TABLE BORDER="1" width="671">
