@@ -38,6 +38,7 @@ import junit.framework.TestCase;
 
 public class BuildTests extends TestCase {
 	
+	private List copyrightExcludeDirectories;
 	private List cvsExcludeDirectories;
 	private String sourceDirectoryName;
 	private String logFileName;
@@ -112,6 +113,7 @@ public class BuildTests extends TestCase {
 		
 		boolean result = false;
 		initializeJavaCopyright();
+		
 		new File(logFileName).mkdirs();
 		logFileName = logFileName + File.separator + "copyrightLog.txt";
 
@@ -142,6 +144,10 @@ public class BuildTests extends TestCase {
 		
 		boolean result = false;
 		
+		if (isCopyrightExcludeDirectory(aDirectory)) {
+			return result;
+		}
+		
 		File[] files = aDirectory.listFiles();
 		
 		if (files == null) {
@@ -167,12 +173,9 @@ public class BuildTests extends TestCase {
 		logFileName = logFileName + File.separator + "cvsTypesLog.txt";
 			
 		try {
-
-	//		StringWriter aWriter = new StringWriter();
 			BufferedWriter aLog = new BufferedWriter(new FileWriter(logFileName));
 			File rootDirectory = new File(sourceDirectoryName);
 			result = scanCVSKTag(rootDirectory, aLog);
-	//		System.out.println(aWriter.getBuffer().toString());
 			aLog.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -208,25 +211,39 @@ public class BuildTests extends TestCase {
 		cvsTypes.put("rsc", CVS_BINARY);
 		cvsTypes.put("jnilib", CVS_BINARY);
 		cvsTypes.put("a", CVS_BINARY);
-		
+		cvsTypes.put("sl", CVS_BINARY);
+		cvsTypes.put("a", CVS_BINARY);
+		cvsTypes.put("1", CVS_BINARY);
+		cvsTypes.put("xpm", CVS_BINARY);
+		cvsTypes.put("a", CVS_BINARY);
+		cvsTypes.put("pm", CVS_BINARY);
+
 		// Define directories with all binary types	
 		cvsDirectoryTypes.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
 		
 		// Define exclude directories
 		cvsExcludeDirectories.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
+		cvsExcludeDirectories.add("platform-launcher");
 
 	}
 	
 	private void initializeJavaCopyright() {
+		copyrightExcludeDirectories = new ArrayList();
+
 		javaCopyrightLines = new String[8];
 		javaCopyrightLines[0]="/*******************************************************************************";
-		javaCopyrightLines[0]=" * Copyright (c) 2000, 2003 IBM Corporation and others.";
-		javaCopyrightLines[0]=" * All rights reserved. This program and the accompanying materials ";
-		javaCopyrightLines[0]=" * are made available under the terms of the Common Public License v1.0";
-		javaCopyrightLines[0]=" * which accompanies this distribution, and is available at";
-		javaCopyrightLines[0]=" * http://www.eclipse.org/legal/cpl-v10.html";
-		javaCopyrightLines[0]=" * ";
-		javaCopyrightLines[0]=" * Contributors:";
+		javaCopyrightLines[1]=" * Copyright (c) 2000, 2003 IBM Corporation and others.";
+		javaCopyrightLines[2]=" * All rights reserved. This program and the accompanying materials ";
+		javaCopyrightLines[3]=" * are made available under the terms of the Common Public License v1.0";
+		javaCopyrightLines[4]=" * which accompanies this distribution, and is available at";
+		javaCopyrightLines[5]=" * http://www.eclipse.org/legal/cpl-v10.html";
+		javaCopyrightLines[6]=" * ";
+		javaCopyrightLines[7]=" * Contributors:";
+		
+		// Define directories with all binary types	
+		copyrightExcludeDirectories.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
+		copyrightExcludeDirectories.add("org.eclipse.jdt.debug.tests" + File.separator + "resources");
+
 	}
 	
 	private boolean scanCVSKTag(File aDirectory, BufferedWriter aLog) {
@@ -271,7 +288,23 @@ public class BuildTests extends TestCase {
 		}
 		return false;
 	}
-
+	
+	/**
+	 * @param aDirectory
+	 * @return
+	 */
+	private boolean isCopyrightExcludeDirectory(File aDirectory) {
+		String aString = aDirectory.getPath().substring(sourceDirectoryName.length()).toLowerCase();
+		Iterator anIterator = copyrightExcludeDirectories.iterator();
+		while (anIterator.hasNext()) {
+			String anItem = (String) anIterator.next();
+			if (aString.indexOf(anItem) != -1) {
+				return true; 
+			}
+		}
+		return false;
+	}
+	
 	private boolean scanCVSDirectory(File aDirectory, BufferedWriter aLog) {
 		
 		boolean result = false;
@@ -315,14 +348,14 @@ public class BuildTests extends TestCase {
 			aReader = new LineNumberReader(new FileReader(aFile));
 			for (int i = 0; i < javaCopyrightLines.length; i++) {
 				String aLine = aReader.readLine();
+				if (aLine == null) {
+					result = true;
+					break;
+				}
+				
 				if (i > -1) {
 					if (!aLine.trim().toLowerCase().equals(javaCopyrightLines[i].trim().toLowerCase())) {
 						result = true;
-						aLog.write(aFile.getPath());
-						aLog.newLine();
-//						System.out.println("Error in line: " + i);
-//						System.out.println(aLine);
-//						System.out.println(copyrightLines[i]);
 						break;
 					}
 				}
@@ -333,11 +366,28 @@ public class BuildTests extends TestCase {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		if (result) {
 			badCopyrights++;
+			try {
+				int start = aFile.getPath().indexOf("plugins");
+				String fileName;
+				if (start == -1) {
+					fileName = aFile.getPath();
+				} else {
+					fileName = aFile.getPath().substring(start + "plugins".length() + 1);
+				}
+
+				aLog.write(fileName);
+				aLog.newLine();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+	
 		} else {
 			goodCopyrights++;
 		}
+		
 		return result;
 	}
 	
@@ -559,14 +609,10 @@ public class BuildTests extends TestCase {
 		
 		private String getOutputFile(int type) {
 		
-			// String to use when running as an automated test.
-			String aString = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
 
-			// String t use when running in an Eclipse runtime
-			// String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
-
-			new File(aString).mkdirs();
-			aString = aString + File.separator + "org.eclipse.nls.";
+			new File(logFileName).mkdirs();
+			
+			String aString = logFileName + File.separator + "org.eclipse.nls.";
 			aString = new File(aString).getPath();
 
 			switch (type) {
@@ -591,8 +637,6 @@ public class BuildTests extends TestCase {
 		
 		private String getFilesToTest(int type) {
 			
-//			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder" + File.separator;
-//			String sniffFolder = File.separator + "builds" + File.separator + "t" + File.separator;
 			String sniffFolder = Platform.getLocation().toOSString();
 
 			String aString = new File(sniffFolder).getPath() + File.separator;
@@ -719,7 +763,7 @@ public class BuildTests extends TestCase {
 	protected void setUp() throws Exception {
 		
 		// Autoamted Test
-		logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator;
+		logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";  // A tad bogus but this is where the build wants to copy the results from!
 		sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
 
 		// Runtime Workbench - TODI Put me back to Automated status
