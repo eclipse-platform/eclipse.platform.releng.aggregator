@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.eclipse.releng.tools"
+   name="RelEng Plug-in"
+   version="3.0.4"
+   provider-name="Eclipse.org"
+   class="org.eclipse.releng.tools.RelEngPlugin">
+
+   <runtime>
+      <library name="tools.jar"/>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.ui.ide" optional="true"/>
+      <import plugin="org.eclipse.ui.views" optional="true"/>
+      <import plugin="org.eclipse.jface.text" optional="true"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor" optional="true"/>
+      <import plugin="org.eclipse.ui.editors" optional="true"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.team.cvs.core"/>
+      <import plugin="org.eclipse.team.core"/>
+      <import plugin="org.eclipse.team.cvs.ui"/>
+<!-- Blanket imports from team plugin.xml -->
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.runtime.compatibility"/>
+      <import plugin="org.eclipse.team.core"/>
+      <import plugin="org.eclipse.team.ui"/>
+      <import plugin="org.eclipse.compare"/>
+   </requires>
+
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IResource"
+            id="org.eclipse.releng.tools.ResourceContributions">
+         <filter
+               name="projectPersistentProperty"
+               value="org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature">
+         </filter>
+         <action
+               label="Release..."
+               class="org.eclipse.releng.tools.TagAndReleaseAction"
+               menubarPath="team.main/group2"
+               id="org.eclipse.releng.tools.tagAndRelease">
+			</action>
+			<action
+               label="Released"
+               tooltip="Compare the selected project(s) with the released versions"
+               class="org.eclipse.releng.tools.CompareLocalToMap"
+               menubarPath="compareWithMenu/compareWithGroup"
+               id="org.eclipse.releng.tools.compareWithReleased">
+         </action>
+         <action
+               label="Released"
+               class="org.eclipse.releng.tools.ReplaceLocalFromMap"
+               tooltip="Replace the selcted project(s) with the released versions"
+               menubarPath="replaceWithMenu/replaceWithGroup"
+               id="org.eclipse.releng.tools.replaceWithReleased">
+         </action>
+      </objectContribution>
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IFile"
+            nameFilter="*.map"
+            id="org.eclipse.releng.cvs.mapActions">
+         <action
+               label="Load Map Projects"
+               class="org.eclipse.releng.tools.LoadMap"
+               menubarPath="team.main/group1"
+               id="org.eclipse.releng.cvs.LoadMap">
+         </action>
+         <action
+               label="Tag Map Projects"
+               class="org.eclipse.releng.tools.TagMap"
+               menubarPath="team.main/group1"
+               id="org.eclipse.releng.cvs.TagMap">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            id="org.eclipse.releng.internal.tools.CopyrightContribution">
+         <action
+               label="Fix Copyrights"
+               class="org.eclipse.releng.tools.FixCopyrightAction"
+               menubarPath="additions"
+               enablesFor="+"
+               id="org.eclipse.releng.tools.fixCopyrights">
+         </action>
+      </objectContribution>
+   </extension>
+   
+   	<!-- ********** Action Sets ************** -->
+	<extension point="org.eclipse.ui.actionSets">
+		<actionSet 
+			label="%RelEng" 
+			visible="false" 
+			id="org.eclipse.releng.tools.RelEngActionSet"
+			description="%RelEngActionSet.description">
+	  	  <action
+	  	  	toolbarPath="Normal/RelEng Tools"
+	  		 label="%RelEngActionSet.Release"
+	  		 tooltip="%RelEngActionSet.tooltip"
+	  		 icon="icons/full/clcl16/release_action.gif"
+	  		 class="org.eclipse.releng.tools.TagAndReleaseAction"
+	  		 id="org.eclipse.eclipse.releng.tools.ReleaseAction"> 
+	  	    </action>
+	  </actionSet>
+	</extension>
+   
+
+</plugin>
