@@ -10,70 +10,67 @@
 
 <h3>Build configuration</h3>
 
-<p>The component build mechanism is driven by a build configuration.&nbsp; The
-build configuration for an individual plug-in, fragment, or component is found
+<p>The feature build mechanism is driven by a build configuration.&nbsp; The
+build configuration for an individual plug-in, fragment, or feature is found
 in a <b> build.properties</b> file for the corresponding element.</p>
 
-<p>PDE supplies wizards that create the <b> build.properties</b> file for each plug-in and fragment
-that is to be packaged into a component. The <b> build.properties</b> file contains information on how to compile source folders into
-JARs. Typically, you modify this file inside the component manifest
-editor.&nbsp; You can also add entries directly to the file using another
-editor.</p>
+<p>PDE project creation wizards generate the <b> build.properties</b> file when
+projects in question are created. The file contains information on how to compile source folders into
+JARs. This information can be indirectly updated in the Runtime page of the
+manifest editor. It can also be directly modified using the appropriate editor.</p>
 
 <p>PDE provides a simple editor for the <b> build.properties</b> that has form and source views.
 The file itself follows the Java properties format. You need to provide a number of
 keys and their corresponding values. Multiple values are separated using a comma
 as the delimiter. </p>
 
-<p > There are six
-points where text can be specified by a plug-in or fragment for inclusion in the
+<p>The most important keys to provide are those for mapping of source folders
+into run-time libraries. They will drive the build process and control where to
+find source code to compile and how to package it into the libraries. The keys
+are in form &quot;<b>source.&lt;library&gt;</b>&quot; (e.g. <b>source.xyz.jar</b>),
+while values are comma-separated source folders. </p>
+
+<p > In addition, there are six points where text can be specified by a plug-in or fragment for inclusion in the
 build.&nbsp;  These points are: 
  
  </p>
 <ul>
-  <li>bin.includes
+  <li><b>bin.includes</b> - lists files to include in the binary build
 </li>
-  <li>bin.excludes
-</li>
-  <li>javadoc.packages
-</li>
-  <li>javadoc.excludedpackages
+  <li><b>bin.excludes</b> - lists files to exclude from the binary build
 </li>
   <li>
-src.includes</li>
+<b>
+src.includes</b> - lists files to include in the SDK-type build (binary+sources)</li>
   <li>
- src.excludes</li>
+ <b>
+ src.excludes</b> - lists files to exclude from the SDK-type build</li>
+  <li>
+ <b>custom=true</b> - indicates that the build script is hand-crafted as opposed
+ to automatically generated</li>
+  <li>
+ <b>jars.extra.classpath</b> - extra relative classpaths used to make automated
+ build easier (e.g. ../someplugin/xyz.jar)</li>
+  <li>
+ <b>jars.build.order</b> - defines order in which jars should be compiled (in
+ case there are multiple libraries)</li>
 </ul>
 <p  > The values
-defined in these points are expressed as Ant "patterns". 
- &nbsp;  Typically this amounts to a comma-separated list of strings
-to match.&nbsp;&nbsp;  
+defined in these points are expressed as Ant "patterns". Typically this amounts to a comma-separated list of strings
+to match.  
  </p>
 <p  >Standard formats give the
-expected results.&nbsp; For example, &quot;<b>.jar</b>&quot; indicates all jar files in the top level
+expected results.&nbsp; For example, &quot;*<b>.jar</b>&quot; indicates all jar files in the top level
 directory.
 </p>
 <p  >The patterns are
 not deep by default.&nbsp; If you want to
 describe all Java files for example, you should use the pattern "<b>**/*.java</b>".&nbsp;&nbsp;
 The pattern "<b>**</b>" matches any number of directory levels.&nbsp;
-Similarly, to describe whole subtrees, use "<b>foo/</b>".&nbsp;
+Similarly, to describe whole subtrees, use "<b>xyz/</b>".
  </p>
-<p  > Default
-values for these points are always automatically generated with identifiers of
-form <b>auto.&lt;lastPortionOfPointId&gt;</b>.&nbsp;
-This is done to allow your override to extend these default values if
-desired. &nbsp; To set override values, a
-plug-in defines additional name/value properties in the previously-mentioned <b>build.properties</b>
-file. &nbsp; Some examples:</p>
-<font color='#4444CC'><pre>
-   bin.includes=plugin.xml,*.jar
-   javadoc.packages=${auto.packages},org.eclipse.core.target.*
-   src.excludes=${auto.excludes},*Hack.java
-</pre></font>
-<p>When these values are entered in
-the <b> build.properties</b> editor, it looks like this:</p>
-<p align="center"><img border="0" src="images/build-variables.jpg" width="547" height="488"></p>
+<p  >&nbsp;
+ </p>
 <p CLASS="BodyText"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 
 </body>

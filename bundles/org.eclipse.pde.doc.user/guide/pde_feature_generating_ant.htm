@@ -14,11 +14,11 @@
 scripts written in XML format. Ant is ideal for executing tasks usually found in
 automated builds.&nbsp;</p>
 
-<p>The variables set in the plug-in and fragment <b> build.properties
+<p>The variables set in the plug-in, fragment or feature <b>build.properties
 </b> will be used by automated build scripts for
 Ant.&nbsp; PDE generates Ant scripts for creating
 individual plug-in and fragment build files and one overall script for building
-the component JAR. This &quot;main&quot; script is also responsible for running individual
+the feature JAR. This &quot;main&quot; script is also responsible for running individual
 script files in the right order (defined by the plug-in dependency chain). Each
 build file has the same name (<b>build.xml</b>) and is created as a sibling of the manifest
 files in the corresponding projects.</p>
@@ -28,12 +28,84 @@ modifying the generated scripts. If you do modify them, you must not recreate th
 scripts every time you want to rebuild the component. For this reason, script
 generation and execution can be individually controlled. </p>
 
-<p>To create scripts, you can simply press the button <b>Create JAR</b> in
-the component manifest. If the manifest is not open, you can select the
-manifest file and select <b>Create Component JAR</b> from the popup menu.
-In both cases, the following wizard will come up:</p>
+<p>To create scripts, you can simply press the button <b>Package...</b> in
+the feature manifest. If the manifest is not open, you can select the
+manifest file and select <b>Create Feature JAR</b> from the popup menu (similar
+command exists for plug-in and fragment manifests). The command will generate
+the build script and open Ant wizard to execute it:</p>
 
-<p align="center"><img border="0" src="images/component-jar.jpg" width="406" height="473"></p>
+<p align="center"><img border="0" src="images/feature-jar.jpg" width="438" height="495"></p>
+
+<p align="left">The standard Ant wizard allows customization in two ways: by
+providing the execution arguments and by selecting one or more build targets.</p>
+
+<p align="left">Ant arguments are typically used to provide property values that
+override default values and control the build process. Arguments are set using
+&quot;-Dproperty=value&quot;. The following properties are recognized:</p>
+
+<ul>
+  <li>
+    <p align="left"><b>bootclasspath</b> - if set, it replaces the default boot
+    classpath. Used when compiling cross-platform plug-ins (e.g. building a UI
+    plug-in for Windows using Linux)</li>
+  <li><b>build.compiler</font> </b>- sets
+    what compiler should be used. The default is the JDT compiler.</li>
+  <li><b>build.result.folder</b></font> - where
+    the temporary files for the update JAR creation should be placed.
+    These files are usually the plug-in library JARs.</font></li>
+  <li><b>plugin.destination</b> - where
+    plug-in and fragment's update JARs should be put. These JARs represent
+    entire plug-ins and fragments in format suitable for publishing on an
+    Install/Update server and referencing by a feature. The typical layout of an
+    Update site is to have all the plug-in and fragment JARs in one place and
+    all the feature in another. This argument is useful to place plug-ins and
+    fragment directly into the desired directory (or the staging place on the
+    local machine before pushing the features onto the remote server).</li>
+  <li><b>feature.destination</b> - where
+    feature's update JARs should be put.</li>
+</ul>
+<p>When executing feature build script, the
+following targets are used to call individual targets of plug-ins or fragments
+that are listed in the feature:</p>
+<ul>
+  <li><b>all.plugins</b> - to build all the
+    listed plug-ins</li>
+  <li><b>all.fragments</b> - to build all the
+    listed fragments</li>
+  <li><b>all.children</b> - to build all the
+    listed plug-ins and fragments</li>
+</ul>
+<p>The following targets build JARs and sources
+for all feature children:</p>
+<ul>
+  <li><b>build.jars</b></li>
+  <li><b>build.sources</b></li>
+</ul>
+<p>Target <b>build.update.jar</b> can be selected
+to generate a feature JAR in the format used by the install/update mechanism.
+The above mentioned property <b>feature.destination</b> can be used to define
+where to put the JAR and <b>plugin.destination</b> controls where to put
+individual update JARs for plug-ins and fragments.</p>
+<p>Target <b>zip.distribution</b> creates a zip
+file with the feature and its plug-ins and fragments in an SDK-like structure
+but does not include source code. Source can be generated with the <b>zip.sources</b>
+target.</p>
+<p>Use <b>clean</b> target to delete everything
+produced by running any of the targets. Finally, the <b>refresh</b> target
+performs a &quot;Refresh&quot; action in the current project, thus making the
+newly generated resources visible in the Navigator or Package Explorer.</p>
+<p>When executing build scripts for individual
+plug-ins and fragments, an additional target called zip.plugin can be used. It
+creates a zip file with the binary and source contents of a plug-in with the
+following structure:</p>
+<blockquote>
+  <p>id_version/<br>
+  &nbsp;&nbsp;&nbsp; contents</p>
+</blockquote>
+<p>where 'id' is the plug-in unique identifier
+and 'version' is the plug-in version. This zip file can be directly unzipped
+into the Eclipse installation directory as a form of a quick manual deployment.</p>
+<p>&nbsp;</p>
 
 <p CLASS="BodyText"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 
