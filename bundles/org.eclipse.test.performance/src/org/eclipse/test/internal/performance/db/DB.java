@@ -577,7 +577,6 @@ public class DB {
         if (fConnection != null)
             return;
 
-
         String dbloc= PerformanceTestPlugin.getDBLocation();
         if (dbloc == null)
             return;
@@ -627,7 +626,7 @@ public class DB {
             try {
                 fConnection= DriverManager.getConnection("jdbc:" + fDBType + ":" + url, info); //$NON-NLS-1$ //$NON-NLS-2$
             } catch (SQLException e) {
-                if (DERBY.equals(fDBType)) {
+                if ("08001".equals(e.getSQLState()) && DERBY.equals(fDBType)) {
                     if (DEBUG) System.out.println("DriverManager.getConnection failed; retrying for cloudscape"); //$NON-NLS-1$
                     // try Cloudscape
                     fDBType= CLOUDSCAPE;
