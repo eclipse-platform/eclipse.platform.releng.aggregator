@@ -40,7 +40,32 @@ and the <b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org
 extension point make up the generic mechanism that can be used to create your own intro support for
 a given product.  The main purpose of this extension is to define the class that implements
 <a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a> and to
-specify the binding between a product id and an intro part.  Below is the snippet that defines the intro part for the workbench.
+specify the binding between a product id and an intro part.  For example, the following contribution
+defines a hypothetical intro part to be shown by the workbench on startup:
+<pre><font color="#4444CC">
+&lt;extension  
+	point="org.eclipse.ui.intro"&gt;
+	&lt;intro
+		class="com.example.SampleIntroPart"
+		id="someId"&gt;
+		icon="someIcon.gif"
+	&lt;/intro>
+	&lt;introProductBinding
+		introId="someId"
+		productId="com.example.someProductId"&gt;
+	&lt;/introProductBinding&gt;
+&lt;/extension>
+</font></pre>
+This contribution first defines the intro part and assigns it the id "someId".  It then binds this
+intro part to a product whose id is "com.example.someProductId".  On platform startup, the class specified
+in the <b>class</b> attribute will be instantiated by the workbench and presented to the user as the
+introduction to the product.  This is the lowest level integration into the 
+<a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a>
+interface.
+</p>
+<p>The platform supplies its own <a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a>
+implementation called <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>
+that allows for the content and presentation of the intro to be customized.  Below is the snippet that defines the intro part for the workbench.
 We won't go over the mechanics of implementing an intro part since we want to focus on defining
 the intro content.  (See the extension point documentation and javadoc referenced above for more detail
 if you need it.)
@@ -57,18 +82,28 @@ if you need it.)
 	&lt;/introProductBinding&gt;
 &lt;/extension>
 </font></pre>
-The class <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>
-implements a part whose content is specified in the <b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
-extension point.  This structure allows product plug-in developers to focus on developing their intro content rather than
-implementing an intro part scheme from scratch.  If a different intro class is specified, then the other intro extension points
-are not utilized and the plug-in must implement its own scheme for intro content format and configuration.
+The above contribution defines the 
+<a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a> as the
+intro part to be used for the Eclipse SDK platform.  The rest of this discussion shows you how to use and extend
+this part.
+</p>
+<h4>Using the CustomizableIntroPart</h4>
+<p>The platform's <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>
+allows for the content and presentation of the intro to be customized using the
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
+extension point.  (This intro config can be extended using the 
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
+extension point.)  This structure allows product plug-in developers to focus on developing their intro content rather than
+implementing an intro part scheme from scratch.  If a different intro class is specified, then these two extension points
+are not utilized and the specified class must implement its own scheme for intro content format and configuration.
 </p>
 <h4>Defining an intro config</h4>
 <p>
 <b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
 describes the id of the intro config that is to show our content, and the name of the
 XML file that contains the specific definition for the intro content.  It is expected that only one
-intro config should be defined for an intro extension.  (Only the first intro config found can be shown in a
+intro config should be defined for a given <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>.
+(Only the first intro config found can be shown in a
 <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>.)
 <pre><font color="#4444CC">
 &lt;extension   
@@ -183,6 +218,17 @@ and its associated <a href="../reference/extension-points/introContentFileSpec.h
 valid elements, subelements, and their attributes.
 </p>
 <h4>Extending an intro config</h4>
+<p>
+An intro configuration can be extended in three ways:
+<ul>
+<li>content of an existing intro config can be extended.</li>
+<li>a custom standby content part, such as Cheat Sheet, can be contributed to provide 
+content for the standby area of the Intro part.</li>
+<li>custom IntroURL actions can be defined.</li>
+</ul>
+</p>
+<h5>Extending the content of an intro config</h5>
+<p>
 Plug-ins can contribute intro content to a page defined elsewhere.  However, the defining page must define an
 <b>anchor</b> attribute that acts as a location placeholder for new content.  The SDK overview page defines
 two anchors for adding JDT and PDE related elements on the overview page.
@@ -220,8 +266,9 @@ content.
     ...
 &lt;/extension&gt;
 </font></pre>
-The format of the content file is similar to that of the main page, except that the path of the target anchor
-must be specified.
+The format of the content file is similar to that of the intro config content, except that it must
+contain an <b>extensionContent</b> element that defines the path to the anchor where the extension content
+should be inserted.
 <pre><font color="#4444CC"> 
 &lt;introContent&gt;
 	&lt;extensionContent alt-style="css/swt.properties" style="css/overview.css" <b>path="overview/page-content/overview-links/jdtAnchor"</b>&gt;
@@ -241,8 +288,8 @@ a closely related product's intro along with key content of its own.
 own intro and intro config, and then reference important elements defined in another intro's config
 using an <b>include</b> in the content file.  This mechanism is valuable in situations where related products
 are built on top of one another and it is necessary to introduce users to key concepts in the higher level
-products.
-<h4>Contributing a standby content part</h4>
+products.</p>
+<h5>Contributing a standby content part</h5>
 <p>
 Plug-ins can also implement a part for displaying alternative content when the intro page is in standby mode.  For
 example, the platform defines a standby part that will show a cheat sheet for related intro content.  The part is launched using a page
@@ -262,11 +309,38 @@ The following snippet shows how the platform defines a standby part for showing 
 &lt;/extension&gt;
 </font></pre>
 This cheat sheet could be launched from an intro page using a <b>link</b> subelement whose
-URL is <tt>http://org.eclipse.ui.intro/showStandby?partId=org.eclipse.platform.cheatsheet</tt>.
-The detailed mechanics for implementing a standby part are beyond the scope of this document.
-See <a href="../reference/api/org/eclipse/ui/intro/config/IStandbyContentPart.html"><b>IStandbyContentPart</b></a>
+URL is <tt>http://org.eclipse.ui.intro/showStandby?partId=org.eclipse.platform.cheatsheet&amp;input=org.eclipse.pde.helloworld</tt>.
+This IntroURL would launch the org.eclipse.platform.cheatsheet standby content part and set its input to
+"org.eclipse.pde.helloworld".  The detailed mechanics for implementing a standby part are beyond the scope
+of this discussion.   See <a href="../reference/api/org/eclipse/ui/intro/config/IStandbyContentPart.html"><b>IStandbyContentPart</b></a>
 and its related classes for more information.
 </p>
+<h5>Defining a custom IntroURL action</h5>
+<p>
+Using the <b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
+extension point, plug-ins can contribute their own custom actions that can be used as a <b>url</b> value for a link element in a page.
+For example, consider the following link:
+</p>
+<p><tt>http://org.eclipse.ui.intro/runAction?pluginId=org.eclipse.pde.ui&amp;class=org.eclipse.pde.ui.internal.samples.ShowSampleAction&amp;id=org.eclipse.sdk.samples.swt.examples</tt></p>
+<p>This IntroURL will run an action class called <b>ShowSampleAction</b>, which is in a package "org.eclipse.pde.ui.internal.samples" in the plug-in
+"org.eclipse.pde.ui".  The id of the sample to run is "org.eclipse.sdk.samples.swt.examples".
+</p>
+<p>To define a custom version of this intro URL, you can use the following markup:
+<pre><font color="#4444CC"> 
+&lt;extension point="org.eclipse.ui.intro.configExtension"&gt;
+	&lt;action
+		name="myCommand"
+		<b>replaces="runAction?pluginID=org.eclipse.pde.ui&amp;class=org.eclipse.pde.ui.internal.samples.ShowSampleAction"</b>&gt;
+	&lt;/action&gt;
+&lt;/extension&gt;
+</font></pre>
+With the above extension you can now use the following URL to run the same action:</p>
+<p><tt>http://org.eclipse.ui.intro/myCommand?id=org.eclipse.sdk.samples.swt.examples</tt></p>
+<p>
+The action "myCommand" will be replaced by the value of the <b>replaces</b> attribute and any remaining URL
+parameters will be appended to the end.  Once the substitution is made, the resulting URL will be expanded back into:</p>
+<p><tt>http://org.eclipse.ui.intro/runAction?pluginId=org.eclipse.pde.ui&amp;class=org.eclipse.pde.ui.internal.samples.ShowSampleAction&amp;id=org.eclipse.sdk.samples.swt.examples</tt></p>
+
 <p><a href="../notices.html"><img border="0" src="../cpy.gif" alt="Legal notices." border="0" width="324" height="14"></a></p>
 
 </BODY>
