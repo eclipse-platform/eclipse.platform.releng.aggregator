@@ -56,61 +56,71 @@ public class DB {
      * @param buildPattern
      * @param scenarioPattern
      * @return array of scenarios
-     * @deprecated Use the Variations based form of this method.
+     * @deprecated Use queryScenarios(Variations variations, ...) instead
      */
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
-        return queryScenarios(configName, new String[] { buildPattern }, scenarioPattern, null);
+        Variations variations= new Variations();
+        variations.put(PerformanceTestPlugin.CONFIG, configName);       
+        variations.put(PerformanceTestPlugin.BUILD, buildPattern);  
+        return queryScenarios(variations, scenarioPattern, PerformanceTestPlugin.BUILD, null);
     }
 
     /**
-     * Return the specified Dimensions of all Scenarios that match the given config, build, and scenario name.
      * @param configName
      * @param buildPatterns
      * @param scenarioPattern
      * @param dimensions
      * @return array of scenarios
-     * @deprecated Use the Variations based form of this method.
+     * @deprecated Use queryScenarios(Variations variations, ...) instead
      */
     public static Scenario[] queryScenarios(String configName, String[] buildPatterns, String scenarioPattern, Dim[] dimensions) {
-        
-        if ("%".equals(configName)) { //$NON-NLS-1$
-            System.err.println("Warning: DB.queryScenarios no longer supports config patters; returning empty array"); //$NON-NLS-1$
-            return new Scenario[0];
-        }
-        
-        Variations v= new Variations();
-        v.put(PerformanceTestPlugin.CONFIG, configName);
-        String[] scenarios= getDefault().internalQueryScenarioNames(v, scenarioPattern); // get all Scenario names
-        if (scenarios == null)
-            return new Scenario[0];
-        Scenario[] tables= new Scenario[scenarios.length];
-        for (int i= 0; i < scenarios.length; i++) {
-            Variations v2= new Variations();
-            v2.put(PerformanceTestPlugin.CONFIG, configName);
-            tables[i]= new Scenario(v2, PerformanceTestPlugin.BUILD, buildPatterns, scenarios[i], dimensions);
-        }
-        return tables;
+        Variations variations= new Variations();
+        variations.put(PerformanceTestPlugin.CONFIG, configName);       
+        variations.put(PerformanceTestPlugin.BUILD, buildPatterns);  
+        return queryScenarios(variations, scenarioPattern, PerformanceTestPlugin.BUILD, dimensions);
     }
 
     /**
-     * 
-     * @param config
-     * @param builds
+     * @param configName
+     * @param buildPatterns
      * @param scenarioName
      * @return Scenario
-     * @deprecated 
+     * @deprecated Use queryScenarios(Variations variations, ...) instead
      */
-    public static Scenario queryScenario(String config, String[] builds, String scenarioName) {
-        Variations v= new Variations();
-        v.put(PerformanceTestPlugin.CONFIG, config);
-        return new Scenario(v, PerformanceTestPlugin.BUILD, builds, scenarioName, null);
+    public static Scenario queryScenario(String configName, String[] buildPatterns, String scenarioName) {
+        Variations variations= new Variations();
+        variations.put(PerformanceTestPlugin.CONFIG, configName);
+        variations.put(PerformanceTestPlugin.BUILD, buildPatterns);
+        return new Scenario(scenarioName, variations, PerformanceTestPlugin.BUILD, null);
     }
     
+    /**
+     * Returns all Scenarios that match the given variation and scenario pattern.
+     * Every Scenario returned contains a series of datapoints specified by the seriesKey.
+     *      
+     * For example to get the datapoints for 
+     * For every Scenario only the specified Diemnsions are retrieved from the database.
+     * @param variations
+     * @param scenarioPattern
+     * @param seriesKey
+     * @param dimensions
+     * @return array of scenarios
+     */
+    public static Scenario[] queryScenarios(Variations variations, String scenarioPattern, String seriesKey, Dim[] dimensions) {
+        String[] scenarioNames= getDefault().internalQueryScenarioNames(variations, scenarioPattern); // get all Scenario names
+        if (scenarioNames == null)
+            return new Scenario[0];
+        Scenario[] tables= new Scenario[scenarioNames.length];
+        for (int i= 0; i < scenarioNames.length; i++)
+            tables[i]= new Scenario(scenarioNames[i], variations, seriesKey, dimensions);
+        return tables;
+    }
+
     // fingerprints
     /**
      * @param variationPatterns
      * @param global
-     * @return
+     * @return array of SummaryEntries
      * @deprecated Use querySummaries(Variations, null) instead
      */
     public static SummaryEntry[] querySummaries(Variations variationPatterns, boolean global) {
