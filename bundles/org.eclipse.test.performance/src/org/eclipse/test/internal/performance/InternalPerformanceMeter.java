@@ -17,6 +17,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
+    public static final int AVERAGE= -3;
     public static final int BEFORE= 0;
     public static final int AFTER= 1;
     
