@@ -36,7 +36,7 @@ adapter of type <b><a href="../reference/api/org/eclipse/ui/views/contentoutline
 public Object getAdapter(Class required) {
 	if (IContentOutlinePage.class.equals(required)) {
 		if (fOutlinePage == null) {
-			fOutlinePage= new J<b>avaContentOutlinePage</b>(getDocumentProvider(), this);
+			fOutlinePage= new <b>JavaContentOutlinePage</b>(getDocumentProvider(), this);
 			if (getEditorInput() != null)
 				fOutlinePage.setInput(getEditorInput());
 		}
@@ -75,27 +75,29 @@ public void createControl(Composite parent) {
 
 	if (fInput != null)
 		viewer.setInput(fInput);
-}</pre></font>
+}
+</pre></font>
 
 
 <P >The tree viewer creation is inherited from <b><a href="../reference/api/org/eclipse/ui/views/contentoutline/ContentOutlinePage.html">ContentOutlinePage</a></b>.&nbsp; 
-  The standard content and label providers are used. Whenever the editor input 
-  is set (or changed),&nbsp; <b>JavaContentOutlinePage</b> obtains a document 
-  for the editor input and parses the text.</P>
+  The standard label provider is used.  The content provider is provided inside
+   <b>JavaContentOutlinePage</b> and is responsible for parsing the editor input into
+   individual segments whenever it changes.</P>
 
 
-<font color='#4444CC'><pre>public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-	...
-	if (newInput != null) {
-		IDocument document= fDocumentProvider.getDocument(newInput);
-		if (document != null) {
-			document.addPositionCategory(SEGMENTS);
-			document.addPositionUpdater(fPositionUpdater);
-
-			parse(document);
+<font color='#4444CC'><pre>
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			...
+			if (newInput != null) {
+				IDocument document= fDocumentProvider.getDocument(newInput);
+				if (document != null) {
+					document.addPositionCategory(SEGMENTS);
+					document.addPositionUpdater(fPositionUpdater);
+					parse(document);
+				}
+			}
 		}
-	}
-}</pre>
+</pre></font>
 
 
 <P >The text is parsed into ranges, called segments, within the document.&nbsp;
@@ -105,11 +107,12 @@ These segments are displayed by name in the outline view.</P>
 <P ><img src="images/javacontentoutline.gif" alt="" border="0" width="220" height="215"></P>
 
 
-<P ><font color="#000000">When the selection changes, the selected segment is 
-  retrieved.&nbsp; Its offsets are used to set the highlight range in the editor.</font></P>
+<P >When the selection changes, the selected segment is 
+  retrieved.&nbsp; Its offsets are used to set the highlight range in the editor.</P>
 
 
-</font><pre><font color='#4444CC'>public void selectionChanged(SelectionChangedEvent event) {
+<pre><font color='#4444CC'>
+public void selectionChanged(SelectionChangedEvent event) {
 
 	super.selectionChanged(event);
 
@@ -127,7 +130,9 @@ These segments are displayed by name in the outline view.</P>
 		}
 	}
 }
-</font></pre><pre><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." width="324" height="14"></a></pre>
+</font></pre>
+
+<pre><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." width="324" height="14"></a></pre>
 
 </BODY>
 </HTML>

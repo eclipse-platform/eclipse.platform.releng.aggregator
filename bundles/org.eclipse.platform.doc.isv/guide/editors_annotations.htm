@@ -12,10 +12,8 @@ Source viewers and annotations
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H2>Source viewers and annotations</H2>
-The platform text framework provides user interface classes that implement a
-rich presentation of an editor's document.&nbsp;&nbsp;&nbsp;
 <p>The editor and its corresponding text viewer are largely responsible for the
-implementation of the document's presentation and configuration of any needed
+implementation of the document's presentation and the configuration of any needed
 helper classes.&nbsp; (See <a href="jface_viewers.htm">Viewers</a> if you are not familiar with the
 concept of a viewer.)&nbsp;&nbsp;</p>
 <p>A <b><a href="../reference/api/org/eclipse/jface/text/TextViewer.html">TextViewer</a></b>
@@ -29,31 +27,36 @@ squigglies underneath text.</p>
 and its helper classes are used
 throughout the <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>
 hierarchy.&nbsp; The package <b><a href="../reference/api/org/eclipse/jface/text/source/package-summary.html">org.eclipse.jface.text.source</a></b>
- defines this viewer and the other classes supporting annotation presentation.</p>
+defines this viewer and the other classes supporting annotation presentation.</p>
 <h3>Annotations and rulers</h3>
-<p>We saw earlier that a document provider provides a model for its document's annotations, <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
-in addition to the document itself.&nbsp; This annotation model holds the annotations,
-enumerates them on request, and listens for text
-changes in order to keep the annotations up to date with the text.&nbsp;&nbsp;The <b>JavaDocumentProvider</b>
-inherits the behavior defined in <b><a href="../reference/api/org/eclipse/ui/editors/text/FileDocumentProvider.html">FileDocumentProvider</a></b>
-and thus its annotation model.</p>
-
-<pre><font color="#4444CC">protected IAnnotationModel createAnnotationModel(Object element) throws CoreException {
-	if (element instanceof IFileEditorInput) {
-		IFileEditorInput input= (IFileEditorInput) element;
-		<b>return new ResourceMarkerAnnotationModel(input.getFile()</b>);
-	}
-	return super.createAnnotationModel(element);
-}</font></pre>
-<p><b><a href="../reference/api/org/eclipse/ui/texteditor/ResourceMarkerAnnotationModel.html">ResourceMarkerAnnotationModel</a></b>
- defines a model for annotations that represent a marker on a resource in the
+<p>Annotations, like partitions, are largely dependent on the kind of document being edited.
+The <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a>
+for a document is what holds the annotations, enumerates them on request, and listens for text
+changes in order to keep the annotations up to date with the text.  Annotation models are registered
+in the <b><a href="../reference/extension-points/org_eclipse_core_filebuffers_annotationModelCreation.html">org.eclipse.core.filebuffers.annotationModelCreation</a></b> 
+extension.  This extension point allows plug-ins to register a class that will create an annotation model
+appropriate for a given file extension.  The Java Editor example does not use this extension point, so it
+inherits the annotation model defined by the platform.
+<pre><font color="#4444CC">
+&lt;extension
+	point="org.eclipse.core.filebuffers.annotationModelCreation"&gt;
+	&lt;factory
+		extensions="*"
+		<b>class="org.eclipse.ui.texteditor.ResourceMarkerAnnotationModelFactory"</b>&gt;
+	&lt;/factory&gt;
+&lt;/extension&gt;
+</font></pre>
+<p>
+The supplied factory class will create a
+<b><a href="../reference/api/org/eclipse/ui/texteditor/ResourceMarkerAnnotationModel.html">ResourceMarkerAnnotationModel</a></b>
+for files with any extension.  This class displays annotations that represent a marker on a resource in the
 workspace.&nbsp; (See <a href="resAdv_markers.htm">Resource markers</a> for more
 information on markers.)&nbsp; It assigns an image and description to each marker and monitors its resource for changes in the markers.</p>
 <p>To see how an annotation model is displayed in a text editor, we'll examine
 the platform text editor and its use of rulers and annotations.&nbsp; The
 specifics of how different annotations are shown in the rulers and text can be
-controlled by the user in the <b>Workbench &gt; Editors &gt; Text Editor</b>
-preferences on the <b>Annotations</b> tab.</p>
+controlled by the user in the <b>Workbench &gt; Editors &gt; Annotations</b>
+preferences.</p>
 <h4>Vertical ruler</h4>
 <p>A vertical ruler to the left of the editing area is used by platform text
 editors to show text ranges and line-based annotations adjacent to their text line.</p>

@@ -32,69 +32,82 @@ Documents and partitions
   for the input, so that it can effectively display and manipulate text.</p>
 <p>This means that there must be a way to map from an expected domain model (the 
   editor input) to the presentation model.&nbsp; This mapping is defined in an 
-  <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocumentProvider</b></a>.&nbsp; 
+  <a href="../reference/api/org/eclipse/jface/text/IDocumentProvider.html"><b>IDocumentProvider</b></a>.&nbsp; 
   Given an editor input, the document provider returns an appropriate <a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>.</p>
-<p>The Java editor example defines a <b>JavaDocumentProvider</b> which returns 
-  the appropriate document.&nbsp; How is the relationship between the appropriate 
-  document provider and the &quot;*.jav&quot; extension established?&nbsp;It's 
-  done in the <b><a href="../reference/extension-points/org_eclipse_ui_editors_documentProviders.html">org.eclipse.ui.editors.documentProviders</a></b> 
-  extension.&nbsp; This extension is used to define mappings between file types 
-  and document providers.&nbsp; The example defines its document provider as follows:</p>
-<font SIZE="2">
-<pre><font color="#4444CC">&lt;extension
-      point=&quot;org.eclipse.ui.editors.documentProviders&quot;&gt;
-   &lt;provider
-         extensions=&quot;jav&quot;
-         class=&quot;org.eclipse.ui.examples.javaeditor.JavaDocumentProvider&quot;
-         id=&quot;org.eclipse.ui.examples.javaeditor.JavaDocumentProvider&quot;&gt;
-   &lt;/provider&gt;
-&lt;/extension&gt;</font></pre>
-</font>
-<p>When the user opens a file with the specified extension, the workbench manages 
-  the details of creating the document provider instance.&nbsp; The workbench 
-  creates a document provider instance only once and shares this instance among 
-  different editors.</p>
-<p>It is not required that your plug-in use this extension point to register its 
-  document provider. Another way to associate a document provider with an editor 
-  is to let your plug-in itself manage the document provider.&nbsp; This is usually 
-  done in your plug-in class.&nbsp; When an input element is set into your editor, 
-  the editor asks its plug-in class for the appropriate document provider.&nbsp; 
-  The plug-in can manage the creation and the references to the document provider.&nbsp; 
-  This technique may be preferable when there is special initialization or other 
-  processing involved with the document provider.&nbsp; See <b>ClassFileEditor</b> 
-  in the JDT tooling for an example.&nbsp;</p>
-<p>Once the proper document provider is associated with an editor, its main task 
-  is to create a document from the editor input and configure an appropriate object 
-  for dividing the document up into partitions.&nbsp;&nbsp;</p>
-<h4>Partitions</h4>
-<p>Let's look at documents and partitions in the <b>JavaDocumentProvider</b>.&nbsp;
-When a document is created, an <a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>IDocumentPartitioner</b></a>
-is created and set into the document.&nbsp;&nbsp;</p>
-<pre><font color="#4444CC">protected IDocument createDocument(Object element) throws CoreException {
-	IDocument document= super.createDocument(element);
-	if (document != null) {
-		<b>IDocumentPartitioner partitioner= createJavaPartitioner();
-		document.setDocumentPartitioner(partitioner);</b>
+<p>The Java editor example inherits the <b>TextFileDocumentProvider</b> defined by 
+  the plug-in <b>org.eclipse.ui.editors</b>. The extension
+  <b><a href="../reference/extension-points/org_eclipse_ui_editors_documentProviders.html">org.eclipse.ui.editors.documentProviders</a></b> 
+  is used to define mappings between editor input types (or file extensions)
+  and document providers. The editors plug-in defines its document provider as follows:</p>
+<pre><font color="#4444CC">
+   &lt;extension
+         point="org.eclipse.ui.editors.documentProviders"&gt;
+      &lt;provider
+            class="org.eclipse.ui.editors.text.TextFileDocumentProvider"
+            inputTypes="org.eclipse.ui.IStorageEditorInput"
+            id="org.eclipse.ui.editors.text.StorageDocumentProvider"&gt;
+      &lt;/provider&gt;
+   &lt;/extension&gt;
+</font></pre>
+<p>This extension point allows plug-ins to register document providers and associate them
+  with either a file extension or an editor input class.  Since the Java editor example does
+  not define its own document provider extension, it inherits the generic document provider
+  specified for all input types that are <a href="../reference/api/org/eclipse/ui/IStorageEditorInput.html"><b>IStorageEditorInput</b></a>.
+  When the user opens a file for editing, the platform manages the details of creating the
+  proper document provider instance.  If a specific document provider is registered for the file extension, that one
+  will be used.  If there is no specific document provider for the file extension, then the editor input type
+  will be used to find the appropriate provider.</p>
+<p>By using the generic platform document provider, the Java editor example can take advantage of all of the
+features of the document provider, such as file buffering and other optimizations.</p>
+<h4>Document setup</h4>
+<p>Since the Java editor uses the platform text document provider, how can it supply any specialized behavior
+for handling Java files?</p>
+<p>
+The extension <b><a href="../reference/extension-points/org_eclipse_core_filebuffers_documentSetup.html">org.eclipse.core.filebuffers.documentSetup</a></b> 
+is used to define mappings between file extensions and an <a href="../reference/api/org/eclipse/core/filebuffers/IDocumentSetupParticipant.html"><b>IDocumentSetupParticipant</b></a>.
+The setup participant will set up the document with any special features once it has been provided to the editor.
+<pre><font color="#4444CC"> 
+&lt;extension
+	id="ExampleJavaDocumentSetupParticipant"
+	name="%documentSetupParticipantName"
+	point="org.eclipse.core.filebuffers.documentSetup"&gt;
+	&lt;participant
+		extensions="jav"
+		<b>class="org.eclipse.ui.examples.javaeditor.JavaDocumentSetupParticipant"</b>&gt;
+	&lt;/participant&gt;
+&lt;/extension&gt;
+</font></pre>
+This extension definition is what gives the example a chance to setup the document for Java specific
+tasks.  So what does <b>JavaDocumentSetupParticipant</b> do?  We'll look at a simplified version of the
+<b>setup</b> method.
+<pre><font color="#4444CC"> 
+	public void setup(IDocument document) {
+		...
+		IDocumentPartitioner partitioner= new DefaultPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
 		partitioner.connect(document);
+		...
 	}
-	return document;
-}</font></pre>
-<p>The partitioner is responsible for dividing the document into non-overlapping 
-  regions called partitions.&nbsp; Partitions (represented at <a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>ITypedRegion</b></a>) 
+</font></pre>
+The setup code configures an object called a <b>partitioner</b>.
+<h4>Partitions</h4>
+<p>The partitioner (<a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>IDocumentPartitioner</b></a>)
+is responsible for dividing the document into non-overlapping 
+  regions called partitions.&nbsp; Partitions (represented by <a href="../reference/api/org/eclipse/jface/text/ITypedRegion.html"><b>ITypedRegion</b></a>) 
   are useful for treating different sections of the document differently with 
   respect to features like syntax highlighting or formatting.</p>
 <p> In the case of the Java editor
 example, the document is divided into partitions that represent the javadoc
 comments, multi line comments, and everything else.&nbsp; Each region is assigned a
-content type and its position in the document.&nbsp; Positions are updated as the user edits text.&nbsp;&nbsp;&nbsp;</p>
+content type and its position in the document.&nbsp; Positions are updated as the user edits text.</p>
 <h4>Rule based document partitioning</h4>
 <p>It is up to each editor to determine the appropriate implementation for a
 document partitioner.&nbsp; Support is provided in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
  for rule-based document scanning.&nbsp; Using a rule-based scanner allows an editor to use
 the <a href="../reference/api/org/eclipse/jface/text/rules/DefaultPartitioner.html"><b>DefaultPartitioner</b></a>
-provided by the framework.<pre><font color="#4444CC">private IDocumentPartitioner createJavaPartitioner() {
-	return new <b>DefaultPartitioner(getJavaPartitionScanner(), TYPES)</b>;
-}</font></pre>
+provided by the framework.
+<pre><font color="#4444CC">
+IDocumentPartitioner partitioner= new DefaultPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
+</font></pre>
 <p><a href="../reference/api/org/eclipse/jface/text/rules/RuleBasedPartitionScanner.html"><b>RuleBasedPartitionScanner</b></a><b>
 </b>is the superclass for rule based scanners.&nbsp; Subclasses are responsible
 for enumerating and implementing the rules that should be used to distinguish
@@ -130,15 +143,6 @@ line comments, and&nbsp;words.&nbsp; This is done in the scanner's constructor:
  for more details about defining rules and the types of rules availables.&nbsp;
 We'll look at the scanners again when we look at <a href="editors_highlighting.htm">syntax
 coloring</a>.</p>
-
-<h4>Annotation models</h4>
-
-<p>Besides providing an appropriate document for an editor input, another important 
-  task of a document provider is to supply an appropriate <a href="../reference/api/org/eclipse/jface/text/source/IAnnotationModel.html"><b>IAnnotationModel</b></a> 
-  to use with an editor input.&nbsp; This model is used to manage annotations 
-  attached to documents.&nbsp; By letting the document provider supply the model, 
-  your editor can use a model appropriate for the type of content.&nbsp; We'll 
-  look at annotations and how they are presented more closely in the next section.</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." width="324" height="14"></a></p>
 
