@@ -11,7 +11,7 @@
 <BODY BGCOLOR="#ffffff">
 <h3>Products extension point</h3>
 <p>The preferred mechanism for defining a product based on the Eclipse platform is to use the
-<b><a href="../reference/extension-points/org_eclipse_core_runtime_products.html">org.eclipse.core.runtime.products</b></a>
+<a href="../reference/extension-points/org_eclipse_core_runtime_products.html"><b>org.eclipse.core.runtime.products</b></a>
 extension point.  There are two different ways to define a product in this extension point.
 <h4>Static product definitions</h4>
 When product information can be determined statically in the manifest file, a static product definition
@@ -19,22 +19,22 @@ is used.  A plug-in simply declares the name of its product, as well as the id o
 extension that should be run when the product is invoked.  This is the technique used by the Eclipse
 platform itself in defining the Eclipse product.  Here is the extension definition 
 found in <b>org.eclipse.platform</b>:
-<pre><font color="#4444CC">
-&lt;extension id="ide" point="org.eclipse.core.runtime.products"&gt; 
+<pre><font color="#4444CC">&lt;extension id="ide" point="org.eclipse.core.runtime.products"&gt; 
 	&lt;<b>product name="%productName" application="org.eclipse.ui.ide.workbench" description="%productBlurb"</b>&gt; 
-	&lt;property name="windowImages" value="eclipse.gif,eclipse32.gif"/&gt; 
-	&lt;property name="aboutImage" value="eclipse_lg.gif"/&gt; 
-	&lt;property name="aboutText" value="%productBlurb"/&gt; 
-	&lt;property name="appName" value="Eclipse"/&gt; 
-	&lt;property name="preferenceCustomization" value="plugin_customization.ini"/&gt; 
+		&lt;property name="windowImages" value="eclipse.gif,eclipse32.gif"/&gt; 
+		&lt;property name="aboutImage" value="eclipse_lg.gif"/&gt; 
+		&lt;property name="aboutText" value="%productBlurb"/&gt; 
+		&lt;property name="appName" value="Eclipse"/&gt; 
+		&lt;property name="preferenceCustomization" value="plugin_customization.ini"/&gt; 
 	&lt;/product&gt; 
-&lt;/extension&gt; 
-</font></pre>
+&lt;/extension&gt; </font></pre>
 A product extension is defined whose <b>application</b> id is "org.eclipse.ui.ide.workbench".
-This is the application id defined by the plug-in <b>org.eclipse.ui.ide</b> in its
-<b><a href="../reference/extension-points/org_eclipse_core_runtime_applications.html">org.eclipse.core.runtime.applications</b></a>
-extension.
-<font color='#4444CC'><pre>
+This is the application id defined by the plug-in <b>org.eclipse.ui.ide</b> in
+its
+contribution to the <a href="../reference/extension-points/org_eclipse_core_runtime_applications.html"><b>org.eclipse.core.runtime.applications</b></a>
+extension point.
+<font color='#4444CC'>
+<pre>
 &lt;extension
 	<b>id="workbench"</b>
 	point="org.eclipse.core.runtime.applications"&gt;
@@ -44,49 +44,30 @@ extension.
 		&lt;/run&gt;
 	&lt;/application&gt;
 &lt;/extension&gt;
-</pre></font> 
-This extension is defined with the same id that is referenced in the <b>application</b> attribute of the
-products extension.  (The fully qualified name, with plug-in prefix, is used when referring to the
-application id from the other plug-in.)  Using this mechanism, a separate plug-in can define all of the
-product-specific branding, and then refer to an existing plug-in's application as the application that
+</pre>
+</font> 
+This extension is defined with the same id that is referenced in the <b>application</b> property
+of the product extension. (The fully qualified name, with plug-in prefix, is
+used when referring to the
+application id from the other plug-in.)  Using this mechanism, a separate plug-in
+can define all of the product-specific branding, and then refer to an existing
+plug-in's application as the application that
 is actually run when the product is started.
 </p>
 <p>
-In addition to the application, the <b><a href="../reference/extension-points/org_eclipse_core_runtime_products.html">org.eclipse.core.runtime.products</b></a>
+In addition to the application, the <a href="../reference/extension-points/org_eclipse_core_runtime_products.html"><b>org.eclipse.core.runtime.products</b></a>
 extension describes product customization properties that are used to configure the product's branding information.
 This information is described as named properties.  Let's look again at that portion of the markup for the 
 platform plug-in.
-<pre><font color="#4444CC">
-	&lt;property name="windowImages" value="eclipse.gif,eclipse32.gif"/&gt; 
+<pre><font color="#4444CC">	&lt;property name="windowImages" value="eclipse.gif,eclipse32.gif"/&gt; 
 	&lt;property name="aboutImage" value="eclipse_lg.gif"/&gt; 
 	&lt;property name="aboutText" value="%productBlurb"/&gt; 
 	&lt;property name="appName" value="Eclipse"/&gt; 
-	&lt;property name="preferenceCustomization" value="plugin_customization.ini"/&gt; 
-</pre></font>
+	&lt;property name="preferenceCustomization" value="plugin_customization.ini"/&gt; </font></pre>
 The possible property names that are honored by the platform for product customization are defined in
 <b><a href="../reference/api/org/eclipse/ui/branding/IProductConstants.html">IProductConstants</a></b>.
 See the javadoc for a complete description of these properties and their values.  We'll look at these
 further in <a href="product_configproduct.htm">Customizing a product</a>.
-</p>
-<p>When the static product definition technique is used, the product itself is represented by an instance of
-<b><a href="../reference/api/org/eclipse/core/runtime/IProduct.html">IProduct</a></b>.  This instance can
-be queried for the attributes specified in the extension definition.
-</p>
-<h4>Dynamic product definitions</h4>
-<p>A dynamic product definition can be used when the product definition cannot be declared statically in a manifest
-file.  Instead, the name of a class that defines the product is declared.  Here is a sample markup for a dynamic
-product definition.
-<font color='#4444CC'><pre>
-&lt;extension id="dynamicProvider" point="org.eclipse.core.runtime.products"&gt; 
-	&lt;provider&gt; 
-		&lt;<b>run class="com.example.productProvider"</b>/&gt; 
-	&lt;/provider&gt; 
-&lt;/extension&gt; 
-</pre></font> 
-The specified <b>class</b> must implement <b><a href="../reference/api/org/eclipse/core/runtime/IProductProvider.html">IProductProvider</a></b>,
-which can then instantiate an appropriate <b><a href="../reference/api/org/eclipse/core/runtime/IProduct.html">IProduct</a></b>.
-</p>
-
 <p><a href="../notices.html"><img src="../cpy.gif" alt="Legal notices." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
