@@ -17,7 +17,47 @@ Writing the help action</h3>
 is used to build an active help action.</p>
 
 
-<pre>SHOW A CLASS THAT OPENS THE PREF DIALOG (or some other simple example that needs little context.)</pre>
+<p>It is straightforward to implement an <a href="../reference/api/org/eclipse/help/ILiveHelpAction.html"><b>ILiveHelpAction</b></a><b>.&nbsp;
+</b>Your action will be invoked using a <b>run()</b> method.&nbsp; You must also
+implement a method that accepts a String parameter from the javascript.&nbsp;&nbsp;
+If you don't need initialization data, you can just implement
+this method to do nothing.</p>
+
+
+<p>Here is a simple implementation of a live help action that opens the
+preferences dialog.  Since the action that invokes the preference dialog is
+already implemented, our live help action is merely a wrapper for that
+action.&nbsp; We don't need any information from the javascript, so the
+initialization data is ignored.</p>
+
+
+<p>(<b>Note</b>:&nbsp; The class <b>OpenPreferencesAction</b> is internal to the
+workbench.&nbsp; In this example, we are using it at our own risk since it could
+change in the future.)</p>
+
+
+<pre><font color="#4444CC">package com.example.helpExample.activeHelp;
+
+import org.eclipse.help.ILiveHelpAction;
+import org.eclipse.ui.internal.OpenPreferencesAction
+
+/**
+* Action to be invoked from a help document
+*/
+public class ActiveHelpOpenPreferencesAction implements ILiveHelpAction {
+  String str;
+
+  public void setInitializationString(String data) {
+    //ignore the data.  We don't use parameters.
+  }
+
+  public void run() {
+    new OpenPreferencesAction().run();      
+  }
+}</font></pre>
+
+
+<p>&nbsp;</p>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
