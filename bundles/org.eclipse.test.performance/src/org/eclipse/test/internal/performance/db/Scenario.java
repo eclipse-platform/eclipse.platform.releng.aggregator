@@ -23,18 +23,18 @@ import org.eclipse.test.internal.performance.eval.StatisticsSession;
  */
 public class Scenario {
 
-	private String fHost;
-	private String fTag;
+	private String fConfigPattern;
+	private String fBuildPattern;
     private String fScenarioName;
-    private String[] fTags;
+    private String[] fBuildNames;
     private StatisticsSession[] fSessions;
     private Dim[] fDimensions;
     private Map fSeries= new HashMap();
 
     
-    Scenario(String host, String tag, String scenario) {
-    	fHost= host;
-    	fTag= tag;
+    Scenario(String configPattern, String buildPattern, String scenario) {
+    	fConfigPattern= configPattern;
+    	fBuildPattern= buildPattern;
         fScenarioName= scenario;
     }
     
@@ -51,9 +51,9 @@ public class Scenario {
     
     public String[] getTimeSeriesLabels() {
         load();
-        if (fTags == null)
+        if (fBuildNames == null)
         	return new String[0];
-        return fTags;
+        return fBuildNames;
     }
     
     public TimeSeries getTimeSeries(Dim dim) {
@@ -63,7 +63,7 @@ public class Scenario {
             double[] ds= new double[fSessions.length];
             for (int i= 0; i < ds.length; i++)
                 ds[i]= fSessions[i].getAverage(dim);
-            ts= new TimeSeries(fTags, ds);
+            ts= new TimeSeries(fBuildNames, ds);
             fSeries.put(dim, ts);
         }
         return ts;
@@ -72,19 +72,17 @@ public class Scenario {
     //---- private
     
     private void load() {
-        if (fTags != null)
+        if (fBuildNames != null)
             return;
         InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
         
-        fTags= DB.queryTags(fHost, fTag, fScenarioName);
-        fSessions= new StatisticsSession[fTags.length];
+        fBuildNames= DB.queryBuildNames(fConfigPattern, fBuildPattern, fScenarioName);
+        fSessions= new StatisticsSession[fBuildNames.length];
 
-        for (int t= 0; t < fTags.length; t++) {
-            String tag= fTags[t];
-            DataPoint[] dps= DB.query(fHost, tag, fScenarioName, null);
+        for (int t= 0; t < fBuildNames.length; t++) {
+            DataPoint[] dps= DB.queryDataPoints(fConfigPattern, fBuildNames[t], fScenarioName, null);
             if (fDimensions == null && dps.length > 0)
                 fDimensions= dps[0].getDimensions();
-
             fSessions[t]= new StatisticsSession(dps);
         }        
     }

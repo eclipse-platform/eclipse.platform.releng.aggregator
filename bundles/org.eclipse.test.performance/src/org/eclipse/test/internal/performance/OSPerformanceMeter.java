@@ -86,7 +86,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	    if (fDataPoints != null) {
 	        HashMap runProperties= new HashMap();
 	        collectRunInfo(runProperties);
-	        fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
 	        return new Sample(getScenarioName(), fStartTime, runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
 	    }
 	    return null;
@@ -122,24 +121,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @param runProperties
 	 */
 	private void collectRunInfo(HashMap runProperties) {
-	    
-		/*
-        runProperties.put(DRIVER_PROPERTY, PerformanceTestPlugin.getBuildId());
-        runProperties.put(HOSTNAME_PROPERTY, getHostName());
-        */
-		
-        /*
-		String version= System.getProperty("java.fullversion");
-		if (version == null)
-		    version= System.getProperty("java.runtime.version");
-	    runProperties.put("jvm", version);
-	    				
-		StringBuffer b= new StringBuffer(400);
-		b.append("eclipse.vmargs=");
-			b.append(System.getProperty("eclipse.vmargs"));
-		b.append(" eclipse.commands=");
-			b.append(System.getProperty("eclipse.commands"));
-		runProperties.put("cmdArgs", b.toString());
-		*/
+        fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
 	}
 }

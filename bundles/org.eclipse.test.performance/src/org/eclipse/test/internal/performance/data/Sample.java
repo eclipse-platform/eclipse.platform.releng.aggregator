@@ -11,6 +11,7 @@
 package org.eclipse.test.internal.performance.data;
 
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Assert;
 
@@ -45,6 +46,13 @@ public class Sample {
     
 	public String getProperty(String name) {
 		return (String) fProperties.get(name);
+	}
+	
+	public String[] getPropertyKeys() {
+	    if (fProperties == null)
+	        return new String[0];
+	    Set set= fProperties.keySet();
+	    return (String[]) set.toArray(new String[set.size()]);
 	}
 	
 	public DataPoint[] getDataPoints() {

@@ -14,6 +14,7 @@ import java.util.HashSet;
 
 import junit.framework.Assert;
 
+import org.eclipse.test.internal.performance.Constants;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -42,9 +43,9 @@ public class Evaluator extends EmptyEvaluator {
 		if (fCheckers == null)
 		    return;	// nothing to do
 		
-		// get reference data tag
-		String refTag= PerformanceTestPlugin.getEnvironment("refTag"); //$NON-NLS-1$
-		if (refTag == null)
+		// get reference build tag
+		String refBuild= PerformanceTestPlugin.getEnvironment(Constants.ASSERT_AGAINST);
+		if (refBuild == null)
 		    return;	// nothing to do
 
 	    if (!(performanceMeter instanceof InternalPerformanceMeter))
@@ -66,29 +67,26 @@ public class Evaluator extends EmptyEvaluator {
 		
 		// get data for this session
 		DataPoint[] sessionDatapoints= null;
-		String sessionTag= PerformanceTestPlugin.getEnvironment("sessionTag"); //$NON-NLS-1$
-		if (sessionTag != null) {
-		    sessionDatapoints= DB.query(null, sessionTag, scenarioName, allDims);
-		    if (sessionDatapoints == null)
-		    	return;
-	        System.out.println("no session data with tag '" + sessionTag + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
-		} else {
+		String build= PerformanceTestPlugin.getEnvironment(Constants.BUILD);
+		if (build != null)
+		    sessionDatapoints= DB.queryDataPoints(null, build, scenarioName, allDims);
+		else
 			sessionDatapoints= session.getDataPoints();
-		}
-
-		DataPoint[] datapoints= DB.query(null, refTag, scenarioName, allDims);
-	    if (datapoints == null)
+	    if (sessionDatapoints == null || sessionDatapoints.length == 0) {
+	        System.out.println("Warning: no session data for build '" + build + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
 	    	return;
-	    if (datapoints.length == 0) {
-	        System.out.println("no reference data with tag '" + refTag + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
+	    }
+
+		DataPoint[] datapoints= DB.queryDataPoints(null, refBuild, scenarioName, allDims);
+	    if (datapoints == null || datapoints.length == 0) {
+	        System.out.println("no reference data for build '" + refBuild + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
 	        return;
 	    }
-	    Sample reference= new Sample(datapoints);
 				
-		StatisticsSession referenceStats= new StatisticsSession(reference.getDataPoints());
+		StatisticsSession referenceStats= new StatisticsSession(datapoints);
 		StatisticsSession measuredStats= new StatisticsSession(sessionDatapoints);
 
-		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refTag + "':"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refBuild + "':"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
 			AssertChecker chk= fCheckers[i];

@@ -12,11 +12,11 @@ package org.eclipse.test.internal.performance.db;
 
 public class TimeSeries {
     
-    private String[] fTags;
+    private String[] fBuildNames;
     private double[] fValues;
     
     TimeSeries(String[] tags, double[] ds) {
-        fTags= tags;
+        fBuildNames= tags;
         fValues= ds;
     }
     
@@ -25,7 +25,7 @@ public class TimeSeries {
      * @return length of series
      */
     public int getLength() {
-        return fTags.length;
+        return fBuildNames.length;
     }
     
     /**
@@ -43,6 +43,6 @@ public class TimeSeries {
      * @return label at given index
      */
     public String getLabel(int ix) {
-        return fTags[ix];
+        return fBuildNames[ix];
     }
 }
