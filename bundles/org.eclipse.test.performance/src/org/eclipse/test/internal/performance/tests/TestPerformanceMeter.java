@@ -21,17 +21,13 @@ import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
-import org.eclipse.test.internal.performance.data.Unit;
 
 
 /**
  * Mock performance meter that generates deterministic values for two dimensions.
  */
 class TestPerformanceMeter extends InternalPerformanceMeter {
-    
-    static Dim TESTDIM1= new Dim(98, Unit.SECOND, 1000);
-    static Dim TESTDIM2= new Dim(99, Unit.BYTE);
-	
+    	
 	private long fStartTime;
 	private List fDataPoints= new ArrayList();
 	private Map fStart= new HashMap();

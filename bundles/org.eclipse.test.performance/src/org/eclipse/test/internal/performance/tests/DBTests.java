@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
@@ -85,8 +86,8 @@ public class DBTests extends TestCase {
 
         // store a reference value
         TestPerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_0);
-		pm1.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
-		pm1.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		pm1.addPair(InternalDimensions.CPU_TIME, 100, 1000);
+		pm1.addPair(InternalDimensions.WORKING_SET, 1000, 2000);
 
 		pm1.start();
 		pm1.stop();
@@ -101,20 +102,21 @@ public class DBTests extends TestCase {
 		
         // store a reference value
         TestPerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_0);
-		pm2.addPair(TestPerformanceMeter.TESTDIM1, 100, 1100);
-		pm2.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		pm2.addPair(InternalDimensions.CPU_TIME, 100, 1100);
+		pm2.addPair(InternalDimensions.WORKING_SET, 1000, 2000);
 		
 		pm2.start();
 		pm2.stop();
 		pm2.commit();
 		boolean failed= false;
 		try {
-            perf.assertPerformanceInRelativeBand(pm2, TestPerformanceMeter.TESTDIM1, -5, +5);
+            perf.assertPerformanceInRelativeBand(pm2, InternalDimensions.CPU_TIME, -5, +5);
         } catch (AssertionFailedError e) {
             failed= true;
         }
-        assertTrue(failed);
 		pm2.dispose();
+        
+        assertTrue(failed);
     }
 
     public void testBasicDBFunctionality() {
@@ -122,16 +124,16 @@ public class DBTests extends TestCase {
         Performance perf= Performance.getDefault();
         
         TestPerformanceMeter pm1= new TestPerformanceMeter(SCENARIO_NAME_1);
-		pm1.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
-		pm1.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		pm1.addPair(InternalDimensions.CPU_TIME, 100, 1000);
+		pm1.addPair(InternalDimensions.WORKING_SET, 1000, 2000);
 		pm1.start();
 		pm1.stop();
 		pm1.commit();
 		pm1.dispose();
 		
 		TestPerformanceMeter pm2= new TestPerformanceMeter(SCENARIO_NAME_2);
-		pm2.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
-		pm2.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		pm2.addPair(InternalDimensions.CPU_TIME, 100, 1000);
+		pm2.addPair(InternalDimensions.WORKING_SET, 1000, 2000);
 		perf.tagAsGlobalSummary(pm2, SHORT_NAME_2, new Dimension[] { Dimension.CPU_TIME, Dimension.USED_JAVA_HEAP } );
 		pm2.start();
 		pm2.stop();
@@ -139,8 +141,8 @@ public class DBTests extends TestCase {
 		pm2.dispose();
 
 		TestPerformanceMeter pm3= new TestPerformanceMeter(SCENARIO_NAME_3);
-		pm3.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
-		pm3.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		pm3.addPair(InternalDimensions.CPU_TIME, 100, 1000);
+		pm3.addPair(InternalDimensions.WORKING_SET, 1000, 2000);
 		perf.tagAsGlobalSummary(pm3, SHORT_NAME_3, Dimension.CPU_TIME);
 		pm3.start();
 		pm3.stop();
@@ -148,8 +150,8 @@ public class DBTests extends TestCase {
 		pm3.dispose();
 
 		TestPerformanceMeter pm4= new TestPerformanceMeter(SCENARIO_NAME_4);
-		pm4.addPair(TestPerformanceMeter.TESTDIM1, 100, 1000);
-		pm4.addPair(TestPerformanceMeter.TESTDIM2, 1000, 2000);
+		pm4.addPair(InternalDimensions.CPU_TIME, 100, 1000);
+		pm4.addPair(InternalDimensions.WORKING_SET, 1000, 2000);
 		perf.tagAsSummary(pm4, SHORT_NAME_4, Dimension.USED_JAVA_HEAP);
 		pm4.start();
 		pm4.stop();
@@ -169,22 +171,22 @@ public class DBTests extends TestCase {
 		Dim[] dimensions= dp.getDimensions();
 		assertEquals(2, dimensions.length);
 		
-		Scalar s1= dp.getScalar(TestPerformanceMeter.TESTDIM1);
+		Scalar s1= dp.getScalar(InternalDimensions.CPU_TIME);
 		assertNotNull(s1);
 		assertEquals(900, s1.getMagnitude());
 
-		Scalar s2= dp.getScalar(TestPerformanceMeter.TESTDIM2);
+		Scalar s2= dp.getScalar(InternalDimensions.WORKING_SET);
 		assertNotNull(s2);
 		assertEquals(1000, s2.getMagnitude());
 
 		//
 		Set dims= new HashSet();
-		dims.add(TestPerformanceMeter.TESTDIM2);
+		dims.add(InternalDimensions.WORKING_SET);
 		points= DB.queryDataPoints(v, SCENARIO_NAME_1, dims);
 		assertEquals(1, points.length);
 		dimensions= points[0].getDimensions();
 		assertEquals(1, dimensions.length);
-		Scalar s= points[0].getScalar(TestPerformanceMeter.TESTDIM2);
+		Scalar s= points[0].getScalar(InternalDimensions.WORKING_SET);
 		assertNotNull(s);	
 		assertEquals(1000, s.getMagnitude());
 		
