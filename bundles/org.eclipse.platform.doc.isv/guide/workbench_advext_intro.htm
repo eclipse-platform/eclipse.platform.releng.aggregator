@@ -13,9 +13,225 @@
 <h3>
 Intro support</h3>
 <P >
-[This document is under construction.]
-</P>
-
+Intro support is a set of extension points and workbench parts that allow plug-ins to define
+specialized pages that introduce a platform product to new users.  The intro information is typically
+shown the first time a product is started.  Intro support is typically configured at the product level,
+although individual plug-ins can contribute intro information to known product intro configurations.</P>
+<P>From a workbench point of view, the root of the intro support is in the <b>intro part</b>.  This
+part is specified in an extension definition.  When the
+workbench initializes, it creates an intro site that reserves space for the intro page.  The
+intro part implementation for the site is determined using product configuration information.
+Once an intro part is shown, it can move between two modes:
+<ul>
+<li>in <b>full mode</b>, the intro part takes over the main workbench area.</li>
+<li>in <b>standby mode</b>, the intro part moves to the side, allowing the current perspective
+to remain visible.</li>
+</ul>
+</p>
+<p>Once an intro part is established, it must be configured with intro information.  This is done using
+an <b>intro config</b> which is also contributed using an extension.  Individual plug-ins can add to the
+basic product intro config using their own extensions.</p>
+<p>We'll look at the platform SDK intro page as an example in order to better understand these 
+concepts.</p>
+<h4>Defining an intro part</h4>
+<p>
+The definition of the intro part is specified using the
+<b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org.eclipse.ui.intro</a></b>
+extension point.  The main purpose of this extension is to define the class that implements
+<a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a> and the binding between
+a product id and an intro part.  Below is the snippet that defines the intro part for the workbench.
+We won't go over the mechanics of implementing an intro part since we want to focus on defining
+the intro content.  (See the extension point documentation and javadoc referenced above for more detail
+if you need it.)
+<pre><font color="#4444CC">
+&lt;extension  
+	point="org.eclipse.ui.intro"&gt;
+	&lt;intro
+		class="org.eclipse.ui.intro.config.CustomizableIntroPart"
+		id="org.eclipse.platform.intro"&gt;
+	&lt;/intro>
+	&lt;introProductBinding
+		introId="org.eclipse.platform.intro"
+		productId="org.eclipse.platform"&gt;
+	&lt;/introProductBinding&gt;
+&lt;/extension>
+</font></pre>
+</p>
+<h4>Defining an intro config</h4>
+<p>
+The main content for the intro part is defined in the intro config.  This is specified in the
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
+extension.  Here, we specify the id of the intro part that is to show our content, and the name of the
+XML file that contains the specific definition for the intro content.
+<pre><font color="#4444CC">
+&lt;extension   
+	id="intro"
+	point="org.eclipse.ui.intro.config"&gt;
+	<b>&lt;config
+		introId="org.eclipse.platform.intro"
+		id="org.eclipse.platform.introConfig"
+		content="$nl$/introContent.xml"&gt;</b>
+	&lt;presentation
+		home-page-id="root" standby-page-id="standby"&gt;
+			&lt;implementation
+ 				ws="win32"
+				style="css/shared.css"
+				kind="html"
+				os="win32"&gt;
+			&lt;/implementation&gt;
+			&lt;implementation
+				kind="swt"&gt;
+			&lt;/implementation&gt;
+	&lt;/presentation&gt;
+	&lt;/config&gt;
+&lt;/extension&gt;  
+</font></pre>
+The path for the file is relative to the plug-in's directory.  (Note
+the use of the <tt>$nl$</tt> variable in the directory name, which means the file will be located in a directory specific
+to the national language of the target environment.)
+</p>
+<p>
+In addition to content, the extension allows you to specify how the content is presented.  
+While the <b>content</b> element focuses on defining pages, the
+<b>presentation</b> element describes presentation-related atributes that describe how
+pages will be shown.  Page ids for the welcome home page (in <b>full mode</b>) and standby page (in <b>standby mode</b>) 
+can be specified.  The home page is the page that is shown when the product is first started.
+A presentation can specify one or more <b>implementations</b> for showing the pages.  Implementations are specified
+per platform and windowing system, allowing you to take advantage of platform-specific features for showing
+page content. The workbench will first look for an implementation that matches the current operating system and
+windowing system.  If one cannot be found, it will choose the generic implementation.  Most of these details
+are handled at the product configuration level, so we won't discuss them any further here.
+</p>
+<h4>Defining intro content</h4>
+<p>
+Now we can look at the content itself.  Content is described in terms of pages.  All pages have an <b>id</b> attribute.
+This is the id that is used when defining the home and standby pages, and other places where there is a reference
+to a page.  All pages also have a <b>title</b>.  Otherwise, the relevant attributes depend on the kind of page that is defined.
+There are two basic types of pages:
+<ul>
+<li><b>Static pages</b> show HTML files.  A <b>url</b> and <b>style</b> are specified for the file.
+The sublements <b>head</b> and <b>html</b> can be used to add raw HTML to the head and body of the
+specified URL.</li>
+<li><b>Dynamic pages</b> are implemented in SWT and described using subelements that describe the content of the
+page.  The subelements are UI items often found in HTML-like pages.  The following subelements
+can be defined in a page: 
+<ul>
+<li>A <b>group</b> is used to group other subelements and define a consistent style across the group.</li>
+<li>A <b>link</b> defines a link that can be displayed using an image and text.  The link can navigate to another
+page and optionally run an intro action.  Actions are specified as commands in the URL.</li>
+<li>The <b>text</b> and <b>img</b> elements show text and image content.</li>
+<li>The <b>include</b> element includes a previously defined subelement.  The element is referred to by its id.  </li>
+</ul></li>
+</ul>
+A page can also specify that its content is defined in a separate <b>content</b> file.  Breaking up pages into separate
+files may be useful when performance is a concern, since an intro page's contents won't be initialized until needed.
+</p>
+<p>
+The best way to get a feel for the content definition format is to browse the implementations in the SDK.  The following
+snippet shows just the first part of the content for the SDK root page, which is the first intro page shown.
+<pre><font color="#4444CC">
+&lt;introContent>
+  &lt;page alt-style="css/root_swt.properties" style="css/root.css" id="root" style-id="page"&gt;
+    &lt;title style-id="intro-header">Welcome to Eclipse Platform 3.0&lt;/title&gt;
+    &lt;group id="links-background"&gt;
+      &lt;group id="page-links"&gt;
+        &lt;link label="Overview" url="http://org.eclipse.ui.intro/showPage?id=overview" id="overview" style-id="left"&gt;
+          &lt;text&gt;Find out what Eclipse is all about&lt;/text&gt;
+        &lt;/link&gt;
+        &lt;link label="Tutorials" url="http://org.eclipse.ui.intro/showPage?id=tutorials" id="tutorials" style-id="left"&gt;
+          &lt;text&gt;Let us guide you through Eclipse end-to-end tutorials&lt;/text&gt;
+        &lt;/link&gt;
+        &lt;link label="Samples" url="http://org.eclipse.ui.intro/showPage?id=samples" id="samples" style-id="right"&gt;
+          &lt;text>Explore Eclipse development through code samples&lt;/text&gt;
+        &lt;/link&gt;
+        &lt;link label="What&apos;s New" url="http://org.eclipse.ui.intro/showPage?id=news" id="news" style-id="right"&gt;
+          &lt;text&gt;Find out what is new in this release&lt;/text&gt;
+        &lt;/link&gt;
+      &lt;/group&gt;
+    &lt;/group&gt;
+</font></pre>
+</p>
+<p>
+Elements on a page can also be <b>filteredFrom</b> a particular implementation.  This allows page designers
+to design with particular platforms in mind.  There are many more powerful attributes that 
+can be used when describing a page and its contents.  The extension point documentation for 
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
+provides the complete reference for valid elements, subelements, and their attributes.
+</p>
+<h4>Extending an intro config</h4>
+Plug-ins can contribute intro content to a page defined elsewhere.  However, the defining page must define an
+<b>anchor</b> attribute that acts as a location placeholder for new content.  The SDK overview page defines
+two anchors for adding JDT and PDE related elements on the overview page.
+<pre><font color="#4444CC">    
+&lt;group id="page-content">
+	&lt;text style-id="page-title" id="page-title"&gt;OVERVIEW&lt;/text&gt;
+	&lt;text style-id="page-description" id="page-description"&gt;Eclipse is a kind of universal tool platform - an open extensible IDE for anything and nothing in particular. It provides a feature-rich development environment that allows the developer to efficiently create tools that integrate seamlessly into the Eclipse Platform.&lt;/text&gt;
+	&lt;group id="overview-links"&gt;
+		&lt;link label="Workbench basics" url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.platform.doc.user/concepts/concepts-2.htm" id="basics"&gt;
+			&lt;text>Learn about basic Eclipse workbench concepts&lt;/text&gt;
+        &lt;/link&gt;
+        &lt;link label="Team support" url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.platform.doc.user/concepts/concepts-26.htm" id="team"&gt;
+			&lt;text&gt;Find out how to collaborate with other developers&lt;/text&gt;
+        &lt;/link&gt;
+		<b>&lt;anchor id="jdtAnchor"/&gt;
+		&lt;anchor id="pdeAnchor"/&gt;</b>
+	&lt;/group&gt;
+&lt;/group&gt;
+</font></pre>
+These anchors can be referenced by plug-ins that add content to the page.  Content is added using the
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
+extension.  Several different kinds of config extensions can be added.
+</p>
+<p>
+The most common way to extend an existing intro config is using the <b>configExtension</b> element.  In this element,
+you specify the <b>configId</b> of the intro config being extended and the <b>content</b> file that describes the new
+content.
+<pre><font color="#4444CC"> 
+&lt;extension
+	point="org.eclipse.ui.intro.configExtension"&gt;
+	&lt;configExtension
+		configId="org.eclipse.platform.introConfig"
+		content="$nl$/overviewExtensionContent.xml"/&gt;  
+    ...
+&lt;/extension&gt;
+</font></pre>
+The format of the content file is similar to that of the main page, except that the path of the target anchor
+must be specified.
+<pre><font color="#4444CC"> 
+&lt;introContent&gt;
+	&lt;extensionContent alt-style="css/swt.properties" style="css/overview.css" <b>path="overview/page-content/overview-links/jdtAnchor"</b>&gt;
+		&lt;link label="Java development" url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.jdt.doc.user/gettingStarted/qs-BasicTutorial.htm" id="java"&gt;
+			&lt;text&gt;Get familiar with developing Java programs using Eclipse&lt;/text&gt;
+		&lt;/link&gt;
+	&lt;/extensionContent&gt;
+&lt;/introContent&gt;
+</font></pre>
+</p>
+<h4>Contributing a standby content part</h4>
+<p>
+Plug-ins can also implement a part for displaying alternative content when the intro page is in standby mode.  For
+example, the platform defines a standby part that will show a cheat sheet for related intro content.  The part is launched using a page
+link with a specialized URL.  Standby parts are launched using a URL containing a special command for showing
+a standby part, such as <tt>http://org.eclipse.ui.intro/showStandby?partId=somePartId</tt>.
+The part is defined in the <b>standbyContentPart</b> subelement in the 
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
+extension. An <b>id</b>, <b>pluginId</b>, and <b>class</b> must be specified for the part.  The class must implement
+<a href="../reference/api/org/eclipse/ui/intro/config/IStandbyContentPart.html"><b>IStandbyContentPart</b></a>.
+The following snippet shows how the platform defines a standby part for showing cheat sheets.
+<pre><font color="#4444CC"> 
+&lt;extension point="org.eclipse.ui.intro.configExtension"&gt;
+	&lt;standbyContentPart
+		id="org.eclipse.platform.cheatsheet"
+		class="org.eclipse.platform.internal.CheatSheetStandbyContent"
+		pluginId="org.eclipse.platform"/&gt;
+&lt;/extension&gt;
+</font></pre>
+This cheat sheet could be launched from an intro page using a <b>link</b> subelement whose
+URL is <tt>http://org.eclipse.ui.intro/showStandby?partId=org.eclipse.platform.cheatsheet</tt>.
+The detailed mechanics for implementing a standby part are beyond the scope of this document.
+See <a href="../reference/api/org/eclipse/ui/intro/config/IStandbyContentPart.html"><b>IStandbyContentPart</b></a>
+and its related classes for more information.
+</p>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 
 </BODY>
