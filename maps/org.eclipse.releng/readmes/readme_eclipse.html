@@ -382,12 +382,28 @@ package. Because this support was marked as interim for 2.0, this is not really
 a breaking change. Nevertheless, existing clients using the interim support will
 need to update the extension point and package names.</p>
 <h3>Platform - Team</h3>
-<h4>Validate edit/save</h4>
-<p>[Describe additional new restrictions on repository providers re: validate
-edit/save not bringing up progress monitors on pain of deadlock, etc.] (bug <font color="#FF0000">MISSING</font>)</p>
-<h4>Linked resources</h4>
-<p>[Describe additional new responsibilities of repository providers re: linked
-resources (<code>RepositoryProvider.canHandleLinkedResources()</code>)] (bug <font color="#FF0000">MISSING</font>)</p>
+<b><font face="Times New Roman">
+<p>Validate edit/save</p>
+</font></b><font face="Times New Roman">
+<p>There are some new restrictions that repository providers should be aware of
+when implementing <code>validateSave/Edit</code>. The first is that the hook can
+be invoked from a non-UI thread. The provider should use <code>Display.syncExec()</code>
+if they are affecting any UI components. Also, the hook should not display a
+progress monitor because there is a good possibility that there already is one
+open for the operation being performed; and opening another will cause deadlock.
+(bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=33471">33471</a>)</p>
+<b>
+<p>Linked resources</p>
+</b>
+<p>The new support for linked files and folders added in Eclipse 2.1 impacts
+repository providers because it changes some of the rules about relationships
+between files in the workspace and their corresponding locations in the local
+file system. All existing repository providers should be updated to handle
+linked resources, as described in the 2.1 Team API. </font>I<font face="Times New Roman">f
+a project is shared via an older 2.0 repository provider, the user will simply
+be able to create linked resources in that project.</font> <font face="Times New Roman">(bug
+<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=26469">26469</a>)</p>
+</font>
 <h3>Platform - SWT</h3>
 <h4>Character field in key event</h4>
 <p>The specification of the <code>Event.character</code> field now makes it
