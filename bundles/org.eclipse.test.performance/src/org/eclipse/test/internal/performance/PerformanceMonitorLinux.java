@@ -52,7 +52,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 				st.nextToken();		// long cutime;		// User time for the process and it's children. */
 				st.nextToken();		// long cstime;		// System time for the process and it's children. */
 	
-				addScalar(scalars, InternalDimensions.USER_TIME, utime*JIFFIES);			
+				//addScalar(scalars, InternalDimensions.USER_TIME, utime*JIFFIES);			
 				addScalar(scalars, InternalDimensions.KERNEL_TIME, stime*JIFFIES);			
 				addScalar(scalars, InternalDimensions.CPU_TIME, (utime+stime)*JIFFIES);			
 				addScalar(scalars, InternalDimensions.SOFT_PAGE_FAULTS, minflt);			

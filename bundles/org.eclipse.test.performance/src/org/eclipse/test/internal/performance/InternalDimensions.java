@@ -24,7 +24,7 @@ public interface InternalDimensions {
 				SYSTEM_TIME= new Dim(2, Unit.SECOND, 1000), 		// System.currentTimeMillis. "System Time"
 				USED_JAVA_HEAP= new Dim(3, Unit.BYTE), 				// Runtime.totalMemory() - Runtime.freeMemory()
     			WORKING_SET= new Dim(4, Unit.BYTE), 				// the working set (or on Linux the resident set). "Working Set"	
-    			USER_TIME= new Dim(10, Unit.SECOND, 1000),			// the amount of elapsed user time. "User time"
+//    			USER_TIME= new Dim(10, Unit.SECOND, 1000),			// the amount of elapsed user time. "User time"
     			KERNEL_TIME= new Dim(11, Unit.SECOND, 1000),		// the amount of elapsed kernel time. "Kernel time"
     			CPU_TIME= new Dim(20, Unit.SECOND, 1000); 			// the amount of CPU time we have used so far. "CPU Time"
 
