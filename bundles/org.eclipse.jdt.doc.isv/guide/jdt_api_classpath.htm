@@ -132,9 +132,9 @@ e.g. entry denoting a library indirectly referred to using a variable 'HOME', wh
 <b><a href="../reference/api/org/eclipse/jdt/core/IClasspathContainer.html">classpath containers</a></b>
 are dynamically resolved, but they can also have distinct values per project and provide additional information about what they represent (name, kind, description, ...).
 Classpath containers are intended to be used to describe more complex project and library aggregates.
-Classpath containers have project specific values, and can be rmanipulated through JavaCore methods 
+Classpath containers have project specific values, and can be manipulated through JavaCore methods 
 <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getClasspathContainer(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)">getClasspathContainer</a></b> and
-<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathVariable(java.lang.String, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)">setClasspathVariable</a></b>.
+<b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathContainer(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject[], org.eclipse.jdt.core.IClasspathContainer[], org.eclipse.core.runtime.IProgressMonitor)">setClasspathContainer</a></b>.
 It is possible to register an automatic <b><a href="../reference/api/org/eclipse/jdt/core/ClasspathContainerInitializer.html">classpath container initializer</a></b>
 which is lazily invoked through the extension point <b><a href="../reference/extension-points/org_eclipse_jdt_core_classpathContainerInitializer.html">org.eclipse.jdt.core.classpathContainerInitializer</a></b>
 when the container needs to be bound.  
@@ -151,21 +151,20 @@ e.g. entry denoting a system class library container:
   JavaCore.setClasspathContainer(
     new Path("JDKLIB/default"), 
     new IJavaProject[]{ myProject }, // value for 'myProject'
-      new IClasspathContainer[] {
-        new IClasspathContainer() {
-          public IClasspathEntry[] getClasspathEntries() {
-            return new IClasspathEntry[]{ 
-              JavaCore.newLibraryEntry(new Path("d:/rt.jar"), null, null, false);
-             }; 
-          }
-          public String getDescription() { return "Basic JDK library container"; }
-          public int getKind() { return IClasspathContainer.K_SYSTEM; }
-          public IPath getPath() { return new Path("JDKLIB/basic"); }
-		}			
-      }
+    new IClasspathContainer[] {
+      new IClasspathContainer() {
+        public IClasspathEntry[] getClasspathEntries() {
+          return new IClasspathEntry[]{ 
+            JavaCore.newLibraryEntry(new Path("d:/rt.jar"), null, null, false);
+          }; 
+        }
+        public String getDescription() { return "Basic JDK library container"; }
+        public int getKind() { return IClasspathContainer.K_SYSTEM; }
+        public IPath getPath() { return new Path("JDKLIB/basic"); }
+      }			
     }, 
     null);	                             
-	 </pre></font>
+</pre></font>
 </li>
 </ul>
 
