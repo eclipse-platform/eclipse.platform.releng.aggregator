@@ -37,18 +37,43 @@ configuration for launching local Java programs:</p>
 configuration can be used.&nbsp; In this example, the launch configuration is
 set as the default launcher for files with the &quot;java&quot; or
 &quot;class&quot; extension.</p>
+<h4>Defining source locators</h4>
+<p>For each type of launch configuration that supports debug mode, it is
+important to define a way to find the source code that corresponds with the
+current execution point in the code.&nbsp; <a href="../reference/api/org/eclipse/debug/core/model/ISourceLocator.html">ISourceLocator</a>
+and <a href="../reference/api/org/eclipse/debug/core/model/IPersistableSourceLocator.htmll">IPersistableSourceLocator</a>
+define an interface for mapping from an executing program back to the source
+code. </p>
+<p>Source locators are typically implemented to work with a corresponding launch
+configuration and launch configuration delegate.&nbsp; Since launch
+configurations can be persisted, source locators must also be able to be stored
+with the launch configuration.&nbsp; Source locators are stored by setting an
+attribute of the launch configuration to an id of a source locator.&nbsp; When a
+launch configuration is read from disk, the id of the source locator must be
+mapped back to the implementation class.&nbsp; This is achieved using the <a href="../reference/extension-points/org_eclipse_debug_core_source_locators.html">org.eclipse.debug.core.sourceLocators</a>
+extension point.&nbsp;</p>
+<p>The extension point allows you to register your class that implements <a href="../reference/api/org/eclipse/debug/core/model/IPersistableSourceLocator.htmll">IPersistableSourceLocator</a>
+and associate it with an id that will be stored with the launch
+configuration.&nbsp; This allows the debug plug-in to look up source locator
+classes by id when it's time to instantiate a launch configuration.</p>
+<p>The following markup is from the Java tooling:</p>
+<pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.core.sourceLocators&quot;&gt;
+	&lt;sourceLocator
+		id = &quot;org.eclipse.jdt.debug.ui.javaSourceLocator&quot;
+	   	class=&quot;org.eclipse.jdt.debug.ui.JavaUISourceLocator&quot;
+	   	name=&quot;Prompting Java Source Locator&quot;/&gt;
+&lt;/extension&gt;</font></pre>
 <h4>Comparing launch configurations</h4>
-<p>Launch configurations store a collection of named attributes and values,
-allowing plug-ins to store any kind of data appropriate for the launch
-configuration type that they define.&nbsp; Since the possible values, their
-types, and meaning are not known by the platform, an extension point is provided
-that allows you to supply a comparator for a specific attribute.&nbsp; The
-comparator is used to determine whether attributes of the specifed name are
-equal.&nbsp; In many cases, the default behavior provided by
-java.lang.Object.equals(Object) is suitable for comparing attributes, and will
+<p>Plug-ins use named attributes and values to store important data with a
+launch configuration.&nbsp; Since the interpretation of any attribute is not known by the platform, an extension point is provided
+that allows you to supply a comparator for a specific attribute.&nbsp; This
+comparator is used to determine whether attributes of the specified name are
+equal.&nbsp; In many cases, the simple string compare provided by
+java.lang.Object.equals(Object) is suitable for comparing attributes.&nbsp; This
+method will
 be used if no comparator has been provided.&nbsp; However, some attribute values
-may require special handling, such as stripping white space values in certain
-text attributes.&nbsp; </p>
+may require special handling, such as stripping white space values from text
+before comparing for equality. </p>
 <p>Comparators are contributed using the <a href="../reference/extension-points/org_eclipse_debug_core_launch_configuration_comparators.html">org.eclipse.debug.core.launchConfigurationComparators</a>
 extension point.&nbsp; </p>
 <p>The Java tools supply launch configuration comparators for comparing program
