@@ -268,8 +268,14 @@ public class FixCopyrightAction implements IObjectActionDelegate {
             warn(file, null, "Multiple copyrights found.  File UNCHANGED."); //$NON-NLS-1$//$NON-NLS-2$
             return;
         }
-
+        
+        boolean hasCPL = true;
+        
         BlockComment copyrightComment = aSourceFile.firstCopyrightComment();
+        if (copyrightComment != null && (copyrightComment.getContents().indexOf("Common Public License") == -1)) {
+        	hasCPL=false;
+        }
+        
         IBMCopyrightComment ibmCopyright = IBMCopyrightComment.parse(copyrightComment, fileType);
         if (ibmCopyright == null) {
             warn(file, copyrightComment, "Could not interpret copyright comment"); //$NON-NLS-1$
@@ -283,10 +289,11 @@ public class FixCopyrightAction implements IObjectActionDelegate {
         int lastMod = revised;
         if (lastMod < currentYear)
             lastMod = getCVSModificationYear(file, new NullProgressMonitor());
-
-        if (lastMod <= revised)
-            return;
-
+              	
+        if (lastMod <= revised && !hasCPL) {
+           	return;
+        }
+        
         // either replace old copyright or put the new one at the top of the file
         ibmCopyright.setRevisionYear(lastMod);
         if (copyrightComment == null)
@@ -306,83 +313,6 @@ public class FixCopyrightAction implements IObjectActionDelegate {
             log.put(errorDescription, aList);
         }
         aList.add(file.getName());
-    }
-
-    /**
-     *  
-     */
-    private String getJavaCopyright() {
-        if (javaCopyright == null) {
-            String newLine = System.getProperty("line.separator");
-            StringWriter aWriter = new StringWriter();
-
-            aWriter
-                    .write("/*******************************************************************************");
-            aWriter.write(newLine);
-            aWriter
-                    .write(" * Copyright (c) 2000, 2004 IBM Corporation and others.");
-            aWriter.write(newLine);
-            aWriter
-                    .write(" * All rights reserved. This program and the accompanying materials ");
-            aWriter.write(newLine);
-            aWriter
-                    .write(" * are made available under the terms of the Common Public License v1.0");
-            aWriter.write(newLine);
-            aWriter
-                    .write(" * which accompanies this distribution, and is available at");
-            aWriter.write(newLine);
-            aWriter.write(" * http://www.eclipse.org/legal/cpl-v10.html");
-            aWriter.write(newLine);
-            aWriter.write(" * ");
-            aWriter.write(newLine);
-            aWriter.write(" * Contributors:");
-            aWriter.write(newLine);
-            aWriter
-                    .write(" *     IBM Corporation - initial API and implementation");
-            aWriter.write(newLine);
-            aWriter
-                    .write(" *******************************************************************************/");
-            aWriter.write(newLine);
-            javaCopyright = aWriter.toString();
-        }
-        return javaCopyright.toString();
-    }
-
-    private String getPropertiesCopyright() {
-        if (propertiesCopyright == null) {
-            String newLine = System.getProperty("line.separator");
-            StringWriter aWriter = new StringWriter();
-
-            aWriter
-                    .write("###############################################################################");
-            aWriter.write(newLine);
-            aWriter
-                    .write("# Copyright (c) 2000, 2004 IBM Corporation and others.");
-            aWriter.write(newLine);
-            aWriter
-                    .write("# All rights reserved. This program and the accompanying materials ");
-            aWriter.write(newLine);
-            aWriter
-                    .write("# are made available under the terms of the Common Public License v1.0");
-            aWriter.write(newLine);
-            aWriter
-                    .write("# which accompanies this distribution, and is available at");
-            aWriter.write(newLine);
-            aWriter.write("# http://www.eclipse.org/legal/cpl-v10.html");
-            aWriter.write(newLine);
-            aWriter.write("# ");
-            aWriter.write(newLine);
-            aWriter.write("# Contributors:");
-            aWriter.write(newLine);
-            aWriter
-                    .write("#     IBM Corporation - initial API and implementation");
-            aWriter.write(newLine);
-            aWriter
-                    .write("###############################################################################");
-            aWriter.write(newLine);
-            propertiesCopyright = aWriter.toString();
-        }
-        return propertiesCopyright.toString();
     }
 
     /**

@@ -23,7 +23,7 @@ public class IBMCopyrightComment {
     public static final int JAVA_COMMENT = 1;
     public static final int PROPERTIES_COMMENT = 2;
 
-    private static final int DEFAULT_CREATION_YEAR = 2003;
+    private static final int DEFAULT_CREATION_YEAR = 2004;
 
     private int commentStyle = 0;
     private int creationYear = -1;
@@ -165,9 +165,9 @@ public class IBMCopyrightComment {
 		writer.println(" IBM Corporation and others."); //$NON-NLS-1$
 
 		writer.println(linePrefix + "All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
-		writer.println(linePrefix + "are made available under the terms of the Common Public License v1.0"); //$NON-NLS-1$
+		writer.println(linePrefix + "are made available under the terms of the Eclipse Public License v1.0"); //$NON-NLS-1$
 		writer.println(linePrefix + "which accompanies this distribution, and is available at"); //$NON-NLS-1$
-		writer.println(linePrefix + "http://www.eclipse.org/legal/cpl-v10.html"); //$NON-NLS-1$
+		writer.println(linePrefix + "http://www.eclipse.org/legal/epl-v10.html"); //$NON-NLS-1$
 	}
 
 	private void writeContributions(PrintWriter writer, String linePrefix) {
