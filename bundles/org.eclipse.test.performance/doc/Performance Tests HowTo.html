@@ -9,8 +9,8 @@
 
 <h1>Performance Tests HowTo</h1>
 <p>
-By Christof Marti and Andre Weinand, IBM OTI Labs<br>
-2004/11/11<br>
+By Sonia Dimitrov, Christof Marti, Andre Weinand<br>
+2005/02/24<br>
 
 <p>
 The Eclipse performance test plugin (org.eclipse.test.performance)
@@ -275,50 +275,47 @@ it in the build (add it to the "build.properties" file).
 <h3>Running a performance test case (within the Automated Testing Framework, locally)</h3>
 
 <ul>
-  <li>modify <code>test.xml</code> as described above </li>
-  <li>download a build and its accompanying Automated Testing Framework</li>
-  <li>unzip the Automated Testing Framework (creates a directory
-"eclipse-testing", see also the contained readme.html)
-    <ul>
-      <li>you need <a
- href="http://www.info-zip.org/pub/infozip/UnZip.html">Info-ZIP UnZip</a>
-version 5.41 or later (<a
- href="ftp://sunsite.cnlab-switch.ch/mirror/infozip/WIN32/unz551xN.exe">Windows</a>)
-installed and added to the path</li>
-    </ul>
+  <li>
+  	modify <code>test.xml</code> as described above
   </li>
-  <li>put the build's zip in the eclipse-testing directory</li>
-  <li>on the command prompt of Windows (similar for other platforms,
-see the readme.html of the Automated Testing Framework):</li>
-  <ul>
-    <li>change to the eclipse-testing directory</li>
-    <li>run: <code>runtests.bat -Dtest.target=performance -vm <em>&lt;path to JRE&gt;</em>\bin\java.exe
-      <em>&lt;your test target&gt;</em></code>
-    </li>
-    <li>if your test plug-in is already run as part of the Automatic
-Test Framework, your test target can be found in the eclipse-testing
-directory's readme.html or test.xml</li>
-    <li>you can stop the test run as soon as the framework has
-extracted everything and started running test cases</li>
-  </ul>
-  <li>export your test plug-in as 'Deployable plug-in' to the
-eclipse-testing/test-eclipse/eclipse directory; choose to export as
-directory structure</li>
-  <li>(if you have exported a 3.1.0 plug-in to a 3.0.0 test harness,
-delete the old 3.0.0 test plug-in and rename yours to *_3.0.0)</li>
-  <li>on the command prompt:</li>
-  <ul>
-    <li>change to the eclipse-testing directory</li>
-    <li>run <em>(note the additional -noclean argument)</em>: <code>runtests.bat
-      <span style="color: red;">-noclean</span> -Dtest.target=performance -vm <em>&lt;path to
-			JRE&gt;</em>\bin\java.exe <em>&lt;your test target&gt;</em></code>
-	</li>
-  </ul>
+  
+  <li>
+  	download a build and its accompanying test framework plug-ins contained 
+    in eclipse-test-framework-*.zip
+  </li>
+  
+  <li>
+  	unzip the Eclipse SDK and the eclipse-test-framework zip to install your target Eclipse<br>
+    (you need <a href="http://www.info-zip.org/pub/infozip/UnZip.html">Info-ZIP 
+    UnZip</a> version 5.41 or later (<a href="ftp://sunsite.cnlab-switch.ch/mirror/infozip/WIN32/unz551xN.exe">Windows</a>) 
+    installed and added to the path).
+  </li>
+
+  <li>
+  	export your test plug-in as a 'Deployable plug-in' to the target Eclipse installed 
+    	above; choose to export as directory structure.
+  </li>
+  
+  <li>
+  	open a terminal or command window and execute the follwoing (on a single line):<br>
+  	<pre>
+        java -jar <i><b>&lt;an eclipse install&gt;</i></b>/startup.jar
+        -application org.eclipse.ant.core.antRunner 
+        -file <i><b>&lt;target eclipse install/plugins/your test plug-in id_version&gt;</b></i>/test.xml 
+        performance
+        -Dos=<i><b>&lt;os&gt;</b></i> -Dws=<i><b>&lt;ws&gt;</b></i> -Darch=<i><b>&lt;arch&gt;</b></i> -Declipse_home=<i><b>&lt;target eclipse install&gt;</b></i>
+        &quot;-Dvmargs=-Xms256M -Xmx256M&quot;
+        -logger org.apache.tools.ant.DefaultLogger
+    </pre>
+  </li>
+  
+  <li>
+  	The JUnit results are written to an xml file in the root of the target Eclipse 
+    	and the performance measurements are written to the console.
+  </li>
+    
 </ul>
 
-<br>
-&nbsp;
-<br>
 <h2><a name="cloudscape"></a>Setting up the Derby database</h2>
 
 Performance tests are only valuable if measured data can be
@@ -535,6 +532,10 @@ Page Faults:             145 [125]        148 [125]            176            19
 System Time:       1.02 s [285 ms]  1.06 s [345 ms]         981 ms         1.01 s         477 ms
 </pre>
 
+If you are interested in creating performance charts and tables similar to those available on the eclipse platform
+download pages, you could try the stand-alone java program org.eclipse.test.performance.ui.Main stored in the
+org.eclipse.releng.basebuilder project. Refer to the <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.releng.basebuilder/plugins/org.eclipse.test.performance.ui/readme.html?rev=HEAD&content-type=text/html">readme.html</a> in 
+org.eclipse.releng.basebuilder/plugins/org.eclipse.test.performance.ui for more details.
 
 <h3>How to setup a Derby server (on Linux and MacOS X)</h3>
 
