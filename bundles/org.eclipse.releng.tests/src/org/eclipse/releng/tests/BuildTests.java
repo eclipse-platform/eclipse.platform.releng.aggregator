@@ -38,16 +38,20 @@ import junit.framework.TestCase;
 
 public class BuildTests extends TestCase {
 	
+	private List cvsExcludeDirectories;
+	private String sourceDirectoryName;
+	private String logFileName;
 	private static final String CVS_KO = "-ko";
 	private static final String CVS_KKV = "-kkv";
 	private static final String CVS_KB = "-kb";
 	private static final String CVS_BINARY = "CVS_BINARY";
 	private static final int ENTRY_TYPE_INDEX = 3;
 	private static final int ENTRY_NAME_INDEX = 0;
-	private static final int ENTRY_FIELDS_SIZE = 5;
+	private static final int MIN_ENTRY_FIELDS_SIZE = 4;
 	private static final String DEFAULT_CVS_TYPE = "-kkv";
 	
 	private Map cvsTypes;
+	private List cvsDirectoryTypes;
 	private String[] javaCopyrightLines;
 	private long goodCopyrights = 0;
 	private long badCopyrights = 0;
@@ -63,6 +67,7 @@ public class BuildTests extends TestCase {
 			}
 		};
 	}
+	
 	/**
 	 * Method hasErrors.
 	 * @param string
@@ -107,24 +112,9 @@ public class BuildTests extends TestCase {
 		
 		boolean result = false;
 		initializeJavaCopyright();
-		
-		// String to use when running as an automated test.
-		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
-
-		// String to use when running in an Eclipse runtime
-//		 String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
-
 		new File(logFileName).mkdirs();
 		logFileName = logFileName + File.separator + "copyrightLog.txt";
 
-		// Source location when running in an automated test.  This is really bad form
-		// but we really don't want to recheck out all the source.
-//		String sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
-		
-		// Source location when running locally.  Run a source build to get it.
-		// TODO Put back correct source location
-		 String sourceDirectoryName = "d:\\sourceFetch";
-		
 		try {
 			BufferedWriter aLog = new BufferedWriter(new FileWriter(logFileName));
 			File rootDirectory = new File(sourceDirectoryName);
@@ -172,25 +162,10 @@ public class BuildTests extends TestCase {
 	public void testCVSKTag() {
 		
 		boolean result = false;
-		
 		initializeCVSTypes();
-		
-		// String to use when running as an automated test.
-		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
-
-		// String to use when running in an Eclipse runtime
-//		 String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
-
 		new File(logFileName).mkdirs();
 		logFileName = logFileName + File.separator + "cvsTypesLog.txt";
-
-		// Source location when running in an automated test.  This is really bad form
-		// but we really don't want to recheck out all the source.
-		String sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
-		
-		// Source location when running locally.  Run a source build to get it.
-//		 String sourceDirectoryName = "d:\\sourceFetch";
-		
+			
 		try {
 
 	//		StringWriter aWriter = new StringWriter();
@@ -229,6 +204,13 @@ public class BuildTests extends TestCase {
 		cvsTypes.put("rsc", CVS_BINARY);
 		cvsTypes.put("jnilib", CVS_BINARY);
 		cvsTypes.put("a", CVS_BINARY);
+		
+		cvsDirectoryTypes = new ArrayList();
+		cvsDirectoryTypes.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
+		
+		cvsExcludeDirectories = new ArrayList();
+		cvsExcludeDirectories.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
+
 	}
 	
 	private void initializeJavaCopyright() {
@@ -246,6 +228,10 @@ public class BuildTests extends TestCase {
 	private boolean scanCVSKTag(File aDirectory, BufferedWriter aLog) {
 		
 		boolean result = false;
+		
+		if (isCvsExcludeDirectory(aDirectory)) {
+			return result;
+		}
 		
 		File[] files = aDirectory.listFiles();
 		
@@ -266,6 +252,22 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 	
+	/**
+	 * @param aDirectory
+	 * @return
+	 */
+	private boolean isCvsExcludeDirectory(File aDirectory) {
+		String aString = aDirectory.getPath().substring(sourceDirectoryName.length()).toLowerCase();
+		Iterator anIterator = cvsExcludeDirectories.iterator();
+		while (anIterator.hasNext()) {
+			String anItem = (String) anIterator.next();
+			if (aString.indexOf(anItem) != -1) {
+				return true; 
+			}
+		}
+		return false;
+	}
+
 	private boolean scanCVSDirectory(File aDirectory, BufferedWriter aLog) {
 		
 		boolean result = false;
@@ -275,7 +277,7 @@ public class BuildTests extends TestCase {
 			BufferedReader aReader = new BufferedReader(new FileReader(entries));
 			String aLine = aReader.readLine();
 			while (aLine != null) {
-				result = result | validateEntry(aDirectory.getParentFile(), aLine, aLog);
+				result = result | validateCVSEntry(aDirectory.getParentFile(), aLine, aLog);
 				aLine = aReader.readLine();
 			}
 			
@@ -335,17 +337,28 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 	
-	private boolean validateEntry(File aDirectory, String aLine, BufferedWriter aLog) {
+	private boolean validateCVSEntry(File aDirectory, String aLine, BufferedWriter aLog) {
 
 		boolean result = false;
 		
 		String[] fields = split(aLine, "/");
-		if (fields.length < ENTRY_FIELDS_SIZE) {
+		if (fields.length < MIN_ENTRY_FIELDS_SIZE) {
 			return result;
 		}
 		
+		String expectedType;
+	
+		// Some entire directories are marked as Binary.	
+		if (isCVSBinaryDirectory(aDirectory)) {
+			expectedType = CVS_BINARY;
+		} else {
+			expectedType = null;
+		}
+		
 		String entryName = aDirectory + File.separator + fields[ENTRY_NAME_INDEX];
-		String expectedType  = (String) cvsTypes.get(entryName);
+		if (expectedType == null) {
+			expectedType  = (String) cvsTypes.get(entryName);
+		}
 
 		// No type registered for exact file name.  Check for extension
 		if (expectedType == null) {			
@@ -406,6 +419,22 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 	
+	/**
+	 * @param aDirectory
+	 * @return
+	 */
+	private boolean isCVSBinaryDirectory(File aDirectory) {
+		String aString = aDirectory.getPath().substring(sourceDirectoryName.length()).toLowerCase();
+		Iterator anIterator = cvsDirectoryTypes.iterator();
+		while (anIterator.hasNext()) {
+			String anItem = (String) anIterator.next();
+			if (aString.indexOf(anItem) != -1) {
+				return true; 
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * @param aLine
 	 * @param delimeter
@@ -668,12 +697,18 @@ public class BuildTests extends TestCase {
 		super(arg0);
 	}
 
-	
 	/**
 	 * @see TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
-		super.setUp();
+		
+		// Autoamted Test
+		logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator;
+		sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
+
+		// Runtime Workbench - TODI Put me back to Automated status
+//		logFileName = "d:\\results";
+//		sourceDirectoryName = "d:\\sourceFetch";
 	}
 
 	/**
