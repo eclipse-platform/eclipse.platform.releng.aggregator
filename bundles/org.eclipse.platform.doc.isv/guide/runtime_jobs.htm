@@ -11,6 +11,7 @@
 <BODY BGCOLOR="#ffffff">
 <H1>
 Concurrency infrastructure</H1>
+<h2>An introduction to jobs</h2>
 <p>
 The <tt>org.eclipse.core.runtime.jobs</tt> package provides infrastructure for
 scheduling, executing, and managing concurrently running operations. The basic
@@ -89,6 +90,37 @@ arbitrary objects back from the job's run method. The result can also be used to
 indicate failure (by returning an <tt>IStatus</tt> with severity <tt>IStatus.ERROR</tt>),
 or cancelation (<tt>IStatus.CANCEL</tt>).
 </p>
+<h2>Common job operations</h2>
+<p>
+We've seen the <tt>schedule</tt> and <tt>join</tt> methods, but jobs have a 
+number of other interesting methods to allow you to interact with them. If you
+schedule a job but then decide it is no longer needed, the job can be stopped using
+the <tt>cancel</tt> method.  If the job has not yet started running when <tt>cancel</tt>
+is called, the job is immediately discarded and will not run.  If, on the other hand, the job 
+has already started running, it is up to the job whether it wants to respond to the cancelation.
+This is a situation where joining the job comes in handy.  Here is a common idiom for
+canceling a job, and ensuring that the job has finished before proceeding:
+<font color='#4444CC'><pre>
+   if (!job.cancel())
+      job.join();
+</pre></font>
+If the cancelation did not take effect immediately, then <tt>cancel</tt> will return 
+false, and we need to <tt>join</tt> the job if we want to be absolutely certain
+that the job has finished running.
+</p>
+<p>
+Slightly less drastic than cancelation is the <tt>Job.sleep</tt> method.  Again,
+if the job has not yet started running, the <tt>sleep</tt> method will cause the
+job to be put on hold indefinitely.  The job will still be remembered by the platform,
+and a call to <tt>Job.wakeUp</tt> will cause the job to be added to the wait
+queue where it will eventually be executed. 
+</p>
+
+
+
+
+
+
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
