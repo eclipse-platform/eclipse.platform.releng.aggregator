@@ -38,11 +38,6 @@
 
 
 <target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
-
-	<!--HACK to ensure the platform doc is built before JDT - call to this script should be moved to build.jars target-->
-	<available file="../org.eclipse.platform.doc.isv/doc.zip" property="platform.doc.zip.present"/>
-	<antcall target="buildPlatformDoc" />
-
 	<condition property="optionsFile" value="jdtOptions">
 	      <os family="unix" />
     </condition>
@@ -51,7 +46,6 @@
     </condition>
 
 	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
-
 		
 	<!--scrub isv plugin directories of any preexisting api doc content-->
 	<delete dir="reference/api"/>
@@ -60,10 +54,6 @@
 	<exec dir="." executable="${javadoc}" output="doc.bin.log">
 		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
 	</exec>
-</target>
-
-<target name="buildPlatformDoc" unless="platform.doc.zip.present">
-	<ant antfile="buildDoc.xml" dir="../org.eclipse.platform.doc.isv" />
 </target>
 
 <target name="createDocZip">
