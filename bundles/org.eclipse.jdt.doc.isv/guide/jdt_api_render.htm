@@ -1,58 +1,66 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
 <html>
 <head>
-             	                                    
-  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-             	                                    
-  <meta http-equiv="Content-Style-Type" content="text/css">
-              	                                    
-  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
-  <title>How to render Java elements in a tree or table viewer</title>
-   
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>How to render Java elements in a tree or table viewer</title>
 </head>
-  <body>
+<body>
 <h2>How to present Java elements in a standard JFace viewer</h2>
-<p> The JDT-UI API provides several classes to present the Java model or
-parts    of it in a standard JFace viewer. This functionality is provided
-primarily by: </p>
+<p> The JDT-UI API provides several classes to present the Java model or parts 
+  of it in a standard JFace viewer. This functionality is provided primarily by: 
+</p>
 <ul>
-  <li><a href="../reference/api/org/eclipse/jdt/ui/StandardJavaElementContentProvider.html">
-            StandardJavaElementContentProvider</a>
-             which translates the Java element hierarchy      into a data 
-structure    accessible by a tree, table or list viewer</li>
-  <li><a href="../reference/api/org/eclipse/jdt/ui/JavaElementLabelProvider.html">
-            JavaElementLabelProvider</a>
-             which provides corresponding images and labels for a standard
- JFace    viewer</li>
+  <li><a href="../reference/api/org/eclipse/jdt/ui/StandardJavaElementContentProvider.html"> 
+    StandardJavaElementContentProvider</a> which translates the Java element hierarchy 
+    into a data structure accessible by a tree, table or list viewer</li>
+  <li><a href="../reference/api/org/eclipse/jdt/ui/JavaElementLabelProvider.html"> 
+    JavaElementLabelProvider</a> which provides corresponding images and labels 
+    for a standard JFace viewer</li>
 </ul>
-            Putting the pieces together is quite simple:<br>
-<pre>	<font color="#4444cc">...<br>	IJavaProject jProject= ...;<br><br>	TreeViewer viewer= new TreeViewer(parent); <br>	// Provide members of a compilation unit or class file, but no working copy elements<br>	ITreeContentProvider contentProvider= new StandardJavaElementContentProvider(true, false);<br>	viewer.setContentProvider(contentProvider);<br>	// There are more flags defined in class JavaElementLabelProvider<br>	ILabelProvider labelProvider= new JavaElementLabelProvider(<br>		JavaElementLabelProvider.SHOW_DEFAULT | <br>		JavaElementLabelProvider.SHOW_QUALIFIED | <br>		JavaElementLabelProvider.SHOW_ROOT);<br>	viewer.setLabelProvider(labelProvider);<br>	<br>	// Using the Java model as the viewers input present Java projects on the first level.<br>	viewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));<br>	...</font><br></pre>
+Putting the pieces together is quite simple:<br>
+<pre><font color="#4444cc">    ...
+    IJavaProject jProject= ...;
 
-In addition to the Java model the <code>StandardJavaElementContentProvider</code>
-class supports the following input element types: <code>IJavaProject</code>, 
-<code>IPackageFragmentRoot</code>, <code>IPackageFragment</code>
-and <code>IFolder</code>.<br>
-<h3>Adding&nbsp; problem and override decorators</h3>
-  When a viewer is supposed to include problem annotations, then a DecoratingLabelProvider 
+    TreeViewer viewer= new TreeViewer(parent);
+	// Provide members of a compilation unit or class file, but no working copy elements
+	ITreeContentProvider contentProvider= new StandardJavaElementContentProvider(true, false);
+	viewer.setContentProvider(contentProvider);
+	// There are more flags defined in class JavaElementLabelProvider
+	ILabelProvider labelProvider= new JavaElementLabelProvider(
+	    JavaElementLabelProvider.SHOW_DEFAULT |
+		JavaElementLabelProvider.SHOW_QUALIFIED |
+		JavaElementLabelProvider.SHOW_ROOT);
+	viewer.setLabelProvider(labelProvider);
+	// Using the Java model as the viewers input present Java projects on the first level.
+	viewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+	...</font></pre>
+<p> In addition to the Java model the <code>StandardJavaElementContentProvider</code> 
+  class supports the following input element types: <code>IJavaProject</code>, 
+  <code>IPackageFragmentRoot</code>, <code>IPackageFragment</code> and <code>IFolder</code>. 
+</p>
+<h3>Adding problem and override decorators</h3>
+When a viewer is supposed to include problem annotations, then a DecoratingLabelProvider 
 together with the <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.html"> 
 ProblemsLabelDecorator</a> is used. Below is a code snippet that outlines the 
 use of a &nbsp;problem label decorator:<br>
-<pre>	<font color="#4444cc">...<br>	DecoratingLabelProvider decorator= new DecoratingLabelProvider(labelProvider, new ProblemsLabelDecorator());	<br>	viewer.setLabelProvider(decorator);<br>	...</font><br><br>
-</pre>
-           In the same way the <a href="../reference/api/org/eclipse/jdt/ui/OverrideIndicatorLabelDecorator.html">
-           OverrideIndicatorLabelDecorator</a>
-            can be used to decorate a normal label provider to show the implement
- and override indicators for methods.<br>
+<pre><font color="#4444cc">    ...
+    DecoratingLabelProvider decorator= new DecoratingLabelProvider(labelProvider, new ProblemsLabelDecorator());
+	viewer.setLabelProvider(decorator);
+	...</font></pre>
+<p> In the same way the <a href="../reference/api/org/eclipse/jdt/ui/OverrideIndicatorLabelDecorator.html"> 
+  OverrideIndicatorLabelDecorator</a> can be used to decorate a normal label provider 
+  to show the implement and override indicators for methods. </p>
 <h3>Updating the presentation on model changes</h3>
-      Neither the <code>OverrideIndicatorLabelDecorator</code> nor the <code> 
-ProblemsLabelDecorator</code> listen to model changes. Hence, the viewer doesn't 
-update its presentation if the Java or resource marker model changes. The reason 
-for pushing the update onto the client for these classes is that there isn't yet 
-a generic implementation that fulfills all performance concerns. Handling Java 
-model delta inspection and viewer refreshing in each label decorator or provider 
-would lead to multiple delta inspections and unnecessary viewer updates.<br>
-<br>
-So what does the client need to do in order to update their viewers ?<br>
+<p> Neither the <code>OverrideIndicatorLabelDecorator</code> nor the <code> ProblemsLabelDecorator</code> 
+  listen to model changes. Hence, the viewer doesn't update its presentation if 
+  the Java or resource marker model changes. The reason for pushing the update 
+  onto the client for these classes is that there isn't yet a generic implementation 
+  that fulfills all performance concerns. Handling Java model delta inspection 
+  and viewer refreshing in each label decorator or provider would lead to multiple 
+  delta inspections and unnecessary viewer updates.</p>
+<p> So what does the client need to do in order to update their viewers ?</p>
 <ul>
   <li><code>OverrideIndicatorLabelDecorator</code>: the client must listen to 
     Java model changes (see <code>JavaCore.addElementChangedListener</code> ) 
@@ -60,26 +68,22 @@ So what does the client need to do in order to update their viewers ?<br>
     indicator of elements presented in the viewer. If so, the class inspecting 
     the delta should trigger a repaint of the corresponding Java elements using 
     the standard JFace viewer API (see update methods on StructuredViewer).</li>
-  <li><code>ProblemsLabelDecorator</code>: the client should listen to  changes
-   notified by the decorator via a <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.ProblemsLabelChangedEvent.html">
-           ProblemsLabelChangedEvent</a>
-            (see also <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.html#addListener(org.eclipse.jface.viewers.ILabelProviderListener)">
-           ProblemsLabelDecorator.addListener</a>
-           ). Since the marker model is resource based, the listener has
-to  map   the   resource notifications to its underlying data model. For
-an example    showing  how to do this for viewers presenting Java elements
-see the internal    classes      <code>ProblemTreeViewer.handleLabelProviderChanged.</code></li>
+  <li><code>ProblemsLabelDecorator</code>: the client should listen to changes 
+    notified by the decorator via a <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.ProblemsLabelChangedEvent.html"> 
+    ProblemsLabelChangedEvent</a> (see also <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.html#addListener(org.eclipse.jface.viewers.ILabelProviderListener)"> 
+    ProblemsLabelDecorator.addListener</a> ). Since the marker model is resource 
+    based, the listener has to map the resource notifications to its underlying 
+    data model. For an example showing how to do this for viewers presenting Java 
+    elements see the internal classes <code>ProblemTreeViewer.handleLabelProviderChanged.</code></li>
 </ul>
-        For the same reasons enumerated for label decorators the StandardJavaElementContentProvider 
-   doesn't listen to model changes. If the viewer needs to update its presentation
-  according to Java model changes, then the client should add a corresponding
-  listener to JavaCore. If the change described by the delta invalidates
-the   structure of the elements presented in the viewer then the client should
- update the viewer using the standard JFace API (see refresh methods on StructuredViewer,
-  and the add and remove methods on TableViewer and AbstractTreeViewer).
-    
-<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved.">
-</a>
-</p>
+<p> For the same reasons enumerated for label decorators the StandardJavaElementContentProvider 
+  doesn't listen to model changes. If the viewer needs to update its presentation 
+  according to Java model changes, then the client should add a corresponding 
+  listener to JavaCore. If the change described by the delta invalidates the structure 
+  of the elements presented in the viewer then the client should update the viewer 
+  using the standard JFace API (see refresh methods on StructuredViewer, and the 
+  add and remove methods on TableViewer and AbstractTreeViewer). </p>
+<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved."> 
+  </a> </p>
 </body>
 </html>
