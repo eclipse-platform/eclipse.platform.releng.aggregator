@@ -32,7 +32,7 @@
     </ul>
 	
     <h2 class="Head">
-      Errors and warnings
+      Problems
     </h2>
     <table border="1" cellspacing="0" cellpadding="5" width="100%">
       <tr>
@@ -60,7 +60,8 @@
         </td>
         <td valign="top">
           <p>
-            Unreachable code can optionally be reported as an error, warning or simply ignored. The bytecode generation will always optimized it out.
+            Unreachable code can optionally be reported as an error, warning or simply ignored. The bytecode generation will always optimized it out. 
+            Note that according to the Java language specification, unreachable code should be an error.
           </p>
         </td>
         <td valign="top">
@@ -78,6 +79,7 @@
         <td valign="top">
           <p>
             An import statement that cannot be resolved might optionally be reported as an error, as a warning or ignored.
+            Note that according to the Java language specification, unresolved import statements should be an error.
           </p>
         </td>
         <td valign="top">
@@ -85,6 +87,167 @@
             Error
           </p>
         </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Unused local variables (i.e. never read)</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will issue an error or a warning for unused local variables (i.e. variables never read from).
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Ignore
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Unused parameters (i.e. never read)</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will issue an error or a warning for unused method parameters (i.e. parameters never read from).
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Ignore
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Unused imports</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will issue an error or a warning for unused import reference.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Warning
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Unused private types, methods or fields</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will issue an error or a warning whenever a private 
+			method or field is declared but never used within the same unit.            
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Ignore
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Usage of non-externalized strings</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will issue an error or a warning for non externalized String literal (i.e. non tagged with //$NON-NLS-&lt;n&gt;$).&nbsp;
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Ignore
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Usage of deprecated API</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will signal use of deprecated API either as an error or a warning.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Warning
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Signal use of deprecated API inside deprecated code</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When enabled, the compiler will signal use of deprecated API inside deprecated code.
+            The severity of the problem is controlled with option "Usage of deprecated API".
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Off
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Maximum number of problems reported per compilation unit</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Specifies the maximum number of problems reported per compilation unit.&nbsp;
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            100
+          </p>
+        </td>
+      </tr>
+    </table>
+	
+    <h2 class="Head">
+      Style
+    </h2>
+    <table border="1" cellspacing="0" cellpadding="5" width="100%">
+      <tr>
+        <th>
+          <p>
+            Option
+          </p>
+        </th>
+        <th>
+          <p>
+            Description
+          </p>
+        </th>
+        <th>
+          <p>
+            Default
+          </p>
+        </th>
       </tr>
       <tr>
         <td valign="top">
@@ -125,13 +288,18 @@
       <tr>
         <td valign="top">
           <p>
-            <strong>Usage of deprecated API</strong>
+            <strong>Conflict of interface method with protected 'Object' method</strong>
           </p>
         </td>
         <td valign="top">
           <p>
-            When enabled, the compiler will signal use of deprecated API either as an error or a warning.
+            When enabled, the compiler will issue an error or a warning whenever an interface defines a method incompatible with a 
+            non-inherited Object method. Until this conflict is resolved, such an interface cannot be implemented, e.g.
           </p>
+          <code>interface I {</code><br>
+          <code>&nbsp;&nbsp;&nbsp;int clone();</code><br>
+          <code>}</code><br>
+          <br>
         </td>
         <td valign="top">
           <p>
@@ -150,9 +318,7 @@
             Locally to a try statement, some catch blocks may hide others , e.g.
           </p>
           <code>try { throw new java.io.CharConversionException();</code><br>
-          <br>
            <code>} catch (java.io.CharConversionException e) {</code><br>
-          <br>
            <code>} catch (java.io.IOException e) {}.</code><br>
           <br>
            
@@ -169,51 +335,18 @@
       <tr>
         <td valign="top">
           <p>
-            <strong>Unused imports</strong>
+            <strong>Non-static access to a static member</strong>
           </p>
         </td>
         <td valign="top">
           <p>
-            When enabled, the compiler will issue an error or a warning for unused import reference.
+            When enabled, the compiler will issue an error or a warning whenever a static field or method is accessed with an expression receiver.
+            A reference to a static member should be qualified with a type name.
           </p>
         </td>
         <td valign="top">
           <p>
-            Ignore
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Unused local variables</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            When enabled, the compiler will issue an error or a warning for unused local variables (i.e. variables never read from).
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            Ignore
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Unused parameters</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            When enabled, the compiler will issue an error or a warning for unused method parameters (i.e. parameters never read from).
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            Ignore
+            Warning
           </p>
         </td>
       </tr>
@@ -238,134 +371,42 @@
       <tr>
         <td valign="top">
           <p>
-            <strong>Non-externalized strings</strong>
+            <strong>Assignment has no effect (e.g. 'x = x')</strong>
           </p>
         </td>
         <td valign="top">
           <p>
-            When enabled, the compiler will issue an error or a warning for non externalized String literal (i.e. non tagged with //$NON-NLS-&lt;n&gt;$).&nbsp;
+            When enabled, the compiler will issue an error or a warning whenever an assignment has no effect (e.g. 'x = x').
           </p>
         </td>
         <td valign="top">
           <p>
-            Ignore
+            Warning
           </p>
         </td>
       </tr>
       <tr>
         <td valign="top">
           <p>
-            <strong>Maximum number of problems reported per compilation unit</strong>
+            <strong>Using a char array in string concatenation</strong>
           </p>
         </td>
         <td valign="top">
           <p>
-            Specifies the maximum number of problems reported per compilation unit.&nbsp;
+            When enabled, the compiler will issue an error or a warning whenever a char[] expression is used in String concatenations, 
           </p>
+            <code>"hello" + new char[]{'w','o','r','l','d'}</code>
         </td>
         <td valign="top">
           <p>
-            100
+            Warning
           </p>
         </td>
       </tr>
     </table>
-	
+
     <h2 class="Head">
-      Classfile generation
-    </h2>
-     
-    <table border="1" cellspacing="0" cellpadding="5" width="100%">
-      <tr>
-        <th>
-          <p>
-            Option
-          </p>
-        </th>
-        <th>
-          <p>
-            Description
-          </p>
-        </th>
-        <th>
-          <p>
-            Default
-          </p>
-        </th>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Add variable attributes to generated class files</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            If enabled, variable attributes are added to the classfile. This will enable local variable names to be displayed in the debugger (in places where variables are
-            definitely assigned) The resulting .class file is then bigger.
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            On
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Add line number attributes to generated class files</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            If enabled, line number information is added to the classfile. This will enable source code highlighting in the debugger.
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            On
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Add source file name to generated class file</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            If enabled, the source file name is added to the classfile. This will enable the debugger to present the corresponding source code.
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            On
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Preserve unused local variables</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            If enabled, unused local variables (i.e. never read) are not stripped from the classfile. If stripped this potentially alters debugging.
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            On
-          </p>
-        </td>
-      </tr>
-    </table>
-	
-    <h2 class="Head">
-      JDK compliance
+      Compliance and Classfiles
     </h2>
      
     <table border="1" cellspacing="0" cellpadding="5" width="100%">
@@ -462,7 +503,7 @@
         </td>
         <td valign="top">
           <p>
-            When enabled, the compiler will issue an error or a warning whenever 'assert' is used as an identifier (reserved keyword in JDK 1.4)
+            When enabled, the compiler will issue an error or a warning whenever 'assert' is used as an identifier (reserved keyword in JDK 1.4).
           </p>
         </td>
         <td valign="top">
@@ -471,10 +512,79 @@
           </p>
         </td>
       </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Add variable attributes to generated class files</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            If enabled, variable attributes are added to the classfile. This will enable local variable names to be displayed in the debugger (in places where variables are
+            definitely assigned) The resulting .class file is then bigger.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Add line number attributes to generated class files</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            If enabled, line number information is added to the classfile. This will enable source code highlighting in the debugger.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Add source file name to generated class file</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            If enabled, the source file name is added to the classfile. This will enable the debugger to present the corresponding source code.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Preserve unused local variables</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            If enabled, unused local variables (i.e. never read) are not stripped from the classfile. If stripped this potentially alters debugging.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
     </table>
 	
     <h2 class="Head">
-      Other
+      Build Path
     </h2>
      
     <table border="1" cellspacing="0" cellpadding="5" width="100%">
@@ -498,6 +608,130 @@
       <tr>
         <td valign="top">
           <p>
+            <strong>Incomplete build path</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Indicate the severity of the problem reported when an entry on the classpath does not exist,
+            is not legite or is not visible (e.g. a reference project is closed).
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Error
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Circular dependencies</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Indicate the severity of the problem reported when a project is involved in a cycle.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Error
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Duplicated resources</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Indicate the severity of the problem reported when more than one occurrence of a resource
+            is to be copied into the output location.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Warning
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Abort building on build path errors</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Allow to toggle the builder to abort if the classpath is invalid.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Scrub output folders on full build</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            Indicate whether the JavaBuilder is allowed to clean the output folders
+	 	    when performing full build operations.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Enable using exclusion patterns in source folders</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            When disabled, no entry on a project classpath can be associated with
+			an exclusion pattern.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
+            <strong>Enable using multiple output locations for source folders</strong>
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+             When disabled, no entry on a project classpath can be associated with
+	         a specific output location, preventing thus usage of multiple output locations.
+          </p>
+        </td>
+        <td valign="top">
+          <p>
+            On
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          <p>
             <strong>Filtered resources</strong>
           </p>
         </td>
@@ -508,24 +742,7 @@
         </td>
         <td valign="top">
           <p>
-            '*.launch'
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td valign="top">
-          <p>
-            <strong>Stop building when an invalid classpath is detected</strong>
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            If enabled, building aborts as soon as an invalid classpath is detected.&nbsp;
-          </p>
-        </td>
-        <td valign="top">
-          <p>
-            On
+            ''
           </p>
         </td>
       </tr>
