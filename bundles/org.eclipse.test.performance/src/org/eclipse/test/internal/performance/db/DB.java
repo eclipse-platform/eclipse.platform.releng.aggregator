@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -27,6 +23,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.test.internal.performance.Constants;
+import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
@@ -38,6 +35,7 @@ public class DB {
     public static final String DB_NAME= "perfDB";	// default db name //$NON-NLS-1$
     
     private static final boolean DEBUG= false;
+    private static final boolean AGGREGATE= true;
     
     private static final String LOCALHOST= "localhost";  //$NON-NLS-1$
     
@@ -68,7 +66,6 @@ public class DB {
     }
 
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern, Dim[] dimensions) {
-        
         return queryScenarios(configName, new String[] { buildPattern }, scenarioPattern, dimensions);
     }
 
@@ -101,11 +98,7 @@ public class DB {
     }
     
     public static void dump() {
-        try {
-            getDefault().internalDump();
-        } catch (SQLException e) {
-	        PerformanceTestPlugin.log(e);
-        }
+        System.err.println("DB.dump: disabled"); //$NON-NLS-1$
     }
 
     public static boolean isActive() {
@@ -167,6 +160,7 @@ public class DB {
             String buildName= PerformanceTestPlugin.getEnvironment(Constants.BUILD);
             fConfigID= fSQL.createConfig(configName, buildName);
             
+            /*
             String osname= System.getProperty("os.name"); //$NON-NLS-1$
             if (osname != null)
                 fSQL.insertConfigProperty(fConfigID, "os.name", osname); //$NON-NLS-1$
@@ -195,6 +189,7 @@ public class DB {
     	            commands= commands.substring(0, 1000);
     	        fSQL.insertConfigProperty(fConfigID, "eclipse.commands", commands); //$NON-NLS-1$
     	    }
+    	    */
         }
         return fConfigID;
     }
@@ -204,45 +199,80 @@ public class DB {
         if (fSQL == null || sample == null)
             return false;
         
-        fStoreCalled= true;
-        
-        //System.out.println("store started..."); //$NON-NLS-1$
+		DataPoint[] dataPoints= sample.getDataPoints();
+	    int n= dataPoints.length;
+		if (n <= 0)
+		    return false;
+
+		//System.out.println("store started..."); //$NON-NLS-1$
 	    try {
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
-            int sample_id= fSQL.createSample(getConfig(), scenario_id, null, new Timestamp(sample.getStartTime()));
-            
-            /*
-            String[] propertyKeys= sample.getPropertyKeys();
-            for (int i= 0; i < propertyKeys.length; i++) {
-                String key= propertyKeys[i];
-                fSQL.insertSampleProperty(sample_id, key, sample.getProperty(key));
-            }
-            */
-            fStoredSamples++;
+            int sample_id= fSQL.createSample(getConfig(), scenario_id, new Timestamp(sample.getStartTime()));
             
             //long l= System.currentTimeMillis();
-			DataPoint[] dataPoints= sample.getDataPoints();
-			for (int i= 0; i < dataPoints.length; i++) {
-			    DataPoint dp= dataPoints[i];
-	            int datapoint_id= fSQL.createDataPoint(sample_id, i, dp.getStep());
-			    Scalar[] scalars= dp.getScalars();		    
-			    for (int j= 0; j < scalars.length; j++) {
-			        Scalar scalar= scalars[j];
-			        int dim_id= scalar.getDimension().getId();
-			        long value= scalar.getMagnitude();					
-					fSQL.insertScalar(datapoint_id, dim_id, value);
-			    }
-			}
+		    if (AGGREGATE) {
+
+			    Scalar[] sc= dataPoints[0].getScalars();
+			    long[] averages= new long[sc.length];
+
+			    // calculate deltas
+		        boolean twoPoints= false;
+				for (int i= 0; i < dataPoints.length; i++) {
+				    DataPoint dp= dataPoints[i];
+				    if (dp.getStep() > 0) {
+				        twoPoints= true;
+				        break;
+				    }
+				}
+				if (twoPoints) {
+					for (int i= 0; i < dataPoints.length; i+= 2) {
+					    Scalar[] s1= dataPoints[i].getScalars();
+					    Scalar[] s2= dataPoints[i+1].getScalars();
+					    for (int j= 0; j < sc.length; j++)
+					        averages[j] += s2[j].getMagnitude() - s1[j].getMagnitude();
+					}
+					n= n/2;
+				} else {
+					for (int i= 0; i < dataPoints.length; i+= 2) {
+					    Scalar[] s1= dataPoints[i].getScalars();
+					    for (int j= 0; j < sc.length; j++)
+					        averages[j] += s1[j].getMagnitude();
+					}
+				}
+				
+	            int datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
+				for (int k= 0; k < sc.length; k++) {
+			        int dim_id= sc[k].getDimension().getId();
+					fSQL.insertScalar(datapoint_id, dim_id, averages[k] / n);
+				}				    
+		        
+		    } else {
+				for (int i= 0; i < dataPoints.length; i++) {
+				    DataPoint dp= dataPoints[i];
+		            int datapoint_id= fSQL.createDataPoint(sample_id, i, dp.getStep());
+				    Scalar[] scalars= dp.getScalars();
+	 			    for (int j= 0; j < scalars.length; j++) {
+				        Scalar scalar= scalars[j];
+				        int dim_id= scalar.getDimension().getId();
+				        long value= scalar.getMagnitude();					
+						fSQL.insertScalar(datapoint_id, dim_id, value);
+				    }
+				}
+		    }
+			
+			fConnection.commit();
+            fStoredSamples++;
+            fStoreCalled= true;
+
 			//System.err.println(System.currentTimeMillis()-l);
-            
+
         } catch (SQLException e) {
             PerformanceTestPlugin.log(e);
-        } finally {
-			try {
-                fConnection.commit();
+            try {
+                fConnection.rollback();
             } catch (SQLException e1) {
                 PerformanceTestPlugin.log(e1);
-            }       
+            }
         }
         return true;
     }
@@ -431,20 +461,24 @@ public class DB {
         Properties env= PerformanceTestPlugin.getEnvironmentVariables();
         
         String dbloc= env.getProperty(Constants.DB_LOCATION);
+        //dbloc= "net://localhost";
+        //dbloc= "/Users/weinand/Eclipse/cloudscape2";
         if (dbloc == null)
             return;
                 
         String dbname= env.getProperty(Constants.DB_NAME, DB_NAME); //$NON-NLS-1$
+        String url= null;
+        java.util.Properties info= new java.util.Properties();
+        info.put("user", env.getProperty(Constants.DB_USER, "guest"));	//$NON-NLS-1$ //$NON-NLS-2$
+        info.put("password", env.getProperty(Constants.DB_PASSWD, "guest"));	//$NON-NLS-1$ //$NON-NLS-2$
         
         try {            
             if (dbloc.startsWith("net://")) { //$NON-NLS-1$
                 // connect over network
                 if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
                 Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
-                String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";create=true;retrieveMessagesFromServerOnGetMessage=true;";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-                String dbuser= env.getProperty(Constants.DB_USER, "guest"); //$NON-NLS-1$
-                String dbpassword= env.getProperty(Constants.DB_PASSWD, "guest"); //$NON-NLS-1$
-                fConnection= DriverManager.getConnection(url, dbuser, dbpassword);
+                info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+                url="jdbc:cloudscape:" + dbloc + "/" + dbname;  //$NON-NLS-1$//$NON-NLS-2$
             } else {
                 // embedded
                 fIsEmbedded= true;
@@ -459,9 +493,10 @@ public class DB {
                 } else
                     f= new File(dbloc);
                 String dbpath= new File(f, dbname).getAbsolutePath();
-                String url= "jdbc:cloudscape:" + dbpath + ";create=true"; //$NON-NLS-1$ //$NON-NLS-2$
-                fConnection= DriverManager.getConnection(url);
+                url= "jdbc:cloudscape:" + dbpath; //$NON-NLS-1$
             }
+            info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+            fConnection= DriverManager.getConnection(url, info);
             if (DEBUG) System.out.println("succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
@@ -506,6 +541,15 @@ public class DB {
             }
             fConnection= null;
         }
+        
+        if (fIsEmbedded) {
+	        try {
+	            DriverManager.getConnection("jdbc:cloudscape:;shutdown=true"); //$NON-NLS-1$
+	        } catch (SQLException e) {
+	            if (! "Cloudscape system shutdown.".equals(e.getMessage())) //$NON-NLS-1$
+	                e.printStackTrace();
+	        }
+        }
     }
     
     private void doesDBexists() throws SQLException {
@@ -524,97 +568,6 @@ public class DB {
         }
     }
     
-    private void internalDump() throws SQLException {
-        if (fConnection == null)
-            return;
-
-		String outFile= null;
-		outFile= "/tmp/dbdump";	//$NON-NLS-1$
-		PrintStream ps= null;
-		if (outFile != null) {
-		    try {
-                ps= new PrintStream(new BufferedOutputStream(new FileOutputStream(outFile)));
-            } catch (FileNotFoundException e) {
-                System.err.println("can't create output file"); //$NON-NLS-1$
-            }
-		}
-		if (ps == null)
-		    ps= System.out;
-
-		Statement stmt= fConnection.createStatement();
-        try {
-            System.out.println("CONFIG(ID, NAME, BUILD):"); //$NON-NLS-1$
-	        ResultSet rs= stmt.executeQuery("SELECT ID, NAME, BUILD FROM CONFIG"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(3)); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-            System.out.println("CONFIG_PROPERTIES(CONFIG_ID, NAME, VALUE):"); //$NON-NLS-1$
-	        rs= stmt.executeQuery("SELECT CONFIG_ID, NAME, VALUE FROM CONFIG_PROPERTIES"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(3)); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-            System.out.println("SCENARIO(ID, NAME):"); //$NON-NLS-1$
-	        rs= stmt.executeQuery("SELECT ID, NAME FROM SCENARIO"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-            System.out.println("SAMPLE(ID, CONFIG_ID, SCENARIO_ID, VARIATION, STARTTIME):"); //$NON-NLS-1$
-	        rs= stmt.executeQuery("SELECT ID, CONFIG_ID, SCENARIO_ID, VARIATION, STARTTIME FROM SAMPLE"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(2)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(3)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(4)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getTimestamp(5).toString()); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-            System.out.println("SAMPLE_PROPERTIES(CONFIG_ID, KEY_ID, VALUE):"); //$NON-NLS-1$
-	        rs= stmt.executeQuery("SELECT SAMPLE_ID, NAME, VALUE FROM SAMPLE_PROPERTIES"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(2)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getString(3)); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-            System.out.println("DATAPOINT(ID, SAMPLE_ID, SEQ, STEP):"); //$NON-NLS-1$
-	        rs= stmt.executeQuery("SELECT ID, SAMPLE_ID, SEQ, STEP FROM DATAPOINT"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(2)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(3)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(4)); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-            System.out.println("SCALAR(DATAPOINT_ID, DIM_ID, VALUE):"); //$NON-NLS-1$
-	        rs= stmt.executeQuery("SELECT DATAPOINT_ID, DIM_ID, VALUE FROM SCALAR"); //$NON-NLS-1$
- 	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getInt(2)); //$NON-NLS-1$
-	            System.out.print(" " + rs.getBigDecimal(3).toString()); //$NON-NLS-1$
-	            System.out.println();
-	        }
-            System.out.println();
-        } finally {
-            stmt.close();
-            if (ps != System.out)
-                ps.close();
-        }
-    }
-
     public static void main(String args[]) {
         DB.dump();
     }

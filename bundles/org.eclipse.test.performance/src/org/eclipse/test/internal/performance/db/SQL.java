@@ -19,6 +19,8 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
+
 public class SQL {
     
     private Connection fConnection;
@@ -81,7 +83,7 @@ public class SQL {
         fInsertScenario= fConnection.prepareStatement(
                 "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertSample= fConnection.prepareStatement(
-                "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, VARIATION, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
+                "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, STARTTIME) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertDataPoint= fConnection.prepareStatement(
                 "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertScalar= fConnection.prepareStatement(
@@ -116,61 +118,81 @@ public class SQL {
         );
     }
     
-    void initialize() throws SQLException {
-        Statement stmt= fConnection.createStatement();
-        
-        stmt.executeUpdate(
-                "create table CONFIG (" + //$NON-NLS-1$
-                    "ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
-                    "NAME varchar(32)," + //$NON-NLS-1$
-                    "BUILD varchar(64)" + //$NON-NLS-1$
-                ")" //$NON-NLS-1$
-            );
-        stmt.executeUpdate(
-                "create table CONFIG_PROPERTIES (" + //$NON-NLS-1$
-                    "CONFIG_ID int not null," + //$NON-NLS-1$
-					 "NAME varchar(128)," + //$NON-NLS-1$
-                    "VALUE varchar(1000)" + //$NON-NLS-1$
-                ")" //$NON-NLS-1$
-            );
-        stmt.executeUpdate(
-        		"create table SAMPLE (" + //$NON-NLS-1$
-        			"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
-					"CONFIG_ID int not null," + //$NON-NLS-1$
-					"SCENARIO_ID int not null," + //$NON-NLS-1$
-					"VARIATION varchar(128)," + //$NON-NLS-1$
-					"STARTTIME timestamp" + //$NON-NLS-1$
-				")" //$NON-NLS-1$
-        );           
-        stmt.executeUpdate(
-                "create table SAMPLE_PROPERTIES (" + //$NON-NLS-1$
-                    "SAMPLE_ID int not null," + //$NON-NLS-1$
-					 "NAME varchar(128)," + //$NON-NLS-1$
-                    "VALUE varchar(1000)" + //$NON-NLS-1$
-                ")" //$NON-NLS-1$
-            );
-        stmt.executeUpdate(
-        		"create table SCENARIO (" + //$NON-NLS-1$
-                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
-					"NAME varchar(256)" + //$NON-NLS-1$
-				")" //$NON-NLS-1$
-        );
-        stmt.executeUpdate(
-        		"create table DATAPOINT (" + //$NON-NLS-1$
-                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
-					"SAMPLE_ID int not null," + //$NON-NLS-1$
-					"SEQ int," + //$NON-NLS-1$
-					"STEP int" + //$NON-NLS-1$
-				")" //$NON-NLS-1$
-        );
-        stmt.executeUpdate(
-        		"create table SCALAR (" + //$NON-NLS-1$
-                	"DATAPOINT_ID int not null," + //$NON-NLS-1$
-					"DIM_ID int not null," + //$NON-NLS-1$
-					"VALUE bigint" + //$NON-NLS-1$
-				")" //$NON-NLS-1$
-        ); 
-        stmt.close();
+    void initialize() {
+        try {
+            Statement stmt= fConnection.createStatement();
+	        stmt.executeUpdate(
+	                "create table CONFIG (" + //$NON-NLS-1$
+	                    "ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+	                    "NAME varchar(32)," + //$NON-NLS-1$
+	                    "BUILD varchar(64)" + //$NON-NLS-1$
+	                ")" //$NON-NLS-1$
+	            );
+	        stmt.executeUpdate(
+	                "create table CONFIG_PROPERTIES (" + //$NON-NLS-1$
+	                    "CONFIG_ID int not null," + //$NON-NLS-1$
+						 "NAME varchar(128)," + //$NON-NLS-1$
+	                    "VALUE varchar(1000)" + //$NON-NLS-1$
+	                ")" //$NON-NLS-1$
+	            );
+	        stmt.executeUpdate(
+	        		"create table SAMPLE (" + //$NON-NLS-1$
+	        			"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+						"CONFIG_ID int not null," + //$NON-NLS-1$
+						"SCENARIO_ID int not null," + //$NON-NLS-1$
+						"STARTTIME timestamp" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );           
+	        stmt.executeUpdate(
+	                "create table SAMPLE_PROPERTIES (" + //$NON-NLS-1$
+	                    "SAMPLE_ID int not null," + //$NON-NLS-1$
+						 "NAME varchar(128)," + //$NON-NLS-1$
+	                    "VALUE varchar(1000)" + //$NON-NLS-1$
+	                ")" //$NON-NLS-1$
+	            );
+	        stmt.executeUpdate(
+	        		"create table SCENARIO (" + //$NON-NLS-1$
+	                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+						"NAME varchar(256) not null" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
+	        stmt.executeUpdate(
+	        		"create table DATAPOINT (" + //$NON-NLS-1$
+	                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+						"SAMPLE_ID int not null," + //$NON-NLS-1$
+						"SEQ int," + //$NON-NLS-1$
+						"STEP int" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
+	        stmt.executeUpdate(
+	        		"create table SCALAR (" + //$NON-NLS-1$
+	                	"DATAPOINT_ID int not null," + //$NON-NLS-1$
+						"DIM_ID int not null," + //$NON-NLS-1$
+						"VALUE bigint" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
+	        
+	        // Primary/unique
+	        stmt.executeUpdate("alter table DATAPOINT add constraint DP_ID primary key (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table SAMPLE add constraint SA_ID primary key (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table SCENARIO add constraint SC_NAME primary key (NAME)"); //$NON-NLS-1$
+	        
+	        // Foreign
+	        stmt.executeUpdate("alter table DATAPOINT add constraint DP_CONSTRAINT " + //$NON-NLS-1$
+	        		"foreign key (SAMPLE_ID) references SAMPLE (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table SCALAR add constraint SCALAR_CONSTRAINT " + //$NON-NLS-1$
+	        		"foreign key (DATAPOINT_ID) references DATAPOINT (ID)"); //$NON-NLS-1$
+
+	        stmt.close();
+	        fConnection.commit();
+	        
+        } catch (SQLException e) {
+            try {
+                fConnection.rollback();
+            } catch (SQLException e1) {
+                PerformanceTestPlugin.log(e1);
+            }
+        }
     }
 
     static int create(PreparedStatement stmt) throws SQLException {
@@ -205,14 +227,10 @@ public class SQL {
         return create(fInsertConfig);
     }
     
-    int createSample(int config_id, int scenario_id, String variation, Timestamp starttime) throws SQLException {
+    int createSample(int config_id, int scenario_id, Timestamp starttime) throws SQLException {
         fInsertSample.setInt(1, config_id);
         fInsertSample.setInt(2, scenario_id);
-        if (variation == null)
-            fInsertSample.setNull(3, Types.VARCHAR);
-        else
-            fInsertSample.setString(3, variation);
-        fInsertSample.setTimestamp(4, starttime);
+        fInsertSample.setTimestamp(3, starttime);
         return create(fInsertSample);
     }
         
