@@ -38,7 +38,7 @@ public class Scenario {
     private String[] fBuildNames;
     private StatisticsSession[] fSessions;
     private Dim[] fDimensions;
-    private Dim[] fQueryDimensions;
+    //private Dim[] fQueryDimensions;
     private Map fSeries= new HashMap();
 
     
@@ -50,7 +50,7 @@ public class Scenario {
     	fConfigName= configName;
     	fBuildPatterns= buildPatterns;
         fScenarioName= scenario;
-        fQueryDimensions= dimensions;
+        //fQueryDimensions= dimensions;
     }
     
    public String getScenarioName() {
