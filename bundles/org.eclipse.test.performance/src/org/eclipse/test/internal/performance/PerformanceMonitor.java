@@ -34,7 +34,7 @@ class PerformanceMonitor {
     }
 
     protected void collectOperatingSystemCounters(Map scalars) {
-        if (true) {
+        if (PerformanceTestPlugin.isOldDB()) {
             addScalar(scalars, InternalDimensions.SYSTEM_TIME, System.currentTimeMillis());
         } else {
             Runtime runtime= Runtime.getRuntime();

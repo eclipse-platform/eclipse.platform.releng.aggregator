@@ -53,6 +53,10 @@ public class PerformanceTestPlugin extends Plugin {
 	 * The shared instance.
 	 */
 	private static PerformanceTestPlugin fgPlugin;
+	
+	/* temporary code */
+	private static boolean fgOldDBInitialized;
+	private static boolean fgOldDB;	// true if we are talking to the old perfDB in Ottawa
 		
 	/**
 	 * The constructor.
@@ -60,6 +64,16 @@ public class PerformanceTestPlugin extends Plugin {
 	public PerformanceTestPlugin() {
 	    super();
 		fgPlugin= this;
+	}
+	
+	static boolean isOldDB() {
+	    if (!fgOldDBInitialized) {
+			String loc= getDBLocation();
+			if (loc != null && loc.indexOf("relengbuildserv") >= 0) //$NON-NLS-1$
+			    fgOldDB= true;
+	        fgOldDBInitialized= true;
+	    }
+	    return fgOldDB;
 	}
 	
 	public void stop(BundleContext context) throws Exception {
