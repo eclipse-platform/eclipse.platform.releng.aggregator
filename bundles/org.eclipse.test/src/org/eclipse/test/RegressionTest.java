@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.StringTokenizer;
+import java.io.ByteArrayOutputStream;
 
 /**
  * Check the output of several tests for regressions.
@@ -152,13 +153,16 @@ public class RegressionTest {
 	 * Read the file given by s, and return its contents.
 	 */
 	static String readFile(String s) throws IOException {
-		FileInputStream r = new FileInputStream(s);
-		int l = r.available();
-		byte[] b = new byte[l];
-		r.read(b);
-		r.close();
-		return new String(b);		
+			FileInputStream r = new FileInputStream(s);
+			ByteArrayOutputStream aStream = new ByteArrayOutputStream();
+			int aByte = r.read();
+			while (aByte != -1) {
+				aStream.write(aByte);
+			}
+			r.close();
+			return aStream.toString();	
 	}
+	
 	
 	/**
 	 * Returns the next 2 tokens in st, if they exist.
