@@ -11,6 +11,10 @@
 
 package org.eclipse.test.internal.performance;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
@@ -61,25 +65,37 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	public void commit() {
 		fPerformanceMonitor.upload();
 	    
-		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
-			System.out.println(fScenarioId + ":");
-			Sample sample= getSample();
-			if (sample != null) {
-				DataPoint[] dataPoints= sample.getDataPoints();
-				for (int i= 0, n= dataPoints.length; i < n - 1; i += 2) {
-					System.out.println("Iteration " + (i / 2 + 1) + ":");
-					Scalar[] before= dataPoints[i].getScalars();
-					Scalar[] after= dataPoints[i + 1].getScalars();
-					for (int j= 0, m= Math.min(before.length, after.length); j < m; j++) {
-						long valueBefore= before[j].getMagnitude();
-						long valueAfter= after[j].getMagnitude();
-						String dimensionId= before[j].getDimension();
-						Dimension dimension= PerfMsrDimensions.getDimension(dimensionId);
-						String name= dimension != null ? dimension.getName() + " [" + dimension.getUnit().getShortName() + "]" : dimensionId;
-						System.out.println(name + ":\t" + valueBefore + "\t" + valueAfter + "\t" + (valueAfter - valueBefore));
-//						System.out.println(name + ":\t" + (valueAfter - valueBefore));
-					}
+		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
+			printSample();
+	}
+
+	private void printSample() {
+		Sample sample= getSample();
+		if (sample != null) {
+			Map averages= new HashMap();
+			DataPoint[] dataPoints= sample.getDataPoints();
+			for (int i= 0, n= dataPoints.length; i < n - 1; i += 2) {
+				Scalar[] start= dataPoints[i].getScalars();
+				Scalar[] stop= dataPoints[i + 1].getScalars();
+				for (int j= 0, m= Math.min(start.length, stop.length); j < m; j++) {
+					String dimensionId= start[j].getDimension();
+					if (dimensionId.equals(stop[j].getDimension())) {
+						long delta= stop[j].getMagnitude() - start[j].getMagnitude();
+						Double value= (Double) averages.get(dimensionId);
+						double oldAvg= value != null ? value.doubleValue() : 0.0;
+						double newAvg= oldAvg + (delta - oldAvg)/(i/2 + 1);
+						averages.put(dimensionId, new Double(newAvg));
+					} else
+						System.out.println("OSPerformanceMeter.toDisplayString(): Dimensions do not match");
 				}
+			}
+			System.out.println(fScenarioId + ":");
+			for (Iterator iter= averages.keySet().iterator(); iter.hasNext();) {
+				String dimensionId= (String) iter.next();
+				double avgDelta= ((Double) averages.get(dimensionId)).doubleValue();
+				Dimension dimension= PerfMsrDimensions.getDimension(dimensionId);
+				String name= dimension != null ? dimension.getName() + " [" + dimension.getUnit().getShortName() + "]" : dimensionId;
+				System.out.println(name + ":\t" + avgDelta);
 			}
 		}
 	}
