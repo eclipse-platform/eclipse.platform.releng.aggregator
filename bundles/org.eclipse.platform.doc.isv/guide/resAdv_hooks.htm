@@ -13,11 +13,78 @@ Resource modification hooks
 <BODY BGCOLOR="#ffffff">
 <H2>
 Resource modification hooks</H2>
-<P >
-Need to cover the move/delete hook and file validator.</P>
+<P >So far, we've assumed that resource API is being used to modify resources
+that are located in the user's file system.&nbsp; This is indeed the fundamental
+structure of the workspace, but it's also possible that a plug-in adds
+capabilities for manipulation of resources that are managed somewhere
+else.&nbsp; For example, the platform <a href="team.htm">Team support</a>
+plug-ins add the ability to work with resources that are under the management of
+a versioning repository.</P>
 
 <P >
-Team points to this topic.</P>
+The resource API includes capabilities that have been added specifically to
+enable the team support plug-ins and plug-ins that implement repository
+providers using the team support.&nbsp; The following discussion covers the
+generic mechanism for registering resource hooks.&nbsp; See <a href="team_provider_hooks.htm">Team
+resource modification hooks </a>for a discussion of how team uses these
+hooks.&nbsp;&nbsp;</P>
+
+<h3 >
+Resource move/delete hooks</h3>
+
+<P >
+This hook allows the team plug-in and its providers to control
+    how resource moves and deletes are implemented.&nbsp; The hook includes the ability to prevent
+these operations from
+    happening.&nbsp; Implementors can provide alternate implementations for
+    moving or deleting files, folders, and projects.&nbsp;</P>
+
+<P >
+The team plug-in uses the <a href="../reference/extension-points/org_eclipse_core_resources_moveDeleteHook.html">org.eclipse.core.resources.moveDeleteHook</a>
+extension point to register its hook:</P>
+
+<pre ><font color="#4444CC">&lt;extension point=&quot;org.eclipse.core.resources.moveDeleteHook&quot; id=&quot;MoveDeleteHook&quot;&gt;
+	&lt;moveDeleteHook class=&quot;org.eclipse.team.internal.core.MoveDeleteManager&quot;/&gt;
+&lt;/extension&gt;</font>
+</pre>
+
+<P >
+The supplied class must implement <a href="../reference/api/org/eclipse/core/resources/IMoveDeleteHook.html">IMoveDeleteHook</a>,
+which is called by the platform whenever a resource is moved or deleted.&nbsp;
+The team plug-in installs a move delete hook manager that can determine which
+team provider is managing a resource and invoke its specific hook.</P>
+
+<P class="Note" >Note:&nbsp; The move delete hook was designed specifically for
+use by the team core plug-in and other team repository provider clients.&nbsp;
+It is not intended for general use.&nbsp; Team providers should not install the
+hook using the extension point, but instead implement their hook in their
+RepositoryProvider class.&nbsp; See <a href="team_provider_hooks.htm">Team
+resource modification hooks</a> for more information about using these hooks.</P>
+
+<h3 >
+File modification validators</h3>
+
+<p>It's also possible that team repository providers will need to prevent or
+intervene in the editing or saving of a file.&nbsp; The team plug-in
+accomplishes this by using the extension point <a href="../reference/extension-points/org_eclipse_core_resources_moveDeleteHook.html">org.eclipse.core.resources.fileModificationValidator</a>
+to register a validator that is called whenever a resource is to be modified.</p>
+
+<pre ><font color="#4444CC">&lt;extension point="org.eclipse.core.resources.fileModificationValidator" id="FileValidator">
+	&lt;fileModificationValidator class="org.eclipse.team.internal.core.FileModificationValidatorManager"/>
+&lt;/extension></font></pre>
+
+<P >The supplied class must implement <a href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html">IFileModificationValidator</a>,
+which is called by the platform whenever a resource is saved or
+opened.&nbsp;&nbsp; The team plug-in installs a file modification manager that
+can determine which team provider is managing a resource and invoke its specific
+validator.</P>
+
+<P class="Note" >Note:&nbsp; The file modification validator hook was designed
+specifically for use by the team core plug-in.&nbsp; It is not intended for
+general use.&nbsp; Team providers should not install the hook using the
+extension point, but instead implement their hook in their Repository Provider
+class.&nbsp;&nbsp; See <a href="team_provider_hooks.htm">Team resource
+modification hooks</a> for more information about using these hooks.</P>
 
 <P >
 <a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></P>
