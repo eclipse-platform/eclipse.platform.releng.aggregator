@@ -398,8 +398,8 @@ public class FileTool {
 							} catch(IOException e2){
 							}
 						}
-						System.out.println("Could not unzip: " + fileName);
-						// throw e;
+						System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
+						e.printStackTrace();
 					}
 				
 				}

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.zip.ZipFile;
 
 import org.eclipse.core.boot.BootLoader;
+import org.eclipse.core.runtime.Platform;
 
 import junit.framework.TestCase;
 
@@ -72,7 +73,9 @@ public class BuildTests extends TestCase {
 		public void testChkpii() {
 			
 			String zipFile = locateEclipseZip();
-			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder";
+//			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder";
+//			String sniffFolder = "\\builds\\t";
+			String sniffFolder = Platform.getLocation().toOSString();
 		
 			try {
 				FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
@@ -91,7 +94,6 @@ public class BuildTests extends TestCase {
 		private boolean testChkpii(int type) {
 			Runtime aRuntime = Runtime.getRuntime();
 			String chkpiiString = getChkpiiString(type);
-			System.out.println(chkpiiString);
 			try {
 				Process aProcess = aRuntime.exec(chkpiiString);
 				BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
@@ -121,8 +123,12 @@ public class BuildTests extends TestCase {
 		 * @return String
 		 */
 		private String locateEclipseZip() {
+
+			// String to use when running as an automated test.			
+			String installDir = BootLoader.getInstallURL().getPath() + ".." + File.separator + "..";
 			
-			String installDir = BootLoader.getInstallURL().getPath() + ".." + File.separator + "..";  // Only one .. for debug
+			// String to use when running in Eclipse
+			// String installDir = BootLoader.getInstallURL().getPath() + "..";
 			File aFile = new File(installDir);
 			if (aFile == null) {
 				System.out.println("File is null");
@@ -157,8 +163,13 @@ public class BuildTests extends TestCase {
 		 */
 		
 		private String getOutputFile(int type) {
+		
+			// String to use when running as an automated test.
 			String aString = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
-//			String aString = BootLoader.getInstallURL().getPath() + "..\\results\\chkpii";
+
+			// String t use when running in an Eclipse runtime
+			// String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
+
 			new File(aString).mkdirs();
 			aString = aString + File.separator + "org.eclipse.nls.";
 			aString = new File(aString).getPath();
@@ -185,7 +196,10 @@ public class BuildTests extends TestCase {
 		
 		private String getFilesToTest(int type) {
 			
-			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder" + File.separator;
+//			String sniffFolder = BootLoader.getInstallURL().getPath() + "releng_sniff_folder" + File.separator;
+//			String sniffFolder = File.separator + "builds" + File.separator + "t" + File.separator;
+			String sniffFolder = Platform.getLocation().toOSString();
+
 			String aString = new File(sniffFolder).getPath() + File.separator;
 			
 			switch (type) {
@@ -208,21 +222,7 @@ public class BuildTests extends TestCase {
 		 */
 		
 		private String getExec() {
-//			String os = BootLoader.getOS();
-//			if (os == null) {
-//				System.out.println("OS IS NULL");
-//			} else {
-//				System.out.println("OS: " + os);
-//			}
-			
-//			String exeName;
-//			if (os.equals(BootLoader.OS_UNKNOWN)) {
-//				exeName = "chkpw501.exe";
-//			} else {
-//				exeName = "chkpl501.exe";
-//			}
-//			String aString = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + exeName;
-			
+
 			return new File("chkpw501.exe").getPath();
 		}
 		
