@@ -36,37 +36,15 @@ public class View {
 		
         // get all Scenarios 
         Dim[] qd= null; // new Dim[] { InternalDimensions.CPU_TIME };
-        Scenario[] scenarios= DB.queryScenarios("%", "%", "%", qd); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        //Scenario[] scenarios= DB.queryScenarios("relengbuildwin2", "%", "%", qd); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        Scenario[] scenarios= DB.queryScenarios("relengbuildwin2", "N%", "%testPerfFullBuild%");
         ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         ps.println();
         
         for (int s= 0; s < scenarios.length; s++) {
-            Scenario t= scenarios[s];
-            ps.println("Scenario " + s + ": " + t.getScenarioName()); //$NON-NLS-1$ //$NON-NLS-2$
-            Report r= new Report(2);
-            
-            String[] timeSeriesLabels= t.getTimeSeriesLabels();
-            r.addCell("Builds:"); //$NON-NLS-1$
-            for (int j= 0; j < timeSeriesLabels.length; j++)
-                r.addCellRight(timeSeriesLabels[j]);
-            r.nextRow();
-                        
-            Dim[] dimensions= t.getDimensions();
-            for (int i= 0; i < dimensions.length; i++) {
-                Dim dim= dimensions[i];
-                r.addCell(dim.getName() + ':');
-                
-                TimeSeries ts= t.getTimeSeries(dim);
-                int n= ts.getLength();
-                for (int j= 0; j < n; j++) {
-                    String stddev= " [" + dim.getDisplayValue(ts.getStddev(j)) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-                    r.addCellRight(dim.getDisplayValue(ts.getValue(j)) + stddev);
-                }
-                r.nextRow();
-            }
-            r.print(ps);
-            ps.println();
+            scenarios[s].dump(ps);
         }
+        
         if (ps != System.out)
             ps.close();
     }
