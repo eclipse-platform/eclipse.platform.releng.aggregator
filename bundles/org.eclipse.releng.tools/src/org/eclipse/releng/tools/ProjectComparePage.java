@@ -170,8 +170,7 @@ public class ProjectComparePage extends WizardPage{
 		CompareParticipant participant = (CompareParticipant)input.getParticipant();
 		CVSCompareSubscriber subscriber = (CVSCompareSubscriber)participant.getSubscriber();
 		subscriber.resetRoots(projects, tags);
-		subscriber.refresh(projects, IResource.DEPTH_INFINITE, monitor);
-		participant.getSubscriberSyncInfoCollector().waitForCollector(monitor);
+		participant.refreshNow(projects, "", monitor);
 		IResource[] r = participant.getSyncInfoSet().members(ResourcesPlugin.getWorkspace().getRoot());
 		return r;
 	}

@@ -12,7 +12,6 @@ package org.eclipse.releng.tools;
 
 import org.eclipse.compare.CompareConfiguration;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -37,8 +36,7 @@ public class ProjectValidationDialog extends ParticipantPageDialog {
 	public static void validateRelease(final Shell shell, final IProject[] p, final CVSTag[] tags, IProgressMonitor monitor) throws TeamException{
 		final CompareParticipant participant = new CompareParticipant(new CVSCompareSubscriber(p, tags, Messages.getString("ReleaseWizard.20"))); //$NON-NLS-1$
 		try {
-			participant.getSubscriber().refresh(p, IResource.DEPTH_INFINITE, monitor);
-			participant.getSubscriberSyncInfoCollector().waitForCollector(monitor);
+			participant.refreshNow(p, Messages.getString("ReleaseWizard.20"), monitor); //$NON-NLS-1$
 			if (!participant.getSyncInfoSet().isEmpty()) {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
