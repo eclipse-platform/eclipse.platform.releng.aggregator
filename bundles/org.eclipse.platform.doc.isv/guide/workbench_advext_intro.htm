@@ -105,7 +105,9 @@ pages will be shown.  The page id for the intro home page (in <b>full mode</b>) 
 and the standby page id (in <b>standby mode</b>) is optional.  The home page is the page that is shown when the product is first started.
 A presentation can specify one or more <b>implementations</b> for showing the pages.  Implementations are specified
 per platform and windowing system, allowing you to take advantage of platform-specific features for showing
-page content.   An implementation that does not specify either a windowing system or operating system will be considered
+page content. For example, the windows platform has a robust HTML browser widget, so an HTML-based implementation
+is used for intro content.  Other platforms without this capability use an SWT-based implementation that maps
+page descriptions to an SWT-based form.  An implementation that does not specify either a windowing system or operating system will be considered
 the generic implementation; to ensure an intro is shown on all platforms, it is important to define
 such an implementation.  The workbench will first look for an implementation that matches the current operating system and
 windowing system.  If one cannot be found, it will choose the generic implementation.  Most of these details
@@ -115,14 +117,19 @@ are handled at the product configuration level, so we won't discuss them any fur
 <p>
 Now we can look at the content itself.  Content is described in terms of pages.  All pages have an <b>id</b> attribute.
 This is the id that is used when defining the home and standby pages, and other places where there is a reference
-to a page.  Pages can also have a <b>title</b>.  Otherwise, the relevant attributes depend on the kind of page that is defined.
+to a page.  Otherwise, the relevant attributes depend on the kind of page that is defined.
 There are two basic types of pages:
 <ul>
-<li><b>Static pages</b> show HTML files.  A <b>url</b> and <b>style</b> are specified for the file.
-The sublements <b>head</b> and <b>html</b> can be used to add raw HTML to the head and body of the
-specified URL.</li>
-<li><b>Dynamic pages</b> are implemented in SWT and described using subelements that describe the content of the
-page.  The subelements are UI items often found in HTML-like pages.  The following subelements
+<li><b>Static pages</b> are plain HTML files.  These pages use the normal HTML mechanisms to link to other
+pages.  Static pages need not be defined in the config content file, except for the home page.  Since the home
+page is specified by id (<b>home-page-id</b>) in the <b>presentation</b> element, there must be a page definition
+using that id in the content file.  This page need only define a <b>url</b>.  All other subelements will be ignored
+since the HTML page itself will describe the page content. All other HTML pages referenced by the home page must be
+included with the plug-in, but do not need to be specified in the content file. </li>
+<li><b>Dynamic pages</b> are described in the XML content file using subelements that describe the content of the
+page.  The subelements are UI items often found in HTML-like pages.  Depending on the implementation, these pages
+will either be dynamically translated to HTML (when the implementation <b>kind</b> is html) or else dynamically
+created as SWT-based UI forms (when the implementation <b>kind</b> is swt).  The following subelements
 can be defined in a page: 
 <ul>
 <li>A <b>group</b> is used to group other subelements and define a consistent style across the group.</li>
@@ -130,10 +137,16 @@ can be defined in a page:
 page and optionally run an intro action.  Actions are specified as commands in the URL.</li>
 <li>The <b>text</b> and <b>img</b> elements show text and image content.</li>
 <li>The <b>include</b> element includes a previously defined subelement.  The element is referred to by its id.  </li>
-</ul></li>
+<li>The <b>head</b> element defines additional HTML to be included in the head section of the page
+when the html implementation is used. </li>
+<li>The <b>html</b> element defines additional HTML to be included in the body of the page
+when the html implementation is used.</li>
 </ul>
-A page can also specify that its content is defined in a separate <b>content</b> file.  Breaking up pages into separate
+A <b>title</b> for a page may also be defined.  A page may also specify that
+its content is defined in a separate <b>content</b> file.  Breaking up pages into separate
 files may be useful when performance is a concern, since an intro page's contents won't be initialized until needed.
+</li>
+</ul>
 </p>
 <p>
 The best way to get a feel for the content definition format is to browse the implementations in the SDK.  The following
@@ -163,9 +176,10 @@ snippet shows just the first part of the content for the SDK root page, which is
 <p>
 Elements on a page can also be <b>filteredFrom</b> a particular implementation.  This allows page designers
 to design with particular platforms in mind.  There are many more powerful attributes that 
-can be used when describing a page and its contents.  The extension point documentation for 
+can be used when describing a page and its contents.  See the extension point documentation for 
 <b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
-provides the complete reference for valid elements, subelements, and their attributes.
+and its associated <a href="../reference/extension-points/introContentFileSpec.html">intro content file format specification</a> for a complete reference of 
+valid elements, subelements, and their attributes.
 </p>
 <h4>Extending an intro config</h4>
 Plug-ins can contribute intro content to a page defined elsewhere.  However, the defining page must define an
