@@ -47,31 +47,62 @@ default implementation classes that you can extend to provide simple modificatio
 <P >
 The interface of interest is <b><a href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart</a></b>, which defines the methods that must be implemented to contribute a view to the workbench. The class
 <b><a href="../reference/api/org/eclipse/ui/part/ViewPart.html">ViewPart</a></b> provides a default implementation of this interface. In a nutshell, a view part is responsible for creating the widgets needed to show the view.</P>
-<P >
-The standard views in the workbench often display some information about an object that the user has selected or is navigating.
-Views update their contents based on actions that occur in the workbench. In our case, we are just saying hello, so our view is quite simple.</P>
-<h4 >
-Using the tools to write our plug-in</h4>
-<P >You can use any Java IDE you wish to build Eclipse plug-ins, but we'll walk
-through the steps for building our plug-in with the Eclipse Java IDE.&nbsp; If you
-are not already familiar with the Eclipse workbench and the Java IDE, consult the Java
-Development User Guide for further explanations of the steps we are
-taking.&nbsp; For now we are focusing on the code, not the tool.&nbsp; However,
-there are
-some IDE logistics for getting started:</P>
+<P > The standard views in the workbench often display some information about 
+  an object that the user has selected or is navigating. Views update their contents 
+  based on actions that occur in the workbench. In our case, we are just saying 
+  hello, so our view is quite simple.</P>
+<h4 >Using the tools to write our plug-in</h4>
+<P >You can use any Java IDE you wish to build Eclipse plug-ins, but we'll walk 
+  through the steps for building our plug-in with the Eclipse Java IDE.&nbsp; 
+  If you are not already familiar with the Eclipse workbench and the Java IDE, 
+  consult the Java Development User Guide for further explanations of the steps 
+  we are taking.&nbsp; For now we are focusing on the code, not the tool.&nbsp; 
+  However, there are some IDE logistics for getting started.</P>
+<h4 >Setting up your environment</h4>
+<p >If you are starting with a clean environment, you will need to ensure that 
+  your code has access to the plug-ins <b><a href="../reference/api/org/eclipse/ui/package-summary.html"> 
+  org.eclipse.ui</a></b> and <b><a href="../reference/api/org/eclipse/ui/package-summary.html"> 
+  org.eclipse.swt</a></b>. Import these plug-ins and any plug-ins they require 
+  into your run-time workbench instance by performing the steps below. If you 
+  already have these plug-ins in your workbench instance, proceed to the section 
+  &quot;Creating your plug-in project&quot;.</p>
 <ol>
-  <li>You'll need to create a project to do your work.&nbsp; The simplest way is
-    to open the <b>New Project...</b> wizard and choose <b>Plug-in Project </b>from
-    the <b>Plug-in Development</b> category.&nbsp; This will set up your project
-    for writing Java code and give you a default plug-in manifest file
-    (explained in a moment.)&nbsp; Use <b>org.eclipse.examples.helloworld</b> as
-    the name for your project and <b>id</b> of your plug-in.&nbsp; The wizard
-    gives you the option of generating code for different kinds of plug-ins, but
-    we want to keep this simple.&nbsp; For now, be sure to choose <b>Create a
-    blank plug-in project </b>on the code generators page.</li>
-  <li>Create a package <b>org.eclipse.examples.helloworld</b> underneath the <b>src</b>
-    directory for the project.</li>
-  <li>Create a new class called <b>HelloWorldView</b> in this package.</li>
+  <li>From the resource perspective, use <strong>File &gt; Import... &gt; External 
+    Plug-ins and Fragments</strong>.</li>
+  <li>Continue clicking on the <strong>Next &gt;</strong> buttons until you get 
+    to the screen called <strong>Selection</strong>. This screen will contain 
+    a list of all of the plug-ins in your host workbench instance.</li>
+  <li>Select org.eclipse.swt and org.eclipse.ui and then click the button <strong>Add 
+    Required Plug-ins</strong>.</li>
+  <li>Click on the <strong>Finish</strong> button. Your Navigator view should 
+    contain org.eclipse.swt, org.eclipse.ui and all of the plug-ins they require.</li>
+</ol>
+<p>For a complete discussion of setting up host and run-time workbench instances 
+  consult the PDE Guide.</p>
+<h4>Creating your plug-in project</h4>
+<ol>
+  <li>You will need to create a project to do your work.&nbsp; The simplest way 
+    is to open the <b>New Project...</b> wizard (File &gt; New &gt; Project...) 
+    and choose <b>Plug-in Project </b>from the <b>Plug-in Development</b> category.&nbsp; 
+    This will set up your project for writing Java code and give you a default 
+    plug-in manifest file (explained in a moment.)&nbsp; Use <b>org.eclipse.examples.helloworld</b> 
+    as the name for your project. By default, the wizard sets <strong>org.eclipse.examples.helloworld</strong> 
+    as the id as well.&nbsp; The wizard gives you the option of generating code 
+    for different kinds of plug-ins, but we want to keep this simple.&nbsp; For 
+    now, be sure to choose <b>Create a blank plug-in project </b>on the <strong>Plug-in 
+    Code Generators</strong> page.</li>
+  <li>When asked if you would like to switch to the Plug-in Development perspective, 
+    answer <strong>Yes</strong>.</li>
+  <li>Create a package <b>org.eclipse.examples.helloworld</b> underneath the <b>src</b> 
+    directory for the project. To do this, double click on the project <strong>org.eclipse.examples.helloworld</strong> 
+    in the Package Explorer view. This expands the project and shows you the <strong>src</strong> 
+    directory. Right click on the <strong>src</strong> directory to get the context 
+    menu. Use <strong>New &gt; Package</strong> to create a new package and give 
+    it the name <b>org.eclipse.examples.helloworld</b></li>
+  <li>Create a new class called <b>HelloWorldView</b> in this package. Right click 
+    on the package you just created in the previous step to get the context menu. 
+    Use <strong>New &gt; Class</strong> to create your new class with the name 
+    <b>HelloWorldView</b>.</li>
 </ol>
 <h4>Writing the code</h4>
 <P >Now we're ready to study some code.&nbsp; Here is everything you need in
@@ -108,10 +139,11 @@ that our .classpath is set up properly so that we can compile the
 code.&nbsp;&nbsp;</P>
 
 <ol>
-  <li>Select the <b>org.eclipse.examples.helloWorld</b> project and open the <b>Properties</b>
-    dialog.</li>
-  <li>In the <b>Java Build Path</b> properties, select the <b>Projects</b> tab,
-    and check the projects&nbsp; <b>org.eclipse.ui</b> and <b>org.eclipse.swt</b>.
+  <li>Select the <b>org.eclipse.examples.helloWorld</b> project and open the <b>Properties</b> 
+    dialog (right click on the project <b>org.eclipse.examples.helloWorld</b> 
+    <strong>&gt; Properties</strong>).</li>
+  <li>In the <b>Java Build Path</b> properties, select the <b>Projects</b> tab, 
+    and check the projects&nbsp; <b>org.eclipse.ui</b> and <b>org.eclipse.swt</b>. 
     These are the projects that contain the classes we imported.</li>
   <li><b>Rebuild</b> the project.&nbsp;</li>
 </ol>
