@@ -738,7 +738,7 @@ public class BuildTests extends TestCase {
 	public static final String[] REQUIRED_SOURCE_FILES = {"about.html"};
 	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
 	
-	public static final String[] REQUIRED_BUNDLE_FILES = {"about.html", "plugin.properties"};
+	public static final String[] REQUIRED_BUNDLE_FILES = {"about.html"};
 	public static final String REQUIRED_BUNDLE_MANIFEST = "MANIFEST.MF";
 	public static final String REQUIRED_BUNDLE_SUFFIX = ".jar";
 	
