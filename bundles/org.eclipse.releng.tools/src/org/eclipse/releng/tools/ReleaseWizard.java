@@ -285,13 +285,22 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.IWizard#canFinish()
 	 */
 	public boolean canFinish() {
+		// There must be projects selected
+		if (!isProjectSelected()) {
+			return false;
+		}
+		// There must be a tag
+		if (!tagPage.isPageComplete()) {
+			return false;
+		}
+		// Force map comparison if option set by user
 		IWizardPage currentPage = getContainer().getCurrentPage();
 		if(currentPage == tagPage){
 			if(tagPage.compareButtonSelected()){
 				return false;
 			}
 		}
-		return super.canFinish();
+		return true;
 	}
 
 	public MapProject getMapProject(){
