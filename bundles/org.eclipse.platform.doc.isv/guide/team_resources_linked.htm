@@ -10,28 +10,65 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h3>Team and linked resources</h3>
-<p>A project in Eclipse may contain resources that are not located within the 
-  project's directory in the local file system. These resources are referred to 
-  as <em>linked resources</em>. Eclipse supports linking files or folders only 
-  as root elements in a project (i.e. a link must be a direct child of the project).</p>
-<p>Linked resources may be dangerous for repository providers because they are 
-  members of a project but do not exists within the project's corresponding directory 
-  in the local file system. Older repository provider implementations (i.e. those 
-  implemented for Eclipse 2.0) may depend on the local file system structure matching 
-  that of the project in Eclipse. To avoid possible problems, linked resources 
-  can not be added projects that are mapped to a 2.0 repository provider and projects 
-  that contain linked resources can not be shared with a 2.0 repository provider.</p>
+<p>A project may contain resources that are not located within the project's directory 
+  in the local file system. These resources are referred to as <a href="resInt_linked.htm">linked 
+  resources</a>. </p>
+<h4>Consequences for Repository Providers</h4>
+<p>Linked resources can pose particular challenges for repository providers which 
+  operate directly against the file system. This is a consequence of the fact 
+  that linked resources by design do not exist in the immediate project directory 
+  tree in the file system. </p>
+<p>Providers which exhibit the following characteristics may be affected by linked 
+  resources:</p>
+<ol>
+  <li>Those which call out to an external program that then operates directly 
+    against the file system.</li>
+  <li>Those which are implemented in terms of IResource but assume that all the 
+    files/folders in a project exist as direct descendents of that single rooted 
+    directory tree.</li>
+</ol>
+<p>In the first case, the existing provider may operate without error provided 
+  the input to the operation corresponds to files or folders located within the 
+  project directory in the file system. However, if a linked resource is the target 
+  of an operation, this will not be the case (i.e. the external program will not 
+  find the file or folder on disk because it is located elsewhere in the file 
+  system). In this case the operation would most likely fail due to invalid input 
+  or, worse yet, yield unpredictable results.</p>
+<p>For the second case, problems may arise if the provider determines the location 
+  of a linked resource using the API on IResource and expects this to translate 
+  to the resource's location in the local file system. For example,a provider 
+  may use IResource.getProjectRelativePath() and assume that this path can be 
+  used along with the project's location on disk to calculate the resource's location. 
+  Again, the opeation would most likely fail.</p>
+<h4>Backwards Compatibility</h4>
+<p>Because existing repository provider (i.e. pre-linked resources) might have 
+  reasonably assumed that the local file system structure mirrored the project 
+  structure, it was important that the introduction of linked resources did not 
+  inadvertantly break existing providers. Consequently, linked resources can not 
+  be added to projects that are mapped to such a provider. Additionally, projects 
+  that contain linked resources can not be shared with that provider.</p>
+<h4>Strategies for Handling Linked Resources</h4>
+<p>In order to be &quot;link friendly&quot;, a provider should allow projects 
+  with linked resources to be version controlled, but can disallow the version 
+  controlling of linked resources themselves. </p>
+<p>A considerably more complex solution would be to allow the versioning of the 
+  actual linked resources, but this should be discouraged since it brings with 
+  it complex scenarios (e.g. the file may already be version controlled under 
+  a different project tree by another provider). Our recommendation therefore 
+  is to support version controlled projects which contain non-version controlled 
+  linked resources.</p>
+<h4>Technical Details for Being &quot;Link Friendly&quot;</h4>
 <p>Repository provider implementations can be upgraded to support linked resources 
   by overriding the <b><font color="#4444CC"><b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b></font>.canHandleLinkedResources()</b> 
   method to return <strong>true</strong>. Once this is done, linked resources 
   will be allowed to exist in projects shared with that repository provider. However, 
   the repository provider must take steps to ensure that linked resources are 
-  handled properly. It is strongly suggested that repository providers ignore 
-  all linked resources. This means that linked resources (and their children) 
-  should be excluded from the actions supported by the repository provider and 
-  the repository provider should use the default move and delete behavior for 
-  linked resources if the repository provider implementation overrides the default 
-  <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>.</p>
+  handled properly. As mentioned above, it is strongly suggested that repository 
+  providers ignore all linked resources. This means that linked resources (and 
+  their children) should be excluded from the actions supported by the repository 
+  provider. Furthermore, the repository provider should use the default move and 
+  delete behavior for linked resources if the repository provider implementation 
+  overrides the default <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>.</p>
 <p>Team providers can use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>.<b>isLinked() 
   </b>to determine if a resource is a link. However, this method only returns 
   true for the root of a link. The following code segment can be used to determine 
