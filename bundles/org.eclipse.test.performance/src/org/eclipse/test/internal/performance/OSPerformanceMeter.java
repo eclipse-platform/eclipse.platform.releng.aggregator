@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
-import org.eclipse.test.internal.performance.data.DimensionMessages;
-import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.db.DB;
@@ -79,28 +77,22 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 				Scalar[] start= dataPoints[i].getScalars();
 				Scalar[] stop= dataPoints[i + 1].getScalars();
 				for (int j= 0, m= Math.min(start.length, stop.length); j < m; j++) {
-					String dimensionId= start[j].getDimension();
-					if (dimensionId.equals(stop[j].getDimension())) {
+					Dimension dimension= start[j].getDimension();
+					if (dimension.equals(stop[j].getDimension())) {
 						long delta= stop[j].getMagnitude() - start[j].getMagnitude();
-						Double value= (Double) averages.get(dimensionId);
+						Double value= (Double) averages.get(dimension);
 						double oldAvg= value != null ? value.doubleValue() : 0.0;
 						double newAvg= oldAvg + (delta - oldAvg)/(i/2 + 1);
-						averages.put(dimensionId, new Double(newAvg));
+						averages.put(dimension, new Double(newAvg));
 					} else
 						System.out.println("OSPerformanceMeter.toDisplayString(): Dimensions do not match");
 				}
 			}
 			System.out.println(fScenarioId + ":");
 			for (Iterator iter= averages.keySet().iterator(); iter.hasNext();) {
-				String dimensionId= (String) iter.next();
-				double avgDelta= ((Double) averages.get(dimensionId)).doubleValue();
-				Dimension dimension= PerfMsrDimensions.getDimension(dimensionId);
-				String name= null;
-				if (dimension != null)
-					name= dimension.getName() + " [" + dimension.getUnit().getShortName() + "]";
-				else
-					name= DimensionMessages.getString("Dimension." + dimensionId);
-					
+				Dimension dimension= (Dimension) iter.next();
+				double avgDelta= ((Double) averages.get(dimension)).doubleValue();
+				String name= dimension.getName() + " [" + dimension.getUnit().getShortName() + "]";
 				System.out.println(name + ":\t" + avgDelta);
 			}
 		}

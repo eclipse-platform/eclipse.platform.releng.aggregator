@@ -34,8 +34,7 @@ public class DataPoint {
 	}
 	
 	public Scalar getScalar(Dimension dimension) {
-		// TODO get rid of perfmsr dependency
-		return (Scalar) fScalars.get(PerfMsrDimensions.getPerfMsrId(dimension));
+		return (Scalar) fScalars.get(dimension);
 	}
 	
 	public String toString() {

@@ -15,15 +15,15 @@ package org.eclipse.test.internal.performance.data;
  * @since 3.1
  */
 public class Scalar {
-	private String fDimension;
+	private Dimension fDimension;
 	private long fMagnitude;
 	
-	public Scalar(String dimension, long extent) {
+	public Scalar(Dimension dimension, long extent) {
 		fDimension= dimension;
 		fMagnitude= extent;
 	}
 	
-	public String getDimension() {
+	public Dimension getDimension() {
 		return fDimension;
 	}
 	
@@ -32,11 +32,9 @@ public class Scalar {
 	}
 	
 	public String toString() {
-		// TODO get rid of perfmsr dependency
-		Dimension dim= PerfMsrDimensions.getDimension(fDimension);
-		if (dim == null)
+		if (fDimension == null)
 			return "Scalar [dimension= " + fDimension + ", magnitude= " + fMagnitude + "]";
 		else
-			return "Scalar [" + dim.getName() + ": " + dim.getDisplayValue(this) + "]";
+			return "Scalar [" + fDimension.getName() + ": " + fDimension.getDisplayValue(this) + "]";
 	}
 }

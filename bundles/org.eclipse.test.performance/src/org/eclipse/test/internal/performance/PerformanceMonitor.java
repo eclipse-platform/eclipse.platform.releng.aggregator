@@ -13,7 +13,6 @@ package org.eclipse.test.internal.performance;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import java.util.Random;
 import org.eclipse.test.internal.performance.PerformanceMonitorLinux;
 import org.eclipse.test.internal.performance.PerformanceMonitorMac;
 import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -164,9 +164,9 @@ class PerformanceMonitor {
 		// no default implementation
 	}
 	
-    void addScalar(Map scalars, int id, long value) {
-        // System.out.println(id + ": " + DimensionMessages.getString(id) + " " + value);
-        scalars.put("" + id, new Scalar("" + id, value));
+    void addScalar(Map scalars, Dimension dimension, long value) {
+        // System.out.println(dimension.getName() + ": " + value);
+        scalars.put(dimension, new Scalar(dimension, value));
     }
     
 	/**
@@ -185,65 +185,5 @@ class PerformanceMonitor {
 		if (os.startsWith("Mac OS X"))
 		    return new PerformanceMonitorMac();
 		return new PerformanceMonitorLinux();
-	}
-	
-	//---- temporary, for debugging
-	
-	/**
-	 * Answer a formatted string for the elapsed time (minutes, hours or days) 
-	 * that is appropriate for the scale of the time.
-	 * 
-	 * @param diff time in milliseconds
-	 * 
-	 * I copied this from karasiuk.utility.TimeIt
-	 */
-	public static String formatedTime(long diff) {
-		if (diff < 0)diff *= -1;
- 		if (diff < 1000)
- 			return String.valueOf(diff) + " milliseconds";
- 		
- 		NumberFormat nf = NumberFormat.getInstance();
- 		nf.setMaximumFractionDigits(1);
-		double d = diff / 1000.0;	
-		if (d < 60)
-			return nf.format(d) + " seconds";
-		
-		d = d / 60.0;
-		if (d < 60.0)
-			return nf.format(d) + " minutes";
-	
-		d = d / 60.0;
-		if (d < 24.0)
-			return nf.format(d) + " hours";
-	
-		d = d / 24.0;
-		return nf.format(d) + " days";
-	}
-	
-	/**
-	 * Answer a number formatted using engineering conventions, K thousands, M millions,
-	 * G billions and T trillions.
-	 * 
-	 * I copied this method from karasiuk.utility.Misc.
-	 */
-	public static String formatEng(long n) {
-		if (n < 1000)
-			return String.valueOf(n);
-		double d = n / 1000.0;
-		NumberFormat nf = NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(1);
-		if (d < 1000.0)
-			return nf.format(d) + "K";
-		
-		d = d / 1000.0;
-		if ( d < 1000.0)
-			return nf.format(d) + "M";
-		
-		d = d / 1000.0;
-		if ( d < 1000.0)
-			return nf.format(d) + "G";
-		
-		d = d / 1000.0;
-		return nf.format(d) + "T";
 	}
 }

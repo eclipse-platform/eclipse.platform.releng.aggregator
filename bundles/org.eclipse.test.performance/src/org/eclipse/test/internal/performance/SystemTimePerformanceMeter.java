@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.test.internal.performance.data.Assert;
 import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -38,14 +39,10 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 
 	private static final String LOCALHOST= "localhost";
 	
-	private static final String DIMENSION_NAME= "System Time";
-
 	private static final int DEFAULT_INITIAL_CAPACITY= 3;
 	
 	private String fScenario;
-	
 	private List fStartTime;
-	
 	private List fStopTime;
 
 	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk";
@@ -120,8 +117,8 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 		
 		DataPoint[] data= new DataPoint[2*fStartTime.size()];
 		for (int i= 0; i < fStartTime.size(); i++) {
-			data[2*i]= createDataPoint(PerfMsrConstants.BEFORE, DIMENSION_NAME, ((Long) fStartTime.get(i)).longValue());
-			data[2*i + 1]= createDataPoint(PerfMsrConstants.AFTER, DIMENSION_NAME, ((Long) fStopTime.get(i)).longValue());
+			data[2*i]= createDataPoint(PerfMsrConstants.BEFORE, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
+			data[2*i + 1]= createDataPoint(PerfMsrConstants.AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
 		}
 		
 		return new Sample(properties, data);
@@ -149,7 +146,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 		}
 	}
 
-	private DataPoint createDataPoint(String kind, String dimension, long value) {
+	private DataPoint createDataPoint(String kind, Dimension dimension, long value) {
 		Map scalars= new HashMap();
 		scalars.put(dimension, new Scalar(dimension, value));
 		return new DataPoint(kind, scalars);
