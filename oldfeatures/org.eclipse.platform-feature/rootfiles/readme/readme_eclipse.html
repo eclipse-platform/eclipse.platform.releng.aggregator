@@ -12,7 +12,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Draft Pre-release 3.0<br>
-Last revised May 31, 2004</p>
+Last revised June 18, 2004</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -676,84 +676,36 @@ excluding subfolders</i></h4>
 <p><i>There is currently no way in Eclipse to run a non-recursive update on a
 folder (i.e., there is nothing equivalent to the cvs -l option). (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33210">33210</a>).</i></p>
 <h3>3.1.8 <a name="I-Platform-Install-Update">Platform - Install/Update</a></h3>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Update manager claims that a
-cycle has been detected in a multiple path case</i></h4>
-<p><i>When a feature includes other features, it is an error to have multiple
-paths from the parent to any of its children (there must be exactly one path
-from the root to any of the included features). Update manager reports the error
-but is not capable of differentiating cycles (when a child includes a parent)
-and multiple paths. Consequently, it will claim that there is a cycle in both
-cases. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=26808">26808</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Bundled e-fixes that patch
-the same feature can clash</i></h4>
-<p><i>When patches (e-fixes) are created by bundling (including) several
-patches, care must be taken that they do not carry different versions of the
-same feature. If they do, both features may end up disabled. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=31407">31407</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Update manager does not
-support https protocol</i></h4>
-<p><i>Update manager currently cannot open connections to the remote update
-sites if the provided URL has <b>https </b>protocol. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=31979">31979</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Internal Error in Update
-Manager while installing/updating when features include the same plug-in</i></h4>
-<p><i>If two or more features in the feature tree formed by inclusion have the
-same plug-in entry, install or update will fail. This happens because update
-manager attempts to install the same plug-in more than once and fails to rename
-files since they already exist. To work around this problem, ensure that no two
-features in the single feature hierarchy (starting from the root feature)
-reference the same plug-in (have a plug-in entry with the same id and version).
-(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33937">33937</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Non-responsive sites may use
-all free threads</i></h4>
-<p><i>Prior to Eclipse 2.1, if the connection to an update site did not respond
+<h4>Manually installing features and plugins on a FAT file system (Windows only)</h4>
+<p>When features and plug-ins are manually installed on top of an Eclipse-based
+product install located on a FAT file system that has already been run at least
+once, the product must be explicitly restarted with the system property
+osgi.checkConfiguration set to true. This property can be set in the
+eclipse/configuration/config.ini file, or passed to the eclipse command line via
+the -vmargs option. Then, open Help &gt; Software Updates &gt; Manage
+Configuration dialog and toggle on the &quot;Show disabled features&quot; button
+its toolbar. Select the newly &quot;installed&quot; feature and press on the
+&quot;Enable feature&quot; action on the right pane (or select the action from
+the feature's context menu). (bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=52525">52525</a>,
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66120">66120</a>, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67461">67461</a>)</p>
+<h4> Non-responsive sites may use
+all free threads</h4>
+<p>Prior to Eclipse 2.1, if the connection to an update site did not respond
 (the site did not exist or was down), the workbench became non-responsive until
-the connection request timed out. In 2.1, connections are made by a separate
+the connection request timed out. Since 2.1, connections are made by a separate
 thread so that the UI stays responsive. Typically, unresponsive connections
 eventually time out and these threads terminate. In rare cases, servers accept
 the connection but never send a response, thereby keeping the connection thread
 live indefinitely. Update manager limits the number of active connection threads
 and will refuse to create more once the limit is reached. To work around the
 problem, exit and restart Eclipse. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18598">18598</a>,
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19775">19775</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] URL validity checking on
-input</i></h4>
-<p><i>URL syntax is currently not completely checked on input. Ensure that the
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19775">19775</a>)</p>
+<h4> URL validity checking on
+input</h4>
+<p>URL syntax is currently not completely checked on input. Ensure that the
 entered URL uses forward&nbsp; slash ('/') separators and does not contain
 invalid characters. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19685">19685</a>,
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20247">20247</a>)</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Running &quot;headless&quot;
-applications that do not handle restart</i></h4>
-<p><i>When install changes are detected, the changes are automatically processed
-and the workbench restarts. The executable launcher supplied with the
-application correctly handles the restart. However, if you have applications
-that directly call the platform (eg. by calling the BootLoader APIs) and do not
-handle restart, the startup reconciliation processing can be suppressed by
-specifying <tt>-noupdate</tt> command line option. In this case, the application
-will start with the set of features and plug-ins that were processed and
-configured on the previous start. If prior configuration cannot be found, the
-application will start with the full set of plug-ins found in the installation
-location.</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Link file entry with
-trailing blanks is invalid</i></h4>
-<p><i>If a link file used to connect product extensions with products contains
-an entry with trailing blank characters, it will be considered invalid. The
-workaround is to ensure that the entry ends with an end-of-line character (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=22993">22993</a>).</i>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Enabling two versions of the
-same feature</i></h4>
-<p><i>Care should be taken when enabling and disabling multiple versions of the
-same feature. If they include other features and the inclusion is set with a
-match attribute that is not &quot;perfect&quot;, disabling old feature version
-may have a consequence of disabling new children. To avoid this situation,
-disable the new version first, then enable the old one; i.e., never have two
-versions of the same feature simultaneously enabled (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=25236">25236</a>).</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Upgrading very old
-workspaces</i></h4>
-<p><i>If you upgrade to 2.1 from a pre-2.0 workspace that existed prior to the
-introduction of features, the next time you add a feature you will be prompted
-on startup with a dialog asking which features to install. If you de-select all
-features and click OK, then all features are disabled. This prevents you from
-ever using that workspace again (since the Eclipse Platform feature is
-disabled). The solution is to delete the <code>.config</code> subdirectory in
-the workspace's metadata area and then restart Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35703">35703</a>)</i></p>
+<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20247">20247</a>)
 <h3>3.1.9 <a name="I-Platform-Debug">Platform - Debug</a></h3>
 <p>None. (Known problems with the Java debugger appear below in the <a href="#I-JDT">JDT</a>
 section.)</p>
