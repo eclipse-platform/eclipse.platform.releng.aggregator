@@ -5,30 +5,78 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Text editor utilities
+Other text editor responsibilities
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H2>Text editor utilities</H2>
-<p>&lt;IN PROGRESS&gt;</p>
-<p>The Java example editor inherits a lot of useful default behavior from <a href="../reference/api/org/eclipse/ui/texteditor/TextEditor.html"><b>TextEditor</b></a></p>
-<p>By subclassing TextEditor, your editor can inherit some useful utility
-methods.</p>
+<H2>Other text editor responsibilities</H2>
+<p>The Java example editor inherits a lot of useful default behavior from <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>.&nbsp;
+The text editing framework handles several other responsibilities that you can
+customize by overriding methods in <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>.&nbsp;
+Browse the implementation of this class and its subclasses to see how behavior
+is customized in the framework.</p>
+<p>The following are some of the useful framework features that can be
+configured.</p>
 <h3>Preference handling</h3>
-<ul>
-  <li>set preference store when initializing editor class</li>
-  <li>override handlePreferenceStoreChanged</li>
-  <li>example inherits from text editor - so all changes made in text editor
-    preference page have impact on the sample</li>
-</ul>
+<p>Text editors typically contribute user preferences that control the
+presentation and behavior of the editor.&nbsp; In the text framework, each text
+editor instance has an associated preference store that is used for accessing
+user preferences.&nbsp; This preference store can be set up by your editor, or
+you can inherit from preference stores already used in the framework.</p>
+<p>In the case of the Java example editor, it inherits the preference store
+initialized by <a href="../reference/api/org/eclipse/ui/texteditor/TextEditor.html"><b>TextEditor</b></a>.&nbsp;
+This is the preference store defined by the workbench editors
+plug-in.&nbsp;&nbsp;</p>
+
+<pre><font color="#4444CC">protected void initializeEditor() {
+	...
+	setPreferenceStore(EditorsPlugin.getDefault().getPreferenceStore());
+}</font></pre>
+
+The editors plug-in preferences can be manipulated in the <b>Workbench &gt;
+Editors</b> and <b>Workbench &gt; Editors &gt; Text Editor</b> preference pages.
+<p>If you do not want to use the standard workbench text preferences for your
+editor, you can set a different preference store for your plug-in class.&nbsp;
+This is typically done by overriding <b>initializeEditor</b> and setting your
+own preference store.&nbsp; If you do use your own preference store, you will
+also need to override the method <b>handlePreferenceStoreChanged()</b> which is
+triggered whenever a preference is updated.</p>
 <h3>Key bindings</h3>
-<ul>
-  <li>can set up scopes by overriding TextEditor.initializeKeyBindings</li>
-  <li>can call AbstractTextEditor.setKeybindingScopes</li>
-</ul>
-<p>any other useful utility things in Text Editor?</p>
+<p><a href="wrkAdv_keyBindings_accelScope.htm">Key binding scopes</a> are useful
+for establishing a lookup order for key bindings.&nbsp; Having contextual scopes
+reduces the chances of different plug-ins contributing conflicting key
+sequences.&nbsp; By default, the workbench operates
+in a global scope.&nbsp; When a text editor becomes active, it is responsible
+for resetting the scope to the text editor scope, so that editor specific key
+bindings will be active.</p>
+<p>In the text framework, each text editor instance has an associated key
+binding scope.&nbsp; It is responsible for setting this scope when it becomes
+active.&nbsp; <a href="../reference/api/org/eclipse/ui/texteditor/TextEditor.html"><b>TextEditor</b></a>
+defines this scope and takes care of making it active.&nbsp; The scope is
+assigned in a method that is called from the constructor:</p>
+
+<pre><font color="#4444CC">protected void initializeKeyBindingScopes() {
+		setKeyBindingScopes(new String[] { &quot;org.eclipse.ui.textEditorScope&quot; });  
+}</font></pre>
+
+<p>The argument to the method is an array of string key binding scope ids.&nbsp;
+If you want your editor to define its own key binding scope, then you can
+override this method in your editor class, or set the scope dynamically using <b>setKeybindingScopes</b>.</p>
+<p>The scope itself must be defined with the corresponding id in the <b><a href="../reference/extension-points/org_eclipse_ui_commands.html">org.eclipse.ui.commands</a></b>
+ extension point.&nbsp; The following is the definition for the text editor
+scope.</p>
+<pre><font color="#4444CC">&lt;extension
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.ui.commands&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;scope
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name=&quot;%scope.text.name&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent=&quot;org.eclipse.ui.globalScope&quot;
+	    description=&quot;%scope.text.description&quot;
+            <b>id=&quot;org.eclipse.ui.textEditorScope&quot;</b>&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/scope&gt;
+&nbsp;&nbsp; &lt;/extension&gt;</font> </pre>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 
