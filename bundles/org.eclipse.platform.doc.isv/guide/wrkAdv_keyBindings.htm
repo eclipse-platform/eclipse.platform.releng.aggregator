@@ -12,7 +12,49 @@ Workbench key bindings
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h2>Workbench key bindings</h2>
-<p>&nbsp;</p>
+<p>The workbench defines many keyboard accelerators for invoking common actions
+with the keyboard.&nbsp; When your plug-in defines a new action using the <b>actionSets</b>, <b>viewActions</b>, or <b>editorActions</b> extension points, an <b>accelerator</b> 
+attribute can be specified with any action.&nbsp; This is one way to establish
+the key combination that will invoke the action.&nbsp; However, allowing each
+plug-in to define their own accelerator keys for actions introduces several
+problems:</p>
+
+
+<ul>
+  <li>Different plug-ins may define the same accelerator for actions that are
+    not related.</li>
+  <li>Plug-ins may define different accelerators for actions that are
+    semantically the same.</li>
+  <li>Plug-ins may define accelerators that later conflict with the workbench
+    (as the workbench is upgraded).</li>
+</ul>
+
+
+<p>In order to alleviate these problems, the platform defines a configurable key
+binding strategy that is extendable by plug-ins.&nbsp; It solves the problems
+listed above and introduces new capabilities:</p>
+
+
+<ul>
+  <li>The user can control which registered sets of key bindings should be used.</li>
+  <li>Plug-ins can define key bindings that emulate other tools that may be
+    familiar to users of the plug-in.</li>
+</ul>
+<p>The basic strategy is that plug-ins use <b>action definitions</b> to define
+semantic actions.&nbsp; Action definitions are simply declarations of an
+action.&nbsp; They do not define an implementation for the action.&nbsp; When a
+plug-in defines an action for an editor, action set, or view, the action can
+specify that it is an implementation of one of these action definitions.&nbsp;
+This allows semantically similar actions to be associated with the same action
+definition.</p>
+<p>Meanwhile, plug-ins can define <b>accelerator sets</b> that map action
+definitions to key combinations.&nbsp; These accelerator sets can be grouped
+into <b>accelerator configurations</b> that the user may activate via the
+Preferences dialog. </p>
+<p>Finally, plug-ins can define <b>accelerator scopes</b> which determine the
+lookup order for key bindings.</p>
+<p>This is all best understood by walking through the workbench and looking at
+how actions and accelerators are declared.</p>
 
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
