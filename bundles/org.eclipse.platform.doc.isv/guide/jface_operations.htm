@@ -1,67 +1,109 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
-<HEAD>
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
-
-<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>
- Long-running operations
-</TITLE>
-
-<link rel="stylesheet" type="text/css" HREF="../book.css">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-<H2>
-Long-running operations</H2>
-<P >
-The <b><a href="../reference/api/org/eclipse/jface/operation/package-summary.html"> org.eclipse.jface.operations</a></b> package defines interfaces for
-long-running operations that require progress indicators or allow user cancellation of the operation.</P>
-
-<H3>Runnables and progress</H3>
-<P >
-The platform runtime defines a common interface, <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b>, which is used to 
-report progress to the user while long running operations are in progress. The client can provide a monitor as a 
-parameter in many platform API methods when it is important to show progress to the user.</P>
-<P >JFace defines more specific interfaces for objects that implement the user interface for a progress monitor.&nbsp;</P>
-<P >
-<b><a href="../reference/api/org/eclipse/jface/operation/IRunnableWithProgress.html"> IRunnableWithProgress</a></b> 
-is the interface for a long-running operation.&nbsp; The <b>run</b>
-method for this interface has an <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a>
-</b>parameter that is used to report progress and check for user cancelation.</P>
-<P ><a href="../reference/api/org/eclipse/jface/operation/IRunnableContext.html"><b>IRunnableContext</b></a>
-is the interface for the different places in the UI where progress can be
-reported.&nbsp; Classes that implement this interface may choose to use different techniques for showing progress and running the operation.&nbsp;
-For example, <b><a href="../reference/api/org/eclipse/jface/dialogs/ProgressMonitorDialog.html">ProgressMonitorDialog</a></b>
-implements this interface by showing a progress dialog.&nbsp; <b><a href="../reference/api/org/eclipse/ui/IWorkbenchWindow.html">IWorkbenchWindow</a></b>
-implements this interface by showing progress in the workbench window's status
-line.&nbsp; <a href="../reference/api/org/eclipse/jface/wizard/WizardDialog.html"><b>WizardDialog</b></a>
-implements this interface to show long running operations inside the wizard
-status line.</P>
-<i><blockquote>Note:&nbsp; The workbench UI provides additional support for
-operations in <b><a href="../reference/api/org/eclipse/ui/actions/WorkspaceModifyOperation.html">WorkspaceModifyOperation</a></b>.&nbsp;
-This class simplifies the implementation of long-running operations that modify
-the workspace.&nbsp; It maps between <a href="../reference/api/org/eclipse/jface/operation/IRunnableWithProgress.html"><b>IRunnableWithProgress</b></a>
-and <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRunnable.html"><b>IWorkspaceRunnable</b></a>.&nbsp;
-See the javadoc for further detail.</blockquote></i>
-
-
-<H3>
-Modal operations</H3>
-<P >
-The <b><a href="../reference/api/org/eclipse/jface/operation/ModalContext.html"> ModalContext</a></b> class is provided to run an operation that is modal from the client code's perspective.
-It is used inside the different implementations of <a href="../reference/api/org/eclipse/jface/operation/IRunnableContext.html"><b>IRunnableContext</b></a>.&nbsp;
-If your plug-in needs to wait on the completion of a long-running operation before continuing
-execution, <b><a href="../reference/api/org/eclipse/jface/operation/ModalContext.html">ModalContext</a></b> can be used to accomplish this while still keeping the user interface responsive.</P>
-<P >
-When you run an operation in a modal context, you can choose to fork the operation in a different thread. If
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
+  <title>Long-running operations</title>
+  <link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+<body bgcolor="#ffffff">
+<h2>
+Long-running operations</h2>
+<p>
+The <b><a
+ href="../reference/api/org/eclipse/jface/operation/package-summary.html">
+org.eclipse.jface.operations</a></b> package defines interfaces for
+long-running operations that require progress indicators or allow user
+cancellation of the operation.</p>
+<h3>Runnables and progress</h3>
+<p>
+The platform runtime defines a common interface, <b><a
+ href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b>,
+which is used to report progress to the user while long running
+operations are in progress. The client can provide a monitor as a
+parameter in many platform API methods when it is important to show
+progress to the user.</p>
+<p>JFace defines more specific interfaces for objects that implement
+the user interface for a progress monitor.&nbsp;</p>
+<p>
+<b><a
+ href="../reference/api/org/eclipse/jface/operation/IRunnableWithProgress.html">
+IRunnableWithProgress</a></b> is the interface for a long-running
+operation.&nbsp; The <b>run</b>
+method for this interface has an <b><a
+ href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a>
+</b>parameter that is used to report progress and check for user
+cancelation.</p>
+<p><a
+ href="../reference/api/org/eclipse/jface/operation/IRunnableContext.html"><b>IRunnableContext</b></a>
+is the interface for the different places in the UI where progress can
+be
+reported.&nbsp; Classes that implement this interface may choose to use
+different techniques for showing progress and running the
+operation.&nbsp;
+For example, <b><a
+ href="../reference/api/org/eclipse/jface/dialogs/ProgressMonitorDialog.html">ProgressMonitorDialog</a></b>
+implements this interface by showing a progress dialog.&nbsp; <b><a
+ href="../reference/api/org/eclipse/ui/IWorkbenchWindow.html">IWorkbenchWindow</a></b>
+implements this interface by showing progress in the workbench window's
+status
+line.&nbsp; <a
+ href="../reference/api/org/eclipse/jface/wizard/WizardDialog.html"><b>WizardDialog</b></a>
+implements this interface to show long running operations inside the
+wizard
+status line.</p>
+<i>
+<blockquote>Note:&nbsp; The workbench UI provides additional support
+for
+operations in <b><a
+ href="../reference/api/org/eclipse/ui/actions/WorkspaceModifyOperation.html">WorkspaceModifyOperation</a></b>.&nbsp;
+This class simplifies the implementation of long-running operations
+that modify
+the workspace.&nbsp; It maps between <a
+ href="../reference/api/org/eclipse/jface/operation/IRunnableWithProgress.html"><b>IRunnableWithProgress</b></a>
+and <a
+ href="../reference/api/org/eclipse/core/resources/IWorkspaceRunnable.html"><b>IWorkspaceRunnable</b></a>.&nbsp;
+See the javadoc for further detail.</blockquote>
+</i>
+<h3>Modal operations</h3>
+<p>
+The <b><a
+ href="../reference/api/org/eclipse/jface/operation/ModalContext.html">
+ModalContext</a></b> class is provided to run an operation that is
+modal from the client code's perspective.
+It is used inside the different implementations of <a
+ href="../reference/api/org/eclipse/jface/operation/IRunnableContext.html"><b>IRunnableContext</b></a>.&nbsp;
+If your plug-in needs to wait on the completion of a long-running
+operation before continuing
+execution, <b><a
+ href="../reference/api/org/eclipse/jface/operation/ModalContext.html">ModalContext</a></b>
+can be used to accomplish this while still keeping the user interface
+responsive.</p>
+<p>
+When you run an operation in a modal context, you can choose to fork
+the operation in a different thread. If
 <b>fork</b> is false, the operation will be run in the
 calling thread.&nbsp; If <b>fork</b> is true,&nbsp; the
-operation will be run in a new thread, the calling thread will be blocked, and
-the UI event loop will be run until the operation terminates.&nbsp;&nbsp;</P>
-<P >
-For more information on the UI event loop, see <a HREF="swt_threading.htm" CLASS="XRef"> Threading issues for clients</a>.</P>
-
-<p><a href="../notices.html"><img border="0" src="../cpy.gif" alt="Legal notices." border="0" width="324" height="14"></a></p>
-
-</BODY>
-</HTML>
+operation will be run in a new thread, the calling thread will be
+blocked, and
+the UI event loop will be run until the operation
+terminates.&nbsp;&nbsp;</p>
+<p>
+For more information on the UI event loop, see <a class="XRef"
+ href="swt_threading.htm"> Threading issues for clients</a>.<br>
+</p>
+<h3>IProgressService</h3>
+New in Eclipse 3.0 is support for long-running operations without
+having to worry about which runnable context to use run a long running
+operation. In addition the new IProgressService APIs provide progress
+dialogs that have details areas that allow the user to have control
+over background operations that may be blocking the given operation.
+See the <a href="workbench_jobs.htm">Workbench Concurrency Support</a>
+documentation.<br>
+<p><a href="../notices.html"><img height="14" width="324" border="0"
+ alt="Legal notices." src="../cpy.gif"></a></p>
+</body>
+</html>
