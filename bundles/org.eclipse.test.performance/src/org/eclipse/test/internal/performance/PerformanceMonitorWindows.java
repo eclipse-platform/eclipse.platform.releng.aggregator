@@ -29,7 +29,7 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 				if (org.eclipse.perfmsr.core.PerformanceMonitor.nativeGetPerformanceCounters(counters)) {
 					addScalar(scalars, Dimensions.WORKING_SET, counters[0]);
 					addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[1]);
-					//addScalar(scalars, Dimensions.ELAPSED_PROCESS, counters[2]);
+					addScalar(scalars, Dimensions.ELAPSED_PROCESS, counters[2]);
 					addScalar(scalars, Dimensions.USER_TIME, counters[3]);
 					addScalar(scalars, Dimensions.KERNEL_TIME, counters[4]);
 					addScalar(scalars, Dimensions.PAGE_FAULTS, counters[5]);
@@ -80,7 +80,7 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 					addScalar(scalars, Dimensions.PROCESS_COUNT, counters[11]); 
 					addScalar(scalars, Dimensions.THREAD_COUNT, counters[12]);
 				} catch (Exception e) {
-				    System.err.println("Warning: Nnative function GetPerformanceInfo() not available on this version of Windows"); //$NON-NLS-1$
+				    System.err.println("Warning: Native function GetPerformanceInfo() not available on this version of Windows"); //$NON-NLS-1$
 					fgNativeGetPerformanceInfoNotAvailable= true;
 				}
 			}

@@ -74,7 +74,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	    if (sample != null) {
 	        DB.store(sample);
 	        if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
-    				printSample(System.out, sample);
+	        	printSample(System.out, sample);
 	    }
 	}
 

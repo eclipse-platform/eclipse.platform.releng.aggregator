@@ -68,18 +68,28 @@ public class StatisticsSession {
 		
 		Statistics stats= new Statistics();
 		
-		for (int i= 0; i < fDataPoints.length - 1; i += 2) {
-			DataPoint before= fDataPoints[i];
-			Assert.assertTrue("order of datapoints makes no sense", before.getStep() == InternalPerformanceMeter.BEFORE); //$NON-NLS-1$
-			DataPoint after= fDataPoints[i + 1];
-			Assert.assertTrue("order of datapoints makes no sense", after.getStep() == InternalPerformanceMeter.AFTER); //$NON-NLS-1$
-			
-			Scalar delta= getDelta(before, after, dimension);
-			long magnitude= delta.getMagnitude();
+		if (fDataPoints.length == 1) {
+			// if there is only one DataPoint, we don't calculate the delta.
+			Scalar sc= fDataPoints[0].getScalar(dimension);
+			long magnitude= sc.getMagnitude();
 			stats.sum += magnitude;
 			stats.count++;
 			stats.average= stats.sum / stats.count;
 			stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
+		} else {
+			for (int i= 0; i < fDataPoints.length - 1; i += 2) {
+				DataPoint before= fDataPoints[i];
+				Assert.assertTrue("order of datapoints makes no sense", before.getStep() == InternalPerformanceMeter.BEFORE); //$NON-NLS-1$
+				DataPoint after= fDataPoints[i + 1];
+				Assert.assertTrue("order of datapoints makes no sense", after.getStep() == InternalPerformanceMeter.AFTER); //$NON-NLS-1$
+				
+				Scalar delta= getDelta(before, after, dimension);
+				long magnitude= delta.getMagnitude();
+				stats.sum += magnitude;
+				stats.count++;
+				stats.average= stats.sum / stats.count;
+				stats.stddev+= (stats.average - magnitude) * (stats.average - magnitude);
+			}
 		}
 		
 		stats.stddev= Math.sqrt(stats.stddev / stats.count - 1);

@@ -50,5 +50,5 @@ class PerformanceMonitor {
 	
     void addScalar(Map scalars, Dimension dimension, long value) {
         scalars.put(dimension, new Scalar(dimension, value));
-    }    
+    }
 }
