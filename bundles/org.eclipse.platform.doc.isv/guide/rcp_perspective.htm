@@ -14,7 +14,39 @@ Adding the perspective
 <H3>
 Adding the perspective</H3>
 <P>
-[This document is under construction.]  
+When a rich client application uses the <b><a href="../reference/api/org/eclipse/ui/application/WorkbenchAdvisor.html">WorkbenchAdvisor</a></b>
+as the primary means for customizing the workbench, it must supply a perspective that is shown in the workbench window.
+This perspective must be identified in the application's workbench advisor class.  The following is specified in the
+<b>BrowserAdvisor</b> class:
+<font color='#4444CC'><pre>
+	public String getInitialWindowPerspectiveId() {
+		return BrowserApp.PLUGIN_ID + ".browserPerspective"; 
+	}
+</pre></font> 
+The corresponding perspective is defined in the browser plug-in's manifest:
+<font color='#4444CC'><pre>
+   &lt;extension
+         point="org.eclipse.ui.perspectives"&gt;
+      &lt;perspective
+            name="%perspectives.browser.name"
+            class="<b>org.eclipse.ui.examples.rcp.browser.BrowserPerspectiveFactory</b>"
+            id="org.eclipse.ui.examples.rcp.browser.browserPerspective"
+            fixed="true"/&gt;
+   &lt;/extension&gt;
+</pre></font> 
+The <b>BrowserPerspectiveFactory</b> is responsible for laying out the views appropriately.
+<font color='#4444CC'><pre>
+	public void createInitialLayout(IPageLayout layout) {
+		layout.addView(BrowserApp.BROWSER_VIEW_ID, IPageLayout.RIGHT, .25f, IPageLayout.ID_EDITOR_AREA);
+		layout.addPlaceholder(BrowserApp.HISTORY_VIEW_ID, IPageLayout.LEFT, .3f, IPageLayout.ID_EDITOR_AREA); 
+		IViewLayout historyLayout = layout.getViewLayout(BrowserApp.HISTORY_VIEW_ID);
+		historyLayout.setCloseable(true);
+		historyLayout.setMoveable(true);
+		layout.setEditorAreaVisible(false);
+	}
+</pre></font>
+The browser perspective defines two views (one visible, with a placeholder for the other), and makes the
+editor area invisible.  For a complete discussion of perspectives and their corresponding layout, see <a href="workbench_perspectives.htm">Perspectives</a>.
 </p>
 
 <p><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></p>
