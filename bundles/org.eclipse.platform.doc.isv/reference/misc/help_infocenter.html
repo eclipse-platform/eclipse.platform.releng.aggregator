@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//w3c//dtd html 4.0 transitional//en">
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+      <meta name="Author" content="eclipse.org">
+      <title>
+         Infocenter
+      </title>
+  <link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   </head>
+<body>
+
+<h1>Installing the help system as an infocenter</h1>
+
+<p>You can allow your users to access the help system over the Internet or an 
+intranet, by installing the stand-alone help system and the documentation 
+plug-ins on a web server. The application accesses the documentation by calling 
+a URL, and the help system is shown in their web browser. The infocenter help 
+system can be used both for client applications and for web applications, either 
+of which can have their help accessed remotely. All features except infopops and 
+active help are supported. </p>
+<h2><b>Installation/packaging</b> </h2>
+These steps are for the help system 
+  integrator and web admin and are not meant to address all the possible scenarios. It is 
+  assumed that all your documentation is delivered as Eclipse plug-ins and, in general, you are 
+  familiar with the eclipse help system. For the end users, it is assumed that they have
+  IE5.x or 6.x or Mozilla installed on their machines.
+
+<ol>
+  <li>Make sure an application server is installed on the machine.&nbsp; We have 
+  tested with Tomcat 3 and Tomcat 4.</li>
+  <li>Download the Eclipse 2.0 Release level Platform Runtime Binary driver from
+  <a href="http://www.eclipse.org/downloads/">www.eclipse.org</a>.</li>
+  <li>Install (unzip) the driver to a directory <var>d:\eclipse</var>.
+  </li>
+  <li>Register the Eclipse Help application residing in 
+  d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0 with the web server. Do not copy 
+  this directory elsewhere; it must remain in Eclipse installation tree.<p>In 
+  Tomcat this registration can be accomplished by adding the following lines to 
+  the tomcat\conf\server.xml file:</p>
+  <pre><em><span style="font-style: normal">&lt;</span></em>Context path=&quot;/help&quot;&nbsp; docBase=&quot;d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0&quot;&gt;
+&lt;/Context&gt;</pre>
+  <p>In Tomcat 3 add the lines near end of the file, as the last element inside 
+  the ContextManager section.&nbsp; In Tomcat 4, add this section as the last element 
+  inside the Host section. </li>
+  <li>Install the following fixes, depending on which server you are using:
+  <ul>
+    <li><b>Tomcat 3:</b>&nbsp; Tomcat 3 does not have XML parser library available to 
+    a web application.&nbsp; To fix that, copy xercesImpl.jar and xmlParserAPIs.jar from 
+    d:\eclipse\plugins\org.apache.xerces_4.0.3\ to 
+    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\WEB-INF\lib\ </li>
+    
+    <li><b>Tomcat 4:</b>&nbsp;
+     	<ul><li> Both Eclipse and Tomcat contain code to set a 
+    URLStreamHandler, but it can only be set once.&nbsp; To allow both Tomcat and 
+    Eclipse to work correctly, a library 
+    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\infocenter\eclipseurl.jar needs 
+    to be added to the class path at Tomcat startup.&nbsp; In Tomcat 4.0.3 edit 
+    tomcat/bin/setclasspath.bat file and after the line:&nbsp;<pre><em><span style="font-style: normal">set CLASSPATH=%JAVA_HOME%\lib\tools.jar</span></em></pre>
+    <p>insert the line:</p>
+    <pre><em><span style="font-style: normal">set CLASSPATH=%CLASSPATH%;d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\infocenter\eclipseurl.jar.</span></em> </pre>
+    
+        </li>
+        <li>
+	 Because of changes to the xml library, remove tomcat\common\lib\xerces.jar, then edit setclasspath.bat by replacing the line
+		   <pre><em><span style="font-style: normal">set JAVA_OPTS=</span></em> </pre>
+            with 
+		   <pre><em><span style="font-style: normal">set JAVA_OPTS=-Xbootclasspath/a:d:\eclipse\plugins\org.apache.xerces_4.0.3\xercesImpl.jar;d:\eclipse\plugins\org.apaches.xerces_4.0.3\xmlParserAPIs.jar.</span></em> </pre>
+        </li>
+        </ul>
+    </li>
+    <li><b>Disable precompiled JSP's:</b>. Unless you are using Tomcat 4.0.x or 
+    plan to ship the jasper jar files, you should also copy 
+    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\infocenter\web.xml to
+    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\WEB-INF. </li>
+     </ul>
+  </li>
+</ol>
+<h2>Using the infocenter</h2>
+<p>Start the web server. Point a web browser to the path of the web 
+application.&nbsp; On the machine the Tomcat is installed, this would be 
+http://localhost:8080/help/. </p>
+<h2>Installing custom documentation</h2>
+<p>The Eclipse platform comes with its own documentation, contained in the 
+org.eclipse.platform.doc.user plug-in.&nbsp; It will be available in the 
+infocenter by default. To have you own documentation show up, package the 
+documentation as Eclipse documentation plug-ins.&nbsp; Install them to 
+d:\eclipse\plugins\.&nbsp; </p>
+
+<a href="hglegal.htm"><img SRC="ngibmcpy.gif" BORDER=0 height=12 width=250></a>
+
+
+</body>
+</html>
+
