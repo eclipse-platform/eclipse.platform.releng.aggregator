@@ -29,12 +29,25 @@ options are supported:</P>
 	from which infocenter is launched, is
 	not the same as Eclipse installation directory.</LI>
 	<LI><B>-host</B> <I>helpServerHost</I> - specifies host name of the
-	interface that help server will use. It overrides host name specified
+	interface that help server will use. It overrides host name specified in
 	the application server plugin preferences.</LI>
 
 	<LI><B>-port</B> <I>helpServerPort</I> - specifies port number that
-	help server will use. It overrides port number specified the
+	help server will use. It overrides port number specified in the
 	application server plugin preferences.</LI>
+
+  <li><b>-locales</b> <I>localeList</I> - specifies a list of locales that infocenter
+   will recognize and provide a customized content for.
+   If the option is not specified, infocenter will build navigation, and index documents
+   for each preferred locale of the browsers accessing the infocenter.
+   When the option is present, locales from browser requests will be matched with locales in the list.
+   If browser preferred locale does not exist in the list, but its language part does, it will be used.
+   Subsequently, additional browser locales in decreased order of preference will be matched against
+   the list.  If none of the browser locales (or its language part) matches any locale on the list,
+   the client will be served content in the default locale - server locale or locale passed with -nl option.
+   For example using options <pre>-nl en -locales de en es fr it ja ko pt_BR zh_CN zh_TW</pre>
+   will cause infocenter operating in 10 locales.  All other locales will receive content for en locale.</li>
+
 	<LI><B>-servertimeout</B> <I>timeout</I> - number of seconds waiting
 	to connect to the help server while executing commands,
 	such as shutdown.  Default is 40s.  You may need to
@@ -68,7 +81,7 @@ familiar with the eclipse help system.</P>
 <P>The org.eclipse.help.standalone.Infocenter class has a main method that you
 can use to launch infocenter from a command line. The command line
 arguments syntax is:</P>
-<PRE><EM><SPAN style="font-style: normal">-command start | shutdown | [-eclipsehome eclipseInstallPath] [-host helpServerHost] [-port helpServerPort] [-servertimeout timeout] [-noexec] [platform options] [-vmargs JavaVMarguments]</SPAN></EM></PRE>
+<PRE><EM><SPAN style="font-style: normal">-command start | shutdown | [-eclipsehome eclipseInstallPath] [-host helpServerHost] [-locales localeList] [-port helpServerPort] [-servertimeout timeout] [-noexec] [platform options] [-vmargs JavaVMarguments]</SPAN></EM></PRE>
 <P>To start an infocenter on port 8081 issue a start command by running</P>
 <PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.1.0\help.jar org.eclipse.help.standalone.Infocenter -command start -eclipsehome d:\myApp\eclipse -port 8081</PRE>
 <P>To shut the infocenter down issue a shutdown command by running</P>
