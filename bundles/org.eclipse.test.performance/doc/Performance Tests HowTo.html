@@ -86,13 +86,9 @@ public class MyPerformanceTestCase extends PeformanceTestCase {
 Notes:
 <ul>
 <li>
-<code>Performance</code> is currently just a factory for <code>PerformanceMeter</code>s.
-The scenario id passed to <code>createPerformanceMeter(...)</code> has
-to be unique in a single test run and should be the same across all test runs.
-</li>
-
-<li>
-The <code>Peformance#getDefaultScenarioId(...)</code> methods are provided for convenice.
+The scenario id passed to <code>createPerformanceMeter(...)</code> must be unique in a single test run
+and must be the same for each build. This enables comparisons between builds.
+The <code>Peformance#getDefaultScenarioId(...)</code> methods are provided for convenience.
 </li>
 
 <li>
@@ -102,11 +98,20 @@ to <code>commit()</code> is required before evaluation with <code>assertPerforma
 and <code>dispose()</code> is required before releasing the meter.
 </li>
 
-<li>The number of runs usually needs some tuning, such that the last runs
-are stable. In general the first runs will take more time because the
-code is not optimized by the JIT compiler yet. This deserves extra
-caution when other code is run before the measurements (e.g., if tests
-are added, removed, reordered).
+<li>The first iterations of the above <code>for</code>-loop will generally take more time because the
+code is not optimized by the JIT compiler yet. This can introduce some variance to the
+measurements, especially if other tests run before and change in some way that affects
+the JIT's optimization of the measured code. A simple way to stabilize the measurements
+is to run the code a few times before the measurements start. Caches also need special
+caution as they can affect the measurements.
+</li>
+
+<li>
+As a rule of thumb the measured code should take at least 100ms on the target machine in
+order for the measurements to be relevant. For example, Windows' and Linux 2.4's system time increases
+in 10ms steps. In some cases the measured code can be invoked repeatedly to accumulate the
+elapsed time, however, it should be kept in mind that JIT could optimize this more aggressively
+than in real-world scenarios.
 </li>
 </ul>
 
@@ -176,7 +181,9 @@ database (see below).
 
 If the <code>test.xml</code> of your test plug-in already exists
 and looks similar to the <code>jdt.text.tests</code>' one, add targets
-similar to:
+similar to those shown below. The <code>performance</code> target is
+the entry point for performance testing like the <code>run</code> target
+is for correctness testing.
 <pre>
 &lt;!-- This target defines the performance tests that need to be run. --&gt;
 &lt;target name="performance-suite"&gt;
@@ -222,7 +229,7 @@ it in the build (add it to the "build.properties" file).
       <li>you need <a
  href="http://www.info-zip.org/pub/infozip/UnZip.html">Info-ZIP UnZip</a>
 version 5.41 or later (<a
- href="ftp://sunsite.cnlab-switch.ch/mirror/infozip/WIN32/unz551xN.exe">WinNT</a>)
+ href="ftp://sunsite.cnlab-switch.ch/mirror/infozip/WIN32/unz551xN.exe">Windows</a>)
 installed and added to the path</li>
     </ul>
   </li>
@@ -346,7 +353,7 @@ Cloudscape runs in embedded mode (not as a separate server)
 and the DB will live in your home directory.
 <p>
 If an absolute or relative path is given, Cloudscape uses or creates
-the DB in that location. E.g. with
+the DB in that location. E.g. with (Linux and MacOS X)
 <pre>
 	-Declipse.perf.dbloc=/tmp/cloudscape
 </pre>
