@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.runtime.Platform;
 
 import junit.framework.TestCase;
@@ -569,7 +568,7 @@ public class BuildTests extends TestCase {
 		private String locateEclipseZip() {
 
 			// String to use when running as an automated test.			
-			String installDir = BootLoader.getInstallURL().getPath()+ File.separator  + ".." + File.separator + "..";
+			String installDir = Platform.getInstallLocation().getURL().getPath()+ ".." + File.separator + "..";
 			
 			// String to use when running in Eclipse
 			// String installDir = BootLoader.getInstallURL().getPath() + "..";
@@ -669,10 +668,10 @@ public class BuildTests extends TestCase {
 		 */
 		private String getExcludeErrors() {
 			
-			String os = BootLoader.getOS();
+			String os = Platform.getOS();
 			String fileName;
 			
-			if (os.equals(BootLoader.OS_WIN32)) {
+			if (os.equals("win32")) {
 				fileName = "ignoreErrorsWindows.txt";
 			} else {
 				fileName = "ignoreErrorsUnix.txt";
@@ -758,8 +757,8 @@ public class BuildTests extends TestCase {
 	protected void setUp() throws Exception {
 		
 		// Autoamted Test
-		logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";  // A tad bogus but this is where the build wants to copy the results from!
-		sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
+		logFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";  // A tad bogus but this is where the build wants to copy the results from!
+		sourceDirectoryName = Platform.getInstallLocation().getURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
 
 		// Runtime Workbench - TODI Put me back to Automated status
 //		logFileName = "d:\\results";
@@ -775,7 +774,7 @@ public class BuildTests extends TestCase {
 
 	public void testFeatureFiles() {
 		List result = new ArrayList();
-		String installDir = BootLoader.getInstallURL().getPath();
+		String installDir = Platform.getInstallLocation().getURL().getPath();
 		File featureDir = new File(installDir, "features");
 		File[] features = featureDir.listFiles();
 		for (int i = 0; i < features.length; i++) {
@@ -817,7 +816,7 @@ public class BuildTests extends TestCase {
 	
 	public void testPluginFiles() {
 		List result = new ArrayList();
-		String installDir = BootLoader.getInstallURL().getPath();
+		String installDir = Platform.getInstallLocation().getURL().getPath();
 		File pluginDir = new File(installDir, "plugins");
 		File[] plugins = pluginDir.listFiles();
 		for (int i = 0; i < plugins.length; i++) {
