@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
@@ -129,7 +130,11 @@ public class ReleaseWizard extends Wizard {
 					operation.run(new SubProgressMonitor(monitor, 90));
 					try {						
 						if(tagPage.isValidateButtonSelected()){
-							validateRelease(new SubProgressMonitor(monitor, 10));
+							try {
+								validateRelease(new SubProgressMonitor(monitor, 10));
+							} catch (TeamException e) {
+								throw new InvocationTargetException(e);
+							}
 						}
 					} finally {
 						monitor.done();
@@ -260,8 +265,8 @@ public class ReleaseWizard extends Wizard {
 	}
 	
 	//This method is called if validate button in TagPage is checked
-	private void validateRelease(IProgressMonitor  monitor){
-		ProjectValidationDialog.validateRelease(selectedProjects, mapProject.getTagsFor(selectedProjects), monitor);
+	private void validateRelease(IProgressMonitor  monitor) throws TeamException{
+		ProjectValidationDialog.validateRelease(getShell(), selectedProjects, mapProject.getTagsFor(selectedProjects), monitor);
 	}
 
 

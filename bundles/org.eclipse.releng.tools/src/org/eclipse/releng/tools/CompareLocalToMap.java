@@ -70,7 +70,7 @@ public class CompareLocalToMap extends WorkspaceAction {
 		// Create the synchronize view participant
 		CVSCompareSubscriber s = new CVSCompareSubscriber(resources, tags, "RelEng Map"); //$NON-NLS-1$
 		CompareParticipant participant = new CompareParticipant(s);
-		participant.refresh(resources, "Refreshing", null);
+		participant.refresh(resources, "Refreshing", getTargetPart().getSite());
 	}
 	private MapProject getMapProject(){
 		return MapProject.getDefaultMapProject();
