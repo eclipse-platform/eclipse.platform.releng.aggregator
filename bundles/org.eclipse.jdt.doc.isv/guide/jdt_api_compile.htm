@@ -1,51 +1,59 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><html><head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<meta http-equiv="Content-Style-Type" content="text/css">
-
-<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"><title>Compiling Java code</title>
-
-
-<link rel="stylesheet" type="text/css" href="../book.css"></head>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+     
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+     
+  <meta http-equiv="Content-Style-Type" content="text/css">
+      
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Compiling Java code</title>
+          
+  <link rel="stylesheet" type="text/css" href="../book.css">
+</head>
 <body bgcolor="#ffffff">
-<h2>
-Compiling Java code</h2>
-<p> The JDT plug-ins include an incremental and batch Java compiler for
-building Java .class files from source code. There is no direct API provided
-by the compiler. It is installed as a builder on Java projects.
-Compilation is triggered using standard platform build mechanisms.</p>
-<p>
-The platform build mechanism is described in detail in <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_builders.htm" class="XRef">resource builders</a>.</p>
-
-<h3>
-Compiling code</h3>
-<p>
-You can programmatically compile the Java source files in a project using the build API.</p>
-<font color="#4444cc"><pre>   IProgressMonitor myProgressMonitor;<br>   myProject.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, myProgressMonitor);<br></pre></font>
+<h2> Compiling Java code</h2>
+<p> The JDT plug-ins include an incremental and batch Java compiler for building 
+Java .class files from source code. There is no direct API provided by the 
+compiler. It is installed as a builder on Java projects. Compilation is triggered 
+using standard platform build mechanisms.</p>
+<p> The platform build mechanism is described in detail in <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_builders.htm" class="XRef">
+ resource builders</a>
+ .</p>
+<h3> Compiling code</h3>
+<p> You can programmatically compile the Java source files in a project using 
+the build API.</p>
+<font color="#4444cc">
+<pre>   IProgressMonitor myProgressMonitor;<br>   myProject.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, myProgressMonitor);<br></pre>
+</font>
 <p> For a Java project, this invokes the Java incremental project builder
-(along with any other incremental project builders that have been added to
-the project's build spec). The generated .class files are written to the
-designated output folder. In the case of a full batch build, all the .class
-files in the output folder are 'scrubbed' to ensure that no stale files are
-found. Make sure that you place all your .class files, for which you do not
-have corresponding source files, in separate class file folders on the classpath
-instead of the output folder.</p>
-<p> Additional resource files are also copied to the output folder. You
-can control which resource files are copied using the resource filter.
-For example, to filter files ending with '.ignore' and folders named 'META-INF', use:
-<font color='#4444CC'><pre>   Hashtable options = JavaCore.getOptions();<br>   options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, "*.ignore,META-INF/");<br>   JavaCore.setOptions(options);<br></pre></font> 
-<p>
-Filenames are filtered if they match one of the supplied patterns. Entire folders are
-filtered if their name matches one of the supplied folder names which end in a path separator.</p>
+ (along with any other incremental project builders that have been added
+to  the project's build spec). The generated .class files are written to
+the designated output folder. In the case of a full batch build, all the
+.class files in the output folder are 'scrubbed' to ensure that no stale
+files are found. Make sure that you place all your .class files, for which
+you do not have corresponding source files, in separate class file folders
+on the classpath  instead of the output folder.</p>
+<p> Additional resource files are also copied to the output folder. You can 
+control which resource files are copied using the resource filter. For example, 
+to filter files ending with '.ignore' and folders named 'META-INF', use:
+<font color="#4444cc">
+<pre>   Hashtable options = JavaCore.getOptions();<br>   options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, "*.ignore,META-INF/");<br>   JavaCore.setOptions(options);<br></pre>
+</font></p>
+<p> Filenames are filtered if they match one of the supplied patterns. Entire 
+folders are filtered if their name matches one of the supplied folder names 
+which end in a path separator.</p>
 <p> The incremental and batch builders can also be configured to only generate
-a single error when the .classpath file has errors. This option is set by
-default and eliminates numerous errors, all usually caused by a missing jar
-file. See the CORE_JAVA_BUILD_INVALID_CLASSPATH option of <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">JavaCore</a></b>. </p>
-
+ a single error when the .classpath file has errors. This option is set by
+ default and eliminates numerous errors, all usually caused by a missing
+jar  file. See the CORE_JAVA_BUILD_INVALID_CLASSPATH option of <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">
+ JavaCore</a>
+</b>. </p>
 <h3>Using the ant javac adapter</h3>
-The Eclipse compiler can be used inside an Ant script using the javac adapter. In order to use the Eclipse compiler, you
-simply need to define the <b>build.compiler</b> property in your script. Here is a small example.
-<font color="#4444cc"><pre>
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;project name="compile" default="main" basedir="../."&gt;<br><br>	<b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
+  The Eclipse compiler can be used inside an Ant script using the javac adapter. 
+In order to use the Eclipse compiler, you simply need to define the <b>build.compiler</b>
+  property in your script. Here is a small example. <font color="#4444cc">
+<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;project name="compile" default="main" basedir="../."&gt;<br><br>	<b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
 
 	&lt;property name="root" value="${basedir}/src"/&gt;
 
@@ -59,37 +67,47 @@ simply need to define the <b>build.compiler</b> property in your script. Here is
 		&lt;/javac&gt;		
 	&lt;/target&gt;
 &lt;/project&gt;
-</pre></font>
-The syntax used for the javac Ant task can be found in the <a href="http://jakarta.apache.org/ant/manual/CoreTasks/javac.html">Ant javac task documentation</a>. The current adapter supports
-the Javac Ant task 1.4.1. A 1.5 version will be available when Ant 1.5 is released.
-<h3>
-Problem determination</h3>
-<p>
-JDT Core defines a specialized marker (marker type "<b>org.eclipse.jdt.core.problem</b>
-") to denote compilation problems. To programmatically discover problems
-detected by the compiler, the standard platform marker protocol should be
-used. See <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_markers.htm" class="XRef">resource
-markers</a> for an overview of using markers.</p>
-<p>
-The following snippet finds all Java problem markers in a compilation unit.</p>
-
-<font color="#4444cc"><pre>   public IMarker[] findJavaProblemMarkers(ICompilationUnit cu) <br>      throws CoreException {<br>      IResource javaSourceFile = cu.getUnderlyingResource();<br>      IMarker[] markers = <br>         javaSourceFile.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,<br>            true, IResource.DEPTH_INFINITE);<br>   }<br></pre></font>
-<p> Java problem markers are maintained by the Java project
-builder and are removed automatically as problems are resolved and the Java
-source is recompiled.</p>
-
-<p>The problem id value is set by one of the constants in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">IProblem</a></b>. The problem's id is reliable,
-but the message is localized and therefore can changed according to the default locale. The contants defined in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">IProblem</a></b>
-are self-descriptive.
+</pre>
+</font> The syntax used for the javac Ant task can be found in the <a href="http://jakarta.apache.org/ant/manual/CoreTasks/javac.html">
+ Ant javac task documentation</a>
+ . The current adapter supports the Javac Ant task 1.4.1. A 1.5 version will 
+be available when Ant 1.5 is released.  
+<h3> Problem determination</h3>
+<p> JDT Core defines a specialized marker (marker type "<b>org.eclipse.jdt.core.problem</b>
+  ") to denote compilation problems. To programmatically discover problems
+ detected by the compiler, the standard platform marker protocol should be
+ used. See <a href="../../org.eclipse.platform.doc.isv/guide/resAdv_markers.htm" class="XRef">
+ resource markers</a>
+  for an overview of using markers.</p>
+<p> The following snippet finds all Java problem markers in a compilation 
+unit.</p>
+<font color="#4444cc">
+<pre>   public IMarker[] findJavaProblemMarkers(ICompilationUnit cu) <br>      throws CoreException {<br>      IResource javaSourceFile = cu.getUnderlyingResource();<br>      IMarker[] markers = <br>         javaSourceFile.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER,<br>            true, IResource.DEPTH_INFINITE);<br>   }<br></pre>
+</font>
+<p> Java problem markers are maintained by the Java project builder and are 
+removed automatically as problems are resolved and the Java source is recompiled.</p>
+<p>The problem id value is set by one of the constants in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">
+ IProblem</a>
+</b>. The problem's id is reliable, but the message is localized and therefore 
+can changed according to the default locale. The contants defined in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">
+ IProblem</a>
+</b> are self-descriptive. </p>
+<p>An implementation of <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">
+ IProblemRequestor</a>
+</b> should be defined to collect the problems discovered during a Java operation. 
+  Working copies can be reconciled with problem detection if a <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">
+ IProblemRequestor</a>
+</b> has been supplied for the working copy creation. To achieve this, you 
+can use the method <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile%28boolean,%20org.eclipse.core.runtime.IProgressMonitor%29">
+ reconcile(boolean forceProblemDetection, IProgressMonitor monitor)</a>
+</b>. Here is an example: <font color="#4444cc">
+<pre>   unit.getBuffer().setContents("public class X extends Zork {}");<br>   IProblemRequestor problemRequestor = new IProblemRequestor() {<br>      public void acceptProblem(IProblem problem) {}<br>      public void beginReporting() {}<br>      public void endReporting() {}<br>      public boolean isActive() {return true;}<br>   };<br>   IJavaElement workingCopy = unit.getWorkingCopy(null, null, problemRequestor);<br>   ((IWorkingCopy)workingCopy).reconcile(true, null);<br></pre>
+</font> You can add an action on the reported problems in the acceptProblem(IProblem) 
+method. In this example, the reported problem will be that <b>Zork cannot 
+be resolved or is not a valid superclass</b> and its id is <b>IProblem.SuperclassNotFound</b>
+ . </p>
+<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif">
+</a>
 </p>
-<p>An implementation of <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> should be defined to collect the problems discovered during a Java operation. 
- Working copies can be reconciled with problem detection if a <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> has been supplied for the
-working copy creation. To achieve this, you can use the method <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean,%20org.eclipse.core.runtime.IProgressMonitor)">reconcile(boolean forceProblemDetection, IProgressMonitor monitor)</a></b>.
-Here is an example:
-<font color="#4444cc"><pre>   unit.getBuffer().setContents("public class X extends Zork {}");<br>   IProblemRequestor problemRequestor = new IProblemRequestor() {<br>      public void acceptProblem(IProblem problem) {}<br>      public void beginReporting() {}<br>      public void endReporting() {}<br>      public boolean isActive() {return true;}<br>   };<br>   IJavaElement workingCopy = unit.getWorkingCopy(null, null, problemRequestor);<br>   ((IWorkingCopy)workingCopy).reconcile(true, null);<br></pre></font>
-You can add an action on the reported problems in the acceptProblem(IProblem) method. In this example, the reported problem will be
-that <b>Zork cannot be resolved or is not a valid superclass</b> and its id is <b>IProblem.SuperclassNotFound</b>.
-<p>
-<a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
-
-</body></html>
+</body>
+</html>
