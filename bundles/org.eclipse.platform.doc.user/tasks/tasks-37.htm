@@ -1,0 +1,161 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Eclipse update policy control</title>
+</HEAD>
+
+<BODY BGCOLOR="#ffffff">
+
+<h1>Eclipse Update Policy Control</h1>
+<p>This document describes the Eclipse Update capability that allows large 
+shops with many seats of Eclipse-based products to exert control over how these 
+products are updated. </p>
+
+<p>Eclipse Update allows users to search for updates to the currently installed 
+features. For each installed feature, Update uses the embedded URL to 
+connect to the remote server and search for new versions. If there are updates, 
+Eclipse allows users to initiate the install procedure. After downloading, 
+installing and restarting the platform, new feature version is ready for use.</p>
+<p>In companies with many users of the same Eclipse-based product (typically a 
+commercial one), several problems can arise from this model:</p>
+<ol>
+  <li>Updates for very large products (e.g. 500+ plug-ins) are also large. 
+  I/T support teams may not like the idea of hundreds of developers individually 
+  downloading 500MEG updates to their individual machines. In addition to the 
+  bandwidth hit, such a large download request may fail, leading to repeated 
+  attempts and increased developers' downtime.</li>
+  <li>Some companies explicitly don't want the developers downloading updates 
+  directly from the Internet. For example, they can set up a local support team 
+  that may not be ready to handle requests related to the version of the product
+    already available from the provider's update site. They may want to restrict updates and 
+  fixes to the internally approved list. Ideally, they would do that by setting 
+  up 'proxy' update sites on the LAN (behind the firewall).</li>
+  <li>Once updates are set in the proxy sites as above, administrators need a 
+  way of letting users know that updates are available.</li>
+</ol>
+<h2>2. Update policy to the rescue</h2>
+
+<h3>2.1 Support for creating local (proxy) update sites</h3>
+<p>First step for a product administrator would be to set up a local Eclipse 
+update site on a server connected to the company's LAN (behind the firewall). 
+The update site would be a subset of the product's update site on the Internet 
+because it would contain only features and plug-ins related to the updates that 
+the company wants applied at the moment. Technically, this site would be a 
+regular Eclipse update site with site.xml, feature and plug-in archives.</p>
+<p>Administrators would construct this site in two ways:</p>
+<ol>
+  <li>Product support teams would make a zip file of the update site readily 
+  available for this particular purpose. Administrators would simply need to 
+  download the zip file from the product support web page using the tool of 
+  their choice and unzip it in the local server. This approach is useful for 
+  very large zip files that require modern restartable downloading managers 
+  (those that can pick up where they left off in case of the connection 
+  problems).</li>
+  <li>Eclipse Update provides a tool to mirror remote update sites 
+  entirely or allow administrators to select updates and fixes to download.
+  This mirroring capability would be fully automated and would greatly simplify administrator's task 
+  but it relies on Update network connection support.</li>
+</ol>
+<h3>2.2 Common update policy control</h3>
+<p>Since features have the update site URL embedded in the manifest, they are unaware of the local 
+update sites set up by the administrators. It is therefore important to provide <b>
+redirection capability</b>. This and other update policy settings can be set for
+an Eclipse product by creating an update policy file and configuring Update to 
+use that file when searching.</p>
+<p>The file in question uses XML format and can have any name. The file can be set in <b>
+Preferences&gt;Install/Update</b><font color="#0000FF"> </font>in the <b>Update
+Policy</b> field. The text field 
+is empty by default: users may set the URL of the update policy file. The file 
+is managed by the local administrator and is shared for all the product 
+installations. Sharing can be achieved in two ways:</p>
+<ul>
+  <li>If users install the product: users are told to open the preference page 
+  and enter the provided URL</li>
+  <li>If administrators install the product: administrators edit the file 'plugin_customization.ini' 
+  in the primary product feature and set the default value of the 'updatePolicyFile' 
+  property as follows:<br>
+  <br>
+&nbsp;&nbsp;&nbsp; <code>org.eclipse.update.core/updatePolicyFile = &lt;URL value&gt;<br>
+  </code><font color="#0000FF"></font><br>
+  <br>
+  This will cause all the installations to have this file set by default.</li>
+</ul>
+<p>The policy file must conform to the following DTD:</p>
+<blockquote>
+  <p><tt>&lt;?xml encoding=&quot;ISO-8859-1&quot;?&gt;</tt>
+  <p><tt>&lt;!ELEMENT update-policy (url-map)*&gt;</tt><br>
+  <tt>&lt;!ATTLIST update-policy</tt><br>
+  <tt>&gt;</tt></p>
+  <p><tt>&lt;!ELEMENT url-map EMPTY&gt;<br>
+  &lt;!ATTLIST url-map<br>
+  &nbsp;&nbsp;&nbsp; pattern&nbsp;&nbsp;&nbsp; CDATA #REQUIRED<br>
+  &nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA
+  #REQUIRED<br>
+  &gt;</tt></p>
+</blockquote>
+<h4>url-map</h4>
+<ul>
+  <li><b>pattern</b> - a string that represents prefix of a feature ID (up to
+    and including a complete ID). A value of "*" matches all the features.</li>
+  <li><b>url</b> - a URL of the alternative update site that should be used if
+    the feature ID begins with the pattern. If the string is emtpy, features matching 
+    pattern will not be updateable.</li>
+</ul>
+<p>This element is used to override Update URLs embedded in feature manifests. When
+looking for new updates, Eclipse search will check the update policy (if 
+present) and check if <b>url-map</b> for the matching feature prefix is 
+specified. If a match is found, the mapped URL will be used <b> instead</b> of the 
+embedded one. This way, administrators can configure Eclipse products to search 
+for updates in the local server behind the firewall. Meanwhile, third-party
+features installed by Eclipse Update will continue to be updated using the
+default mechanism because they will not find matches in the policy.</p>
+<p>Several <b>url-map</b> elements may exist in the file. Feature prefixes can be 
+chosen to be less or more specific. For example, to redirect all Eclipse 
+updates, the pattern attribute would be <code>&quot;org.eclipse&quot;</code>. Similarly, it is 
+possible to use a complete feature ID as a pattern if redirection is required on 
+a per-feature basis.</p>
+<p>Patterns in the file may be chosen to progressively narrow the potential
+matches. This may result in multiple matches for a given feature. In this case,
+the <b>match with a longest pattern</b> will be used. For
+example:</p>
+<blockquote>
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;update-policy&gt;
+	&lt;url-map pattern=&quot;org.eclipse&quot; url=&quot;URL1&quot;/&gt;
+	&lt;url-map pattern=&quot;org.eclipse.jdt&quot; url=&quot;URL2&quot;/&gt;
+&lt;/update-policy&gt;</pre>
+</blockquote>
+<p>In the case above, all Eclipse features will be updated from URL1, except <code>org.eclipse.jdt</code> that will use URL2.</p>
+<p>Update policy files do not contain translatable strings and therefore do not
+require special NL handling. In general, the files should use UTF-8 encoding.</p>
+<h3>2.3 Automatic discovery of updates</h3>
+<p>The third part of the overall solution is covered by another topic but is mentioned here because it is an integral part 
+of the solution. Automatic updates will allow Eclipse to run update search on a 
+specified schedule (on each startup (the default), once a day, once a week 
+etc.). </p>
+<h2>3. Summary </h2>
+<p>Here is the complete sequence of steps that comprise the solution:</p>
+<ol>
+  <li>Administrator allocates a server on the company LAN for hosting local 
+  product updates. Initially it contains no update sites. The machine must have
+    an HTTP server running.</li>
+  <li>Administrator sets up an update policy file on that server and instructs 
+  all users to set the update policy preference the provided URL.</li>
+  <li>As the product provider ships updates and fixes on their update sites,
+    administrator downloads supported updates onto the local server.</li>
+  <li>Automatic update executed at the scheduled frequency when the client's
+    product is up picks up the local 
+  updates and notifies the user</li>
+  <li>User chooses to install the discovered updates</li>
+</ol>
+
+
+<p>&nbsp;<br>
+<a href="../hglegal2003.htm"><img src="../images/ngibmcpy2003.gif" alt="Copyright IBM Corporation and others 2000, 2003" border="0" width="324" height="14"></a>
+</p></title>
+
+</BODY>
+</HTML>
