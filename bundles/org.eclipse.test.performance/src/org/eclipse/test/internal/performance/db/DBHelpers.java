@@ -10,15 +10,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.Set;
-
-import org.eclipse.test.internal.performance.InternalDimensions;
-import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
-import org.eclipse.test.performance.PerformanceMeter;
 
 
 public class DBHelpers {
@@ -55,8 +48,8 @@ public class DBHelpers {
 		//db.dumpSummaries("relengbuildwin2", "N200410192000", "org.eclipse.jdt.text.%");
 		
 		//db.count(ps);
-		//db.countAllDimensions(ps);
-		//db.removeDimension(InternalDimensions.BYTES_WRITTEN);
+		db.countAllDimensions(ps);
+		//db.removeDimension(InternalDimensions.SYSTEM_TIME);
 		
 		//db.countSamples(ps, new Variations("relengbuildwin2", "3.0.0_200410130800"));
 		//db.countDatapoints(ps, new Variations("relengbuildwin2", "3.0.0_200410130800"));
@@ -100,8 +93,8 @@ public class DBHelpers {
     
     void dumpSummaries(String config, String build, String scenarioPattern) {
         Variations variations= new Variations();
-        variations.put("config", config);
-        variations.put("build", build);
+        variations.put(PerformanceTestPlugin.CONFIG, config);
+        variations.put(PerformanceTestPlugin.BUILD, build);
         SummaryEntry[] summries= DB.querySummaries(variations, scenarioPattern);
         for (int i= 0; i < summries.length; i++) {
             SummaryEntry entry= summries[i];
@@ -113,21 +106,21 @@ public class DBHelpers {
         PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SCALAR where DATAPOINT_ID not in (select DATAPOINT.ID from DATAPOINT)"); //$NON-NLS-1$
         ResultSet set= stmt.executeQuery();
         if (set.next())
-            ps.println("count: " + set.getInt(1));
+            ps.println("count: " + set.getInt(1)); //$NON-NLS-1$
         set.close();
         stmt.close();
     }
 
     void countDimension(PrintStream ps, Dim dim) throws SQLException {
-        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SCALAR where DIM_ID = ?");
+        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SCALAR where DIM_ID = ?"); //$NON-NLS-1$
         stmt.setInt(1, dim.getId());
         ResultSet set= stmt.executeQuery();
         if (set.next())
-            ps.println("dimension " + dim + ": " + set.getInt(1));
+            ps.println("dimension " + dim + ": " + set.getInt(1)); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     void countAllDimensions(PrintStream ps) throws SQLException {
-        PreparedStatement stmt= fConnection.prepareStatement("select distinct DIM_ID from SCALAR");
+        PreparedStatement stmt= fConnection.prepareStatement("select distinct DIM_ID from SCALAR"); //$NON-NLS-1$
         ResultSet set= stmt.executeQuery();
         while (set.next()) {
             Dim dimension= Dim.getDimension(set.getInt(1));
@@ -137,57 +130,57 @@ public class DBHelpers {
     }
 
     void countSamples(PrintStream ps, Variations v) throws SQLException {
-        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID");
+        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID"); //$NON-NLS-1$
         stmt.setString(1, v.toExactMatchString());
         ResultSet set= stmt.executeQuery();
         if (set.next())
-            ps.println("samples with variation " + v + ": " + set.getInt(1));
+            ps.println("samples with variation " + v + ": " + set.getInt(1)); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     void countDatapoints(PrintStream ps, Variations v) throws SQLException {
-        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from DATAPOINT, SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID and DATAPOINT.SAMPLE_ID= SAMPLE.ID");
+        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from DATAPOINT, SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID and DATAPOINT.SAMPLE_ID= SAMPLE.ID"); //$NON-NLS-1$
         stmt.setString(1, v.toExactMatchString());
         ResultSet set= stmt.executeQuery();
         if (set.next())
-            ps.println("datapoints with variation " + v + ": " + set.getInt(1));
+            ps.println("datapoints with variation " + v + ": " + set.getInt(1)); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     void countScalars(PrintStream ps, Variations v) throws SQLException {
-        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SCALAR, DATAPOINT, SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID and DATAPOINT.SAMPLE_ID= SAMPLE.ID and DATAPOINT.ID = SCALAR.DATAPOINT_ID");
+        PreparedStatement stmt= fConnection.prepareStatement("select count(*) from SCALAR, DATAPOINT, SAMPLE, VARIATION where VARIATION.KEYVALPAIRS = ? and SAMPLE.VARIATION_ID = VARIATION.ID and DATAPOINT.SAMPLE_ID= SAMPLE.ID and DATAPOINT.ID = SCALAR.DATAPOINT_ID"); //$NON-NLS-1$
         stmt.setString(1, v.toExactMatchString());
         ResultSet set= stmt.executeQuery();
         if (set.next())
-            ps.println("scalars with variation " + v + ": " + set.getInt(1));
+            ps.println("scalars with variation " + v + ": " + set.getInt(1)); //$NON-NLS-1$ //$NON-NLS-2$
     }
     
-    private void removeSamples(PrintStream ps, Variations v) throws SQLException {
+    void removeSamples(PrintStream ps, Variations v) throws SQLException {
         
         int sample_cnt= 0, dp_cnt= 0, scenario_cnt= 0;
         boolean delete= true;
         
-        ps.println("removing:");
+        ps.println("removing:"); //$NON-NLS-1$
         
         int variation_id= 0;
-        PreparedStatement stmt= fConnection.prepareStatement("select ID from VARIATION where KEYVALPAIRS = ?");
+        PreparedStatement stmt= fConnection.prepareStatement("select ID from VARIATION where KEYVALPAIRS = ?"); //$NON-NLS-1$
         stmt.setString(1, v.toExactMatchString());
         ResultSet set= stmt.executeQuery();
         if (set.next()) {
             variation_id= set.getInt(1);
-            System.err.println("variation_id: " + variation_id);
+            System.err.println("variation_id: " + variation_id); //$NON-NLS-1$
         }
         
         if (variation_id <= 0) {
-            System.err.println("nothing found for variation " + v);
+            System.err.println("nothing found for variation " + v); //$NON-NLS-1$
         	return;
     	}
 
         PreparedStatement iterSamples= fConnection.prepareStatement("select SAMPLE.ID, SAMPLE.SCENARIO_ID from SAMPLE where SAMPLE.VARIATION_ID = ?"); //$NON-NLS-1$
-        PreparedStatement iterDatapoints= fConnection.prepareStatement("select DATAPOINT.ID from DATAPOINT where DATAPOINT.SAMPLE_ID = ?");
+        PreparedStatement iterDatapoints= fConnection.prepareStatement("select DATAPOINT.ID from DATAPOINT where DATAPOINT.SAMPLE_ID = ?"); //$NON-NLS-1$
         
-        PreparedStatement deleteScalars= fConnection.prepareStatement("delete from SCALAR where DATAPOINT_ID = ?");
-        PreparedStatement deleteDatapoints= fConnection.prepareStatement("delete from DATAPOINT where SAMPLE_ID = ?");
-        PreparedStatement deleteSamples= fConnection.prepareStatement("delete from SAMPLE where SAMPLE.ID = ?");
-        PreparedStatement deleteScenario= fConnection.prepareStatement("delete from SCENARIO where SCENARIO.ID = ?");
+        PreparedStatement deleteScalars= fConnection.prepareStatement("delete from SCALAR where DATAPOINT_ID = ?"); //$NON-NLS-1$
+        PreparedStatement deleteDatapoints= fConnection.prepareStatement("delete from DATAPOINT where SAMPLE_ID = ?"); //$NON-NLS-1$
+        PreparedStatement deleteSamples= fConnection.prepareStatement("delete from SAMPLE where SAMPLE.ID = ?"); //$NON-NLS-1$
+        PreparedStatement deleteScenario= fConnection.prepareStatement("delete from SCENARIO where SCENARIO.ID = ?"); //$NON-NLS-1$
         
         ResultSet samples= null, datapoints= null, configs= null;
         iterSamples.setInt(1, variation_id);
@@ -195,13 +188,13 @@ public class DBHelpers {
         while (samples.next()) {
             int sample_id= samples.getInt(1);
             int scenario_id= samples.getInt(2);
-            ps.println(" sample: " + sample_id);
+            ps.println(" sample: " + sample_id); //$NON-NLS-1$
             iterDatapoints.setInt(1, sample_id);
 	        datapoints= iterDatapoints.executeQuery();
 	        int dps= 0;
 	        while (datapoints.next()) {
 	            int dp_id= datapoints.getInt(1);
-	            ps.println("  dp: " + dp_id);
+	            ps.println("  dp: " + dp_id); //$NON-NLS-1$
 	            if (delete) {
 	                deleteScalars.setInt(1, dp_id);
 	                try {
@@ -210,7 +203,7 @@ public class DBHelpers {
     		            dp_cnt++;
     		            dps++;
                     } catch (SQLException e) {
-                        System.err.println("removing scalars: " + e);
+                        System.err.println("removing scalars: " + e); //$NON-NLS-1$
                     }
 	            }
 	        }
@@ -220,7 +213,7 @@ public class DBHelpers {
                     deleteDatapoints.executeUpdate();
                     fConnection.commit();
                 } catch (SQLException e1) {
-                    System.err.println("removing datapoints: " + e1);
+                    System.err.println("removing datapoints: " + e1); //$NON-NLS-1$
                 }
 	            
 	            deleteSamples.setInt(1, sample_id);
@@ -229,7 +222,7 @@ public class DBHelpers {
                     fConnection.commit();
                     sample_cnt++;
                 } catch (SQLException e) {
-                    System.err.println("removing sample: " + e);
+                    System.err.println("removing sample: " + e); //$NON-NLS-1$
                 }
                 
                 deleteScenario.setInt(1, scenario_id);
@@ -238,7 +231,7 @@ public class DBHelpers {
                     fConnection.commit();
                     scenario_cnt++;
                 } catch (SQLException e) {
-                    System.err.println("removing scenario: " + e);
+                    System.err.println("removing scenario: " + e); //$NON-NLS-1$
                 }
 	        }
         }
@@ -254,9 +247,9 @@ public class DBHelpers {
             deleteVariation.close();
             
         }
-        ps.println("  samples: " + sample_cnt);
-        ps.println("  scenarios: " + scenario_cnt);
-        ps.println("  datapoints: " + dp_cnt);
+        ps.println("  samples: " + sample_cnt); //$NON-NLS-1$
+        ps.println("  scenarios: " + scenario_cnt); //$NON-NLS-1$
+        ps.println("  datapoints: " + dp_cnt); //$NON-NLS-1$
         
         if (configs != null) configs.close();
         if (samples != null) samples.close();
@@ -271,12 +264,12 @@ public class DBHelpers {
         if (deleteDatapoints != null) deleteDatapoints.close();
     }
 
-    private void countSamplesWithNullVariations() throws SQLException {
+    void countSamplesWithNullVariations() throws SQLException {
         Statement stmt= fConnection.createStatement();
         ResultSet rs= stmt.executeQuery("select count(*) from SAMPLE where SAMPLE.VARIATION_ID is null"); //$NON-NLS-1$
         while (rs.next()) {
             int config_id= rs.getInt(1);
-            System.out.println("samples with NULL variation: " + config_id);
+            System.out.println("samples with NULL variation: " + config_id); //$NON-NLS-1$
             //System.out.println(" " + rs.getString(2));
             //removeSamples(config_id);
         }
@@ -284,14 +277,14 @@ public class DBHelpers {
         stmt.close();
     }
    
-    private void removeDimension(Dim dim) throws SQLException {
+    void removeDimension(Dim dim) throws SQLException {
         PreparedStatement q= fConnection.prepareStatement("delete from SCALAR where SCALAR.DIM_ID = ?"); //$NON-NLS-1$
         q.setInt(1, dim.getId());
         q.executeUpdate();
         q.close();
     }
     
-    private void dumpScenarios(PrintStream ps, String pattern) throws SQLException {
+    void dumpScenarios(PrintStream ps, String pattern) throws SQLException {
         PreparedStatement stmt= fConnection.prepareStatement("select NAME from SCENARIO where NAME like ? order by NAME"); //$NON-NLS-1$
         stmt.setString(1, pattern);
         ResultSet rs= stmt.executeQuery();
@@ -301,7 +294,7 @@ public class DBHelpers {
         stmt.close();
     }
     
-    private void dumpSizes(PrintStream ps) throws SQLException {
+    void dumpSizes(PrintStream ps) throws SQLException {
         if (fConnection == null)
             return;    
         Statement stmt= fConnection.createStatement();
@@ -315,7 +308,7 @@ public class DBHelpers {
         }
     }
 
-    private void dumpSize(PrintStream ps, String table) throws SQLException {
+    void dumpSize(PrintStream ps, String table) throws SQLException {
         Statement stmt= fConnection.createStatement();
         ResultSet rs= stmt.executeQuery("select Count(*) from " + table); //$NON-NLS-1$
         if (rs.next())
@@ -342,7 +335,7 @@ public class DBHelpers {
         }
     }
     
-    private void dumpTable(PrintStream ps, String tableName, int maxRow) throws SQLException {
+    void dumpTable(PrintStream ps, String tableName, int maxRow) throws SQLException {
         ps.print(tableName + '(');
 		Statement select= fConnection.createStatement();
         ResultSet result= select.executeQuery("select * from " + tableName); //$NON-NLS-1$
@@ -362,8 +355,11 @@ public class DBHelpers {
         select.close();
     }
 
-    private void view(PrintStream ps, String config, String buildPattern, String scenarioPattern) throws SQLException {
-        Scenario[] scenarios= DB.queryScenarios(config, buildPattern, scenarioPattern); 
+    void view(PrintStream ps, String config, String buildPattern, String scenarioPattern) throws SQLException {
+        Variations v= new Variations();
+        v.put(PerformanceTestPlugin.CONFIG, config);
+        v.put(PerformanceTestPlugin.BUILD, buildPattern);
+        Scenario[] scenarios= DB.queryScenarios(v, scenarioPattern, PerformanceTestPlugin.BUILD, null);
         ps.println(scenarios.length + " Scenarios"); //$NON-NLS-1$
         ps.println();
         for (int s= 0; s < scenarios.length; s++)
