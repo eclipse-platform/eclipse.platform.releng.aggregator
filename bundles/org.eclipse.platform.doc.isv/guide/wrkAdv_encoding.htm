@@ -12,6 +12,59 @@ Text file encoding
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h2>Text file encoding</h2>
+<p>If your plug-in reads text files, it should honor the <b>text file encoding</b>
+preference in the workbench.&nbsp; </p>
+
+
+<p><img border="0" src="images/textencoding.jpg" width="409" height="155"></p>
+
+
+<p>Text files are encoded differently depending on the platform and the
+locale.&nbsp; Most of the time, using the default text file encoding for the
+locale of the host operating system is good enough.&nbsp; However, a user may
+want to work with text files that originate from another source.&nbsp; Given the
+ability to use Eclipse in a networked team environment, it's certainly possible
+that users will want to work with text files that use a different encoding
+scheme than their native encoding scheme so that they can easily interchange
+files with another team.</p>
+
+
+<p>For this reason, the workbench defines its own encoding profile that is
+specified by the user in the <b>Preferences</b> dialog.&nbsp; Plug-ins that
+interpret text files, such as editors and builders, should consult the workbench
+encoding preference rather than assume that the installed operating system
+encoding is in use.</p>
+
+
+<p>The current encoding preference can be obtained from the resources plug-in
+using <b><a href="../reference/api/org/eclipse/resources/ResourcesPlugin.html">ResourcesPlugin</a>.getEncoding().&nbsp;
+</b>This encoding should be passed to <b>java.io </b>readers instead of using
+the default system encoding. </p>
+
+
+<p>If you need to track changes to this preference, you can hook a listener on
+the <b><a href="../reference/api/org/eclipse/resources/ResourcesPlugin.html">ResourcesPlugin</a>
+</b>preferences and react to changes in <b>ResourcesPlugin.PREF_ENCODING.&nbsp; </b>The
+following example comes from the default text editor:</p>
+
+
+<pre><font color="#4444CC">public void initialize(StatusTextEditor textEditor) {
+	
+	fTextEditor= textEditor;
+	
+	fPropertyChangeListener= new Preferences.IPropertyChangeListener() {
+		public void propertyChange(Preferences.PropertyChangeEvent e) {
+			if (ResourcesPlugin.PREF_ENCODING.equals(e.getProperty()))
+				setEncoding(null, false);
+		}
+	};
+		
+	Preferences p= ResourcesPlugin.getPlugin().getPluginPreferences();
+	p.addPropertyChangeListener(fPropertyChangeListener);
+	
+	fEncodingActionGroup= new EncodingActionGroup(fTextEditor);
+	fEncodingActionGroup.update();
+}</font></pre>
 <p>&nbsp;</p>
 
 
