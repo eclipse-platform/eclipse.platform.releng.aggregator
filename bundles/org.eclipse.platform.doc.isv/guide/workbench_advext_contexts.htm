@@ -13,8 +13,79 @@
 <h3>
 Contexts</h3>
 <P >
-[This document is under construction.]
+A <b>context</b> can be used to influence what commands are available to the user at any given moment.
+Contexts are much more dynamic than activities.  While an activity represents a broad set of function that
+is available to the user most of the time, contexts describe a focus of the user at a specific point
+in time.  For example, the commands available to a user while editing text might be different than those
+available to a user while editing Java text or browsing packages in the package explorer.
 </P>
+<h4>Defining a context</h4>
+<p>
+Contexts are declared in the
+<b><a href="../reference/extension-points/org_eclipse_ui_contexts.html">org.eclipse.ui.contexts</a></b>
+extension point. Consider the following context which is defined for editing text:
+<pre><font color="#4444CC">
+&lt;extension
+	point="org.eclipse.ui.contexts"&gt;
+	&lt;context
+		name="%context.editingText.name"
+		description="%context.editingText.description"
+		id="org.eclipse.ui.textEditorScope"
+		parentId="org.eclipse.ui.contexts.window"&gt;
+	&lt;/context&gt;
+</font></pre>
+Contexts are assigned a name and description that are used when showing information about the context to the user.
+The id of the context is used when binding UI contributions such as commands to a particular context.
+</p>
+<h4>Context hierarchies</h4>
+<p>
+Contexts are hierarchical in nature.  When a context is active, the commands available in the context and in its parent contexts
+are also available.  This is useful for defining levels of contexts that move from very general situations down to more
+specific contexts.  In the context definition above, note that there is an id of a parent assigned to the context:
+<pre><font color="#4444CC">
+	&lt;context
+		name="%context.editingText.name"
+		description="%context.editingText.description"
+		id="org.eclipse.ui.textEditorScope"
+		<b>parentId="org.eclipse.ui.contexts.window"</b>&gt;
+	&lt;/context&gt;
+</font></pre>
+The parent context defines the more general context of working within a window.  Its parent defines an even
+more general context of working within a window or a dialog.
+<pre><font color="#4444CC">
+&lt;context
+	name="%context.window.name"
+	description="%context.window.description"
+	id="org.eclipse.ui.contexts.window"
+	<b>parentId="org.eclipse.ui.contexts.dialogAndWindow"</b>&gt;
+&lt;/context&gt;
+&lt;context
+	name="%context.dialogAndWindow.name"
+	description="%context.dialogAndWindow.description"
+	id="org.eclipse.ui.contexts.dialogAndWindow"&gt;
+&lt;/context&gt;
+</font></pre>
+</p>
+<h4>Associating a contribution with a context</h4>
+<p>
+So far, all we've done is define a hierarchy of contexts.  The context becomes useful when it is referenced in the
+description of another UI contribution.  The most common use of contexts is in key bindings.  When a context is
+associated with a key binding, the key binding will only be active when the user is in that context.  For example,
+the following markup specifies the root dialog and window context as the context for a key binding:
+<pre><font color="#4444CC">
+<keyBinding
+	commandId="org.eclipse.ui.edit.cut"
+	<b>contextId="org.eclipse.ui.contexts.dialogAndWindow"</b>
+	keySequence="M1+X"
+	keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
+</keyBinding>
+</font></pre>
+</p>
+<h4>
+Using context API</h4>
+<p>
+This section is under construction
+</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 
