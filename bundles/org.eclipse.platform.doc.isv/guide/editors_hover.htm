@@ -5,35 +5,109 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Text hover
+Text and ruler hover
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H2>Text hover</H2>
-<p>JavaTextHover - installed using ITextViewer.setTextHover or subclass
-SourceViewerConfiguration and implement getTextHover.</p>
-<p>Hover is responsible for computing the region that should be used as the
-source of hover info.&nbsp;&nbsp;</p>
-<p>JavaTextHover shows how you can determine the hover region using other
-relevant information.&nbsp; In this example, a hover region is only provided the
-offset for which hover is requested is contained in the selection (show the code
-and screen snap).</p>
-<p>(Is this what Kai considers context sensitive behavior or did he have
-something more elaborate in mind?)</p>
-<h3>Ruler hover</h3>
-<p>Hover on the ruler can be used to show line-oriented information.</p>
-<p>You can configure your ruler hover by subclassing SourceViewerConfiguration
-or using
-setAnnotationHover</p>
-<p>An annotation hover returns the string itself given the viewer and line
-number.&nbsp; JavaAnnotationHover demonstrates this by using the line number to
-obtain the text on that line and place in the ruler's hover.&nbsp; (show code
-and screen snap).</p>
-<p>&nbsp;</p>
-<p>&nbsp;</p>
+<H2>Text and ruler hover</H2>
+<p>Hover support is provided in the platform text framework, allowing you to
+implement informational hovers (or infopops) over the text and the vertical
+ruler shown in your editor.</p>
+<p>Hover support is optional.&nbsp; By default, <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>does not install hover behavior since there is no useful general information
+to show.&nbsp; In order to provide text or ruler hover, your editor's source
+viewer configuration must be <a href="editors_sourceviewers.htm">configured</a>
+to define a pluggable hover object.</p>
+<p>Let's look again at <b>JavaSourceViewerConfiguration</b>
+ to see which methods define the hover behavior:</p>
 
+<pre><font color="#4444CC">public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+	return new JavaTextHover();
+}
+public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+	return new JavaAnnotationHover();
+}
+</font></pre>
+<p>Hover helper classes can also be installed dynamically using <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
+ protocol (<b>setTextHover</b> and <b>setAnnotationHover</b>).&nbsp; There is no
+particular runtime benefit to doing it either way, but putting all of the
+pluggable behavior overrides in a subclass of <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+</b>provides the advantage of consolidating all of the definitions in one place.</p>
+<p>Let's look at the specifics of providing both kinds of hover.</p>
+<h3>Text hover</h3>
+<p>Text hover allows you to provide informational text about text shown in the
+editor.&nbsp; This is done using the <b><a href="../reference/api/org/eclipse/jface/text/ITextHover.html">ITextHover</a></b>
+interface.&nbsp; A text hover is responsible for computing the region that
+should be used as the source of hover information, given an offset into the
+document.&nbsp; It is also responsible for providing the informational text
+about a specific region.&nbsp; <b>JavaTextHover</b> is pretty simple.&nbsp; It
+checks to see if the supplied offset for hover is contained inside the text
+selection.&nbsp;&nbsp;&nbsp; If so, it supplies a valid hover region at the
+offset.&nbsp;</p>
+
+<pre><font color="#4444CC">public class JavaTextHover implements ITextHover {
+
+	...
+	
+	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
+		Point selection= textViewer.getSelectedRange();
+		if (selection.x &lt;= offset &amp;&amp; offset &lt; selection.x + selection.y)
+			return new Region(selection.x, selection.y);
+		return new Region(offset, 0);
+	}
+}</font></pre>
+<p>Given its own computed hover region, it obtains the selected text from its
+document and returns that as the hover info.</p>
+
+<pre><font color="#4444CC">public class JavaTextHover implements ITextHover {
+
+	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
+		if (hoverRegion != null) {
+			try {
+				if (hoverRegion.getLength() &gt; -1)
+					return textViewer.getDocument().get(hoverRegion.getOffset(), hoverRegion.getLength());
+			} catch (BadLocationException x) {
+			}
+		}
+		return JavaEditorMessages.getString(&quot;JavaTextHover.emptySelection&quot;); 
+	}
+	...
+}</font></pre>
+<p>Sure enough, we can see that if we hover over a selection in the editor, the
+hover text shows the selection.</p>
+<p>&lt;screen snap&gt;</p>
+<p>More complicated contextual information can be used to compute useful hover
+information.&nbsp; Examples of this can be found in the <b>JavaTextHover</b>
+implemented with the JDT editor.</p>
+<h3>Ruler hover</h3>
+<p>Hover on the vertical ruler is useful for showing show line-oriented information.&nbsp;
+The hover class is configured as described above.&nbsp; <b><a href="../reference/api/org/eclipse/jface/text/IAnnotationHover.html">IAnnotationHover</a></b>
+is the interface for ruler hover objects.&nbsp; Although the name implies that
+the hover is designed for annotations in the ruler, it is really up to an
+individual editor to detemine what is appropriate.&nbsp; A ruler hover is responsible for returning the info string associated with a
+particular line number, regardless of the presence of markers on that line.&nbsp;&nbsp;&nbsp;</p>
+<p>The Java example editor's <b>JavaAnnotationHover</b>  implements hover for
+all lines.&nbsp; It uses the line number to
+obtain all of the text on the hover line and returning it as the info string.</p>
+
+<pre><font color="#4444CC">public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
+	IDocument document= sourceViewer.getDocument();
+
+	try {
+		IRegion info= document.getLineInformation(lineNumber);
+		return document.get(info.getOffset(), info.getLength());
+	} catch (BadLocationException x) {
+	}
+	return null;
+}</font></pre>
+<p>&lt;screen snap&gt;<p>Since the hover has access to the document and the
+source viewer, it has all the context needed to make more complicated contextual
+decisions about the info that should be shown.&nbsp; For example, the annotation
+model could be retrieved from the source viewer in order to provide hover info
+for any annotations shown in the vertical ruler.&nbsp; The <b>JavaAnnotationHover</b>
+provided by the JDT editor provides this capability.
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 
 </BODY>
