@@ -958,22 +958,37 @@ However, PDE cannot handle these plug-ins because it creates project names using
 plug-in IDs during binary project import. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18500">18500</a>)</p>
 <h2>4. <a name="Running Eclipse">Running Eclipse</a></h2>
 <p>After installing the Eclipse SDK in a directory, you can start the Workbench
-by running the Eclipse executable included with the release (you also need a
-JRE, included with the Eclipse SDK). On Windows, the executable file is called <samp>eclipse.exe</samp>,
+by running the Eclipse executable included with the release (you also need a 1.4
+JRE, not included with the Eclipse SDK). On Windows, the executable file is called <samp>eclipse.exe</samp>,
 and is located in the <code>eclipse</code> subdirectory of the install. If
 installed at <code>c:\eclipse-SDK-3.0-win32</code>, the executable is <code>c:\eclipse-SDK-3.0-win32\eclipse\eclipse.exe</code>.
 <b>Note:</b> Set-up on most other operating environments is analogous. Special
-instructions for Mac OS X.</p>
-<p><i>[TBD - review in light of (a) workspace prompter and (b) separate
-configuration area.]</i></p>
-<p>If you do not specify otherwise, Eclipse creates a default workspace in a
-subdirectory as a sibling of the executable (that is, at, <code>c:\eclipse-SDK-3.0-win32\eclipse\workspace</code>).
+instructions for Mac OS X are listed below.</p>
+<p>Depending on the JRE that you are running, the number of plug-ins you are using, and
+the number of files you will be working with, you may have to increase the amount of memory that
+is available to the Java VM running Eclipse. Eclipse allows you to pass arguments directly to the
+Java VM using the
+<code>-vmargs</code> command line argument, which must follow all other Eclipse specific arguments.
+To increase the available memory, you would typically use:</p>
+<blockquote>
+  <p><code>eclipse -vmargs -Xmx&lt;memory size&gt;</code></p>
+</blockquote>
+<p>The <code>&lt;memory size&gt;</code> value should typically be at least
+&quot;128M&quot; (128 megabytes).
+Usually, &quot;256M&quot; (256 megabytes) is ample. You should
+not set this value to be larger than the amount of physical memory on your machine.</p>
+<p>When the Workbench is launched, the first thing you see is a 
+dialog that allows you to select where the workspace will be located. The
+workspace is the directory where your work will be stored.
+If you do not specify otherwise, Eclipse creates the workspace
+as a sibling of the executable (that is, at <code>c:\eclipse-SDK-3.0-win32\eclipse\workspace</code>).
 This workspace directory is used as the default content area for your projects
 as well as for holding any required metadata. For shared or multi-workspace
 installs you must explicitly specify the location for your workspace using the
-&quot;<code>-data</code>&quot; command line argument; for example,&nbsp;</p>
+dialog (or via the &quot;<code>-data</code>&quot; command line argument).</p>
+<p>Here is a typical Eclipse command line:&nbsp;</p>
 <blockquote>
-  <p><code>eclipse -data c:\myworkspace -vm c:\jdk1.4.2\jre\bin\javaw</code></p>
+  <p><code>eclipse -vm c:\jdk1.4.2\jre\bin\javaw -vmargs -Xmx256M</code></p>
 </blockquote>
 <p><i>Tip:</i> It's generally a good idea to explicitly specify which Java VM to
 use when running Eclipse. This is achieved with the &quot;<code>-vm</code>&quot;
@@ -981,50 +996,32 @@ command line argument as illustrated above. If you don't use &quot;<code>-vm</co
 Eclipse will look on the O/S path. When you install other Java-based products,
 they may change your path and could result in a different Java VM being used
 when you next launch Eclipse.</p>
-<p>To create a Windows shortcut to an installed Eclipse and a particular
-workspace (e.g., <code>c:\myworkspace</code>):</p>
+<p>To create a Windows shortcut to an installed Eclipse:</p>
 <ol>
   <li>Navigate to <code>eclipse.exe</code> in Windows Explorer and use Create
     Shortcut on the content menu.
   <li>Select the shortcut and edit its Properties. In the Target: field append
-    the <code>-data</code> option followed by the location of the workspace
-    (e.g., <code>-data</code> &quot;c:\myworkspace&quot;).
+    the command
+    line arguments.
 </ol>
-<p>Opening this shortcut launches Eclipse on the specified workspace. (You can
+<p>Opening this shortcut launches Eclipse. (You can
 drag the shortcut to the Windows Desktop if you want to keep it in easy reach.)</p>
 <h3>Mac OS X</h3>
-<p>On Mac OS X, you start Eclipse by double clicking the Eclipse application. If you need to pass arguments to Eclipse, you'll have to edit the Info.plist file
+<p>On Mac OS X, you start Eclipse by double clicking the Eclipse application. If you need to pass arguments to Eclipse, you'll have to edit the <code>Info.plist</code> file
 inside the Eclipse application bundle: select the Eclipse application bundle icon while holding down the Control Key.
-This will present you with a popup menu. Select "Show Package Contents" in the popup menu.
-Locate Info.plist file in the "Contents" subfolder and open it with your favorite text editor.
-Add to, remove from or edit the command line options listed at the end of the file for the "Eclipse" key.</p>
-<p>If you need to launch Eclipse from the command line, you can use the symbolic link "eclipse" in the
+This will present you with a popup menu. Select &quot;Show Package Contents&quot; in the popup menu.
+Locate <code>Info.plist</code> file in the <code>Contents</code> subfolder and open it with your favorite text editor.
+Add to, remove from or edit the command line options listed at the end of the file for the &quot;Eclipse&quot; key.</p>
+<p>If you need to launch Eclipse from the command line, you can use the symbolic link &quot;eclipse&quot; in the
 top-level eclipse folder. It refers to the eclipse executable inside the application bundle and takes
-the same arguments as "eclipse.exe" on other platforms. Due to a platform limitation you cannot
-pass an arbitrary Java VM to the "-vm" option, but must use the program "java_swt" found inside
+the same arguments as &quot;eclipse.exe&quot; on other platforms. Due to a platform limitation you cannot
+pass an arbitrary Java VM to the &quot;<code>-vm</code>&quot; option, but must use the program &quot;<code>java_swt</code>&quot; found inside
 the application bundle; for example:</p>
 
 <pre>	cd <i>&lt;eclipse directory&gt;</i>
-	./eclipse -vm Eclipse.app/Contents/MacOS/java_swt -data myworkspace
+	./eclipse -vm Eclipse.app/Contents/MacOS/java_swt
 </pre>
 <h2>5. <a name="Upgrading"></a>Upgrading Workspace from a Previous Release</h2>
-<p><i>[TBD - review in light of (a) workspace prompter.]</i></p>
-<p>If you are upgrading to a newer release of Eclipse from an older release,
-there are simple steps to follow to migrate your workspace to the new release.
-Your workspace is the directory on disk that contains all of your project files,
-as well as metadata such as preferences you may have customized. The steps to
-follow for upgrading depend on whether or not you used the &quot;<code>-data</code>&quot;
-command line argument when starting Eclipse. The &quot;<code>-data</code>&quot;
-argument is recommended because it clearly specifies the location of your
-workspace. If this argument is not used, Eclipse will place the workspace in the
-current working directory at the time Eclipse was launched.</p>
-<p>Note that if you installed additional features and plug-ins into your older
-Eclipse, you should re-install them in the new Eclipse prior to upgrading
-workspaces.
-<p><i>Tip:</i> It doesn't hurt to make a backup copy of your workspace before
-upgrading. After you've upgraded your workspace, you won't be able to use it
-again with an older version of Eclipse. If you ever want to go &quot;back in
-time&quot; to an earlier release, you'll need that backup!</p>
 <h3>Users who don't use &quot;-data&quot;</h3>
 <p>If you weren't previously using &quot;-data&quot; to specify your workspace,
 follow these steps to upgrade:
@@ -1035,23 +1032,35 @@ follow these steps to upgrade:
     you are using a shortcut or script to launch Eclipse, then it will be under
     the current working directory of that shortcut or script in a subdirectory
     called &quot;workspace&quot;. For Windows users, this is specified by the
-    Start in: argument in your shortcut properties.</li>
+    &quot;Start in:&quot; argument in your shortcut properties.</li>
   <li>Copy this workspace directory to a new, empty location outside of any
     Eclipse install directory.</li>
   <li>Install the new version of Eclipse in a new location, separate from any
     old version of Eclipse.</li>
-  <li>Start this new version of Eclipse, using the &quot;<code>-data</code>&quot;
-    command line argument to point to the workspace location.</li>
+  <li>If you had installed additional features and plug-ins into your old
+    Eclipse, you should re-install them in the new Eclipse.</li>
+  <li>Start this new version of Eclipse and select
+    this location using the workspace chooser dialog at startup (or use &quot;<code>-data</code>&quot;
+    command line argument to pre-select the workspace location).</li>
 </ol>
 <h3>Users who do use &quot;-data&quot;</h3>
 <p>If you were previously using the &quot;<code>-data</code>&quot; argument to
 start Eclipse, your upgrade path is much easier:
 <ol>
+  <li>Optionally copy your workspace directory to a new, empty location outside of any
+    Eclipse install directory as a backup.</li>
   <li>Install the new version of Eclipse in a new location, separate from any
     old versions of Eclipse.</li>
-  <li>Start this new version of Eclipse, using the &quot;<code>-data</code>&quot;
-    command line argument to point to your old workspace location.</li>
+  <li>If you had installed additional features and plug-ins into your old
+    Eclipse, you should re-install them in the new Eclipse.</li>
+  <li>Start this new version of Eclipse and select this location using the workspace chooser dialog at
+    startup (or use &quot;<code>-data</code>&quot;
+    command line argument to pre-select the workspace location).</li>
 </ol>
+<p><i>Note:</i> Copying your workspace is recommended because,
+after you've upgraded your workspace, you won't be able to use it
+again with an older version of Eclipse. If you ever want to go &quot;back in
+time&quot; to an earlier release, you will need that backup.</p>
 <h2>6. <a name="Interoperability with Previous Releases">Interoperability with
 Previous Releases</a></h2>
 <h3>6.1 Interoperability of Release 3.0 and 2.1</h3>
@@ -1064,7 +1073,7 @@ to a particular feature or plug-in version, and differ between versions. The
 workspace compatibility guarantees only cover cases where all developers upgrade
 their Eclipse workspaces in lock step. In those cases there should be no problem
 with shared metadata. However, when some developers are working in Eclipse 3.0
-while others are working in Eclipse 2.1 (or 2.0), there are no such guarantees.
+while others are working in Eclipse 2.1, there are no such guarantees.
 This section provides advice for what to do and to not do. It addresses the
 specific issues with the Eclipse SDK.</p>
 <p>The typical failure mode is noticed by the 3.0 user. 3.0 metadata is lost
@@ -1092,12 +1101,6 @@ repository. Here's how things typically go awry:</p>
 <p>Here are a list of things to watch out for when the project is to be shared
 between users of Eclipses 3.0 and 2.1:</p>
 <ul>
-  <li><i>[TBD - carryover from 2.1.3; review for 3.0] <b>Linked folders and
-    files<br>
-    </b>This support was added in 2.1. Information about linked resources is
-    recorded in the project's <code>.project</code> file. Recommendation: do not
-    use. Better still, disable linked resources via the <b>Workbench &gt; Linked
-    Resources</b> preference page.</i></li>
   <li><i>[TBD - carryover from 2.1.3; review for 3.0] <b>External tool (Ant)
     builders</b><br>
     Information about external tool builder is recorded in the project's <code>.project</code>
