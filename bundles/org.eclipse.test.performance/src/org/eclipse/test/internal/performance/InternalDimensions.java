@@ -6,7 +6,7 @@ import org.eclipse.test.internal.performance.data.Unit;
 /**
  * Some hard coded measurement id's.
  */
-public interface Dimensions {
+public interface InternalDimensions {
     
 //  Common:
 //		OS Counters:

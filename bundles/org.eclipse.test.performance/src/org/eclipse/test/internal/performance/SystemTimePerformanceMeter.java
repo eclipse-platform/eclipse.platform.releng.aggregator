@@ -103,8 +103,8 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	    	
 	    	DataPoint[] data= new DataPoint[2*fStartTime.size()];
 	    	for (int i= 0; i < fStartTime.size(); i++) {
-	    		data[2*i]= createDataPoint(BEFORE, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
-	    		data[2*i+1]= createDataPoint(AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
+	    		data[2*i]= createDataPoint(BEFORE, InternalDimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
+	    		data[2*i+1]= createDataPoint(AFTER, InternalDimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
 	    	}
 	    	
 	    	return new Sample(getScenarioName(), fStartDate, properties, data);

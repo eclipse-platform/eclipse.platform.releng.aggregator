@@ -16,7 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Date;
 
-import org.eclipse.test.internal.performance.Dimensions;
+import org.eclipse.test.internal.performance.InternalDimensions;
 
 public class View {
 
@@ -44,7 +44,7 @@ public class View {
         query1.setString(1, "localhost");
         query1.setString(2, conf);
         query1.setString(3, "org.eclipse.jdt.ui.tests.performance.views.StartupTest#testStartup()");
-        query1.setInt(4, Dimensions.ELAPSED_PROCESS.getId());
+        query1.setInt(4, InternalDimensions.ELAPSED_PROCESS.getId());
 
         
         

@@ -62,9 +62,9 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 				    int user_time= counters[0]*1000 + counters[1]/1000;
 				    int kernel_time= counters[2]*1000 + counters[3]/1000;
 				    
-			        addScalar(scalars, Dimensions.USER_TIME, user_time);
-					addScalar(scalars, Dimensions.KERNEL_TIME, kernel_time);
-					addScalar(scalars, Dimensions.CPU_TIME, user_time + kernel_time);
+			        addScalar(scalars, InternalDimensions.USER_TIME, user_time);
+					addScalar(scalars, InternalDimensions.KERNEL_TIME, kernel_time);
+					addScalar(scalars, InternalDimensions.CPU_TIME, user_time + kernel_time);
 					//addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[4]*PAGESIZE);		
 					//addScalar(scalars, Dimensions.TRS, counters[5]);
 					//addScalar(scalars, Dimensions.DRS, counters[6] + counters[7]);
@@ -75,7 +75,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 		    if (st != null) {
 		        long s= Long.parseLong(st);
 		        long e= System.currentTimeMillis();
-				addScalar(scalars, Dimensions.ELAPSED_PROCESS, e-s);
+				addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, e-s);
 		    }
 		    super.collectOperatingSystemCounters(scalars);
 		}

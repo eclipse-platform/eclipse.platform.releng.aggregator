@@ -27,23 +27,23 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 			if (org.eclipse.perfmsr.core.PerformanceMonitor.isLoaded()) {
 				long[] counters= new long[14];
 				if (org.eclipse.perfmsr.core.PerformanceMonitor.nativeGetPerformanceCounters(counters)) {
-					addScalar(scalars, Dimensions.WORKING_SET, counters[0]);
-					addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[1]);
-					addScalar(scalars, Dimensions.ELAPSED_PROCESS, counters[2]);
-					addScalar(scalars, Dimensions.USER_TIME, counters[3]);
-					addScalar(scalars, Dimensions.KERNEL_TIME, counters[4]);
-					addScalar(scalars, Dimensions.PAGE_FAULTS, counters[5]);
+					addScalar(scalars, InternalDimensions.WORKING_SET, counters[0]);
+					addScalar(scalars, InternalDimensions.WORKING_SET_PEAK, counters[1]);
+					addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, counters[2]);
+					addScalar(scalars, InternalDimensions.USER_TIME, counters[3]);
+					addScalar(scalars, InternalDimensions.KERNEL_TIME, counters[4]);
+					addScalar(scalars, InternalDimensions.PAGE_FAULTS, counters[5]);
 					if (counters[6] != -1)
-						addScalar(scalars, Dimensions.COMITTED, counters[6]);
-					addScalar(scalars, Dimensions.GDI_OBJECTS, counters[7]);
+						addScalar(scalars, InternalDimensions.COMITTED, counters[6]);
+					addScalar(scalars, InternalDimensions.GDI_OBJECTS, counters[7]);
 					//addScalar(scalars, Dimensions.USER_OBJECTS, counters[8]);
 					if (counters[9] != -1)
-						addScalar(scalars, Dimensions.OPEN_HANDLES, counters[9]);
-					addScalar(scalars, Dimensions.READ_COUNT, counters[10]);
-					addScalar(scalars, Dimensions.WRITE_COUNT, counters[11]);
-					addScalar(scalars, Dimensions.BYTES_READ, counters[12]);
-					addScalar(scalars, Dimensions.BYTES_WRITTEN, counters[13]);
-	                addScalar(scalars, Dimensions.CPU_TIME, counters[3] + counters[4]);
+						addScalar(scalars, InternalDimensions.OPEN_HANDLES, counters[9]);
+					addScalar(scalars, InternalDimensions.READ_COUNT, counters[10]);
+					addScalar(scalars, InternalDimensions.WRITE_COUNT, counters[11]);
+					addScalar(scalars, InternalDimensions.BYTES_READ, counters[12]);
+					addScalar(scalars, InternalDimensions.BYTES_WRITTEN, counters[13]);
+	                addScalar(scalars, InternalDimensions.CPU_TIME, counters[3] + counters[4]);
 				}
 			}
 		    super.collectOperatingSystemCounters(scalars);
@@ -66,19 +66,19 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 				try {
 					org.eclipse.perfmsr.core.PerformanceMonitor.nativeGetPerformanceInfo(counters);
 					long pageSize= counters[9];
-					addScalar(scalars, Dimensions.COMMIT_TOTAL, counters[0]*pageSize);
-					addScalar(scalars, Dimensions.COMMIT_LIMIT, counters[1]*pageSize); 
-					addScalar(scalars, Dimensions.COMMIT_PEAK, counters[2]*pageSize);
-					addScalar(scalars, Dimensions.PHYSICAL_TOTAL, counters[3]*pageSize); 
-					addScalar(scalars, Dimensions.PHYSICAL_AVAIL, counters[4]*pageSize); 
-					addScalar(scalars, Dimensions.SYSTEM_CACHE, counters[5]*pageSize);
-					addScalar(scalars, Dimensions.KERNEL_TOTAL, counters[6]*pageSize); 
-					addScalar(scalars, Dimensions.KERNEL_PAGED, counters[7]*pageSize); 
-					addScalar(scalars, Dimensions.KERNEL_NONPAGED, counters[8]*pageSize); 
-					addScalar(scalars, Dimensions.PAGE_SIZE, counters[9]);
-					addScalar(scalars, Dimensions.HANDLE_COUNT, counters[10]); 
-					addScalar(scalars, Dimensions.PROCESS_COUNT, counters[11]); 
-					addScalar(scalars, Dimensions.THREAD_COUNT, counters[12]);
+					addScalar(scalars, InternalDimensions.COMMIT_TOTAL, counters[0]*pageSize);
+					addScalar(scalars, InternalDimensions.COMMIT_LIMIT, counters[1]*pageSize); 
+					addScalar(scalars, InternalDimensions.COMMIT_PEAK, counters[2]*pageSize);
+					addScalar(scalars, InternalDimensions.PHYSICAL_TOTAL, counters[3]*pageSize); 
+					addScalar(scalars, InternalDimensions.PHYSICAL_AVAIL, counters[4]*pageSize); 
+					addScalar(scalars, InternalDimensions.SYSTEM_CACHE, counters[5]*pageSize);
+					addScalar(scalars, InternalDimensions.KERNEL_TOTAL, counters[6]*pageSize); 
+					addScalar(scalars, InternalDimensions.KERNEL_PAGED, counters[7]*pageSize); 
+					addScalar(scalars, InternalDimensions.KERNEL_NONPAGED, counters[8]*pageSize); 
+					addScalar(scalars, InternalDimensions.PAGE_SIZE, counters[9]);
+					addScalar(scalars, InternalDimensions.HANDLE_COUNT, counters[10]); 
+					addScalar(scalars, InternalDimensions.PROCESS_COUNT, counters[11]); 
+					addScalar(scalars, InternalDimensions.THREAD_COUNT, counters[12]);
 				} catch (Exception e) {
 				    System.err.println("Warning: Native function GetPerformanceInfo() not available on this version of Windows"); //$NON-NLS-1$
 					fgNativeGetPerformanceInfoNotAvailable= true;

@@ -51,11 +51,11 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 				st.nextToken();		// long cutime;		// User time for the process and it's children. */
 				st.nextToken();		// long cstime;		// System time for the process and it's children. */
 	
-				addScalar(scalars, Dimensions.USER_TIME, utime*JIFFIES);			
-				addScalar(scalars, Dimensions.KERNEL_TIME, stime*JIFFIES);			
-				addScalar(scalars, Dimensions.CPU_TIME, (utime+stime)*JIFFIES);			
-				addScalar(scalars, Dimensions.SOFT_PAGE_FAULTS, minflt);			
-				addScalar(scalars, Dimensions.HARD_PAGE_FAULTS, majflt);
+				addScalar(scalars, InternalDimensions.USER_TIME, utime*JIFFIES);			
+				addScalar(scalars, InternalDimensions.KERNEL_TIME, stime*JIFFIES);			
+				addScalar(scalars, InternalDimensions.CPU_TIME, (utime+stime)*JIFFIES);			
+				addScalar(scalars, InternalDimensions.SOFT_PAGE_FAULTS, minflt);			
+				addScalar(scalars, InternalDimensions.HARD_PAGE_FAULTS, majflt);
 		    }
 
 		    /**
@@ -72,10 +72,10 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 				int lrs= Integer.parseInt(st.nextToken()); 		// Library size in pages.
 				// st.nextToken();		// int dt;				// Dirty pages.
 	
-				addScalar(scalars, Dimensions.WORKING_SET, resident*PAGESIZE);		
-				addScalar(scalars, Dimensions.TRS, trs*PAGESIZE);			
-				addScalar(scalars, Dimensions.DRS, drs*PAGESIZE);			
-				addScalar(scalars, Dimensions.LRS, lrs*PAGESIZE);
+				addScalar(scalars, InternalDimensions.WORKING_SET, resident*PAGESIZE);		
+				addScalar(scalars, InternalDimensions.TRS, trs*PAGESIZE);			
+				addScalar(scalars, InternalDimensions.DRS, drs*PAGESIZE);			
+				addScalar(scalars, InternalDimensions.LRS, lrs*PAGESIZE);
 			}
 			super.collectOperatingSystemCounters(scalars);
 		}
@@ -100,11 +100,11 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 				long buffers= Long.parseLong(st.nextToken());
 				long cache= Long.parseLong(st.nextToken());
 		
-				addScalar(scalars, Dimensions.PHYSICAL_TOTAL, total);
-				addScalar(scalars, Dimensions.USED_LINUX_MEM, used);
-				addScalar(scalars, Dimensions.FREE_LINUX_MEM, free);
-				addScalar(scalars, Dimensions.BUFFERS_LINUX, buffers);
-				addScalar(scalars, Dimensions.SYSTEM_CACHE, cache);
+				addScalar(scalars, InternalDimensions.PHYSICAL_TOTAL, total);
+				addScalar(scalars, InternalDimensions.USED_LINUX_MEM, used);
+				addScalar(scalars, InternalDimensions.FREE_LINUX_MEM, free);
+				addScalar(scalars, InternalDimensions.BUFFERS_LINUX, buffers);
+				addScalar(scalars, InternalDimensions.SYSTEM_CACHE, cache);
 		    }
 		    super.collectGlobalPerformanceInfo(scalars);
 		}

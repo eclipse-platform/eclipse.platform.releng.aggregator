@@ -35,7 +35,7 @@ class PerformanceMonitor {
 
     protected void collectOperatingSystemCounters(Map scalars) {
         // default implementation
-        addScalar(scalars, Dimensions.SYSTEM_TIME, System.currentTimeMillis());
+        addScalar(scalars, InternalDimensions.SYSTEM_TIME, System.currentTimeMillis());
         /*
     	Runtime runtime= Runtime.getRuntime();
 		runtime.gc();
