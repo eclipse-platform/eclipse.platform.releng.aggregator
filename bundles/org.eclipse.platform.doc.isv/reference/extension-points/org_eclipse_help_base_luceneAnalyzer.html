@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Lucene Analyzer</title>
+<style>@import url("../../book.css");</style>
+<style>@import url("../../schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Lucene Analyzer</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>org.eclipse.help.base.luceneAnalyzer<p></p>
+<h6 class=CaptionFigColumn id=header>Since: </h6>3.0 (originally added in release 2.0 as org.eclipse.help.luceneAnalyzer)
+<p></p>
+
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6>This extension point is used to register text analyzers for use by help when indexing and searching documentation.
+<p>
+Help exploits capabilities of the Lucene search engine, that allows indexing of token streams (streams of words).
+Analyzers create tokens from the character stream.  They examine text content and provide tokens for use with the index.
+The text stream can be tokenized in many unique ways.  A trivial analyzer can tokenize streams at white space,
+a different one can perform filtering of tokens, based on the application needs.
+Since the documentation is mostly human-readable text, it is desired that analyzers used by the help system
+perform language and grammar aware tokenization and normalization of indexed text.
+For some languages, the quality of search increases significantly if stop word removal and stemming is performed
+on the indexed text.
+<p>
+The analyzer contributed to this extension point will override the one provided by the Eclipse help system for a given locale.
+</p></p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.analyzer">analyzer</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.analyzer">analyzer</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST analyzer</p>
+<p class=code id=dtdAttlist>locale&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>class&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>locale</b> - a string identifying locale for which the supplied analyzer is
+to bue sued.
+If two letters, language is provided, and the analyzer will be
+available to all locales of that language.</li>
+<li><b>class</b> - a fully qualified name of the Java class extending <samp>org.apache.lucene.analysis.Analyzer</samp>.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.analyzer">analyzer</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.analyzer">analyzer</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST analyzer</p>
+<p class=code id=dtdAttlist>locale&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>class&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>locale</b> - a string identifying locale for which the supplied analyzer is
+to bue sued.
+If two letters, language is provided, and the analyzer will be
+available to all locales of that language.</li>
+<li><b>class</b> - a fully qualified name of the Java class extending <samp>org.apache.lucene.analysis.Analyzer</samp>.</li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>Following is an example of Lucene Analyzer configuration:
+
+<p>
+<pre>
+ <p class=code id=tag>&lt;extension id=<p class=code id=cstring>&quot;com.xyx.XYZ&quot;</p><p class=code id=tag> point=<p class=code id=cstring>&quot;org.eclipse.help.base.luceneAnalyzer&quot;</p><p class=code id=tag>&gt;</p>
+  <p class=code id=tag>&lt;analyzer locale=<p class=code id=cstring>&quot;ll_CC&quot;</p><p class=code id=tag> class=<p class=code id=cstring>&quot;com.xyz.ll_CCAnalyzer&quot;</p><p class=code id=tag>/&gt;</p>
+ <p class=code id=tag>&lt;/extension&gt;</p>
+</pre>
+</p>
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6>The value of the <samp>locale</samp> attribute must represent either a five- or two-charcter locale string.
+If the analyzer is configured for a language by specifying two-letter language designation, the analyzer is
+going to be used for all locales of this language.  If the analyzer is configured that matchs a five-character
+locale, it is going to be used instead.
+<p>
+The value of the <samp>class</samp> attribute must represent a class that extends <samp>org.apache.lucene.analysis.Analyzer</samp>.
+It is recommended that this analyzer performs lowercase filtering for languages where it is possible to increase
+number of search hits by making search case-sensitive.
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>The Eclipse help system provides analyzers for all languages. For English and German, the analyzers perform stop word filtering, lowercase filtering, and stemming. For all the other languages the supplied analyzer only performs lowercase filtering.
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright (c) 2000, 2003 IBM Corporation and others.<br>
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Common Public License v1.0 which accompanies 
+this distribution, and is available at <a href="http://www.eclipse.org/legal/cpl-v10.html">http://www.eclipse.org/legal/cpl-v10.html</a>
+<p></p>
+
+</p>
+</BODY>
+</HTML>

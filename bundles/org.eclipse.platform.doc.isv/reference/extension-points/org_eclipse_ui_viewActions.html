@@ -1,0 +1,573 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>View Menus,Toolbars and Actions</title>
+<style>@import url("../../book.css");</style>
+<style>@import url("../../schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>View Menus,Toolbars and Actions</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>org.eclipse.ui.viewActions<p></p>
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6>This extension point is used to add actions to the pulldown menu and toolbar for views registered by other plug-ins. Each view has a local pulldown menu normally activated 
+by clicking on the top right triangle button. Other plug-ins can contribute submenus and actions to this menu. Plug-ins may also contribute actions to a view toolbar. View owners are first given a chance to populate these areas. Optional additions by other plug-ins are appended.<p>
+<p>
+An action's enablement and/or visibility can be defined using the elements <samp>enablement</samp> and <samp>visibility</samp> respectively. These two elements contain a boolean expression that is evaluated to determine the enablement and/or visibility.
+<p>
+The syntax is the same for the <samp>enablement</samp> and <samp>visibility</samp> elements. Both contain only one boolean expression sub-element. In the simplest case, this will be an <samp>objectClass</samp>, <samp>objectState</samp>, <samp>pluginState</samp>, or <samp>systemProperty</samp> element. In the more complex case, the <samp>and</samp>, <samp>or</samp>, and <samp>not</samp> elements can be combined to form a boolean expression. Both the <samp>and</samp>, and <samp>or</samp> elements must contain 2 sub-elements. The <samp>not</samp> element must contain only 1 sub-element.
+</p><p>
+<p>
+An action's enablement and/or visibility can be defined using the elements <samp>enablement</samp> and <samp>visibility</samp> respectively. These two elements contain a boolean expression that is evaluated to determine the enablement and/or visibility.
+<p>
+The syntax is the same for the <samp>enablement</samp> and <samp>visibility</samp> elements. Both contain only one boolean expression sub-element. In the simplest case, this will be an <samp>objectClass</samp>, <samp>objectState</samp>, <samp>pluginState</samp>, or <samp>systemProperty</samp> element. In the more complex case, the <samp>and</samp>, <samp>or</samp>, and <samp>not</samp> elements can be combined to form a boolean expression. Both the <samp>and</samp>, and <samp>or</samp> elements must contain 2 sub-elements. The <samp>not</samp> element must contain only 1 sub-element.
+</p></p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.viewContribution">viewContribution</a>+)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li>
+<li><b>id</b> - an optional identifier of the extension instance</li>
+<li><b>name</b> - an optional name of the extension instance</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.viewContribution">viewContribution</a> (<a href="#e.menu">menu</a>* , <a href="#e.action">action</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST viewContribution</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>targetID&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to define a group of view actions and/or menus.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique identifier used to reference this contribution.</li>
+<li><b>targetID</b> - a unique identifier of a registered view that is the target of this contribution.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.action">action</a> (<a href="#e.selection">selection</a>* | <a href="#e.enablement">enablement</a>?)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST action</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>menubarPath&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>toolbarPath&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>icon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>disabledIcon&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>hoverIcon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>tooltip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>helpContextId&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>style&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(push|radio|toggle) "push"<p class=code id=dtdAttlist>state&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true | false) <p class=code id=dtdAttlist>class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>enablesFor&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element defines an action that the user can invoke in the UI.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique identifier used as a reference for this action.</li>
+<li><b>label</b> - a translatable name used either as the menu item text or toolbar button label. The name can include mnenomic information.</li>
+<li><b>menubarPath</b> - a slash-delimited path ('/') used to specify the location of this action in the pulldown menu. Each token in the path, except the last one, must represent a valid identifier of an existing menu in the hierarchy. The last token represents the named group into which this action will be added. If the path is omitted, this action will not appear in the pulldown menu.</li>
+<li><b>toolbarPath</b> - a named group within the local toolbar of the target view. If the group does not exist, it will be created. If omitted, the action will not appear in the local toolbar.</li>
+<li><b>icon</b> - a relative path of an icon used to visually represent the action in its context.
+If omitted and the action appears in the toolbar, the Workbench will use a placeholder icon. The path is relative to the location of the plugin.xml file of the contributing plug-in. The icon will appear in the toolbar but not in the pulldown menu.</li>
+<li><b>disabledIcon</b> - a relative path of an icon used to visually represent the action in its context when the action is disabled. If omitted, the normal icon will simply appear greyed out. The path is relative to the location of the plugin.xml file of the contributing plug-in. The disabled icon will appear in the toolbar but not in the pulldown menu.</li>
+<li><b>hoverIcon</b> - a relative path of an icon used to visually represent the action in its context when the mouse pointer is over the action. If omitted, the normal icon will be used. The path is relative to the location of the plugin.xml file of the contributing plug-in.</li>
+<li><b>tooltip</b> - a translatable text representing the action's tool tip. Only used if the action appears in the toolbar.</li>
+<li><b>helpContextId</b> - a unique identifier indicating the help context for this action. If the action appears as a menu item, then pressing F1 while the menu item is highlighted will display help.</li>
+<li><b>style</b> - an optional attribute to define the user interface style type for the action. If defined, the attribute value will be one of the following:
+    <table border="0" width="80%">
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>push</b></td>
+        <td valign="top">- as a regular menu item or tool item.</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>radio</b></td>
+        <td valign="top">- as a radio style menu item or tool item. Actions with the radio style within the same menu or toolbar group behave as a radio set. The initial value is specified by the <samp>state</samp> attribute.</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>toggle</b></td>
+        <td valign="top">- as a checked style menu item or as a toggle tool item. The initial value is specified by the <samp>state</samp> attribute.</td>
+      </tr>
+    </table></li>
+<li><b>state</b> - an optional attribute indicating the initial state (either <samp>true</samp> or <samp>false</samp>), used when the <samp>style</samp> attribute has the value <samp>radio</samp> or <samp>toggle</samp>.</li>
+<li><b>class</b> - name of the fully qualified class that implements <samp>org.eclipse.ui.IViewActionDelegate</samp>.</li>
+<li><b>enablesFor</b> - a value indicating the selection count which must be met to enable the action.
+If this attribute is specified and the condition is met, the action is enabled.
+If the condition is not met, the action is disabled.
+If no attribute is specified, the action is enabled for any number of items selected.
+The following attribute formats are supported: 
+    <table border="0" width="80%">
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>!</b></td>
+        <td valign="top">- 0 items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>?</b></td>
+        <td valign="top">- 0 or 1 items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>+</b></td>
+        <td valign="top">- 1 or more items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>multiple, 2+</b></td>
+        <td valign="top">- 2 or more items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>n</b></td>
+        <td valign="top">- a precise number of items selected.a precise number of items selected.&nbsp;
+          For example: enablesFor=&quot; 4&quot; enables the action only when 4
+          items are selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>*</b></td>
+        <td valign="top">- any number of items selected</td>
+      </tr>
+    </table></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.viewContribution">viewContribution</a>+)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li>
+<li><b>id</b> - an optional identifier of the extension instance</li>
+<li><b>name</b> - an optional name of the extension instance</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.viewContribution">viewContribution</a> (<a href="#e.menu">menu</a>* , <a href="#e.action">action</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST viewContribution</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>targetID&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to define a group of view actions and/or menus.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique identifier used to reference this contribution.</li>
+<li><b>targetID</b> - a unique identifier of a registered view that is the target of this contribution.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.action">action</a> (<a href="#e.selection">selection</a>* | <a href="#e.enablement">enablement</a>?)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST action</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>menubarPath&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>toolbarPath&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>icon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>disabledIcon&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>hoverIcon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>tooltip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>helpContextId&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>style&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(push|radio|toggle) "push"<p class=code id=dtdAttlist>state&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true | false) <p class=code id=dtdAttlist>class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>enablesFor&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element defines an action that the user can invoke in the UI.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique identifier used as a reference for this action.</li>
+<li><b>label</b> - a translatable name used either as the menu item text or toolbar button label. The name can include mnenomic information.</li>
+<li><b>menubarPath</b> - a slash-delimited path ('/') used to specify the location of this action in the pulldown menu. Each token in the path, except the last one, must represent a valid identifier of an existing menu in the hierarchy. The last token represents the named group into which this action will be added. If the path is omitted, this action will not appear in the pulldown menu.</li>
+<li><b>toolbarPath</b> - a named group within the local toolbar of the target view. If the group does not exist, it will be created. If omitted, the action will not appear in the local toolbar.</li>
+<li><b>icon</b> - a relative path of an icon used to visually represent the action in its context.
+If omitted and the action appears in the toolbar, the Workbench will use a placeholder icon. The path is relative to the location of the plugin.xml file of the contributing plug-in. The icon will appear in the toolbar but not in the pulldown menu.</li>
+<li><b>disabledIcon</b> - a relative path of an icon used to visually represent the action in its context when the action is disabled. If omitted, the normal icon will simply appear greyed out. The path is relative to the location of the plugin.xml file of the contributing plug-in. The disabled icon will appear in the toolbar but not in the pulldown menu.</li>
+<li><b>hoverIcon</b> - a relative path of an icon used to visually represent the action in its context when the mouse pointer is over the action. If omitted, the normal icon will be used. The path is relative to the location of the plugin.xml file of the contributing plug-in.</li>
+<li><b>tooltip</b> - a translatable text representing the action's tool tip. Only used if the action appears in the toolbar.</li>
+<li><b>helpContextId</b> - a unique identifier indicating the help context for this action. If the action appears as a menu item, then pressing F1 while the menu item is highlighted will display help.</li>
+<li><b>style</b> - an optional attribute to define the user interface style type for the action. If defined, the attribute value will be one of the following:
+    <table border="0" width="80%">
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>push</b></td>
+        <td valign="top">- as a regular menu item or tool item.</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>radio</b></td>
+        <td valign="top">- as a radio style menu item or tool item. Actions with the radio style within the same menu or toolbar group behave as a radio set. The initial value is specified by the <samp>state</samp> attribute.</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>toggle</b></td>
+        <td valign="top">- as a checked style menu item or as a toggle tool item. The initial value is specified by the <samp>state</samp> attribute.</td>
+      </tr>
+    </table></li>
+<li><b>state</b> - an optional attribute indicating the initial state (either <samp>true</samp> or <samp>false</samp>), used when the <samp>style</samp> attribute has the value <samp>radio</samp> or <samp>toggle</samp>.</li>
+<li><b>class</b> - name of the fully qualified class that implements <samp>org.eclipse.ui.IViewActionDelegate</samp>.</li>
+<li><b>enablesFor</b> - a value indicating the selection count which must be met to enable the action.
+If this attribute is specified and the condition is met, the action is enabled.
+If the condition is not met, the action is disabled.
+If no attribute is specified, the action is enabled for any number of items selected.
+The following attribute formats are supported: 
+    <table border="0" width="80%">
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>!</b></td>
+        <td valign="top">- 0 items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>?</b></td>
+        <td valign="top">- 0 or 1 items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>+</b></td>
+        <td valign="top">- 1 or more items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>multiple, 2+</b></td>
+        <td valign="top">- 2 or more items selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>n</b></td>
+        <td valign="top">- a precise number of items selected.a precise number of items selected.&nbsp;
+          For example: enablesFor=&quot; 4&quot; enables the action only when 4
+          items are selected</td>
+      </tr>
+      <tr>
+ <td valign="top" width="25"></td>
+        <td valign="top" nowrap><b>*</b></td>
+        <td valign="top">- any number of items selected</td>
+      </tr>
+    </table></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.menu">menu</a> (<a href="#e.separator">separator</a>+ , <a href="#e.groupMarker">groupMarker</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST menu</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>label&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>path&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to defined a new menu.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique identifier that can be used to reference this menu.</li>
+<li><b>label</b> - a translatable name used by the Workbench for this new menu. The name should include mnemonic information.</li>
+<li><b>path</b> - the location of the new menu starting from the root of the menu. Each token in the path must refer to an existing menu, except the last token which should represent a named group in the last menu in the path. If omitted, the new menu will be added to the <samp>additions</samp> named group of the menu.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.separator">separator</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST separator</p>
+<p class=code id=dtdAttlist>name&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to create a menu separator in the new menu.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of the menu separator. This name can later be referenced as the last token in a menu path. Therefore, a separator also serve as named group into which actions and menus can be added.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.groupMarker">groupMarker</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST groupMarker</p>
+<p class=code id=dtdAttlist>name&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to create a named group in the new menu. It has no visual representation in the new menu, unlike the <samp>separator</samp> element.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of the group marker. This name can later be referenced as the last token in the menu path. It serves as named group into which actions and menus can be added.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.selection">selection</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST selection</p>
+<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to help determine the action enablement based on the current selection. Ignored if the <samp>enablement</samp> element is specified.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>class</b> - a fully qualified name of the class or interface that each object in the selection must implement in order to enable the action.</li>
+<li><b>name</b> - an optional wild card filter for the name that can be applied to all objects in the selection. If specified and the match fails, the action will be disabled.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.enablement">enablement</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to define the enablement for the extension.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.visibility">visibility</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to define the visibility for the extension.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.and">and</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a boolean AND operation on the result of evaluating it's two sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.or">or</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a boolean OR operation on the result of evaluating it's two sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.not">not</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a boolean NOT operation on the result of evaluating it's sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.objectClass">objectClass</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST objectClass</p>
+<p class=code id=dtdAttlist>name&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the class or interface of each object in the current selection. If each object in the selection implements the specified class or interface, the expression is evaluated as true.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - a fully qualified name of a class or interface.  The expression is evaluated as true only if all objects within the selection implement this class or interface.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.objectState">objectState</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST objectState</p>
+<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the attribute state of each object in the current selection. If each object in the selection has the specified attribute state, the expression is evaluated as true. To evaluate this type of expression, each object in the selection must implement, or adapt to, <samp>org.eclipse.ui.IActionFilter</samp> interface.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of an object's attribute. Acceptable names reflect the object type, and should be publicly declared by the plug-in where the object type is declared.</li>
+<li><b>value</b> - the required value of the object's attribute. The acceptable values for the object's attribute should be publicly declared.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.pluginState">pluginState</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST pluginState</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;(installed|activated) "installed"&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the state of a plug-in. The state of the plug-in may be one of the following: <samp>installed</samp> or <samp>activated</samp>.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - the identifier of a plug-in which may or may not exist in the plug-in registry.</li>
+<li><b>value</b> - the required state of the plug-in. The state of the plug-in may be one of the following: <samp>installed</samp> or <samp>activated</samp>.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.systemProperty">systemProperty</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST systemProperty</p>
+<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the state of some system property.  The property value is retrieved from the <samp>java.lang.System</samp>.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of the system property.</li>
+<li><b>value</b> - the required value of the system property.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.menu">menu</a> (<a href="#e.separator">separator</a>+ , <a href="#e.groupMarker">groupMarker</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST menu</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>label&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>path&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to defined a new menu.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique identifier that can be used to reference this menu.</li>
+<li><b>label</b> - a translatable name used by the Workbench for this new menu. The name should include mnemonic information.</li>
+<li><b>path</b> - the location of the new menu starting from the root of the menu. Each token in the path must refer to an existing menu, except the last token which should represent a named group in the last menu in the path. If omitted, the new menu will be added to the <samp>additions</samp> named group of the menu.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.separator">separator</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST separator</p>
+<p class=code id=dtdAttlist>name&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to create a menu separator in the new menu.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of the menu separator. This name can later be referenced as the last token in a menu path. Therefore, a separator also serve as named group into which actions and menus can be added.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.groupMarker">groupMarker</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST groupMarker</p>
+<p class=code id=dtdAttlist>name&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to create a named group in the new menu. It has no visual representation in the new menu, unlike the <samp>separator</samp> element.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of the group marker. This name can later be referenced as the last token in the menu path. It serves as named group into which actions and menus can be added.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.selection">selection</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST selection</p>
+<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to help determine the action enablement based on the current selection. Ignored if the <samp>enablement</samp> element is specified.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>class</b> - a fully qualified name of the class or interface that each object in the selection must implement in order to enable the action.</li>
+<li><b>name</b> - an optional wild card filter for the name that can be applied to all objects in the selection. If specified and the match fails, the action will be disabled.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.enablement">enablement</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to define the enablement for the extension.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.visibility">visibility</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to define the visibility for the extension.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.and">and</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a boolean AND operation on the result of evaluating it's two sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.or">or</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a boolean OR operation on the result of evaluating it's two sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.not">not</a> (<a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.not">not</a> | <a href="#e.objectClass">objectClass</a> | <a href="#e.objectState">objectState</a> | <a href="#e.pluginState">pluginState</a> | <a href="#e.systemProperty">systemProperty</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a boolean NOT operation on the result of evaluating it's sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.objectClass">objectClass</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST objectClass</p>
+<p class=code id=dtdAttlist>name&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the class or interface of each object in the current selection. If each object in the selection implements the specified class or interface, the expression is evaluated as true.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - a fully qualified name of a class or interface.  The expression is evaluated as true only if all objects within the selection implement this class or interface.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.objectState">objectState</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST objectState</p>
+<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the attribute state of each object in the current selection. If each object in the selection has the specified attribute state, the expression is evaluated as true. To evaluate this type of expression, each object in the selection must implement, or adapt to, <samp>org.eclipse.ui.IActionFilter</samp> interface.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of an object's attribute. Acceptable names reflect the object type, and should be publicly declared by the plug-in where the object type is declared.</li>
+<li><b>value</b> - the required value of the object's attribute. The acceptable values for the object's attribute should be publicly declared.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.pluginState">pluginState</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST pluginState</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;(installed|activated) "installed"&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the state of a plug-in. The state of the plug-in may be one of the following: <samp>installed</samp> or <samp>activated</samp>.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - the identifier of a plug-in which may or may not exist in the plug-in registry.</li>
+<li><b>value</b> - the required state of the plug-in. The state of the plug-in may be one of the following: <samp>installed</samp> or <samp>activated</samp>.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.systemProperty">systemProperty</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST systemProperty</p>
+<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the state of some system property.  The property value is retrieved from the <samp>java.lang.System</samp>.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - the name of the system property.</li>
+<li><b>value</b> - the required value of the system property.</li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>The following is an example of a view action extension:
+<p>
+<pre>
+   <p class=code id=tag>&lt;extension point=<p class=code id=cstring>&quot;org.eclipse.ui.viewActions&quot;</p><p class=code id=tag>&gt;</p> 
+      <p class=code id=tag>&lt;viewContribution 
+         id=<p class=code id=cstring>&quot;com.xyz.xyzViewC1&quot;</p><p class=code id=tag> 
+         targetID=<p class=code id=cstring>&quot;org.eclipse.ui.views.navigator.ResourceNavigator&quot;</p><p class=code id=tag>&gt;</p> 
+         <p class=code id=tag>&lt;menu
+            id=<p class=code id=cstring>&quot;com.xyz.xyzMenu&quot;</p><p class=code id=tag> 
+            label=<p class=code id=cstring>&quot;XYZ Menu&quot;</p><p class=code id=tag> 
+            path=<p class=code id=cstring>&quot;additions&quot;</p><p class=code id=tag>&gt;</p> 
+            <p class=code id=tag>&lt;separator name=<p class=code id=cstring>&quot;group1&quot;</p><p class=code id=tag>/&gt;</p> 
+         <p class=code id=tag>&lt;/menu&gt;</p> 
+         <p class=code id=tag>&lt;action
+            id=<p class=code id=cstring>&quot;com.xyz.runXYZ&quot;</p><p class=code id=tag> 
+            label=<p class=code id=cstring>&quot;&amp;amp;Run XYZ Tool&quot;</p><p class=code id=tag> 
+            menubarPath=<p class=code id=cstring>&quot;com.xyz.xyzMenu/group1&quot;</p><p class=code id=tag> 
+            toolbarPath=<p class=code id=cstring>&quot;Normal/additions&quot;</p><p class=code id=tag>
+            style=<p class=code id=cstring>&quot;toggle&quot;</p><p class=code id=tag>
+            state=<p class=code id=cstring>&quot;true&quot;</p><p class=code id=tag> 
+            icon=<p class=code id=cstring>&quot;icons/runXYZ.gif&quot;</p><p class=code id=tag> 
+            tooltip=<p class=code id=cstring>&quot;Run XYZ Tool&quot;</p><p class=code id=tag> 
+            helpContextId=<p class=code id=cstring>&quot;com.xyz.run_action_context&quot;</p><p class=code id=tag> 
+            class=<p class=code id=cstring>&quot;com.xyz.actions.RunXYZ&quot;</p><p class=code id=tag>&gt;</p> 
+            <p class=code id=tag>&lt;selection class=<p class=code id=cstring>&quot;org.eclipse.core.resources.IFile&quot;</p><p class=code id=tag> name=<p class=code id=cstring>&quot;*.java&quot;</p><p class=code id=tag>/&gt;</p> 
+         <p class=code id=tag>&lt;/action&gt;</p> 
+     <p class=code id=tag>&lt;/viewContribution&gt;</p> 
+   <p class=code id=tag>&lt;/extension&gt;</p> 
+</pre>
+</p>
+<p>
+In the example above, the specified action will only enable for a single selection (<samp>enablesFor</samp> attribute). In addition, the object in the selection must be a Java file resource.
+</p>
+<p>
+The following is an other example of a view action extension: 
+</p>
+<p>
+<pre>
+   <p class=code id=tag>&lt;extension point=<p class=code id=cstring>&quot;org.eclipse.ui.viewActions&quot;</p><p class=code id=tag>&gt;</p> 
+      <p class=code id=tag>&lt;viewContribution 
+         id=<p class=code id=cstring>&quot;com.xyz.xyzViewC1&quot;</p><p class=code id=tag> 
+         targetID=<p class=code id=cstring>&quot;org.eclipse.ui.views.navigator.ResourceNavigator&quot;</p><p class=code id=tag>&gt;</p> 
+         <p class=code id=tag>&lt;menu
+            id=<p class=code id=cstring>&quot;com.xyz.xyzMenu&quot;</p><p class=code id=tag> 
+            label=<p class=code id=cstring>&quot;XYZ Menu&quot;</p><p class=code id=tag> 
+            path=<p class=code id=cstring>&quot;additions&quot;</p><p class=code id=tag>&gt;</p> 
+            <p class=code id=tag>&lt;separator name=<p class=code id=cstring>&quot;group1&quot;</p><p class=code id=tag>/&gt;</p> 
+         <p class=code id=tag>&lt;/menu&gt;</p> 
+         <p class=code id=tag>&lt;action 
+            id=<p class=code id=cstring>&quot;com.xyz.runXYZ2&quot;</p><p class=code id=tag> 
+            label=<p class=code id=cstring>&quot;&amp;amp;Run XYZ2 Tool&quot;</p><p class=code id=tag> 
+            menubarPath=<p class=code id=cstring>&quot;com.xyz.xyzMenu/group1&quot;</p><p class=code id=tag>
+            style=<p class=code id=cstring>&quot;push&quot;</p><p class=code id=tag>
+            icon=<p class=code id=cstring>&quot;icons/runXYZ2.gif&quot;</p><p class=code id=tag> 
+            tooltip=<p class=code id=cstring>&quot;Run XYZ2 Tool&quot;</p><p class=code id=tag> 
+            helpContextId=<p class=code id=cstring>&quot;com.xyz.run_action_context2&quot;</p><p class=code id=tag> 
+            class=<p class=code id=cstring>&quot;com.xyz.actions.RunXYZ2&quot;</p><p class=code id=tag>&gt;</p> 
+            <p class=code id=tag>&lt;enablement&gt;</p>
+               <p class=code id=tag>&lt;and&gt;</p>
+                  <p class=code id=tag>&lt;objectClass name=<p class=code id=cstring>&quot;org.eclipse.core.resources.IFile&quot;</p><p class=code id=tag>/&gt;</p>
+                  <p class=code id=tag>&lt;not&gt;</p>
+                     <p class=code id=tag>&lt;objectState name=<p class=code id=cstring>&quot;extension&quot;</p><p class=code id=tag> value=<p class=code id=cstring>&quot;java&quot;</p><p class=code id=tag>/&gt;</p>
+                  <p class=code id=tag>&lt;/not&gt;</p>
+               <p class=code id=tag>&lt;/and&gt;</p>
+            <p class=code id=tag>&lt;/enablement&gt;</p>
+         <p class=code id=tag>&lt;/action&gt;</p> 
+      <p class=code id=tag>&lt;/editorContribution&gt;</p> 
+   <p class=code id=tag>&lt;/extension&gt;</p> 
+</pre>
+</p>
+<p>
+In the example above, the specified action will appear as a menu item. The action is enabled if the selection contains no Java file resources.
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6>The value of the <samp>class</samp> attribute must be a fully qualified name of a Java class that implements <samp>org.eclipse.ui.IViewActionDelegate</samp>. This class is loaded as late as possible to avoid loading the entire plug-in before it is really needed.
+<p>
+The interface <samp>org.eclipse.ui.IViewActionDelegate</samp> extends <samp>org.eclipse.ui.IActionDelegate</samp> and adds an additional method that allows the 
+delegate to initialize with the view instance it is contributing into.
+</p>
+<p>
+This extension point can be used to contribute actions into menus previously created by the target view. Omitting the menu path attribute will result in adding the new menu or action at the end of the pulldown menu.
+</p>
+<p>
+The enablement criteria for an action extension is initially defined by <samp>enablesFor</samp>, and also either <samp>selection</samp> or <samp>enablement</samp>. However, once the action delegate has been instantiated, it may control the action enable state directly within its <samp>selectionChanged</samp> method.
+</p>
+<p>
+Action and menu labels may contain special characters that encode mnemonics using the following rules:
+<ol>
+<li>
+Mnemonics are specified using the ampersand ('&amp;') character in front
+of a selected character in the translated text. Since ampersand is not
+allowed in XML strings, use <samp>&amp;amp;</samp> character entity.</li>
+</ol>
+If two or more actions are contributed to a menu or toolbar by a single extension the actions will appear in the reverse order of how they are listed in the plugin.xml file. This behavior is admittedly unintuitive.  However, it was discovered after the  Eclipse Platform API was frozen.  Changing the behavior now would break every plug-in which relies upon the existing behavior.
+<p>
+The <samp>selection</samp> and <samp>enablement</samp> elements are mutually exclusive. The <samp>enablement</samp> element can replace the <samp>selection</samp> element using the sub-elements <samp>objectClass</samp> and <samp>objectState</samp>. For example, the following:
+<pre>
+ <p class=code id=tag>&lt;selection
+  class=<p class=code id=cstring>&quot;org.eclipse.core.resources.IFile&quot;</p><p class=code id=tag>
+  name=<p class=code id=cstring>&quot;*.java&quot;</p><p class=code id=tag>&gt;</p>
+ <p class=code id=tag>&lt;/selection&gt;</p>
+</pre>
+can be expressed using:
+<pre>
+ <p class=code id=tag>&lt;enablement&gt;</p>
+  <p class=code id=tag>&lt;and&gt;</p>
+   <p class=code id=tag>&lt;objectClass name=<p class=code id=cstring>&quot;org.eclipse.core.resources.IFile&quot;</p><p class=code id=tag>/&gt;</p>
+   <p class=code id=tag>&lt;objectState name=<p class=code id=cstring>&quot;extension&quot;</p><p class=code id=tag> value=<p class=code id=cstring>&quot;java&quot;</p><p class=code id=tag>/&gt;</p>
+  <p class=code id=tag>&lt;/and&gt;</p>
+ <p class=code id=tag>&lt;/enablement&gt;</p>
+</pre>
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>Each view normally comes with a number of standard items on the pulldown menu and local toolbar. Additions from other plug-ins will be appended to the standard complement.
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright (c) 2002, 2004 IBM Corporation and others.<br>
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Common Public License v1.0 which 
+accompanies 
+this distribution, and is available at 
+<a 
+href="http://www.eclipse.org/legal/cpl-v10.html">http://www.eclipse.org/legal/cpl-v10.html</a>
+<p></p>
+
+</p>
+</BODY>
+</HTML>

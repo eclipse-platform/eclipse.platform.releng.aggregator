@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Creation Wizards</title>
+<style>@import url("../../book.css");</style>
+<style>@import url("../../schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Creation Wizards</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>org.eclipse.ui.newWizards<p></p>
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6>This extension point is used to register resource creation wizard extensions. Creation wizards appear as choices within the "New Dialog", and are typically used to create folders and files. 
+<p>
+In the "New Dialog", wizards are organized into categories which usually reflect a particular problem domain.  For instance, a Java oriented plugin may define a category called "Java" which is appropriate for "Class" or "Package" creation wizards.  The categories defined by one plug-in can be referenced by other plug-ins using the category attribute. Uncategorized wizards, as well as wizards with invalid category paths, will end up in an "Other" category. 
+</p>
+
+<p>
+Wizards may optionally specify a description subelement whose body should contain short text about the wizard.
+</p></p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.category">category</a> | <a href="#e.wizard">wizard</a> | <a href="#e.primaryWizard">primaryWizard</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li>
+<li><b>id</b> - an optional identifier of the extension instance</li>
+<li><b>name</b> - an optional name of the extension instance</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.category">category</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST category</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>parentCategory&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique name that can be used to identify this category</li>
+<li><b>name</b> - a translatable name of the category that will be used in the dialog box</li>
+<li><b>parentCategory</b> - a path to another category if this category should be added as a child</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.wizard">wizard</a> (<a href="#e.description">description</a>? , <a href="#e.selection">selection</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST wizard</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>icon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>project&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true | false) <p class=code id=dtdAttlist>finalPerspective&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>preferredPerspectives&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>helpHref&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>descriptionImage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique name that can be used to identify this wizard</li>
+<li><b>name</b> - a translatable name of the wizard that will be used in the dialog box</li>
+<li><b>icon</b> - a relative path of an icon that will be used together with the name to represent the wizard 
+as one of the choices in the creation dialog box.</li>
+<li><b>category</b> - a slash-delimited path ('/') of category IDs. Each token in the
+path must represent a valid category ID previously defined
+by this or some other plug-in. If omitted, the wizard will be
+added to the "Other" category.</li>
+<li><b>class</b> - a fully qualified name of the Java class implementing <samp>org.eclipse.ui.INewWizard</samp>.</li>
+<li><b>project</b> - an optional attribute indicating the wizard will create an IProject resource.
+Also causes the wizard to appear as a choice within the "New Project Dialog".</li>
+<li><b>finalPerspective</b> - an optional attribute which identifies a perspective to activate when IProject resource creation is finished.</li>
+<li><b>preferredPerspectives</b> - an optional attribute specifying a comma-separated list of perspective IDs.  If the current perspective is in this list, then no perspective activation occurs when IProject resource creation is finished.</li>
+<li><b>helpHref</b> - a help url that can describe this wizard in detail.
+<p>
+Since 3.0
+</p></li>
+<li><b>descriptionImage</b> - a larger image that can help describe this wizard.
+<p>
+Since 3.0
+</p></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.description">description</a> (#PCDATA)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+an optional subelement whose body contains a short text describing what the wizard will do when started</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.selection">selection</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST selection</p>
+<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>class</b> - a fully qualified class name.  If each object in the workbench selection implements this interface the selection will be passed to the wizard.  Otherwise, an empty selection is passed</li>
+<li><b>name</b> - an optional name filter.  Each object in the workbench selection must match the name filter to be passed to the wizard</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.primaryWizard">primaryWizard</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST primaryWizard</p>
+<p class=code id=dtdAttlist>id&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+a means of declaring that a wizard is "primary" in the UI.  A primary wizard is emphasized in the new wizard dialog.  Please note that this element is not intended to be used by plug in developers!  This element exists so that product managers may emphasize a set of wizards for their products.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - the id of a wizard that should be made primary.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.category">category</a> | <a href="#e.wizard">wizard</a> | <a href="#e.primaryWizard">primaryWizard</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li>
+<li><b>id</b> - an optional identifier of the extension instance</li>
+<li><b>name</b> - an optional name of the extension instance</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.category">category</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST category</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>parentCategory&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique name that can be used to identify this category</li>
+<li><b>name</b> - a translatable name of the category that will be used in the dialog box</li>
+<li><b>parentCategory</b> - a path to another category if this category should be added as a child</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.wizard">wizard</a> (<a href="#e.description">description</a>? , <a href="#e.selection">selection</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST wizard</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>icon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>project&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(true | false) <p class=code id=dtdAttlist>finalPerspective&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>preferredPerspectives&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>helpHref&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>descriptionImage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - a unique name that can be used to identify this wizard</li>
+<li><b>name</b> - a translatable name of the wizard that will be used in the dialog box</li>
+<li><b>icon</b> - a relative path of an icon that will be used together with the name to represent the wizard 
+as one of the choices in the creation dialog box.</li>
+<li><b>category</b> - a slash-delimited path ('/') of category IDs. Each token in the
+path must represent a valid category ID previously defined
+by this or some other plug-in. If omitted, the wizard will be
+added to the "Other" category.</li>
+<li><b>class</b> - a fully qualified name of the Java class implementing <samp>org.eclipse.ui.INewWizard</samp>.</li>
+<li><b>project</b> - an optional attribute indicating the wizard will create an IProject resource.
+Also causes the wizard to appear as a choice within the "New Project Dialog".</li>
+<li><b>finalPerspective</b> - an optional attribute which identifies a perspective to activate when IProject resource creation is finished.</li>
+<li><b>preferredPerspectives</b> - an optional attribute specifying a comma-separated list of perspective IDs.  If the current perspective is in this list, then no perspective activation occurs when IProject resource creation is finished.</li>
+<li><b>helpHref</b> - a help url that can describe this wizard in detail.
+<p>
+Since 3.0
+</p></li>
+<li><b>descriptionImage</b> - a larger image that can help describe this wizard.
+<p>
+Since 3.0
+</p></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.description">description</a> (#PCDATA)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+an optional subelement whose body contains a short text describing what the wizard will do when started</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.selection">selection</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST selection</p>
+<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>class</b> - a fully qualified class name.  If each object in the workbench selection implements this interface the selection will be passed to the wizard.  Otherwise, an empty selection is passed</li>
+<li><b>name</b> - an optional name filter.  Each object in the workbench selection must match the name filter to be passed to the wizard</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.primaryWizard">primaryWizard</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST primaryWizard</p>
+<p class=code id=dtdAttlist>id&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+a means of declaring that a wizard is "primary" in the UI.  A primary wizard is emphasized in the new wizard dialog.  Please note that this element is not intended to be used by plug in developers!  This element exists so that product managers may emphasize a set of wizards for their products.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - the id of a wizard that should be made primary.</li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>Following is an example of creation wizard configuration: 
+<p>
+<pre>
+   <p class=code id=tag>&lt;extension point=<p class=code id=cstring>&quot;org.eclipse.ui.newWizards&quot;</p><p class=code id=tag>&gt;</p> 
+      <p class=code id=tag>&lt;category 
+        id=<p class=code id=cstring>&quot;com.xyz.XYZ&quot;</p><p class=code id=tag> 
+        name=<p class=code id=cstring>&quot;XYZ Wizards&quot;</p><p class=code id=tag>&gt;</p> 
+      <p class=code id=tag>&lt;/category&gt;</p> 
+      <p class=code id=tag>&lt;category 
+        id=<p class=code id=cstring>&quot;com.xyz.XYZ.Web&quot;</p><p class=code id=tag> 
+        name=<p class=code id=cstring>&quot;Web Wizards&quot;</p><p class=code id=tag> 
+        parentCategory=<p class=code id=cstring>&quot;com.xyz.XYZ&quot;</p><p class=code id=tag>&gt;</p> 
+      <p class=code id=tag>&lt;/category&gt;</p> 
+      <p class=code id=tag>&lt;wizard 
+          id=<p class=code id=cstring>&quot;com.xyz.wizard1&quot;</p><p class=code id=tag> 
+          name=<p class=code id=cstring>&quot;XYZ artifact&quot;</p><p class=code id=tag> 
+          category=<p class=code id=cstring>&quot;com.xyz.XYZ/com.xyz.XYZ.Web&quot;</p><p class=code id=tag> 
+          icon=<p class=code id=cstring>&quot;./icons/XYZwizard1.gif&quot;</p><p class=code id=tag> 
+          class=<p class=code id=cstring>&quot;com.xyz.XYZWizard1&quot;</p><p class=code id=tag>&gt;</p> 
+          <p class=code id=tag>&lt;description&gt;</p> 
+              Create a simple XYZ artifact and set initial content 
+          <p class=code id=tag>&lt;/description&gt;</p> 
+           <p class=code id=tag>&lt;selection class=<p class=code id=cstring>&quot;org.eclipse.core.resources.IResource&quot;</p><p class=code id=tag>/&gt;</p>          
+      <p class=code id=tag>&lt;/wizard&gt;</p> 
+   <p class=code id=tag>&lt;/extension&gt;</p> 
+</pre>
+</p>
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6>The value of the class attribute must represent a class 
+that implements <samp>org.eclipse.ui.INewWizard</samp>. 
+If the wizard is created from within the 
+New Wizard it will be inserted into the existing wizard.  
+If the wizard is launched as a shortcut 
+(from the File New menu or a toolbar button) it will 
+appear standalone as a separate dialog box.
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>The workbench comes with wizards for creating empty 
+resources of the following types: 
+project, folder and file. These wizards are registered 
+using the same mechanism as described above. 
+Additional wizards may also appear, subject to 
+particular platform installation.
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright (c) 2002, 2004 IBM Corporation and others.<br>
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Common Public License v1.0 which 
+accompanies 
+this distribution, and is available at 
+<a 
+href="http://www.eclipse.org/legal/cpl-v10.html">http://www.eclipse.org/legal/cpl-v10.html</a>
+<p></p>
+
+</p>
+</BODY>
+</HTML>

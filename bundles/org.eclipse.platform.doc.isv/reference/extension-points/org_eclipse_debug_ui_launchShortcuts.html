@@ -1,0 +1,516 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Launch Shortcuts</title>
+<style>@import url("../../book.css");</style>
+<style>@import url("../../schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Launch Shortcuts</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>org.eclipse.debug.ui.launchShortcuts<p></p>
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6>This extension point provides support for selection sensitive launching.  Extensions register a shortcut which
+appears in the run and/or debug cascade menus to launch the workbench selection or active editor.<p>
+<p>
+</p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.shortcut">shortcut</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li>
+<li><b>id</b> - an optional identifier of the extension instance</li>
+<li><b>name</b> - an optional name of the extension instance</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.shortcut">shortcut</a> (<a href="#e.perspective">perspective</a>* , <a href="#e.contextualLaunch">contextualLaunch</a>? , <a href="#e.enablement">enablement</a>?)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST shortcut</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>modes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>icon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>helpContextId&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - specifies a unique identifier for this launch shortcut.</li>
+<li><b>modes</b> - specifies a comma-separated list of modes this shortcut supports.</li>
+<li><b>class</b> - specifies the fully qualified name of a class which implements
+<code>org.eclipse.debug.ui.ILaunchShortcut</code>.</li>
+<li><b>label</b> - specifies a label used to render this shortcut.</li>
+<li><b>icon</b> - specifies a plugin-relative path to an image used to render this shortcut. Icon is optional because it is up to other plugins (i.e. Views) to render it.</li>
+<li><b>category</b> - specifies the launch configuration type category this shortcut is applicable for. When unspecified, the category is <code>null</code> (default).</li>
+<li><b>helpContextId</b> - an optional identifier that specifies the help context to associate with this launch shortcut</li>
+<li><b>path</b> - an optional menu path used to group launch shortcuts in menus. Launch shortcuts are grouped alphabetically based on the <code>path</code> attribute, and then sorted alphabetically within groups based on the <code>label</code> attribute. When unspecified, a shortcut appears in the last group. This attribute was added in the 3.0.1 release.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.perspective">perspective</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST perspective</p>
+<p class=code id=dtdAttlist>id&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+The <code>perspective</code> element has been <b>deprecated</b> in the 3.1 release. The top level Run/Debug/Profile cascade menus now support contextual (selection sensitive) launching, and clients should provide a <code>contextualLaunch</code> element instead.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - the unique identifier of a perspective in which a menu shortcut for this launch shortcut will appear.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.contextualLaunch">contextualLaunch</a> (<a href="#e.contextLabel">contextLabel</a>* , <a href="#e.enablement">enablement</a>?)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+Holds all descriptions for adding shortcuts to the selection sensitive Run/Debug/Profile cascade menus.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.contextLabel">contextLabel</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST contextLabel</p>
+<p class=code id=dtdAttlist>mode&nbsp;&nbsp;(run|debug|profile) <p class=code id=dtdAttlist>label&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+Specify the label for a contextual launch mode.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>mode</b> - specifies a mode from the set {"run","debug","profile"}</li>
+<li><b>label</b> - specifies the label to appear in the contextual launch menu.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.shortcut">shortcut</a>*)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>point</b> - a fully qualified identifier of the target extension point</li>
+<li><b>id</b> - an optional identifier of the extension instance</li>
+<li><b>name</b> - an optional name of the extension instance</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.shortcut">shortcut</a> (<a href="#e.perspective">perspective</a>* , <a href="#e.contextualLaunch">contextualLaunch</a>? , <a href="#e.enablement">enablement</a>?)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST shortcut</p>
+<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>modes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>icon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>category&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>helpContextId&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>path&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - specifies a unique identifier for this launch shortcut.</li>
+<li><b>modes</b> - specifies a comma-separated list of modes this shortcut supports.</li>
+<li><b>class</b> - specifies the fully qualified name of a class which implements
+<code>org.eclipse.debug.ui.ILaunchShortcut</code>.</li>
+<li><b>label</b> - specifies a label used to render this shortcut.</li>
+<li><b>icon</b> - specifies a plugin-relative path to an image used to render this shortcut. Icon is optional because it is up to other plugins (i.e. Views) to render it.</li>
+<li><b>category</b> - specifies the launch configuration type category this shortcut is applicable for. When unspecified, the category is <code>null</code> (default).</li>
+<li><b>helpContextId</b> - an optional identifier that specifies the help context to associate with this launch shortcut</li>
+<li><b>path</b> - an optional menu path used to group launch shortcuts in menus. Launch shortcuts are grouped alphabetically based on the <code>path</code> attribute, and then sorted alphabetically within groups based on the <code>label</code> attribute. When unspecified, a shortcut appears in the last group. This attribute was added in the 3.0.1 release.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.perspective">perspective</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST perspective</p>
+<p class=code id=dtdAttlist>id&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+The <code>perspective</code> element has been <b>deprecated</b> in the 3.1 release. The top level Run/Debug/Profile cascade menus now support contextual (selection sensitive) launching, and clients should provide a <code>contextualLaunch</code> element instead.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>id</b> - the unique identifier of a perspective in which a menu shortcut for this launch shortcut will appear.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.contextualLaunch">contextualLaunch</a> (<a href="#e.contextLabel">contextLabel</a>* , <a href="#e.enablement">enablement</a>?)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+Holds all descriptions for adding shortcuts to the selection sensitive Run/Debug/Profile cascade menus.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.contextLabel">contextLabel</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST contextLabel</p>
+<p class=code id=dtdAttlist>mode&nbsp;&nbsp;(run|debug|profile) <p class=code id=dtdAttlist>label&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+Specify the label for a contextual launch mode.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>mode</b> - specifies a mode from the set {"run","debug","profile"}</li>
+<li><b>label</b> - specifies the label to appear in the contextual launch menu.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.enablement">enablement</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+A generic root element. The element can be used inside an extension point to define its enablement expression.
+            The children of an enablement expression are combined using the and operator.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.not">not</a> (<a href="#e.not">not</a> | <a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.instanceof">instanceof</a> | <a href="#e.test">test</a> | <a href="#e.systemTest">systemTest</a> | <a href="#e.equals">equals</a> | <a href="#e.count">count</a> | <a href="#e.with">with</a> | <a href="#e.resolve">resolve</a> | <a href="#e.adapt">adapt</a> | <a href="#e.iterate">iterate</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a NOT operation on the result of evaluating it's sub-element expression.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.and">and</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent an AND operation on the result of evaluating all it's sub-elements expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.or">or</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent an  OR operation on the result of evaluating all it's sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.instanceof">instanceof</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST instanceof</p>
+<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to perform an instanceof check of the object in focus. The expression returns
+            EvaluationResult.TRUE if the object's type is a sub type of the type specified by the attribute value.
+            Otherwise EvaluationResult.FALSE is returned.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>value</b> - a fully qualified name of a class or interface.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.test">test</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST test</p>
+<p class=code id=dtdAttlist>property&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>args&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>value&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the property state of the object in focus. The set of
+            testable properties can be extended using the propery tester extension point. The test
+            expression returns EvaluationResult.NOT_LOADED if teh property tester doing the actual
+            testing isn't loaded yet.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>property</b> - the name of an object's property to test.</li>
+<li><b>args</b> - additional arguments passed to the property tester. Multiple arguments are seperated
+                  by commas. Each individual argument is converted into a Java base type using the same
+                  rules as defined for the value attribute of the test expression.</li>
+<li><b>value</b> - the expected value of the property. Can be omitted if the property 
+                  is a boolean property. The test expression is supposed to return 
+EvaluationResult.TRUE if the property matches the value and EvaluationResult.FALSE
+otherwise. The value attribute is converted into a Java base type using the following
+rules:
+<ul>
+ <li>the string &quot;true&quot; is converted into Boolean.TRUE</li>
+ <li>the string &quot;false&quot; is converted into Boolean.FALSE</li>
+ <li>if the string contains a dot then the interpreter tries to convert
+ the value into a Float object. If this fails the string is treated as a
+ java.lang.String</li>
+ <li>if the string only consists of numbers then the interpreter
+ converts the value in an Integer object.</li>
+ <li>in all other cases the string is treated as a java.lang.String</li>
+ <li>the conversion of the string into a Boolean, Float, or Integer can
+ be suppressed by surrounding the string with single quotes. For
+ example, the attribute value=&quot;'true'&quot; is converted into the
+ string &quot;true&quot;</li>
+</ul></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.systemTest">systemTest</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST systemTest</p>
+<p class=code id=dtdAttlist>property&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+Tests a system property by calling the System.getProperty method and compares the result
+            with the value specified through the value attribute.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>property</b> - the name of an system property to test.</li>
+<li><b>value</b> - the expected value of the property. The value is interpreted as a string value.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.equals">equals</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST equals</p>
+<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to perform an equals check of the object in focus. The expression returns
+            EvaluationResult.TRUE if the object is equal to the value provided by the attribute value. Otherwise
+            EvaluationResult.FALSE is returned.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>value</b> - the operatand of the equals tests. The value provided as a string is converted into
+                  a Java base type using the same rules as for the value attribute of the test expression.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.count">count</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST count</p>
+<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to test the number of elements in a collection.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>value</b> - an expression to specify the number of elements in a list. Following wildcard
+                  characters can be used:
+                  <dl>
+                    <dt>*</dt> <dd>any number of elements</dd>
+                    <dt>?</dt> <dd>no elements or one element</dd>
+                    <dt>+</dt> <dd>one or more elements</dd>
+                    <dt>!</dt> <dd>no elements</dd>
+                    <dt>integer value</dt> <dd>the list must contain the exact number of elements</dd>
+                  </dl></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.with">with</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST with</p>
+<p class=code id=dtdAttlist>variable&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element changes the object to be inspected for all its child element to the object
+            referneced by the given variable. If the variable can not be resolved then the expression
+            will throw a ExpressionException when evaluating it. The children of a with expression 
+            are combined using the and operator.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>variable</b> - the name of the variable to be used for further inspection. It is up to the evaluator
+                  of an extension point to provide the variable in the variable pool.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.resolve">resolve</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST resolve</p>
+<p class=code id=dtdAttlist>variable&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>args&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element changes the object to be inspected for all its child element to the object
+            referneced by the given variable. If the variable can not be resolved then the expression
+            will throw a ExpressionException when evaluating it. The children of a with expression 
+            are combined using the and operator.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>variable</b> - the name of the variable to be resolved. This variable is then used as the object in focus
+                  for child element evaluation. It is up to the evaluator of an extension point to provide a 
+                  corresponding variable resolver (see IVariableResolver) through the evaluation context passed
+                  to the root expression element when evaluating the expression.</li>
+<li><b>args</b> - additional arguments passed to the variable resolver. Multiple arguments are seperated
+                  by commas. Each individual argument is converted into a Java base type using the same
+                  rules as defined for the value attribute of the test expression.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.adapt">adapt</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST adapt</p>
+<p class=code id=dtdAttlist>type&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to adapt the object in focus to the type specified by the attribute
+            type. The expression returns not loaded if either the adapter or the type referenced isn't
+            loaded yet. It throws a ExpressionException during evaluation if the type name doesn't exist 
+            at all. The children of an adapt expression are combined using the and operator.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>type</b> - the type to which the object in focus is to be adapted.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.iterate">iterate</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST iterate</p>
+<p class=code id=dtdAttlist>operator&nbsp;(or|and) &gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to iterate over a variable that is of type java.util.Collection. If
+            the object in focus is not of type java.util.Collection then an ExpressionException will
+            be thrown while evaluating the expression.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>operator</b> - either "and" or "or". The operator defines how the child
+                  elements will be combined. If not specified, "and" will be used.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.enablement">enablement</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+A generic root element. The element can be used inside an extension point to define its enablement expression.
+            The children of an enablement expression are combined using the and operator.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.not">not</a> (<a href="#e.not">not</a> | <a href="#e.and">and</a> | <a href="#e.or">or</a> | <a href="#e.instanceof">instanceof</a> | <a href="#e.test">test</a> | <a href="#e.systemTest">systemTest</a> | <a href="#e.equals">equals</a> | <a href="#e.count">count</a> | <a href="#e.with">with</a> | <a href="#e.resolve">resolve</a> | <a href="#e.adapt">adapt</a> | <a href="#e.iterate">iterate</a>)&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent a NOT operation on the result of evaluating it's sub-element expression.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.and">and</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent an AND operation on the result of evaluating all it's sub-elements expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.or">or</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element represent an  OR operation on the result of evaluating all it's sub-element expressions.</p>
+<br><br>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.instanceof">instanceof</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST instanceof</p>
+<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to perform an instanceof check of the object in focus. The expression returns
+            EvaluationResult.TRUE if the object's type is a sub type of the type specified by the attribute value.
+            Otherwise EvaluationResult.FALSE is returned.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>value</b> - a fully qualified name of a class or interface.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.test">test</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST test</p>
+<p class=code id=dtdAttlist>property&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>args&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>value&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to evaluate the property state of the object in focus. The set of
+            testable properties can be extended using the propery tester extension point. The test
+            expression returns EvaluationResult.NOT_LOADED if teh property tester doing the actual
+            testing isn't loaded yet.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>property</b> - the name of an object's property to test.</li>
+<li><b>args</b> - additional arguments passed to the property tester. Multiple arguments are seperated
+                  by commas. Each individual argument is converted into a Java base type using the same
+                  rules as defined for the value attribute of the test expression.</li>
+<li><b>value</b> - the expected value of the property. Can be omitted if the property 
+                  is a boolean property. The test expression is supposed to return 
+EvaluationResult.TRUE if the property matches the value and EvaluationResult.FALSE
+otherwise. The value attribute is converted into a Java base type using the following
+rules:
+<ul>
+ <li>the string &quot;true&quot; is converted into Boolean.TRUE</li>
+ <li>the string &quot;false&quot; is converted into Boolean.FALSE</li>
+ <li>if the string contains a dot then the interpreter tries to convert
+ the value into a Float object. If this fails the string is treated as a
+ java.lang.String</li>
+ <li>if the string only consists of numbers then the interpreter
+ converts the value in an Integer object.</li>
+ <li>in all other cases the string is treated as a java.lang.String</li>
+ <li>the conversion of the string into a Boolean, Float, or Integer can
+ be suppressed by surrounding the string with single quotes. For
+ example, the attribute value=&quot;'true'&quot; is converted into the
+ string &quot;true&quot;</li>
+</ul></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.systemTest">systemTest</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST systemTest</p>
+<p class=code id=dtdAttlist>property&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>value&nbsp;&nbsp;&nbsp;&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+Tests a system property by calling the System.getProperty method and compares the result
+            with the value specified through the value attribute.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>property</b> - the name of an system property to test.</li>
+<li><b>value</b> - the expected value of the property. The value is interpreted as a string value.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.equals">equals</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST equals</p>
+<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to perform an equals check of the object in focus. The expression returns
+            EvaluationResult.TRUE if the object is equal to the value provided by the attribute value. Otherwise
+            EvaluationResult.FALSE is returned.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>value</b> - the operatand of the equals tests. The value provided as a string is converted into
+                  a Java base type using the same rules as for the value attribute of the test expression.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.count">count</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST count</p>
+<p class=code id=dtdAttlist>value&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to test the number of elements in a collection.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>value</b> - an expression to specify the number of elements in a list. Following wildcard
+                  characters can be used:
+                  <dl>
+                    <dt>*</dt> <dd>any number of elements</dd>
+                    <dt>?</dt> <dd>no elements or one element</dd>
+                    <dt>+</dt> <dd>one or more elements</dd>
+                    <dt>!</dt> <dd>no elements</dd>
+                    <dt>integer value</dt> <dd>the list must contain the exact number of elements</dd>
+                  </dl></li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.with">with</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST with</p>
+<p class=code id=dtdAttlist>variable&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element changes the object to be inspected for all its child element to the object
+            referneced by the given variable. If the variable can not be resolved then the expression
+            will throw a ExpressionException when evaluating it. The children of a with expression 
+            are combined using the and operator.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>variable</b> - the name of the variable to be used for further inspection. It is up to the evaluator
+                  of an extension point to provide the variable in the variable pool.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.resolve">resolve</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST resolve</p>
+<p class=code id=dtdAttlist>variable&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>args&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element changes the object to be inspected for all its child element to the object
+            referneced by the given variable. If the variable can not be resolved then the expression
+            will throw a ExpressionException when evaluating it. The children of a with expression 
+            are combined using the and operator.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>variable</b> - the name of the variable to be resolved. This variable is then used as the object in focus
+                  for child element evaluation. It is up to the evaluator of an extension point to provide a 
+                  corresponding variable resolver (see IVariableResolver) through the evaluation context passed
+                  to the root expression element when evaluating the expression.</li>
+<li><b>args</b> - additional arguments passed to the variable resolver. Multiple arguments are seperated
+                  by commas. Each individual argument is converted into a Java base type using the same
+                  rules as defined for the value attribute of the test expression.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.adapt">adapt</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST adapt</p>
+<p class=code id=dtdAttlist>type&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to adapt the object in focus to the type specified by the attribute
+            type. The expression returns not loaded if either the adapter or the type referenced isn't
+            loaded yet. It throws a ExpressionException during evaluation if the type name doesn't exist 
+            at all. The children of an adapt expression are combined using the and operator.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>type</b> - the type to which the object in focus is to be adapted.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.iterate">iterate</a> (<a href="#e.not">not</a> , <a href="#e.and">and</a> , <a href="#e.or">or</a> , <a href="#e.instanceof">instanceof</a> , <a href="#e.test">test</a> , <a href="#e.systemTest">systemTest</a> , <a href="#e.equals">equals</a> , <a href="#e.count">count</a> , <a href="#e.with">with</a> , <a href="#e.resolve">resolve</a> , <a href="#e.adapt">adapt</a> , <a href="#e.iterate">iterate</a>)*&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST iterate</p>
+<p class=code id=dtdAttlist>operator&nbsp;(or|and) &gt;</p>
+<p></p>
+<p class=ConfigMarkup id=elementDesc>
+This element is used to iterate over a variable that is of type java.util.Collection. If
+            the object in focus is not of type java.util.Collection then an ExpressionException will
+            be thrown while evaluating the expression.</p>
+<br>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>operator</b> - either "and" or "or". The operator defines how the child
+                  elements will be combined. If not specified, "and" will be used.</li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>The following is an example of a launch shortcut extension point:
+
+<p>
+<pre>
+ <p class=code id=tag>&lt;extension point=<p class=code id=cstring>&quot;org.eclipse.debug.ui.launchShortcuts&quot;</p><p class=code id=tag>&gt;</p>
+  <p class=code id=tag>&lt;shortcut
+     id=<p class=code id=cstring>&quot;com.example.ExampleLaunchShortcutId&quot;</p><p class=code id=tag>
+     modes=<p class=code id=cstring>&quot;run,debug&quot;</p><p class=code id=tag>
+     class=<p class=code id=cstring>&quot;com.example.ExampleLaunchShortcutImpl&quot;</p><p class=code id=tag>
+     label=<p class=code id=cstring>&quot;Example Launch Shortcut&quot;</p><p class=code id=tag>
+     icon=<p class=code id=cstring>&quot;icons/examples.gif&quot;</p><p class=code id=tag>&gt;</p>
+     <p class=code id=tag>&lt;perspective id=<p class=code id=cstring>&quot;org.eclipse.jdt.ui.JavaPerspective&quot;</p><p class=code id=tag>/&gt;</p>
+     <p class=code id=tag>&lt;perspective id=<p class=code id=cstring>&quot;org.eclipse.debug.ui.DebugPerspective&quot;</p><p class=code id=tag>/&gt;</p>
+  <p class=code id=tag>&lt;/shortcut&gt;</p>
+ <p class=code id=tag>&lt;/extension&gt;</p>
+</pre>
+</p>
+
+In the above example, a launch shortcut will be shown in the run and debug cascade menus with the label
+"Example Launch Shortcut", in the JavaPerspective and the DebugPerspective.
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6><p>
+Value of the attribute <b>class</b> must be a fully qualified name of a Java class that implements the 
+interface <b>org.eclipse.debug.ui.ILaunchShortcut</b>.
+</p>
+<p>
+Since 3.1, the debug platform registers a command handler for each launch shortcut and its applicable modes to allow clients to define key-bindings for a launch shortcut. The command id for a handler is generated as the launch shortcut id attribute, followed by a dot and the applicable launch mode. For example, the command id for the above launch shortcut example would be <code>com.example.ExampleLaunchShortcutId.debug</code> for launching in debug mode. A command and key binding could be defined as follows, to bind "<code>ALT-SHIFT-D, E</code>" to the launch shortcut.
+<pre>
+   <p class=code id=tag>&lt;extension point=<p class=code id=cstring>&quot;org.eclipse.ui.commands&quot;</p><p class=code id=tag>&gt;</p>
+      <p class=code id=tag>&lt;command
+            name=<p class=code id=cstring>&quot;Debug Example Launch&quot;</p><p class=code id=tag>
+            description=<p class=code id=cstring>&quot;Debug Example Launch&quot;</p><p class=code id=tag>
+            categoryId=<p class=code id=cstring>&quot;org.eclipse.debug.ui.category.run&quot;</p><p class=code id=tag>
+            id=<p class=code id=cstring>&quot;com.example.ExampleLaunchShortcutId.debug&quot;</p><p class=code id=tag>&gt;</p>
+      <p class=code id=tag>&lt;/command&gt;</p>
+      <p class=code id=tag>&lt;keyBinding
+            keySequence=<p class=code id=cstring>&quot;M3+M2+D E&quot;</p><p class=code id=tag>
+            contextId=<p class=code id=cstring>&quot;org.eclipse.ui.globalScope&quot;</p><p class=code id=tag>
+            commandId=<p class=code id=cstring>&quot;com.example.ExampleLaunchShortcutId.debug&quot;</p><p class=code id=tag>
+            keyConfigurationId=<p class=code id=cstring>&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;</p><p class=code id=tag>&gt;</p>
+      <p class=code id=tag>&lt;/keyBinding&gt;</p>
+   <p class=code id=tag>&lt;/extension&gt;</p>      
+</pre>
+</p>
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright (c) 2000, 2003 IBM Corporation and others.<br>
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Common Public License v1.0 which 
+accompanies this distribution, and is available at 
+<a href="http://www.eclipse.org/legal/cpl-v10.html">http://www.eclipse.org/legal/cpl-v10.html</a>
+<p></p>
+
+</p>
+</BODY>
+</HTML>

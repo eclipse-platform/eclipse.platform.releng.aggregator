@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD><meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Auto-refresh providers</title>
+<style>@import url("../../book.css");</style>
+<style>@import url("../../schema.css");</style>
+</HEAD>
+<BODY>
+<H1><CENTER>Auto-refresh providers</CENTER></H1>
+<p></p>
+<h6 class=CaptionFigColumn id=header>Identifier: </h6>org.eclipse.core.resources.refreshProviders<p></p>
+<h6 class=CaptionFigColumn id=header>Since: </h6>3.0
+<p></p>
+
+<p>
+<h6 class=CaptionFigColumn id=header>Description: </h6>The workspace supports a mode where changes that occur in the file system are automatically detected and reconciled with the workspace in memory. By default, this is accomplished by creating a monitor that polls the file system and periodically searching for changes.  The monitor factories extension point allows clients to create more efficient monitors, typically by hooking into some native file system facility for change callbacks.</p>
+<p><h6 class=CaptionFigColumn id=header>Configuration Markup:</h6></p>
+<p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.refreshProvider">refreshProvider</a>)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.refreshProvider">refreshProvider</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST refreshProvider</p>
+<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - A human-readable name for the monitor factory</li>
+<li><b>class</b> - The fully qualified name of a class implementing <code>org.eclipse.core.resources.refresh.RefreshProvider</code>.</li>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.extension">extension</a> (<a href="#e.refreshProvider">refreshProvider</a>)&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST extension</p>
+<p class=code id=dtdAttlist>point&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>id&nbsp;&nbsp;&nbsp;&nbsp;CDATA #IMPLIED<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #IMPLIED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+</ul>
+<br><p class=code id=dtd>&lt;!ELEMENT <a name="e.refreshProvider">refreshProvider</a> EMPTY&gt;</p>
+<p class=code id=dtd>&lt;!ATTLIST refreshProvider</p>
+<p class=code id=dtdAttlist>name&nbsp;&nbsp;CDATA #REQUIRED<p class=code id=dtdAttlist>class&nbsp;CDATA #REQUIRED&gt;</p>
+<p></p>
+<ul class=ConfigMarkup id=attlistDesc>
+<li><b>name</b> - A human-readable name for the monitor factory</li>
+<li><b>class</b> - The fully qualified name of a class implementing <code>org.eclipse.core.resources.refresh.RefreshProvider</code>.</li>
+</ul>
+<br><h6 class=CaptionFigColumn id=header>Examples: </h6>Following is an example of an adapter declaration.  This example declares that this plug-in will provide an adapter factory that will adapt objects of type IFile to objects of type MyFile.
+<p>
+<pre>
+   <p class=code id=tag>&lt;extension
+         id=<p class=code id=cstring>&quot;coolProvider&quot;</p><p class=code id=tag>
+         point=<p class=code id=cstring>&quot;org.eclipse.core.resources.refreshProviders&quot;</p><p class=code id=tag>&gt;</p>
+      <p class=code id=tag>&lt;refreshProvider
+            name=<p class=code id=cstring>&quot;Cool Refresh Provider&quot;</p><p class=code id=tag>
+            class=<p class=code id=cstring>&quot;com.xyz.CoolRefreshProvider&quot;</p><p class=code id=tag>&gt;</p>
+      <p class=code id=tag>&lt;/refreshProvider&gt;</p>
+   <p class=code id=tag>&lt;/extension&gt;</p>
+</pre>
+</p>
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>API Information: </h6>Refresh provider implementations must subclass the abstract type <tt>RefreshProvider</tt> in the <tt>org.eclipse.core.resources.refresh</tt> package.  Refresh requests and failures should be forward to the provide <tt>IRefreshResult</tt>.  Clients must also provide an implementation of <tt>IRefreshMonitor</tt> through which the workspace can request that refresh monitors be uninstalled.
+<p></p>
+
+<h6 class=CaptionFigColumn id=header>Supplied Implementation: </h6>The <tt>org.eclipse.core.resources.win32</tt> fragment provides a native refresh monitor that uses win32 file system notification callbacks.  The workspace also supplies a default naive polling-based monitor that can be used for file systems that do not have native refresh callbacks available.
+<p></p>
+
+<br>
+<p class=note id=copyright>
+Copyright (c) 2004 IBM Corporation and others.<br>
+All rights reserved. This program and the accompanying materials are made 
+available under the terms of the Common Public License v1.0 which 
+accompanies 
+this distribution, and is available at 
+<a 
+href="http://www.eclipse.org/legal/cpl-v10.html">http://www.eclipse.org/legal/cpl-v10.html</a>
+<p></p>
+
+</p>
+</BODY>
+</HTML>
