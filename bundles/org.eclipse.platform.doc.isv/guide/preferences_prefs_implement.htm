@@ -13,12 +13,16 @@ Implementing a preference page
 <BODY BGCOLOR="#ffffff">
 <h3>Implementing a preference page</h3>
 
-<H4>
-Defining the page</H4>
-<P >
-Implementing a preference page is similar to creating a page for a wizard. The preference page supplies a
-<b> createContents</b> method that creates the SWT controls representing the page content and adds listeners for any events of interest. The page is responsible for creating and returning the composite that will parent all of the controls in the page.&nbsp;
-The following snippet shows the highlights:</P>
+<h4>
+Defining the page</h4>
+<p>
+The JFace plug-in provides a framework for implementing wizards, preference pages, 
+and dialogs.  The implementation for these dialogs follows a common pattern.
+The contents of a page or dialog is defined by implementing a <b>createContents</b> 
+method that creates the SWT controls representing the page content.  This method
+should also add listeners for any events of interest. The page is responsible for 
+creating and returning the composite that will parent all of the controls in the page.
+The following snippet shows the highlights:</p>
 <font color='#4444CC'><pre>
 protected Control createContents(Composite parent)
 {
@@ -58,48 +62,47 @@ protected Control createContents(Composite parent)
 
 	return new Composite(parent, SWT.NULL);
 }</pre></font>
-<P >
+<p>
 Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.&nbsp;
-Here is what the corresponding page looks like:</P>
-<P >
-<img src="images/readmepreferences.gif" alt="Readme tool preferences page" border="0"></P>
-<P >
+Here is what the corresponding page looks like:</p>
+<p>
+<img src="images/readmepreferences.gif" alt="Readme tool preferences page" border="0"></p>
+<p>
 The other primary responsibility of a preference page is to react to the <b> performOk</b> message. Typically, this 
 method updates and stores the user preferences and, if necessary, updates any other plug-in objects to reflect the 
 change in preferences.  The <b>performDefaults</b> method is used to restore preferences to their
 default state when the user presses the <b>Restore Defaults</b>
-button.&nbsp;&nbsp;</P>
-<P >
+button.&nbsp;&nbsp;</p>
+<p>
 You may override <b>performApply</b> if you have additional processing when the
-user selects <b>Apply</b>.&nbsp; The default implementation is to call <b>performOk</b>.&nbsp;&nbsp;</P>
-<P >
+user selects <b>Apply</b>.&nbsp; The default implementation is to call <b>performOk</b>.&nbsp;&nbsp;</p>
+<p>
 Preference pages should override the <b> doGetPreferenceStore()</b> method to return a preference store for 
-storing their values. </P>
+storing their values. </p>
 
 
-<H4>
-Plug-in preference store</H4>
-<P >
-Preference stores are similar in nature to dialog settings.  In <a HREF="dialogs_settings.htm" CLASS="XRef">Dialog settings</a>, we saw how the
-<b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> class maintains dialog settings during the 
-lifetime of a plug-in. A similar strategy is employed for user preferences. Preference stores are merely a convenience mechanism - they
-provide plug-in level access to preferences that are actually stored using the runtime preferences service.  Your plug-in
-can add entries to a preference store and update the values as the user changes the settings in your preferences page.   
-Since preference stores use the platform preferences service, they will take care of saving these values at the 
-appropriate scope and location, and initializing the preference store using the appropriate mechanisms.</P>
-<P >
+<h4>
+Plug-in preference store</h4>
+<p>Preference stores are a convenience mechanism for accessing and storing preference values in a
+plug-in class.  They provide plug-in level access to preferences that are actually stored using 
+the runtime preferences service.  <a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"><b>AbstractUIPlugin</b></a> 
+defines a plug-in wide preference store that is maintained during the lifetime of the plug-in.  Your plug-in
+can add entries to this preference store and update the values as the user changes the settings in your preferences page.   
+Since preference stores use the platform preferences service, they will take care of saving preference values at the 
+appropriate scope and location, and initializing the preference store using the appropriate mechanisms.</p>
+<p>
 The following code in the <b> ReadmePreferencePage</b> obtains the preference store for the
-<b>ReadmePlugin</b>.</P>
+<b>ReadmePlugin</b>.</p>
 <font color='#4444CC'><pre>
    protected IPreferenceStore doGetPreferenceStore() {
       return ReadmePlugin.getDefault().getPreferenceStore();
    }
 </pre></font>
-<P >
+<p>
 Because <b> ReadmePlugin</b> extends the <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> class, it automatically inherits a preference store. 
 This preference store is initialized using the platform preferences service. The only thing the <b>ReadmePlugin</b> has 
 to do is implement a method that initializes the preference controls to their default values. These values are used the 
-first time the preference page is shown or when the user presses the <b>Defaults</b> button in the preferences page.</P>
+first time the preference page is shown or when the user presses the <b>Defaults</b> button in the preferences page.</p>
 <font color='#4444CC'><pre>
 protected void initializeDefaultPreferences(IPreferenceStore store) {
 	// These settings will show up when Preference dialog
@@ -114,15 +117,15 @@ protected void initializeDefaultPreferences(IPreferenceStore store) {
 <i><blockquote>
 Note:&nbsp; If there are no preferences saved anywhere for a plug-in, the plug-in will get an empty preference
 store.</blockquote></i>
-<H4>
-Retrieving and saving preferences</H4>
-<P >
-Once you've associated your plug-in's preference store with your preference page, you can implement the logic for retrieving and saving the preferences.</P>
-<P >
+<h4>
+Retrieving and saving preferences</h4>
+<p>
+Once you've associated your plug-in's preference store with your preference page, you can implement the logic for retrieving and saving the preferences.</p>
+<p>
 Preference pages are responsible for initializing the values of their controls using the preferences settings from the preference store. This
 process is similar to initializing dialog control values from dialog settings. The
 <b> ReadmePreferencePage</b> initializes all of its controls in a single method,
-<b>initializeValues</b>, which is called from its <b> createContents</b> method.</P>
+<b>initializeValues</b>, which is called from its <b> createContents</b> method.</p>
 <font color='#4444CC'><pre>private void initializeValues() {
 	IPreferenceStore store = getPreferenceStore();
 	checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));
@@ -130,11 +133,11 @@ process is similar to initializing dialog control values from dialog settings. T
 	checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));
 	...
 }</pre></font>
-<P >
+<p>
 When the <b>OK</b> (or <b>Apply</b>) button is pressed, the current values of the controls on the preference page should be stored back into the
 preference store. The
 <b> ReadmePreferencePage</b> implements this logic in a separate method,
-<b>storeValues</b>.</P>
+<b>storeValues</b>.</p>
 <font color='#4444CC'><pre>
 private void storeValues() {
 	IPreferenceStore store = getPreferenceStore();
@@ -143,10 +146,10 @@ private void storeValues() {
 	store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());
 	...
 }</pre></font>
-<P >
+<p>
 When the user presses the <b>Defaults</b> button, the platform will restore all preference store values to the default values specified in the plug-in class. However, your preference page is responsible for reflecting these default values
 in the controls on the preference page. The
-<b> ReadmePreferencePage</b> implements this in <b>initializeDefaults</b>.</P>
+<b> ReadmePreferencePage</b> implements this in <b>initializeDefaults</b>.</p>
 <font color='#4444CC'><pre>
    private void initializeDefaults() {
       IPreferenceStore store = getPreferenceStore();
