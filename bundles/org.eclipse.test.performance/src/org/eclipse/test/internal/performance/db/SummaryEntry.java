@@ -25,6 +25,6 @@ public class SummaryEntry {
     }
     
     public String toString() {
-        return "SummaryEntry: " + scenarioName + ' ' + shortName + ' ' + dimension; //$NON-NLS-1$
+        return "SummaryEntry: <" + scenarioName + "> <" + shortName + "> <" + dimension + '>'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 }
