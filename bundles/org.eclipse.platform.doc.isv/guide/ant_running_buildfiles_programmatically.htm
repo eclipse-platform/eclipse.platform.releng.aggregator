@@ -19,36 +19,35 @@ This is done via the <a href="../reference/api/org/eclipse/ant/core/AntRunner.ht
 class included in the <b> org.eclipse.ant.core</b> plug-in.
 </p>
 
-<p>The following code snippet shows an example of how to use the <a href="../reference/api/org/eclipse/ant/core/AntRunner.html"><b>AntRunner</b></a>:</p>
+<p>The following code snippet shows an example of how to use the <a href="../reference/api/org/eclipse/ant/core/AntRunner.html"><b>AntRunner</b></a> from within code of another plug-in:</p>
 
 <pre><font color="#4444CC">import org.eclipse.ant.core.AntRunner;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-public class Running {
+...
 
-public static void main(String[] args) throws Exception {
+public void runBuild() {
 	IProgressMonitor monitor = ...
 	AntRunner runner = new AntRunner();
 	runner.setBuildFileLocation(&quot;c:/buildfiles/build.xml&quot;);
 	runner.setArguments(&quot;-Dmessage=Building -verbose&quot;);
 	runner.run(monitor);
-}
 }</font></pre>
 
 <p>If a progress monitor is used, it is made available for the running tasks.
 See <a href="./ant_contributing_task.htm#monitor">Progress Monitors</a> for more details.
-Note that only one Ant build can occur at any given time. See <a href="../reference/api/org/eclipse/ant/core/AntRunner.html#isBuildRunning()">
+Note that only one Ant build can occur at any given time if the builds do not occur in separate VMs. See <a href="../reference/api/org/eclipse/ant/core/AntRunner.html#isBuildRunning()">
 AntRunner.isBuildRunning()</a>;
 </p>
 
 <h3>
-Special care for native libraries</h3>
+Special care for native libraries if build occurs within the same VM</h3>
 <P >
-Every time an Ant script runs in Eclipse a new classloader is created. Since a library can only be
+Every time an Ant buildfile runs in Eclipse a new classloader is created. Since a library can only be
 loaded by one classloader in Java, tasks making use of native libraries could run into problems during
-multiple script runs. If the previous classloader has not been garbage collected at the time the new
+multiple buildfile runs. If the previous classloader has not been garbage collected at the time the new
 classloader tries to load the native library, an exception is thrown indicating the problem and the
-script execution fails. One way of avoiding this problem is having the library load be handled by
+build fails. One way of avoiding this problem is having the library load be handled by
 a class inside a plug-in library. The task can make use of that class for accessing native
 methods. This way, the library is loaded by the plug-in classloader and it does not run into the
 load library conflict.
