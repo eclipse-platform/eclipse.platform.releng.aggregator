@@ -10,41 +10,40 @@
 
 <h2>Dependencies page</h2>
 <p>The Dependencies page shows the dependencies that your plug-in has on other
-plug-ins.&nbsp; The plug-ins your plug-in currently depends on are shown in the
-list. You can modify the list by adding more plug-ins (button <b>Add...</b>) or
-removing them from the list. Changes in this list will prompt PDE to update the plug-in manifest and
-also configure the build path of the project so that the classes of the imported
-plug-in are visible to the plug-in under development.</p>
-<p>Since the PDE distinguishes between workspace and external plug-ins, the eligible plug-ins will be shown in two separate lists of
-checkboxes.</p>
-<p>Once you add the plug-in reference to the list, you can browse it by
-selecting <b>Open</b> from the pop-up menu or double-clicking on the entry.</p>
+plug-ins.&nbsp; You must list on this page all the plug-ins that contribute code 
+required on your plug-in project's classpath to compile.&nbsp;&nbsp; You must 
+also list all plug-ins that contribute extension points that your plug-in uses.&nbsp; 
+When you modify the list of dependencies and save the file, PDE will 
+automatically update your classpath.</p>
 <p align="center">
-<img border="0" src="images/plugin-dependencies.gif" alt="Dependencies editor page" width="545" height="507"></p>
+<img border="0" src="images/plugin-dependencies.gif" alt="Dependencies editor page" width="629" height="503"></p>
+<p align="left">
+&nbsp;</p>
+<p align="left">
+Note that the order of the plug-ins in the list is important because it dictates 
+the classloading order at runtime, so use the Up and Down buttons to organize 
+the list as appropriate.</p>
 <p align="left">When you select an entry in the list of required plug-ins, you
-can re-export the dependency in the <b>Import Details</b> section. Re-exporting
-will make the plug-in visible to plug-ins that import it. You can also be more
-specific regarding the version and matching of the requirement. By default, any
-plug-in that has the required ID will work. You can add constraints by
-specifying the version and whether the version match should be explicitly
-specified (you can read more about valid values in the Core ISV guide).</p>
-<p align="left">The section in the bottom-right corner can be used to obtain
-dependency graph information. You can select the type of information from the
-drop-down combo box. The section can be used to check loops in the dependency
-graph, fragments that reference your plug-in and other plug-ins that require
-your plug-in. In each case, the result will be shown in the list below the combo
-box.</p>
-<p>By default, changes in the dependencies list will automatically trigger 
-updating of your plug-in project's build path.&nbsp; You can turn that feature 
-off on the<b> Plug-in Development-&gt;Java Build Path Control</b> preference page.&nbsp; 
-When this feature is off, if you add or remove a plug-in in your dependency 
-list, you are responsible for updating the build path so that the required 
-entries are added. If you do not, the Java compiler will not be able to resolve 
-references to types that belong to the required plug-ins.&nbsp; See
-<a href="pde_selfhosting_buildpath.htm">Build Path Computation</a> for more 
-details.</p>
-<p align="left">&nbsp;</p>
-<p align="left">&nbsp;</p>
+can mark the dependency as re-exported in the <b>Dependency Properties</b> section.&nbsp; 
+Re-exporting a dependency means that clients of your plug-in will get that 
+dependency for free.&nbsp; It is important that you do not abuse this 
+functionality and use it only when it makes sense to do so.</p>
+<p align="left">If your plug-in requires a specific version of a plug-in to 
+function properly, then you can specify the version required along with the 
+version match rule.&nbsp; You can read more about valid values in the Platform ISV guide.</p>
+<p align="left">The <b>Dependency Analysis</b> contain several useful features 
+such as finding cycles in the dependency graph.&nbsp; Such cycles are forbidden 
+by the runtime and is therefore useful to do a sanity check on your plug-in's 
+dependency graph before testing it.</p>
+<p align="left">For a selected plug-in in the list, <b>Compute Dependency Extent</b> 
+will give you a list of all the Java types and all the extension points that 
+your plug-in needs from that dependency.&nbsp; So, in essence, it tells you why 
+you need that plug-in.</p>
+<p align="left">Since the JARs from all the plug-ins in the list of dependencies 
+will be on your plug-in's classpath at runtime, it is very important to not have 
+any dependencies that you do not need, as they would slow down classloading.&nbsp; 
+To find such extraneous entries and remove them, use the <b>Find Unused 
+Dependencies</b> item available on this page.</p>
 <p align="left">&nbsp;</p>
 <p>&nbsp;<br>
 <a href="../hglegal2003.htm">

@@ -9,116 +9,33 @@
 <BODY BGCOLOR="#ffffff">
 
 <h2>Extensions page</h2>
-<p>The Extensions page is used to browse and edit plug-in extensions. Extensions are the
+<p>Extensions are the
 central mechanism for contributing behavior to the platform. Unless your plug-in is a
 simple Java API library made available to other plug-ins, new behavior is contributed as an extension.</p>
-<p>Plug-ins contribute to the extension points defined by those plug-ins that
-they require.&nbsp; Your extension syntax must match the extension point
-definition in order to be processed correctly. The total list of eligible
-extension points is computed by PDE by traversing all the visible plug-ins (both
-workspace and external).</p>
-<p>The generic extension wizard provided by PDE will simply scan the extension points.&nbsp;
-If an extension schema is provided (see <a href="pde_schema.htm">Extension Point
-Schema</a>), then the wizard will extract grammar and extension point meta
-data from the schema.</p>
-<p>In addition to the generic wizard, a number of extension templates are
-available. These are the same templates that can be used to generate initial
-content of the plug-in project. Their presence here allows you to stage the
-extension creation. You can create a plug-in with a simple view, then add an
-editor or a wizard later.</p>
-<h3>Example:&nbsp; Adding an Action Sets extension</h3>
-<p>To illustrate the operation of the Extensions page, we will add a 'Hello, PDE world'
-action to our plug-in. We will be contributing to the <a href="../../org.eclipse.platform.doc.isv/reference/extension-points/org_eclipse_ui_actionSets.html"><b>org.eclipse.ui.actionSets</b></a>
- extension point.&nbsp; This example assumes you are already familiar with the
-extension point.&nbsp;&nbsp;</p>
-<p> We will start by pressing the <b>Add...</b> button to select the
-extension wizard:</p>
+<p>The Extensions page is where you can add, remove and modify the extensions 
+your plug-in contributes to the platform.</p>
 <p align="center">
-<img border="0" src="images/new-extension.gif" alt="Extension Wizard Selection" width="500" height="500"></p>
-<p align="left">The <b>Schema-based Extension</b> wizard is the default since it handles
-extensions in the most generic ways. It will scan the plug-ins and offer all the
-extension points found, with or without schemas. Those with schemas will allow
-PDE to offer better assistance. If an extension point schema is missing, PDE will
-let you add elements and attributes to the extension, but it will not be able to verify if they are
-valid for the selected extension point.</p>
-<p align="left">When you press <b>Next</b>, a list of extension points will be
-offered. Select <b>org.eclipse.ui.actionSets</b> and press <b>Finish</b>.</p>
-<p align="center">
-<img border="0" src="images/extension-list.gif" alt="Schema-based wizard - extension point selection" width="500" height="635"></p>
-<p align="left">The wizard will add the new extension to the list of extensions.
-Since this
-extension has a schema associated with it, we can further edit our extension definition.
-We select the newly added extension and choose <b>New-&gt;actionSet</b> from the
-popup menu. This XML
-element has been defined as the only valid element that can show up in the
-extension definition.&nbsp;</p>
-<p align="left">For all required attributes, PDE will create default values.&nbsp;
-We can change the default name of the action set to &quot;Sample Action Set&quot; by selecting the element and changing the
-<b>label</b>
-property in the Properties view. The new name will show up in
-the extension list.&nbsp;</p>
-<p align="center">
-<img src="images/actionSet-1.gif" alt="Extensions editor page" border="0" width="545" height="501"></p>
-<p align="left">We now need to define a menu and an action for the action set.
-If we select the action set and popup the menu in the &quot;Extension Element Children&quot;
-section, the &quot;New&quot; menu will offer two choices:&nbsp; menu and
-action.&nbsp; These choices are based on the schema information for the action
-sets extension.&nbsp; First, we create the menu.</p>
-<ol>
-  <li>
-    Select <b>New-&gt;menu </b>to create the menu.&nbsp;&nbsp;</li>
-  <li>
-    Select it and change its properties.&nbsp; Change the <b> id</b> to &quot;sampleMenu&quot; and its
-    <b>label</b> to &quot;Sample Menu.&quot;</li>
-  <li>
-    While the menu object is still selected, popup a menu and
-    select <b>New-&gt;separator</b>. A new child should appear.</li>
-  <li>
-    Select &quot;separator&quot; and change its <b> name</b> into &quot;sampleGroup&quot;.
-    This will create a named group in the menu that we can use to contribute our
-    action.</li>
-</ol>
-<p align="left">We can create the action in a similar way:</p>
-<ol>
-  <li>
-    Select <b>New-&gt;action</b> to create an
-    action.&nbsp;&nbsp;</li>
-  <li>
-    Select it and change its properties.&nbsp; Change its <b>label</b>
-    to &quot;&amp;Sample Action&quot; and its <b> menubarPath</b> to &quot;sampleMenu/sampleGroup.&quot;&nbsp;
-    This will add the action to the menu that we just defined.</li>
-</ol>
-<p align="left">The last thing we need to set is the action's Java class. The
-extension point definition specifies that an action must implement&nbsp; <a href="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/ui/IWorkbenchWindowActionDelegate.html"><b>IWorkbenchWindowActionDelegate</b></a>.&nbsp;&nbsp;
-PDE can offer assistance since it knows this information from the schema:</p>
-<ol>
-  <li>
-    Click on the <b>class</b> property to put it into edit mode.
-    Select the button to open the cell editor dialog.</li>
-  <li>
-    Select the radio button to create a new class.</li>
-  <li>
-    Click on the <b>Browse</b> button to choose the source container
-    and choose &quot;XYZ Plugin&quot;.</li>
-  <li>
-    Change the name of the class to be &quot;SampleAction.&quot;</li>
-</ol>
-<p align="left">Before you press <b>Finish</b>, the dialog should look like this:</p>
-<p align="center">
-<img border="0" src="images/actionSet-2.gif" alt="Java Attribute Editor" width="463" height="500"></p>
-<p align="left">When you finish, the new class will be
-generated based on the required interface (with a stub implementation for each
-abstract method). In addition, the name of the new class will be set for the class property value. The wizard will
-also open the new Java class for editing by default. You can locate the &quot;run&quot; method and add the following
-statement:</p>
-<font color='#4444CC'><pre>   System.out.println(&quot;Hello, PDE world!&quot;);
-</pre></font>
-<p align="left">Save the new source code and close the Java editor.&nbsp; Then
-return to the Extensions page of the
-manifest editor and save.</p>
-<p align="left">We will continue with this example when we <a href="pde_running.htm">run
-the plug-in</a>.</p>
-<p>&nbsp;<br>
+<img src="images/actionSet-1.gif" alt="Extensions editor page" border="0" width="629" height="550"></p>
+<p>&nbsp;</p>
+<p>Each extension point comes with an xml schema specifying its grammar.&nbsp; 
+Your extension's syntax must therefore follow that grammar in order to be 
+processed correctly.&nbsp; When you create a new extension, PDE extracts the 
+grammar for the corresponding extension point and populates the context menu of 
+each element selected in the Extensions viewer with a list of valid child 
+elements that you can create.</p>
+<p>Also, for each selected element in the body of an extension, PDE populates 
+the Extension Element Details section with all the the valid attributes for that 
+element.&nbsp; Required attributes are denoted with an asterisk.&nbsp; </p>
+<p>When you hover your mouse over an attribute name, a tooltip box appears 
+describing the purpose of that attribute.</p>
+<p>When an attribute expects the name of a Java class as a value, e.g. the <i>
+class</i> attribute above, clicking on the name of the attribute will open the 
+Java file specified if it exists.&nbsp; If the file does not exist, then 
+clicking on the <i>class</i> link will bring up the JDT New Class wizard to 
+create a new Java class on the fly.&nbsp; PDE will prime the wizard with the 
+correct superclass and/or interface when the schema for the extension point 
+specifies this information for the given attribute.</p>
+<p><br>
 <a href="../hglegal2003.htm">
 <img src = "../images/ngibmcpy2003.gif" alt="Copyright IBM Corporation and others 2000, 2003" border="0" width="324" height="14"></a>
 </p>
