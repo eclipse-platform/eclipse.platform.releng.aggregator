@@ -31,7 +31,7 @@ public class CommitCommentPage extends CVSWizardPage {
 		String description) {
 			
 		super(pageName, title, image, description);
-		commitCommentArea = new CommitCommentArea(parentDialog, null);
+		commitCommentArea = new CommitCommentArea();
 	}
 
 	public void createControl(Composite parent) {
