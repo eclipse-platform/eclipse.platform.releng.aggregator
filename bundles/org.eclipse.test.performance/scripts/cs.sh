@@ -24,7 +24,7 @@ export CLASSPATH="${CSLIB}/cs.jar:${CSLIB}/cstools.jar:${CSLIB}/csnet.jar:${CLAS
 
 case $1 in
 	start )
-		$NSC start
+		$NSC start -h 0.0.0.0
 		break;;
 		
 	stop )
