@@ -35,11 +35,12 @@ basic product intro config using their own extensions.</p>
 concepts.</p>
 <h4>Defining an intro part</h4>
 <p>
-The definition of the intro part is specified using the
-<b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org.eclipse.ui.intro</a></b>
-extension point.  The main purpose of this extension is to define the class that implements
-<a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a> and the binding between
-a product id and an intro part.  Below is the snippet that defines the intro part for the workbench.
+The <a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a> interface
+and the <b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org.eclipse.ui.intro</a></b>
+extension point make up the generic mechanism that can be used to create your own intro support for
+a given product.  The main purpose of this extension is to define the class that implements
+<a href="../reference/api/org/eclipse/ui/intro/IIntroPart.html"><b>IIntroPart</b></a> and to
+specify the binding between a product id and an intro part.  Below is the snippet that defines the intro part for the workbench.
 We won't go over the mechanics of implementing an intro part since we want to focus on defining
 the intro content.  (See the extension point documentation and javadoc referenced above for more detail
 if you need it.)
@@ -56,13 +57,19 @@ if you need it.)
 	&lt;/introProductBinding&gt;
 &lt;/extension>
 </font></pre>
+The class <a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>
+implements a part whose content is specified in the <b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
+extension point.  This structure allows product plug-in developers to focus on developing their intro content rather than
+implementing an intro part scheme from scratch.  If a different intro class is specified, then the other intro extension points
+are not utilized and the plug-in must implement its own scheme for intro content format and configuration.
 </p>
 <h4>Defining an intro config</h4>
 <p>
-The main content for the intro part is defined in the intro config.  This is specified in the
 <b><a href="../reference/extension-points/org_eclipse_ui_intro_config.html">org.eclipse.ui.intro.config</a></b>
-extension.  Here, we specify the id of the intro part that is to show our content, and the name of the
-XML file that contains the specific definition for the intro content.
+describes the id of the intro config that is to show our content, and the name of the
+XML file that contains the specific definition for the intro content.  It is expected that only one
+intro config should be defined for an intro extension.  (Only the first intro config found can be shown in a
+<a href="../reference/api/org/eclipse/ui/intro/config/CustomizableIntroPart.html"><b>CustomizableIntroPart</b></a>.)
 <pre><font color="#4444CC">
 &lt;extension   
 	id="intro"
@@ -91,14 +98,16 @@ the use of the <tt>$nl$</tt> variable in the directory name, which means the fil
 to the national language of the target environment.)
 </p>
 <p>
-In addition to content, the extension allows you to specify how the content is presented.  
+The config extension allows you to specify both the content and the presentation of the content.
 While the <b>content</b> element focuses on defining pages, the
-<b>presentation</b> element describes presentation-related atributes that describe how
-pages will be shown.  Page ids for the welcome home page (in <b>full mode</b>) and standby page (in <b>standby mode</b>) 
-can be specified.  The home page is the page that is shown when the product is first started.
+<b>presentation</b> element describes presentation-related attributes that describe how
+pages will be shown.  The page id for the intro home page (in <b>full mode</b>) must be specified,
+and the standby page id (in <b>standby mode</b>) is optional.  The home page is the page that is shown when the product is first started.
 A presentation can specify one or more <b>implementations</b> for showing the pages.  Implementations are specified
 per platform and windowing system, allowing you to take advantage of platform-specific features for showing
-page content. The workbench will first look for an implementation that matches the current operating system and
+page content.   An implementation that does not specify either a windowing system or operating system will be considered
+the generic implementation; to ensure an intro is shown on all platforms, it is important to define
+such an implementation.  The workbench will first look for an implementation that matches the current operating system and
 windowing system.  If one cannot be found, it will choose the generic implementation.  Most of these details
 are handled at the product configuration level, so we won't discuss them any further here.
 </p>
@@ -106,7 +115,7 @@ are handled at the product configuration level, so we won't discuss them any fur
 <p>
 Now we can look at the content itself.  Content is described in terms of pages.  All pages have an <b>id</b> attribute.
 This is the id that is used when defining the home and standby pages, and other places where there is a reference
-to a page.  All pages also have a <b>title</b>.  Otherwise, the relevant attributes depend on the kind of page that is defined.
+to a page.  Pages can also have a <b>title</b>.  Otherwise, the relevant attributes depend on the kind of page that is defined.
 There are two basic types of pages:
 <ul>
 <li><b>Static pages</b> show HTML files.  A <b>url</b> and <b>style</b> are specified for the file.
@@ -180,10 +189,11 @@ two anchors for adding JDT and PDE related elements on the overview page.
 </font></pre>
 These anchors can be referenced by plug-ins that add content to the page.  Content is added using the
 <b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
-extension.  Several different kinds of config extensions can be added.
+extension.  In addition to extending page content, this extension point also allows one to contribute standby content
+parts and custom actions.
 </p>
 <p>
-The most common way to extend an existing intro config is using the <b>configExtension</b> element.  In this element,
+To extend an existing intro config, you can use the <b>configExtension</b> element.  In this element,
 you specify the <b>configId</b> of the intro config being extended and the <b>content</b> file that describes the new
 content.
 <pre><font color="#4444CC"> 
@@ -206,7 +216,17 @@ must be specified.
 	&lt;/extensionContent&gt;
 &lt;/introContent&gt;
 </font></pre>
+After contributing custom content to an intro's predefined anchor points, a given product can bind itself to that
+intro using the <b><a href="../reference/extension-points/org_eclipse_ui_intro.html">org.eclipse.ui.intro</a></b>
+discussed above.  When the product is run, the intro that was extended will be shown with the additional
+content.  This allows the product to have its own branding and other product-specific information, while reusing
+a closely related product's intro along with key content of its own.
 </p>
+<p>A given intro could also selectively include pieces of a related product's intro.  In this case, the product could define its
+own intro and intro config, and then reference important elements defined in another intro's config
+using an <b>include</b> in the content file.  This mechanism is valuable in situations where related products
+are built on top of one another and it is necessary to introduce users to key concepts in the higher level
+products.
 <h4>Contributing a standby content part</h4>
 <p>
 Plug-ins can also implement a part for displaying alternative content when the intro page is in standby mode.  For
