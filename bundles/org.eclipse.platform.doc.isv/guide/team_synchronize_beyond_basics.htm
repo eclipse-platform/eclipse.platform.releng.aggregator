@@ -24,25 +24,21 @@ package of the <a
 plug-in. You should check the project out from the CVS repository and
 use as a reference while you are reading this tutorial. </p>
 <h3>Implementing a Subscriber From Scratch</h3>
-<p>This first example assumes that there is no existing infrastructure
-for maintaining the synchronization state of the local workspace. When
-implementing a subscriber from scratch, you can make use of some
-additional API provided in the <em>org.eclipse.team.core</em> plugin.
-The <a
- href="../reference/api/org/eclipse/team/core/variants/package-summary.html">org.eclipse.team.core.variants</a>
-package contains two subclasses of <a
- href="../reference/api/org/eclipse/team/core/subscribers/Subscriber.html">Subscriber
-</a>which can be
-used to simplify implementation. The first is <a
- href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTreeSubscriber.html">ResourceVariantTreeSubscriber
-</a>which will be discussed in the second example below. The second is
-a
-subclass of the first: <a
- href="../reference/api/org/eclipse/team/core/variants/ThreeWaySubscriber.html">ThreeWaySubscriber</a>.
-This subscriber
-implementation provides several helpful classes for managing the
-synchronization state of a local workspace. If you do not have any
-existing infrastructure, this is a good place to start. </p>
+<p>This first example assumes that there is no existing infrastructure for maintaining 
+  the synchronization state of the local workspace. When implementing a subscriber 
+  from scratch, you can make use of some additional API provided in the <em>org.eclipse.team.core</em> 
+  plugin. The <a
+ href="../reference/api/org/eclipse/team/core/variants/package-summary.html">org.eclipse.team.core.variants</a> 
+  package contains two subclasses of <a
+ href="../reference/api/org/eclipse/team/core/subscribers/Subscriber.html">Subscriber 
+  </a>which can be used to simplify implementation. The first is <a
+ href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTreeSubscriber.html">ResourceVariantTreeSubscriber 
+  </a>which will be discussed in the second example below. The second is a subclass 
+  of the first: <a
+ href="../reference/api/org/eclipse/team/core/variants/ThreeWaySubscriber.html">ThreeWaySubscriber</a>. 
+  This subscriber implementation provides several helpful classes for managing 
+  the synchronization state of a local workspace. If you do not have any existing 
+  infrastructure, this is a good place to start. </p>
 <p>Implementing a subscriber from scratch will be illustrated using the file system 
   example available in the <a
  href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.team.examples.filesystem/">org.eclipse.team.examples.filesystem</a> 
@@ -53,14 +49,15 @@ existing infrastructure, this is a good place to start. </p>
 <h3>ThreeWaySubscriber</h3>
 <p>For the file system example, we already had an implementation of a <a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider 
   </a>that associated a local project with a file system location where the local 
-  contents were mirrored. FileSystemSubscriber was created as a subclass of ThreeWaySubscriber 
-  in order to make use of a ThreeWaySynchronizer to manage workspace synchronization 
-  state. Subclasses of this class must do the following:</p>
+  contents were mirrored. FileSystemSubscriber was created as a subclass of <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySubscriber.html">ThreeWaySubscriber</a> 
+  in order to make use of a <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySynchronizer.html">ThreeWaySynchronizer</a> 
+  to manage workspace synchronization state. Subclasses of this class must do 
+  the following:</p>
 <ul>
-  <li>create a ThreeWaySynchronizer instance to manage the
-local workspace synchronization state.</li>
-  <li>create an instance of a ThreeWayRemoteTree subclass to
-provide remote tree refresh. </li>
+  <li>create a <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySynchronizer.html">ThreeWaySynchronizer</a> 
+    instance to manage the local workspace synchronization state.</li>
+  <li>create an instance of a <a href="../reference/api/org/eclipse/team/core/variants/ThreeWayRemoteTree.html">ThreeWayRemoteTree</a> 
+    subclass to provide remote tree refresh. </li>
   <ul>
     <li>The class FileSystemRemoteTree was defined for this
 purpose</li>
@@ -68,9 +65,8 @@ purpose</li>
   <li>implement a method to create the resource variant handles used to
 calculate the synchronization state.
     <ul>
-      <li>The class FileSystemResourceVariant (a subclass of
-CachedResourceVariant)
-was defined for this</li>
+      <li>The class FileSystemResourceVariant (a subclass of <a href="../reference/api/org/eclipse/team/core/variants/CachedResourceVariant.html">CachedResourceVariant</a>) 
+        was defined for this</li>
     </ul>
   </li>
   <li>implement the roots method.
@@ -88,56 +84,55 @@ synchronization state in the ThreeWaySynchronizer. The
 operations are implemented in the class
 org.eclipse.team.examples.filesystem.FileSystemOperations.</p>
 <h3>ThreeWaySynchronizer</h3>
-<p>ThreeWaySynchronizer manages the synchronization state between the
-local workspace and a remote location. It caches and persists the
-local, base and remote timestamps in order to support the efficient
-calculation of the synchronization state of a resource. It also fires
-change notifications to any registered listeners. The
-ThreeWaySubscriber
-translates these change events into the proper format to be sent to
-listeners registered with the subscriber.</p>
-<p>The ThreeWaySynchronizer makes use of Core scheduling
-rules and locks to ensure thread safety and provide change notification
-batching.</p>
+<p><a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySynchronizer.html">ThreeWaySynchronizer</a> 
+  manages the synchronization state between the local workspace and a remote location. 
+  It caches and persists the local, base and remote timestamps in order to support 
+  the efficient calculation of the synchronization state of a resource. It also 
+  fires change notifications to any registered listeners. The <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySubscriber.html">ThreeWaySubscriber</a> 
+  translates these change events into the proper format to be sent to listeners 
+  registered with the subscriber.</p>
+<p>The <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySynchronizer.html">ThreeWaySynchronizer</a> 
+  makes use of Core scheduling rules and locks to ensure thread safety and provide 
+  change notification batching.</p>
 <h3>ThreeWayRemoteTree</h3>
-<p>A ThreeWayRemoteTree is a subclass of ResourceVariantTree
-that is tailored to the ThreeWaySubscriber. It must be
-overridden by clients to provide the mechanism for fetching the remote
-state from the server. ResourceVariantTree is discussed in
-more detail in the next example.</p>
+<p>A <a href="../reference/api/org/eclipse/team/core/variants/ThreeWayRemoteTree.html">ThreeWayRemoteTree</a> 
+  is a subclass of <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTree.html">ResourceVariantTree</a> 
+  that is tailored to the <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySubscriber.html">ThreeWaySubscriber</a>. 
+  It must be overridden by clients to provide the mechanism for fetching the remote 
+  state from the server. <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTree.html">ResourceVariantTree</a> 
+  is discussed in more detail in the next example.</p>
 <h3>CachedResourceVariant</h3>
-<p>A CachedResourceVariant is a partial implementation of
-IResourceVariant
-that caches any fetched contents for a period of time (currently 1
-hour). This is helpful since the contents may be accessed several times
-in a short period of time (for example, to determine the
-synchronization state and display the contents in a compare editor).
-Subclasses must still provide the unique content identifier along with
-the byte array that can be persisted in order to recreate the resource
-variant handle.</p>
+<p>A <a href="../reference/api/org/eclipse/team/core/variants/CachedResourceVariant.html">CachedResourceVariant</a> 
+  is a partial implementation of IResourceVariant that caches any fetched contents 
+  for a period of time (currently 1 hour). This is helpful since the contents 
+  may be accessed several times in a short period of time (for example, to determine 
+  the synchronization state and display the contents in a compare editor). Subclasses 
+  must still provide the unique content identifier along with the byte array that 
+  can be persisted in order to recreate the resource variant handle.</p>
 <h3>Building on Top of Existing Workspace Synchronization</h3>
 <p>Many repository providers may already have a mechanism for managing their synchronization 
-  state (e.g. if they have existing plugins). The ResourceVariantTreeSubscriber 
+  state (e.g. if they have existing plugins). The <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTreeSubscriber.html">ResourceVariantTreeSubscriber</a> 
   and its related classes provide the ability to build on top of an existing synchronization 
   infrastructure. For example, this is the superclass of all of the CVS subscribers.</p>
 <h4>ResourceVariantTreeSubscriber</h4>
-<p>As was mentioned in the previous example, the ThreeWaySubscriber
-is a subclass of ResourceVariantTreeSubscriber that provides
-local workspace synchronization using a ThreeWaySynchronizer.
-Subclasses of ResourceVariantTreeSubscriber must provide:</p>
+<p>As was mentioned in the previous example, the <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySubscriber.html">ThreeWaySubscriber</a> 
+  is a subclass of <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTreeSubscriber.html">ResourceVariantTreeSubscriber</a> 
+  that provides local workspace synchronization using a <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySynchronizer.html">ThreeWaySynchronizer</a>. 
+  Subclasses of <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTreeSubscriber.html">ResourceVariantTreeSubscriber</a> 
+  must provide:</p>
 <ul>
   <li>
-    <p>Subclasses of ResourceVariantTree (or
-AbstractResourceVariantTree)
-that provide the behavior for traversing and refreshing the remote
-resource variants and, for subscribers that support three-way
-comparisons, the base resource variants.</p>
+    <p>Subclasses of <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTree.html">ResourceVariantTree</a> 
+      (or <a href="../reference/api/org/eclipse/team/core/variants/AbstractResourceVariantTree.html">AbstractResourceVariantTree</a>) 
+      that provide the behavior for traversing and refreshing the remote resource 
+      variants and, for subscribers that support three-way comparisons, the base 
+      resource variants.</p>
   </li>
-  <li>An implementation of IResourceVariantComparator that
-performs the two-way or three-way comparison for a local resource and
-its base and remote resource variants.It is common to also provide a
-subclass of SyncInfo in order to customize the
-synchronization state determination algorithm. </li>
+  <li>An implementation of <a href="../reference/api/org/eclipse/team/core/variants/IResourceVariantComparator.html">IResourceVariantComparator</a> 
+    that performs the two-way or three-way comparison for a local resource and 
+    its base and remote resource variants.It is common to also provide a subclass 
+    of <a href="../reference/api/org/eclipse/team/core/synchronize/SyncInfo.html">SyncInfo</a> 
+    in order to customize the synchronization state determination algorithm. </li>
   <li>An implementation of the roots method for providing the roots of the subscriber 
     and an implementation of the isSupervised method for determining what resources 
     are supervised by the subscriber.</li>
@@ -145,15 +140,14 @@ synchronization state determination algorithm. </li>
 <p>The other capabilities of the subscriber are implemented using these
 facilities.</p>
 <h4>ResourceVariantTree</h4>
-<p>ResourceVariantTree is a concrete implementation of
-IResourceVariantTree
-that provides the following:</p>
+<p><a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantTree.html">ResourceVariantTree</a> 
+  is a concrete implementation of <a href="../reference/api/org/eclipse/team/core/variants/IResourceVariantTree.html">IResourceVariantTree</a> 
+  that provides the following:</p>
 <ul>
   <li>traversal of the resource variant tree</li>
   <li>logic to merge the previous resource variant tree state with the
 current fetched state.</li>
-  <li>caching of the resource variant tree using a
-ResourceVariantByteStore.</li>
+  <li>caching of the resource variant tree using a <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantByteStore.html">ResourceVariantByteStore</a>.</li>
 </ul>
 <p>The following must be implemented by subclasses:</p>
 <ul>
@@ -163,14 +157,15 @@ represent a resource variant</li>
   <li>creation of the byte store instance used to cache the bytes that
 uniquely identify a resource variant</li>
 </ul>
-<p>Concrete implementations of ResourceVariantByteStore are provided that persist 
-  bytes across workbench invocations (PersistantResourceVariantByteStore) or cached 
-  the bytes only for the current session (SessionResourceVariantByteStore). However, 
-  building a subscriber on top of an existing workspace synchronization infrastructure 
-  will typically require the implementation of ResourceVariantByteStore subclasses 
-  that interface with the underlying synchronizer. For example the ThreeWayRemoteTree 
+<p>Concrete implementations of <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantByteStore.html">ResourceVariantByteStore</a> 
+  are provided that persist bytes across workbench invocations (<a href="../reference/api/org/eclipse/team/core/variants/PersistantResourceVariantByteStore.html">PersistantResourceVariantByteStore</a>) 
+  or cached the bytes only for the current session (<a href="../reference/api/org/eclipse/team/core/variants/SessionResourceVariantByteStore.html">SessionResourceVariantByteStore</a>). 
+  However, building a subscriber on top of an existing workspace synchronization 
+  infrastructure will typically require the implementation of <a href="../reference/api/org/eclipse/team/core/variants/ResourceVariantByteStore.html">ResourceVariantByteStore</a> 
+  subclasses that interface with the underlying synchronizer. For example the 
+  <a href="../reference/api/org/eclipse/team/core/variants/ThreeWayRemoteTree.html">ThreeWayRemoteTree</a> 
   makes use of a byte store implementation that stores the remote bytes in the 
-  ThreeWaySynchronizer.</p>
+  <a href="../reference/api/org/eclipse/team/core/variants/ThreeWaySynchronizer.html">ThreeWaySynchronizer</a>.</p>
 <p>The creation of resource variant handles for this example does not differ from 
   the previous example except that the handles are requested from a resource variant 
   tree instance instead of the subscriber.</p>
