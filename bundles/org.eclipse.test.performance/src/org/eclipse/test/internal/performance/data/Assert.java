@@ -41,10 +41,13 @@ public final class Assert {
 		 */
 		private static class AssertionFailedException extends RuntimeException {
 	
+			private static final long serialVersionUID = 1L;
+
 			/**
 			 * Constructs a new exception.
 			 */
 			public AssertionFailedException() {
+				// empty
 			}
 			
 			/**
@@ -59,6 +62,7 @@ public final class Assert {
 		
 	/* This class is not intended to be instantiated. */
 	private Assert() {
+		// empty
 	}
 	
 	/**
@@ -111,8 +115,6 @@ public final class Assert {
 	 * </p>
 	 * 
 	 * @param object the value to test
-	 * @exception Throwable an unspecified unchecked exception if the object
-	 *   is <code>null</code>
 	 */
 	public static void isNotNull(Object object) {
 		// succeed as quickly as possible
@@ -138,8 +140,6 @@ public final class Assert {
 	 * 
 	 * @param object the value to test
 	 * @param message the message to include in the exception
-	 * @exception Throwable an unspecified unchecked exception if the object
-	 *   is <code>null</code>
 	 */
 	public static void isNotNull(Object object, String message) {
 		if (object == null)

@@ -22,17 +22,20 @@ public class EmptyEvaluator implements IEvaluator {
 	 * @see org.eclipse.test.internal.performance.eval.IEvaluator#evaluate(org.eclipse.jdt.ui.tests.performance.PerformanceMeter)
 	 */
 	public void evaluate(PerformanceMeter performanceMeter) throws RuntimeException {
+		// empty
 	}
 
 	/*
 	 * @see org.eclipse.test.internal.performance.eval.IEvaluator#setAssertCheckers(org.eclipse.test.internal.performance.eval.AssertChecker[])
 	 */
 	public void setAssertCheckers(AssertChecker[] asserts) {
+		// empty
 	}
 
 	/*
 	 * @see org.eclipse.test.internal.performance.eval.IEvaluator#setReferenceFilterProperties(java.lang.String, java.lang.String)
 	 */
 	public void setReferenceFilterProperties(String driver, String timestamp) {
+		// empty
 	}
 }

@@ -23,6 +23,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 	
 	/**
 	 * Write out operating system counters for Linux.
+	 * @param scalars
 	 */
 	protected void collectOperatingSystemCounters(Map scalars) {
 		synchronized(this) {
@@ -30,7 +31,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 		     * The status values for a Linux process, that is the values that come from /proc/self/stat.
 		     * The names of the variables match the man proc page.
 		     */
-		    StringTokenizer st= readTokens("/proc/self/stat", false);
+		    StringTokenizer st= readTokens("/proc/self/stat", false); //$NON-NLS-1$
 		    if (st != null) {
 				st.nextToken();		// int pid;		// Process id.
 				st.nextToken();						// String comm;		// The command name.
@@ -61,7 +62,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 		     * The status memory values values for a Linux process, that is the values that come from /proc/self/statm.
 		     * The names of the variables match the man proc page.
 		     */
-			st= readTokens("/proc/self/statm", false);
+			st= readTokens("/proc/self/statm", false); //$NON-NLS-1$
 			if (st != null) {
 				st.nextToken(); 	// int size;				// Size of the process in pages
 				int resident= Integer.parseInt(st.nextToken());	// Resident size in pages.
@@ -76,32 +77,37 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 				addScalar(scalars, Dimensions.DRS, drs*PAGESIZE);			
 				addScalar(scalars, Dimensions.LRS, lrs*PAGESIZE);
 			}
+			super.collectOperatingSystemCounters(scalars);
 		}
 	}
 	
 	/**
 	 * Write out the global machine counters for Linux.
+	 * @param scalars
 	 */
 	protected void collectGlobalPerformanceInfo(Map scalars) {
-	    /**
-	     * The meminfo values for a Linux machine, that is the values that come from /proc/meminfo.
-	     */
-	    StringTokenizer st= readTokens("/proc/meminfo", true);
-	    if (st != null) {
-			st.nextToken();		// throw away label
-			long total= Long.parseLong(st.nextToken());
-			long used= Long.parseLong(st.nextToken());
-			long free= Long.parseLong(st.nextToken());
-			st.nextToken();		// long shared;
-			long buffers= Long.parseLong(st.nextToken());
-			long cache= Long.parseLong(st.nextToken());
-	
-			addScalar(scalars, Dimensions.PHYSICAL_TOTAL, total);
-			addScalar(scalars, Dimensions.USED_LINUX_MEM, used);
-			addScalar(scalars, Dimensions.FREE_LINUX_MEM, free);
-			addScalar(scalars, Dimensions.BUFFERS_LINUX, buffers);
-			addScalar(scalars, Dimensions.SYSTEM_CACHE, cache);
-	    }
+		synchronized(this) {
+		    /**
+		     * The meminfo values for a Linux machine, that is the values that come from /proc/meminfo.
+		     */
+		    StringTokenizer st= readTokens("/proc/meminfo", true); //$NON-NLS-1$
+		    if (st != null) {
+				st.nextToken();		// throw away label
+				long total= Long.parseLong(st.nextToken());
+				long used= Long.parseLong(st.nextToken());
+				long free= Long.parseLong(st.nextToken());
+				st.nextToken();		// long shared;
+				long buffers= Long.parseLong(st.nextToken());
+				long cache= Long.parseLong(st.nextToken());
+		
+				addScalar(scalars, Dimensions.PHYSICAL_TOTAL, total);
+				addScalar(scalars, Dimensions.USED_LINUX_MEM, used);
+				addScalar(scalars, Dimensions.FREE_LINUX_MEM, free);
+				addScalar(scalars, Dimensions.BUFFERS_LINUX, buffers);
+				addScalar(scalars, Dimensions.SYSTEM_CACHE, cache);
+		    }
+		    super.collectGlobalPerformanceInfo(scalars);
+		}
 	}
 
     private StringTokenizer readTokens(String procPath, boolean skipFirst) {
@@ -112,11 +118,13 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 			    rdr.readLine();	// throw away the heading line
 			return new StringTokenizer(rdr.readLine());
 		} catch (IOException e) {
+			// TODO: should be logged
 		} finally {
 			try {
 			    if (rdr != null)
 			        rdr.close();
 			} catch (IOException e) {
+				// silently ignored
 			}
 		}
 		return null;

@@ -32,9 +32,9 @@ import org.eclipse.test.internal.performance.eval.RelativeBandChecker;
  */
 public class Performance {
 
-	private static final String PERFORMANCE_METER_FACTORY= "/option/performanceMeterFactory";
+	private static final String PERFORMANCE_METER_FACTORY= "/option/performanceMeterFactory"; //$NON-NLS-1$
 	
-	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory";
+	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory"; //$NON-NLS-1$
 
 	private static Performance fgDefault;
 	
@@ -46,6 +46,7 @@ public class Performance {
 	 * Private constructor to block instance creation.
 	 */
 	private Performance() {
+		// empty
 	}
 	
 	/**
@@ -100,7 +101,7 @@ public class Performance {
 	 * @return the default scenario id for the test
 	 */
 	public String getDefaultScenarioId(TestCase test) {
-		return test.getClass().getName() + "#" + test.getName() + "()";
+		return test.getClass().getName() + '#' + test.getName() + "()"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -114,7 +115,7 @@ public class Performance {
 	 * @return the default scenario id for the test and the id
 	 */
 	public String getDefaultScenarioId(TestCase test, String id) {
-		return getDefaultScenarioId(test) + "-" + id;
+		return getDefaultScenarioId(test) + '-' + id;
 	}
 
 	private PerformanceMeterFactory getPeformanceMeterFactory() {

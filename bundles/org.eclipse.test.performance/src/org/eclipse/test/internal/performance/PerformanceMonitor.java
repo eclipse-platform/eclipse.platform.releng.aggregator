@@ -22,10 +22,10 @@ class PerformanceMonitor {
 
     public static PerformanceMonitor getPerformanceMonitor() {
 		if (fgPerformanceMonitor == null) {
-		    String os= System.getProperty("os.name");
-		    if (os.startsWith("Windows"))
+		    String os= System.getProperty("os.name"); //$NON-NLS-1$
+		    if (os.startsWith("Windows")) //$NON-NLS-1$
 		        fgPerformanceMonitor= new PerformanceMonitorWindows();
-		    else if (os.startsWith("Mac OS X"))
+		    else if (os.startsWith("Mac OS X")) //$NON-NLS-1$
                 fgPerformanceMonitor= new PerformanceMonitorMac();
             else
                 fgPerformanceMonitor= new PerformanceMonitorLinux();
@@ -36,6 +36,10 @@ class PerformanceMonitor {
     protected void collectOperatingSystemCounters(Map scalars) {
         // default implementation
         addScalar(scalars, Dimensions.SYSTEM_TIME, System.currentTimeMillis());
+    	Runtime runtime= Runtime.getRuntime();
+		runtime.gc();
+		long used= runtime.totalMemory() - runtime.freeMemory();
+		addScalar(scalars, Dimensions.USED_JAVA_HEAP, used);
     }
 
 	protected void collectGlobalPerformanceInfo(Map scalars) {

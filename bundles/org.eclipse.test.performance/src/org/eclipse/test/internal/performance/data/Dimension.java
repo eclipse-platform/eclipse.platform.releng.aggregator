@@ -41,7 +41,7 @@ public class Dimension {
 		    if (fgRegisteredDimensions[id] == null) {
 		        fgRegisteredDimensions[id]= this;
 		    } else
-		        System.err.println("Dimension with id " + id + " already registered");
+		        System.err.println("Dimension with id " + id + " already registered"); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
 
 		fId= id;
@@ -66,7 +66,7 @@ public class Dimension {
 	}
 	
 	public String toString() {
-		return "Dimension [name=" + getName() + ", " + fUnit + "]";
+		return "Dimension [name=" + getName() + ", " + fUnit + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	public String getDisplayValue(Scalar scalar) {
@@ -74,6 +74,6 @@ public class Dimension {
 	}
 	
 	public String getDisplayValue(double scalar) {
-		return fUnit.getDisplayValue1((double)(scalar / fMultiplier));
+		return fUnit.getDisplayValue1(scalar / fMultiplier);
 	}
 }

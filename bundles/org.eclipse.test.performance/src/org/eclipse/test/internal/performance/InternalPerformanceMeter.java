@@ -23,12 +23,12 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
     public static final int BEFORE= 0;
     public static final int AFTER= 1;
     
-	private static final String LOCALHOST= "localhost";
+	private static final String LOCALHOST= "localhost"; //$NON-NLS-1$
 
-	public static final String DRIVER_PROPERTY= "driver"; //$NON-NLS-1$
-	public static final String HOSTNAME_PROPERTY= "host"; //$NON-NLS-1$
-	public static final String RUN_TS_PROPERTY= "runTS"; //$NON-NLS-1$
-	public static final String TESTNAME_PROPERTY= "testname"; //$NON-NLS-1$
+	//public static final String DRIVER_PROPERTY= "driver"; //$NON-NLS-1$
+	//public static final String HOSTNAME_PROPERTY= "host"; //$NON-NLS-1$
+	//public static final String RUN_TS_PROPERTY= "runTS"; //$NON-NLS-1$
+	//public static final String TESTNAME_PROPERTY= "testname"; //$NON-NLS-1$
 	
 	private String fScenarioId;
 
@@ -45,7 +45,8 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
 
 	/**
-	 * Answer the scenario id.
+	 * Answer the scenario ID.
+	 * @return the scenario ID
 	 */
 	public String getScenarioName() {
 		return fScenarioId;
@@ -53,6 +54,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
 	/**
 	 * Answer the name of the host that we are running on.
+	 * @return the hostname
 	 */
 	String getHostName() {
 		try {

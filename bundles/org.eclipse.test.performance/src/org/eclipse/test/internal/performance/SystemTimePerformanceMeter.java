@@ -34,8 +34,8 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	/**
 	 * @param scenarioId the scenario id
 	 */
-	public SystemTimePerformanceMeter(String scenario) {
-		this(scenario, DEFAULT_INITIAL_CAPACITY);
+	public SystemTimePerformanceMeter(String scenarioId) {
+		this(scenarioId, DEFAULT_INITIAL_CAPACITY);
 		fStartDate= System.currentTimeMillis();
 	}
 	
@@ -68,11 +68,11 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 		Assert.isTrue(fStartTime.size() == fStopTime.size());
-		System.out.println("Scenario: " + getScenarioName());
+		System.out.println("Scenario: " + getScenarioName()); //$NON-NLS-1$
 		int maxOccurenceLength= String.valueOf(fStartTime.size()).length();
 		for (int i= 0; i < fStartTime.size(); i++) {
 			String occurence= String.valueOf(i + 1);
-			System.out.println("Occurence " + replicate(" ", maxOccurenceLength - occurence.length()) + occurence + ": " + (((Long) fStopTime.get(i)).longValue() - ((Long) fStartTime.get(i)).longValue()));
+			System.out.println("Occurence " + replicate(" ", maxOccurenceLength - occurence.length()) + occurence + ": " + (((Long) fStopTime.get(i)).longValue() - ((Long) fStartTime.get(i)).longValue())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 	}
 	
@@ -96,8 +96,10 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	    	Assert.isTrue(fStartTime.size() == fStopTime.size());
 	    	
 	    	Map properties= new HashMap();
+	    	/*
 	    	properties.put(DRIVER_PROPERTY, PerformanceTestPlugin.getBuildId());
 	    	properties.put(HOSTNAME_PROPERTY, getHostName());
+	    	*/
 	    	
 	    	DataPoint[] data= new DataPoint[2*fStartTime.size()];
 	    	for (int i= 0; i < fStartTime.size(); i++) {

@@ -32,48 +32,49 @@ public class SQL {
     }
     
     public void dispose() throws SQLException {
+    	// TODO: close prepared statements
     }
     
     void createPreparedStatements() throws SQLException {
         fInsertTag= fConn.prepareStatement(
-                "insert into TAG (NAME) values (?)", Statement.RETURN_GENERATED_KEYS);
+                "insert into TAG (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertConfig= fConn.prepareStatement(
-                "insert into CONFIG (HOST, PLATFORM) values (?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "insert into CONFIG (HOST, PLATFORM) values (?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertScenario= fConn.prepareStatement(
-                "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS);
+                "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertSample= fConn.prepareStatement(
-                "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertDataPoint= fConn.prepareStatement(
-                "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertScalar= fConn.prepareStatement(
-                "insert into SCALAR values (?, ?, ?)");
+                "insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
 
         fQueryTag= fConn.prepareStatement(
-        			"select ID from TAG where NAME = ?");
+        			"select ID from TAG where NAME = ?"); //$NON-NLS-1$
         fQueryConfig= fConn.prepareStatement(
-                "select ID from CONFIG where HOST = ? and PLATFORM = ?");
+                "select ID from CONFIG where HOST = ? and PLATFORM = ?"); //$NON-NLS-1$
         fQueryScenario= fConn.prepareStatement(
-                "select ID from SCENARIO where NAME = ?");
+                "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
         
         fQuery1= fConn.prepareStatement(
-                "select SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " +
-            		"where " +
-                 "SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and CONFIG.PLATFORM = ? and " +
-          		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " +
-          		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +
-            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
-            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " +
-            		"SCALAR.DIM_ID = ?"
+                "select SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
+            		"where " + //$NON-NLS-1$
+                 "SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.HOST = ? and CONFIG.PLATFORM = ? and " + //$NON-NLS-1$
+          		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
+          		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
+            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
+            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " + //$NON-NLS-1$
+            		"SCALAR.DIM_ID = ?" //$NON-NLS-1$
         			);
         fQuery3= fConn.prepareStatement(
-                "select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " +
-            		"where " +
-                 "SAMPLE.CONFIG_ID = ? and " +
-         		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " +
-         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " +
-            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
-            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID " +
-            		"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP"
+                "select SAMPLE.ID,DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE, STARTTIME from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG, TAG " + //$NON-NLS-1$
+            		"where " + //$NON-NLS-1$
+                 "SAMPLE.CONFIG_ID = ? and " + //$NON-NLS-1$
+         		"SAMPLE.TAG_ID = TAG.ID and TAG.NAME = ? and " + //$NON-NLS-1$
+         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
+            		"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
+            		"DATAPOINT.SAMPLE_ID = SAMPLE.ID " + //$NON-NLS-1$
+            		"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP" //$NON-NLS-1$
             		);
     }
     
@@ -81,47 +82,47 @@ public class SQL {
         Statement stmt= fConn.createStatement();
         
         stmt.executeUpdate(
-            "create table SAMPLE (" +
-                "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                "CONFIG_ID int not null," +
-                "SCENARIO_ID int not null," +
-                "TAG_ID int," +
-                "STARTTIME bigint" +
-            ")"
+        		"create table SAMPLE (" + //$NON-NLS-1$
+                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+					"CONFIG_ID int not null," + //$NON-NLS-1$
+					"SCENARIO_ID int not null," + //$NON-NLS-1$
+					"TAG_ID int," + //$NON-NLS-1$
+					"STARTTIME bigint" + //$NON-NLS-1$
+				")" //$NON-NLS-1$
         );           
         stmt.executeUpdate(
-                "create table CONFIG (" +
-                    "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                    "HOST varchar(40)," +
-                    "PLATFORM varchar(20)" +
-                ")"
+                "create table CONFIG (" + //$NON-NLS-1$
+                    "ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+                    "HOST varchar(40)," + //$NON-NLS-1$
+                    "PLATFORM varchar(20)" + //$NON-NLS-1$
+                ")" //$NON-NLS-1$
             );
         stmt.executeUpdate(
-                "create table TAG (" +
-                		"ID int not null GENERATED ALWAYS AS IDENTITY," +
-                		"NAME varchar(255)" +
-                ")"
+                "create table TAG (" + //$NON-NLS-1$
+                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+                	"NAME varchar(255)" + //$NON-NLS-1$
+                ")" //$NON-NLS-1$
             );
         stmt.executeUpdate(
-            "create table SCENARIO (" +
-                "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                "NAME varchar(255)" +
-            ")"
+        		"create table SCENARIO (" + //$NON-NLS-1$
+                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+					"NAME varchar(255)" + //$NON-NLS-1$
+				")" //$NON-NLS-1$
         );     
         stmt.executeUpdate(
-            "create table DATAPOINT (" +
-                "ID int not null GENERATED ALWAYS AS IDENTITY," +
-                "SAMPLE_ID int not null," +
-                "SEQ int," +
-                "STEP int" +
-            ")"
+        		"create table DATAPOINT (" + //$NON-NLS-1$
+                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+					"SAMPLE_ID int not null," + //$NON-NLS-1$
+					"SEQ int," + //$NON-NLS-1$
+					"STEP int" + //$NON-NLS-1$
+				")" //$NON-NLS-1$
         );
         stmt.executeUpdate(
-            "create table SCALAR (" +
-                "DATAPOINT_ID int not null," +
-                "DIM_ID int not null," +
-                "VALUE bigint" +
-            ")"
+        		"create table SCALAR (" + //$NON-NLS-1$
+                	"DATAPOINT_ID int not null," + //$NON-NLS-1$
+					"DIM_ID int not null," + //$NON-NLS-1$
+					"VALUE bigint" + //$NON-NLS-1$
+				")" //$NON-NLS-1$
         ); 
         stmt.close();
     }

@@ -18,12 +18,12 @@ import java.util.Map;
  */
 class PerformanceMonitorMac extends PerformanceMonitor {
 
-	private static long PAGESIZE= 4096;
+//	private static long PAGESIZE= 4096;
 
 	/** 
 	 * name of the library that implements the native methods.
 	 */
-	private static final String NATIVE_LIBRARY_NAME= "perf_3_1_0";
+	private static final String NATIVE_LIBRARY_NAME= "perf_3_1_0"; //$NON-NLS-1$
 	
 	/**
 	 * Is the native library loaded? 0-don't know, 1-no, 2-yes
@@ -33,6 +33,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 	/**
 	 * Answer true if the native library for this class has been successfully
 	 * loaded. If the load has not been attempted yet, try to load it.
+	 * @return returns true if native library has been successfullz loaded
 	 */
 	public static boolean isLoaded() {
 		if (fgIsLoaded == 0) {
@@ -50,6 +51,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
     
 	/**
 	 * Write out operating system counters for Mac OS X.
+	 * @param scalars where to collect the data
 	 */
 	protected void collectOperatingSystemCounters(Map scalars) {
 		synchronized(this) {

@@ -23,10 +23,12 @@ public class DimensionMessages {
 
 	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
 
-	private DimensionMessages() {}
+	private DimensionMessages() {
+		// emtpy
+	}
 	
 	public static String getString(int id) {
-	    return getString("Dimension." + id);
+	    return getString("Dimension." + id); //$NON-NLS-1$
 	}
 
 	public static String getString(String key) {

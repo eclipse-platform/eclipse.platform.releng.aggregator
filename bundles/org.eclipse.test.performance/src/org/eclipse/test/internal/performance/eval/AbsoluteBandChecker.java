@@ -34,7 +34,7 @@ public class AbsoluteBandChecker extends AssertChecker {
 		double test= reference.getAverage(dimension);
 		
 		if (actual > fUpperBand + test || actual < test - fLowerBand) {
-			message.append("\n " + dimension.getName() + ": " + dimension.getDisplayValue(actual) + " is not within [-" + dimension.getDisplayValue(new Scalar(null, fLowerBand)) + ", +" + dimension.getDisplayValue(new Scalar(null, fUpperBand)) + "] of " + dimension.getDisplayValue(test));
+			message.append('\n' + dimension.getName() + ": " + dimension.getDisplayValue(actual) + " is not within [-" + dimension.getDisplayValue(new Scalar(null, fLowerBand)) + ", +" + dimension.getDisplayValue(new Scalar(null, fUpperBand)) + "] of " + dimension.getDisplayValue(test)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			return false;
 		}
 		

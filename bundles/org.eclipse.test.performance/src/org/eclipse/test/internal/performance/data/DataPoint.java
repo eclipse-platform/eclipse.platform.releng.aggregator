@@ -44,6 +44,6 @@ public class DataPoint {
 	}
 	
 	public String toString() {
-		return "DataPoint [step= " + fStep + ", #dimensions: " + fScalars.size() + "]";
+		return "DataPoint [step= " + fStep + ", #dimensions: " + fScalars.size() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

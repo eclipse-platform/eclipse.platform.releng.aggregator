@@ -12,6 +12,8 @@ package org.eclipse.test.internal.performance.db;
 
 import java.io.File;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -27,6 +29,7 @@ public class DB {
     public static final String DB_NAME= "perfDB";	// default db name //$NON-NLS-1$
     
     private static final boolean DEBUG= false;
+    private static final DateFormat DATE_FORMAT= new SimpleDateFormat();
     
     private static DB fgDefault;
     
@@ -100,12 +103,11 @@ public class DB {
     
     private int getConfig() throws SQLException {
         if (fConfigID == 0) {
-            String name= System.getProperty("os.name", "?");
-            String version= System.getProperty("os.version", "?");
-            String arch= System.getProperty("os.arch", "?");
-            String conf= name + "/" + version + "/" + arch;
-            System.out.println("arch: " + conf);
-            fConfigID= fSQL.getConfig("localhost", conf);
+            String name= System.getProperty("os.name", "?"); //$NON-NLS-1$ //$NON-NLS-2$
+            String version= System.getProperty("os.version", "?"); //$NON-NLS-1$ //$NON-NLS-2$
+            String arch= System.getProperty("os.arch", "?"); //$NON-NLS-1$ //$NON-NLS-2$
+            String conf= name + '/' + version + '/' + arch;
+            fConfigID= fSQL.getConfig("localhost", conf); //$NON-NLS-1$
         }
         return fConfigID;
     }
@@ -169,7 +171,8 @@ public class DB {
                 if (dim != null)
                     map.put(dim, new Scalar(dim, value));
                 
-                if (DEBUG) System.out.println(i + ": " + sample_id+","+datapoint_id +","+step+ " " + Dimension.getDimension(dim_id).getName() + " " + value + " " + d.toGMTString());                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+                if (DEBUG)
+                	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dimension.getDimension(dim_id).getName() + ' ' + value + ' ' + DATE_FORMAT.format(d));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
             }
             
             return (DataPoint[])dataPoints.toArray(new DataPoint[dataPoints.size()]);

@@ -18,22 +18,22 @@ import java.text.NumberFormat;
  */
 public class Unit {
 
-	public static final Unit SECOND= new Unit("s", "second", false);  //$NON-NLS-1$
-	public static final Unit BYTE= new Unit("byte", "byte", true);  //$NON-NLS-1$
-	public static final Unit CARDINAL= new Unit("", "", false);  //$NON-NLS-1$
+	public static final Unit SECOND= new Unit("s", "second", false);  //$NON-NLS-1$ //$NON-NLS-2$
+	public static final Unit BYTE= new Unit("byte", "byte", true);  //$NON-NLS-1$ //$NON-NLS-2$
+	public static final Unit CARDINAL= new Unit("", "", false);  //$NON-NLS-1$ //$NON-NLS-2$
 
 	private static final int T_DECIMAL= 1000;
 	private static final int T_BINARY= 1024;
 	
-	protected static final String[] PREFIXES= new String[] { "y", "z", "a", "f", "p", "n", "u", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y" };
+	//protected static final String[] PREFIXES= new String[] { "y", "z", "a", "f", "p", "n", "u", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y" };
 	//protected static final String[] FULL_PREFIXES= new String[] { "yocto", "zepto", "atto", "femto", "pico", "nano", "micro", "milli", "", "kilo", "mega", "giga", "tera", "peta", "exa", "zetta", "yotta" };
-	protected static final String[] BINARY_PREFIXES= new String[] { "", "", "", "", "", "", "", "", "", "ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" };
-	protected static final String[] BINARY_FULL_PREFIXES= new String[] { "", "", "", "", "", "", "", "", "", "kibi", "mebi", "gibi", "tebi", "pebi", "exbi", "zebi", "yobi" };
+	//protected static final String[] BINARY_PREFIXES= new String[] { "", "", "", "", "", "", "", "", "", "ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi", "Yi" };
+	//protected static final String[] BINARY_FULL_PREFIXES= new String[] { "", "", "", "", "", "", "", "", "", "kibi", "mebi", "gibi", "tebi", "pebi", "exbi", "zebi", "yobi" };
 	
 	private final String fShortName;
 	private final String fFullName;
 	private final boolean fIsBinary;
-	private final int fPrecision= 2;
+	//private final int fPrecision= 2;
 	
 	public Unit(String shortName, String fullName, boolean binary) {
 		fShortName= shortName;
@@ -53,14 +53,14 @@ public class Unit {
 	    
 	    //return getDisplayValue1(magnitudel / multiplier);
 	    //return Long.toString((double)(magnitudel / multiplier));
-	    return getDisplayValue1((double)(magnitudel / multiplier));
+	    return getDisplayValue1(magnitudel / multiplier);
 	}
 
 	public String getDisplayValue1(double magnitude) {
 	    
-	    if ("s".equals(fShortName))
+	    if ("s".equals(fShortName)) //$NON-NLS-1$
 	        return formatedTime((long) (magnitude*1000.0));
-	    if ("byte".equals(fShortName))
+	    if ("byte".equals(fShortName)) //$NON-NLS-1$
 	        return formatEng((long) (magnitude));
 	    return Double.toString(magnitude);
 	    
@@ -95,7 +95,7 @@ public class Unit {
 	}
 	
 	public String toString() {
-		return "Unit [" + getShortName() + "]";
+		return "Unit [" + getShortName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
@@ -105,29 +105,30 @@ public class Unit {
 	 * @param diff time in milliseconds
 	 * 
 	 * I copied this from karasiuk.utility.TimeIt
+	 * @return the formatted time
 	 */
 	public static String formatedTime(long diff) {
 		if (diff < 0)
 		    diff *= -1;
 		if (diff < 1000)
-			return String.valueOf(diff) + " milliseconds";
+			return String.valueOf(diff) + " milliseconds"; //$NON-NLS-1$
 		
 		NumberFormat nf= NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(1);
 		double d = diff / 1000.0;	
 		if (d < 60)
-			return nf.format(d) + " seconds";
+			return nf.format(d) + " seconds"; //$NON-NLS-1$
 		
 		d = d / 60.0;
 		if (d < 60.0)
-			return nf.format(d) + " minutes";
+			return nf.format(d) + " minutes"; //$NON-NLS-1$
 	
 		d = d / 60.0;
 		if (d < 24.0)
-			return nf.format(d) + " hours";
+			return nf.format(d) + " hours"; //$NON-NLS-1$
 	
 		d = d / 24.0;
-		return nf.format(d) + " days";
+		return nf.format(d) + " days"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -135,6 +136,8 @@ public class Unit {
 	 * G billions and T trillions.
 	 * 
 	 * I copied this method from karasiuk.utility.Misc.
+	 * @param n the number to format
+	 * @return the formatted number
 	 */
 	public String formatEng(long n) {
 	    int TSD= fIsBinary ? T_BINARY : T_DECIMAL;
@@ -144,18 +147,18 @@ public class Unit {
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(1);
 		if (d < TSD)
-			return nf.format(d) + "K";
+			return nf.format(d) + "K"; //$NON-NLS-1$
 		
 		d = d / TSD;
 		if ( d < TSD)
-			return nf.format(d) + "M";
+			return nf.format(d) + "M"; //$NON-NLS-1$
 		
 		d = d / TSD;
 		if ( d < TSD)
-			return nf.format(d) + "G";
+			return nf.format(d) + "G"; //$NON-NLS-1$
 		
 		d = d / TSD;
-		return nf.format(d) + "T";
+		return nf.format(d) + "T"; //$NON-NLS-1$
 	}
 
 }

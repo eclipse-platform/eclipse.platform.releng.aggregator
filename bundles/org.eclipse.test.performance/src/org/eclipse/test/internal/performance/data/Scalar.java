@@ -33,8 +33,7 @@ public class Scalar {
 	
 	public String toString() {
 		if (fDimension == null)
-			return "Scalar [dimension= " + fDimension + ", magnitude= " + fMagnitude + "]";
-		else
-			return "Scalar [" + fDimension.getName() + ": " + fDimension.getDisplayValue(this) + "]";
+			return "Scalar [dimension= " + fDimension + ", magnitude= " + fMagnitude + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "Scalar [" + fDimension.getName() + ": " + fDimension.getDisplayValue(this) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

@@ -32,7 +32,7 @@ public class RelativeBandChecker extends AssertChecker {
 		double test= reference.getAverage(dimension);
 		
 		if (actual > fUpperBand * test || actual < fLowerBand * test) {
-			message.append("\n " + dimension.getName() + ": " + dimension.getDisplayValue(actual) + " is not within [" + Math.round(fLowerBand * 100)+ "%, " + Math.round(fUpperBand * 100) + "%] of " + dimension.getDisplayValue(test));
+			message.append('\n' + dimension.getName() + ": " + dimension.getDisplayValue(actual) + " is not within [" + Math.round(fLowerBand * 100)+ "%, " + Math.round(fUpperBand * 100) + "%] of " + dimension.getDisplayValue(test)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			return false;
 		}
 		return true;

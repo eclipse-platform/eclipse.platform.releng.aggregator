@@ -46,7 +46,7 @@ public class Evaluator extends EmptyEvaluator {
 	    Sample session= ipm.getSample();
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
 		
-		String refTag= PerformanceTestPlugin.getEnvironment("refTag");
+		String refTag= PerformanceTestPlugin.getEnvironment("refTag"); //$NON-NLS-1$
 		if (refTag == null)
 		    return;	// nothing to do
 
@@ -54,7 +54,7 @@ public class Evaluator extends EmptyEvaluator {
 	    if (datapoints == null)
 	    	return;
 	    if (datapoints.length == 0) {
-	        System.out.println("no reference data with tag '" + refTag + "' found");
+	        System.out.println("no reference data with tag '" + refTag + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
 	        return;
 	    }
 	    Sample reference= new Sample(datapoints);

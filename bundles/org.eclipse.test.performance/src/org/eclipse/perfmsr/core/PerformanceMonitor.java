@@ -21,18 +21,17 @@ public class PerformanceMonitor {
 	/** 
 	 * ivjperf - name of the library that implements the native methods.
 	 */
-	private static final String NATIVE_LIBRARY_NAME= "ivjperf";
+	private static final String NATIVE_LIBRARY_NAME= "ivjperf"; //$NON-NLS-1$
 	
 	/**
 	 * Is the native library loaded? 0-don't know, 1-no, 2-yes
 	 */
 	private static int fgIsLoaded= 0;
 	
-	private boolean fgNativeGetPerformanceInfoNotAvailable;
-
 	/**
 	 * Answer true if the native library for this class has been successfully
 	 * loaded. If the load has not been attempted yet, try to load it.
+	 * @return true if native library has been successfully loaded
 	 */
 	public static boolean isLoaded() {
 		if (fgIsLoaded == 0) {
@@ -40,7 +39,7 @@ public class PerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
-			    System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
+			    System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded"); //$NON-NLS-1$ //$NON-NLS-2$
 			    fgIsLoaded= 1;
 			}
 		}

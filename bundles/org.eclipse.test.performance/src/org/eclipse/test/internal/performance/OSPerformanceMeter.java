@@ -15,12 +15,9 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Sample;
-import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
 
@@ -34,7 +31,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	private long fStartTime;
 	private List fDataPoints= new ArrayList();
 	
-    private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
+    private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults"; //$NON-NLS-1$
     
 	
 	/**
@@ -99,33 +96,21 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	
     private void snapshot(int step) {
 	    HashMap map= new HashMap();
-	    
-	    if (true) {
-	    		Runtime runtime= Runtime.getRuntime();
-			runtime.gc();
-			long used= runtime.totalMemory() - runtime.freeMemory();
-			addScalar(map, Dimensions.USED_JAVA_HEAP, used);
-		}
-
 	    fPerformanceMonitor.collectOperatingSystemCounters(map);
 	    fDataPoints.add(new DataPoint(step, map));
     }
 
-    private void addScalar(Map scalars, Dimension dimension, long value) {
-        scalars.put(dimension, new Scalar(dimension, value));
-    }    
-
 	private void printSample(PrintStream ps, Sample sample) {
-		ps.print("Scenario '" + getScenarioName() + "' ");
+		ps.print("Scenario '" + getScenarioName() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 		DataPoint[] dataPoints= sample.getDataPoints();
 		if (dataPoints.length > 0) {
 			StatisticsSession s= new StatisticsSession(dataPoints);
 			Dimension[] dimensions= dataPoints[0].getDimensions();
 			if (dimensions.length > 0) {
-				ps.println("(average over " + s.getCount(dimensions[0]) + " samples):");
+				ps.println("(average over " + s.getCount(dimensions[0]) + " samples):"); //$NON-NLS-1$ //$NON-NLS-2$
 				for (int i= 0; i < dimensions.length; i++) {
 				    Dimension dimension= dimensions[i];
-				    ps.println("  " + dimension.getName() + ": " + dimension.getDisplayValue(s.getAverage(dimension)));
+				    ps.println("  " + dimension.getName() + ": " + dimension.getDisplayValue(s.getAverage(dimension))); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}
@@ -134,12 +119,15 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 
 	/**
 	 * Write out the run element if it hasn't been written out yet.
+	 * @param runProperties
 	 */
 	private void collectRunInfo(HashMap runProperties) {
 	    
+		/*
         runProperties.put(DRIVER_PROPERTY, PerformanceTestPlugin.getBuildId());
         runProperties.put(HOSTNAME_PROPERTY, getHostName());
-
+        */
+		
         /*
 		String version= System.getProperty("java.fullversion");
 		if (version == null)
