@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Nesting</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2> Nesting</H2>
+To the outside world, every part is a black box. The part can use IPartFactory 
+to create nested children however it sees fit, but it does not expose those children 
+directly to the outside world. The following example demonstrates a view with 
+two nested children. <br>
+<br>
+<div style="margin-left: 40px;"><code>/**<br>
+  &nbsp;* Example view containing a nested error log on the left and a nested 
+  property <br>
+  &nbsp;* view on the right.<br>
+  &nbsp;* <br>
+  &nbsp;* @since 3.1<br>
+  &nbsp;*/<br>
+  public class TestCompositeView {<br>
+  &nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp; public TestCompositeView(Composite parent, IPartFactory factory) 
+  throws CoreException {&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <br>
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // 
+  Create PDE error log view</span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ContainerContext 
+  logViewContext = new ContainerContext();&nbsp;&nbsp;&nbsp; </span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ISite 
+  logView = factory.createView(</span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  "org.eclipse.pde.runtime.LogView", </span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  parent, logViewContext, null);</span><br style="color: rgb(255, 0, 0);">
+  <br style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // 
+  Create Property view</span><br
+ style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ContainerContext 
+  emptyContext = new ContainerContext();</span><br style="color: rgb(255, 0, 0);">
+  <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ISite 
+  propertiesView = factory.createView(IPageLayout.ID_PROP_SHEET, parent, emptyContext, 
+  null);</span><br>
+  <br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Construct layout<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; GridLayout layout = new GridLayout();<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; layout.numColumns = 2;<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; parent.setLayout(layout);<br>
+  <br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Arrange error log view<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; GridData data1 = new GridData(GridData.FILL_BOTH);<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; logView.getControl().setLayoutData(data1);<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Arrange properties view<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; GridData data2 = new GridData(GridData.FILL_BOTH);<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; propertiesView.getControl().setLayoutData(data2);<br>
+  <br>
+  &nbsp;&nbsp;&nbsp; }<br>
+  }</code><br>
+  <br>
+</div>
+<span style="font-weight: bold;"> </span>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p></BODY>
+</HTML>

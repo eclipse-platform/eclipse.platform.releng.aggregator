@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Multiplexing an interface</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<div style="margin-left: 40px;"></div>
+<h2> Multiplexing an interface</h2>
+<p>Many composite parts will have the notion of an active child. Such parts may 
+  want to dynamically attach a dependency to the child that is currently active. 
+  <br>
+  <br>
+  For example, we may want to create a view that arranges its children in a tab 
+  folder. The parent may want to set its own name and icon to match that of its 
+  active child. We could accomplish this using the following pattern: </p>
+<ul>
+  <li> Remember the current name and icon for each child part;</li>
+  <li> Set the initial name and icon to its default value (read from IPartDescriptor);</li>
+  <li> Attach an INameable to each child that listens to name and icon changes;</li>
+  <li> Whenever the name or icon of the active part changes, change the name and 
+    icon of the outer part to match;</li>
+  <li> Whenever the active child changes, change the name and icon of the outer 
+    part to the saved name and icon for the child.</li>
+</ul>
+We will refer to this as multiplexing the INameable interface.<br>
+<br>
+In general, the multiplexer pattern works like this: 
+<ul>
+  <li> Remember some state for each child, with an appropriate initial value;</li>
+  <li> Keep track of state changes in all children;</li>
+  <li> When the state of the active child changes, forward the change to a shared 
+    interface;</li>
+  <li> When a new child becomes active, forward its entire state to the shared 
+    interface.</li>
+</ul>
+Since this pattern is quite common, we supply a Multiplexer class to support it. 
+Clients that supply new types of interfaces using the <span
+ style="font-style: italic;">org.eclipse.core.component.types </span>extension 
+point can also supply a multiplexed version of their interface. The multiplexed 
+version will: 
+<ul>
+  <li>Implement the interface;</li>
+  <li> Know what state to remember for each child and what the initial value should 
+    be;</li>
+  <li> Receive notifications when it is activated/deactivated;</li>
+  <li> Forward its state to a shared instance when it is active. </li>
+</ul>
+Clients using the Multiplexer don't need to know the details of multiplexing each 
+interface. They can simply attach an INameable to the multiplexer as though it 
+was a part, and attach the multiplexer to each child part as though it were an 
+INameable. This is shown in the following example, use of the multiplexer has 
+been highlighted in red. Multiplexers need to be explicitly disposed.<br>
+<code><br>
+</code> 
+<div style="margin-left: 40px;"><code>public class MultiplexNameView implements 
+  IDisposable {</code><br>
+  <code>&nbsp;&nbsp;&nbsp; private Multiplexer mplex;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; private ISite view1;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; private ISite view2;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; private Listener focusListener = new Listener() {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* (non-Javadoc)</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public void handleEvent(Event 
+  e) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if 
+  (e.widget == view1.getControl()) {</code><br>
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  mplex.setActivePart(view1);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else 
+  if (e.widget == view2.getControl()) {</code><br>
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  mplex.setActivePart(view2);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; };</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; /**</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; * Component constructor. Do not invoke directly.</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; */</code><br>
+  <code>&nbsp;&nbsp;&nbsp; public MultiplexNameView(Composite parent, IPartFactory 
+  factory, INameable name) throws CoreException {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create a multiplexer. Redirect 
+  our INameable to the multiplexer</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span
+ style="color: rgb(255, 0, 0);">mplex = new Multiplexer(new ContainerContext().addInstance(INameable.class, 
+  name));</span></code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create a resource navigator. 
+  Give the navigator a multiplexed INameable, but use</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // defaults for all of the 
+  other interfaces.</code><br>
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  ContainerContext viewContext1 = new ContainerContext()</code><br
+ style="color: rgb(255, 0, 0);">
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  .delegateTo(INameable.class, mplex); </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; view1 = factory.createView(</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  IPageLayout.ID_RES_NAV, parent, viewContext1, null);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; view1.getControl().addListener(SWT.Activate, 
+  focusListener);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create property view. Give 
+  the properties view a multiplexed INameable, but use</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // defaults for everything 
+  else.</code><br>
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  ContainerContext viewContext2 = new ContainerContext()</code><br
+ style="color: rgb(255, 0, 0);">
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  .delegateTo(INameable.class, mplex);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; view2 = factory.createView(IPageLayout.ID_PROP_SHEET, 
+  parent, viewContext2, null);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; view2.getControl().addListener(SWT.Activate, 
+  focusListener);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Make the navigator active 
+  initially</code><br>
+  <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  mplex.setActivePart(view1);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent.setLayout(new FillLayout());&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  </code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; /* (non-Javadoc)</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; * @see org.eclipse.core.component.IDisposable#dispose()</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; */</code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void dispose() {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; mplex.dispose();</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>}</code><br>
+</div>
+<h2>&nbsp; </h2>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

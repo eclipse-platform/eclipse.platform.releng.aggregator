@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Implementing multiplexing components</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Implementing multiplexing components</H2>
+In order to be used in a Multiplexer, site interfaces need to register an alternative 
+default implementation with the <span
+ style="font-style: italic;">org.eclipse.ui.part.SiteMultiplexerInitializer</span> 
+scope. Since this extends the site scope, the more specific multiplexer version 
+will take priority over the default version when used in a Multiplexer. <br>
+<br>
+A multiplexed component will almost always use the following pattern: 
+<ol>
+  <li>Implement the INestedComponent lifecycle interface;</li>
+  <li>Take an IMultiplexer in their constructor and use it to access the shared 
+    version of their interface; </li>
+  <li>Store the part's state;</li>
+  <li>Listen to state changes in the child and update the stored state appropriately;</li>
+  <li>Each time the component is activated, it should forward the stored state 
+    to the shared interface in the multiplexer; </li>
+  <li>While the component is active, it should forward state changes directly 
+    to the shared interface.</li>
+</ol>
+The following example demonstrates the code used by the workbench to multiplex 
+the ISelectionHandler interface with ChildSelectionHandler. 
+<br>
+<br>
+<div style="margin-left: 40px;"><code>/**</code><br>
+  <code>&nbsp;* Multiplexed version of the ISelectionHandler interface</code><br>
+  <code>&nbsp;* </code><br>
+  <code>&nbsp;* @since 3.1</code><br>
+  <code>&nbsp;*/</code><br>
+  <code>public class ChildSelectionHandler implements ISelectionHandler, INestedComponent 
+  {</code><br>
+  <code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; private ISelectionHandler parent;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; private ISelection selection;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; private boolean isActive = false;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; private IMultiplexer multiplexer;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; public ChildSelectionHandler(IMultiplexer mplex) throws 
+  DependencyException {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.multiplexer = mplex;</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Get access to the shared 
+  ISelectionHandler being multiplexed (we should</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // only modify it when we're 
+  the active child)</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.parent = (ISelectionHandler)mplex.getSharedComponents().getComponent(ISelectionHandler.class);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Set the initial state (the 
+  part's initial selection will be null</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // until it explicitly sets 
+  it).</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code></code><code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public IMultiplexer getMultiplexer() {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Return the multiplexer we 
+  were created with</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return multiplexer;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void activate() {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Forward our stored selection 
+  to the shared interface</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent.setSelection(selection);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; isActive = true;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code></code><code>&nbsp;&nbsp;&nbsp; public void deactivate() {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; isActive = false;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void setSelection(ISelection newSelection) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Remember the child's new 
+  selection</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; selection = newSelection;</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (isActive) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // 
+  If we're active, forward the selection directly to the shared</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // 
+  interface</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent.setSelection(newSelection);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><code></code><br>
+  <code>}</code><br>
+</div>
+Here is the associated extension point markup for ChildSelectionHandler.<br>
+<br>
+<span style="font-weight: bold;"> </span> 
+<div style="margin-left: 40px;"><code>&lt;extension</code><code> point="org.eclipse.core.component.types"&gt;</code><br>
+  <code>&nbsp;&nbsp; &lt;component</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; implementation="org.eclipse.ui.internal.part.services.ChildSelectionHandler"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; interface="org.eclipse.ui.part.services.ISelectionHandler"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; singleton="false"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; initializer="org.eclipse.ui.part.SiteMultiplexerInitializer"/&gt;</code><br>
+  <code>&lt;/extension&gt;</code><br>
+  <code></code><br>
+  <br>
+</div>
+<div style="margin-left: 40px;"><img src="images/composite_view.PNG" alt="Screenshot of TestCompositeView"><br>
+  <br>
+</div>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Component Framework</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H1>Component Framework</H1>
+<P CLASS="Para"> By providing simple API for views and editors, also known as 
+  parts, the Component Framework permits existing parts to be nested and composed. 
+  The Component Framework API allows clients to instantiate parts inside arbitrary 
+  SWT composites, improves robustness and leak proofing by having a part communicate 
+  with local interfaces on its site rather than reaching to global objects, allows 
+  clients to extend the set of interfaces available from a site and provides a 
+  framework for clients to create their own reusable components using the same 
+  API available to views and editors. The Component Framework also allows for 
+  constructing and destructing a part with atomic operations and allows existing 
+  parts to use new site interfaces.</P>
+<P CLASS="Para"><img alt="Image of NameViewNew view" src="images/NameViewNew.PNG"><br>
+</P>
+<P CLASS="Para">This simple example provides a view that sets its name, title, 
+  tooltip, and image and demonstrates how to write an editor or view using the 
+  component framework. It shows the source using the component API. New parts 
+  can take arguments in their constructor and do not need to implement any particular 
+  interface or need to inherit from any particular base class.<br>
+  <br>
+</P>
+<div style="margin-left: 40px;"><code>/**<br>
+  &nbsp;* Sample view that sets its name, tooltip, image, and content description. 
+  The view<br>
+  &nbsp;* uses a custom image supplied by its plug-in.<br>
+  &nbsp;* <br>
+  &nbsp;* @since 3.1<br>
+  &nbsp;*/<br>
+  public class NameViewNew {<br>
+  &nbsp;&nbsp;&nbsp; /**<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; * Component constructor. Do not invoke directly.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; */<br>
+  &nbsp;&nbsp;&nbsp; public NameViewNew(Composite parent, INameable name, IPluginImages 
+  images) {<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; name.setName("Name View (New)");<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; name.setContentDescription("content description");<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; name.setTooltip("This is a tooltip");<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; name.setImage(images.getImage("icons/sample.gif"));<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Create some bogus view contents<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Label content = new Label(parent, SWT.NONE);<br>
+  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; content.setText("View contents go here");<br>
+  &nbsp;&nbsp;&nbsp; }<br>
+  }</code><br>
+</div>
+<p>Notice that the arguments given to the view's constructor are already aware 
+  of their context. For example, the IPluginImages interface does not need to 
+  be told which plug-in the view belongs to. Similarly, the interfaces are resistant 
+  to leaks. In this example, the view's image is allocated and deallocated automatically 
+  by the INameable implementation, so the view itself doesn't need to implement 
+  a dispose method.<br>
+  <br>
+  It is interesting to note that the API for views and editors is exactly the 
+  same. In other words, if we had chosen to register the NameViewNew class with 
+  the org.eclipse.ui.editors extension point, it could also be used as an editor 
+  without further modification.<br>
+</p>
+<h2>&nbsp; </h2>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

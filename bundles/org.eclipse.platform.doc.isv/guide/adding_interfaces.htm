@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Adding new interfaces</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2> Adding new interfaces</H2>
+New types of objects can be passed into a part's constructor by registering them 
+with the the <span style="font-style: italic;">org.eclipse.core.component.types</span> 
+extension point. At this point, we should introduce the term <span
+ style="font-style: italic;">component</span>. A component is any sort of object 
+that is created from an extension point by injecting arguments into its constructor. 
+New-style parts are one sort of component, but there are other types of components 
+as well.<br>
+<br>
+The following example shows a sample types extension. This example specifies that 
+the INameable interface should be available from a part's site.<br>
+<br>
+<div style="margin-left: 40px;"><code>&lt;extension</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; point="org.eclipse.core.component.types"&gt;</code><br>
+  <code>&nbsp;&nbsp; &lt;component<br>
+  </code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; initializer="org.eclipse.ui.part.SiteInitializer"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; interface="org.eclipse.ui.part.services.INameable"<br>
+  </code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; implementation="org.eclipse.ui.internal.part.services.NullNameableService"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; singleton="true"</code><br>
+  <code>&nbsp;&nbsp; /&gt;</code><br>
+  <code></code><code>&lt;/extension&gt;</code><br>
+</div>
+<p>The <span style="font-style: italic;">initializer</span> attribute indicates 
+  where the interface will be used. For example, the string "org.eclipse.ui.part.SiteInitializer" 
+  means that the interface is used on a part's site. We could have also used "org.eclipse.ui.part.PartInitializer" 
+  if the interface was intended for parts themselves to implement. <br>
+  <br>
+  The <span style="font-style: italic;">interface</span> attribute is the name 
+  of the interface. This must exactly match the type that the component will receive 
+  in its constructor. If we create an extension that supplies Strings and a component 
+  asks for an Object, it will not use our extension even though it would have 
+  been a compatible type. <br>
+  <br>
+  The <span style="font-style: italic;">implementation</span> attribute identifies 
+  the default implementation of the interface. It either points to a component 
+  class that implements the interface or a ComponentFactory that can create them, 
+  for additional information, see the ComponentFactory section . This implementation 
+  is used to satisfy a dependency whenever a component requests this interface 
+  and it can't be found in its parent context. All interfaces must supply a default 
+  implementation. This means that a correctly written component will always work 
+  in a given scope, regardless of how many dependencies are supplied by its parent 
+  context. The implementation cannot override or extend the interface attribute 
+  by implementing additional interfaces. Other components can depend on this component 
+  through its registered interface, but cannot depend on the implementation class 
+  directly. <br>
+  <br>
+  The <span style="font-style: italic;">singleton</span> attribute indicates whether 
+  the default implementation is a singleton. If true, then a single instance will 
+  be created and shared between every other component that needs it. If false, 
+  then a new instance will be created for each container that needs it. For example, 
+  in the case of parts, singleton=:"false" would mean that one instance will be 
+  created for every part.<br>
+</p>
+<h2>&nbsp; </h2>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

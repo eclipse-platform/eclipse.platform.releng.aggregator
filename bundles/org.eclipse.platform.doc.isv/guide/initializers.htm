@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Initializers</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2> Initializers</H2>
+The main purpose of an initializer is to identify a scope. However, it is more 
+than just a unique identifier. It points to the Java class that supplies initialization 
+information to the scope. In order to create an object from the org.eclipse.core.component.types 
+extension point, Eclipse must manually construct an initializer of the appropriate 
+type. This allows Eclipse to pass required context to components from outside 
+the component framework. Any component is allowed to depend on the initializer 
+for its scope, it to access this context. Currently most of the initializers provided 
+by the workbench have an empty public interface, so most clients would not want 
+to do this yet. <br>
+<br>
+Inheritance <span style="font-style: italic;"><span
+ style="font-weight: bold;">is</span> </span>taken into consideration between 
+initializer types. Registering a component type on an initializer's base class 
+will also affect the initializer and all of its subclasses. Initializers cannot 
+be interfaces, so only single inheritance is possible. For example, an interface 
+registered on <span
+ style="font-style: italic;">org.eclipse.core.component.ExtensionInitializer </span>would 
+be visible both from a part and from its site since <span
+ style="font-style: italic;">org.eclipse.core.component.ExtensionInitializer</span> 
+is a base class for both the part and site initializers.<br>
+<br>
+The workbench supplies the following initializer types:<br>
+<br>
+<table style="width: 100%; text-align: left;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr> 
+      <td style="vertical-align: top; font-weight: bold;">Initializer<br> </td>
+      <td style="vertical-align: top; font-weight: bold;">Base class<br> </td>
+      <td style="vertical-align: top; font-weight: bold;">Used for<br> </td>
+    </tr>
+    <tr> 
+      <td style="vertical-align: top;">org.eclipse.core.component.ExtensionInitializer<br> 
+      </td>
+      <td style="vertical-align: top;">none<br> </td>
+      <td style="vertical-align: top;">Dependencies used by any component created 
+        from an extension point.<br> </td>
+    </tr>
+    <tr> 
+      <td style="vertical-align: top;">org.eclipse.ui.part.PartInitializer<br> 
+      </td>
+      <td style="vertical-align: top;">org.eclipse.core.component.ExtensionInitializer</td>
+      <td style="vertical-align: top;">Interfaces that can be implemented by a 
+        part.<br> </td>
+    </tr>
+    <tr> 
+      <td style="vertical-align: top;">org.eclipse.ui.part.SiteInitializer</td>
+      <td style="vertical-align: top;">org.eclipse.core.component.ExtensionInitializer</td>
+      <td style="vertical-align: top;">Components available from a site (such 
+        as things a part can take in its constructor).<br> </td>
+    </tr>
+    <tr> 
+      <td style="vertical-align: top;">org.eclipse.ui.part.SiteMultiplexerInitializer<br> 
+      </td>
+      <td style="vertical-align: top;">org.eclipse.ui.part.SiteInitializer</td>
+      <td style="vertical-align: top;">Dependencies that only apply to site inside 
+        a multiplexer (used to override the default component implementation provided 
+        by a site).<br> </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Passing arguments to a part</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<div style="margin-left: 40px;"></div>
+<h2> Passing arguments to a part</h2>
+A parent passes arguments to its children using a ContainerContext. The context 
+can pass arguments to the constructor of a part or specify a factory for constructing 
+those arguments. For example, a particular ContainerContext might specify rules 
+like:<br>
+<ul>
+  <li>If the child asks for an INameable, use object X; </li>
+  <li>If the child asks for an IActionBars, construct one using factory Y;</li>
+  <li>If the child asks for any unknown type and object Z can be adapted to that 
+    type, return the adapter; </li>
+  <li>If the child asks for a dependency that can't be satisfied in any other 
+    way, redirect to some other context.</li>
+</ul>
+If the context doesn't supply a particular dependency, the child will use the 
+default implementation from the <span
+ style="font-style: italic;">org.eclipse.core.component.types</span> extension 
+point. Since the context can override any of the arguments a part gets in its 
+constructor, the parent can override any of the interfaces the part normally obtains 
+from its site. For example, the parent could force its child to use a different 
+implementation of IActionBars by supplying an IActionBars in the context.<br>
+<ul>
+  <p>The parent has several options for constructing the context:</p>
+  <li>Provide the child with a specific instance for one of its dependencies;</li>
+  <li>Provide the child with a factory to construct one of its dependencies, if 
+    needed; </li>
+  <li>Redirect some or all of its own dependencies to one of its children; </li>
+  <li>Use a multiplexer to dynamically redirect one or more dependencies to its 
+    active child; </li>
+  <li>Let the child use the default implementation for some or all of its dependencies. 
+  </li>
+</ul>
+The following <span style="font-weight: bold;">DefaultContextView</span>, <span style="font-weight: bold;">RedirectContextView</span> 
+and <span style="font-weight: bold;">OverrideInstanceView</span> examples demonstrate 
+each possibility. 
+<h3> Default context</h3>
+The following example shows the source for a view that creates two nested children 
+in the default context. The fact that the children are created in the default 
+context means that the parent doesn't care about the child's name, toolbar, selection, 
+and so on and isn't prepared to deal with them. If the parent wanted to do something 
+with, say, the current selection in one of its children, it would have needed 
+to pass an ISelectionHandler to that child. The end result is shown below the 
+example.<br>
+<br>
+<span style="font-weight: bold;"> </span> 
+<div style="margin-left: 40px;"><code>/**</code><br>
+  <code>&nbsp;* View that demonstrates how to create two nested children </code><br>
+  <code>&nbsp;* with the default context.</code><code></code><code></code><code></code><br>
+  <code>&nbsp;*/</code><br>
+  <code>public class DefaultContextView {</code><br>
+  <code>&nbsp;&nbsp;&nbsp; public DefaultContextView(Composite parent, IPartFactory 
+  factory) throws CoreException {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create a resource navigator</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ContainerContext viewContext1 
+  = new ContainerContext();&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ISite view1 = factory.createView(</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  IPageLayout.ID_RES_NAV, parent, viewContext1, null);</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create property view</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ContainerContext viewContext2 
+  = new ContainerContext();</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ISite view2 = factory.createView(IPageLayout.ID_PROP_SHEET, 
+  parent, viewContext2, null);</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent.setLayout(new FillLayout());&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  </code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>}</code><span style="font-weight: bold;"></span><br>
+  <span style="font-weight: bold;"></span></div>
+<span style="font-weight: bold;"> <br>
+</span> 
+<div style="margin-left: 40px;"><img src="images/DefaultContextView.PNG" alt="Screenshot of DefaultContextView"><br>
+</div>
+<br>
+<h3>Redirecting dependencies from a parent to a child<br>
+</h3>
+<span style="font-weight: bold;"></span>This example demonstrates how to redirect 
+a site interface from the parent to a child. This composite view contains a resource 
+navigator and a property view. It redirects its selection handler to the resource 
+navigator and it redirects its action bars to the properties view. The result 
+is a view that provides a resource selection and contains the toolbar and menu 
+from the properties view, as shown below. <br>
+<span style="font-weight: bold;"><br>
+</span> 
+<div style="margin-left: 40px;"><code>public class RedirectContextView {</code><br>
+  <code>&nbsp;&nbsp;&nbsp; /**</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; * Component constructor. Do not invoke directly.</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; */</code><br>
+  <code>&nbsp;&nbsp;&nbsp; public RedirectContextView(Composite parent, IPartFactory 
+  factory, ISelectionHandler selection, IActionBars actionBars) throws CoreException 
+  {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create a resource navigator. 
+  Redirect the navigator's selection directly to our parent.</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ContainerContext viewContext1 
+  = new ContainerContext()</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addInstance(ISelectionHandler.class, 
+  selection); </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ISite view1 = factory.createView(</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  IPageLayout.ID_RES_NAV, </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  parent, viewContext1, null);</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create property view. Allow 
+  the property view to use our action bars directly.</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ContainerContext viewContext2 
+  = new ContainerContext()</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .addInstance(IActionBars.class, 
+  actionBars);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ISite view2 = factory.createView(IPageLayout.ID_PROP_SHEET, 
+  parent, viewContext2, null);</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent.setLayout(new FillLayout());&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  </code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>}</code><span style="font-weight: bold;"></span><br>
+  <span style="font-weight: bold;"></span></div>
+<br>
+<br>
+<div style="margin-left: 40px;"><img src="images/RedirectContextView.PNG" alt="Screenshot of RedirectContextView"><br>
+</div>
+<h3>Providing dependencies directly<br>
+</h3>
+This example demonstrates how to supply a child with one of its dependencies directly. 
+In this example, we create a composite view containing a problems view and a properties 
+view. We supply the problem view with an ISelectionHandler in order to display 
+the number of selected problems in the content description. The end result is 
+shown below.<br>
+<br>
+<span style="font-weight: bold;"> </span> 
+<div style="margin-left: 40px;"><code>public class OverrideInstanceView {<br>
+  &nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp; /**<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; * Component constructor. Do not invoke directly.<br>
+  &nbsp;&nbsp;&nbsp;&nbsp; */<br>
+  &nbsp;&nbsp;&nbsp; public OverrideInstanceView(Composite parent, IPartFactory 
+  factory, final INameable name) throws CoreException {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ContainerContext viewContext1 = new 
+  ContainerContext();<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Add an ISelectionHandler to the 
+  view's context. Whenever the view changes its selection,<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // display the number of selected 
+  items in the content description<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; viewContext1.addInstance(ISelectionHandler.class, 
+  new ISelectionHandler() {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* (non-Javadoc)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; * @see 
+  org.eclipse.ui.part.services.ISelectionHandler#setSelection(org.eclipse.jface.viewers.ISelection)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; public void 
+  setSelection(ISelection newSelection) {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  if (newSelection instanceof IStructuredSelection) {<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  IStructuredSelection sel = (IStructuredSelection)newSelection;<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  int selectionSize = sel.size();<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  name.setContentDescription(MessageFormat.format("{0} problems selected", <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  new String[] {Integer.toString(selectionSize)}));<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  }<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; });<br>
+  <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create a problem view<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ISite view1 = factory.createView(<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  IPageLayout.ID_PROBLEM_VIEW, parent, viewContext1, null);<br>
+  &nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create property view<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ContainerContext viewContext2 = new 
+  ContainerContext();<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ISite view2 = factory.createView(IPageLayout.ID_PROP_SHEET, 
+  parent, viewContext2, null);<br>
+  &nbsp;&nbsp;&nbsp; <br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent.setLayout(new FillLayout());<br>
+  &nbsp;&nbsp;&nbsp; }<br>
+  }</code><span style="font-weight: bold;"></span><br>
+  <span style="font-weight: bold;"></span></div>
+<br>
+<span style="font-weight: bold;"> <br>
+</span> 
+<div style="margin-left: 40px;"><img src="images/OverrideInstanceView.PNG" alt="Screenshot of OverrideInstanceView"><br>
+  <br>
+</div>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

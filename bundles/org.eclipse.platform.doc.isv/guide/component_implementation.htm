@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Component implementation</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H1 CLASS="Head">Component implementation</H1>
+Components registered with the types extension point are much like part components. 
+They can take a set of dependencies in their constructor and must implement the 
+interface they were registered for. This example shows the implementation of the 
+NullNameableService.<br>
+<br>
+<div style="margin-left: 40px;"><code>/**</code><br>
+  <code>&nbsp;* Default implementation of the Nameable service. All methods are 
+  no-ops.</code><br>
+  <code>&nbsp;* </code><br>
+  <code>&nbsp;* @since 3.1</code><br>
+  <code>&nbsp;*/</code><br>
+  <code>public class NullNameableService implements INameable {</code><br>
+  <code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; /**</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; * Component constructor. Do not invoke directly.</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; */</code><br>
+  <code>&nbsp;&nbsp;&nbsp; public NullNameableService() {</code><code></code><code>}</code><code></code><br>
+  <code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void setName(String newName) {}</code><code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void setContentDescription(String contentDescription) 
+  {</code><code>}</code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void setImage(ImageDescriptor theImage) {</code><code>}</code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void setTooltip(String toolTip) {</code><code>}</code><br>
+  <code>}</code><br>
+</div>
+<br>
+This may be a simple example as the class doesn't do anything, however it demonstrates 
+a common pattern. The INameable service is used to tell the parent about some 
+state in the child. With this type of interface, the default implementation typically 
+doesn't do anything. This makes sense: if the parent doesn't care about the state 
+of its child, it can be ignored. By convention, we use the "Null" prefix to indicate 
+that this is a component that doesn't do anything. This type of object is usually 
+registered as a singleton since it would be wasteful to create multiple instances 
+of such a trivial object. Clients should ensure that any new interfaces that report 
+state are capable of being multiplexed.<br>
+<br>
+If the purpose of the interface is to allocate resources or generate output, the 
+default implementation will typically do something more useful. The following 
+example shows the implementation of the DefaultMessageDialogs class. Since this 
+class is intended for generating interactive output, it has a useful default implementation 
+and would not support multiplexing. Since this class needs access to a part's 
+Composite, it cannot be a singleton. By convention, we use the class prefix "Default" 
+to indicate that this is a default component with some useful behavior.<br>
+<br>
+<span style="font-weight: bold;"> </span> 
+<div style="margin-left: 40px;"><code>/**</code><br>
+  <code>&nbsp;* Default implementation of the IMessageDialogs interface. Takes 
+  the part's </code><br>
+  <code>&nbsp;* control as context and allows the part to open dialogs in a child 
+  shell.</code><br>
+  <code>&nbsp;* </code><br>
+  <code>&nbsp;* @since 3.1</code><br>
+  <code>&nbsp;*/</code><br>
+  <code>public class DefaultMessageDialogs implements IMessageDialogs {</code><br>
+  <code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; private Composite control;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; /**</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; * Component constructor. Do not invoke directly.</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp; */</code><br>
+  <code>&nbsp;&nbsp;&nbsp; public DefaultMessageDialogs(Composite control) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.control = control;</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void open(IStatus message) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (message.getSeverity() == 
+  IStatus.ERROR) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ErrorDialog.openError(control.getShell(), 
+  null, null, message);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; open(message.getSeverity(), 
+  message.getMessage());</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code></code><code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void openError(String message, Throwable cause) 
+  {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; open(new Status(IStatus.ERROR, 
+  </code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  WorkbenchPlugin.getDefault().getBundle().getSymbolicName(),</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  IStatus.OK,</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  message,</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  cause));</code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>&nbsp;&nbsp;&nbsp; </code><code></code><code></code><br>
+  <code>&nbsp;&nbsp;&nbsp; public void open(int severity, String message) {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (severity == IStatus.ERROR) 
+  {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MessageDialog.openError(control.getShell(), 
+  null, message);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else if (severity == IStatus.WARNING) 
+  {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MessageDialog.openWarning(control.getShell(), 
+  null, message);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else {</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MessageDialog.openInformation(control.getShell(), 
+  null, message);</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }&nbsp;&nbsp;&nbsp; </code><br>
+  <code>&nbsp;&nbsp;&nbsp; }</code><br>
+  <code>}</code><span style="font-weight: bold;"></span><br>
+  <span style="font-weight: bold;"></span></div>
+<p>Here is the associated extension point markup for DefaultMessageDialog.</p>
+<div style="margin-left: 40px;"><code>&lt;extension</code><code> point="org.eclipse.core.component.types"&gt;</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;component</code><br>
+  <code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  initializer="org.eclipse.ui.part.SiteInitializer"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; interface="org.eclipse.ui.part.services.IMessageDialogs"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; implementation="org.eclipse.ui.internal.part.services.DefaultMessageDialogs"</code><br>
+  <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; singleton="false"</code><code>/&gt;</code><br>
+  <code>&lt;/extension&gt;</code><br>
+</div>
+<h2>&nbsp; </h2>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>

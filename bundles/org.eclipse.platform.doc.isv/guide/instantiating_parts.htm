@@ -1,0 +1,262 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Instantiating parts</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H1 CLASS="Head"> 
+</H1>
+<div style="margin-left: 40px;">
+<h2> Instantiating parts</h2>
+  All interaction with a part happens through an ISite. From the point of view 
+  of someone creating a part, the ISite <span
+ style="font-style: italic;">is</span> the part. An ISite can either be created 
+  from an IPartFactory or by directly instantiating the Site class.<br>
+  <br>
+  To destroy a part, dispose the control for its ISite.<br>
+  <h3>Instantiating parts using IPartFactory </h3>
+  <p>Views and editors are normally created using an IPartFactory and IPartFactory 
+    can only create parts registered with the views or editors extension point. 
+    . Parts created by IPartFactory depend on an IWorkbenchPage and cannot outlive 
+    the IWorkbenchPage. IPartFactory creates parts by ID and the part's implementation 
+    class does not need to be API. An IPartFactory can be obtained from IWorkbenchPage. 
+    Parts can also take an IPartFactory in their constructor to create nested 
+    children. </p>
+  <p>This example demonstrates how to create a view using IPartFactory.<br>
+  </p>
+  <div style="margin-left: 40px;"><code>/**<br>
+    &nbsp;* Used to create instances of editors and views.<br>
+    &nbsp;* <br>
+    &nbsp;* @since 3.1<br>
+    &nbsp;*/<br>
+    public interface IPartFactory {<br>
+    &nbsp;&nbsp;&nbsp; /**<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * Creates an instance of a view. Returns an &lt;code&gt;ISite&lt;/code&gt; 
+    for the newly created view.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * When the caller is done with the part it should 
+    dispose the part's main control. This can<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * be accomplished by calling &lt;code&gt;ISite.getControl().dispose()&lt;/code&gt;, 
+    or by disposing the <br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * parent composite.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param viewId ID of the view, as registered with 
+    the org.eclipse.ui.views extension point<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param parentComposite parent composite for the 
+    view. If the view is successfully created, it<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; will 
+    create exactly one new child control in this composite. <br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param context local context for the view. This 
+    object can override any or all of the view's dependencies.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If the 
+    view has a dependency that isn't found in the local context, a default implementation 
+    will<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; be supplied 
+    by the org.eclipse.core.component.types extension point.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param savedState previously saved state of the 
+    part, or null if none<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @return an ISite for the newly created view<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @throws CoreException if unable to create the part<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; */<br>
+    &nbsp;&nbsp;&nbsp; public ISite createView(String viewId, Composite parentComposite, 
+    IContainerContext context, IMemento savedState) throws CoreException;<br>
+    &nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp; /**<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * Creates an instance of an editor. Returns an &lt;code&gt;ISite&lt;/code&gt; 
+    for the newly created editor.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * When the caller is done with the part it should 
+    dispose the part's main control. This can<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * be accomplished by calling &lt;code&gt;ISite.getControl().dispose()&lt;/code&gt;, 
+    or by disposing the <br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * parent composite.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * <br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param editorId ID of the editor, as registered 
+    with the org.eclipse.ui.editors extension point<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param parentComposite parent composite for the 
+    editor. If the editor is successfully created,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; it will 
+    create exactly one new child control in this composite.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param context local context for the editor. This 
+    object can override any or all of the part's dependencies.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; If the 
+    part has a dependency that isn't found in the local context, a default implementation 
+    will<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; be supplied 
+    by the org.eclipse.core.component.types extension point.<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param input IEditorInput for this editor<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @param savedState previously saved state for the 
+    part, or null if none<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @return an ISite for the newly created editor<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; * @throws CoreException if unable to create the part<br>
+    &nbsp;&nbsp;&nbsp;&nbsp; */<br>
+    &nbsp;&nbsp;&nbsp; public ISite createEditor(String editorId, Composite parentComposite, 
+    IContainerContext context, IEditorInput input, IMemento savedState) throws 
+    CoreException;<br>
+    }</code><span style="font-weight: bold;"></span><br>
+    <span style="font-weight: bold;"></span></div>
+  <br>
+  <p>Here is an example of an action that creates 
+  a view using IPartFactory</p>
+  <div style="margin-left: 40px;"><code>/**<br>
+    &nbsp;* Demonstrate how to open a view by its ID from an IWorkbenchPage.<br>
+    &nbsp;*/<br>
+    public class CreateViewByIdAction implements IWorkbenchWindowActionDelegate 
+    {<br>
+    &nbsp;&nbsp;&nbsp; private IWorkbenchWindow window;<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; public void run(IAction action) {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IWorkbenchPage page = window.getActivePage();<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (page == null) {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><code>// 
+    ...uninteresting error-handling code removed...</code><code><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final Shell tempShell = new Shell(window.getShell(), 
+    SWT.DIALOG_TRIM | SWT.RESIZE);<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tempShell.setLayout(new FillLayout());<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tempShell.setText("Problems");<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+    <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    IPartFactory factory = page.getPartFactory();</span><br
+ style="color: rgb(255, 0, 0);">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try {<br>
+    <span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    factory.createView(IPageLayout.ID_PROBLEM_VIEW, tempShell, new ContainerContext(), 
+    null);</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } catch (CoreException e) {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><code>// 
+    ...uninteresting error-handling code removed...</code><code><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Open the dialog<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tempShell.open();<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Display d = tempShell.getDisplay();<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (!tempShell.isDisposed()) 
+    {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!d.readAndDispatch())<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    d.sleep();<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <br>
+    &nbsp;&nbsp;&nbsp; }<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; public void init(IWorkbenchWindow window) {<br>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; this.window = window;<br>
+    &nbsp;&nbsp;&nbsp; }<br>
+    <br>
+    &nbsp;&nbsp;&nbsp; // ...remaining (empty) methods removed...<br>
+    }<br>
+    <br>
+    </code>
+    <h3>Instantiating parts using the Site class</h3>
+    Not all parts are views or editors. Clients can also use the part API to create 
+    their own reusable components. Such parts are not registered with the view 
+    or editor extension points, but can make use of most of the API available 
+    to views and editors. Although there is nothing stopping clients from inventing 
+    their own API for reusable components, making use of the part pattern allows 
+    their components to be embedded inside anything that supports embedding of 
+    views or editors.<br>
+    <br>
+    Parts created using the Site class have the following properties: 
+    <ul>
+      <li>The part's implementation class must be known and loaded; </li>
+      <li>The part does not need to be a view or editor, and does not require 
+        any extension markup; </li>
+      <li>The part has access to a reduced set of site interfaces, so views and 
+        editors cannot be created in this manner unless their JavaDoc explicitly 
+        says so;</li>
+      <li>These parts can be created without a workbench page;</li>
+      <li>This pattern can only be used to create component-based parts. Views 
+        and editors that implement IViewPart or IEditorPart cannot be created 
+        in this manner.</li>
+    </ul>
+    The Site constructor must be given the part's implementation class and the 
+    associated plugin bundle. The plugin bundle determines where log error messages 
+    will be logged and where the part should search when looking for resources 
+    in its own plugin.<br>
+    <br>
+    The following example demonstrates how to use the Site class to instantiate 
+    a part directly. In this example, we instantiate the NameTestView part in 
+    a dialog. Although NameTestView is called a view and can make use of the view 
+    API, it doesn't actually need to be registered with the org.eclipse.ui.views 
+    extension point unless the workbench is actually supposed to use it as a view.<br>
+    <br>
+    <code><br>
+    </code> 
+    <div style="margin-left: 40px;"><code>/**</code><br>
+      <code>&nbsp;* Demonstrate how to open a part programmatically using the 
+      Site class.</code><code></code><code></code><br>
+      <code>&nbsp;*/</code><br>
+      <code>public class ProgrammaticViewCreationExampleAction implements IWorkbenchWindowActionDelegate 
+      {</code><br>
+      <code>&nbsp;&nbsp;&nbsp; private IWorkbenchWindow window;</code><code></code><code></code><br>
+      <code></code><br>
+      <code>&nbsp;&nbsp;&nbsp; public void run(IAction action) {&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Create a shell</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final Shell tempShell = 
+      new Shell(window.getShell(), SWT.DIALOG_TRIM | SWT.RESIZE);</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tempShell.setLayout(new 
+      FillLayout());</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tempShell.setText("Name 
+      test view");</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bundle thisPlugin = ComponentExamplesPlugin.getDefault().getBundle(); 
+      </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; try {</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      // Instantiate the NameTestView part (this line is the whole point of the 
+      example)</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      // It demonstrates how the Site class can be used instead of calling NameTestView's 
+      constructor.</code><br>
+      <code></code><code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      Site testPart = new Site(tempShell, new ContainerContext(), </code><br
+ style="color: rgb(255, 0, 0);">
+      <code style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      thisPlugin, </code><br style="color: rgb(255, 0, 0);">
+      <code><span style="color: rgb(255, 0, 0);">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      NameTestView.class);&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } catch (CoreException 
+      e) {<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // ...uninteresting 
+      error-handling code removed...<br>
+      </code><code></code><code></code><code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      }</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Open a modal dialog</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tempShell.open();</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Display d = tempShell.getDisplay();</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while (!tempShell.isDisposed()) 
+      {</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      if (!d.readAndDispatch())</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+      d.sleep();</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</code><br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </code><br>
+      <code>&nbsp;&nbsp;&nbsp; }</code><code></code><br>
+      <code></code><br>
+      <code>&nbsp;&nbsp;&nbsp; public void init(IWorkbenchWindow window) {</code><br>
+      <code>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; this.window = window;</code><br>
+      <code>&nbsp;&nbsp;&nbsp; }<br>
+      <br>
+      &nbsp;&nbsp;&nbsp; </code><code>// ...remaining (empty) methods removed...</code><br>
+      <code>}</code></div>
+    <code> </code></div>
+    </div>
+<h2>&nbsp; </h2>
+<p><a href="../notices.html"><img src="../cpy.png" alt="Legal notices." border="0" ></a></p>
+</BODY>
+</HTML>
