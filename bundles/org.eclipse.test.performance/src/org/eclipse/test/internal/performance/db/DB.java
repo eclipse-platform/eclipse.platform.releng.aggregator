@@ -473,8 +473,6 @@ public class DB {
         Properties env= PerformanceTestPlugin.getEnvironmentVariables();
         
         String dbloc= env.getProperty(Constants.DB_LOCATION);
-        //dbloc= "net://localhost";
-        dbloc= "/Users/weinand/Eclipse/cloudscape2";
         if (dbloc == null)
             return;
                 
