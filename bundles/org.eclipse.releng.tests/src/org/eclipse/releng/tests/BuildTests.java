@@ -172,7 +172,7 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 	
-	public void testCVSKTag() {
+	private void testCVSKTag() {
 		
 		boolean result = false;
 		
