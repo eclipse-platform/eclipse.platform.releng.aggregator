@@ -44,7 +44,8 @@ file (see Preferences-&gt;Java-&gt;Compiler-&gt;Other). </p>
 <h3>Using the ant javac adapter</h3>
 The Eclipse compiler can be used inside an Ant script using the javac adapter. In order to use the Eclipse compiler, you
 simply need to define the <b>build.compiler</b> property in your script. Here is a small example.
-<font color="#4444cc"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;project name="compile" default="main" basedir="../."&gt;<br><br>	<b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
+<font color="#4444cc"><pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br>&lt;project name="compile" default="main" basedir="../."&gt;<br><br>	<b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
 
 	&lt;property name="root" value="${basedir}/src"/&gt;
 
@@ -84,8 +85,25 @@ are self-descriptive.
 <p>An implementation of <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> should be defined to collect the problems discovered during a Java operation. 
  Working copies can be reconcile with problem detection if a <b><a href="../reference/api/org/eclipse/jdt/core/IProblemRequestor.html">IProblemRequestor</a></b> has been supplied for the
 working copy creation. To archieve this, you can use the method <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean,%20org.eclipse.core.runtime.IProgressMonitor)">reconcile(boolean forceProblemDetection, IProgressMonitor monitor)</a></b>.
-An example of such an implementor is the member class <b>CompilationUnitAnnotationModel</b> of the class <b>org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider</b>.</p>
-
+Here is an example:
+<font color="#4444cc"><pre>
+		unit.getBuffer().setContents("public class X extends Zork {}");
+		IProblemRequestor problemRequestor = new IProblemRequestor() {
+			public void acceptProblem(IProblem problem) {
+			}
+			public void beginReporting() {
+			}
+			public void endReporting() {
+			}
+			public boolean isActive() {
+				return true;
+			}
+		};
+		IJavaElement workingCopy = unit.getWorkingCopy(null, null, problemRequestor);
+		((IWorkingCopy)workingCopy).reconcile(true, null);
+</pre></font>
+You can add an action on the reported problems in the acceptProblem(IProblem) method. In this example, the reported problem will be
+that <b>Zork cannot be resolved or is not a valid superclass</b> and its id is <b>IProblem.SuperclassNotFound</b>.
 <p>
 <a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 
