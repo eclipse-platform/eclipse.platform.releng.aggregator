@@ -10,12 +10,48 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H2>
-Plug-ins and extensions</H2>
+The runtime plug-in model</H2>
+<P >
+The platform runtime plug-in is the kernel that starts the platform base and dynamically discovers 
+and runs plug-ins. A <b> plug-in</b> is a structured component that describes itself to the system using
+a manifest (<b>plugin.xml</b>) file. The runtime plug-in keeps track of all of the installed plug-ins and
+the function that they provide.</P>
+<P >
+Plug-ins contribute function to the platform using a common extension model. <b> Extension points</b> 
+are well-defined function points in the system that can be extended by plug-ins. When a plug-in 
+contributes an implementation for an extension point, we say that it adds an
+<b> extension</b> to the platform. Plug-ins can define their own extension points, so that other 
+plug-ins can integrate tightly with them.</P>
+<P >
+All plug-ins use the same extension mechanisms to add features to the platform.  Plug-ins provided 
+with the Eclipse SDK do not use any private mechanisms in their implementation.  </p>
+<p>Extensions are typically written in Java using the platform APIs and delivered in JAR files.  
+However, some extension points accommodate extensions provided in other formats, such as native platform
+executables or scripting languages.  In general, only a subset of the platform function is available to 
+non-Java extensions. </P>
+<P >
+A general goal of the runtime is that the end user should not pay a memory or performance penalty 
+for plug-ins that are installed, but not used. A plug-in can be installed and added to the platform,
+but the plug-in will not be activated unless a function provided by the plug-in has been requested 
+according to the user's activity.</P>
 <p>
-[This documentation is under construction.]
-</P>
-<p>
-Plug-in model, extension points.  Mention OSGi as an implementation underneath.  Plugin = bundle.
+The specific implementation mechanisms used by the platform runtime plug-in are not of general interest.  However,
+knowledge of the way a plug-in is started can be important in determining what kind of initialization 
+is appropriate when a plug-in is started.  Those already familiar with the OSGi open services model
+will recognize that the Eclipse runtime engine follows this model and that an Eclipse plug-in is, 
+in effect, an OSGi bundle.</p>
+<P>
+For the rest of this discussion, we will view the functions of a plug-in from two different
+perspectives: 
+<ol>
+<li><strong>Plug-in mechanics.</strong>  The mechanics of being a plug-in include plug-in loading and
+start-up, loading classes from the plug-in, managing plug-in prerequisites, and cleaning
+up after a plug-in.  The mechanics are important to the runtime engine itself or to tools that 
+manipulate or view the runtime structures.  The mechanics are implemented using the OSGi model
+of bundles.</li>
+<li><strong>Plug-in function</strong>.  The functional aspects of a plug-in are the extensions it implements 
+and the extension points it defines for other plug-ins.  This information is usually of broader interest and
+can be found in a public extension registry.</li>
 </p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
