@@ -12,6 +12,9 @@
 package org.eclipse.test.internal.performance;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
@@ -24,7 +27,16 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
-    public static final int AVERAGE= -3;
+    
+	private static class DimensionComparator implements Comparator {
+
+		public int compare(Object o1, Object o2) {
+			return ((Dim) o1).getId() - ((Dim) o2).getId();
+		}
+
+	}
+
+	public static final int AVERAGE= -3;
     public static final int BEFORE= 0;
     public static final int AFTER= 1;
     
@@ -77,6 +89,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 		if (dataPoints.length > 0) {
 			StatisticsSession s= new StatisticsSession(dataPoints);
 			Dim[] dimensions= dataPoints[0].getDimensions();
+			Arrays.sort(dimensions, new DimensionComparator());
 			if (dimensions.length > 0) {
 				ps.println("(average over " + s.getCount(dimensions[0]) + " samples):"); //$NON-NLS-1$ //$NON-NLS-2$
 				for (int i= 0; i < dimensions.length; i++) {
