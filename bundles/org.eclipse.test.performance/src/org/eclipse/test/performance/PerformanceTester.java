@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 /**
  * @since 3.1
  */
-public final class PerformanceTester {
+final class PerformanceTester {
 
 	protected PerformanceMeter fPerformanceMeter;
 
