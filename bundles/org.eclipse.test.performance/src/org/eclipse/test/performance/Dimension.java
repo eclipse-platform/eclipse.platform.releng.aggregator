@@ -21,19 +21,66 @@ import org.eclipse.test.internal.performance.InternalDimensions;
  */
 public interface Dimension {
 
+    // Dimensions available on all platforms:
+    
     /**
-     * The amount of CPU time used so far.
+     * The amount of time that the process has executed in kernel mode.
+     * It is calculated by taking the sum of the time that each of the threads of the process has executed in kernel mode.
+     */
+    public Dimension KERNEL_TIME= InternalDimensions.KERNEL_TIME;
+    
+    /**
+     * The amount of CPU time used so far by this process.
+     * It is calculated by adding the KERNEL_TIME and the amount of time that the process has executed in user mode.
+     * The user time is calculated by taking the sum of the time that each of the threads of the process has executed in user mode.
+     * It does not include any time where the process is waiting for OS resources.
+     * It is the best approximation for ELAPSED_PROCESS (which is not available on all platforms).
      */
     public Dimension CPU_TIME= InternalDimensions.CPU_TIME;
     
     /**
-     * The elapsed time this process is running.
+     * WORKING_SET is the amount of memory in the working set of this process.
+     * The working set is the set of memory pages touched recently by the threads in the process.
+     * If free memory in the computer is above a threshold, pages are left in the working set of a process
+     * even if they are not in use. When free memory falls below a threshold, pages are removed from
+     * working sets.
+     */
+    public Dimension WORKING_SET= InternalDimensions.WORKING_SET;
+
+    
+    // Dimensions not available on all platforms!
+    
+    /**
+     * The total elapsed time this process has been running.
+     * On Windows it is calculated by subtracting the creation time of the process from the current system time.
+     * Please note that in contrast to the CPU_TIME the elapsed time of a process is influenced by other processes running in parallel.
+     * Currently this dimension is only available on Windows.
      */
     public Dimension ELAPSED_PROCESS= InternalDimensions.ELAPSED_PROCESS;
 
     /**
-     * Runtime.totalMemory() - Runtime.freeMemory().
+	 * WORKING_SET_PEAK is the maximum amount of memory in the working set of this process at any point in time.
+	 * The working set is the set of memory pages touched recently by the threads in the process.
+	 * If free memory in the computer is above a threshold, pages are left in the working set of a process
+	 * even if they are not in use. When free memory falls below a threshold, pages are removed from working sets.
+     * Currently this dimension is only available on Windows.
+     */
+    public Dimension WORKING_SET_PEAK= InternalDimensions.WORKING_SET_PEAK;
+
+    /**
+     * The amount of memory used in the JVM.
+     * It is calculated by subtracting <code>Runtime.freeMemory()</code> from <code>Runtime.totalMemory()</code>.
+     * Currently this dimension is only available on MacOS X.
      */
     public Dimension USED_JAVA_HEAP= InternalDimensions.USED_JAVA_HEAP;
 
+    /**
+     * The total amount of committed memory (for the entire machine).
+     * Committed memory is the size of virtual memory that has been committed (as opposed to simply reserved).
+     * Committed memory must have backing (i.e., disk) storage available, or must be assured never to need disk
+     * storage (because main memory is large enough to hold it.) Notice that this is an instantaneous count,
+     * not an average over the time interval.
+     * Currently this dimension is only available on Windows.
+     */
+    public Dimension COMITTED= InternalDimensions.COMITTED;
 }
