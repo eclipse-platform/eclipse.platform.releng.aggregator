@@ -12,7 +12,6 @@ package org.eclipse.test.internal.performance.eval;
 
 import org.eclipse.test.internal.performance.data.Dimension;
 
-
 /**
  * @since 3.1
  */
@@ -36,7 +35,6 @@ public class RelativeBandChecker extends AssertChecker {
 			message.append("\n " + dimension.getName() + ": " + dimension.getDisplayValue(actual) + " is not within [" + Math.round(fLowerBand * 100)+ "%, " + Math.round(fUpperBand * 100) + "%] of " + dimension.getDisplayValue(test));
 			return false;
 		}
-		
 		return true;
 	}	
 }

@@ -11,6 +11,7 @@
 package org.eclipse.test.internal.performance.data;
 
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -27,6 +28,11 @@ public class DataPoint {
 	
 	public int getStep() {
 		return fStep;
+	}
+	
+	public Dimension[] getDimensions() {
+	    Set set= fScalars.keySet();
+	    return (Dimension[]) set.toArray(new Dimension[set.size()]);
 	}
 	
 	public Scalar[] getScalars() {

@@ -11,9 +11,9 @@
 
 package org.eclipse.test.internal.performance;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +22,7 @@ import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.db.DB;
+import org.eclipse.test.internal.performance.eval.StatisticsSession;
 
 
 /**
@@ -29,11 +30,11 @@ import org.eclipse.test.internal.performance.db.DB;
  */
 public class OSPerformanceMeter extends InternalPerformanceMeter {
 
-	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
-
 	private PerformanceMonitor fPerformanceMonitor;
 	private long fStartTime;
 	private List fDataPoints= new ArrayList();
+	
+    private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
     
 	
 	/**
@@ -58,25 +59,26 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#start()
 	 */
 	public void start() {
-		snapshot(0);
+		snapshot(BEFORE);
 	}
 	
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
 	public void stop() {
-		snapshot(1);
+		snapshot(AFTER);
 	}
 	
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
 	 */
 	public void commit() {
-	    
-	    DB.store(getSample());
-	    
-		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
-			printSample();
+	    Sample sample= getSample();
+	    if (sample != null) {
+	        DB.store(sample);
+	        if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
+    				printSample(System.out, sample);
+	    }
 	}
 
 	/*
@@ -113,34 +115,21 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
         scalars.put(dimension, new Scalar(dimension, value));
     }    
 
-	private void printSample() {
-		Sample sample= getSample();
-		if (sample != null) {
-			Map averages= new HashMap();
-			DataPoint[] dataPoints= sample.getDataPoints();
-			for (int i= 0, n= dataPoints.length; i < n - 1; i += 2) {
-				Scalar[] start= dataPoints[i].getScalars();
-				Scalar[] stop= dataPoints[i + 1].getScalars();
-				for (int j= 0, m= Math.min(start.length, stop.length); j < m; j++) {
-					Dimension dimension= start[j].getDimension();
-					if (dimension.equals(stop[j].getDimension())) {
-						long delta= stop[j].getMagnitude() - start[j].getMagnitude();
-						Double value= (Double) averages.get(dimension);
-						double oldAvg= value != null ? value.doubleValue() : 0.0;
-						double newAvg= oldAvg + (delta - oldAvg)/(i/2 + 1);
-						averages.put(dimension, new Double(newAvg));
-					} else
-						System.out.println("OSPerformanceMeter.toDisplayString(): Dimensions do not match");
+	private void printSample(PrintStream ps, Sample sample) {
+		ps.print("Scenario '" + getScenarioName() + "' ");
+		DataPoint[] dataPoints= sample.getDataPoints();
+		if (dataPoints.length > 0) {
+			StatisticsSession s= new StatisticsSession(dataPoints);
+			Dimension[] dimensions= dataPoints[0].getDimensions();
+			if (dimensions.length > 0) {
+				ps.println("(average over " + s.getCount(dimensions[0]) + " samples):");
+				for (int i= 0; i < dimensions.length; i++) {
+				    Dimension dimension= dimensions[i];
+				    ps.println("  " + dimension.getName() + ": " + dimension.getDisplayValue(s.getAverage(dimension)));
 				}
 			}
-			System.out.println(getScenarioName() + ":");
-			for (Iterator iter= averages.keySet().iterator(); iter.hasNext();) {
-				Dimension dimension= (Dimension) iter.next();
-				double avgDelta= ((Double) averages.get(dimension)).doubleValue();
-				String name= dimension.getName() + " [" + dimension.getUnit().getShortName() + "]";
-				System.out.println(name + ":\t" + avgDelta);
-			}
 		}
+		ps.println();
 	}
 
 	/**
@@ -148,9 +137,8 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	private void collectRunInfo(HashMap runProperties) {
 	    
-        runProperties.put(DRIVER_PROPERTY, getBuildId());
+        runProperties.put(DRIVER_PROPERTY, PerformanceTestPlugin.getBuildId());
         runProperties.put(HOSTNAME_PROPERTY, getHostName());
-        runProperties.put(RUN_TS_PROPERTY, new Long(fStartTime));	// not necessary
 
         /*
 		String version= System.getProperty("java.fullversion");

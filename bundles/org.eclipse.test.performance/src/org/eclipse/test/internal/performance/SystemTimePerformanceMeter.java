@@ -93,20 +93,20 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	}
 
 	public Sample getSample() {
-		Assert.isTrue(fStartTime.size() == fStopTime.size());
-		
-		Map properties= new HashMap();
-		properties.put(DRIVER_PROPERTY, getBuildId());
-		properties.put(HOSTNAME_PROPERTY, getHostName());
-		
-		DataPoint[] data= new DataPoint[2*fStartTime.size()];
-		for (int i= 0; i < fStartTime.size(); i++) {
-			data[2*i]= createDataPoint(0, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
-			data[2*i+1]= createDataPoint(1, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
-		}
-		
-		return new Sample(getScenarioName(), fStartDate, properties, data);
-	}
+	    	Assert.isTrue(fStartTime.size() == fStopTime.size());
+	    	
+	    	Map properties= new HashMap();
+	    	properties.put(DRIVER_PROPERTY, PerformanceTestPlugin.getBuildId());
+	    	properties.put(HOSTNAME_PROPERTY, getHostName());
+	    	
+	    	DataPoint[] data= new DataPoint[2*fStartTime.size()];
+	    	for (int i= 0; i < fStartTime.size(); i++) {
+	    		data[2*i]= createDataPoint(BEFORE, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
+	    		data[2*i+1]= createDataPoint(AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
+	    	}
+	    	
+	    	return new Sample(getScenarioName(), fStartDate, properties, data);
+    }
 
 	private DataPoint createDataPoint(int step, Dimension dimension, long value) {
 		Map scalars= new HashMap();

@@ -14,7 +14,10 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IBundleGroup;
+import org.eclipse.core.runtime.IBundleGroupProvider;
 import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.test.internal.performance.db.DB;
 
@@ -35,6 +38,10 @@ public class PerformanceTestPlugin extends Plugin {
 	 */
     public static final String PLUGIN_ID= "org.eclipse.test.performance"; //$NON-NLS-1$
     
+	private static final String VERSION_SUFFIX= "-runtime";
+	private static final String BUILDID_PROPERTY= "eclipse.buildId";
+	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk";
+
 	/**
 	 * The shared instance.
 	 */
@@ -100,5 +107,19 @@ public class PerformanceTestPlugin extends Plugin {
 				properties.put(token, value);
 			}
 		}
+	}
+	
+	public static String getBuildId() {
+		String buildId= System.getProperty(BUILDID_PROPERTY);
+		if (buildId != null)
+			return buildId;
+		IBundleGroupProvider[] providers= Platform.getBundleGroupProviders();
+		for (int i= 0; i < providers.length; i++) {
+			IBundleGroup[] groups= providers[i].getBundleGroups();
+			for (int j= 0; j < groups.length; j++)
+				if (SDK_BUNDLE_GROUP_IDENTIFIER.equals(groups[j].getIdentifier()))
+					return groups[j].getVersion() + VERSION_SUFFIX;
+		}
+		return null;
 	}
 }

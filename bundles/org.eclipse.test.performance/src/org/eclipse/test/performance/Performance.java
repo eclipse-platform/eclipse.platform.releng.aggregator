@@ -15,10 +15,14 @@ import junit.framework.TestCase;
 
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.test.internal.performance.Dimensions;
 import org.eclipse.test.internal.performance.OSPerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
+import org.eclipse.test.internal.performance.eval.AssertChecker;
 import org.eclipse.test.internal.performance.eval.Evaluator;
+import org.eclipse.test.internal.performance.eval.IEvaluator;
+import org.eclipse.test.internal.performance.eval.RelativeBandChecker;
 
 /**
  * Helper for performance measurements. Currently provides performance meter
@@ -35,7 +39,12 @@ public class Performance {
 	private static Performance fgDefault;
 	
 	private PerformanceMeterFactory fPerformanceMeterFactory;
+	private IEvaluator fDefaultEvaluator;
 	
+
+	/**
+	 * Private constructor to block instance creation.
+	 */
 	private Performance() {
 	}
 	
@@ -58,9 +67,18 @@ public class Performance {
 	 * @throws RuntimeException if the properties do not hold
 	 */
 	public void assertPerformance(PerformanceMeter performanceMeter) {
-		Evaluator.getDefaultEvaluator().evaluate(performanceMeter);
+		if (fDefaultEvaluator == null) {
+			fDefaultEvaluator= new Evaluator();
+			fDefaultEvaluator.setAssertCheckers(new AssertChecker[] {
+			        //new RelativeBandChecker(Dimensions.CPU_TIME, 0.0F, 1.05F),
+			        //new RelativeBandChecker(Dimensions.WORKING_SET, 0.0F, 1.0F),
+			        new RelativeBandChecker(Dimensions.USED_JAVA_HEAP, 0.0F, 1.05F),
+			        new RelativeBandChecker(Dimensions.SYSTEM_TIME, 0.0F, 1.05F)
+			});
+		}
+		fDefaultEvaluator.evaluate(performanceMeter);
 	}
-	
+
 	/**
 	 * Creates a performance meter for the given scenario id.
 	 * 

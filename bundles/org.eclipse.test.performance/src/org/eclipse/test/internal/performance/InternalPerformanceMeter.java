@@ -14,19 +14,16 @@ package org.eclipse.test.internal.performance;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import org.eclipse.core.runtime.IBundleGroup;
-import org.eclipse.core.runtime.IBundleGroupProvider;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.performance.PerformanceMeter;
 
+
 public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
+    public static final int BEFORE= 0;
+    public static final int AFTER= 1;
+    
 	private static final String LOCALHOST= "localhost";
-
-	private static final String VERSION_SUFFIX= "-runtime";
-	private static final String BUILDID_PROPERTY= "eclipse.buildId";
-	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk";
 
 	public static final String DRIVER_PROPERTY= "driver"; //$NON-NLS-1$
 	public static final String HOSTNAME_PROPERTY= "host"; //$NON-NLS-1$
@@ -63,19 +60,5 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 		} catch (UnknownHostException e) {
 			return LOCALHOST;
 		}
-	}
-
-	String getBuildId() {
-		String buildId= System.getProperty(BUILDID_PROPERTY);
-		if (buildId != null)
-			return buildId;
-		IBundleGroupProvider[] providers= Platform.getBundleGroupProviders();
-		for (int i= 0; i < providers.length; i++) {
-			IBundleGroup[] groups= providers[i].getBundleGroups();
-			for (int j= 0; j < groups.length; j++)
-				if (SDK_BUNDLE_GROUP_IDENTIFIER.equals(groups[j].getIdentifier()))
-					return groups[j].getVersion() + VERSION_SUFFIX;
-		}
-		return null;
 	}
 }
