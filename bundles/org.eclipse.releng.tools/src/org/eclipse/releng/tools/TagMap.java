@@ -24,8 +24,8 @@ import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
 import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
-import org.eclipse.team.internal.ccvs.core.ICVSResource;
 import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.actions.TagInRepositoryAction;
@@ -34,11 +34,11 @@ import org.eclipse.team.internal.ccvs.ui.actions.TagInRepositoryAction;
  * Tags the versions in a map file with another tag
  */
 public class TagMap extends TagInRepositoryAction {
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#getSelectedCVSResources()
 	 */
-	protected ICVSResource[] getSelectedCVSResources() {
+	protected ICVSRemoteResource[] getSelectedRemoteResources() {
 		IResource[] resources = getSelectedResources();
 		List identifiers = new ArrayList();
 		for (int i = 0; i < resources.length; i++) {
@@ -57,7 +57,7 @@ public class TagMap extends TagInRepositoryAction {
 	 * @param strings
 	 * @return
 	 */
-	private ICVSResource[] getCVSResourcesFor(String[] referenceStrings) {
+	private ICVSRemoteResource[] getCVSResourcesFor(String[] referenceStrings) {
 		Map previouslySelectedRepositories = new HashMap();
 		int size = referenceStrings.length;
 		List result = new ArrayList(size);
@@ -75,7 +75,7 @@ public class TagMap extends TagInRepositoryAction {
 				if (location == null) {
 					location = getWritableRepositoryLocation(storedlocation);
 					previouslySelectedRepositories.put(storedlocation, location);
-					if (location == null) return new ICVSResource[0];
+					if (location == null) return new ICVSRemoteResource[0];
 				}
 				String module = tokenizer.nextToken();
 				String projectName = tokenizer.nextToken();
@@ -89,7 +89,7 @@ public class TagMap extends TagInRepositoryAction {
 				addStatus(e	.getStatus());
 			}
 		}
-		return (ICVSResource[]) result.toArray(new ICVSResource[result.size()]);
+		return (ICVSRemoteResource[]) result.toArray(new ICVSRemoteResource[result.size()]);
 	}
 	
 	private ICVSRepositoryLocation getLocationFromString(String repo) throws CVSException {
@@ -110,7 +110,7 @@ public class TagMap extends TagInRepositoryAction {
 		return newLocation;
 	}
 	
-	public ICVSRepositoryLocation getWritableRepositoryLocation(ICVSRepositoryLocation storedLocation) {
+	private ICVSRepositoryLocation getWritableRepositoryLocation(ICVSRepositoryLocation storedLocation) {
 		// Find out which repo locations are appropriate
 		ICVSRepositoryLocation[] locations = CVSUIPlugin.getPlugin().getRepositoryManager().getKnownRepositoryLocations();
 		List compatibleLocations = new ArrayList();
