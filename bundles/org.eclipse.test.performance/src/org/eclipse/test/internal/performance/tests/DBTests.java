@@ -23,6 +23,7 @@ import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.db.DB;
+import org.eclipse.test.internal.performance.db.Scenario;
 import org.eclipse.test.internal.performance.db.SummaryEntry;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.performance.Dimension;
@@ -94,9 +95,9 @@ public class DBTests extends TestCase {
 		pm1.commit();
 		pm1.dispose();
 		
-		
+		String build= "001"; //$NON-NLS-1$
         // set the variation for the this run
-        System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"=001"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+        System.setProperty("eclipse.perf.config", CONFIG+"=test;"+BUILD+"="+build); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
         // assert that this run's values are compared against reference data
         System.setProperty("eclipse.perf.assertAgainst", BUILD+"=ref"); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -115,7 +116,23 @@ public class DBTests extends TestCase {
             failed= true;
         }
 		pm2.dispose();
-        
+		
+		if (!failed) {
+			// check in DB			
+			Variations v= new Variations();
+			v.put(CONFIG, "%"); //$NON-NLS-1$
+			v.put(BUILD, build);
+	        Scenario[] scenarios= DB.queryScenarios(v, SCENARIO_NAME_0, CONFIG, null);
+	        if (scenarios != null && scenarios.length > 0) {
+	        		Scenario s= scenarios[0];
+	        		String[] failureMessages= s.getFailureMessages();
+	        		if (failureMessages.length == 1) {
+	        			String mesg= failureMessages[0];
+	        			if (mesg != null && mesg.equals("Performance criteria not met when compared to '{b=ref, c=test}':\nCPU Time: 1 s is not within [95%, 105%] of 900 ms")) //$NON-NLS-1$
+	        				failed= true;
+	        		}
+	        }
+		}
         assertTrue(failed);
     }
 
