@@ -738,7 +738,8 @@ public class BuildTests extends TestCase {
 	public static final String[] REQUIRED_SOURCE_FILES = {"about.html"};
 	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
 	
-	public static final String[] REQUIRED_BUNDLE_FILES = {"about.html", "plugin.properties", "META-INF/MANIFEST.MF"};
+	public static final String[] REQUIRED_BUNDLE_FILES = {"about.html", "plugin.properties"};
+	public static final String REQUIRED_BUNDLE_MANIFEST = "MANIFEST.MF";
 	public static final String REQUIRED_BUNDLE_SUFFIX = ".jar";
 	
 	public static final String[] SUFFIX_EXEMPT_LIST = {"org.eclipse.swt","org.apache.ant"};
@@ -871,7 +872,7 @@ public class BuildTests extends TestCase {
 		}
 		
 		// Are we a bundle?
-		if (testDirectory(aPlugin, REQUIRED_BUNDLE_FILES, REQUIRED_BUNDLE_SUFFIX)) {
+		if (testBundleDirectory(aPlugin, REQUIRED_BUNDLE_FILES, REQUIRED_BUNDLE_MANIFEST, REQUIRED_BUNDLE_SUFFIX)) {
 			return true;
 		}
 		
@@ -897,6 +898,45 @@ public class BuildTests extends TestCase {
 			return false;
 		}
 		
+		return true;
+	}
+	
+	private boolean testBundleDirectory(File aDirectory, String[] requiredFiles, String manifestFile, String requiredSuffix) {
+		if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
+			return false;
+		}
+		
+		int index = aDirectory.getName().indexOf('_');
+		if (index == -1) {
+			index = aDirectory.getName().length();
+		}	
+		
+		String plainName = aDirectory.getName().substring(0, index);
+				
+		File metaDir = new File(aDirectory, "META-INF");	    
+			
+		String[] metaFiles = metaDir.list();
+	    if (metaFiles == null) {
+		        return(false);
+	    } else {
+	       for (int i=0; i < metaFiles.length; i++) {		            
+	            String filename = metaFiles[i];
+	            if (filename == manifestFile) {
+	            	return true;
+	            }
+	        }
+	    }
+		
+		if (! metaDir.exists()){
+			return false;
+		}
+						
+		if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+			return true;
+		} else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
+			return false;
+		}
+					
 		return true;
 	}
 
@@ -925,5 +965,10 @@ public class BuildTests extends TestCase {
 		}
 		return true;
 	}	
-	
+
+		
 }
+
+
+
+
