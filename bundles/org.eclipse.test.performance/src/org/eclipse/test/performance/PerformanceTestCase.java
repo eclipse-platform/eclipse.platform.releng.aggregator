@@ -51,7 +51,7 @@ public class PerformanceTestCase extends TestCase {
 	}
 	
 	/**
-	 * Overidden to create a default performance meter for this test case.
+	 * Overridden to create a default performance meter for this test case.
 	 * @throws Exception
 	 */
 	protected void setUp() throws Exception {
@@ -60,7 +60,7 @@ public class PerformanceTestCase extends TestCase {
 	}
 
 	/**
-	 * Overidden to disposee of the performance meter.
+	 * Overridden to dispose of the performance meter.
 	 * @throws Exception
 	 */
 	protected void tearDown() throws Exception {
