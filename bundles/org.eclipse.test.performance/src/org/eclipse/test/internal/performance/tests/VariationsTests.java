@@ -17,29 +17,39 @@ import junit.framework.TestCase;
 public class VariationsTests extends TestCase {
 
     public void testVariations() {
-        Variations v1= new Variations("foo", null);         //$NON-NLS-1$
-        assertEquals("|config=foo|", v1.toExactMatchString()); //$NON-NLS-1$
-        assertEquals("%|config=foo|%", v1.toQueryPattern()); //$NON-NLS-1$
+        Variations v1= new Variations();
+        v1.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
+        assertEquals("|k1=foo|", v1.toExactMatchString()); //$NON-NLS-1$
+        assertEquals("%|k1=foo|%", v1.toQueryPattern()); //$NON-NLS-1$
         
-        Variations v2= new Variations("foo", "bar");         //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals("|build=bar||config=foo|", v2.toExactMatchString()); //$NON-NLS-1$
-        assertEquals("%|build=bar|%|config=foo|%", v2.toQueryPattern()); //$NON-NLS-1$
+        Variations v2= new Variations();
+        v2.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
+        v2.put("k2", "bar"); //$NON-NLS-1$ //$NON-NLS-2$
+        assertEquals("|k1=foo||k2=bar|", v2.toExactMatchString()); //$NON-NLS-1$
+        assertEquals("%|k1=foo|%|k2=bar|%", v2.toQueryPattern()); //$NON-NLS-1$
 
-        Variations v3= new Variations("foo", "bar");         //$NON-NLS-1$ //$NON-NLS-2$
-        v3.put("abc", "xyz"); //$NON-NLS-1$ //$NON-NLS-2$
-        assertEquals("|abc=xyz||build=bar||config=foo|", v3.toExactMatchString()); //$NON-NLS-1$
-        assertEquals("%|abc=xyz|%|build=bar|%|config=foo|%", v3.toQueryPattern()); //$NON-NLS-1$
+        Variations v3= new Variations();
+        v3.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
+        v3.put("k2", "bar"); //$NON-NLS-1$ //$NON-NLS-2$
+        v3.put("k3", "xyz"); //$NON-NLS-1$ //$NON-NLS-2$
+        assertEquals("|k1=foo||k2=bar||k3=xyz|", v3.toExactMatchString()); //$NON-NLS-1$
+        assertEquals("%|k1=foo|%|k2=bar|%|k3=xyz|%", v3.toQueryPattern()); //$NON-NLS-1$
 }
     
     public void testParseVariations() {
-        Variations v1= new Variations("foo", null); //$NON-NLS-1$
+        Variations v1= new Variations();
+        v1.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals(v1, new Variations(v1.toExactMatchString()));
         
-        Variations v2= new Variations("foo", "bar");         //$NON-NLS-1$ //$NON-NLS-2$
+        Variations v2= new Variations();
+        v2.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
+        v2.put("k2", "bar"); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals(v2, new Variations(v2.toExactMatchString()));
 
-        Variations v3= new Variations("foo", "bar");         //$NON-NLS-1$ //$NON-NLS-2$
-        v3.put("abc", "xyz"); //$NON-NLS-1$ //$NON-NLS-2$
+        Variations v3= new Variations();
+        v3.put("k1", "foo"); //$NON-NLS-1$ //$NON-NLS-2$
+        v3.put("k2", "bar"); //$NON-NLS-1$ //$NON-NLS-2$
+        v3.put("k3", "xyz"); //$NON-NLS-1$ //$NON-NLS-2$
         assertEquals(v3, new Variations(v3.toExactMatchString()));
     }
     
