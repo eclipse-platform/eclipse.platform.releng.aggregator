@@ -164,6 +164,11 @@ public class BuildTests extends TestCase {
 		boolean result = false;
 		
 		File[] files = aDirectory.listFiles();
+		
+		if (files == null) {
+			return result;
+		}
+		
 		for (int i = 0; i < files.length; i++) {
 			File aFile = files[i];
 			if (aFile.isDirectory()) {
