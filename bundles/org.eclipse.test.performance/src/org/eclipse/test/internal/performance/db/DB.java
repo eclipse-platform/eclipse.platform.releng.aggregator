@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
+import java.io.File;
 import java.sql.*;
 import java.util.Properties;
 
@@ -103,7 +104,13 @@ public class DB {
         } else {
             // embedded
             Class.forName("com.ihost.cs.jdbc.CloudscapeDriver");
-            url= "jdbc:cloudscape:" + DB_PATH + dbName + ";create=true";
+            String dbpath= null;
+            String user_home= System.getProperty("user.home");
+            if (user_home != null)
+            	dbpath= new File(user_home, "cloudscape/" + DB_NAME).getAbsolutePath();
+            if (dbpath == null)
+            	dbpath= DB_PATH + dbName;
+            url= "jdbc:cloudscape:" + dbpath + ";create=true";
         }
         return DriverManager.getConnection(url, p);
     }
