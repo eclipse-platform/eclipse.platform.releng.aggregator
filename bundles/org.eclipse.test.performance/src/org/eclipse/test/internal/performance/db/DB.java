@@ -72,19 +72,26 @@ public class DB {
         if (fgDefault == null) {
             fgDefault= new DB();       
             fgDefault.connect();
-            Runtime.getRuntime().addShutdownHook(
-                new Thread() {
-                    public void run() {
-                        if (DEBUG) System.out.println("shutdownhook"); //$NON-NLS-1$
-                        if (fgDefault != null) {
-                            fgDefault.disconnect();
-                            fgDefault= null;
-                        }
-                    }
-                }
-            );
+            if (PerformanceTestPlugin.getDefault() == null) {
+            	// not started as plugin
+	            Runtime.getRuntime().addShutdownHook(
+	                new Thread() {
+	                    public void run() {
+	                    	shutdown();
+	                    }
+	                }
+	            );
+            }
         }
         return fgDefault;
+    }
+    
+    public static void shutdown() {
+        if (DEBUG) System.out.println("DB.shutdown"); //$NON-NLS-1$
+        if (fgDefault != null) {
+            fgDefault.disconnect();
+            fgDefault= null;
+        }
     }
    
     private SQL getSQL() {

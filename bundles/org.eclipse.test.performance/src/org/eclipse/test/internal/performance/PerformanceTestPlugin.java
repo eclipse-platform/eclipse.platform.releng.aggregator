@@ -13,8 +13,10 @@ package org.eclipse.test.internal.performance;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.test.internal.performance.db.DB;
 
 
 /**
@@ -54,6 +56,11 @@ public class PerformanceTestPlugin extends Plugin {
 	public PerformanceTestPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgPlugin= this;
+	}
+	
+	public void shutdown() throws CoreException {
+		DB.shutdown();
+		super.shutdown();
 	}
 	
 	/**
