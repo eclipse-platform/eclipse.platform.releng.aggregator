@@ -12,16 +12,16 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Release 2.1.0<br>
- March 26, 2003</p>
+ March 27, 2003</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
   <p align="left"><a href="#Target Operating Environments">1. Target Operating
   Environments</a><br>
   <a href="#Compatibility with Previous Release">2. Compatibility with Previous Releases</a><br>
-  <a href="#Upgrading">3. Upgrading a Workspace from a Previous Release</a><br>
-  <a href="#Known Issues">4. Known Issues</a><br>
-  <a href="#Running Eclipse">5. Running Eclipse</a><br>
+  <a href="#Known Issues">3. Known Issues</a><br>
+  <a href="#Running Eclipse">4. Running Eclipse</a><br>
+  <a href="#Upgrading">5. Upgrading a Workspace from a Previous Release</a><br>
   <a href="#Interoperability with Previous Releases">6. Interoperability with Previous Releases</a><br>
   </p>
 </blockquote>
@@ -302,7 +302,7 @@ considered implementation details which may vary between operating environment
 and are subject to change without notice. Client plug-ins that directly depend
 on anything other than what is specified in the Eclipse SDK API are inherently
 unsupportable and receive no guarantees about compatibility within a single
-release much less with an earlier release. Refer to <i><a href="http://www.eclipse.org/articles/Article-API%20use/eclipse-api-usage-rules.html">How
+release much less with earlier releases. Refer to <i><a href="http://www.eclipse.org/articles/Article-API%20use/eclipse-api-usage-rules.html">How
 to Use the Eclipse API</a></i> for information about how to write compliant
 plug-ins.</p>
 
@@ -347,7 +347,9 @@ the assumptions made, existing plug-ins might misbehave or fail for projects
 containing linked resources. A plug-in can prohibit linked resources for a
 project via a project nature (<code>IProjectNatureDescriptor.isLinkingAllowed()</code>),
 but this should only be done where there is a good reason to deny the user this
-additional flexibility in laying out a project. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6664">6664</a>)</p>
+additional flexibility in laying out a project. Users can disable linked resources
+via the <b>Workbench &gt; Linked
+    Resources</b> preference page. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=6664">6664</a>)</p>
 <h4>Project build order</h4>
 <p>The default order in which projects get built was changed in Eclipse 2.1 to
 improve the handling of mutually-dependent projects. The old method <code>IWorkspace.computePrerequisiteOrder</code>
@@ -365,14 +367,14 @@ plug-ins are internal and should not be referenced explicitly. As they always
 have, plug-ins requiring the Eclipse Platform UI (API found in the <code>org.eclipse.swt.*</code>,
 <code>org.eclipse.jface.*</code>, and <code>org.eclipse.ui.*</code> packages)
 should continue to state a dependency on the <code>org.eclipse.ui</code>
-plug-in.</p>
+ plug-in.</p>
 <h3>Platform - Help</h3>
 <h4>Pluggable app server</h4>
 <p>Eclipse 2.0 provided interim support for pluggable app servers via an
 undocumented <code>org.eclipse.help.app-server</code> extension point, with
 interim APIs in the <code>org.eclipse.help</code> package. For 2.1, this support
 has been made internal, along with the former interim API classes. Because this
-support was marked as interim for 2.0, this is not really a breaking API change.
+support was marked as interim for 2.0, this is not considered a breaking API change.
 Nevertheless, existing clients using the interim support will be broken. Even
 though the mechanism is not officially supported, clients that are adamant about
 plugging in a different app server can do so (with all the usual risks of
@@ -382,8 +384,8 @@ depending on unsupported Eclipse internals).</p>
 extension point, with API in the <code>org.eclipse.help.ui.browser</code>
 package. For 2.1, this support appears in finished form in different location:
 the <code>org.eclipse.help.browser</code> extension point, with API in the <code>org.eclipse.help.browser</code>
-package. Because this support was marked as interim for 2.0, this is not really
-a breaking change. Nevertheless, existing clients using the interim support will
+package. Because this support was marked as interim for 2.0, this is not
+considered a breaking API change. Nevertheless, existing clients using the interim support will
 need to update the extension point and package names.</p>
 <h3>Platform - Team</h3>
 <b>
@@ -394,7 +396,7 @@ when implementing <code>validateSave/Edit</code>. The first is that the hook can
 be invoked from a non-UI thread. The provider should use <code>Display.syncExec()</code>
 if they are affecting any UI components. Also, the hook should not display a
 progress monitor because there is a good possibility that there already is one
-open for the operation being performed; and opening another will cause deadlock.
+open for the operation being performed; opening another will cause deadlock.
 (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=33471">33471</a>)</p>
 <b>
 <p>Linked resources</p>
@@ -414,7 +416,7 @@ clear that the character reflects the outcome after any modifier keys are taken
 into account (for example, CTRL+A is reduced to the ASCII equivalent character
 with integer value 1). Since the treatment of modifier keys was completely
 unspecified before, this change affects clients that make assumptions about how
-modifiers were handled. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=33592">33592</a>)</p>
+modifiers are handled. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=33592">33592</a>)</p>
 <h4>New key modifier: command</h4>
 <p>In order to properly support the Mac for Eclipse 2.1, a new <code>SWT.COMMAND
 </code>key modifier constant was added to represent the Apple command key. On
@@ -475,66 +477,42 @@ indicates what should be used instead.</p>
 <ul>
   <li>Package <code>org.eclipse.ui.texteditor</code>
     <ul>
-      <li>Class <code>AbstractTextEditor</code>
-        <ul>
-          <li>Field <code>PREFERENCE_FONT</code></li>
-        </ul>
+      <li>Field <code>AbstractTextEditor.PREFERENCE_FONT</code>
       </li>
     </ul>
   </li>
   <li>Package <code>org.eclipse.jface.text.source</code>
     <ul>
-      <li>Class <code>AnnotationBarHoverManager</code>
-        <ul>
-          <li>Constructor <code>AnnotationBarHoverManager(ISourceViewer,
-            IVerticalRuler, IAnnotationHover, IInformationControlCreator)</code></li>
-        </ul>
+      <li>Constructor <code>AnnotationBarHoverManager(ISourceViewer,
+            IVerticalRuler, IAnnotationHover, IInformationControlCreator)</code>
       </li>
     </ul>
   </li>
   <li>Package <code>org.eclipse.jface.text.rules</code>
     <ul>
-      <li>Class <code>DefaultDamagerRepairer</code>
-        <ul>
-          <li>Constructor <code>DefaultDamagerRepairer(ITokenScanner,
-            TextAttribute)</code></li>
-        </ul>
+      <li>Constructor <code>DefaultDamagerRepairer(ITokenScanner,
+            TextAttribute)</code>
       </li>
     </ul>
   </li>
   <li>Package <code>org.eclipse.jface.text.information</code>
     <ul>
-      <li>Interface <code>IInformationProvider</code>
-        <ul>
-          <li>Method <code>getInformation(ITextViewer, IRegion)</code></li>
-        </ul>
+      <li>Method <code>IInformationProvider.getInformation(ITextViewer, IRegion)</code>
       </li>
     </ul>
   </li>
   <li>Package <code>org.eclipse.ui.texteditor</code>
     <ul>
-      <li>Class <code>IncrementalFindAction</code>
-        <ul>
-          <li>Constructor <code>IncrementalFindAction(ResourceBundle, String,
-            IWorkbenchWindow, <b>boolean</b>)</code></li>
-        </ul>
+      <li>Constructor <code>IncrementalFindAction(ResourceBundle, String,
+            IWorkbenchWindow, <b>boolean</b>)</code>
       </li>
-      <li>Class <code>MarkerRulerAction</code>
-        <ul>
-          <li>Constructor <code>MarkerRulerAction(ResourceBundle, String,
-            IVerticalRuler, ITextEditor, String, <b>boolean</b>)</code></li>
-        </ul>
+      <li>Constructor <code>MarkerRulerAction(ResourceBundle, String,
+            IVerticalRuler, ITextEditor, String, <b>boolean</b>)</code>
       </li>
-      <li>Class <code>MarkerRulerAction</code>
-        <ul>
-          <li>Method <code>getVerticalRuler()</code></li>
-        </ul>
+      <li>Method <code>MarkerRulerAction.getVerticalRuler()</code>
       </li>
-      <li>Class <code>SelectMarkerRulerAction</code>
-        <ul>
-          <li>Constructor <code>SelectMarkerRulerAction(ResourceBundle, String,
-            IVerticalRuler, ITextEditor)</code></li>
-        </ul>
+      <li>Constructor <code>SelectMarkerRulerAction(ResourceBundle, String,
+            IVerticalRuler, ITextEditor)</code>
       </li>
     </ul>
   </li>
@@ -551,8 +529,7 @@ output folder its generated files get written to. This change was made to give
 certain kinds of users greater flexibility in laying out their Java projects on
 disk. Clients used to be able to assume that a Java project's output files were
 in the project's output folder (<code>IProject.getOutputLocation()</code>); now
-they need to take into account the possibility of other output locations (<code>IClasspathEntry.getOutputLocation()
-!= null</code>). Existing code appears to work fine until the user exercises the
+they need to take into account the possibility of other output locations (<code>IClasspathEntry.getOutputLocation()!=null</code>). Existing code appears to work fine until the user exercises the
 additional flexibility. This change is most likely to affect client code that
 deploys code directly from the project's output folder (e.g., creates a JAR;
 launches a Java VM with the output folder on the runtime class path). (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24123">24123</a>)</p>
@@ -616,173 +593,9 @@ may need to be rewritten. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi
 <p>None.</p>
 <h3>PDE</h3>
 <p>None.</p>
-<h3>2.2 Incompatibilities between release 2.0 and 1.0</h3>
-<p>(This section from the 2.0 release notes is included for the benefit of
-customers migrating to 2.1 from 1.0.)</p>
-The Eclipse SDK 2.0 is upwards compatible with the Eclipse SDK 1.0 to the
-greatest extent possible. We made exceptions in areas where slavishly
-maintaining compatibility would not be in the best interests of the Platform or
-its clients. The exceptions noted in the 2.0 release notes are repeated here for
-the benefit of customers migrating from 1.0 to 2.1 directly.
-<h3>Platform - UI</h3>
-<p>The public client API has been kept stable with the exception of <code>ITextViewer</code>
-interface which changed in an incompatible way:</p>
-<ul>
-  <li>Added method <code>ITextViewer.invalidateTextPresentation()</code></li>
-  <li>Added method <code>ITextViewer.setDefaultPrefixes(String[] defaultPrefixes,
-    String contentType)</code></li>
-  <li>Removed method <code>ITextViewer.setDefaultPrefix(String defaultPrefix,
-    String contentType)</code></li>
-</ul>
-<h3>Platform - Debug</h3>
-<p>The debug API has been completely reworked for 2.0. The new APIs are not
-compatible with the 1.0 APIs, which were all considered &quot;interim&quot;.</p>
-<p>The high level API differences between the new and old debug platforms are:</p>
-<ul>
-  <li>Breakpoints - In 1.0, breakpoints were implemented as markers. In 2.0,
-    breakpoints are implemented as objects (interface <code>IBreakpoint</code>),
-    with an associated marker used for presentation in editors, and persistence
-    of attributes. There is a new extension point for registering types of
-    breakpoints: <code>org.eclipse.debug.core.breakpoints</code>.</li>
-  <li>Launch Configurations - In 1.0, an <code>ILauncher</code> was used to
-    launch applications. In 2.0, the concept of a &quot;launcher&quot; has been
-    replaced with a launch configuration. There are new extension points to
-    register launch configuration types, and for comparing launch configurations
-    (<code>org.eclipse.debug.core.launchConfigurationTypes</code>, <code>org.eclipse.debug.core.launchConfigurationComparators</code>).
-    The associated interfaces are <code>ILaunchConfigurationType</code>, <code>ILaunchConfiguration</code>,
-    <code>ILaunchConfigurationWorkingCopy</code>, and <code>ILaunchConfigurationDelegate</code>.</li>
-  <li>Launch Configuration Tab Groups - In 1.0, wizards were registered with
-    launchers for launch related UI. In 2.0, the launch configuration dialog and
-    launch shortcuts replace launch wizards. The associated extension points are
-    <code>org.eclipse.debug.ui.launchConfigurationTabGroups</code>, <code>org.eclipse.debug.ui.launchConfigurationTypeImages</code>,
-    and <code>org.eclipse.debug.ui.launchShortcuts</code>. The associated
-    interfaces are <code>ILaunchConfigurationTabGroup</code>, <code>ILaunchConfigurationTab</code>,
-    and <code>ILaunchShortcut</code>.</li>
-  <li>Debug model API changes - Interfaces defining the debug model elements
-    have been modified, and new debug elements have been added to support
-    procedural debug and expression management.</li>
-</ul>
-<p>As well, the Java debug model API has been enhanced and changed to reflect
-changes in the debug platform.</p>
-<h3>Platform - Core</h3>
-<p>Eclipse 1.0 Core Target Management was provisional. For 2.0, Core Target
-Management has been withdrawn and replaced by team target management providers.
-These new target management facilities are early access, and are contained in
-the Eclipse FTP and WebDAV Support feature (separately installable).
-<h3>Platform - Help</h3>
-<p>Help APIs and extension points were marked as interim in Eclipse 1.0. Based
-on the initial feedback, the Help APIs and extension points have changed
-significantly in Eclipse 2.0 and are not compatible with those in Eclipse 1.0.</p>
-<h3>Platform - Scripting</h3>
-<p>Eclipse 1.0 Scripting support was provisional and incomplete. For 2.0, the
-Scripting component has been withdrawn completely from the Eclipse Platform.
-<h3>Platform - Install/Update</h3>
-<p>The Install/Update component API has been completely reworked for 2.0. The
-1.0 notion of component has been replaced in 2.0 by the notion of a feature. The
-new APIs are not compatible with the 1.0 APIs, which were all considered
-&quot;interim&quot;.</p>
-<h3>Platform - Team</h3>
-<p>Workspace compatibility from VCM CVS 1.0 to Team CVS 2.0: the meta
-information for CVS providers has considerably changed from 1.0 to 2.0, and the
-meta information is not being preserved. To ease migration, some automation of
-migrating CVS repository locations is provided, and some helpful steps have been
-included. These are described in the <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-vcm-home/docs/online/cvs_features2.0/cvs-faq.html#10">Team
-CVS FAQ</a>.</p>
-<h3>PDE</h3>
-<h4>Extension point schema file extension changed</h4>
-<p>Extension point schema file extension has been changed from *.xsd to *.exsd
-to avoid conflicts with XML schema editors and/or non-PDE schema files. PDE will
-still detect files with the old extension and will issue a warning about the
-change.</p>
-<h4>Support for components removed</h4>
-<p>Eclipse 2.0 Install/Update has discontinued the use of components in favor of
-features. Consequently, PDE 2.0 supports feature-related development while
-component support has been removed. Features are described in the Eclipse
-Platform Plug-in Developer Guide.</p>
-
-<h2>3. <a name="Upgrading"></a>Upgrading a Workspace from a Previous Release</h2>
-<p>
-If you are upgrading to a newer release of Eclipse from an older release, there are
-simple steps to follow to migrate your workspace to the new release.  Your workspace
-is the directory on disk that contains all of your project files, as well as meta-data such
-as preferences you may have customized.  The steps to follow for upgrading depend on
-whether or not you used the &quot;-data&quot; command line argument when starting 
-Eclipse.  The &quot;-data&quot; argument is recommended because it clearly specifies the 
-location of your workspace.  If this argument is not used, Eclipse will place the workspace
-in the current working directory at the time Eclipse was launched.
-</p>
-<p><i>Tip:</i> It doesn't hurt to make a backup of your workspace before
-upgrading.  After you've upgraded your workspace, you won't be able to use it
-again with an older version of Eclipse.  If you ever want to go &quot;back in time&quot;
-to an earlier release, you'll need that backup!
-</p>
-<h3>Users who don't use &quot;-data&quot;</h3>
-<p>
-If you weren't previously using &quot;-data&quot; to specify your workspace, follow
-these steps to upgrade:
-<ol>
-<li>Find the workspace directory used by your old version of Eclipse.  Typically this
-is located inside the eclipse install directory in a sub-directory called &quot;workspace&quot;.
-If you were using a shortcut or script to launch Eclipse, then it will be under the current
-working directory of that shortcut or script in a sub-directory called &quot;workspace&quot;.
-Windows users, this is specified by the &quot;Start in&quot; argument in your shortcut properties.</li>
-<li>Copy this workspace directory into a new, empty location outside of any Eclipse
-install directory.</li>
-<li>Install the new version of Eclipse in a new location, separate from any old version
-of Eclipse.</li>
-<li>Start this new version of Eclipse, using the &quot;-data&quot; command line argument to 
-point to the workspace location.</li>
-</ol>
-<p>
-Example:<br><br>
-Old Eclipse install directory: <br>
-&nbsp;&nbsp;&nbsp;<code>c:\eclipse2_0</code><br><br>
-New Eclipse install directory: <br>
-&nbsp;&nbsp;&nbsp;<code>c:\eclipse2_1</code><br><br>
-Workspace location: <br>
-&nbsp;&nbsp;&nbsp;<code>c:\data\EclipseWorkspace</code><br><br>
-Java VM location: <br>
-&nbsp;&nbsp;&nbsp;<code>c:\jre</code><br><br>
-Command line to start Eclipse: <br>
-&nbsp;&nbsp;&nbsp;<code>&quot;c:\eclipse2_1 -data c:\data\EclipseWorkspace -vm d:\jre\bin\javaw&quot;</code><br>
-</p>
-<p><i>Tip:</i> It's generally a good idea to explicitly specify which Java VM to
-use when running Eclipse.  This is achieved with the &quot;-vm&quot; command line
-argument as illustrated above.  If you don't use &quot;-vm&quot;, Eclipse will look
-on the O/S path.  When you install other products, they may change your path, resulting
-in a different Java VM being used when you next launch Eclipse.
-</p>
-<h3>Users who do use &quot;-data&quot;</h3>
-<p>
-If you were previously using the &quot;-data&quot; argument to start Eclipse, your 
-upgrade path is much easier:
-<ol>
-<li>Install the new version of Eclipse in a new location, separate from any old version
-of Eclipse.</li>
-<li>Start this new version of Eclipse, using the &quot;-data&quot; command line argument to 
-point to your old workspace location.</li>
-</ol>
-See the example in the previous section for an illustration.
-<h3>Adding third party plug-ins</h3>
-<p>
-If you have installed extra plug-ins in your Eclipse environment, you will need to add
-these new plug-ins to each new build or version of Eclipse you install.  Before you do
-this, refer to the documentation for those plug-ins to ensure they are compatible
-with the version of Eclipse you are moving to.  There are several ways to add these
-extra plug-ins to your new Eclipse install:
-<ol>
-<li>Copy the directories for each plug-in into the &quot;plugins&quot; directory of your
-new Eclipse version.</li>
-<li>Use an Eclipse update site to re-install those extra plug-ins or features in the
-new version of Eclipse.</li>
-<li>If you are using product extensions, simply copy the &quot;links&quot; directory
-into the new Eclipse version install directory.  For more details on product extensions,
-see the documentation in the Platform Plug-in Developer Guide, under <b>Programmer's
-Guide &gt; Packaging and delivering Eclipse based products &gt; Product extensions</b>.</li>
-</ol>
 
 
-<h2>4. <a name="Known Issues"></a> Known Issues</h2>
+<h2>3. <a name="Known Issues"></a>  Known Issues</h2>
 <blockquote>
   <p><a href="#I-Platform">3.1 Platform</a><br>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Core">3.1.1 Core</a><br>
@@ -804,6 +617,13 @@ Guide &gt; Packaging and delivering Eclipse based products &gt; Product extensio
 </blockquote>
 <p>Note: Bug numbers refer to the Eclipse project bug database at <a href="http://dev.eclipse.org/bugs/">http://dev.eclipse.org/bugs/</a></p>
 <h3>3.1 <a name="I-Platform">Platform</a></h3>
+<h4>DBCS support on Linux GTK (Linux GTK only)</h4>
+<p>The versions of GTK included with RedHat Linux 8.0 and SuSE Linux 8.1 that we
+tested support Latin-1 locales but not DCBS. The DCBS support in GTK 2.2 should
+be sufficient, and in principle Eclipse should work on any recent Linux with GTK
+2.2. We have verified that Eclipse DBCS support works with RedHat Linux 8.0 and
+GTK 2.2. However, we were unable to get Eclipse working with SuSE Linux 8.1 and
+and GTK 2.2, so this remains an open issue.</p>
 <h4>Eclipse process does not exit (HP-UX only)</h4>
 <p>On HP-UX, the HP JVM process that runs the Eclipse Workbench does not
 terminate upon closing the workbench. The remedy is to always pass the <code>-XdoCloseWithReadPending</code>
@@ -813,13 +633,6 @@ the command line:</p>
   <p><code>eclipse -vmargs -XdoCloseWithReadPending</code></p>
 </blockquote>
 <p>(bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=18321">18321</a>)</p>
-<h4>DBCS support on Linux GTK (Linux GTK only)</h4>
-<p>The versions of GTK included with RedHat Linux 8.0 and SuSE Linux 8.1 that we
-tested support Latin-1 locales but not DCBS. The DCBS support in GTK 2.2 should
-be sufficient, and in principle Eclipse should work on any recent Linux with GTK
-2.2. We have verified that Eclipse DBCS support works with RedHat Linux 8.0 and
-GTK 2.2. However, we were unable to get Eclipse working with SuSE Linux 8.1 and
-and GTK 2.2, so this remains an open issue.</p>
 <h3>3.1.1 <a name="I-Platform - Core">Platform - Core</a></h3>
 <h4>Declaring package name prefixes improves plug-in class loading speed</h4>
 <p>A significant (10-15%) speed increase in the time to load a plug-in's classes
@@ -832,7 +645,7 @@ certain invalid characters, including :%#&lt;&gt;&quot;!. The workaround is to
 install Eclipse in a directory whose path does not contain invalid characters.
 (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=3109">3109</a> and <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=17281">17281</a>)</p>
 <h4><b>Problems with classloaders in created threads</b></h4>
-<p>There is a known issue with trying to load classes from a newly created
+<p>There is a known issue with trying to load classes from a newly-created
 thread using a class loader different from the plug-in class loader. The result
 will be a <code>ClassNotFoundException</code>. As a workaround, do the
 following:</p>
@@ -846,8 +659,7 @@ following:</p>
 with other users of the thread (all of Eclipse), so the results will be
 unpredictable. However, there should be no problem in practice provided you
 reset the context class loader back to its original value when your use in the
-current thread is&nbsp;<br>
-complete. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8907">8907</a>)</p>
+current thread is&nbsp;complete. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8907">8907</a>)</p>
 <h4>Deadlock creating executable extension in Plugin.startup</h4>
 <p>If <code>Plugin.startup</code> code is too complex and performs tasks such as
 creating an executable extension, a deadlock situation can be created. Only
@@ -1031,7 +843,7 @@ limitation of the Open Motif library. (bug <a href="http://dev.eclipse.org/bugs/
 <h4>Hang opening font or color dialogs (Mac OS X Carbon only)</h4>
 <p>When running with J2SE 1.4.1 for Mac OS X, opening a font or color dialog can
 hang Eclipse. This is a bug in Apple's J2SE 1.4.1 involving Cocoa-based dialogs.
-Note that J2SE 1.3.1 for Mac OS X does have this problem. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=30021">30021</a>)</p>
+Note that J2SE 1.3.1 for Mac OS X does not have this problem. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=30021">30021</a>)</p>
 <h4>Crash when attempting to launch file browser (AIX Motif only)</h4>
 <p>There is a known AIX graphics bug affecting certain levels of AIX releases.
 Ensure that the AIX installed includes the necessary service updates as
@@ -1056,6 +868,11 @@ IME-related crash (Linux Motif only)
 </h4>
 <p>When using Linux Motif and GB18030 IME &quot;chinput&quot;, you can crash if
 the IME client window is left open when the parent window is disposed. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32045">32045</a>)</p>
+<h4>Problems with Japanese IME (Linux Motif only)</h4>
+<p>On Linux Motif, the Japanese IME Wnn7 Personal is not working properly with
+Eclipse: the pre-edit text does not appear in the text widget, making it
+unusable. The IME that we tested - Kinput2 on the client + Canna on the server
+side (default IME in RedHat 8.0) - works fine. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=31754">31754</a>)</p>
 <h4>BiDi support</h4>
 <p>The <code>StyledText</code> widget provides bidirectional language support
 for Hebrew and Arabic locales. Currently this support is available only on
@@ -1142,93 +959,9 @@ using an external communications client (e.g. rsh or ssh) that adds CRs to the
 communications channel (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21180">21180</a>).
 Another involves Eclipse not properly reading the stderr output of the external
 communications tool (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=11633">11633</a>).</p>
-<h4>Synchronize view &quot;Mark as Merged&quot; has surprising behavior with
-respect to modes</h4>
-<p>When you <b>Mark as Merged</b>, if its your only incoming change and you are
-in the incoming mode, the sync view becomes empty. On the surface it looks like
-the change is gone. However, your change will appear in outgoing mode. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18513">18513</a>)</p>
-<h4>Change ASCII/Binary Properties not available for unadded files</h4>
-<p>The <b>Change ASCII/Binary Properties</b> menu item is only enabled for files
-and folders that are under CVS control. If you want to set the keyword
-substitution mode for a new file, you will need to add it to version control
-first. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19183">19183</a>)</p>
-<h4>Error updating incoming directory additions with pruning turned off</h4>
-<p>If pruning is turned off and a project has incoming nested folder additions
-that do not contain any files, performing an update in the Synchronize view will
-result in an error (cannot create folder). The workaround is to perform a <b>Team
-&gt; Update</b> which will bring in the directories. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19442">19442</a>)</p>
-<h4>ClassCastException on attempt to replace directory with file</h4>
-<p>Performing the following steps will result in the above exception:</p>
-<ol>
-  <li>Create a new project &amp; share it with a CVS repository.</li>
-  <li>Create a directory in the project root and a file inside this directory.</li>
-  <li>Synchronize the project using <b>Team &gt; Synchronize with Repository</b>.</li>
-  <li>Locally delete the directory (and contained file) that was just created</li>
-  <li>Create a file in the project root with the same name as the directory that
-    was just deleted.</li>
-  <li>Synchronize again using <b>Team &gt; Synchronize with Repository</b>.</li>
-</ol>
-<p>The workaround is to commit the folder deletion before creating the new file.
-(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20906">20906</a>)</p>
-<h4>Still prompted if delete unmanaged preference turned off</h4>
-<p>If the &quot;delete unmanaged resources on replace&quot; preference has been
-disabled on the <b>Team &gt; CVS</b> preference page and a <b>Team &gt; Replace
-With</b> operation is performed on a project that has one unmanaged resource and
-no other outgoing changes, the user is prompted to overwrite local changes even
-though the operation will not overwrite the unmanaged resource. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18834">18834</a>)</p>
-<h4>Refresh does not update dirty state of parent folders</h4>
-<p>If files have been deleted in the file system, a <b>Refresh</b> command will
-not properly mark the files as an outgoing deletions in Eclipse. The workaround
-is to perform a <b>Team &gt; Synchronize with Repository</b>, switch to
-Incoming/Outgoing mode, select the incoming additions that should be outgoing
-deletions and choose <b>Override and Commit</b> from the context menu. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=31914">31914</a>)</p>
-<h4>Prompted to overwrite project when using Check Out As and project did not
-previously exist</h4>
-<p>In the CVS Repositories View, performing <b>Check Out As</b> on a project
-that is missing a .project file will prompt the user to choose a project type
-(e.g., Java project) and configure the project. After clicking <b>Finish</b>,
-the user may be prompted to overwrite the project even though the project didn't
-exist before the operation began. The workaround is to choose to overwrite. (bug
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32533">32533</a>).</p>
 <h4>No way to update folder excluding subfolders</h4>
 <p>There is currently no way in Eclipse to run a non-recursive update on a
 folder (i.e., there is nothing equivalent to the cvs -l option). (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33210">33210</a>).</p>
-<h4>Tag with Existing and branches</h4>
-<p>The <b>Tag with Existing</b> operation fails if the branch being moved
-already exists for one of the resources being tagged. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34711">34711</a>).</p>
-<h4>Checkout Into and linked resources</h4>
-<p>Using <b>Checkout Into</b> the user can check out a folder into a folder that
-is a linked resource. However, CVS operations cannot be performed on any
-children of a linked resource, including those added to the workspace using <b>Checkout
-Into</b>. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35011">35011</a>).</p>
-<h4>Performing Edit followed by Unedit doesn't refresh decorators</h4>
-<p>Performing a <b>Team &gt; Edit</b> on a file followed by a <b>Team &gt;
-Unedit</b> does not reset the decorator (i.e., it will still appear as though
-the file is being edited). This only occurs if the edited file was not modified
-locally. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35377">35377</a>).</p>
-<h4>Dirty state not reset properly on Commit of previously merged file</h4>
-<p>If a file which contained a merge conflict is edited so it's content matches
-that of the server and then committed, the file will still be marked as dirty in
-any views in which the CVS decorators are turned on. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35378">35378</a>).</p>
-<h4>On Add to Version Control, empty folders are skipped and removed from the
-Synchronize view</h4>
-<p>In the <b>Synchronize</b> view, if there are outgoing additions of empty
-folders, performing an <b>Add to Version Control</b> will remove the empty
-folders from the view but not add them to version control. The workaround is to
-add them in the <b>Navigator</b> view. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35527">35527</a>).</p>
-<h4>Synchronize CVS Projects improperly synchronizes working set (GTK only)</h4>
-<p>In GTK operating environment, if the option to synchronize a working set was previously selected in the Synchronize CVS Projects dialog but is no longer, the operation may
-still synchronize the working set if no options in the dialog are changed before OK is clicked. The workaround is to first click "Include working
-set resources shared with CVS" and then click "Include all projects shared with CVS" before clicking OK. (bug
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35671">35671</a>)</p>
-<h4>CVS Compare editor still dirty after user discards changes</h4>
-<p>In the CVS compare editor, if a local file is modified, the editor will show a dirty indicator. If the user then chooses to open anther
-file in the editor, a prompt will ask whether the changes are to be kept. If the user chooses to discard the changes, they will be discarded but the dirty indicator is not cleared. (bug
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35647">35647</a>)</p>
-<h4>CSV Share Project fails for new repository and existing project</h4>
-<p>When using the CVS Share Project wizard to share a project, if the user enters a new repository location and the project being shared already exists in that repository, the operation will fail. The workaround is to rerun the
-<b> Share Project</b> operation which should succeed since the repository location now exists. (bug
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=26171">26171</a>)</p>
 <h3>3.1.8 <a name="I-Platform - Install/Update">Platform - Install/Update</a></h3>
 <h4>Update manager claims that a cycle has been detected in a multiple path case</h4>
 <p>When a feature includes other features, it is an error to have multiple paths
@@ -1266,8 +999,8 @@ more once the limit is reached. To work around the problem, exit and restart
 Eclipse. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18598">18598</a>,
 <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19775">19775</a>)</p>
 <h4>URL validity checking on input</h4>
-<p>URL syntax is currently not completely checked on input. Ensure that any
-entered URLs use the correct separators (eg. forward&nbsp; slash '/') and do not
+<p>URL syntax is currently not completely checked on input. Ensure that the entered
+URL uses forward&nbsp; slash ('/') separators and does not
 contain invalid characters. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19685">19685</a>,
 <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20247">20247</a>)
 <h4>Running &quot;headless&quot; applications that do not handle restart</h4>
@@ -1290,8 +1023,14 @@ workaround is to ensure that the entry ends with an end-of-line character (bug <
 same feature. If they include other features and the inclusion is set with a
 match attribute that is not &quot;perfect&quot;, disabling old feature version
 may have a consequence of disabling new children. To avoid this situation,
-disable the new version first, then enable the old one i.e. never have two
+disable the new version first, then enable the old one; i.e., never have two
 versions of the same feature simultaneously enabled (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=25236">25236</a>).</p>
+<h4>Upgrading very old workspaces</h4>
+<p>If you upgrade to 2.1 from a pre-2.0 workspace that existed prior to the introduction of
+features, the next time you add a feature you will be prompted on startup with a dialog asking which features to install.  If you de-select all features and click OK, then all features are disabled.  This prevents
+you from ever using that workspace again (since the Eclipse Platform feature is disabled).  The
+solution is to delete the <code>.config</code> subdirectory in the workspace's
+metadata area and then restart Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35703">35703</a>)</p>
 <h3>3.1.9 <a name="I-Platform - Debug">Platform - Debug</a></h3>
 <p>None. (Known problems with the Java debugger appear below in the <a href="#I-Java Development Tools (JDT)">JDT</a>
 section.)</p>
@@ -1438,6 +1177,11 @@ class name contains GB18030 characters. (bug <a href="http://bugs.eclipse.org/bu
 <p>Linked editing is used for renaming elements within a single compilation unit
 and for templates with multiple occurrences of the same template variable.
 Linked editing does not work correctly in overwrite mode. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35216">35216</a>)</p>
+<h4>Catch block code generation template must end with newline if last line is
+line comment</h4>
+<p>If the last line of the catch block code generation template is a line comment then the line
+must be terminated with a newline. Otherwise the closing curly bracket ends up on the comment
+line, resulting in a compilation error. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35746">35746</a>)</p>
 <h3>3.3 <a name="I-Plug-in Development Environment (PDE)">Plug-in Development
 Environment (PDE)</a></h3>
 <h4>PDE source page colors do not take effect on Apply</h4>
@@ -1519,9 +1263,9 @@ works. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18108">18108</
 when trying to obtain the timestamp of a newly uploaded file. This causes a
 &quot;file does not exist&quot; error. The workaround is to <b>Synchronize</b>
 again and continue. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19715">19715</a>)</p>
-<h2>5. <a name="Running Eclipse">Running Eclipse</a></h2>
-<p>After installing the Eclipse release in a directory, start the Workbench by running the Eclipse executable
-included with the release. On Windows, the executable file is called <samp>eclipse.exe</samp>,
+<h2>4. <a name="Running Eclipse">Running Eclipse</a></h2>
+<p>After installing the Eclipse SDK in a directory, you can start the Workbench by running the Eclipse executable
+included with the release (you also need a JRE, included with the Eclipse SDK). On Windows, the executable file is called <samp>eclipse.exe</samp>,
 and is located in
 the <code>eclipse</code> subdirectory of the install. If installed at <code>c:\eclipse-SDK-2.1-win32</code>,
 the executable is <code>c:\eclipse-SDK-2.1-win32\eclipse\eclipse.exe</code>. <b>Note:</b> Set-up on
@@ -1547,6 +1291,89 @@ workspace (e.g., <code>c:\myworkspace</code>):</p>
 </ol>
 <p>Opening this shortcut launches Eclipse on the specified workspace. (You can
 drag the shortcut to the Windows Desktop if you want to keep it in easy reach.)</p>
+
+<h2>5. <a name="Upgrading"></a>Upgrading a Workspace from a Previous Release</h2>
+<p>
+If you are upgrading to a newer release of Eclipse from an older release, there are
+simple steps to follow to migrate your workspace to the new release.  Your workspace
+is the directory on disk that contains all of your project files, as well as meta-data such
+as preferences you may have customized.  The steps to follow for upgrading depend on
+whether or not you used the &quot;-data&quot; command line argument when starting 
+Eclipse.  The &quot;-data&quot; argument is recommended because it clearly specifies the 
+location of your workspace.  If this argument is not used, Eclipse will place the workspace
+in the current working directory at the time Eclipse was launched.
+</p>
+<p><i>Tip:</i> It doesn't hurt to make a backup of your workspace before
+upgrading.  After you've upgraded your workspace, you won't be able to use it
+again with an older version of Eclipse.  If you ever want to go &quot;back in time&quot;
+to an earlier release, you'll need that backup!
+</p>
+<h3>Users who don't use &quot;-data&quot;</h3>
+<p>
+If you weren't previously using &quot;-data&quot; to specify your workspace, follow
+these steps to upgrade:
+<ol>
+<li>Find the workspace directory used by your old version of Eclipse.  Typically this
+is located inside the eclipse install directory in a sub-directory called &quot;workspace&quot;.
+If you were using a shortcut or script to launch Eclipse, then it will be under the current
+working directory of that shortcut or script in a sub-directory called &quot;workspace&quot;.
+Windows users, this is specified by the &quot;Start in&quot; argument in your shortcut properties.</li>
+<li>Copy this workspace directory into a new, empty location outside of any Eclipse
+install directory.</li>
+<li>Install the new version of Eclipse in a new location, separate from any old version
+of Eclipse.</li>
+<li>Start this new version of Eclipse, using the &quot;-data&quot; command line argument to 
+point to the workspace location.</li>
+</ol>
+<p>
+Example:<br><br>
+Old Eclipse install directory: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\eclipse2_0</code><br><br>
+New Eclipse install directory: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\eclipse2_1</code><br><br>
+Workspace location: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\data\EclipseWorkspace</code><br><br>
+Java VM location: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\jre</code><br><br>
+Command line to start Eclipse: <br>
+&nbsp;&nbsp;&nbsp;<code>&quot;c:\eclipse2_1 -data c:\data\EclipseWorkspace -vm d:\jre\bin\javaw&quot;</code><br>
+</p>
+<p><i>Tip:</i> It's generally a good idea to explicitly specify which Java VM to
+use when running Eclipse.  This is achieved with the &quot;-vm&quot; command line
+argument as illustrated above.  If you don't use &quot;-vm&quot;, Eclipse will look
+on the O/S path.  When you install other products, they may change your path, resulting
+in a different Java VM being used when you next launch Eclipse.
+</p>
+<h3>Users who do use &quot;-data&quot;</h3>
+<p>
+If you were previously using the &quot;-data&quot; argument to start Eclipse, your 
+upgrade path is much easier:
+<ol>
+<li>Install the new version of Eclipse in a new location, separate from any old version
+of Eclipse.</li>
+<li>Start this new version of Eclipse, using the &quot;-data&quot; command line argument to 
+point to your old workspace location.</li>
+</ol>
+See the example in the previous section for an illustration.
+<h3>Adding third party plug-ins</h3>
+<p>
+If you have installed extra plug-ins in your Eclipse environment, you will need to add
+these new plug-ins to each new build or version of Eclipse you install.  Before you do
+this, refer to the documentation for those plug-ins to ensure they are compatible
+with the version of Eclipse you are moving to.  There are several ways to add these
+extra plug-ins to your new Eclipse install:
+<ol>
+<li>Copy the directories for each plug-in into the &quot;plugins&quot; directory of your
+new Eclipse version.</li>
+<li>Use an Eclipse update site to re-install those extra plug-ins or features in the
+new version of Eclipse.</li>
+<li>If you are using product extensions, simply copy the &quot;links&quot; directory
+into the new Eclipse version install directory.  For more details on product extensions,
+see the documentation in the Platform Plug-in Developer Guide, under <b>Programmer's
+Guide &gt; Packaging and delivering Eclipse based products &gt; Product extensions</b>.</li>
+</ol>
+
+
 <h2>6. <a name="Interoperability with Previous Releases">Interoperability with
 Previous Releases</a></h2>
 <h3>6.1 Interoperability of Release 2.1 and 2.0</h3>
@@ -1581,11 +1408,11 @@ repository. Here's how things typically go awry:</p>
     a result of their actions.</li>
   <li>A user working in Eclipse 2.1 picks up the changes to a project from the
     shared repository, including the updated shared metadata file. The user may
-    be unaware that they have just taken a retrograde step until later, when
+    be unaware that they have just taken a retrograde step until later when
     things start to malfunction.</li>
 </ul>
 <p>Here are a list of things to watch out for when the project is to be shared
-with 2.0:</p>
+between users of Eclipses 2.1 and 2.0:</p>
 <ul>
   <li><b>Linked folders and files<br>
     </b>This support was added in 2.1. Information about linked resources is
@@ -1632,7 +1459,7 @@ with 2.0:</p>
     entries and therefore most Java capabilities (including compilation, search,
     run, debug) will not produce the expected results. Recommendation: Ensure
     that the setting on the <b>Plug-in Development &gt; Java Build Path Control </b>preference
-    page for using classpath containers is disabled before creating any plug-in
+    page for using classpath containers is disabled before creating any new plug-in
     (or fragment) projects.</li>
 </ul>
 <h4>Using Eclipse 2.1 to develop plug-ins that work in Eclipse 2.0</h4>
