@@ -1,40 +1,41 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-  <meta http-equiv="Content-Type"
- content="text/html; charset=ISO-8859-1">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
- type="text/css">
-  <title>Synchronization Support</title>
-  <link rel="stylesheet" type="text/css" href="../book.css">
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
+  <title>Synchronization Support - Local History Example</title>
+  <link href="../book.css" type="text/css" rel="stylesheet">
 </head>
 <body style="background-color: rgb(255, 255, 255);">
 <h2>Local History Example<br>
 </h2>
 <p>The best way to understand the Synchronize APIs is to create a
 simple example that actually works. In this example we will be creating
-a page in the Synchronize View that allows browsing the latest change
-in local history for all files in the workspace. This synchronization
+a page in the Synchronize View that will display the latest local
+history state for all files in the workspace. The local history
+synchronization
 will update automatically when changes are made to the workspace, and a
 compare editor can open to browse, merge, then changes. We will also
 add a custom decorator to show the last timestamp of the local history
 element and an action to revert the workspace files to their latest
-saved local history state.<br>
-</p>
-<p>This is an excellent example because we already have a store of
-resource variants available and we don't have to manage it. Local
-history provides access to these variants and we will take advantage of
-this to simplify the example.<br>
+saved local history state. This is an excellent example because we
+already have a store of
+resource variants available and we don't have to manage it. <br>
 </p>
 For the remainder of this example we will make use of a running
-example. The source code can be found <a
- href="link%20to%20a%20zip%20file">here</a>.<br>
+example. The source code can be found in the local history package of
+the <a
+ href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.team.examples.filesystem/">org.eclipse.team.examples.filesystem</a>
+plug-in. You should check the project out from the CVS repository and
+use as a reference while you are reading this tutorial. <br>
 <br>
-<img src="images/team_synchronize_example_localhistory_overview.gif"
- alt="" style="width: 1024px; height: 766px;"><br>
+<img src="images/team_synchronize_example_localhistory_overview.gif"><br>
 <br>
-This screen shot shows the local history participant in the Synchronize
+This screen shot shows the local history synchronization in the
+Synchronize
 View. It has a custom decorator, and action, you can browse the changes
 between the local resource and the latest state in history. Notices
 also that the standard Synchronize View presentation is used: problem
@@ -75,7 +76,7 @@ compare, and display these to the user.<br>
  style="font-weight: bold;"><br></span></pre>
 Since the IFileState interface already provides access to the contents
 of the file from local history, this was easy. Genrally when creating a
-variant you have to provide a way of accessing the content, an content
+variant you have to provide a way of accessing the content, a content
 identifier that will be displayed to the user to identify this variant,
 and a name. The asBytes() method is only required if persisting the
 variants between sessions. <br>
@@ -140,7 +141,7 @@ Subscriber to only a set of resources. <br>
  style="color: rgb(68, 68, 204);"></span></pre>
 <p>The Subscriber will return a new SyncInfo instance that will contain
 the latest state of the file in local history. The SyncInfo is created
-with the with a null base and a local history variant for the remote
+with a null base and a local history variant for the remote
 element. For all other elements in the workspace (e.g. folders and
 projects) they are considered in-sync because they don't have local
 history. The remaining code in the local history subscriber is the
@@ -159,7 +160,8 @@ implementation of the members() method:<br>
  style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	return new IResource[0];</span><br
  style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}</span><br></pre>
 <p>The interesting detail of this method is that it will return
-nn-existing children if a deleted resource has local history. This will
+non-existing children if a deleted resource has local history. This
+will
 allow our Subscriber to return SyncInfo for elements that only exist in
 local history and are no longer in the workspace.<br>
 </p>
@@ -267,8 +269,8 @@ supported by the resources plugin.<br>
  style="color: rgb(68, 68, 204);"></span></pre>
 <pre><span style="color: rgb(68, 68, 204);"></span><span
  style="color: rgb(68, 68, 204);"></span></pre>
-<p><a href="../hglegal.htm"><img src="../ngibmcpy.gif"
- alt="Copyright IBM Corporation and others 2000, 2003." border="0"
- width="324" height="14"></a></p>
+<p><a href="../hglegal.htm"><img height="14" width="324" border="0"
+ alt="Copyright IBM Corporation and others 2000, 2003."
+ src="../ngibmcpy.gif"></a></p>
 </body>
 </html>
