@@ -37,16 +37,22 @@ JDT for building a simple Java application.
 Much like other workbench contributions, a name, description, and id can be specified for the cheat
 sheet.  The name and description are shown when the user accesses the
 <b>Help&gt;Cheat Sheets...</b> list.  A category for the cheat sheet can also be defined if you want 
-to place several cheat sheets into a logical grouping.  
+to place several cheat sheets into a logical grouping.  If no category is specified, the cheat sheet will
+appear in the <b>Other</b> category.
 </p>
 <p><img border="0" src="images/cheatsheet.jpg" alt="Cheat sheet dialog" border="0"></p>
 <h4>Cheat sheet items</h4>
 <p>
-The real work for cheat sheets is done in the content file.  The content file is an XML file that
-gives some overview information about the cheat sheet and then describes each step (called an <i>item</i> that
+The real work for cheat sheets is done in the content file.  The content file is an XML file whose name and location
+are specified in the <b>contentFile</b> attribute.  The path for the file is relative to the plug-in's directory.  (Note
+the use of the <tt>$nl$</tt> variable in the directory name, which means the file will be located in a directory specific
+to the national language of the target environment.)
+</p>
+<p>The file format itself includes overview information about the cheat sheet followed
+by a description of each step (called an <i>item</i>) that
 the user will perform.  At its simplest, an item is just a detailed description of the step that the user should
 take.  However, an item can also specify an action that can be run to perform the step on behalf of the
-user.  Let's look at the content file (<tt>HelloWorld.xml</tt>) 
+user.  Let's look at the first part of the content file (<tt>HelloWorld.xml</tt>) 
 for the Java cheat sheet.
 <pre><font color="#4444CC">
 &lt;?xml version="1.0" encoding="UTF-8" ?&gt; 
@@ -74,6 +80,11 @@ You can click the "Click to Perform" button to have the "Java" perspective opene
 &lt;/item&gt;
 ...
 </font></pre>
+</p>
+<p>
+<img border="0" src="images/javacheatsheet.jpg" alt="Simple java cheat sheet" border="0">
+</p>
+<p>
 The title and intro information are shown at the top of the cheat sheet.  Then, the items are described. 
 The first item for this cheat sheet describes how to open the Java perspective.  Better still, the <b>action</b>
 attribute specifies a class that can be used to run the action on behalf of the user.  The class must
@@ -155,10 +166,10 @@ matches the condition is the one that will be performed.   For example:
 &lt;/item&gt;
 </pre></font>
 The action to be performed is chosen based on the value of the <tt>v1</tt> variable.  If the variable
-value is neither <tt>a</tt> aor <tt>b</tt>, it is considered an error.
+value is neither <tt>a</tt> or <tt>b</tt>, it is considered an error.
 </p>
 <h5>Repeated subitems</h5>
-<p><b>Repeated subitems</b> describe a subitem that can can expand into 0, 1, or more similar substeps.  The
+<p>Repeated subitems describe a subitem that can can expand into 0, 1, or more similar substeps.  The
 substeps are individualized using the special variable <tt>${this}</tt>.  This variable will be replaced by
 the values specified in the <b>values</b> attribute.  The values attribute is a string of values that are separated
 by commas.  A variable that expands into a list of values may be used in the values attribute.
@@ -177,9 +188,9 @@ subitem description, such as the action class or parameter value.
 <h4>
 Cheat sheet listeners</h4>
 <p>
-In some cases, you may want to keep another part of your UI up to date with the progress that is being
-made in a cheat sheet.  For example, you may have an editor that changes its position based on the
-user's current step in the cheat sheet.  In this case, a <b>listener</b> can be specified as an attribute of
+In some cases, you may want to change other parts of your UI if a cheat sheet is active.
+For example, you may have an editor that shows special annotations if a cheat sheet is guiding the
+user through an editing task.  In this case, a <b>listener</b> can be specified as an attribute of
 the cheatsheet.  The listener attribute must be the fully qualified name of a Java class that
 subclasses
 <a href="../reference/api/org/eclipse/ui/cheatsheets/CheatSheetListener.html"><b>CheatSheetListener</b></a>.  
