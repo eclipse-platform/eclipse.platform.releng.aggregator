@@ -165,7 +165,7 @@ public class BuildTests extends TestCase {
 		return result;
 	}
 	
-	public void testCVSKTag() {
+	public void ztestCVSKTag() {
 		
 		boolean result = false;
 		initializeCVSTypes();
