@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="Lab User">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   <title>Web-triggered updates</title>
+</head>
+<body>
+
+<h1>
+Web-triggered updates</h1>
+<p>Eclipse update manager can be used to render and browse Eclipse update sites
+in a predictable manner. An update site can contain categories shown in the tree
+view, and these categories in turn contain features. Features can be inspect in
+the Preview view inside update manager. If a feature is a valid install
+candidate, it will contain a button &quot;Install Now&quot; that will launch
+Eclipse install wizard. Upon completion of the install task, the feature will be
+part of the product.</p>
+<p>This standard way of presenting features for installation is not the only
+way. Providers can take over presentation, registration, search and other tasks
+from update manager and return control only when it is time to actually install
+a feature into an Eclipse product.</p>
+<p>Update manager is capable of running a servlet that can accept requests from
+Web pages. This capability is not automatic: it must be activated in <b>Preferences&gt;Install/Update&gt;Web-triggered
+Updates</b> page. When <b>OK</b> is pressed, update manager will activate the
+application server that can handle incoming requests. After that, all URLs
+opened from within Update Manager will be encoded with the callback URL
+information. If the initial URL is a regular Web page, the encoded URL will have
+the query part that adds the callback URL to use to call Eclipse:</p>
+<blockquote>
+  <div align="left">
+    <pre align="left">http://acme.com/myApplication.html</pre>
+  </div>
+</blockquote>
+<p align="left">becomes</p>
+<blockquote>
+  <div align="left">
+    <pre align="left">http://acme.com/myApplication.html?updateURL=&lt;localhost&gt;:&lt;localport&gt;?org.eclipse.update/install</pre>
+  </div>
+</blockquote>
+<p align="left">where 'localhost' is the address of the Eclipse server running
+on your local machine, local port is selected dynamically when the server is
+started, and the query is the Eclipse Web application name and the name of the
+servlet that handles the request.</p>
+<p align="left">If the original URL is already a query:</p>
+<blockquote>
+  <div align="left">
+    <pre align="left">http://acme.com/myApplication/myServlet?arg1=value1&amp;arg2=value2</pre>
+  </div>
+</blockquote>
+<p align="left">the encoding will simply add our information as another
+parameter:</p>
+<blockquote>
+  <div align="left">
+    <pre align="left">http://acme.com/myApplication/myServlet?arg1=value1&amp;arg2=value2&amp;updateURL=&lt;localhost&gt;:&lt;localport&gt;?org.eclipse.update/install</pre>
+  </div>
+</blockquote>
+<p align="left">The encoding is ignored by normal web pages and queries and does
+not cause any problems nor it affects the presentation. It simply adds
+information that can be used by a page that knows about it.</p>
+<p align="left">Since a Web page must be launched from update manager, site
+bookmarks in Updates view can be created as Web bookmarks. Update manager treats
+these bookmarks accordingly and when you double-click on one, it will open the
+URL in a browser (if embedded browser is available on the version of operating
+and windowing system, it will open directly inside update manager; otherwise, it
+will open in the resident browser window).</p>
+<h3 align="left">Tasks that can be performed in a Web page</h3>
+<p align="left">Providers can set up their Update web pages any way they want:
+they can use elaborate Web applications backed by databases, or use simple,
+static HTML. Using more complex architecture allows providers to offer more
+value to users. Complex searches for new features, updates and e-fixes, rich
+visual presentations of selected features, articles on their functionality,
+various useful links, 'most popular features' votes are just some of the
+possibilities. In addition, providers can enable authentication to restrict
+access to some of the features, require user registration etc.</p>
+<h3 align="left">Calling Eclipse from a Web page</h3>
+<p align="left">There are many different ways to extract the encoded
+information. A very simple one is to use Java Script function as shown below:</p>
+<blockquote>
+  <pre align="left">&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+
+function getArgs() {
+   var args = new Object();
+   var query = location.search.substring(1);
+   var pairs = query.split(&quot;&amp;&quot;);
+   for (var i=0; i&lt;pairs.length; i++) {
+      var pos = pairs[i].indexOf('=');
+      if (pos == -1) continue;
+      var argname = pairs[i].substring(0, pos);
+      var value = pairs[i].substring(pos+1);
+      args[argname] = unescape(value);
+   }
+   return args;
+}
+&lt;/SCRIPT&gt;</pre>
+</blockquote>
+<p align="left">The function above parses the URL of the current page and
+returns query arguments as an array.</p>
+<p align="left">The role of the callback URL is to allow Web pages to return
+control back to Eclipse. Once user selected a feature to install, it must return
+back to Eclipse to complete it. The role of Web-triggered update is not to make
+update sites obsolete: they are still needed, but in this scenario they are used
+simply as a location where features are physically stored. Web page must at some
+point call back into Eclipse and pass the update site URL, as well as the
+selected feature ID and version. This information is encoded by using the
+original callback URL and adding the arguments, thus forming a query.</p>
+<p>The arguments for the callback query are:</p>
+<ul>
+  <li><b>server</b> - expects a URL of the Eclipse Update site (the one with
+    site.xml) where feature and plug-in archives are placed. This URL can be the
+    same as the web site, or can be a completely different server (you probably
+    had experience with download sites in which the actual data servers are
+    different from the front end and use different protocols, e.g. FTP).
+  <li><b>feature</b> - expects a string in the form &lt;id&gt;_&lt;version&gt;
+    where 'id' is the feature identifier and 'version' is its version. These
+    values will be used to locate the feature on the update server.
+  <li><b>backURL</b> - passes the URL of the page itself that will be used in
+    Eclipse servlet to feed the 'Go Back' links (those that will get you back to
+    this page)</li>
+</ul>
+<p align="left">Calling back to Eclipse should be done when users finished all
+their selections in the Web page and all that is left is to press some kind of
+'Download' button or hyperlink. A simple implementation of this capability would
+be:</p>
+<div align="left">
+  <blockquote>
+    <pre align="left">&lt;input type=&quot;button&quot; 	name=&quot;Download&quot; value=&quot;Download&quot; 
+			onClick=&quot;javascript:download('com.example.root', '1.0.0')&quot;&gt;</pre>
+  </blockquote>
+</div>
+<p>In the code above, feature Id and versions are hard-coded in the button tag.</p>
+<p>The download function can be implemented as follows:</p>
+<blockquote>
+  <pre>function download(id, version) {
+   var args = getArgs();
+   if (args.updateURL) {
+      var updateURL = args.updateURL;
+      var callback = updateURL+&quot;?server=
+      &quot;+escape(&quot;<a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-update-home/optionalSite/index.html">http://acme.com/updateSite</a>/&quot;)+
+      &quot;&amp;feature=&quot;+escape(id+'_'+version)+&quot;&amp;backURL=&quot;+escape(location);
+      location = callback;
+   }
+}</pre>
+</blockquote>
+<p>In the JavaScript function above, the callback URL that was encoded in the
+page URL from the beginning is used to form the query. Once the query is
+created, the browser is asked to open it. This step will cause the browser to
+call Eclipse servlet, which will process the query, connect to the provider
+update site (in this case &quot;http://acme.com/updateSite/&quot;) and locate
+the feature with the provided id and version. If everything goes well, Eclipse
+window will be brought to the top and the familiar install wizard will open. At
+that point, you will be back in Eclipse and can finish the installation as
+usual.</p>
+<p>It is important to point out that having encoded callback URL is crucial for
+the whole mechanism. If the page that contains the 'download' link or button is
+several levels deep in the web site map, the root web page (the one launched
+from update manager) has to ensure the callback URL passed down to all pages
+opened from within that page. It can be done in various ways (direct encoding in
+the page, saving a transient cookie, storing it in a servlet that serves the
+pages from the site etc.).</p>
+<p>&nbsp;</p>
+<p><a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. and others 2000, 2002." BORDER=0 height=12 width=250></a>
+</p>
+</body>
+</html>

@@ -38,8 +38,8 @@ the following structure
 <h2><a name="manifest"></a>Feature manifest</h2>
 <p>The feature manifest format is defined by the following dtd:
 <p><tt>&lt;?xml encoding="ISO-8859-1"?></tt>
-<p><tt>&lt;!ELEMENT feature (install-handler?, description?, copyright?,
-license?, url?, includes*, requires?, plugin*, data*)></tt>
+<p><tt>&lt;!ELEMENT feature (install-handler? | description? | copyright? |
+license? | url? | includes* | requires? | plugin* | data*)></tt>
 <br><tt>&lt;!ATTLIST feature</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #REQUIRED</tt>
@@ -62,7 +62,11 @@ CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; primary&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-(true | false) "false"</tt>
+(true | false) "false"<br>
+&nbsp;&nbsp;&nbsp; exclusive&nbsp;&nbsp;&nbsp;&nbsp; (true | false)
+&quot;false&quot;<br>
+&nbsp;&nbsp;&nbsp; plugin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA
+#IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; application&nbsp;&nbsp; CDATA #IMPLIED</tt>
 <br><tt>></tt>
 <p><tt>&lt;!ELEMENT install-handler EMPTY></tt>
@@ -96,7 +100,9 @@ CDATA #REQUIRED</tt>
 CDATA #IMPLIED</tt>
 <br><tt>></tt>
 <p><tt>&lt;!ELEMENT discovery EMPTY></tt>
-<br><tt>&lt;!ATTLIST discovery</tt>
+<br><tt>&lt;!ATTLIST discovery<br>
+&nbsp;&nbsp;&nbsp; type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(web | update) &quot;update&quot;</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #REQUIRED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -104,20 +110,34 @@ CDATA #IMPLIED</tt>
 <br><tt>></tt>
 <p><tt>&lt;!ELEMENT includes EMPTY></tt>
 <br><tt>&lt;!ATTLIST includes</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp;&nbsp;&nbsp; id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #REQUIRED</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-CDATA #REQUIRED</tt>
-<br><tt>></tt>
+<br><tt>&nbsp;&nbsp;&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED<br>
+&nbsp;&nbsp;&nbsp;
+name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #IMPLIED<br>
+&nbsp;&nbsp;&nbsp;
+optional&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true | false)
+&quot;false&quot;<br>
+&nbsp;&nbsp;&nbsp; search-location&nbsp;&nbsp; (root | self | both)
+&quot;root&quot;<br>
+&nbsp;&nbsp;&nbsp;
+match&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+(perfect | equivalent | compatible | greaterOrEqual) &quot;compatible&quot;<br>
+></tt>
 <p><tt>&lt;!ELEMENT requires (import+)></tt>
 <p><tt>&lt;!ELEMENT import EMPTY></tt>
 <br><tt>&lt;!ATTLIST import</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; plugin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-CDATA #REQUIRED</tt>
+CDATA #IMPLIED<br>
+&nbsp;&nbsp;&nbsp; feature&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; match&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-(perfect | equivalent | compatible | greaterOrEqual) "compatible"</tt>
+(perfect | equivalent | compatible | greaterOrEqual) "compatible"<br>
+&nbsp;&nbsp;&nbsp; patch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (true |
+false) &quot;false&quot;</tt>
 <br><tt>></tt>
 <p><tt>&lt;!ELEMENT plugin EMPTY></tt>
 <br><tt>&lt;!ATTLIST plugin</tt>
@@ -229,6 +249,17 @@ application - optional identifier of the Eclipse application that is to
 be used during startup when the declaring feature is the primary feature. The application identifier must represent a valid application
 registered in the <tt>org.eclipse.core.runtime.applications</tt> extension
 point. Default is <tt>org.eclipse.ui.workbench</tt>.</li>
+
+<li>
+plugin (new in 2.1) - optional identifier that represents the id of the plug-in
+listed in the feature that is used to carry attribution information for the
+feature (images, translations, splash screens in case of primary feature etc.).
+If not specified, the assumption will be made the the attribution plug-in has
+the same id as the feature.</li>
+
+<li>
+exclusive (new in 2.1) - optional flag that, if &quot;true&quot;, indicates that
+the feature cannot be installed in a group with other features.</li>
 </ul>
 
 <li>
@@ -324,7 +355,9 @@ label - displayable label (name) for the referenced site</li>
 &lt;discovery> - URL to go to for new features. In general, a provider
 can use this element to reference its own site(s), or site(s) of partners
 that offer complementary features. Eclipse uses this element simply as
-a way to distribute new site URLs to the clients</li>
+a way to distribute new site URLs to the clients. Sites that belong to root
+features (at the top of the hierarchy) typically appear in &quot;Sites to
+Visit&quot; in Update Manager.</li>
 
 <ul>
 <li>
@@ -332,6 +365,12 @@ url - actual URL</li>
 
 <li>
 label - displayable label (name) for the referenced site</li>
+
+<li>
+type (new in 2.1) - by default, discovery sites are assumed to be update sites
+(&quot;update&quot;). By setting the value of this attribute to &quot;web&quot;,
+it is possible to indicate to Eclipse that the URL should be treated as a
+regular Web hyperlink that can be directly displayed in a suitable browser.</li>
 </ul>
 </ul>
 
@@ -342,10 +381,39 @@ update site as this feature</li>
 
 <ul>
 <li>
-&lt;id> - required nested feature identifier</li>
+id - required nested feature identifier</li>
 
 <li>
-&lt;version> - required nested feature version</li>
+version - required nested feature version</li>
+
+<li>
+optional (new in 2.1) - it is possible to include a feature as optional when
+this attribute is &quot;true&quot;. Users are allowed to not install optional
+features, disable them if they are installed, and install them later. A missing
+optional feature is not treated as an error.</li>
+
+<li>
+name (new in 2.1) - if an optional feature is missing, Eclipse cannot render its
+name properly. This attribute can be used as a 'place holder' to allow Eclipse
+to render the name of the optional feature when it is not installed.</li>
+
+<li>
+match (new in 2.1) - if a feature is included with match=&quot;perfect&quot;
+(the default), the exact version must exist in order to satisfy the reference.
+In contrast, other values (&quot;compatible&quot;, &quot;equivalent&quot; etc.)
+allow some flexibility. Setting this attribute to something other than
+&quot;perfect&quot; is crucial if you want to allow branches to be updated or to
+be patched.</li>
+
+<li>
+search-location (new in 2.1) - if match is set to something else than
+&quot;perfect&quot;, an included feature can be updated within the limits set by
+the &quot;match&quot; attribute. By default, search location is &quot;root&quot;
+which means that URL specified in the &quot;update&quot; element within the
+&quot;url&quot; element of the parent will be considered. If an included feature
+has its own &quot;update&quot; element defined, it will be ignored by default.
+If the parent feature wants to allow the child to be updated from its own
+location, it can set this attribute to &quot;both&quot; or &quot;self&quot;.</li>
 </ul>
 
 <li>
@@ -360,10 +428,18 @@ of the &lt;import> specification in plugin.xml</li>
 
 <ul>
 <li>
-plugin - identifier of dependent plug-in</li>
+plugin - identifier of dependent plug-in, if plug-in is used to express
+dependency</li>
 
 <li>
-version - optional plug-in version specification</li>
+feature (new in 2.1) - identifier of dependent feature, if feature is used to
+express dependency. <b>Either plugin or feature attribute must be set, but not
+both. </b>If &quot;patch&quot; is &quot;true&quot;, feature attribute must be
+used.</li>
+
+<li>
+version - optional plug-in version specification. If &quot;patch&quot; is
+&quot;true&quot;, version must be set.</li>
 
 <li>
 match - optional matching rule. Valid values and processing are as follows:</li>
@@ -375,7 +451,8 @@ is ignored.</li>
 
 <li>
 <b><i>perfect</i></b> - dependent plug-in version must match exactly the
-specified version.</li>
+specified version. If &quot;patch&quot; is &quot;true&quot;, &quot;perfect&quot;
+is assumed and other values cannot be set.</li>
 
 <li>
 <b><i>equivalent</i></b> - dependent plug-in version must be at least at
@@ -391,6 +468,23 @@ version level must equal the specified version).</li>
 <b><i>greaterOrEqual</i></b> - dependent plug-in version must be at least
 at the version specified, or at a higher service, minor or major level.</li>
 </ul>
+
+<li>
+patch (new in 2.1) - if &quot;true&quot;, this constraint declares the enclosing
+feature to be a patch for the referenced feature. Certain rules must be followed
+when this attribute is set:
+<ul>
+  <li>feature attribute must be used to express patch dependency</li>
+  <li>version attribute must be set</li>
+  <li>match attribute should not be set and &quot;perfect&quot; value will be
+    assumed.</li>
+</ul>
+<p>A patch is a feature that carries newer versions of features in the hierarchy
+of the feature it is patching. A patch carries these new feature version by
+inclusion. Patched feature must be ready to accept patches by including its
+children using &quot;match&quot; attribute that is set to something else than
+&quot;perfect&quot;. This is crucial since it will allow the patched feature to
+pick up newer versions of its children after the patch has been installed.</li>
 </ul>
 </ul>
 
