@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M8<br>
-  Last revised February 12, 2004</p>
+  Last revised February 26, 2004</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -971,17 +971,21 @@ cases where assumptions made in current plug-ins are invalid.</p>
 which they need access is available via <tt>getResource()</tt> (and is on the
 classpath) or use the relevant API for accessing the contents of a plug-in
 (e.g., <tt>Bundle.getEntry(String)</tt>).</p>
-<h3>BootLoader API methods deleted</h3>
+<h3>BootLoader API methods moved/deleted</h3>
 <p><b>Who is affected:</b> Plug-ins which use certain API methods from the class
 <tt>org.eclipse.core.boot.BootLoader</tt>.</p>
-<p><b>Description:</b> Methods such as getRunnable(), startup(), shutdown() and 
-  run() were removed from the BootLoader class (now supplied in the compatibility 
-  layer). This API is the interface between the main() in startup.jar and the 
-  OSGi framework/Eclipse runtime. With the restructuring of the runtime, these 
-  interactions are no longer relevant.</p>
-<p><b>Action required:</b> In general this API is used by very few people. In 
-  the rare case that it is, users should reconsider their usecases and use some 
-  of the alternatives provided in the new structure.</p>
+<p><b>Description:</b> Methods such as startup(), shutdown() and 
+  run() were moved from the BootLoader class (now supplied in the compatibility
+  layer) to EclipseStarter which is part of the OSGi framework (i.e., org.eclipse.osgi).
+  This API is the interface between the main() in startup.jar and the OSGi framework/Eclipse
+  runtime. Given the
+  restructuring
+  of the runtime, these methods could not be left on BootLoader.</p>
+<p> The method BootLoader.getRunnable() has been removed as the runtime  can
+  no longer support the acquisition of individual applications. Rather users
+  should indicate the application of interest when they start the platform.</p>
+<p><b>Action required:</b> In general this API is used by very few people. In
+  the rare case that it is, users can adapt by using the new methods on EclipseStarter.</p>
 <h3>Re-exporting runtime API</h3>
 <p><b>Who is affected:</b> Plug-ins which expose API that includes elements from
 changed runtime API.</p>
