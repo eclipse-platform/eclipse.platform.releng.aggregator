@@ -20,21 +20,26 @@ public class Sample {
 	Map fProperties;
 	DataPoint[] fDataPoints;
 	String fId;
+	
 	public Sample(Map properties, DataPoint[] dataPoints) {
 		fProperties= properties;
 		fDataPoints= dataPoints;
 	}
+	
 	public String getProperty(String name) {
 		return (String) fProperties.get(name);
 	}
+	
 	public DataPoint[] getDataPoints() {
 		DataPoint[] dataPoints= new DataPoint[fDataPoints.length];
 		System.arraycopy(fDataPoints, 0, dataPoints, 0, fDataPoints.length);
 		return dataPoints;
 	}
+	
 	public String getId() {
 		return fId;
 	}
+	
 	public String toString() {
 		return "MeteringSession [id= " + fId + ", #datapoints: " + fDataPoints.length + "]";
 	}

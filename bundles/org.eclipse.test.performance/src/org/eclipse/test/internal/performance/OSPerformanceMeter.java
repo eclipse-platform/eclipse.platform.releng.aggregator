@@ -27,9 +27,6 @@ import org.eclipse.test.internal.performance.db.DB;
  */
 public class OSPerformanceMeter extends InternalPerformanceMeter {
 
-	/**
-	 * The perfmsr plug-in's performance monitor
-	 */
 	private PerformanceMonitor fPerformanceMonitor;
 	
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
@@ -63,6 +60,10 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
 	 */
 	public void commit() {
+	    
+	    if (false) {
+		    DB.store(fScenarioId, getSample());
+	    }
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 			printSample();

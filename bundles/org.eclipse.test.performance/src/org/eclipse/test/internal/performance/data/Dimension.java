@@ -51,6 +51,10 @@ public class Dimension {
 		return DimensionMessages.getString(fId);
 	}
 	
+    public int getId() {
+        return fId;
+    }
+	
 	public Unit getUnit() {
 		return fUnit;
 	}
@@ -64,13 +68,13 @@ public class Dimension {
 	}
 
 	public DisplayValue getDisplayValue(Scalar scalar) {
-		return fUnit.getDisplayValue((double) scalar.getMagnitude() / fMultiplier);
+		return fUnit.getDisplayValue(scalar.getMagnitude(), fMultiplier);
 	}
 	
 	public DisplayValue getDisplayValue(double scalar) {
-		return fUnit.getDisplayValue(scalar / fMultiplier);
+		return fUnit.getDisplayValue(scalar);
 	}
-	
+
 //	/**
 //	 * Answer a formatted string for the elapsed time (minutes, hours or days) 
 //	 * that is appropriate for the scale of the time.

@@ -17,6 +17,11 @@ import java.text.NumberFormat;
  * @since 3.1
  */
 public class Unit {
+
+	public static final Unit SECOND= new Unit("s", "second", false);  //$NON-NLS-1$
+	public static final Unit BYTE= new Unit("byte", "byte", true);  //$NON-NLS-1$
+	public static final Unit CARDINAL= new Unit("", "", false);  //$NON-NLS-1$
+
 	private static final int T_DECIMAL= 1000;
 	private static final int T_BINARY= 1024;
 	
@@ -30,6 +35,12 @@ public class Unit {
 	private final boolean fIsBinary;
 	private final int fPrecision= 2;
 	
+	public Unit(String shortName, String fullName, boolean binary) {
+		fShortName= shortName;
+		fFullName= fullName;
+		fIsBinary= binary;
+	}
+	
 	public String getShortName() {
 		return fShortName;
 	}
@@ -37,8 +48,13 @@ public class Unit {
 	public String getFullName() {
 		return fFullName;
 	}
-	
+
+	public DisplayValue getDisplayValue(long magnitudel, int multiplier) {
+	    return getDisplayValue(magnitudel / multiplier);
+	}
+
 	public DisplayValue getDisplayValue(double magnitude) {
+	    
 		int div= fIsBinary ? T_BINARY : T_DECIMAL;
 		boolean negative= magnitude < 0;
 		double mag= Math.abs(magnitude), ratio= mag / div;
@@ -68,20 +84,10 @@ public class Unit {
 	}
 	
 	public DisplayValue getDisplayValue(Scalar scalar) {
-		return getDisplayValue(scalar.getMagnitude());
-	}
-	
-	public Unit(String shortName, String fullName, boolean binary) {
-		fShortName= shortName;
-		fFullName= fullName;
-		fIsBinary= binary;
+		return getDisplayValue(scalar.getMagnitude(), 1);
 	}
 	
 	public String toString() {
 		return "Unit [" + getShortName() + "]";
 	}
-	
-	public static final Unit SECOND= new Unit("s", "second", false);  //$NON-NLS-1$
-	public static final Unit BYTE= new Unit("byte", "byte", true);  //$NON-NLS-1$
-	public static final Unit CARDINAL= new Unit("", "", false);  //$NON-NLS-1$
 }

@@ -136,7 +136,7 @@ public class SQL {
             "create table SCALAR (" +
                 "DATAPOINT_ID int not null," +
                 "DIM_ID int not null," +
-                "VALUE int not null" +
+                "VALUE bigint" +
             ")"
         ); 
         stmt.executeUpdate(
@@ -219,10 +219,10 @@ public class SQL {
         return create(fInsertDimension);        
     }
    
-    void createScalar(int dataPoint_id, int dim_id, int value) throws SQLException {
+    void createScalar(int dataPoint_id, int dim_id, long value) throws SQLException {
         fInsertScalar.setInt(1, dataPoint_id);
         fInsertScalar.setInt(2, dim_id);
-        fInsertScalar.setInt(3, value);
+        fInsertScalar.setLong(3, value);
         create(fInsertScalar);
     }
     

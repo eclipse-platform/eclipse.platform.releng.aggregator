@@ -4,7 +4,7 @@ import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.Unit;
 
 /**
- * Some hard coded measurement id's. The server and the plug need to agreee onwhat these mean.
+ * Some hard coded measurement id's.
  */
 public interface Dimensions {
     
@@ -25,14 +25,14 @@ public interface Dimensions {
 //	Windows:
 //	OS Counters:
     		Dimension
-			COMITTED= new Dimension(7), 		// "Committed"
-    			WORKING_SET_PEAK= new Dimension(8),	// "Working Set Peak"
-    			ELAPSED_PROCESS= new Dimension(9),	// "Elapsed Process"
-    			PAGE_FAULTS= new Dimension(19), 	// "Page Faults"
-    			GDI_OBJECTS= new Dimension(34), 	// "GDI Objects"
-    			USER_OBJECTS= new Dimension(35), 	// "USER Objects"
-    			OPEN_HANDLES= new Dimension(36), 	// "Open Handles"
-    			READ_COUNT= new Dimension(38), 		// "Read Count"
+			COMITTED= new Dimension(7, Unit.BYTE), 		// "Committed"
+    			WORKING_SET_PEAK= new Dimension(8, Unit.BYTE),	// "Working Set Peak"
+    			ELAPSED_PROCESS= new Dimension(9, Unit.SECOND),// "Elapsed Process"
+    			PAGE_FAULTS= new Dimension(19), 				// "Page Faults"
+    			GDI_OBJECTS= new Dimension(34), 				// "GDI Objects"
+    			USER_OBJECTS= new Dimension(35), 				// "USER Objects"
+    			OPEN_HANDLES= new Dimension(36), 				// "Open Handles"
+    			READ_COUNT= new Dimension(38, Unit.BYTE), 		// "Read Count"
     			WRITE_COUNT= new Dimension(39, Unit.BYTE), 	// "Write Count"
     			BYTES_READ= new Dimension(40, Unit.BYTE), 		// "Bytes Read"
     			BYTES_WRITTEN= new Dimension(41, Unit.BYTE); 	// "Bytes Written"

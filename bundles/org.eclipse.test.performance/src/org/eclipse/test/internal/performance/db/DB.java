@@ -13,7 +13,10 @@ package org.eclipse.test.internal.performance.db;
 import java.sql.*;
 import java.util.Properties;
 
+import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.Dimensions;
 import org.eclipse.test.internal.performance.data.Sample;
+import org.eclipse.test.internal.performance.data.Scalar;
 
 public class DB {
     
@@ -120,9 +123,43 @@ public class DB {
         }
     }
     
-    public void store(Sample sample) {
+    public static void store(String scenarioId, Sample sample) {
         
+        if (scenarioId == null || sample == null)
+            return;
         
+        DB db= getDefault();
+        SQL sql= db.getSQL();
+ 
+        if (sql == null)
+            return;
+
+	    try {
+            int config_id= sql.getConfig("burano", "MacOS X");
+            int session_id= sql.addSession("3.1", config_id);
+            int scenario_id= sql.getScenario(scenarioId);
+            int sample_id= sql.createSample(session_id, scenario_id, 0);
+            int draw_id= sql.createDraw(sample_id);
+            int datapoint_id= sql.createDataPoint(draw_id);
+            
+			DataPoint[] dataPoints= sample.getDataPoints();
+			for (int i= 0; i < dataPoints.length; i++) {
+			    DataPoint dp= dataPoints[i];
+			    Scalar[] scalars= dp.getScalars();
+			    for (int j= 0; j < scalars.length; j++) {
+			        Scalar scalar= scalars[j];
+			        long value= scalar.getMagnitude();
+			        int id= scalar.getDimension().getId();
+			        sql.createScalar(datapoint_id, id, value);
+                }
+			}
+            
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            db.disconnect();
+        }
     }
 
     //---- test --------
@@ -135,6 +172,7 @@ public class DB {
             
             SQL sql= db.getSQL();
             
+            /*
             System.out.println("adding to DB");
             int config_id= sql.getConfig("burano", "MacOS X");
             int session_id= sql.addSession("3.1", config_id);
@@ -153,9 +191,9 @@ public class DB {
 	            }
             }
             System.out.println("end adding to DB");
+            */
             
-            
-            ResultSet result= sql.query("burano", "MacOS X", "3.1", "foo.bar.Test.testFoo()", time_id);
+            ResultSet result= sql.query("burano", "MacOS X", "3.1", "aFirstTest", Dimensions.USER_TIME.getId());
             for (int i= 0; result.next(); i++)
                 System.out.println(i + ": " + result.getString(1));
             result.close();
