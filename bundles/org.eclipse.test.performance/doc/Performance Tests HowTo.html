@@ -12,7 +12,7 @@
 <h1>Performance Tests HowTo</h1>
 <p>
 By Christof Marti and Andre Weinand, IBM OTI Labs<br>
-2004/11/4<br>
+2004/11/11<br>
 
 <p>
 The Eclipse performance test plugin (org.eclipse.test.performance)
@@ -321,59 +321,59 @@ delete the old 3.0.0 test plug-in and rename yours to *_3.0.0)</li>
 <br>
 &nbsp;
 <br>
-<h2><a name="cloudscape"></a>Setting up the Cloudscape database</h2>
+<h2><a name="cloudscape"></a>Setting up the Derby database</h2>
 
 Performance tests are only valuable if measured data can be
-monitored over time and compared against reference data. For this
-functionality the Eclipse performance plugin makes use of IBM's <a
- href="http://www-306.ibm.com/software/data/cloudscape/">Cloudscape</a>
-database (which is now becoming the Apache subproject named <a
- href="http://incubator.apache.org/derby/">Derby</a>).<br>
+monitored over time and compared against reference data.
+For this functionality the Eclipse performance plugin makes use of
+the Apache project's <a href="http://incubator.apache.org/derby/">Derby</a>
+database (formerly called 
+<a href="http://www-306.ibm.com/software/data/cloudscape/">Cloudscape</a>).
 </p>
-<p>Cloudscape is a database engine written in Java that can be accessed
-via JDBC. Cloudscape is easily embeddable in Java programs or can run
-as a network server. <br>
+<p>Derby is a database engine written in Java that can be accessed
+via JDBC. Derby is easily embeddable in Java programs or can run
+as a network server.
 </p>
-<p>This section describes how to install Cloudscape and how to
-configure
-the performance test plugin to use Cloudscape.
+<p>This section describes how to install Derby and how to
+configure the performance test plugin to use Derby.
 
-<h3>Getting and installing Cloudscape</h3>
+<h3>Getting and installing Derby</h3>
 
-The performance infrastructure does not include Cloudscape. If you want to leverage Cloudscape
+The performance infrastructure does not include Derby.
+If you want to leverage Derby
 you need to download and install it.
 
 <p>
-The performance plugin has an optional prereq for a "Cloudspace"
+The performance plugin has an optional prereq for a "org.apche.derby"
 library project. Since it is optional, you won't see any compile time
 errors when loading the performance plugin from the Eclipse repository
-and the Cloudscape project is not available in your workspace. However
+and the Derby project is not available in your workspace. However
 you'll see runtime errors when running the tests and trying to access
 the database.<br>
 
 <p>
 If you have access to the following repository you can get the
-"Cloudscape" library project from there:
+org.apache.derby library project from there:
 <pre>
   :pserver:anonymous@ottcvs1.ott.oti.com:/home/cvs/zrheclipse
 </pre>
-Otherwise get Cloudscape from
+Otherwise get Derby from
 <a href="http://www-106.ibm.com/developerworks/db2/library/techarticle/dm-0408cline/index.html">here</a>.
 Unpack the archive to any directory.
 <br>
-To create a library project for Cloudscape, open the Java project
-wizard and enter "Cloudscape" as the project's name. Go to the next
+To create a library project for Derby, open the Java project
+wizard and enter "org.eclipse.derby" as the project's name. Go to the next
 page and select the "Libraries" tab. Remove the JRE and add the five
-jar-files from Cloudscape's lib directory via the "Add External JARs"
+jar-files () from Derby's lib directory via the "Add External JARs"
 button. Switch to the "Order and Export" tab and check all five
 libraries. Press "Finish". Create a new file "plugin.xml" inside the
-Cloudscape project and paste the following contents into it:<br>
+Derby project and paste the following contents into it:<br>
 <pre>
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;?eclipse version="3.0"?&gt;
 &lt;plugin
-&nbsp;&nbsp; id="Cloudscape"
-&nbsp;&nbsp; name="Cloudscape"
+&nbsp;&nbsp; id="org.apache.derby"
+&nbsp;&nbsp; name="Derby"
 &nbsp;&nbsp; version="1.0.0"&gt;
 &nbsp;&nbsp; &lt;runtime&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="db2jcc.jar"&gt;
@@ -382,13 +382,13 @@ Cloudscape project and paste the following contents into it:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="db2jcc_license_c.jar"&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;export name="*"/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/library&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="cstools.jar"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="derby.jar"&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;export name="*"/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/library&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="csnet.jar"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="derbynet.jar"&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;export name="*"/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/library&gt;
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="cs.jar"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;library name="derbytools.jar"&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;export name="*"/&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/library&gt;
 &nbsp;&nbsp; &lt;/runtime&gt;
@@ -400,28 +400,28 @@ In addition you'll need to load the performance plugin
 on Windows the associated fragment (org.eclipse.test.performance.win32).
 
 
-<h3>Configuring the performance plugin for using Cloudscape</h3>
+<h3>Configuring the performance plugin for using Derby</h3>
 
 The performance test plugin is configured via the three Java properties
 eclipse.perf.dbloc, eclipse.perf.config, and eclipse.perf.assertAgainst.
 <p>
-The eclipse.perf.dbloc specifies where the Cloudscape DB is located.
+The eclipse.perf.dbloc specifies where the Derby DB is located.
 If no value is given
 <pre>
 	-Declipse.perf.dbloc=
 </pre>
-Cloudscape runs in embedded mode (not as a separate server)
+Derby runs in embedded mode (not as a separate server)
 and the DB will live in your home directory.
 <p>
-If an absolute or relative path is given, Cloudscape uses or creates
+If an absolute or relative path is given, Derby uses or creates
 the DB in that location. E.g. with (Linux and MacOS X)
 <pre>
-	-Declipse.perf.dbloc=/tmp/cloudscape
+	-Declipse.perf.dbloc=/tmp/derby
 </pre>
-Cloudscape runs in embedded mode and creates the database under
-/tmp/cloudscape.
+Derby runs in embedded mode and creates the database under
+/tmp/derby.
 <p>
-To connect to a cloudscape server running locally or remotely use the
+To connect to a Derby server running locally (or remotely) use the
 following:
 <pre>
 	-Declipse.perf.dbloc=net://<i>tcp-ip address</i>
@@ -538,21 +538,21 @@ System Time:       1.02 s [285 ms]  1.06 s [345 ms]         981 ms         1.01 
 </pre>
 
 
-<h3>How to setup a Cloudscape server (on Linux and MacOS X)</h3>
+<h3>How to setup a Derby server (on Linux and MacOS X)</h3>
 
 <ul>
 
-<li>Either get Cloudscape from the repository or from <a
+<li>Either get Derby from the repository or from <a
  href="http://www-106.ibm.com/developerworks/db2/library/techarticle/dm-0408cline/index.html">here</a>.
 </li>
 
-<li>Get the (Bourne) shell script "cs.sh" from the scripts folder of <code>org.eclipse.test.performance</code>
+<li>Get the (Bourne) shell script "derby.sh" from the scripts folder of <code>org.eclipse.test.performance</code>
 and install it on the server
-(rename it to "cs" and make it executable; if you've checked out the
+(rename it to "derby" and make it executable; if you've checked out the
 file on Windows and copied it to Linux,
 it might be necessary to convert line delimiters with the dos2unix
 tool).
-The script simplifies the usage of the Cloudscape tools - especially
+The script simplifies the usage of the Derby tools - especially
 starting and stopping the server - because
 it sets the correct classpath and some important properties.
 </li>
@@ -560,16 +560,16 @@ it sets the correct classpath and some important properties.
 <li>Edit the script and adapt the variables <code>CSLIB</code>, <code>DBROOT</code>,
 and <code>JAVA</code>
 to your installation. <code>CSLIB</code> should point to the directory
-containing the Cloudscape jars.
-If you've used the Cloudscape installer, then this is the lib directory
+containing the Derby jars.
+If you've used the Derby installer, then this is the lib directory
 inside the Cloudscape 10.0 directory.
-If you are using the Cloudscape project from the repository, then this
+If you are using the org.apache.derby project from the repository, then this
 is just the project folder.
 </li>
 
 <li>in a Shell execute
 <pre>
-	cs start &amp;
+	derby start &amp;
 </pre>
 to launch the server in background. The server will send this to
 stdout:
@@ -581,7 +581,7 @@ to the console.
 
 <li>stop the server with
 <pre>
-	cs stop
+	derby stop
 </pre>
 </li>
 </ul>
