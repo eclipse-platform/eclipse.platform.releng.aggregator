@@ -161,6 +161,7 @@ public class ProjectComparePage extends WizardPage{
 	 */
 	public void dispose() {
 		super.dispose();
+		input.getParticipant().dispose();
 		input.dispose();
 	}
 	
