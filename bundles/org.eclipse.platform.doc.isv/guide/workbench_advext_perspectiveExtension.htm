@@ -20,8 +20,8 @@ org.eclipse.ui.perspectiveExtensions</H3>
  extension point.</P>
 
 
-<P >The concepts discussed above for action sets, wizard entries, view layout,
-view shortcuts, and perspective shortcuts also apply when plug-ins contribute to
+<P >The contributions that can be defined for new perspectives (action sets, wizard entries, view layout,
+view shortcuts, and perspective shortcuts) also apply when plug-ins contribute to
 an existing perspective.&nbsp; One important difference is that these items are
 specified in the <b>plugin.xml</b> markup instead of
 configuring them into an
@@ -34,52 +34,68 @@ perspective.</P>
 
 
 <font color='#4444CC'><pre>
-   &lt;extension 
-      point=&quot;org.eclipse.ui.perspectiveExtensions&quot;&gt;
-      &lt;perspectiveExtension 
-         targetID=&quot;org.eclipse.debug.ui.DebugPerspective&quot;&gt;
-         &lt;actionSet id=&quot;org.eclipse.jdt.ui.JavaActionSet&quot;/&gt;
-         &lt;view
-            id=&quot;org.eclipse.jdt.debug.ui.DisplayView&quot; 
-            relative=&quot;org.eclipse.debug.ui.InspectorView&quot; 
-            relationship=&quot;stack&quot;/&gt;
-      &lt;/perspectiveExtension&gt;
-   &lt;/extension&gt;
-</pre></font>
+&lt;extension point=&quot;org.eclipse.ui.perspectiveExtensions&quot;&gt;
+  &lt;perspectiveExtension 
+	<b>targetID</b>=&quot;org.eclipse.debug.ui.DebugPerspective&quot;&gt;
+	&lt;actionSet id=&quot;org.eclipse.jdt.debug.ui.JDTDebugActionSet&quot;/&gt;
+    	&lt;view id=&quot;org.eclipse.jdt.debug.ui.DisplayView&quot; 
+        	relative=&quot;org.eclipse.debug.ui.ExpressionView&quot; 
+    		relationship=&quot;stack&quot;/&gt;	
+        &lt;view id=&quot;org.eclipse.jdt.ui.PackageExplorer&quot; 
+                relative=&quot;org.eclipse.debug.ui.DebugView&quot; 
+                relationship=&quot;stack&quot;
+                visible=&quot;false&quot;/&gt;
+        &lt;view id=&quot;org.eclipse.jdt.ui.TypeHierarchy&quot; 
+                relative=&quot;org.eclipse.debug.ui.DebugView&quot; 
+                relationship=&quot;stack&quot;
+                visible=&quot;false&quot;/&gt;
+        &lt;view id=&quot;org.eclipse.search.SearchResultView&quot; 
+                relative=&quot;org.eclipse.debug.ui.ConsoleView&quot; 
+                relationship=&quot;stack&quot;
+                visible=&quot;false&quot;/&gt; 
+    	&lt;viewShortcut id=&quot;org.eclipse.jdt.debug.ui.DisplayView&quot;/&gt;
+  &lt;/perspectiveExtension&gt; 
+&lt;/extension&gt;</pre></font>
 
 
 <P >The <b>targetID</b> is the id of the perspective
-that the extension is contributing to.&nbsp; Specifying a <b>perspectiveShortcut</b>
-indicates that another perspective (specified by <b>id</b>)
-should be added to the <b>Perspective-&gt;Open </b>menu of the target
-perspective.&nbsp; This is analogous to calling <b>IPageLayout.addPerspectiveShortcut</b>
-in the original perspective definition in the <b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>.&nbsp;
-The <b>actionSet</b> parameter identifies the <b>id</b>
+that the extension is contributing to.&nbsp; The <b>actionSet</b> parameter identifies the <b>id</b>
 of a previously declared action set that should be added to the target
 perspective.&nbsp; This is analogous to using<b>
 IPageLayout.addActionSet</b> in the&nbsp; <b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>.</P>
 
 
 <P >Contributing a view to a perspective is a little more involved, since the
-perspective page layout information must be declared.&nbsp; In addition to
+perspective page layout information must be declared.&nbsp; The <b>visible</b>
+attribute controls whether the view is initially visible when the perspective is
+opened.&nbsp; In addition to
 supplying the <b>id</b> of the contributed view, the id
 of a view that already exists in the perspective ( a <b>relative</b>
 view) must be specified as a reference point for placing the new view.&nbsp; The
 <b>relationship</b> parameter specifies the layout
 relationship between the new view and the <b>relative</b>
-view.&nbsp; The value <b>stack</b> indicates that the
-view will be stacked with the relative view in a folder.&nbsp;&nbsp;</P>
+view.&nbsp;&nbsp;</P>
 
 
-<P >You can also specify <b>left</b>, <b>right</b>,
-<b>top</b>, or <b>bottom</b>,
-which indicates that the new view will be placed beside the <b>relative</b>
-view.&nbsp; In this case, a ratio between 0.0 and 1.0 must be defined, which
+<ul>
+  <li> <b>stack</b> indicates that the
+view will be stacked with the relative view in a folder</li>
+  <li><b>fast</b> indicates that the view will be shown as a fast
+    view&nbsp;&nbsp;</li>
+  <li> <b>left</b>, <b>right</b>,
+<b>top</b>, or <b>bottom</b> indicate that the new view will be placed beside the <b>relative</b>
+view.&nbsp; In this case, a <b> ratio</b> between 0.0 and 1.0 must be defined, which
 indicates the percentage of area in the <b>relative</b>
-view that will be allocated to the new view.</P>
+view that will be allocated to the new view.&nbsp;&nbsp;</li>
+</ul>
 
 
-<P >Plug-ins can also add view shortcuts and new wizard shortcuts in a similar
+<P >Specifying a <b>perspectiveShortcut</b>
+indicates that another perspective (specified by <b>id</b>)
+should be added to the <b>Window-&gt;Open Perspective... </b>menu of the target
+perspective.&nbsp; This is analogous to calling <b>IPageLayout.addPerspectiveShortcut</b>
+in the original perspective definition in the <b><a href="../reference/api/org/eclipse/ui/IPerspectiveFactory.html">IPerspectiveFactory</a></b>.&nbsp;
+Plug-ins can also add view shortcuts and new wizard shortcuts in a similar
 manner.&nbsp; See <b><a href="../reference/extension-points/org_eclipse_ui_perspectiveExtensions.html">org.eclipse.ui.perspectiveExtensions</a></b>
 for a complete definition of the extension point.</P>
 
