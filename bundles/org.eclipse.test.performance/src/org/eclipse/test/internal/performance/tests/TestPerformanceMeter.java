@@ -45,7 +45,7 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
 		fStartTime= System.currentTimeMillis();
 	}
 		
-    public void addPair(Dim dimension, long start, long end) {
+    void addPair(Dim dimension, long start, long end) {
 	    fStart.put(dimension, new Scalar(dimension, start));        
 	    fStop.put(dimension, new Scalar(dimension, end));        
     }
