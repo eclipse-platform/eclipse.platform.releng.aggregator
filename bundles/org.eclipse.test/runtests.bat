@@ -26,7 +26,7 @@ REM Install Eclipse plugins and startup.jar required to run Ant headless
 REM
 REM ****************************************************************
 
-unzip -qq -o -C eclipse-SDK-*.zip */startup.jar */plugins/org.eclipse.ant.core* */plugins/org.apache.ant* */plugins/org.apache.xerces* */plugins/org.eclipse.core.boot* */plugins/org.eclipse.core.runtime* */plugins/org.junit*
+unzip -qq -o eclipse-SDK-*.zip
 unzip -qq -o -C eclipse-junit-tests*.zip */plugins/org.eclipse.test*
 
 
