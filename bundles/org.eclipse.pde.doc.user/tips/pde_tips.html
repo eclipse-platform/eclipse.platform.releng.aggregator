@@ -1,0 +1,105 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>PDE Tips and Tricks</title>
+</head>
+
+<body>
+
+<h2>PDE Tips and Tricks</h2>
+<p>[This section should make interesting bathroom reading for an end user of
+Eclipse 2.1. It should give them bits of advice on how to use Eclipse
+effectively. It should stay away for things that a user would naturally discover
+while using Eclipse, and instead focus on high-value things that they might not
+have noticed. It also differs in tone from the &quot;New for 2.1&quot; section
+in that it deals with anything in 2.1, not just the new stuff. Each item should
+stand by itself (as they would have to if we had a &quot;Tip of the Day&quot;
+facility).]</p>
+<p>[This section needs work. The material here is lifted from the M2 through M5
+&quot;New and Noteworthy&quot; bulletins. Some of the items might make good Tips
+and Tricks.]</p>
+<table border="0" cellpadding="10" cellspacing="0" width="500">
+  <tr>
+    <td colspan="2" valign="top">
+      <hr>
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" align="right"><b>Support for feature-based self-hosting</b></td>
+    <td valign="top" align="left">The current method of self-hosting in Eclipse
+      is plug-in-based. PDE launches a second run-time workbench instance by
+      passing an array of plug-ins that it should load. A regular Eclipse
+      product is feature-based: during startup, it checks all the features that
+      should be active, computes plug-ins that belong to those features, and
+      passes the result for loading.
+      <p>This difference in behavior makes it complicated to self-host in
+      scenarios where a full startup that involves features is required. PDE now
+      supports this scenario if care is taken with the setup:</p>
+      <ol>
+        <li>The workspace needs to be &lt;work-area&gt;/plugins.</li>
+        <li>Features must be imported into the workspace using the new 'Feature
+          Import' wizard (they will be created in &lt;work-area&gt;/features).</li>
+        <li>All plug-ins must be in the workspace (either in source or imported
+          as binary projects).</li>
+        <li>When launching, Run-time Workbench launcher must be configured to
+          use features (in Plug-ins and Fragments tab).</li>
+      </ol>
+      <p>If all these conditions are met, the runtime Eclipse instance will be
+      launched in a way that is the closest possible approximation of a normal
+      Eclipse startup. This facilitates testing About dialogs and other aspects
+      that may depend on the set of installed features.</td>
+  </tr>
+  <tr>
+    <td width="30%" valign="top" align="right"><b>Plug-in dependency extent</b></td>
+    <td width="70%" valign="top" align="left">You can now discover the extent to
+      which one plug-in depends on another. The <b>Compute Dependency Extent </b>operation
+      found on the context menu in several contexts (including manifest file
+      Dependencies page and Dependencies view) performs a combined Java and
+      plug-in search to find all external types and extension points referenced
+      by the plug-in. When a type is selected in the Search results view, the <b>References
+      in <i>MyPlugIn</i></b> action in the context menu searches for the places
+      in the plug-in where the selected type is referenced.&nbsp;
+      <p>The dependency extent facility is useful for identifying cases of extra
+      required plug-ins (0 types found), and aiding code refactoring between
+      plug-ins.</td>
+  </tr>
+  <tr>
+    <td width="30%" valign="top" align="right"><b>Plug-in dependencies view</b></td>
+    <td width="70%" valign="top" align="left">A new view can be opened by
+      selecting a plug-in manifest file (<code> plugin.xml</code>) and choosing <b>Open
+      Dependencies</b> from the context menu. This view allows you to browse the
+      plug-ins it requires, the ones they require, and so on.</td>
+  </tr>
+  <tr>
+    <td width="30%" valign="top" align="right"><b>Searching other plug-ins</b></td>
+    <td width="70%" valign="top" align="left">Select a plug-in in the Plug-ins
+      view and choose <b>Add to Java Search</b> from the context menu to include
+      the plug-in's JAR libraries in Java searches. This is handy for remaining
+      aware of other plug-ins that depend on ones you're working on.</td>
+  </tr>
+  <tr>
+    <td width="30%" valign="top" align="right"><b>Plug-in searches</b></td>
+    <td width="70%" valign="top" align="left">PDE now contributes a Plug-in
+      Search tab on the Search dialog so that you can search for plug-ins,
+      fragments, and extension points.</td>
+  </tr>
+  <tr>
+    <td width="30%" valign="top" align="right"><b>Plug-ins should declare
+      package prefixes</b></td>
+    <td width="70%" valign="top" align="left">A significant (10-15%) speed
+      increase in the time to load a plug-in's classes can be obtained simply by
+      declaring the package name prefixes found in that plug-in's runtime
+      library JARs. This is done in the new Package Prefixes section of the
+      Runtime page in the PDE plug-in manifest editor. (Further information <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/docs/package-prefixes/prefixes.html">here</a>.)
+      <p align="center"><img border="0" src="images/package-prefix.gif" width="417" height="167"></td>
+  </tr>
+</table>
+
+</body>
+
+</html>
