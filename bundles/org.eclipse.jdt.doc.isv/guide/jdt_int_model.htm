@@ -142,7 +142,8 @@
   When you want to create Java elements from a generic resource the class <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b> 
   JavaCore</b></a> is the best starting point. The following code snippet shows 
   how to get Java elements from their corresponding resources.</p>
-<font color="#4444cc"> <pre>    private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) {
+<font color="#4444cc"> <pre>    
+        private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) {
         IJavaProject myJavaProject= JavaCore.create(myProject);
         if (myJavaProject == null)
             // the project is not configured for Java (has no Java nature)
@@ -155,10 +156,16 @@
         // .jar (package fragment root)
         IJavaElement myJavaFile = JavaCore.create(myFile);
     }</pre></font> 
-<p><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a> 
-  is also used to maintain the Java class path, including locations for finding 
-  source code and libraries, and locations for generating output binary (<b>.class</b>) 
-  files.</p>
+<p>Once you have a Java element, you can use the JDT API to traverse and query
+the model.&nbsp; You may also query the non-Java resources contained in a Java
+element.&nbsp;</p>
+<font color="#4444cc"><pre>         private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) {
+        ...
+        // get the non Java resources contained in my project.
+        Object[] nonJavaChildren = myJavaProject.getNonJavaResources();
+        ...
+            </font></pre> 
+<h3> Java projects</h3>
 <p>When you create a Java project from a simple project, <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b> 
   JavaCore</b></a> will check to see if the project is configured with the Java 
   nature.&nbsp; The JDT plug-in uses a project nature to designate a project as 
@@ -166,6 +173,10 @@
   ) is assigned to a project when the "New Java project" wizard creates a project.&nbsp; 
   If the Java nature is not configured on a project, <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b> 
   JavaCore</b></a> will return null when asked to create the project.</p>
+<p><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a> 
+  is also used to maintain the Java class path, including locations for finding 
+  source code and libraries, and locations for generating output binary (<b>.class</b>) 
+  files.</p>
 <p> What are the unique characteristics of Java projects? They record their classpath 
   in a "<b>.classpath</b>" file and add the Java incremental project builder to 
   the project's build spec.&nbsp; Otherwise, they are just regular projects and 

@@ -30,17 +30,17 @@ the build API.</p>
 <p> For a Java project, this invokes the Java incremental project builder
  (along with any other incremental project builders that have been added
 to  the project's build spec). The generated .class files are written to
-the designated output folder. In the case of a full batch build, all the
-.class files in the output folder are 'scrubbed' to ensure that no stale
-files are found. Make sure that you place all your .class files, for which
-you do not have corresponding source files, in separate class file folders
+the designated output folder. Additional resource files are also copied to the output folder.&nbsp;</p>
+<p> In the case of a full batch build, all the
+.class files in the output folder may be 'scrubbed' to ensure that no stale
+files are found. This is controlled using a JDT Core Builder Option (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER">CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER</a>).&nbsp;
+The default for this option is to clean output folders.&nbsp; Unless this option
+is reset, you must ensure that you place all .class files for which
+you do not have corresponding source files in a separate class file folder
 on the classpath  instead of the output folder.</p>
-<p> Additional resource files are also copied to the output folder.&nbsp;<p>The
-incremental and batch builders can be configured with specialized options that
-control which resources are copied to the output folder and whether the output
-folder should be cleaned up after a full build.&nbsp; See <a href="jdt_api_options.htm##builder">JDT
-Core Builder Options</a> for a complete list of builder-related options.&nbsp;
-The following sample shows how to set up a resource filter so that files ending with '.ignore' and folders named 'META-INF',
+<p>The
+incremental and batch builders can be configured with other options that
+control which resources are copied to the output folder.&nbsp; The following sample shows how to set up a resource filter so that files ending with '.ignore' and folders named 'META-INF',
 are not copied to the output folder:
 <font color="#4444cc">
 <pre>   Hashtable options = JavaCore.getOptions();
@@ -53,11 +53,27 @@ folders are filtered if their name matches one of the supplied folder names
 which end in a path separator.</p>
 <p> The incremental and batch builders can also be configured to only generate
  a single error when the .classpath file has errors. This option is set by
- default and eliminates numerous errors. </p>
+ default and eliminates numerous errors.&nbsp; See <a href="jdt_api_options.htm##builder">JDT
+Core Builder Options</a> for a complete list of builder-related options and
+their defaults. </p>
 <p>The compiler can also be configured using <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a>
 options.&nbsp; For example, you can define the severity that should be used for
 different kinds of problems that are found during compilation.&nbsp; See <a href="jdt_api_options.htm##compiler">JDT
-Core Compiler Options </a>for a complete list of compiler-related options. </p>
+Core Compiler Options </a>for a complete list of compiler-related options and t
+heir defaults. </p>
+<p>When programmatically configuring options for the builder or compiler, you
+should determine the scope of the option.&nbsp; For example, setting up a
+resource filter may only apply to a particular project.&nbsp; The following example sets up
+the same resource filter shown earlier, but sets it only the individual
+project. </p>
+<font color="#4444cc">
+<pre>   
+   Hashtable options = myProject.getOptions(false);  // get only the options set up in this project
+   options.put(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER, &quot;*.ignore,META-INF/&quot;);
+   myProject.setOptions(options);
+</pre>
+</font>
+
 <h3>Using the ant javac adapter</h3>
   The Eclipse compiler can be used inside an Ant script using the javac adapter. 
 In order to use the Eclipse compiler, you simply need to define the <b>build.compiler</b>
