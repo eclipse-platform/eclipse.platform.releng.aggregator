@@ -18,18 +18,49 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 
+/*
+ * Any SQL should only be used here.
+ */
 public class SQL {
     
+    private boolean fCompatibility= false;
+    
     private Connection fConnection;
+    
     private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryVariation, fQueryVariations, fQueryScenario, fQueryAllScenarios, fQueryDatapoints, fQueryScalars;
-    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntries, fTableExistsQuery;
+    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntries;
     
 
     SQL(Connection con) throws SQLException {
         fConnection= con;
-	    initialize();
-        upgradeDB();
+        
+        boolean needsUpgrade= true;
+        boolean needsInitialization= true;
+        
+        Statement statement= fConnection.createStatement();
+        ResultSet rs= statement.executeQuery("select SYS.SYSTABLES.TABLENAME from SYS.SYSTABLES where SYS.SYSTABLES.TABLENAME not like 'SYS%'"); //$NON-NLS-1$
+        while (rs.next()) {
+            String tablename= rs.getString(1);
+            if ("SUMMARYENTRY".equals(tablename)) //$NON-NLS-1$
+                needsUpgrade= false;
+            else if ("CONFIG_ORG".equals(tablename)) //$NON-NLS-1$
+                fCompatibility= true;
+            else if ("VARIATION".equals(tablename)) //$NON-NLS-1$
+                needsInitialization= false;
+        }
+        if (!fCompatibility) {
+            // check whether table SAMPLE still has the CONFIG_ID column
+            rs= statement.executeQuery("select count(*) from SYS.SYSTABLES, SYS.SYSCOLUMNS where SYS.SYSTABLES.TABLENAME = 'SAMPLE' and " + //$NON-NLS-1$
+        			"SYS.SYSTABLES.TABLEID = SYS.SYSCOLUMNS.REFERENCEID and SYS.SYSCOLUMNS.COLUMNNAME = 'CONFIG_ID' "); //$NON-NLS-1$
+            if (rs.next() && rs.getInt(1) == 1)
+                fCompatibility= true;
+        }
+
+        if (needsInitialization)
+            initialize();
+        else if (needsUpgrade)
+	    	upgradeDB();
     }
     
     public void dispose() throws SQLException {
@@ -47,12 +78,9 @@ public class SQL {
         if (fQueryAllScenarios != null) fQueryAllScenarios.close();
         if (fQueryVariations != null) fQueryVariations.close();
         if (fQuerySummaryEntries != null) fQuerySummaryEntries.close();
-        if (fTableExistsQuery != null) fTableExistsQuery.close();
     }
         
     private void initialize() throws SQLException {
-        if (tableExists("VARIATION"))  //$NON-NLS-1$
-            return;
         Statement stmt= null;
         try {
             stmt= fConnection.createStatement();
@@ -130,10 +158,6 @@ public class SQL {
     }
 
     private void upgradeDB() throws SQLException {
-        
-        if (tableExists("SUMMARYENTRY")) //$NON-NLS-1$
-            return;
-
         Statement stmt= null;
         try {
             stmt= fConnection.createStatement();
@@ -208,9 +232,16 @@ public class SQL {
     }
 
     int createSample(int variation_id, int scenario_id, Timestamp starttime) throws SQLException {
-        if (fInsertSample == null)
-            fInsertSample= fConnection.prepareStatement(
-                "insert into SAMPLE (VARIATION_ID, SCENARIO_ID, STARTTIME) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
+        if (fInsertSample == null) {
+            if (fCompatibility) {
+                // since we cannot remove table columns in cloudscape we have to provide a non-null value for CONFIG_ID
+                fInsertSample= fConnection.prepareStatement(
+                        "insert into SAMPLE (VARIATION_ID, SCENARIO_ID, STARTTIME, CONFIG_ID) values (?, ?, ?, 0)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
+            } else {
+                fInsertSample= fConnection.prepareStatement(
+                        "insert into SAMPLE (VARIATION_ID, SCENARIO_ID, STARTTIME) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
+            }
+        }
         fInsertSample.setInt(1, variation_id);
         fInsertSample.setInt(2, scenario_id);
         fInsertSample.setTimestamp(3, starttime);
@@ -321,23 +352,5 @@ public class SQL {
         fQuerySummaryEntries.setString(1, variations.toExactMatchString());
         fQuerySummaryEntries.setInt(2, global ? 1 : 0);
         return fQuerySummaryEntries.executeQuery();
-    }
-    
-    boolean tableExists(String tableName) throws SQLException {
-        if (fTableExistsQuery == null)
-            fTableExistsQuery= fConnection.prepareStatement(
-                    "select count(*) from sys.systables where sys.systables.tablename = ?" //$NON-NLS-1$
-            );
-        fTableExistsQuery.setString(1, tableName);
-        ResultSet rs= null;
-        try {
-	        rs= fTableExistsQuery.executeQuery();
-	        if (rs.next() && rs.getInt(1) == 1)
-	            return true;
-        } finally {
-	        if (rs != null)
-	            rs.close();
-        }
-        return false;
     }
 }
