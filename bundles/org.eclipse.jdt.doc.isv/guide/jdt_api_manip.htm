@@ -87,7 +87,7 @@ modifies the buffer, reconciles the changes, commits the changes to disk and fin
     IBufferFactory factory = ...;
     
     // Create working copy
-    IWorkingCopy workingCopy = originalUnit.getWorkingCopy(null, factory, null);
+    IWorkingCopy workingCopy = (IWorkingCopy)originalUnit.getWorkingCopy(null, factory, null);
     
     // Modify buffer and reconcile
     IBuffer buffer = ((IOpenable)workingCopy).getBuffer();
@@ -117,10 +117,10 @@ working copy, and client 2 trying to retrieve the shared working copy notices it
     IBufferFactory factory = ...;
     
     // Client 1: Create shared working copy
-    IWorkingCopy workingCopyForClient1 = originalUnit.getSharedWorkingCopy(null, factory, null);
+    IWorkingCopy workingCopyForClient1 = (IWorkingCopy)originalUnit.getSharedWorkingCopy(null, factory, null);
     
     // Client 2: Retrieve shared working copy
-    IWorkingCopy workingCopyForClient2 = originalUnit.findSharedWorkingCopy(factory);
+    IWorkingCopy workingCopyForClient2 = (IWorkingCopy)originalUnit.findSharedWorkingCopy(factory);
      
     // This is the same working copy
     assert workingCopyForClient1 == workingCopyForClient2;
@@ -129,7 +129,7 @@ working copy, and client 2 trying to retrieve the shared working copy notices it
     workingCopyForClient1.destroy();
     
     // Client 2: Attempt to retrieve shared working copy and find out it's null
-    workingCopyForClient2 = originalUnit.findSharedWorkingCopy(factory);
+    workingCopyForClient2 = (IWorkingCopy)originalUnit.findSharedWorkingCopy(factory);
     assert workingCopyForClient2 == null;
 </pre></font>
 
@@ -299,7 +299,7 @@ These techniques include the following:</P>
    myCompilationUnit.getBuffer().setContents(newContents);
 
    // Save the buffer to the file.
-   myCompilationUnit.save();
+   myCompilationUnit.save(null, false);
 </pre></font>
 <P>
 This technique can result in problem markers being associated with incorrect line numbers, since the Java elements were not updated directly.</P>
