@@ -105,8 +105,8 @@ canceling a job, and ensuring that the job has finished before proceeding:
       job.join();
 </pre></font>
 If the cancelation did not take effect immediately, then <tt>cancel</tt> will return 
-false, and we need to <tt>join</tt> the job if we want to be absolutely certain
-that the job has finished running.
+<tt>false</tt>, and the <tt>join</tt> is needed to wait for the job to respond to the
+cancelation request.
 </p>
 <p>
 Slightly less drastic than cancelation is the <tt>Job.sleep</tt> method.  Again,
@@ -115,13 +115,37 @@ job to be put on hold indefinitely.  The job will still be remembered by the pla
 and a call to <tt>Job.wakeUp</tt> will cause the job to be added to the wait
 queue where it will eventually be executed. 
 </p>
-
-
-
-
-
-
-
+<h2>Job families</h2>
+<p>
+Sometimes you may want to query or modify a whole group of related jobs. This
+can be accomplished using <i>job families</i>.  A job declares that it belongs to
+a certain family by overriding the <tt>belongsTo</tt> method:
+<font color='#4444CC'><pre>
+   public static final String MY_FAMILY = "myJobFamily";
+   ...
+   class FamilyJob extends Job {
+      ...
+      public boolean belongsTo(Object family) {
+         return family == MY_FAMILY;
+      }
+   }
+</pre></font>
+You can now cancel, join, sleep, or find all jobs in that family by using methods on
+<tt>IJobManager</tt>:
+<font color='#4444CC'><pre>
+   IJobManager jobMan = Platform.getJobManager();
+   jobMan.cancel(MY_FAMILY);
+   jobMan.join(MY_FAMILY, null);
+</pre></font>
+Note that since job families are arbitrary objects, you can store interesting
+state in the job family itself, and jobs can dynamically decide what families
+they belong to as needed. Just be sure to use a family object that is 
+fairly unique, to avoid accidental interaction with the families created by
+other plug-ins. Families are also a convenient way of locating particular
+groups of jobs.  The method <tt>IJobManager.find(Object family)</tt> can
+be used to locate instances of all running, waiting, and sleeping jobs at any
+given time.
+</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>

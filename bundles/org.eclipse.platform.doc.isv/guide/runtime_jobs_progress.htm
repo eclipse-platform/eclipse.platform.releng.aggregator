@@ -4,23 +4,64 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>Reporting progress</TITLE>
+<TITLE>Reporting and listening to progress</TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H1>
-Reporting progress</H1>
+Reporting and listening to progress</H1>
 <p>
-[This documentation is under construction]
+Long running jobs (those lasting more than a second) should report progress to the <tt>IProgressMonitor</tt> passed to the
+job's <tt>run</tt> method.  The workbench progress view will
+show all progress messages and units of completed work given
+to this monitor.  The supplied progress monitor is also used to respond to
+cancelation requests made from the progress view.  When a user
+(or plug-in) attempts to cancel a job, the method <tt>IProgressMonitor.isCanceled</tt>
+will return <tt>true</tt>. When this occurs, it is the job's responsibility to
+respond to the cancelation by exiting the <tt>run</tt> method as soon as possible.
+Here is a sample <tt>run</tt> method from a job that reports progress and responds 
+to cancelation:
+<font color='#4444CC'><pre>
+   public IStatus run(IProgressMonitor monitor) {
+      final int ticks = 6000;
+      monitor.beginTask("Doing some work", ticks);
+      try {
+         for (int i = 0; i &lt; ticks; i++) {
+            if (monitor.isCanceled())
+               return Status.CANCEL_STATUS;
+            monitor.subTask("Processing tick #" + i);
+            //... do some work ...
+            monitor.worked(1);
+         }
+      } finally {
+         monitor.done();
+      }
+      return Status.OK_STATUS;
+   }
+</pre></font>
+In the progress view, the string supplied to <tt>beginTask</tt> will appear
+after the job name, and the <tt>subTask</tt> messages will appear as
+a child in the progress tree. The progress view will calculate and display a 
+percent completion based on the number of <tt>worked</tt> calls that
+have occurred.  Here is a snapshot of the progress view while the above
+job is running:
 </p>
+<P ><img src="images/job-progress.jpg" alt="Job progress view" ></P>
+
+
+
 <p>
-Topics to be covered in this section:
+[The remainder of this document is under construction]<br>
+
+Other topics to be covered in this section:
 <ul>
-<li>Reporting progress</li>
-<li>Responding to cancelation</li>
 <li>system job</li>
 <li>progress groups</li>
+
+<li>job state</li>
+<li>job change listeners</li>
+
 </ul>
 </p>
 
