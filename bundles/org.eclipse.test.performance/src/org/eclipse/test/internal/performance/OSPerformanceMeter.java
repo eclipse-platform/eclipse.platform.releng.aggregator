@@ -11,17 +11,11 @@
 
 package org.eclipse.test.internal.performance;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-
 import org.eclipse.test.internal.performance.data.DataPoint;
-import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
-import org.eclipse.test.internal.performance.db.DB;
-import org.eclipse.test.internal.performance.eval.StatisticsSession;
 
 
 /**
@@ -31,10 +25,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 
 	private PerformanceMonitor fPerformanceMonitor;
 	private long fStartTime;
-	private List fDataPoints= new ArrayList();
-	
-    private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults"; //$NON-NLS-1$
-    
+	private List fDataPoints= new ArrayList();    
 	
 	/**
 	 * @param scenarioId the scenario id
@@ -69,24 +60,9 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	}
 	
 	/*
-	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
-	 */
-	public void commit() {
-	    Sample sample= getSample();
-	    if (sample != null) {
-	        Properties config= PerformanceTestPlugin.getConfig();
-	        if (config != null)
-	            DB.store(config, sample);
-	        if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
-	        	printSample(System.out, sample);
-	    }
-	}
-
-	/*
 	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
 	 */
 	public Sample getSample() {
-	    
 	    if (fDataPoints != null) {
 	        HashMap runProperties= new HashMap();
 	        collectRunInfo(runProperties);
@@ -102,23 +78,6 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	    fPerformanceMonitor.collectOperatingSystemCounters(map);
 	    fDataPoints.add(new DataPoint(step, map));
     }
-
-	private void printSample(PrintStream ps, Sample sample) {
-		ps.print("Scenario '" + getScenarioName() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
-		DataPoint[] dataPoints= sample.getDataPoints();
-		if (dataPoints.length > 0) {
-			StatisticsSession s= new StatisticsSession(dataPoints);
-			Dim[] dimensions= dataPoints[0].getDimensions();
-			if (dimensions.length > 0) {
-				ps.println("(average over " + s.getCount(dimensions[0]) + " samples):"); //$NON-NLS-1$ //$NON-NLS-2$
-				for (int i= 0; i < dimensions.length; i++) {
-				    Dim dimension= dimensions[i];
-				    ps.println("  " + dimension.getName() + ": " + dimension.getDisplayValue(s.getAverage(dimension))); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-		}
-		ps.println();
-	}
 
 	/**
 	 * Write out the run element if it hasn't been written out yet.
