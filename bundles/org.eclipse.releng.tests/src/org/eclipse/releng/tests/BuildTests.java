@@ -106,20 +106,26 @@ public class BuildTests extends TestCase {
 		initializeCVSTypes();
 		
 		// String to use when running as an automated test.
-		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "cvsTags";
+		String logFileName = BootLoader.getInstallURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";
 
-		// String t use when running in an Eclipse runtime
-		// String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "cvsTags";
+		// String to use when running in an Eclipse runtime
+		// String logFileName = BootLoader.getInstallURL().getPath() + "plugins" + File.separator + "org.eclipse.releng.tests_2.1.0" + File.separator + "results" + File.separator + "chkpii";
 
 		new File(logFileName).mkdirs();
 		logFileName = logFileName + File.separator + "cvsTypesLog.txt";
 
+		// Source location when running in an automated test.  This is really bad form
+		// but we really don't want to recheck out all the source.
+		String sourceDirectoryName = BootLoader.getInstallURL().getPath() +  ".." + File.separator + ".." + File.separator + ".." + File.separator + ".." + File.separator + "src";
+		
+		// Source location when running locally.  Run a source build to get it.
+		// String sourceDirectoryName = "d:\\sourceFetch";
+		
 		try {
 
 	//		StringWriter aWriter = new StringWriter();
 			BufferedWriter aLog = new BufferedWriter(new FileWriter(logFileName));
-			String rootDirectoryName = "d:\\sourceFetch";
-			File rootDirectory = new File(rootDirectoryName);
+			File rootDirectory = new File(sourceDirectoryName);
 			result = scanCVSKTag(rootDirectory, aLog);
 	//		System.out.println(aWriter.getBuffer().toString());
 			aLog.close();
