@@ -12,7 +12,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Draft Pre-release 3.0<br>
-Last revised June 21, 2004</p>
+Last revised June 22, 2004</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -248,7 +248,7 @@ copy of porting guide in a well-known location.]</p>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - UI">3.1.4 UI</a><br>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Text">3.1.5 Text</a><br>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - SWT">3.1.6 SWT</a><br>
-  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Team - CVS">3.1.7 Team</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Team - CVS">3.1.7 Team and CVS</a><br>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Install/Update">3.1.8
   Install/Update<br>
   </a>&nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Debug">3.1.9 Debug<br>
@@ -350,42 +350,43 @@ simple bookkeeping tasks should be performed in <code>Plugin.startup</code>
 code. (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=12827">12827</a>,
 <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>, <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=16141">16141</a>)</i></p>
 <h3>3.1.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Xerces JARs no longer
-required on runtime Ant classpath</i></h4>
-<p><i>Explicitly adding the Xerces JARs to the runtime Ant classpath is no
-longer required and can cause problems. The Xerces classes are loaded from the <code>org.apache.xerces</code>
-plug-in provided with Eclipse. For most Ant distributions, the Xerces JARs
-cannot even be in the same physical location as the <code>ant.jar</code> and <code>optional.jar</code>.
-This results from the Ant JARs containing manifest files which contain classpath
-entries pointing to the Xerces JARs. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33664">33664</a>,
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33117">33117</a>, <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34151">34151</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Custom Ant tasks and Ant
-types must be separate from plug-in library JARs</i></h4>
-<p><i>Including the class files for custom Ant tasks or Ant types in the regular
+<h4>UTF-8 encoded buildfiles with Byte Order Mark</h4>
+<p>UTF-8 encoded buildfiles with byte order marks will fail to be parsed correctly depending on the XML parser being used for the build. Therefore a valid buildfile will fail to build with an error message similar to: "BUILD FAILED: C:\workspace\bom.xml:1: Document root element is missing.". To succeed in building with these files, ensure to include Xerces jars on the Ant runtime classpath so that the Xerces parser is used to parse the XML. As well the context menu for these files in the Navigator or Package Explorer will not have the run shortcuts for Ant builds. (bug
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67048">67048</a>)</p>
+<h4> Custom Ant tasks and Ant
+types must be separate from plug-in library JARs</h4>
+<p>Including the class files for custom Ant tasks or Ant types in the regular
 code JAR for your plug-in causes problems. These class files must be provided in
 a separate JAR that is contributed to the <code>org.eclipse.ant.core.antTasks</code>
 or <code>antTypes</code> extension point (and not declared as a library in the
 plug-in's manifest). This ensures that the Ant tasks and types are loaded by the
-special Ant class loader and not by a plug-in classloader. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34466">34466</a>).</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Concurrent Ant builds not
-supported</i></h4>
-<p><i>Eclipse runs Ant in the same JVM as the rest of Eclipse. Several aspects
+special Ant class loader and not by a plug-in classloader. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34466">34466</a>).</p>
+<h4> Concurrent Ant builds not
+supported</h4>
+<p>Eclipse runs Ant in the same JVM as the rest of Eclipse. Several aspects
 of Ant and its use of global Java resources (such as System.out and System.err),
-make it unsafe to run more than one Ant build concurrently. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24129">24129</a>).</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Running certain Ant tasks
-cause memory leakage</i></h4>
-<p><i>Certain Ant tasks are known to leak memory. Please see the bug report for
-details, patches, and possible workarounds. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24448">24448</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Tasks that require input
-lock up workspace</i></h4>
-<p><i>As with using Ant from the command line, prompts for input from the
+make it unsafe to run more than one Ant build concurrently. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24129">24129</a>).</p>
+<h4> Running certain Ant tasks
+cause memory leakage</h4>
+<p>Certain Ant tasks are known to leak memory. Please see the bug report for
+details, patches, and possible workarounds. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=24448">24448</a>)</p>
+<h4> Tasks that require input
+lock up workspace</h4>
+<p>As with using Ant from the command line, prompts for input from the
 console is not handled. This is not the same as making use of the &lt;input&gt;
-task, which works correctly within Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21748">21748</a>)</i></p>
-<h4><i>[TBD - carryover from 2.1.3; review for 3.0] Ant Editor code completion
-based on Ant 1.5</i></h4>
-<p><i>Code completion provided by the Ant editor does not respect the
-user-specified version of <code>org.eclipse.ant.core</code> plug-in or ANT_HOME.
-Code completion proposals are always based on Ant 1.5. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=30886">30886</a>).</i></p>
+task, which works correctly within Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21748">21748</a>)</p>
+<h4>No input handler supplied for &lt;input> task when running Ant in a separate VM</h4>
+<p>By default, no input handler is supplied for the &lt;input> task for a build running in a separate VM. Therefore the input requests will always fail. The user can supply an input handler using the -inputhandler argument. (bug
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=45484">45484</a>)</p>
+<h4>&quot;version&quot; property is always set when running Ant in the same VM as Eclipse</h4>
+<p>The Xalan libraries set system properties including a version property. These get set as properties within the Ant build and therefore the "version" property cannot be set within an Ant buildfile due to the immutable nature of Ant properties. This property will always be set to "2.4.1" for Ant builds in the same VM as Eclipse. (bug
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=45717">45717</a>)</p>
+<h4>XDoclet support from within Eclipse</h4>
+<p>Since there are differences when running Ant from the commandline and within Eclipse, some extra steps may be needed to have XDoclet support function correctly within Eclipse. Problems may occur creating XDoclet subtasks. The workarounds and full discussion can be found in bug report. (bug
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37070">37070</a>)</p>
+<h4>Ant Editor code completion based on Ant 1.6.1</h4>
+<p>Code completion provided by the Ant editor does not respect the user-specified version of org.eclipse.ant.core plug-in or ANT_HOME. Code completion proposals are always based on Ant 1.6.1 (bug
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=30886">30886</a>)</p>
 <h3>3.1.3 <a name="I-Platform-Help">Platform - Help</a></h3>
 <font FACE="Tms Rmn"><b>
 <h4>Help browser tool bar buttons do not work for some documents</h4>
