@@ -71,11 +71,10 @@ public class Performance {
 		if (fDefaultEvaluator == null) {
 			fDefaultEvaluator= new Evaluator();
 			fDefaultEvaluator.setAssertCheckers(new AssertChecker[] {
-			        //new RelativeBandChecker(Dimensions.CPU_TIME, 0.0f, 1.05f),
+			        new RelativeBandChecker(Dimensions.CPU_TIME, 0.0f, 1.05f),
 			        //new RelativeBandChecker(Dimensions.WORKING_SET, 0.0f, 3.00f),
 			        //new RelativeBandChecker(Dimensions.USED_JAVA_HEAP, 0.0f, 2.00f),
-			        new RelativeBandChecker(Dimensions.SYSTEM_TIME, 0.0f, 1.10f),
-			        new RelativeBandChecker(Dimensions.BUFFERS_LINUX, 0.0f, 1.10f)
+			        //new RelativeBandChecker(Dimensions.SYSTEM_TIME, 0.0f, 1.10f)
 			});
 		}
 		fDefaultEvaluator.evaluate(performanceMeter);
