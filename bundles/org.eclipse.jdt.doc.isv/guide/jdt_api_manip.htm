@@ -42,6 +42,57 @@ For example, you can query a type from a compilation unit. Once you have the <a 
 <P>
 The <b><a href="../reference/api/org/eclipse/jdt/core/ISourceManipulation.html"> ISourceManipulation</a></b> interface defines common source manipulations for java elements. This includes methods for renaming, moving, copying, or deleting a type's member. </P>
 
+<H4>
+Working copies
+</h4>
+<P>
+Code can be modified by manipulating the compilation unit (and thus the underlying <b>IFile</b> is modified) or
+one can modify an in-memory copy of the compilation unit called a working copy. </P>
+<P>
+A working copy is obtained from a compilation unit using the 
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getWorkingCopy()">getWorkingCopy</a></b>
+method.  Whoever creates such a working copy is responsible for destroying it when not needed any longer using the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#destroy()">destroy</a></b>
+method. </P>
+<P>
+Working copies modify an in-memory buffer. The <b>getWorkingCopy()</b> method creates a default buffer, but
+clients can provide their own buffer implementation using the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getWorkingCopy(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.jdt.core.IBufferFactory, org.eclipse.jdt.core.IProblemRequestor)">getWorkingCopy(IProgressMonitor, IBufferFactory, IProblemRequestor)</a></b>
+method. Clients can manipulate the text of this buffer directly. If they do so, they must synchronize the working copy with
+the buffer from time to time using either the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile()">reconcile()</a></b>
+method or the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile(boolean, org.eclipse.core.runtime.IProgressMonitor)">reconcile(boolean,IProgressMonitor)</a></b>
+method.  </P>
+<P>
+Finally a working copy can be saved to disk (replacing the original compilation unit) using the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#commit(boolean, org.eclipse.core.runtime.IProgressMonitor)">commit</a></b>
+method. </P>
+<P>
+For example the following code snippet creates a working copy on a compilation unit using a custom buffer factory, it
+modifies the buffer, it reconciles the changes, it commits the changes to disk and it finally destroys the working copy. </P>
+<font color='#4444CC'><pre>
+    // Get original compilation unit
+    ICompilationUnit originalUnit = ...;
+    
+    // Get buffer factory
+    IBufferFactory factory = ...;
+    
+    // Create working copy
+    IWorkingCopy workingCopy = originalUnit.getWorkingCopy(null, factory, null);
+    
+    // Modify buffer and reconcile
+    IBuffer buffer = ((IOpenable)workingCopy).getBuffer();
+    buffer.append("class X {}");
+    workingCopy.reconcile();
+    
+    // Commit changes
+    workingCopy.commit(false, null);
+    
+    // Destroy working copy
+    workingCopy.destroy();
+</pre></font>
+
 
 <H3>Code modification using the DOM/AST API</h3>
 
