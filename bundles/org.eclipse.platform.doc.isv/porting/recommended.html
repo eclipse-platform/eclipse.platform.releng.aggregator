@@ -12,10 +12,775 @@
 
 <body>
 
-<h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
-<p>This section describes other changes that we recommend be made when porting
-an existing plug-in to 3.0.</p>
-<p><i>[content to be extracted]</i></p>
+<h2>Other Recommended Changes when Migrating Plug-ins to 3.0</h2>
+<p>This section describes other recommend changes that we be made when porting existing plug-ins to 3.0.</p>
+<h3>Changes to API classes and interfaces (by package)</h3>
+<h4>IWorkspaceRunnable and IWorkspace.run (org.eclipse.core.runtime)</h4>
+<p>Clients of the <tt>IWorkspace.run(IWorkspaceRunnable,IProgressMonitor)</tt>
+method should revisit their uses of this method and consider using the richer
+method <tt>IWorkspace.run(IWorkspaceRunnable,ISchedulingRule,int,IProgressMonitor)</tt>.
+The old <tt>IWorkspace.run</tt> method acquires a lock on the entire workspace
+for the duration of the <tt>IWorkspaceRunnable</tt>. This means that an
+operation done with this method will never be able to run concurrently with
+other operations that are changing the workspace. In Eclipse 3.0, many
+long-running operations have been moved into background threads, so the
+likelihood of conflicts between operations is greatly increased. If a modal
+foreground operation is blocked by a long running background operation, the UI
+becomes blocked until the background operation completes, or until one of the
+operations is canceled.</p>
+<p>The suggested solution is to switch all references to old <tt>IWorkspace.run</tt>
+to use the new method with a scheduling rule parameter. The scheduling rule
+should be the most fine-grained rule that encompasses the rules for all changes by that
+operation. If the operation tries to modify resources outside of the scope
+of the scheduling rule, a runtime exception will occur. The precise scheduling rule
+required by a given workspace operation is not specified, and may change depending
+on the installed repository provider on a given project. The factory 
+<code>IResourceRuleFactory</code> should be used to obtain the scheduling
+rule for a resource-changing operation. If desired, a <tt>MultiRule</tt> can be used 
+to specify multiple resource rules, and the <tt>MultiRule.combine</tt> convenience 
+method can be used to combine rules from various resource-changing operations.
+<p>
+If no locking is required, a scheduling rule of <tt>null</tt> can be used. This will
+allow the runnable to modify all resources in the workspace, but will not prevent other
+threads from also modifying the workspace concurrently. For simple changes to 
+the workspace this is often the easiest and most concurrency-friendly solution.
+</p>
+<h4>IWorkbenchPage (package org.eclipse.ui)</h4>
+<ul>
+  <li>The constant EDITOR_ID_ATTR is now deprecated. This is an IMarker
+    attribute name that specifies the preferred editor id to open the IMarker
+    resource with. This constant in now on org.eclipse.ui.ide.IDE class.</li>
+</ul>
+<h4>IEditorDescriptor (package org.eclipse.ui)</h4>
+<ul>
+  <li>There are new API methods to determine whether the editor will open
+    internally to the workbench page (isInternal), in-place to the workbench
+    window (isOpenInPlace), or externally to the workbench (isExternal). While
+    this is not a breaking change, it is a good opportunity for clients that are
+    illegally down-casting IEditorDescriptor to
+    org.eclipse.ui.internal.model.EditorDescriptor to call isInternal to bring
+    there code back into line.</li>
+</ul>
+<h4>ISharedImages (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following fields were removed (deprecated) from this interface because
+    they were IDE-specific:
+    <ul>
+      <li>String IMG_OBJ_PROJECT</li>
+      <li>String IMG_OBJ_PROJECT_CLOSED</li>
+      <li>String IMG_OPEN_MARKER</li>
+      <li>String IMG_OBJS_TASK_TSK</li>
+      <li>String IMG_OBJS_BKMRK_TSK</li>
+    </ul>
+  </li>
+  <li>Existing clients should instead use the fields of the same names declared
+    on IDE.SharedImages in the org.eclipse.ui.ide package of the
+    org.eclipse.ui.ide plug-in.</li>
+</ul>
+<h4>IWorkbenchActionConstants (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following fields were removed (deprecated) from this interface; they
+    are subsumed by the new ActionFactory class:
+    <ul>
+      <li>String ABOUT</li>
+      <li>String BACK</li>
+      <li>String CLOSE</li>
+      <li>String CLOSE_ALL</li>
+      <li>String COPY</li>
+      <li>String CUT</li>
+      <li>String DELETE</li>
+      <li>String EXPORT</li>
+      <li>String FIND</li>
+      <li>String FORWARD</li>
+      <li>String IMPORT</li>
+      <li>String MOVE</li>
+      <li>String NEW</li>
+      <li>String NEXT</li>
+      <li>String PASTE</li>
+      <li>String PREVIOUS</li>
+      <li>String PRINT</li>
+      <li>String PROPERTIES</li>
+      <li>String QUIT</li>
+      <li>String REDO</li>
+      <li>String REFRESH</li>
+      <li>String RENAME</li>
+      <li>String REVERT</li>
+      <li>String SAVE</li>
+      <li>String SAVE_ALL</li>
+      <li>String SAVE_AS</li>
+      <li>String SELECT_ALL</li>
+      <li>String UNDO</li>
+      <li>String UP</li>
+    </ul>
+  </li>
+  <li>Clients should instead call getID() on the fields of the same names
+    declared on ActionFactory in the org.eclipse.ui.actions package (org.eclipse.ui
+    plug-in). For example, change IWorkbenchActionConstants.CUT to
+    ActionFactory.CUT.getId().</li>
+  <li>The following fields were removed (deprecated) from this interface because
+    they were IDE-specific.
+    <ul>
+      <li>String ADD_TASK</li>
+      <li>String BOOKMARK</li>
+      <li>String BUILD</li>
+      <li>String BUILD_PROJECT</li>
+      <li>String CLOSE_PROJECT</li>
+      <li>String FIND</li>
+      <li>String OPEN_PROJECT</li>
+      <li>String REBUILD_ALL</li>
+      <li>String REBUILD_PROJECT</li>
+    </ul>
+  </li>
+  <li>Clients should instead call getID() on the fields of the same names
+    declared on IDEActionFactory in the org.eclipse.ui.ide package (org.eclipse.ui.ide
+    plug-in). For example, change IWorkbenchActionConstants.BUILD to
+    IDEActionFactory.BUILD.getId().</li>
+</ul>
+<h4>IWorkbenchPreferenceConstants (package org.eclipse.ui)</h4>
+<ul>
+  <li>The following fields were removed (deprecated) from this interface because
+    they were IDE-specific:
+    <ul>
+      <li>String PROJECT_OPEN_NEW_PERSPECTIVE</li>
+    </ul>
+  </li>
+  <li>Clients should instead use the fields of the same names declared on
+    IDE.Preferences in the org.eclipse.ui.ide package.</li>
+</ul>
+<h4>IExportWizard (package org.eclipse.ui)</h4>
+<ul>
+  <li>Prior to 3.0, the selection passed to IWorkbenchWizard.init(IWorkbench,
+    IStructuredSelection) for an export wizard was preprocessed. If any of the
+    selections were IResources, or adaptable to IResource, then the selection
+    consisted only of these resources. In 3.0, the generic export wizard does
+    not do any preprocessing.&nbsp;</li>
+  <li>The selection passed to the wizard is generally used to prime the
+    particular wizard page with contextually appropriate values.</li>
+  <li>Client that implement IExportWizard and requires this resource-specific
+    selection transformation should add the following to their init(IWorkbench,
+    IStructuredSelection selection) method to computer <code>filteredSelection</code>
+    from <code>selection</code>:
+    <ul>
+      <li><code>IStructuredSelection filteredSelection = selection;<br>
+        List selectedResources = IDE.computeSelectedResources(currentSelection);<br>
+        if (!selectedResources.isEmpty()) {<br>
+        &nbsp;&nbsp;&nbsp; filteredSelection = new
+        StructuredSelection(selectedResources);<br>
+        }</code></li>
+    </ul>
+  </li>
+</ul>
+<h4>IImportWizard (package org.eclipse.ui)</h4>
+<ul>
+  <li>Prior to 3.0, the selection passed to IWorkbenchWizard.init(IWorkbench,
+    IStructuredSelection) for an import wizard was preprocessed. If any of the
+    selections were IResources, or adaptable to IResource, then the selection
+    consisted only of these resources. In 3.0, the generic import wizard does
+    not do any preprocessing.&nbsp;</li>
+  <li>The selection passed to the wizard is generally used to prime the
+    particular wizard page with contextually appropriate values.</li>
+  <li>Client that implement IImportWizard and requires this resource-specific
+    selection transformation should add the following to their init(IWorkbench,
+    IStructuredSelection selection) method to compute a filtered selection from
+    the selection passed in:
+    <ul>
+      <li><code>IStructuredSelection filteredSelection = selection;<br>
+        List selectedResources = IDE.computeSelectedResources(currentSelection);<br>
+        if (!selectedResources.isEmpty()) {<br>
+        &nbsp;&nbsp;&nbsp; filteredSelection = new
+        StructuredSelection(selectedResources);<br>
+        }</code></li>
+    </ul>
+  </li>
+</ul>
+<h4>INewWizard (package org.eclipse.ui)</h4>
+<ul>
+  <li>Prior to 3.0, the selection passed to IWorkbenchWizard.init(IWorkbench,
+    IStructuredSelection) for a new wizard was preprocessed. If there was no
+    structured selection at the time the wizard was invoked, but the active
+    workbench window had an active editor open on an IFile, then the selection
+    passed in would consist of that IFile. In 3.0, the generic new wizard does
+    not do any preprocessing, and an empty selection will be passed when there
+    is no structured selection.</li>
+  <li>The selection passed to the wizard is generally used to prime the
+    particular wizard page with contextually appropriate values.</li>
+  <li>Client that implement INewWizard and requires this capability should add
+    the following to their init(IWorkbench, IStructuredSelection selection)
+    method to compute a selection from the active editor's input:
+    <pre>if (selection.isEmpty()) {
+   IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+   if (window != null) {
+      IWorkbenchPart part = window.getPartService().getActivePart();
+      if (part instanceof IEditorPart) {
+         IEditorInput input = ((IEditorPart) part).getEditorInput();
+         if (input instanceof IFileEditorInput) {
+            selection = new StructuredSelection(((IFileEditorInput) input).getFile());
+         }
+      }		
+  }
+}</pre>
+  </li>
+</ul>
+<h4>WorkbenchHelp (package org.eclipse.ui.help)</h4>
+<ul>
+  <li>The following WorkbenchHelp method was removed (deprecated) from this
+    class because its result (IHelp) was removed (deprecated):
+    <ul>
+      <li>public static IHelp getHelpSupport()</li>
+    </ul>
+  </li>
+  <li>Clients that called this method to obtain an IHelp should instead call the
+    static methods on HelpSystem or WorkbenchHelp.</li>
+</ul>
+<h4>IHelp (package org.eclipse.help)</h4>
+<ul>
+  <li>This interface has been removed (deprecated). WorkbenchHelp.getHelpsupport()
+    was the only way to get hold of an IHelp object. This method has also been
+    removed (deprecated).</li>
+  <li>The following IHelp methods now appear as static methods on a new
+    HelpSystem class in the same package:
+    <ul>
+      <li>public IToc[] getTocs()</li>
+      <li>public IContext getContext(String contextId)</li>
+    </ul>
+  </li>
+  <li>The rest of the IHelp methods now appear as static method on WorkbenchHelp.</li>
+  <li>This interface was formerly mentioned in the contract for the
+    org.eclipse.help.support extension point. This extension point has been
+    renamed &quot;org.eclipse.ui.helpSupport&quot;, and the contract simplified
+    so that the implementer only needs supply the display methods. For these
+    purposes, IHelp has been replaced by AbstractHelpUI (in the
+    org.eclipse.ui.help package).</li>
+  <li>There should be no clients implementing this interface beyond the Platform
+    which supplied the sole implementation of this interface.</li>
+</ul>
+<h4>ITextEditorActionConstants (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>This interface additionally includes newly defined constants that redefine
+    deprecated constants inherited from org.eclipse.ui.IWorkbenchActionConstants.
+    This change allows clients to free their code from deprecation warnings. The
+    constants ADD_TASK and BOOKMARK have not been redefined as they are IDE
+    specific. When using these two constants in your code, please follow the
+    instructions given in the deprecation message.</li>
+</ul>
+<h4>IAbstractTextEditorHelpContextIds (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>BOOKMARK_ACTION and ADD_TASK_ACTION have been deprecated because they are
+    IDE specific. Use the constants defined in
+    org.eclipse.ui.editors.text.ITextEditorHelpContextIds instead.</li>
+</ul>
+<h4>BasicTextEditorActionContributor (package org.eclipse.ui.texteditor)</h4>
+<ul>
+  <li>BasicTextEditorActionContributor no longer assigns any editor action as
+    global action for org.eclipse.ui.IWorkbenchActionConstants.ADD_TASK and
+    org.eclipse.ui.IWorkbenchActionConstants.BOOKMARK because these actions are
+    IDE specific. This is now done by the
+    org.eclipse.ui.editors.text.TextEditorActionContributor. If your editors are
+    not configured to used TextEditorActionContributor but uses a contributor
+    that is a subclass of BasicTextEditorActionContributor, this contributor has
+    to be extended to also assign global action handlers for ADD_TASK and
+    BOOKMARK. This can be done by adding the following lines to the
+    setActiveEditor method of the editor action contributor:</li>
+  <li>
+    <pre> IActionBars actionBars= getActionBars();
+ if (actionBars != null) {
+   actionBars.setGlobalActionHandler(IDEActionFactory.ADD_TASK.getId(), getAction(textEditor, IDEActionFactory.ADD_TASK.getId()));
+   actionBars.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), getAction(textEditor, IDEActionFactory.BOOKMARK.getId()));
+ }</pre>
+  </li>
+</ul>
+<h4>TextEditorActionContributor (package org.eclipse.ui.editors.text)</h4>
+<ul>
+  <li>TextEditorActionContributor assigns global action handlers for
+    IWorkbenchActionConstants.ADD_TASK (now IDEActionFactory.ADD_TASK.getId())
+    and IWorkbenchActionConstants.BOOKMARK (now IDEActionFactory.BOOKMARK.getId()).
+    These action handlers have previously been registered by
+    BasicTextEditorActionContributor. See migration notes for
+    BasicTextEditorActionContributor.</li>
+</ul>
+<h4>ILaunchConfigurationType (package org.eclipse.debug.core)</h4>
+<p>With the introduction of extensible launch modes in 3.0, more than one launch
+delegate can exist for a launch configuration type. Releases prior to 3.0 only
+supported one launch delegate per launch configuration type. The method <code>ILaunchConfigurationType.getDelegate()</code>
+is now deprecated. The method <code>getDelegate(String mode)</code> should be
+used in its place to retrieve the launch delegate for a specific launch mode.
+The deprecated method has been changed to return the launch delegate for the <code>run</code>
+mode.</p>
+<h4>ILaunchConfigurationTab and ILaunchConfigurationTabGroup (package
+org.eclipse.debug.ui)</h4>
+<p>Launch tab groups and launch tabs are no longer notified when a launch
+completes. The method <code>launched(ILaunch)</code> in the interfaces <code>ILaunchConfigurationTab</code>
+and <code>ILaunchConfigurationTabGroup</code> has been deprecated and is no
+longer called. Relying on this method for launch function was always
+problematic, since tabs only exist when launching is performed from the launch
+dialog. Also, with the introduction of background launching, this method can no
+longer be called, as the launch dialog is be closed before the resulting launch
+object exists.</p>
+<h4>ILaunchConfigurationTab and AbstractLaunchConfigurationTab (package
+org.eclipse.debug.ui)</h4>
+<p>Two methods have been added to the <code>ILaunchConfigurationTab</code>
+interface - activated and deactivated. These new life cycle methods are called
+when a tab is entered and exited respectively. Existing implementations of <code>ILaunchConfigurationTab</code>
+that subclass the abstract class provided by the debug plug-in (<code>AbstractLaunchConfigurationTab</code>)
+are binary compatible since the methods are implemented in the abstract class.</p>
+<p>In prior releases, a tab was sent the message <code>initializeFrom</code>
+when it was activated, and <code>performApply</code> when it was deactivated. In
+this way, the launch configuration tab framework provided inter-tab
+communication via a launch configuration (by updating the configuration with
+current attribute values when a tab is exited, and updating the newly entered
+tab). However, since many tabs do not perform inter-tab communication, this can
+be inefficient. As well, there was no way to distinguish between a tab being
+activated, and a tab displaying a selected launch configuration for the first
+time. The newly added methods allow tabs to distinguish between activation and
+initialization, and deactivation and saving current values.</p>
+<p>The default implementation of <code>activated</code>, provided by the
+abstract tab, calls <code>initializeFrom</code>. And, the default implementation
+of <code>deactivated</code> calls <code>performApply</code>. Tabs wishing to
+take advantage of the new API should override these methods as required.
+Generally, for tabs that do not perform inter-tab communication, the recommended
+approach is to re-implement these methods to do nothing.</p>
+<h4>launchConfigurationTabGroup extension point Type (package
+org.eclipse.debug.ui)</h4>
+<p>In prior releases, perspective switching was specified on a launch
+configuration, via the launch configuration attributes <code>ATTR_TARGET_DEBUG_PERSPECTIVE</code>
+and <code>ATTR_TARGET_RUN_PERSPECTIVE</code>. With the addition of extensible
+launch modes in 3.0, this approach no longer scales. Perspective switching is
+now specified on launch configuration type basis, per launch mode that a launch
+configuration type supports. API has been added to <code>DebugUITools</code> to
+set and get the perspective associated with a launch configuration type for a
+specific launch mode.</p>
+<p>An additional, optional, <code>launchMode</code> element has been added to
+the <code>launchConfigurationTabGroup</code> extension point, allowing a
+contributed tab group to specify a default perspective for a launch
+configuration type and mode.</p>
+<p>From the Eclipse user interface, users can edit the perspective associated
+with a launch configuration type by opening the launch configuration dialog, and
+selecting a launch configuration type node in the tree (rather than an
+individual configuration). A tab is displayed allowing the user to set a
+perspective with each supported launch mode.</p>
+<h4>[JDT only] IVMRunner (package org.eclipse.jdt.launching)</h4>
+<p>Two methods have been added to the <code>VMRunnerConfiguration</code> class
+to support the setting and retrieving of environment variables. Implementors of <code>IVMRunner</code>
+should call <code>VMRunnerConfiguration.getEnvironment()</code> and pass that
+environment into the executed JVM. Clients who use <code>DebugPlugin.exec(String[]
+cmdLine, File workingDirectory)</code> can do this by calling <code>DebugPlugin.exec(String[]
+cmdLine, File workingDirectory, String[] envp)</code> instead. Simply passing in
+the result from <code>getEnvironment()</code> is sufficient.</p>
+<h4>[JDT only] VMRunnerConfiguration and Bootstrap Classes (package
+org.eclipse.jdt.launching)</h4>
+<p>In prior releases, the <code>VMRunnerConfiguration</code> had one attribute
+to describe a boot path. The attribute is a collection of <code>Strings</code>
+to be specified in the -<code>Xbootclasspath</code> argument. Three new
+attributes have been added to the VMRunnerConfiguration to support JVMs that
+allow for prepending and appending to the boot path. The new methods/attributes
+added are:</p>
+<ul>
+  <li><code>getPrependBootClassPath()</code> - returns a collection of entries
+    to be prepended to the boot path (the <code>-Xbootclasspath/p</code>
+    argument)
+  <li><code>getMainBootClassPath()</code> - returns a collection of entries to
+    be placed on the boot path (the <code>-Xbootclasspath</code> argument)
+  <li><code>getAppendBootClassPath()</code> - returns a collection of entries to
+    be appended to the boot path (the <code>-Xbootclasspath/a</code> argument)</li>
+</ul>
+<p>The old attribute,<code> getBootClassPath()</code>, still exists and contains
+a complete path equivalent to that of the three new attributes. However, <code>VMRunners</code>
+that support the new boot path options should take advantage of the new
+attributes.</p>
+<h3>[JDT only] Improved support for working copies (package org.eclipse.jdt.core)</h3>
+<p>The Java model working copy facility has been reworked in 3.0 to provide
+greatly increased functionality. Prior to 3.0, the Java model allowed creation
+of individual working copies of compilation units. Changes could be made to the
+working copy and later committed. There was support for limited analysis of a
+working copy in the context of the rest of the Java model. However, there was no
+way these these analyses could ever take into account more than one of the
+working copies at a time.</p>
+<p>The changes in 3.0 make it possible to create and manage sets of working
+copies of compilation units, and to perform analyses in the presence of all
+working copies in a set. For example, it is now possible for a client like JDT
+refactoring to create working copies for one or more compilation units that it
+is considering modifying and then to resolve type references between the working
+copies. Formerly this was only possible after the changes to the compilation
+unit working copies had been committed.</p>
+<p>The Java model API changes in 2 ways to add this improved support:</p>
+<p>(1) The functionality formerly found on <code>IWorkingCopy</code> and
+inherited by <code>ICompilationUnit</code> has been consolidated into <code>ICompilationUnit</code>.
+The <code>IWorkingCopy</code> interface was only used in this one place, and was
+gratuitously more general that in needed to be. This change simplifies the API. <code>IWorkingCopy</code>
+has been deprecated. Other places in the API where <code>IWorkingCopy</code> is
+used as a parameter or result type have been deprecated as well; the replacement
+API methods mention <code>ICompilationUnit</code> instead of <code>IWorkingCopy</code>.</p>
+<p>(2) The interface <code>IBufferFactory</code> has been replaced by <code>WorkingCopyOwner</code>.
+The improved support for working copies requires that there be an object to own
+the working copies. Although <code>IBufferFactory</code> is in the right place,
+the name does not adequately convey how the new working copy mechanism works. <code>WorkingCopyOwner</code>
+is much more suggestive. In addition, <code>WorkingCopyOwner</code> is declared
+as an abstract class, rather than as an interface, to allow the notion of
+working copy owner to evolve in the future. The one method on <code>IBufferFactory</code>
+moves to <code>WorkingCopyOwner</code> unaffected. <code>WorkingCopyOwner</code>
+does not implement <code>IBufferFactory</code> to make it clear that <code>IBufferFactory</code>
+is a thing of the past. <code>IBufferFactory</code> has been deprecated. Other
+places in the API where <code>IBufferFactory</code> appears as a parameter or
+result type have been deprecated as well; the replacement API methods mention <code>WorkingCopyOwner</code>
+instead of <code>IBufferFactory</code>.</p>
+<p>These changes do not break binary compatibility.</p>
+<p>When migrating, all references to the type <code>IWorkingCopy</code> should
+instead reference <code>ICompilationUnit</code>. The sole implementation of <code>IWorkingCopy</code>
+implements <code>ICompilationUnit</code> as well, meaning objects of type <code>IWorkingCopy</code>
+can be safely cast to <code>ICompilationUnit</code>.</p>
+<p>A class that implements <code>IBufferFactory</code> will need to replaced by
+a subclass of <code>WorkingCopyOwner</code>. Although <code>WorkingCopyOwner</code>
+does not implement <code>IBufferFactory</code> itself, it would be possible to
+declare the subclass of <code>WorkingCopyOwner</code> that implements <code>IBufferFactory</code>
+thereby creating a bridge between old and new (<code>IBufferFactory</code>
+declares <code>createBuffer(IOpenable)</code> whereas <code>WorkingCopyOwner</code>
+declares <code>createBuffer(ICompilationUnit)</code>; <code>ICompilationUnit</code>
+extends <code>IOpenable</code>).</p>
+<p>Because the changes involving <code>IWorkingCopy</code> and <code>IBufferFactory</code>
+are interwined, we recommend dealing with both at the same time. The details of
+the deprecations are as follows:</p>
+<ul>
+  <li><code>IWorkingCopy</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public void commit(boolean, IProgressMonitor)</code> has been
+        deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public void commitWorkingCopy(boolean, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.commit(b,monitor)</code> as <code>((ICompilationUnit)
+            wc).commitWorkingCopy(b,monitor)</code></li>
+        </ul>
+      </li>
+      <li><code>public void destroy()</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public void discardWorkingCopy(boolean, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.destroy()</code> as <code>((ICompilationUnit)
+            wc).discardWorkingCopy()</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement findSharedWorkingCopy(IBufferFactory)</code>
+        has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit findWorkingCopy(WorkingCopyOwner)</code></li>
+            </ul>
+          </li>
+          <li>Note: <code>WorkingCopyOwner</code> substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getOriginal(IJavaElement)</code> has been
+        deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>IJavaElement</code>:
+            <ul>
+              <li><code>public IJavaElement getPrimaryElement()</code></li>
+            </ul>
+          </li>
+        </ul>
+        <ul>
+          <li>Rewrite <code>wc.getOriginal(elt)</code> as <code>elt.getPrimaryElement()</code></li>
+          <li>Note: Unlike <code>IWorkingCopy.getOriginal</code>, <code>IJavaElement.getPrimaryElement</code>
+            does not return <code>null</code> if the receiver is not a working
+            copy.</li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getOriginalElement()</code> has been
+        deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getPrimary()</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.getOriginalElement()</code> as <code>((ICompilationUnit)
+            wc).getPrimary()</code></li>
+          <li>Note: Unlike <code>IWorkingCopy.getOriginalElement</code>, <code>IWorkingCopy.getPrimary</code>
+            does not return <code>null</code> if the receiver is not a working
+            copy.</li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement[] findElements(IJavaElement)</code> has been
+        deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.findElements(elts)</code> as <code>((ICompilationUnit)
+            wc).findElements(elts)</code></li>
+        </ul>
+      </li>
+      <li><code>public IType findPrimaryType()</code> has been deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.findPrimaryType()</code> as <code>((ICompilationUnit)
+            wc).findPrimaryType()</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getSharedWorkingCopy(IProgressMonitor,
+        IBufferFactory, IProblemRequestor)</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(WorkingCopyOwner,
+                IProblemRequestor, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: the parameter order has changed, and <code>WorkingCopyOwner</code>
+            substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getWorkingCopy()</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.getWorkingCopy() </code>as <code>((ICompilationUnit)
+            wc).getWorkingCopy(null)</code></li>
+        </ul>
+      </li>
+      <li><code>public IJavaElement getWorkingCopy(IProgressMonitor,
+        IBufferFactory, IProblemRequestor)</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(WorkingCopyOwner,
+                IProblemRequestor, IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: the parameter order has changed, and <code>WorkingCopyOwner</code>
+            substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+      <li><code>public boolean isBasedOn(IResource)</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public boolean hasResourceChanged()</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.isBasesOn(res)</code> as <code>((ICompilationUnit)
+            wc).hasResourceChanged()</code></li>
+        </ul>
+      </li>
+      <li><code>public boolean isWorkingCopy()</code> has been deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.isWorkingCopy()</code> as <code>((ICompilationUnit)
+            wc).isWorkingCopy()</code></li>
+        </ul>
+      </li>
+      <li><code>public IMarker[]&nbsp; reconcile()</code> has been deprecated.
+        <ul>
+          <li>The equivalent functionality is now provided on <code>ICompilationUnit</code>
+            directly:
+            <ul>
+              <li><code>public void reconcile(boolean,IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Rewrite <code>wc.reconcile()</code> as <code>((ICompilationUnit)
+            wc).reconcile(false, null)</code></li>
+          <li>Note: The former method always returned <code>null</code>; the
+            replacement method does not return a result.</li>
+        </ul>
+      </li>
+      <li><code>public void reconcile(boolean, IProgressMonitor)</code> has been
+        deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.reconcile(b,monitor)</code> as <code>((ICompilationUnit)
+            wc).reconcile(b.monitor)</code></li>
+        </ul>
+      </li>
+      <li><code>public void restore()</code> has been deprecated.
+        <ul>
+          <li>The method is now declared on <code>ICompilationUnit</code>
+            directly.</li>
+          <li>Rewrite <code>wc.restore()</code> as <code>((ICompilationUnit)
+            wc).restore()</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>IType</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public ITypeHierarchy newSupertypeHierarchy(IWorkingCopy[],
+        IProgressMonitor)</code> has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ITypeHierarchy newSupertypeHierarchy(c,
+                IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: The Java language rules for array types preclude casting <code>IWorkingCopy[]</code>
+            to <code>ICompilationUnit[]</code>.</li>
+        </ul>
+      </li>
+      <li><code>public ITypeHierarchy newTypeHierarchy(IWorkingCopy[],
+        IProgressMonitor)</code> has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ITypeHierarchy newTypeHierarchy(ICompilationUnit[],
+                IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: The Java language rules for array types preclude casting <code>IWorkingCopy[]</code>
+            to <code>ICompilationUnit[]</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>IClassFile</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public IJavaElement getWorkingCopy(IProgressMonitor,
+        IBufferFactory)</code> has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ICompilationUnit getWorkingCopy(WorkingCopyOwner,
+                IProgressMonitor)</code></li>
+            </ul>
+          </li>
+          <li>Note: the parameter order has changed, and <code>WorkingCopyOwner</code>
+            substitutes for <code>IBufferFactory.</code></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>JavaCore</code> (package <code>org.eclipse.jdt.core</code>)
+    <ul>
+      <li><code>public IWorkingCopy[] getSharedWorkingCopies(IBufferFactory)</code>
+        has been deprecated.
+        <ul>
+          <li>The replacement method is provided on the same class:
+            <ul>
+              <li><code>public ICompilationUnit[]
+                getWorkingCopies(WorkingCopyOwner)</code></li>
+            </ul>
+          </li>
+          <li>Note: <code>WorkingCopyOwner</code> substitutes for <code>IBufferFactory.</code></li>
+          <li>Note: The Java language rules for array types preclude casting <code>ICompilationUnit[]</code>
+            to <code>IWorkingCopy[]</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><code>SearchEngine</code> (package <code>org.eclipse.jdt.core.search</code>)
+    <ul>
+      <li><code>public SearchEngine(IWorkingCopy[])</code> has been deprecated.
+        <ul>
+          <li>The replacement constructor is provided on the same class:
+            <ul>
+              <li><code>public SearchEngine(ICompilationUnit[])</code></li>
+            </ul>
+          </li>
+          <li>Note: The Java language rules for array types preclude casting <code>IWorkingCopy[]</code>
+            to <code>ICompilationUnit[]</code>.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<h3>Restructuring of org.eclipse.help plug-in</h3>
+<p>The org.eclipse.help plug-in, which used to hold APIs and extension points
+for contributing to and extending help system, as well as displaying help, now
+contains just APIs and extension points for contributing and accessing help
+resources. A portion of default help UI implementation contained in that plug-in
+has been moved to a new plug-in org.eclipse.help.base together with APIs for
+extending the implementation. The APIs and extension point for contributing Help
+UI and displaying help have been moved to org.eclipse.ui plug-in. This
+restructuring allows applications greater flexibility with regard to the help
+system; the new structure allows applications based on the generic workbench to
+provide their own Help UI and/or Help implementation, or to omit the help system
+entirely.</p>
+<p>Because the extension points and API packages affected are intended only for
+use by the help system itself, it is unlikely that existing plug-ins are
+affected by this change. They are included here only for the sake of
+completeness:</p>
+<ul>
+  <li>API packages org.eclipse.ui.help.browser and
+    org.eclipse.ui.help.standalone, formerly provided by the org.eclipse.help
+    plug-in, have been moved to the org.eclipse.help.base plug-in.</li>
+  <li>Extension points org.eclipse.help.browser, org.eclipse.help.luceneAnalyzer,
+    and org.eclipse.help.webapp, formerly defined by the org.eclipse.help
+    plug-in, have been moved to the org.eclipse.help.base plug-in, with a
+    corresponding change in extension point id.</li>
+  <li>Extension point org.eclipse.help.support has been replaced by the
+    org.eclipse.ui.helpSupport extension point. The contract for this extension
+    point changed as well (see entry for IHelp).</li>
+</ul>
+<h3>New Search UI API</h3>
+<P>A new API for implmenting custom searches has been added in 3.0. The original API is deprecated in 3.0 and we recommend that cllients port to the new API in the packages org.eclipse.search.ui and org.eclipse.search.ui.text.
+</P>
+<P>Clients will have to create implementations of <CODE>ISearchQuery</CODE>, <CODE>ISearchResult</CODE> and <CODE>ISearchResultPage</CODE>. The <CODE>ISearchResultPage</CODE> implementation must then be contributed into the new <CODE>org.eclipse.search.searchResultViewPages</CODE> extension point. </P>
+<P>Default implementations for <CODE>ISearchResult</CODE> and <CODE>ISearchResultPage</CODE> are provided in the package<CODE>
+org.eclipse.search.ui.text</CODE>.</P>
+
+<h3>null messages in MessageBox and DirectoryDialog (package
+org.eclipse.swt.widgets)</h3>
+<p>Prior to 3.0, calling SWT's DirectoryDialog.setMessage(String string) or
+MessageBox.setMessage(String string) with a null value for string would result
+in a dialog with no text in the title. This behavior was unspecified (passing
+null has never been permitted) and creates problems with getMessage which is not
+permitted to return null. In 3.0, passing null now results in an
+IllegalArgumentException exception being thrown, and the specifications have
+been changed to state this, bringing it into line with the method on their
+superclass Dialog.setMessage. If you use Dialog.setMessage, ensure that that the
+string passed in is never null. Simply pass an empty string if you want a dialog
+with no text in the title.</p>
+<h3>Improving modal progress feedback</h3>
+<p>Supporting concurrent operations requires more sophisticated ways to show
+modal progress. As part of the responsiveness effort additional progress support
+was implemented in the class IProgressService. The existing way to show progress
+with the ProgressMonitorDialog is still working. However, to improve the user
+experience we recommend migrating to the new IProgressService.</p>
+<p>The document <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-core-home/documents/plan_concurrency_modal_progress.html">Showing
+Modal Progress in Eclipse 3.0</a> describes how to migrate to the new
+IProgressService.</p>
+<h3>Debug Action Groups removed</h3>
+<p>The Debug Action Groups extension point
+(org.eclipse.debug.ui.debugActionGroups) has been removed. In Eclipse 3.0, the
+workbench introduced support for Activities via the
+org.eclipse.platform.ui.activities extension point. This support provides
+everything that Debug Action Groups provided and is also easier to use (it
+supports patterns instead of specifying all actions exhaustively) and has a
+programmatic API to support it. Failing to remove references to the old
+extension point won't cause any failures. References to the extension point will
+simply be ignored. Product vendors are encouraged to use the workbench
+Activities support to associate language-specific debugger actions with
+language-specific activities (for example, C++ debugging actions might be
+associated with an activity called &quot;Developing C++&quot;).</p>
+<h3>BreakpointManager can be disabled</h3>
+<p>IBreakpointManager now defines the methods setEnabled(boolean) and
+isEnabled(). When the breakpoint manager is disabled, debuggers should ignore
+all registered breakpoints. The debug platform also provides a new listener
+mechanism, IBreakpointManagerListener which allows clients to register with the
+breakpoint manager to be notified when its enablement changes. The Breakpoints
+view calls this API from a new toggle action that allows the user to &quot;Skip
+All Breakpoints.&quot; Debuggers which do not honor the breakpoint manager's
+enablement will thus appear somewhat broken if the user tries to use this
+feature.</p>
 <p><a href="../notices.html"><img src="../cpy.gif" border="0" alt="Legal notices" width="324" height="14"></a></p>
 
 </body>
