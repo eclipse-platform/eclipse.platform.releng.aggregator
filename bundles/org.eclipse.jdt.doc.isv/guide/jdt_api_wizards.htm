@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Java wizard pages</title>
+<link rel="stylesheet" type="text/css" href="../book.css">
+</head>
+<body>
+<h2> Java wizard pages</h2>
+<p> The <a href="../reference/api/org/eclipse/jdt/ui/wizards/package-summary.html"><b>org.eclipse.jdt.ui.wizards</b></a> 
+  package provides wizard pages for creating and configuring Java
+elements.&nbsp; Several
+prefabricated pages are provided for your use.</p>
+<h3> Configuring Java build settings</h3>
+<p><a href="../reference/api/org/eclipse/jdt/ui/wizards/JavaCapabilityConfigurationPage.html"><b>JavaCapabilityConfigurationPage</b></a> supports editing the Java build settings 
+    (source folder setup, referenced projects and, referenced and exported libraries).&nbsp;&nbsp;</p>
+<p>If you need to provide a wizard that configures a project for your plug-in
+while also configuring it with the Java nature and other Java project
+capabilities, you should use this page (rather than subclassing <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewJavaProjectWizardPage.html"><b>NewJavaProjectWizardPage</b></a>).</p>
+<h3><b>Creating new Java elements</b></h3>
+<p>A hierarchy of wizard pages support the creation of new Java
+elements.&nbsp;&nbsp;</p>
+<p><a href="../reference/api/org/eclipse/jdt/ui/wizards/NewElementWizardPage.html"><b>NewElementWizardPage</b></a>
+is the abstract class that defines the basic operation of the wizard.&nbsp;
+Additional abstract classes are provided in the hierarchy for making
+customizations to the functionality provided by the concrete wizards.</p>
+<p>The concrete creation wizards can be used directly and generally are not
+intended to be subclassed.&nbsp;</p>
+<ul>
+  <li> 
+    <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewClassWizardPage.html"><b>NewClassWizardPage</b></a>
+    allows users to define a new Java class.&nbsp; To customize the behavior for
+    this wizard, you should subclass <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewTypeWizardPage.html"><b>NewTypeWizardPage</b></a>.</li>
+  <li> 
+    <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewInterfaceWizardPage.html"><b>NewInterfaceWizardPage</b></a>
+    allows users to define a new Java interface.&nbsp; To customize the behavior
+    for this wizard, you should subclass <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewTypeWizardPage.html"><b>NewTypeWizardPage</b></a>.</li>
+  <li> 
+    <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewJavaProjectWizardPage.html"><b>NewJavaProjectWizardPage</b></a>
+    allows users to create a new Java project.&nbsp; To create a different kind
+    of project with Java capabilities, you should use <a href="../reference/api/org/eclipse/jdt/ui/wizards/JavaCapabilityConfigurationPage.html"><b>JavaCapabilityConfigurationPage</b></a> <b>
+    </b>where possible rather than subclassing this class.</li>
+  <li> 
+    <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewPackageWizardPage.html"><b>NewPackageWizardPage</b></a>
+    allows users to create a new Java package. To customize the behavior for
+    this wizard, you should subclass <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewContainerWizardPage.html"><b>NewContainerWizardPage</b></a>
+    rather than this class.&nbsp;</li>
+</ul>
+<h3>Contributing a classpath container wizard page</h3>
+<p>The interface <a href="../reference/api/org/eclipse/jdt/ui/wizards/IClasspathContainerPage.html"><b>IClasspathContainerPage</b></a>
+defines a structure for contributing a wizard page that allows a user to define
+a new classpath container entry or edit an existing one.&nbsp; If your plug-in
+has defined its own type of classpath container using the JDT Core <b><a href="../reference/extension-points/org_eclipse_jdt_core_classpathContainerInitializer.html">org.eclipse.jdt.core.classpathContainerInitializer</a></b>
+ extension point, then you will probably want to define a corresponding wizard
+page for editing and creating classpath containers of this type.</p>
+<p>Your plug-in's markup should provide an extension <b><a href="../reference/extension-points/org_eclipse_jdt_core_classpathContainerInitializer.html">org.eclipse.jdt.ui.classpathContainerPage</a>.&nbsp;
+</b>In the extension markup, you provide the name of your class that implements <a href="../reference/api/org/eclipse/jdt/ui/wizards/IClasspathContainerPage.html"><b>IClasspathContainerPage</b></a>.&nbsp;
+If you want to provide additional information in your wizard page about a
+classpath's context when it is selected, you can implement <a href="../reference/api/org/eclipse/jdt/ui/wizards/IClasspathContainerPageExtension.html"><b>IClasspathContainerPageExtension</b></a><b>
+</b>to initialize any state that depends on the entries selected in the current
+classpath.</p>
+<h3> Customizing a wizard page</h3>
+<p> Besides using 
+  prefabricated pages, you can subclass the wizard pages to 
+  add your own input fields or to influence the code generation.&nbsp; You
+should use the abstract classes in the <a href="../reference/api/org/eclipse/jdt/ui/wizards/NewElementWizardPage.html"><b>NewElementWizardPage</b></a><b>
+</b>hierarchy to customize a wizard rather than subclassing the concrete
+classes.</p>
+<p> Below is a sample 
+  of a new type wizard page that is customized to create JUnit test case classes. 
+  The page initializes the super class field with &quot;junit.framework.TestCase&quot; 
+  and adds a checkbox that controls whether method stubs for the <code>setUp()</code> and <code>tearDown()</code>
+  method are to be created.</p>
+<pre><font color="#4444CC">public class TestCaseWizardPage extends NewTypeWizardPage {
+    private Button fCreateStubs;
+
+    public TestCaseWizardPage() {
+        super(true, &quot;TestCaseWizardPage&quot;);
+    }
+
+    /**
+     * The wizard managing this wizard page must call this method
+     * during initialization with a corresponding selection.
+     */   
+    public void init(IStructuredSelection selection) {
+        IJavaElement jelem= getInitialJavaElement(selection);
+        initContainerPage(jelem);
+        initTypePage(jelem);
+        // define the components for which a status is desired
+        IStatus[] status= new IStatus[] {
+            fContainerStatus,
+            isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
+            fTypeNameStatus,
+        };
+        updateStatus(status);
+    }
+
+    public void createControl(Composite parent) {
+        initializeDialogUnits(parent);
+        Composite composite= new Composite(parent, SWT.NONE);
+        int nColumns= 4;
+        GridLayout layout= new GridLayout();
+        layout.numColumns= nColumns;
+        composite.setLayout(layout);
+
+        // Create the standard input fields
+        createContainerControls(composite, nColumns);
+        createPackageControls(composite, nColumns);
+        createSeparator(composite, nColumns);
+        createTypeNameControls(composite, nColumns);
+        createSuperClassControls(composite, nColumns);
+
+        // Create the checkbox controlling whether we want stubs
+        fCreateStubs= new Button(composite, SWT.CHECK);
+        fCreateStubs.setText(&quot;Add 'setUp()' and 'tearDown()' to new class&quot;);
+        GridData gd= new GridData();
+        gd.horizontalSpan= nColumns;
+        fCreateStubs.setLayoutData(gd);
+
+        setControl(composite);
+
+        // Initialize the super type field and mark it as read-only
+        setSuperClass(&quot;junit.framework.TestCase&quot;, false);
+    }
+
+    protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+        if (fCreateStubs.getSelection()) {
+            String setUpMathod= &quot;public void setUp() {}&quot;;
+            newType.createMethod(setUpMathod, null, false, null);
+
+            String tearDownMathod= &quot;public void setUp() {}&quot;
+            newType.createMethod(tearDownMathod, null, false, null); 
+        }
+   }
+}</font></pre>
+<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved."> 
+  </a> </p>
+</body>
+</html>
