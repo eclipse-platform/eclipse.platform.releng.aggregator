@@ -181,11 +181,13 @@ public class DB {
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
             int sample_id= fSQL.createSample(getConfig(), scenario_id, null, new Timestamp(sample.getStartTime()));
             
+            /*
             String[] propertyKeys= sample.getPropertyKeys();
             for (int i= 0; i < propertyKeys.length; i++) {
                 String key= propertyKeys[i];
                 fSQL.insertSampleProperty(sample_id, key, sample.getProperty(key));
             }
+            */
             fStoredSamples++;
             
             //System.err.println(PerformanceTestPlugin.getBuildId());
