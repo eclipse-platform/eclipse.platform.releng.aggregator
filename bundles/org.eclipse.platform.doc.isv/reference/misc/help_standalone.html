@@ -14,36 +14,53 @@
 <p>If you are creating an application that is not based on 
 the Eclipse framework, you can still use the Eclipse help system. Your 
 application can package and install the stand-alone help system, a very small 
-version of Eclipse that has had everything except the help system stripped out 
+version of Eclipse that has everything except the help system stripped out 
 of it. Then, your application can make API calls from its Help menu, or from UI 
 objects, to launch the help browser. The stand-alone help system has all the 
-features of the integrated help system, except infopops and active help. </p>
+features of the integrated help system, except infopops and active help. When an application is not Java based, or help is required when the application is not running, it is possible to use stand-alone help from a system shell, a shell script or a desktop shortcut and provide command line options instead of calling Java APIs.</p>
+<P>The stand-alone help system allows passing number of options that can be used to customize various aspects of the help system. The following options are supported:</P><UL>
+	<LI><B>-eclipsehome</B> <I>eclipseInstallPath</I> - specifies Eclipse
+	installation directory. It must be provided, when current directory from which infocenter is launched, is
+	not the same as Eclipse installation directory.</LI>
+	<LI><B>-host</B> <I></I>helpServerPort - specifies host name of the
+	interface that help server will use. It overrides host name specified
+	the application server plugin preferences.</LI>
+
+	<LI><B>-port</B> <I>helpServerPort</I> - specifies port number that
+	help server will use. It overrides port number specified the
+	application server plugin preferences.</LI>
+	<LI>Additionally, most <A
+		href="../../../org.eclipse.platform.doc.user/tasks/running_eclipse.htm">options
+	accepted by Eclipse executable</A> can be passed. They are especially useful during debugging and for applying customization to Eclipse.</LI>
+</UL>
 <h2><b>Installation/packaging</b> </h2>
 These steps are for the help system 
   integrator and are not meant to address all the possible scenarios. It is 
-  assumed that the launching application is in Java, and that 
+  assumed   that 
   all your documentation is delivered as Eclipse plug-ins and, in general, you are 
   familiar with the eclipse help system.
 <ol>
-  <li>Download the Eclipse 2.0 Release level Platform Runtime Binary driver from
+  <li>Download the Eclipse Platform Runtime Binary driver from
   <a target="_blank" href="http://www.eclipse.org/downloads/">www.eclipse.org</a>.</li>
   <li>Install (unzip) the driver under your application directory, for 
   example, <var>d:\myApp</var>. This will create an eclipse subdirectory, d:\myApp\eclipse that 
   contains the code required for the Eclipse platform (which includes the help 
   system). </li>
 </ol>
-<h2><b>How to call the help classes</b></h2>
+<h2><b>How to call the help classes from Java</b></h2>
 <ol>
   <li>Make sure <em><span style="font-style: normal">d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar</span></em> is 
   on your app classpath. The class you use to start, launch, and shut down the help system is 
   org.eclipse.help.standalone.Help. </li>
-  <li>In your application, create an instance of the Help class by passing the plugins 
-  directory. This object should be held onto until the end of your application.<pre><em><span style="font-style: normal">Help helpSystem = new Help(&quot;d:\\myApp\\eclipse\\plugins&quot;);</span></em> </pre>
-  </li>
-  <li>To start the help system:
+  <li>Create an array of String containing options that you want to pass to help system support. Typically, the eclipsehome option is needed.
+  <PRE><EM><SPAN style="font-style: normal">String[] options = new String[] { &quot;-eclipsehome&quot;, &quot;d:\\myApp\\eclipse&quot; };</SPAN></EM> </PRE></li>
+	<LI>In your application, create an instance of the Help class by
+	passing the options. This object should be held onto until
+	the end of your application.<PRE><EM><SPAN style="font-style: normal">Help helpSystem = new Help(options);</SPAN></EM> </PRE>
+	</LI>
+	<li>To start the help system:
   <pre><em><span style="font-style: normal">helpSystem.start();</span></em> </pre>
-  <p>At the end of your application, to shutdown the help system: </p>
-  <pre><em><span style="font-style: normal">helpSystem.shutdown();</span></em> </pre>
+  <p></p>
   </li>
   <li>To invoke help when needed:
   <pre><em><span style="font-style: normal">helpSystem.displayHelp();</span></em> </pre>
@@ -55,14 +72,21 @@ helpSystem.displayHelp(&quot;/com.mycompany.mytool.doc/tasks/task1.htm&quot;);</
   helpSystem.displayContext(contextId, x, y) where contextId is a fully 
   qualified context id. The screen coordinates, x and y, are not currently used.
   </li>
+	<LI>
+	<P>At the end of your application, to shutdown the help system:</P>
+	<PRE><EM><SPAN style="font-style: normal">helpSystem.shutdown();</SPAN></EM> </PRE></LI>
 </ol>
-<h2><b>Testing stand-alone help</b> </h2>
-<p>The org.eclipse.help.standalone.Help class has a simple main program that you 
-can launch and see how the stand-alone help works out of the box. From a command 
-line, run the following command:</p>
-<pre>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar 
-org.eclipse.help.standalone.Help d:\myApp\eclipse\plugins</pre>
+<h2><b>How to call the help from command line</b> </h2>
+<p>The org.eclipse.help.standalone.Help class has a  main method that you 
+can use to launch stand-alone help from a command 
+line. The command line arguments syntax is:</p>
+<pre><em><span style="font-style: normal">-command start | shutdown | (displayHelp [href]) [-eclipsehome eclipseInstallPath] [-host helpServerHost] [-port helpServerPort] [platform options] [-vmargs JavaVMarguments]</span></em></pre>
+<P>A simple way to display help is to invoke</P>
+<pre>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Help -command displayHelp</pre><P>from within d:\myApp directory. To display specific TOC file or topic use</P>
 
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Help -command displayHelp /com.mycompany.mytool.doc/tasks/task1.htm</PRE>
+<P>The calls above to display help will cause help system to start, display help, and keep running to allow a user to continue browsing  help after the command is executed. To control the life cycle of the help system, use start and shutdown commands, in addition to the displayHelp command. For example, you may call</P>
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Help -command startup</PRE>
 <a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. and others 2000, 2002." BORDER=0 height=12 width=250></a>
 
 </body>

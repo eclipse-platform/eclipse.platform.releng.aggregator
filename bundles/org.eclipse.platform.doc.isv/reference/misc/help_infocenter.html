@@ -13,79 +13,80 @@
 <h1>Installing the help system as an infocenter</h1>
 
 <p>You can allow your users to access the help system over the Internet or an 
-intranet, by installing the stand-alone help system and the documentation 
-plug-ins on a web server. The application accesses the documentation by calling 
-a URL, and the help system is shown in their web browser. The infocenter help 
+intranet, by installing the infocenter and the documentation 
+plug-ins on   a server. Clients view help by navigating 
+to a URL, and the help system is shown in their web browser. The infocenter help 
 system can be used both for client applications and for web applications, either 
-of which can have their help accessed remotely. All features except infopops and 
+of which can have their help accessed remotely. All features of help system except infopops and 
 active help are supported. </p>
-<h2><b>Installation/packaging</b> </h2>
-These steps are for the help system 
-  integrator and web admin and are not meant to address all the possible scenarios. It is 
-  assumed that all your documentation is delivered as Eclipse plug-ins and, in general, you are 
-  familiar with the eclipse help system. For the end users, it is assumed that they have
-  IE5.x or 6.x or Mozilla installed on their machines.
+<P>The infocenter help system allows passing number of options that can
+be used to customize various aspects of the infocenter. The following
+options are supported:</P>
+<UL>
+	<LI><B>-eclipsehome</B> <I>eclipseInstallPath</I> - specifies Eclipse
+	installation directory. It must be provided, when current directory from which infocenter is launched, is
+	not the same as Eclipse installation directory.</LI>
+	<LI><B>-host</B> <I></I>helpServerPort - specifies host name of the
+	interface that help server will use. It overrides host name specified
+	the application server plugin preferences.</LI>
 
-<ol>
-  <li>Make sure an application server is installed on the machine.&nbsp; We have 
-  tested with Tomcat 3 and Tomcat 4.</li>
-  <li>Download the Eclipse 2.0 Release level Platform Runtime Binary driver from
-  <a href="http://www.eclipse.org/downloads/">www.eclipse.org</a>.</li>
-  <li>Install (unzip) the driver to a directory <var>d:\eclipse</var>.
-  </li>
-  <li>Register the Eclipse Help application residing in 
-  d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0 with the web server. Do not copy 
-  this directory elsewhere; it must remain in Eclipse installation tree.<p>In 
-  Tomcat this registration can be accomplished by adding the following lines to 
-  the tomcat\conf\server.xml file:</p>
-  <pre><em><span style="font-style: normal">&lt;</span></em>Context path=&quot;/help&quot;&nbsp; docBase=&quot;d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0&quot;&gt;
-&lt;/Context&gt;</pre>
-  <p>In Tomcat 3 add the lines near end of the file, as the last element inside 
-  the ContextManager section.&nbsp; In Tomcat 4, add this section as the last element 
-  inside the Host section. </li>
-  <li>Install the following fixes, depending on which server you are using:
-  <ul>
-    <li><b>Tomcat 3:</b>&nbsp; Tomcat 3 does not have XML parser library available to 
-    a web application.&nbsp; To fix that, copy xercesImpl.jar and xmlParserAPIs.jar from 
-    d:\eclipse\plugins\org.apache.xerces_4.0.3\ to 
-    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\WEB-INF\lib\ </li>
-    
-    <li><b>Tomcat 4:</b>&nbsp;
-     	<ul><li> Both Eclipse and Tomcat contain code to set a 
-    URLStreamHandler, but it can only be set once.&nbsp; To allow both Tomcat and 
-    Eclipse to work correctly, a library 
-    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\infocenter\eclipseurl.jar needs 
-    to be added to the class path at Tomcat startup.&nbsp; In Tomcat 4.0.3 edit 
-    tomcat/bin/setclasspath.bat file and after the line:&nbsp;<pre><em><span style="font-style: normal">set CLASSPATH=%JAVA_HOME%\lib\tools.jar</span></em></pre>
-    <p>insert the line:</p>
-    <pre><em><span style="font-style: normal">set CLASSPATH=%CLASSPATH%;d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\infocenter\eclipseurl.jar.</span></em> </pre>
-    
-        </li>
-        <li>
-	 Because of changes to the xml library, remove tomcat\common\lib\xerces.jar, then edit setclasspath.bat by replacing the line
-		   <pre><em><span style="font-style: normal">set JAVA_OPTS=</span></em> </pre>
-            with 
-		   <pre><em><span style="font-style: normal">set JAVA_OPTS=-Xbootclasspath/a:d:\eclipse\plugins\org.apache.xerces_4.0.3\xercesImpl.jar;d:\eclipse\plugins\org.apaches.xerces_4.0.3\xmlParserAPIs.jar.</span></em> </pre>
-        </li>
-        </ul>
-    </li>
-    <li><b>Disable precompiled JSP's:</b>. Unless you are using Tomcat 4.0.x or 
-    plan to ship the jasper jar files, you should also copy 
-    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\infocenter\web.xml to
-    d:\eclipse\plugins\org.eclipse.help.webapp_2.0.0\WEB-INF. </li>
-     </ul>
-  </li>
-</ol>
+	<LI><B>-port</B> <I>helpServerPort</I> - specifies port number that
+	help server will use. It overrides port number specified the
+	application server plugin preferences.</LI>
+	<LI>Additionally, most <A
+		href="../../../org.eclipse.platform.doc.user/tasks/running_eclipse.htm">options
+	accepted by Eclipse executable</A> can be passed. They are especially
+	useful during debugging and for applying customization to Eclipse.</LI>
+</UL>
+<H2><B>Installation/packaging</B></H2>
+<P>These steps are for the help system integrator and are not meant to
+address all the possible scenarios. It is assumed that all your
+documentation is delivered as Eclipse plug-ins and, in general, you are
+familiar with the eclipse help system.</P>
+<OL>
+	<LI>Download the Eclipse Platform Runtime Binary
+	driver from <A target="_blank" href="http://www.eclipse.org/downloads/">www.eclipse.org</A>.</LI>
+	<LI>Install (unzip) the driver in a directory, <VAR>d:\myApp</VAR>. This will create an eclipse subdirectory,
+	d:\myApp\eclipse that contains the code required for the Eclipse
+	platform (which includes the help system).</LI>
+</OL>
+<H2><B>How to start or stop infocenter from command line</B></H2>
+<P>The org.eclipse.help.standalone.Infocenter class has a main method that you
+can use to launch infocenter from a command line. The command line
+arguments syntax is:</P>
+<PRE><EM><SPAN style="font-style: normal">-command start | shutdown | [-eclipsehome eclipseInstallPath] [-host helpServerHost] [-port helpServerPort] [platform options] [-vmargs JavaVMarguments]</SPAN></EM></PRE>
+<P>To start an infocenter on port 8081 issue a start command by running</P>
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Infocenter -command start -eclipsehome d:\myApp\eclipse -port 8081</PRE>
+<P>To shut the infocenter down issue a shutdown command by running</P>
+
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar org.eclipse.help.standalone.Infocenter -command shutdown -eclipsehome d:\myApp\eclipse</PRE>
 <h2>Using the infocenter</h2>
-<p>Start the web server. Point a web browser to the path of the web 
-application.&nbsp; On the machine the Tomcat is installed, this would be 
-http://localhost:8080/help/. </p>
-<h2>Installing custom documentation</h2>
-<p>The Eclipse platform comes with its own documentation, contained in the 
-org.eclipse.platform.doc.user plug-in.&nbsp; It will be available in the 
-infocenter by default. To have you own documentation show up, package the 
-documentation as Eclipse documentation plug-ins.&nbsp; Install them to 
-d:\eclipse\plugins\.&nbsp; </p>
+<p>Start the web server. Point a web browser to the path &quot;help&quot; web 
+application running on a port specified when starting the infocenter.&nbsp; On the machine the infocenter is installed, this would be 
+http://localhost:8081/help/. </p>
+<H2><B>How to start or stop infocenter from Java</B></H2>
+<P>When including infocenter as part of another application, it may be more convenient to start it and stop using Java APIs instead of using system commands. Follow the steps if it is the case:</P>
+<OL>
+	<LI>Make sure <EM><SPAN style="font-style: normal">d:\myApp\eclipse\plugins\org.eclipse.help_2.0.0\help.jar</SPAN></EM>
+	is on your app classpath. The class you use to start, and shut
+	down the infocenter isorg.eclipse.help.standalone.Infocenter.</LI>
+	<LI>Create an array of String containing options that you want to pass
+	to the infocenter. Typically, the eclipsehome and port options are needed. <PRE><EM><SPAN
+		style="font-style: normal">String[] options = new String[] { &quot;-eclipsehome&quot;, &quot;d:\\myApp\\eclipse&quot; , &quot;-port&quot;, &quot;8081&quot; };</SPAN></EM> </PRE></LI>
+	<LI>In your application, create an instance of the Help class by
+	passing the options.<PRE><EM><SPAN style="font-style: normal">Infocenter infocenter = new Help(options);</SPAN></EM> </PRE>
+	</LI>
+	<LI>To start the help system: <PRE><EM><SPAN style="font-style: normal">helpSystem.start();</SPAN></EM></PRE>
+	</LI>
+	<LI>
+	<P>To shut the infocenter down:</P>
+	<PRE><EM><SPAN style="font-style: normal">helpSystem.shutdown();</SPAN></EM> </PRE></LI>
+</OL>
+<H2>Making infocenter available on the web</H2>
+<P>Eclipse contains a complete infocenter and does not require other server software to run. However, in unsecure environment like Internet, it is recommended infocenter is not accessed directly by clients, but is made available through an HTTP server or an application server. Most servers come with
+modules or servlets for delegating certain request to other web resources. For example, one may configure a proxy module to redirect requests made to http://mycompany/myproduct/infocenter to  http://internalserver:8081/help that runs an infocenter.</P>
+<P></P>
+
 
 <a href="hglegal.htm"><img SRC="ngibmcpy.gif" ALT="Copyright IBM Corp. and others 2000, 2002." BORDER=0 height=12 width=250></a>
 
