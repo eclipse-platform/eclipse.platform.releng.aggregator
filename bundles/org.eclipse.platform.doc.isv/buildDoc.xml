@@ -52,7 +52,12 @@
 	 </copy>
 </target>
 
-<target name="generateJavadoc" if="JAVADOC14_HOME">
+<target name="getJavadocPath">
+	<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
+	<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+</target>
+
+<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
 	<condition property="optionsFile" value="platformOptions">
 	      <os family="unix" />
@@ -67,7 +72,7 @@
 	<delete dir="reference/api"/>
 	<mkdir dir="reference/api"/>
 
-	<exec dir="." executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
+	<exec dir="." executable="${javadoc}" output="doc.bin.log">
 		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
 	</exec>
 	

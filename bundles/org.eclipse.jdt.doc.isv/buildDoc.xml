@@ -30,7 +30,14 @@
 	  </copy>
 </target>
 
-<target name="generateJavadoc" if="JAVADOC14_HOME">
+
+<target name="getJavadocPath">
+	<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
+	<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+</target>
+
+
+<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
 	<!--HACK to ensure the platform doc is built before JDT - call to this script should be moved to build.jars target-->
 	<available file="../org.eclipse.platform.doc.isv/doc.zip" property="platform.doc.zip.present"/>
@@ -50,7 +57,7 @@
 	<delete dir="reference/api"/>
 	<mkdir dir="reference/api"/>
 
-	<exec dir="." executable="${JAVADOC14_HOME}/javadoc" output="doc.bin.log">
+	<exec dir="." executable="${javadoc}" output="doc.bin.log">
 		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
 	</exec>
 </target>
