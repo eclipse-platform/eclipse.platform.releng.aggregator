@@ -104,7 +104,7 @@ public class DB {
      * @param scenarioPattern
      * @param seriesKey
      * @param dimensions
-     * @return array of scenarios
+     * @return array of scenarios or <code>null</code> if an error occured.
      */
     public static Scenario[] queryScenarios(Variations variations, String scenarioPattern, String seriesKey, Dim[] dimensions) {
         String[] scenarioNames= getDefault().internalQueryScenarioNames(variations, scenarioPattern); // get all Scenario names
@@ -116,17 +116,14 @@ public class DB {
         return tables;
     }
 
-    // fingerprints
     /**
+     * Returns all summaries that match the given variation and scenario patterns.
+     * If scenarioPattern is null, all summary scenarios are returned that are marked as "global".
+     * If scenarioPattern is not null, it is used to filter the scenarios and only scenarios marked as "local" are returned.
      * @param variationPatterns
-     * @param global
-     * @return array of SummaryEntries
-     * @deprecated Use querySummaries(Variations, null) instead
+     * @param scenarioPattern
+     * @return array of summaries or <code>null</code> if an error occured.
      */
-    public static SummaryEntry[] querySummaries(Variations variationPatterns, boolean global) {
-        return getDefault().internalQuerySummaries(variationPatterns, null);
-    }
-
     public static SummaryEntry[] querySummaries(Variations variationPatterns, String scenarioPattern) {
         return getDefault().internalQuerySummaries(variationPatterns, scenarioPattern);
     }
