@@ -96,10 +96,10 @@ public class Evaluator extends EmptyEvaluator {
 		}
 		
 		if (!pass) {
-//		    if (config != null)
-//		        DB.markAsFailed(config, session, failMesg.toString());
+		    if (config != null)
+		        	DB.markAsFailed(config, session, failMesg.toString());
 //		    else
-		        Assert.assertTrue(failMesg.toString(), false);
+//				Assert.assertTrue(failMesg.toString(), false);
 		}
 	}
 }

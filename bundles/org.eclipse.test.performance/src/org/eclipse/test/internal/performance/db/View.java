@@ -51,7 +51,7 @@ public class View {
         ps.println();
 
         for (int s= 0; s < scenarios.length; s++)
-            scenarios[s].dump(ps);
+            scenarios[s].dump(ps, PerformanceTestPlugin.BUILD);
 
         if (ps != System.out)
             ps.close();

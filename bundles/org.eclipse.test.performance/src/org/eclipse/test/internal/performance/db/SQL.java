@@ -30,7 +30,7 @@ public class SQL {
     private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryVariation, fQueryVariations, fQueryScenario, fQueryAllScenarios, fQueryDatapoints, fQueryScalars;
     private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntry, fQueryGlobalSummaryEntries, fQuerySummaryEntries;
-    private PreparedStatement fInsertFailure;
+    private PreparedStatement fInsertFailure, fQueryFailure;
 
     SQL(Connection con) throws SQLException {
         fConnection= con;
@@ -49,7 +49,7 @@ public class SQL {
                 fCompatibility= true;
             else if ("VARIATION".equals(tablename)) //$NON-NLS-1$
                 needsInitialization= false;
-            else if ("FAILURES".equals(tablename)) //$NON-NLS-1$
+            else if ("FAILURE".equals(tablename)) //$NON-NLS-1$
                 needsFailures= false;
         }
         if (!fCompatibility) {
@@ -87,6 +87,7 @@ public class SQL {
         if (fQueryVariations != null) fQueryVariations.close();
         if (fQueryGlobalSummaryEntries != null) fQueryGlobalSummaryEntries.close();
         if (fQuerySummaryEntries != null) fQuerySummaryEntries.close();
+        if (fQueryFailure != null) fQueryFailure.close();
     }
         
     private void initialize() throws SQLException {
@@ -137,13 +138,13 @@ public class SQL {
 						"IS_GLOBAL smallint not null" + //$NON-NLS-1$
 					")" //$NON-NLS-1$
 	        );
-//	        stmt.executeUpdate(
-//	        		"create table FAILURE (" + //$NON-NLS-1$
-//	                	"VARIATION_ID int not null," + //$NON-NLS-1$
-//						"SCENARIO_ID int not null," + //$NON-NLS-1$
-//						"NAME varchar(1000) not null" + //$NON-NLS-1$
-//					")" //$NON-NLS-1$
-//	        );
+	        stmt.executeUpdate(
+	        		"create table FAILURE (" + //$NON-NLS-1$
+	                	"VARIATION_ID int not null," + //$NON-NLS-1$
+						"SCENARIO_ID int not null," + //$NON-NLS-1$
+						"MESSAGE varchar(1000) not null" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
 	        
 	        // Primary/unique
 	        stmt.executeUpdate("alter table VARIATION add constraint VA_KVP primary key (KEYVALPAIRS)"); //$NON-NLS-1$
@@ -157,24 +158,25 @@ public class SQL {
 	        stmt.executeUpdate("alter table SAMPLE add constraint SAMPLE_CONSTRAINT2 " + //$NON-NLS-1$
 					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
 	        stmt.executeUpdate("alter table DATAPOINT add constraint DP_CONSTRAINT " + //$NON-NLS-1$
-	        		"foreign key (SAMPLE_ID) references SAMPLE (ID)"); //$NON-NLS-1$
+	        			"foreign key (SAMPLE_ID) references SAMPLE (ID)"); //$NON-NLS-1$
 	        stmt.executeUpdate("alter table SCALAR add constraint SCALAR_CONSTRAINT " + //$NON-NLS-1$
-	        		"foreign key (DATAPOINT_ID) references DATAPOINT (ID)"); //$NON-NLS-1$
+	        			"foreign key (DATAPOINT_ID) references DATAPOINT (ID)"); //$NON-NLS-1$
 
 	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT " + //$NON-NLS-1$
 					"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
 	        stmt.executeUpdate("alter table SUMMARYENTRY add constraint FP_CONSTRAINT2 " + //$NON-NLS-1$
 					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
 
-//	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT " + //$NON-NLS-1$
-//					"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
-//	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT2 " + //$NON-NLS-1$
-//					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT " + //$NON-NLS-1$
+					"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT2 " + //$NON-NLS-1$
+					"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
 
 			fConnection.commit();
 	        
         } finally {
-            stmt.close();
+            if (stmt != null)
+                stmt.close();
         }
     }
 
@@ -201,7 +203,8 @@ public class SQL {
 	        fConnection.commit();
 	        
         } finally {
-            stmt.close();
+            if (stmt != null)
+                stmt.close();
         }
     }
 
@@ -210,11 +213,24 @@ public class SQL {
         try {
             stmt= fConnection.createStatement();
 
+	        stmt.executeUpdate(
+	        		"create table FAILURE (" + //$NON-NLS-1$
+	                	"VARIATION_ID int not null," + //$NON-NLS-1$
+						"SCENARIO_ID int not null," + //$NON-NLS-1$
+						"MESSAGE varchar(1000) not null" + //$NON-NLS-1$
+					")" //$NON-NLS-1$
+	        );
 
-	        fConnection.commit();
+	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT " + //$NON-NLS-1$
+				"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table FAILURE add constraint FA_CONSTRAINT2 " + //$NON-NLS-1$
+				"foreign key (SCENARIO_ID) references SCENARIO (ID)"); //$NON-NLS-1$
+
+    			fConnection.commit();
 	        
         } finally {
-            stmt.close();
+            if (stmt != null)
+                stmt.close();
         }        
     }
     
@@ -412,13 +428,25 @@ public class SQL {
         fQuerySummaryEntries.setString(2, scenarioPattern);
         return fQuerySummaryEntries.executeQuery();
     }
-    
-    void insertFailure(int datapoint_id, int dim_id, long value) throws SQLException {
+
+    void insertFailure(int variation_id, int scenario_id, String message) throws SQLException {
         if (fInsertFailure == null)
-            fInsertFailure= fConnection.prepareStatement("insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
-        fInsertFailure.setInt(1, datapoint_id);
-        fInsertFailure.setInt(2, dim_id);
-        fInsertFailure.setLong(3, value);
+            fInsertFailure= fConnection.prepareStatement("insert into FAILURE values (?, ?, ?)"); //$NON-NLS-1$
+        fInsertFailure.setInt(1, variation_id);
+        fInsertFailure.setInt(2, scenario_id);
+        fInsertFailure.setString(3, message);
         fInsertFailure.executeUpdate();
+    }
+
+    public ResultSet queryFailure(Variations variations, String scenarioPattern) throws SQLException {
+        if (fQueryFailure == null)
+            fQueryFailure= fConnection.prepareStatement(
+            		"select SCENARIO.NAME, FAILURE.MESSAGE from FAILURE, VARIATION, SCENARIO where " +	//$NON-NLS-1$
+            		"FAILURE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
+            		"FAILURE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
+            ); 
+        fQueryFailure.setString(1, variations.toExactMatchString());
+        fQueryFailure.setString(2, scenarioPattern);
+        return fQueryFailure.executeQuery();
     }
 }

@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -121,9 +122,10 @@ public class DB {
         String[] scenarioNames= getDefault().internalQueryScenarioNames(variations, scenarioPattern); // get all Scenario names
         if (scenarioNames == null)
             return new Scenario[0];
+        Scenario.SharedState ss= new Scenario.SharedState(variations, scenarioPattern, seriesKey, dimensions);
         Scenario[] tables= new Scenario[scenarioNames.length];
         for (int i= 0; i < scenarioNames.length; i++)
-            tables[i]= new Scenario(scenarioNames[i], variations, seriesKey, dimensions);
+            tables[i]= new Scenario(scenarioNames[i], ss);
         return tables;
     }
 
@@ -158,10 +160,10 @@ public class DB {
     }
     
     public static Scenario getScenarioSeries(String scenarioName, Variations v, String seriesKey, String startBuild, String endBuild, Dim[] dims) {
-        
         v= (Variations) v.clone();
         v.put(seriesKey, new String[] { startBuild, endBuild });
-        Scenario scenario= new Scenario(scenarioName, v, seriesKey, dims);
+        Scenario.SharedState ss= new Scenario.SharedState(v, scenarioName, seriesKey, dims);
+        Scenario scenario= new Scenario(scenarioName, ss);
         TimeSeries ts= scenario.getTimeSeries(dims[0]);
         if (ts.getLength() < 2) {
             v.put(seriesKey, "%"); //$NON-NLS-1$
@@ -170,12 +172,16 @@ public class DB {
                 String start= findClosest(names, startBuild);
                 String end= findClosest(names, endBuild);
                 v.put(seriesKey, new String[] { start, end });
-                scenario= new Scenario(scenarioName, v, seriesKey, dims);
+                scenario= new Scenario(scenarioName, ss);
             }
         }
         return scenario;
     }
     
+    public static Map queryFailure(String scenarioPattern, Variations variations) {
+        return getDefault().internalQueryFailure(scenarioPattern, variations);
+    }
+        
     private static String findClosest(String[] names, String name) {
         for (int i= 0; i < names.length; i++)
             if (names[i].equals(name))
@@ -225,7 +231,7 @@ public class DB {
      * @param failMesg the reason of the failure
      */
     public static void markAsFailed(Variations variations, Sample sample, String failMesg) {
-    		// empty for now
+        getDefault().internalMarkAsFailed(variations, sample, failMesg);
     }
     
     public static Connection getConnection() {
@@ -275,6 +281,29 @@ public class DB {
         return fSQL;
     }
     
+    private void internalMarkAsFailed(Variations variations, Sample sample, String failMesg) {
+        
+        if (fSQL == null)
+            return;
+  
+	    try {
+            int variation_id= fSQL.getVariations(variations);
+            int scenario_id= fSQL.getScenario(sample.getScenarioID());
+
+            fSQL.insertFailure(variation_id, scenario_id, failMesg);
+            
+            fConnection.commit();
+			
+	    } catch (SQLException e) {
+            PerformanceTestPlugin.log(e);
+            try {
+                fConnection.rollback();
+            } catch (SQLException e1) {
+                PerformanceTestPlugin.log(e1);
+            }
+        }
+    }
+
     private boolean internalStore(Variations variations, Sample sample) {
         
         if (fSQL == null || sample == null)
@@ -575,6 +604,33 @@ public class DB {
 	        );
         }
         return names;
+    }
+
+    private Map internalQueryFailure(String scenarioPattern, Variations variations) {
+        if (fSQL == null)
+            return null;
+        ResultSet result= null;
+        try {
+            Map map= new HashMap();
+            result= fSQL.queryFailure(variations, scenarioPattern);
+            while (result.next()) {
+                String scenario= result.getString(1);
+                String message= result.getString(2);
+                map.put(scenario, message);
+            }
+            return map;
+        } catch (SQLException e) {
+	        PerformanceTestPlugin.log(e);
+
+        } finally {
+            if (result != null)
+                try {
+                    result.close();
+                } catch (SQLException e1) {
+                	// ignored
+                }
+        }
+        return null;
     }
 
     /**

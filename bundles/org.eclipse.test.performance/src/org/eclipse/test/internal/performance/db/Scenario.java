@@ -29,39 +29,82 @@ import org.eclipse.test.internal.performance.eval.StatisticsSession;
  * The axis of the data points can be specified when creating a scenario.
  * Typical examples are:
  * - datapoints corresponding to different builds
- * - datapoints corresponding to diferent JVMs
+ * - datapoints corresponding to different OSes
+ * - datapoints corresponding to different JVMs
  * @since 3.1
  */
 public class Scenario {
     
     private final static boolean DEBUG= false;
+    
+    public static class SharedState {
+        
+        private Variations fVariations;
+        private String fSeriesKey;
+        private Set fQueryDimensions;
+        private String fScenarioPattern;
+        private Map fMessages;
+        
+      
+        SharedState(Variations variations, String scenarioPattern, String seriesKey, Dim[] dimensions) {
+            fVariations= variations;
+            fScenarioPattern= scenarioPattern;
+            fSeriesKey= seriesKey;
+            if (dimensions != null && dimensions.length > 0) {
+                fQueryDimensions= new HashSet();
+                for (int i= 0; i < dimensions.length; i++)
+                    fQueryDimensions.add(dimensions[i]);
+            }
+        }
+        
+        String[] getFailures(String[] names, String scenarioId) {
+            if (fMessages == null) {
+	            fMessages= new HashMap();
+	            Variations v= (Variations) fVariations.clone();
+	            for (int i= 0; i < names.length; i++) {
+	                v.put(fSeriesKey, names[i]);
+	                Map map= DB.queryFailure(fScenarioPattern, v);
+	                fMessages.put(names[i], map);
+	            }
+            }
+            String[] result= new String[names.length];
+            for (int i= 0; i < names.length; i++) {
+                Map messages= (Map) fMessages.get(names[i]);
+                if (messages != null)
+                    result[i]= (String) messages.get(scenarioId);
+            }
+            return result;
+        }
+    }
 
+    private SharedState fSharedState;
     private String fScenarioName;
-    private Variations fVariations;
-    private String fSeriesKey;
     private String[] fSeriesNames;
     private StatisticsSession[] fSessions;
-    private Dim[] fDimensions;
-    private Set fQueryDimensions;
     private Map fSeries= new HashMap();
-
+    private Dim[] fDimensions;
    
     /** 
      * @param scenario
      * @param variations
      * @param seriesKey
      * @param dimensions
+     * @deprecated
      */
     public Scenario(String scenario, Variations variations, String seriesKey, Dim[] dimensions) {
         Assert.assertFalse(scenario.indexOf('%') >= 0);
         fScenarioName= scenario;
-        fVariations= variations;
-        fSeriesKey= seriesKey;
-        if (dimensions != null && dimensions.length > 0) {
-            fQueryDimensions= new HashSet();
-            for (int i= 0; i < dimensions.length; i++)
-                fQueryDimensions.add(dimensions[i]);
-        }
+        fSharedState= new SharedState(variations, scenario, seriesKey, dimensions);
+    }
+
+    /** 
+     * @param scenario
+     * @param sharedState
+     */
+    public Scenario(String scenario, SharedState sharedState) {
+        Assert.assertFalse(scenario.indexOf('%') >= 0);
+        fScenarioName= scenario;
+        fSharedState= sharedState;
     }
 
     public String getScenarioName() {
@@ -69,21 +112,26 @@ public class Scenario {
     }
 
     public Dim[] getDimensions() {
-        load();
+        loadSessions();
         if (fDimensions == null)
-        	return new Dim[0];
+            return new Dim[0];
         return fDimensions;
     }
     
     public String[] getTimeSeriesLabels() {
-        load();
+        loadSeriesNames();
         if (fSeriesNames == null)
-        	return new String[0];
+            return new String[0];
         return fSeriesNames;
     }
     
+    public String[] getFailureMessages() {
+        loadSeriesNames();
+        return fSharedState.getFailures(fSeriesNames, fScenarioName);
+    }
+
     public TimeSeries getTimeSeries(Dim dim) {
-        load();
+        loadSessions();
         TimeSeries ts= (TimeSeries) fSeries.get(dim);
         if (ts == null) {
             double[] ds= new double[fSessions.length];
@@ -98,12 +146,12 @@ public class Scenario {
         return ts;
     }
     
-    public void dump(PrintStream ps) {
+    public void dump(PrintStream ps, String key) {
 	    ps.println("Scenario: " + getScenarioName()); //$NON-NLS-1$
 	    Report r= new Report(2);
 	    
 	    String[] timeSeriesLabels= getTimeSeriesLabels();
-	    r.addCell("Builds:"); //$NON-NLS-1$
+	    r.addCell(key + ":"); //$NON-NLS-1$
 	    for (int j= 0; j < timeSeriesLabels.length; j++)
 	        r.addCellRight(timeSeriesLabels[j]);
 	    r.nextRow();
@@ -130,30 +178,35 @@ public class Scenario {
     
     //---- private
         
-    private void load() {
-        if (fSeriesNames != null)
+    private void loadSeriesNames() {
+        if (fSeriesNames == null) {
+            long start;
+            if (DEBUG) start= System.currentTimeMillis();
+            fSeriesNames= DB.querySeriesValues(fScenarioName, fSharedState.fVariations, fSharedState.fSeriesKey);
+            if (DEBUG) System.err.println("names: " + (System.currentTimeMillis()-start)); //$NON-NLS-1$
+        }
+    }
+    
+    private void loadSessions() {
+        if (fSessions != null)
             return;
-        //InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
+        
+        loadSeriesNames();
         
         long start;
+        Variations v= (Variations) fSharedState.fVariations.clone();
         if (DEBUG) start= System.currentTimeMillis();
-        String[] names= DB.querySeriesValues(fScenarioName, fVariations, fSeriesKey);
-        if (DEBUG) System.err.println("names: " + (System.currentTimeMillis()-start)); //$NON-NLS-1$
-
         ArrayList sessions= new ArrayList();
         ArrayList names2= new ArrayList();
-        
-        Variations v= (Variations) fVariations.clone();
-        if (DEBUG) start= System.currentTimeMillis();
         Set dims= new HashSet();
-        for (int t= 0; t < names.length; t++) {
-            v.put(fSeriesKey, names[t]);
-            DataPoint[] dps= DB.queryDataPoints(v, fScenarioName, fQueryDimensions);
+        for (int t= 0; t < fSeriesNames.length; t++) {
+            v.put(fSharedState.fSeriesKey, fSeriesNames[t]);
+            DataPoint[] dps= DB.queryDataPoints(v, fScenarioName, fSharedState.fQueryDimensions);
             if (DEBUG) System.err.println("  dps length: " + dps.length); //$NON-NLS-1$
             if (dps.length > 0) {
-            	dims.addAll(dps[0].getDimensions2());
-            	sessions.add(new StatisticsSession(dps));
-            	names2.add(names[t]);
+                dims.addAll(dps[0].getDimensions2());
+                sessions.add(new StatisticsSession(dps));
+                names2.add(fSeriesNames[t]);
             }
         }
         if (DEBUG) System.err.println("data: " + (System.currentTimeMillis()-start)); //$NON-NLS-1$
@@ -163,7 +216,7 @@ public class Scenario {
         
         fDimensions= (Dim[]) dims.toArray(new Dim[dims.size()]);
         Arrays.sort(fDimensions,
-            new Comparator() {
+        new Comparator() {
             	public int compare(Object o1, Object o2) {
             	    Dim d1= (Dim)o1;
             	    Dim d2= (Dim)o2;
