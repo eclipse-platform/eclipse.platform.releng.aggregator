@@ -18,6 +18,14 @@ public class PerformanceTestCase extends TestCase {
 
 	protected PerformanceMeter fPerformanceMeter;
 
+	public PerformanceTestCase() {
+		super();
+	}
+
+	public PerformanceTestCase(String name) {
+		super(name);
+	}
+	
 	protected void setUp() throws Exception {
 		Performance performance= Performance.getDefault();
 		fPerformanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
