@@ -26,7 +26,13 @@ import org.osgi.framework.BundleContext;
  */
 public class PerformanceTestPlugin extends Plugin {
     
+    /**
+     * @deprecated 
+     */
     public static final String CONFIG= "config"; //$NON-NLS-1$
+    /**
+     * @deprecated 
+     */
 	public static final String BUILD= "build"; //$NON-NLS-1$
 
 	private static final String DEFAULT_DB_NAME= "perfDB"; //$NON-NLS-1$
