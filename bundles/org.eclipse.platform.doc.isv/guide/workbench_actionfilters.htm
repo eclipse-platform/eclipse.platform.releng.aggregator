@@ -175,7 +175,35 @@ satisfied before applying the enablement expression.
 </TR>
 </TABLE>
 
-
+<h3>Using objectState with content types</h3>
+<p>The ability to define content types (see <a href="runtime_content.htm">Content types</a>) can be combined
+with boolean expressions to define very specific enablement or visibility conditions based on
+the content type of a resource.  For example, the following snippet makes a popup menu item visible only if the
+selected file's content matches the plug-in's specialized content types.
+<font color='#4444CC'><pre>
+&lt;extension point="org.eclipse.ui.popupMenus"&gt;
+	&lt;objectContribution
+		id="com.example.objectContributions"
+		objectClass="org.eclipse.core.resources.IFile"
+		nameFilter="*.xml"&gt;
+		&lt;visibility&gt;
+			&lt;or>
+				&lt;objectState
+					<b>name="contentTypeId"</b>
+					value="com.example.employeeRecordContentType"/&gt;
+				&lt;objectState
+					<b>name="contentTypeId"</b>
+					value="com.example.customerRecordContentType"/&gt;
+			&lt;/or&gt;
+		&lt;/visibility&gt;
+		&lt;action id="com.example.action1"
+ 			...
+</pre></font>
+The <b>contentTypeId</b> attribute can be used in an objectState expression to check the content type of
+the selected xml file.  This allows a plug-in to apply very specific content checking before enabling or showing
+menu actions related to specific types of files.  See <a href="runtime_content.htm">Content types</a> for more detail
+about the content type extension.
+</p>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 
 
