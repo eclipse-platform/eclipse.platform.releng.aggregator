@@ -331,8 +331,41 @@ Java element change listeners are similar conceptually to resource change listen
    }
 </pre></font>
 <P>
-The <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html"><b> IJavaElementDelta</b></a> includes the element that was
-changed and flags describing the kind of change that occurred. </P>
+The <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html"><b> IJavaElementDelta</b></a> includes the 
+<a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#getElement()">element</a> that was
+changed and <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#getFlags()">flags</a> describing 
+the kind of change that occurred. Most of the time the delta is rooted at the Java Model level. Clients must then navigate
+this delta using <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#getAffectedChildren()"><b>getAffectedChildren</b></a> 
+to find out what projects have changed, and recursively. </P>
+<P>
+The following example method traverses a delta and prints the elements that have been added, removed and changed:</P>
+<font color='#4444CC'><pre>
+   void traverseAndPrint(IJavaElementDelta delta) {
+    	switch (delta.getKind()) {
+    		case IJavaElementDelta.ADDED:
+    			System.out.println(delta.getElement() + " was added");
+    			break;
+    		case IJavaElementDelta.REMOVED:
+    			System.out.println(delta.getElement() + " was removed");
+    			break;
+    		case IJavaElementDelta.CHANGED:
+    			System.out.println(delta.getElement() + " was changed");
+				if ((delta.getFlags() & IJavaElementDelta.F_CHILDREN) != 0) {
+					System.out.println("The change was in its children");
+				}
+				if ((delta.getFlags() & IJavaElementDelta.F_CONTENT) != 0) {
+					System.out.println("The change was in its content");
+				}
+				/* Others flags can also be checked */
+    			break;
+    	}
+    	IJavaElementDelta[] children = delta.getAffectedChildren();
+    	for (int i = 0; i < children.length; i++) {
+    		traverseAndPrint(children[i]);
+    	}
+    }
+</pre></font>
+
 <P>
 Several kinds of operations can trigger a Java element change notification. Here are some examples:
 <ul>
@@ -353,7 +386,7 @@ Several kinds of operations can trigger a Java element change notification. Here
 <li>Modifying an <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a> that ends with ".java" and that is on the
       project's classpath, e.g. using <b>IFile.setContents</b> (the delta indicates that a compilation unit was changed, but 
       <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_FINE_GRAINED">no finer-grained information</a>
-      is provided as this was not done through a Java Model operation)
+      is provided as this was not done through a Java Model operation)</li>
 </ul></P>
 <P>
 As for 
