@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M6<br>
-Last revised December 9, 2003</p>
+Last revised December 11, 2003</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -577,6 +577,57 @@ itself, save the one that reported the problem (<a href="https://bugs.eclipse.or
 code that implements the IJavaBreakpointListener interface. This code needs to
 be modified to return an appropriate int value before it will compile or run in
 3.0.</p>
+
+<h3>Clipboard access in UI thread (package org.eclipse.swt.dnd)</h3>
+<p>Prior to 3.0, the methods on the SWT Clipboard class were tacitly permitted
+to run in threads other than the UI thread. This oversight resulted in failures
+on GTK where the operating system requires that clipboard interactions be
+performed in the UI thread. The oversight was not revealed earlier because many
+applications are single-threaded and receive most of their testing on Windows.
+In order for the Clipboard API to be sustainable and cross-platform, in 3.0 the
+specification and implementation of all Clipboard API methods have been changed
+to throw an SWT Exception (ERROR_THREAD_INVALID_ACCESS) if invoked from a non-UI
+thread. Clipboard services are commonly provided automatically by Eclipse
+components such as the text editor, which insulate many clients from this
+breaking change. Existing code that does make direct use of Clipboard should
+ensure that the API methods are called on the correct thread, using
+Display.asyncExec or syncExec as required to shift accesses into the UI thread.</p>
+<h3>SWT.KeyDown events</h3>
+<p>In 3.0 key down events are reported before the work is done in the OS. This
+is much earlier than it was prior to 3.0. This change was made to support key
+bindings in Eclipse which necessitates intercepting key events before any widget
+had a chance to process the character. Consequences of this change are visible
+to code that handles low-level SWT.KeyDown events directly. For example, it
+means that when a listener on a Text widget receives a key down event, the
+widget's content (getText()) will not yet include the key just typed (it would
+have prior to 3.0). The recommended way to get the full text from the widget
+including the current key is to handle the higher-level SWT.Modify or SWT.Verify
+events rather than the low-level SWT.KeyDown event; code that does it this way
+is unaffected by this change.</p>
+<h3>Tab traversal of SWT Canvas (package org.eclipse.swt.widgets)</h3>
+<p>Prior to 3.0, when the focus was in an SWT Canvas or one of its subclasses
+(including custom widgets), typing Ctrl+Tab, Shift+Tab, Ctrl+PgUp, or Ctrl+PgDn
+would automatically trigger traversal to the next/previous widget without
+reporting a key event. This behavior was unspecified, and runs counter to the
+rule that Canvases see every key typed in them. The proper way to handle
+traversal is by registering a traverse listener. In order to properly support
+Eclipse key bindings in 3.0, the default behavior was changed so that Canvas now
+sees Ctrl+Tab, Shift+Tab, Ctrl+PgUp, and Ctrl+PgDn key events instead of
+traversing. If you use a raw Canvas or define a subclass of Canvas, ensure that
+that you register a traverse listener.</p>
+<h3>Selection event order in Table and Tree widgets</h3>
+<p>Mouse selections of items in SWT Table and Tree widgets generate the event
+sequence MouseDown-Selection-MouseUp uniformly in all operating environments.
+Similarly, keyboard selections generate the event sequence
+KeyDown-Selection-KeyUp uniformly in all operating environments. Prior to 3.0,
+the event order was not uniform, with Motif and Photon at variance with the rest
+by always reporting the Selection event first; i.e., Selection-MouseDown-MouseUp
+or Selection-KeyDown-KeyUp. For 3.0, the event order on Motif and Photon has
+been changed to match the others. Existing code that was functioning correctly
+on {Windows, GTK} and on {Motif, Photon} is unlikely to be affected. But it is
+wise to check your code to ensure that it does not rely on an invalid event
+order.</p>
+
 
 <h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
 <p>This section describes other changes that we recommend be made when porting
@@ -1322,6 +1373,20 @@ completeness:</p>
     org.eclipse.ui.helpSupport extension point. The contract for this extension
     point changed as well (see entry for IHelp).</li>
 </ul>
+<h3>null messages in MessageBox and DirectoryDialog (package
+org.eclipse.swt.widgets)</h3>
+<p>Prior to 3.0, calling SWT's DirectoryDialog.setMessage(String string) or
+MessageBox.setMessage(String string) with a null value for string would result
+in a dialog with no text in the title. This behavior was unspecified (passing
+null has never been permitted) and creates problems with getMessage which is not
+permitted to return null. In 3.0, passing null now results in an
+IllegalArgumentException exception being thrown, and the specifications have
+been changed to state this, bringing it into line with the method on their
+superclass Dialog.setMessage. If you use Dialog.setMessage, ensure that that the
+string passed in is never null. Simply pass an empty string if you want a dialog
+with no text in the title.</p>
+
+
 <h2><a name="Proposed Changes for 3.0">Proposed Changes for 3.0</a></h2>
 <p>The following proposals are under discussion for inclusion in Eclipse 3.0.
 They are mentioned here because the proposed changes impact existing plug-ins
