@@ -67,7 +67,7 @@ public class StatisticsSession {
 	}
 
 	private Statistics computeStats(Dim dimension) {
-		
+	    		
 		Statistics stats= new Statistics();
 		
 		Set set= new HashSet();
@@ -79,7 +79,7 @@ public class StatisticsSession {
 		long mags[]= new long[fDataPoints.length];
 		switch (set.size()) {
 		case 1:
-			// if there is only one DataPoint, we don't calculate the delta.
+			// if there is only one Step, we don't calculate the delta.
 			for (int i= 0; i < fDataPoints.length; i++) {
 				Scalar sc= fDataPoints[i].getScalar(dimension);
 				if (sc != null) {
