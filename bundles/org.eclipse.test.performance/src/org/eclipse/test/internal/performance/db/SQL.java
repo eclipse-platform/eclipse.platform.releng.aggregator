@@ -24,7 +24,8 @@ public class SQL {
     private Connection fConnection;
     private PreparedStatement fInsertConfig, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fInsertConfigProperty, fInsertSampleProperty;
-    private PreparedStatement fQueryScenario, fQueryAllScenarios, fQueryBuilds;
+    private PreparedStatement fQueryScenario, fQueryAllScenarios, fQueryBuilds, fTestQuery, fQueryDatapoints;
+    private PreparedStatement fQueryScalars;
     private PreparedStatement[] fQueries= new PreparedStatement[20];
     
 
@@ -50,7 +51,7 @@ public class SQL {
     		StringBuffer sb= new StringBuffer(
     				"select SAMPLE.ID, DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG " + //$NON-NLS-1$
 					"where " + //$NON-NLS-1$
-					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
+					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME = ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
 					"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
 					"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
 					"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
@@ -100,8 +101,43 @@ public class SQL {
         		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
+        fQueryDatapoints= fConnection.prepareStatement(
+        		"select DATAPOINT.ID, DATAPOINT.STEP  from CONFIG, SCENARIO, SAMPLE, DATAPOINT " + //$NON-NLS-1$
+        		"where " + //$NON-NLS-1$
+        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME = ? and CONFIG.BUILD = ? and " + //$NON-NLS-1$
+        		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
+         		"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
+        );
+        
+        fQueryScalars= fConnection.prepareStatement(
+        		"select SCALAR.DIM_ID, SCALAR.VALUE from SCALAR " + //$NON-NLS-1$
+        		"where " + //$NON-NLS-1$
+				"SCALAR.DATAPOINT_ID = ?" //$NON-NLS-1$
+        );
+        
+        fTestQuery= fConnection.prepareStatement(
+				"select DATAPOINT.ID from SCALAR, DATAPOINT " + //$NON-NLS-1$
+				"where " + //$NON-NLS-1$
+				// "SCALAR.DATAPOINT_ID = DATAPOINT.ID and " +
+				"CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
+				"SAMPLE.CONFIG_ID = CONFIG.ID and SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ? " //$NON-NLS-1$
+				+ " and DATAPOINT.SAMPLE_ID = SAMPLE.ID" //$NON-NLS-1$
+               /*
+				"select Count(*) from SAMPLE, SCENARIO, CONFIG " + //$NON-NLS-1$
+				"where " + //$NON-NLS-1$
+				"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
+				"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? " //$NON-NLS-1$
+				*/
+        ); 
     }
     
+    ResultSet queryTest(String configPattern, String buildPattern, String scenarioPattern) throws SQLException {
+        fTestQuery.setString(1, configPattern);
+        fTestQuery.setString(2, buildPattern);
+        fTestQuery.setString(3, scenarioPattern);
+        return fTestQuery.executeQuery();
+    }
+
     void initialize() throws SQLException {
         Statement stmt= fConnection.createStatement();
         
@@ -216,16 +252,28 @@ public class SQL {
 		fInsertScalar.executeUpdate();
     }
     
-    ResultSet queryDataPoints(String configPattern, String buildPattern, String scenario, int[] dim_ids) throws SQLException {
+    ResultSet queryDataPoints(String configName, String buildPattern, String scenario, int[] dim_ids) throws SQLException {
     	PreparedStatement queryStatement= getQueryStatement(dim_ids.length);
-    	queryStatement.setString(1, configPattern);
+    	queryStatement.setString(1, configName);
     	queryStatement.setString(2, buildPattern);
     	queryStatement.setString(3, scenario);
     	int j= 4;
     	for (int i= 0; i < dim_ids.length; i++)
     		queryStatement.setInt(j++, dim_ids[i]);
         return queryStatement.executeQuery();
-    }    
+    }
+    
+    ResultSet queryDataPoints(String configName, String buildName, String scenarioName) throws SQLException {
+     	fQueryDatapoints.setString(1, configName);
+    	fQueryDatapoints.setString(2, buildName);
+    	fQueryDatapoints.setString(3, scenarioName);
+    	return fQueryDatapoints.executeQuery();
+    }
+
+    ResultSet queryDataPoints(int datapointId) throws SQLException {
+        fQueryScalars.setInt(1, datapointId);
+    	return fQueryScalars.executeQuery();
+    }
 
     ResultSet queryScenarios(String configPattern, String scenarioPattern) throws SQLException {
         fQueryAllScenarios.setString(1, configPattern);
