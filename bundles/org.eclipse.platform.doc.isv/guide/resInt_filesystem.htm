@@ -20,7 +20,8 @@ When the platform core is running and the resources plug-in is active, the works
 represents an associated collection of files and directories in the local file system.  You can access the workspace from the
 resources plug-in class in <b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>. </P>
 <P CLASS="Code">
-ResourcesPlugin.getWorkspace();</P>
+ResourcesPlugin.getWorkspace();
+</P>
 <P >
 When the resources plug-in is not running, the workspace exists solely in the local file system and is viewed or manipulated by the user
 via standard file-based tools. Let's look at what a workspace looks like on disk as we explain the
@@ -47,17 +48,18 @@ Inside each directory, we find the files and folders within the project, laid ou
 whether accessed from the file system or from the workspace.  No surprises.</P>
 <P CLASS="Code">
 C:\MySDK\workspace&nbsp; (workspace root)<br>
-&nbsp;&nbsp;&nbsp; .metadata\ (platform metadata directory<br>
-&nbsp;&nbsp;&nbsp; MyWeb\ (project content directory for MyWeb)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; index.html<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; images\<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; logo.gif<br>
-&nbsp;&nbsp;&nbsp; MyServlet\ (project content directory for MyServlet)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; src\<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; main.java<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bin\<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; main.class<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; main$$1.class </P>
+&nbsp;&nbsp;&nbsp;.metadata\ (platform metadata directory<br>
+&nbsp;&nbsp;&nbsp;MyWeb\ (project content directory for MyWeb)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index.html<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;images\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;logo.gif<br>
+&nbsp;&nbsp;&nbsp;MyServlet\ (project content directory for MyServlet)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;src\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;main.java<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bin\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;main.class<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;main$$1.class
+</P>
 <P >
 The platform has a special <b>.metadata</b> directory for holding platform internal information.  The
 <b>.metadata</b> directory of a workspace is considered to be a &quot;black box.&quot;  Important information about the workspace structure, such as a project's references or a resource's properties,
@@ -99,10 +101,12 @@ To navigate the workspace from a plug-in, we must first obtain the <a href="../r
 IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();</P>
 <P >
 Once we have a workspace root, we can access the projects in the workspace. </P>
-<P CLASS="Code">IProject myWebProject = myWorkspaceRoot.getProject(&quot;MyWeb&quot;);<br>
+<P CLASS="Code">
+IProject myWebProject = myWorkspaceRoot.getProject(&quot;MyWeb&quot;);<br>
 // open if necessary<br>
 if (myWebProject.exists() &amp;&amp; !myWebProject.isOpen())<br>
-&nbsp;&nbsp;&nbsp; myWebProject.open(null);</P>
+&nbsp;&nbsp;&nbsp;myWebProject.open(null);
+</P>
 <P >
 Before we can manipulate a project, we must open it.  Opening the project reads the project's
 structure from disk and creates the in-memory object representation of the project's resource tree.  Opening a project is an explicit operation since each open project consumes memory to represent the resource tree
@@ -125,13 +129,14 @@ located outside of our workspace.  </P>
 <P CLASS="Code">
 IFolder imagesFolder = myWebProject.getFolder(&quot;images&quot;);<br>
 if (imagesFolder.exists()) {<br>
-&nbsp;&nbsp;&nbsp; // create a new file<br>
-&nbsp;&nbsp;&nbsp; IFile newLogo = imagesFolder.getFile(&quot;newLogo.gif&quot;);<br>
-&nbsp;&nbsp;&nbsp; FileInputStream fileStream = new FileInputStream(<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &quot;c:/MyOtherData/newLogo.gif&quot;);<br>
-&nbsp;&nbsp;&nbsp; newLogo.create(fileStream, false, null);<br>
-&nbsp;&nbsp;&nbsp; fileStream.close();<br>
-}</P>
+&nbsp;&nbsp;&nbsp;// create a new file<br>
+&nbsp;&nbsp;&nbsp;IFile newLogo = imagesFolder.getFile(&quot;newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp;FileInputStream fileStream = new FileInputStream(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&quot;c:/MyOtherData/newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp;newLogo.create(fileStream, false, null);<br>
+&nbsp;&nbsp;&nbsp;fileStream.close();<br>
+}
+</P>
 <P >
  In the example above, the
 first line obtains a handle to the images folder.&nbsp; We must check that the
@@ -146,12 +151,12 @@ one from its contents.</P>
 <P CLASS="Code">
 IFile logo = imagesFolder.getFile(&quot;logo.gif&quot;);<br>
 if (logo.exists()) {<br>
-&nbsp;&nbsp;&nbsp; IPath newLogoPath = new Path(&quot;newLogo.gif&quot;);<br>
-&nbsp;&nbsp;&nbsp; logo.copy(newLogoPath,
-false, null);<br>
-&nbsp;&nbsp;&nbsp; IFile newLogo = imagesFolder.getFile(&quot;newLogo.gif&quot;);<br>
-...<br>
-}</P>
+&nbsp;&nbsp;&nbsp;IPath newLogoPath = new Path(&quot;newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp;logo.copy(newLogoPath, false, null);<br>
+&nbsp;&nbsp;&nbsp;IFile newLogo = imagesFolder.getFile(&quot;newLogo.gif&quot;);<br>
+&nbsp;&nbsp;&nbsp;...<br>
+}
+</P>
 <P >
 Finally, we'll create another images folder and move the newly created file to it.  We rename the file as a side effect of moving it.</P>
 <P CLASS="Code">
@@ -160,11 +165,8 @@ IFolder newImagesFolder = myWebProject.getFolder(&quot;newimages&quot;);<br>
 newImagesFolder.create(false, true, null);<br>
 IPath renamedPath = newImagesFolder.getFullPath().append(&quot;renamedLogo.gif&quot;);<br>
 newLogo.move(renamedPath, false, null);<br>
-IFile renamedLogo = newImagesFolder.getFile(&quot;renamedLogo.gif&quot;);</P>
-
-
-<P CLASS="Code">
-&nbsp;</P>
+IFile renamedLogo = newImagesFolder.getFile(&quot;renamedLogo.gif&quot;);
+</P>
 
 
 <P>Many of the resource API methods include a <b>force</b>
@@ -215,7 +217,7 @@ each method provides specific information about this parameter. Additional metho
 <b> IResource.refreshLocal(int depth, IProgressMonitor monitor)</b>. See <b><a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a></b>
 for information on correct usage and costs.</P>
 
-<p CLASS="Note"><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 
 </BODY>
 </HTML>

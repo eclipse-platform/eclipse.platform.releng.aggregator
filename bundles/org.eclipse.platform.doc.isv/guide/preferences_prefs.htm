@@ -23,14 +23,15 @@ The <b><a href="../reference/extension-points/org_eclipse_ui_preferencePages.htm
 <P >
 The readme tool uses this extension point to add the Readme Example preferences page.</P>
 <P class="Code" >
-  &lt;extension<br>
-&nbsp;&nbsp;&nbsp; point = &quot;org.eclipse.ui.preferencePages&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;page&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="org.eclipse.ui.examples.readmetool.Page1"<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; name="Readme Example"><br>
-&nbsp;&nbsp;&nbsp; &lt;/page><br>
-   &lt;/extension></P>
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp;point = &quot;org.eclipse.ui.preferencePages&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;page&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id="org.eclipse.ui.examples.readmetool.Page1"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name="Readme Example"><br>
+&nbsp;&nbsp;&nbsp;&lt;/page><br>
+&lt;/extension>
+</P>
 <P >
 This markup defines a preference page named &quot;Readme Example&quot; which is implemented by the class
 <b>ReadmePreferencePage</b>. The class must implement the
@@ -49,24 +50,21 @@ Perhaps a better name is
 <b>path</b>.) The <b> category</b> attribute
 specifies the id (or a sequence of ids from the root) of the parent page. For example, the following markup would create a second readme tool preference page, &quot;Readme Example Child Page,&quot; as a child of the original page.</P>
 <P class="Code" >
-  &lt;extension<br>
-&nbsp;&nbsp;&nbsp; point = &quot;org.eclipse.ui.preferencePages&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp;       &lt;page&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; id="org.eclipse.ui.examples.readmetool.Page1"<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            name="Readme Example"><br>
-&nbsp;&nbsp;&nbsp;       &lt;/page>&nbsp;&nbsp;&nbsp;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; &lt;page&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-id=&quot;org.eclipse.ui.examples.readmetool.Page2&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage2&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;            name="Readme Example Child
-Page&quot;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-category=&quot;org.eclipse.ui.examples.readmetool.Page1&gt;<br>
-&nbsp;&nbsp;&nbsp;       &lt;/page><br>
-   &lt;/extension></P>
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp;point = &quot;org.eclipse.ui.preferencePages&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;page<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id="org.eclipse.ui.examples.readmetool.Page1"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name="Readme Example"><br>
+&nbsp;&nbsp;&nbsp;&lt;/page><br>
+&nbsp;&nbsp;&nbsp;&lt;page<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id=&quot;org.eclipse.ui.examples.readmetool.Page2&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;class=&quot;org.eclipse.ui.examples.readmetool.ReadmePreferencePage2&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;name="Readme Example Child Page&quot;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;category=&quot;org.eclipse.ui.examples.readmetool.Page1&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;/page><br>
+&lt;/extension>
+</P>
 
 
 <P >
@@ -85,30 +83,31 @@ Defining the page</H4>
 Implementing a preference page is similar to creating a page for a wizard. The preference page supplies a
 <b> createContents</b> method that creates the SWT controls representing the page content and adds listeners for any events of interest. The page is responsible for creating and returning the composite that will parent all of the controls in the page.&nbsp;
 The following snippet shows the highlights:</P>
-<p class="Code">protected Control createContents(Composite parent)<br>
-{<br>
-&nbsp;&nbsp;&nbsp; ...<br>
-&nbsp;&nbsp;&nbsp; //composite_textField &lt;&lt; parent<br>
-&nbsp;&nbsp;&nbsp; Composite composite_textField = createComposite(parent, 2);<br>
-&nbsp;&nbsp;&nbsp; Label label_textField = createLabel(composite_textField, "Text Field");&nbsp;<br>
-&nbsp;&nbsp;&nbsp; textField = createTextField(composite_textField);<br>
-&nbsp;&nbsp;&nbsp; pushButton_textField = createPushButton(composite_textField, "Change");<br>
+<p class="Code">
+protected Control createContents(Composite parent) {<br>
+&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;//composite_textField &lt;&lt; parent<br>
+&nbsp;&nbsp;&nbsp;Composite composite_textField = createComposite(parent, 2);<br>
+&nbsp;&nbsp;&nbsp;Label label_textField = createLabel(composite_textField, "Text Field");&nbsp;<br>
+&nbsp;&nbsp;&nbsp;textField = createTextField(composite_textField);<br>
+&nbsp;&nbsp;&nbsp;pushButton_textField = createPushButton(composite_textField, "Change");<br>
 <br>
-&nbsp;&nbsp;&nbsp; //composite_tab &lt;&lt; parent<br>
-&nbsp;&nbsp;&nbsp; Composite composite_tab = createComposite(parent, 2);<br>
-&nbsp;&nbsp;&nbsp; Label label1 = createLabel(composite_tab, "Radio Button Options");<br>
+&nbsp;&nbsp;&nbsp;//composite_tab &lt;&lt; parent<br>
+&nbsp;&nbsp;&nbsp;Composite composite_tab = createComposite(parent, 2);<br>
+&nbsp;&nbsp;&nbsp;Label label1 = createLabel(composite_tab, "Radio Button Options");<br>
 <br>
-&nbsp;&nbsp;&nbsp; tabForward(composite_tab);<br>
-&nbsp;&nbsp;&nbsp; //radio button composite &lt;&lt; tab composite<br>
-&nbsp;&nbsp;&nbsp; Composite composite_radioButton = createComposite(composite_tab, 1);<br>
-&nbsp;&nbsp;&nbsp; radioButton1 = createRadioButton(composite_radioButton, "Radio button 1");<br>
-&nbsp;&nbsp;&nbsp; radioButton2 = createRadioButton(composite_radioButton, "Radio button 2");<br>
-&nbsp;&nbsp;&nbsp; radioButton3 = createRadioButton(composite_radioButton, "Radio button 3");<br>
-&nbsp;&nbsp;&nbsp; ...<br>
-&nbsp;&nbsp;&nbsp; initializeValues();<br>
-&nbsp;&nbsp;&nbsp; ...<br>
-&nbsp;&nbsp;&nbsp; return new Composite(parent, SWT.NULL);<br>
-}</p>
+&nbsp;&nbsp;&nbsp;tabForward(composite_tab);<br>
+&nbsp;&nbsp;&nbsp;//radio button composite &lt;&lt; tab composite<br>
+&nbsp;&nbsp;&nbsp;Composite composite_radioButton = createComposite(composite_tab, 1);<br>
+&nbsp;&nbsp;&nbsp;radioButton1 = createRadioButton(composite_radioButton, "Radio button 1");<br>
+&nbsp;&nbsp;&nbsp;radioButton2 = createRadioButton(composite_radioButton, "Radio button 2");<br>
+&nbsp;&nbsp;&nbsp;radioButton3 = createRadioButton(composite_radioButton, "Radio button 3");<br>
+&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;initializeValues();<br>
+&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;return new Composite(parent, SWT.NULL);<br>
+}
+</p>
 <P >
  Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.&nbsp;
 Here is what the corresponding page looks like:</P>
@@ -131,33 +130,25 @@ working directory and initializing the preference store from the saved settings.
 The following code in the <b> ReadmePreferencePage</b> obtains the preference store for the
 <b>ReadmePlugin</b>.</P>
 <P CLASS="Code">
-protected IPreferenceStore doGetPreferenceStore() {</P>
-<P CLASS="Code">
-&nbsp;return ReadmePlugin.getDefault().getPreferenceStore();</P>
-<P CLASS="Code">
-}</P>
+protected IPreferenceStore doGetPreferenceStore() {<br>
+&nbsp;&nbsp;&nbsp;return ReadmePlugin.getDefault().getPreferenceStore();<br>
+}
+</P>
 <P >
 Because <b> ReadmePlugin</b> extends the <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> class, it automatically inherits a preference store. This preference store is initialized from a preferences file stored in the
 plug-in's directory.&nbsp; The only thing the <b> ReadmePlugin</b> has to do is implement a method that initializes the preferences to their default values. These values are used the first time the preference page is shown or when the user presses the
 <b>Defaults</b> button in the preferences page.</P>
 <P CLASS="Code">
-protected void initializeDefaultPreferences(IPreferenceStore store) {</P>
-<P CLASS="Code">
-&nbsp;// These settings will show up when Preference dialog</P>
-<P CLASS="Code">
-&nbsp;// opens up for the first time.</P>
-<P CLASS="Code">
-&nbsp;store.setDefault(IReadmeConstants.PRE_CHECK1, true);</P>
-<P CLASS="Code">
-&nbsp;store.setDefault(IReadmeConstants.PRE_CHECK2, true);</P>
-<P CLASS="Code">
-&nbsp;store.setDefault(IReadmeConstants.PRE_CHECK3, false);</P>
-<P CLASS="Code">
-&nbsp;store.setDefault(IReadmeConstants.PRE_RADIO_CHOICE, 2);</P>
-<P CLASS="Code">
-&nbsp;store.setDefault(IReadmeConstants.PRE_TEXT, &quot;Default text&quot;);</P>
-<P CLASS="Code">
-}</P>
+protected void initializeDefaultPreferences(IPreferenceStore store) {<br>
+&nbsp;&nbsp;&nbsp;// These settings will show up when Preference dialog<br>
+&nbsp;&nbsp;&nbsp;// opens up for the first time.<br>
+&nbsp;&nbsp;&nbsp;store.setDefault(IReadmeConstants.PRE_CHECK1, true);<br>
+&nbsp;&nbsp;&nbsp;store.setDefault(IReadmeConstants.PRE_CHECK2, true);<br>
+&nbsp;&nbsp;&nbsp;store.setDefault(IReadmeConstants.PRE_CHECK3, false);<br>
+&nbsp;&nbsp;&nbsp;store.setDefault(IReadmeConstants.PRE_RADIO_CHOICE, 2);<br>
+&nbsp;&nbsp;&nbsp;store.setDefault(IReadmeConstants.PRE_TEXT, &quot;Default text&quot;);<br>
+}
+</P>
 
 
 <P class="Note">
@@ -175,53 +166,41 @@ process is similar to initializing dialog control values from dialog settings. T
 <b> ReadmePreferencePage</b> initializes all of its controls in a single method,
 <b>initializeValues</b>, which is called from its <b> createContents</b> method.</P>
 <P CLASS="Code">
-private void initializeValues() {</P>
-<P CLASS="Code">
-&nbsp;IPreferenceStore store = getPreferenceStore();</P>
-<P CLASS="Code">
-&nbsp;checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));</P>
-<P CLASS="Code">
-&nbsp;checkBox2.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK2));</P>
-<P CLASS="Code">
-&nbsp;checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));<BR>
-&nbsp;...</P>
+private void initializeValues() {<br>
+&nbsp;&nbsp;&nbsp;IPreferenceStore store = getPreferenceStore();<br>
+&nbsp;&nbsp;&nbsp;checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));<br>
+&nbsp;&nbsp;&nbsp;checkBox2.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK2));<br>
+&nbsp;&nbsp;&nbsp;checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));<br>
+&nbsp;&nbsp;&nbsp;...<br>
+}
+</P>
 <P >
 When the <b>OK</b> (or <b>Apply</b>) button is pressed, the current values of the controls on the preference page should be stored back into the
 preference store. The
 <b> ReadmePreferencePage</b> implements this logic in a separate method,
 <b>storeValues</b>.</P>
 <P CLASS="Code">
-private void storeValues() {</P>
-<P CLASS="Code">
-&nbsp;IPreferenceStore store = getPreferenceStore();</P>
-<P CLASS="Code">
-&nbsp;store.setValue(IReadmeConstants.PRE_CHECK1, checkBox1.getSelection());</P>
-<P CLASS="Code">
-&nbsp;store.setValue(IReadmeConstants.PRE_CHECK2, checkBox2.getSelection());</P>
-<P CLASS="Code">
-&nbsp;store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());</P>
-<P CLASS="Code">
-&nbsp;...</P>
-<P CLASS="Code">
-}</P>
+private void storeValues() {<br>
+&nbsp;&nbsp;&nbsp;IPreferenceStore store = getPreferenceStore();<br>
+&nbsp;&nbsp;&nbsp;store.setValue(IReadmeConstants.PRE_CHECK1, checkBox1.getSelection());<br>
+&nbsp;&nbsp;&nbsp;store.setValue(IReadmeConstants.PRE_CHECK2, checkBox2.getSelection());<br>
+&nbsp;&nbsp;&nbsp;store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());<br>
+&nbsp;&nbsp;&nbsp;...<br>
+}
+</P>
 <P >
 When the user presses the <b>Defaults</b> button, the platform will restore all preference store values to the default values specified in the plug-in class. However, your preference page is responsible for reflecting these default values
 in the controls on the preference page. The
 <b> ReadmePreferencePage</b> implements this in <b>initializeDefaults</b>.</P>
 <P CLASS="Code">
-private void initializeDefaults() {</P>
-<P CLASS="Code">
-&nbsp;IPreferenceStore store = getPreferenceStore();</P>
-<P CLASS="Code">
-&nbsp;checkBox1.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK1));</P>
-<P CLASS="Code">
-&nbsp;checkBox2.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK2));</P>
-<P CLASS="Code">
-&nbsp;checkBox3.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK3));</P>
-<P CLASS="Code">
-&nbsp;...</P>
-<P CLASS="Code">
-}</P>
+private void initializeDefaults() {<br>
+&nbsp;&nbsp;&nbsp;IPreferenceStore store = getPreferenceStore();<br>
+&nbsp;&nbsp;&nbsp;checkBox1.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK1));<br>
+&nbsp;&nbsp;&nbsp;checkBox2.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK2));<br>
+&nbsp;&nbsp;&nbsp;checkBox3.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK3));<br>
+&nbsp;&nbsp;&nbsp;...<br>
+}
+</P>
 
 
 
@@ -239,19 +218,17 @@ page that uses these field editors to display and store the preference values on
 <P >
 Instead of creating SWT controls to fill its contents, a <b><a href="../reference/api/org/eclipse/jface/preference/FieldEditorPreferencePage.html"> FieldEditorPreferencePage</a></b> creates field editors to display the contents.</P>
 <P CLASS="Code">
-public void createFieldEditors() {</P>
-<P CLASS="Code">
-&nbsp;&nbsp;&nbsp; // The first string is the preference key name<BR>
-&nbsp;&nbsp;&nbsp; // The second string is the label shown next to the widget&nbsp;<br>
-&nbsp;&nbsp;&nbsp; addField(new BooleanFieldEditor(USE_OLD_MODE, &quot;Use old mode&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; getFieldEditorParent()));</P>
-<P CLASS="Code">
-&nbsp;&nbsp;&nbsp; addField(new StringFieldEditor(APPLICATION_NAME, &quot;Application Name&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; getFieldEditorParent()));</P>
-<P CLASS="Code">
-&nbsp;&nbsp;&nbsp; addField(new ColorFieldEditor(COLOR, &quot;Text Color&quot;,
-getFieldEditorParent()));<br>
-&nbsp;&nbsp;&nbsp; ...</P>
+public void createFieldEditors() {<br>
+&nbsp;&nbsp;&nbsp;// The first string is the preference key name<BR>
+&nbsp;&nbsp;&nbsp;// The second string is the label shown next to the widget&nbsp;<br>
+&nbsp;&nbsp;&nbsp;addField(new BooleanFieldEditor(USE_OLD_MODE, &quot;Use old mode&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getFieldEditorParent()));<br>
+&nbsp;&nbsp;&nbsp;addField(new StringFieldEditor(APPLICATION_NAME, &quot;Application Name&quot;,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getFieldEditorParent()));<br>
+&nbsp;&nbsp;&nbsp;addField(new ColorFieldEditor(COLOR, &quot;Text Color&quot;, getFieldEditorParent()));<br>
+&nbsp;&nbsp;&nbsp;...<br>
+}
+</P>
 <P >
 Each field editor is assigned the name of its corresponding preference key and the text label for the SWT
 control that it will create. The kind of control created depends on the type of field editor. For example, a boolean field editor creates a checkbox.</P>

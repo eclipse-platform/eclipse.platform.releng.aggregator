@@ -56,7 +56,8 @@ Marker creation</H4>
 Markers are not directly created using a constructor. They are created using a factory method
 (<b>IResource.createMarker()</b>) on the associated resource. </P>
 <P CLASS="Code">
-IMarker marker = file.createMarker(IMarker.TASK);</P>
+IMarker marker = file.createMarker(IMarker.TASK);
+</P>
 <P >
 To create a marker that has global scope (not associated with any specific resource), you can use
 the workspace root
@@ -69,10 +70,11 @@ Marker deletion</H4>
 The code for deleting a marker is straightforward.</P>
 <P CLASS="Code">
 try {<br>
-&nbsp;&nbsp;&nbsp; marker.delete();<br>
+&nbsp;&nbsp;&nbsp;marker.delete();<br>
 } catch (CoreException e) {<br>
-&nbsp;&nbsp;&nbsp; // Something went wrong<br>
-}</P>
+&nbsp;&nbsp;&nbsp;// Something went wrong<br>
+}
+</P>
 <P >
 When a marker is deleted, its marker object (handle) becomes &quot;stale.&quot; Plug-ins should use the
 <b> IMarker.exists()</b> protocol to make sure a marker object is still valid.</P>
@@ -82,10 +84,11 @@ many markers at once or if individual marker references or ids are not available
 <P CLASS="Code">
 int depth = IResource.DEPTH_INFINITE;<br>
 try {<br>
-&nbsp;&nbsp;&nbsp; resource.deleteMarkers(IMarker.PROBLEM, true, depth);<br>
+&nbsp;&nbsp;&nbsp;resource.deleteMarkers(IMarker.PROBLEM, true, depth);<br>
 } catch (CoreException e) {<br>
-&nbsp;&nbsp;&nbsp; // something went wrong<br>
-}</P>
+&nbsp;&nbsp;&nbsp;// something went wrong<br>
+}
+</P>
 <P >
 When deleting a group of markers, you specify a marker <b> type</b> to delete, such as <b> IMarker.PROBLEM</b>, or
 <b> null</b> to delete all markers. The second argument
@@ -110,15 +113,14 @@ creator of the marker type using naming conventions.&nbsp; The
 the standard attribute names (and some of the expected values) for the platform marker types.  The following method manipulates attributes using the platform constants.</P>
 <P CLASS="Code">
 IMarker marker = file.createMarker(IMarker.TASK);<br>
-if (marker.exists())<br>
-&nbsp;&nbsp;&nbsp; try {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; marker.setAttribute(IMarker.MESSAGE, &quot;A sample marker message&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; marker.setAttribute(IMarker.PRIORITY,
-IMarker.PRIORITY_HIGH);<br>
-&nbsp;&nbsp;&nbsp; } catch (CoreException e) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // You need to handle the case where
-the resource doesn't exist<br>
-&nbsp;&nbsp;&nbsp; }</P>
+if (marker.exists()) {<br>
+&nbsp;&nbsp;&nbsp;try {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;marker.setAttribute(IMarker.MESSAGE, &quot;A sample marker message&quot;);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);<br>
+&nbsp;&nbsp;&nbsp;} catch (CoreException e) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// You need to handle the case where the resource doesn't exist<br>
+&nbsp;&nbsp;&nbsp;}<br>
+}</P>
 
 
 <P>
@@ -134,10 +136,11 @@ Resources can be queried for their markers and the markers of their children. Fo
 IMarker[] problems = null;<br>
 int depth = IResource.DEPTH_INFINITE;<br>
 try {<br>
-&nbsp;&nbsp;&nbsp; problems = resource.findMarkers(IMarker.PROBLEM, true, depth);<br>
+&nbsp;&nbsp;&nbsp;problems = resource.findMarkers(IMarker.PROBLEM, true, depth);<br>
 } catch (CoreException e) {<br>
-&nbsp;&nbsp;&nbsp; // something went wrong<br>
-}</P>
+&nbsp;&nbsp;&nbsp;// something went wrong<br>
+}
+</P>
 <P >
 The result returned by <b>findMarkers</b>  depends on
 the arguments passed.&nbsp; In the snippet above, we are looking for all markers
@@ -173,55 +176,55 @@ Extending the platform with new marker types</a></H3>
 <P >
 Plug-ins can declare their own marker types using the <b><a href="../reference/extension-points/org_eclipse_core_resources_markers.html"> org.eclipse.core.resources.markers</a></b> 
 extension point. The standard marker types for problems, tasks and bookmarks are declared by the platform in the resources plug-in's markup.</P>
-<P class="Code" >
-  &lt;extension&nbsp;<br>
-&nbsp;&nbsp;&nbsp; id=&quot;problemmarker&quot;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.core.resources.markers&quot;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; name=&quot;%problemName&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;super type=&quot;org.eclipse.core.resources.marker&quot;/&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;persistent value="true"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="severity"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="message"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="location"/><br>
-  &lt;/extension><br>
-  &lt;extension&nbsp;<br>
-&nbsp;&nbsp;&nbsp; id=&quot;taskmarker&quot;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.core.resources.markers&quot;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; name=&quot;%taskName&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;super type=&quot;org.eclipse.core.resources.marker&quot;/&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;persistent value="true"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="priority"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="message"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="done"/><br>
+<P class="Code">
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp;id=&quot;problemmarker&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.markers&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;name=&quot;%problemName&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;super type=&quot;org.eclipse.core.resources.marker&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;persistent value="true"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="severity"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="message"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="location"/><br>
 &lt;/extension><br>
-  &lt;extension&nbsp;<br>
-&nbsp;&nbsp;&nbsp; id="bookmark"&nbsp;<br>
-&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.core.resources.markers&quot;&nbsp;<br>
-&nbsp;&nbsp;&nbsp; name=&quot;%bookmarkName&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;super type=&quot;org.eclipse.core.resources.marker&quot;/&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;persistent value="true"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="message"/><br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name="location"/><br>
-  &lt;/extension></P>
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp;id=&quot;taskmarker&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.markers&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;name=&quot;%taskName&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;super type=&quot;org.eclipse.core.resources.marker&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;persistent value="true"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="priority"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="message"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="done"/><br>
+&lt;/extension><br>
+&lt;extension<br>
+&nbsp;&nbsp;&nbsp;id="bookmark"&nbsp;<br>
+&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.markers&quot;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;name=&quot;%bookmarkName&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;super type=&quot;org.eclipse.core.resources.marker&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;persistent value="true"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="message"/><br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name="location"/><br>
+&lt;/extension>
+</P>
 <P >
 New marker types are derived from existing ones using multiple inheritance. New marker types inherit all of the attributes from their
 super types and add any new attributes defined as part of the declaration. They also transitively inherit
 attributes from the super types of their super types.  The following markup defines a new kind of marker in a hypothetical
 <b>com.example.markers</b> plug-in.</P>
-<P class="Code" >
+<P class="Code">
 &lt;extension<br>
-&nbsp;&nbsp;&nbsp; id=&quot;mymarker&quot;<br>
-&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.core.resources.markers&quot; /&gt;<br>
+&nbsp;&nbsp;&nbsp;id=&quot;mymarker&quot;<br>
+&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.markers&quot; /&gt;<br>
 &lt;extension<br>
-&nbsp;&nbsp;&nbsp; id=&quot;myproblem&quot;<br>
-&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.core.resources.markers&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;super type=&quot;org.eclipse.core.resources.problemmarker&quot;
-/&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;super type=&quot;com.example.markers.mymarker&quot;
-/&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;attribute name=&quot;myAttribute&quot; /&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;persistent value=&quot;true&quot; /&gt;<br>
-&lt;/extension&gt;</P>
+&nbsp;&nbsp;&nbsp;id=&quot;myproblem&quot;<br>
+&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.markers&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;super type=&quot;org.eclipse.core.resources.problemmarker&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;super type=&quot;com.example.markers.mymarker&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;attribute name=&quot;myAttribute&quot; /&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;persistent value=&quot;true&quot; /&gt;<br>
+&lt;/extension&gt;
+</P>
 <P >
 Note that the type <b> org.eclipse.core.resources.problemmarker</b> is actually one of the pre-defined types (aka
 <b>IMarker.PROBLEM</b>).&nbsp; </P>
@@ -241,14 +244,15 @@ views and editors).  Markers of a particular type do not have to have values for
 for constraining content. </P>
 <P CLASS="Code">
 public IMarker createMyMarker(IResource resource) {<br>
-&nbsp;&nbsp;&nbsp; try {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; IMarker marker = resource.createMarker(&quot;com.example.markers.myproblem&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; marker.setAttribute(&quot;myAttribute&quot;, &quot;MYVALUE&quot;);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return marker;<br>
-&nbsp;&nbsp;&nbsp; } catch (CoreException e) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // You need to handle the cases where attribute value is rejected<br>
-&nbsp;&nbsp;&nbsp; }<br>
-}</P>
+&nbsp;&nbsp;&nbsp;try {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IMarker marker = resource.createMarker(&quot;com.example.markers.myproblem&quot;);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;marker.setAttribute(&quot;myAttribute&quot;, &quot;MYVALUE&quot;);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return marker;<br>
+&nbsp;&nbsp;&nbsp;} catch (CoreException e) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// You need to handle the cases where attribute value is rejected<br>
+&nbsp;&nbsp;&nbsp;}<br>
+}
+</P>
 <P >
 You can query your own marker types in the same way you query the platform marker
 types.&nbsp; The method below finds all <b>mymarkers</b> associated with the given target resource and all
@@ -257,10 +261,10 @@ of its descendents.  Note that this will also find all
 argument.</P>
 <P CLASS="Code">
 public IMarker[] findMyMarkers(IResource target) {<br>
-&nbsp;&nbsp;&nbsp; String type = &quot;com.example.markers.mymarker&quot;;<br>
-&nbsp;&nbsp;&nbsp; IMarker[] markers = target.findMarkers(type, true,
-IResource.DEPTH_INFINITE);<br>
-}</P>
+&nbsp;&nbsp;&nbsp;String type = &quot;com.example.markers.mymarker&quot;;<br>
+&nbsp;&nbsp;&nbsp;IMarker[] markers = target.findMarkers(type, true, IResource.DEPTH_INFINITE);<br>
+}
+</P>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="195" height="12"></a></p>
 

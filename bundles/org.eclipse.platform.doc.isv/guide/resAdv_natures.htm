@@ -30,14 +30,15 @@ The <a href="../reference/extension-points/org_eclipse_core_resources_natures.ht
 <b> com.example.natures</b> plug-in.</P>
 <P CLASS="Code">
 &lt;extension<br>
-&nbsp;&nbsp;&nbsp; point=&quot;org.eclipse.core.resources.natures&quot;<br>
-&nbsp;&nbsp;&nbsp; id=&quot;mynature&quot;<br>
-&nbsp;&nbsp;&nbsp; name=&quot;My Nature&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;runtime&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;run&nbsp;class=&quot;com.example.natures.MyNature&quot;&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/run&gt;<br>
-&nbsp;&nbsp;&nbsp; &lt;/runtime&gt;<br>
-&lt;/extension&gt; </P>
+&nbsp;&nbsp;&nbsp;point=&quot;org.eclipse.core.resources.natures&quot;<br>
+&nbsp;&nbsp;&nbsp;id=&quot;mynature&quot;<br>
+&nbsp;&nbsp;&nbsp;name=&quot;My Nature&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;runtime&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;run&nbsp;class=&quot;com.example.natures.MyNature&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/run&gt;<br>
+&nbsp;&nbsp;&nbsp;&lt;/runtime&gt;<br>
+&lt;/extension&gt;
+</P>
 <P >
 The class identified in the extension must implement the platform interface
 <b><a href="../reference/api/org/eclipse/core/resources/IProjectNature.html">IProjectNature</a></b>. This class implements plug-in specific behavior for associating nature-specific information with a project when
@@ -45,23 +46,24 @@ the nature is configured.</P>
 <P CLASS="Code">
 public class MyNature implements IProjectNature {<br>
 <br>
-&nbsp;&nbsp;&nbsp; private IProject project;<br>
+&nbsp;&nbsp;&nbsp;private IProject project;<br>
 <br>
-&nbsp;&nbsp;&nbsp; public void configure() throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Add nature-specific information<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // for the project, such as adding a builder<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // to a project's build spec.<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; public void deconfigure() throws CoreException {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Remove the nature-specific information here.<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; public IProject getProject() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return project;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp; public void setProject(IProject value) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; project = value;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-}</P>
+&nbsp;&nbsp;&nbsp;public void configure() throws CoreException {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Add nature-specific information<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// for the project, such as adding a builder<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// to a project's build spec.<br>
+&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;public void deconfigure() throws CoreException {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Remove the nature-specific information here.<br>
+&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;public IProject getProject() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return project;<br>
+&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;public void setProject(IProject value) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;project = value;<br>
+&nbsp;&nbsp;&nbsp;}<br>
+}
+</P>
 <P >
 The <b> configure()</b> and <b> deconfigure()</b> methods are sent by the platform
 when natures are added and removed from a project.&nbsp; You can implement the
@@ -75,17 +77,17 @@ Associating the nature with a project</H3>
 Once you've defined the nature and implemented its class, you must assign the nature to a project. The following snippet assigns our new nature to a given project.</P>
 <P CLASS="Code">
 try {<br>
-&nbsp;&nbsp;&nbsp; IProjectDescription description = project.getDescription();<br>
-&nbsp;&nbsp;&nbsp; String[] natures = description.getNatureIds();<br>
-&nbsp;&nbsp;&nbsp; String[] newNatures = new String[natures.length + 1];<br>
-&nbsp;&nbsp;&nbsp; System.arraycopy(natures, 0, newNatures, 0, natures.length);<br>
-&nbsp;&nbsp;&nbsp; newNatures[natures.length] = &quot;com.example.natures.mynature&quot;;<br>
-&nbsp;&nbsp;&nbsp; description.setNatureIds(newNatures);<br>
-&nbsp;&nbsp;&nbsp; project.setDescription(description, null);<br>
+&nbsp;&nbsp;&nbsp;IProjectDescription description = project.getDescription();<br>
+&nbsp;&nbsp;&nbsp;String[] natures = description.getNatureIds();<br>
+&nbsp;&nbsp;&nbsp;String[] newNatures = new String[natures.length + 1];<br>
+&nbsp;&nbsp;&nbsp;System.arraycopy(natures, 0, newNatures, 0, natures.length);<br>
+&nbsp;&nbsp;&nbsp;newNatures[natures.length] = &quot;com.example.natures.mynature&quot;;<br>
+&nbsp;&nbsp;&nbsp;description.setNatureIds(newNatures);<br>
+&nbsp;&nbsp;&nbsp;project.setDescription(description, null);<br>
 } catch (CoreException e) {<br>
-&nbsp;&nbsp;&nbsp; // Something went wrong<br>
+&nbsp;&nbsp;&nbsp;// Something went wrong<br>
 }<br>
- </P>
+</P>
 <P>
 The identifier used for the nature is the fully qualified name (plug-in id + extension id) of the nature extension. </P>
 <P >
