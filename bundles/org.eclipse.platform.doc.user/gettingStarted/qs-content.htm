@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Content Sensitive Object Contributions</title>
+
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Content Sensitive Object Contributions</h3>
+<p>Context menus for some applications have previously only been able to exclude 
+  some menu options based on peripheral information known about the resources 
+  selected (the number of resources selected, the physical name of the file, the 
+  type of the resource, etc.). There are some cases where a restricted amount 
+  of information known about the contents of the resource would significantly 
+  reduce unusable options from the menus. Consider XML files as a good example 
+  of where such information would be useful. There are numerous situations where 
+  an action is applicable for one type of XML file but not another. For example, 
+  some XML files contain Ant scripts. The action &quot;Run Ant...&quot; makes 
+  sense in its context menu. But this action is not applicable to an XML file 
+  used to define a plug-in.</p>
+<p>The notion of a content type has been added to Eclipse. A new extension point, 
+  org.eclipse.core.runtime.contentTypes allows plug-ins to contribute to the Platform 
+  content type catalog. Further, classes called Content Type Describers have been 
+  added.</p>
+<p>For developers providing their own content types, two customizable, built-in 
+  content type describers are available: BinarySignatureDescriber (for binary 
+  content types) and XMLRootElementContentDescriber (for text, XML based content 
+  types). Plug-in providers may create their own content describers. The Platform 
+  Plug-in Developer Guide (Programmer's Guide -&gt; Runtime overview -&gt; Content 
+  types) describes this in more detail.</p>
+<p>XMLRootElementContentDescriber<br>
+  It will now be possible to define object contributions which are specific to 
+  an XML file with a given top level tag or which specify a given DTD. To do this, 
+  define an extension to the org.eclipse.core.runtime.contentTypes extension point 
+  with a describer class of XMLRootElementContentDescriber and parameters indicating 
+  the top level tag name or the dtd name as follows:</p>
+<p> &lt;extension<br>
+  point=&quot;org.eclipse.core.runtime.contentTypes&quot;&gt;<br>
+  &lt;content-type<br>
+  id=&lt;id&gt;<br>
+  name=&lt;name&gt; <br>
+  base-type=&quot;org.eclipse.core.runtime.xml&quot;&gt;<br>
+  &lt;describer class=&quot;org.eclipse.core.runtime.content.XMLRootElementContentDescriber&quot;&gt;<br>
+  &lt;parameter name=&quot;element&quot; value=tagValue /&gt;<br>
+  &lt;/describer&gt;<br>
+  &lt;/content-type&gt;<br>
+  &lt;/extension&gt;<br>
+  or <br>
+  &lt;extension<br>
+  point=&quot;org.eclipse.core.runtime.contentTypes&quot;&gt;<br>
+  &lt;content-type<br>
+  id=&lt;id&gt;<br>
+  name=&lt;name&gt; <br>
+  base-type=&quot;org.eclipse.core.runtime.xml&quot;&gt;<br>
+  &lt;describer class=&quot;org.eclipse.core.runtime.content.XMLRootElementContentDescriber&quot;&gt;<br>
+  &lt;parameter name=&quot;dtd&quot; value=dtdValue /&gt;<br>
+  &lt;/describer&gt;<br>
+  &lt;/content-type&gt;<br>
+  &lt;/extension&gt;<br>
+  where tagValue represents the name of the top level tag to match and</p>
+<p>dtdValue represents the name of the DTD as seen in the XML file.</p>
+<p>Consider the following object contribution in a plugin.xml file:</p>
+<p> &lt;extension<br>
+  point=&quot;org.eclipse.core.runtime.contentTypes&quot;&gt;<br>
+  &lt;content-type <br>
+  id=&quot;topElementContentType&quot;<br>
+  name=&quot;Tests top-level element recognition&quot; <br>
+  base-type=&quot;org.eclipse.core.runtime.xml&quot;<br>
+  priority=&quot;high&quot;&gt;<br>
+  &lt;describer class=&quot;org.eclipse.core.runtime.content.XMLRootElementContentDescriber&quot;&gt;<br>
+  &lt;parameter name=&quot;element&quot; value=&quot;myTag&quot; /&gt;<br>
+  &lt;/describer&gt;<br>
+  &lt;/content-type&gt;<br>
+  &lt;/extension&gt;</p>
+<p> &lt;extension<br>
+  point=&quot;org.eclipse.core.runtime.contentTypes&quot;&gt;<br>
+  &lt;content-type <br>
+  id=&quot;dtdContentType&quot;<br>
+  name=&quot;Tests dtd element recognition&quot; <br>
+  base-type=&quot;org.eclipse.core.runtime.xml&quot;<br>
+  priority=&quot;high&quot;&gt;<br>
+  &lt;describer class=&quot;org.eclipse.core.runtime.content.XMLRootElementContentDescriber&quot;&gt;<br>
+  &lt;parameter name=&quot;dtd&quot; value=&quot;myDTD.xml&quot; /&gt;<br>
+  &lt;/describer&gt;<br>
+  &lt;/content-type&gt;<br>
+  &lt;/extension&gt;</p>
+<p> &lt;extension point=&quot;org.eclipse.ui.popupMenus&quot;&gt;<br>
+  &lt;objectContribution<br>
+  id=&quot;org.eclipse.ui.examples.objectContributions&quot;<br>
+  objectClass=&quot;org.eclipse.core.resources.IFile&quot;<br>
+  nameFilter=&quot;*.xml&quot;&gt;<br>
+  &lt;visibility&gt;<br>
+  &lt;or&gt;<br>
+  &lt;objectState<br>
+  name=&quot;contentTypeId&quot;<br>
+  value=&quot;org.eclipse.ui.examples.topElementContentType&quot;/&gt;<br>
+  &lt;objectState<br>
+  name=&quot;contentTypeId&quot;<br>
+  value=&quot;org.eclipse.ui.examples.dtdContentType&quot;/&gt;<br>
+  &lt;/or&gt;<br>
+  &lt;/visibility&gt;<br>
+  &lt;action id=&quot;org.eclipse.ui.examples.objectContributions.action1&quot;<br>
+  label=&quot;%PopupMenus.action&quot;<br>
+  icon=&quot;icons/ctool16/openbrwsr.gif&quot;<br>
+  menubarPath=&quot;additions&quot;<br>
+  class=&quot;org.eclipse.ui.examples.objectContributions.PopupMenuActionDelegate&quot;<br>
+  enablesFor=&quot;1&quot;&gt;<br>
+  &lt;/action&gt;<br>
+  &lt;/objectContribution&gt;<br>
+  &lt;/extension&gt;<br>
+  This will make action1 visible for any IFile with a name matching *.xml provided 
+  it contains myTag as the top level XML tag or it uses the DTD called myDTD.xml. 
+  So the following XML files will match:</p>
+<p>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;<br>
+  &lt;myTag<br>
+  id=&quot;org.eclipse.ui.workbench&quot;<br>
+  name=&quot;%pluginName&quot;<br>
+  version=&quot;3.0.0&quot;<br>
+  provider-name=&quot;%providerName&quot;<br>
+  class=&quot;org.eclipse.ui.internal.WorkbenchPlugin&quot;&gt;<br>
+  &lt;/myTag&gt;<br>
+  Or</p>
+<p>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;<br>
+  &lt;!DOCTYPE Book SYSTEM &quot;myDTD.xml&quot;&gt;<br>
+  &lt;fragment<br>
+  id=&quot;org.eclipse.ui.workbench&quot;<br>
+  name=&quot;%pluginName&quot;<br>
+  version=&quot;3.0.0&quot;<br>
+  provider-name=&quot;%providerName&quot;<br>
+  class=&quot;org.eclipse.ui.internal.WorkbenchPlugin&quot;&gt;<br>
+  &lt;runtime&gt;<br>
+  &lt;library name=&quot;workbench.jar&quot;&gt;<br>
+  &lt;export name=&quot;*&quot;/&gt;<br>
+  &lt;packages prefixes=&quot;org.eclipse.ui, org.eclipse.jface&quot;/&gt;<br>
+  &lt;/library&gt;<br>
+  &lt;/runtime&gt;<br>
+  &lt;/fragment&gt;</p>
+<p>BinarySignatureDescriber<br>
+  The BinarySignatureDescriber is a content describer to detect a specified binary 
+  'signature' at a given offset within a file. This describer is used in the same 
+  fashion as the XMLRootElementContentDescriber with the exception that it takes 
+  parameters &quot;signature&quot;, &quot;offset&quot; and &quot;required&quot; 
+  instead of &quot;element&quot; or &quot;dtd&quot;. The Javadoc for BinarySignatureDescriber 
+  gives complete details on this content describer's class usage. </p>
+<P><br>
+<a href="../hglegal2003.htm">
+<img src="../images/ngibmcpy2003.gif" alt="Copyright IBM Corporation 2000, 2003. All Rights Reserved." border="0" width="324" height="14"></a>
+</P>
+
+</BODY>
+</HTML>
