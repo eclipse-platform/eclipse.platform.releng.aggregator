@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Customizing a primary feature</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Customizing a primary feature</h2>
+<p>Product customization works differently when using the primary feature mechanism.
+The branding information for the feature is located in a plug-in of the same
+name as the primary feature. The files that designate and define branding
+information for our hypothetical acmeweb application are highlighted in the
+sample directory structure below:</p>
+<pre><font color="#4444CC">acmeweb/
+	<b>acmeweb.exe	</b></font>(product executable - invokes eclipse.exe and specifies the primary feature)
+	<font color="#4444CC">eclipse/</font>
+		<font color="#4444CC">.eclipseproduct</font>
+		<font color="#4444CC">eclipse.exe
+		startup.jar
+		install.ini
+		.config/
+		platform.cfg
+		jre/
+		features/</font>
+			<font color="#4444CC"><b>com.example.acme.acmefeature_1.0.0/</b>&nbsp;&nbsp;&nbsp; </font>(primary feature)<font color="#4444CC">
+				feature.xml
+			org.eclipse.platform_2.0.0/
+			org.eclipse.platform.win32_2.0.0/
+		plugins/
+			<b>com.example.acme.acmefeature_1.0.0/</b>&nbsp;&nbsp;&nbsp; </font>(plug-in for primary feature.  Contains branding info.)<font color="#4444CC">
+				plugin.xml
+				<b>about.ini
+				about.html
+				about.mappings
+				about.properties
+				acme.gif
+				plugin_customization.ini
+				splash.jpg
+				welcome.xml</b>
+			com.example.acme.acmewebsupport_1.0.0/
+			org.eclipse.platform_2.0.0/
+			...
+			links/
+			...</font></pre>
+<p>The plug-in associated with a <a href="product_def_primary.htm">primary
+  feature</a> is where the branding information for a product is specified.&nbsp;
+  There are many customizable aspects of a product.&nbsp; Product-level
+  customizations are defined using the <b>about.ini</b> file and other files
+  described therein.&nbsp; Products can also control the default preference values
+  of other plug-ins.&nbsp; This is done using the <b>plugin_customization.ini</b>
+  file.</p>
+<p>Referring once again to our sample product's primary feature plug-in, let's
+look closer at how the product is customized.</p>
+<pre><font color="#4444CC"><b>com.example.acme.acmefeature_1.0.0/</b></font><font color="#4444CC">
+		plugin.xml
+		<b>about.ini
+		about.html
+		about.mappings
+		about.properties
+		acme.gif
+		plugin_customization.ini
+		plugin_customization.properties
+		splash.bmp
+		welcome.xml</b></font></pre>
+<p>We'll review the same customizations that we reviewed for the products extension point, focusing
+on how the specification differs using the primary feature mechanism.</p>
+<h3>About dialogs</h3>
+<p>As discussed with the product-level customization, all features and plug-ins should 
+contribute an <b>about.html</b> file that provides information about that particular plug-in.</p>
+<p>The primary feature also supplies the information and graphics for the
+overall product.&nbsp; Additional files are used to specify this information.</p>
+<ul>
+  <li><b>about.ini</b> specifies the about text and images for features,
+    windows, and the about dialog itself.&nbsp; It also specifies the welcome
+    page.&nbsp; See <a href="../reference/misc/about_customization.html">Customization
+    using about.ini </a>for a complete description of the format of this file.&nbsp;</li>
+  <li><b>about.properties</b> should be used to hold translated strings from the
+    <b>about.ini </b>file (using &quot;%var&quot; as the value in about.ini paired with an
+    entry for the key &quot;var&quot; in about.properties.&nbsp; This file is a <b>java.io.Properties</b>
+    format file.</li>
+  <li><b>about.mappings</b> can be used to fill in values for fill-in fields in
+    the about text.&nbsp; This is useful when the about text contains
+    information specific to a particular install, such as license key, install
+    date, or licensed user. For example, the about text could be defined as
+    &quot;AcmeWeb is licensed to {0}&quot;.&nbsp; The about.mappings file could
+    be generated at install time based on input from the user.&nbsp; The final
+    form should contain a mapping for the field, such as &quot;0=Joe Q. Webuser&quot;.&nbsp;
+    The about.mappings file is a <b>java.io.Properties</b> format file.</li>
+</ul>
+<h3>Window images</h3>
+<p>A 16x16 pixel color image can be used to brand windows created by the
+product.&nbsp; It will appear in the upper left hand corner of product
+windows.&nbsp; It is specified in the <b>windowImage</b> attribute in the <b>about.ini</b>
+file.&nbsp; The path should be specified as a plug-in relative path.&nbsp; A
+proper entry for the directory structure shown above would be as follows:</p>
+<pre><font color="#4444CC">windowImage=acme.gif</font></pre>
+<h3>Welcome page</h3>
+<p>Plug-ins using the Eclipse 2.1 Welcome mechanisms should specify the welcome
+page file in the welcomePage attribute in the about.ini file. The path should be specified as a plug-in
+relative path.&nbsp; A proper entry for the directory structure shown above
+would be as follows:</p>
+<pre><font color="#4444CC">welcomePage=welcome.xml</font></pre>
+<p>You can also specify an national language lookup for the file.&nbsp; (See <a href="product_def_nl.htm">Locale
+specific files</a> for more detail.)</p>
+<pre><font color="#4444CC">welcomePage=$nl$/welcome.xml</font></pre>
+<h3>Splash screens</h3>
+<p>The product splash screen is supplied in a <b>splash.bmp</b> file located in
+the primary feature plug-in directory.&nbsp; The image should be supplied in
+24-bit color BMP format (RGB format) and should be approximately 500x330 pixels in
+size.&nbsp; If splash screens need to be customized for different locales, they
+can be placed in a fragment of the primary feature's plug-in.</p>
+<a name="preferences"></a>
+<h3>Preferences defaults</h3>
+
+<p>The <b>plugin_customization.ini</b>
+ file is used to set the default preference values for preferences defined by
+other plug-ins.&nbsp; This file is a <b>java.io.Properties</b> format file.
+Typically this file is used to set the values for preferences that are published
+as part of a plug-in's public API.&nbsp; That is, you are taking a risk if you
+refer to preferences that are used by plug-ins but not defined formally in the
+API.&nbsp;&nbsp;</p>
+<p>One common customization is to set the default perspective for the
+workbench.&nbsp; This preference is defined in the <b>org.eclipse.ui </b>plug-in.&nbsp;&nbsp;
+The
+following example assumes that the product should be launched with the resource
+perspective as the default perspective.</p>
+<pre><font color="#4444CC">org.eclipse.ui/defaultPerspectiveId=org.eclipse.ui.resourcePerspective</font></pre>
+<p>If you discover you need to change the default value for one of another plug-in's
+preferences, consult the API documentation for that plug-in to see if the
+preference is considered public.</p>
+<p>The <b>plugin_customization.properties</b> file contains translated strings
+for the <b>plugin_customization.ini</b>
+ file.<font color="#4444CC"><br>
+</font></p>
+<p><a href="../hglegal.htm"><img border="0" src="../cpy.gif" alt="Copyright IBM Corporation and others 2000, 2004." border="0" width="324" height="14"></a></p>
+</BODY>
+</HTML>

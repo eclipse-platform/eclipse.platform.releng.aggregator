@@ -10,68 +10,41 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h3>Primary feature</h3>
-<p><font color="#FF0000">&lt;this needs to be prefaced with notes that identify it as the legacy approach.
-  It is fully supported but is left in place for people with existing products.
-  There will be some level of updating needed to the details as some files have
-  moved/been renamed, ..&gt;</font></p>
-<p>When the Eclipse platform is started, exactly one feature gets to control
+<p>In Eclipse 2.1, the notion of a <b>primary feature</b> was used to customize the
+product-branding aspects of a product.  This mechanism is still supported in Eclipse 3.0,
+but as a legacy feature.  Newly developed products should use the <a href="product_def_extpt.htm">products extension point</a>
+to define a product.
+</p>
+<p>The remainder of this discussion describes the legacy implementation for primary features.</p>
+<p>When the Eclipse platform is started, exactly one feature can control
   the overall &quot;personality&quot; or &quot;branding&quot; of the platform,
   including the splash screen, window images, about box, welcome page, and other
   customizable aspects of the platform.&nbsp; This feature is called the product's <b>primary feature</b>.</p>
 <p>Let's look again at the description of the platform feature in its platform
 manifest:</p>
-<pre><font color="#4444CC">feature 
-	id=&quot;org.eclipse.platform&quot; 
-	label=&quot;%featureName&quot; 
-	version=&quot;2.0.0&quot; 
-	provider-name=&quot;%providerName&quot; 
-	<b>primary=&quot;true&quot;</b> 
-	application=&quot;org.eclipse.ui.workbench&quot;&gt;</font></pre>
+<pre><font color="#4444CC">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;feature
+      id="org.eclipse.platform"
+      label="%featureName"
+      version="3.0.0"
+      provider-name="%providerName"
+      plugin=""
+      image="eclipse_update_120.jpg"
+      <b>primary="true"</b>
+      application="org.eclipse.ui.ide.workbench"&gt;
+      ...
+</font></pre>
 <p>The platform feature has been designated as a primary feature. Although it's
 possible to designate many features as primary features in their <b>feature.xml</b> 
-files,
-only one primary feature gets control when the platform is launched.&nbsp; This
+files, only one primary feature gets control when the platform is launched. This
 is controlled in the product's <b>install.ini </b>file underneath the <b>eclipse</b>
 directory.&nbsp; The <b>feature.default.id</b> property in this file designates
 the primary feature for the product.&nbsp; Typically, a product only defines branding information for
 one feature and designates this feature in the <b>install.ini </b>file.&nbsp;
 (If there are multiple eligible primary features, the <b>-feature </b>command
 line option for <b>eclipse.exe</b> overrides the choice made in <b>install.ini</b>.) </p>
-<p>The branding information for the feature is located in a plug-in of the same
-name as the primary feature.&nbsp; The files that designate and define branding
-information for our hypothetical acmeweb application are highlighted in the
-sample directory structure below:</p>
-<pre><font color="#4444CC">acmeweb/
-	<b>acmeweb.exe	</b></font>(product executable - invokes eclipse.exe and specifies the primary feature)
-	<font color="#4444CC">eclipse/</font>
-		<font color="#4444CC">.eclipseproduct</font>
-		<font color="#4444CC">eclipse.exe
-		startup.jar
-		install.ini
-		.config/
-		platform.cfg
-		jre/
-		features/</font>
-			<font color="#4444CC"><b>com.example.acme.acmefeature_1.0.0/</b>&nbsp;&nbsp;&nbsp; </font>(primary feature)<font color="#4444CC">
-				feature.xml
-			org.eclipse.platform_2.0.0/
-			org.eclipse.platform.win32_2.0.0/
-		plugins/
-			<b>com.example.acme.acmefeature_1.0.0/</b>&nbsp;&nbsp;&nbsp; </font>(plug-in for primary feature.  Contains branding info.)<font color="#4444CC">
-				plugin.xml
-				<b>about.ini
-				about.html
-				about.mappings
-				about.properties
-				acme.gif
-				plugin_customization.ini
-				splash.jpg
-				welcome.xml</b>
-			com.example.acme.acmewebsupport_1.0.0/
-			org.eclipse.platform_2.0.0/
-			...
-			links/
-			...</font></pre>
+
 <p><a href="../hglegal.htm"><img border="0" src="../cpy.gif" alt="Copyright IBM Corporation and others 2000, 2004." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>

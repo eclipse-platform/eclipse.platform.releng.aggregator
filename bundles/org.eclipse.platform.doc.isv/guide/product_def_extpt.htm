@@ -4,13 +4,70 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>Product Extension Point</TITLE>
+<TITLE>Products extension point</TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<h3>Product Extension Point</h3>
-<p>&nbsp;</p>
+<h3>Products extension point</h3>
+<p>[This document is still under construction.]</p>
+<p>The preferred mechanism for defining a product based on the Eclipse platform is to use the
+<b><a href="../reference/extension-points/org_eclipse_core_runtime_products.html">org.eclipse.core.runtime.products</b></a>
+extension point.  In this extension point, a plug-in can declare the name of its product, as well as the id of the application
+extension that should be run when the product is invoked.  Here is a snippet of the plugin.xml defined
+by <b>org.eclipse.ui.examples.rcp.browser</b> in the <a href="rcp_browser.htm">Browser example</a>.
+<pre><font color="#4444CC">
+&lt;extension
+	id="product"
+	point="org.eclipse.core.runtime.products"&gt;
+	&lt;product
+		name="%productName"
+		<b>application="org.eclipse.ui.examples.rcp.browser.app"</b>&gt;
+	...
+</font></pre>
+A product extension is defined whose <b>application</b> id is "org.eclipse.ui.examples.rcp.browser.app".
+This application id is also defined in the plugin.xml in the 
+<b><a href="../reference/extension-points/org_eclipse_core_runtime_applications.html">org.eclipse.core.runtime.applications</b></a>
+extension.
+<font color='#4444CC'><pre>
+   &lt;extension
+         <b>id="app"</b>
+         name="%appName"
+         point="org.eclipse.core.runtime.applications"&gt;
+      &lt;application&gt;
+         &lt;run
+            class="org.eclipse.ui.examples.rcp.browser.BrowserApp"&gt;
+         &lt;/run&gt;
+      &lt;/application&gt;
+   &lt;/extension&gt;
+</pre></font> 
+This extension is defined with the same id that is referenced in the <b>application</b> attribute of the
+products extension.  (The fully qualified name, with plug-in prefix, is used, but the id is the same.)
+</p>
+<p>
+In addition to the application, the <b><a href="../reference/extension-points/org_eclipse_core_runtime_products.html">org.eclipse.core.runtime.products</b></a>
+extension describes product customization properties that are used to configure the product's branding information.
+This information is described as named properties.  The <a href="rcp_browser.htm">Browser example</a> defines several
+of these properties:
+<pre><font color="#4444CC">
+	&lt;property
+ 		name="appName"
+		value="%swtAppName"/&gt;
+	&lt;property
+		name="windowImages"
+		value="icons/eclipse.gif,icons/eclipse32.gif"/&gt;
+	&lt;property
+		name="aboutText"
+		value="%aboutText"/&gt;
+	&lt;property
+		name="aboutImage"
+		value="icons/eclipse_lg.gif"/&gt;
+	&lt;/product&gt;
+</pre></font>
+The possible property names that are honored by the platform for product customization are defined in
+<b><a href="../reference/api/org/eclipse/ui/branding/IProductConstants.html">IProductConstants</a></b>.
+See the javadoc for a complete description of these properties and their values.
+</p>
 <p><a href="../hglegal.htm"><img src="../cpy.gif" alt="Copyright IBM Corporation and others 2000, 2004." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
