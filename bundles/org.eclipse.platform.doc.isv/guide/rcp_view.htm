@@ -5,16 +5,54 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Adding a view
+Adding views
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H3>
-Adding a view</H3>
+Adding views</H3>
 <P>
-[This document is under construction.]  
+The browser example defines two views in its workbench.  One view shows the browser content and the other
+displays the history of visited links.  We first saw these views when they were added to the browser's perspective:
+<font color='#4444CC'><pre>
+	public void createInitialLayout(IPageLayout layout) {
+		<b>layout.addView(BrowserApp.BROWSER_VIEW_ID, IPageLayout.RIGHT, .25f, IPageLayout.ID_EDITOR_AREA);
+		layout.addPlaceholder(BrowserApp.HISTORY_VIEW_ID, IPageLayout.LEFT, .3f, IPageLayout.ID_EDITOR_AREA); </b>
+		IViewLayout historyLayout = layout.getViewLayout(BrowserApp.HISTORY_VIEW_ID);
+		historyLayout.setCloseable(true);
+		historyLayout.setMoveable(true);
+		layout.setEditorAreaVisible(false);
+	}
+</pre></font>
+The corresponding views are also defined in the browser plug-in's manifest:
+<font color='#4444CC'><pre>
+   &lt;extension
+         point="org.eclipse.ui.views"&gt;
+      &lt;category
+            name="%views.category.name"
+            id="org.eclipse.ui.examples.rcp.browser"/&gt;
+      &lt;view
+            id="org.eclipse.ui.examples.rcp.browser.browserView"
+            name="%views.browser.name"
+            icon="icons/eclipse.gif"
+            <b>class="org.eclipse.ui.examples.rcp.browser.BrowserView"</b>
+            category="org.eclipse.ui.examples.rcp.browser"
+            allowMultiple="true"/&gt;
+      &lt;view
+            id="org.eclipse.ui.examples.rcp.browser.historyView"
+            name="%views.history.name"
+            icon="icons/eclipse.gif"
+            <b>class="org.eclipse.ui.examples.rcp.browser.HistoryView"</b>
+            category="org.eclipse.ui.examples.rcp.browser"/&gt;
+   &lt;/extension&gt;
+</pre></font> 
+The <b>BrowserView</b> and <b>HistoryView</b> create the necessary SWT controls for showing the browser content
+and history.  The implementation of these views is no different for rich client plug-ins, so we won't
+review them here.  See the example classes and <a href="workbench_basicext_views.htm">
+org.eclipse.ui.views</a> for more information.
+
 </p>
 
 <p><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></p>
