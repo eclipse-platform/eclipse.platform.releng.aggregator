@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Performance Tests HowTo</title>
+  <link rel="stylesheet" href="http://dev.eclipse.org/default_style.css" type="text/css">
+</head>
+<body>
+<h1 style="text-align: center;">Performance Tests HowTo</h1>
+
+<p>
+Supported platforms: Windows, Linux, MacOS X
+</p>
+
+<h3>Setting up the environment</h3>
+<ul>
+  <li>check out the following plug-ins from dev.eclipse.org.</li>
+  <ul>
+    <li>org.eclipse.test.performance</li>
+    <li>org.eclipse.test.performance.win32 (for Windows only)</li>
+  </ul>
+  <li>add org.eclipse.test.performance to your test plug-in's dependencies</li>
+</ul>
+
+<h3>Writing a performance test case</h3>
+<ul>
+  <li>also see below for <a href="#convert">converting test cases from earlier versions of this document</a></li>
+  <li>create a test case with test methods along the lines of:</li>
+<pre>
+public void testMyOperation() {
+	Performance perf= Performance.getDefault();
+	PerformanceMeter performanceMeter= perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
+	try {
+		for (int i= 0; i &lt; 10; i++) {
+			performanceMeter.start();
+			toMeasure();
+			performanceMeter.stop();
+		}
+		performanceMeter.commit();
+		perf.assertPerformance(performanceMeter);
+	} finally {
+		performanceMeter.dispose();
+	}
+}
+</pre>
+<li>or create a test case extending <code>PerformanceTestCase</code> which is a convenience class that makes the
+use of <code>PerformanceMeter</code> transparent:
+<pre>
+public class MyPerformanceTestCase extends PeformanceTestCase {
+
+	public void testMyOperation() {
+		for (int i= 0; i &lt; 10; i++) {
+			startMeasuring();
+			toMeasure();
+			stopMeasuring();
+		}
+		commitMeasurements();
+		assertPerformance();
+	}
+}
+</pre>
+</ul>
+Notes:
+<ul>
+  <li><code>Performance</code> is currently just a factory for <code>PerformanceMeter</code>s. The scenario id passed to <code>createPerformanceMeter(...)</code> has to be unique in a single test run and should be the same in each test run.</li>
+  <li>The <code>Peformance#getDefaultScenarioId(...)</code> methods are provided for convenice.
+  <li><code>PerformanceMeter</code> is a general abstraction for measuring, that supports repeated measurements by multiple invocations of the <code>start()</code>, <code>stop()</code> sequence. The call to <code>commit()</code> is required before evaluation with <code>assertPerformance()</code> and <code>dispose()</code> is required before releasing the meter.
+  <li>The number of runs will need some tuning, such that the last runs are stable. In general the first runs will take more time because the code is not optimized by the JIT compiler yet. This deserves extra caution when other code is run before the measurements (e.g., if tests are added, removed, reordered).
+</ul>
+
+<h3>Running a performance test case (from a launch configuration)</h3>
+<ul>
+  <li>create a new JUnit Plug-in Test launch configuration for the test case</li>
+  <li>add "-Xms250M -Xmx250M" or similar to the VM arguments to avoid memory pressure during the measurements</li>
+  <li>add the <code>-DInternalPrintPerformanceResults</code> to your launch configuration's VM arguments, this option is a provisional solution for providing access to the measurements, it lets the <code>PerformanceMeter</code> print the measured averages to the console on <code>commit()</code> and will be removed as soon as the new backend is in place</li>
+  <li>run the launch configuration</li>
+</ul>
+
+<h3>Running a performance test case (within the Automated Testing Framework on each build)</h3>
+<ul>
+  <li>if the <code>test.xml</code> of your test plug-in already exists and looks similar to the <code>jdt.text.tests</code>' one, add targets similar to:</li>
+<pre>
+&lt;!-- This target defines the performance tests that need to be run. --&gt;
+&lt;target name="performance-suite"&gt;
+  &lt;property name="your-performance-folder" value="${eclipse-home}/your_performance_folder"/&gt;
+  &lt;delete dir="${your-performance-folder}" quiet="true"/&gt;
+  &lt;ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}"&gt;
+    &lt;property name="data-dir" value="${your-performance-folder}"/&gt;
+    &lt;property name="plugin-name" value="${plugin-name}"/&gt;
+    &lt;property name="classname" value="<em>&lt;your fully qualified test case class name&gt;</em>"/&gt;
+  &lt;/ant&gt;
+&lt;/target&gt;
+
+&lt;!-- This target runs the performance test suite. Any actions that need to happen --&gt;
+&lt;!-- after all the tests have been run should go here. --&gt;
+&lt;target name="performance" depends="init,performance-suite,cleanup"&gt;
+  &lt;ant target="collect" antfile="${library-file}" dir="${eclipse-home}"&gt;
+    &lt;property name="includes" value="org*.xml"/&gt;
+    &lt;property name="output-file" value="${plugin-name}.xml"/&gt;
+  &lt;/ant&gt;
+&lt;/target&gt;
+</pre>
+</ul>
+
+Notes:
+<ul>
+  <li>Performance measurements are run on a dedicated performance measurement machine of the Releng team.</li>
+  <li>If you have created a new source folder, do not forget to include it in the build (add it to the "build.properties" file).</li>
+</ul>
+
+<h3>Running a performance test case (within the Automated Testing Framework, locally)</h3>
+<ul>
+  <li>modify <code>test.xml</code> as described above
+  <li>download a build and its accompanying Automated Testing Framework</li>
+  <li>unzip the Automated Testing Framework (creates a directory "eclipse-testing", see also the contained readme.html)
+    <ul><li>you need <a href="http://www.info-zip.org/pub/infozip/UnZip.html">Info-ZIP UnZip</a>
+      version 5.41 or later (<a href="ftp://sunsite.cnlab-switch.ch/mirror/infozip/WIN32/unz551xN.exe">WinNT</a>)
+      installed and added to the path</li></ul>
+  </li>
+  <li>put the build's zip in the eclipse-testing directory</li>
+  <li>on the command prompt of Windows (similar for other platforms, see the readme.html of the Automated Testing Framework):</li>
+  <ul>
+    <li>change to the eclipse-testing directory</li>
+    <li>run: <code>runtests.bat -vm <em>&lt;path to JRE&gt;</em>\bin\java.exe <em>&lt;your test target&gt;</em><code></li>
+    <li>if your test plug-in is already run as part of the Automatic Test Framework, your test target can be found in the eclipse-testing directory's readme.html or test.xml</li>
+    <li>you can stop the test run as soon as the framework has extracted everything and started running test cases</li>
+  </ul>
+  <li>export your test plug-in as 'Deployable plug-in' to the eclipse-testing/test-eclipse/eclipse directory; choose to export as directory structure</li>
+  <li>(if you have exported a 3.1.0 plug-in to a 3.0.0 test harness, delete the old 3.0.0 test plug-in and rename yours to *_3.0.0)</li>
+  <li>on the command prompt:</li>
+  <ul>
+    <li>change to the eclipse-testing directory</li>
+    <li>run <em>(note the additional -noclean argument)</em>: <code>runtests.bat <span style="color: red;">-noclean</span> -vm <em>&lt;path to JRE&gt;</em>\bin\java.exe <em>&lt;your test target&gt;</em><code></li>
+  </ul>
+</ul>
+
+<h3><a name="convert">Converting test cases from earlier versions of this document</a></h3>
+<ul>
+  <li>replace the use of any <code>PerformanceMeterFactory</code> with <code>org.eclipse.test.performance.Performance#createPerformanceMeter(...)</code>, maybe in combination with one of the <code>Performance#getDefaultScenarioId(...)</code> methods
+  <li>replace the use of any old <code>PerformanceMeter</code> with org.eclipse.test.performance.PerformanceMeter:</li>
+  <ul>
+    <li>add a call to <code>Performance.assertPerformance(performanceMeter)</code> after the call to <code>commit()</code></li>
+    <li>surround the use of the <code>PerformanceMeter</code> with a try-block and add a call to <code>performanceMeter.dispose()</code> in the finally-block</li>
+  </ul>
+  <li>remove <code>org.eclipse.perfmsr.core</code> and <code>org.eclipse.jdt.text.tests</code> from your test plug-in's dependencies</li>
+  <li>for running a performance test from a launch configuration:</li>
+  <ul>
+    <li>remove the <code>etools_perf_ctrl</code> system property from your launch configuration's VM arguments</li>
+    <li>instead add the <code>-DInternalPrintPerformanceResults</code> to your launch configuration's VM arguments, this option is a provisional solution for providing access to the measurements, it lets the <code>PerformanceMeter</code> print the measured averages to the console on <code>commit()</code> and will be removed as soon as the new backend is in place</li>
+  </ul>
+  <li>for running a performance test within the Automated Testing Framework on each build (if the you <code>test.xml</code> looks similar to the <code>jdt.text.tests</code>' one):</li>
+  <ul>
+    <li>remove any <code>if="performance"</code> and <code>unless="performance"</code> attributes</li>
+    <li>remove the dependency of the <code>run</code> target on the <code>performance-suite</code> target</li>
+    <li>duplicate the <code>run</code> target, rename the copy to <code>performance</code> and make it dependent on <code>performance-suite</code> instead of <code>suite</code></li>
+  </ul>
+  <li>for running a performance test locally within the Automated Testing Framework (instructions for Windows):</li>
+  <ul>
+    <li>when running <code>runtests.bat</code>, remove the <code>eclipse-testing.properties</code> file and omit the <code>-properties ../eclipse-testing.properties</code> option</li>
+  </ul>
+</ul>
+
+</body>
+</html>
