@@ -54,12 +54,16 @@ reported in the <b>worked</b> calls.
 <p>
 As you can see, the <b><a href="../reference/api/org/eclipse/core/runtime/IProgressMonitor.html">IProgressMonitor</a></b>
 class is designed with corresponding UI support in mind.  The platform's UI plug-in provides support so that
-the workbench can show progress for jobs that are running.  But what if your job is a low-level implementation detail
-that you don't want to show to users?  You can flag your job as a <i>system job</i>.  A system job is just like
-any other job, except the corresponding UI support will not set up a progress view or show any other UI
-affordances associated with running a job.  If your job is not either directly
-initiated by a user, or a periodic task that can be configured by a user, then your
-job should be a system job.  The protocol for setting a system job is simple:
+the workbench can show progress for jobs that are running.  You can set up your jobs with this in mind, so that
+you can control how they are presented.
+</p>
+<h4>System jobs</h4>
+<p>
+What if your job is a low-level implementation detail that you don't want to show to users?  You can flag 
+your job as a <i>system job</i>.  A system job is just like any other job, except the corresponding 
+UI support will not set up a progress view or show any other UI affordances associated with running a job.  
+If your job is not either directly initiated by a user, or a periodic task that can be configured by a user, 
+then your job should be a system job.  The protocol for setting a system job is simple:
 <font color='#4444CC'><pre>
    class TrivialJob extends Job {
       public TrivialJob() {
@@ -69,6 +73,27 @@ job should be a system job.  The protocol for setting a system job is simple:
       ...
    }
 </pre></font>
+The <b>setSystem</b> call must be made before the job is scheduled.  An exception will be triggered if you attempt 
+this call on a job that is currently waiting, sleeping, or running.
+</p>
+<h4>User jobs</h4>
+<p>
+If your job is a long running operation that is initiated by a user, then you should flag 
+your job as a <i>user job</i>.  A user job will appear in a modal progress dialog that provides a button
+for moving the dialog into the background.  The workbench defines a user preference that controls whether
+these dialogs are ever modal.  By defining your job as a user job, your progress feedback will
+automatically conform with the user preference for progress viewing.  The protocol for setting a user job
+is similar:
+<font color='#4444CC'><pre>
+   class TrivialJob extends Job {
+      public TrivialJob() {
+         super("Trivial Job");
+         <b>setUser(true)</b>;
+      }
+      ...
+   }
+</pre></font>
+The <b>setUser</b> call must also be made before the job is scheduled.  
 </p>
 <h3>Progress groups</h3>
 <p>
