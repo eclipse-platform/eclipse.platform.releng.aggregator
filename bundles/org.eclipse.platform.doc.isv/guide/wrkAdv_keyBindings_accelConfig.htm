@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Accelerator configurations
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Accelerator configurations</h3>
+
+
+<p><b>Accelerator configurations</b> are used to represent a general style or theme of
+accelerator sets. For example, the
+Workbench provides a &quot;Default&quot; accelerator configuration and an &quot;Emacs&quot; accelerator configuration.&nbsp;
+Only one accelerator configuration is active at any given time.&nbsp; End users
+control which one is active using the workbench <b>Preferences</b> dialog.</p>
+
+
+<p><img border="0" src="images/keybindings.jpg" width="606" height="532"></p>
+
+
+<p>From an implementation point of view, accelerator configurations are simply
+named groupings of accelerator sets.&nbsp; An accelerator configuration won't
+accomplish anything on its own unless there are accelerator sets associated with
+it.&nbsp; In fact, an accelerator configuration won't be shown in the
+Preferences dialog if there is no accelerator set defined for it.</p>
+
+
+<p>Let's look again at the workbench emacs accelerator set to see how it gets
+associated with an accelerator configuration:</p>
+
+
+<pre><font color="#4444CC">&lt;extension
+      point=&quot;org.eclipse.ui.acceleratorSets&quot;&gt;
+   &lt;acceleratorSet
+         scopeId=&quot;org.eclipse.ui.globalScope&quot;
+<b>         configurationId=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
+</b>      &lt;accelerator
+            key=&quot;Ctrl+F4||Ctrl+X Ctrl+K&quot;
+            id=&quot;org.eclipse.ui.file.close&quot;&gt;
+      &lt;/accelerator&gt;
+      &lt;accelerator
+            key=&quot;Ctrl+Shift+F4||Ctrl+X Ctrl+C&quot;
+            id=&quot;org.eclipse.ui.file.closeAll&quot;&gt;
+      &lt;/accelerator&gt;
+      &lt;accelerator
+            key=&quot;Ctrl+X Ctrl+S&quot;
+            id=&quot;org.eclipse.ui.file.save&quot;&gt;
+      &lt;/accelerator&gt;
+      ...</font></pre>
+
+
+<p>When an accelerator set is defined, it specifies the <b>configurationID</b> of its associated
+accelerator configuration.&nbsp; The accelerator set will only be used if the
+user has chosen the accelerator configuration to which the set belongs.&nbsp; </p>
+
+
+<h4>Defining new accelerator configurations </h4>
+
+
+<p>When a plug-in defines an accelerator set, it often assigns it to an existing
+accelerator configuration.&nbsp; However, your plug-in may want to define a
+completely new style of accelerators.&nbsp; If this is the case, you can define
+a new type of accelerator configuration using the <b><a href="../reference/extension-points/org_eclipse_ui_acceleratorConfigurations.html">org.eclipse.ui.acceleratorConfigurations</a></b>
+extension point.&nbsp; The workbench markup for its accelerator configurations
+is shown below:</p>
+
+
+<pre><font color="#4444CC">&lt;extension
+   point=&quot;org.eclipse.ui.acceleratorConfigurations&quot;&gt;
+      &lt;acceleratorConfiguration
+            name=&quot;%DefaultAcceleratorConfiguration.name&quot;
+            description=&quot;%DefaultAcceleratorConfiguration.description&quot;
+            id=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;
+      &lt;/acceleratorConfiguration&gt;
+      &lt;acceleratorConfiguration
+            name=&quot;%EmacsAcceleratorConfiguration.name&quot;
+            description=&quot;%EmacsAcceleratorConfiguration.description&quot;
+            id=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
+      &lt;/acceleratorConfiguration&gt;
+&lt;/extension&gt;</font></pre>
+
+
+<p>The <b>name</b> is used in the preferences page in the list of available
+configurations.</p>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
+</BODY>
+</HTML>

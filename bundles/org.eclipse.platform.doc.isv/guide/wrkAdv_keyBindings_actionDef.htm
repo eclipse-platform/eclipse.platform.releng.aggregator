@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Action definitions
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Action definitions</h3>
+
+
+<p>An <b>action definition</b> is the declaration of an action by <b>id</b>.&nbsp;
+Action definitions are used to declare semantic actions so that actions defined
+in action sets and editors can associate themselves with a particular semantic
+action definition.&nbsp; The separation of the action definition from the action
+implementation allows multiple plug-ins to define actions that implement the
+same semantic action.&nbsp; The action definition is what gets associated with
+accelerator key combinations.</p>
+
+
+<p>The workbench defines many common action definitions in its <b>plugin.xml</b>
+file, and plug-ins are encouraged to associate their own actions with these
+definitions where it makes sense.&nbsp; In this way, semantically similar
+actions implemented in different plug-ins may share the same key binding.</p>
+
+
+<h4>Defining an action definition</h4>
+
+
+<p>Action definitions are defined using the <b><a href="../reference/extension-points/org_eclipse_ui_actionDefinitions.html">org.eclipse.ui.actionDefinitions</a></b>
+extension point.&nbsp; The following comes from the workbench markup:</p>
+
+
+<pre><font color="#4444CC">&lt;extension
+         point=&quot;org.eclipse.ui.actionDefinitions&quot;&gt;
+      &lt;actionDefinition
+            id=&quot;org.eclipse.ui.file.close&quot;&gt;
+      &lt;/actionDefinition&gt;
+      &lt;actionDefinition
+            id=&quot;org.eclipse.ui.file.closeAll&quot;&gt;
+      &lt;/actionDefinition&gt;
+      &lt;actionDefinition
+            id=&quot;org.eclipse.ui.file.save&quot;&gt;
+      &lt;/actionDefinition&gt;
+      ...</font></pre>
+
+
+<p>The definition itself is simple.&nbsp; It merely specifies an <b>id</b> for a
+semantic action.&nbsp; An action definition only becomes concrete when a plug-in
+associates its action with the definition.</p>
+
+
+<h4>Associating an action with an action definition</h4>
+
+
+<p>Actions can be associated with an action definition in code or in the <b>plugin.xml</b>.&nbsp;
+Your choice depends on where the action is defined.</p>
+
+
+<p>Actions that are instantiated in code can also be associated with an action
+definition using <a href="../reference/api/org/eclipse/jface/action/IAction.html">IAction</a>
+protocol.&nbsp; This is typically done when the action is created.&nbsp; The <b>WorkbenchActionBuilder</b>
+uses this technique to initialize its actions.&nbsp;&nbsp; </p>
+
+
+<pre><font color="#4444CC">private void makeActions() {
+	...
+	saveAction = new SaveAction(window);
+	saveAction.setImageDescriptor(WorkbenchImages.getImageDescriptor(IWorkbenchGraphicConstants.IMG_CTOOL_SAVE_EDIT));
+	aveAction.setHoverImageDescriptor(WorkbenchImages.getImageDescriptor(IWorkbenchGraphicConstants.IMG_CTOOL_SAVE_EDIT_HOVER));
+	sveAction.setDisabledImageDescriptor(WorkbenchImages.getImageDescriptor(IWorkbenchGraphicConstants.IMG_CTOOL_SAVE_EDIT_DISABLED));
+	partService.addPartListener(saveAction);
+	<b>saveAction.setActionDefinitionId(saveActionDefId);</b>
+	...</font></pre>
+
+
+<p>In this way, the implementation action (<b>SaveAction</b>) is associated with
+the action definition <b>saveActionDefId</b>.&nbsp; What is <b>saveActionDefId</b>?&nbsp;
+A quick look at the static field definitions in <b>WorkbenchActionBuilder</b>
+shows the following:</p>
+
+
+<pre><font color="#4444CC">private static final String saveActionDefId = &quot;org.eclipse.ui.file.save&quot;;</font></pre>
+
+
+<p>It is good practice to define constants for your action definitions so that
+they are easily referenced in code.&nbsp; </p>
+
+
+<p>What if you don't instantiate your action in code?&nbsp; If you define an
+action in an action set or editor action, then you typically do not need to
+instantiate it yourself.&nbsp; The workbench will do it for you when the user
+invokes your action from a menu or the keyboard.&nbsp; In this case, you can
+associate your action with an action definition in the XML markup.&nbsp; The
+following shows a hypothetical markup for an action set:</p>
+
+
+<font color="#4444CC">
+<pre>
+&lt;extension point = &quot;org.eclipse.ui.actionSets&quot;&gt;
+	   &lt;actionSet id=&quot;com.example.actions.actionSet&quot;
+		   label=&quot;Example Actions&quot;
+		   visible=&quot;true&quot;&gt;
+		   &lt;action id=&quot;com.example.actions.action1&quot;
+			   menubarPath=&quot;additions&quot;
+			   label=&quot;Example Save Action&quot;
+			   class=&quot;org.example.actions.ExampleActionDelegate&quot;
+			   <b>definitionID=&quot;org.eclipse.ui.file.save&quot;</b>&gt;
+		   &lt;/action&gt;
+		   ...
+	   &lt;/actionSet&gt;
+   &lt;/extension&gt;</pre>
+</font><p>The <b>definitionID</b> attribute is used to declare an action
+definition id for the action.</p>
+
+
+<p>Using either technique, associating your action with an action definition
+assures you that any key bindings that get defined for the action definition <b>org.eclipse.ui.file.save
+</b>will invoke your action when appropriate.&nbsp; </p>
+
+
+<p>Now let's look at how these key bindings get defined. </p>
+
+
+<p>&nbsp;</p>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
+</BODY>
+</HTML>

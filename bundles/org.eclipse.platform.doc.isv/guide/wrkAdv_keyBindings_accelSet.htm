@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Accelerator sets
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Accelerator sets</h3>
+
+
+<p>The map between an action definition and the key combinations that should
+invoke the action is called an <b>accelerator set</b>.&nbsp; Plug-ins can
+contribute accelerator sets using the <b><a href="../reference/extension-points/org_eclipse_ui_acceleratorSets.html">org.eclipse.ui.acceleratorSets</a></b>
+extension point.&nbsp; The workbench defines an accelerator set that provides
+emacs-like key bindings:</p>
+
+
+<pre><font color="#4444CC">&lt;extension
+      point=&quot;org.eclipse.ui.acceleratorSets&quot;&gt;
+   &lt;acceleratorSet
+         scopeId=&quot;org.eclipse.ui.globalScope&quot;
+         configurationId=&quot;org.eclipse.ui.emacsAcceleratorConfiguration&quot;&gt;
+      &lt;accelerator
+            key=&quot;Ctrl+F4||Ctrl+X Ctrl+K&quot;
+            id=&quot;org.eclipse.ui.file.close&quot;&gt;
+      &lt;/accelerator&gt;
+      &lt;accelerator
+            key=&quot;Ctrl+Shift+F4||Ctrl+X Ctrl+C&quot;
+            id=&quot;org.eclipse.ui.file.closeAll&quot;&gt;
+      &lt;/accelerator&gt;
+      <b>&lt;accelerator
+            key=&quot;Ctrl+X Ctrl+S&quot;
+            id=&quot;org.eclipse.ui.file.save&quot;&gt;
+      &lt;/accelerator&gt;</b>
+      ...</font></pre>
+
+
+<p>There is our friend <b>org.eclipse.ui.file.save</b>.&nbsp; Recall our
+hypothetical action definition:</p>
+
+
+<font color="#4444CC">
+<pre>&lt;extension point = &quot;org.eclipse.ui.actionSets&quot;&gt;
+	   &lt;actionSet id=&quot;com.example.actions.actionSet&quot;
+		   label=&quot;Example Actions&quot;
+		   visible=&quot;true&quot;&gt;
+		   &lt;action id=&quot;com.example.actions.action1&quot;
+			   menubarPath=&quot;additions&quot;
+			   label=&quot;Example Save Action&quot;
+			   class=&quot;org.example.actions.ExampleActionDelegate&quot;
+			   <b>definitionID=&quot;org.eclipse.ui.file.save&quot;</b>&gt;
+		   &lt;/action&gt;
+		   ...
+	   &lt;/actionSet&gt;
+&lt;/extension&gt;</pre>
+</font><p>When our example action set is active, our save action will be invoked
+when the user chooses <b>Ctrl+X</b> or <b>Ctrl+S</b>. Likewise, when the
+workbench <b>SaveAction</b> is active, the same key combinations will invoke it
+instead, since the workbench used the same action definition id for the <b>SaveAction</b>.</p>
+
+
+<p>To complete the example, we need to understand what the <b>scopeID</b> and <b>configurationId</b>
+are all about.&nbsp; Let's tackle configurations first.</p>
+
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
+</BODY>
+</HTML>
