@@ -50,6 +50,9 @@ public class BuildTests extends TestCase {
 	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
 	
 	public static final String[] SUFFIX_EXEMPT_LIST = {"org.eclipse.swt"};
+	
+	public static final int PLUGIN_COUNT = 84; // - 20;	// Note this number must include non-shipping test plugins
+	public static final int FEATURE_COUNT = 9; // - 1;	// Note this number must include non-shipping test feature
 
 	/**
 	 * Constructor for EmptyDirectoriesTest.
@@ -98,6 +101,23 @@ public class BuildTests extends TestCase {
 		}
 		assertTrue("Feature directory missing required files: " + aString, result.size() == 0);
 	}
+	
+	public void testPluginCount() {
+		String installDir = BootLoader.getInstallURL().getPath();
+		File pluginDir = new File(installDir, "plugins");
+		File[] plugins = pluginDir.listFiles();
+
+		assertTrue("Plug-ins missing: " + (PLUGIN_COUNT - plugins.length), PLUGIN_COUNT == plugins.length);
+	}
+	
+	public void testFeatureCount() {
+		String installDir = BootLoader.getInstallURL().getPath();
+		File featureDir = new File(installDir, "features");
+		File[] features = featureDir.listFiles();
+
+		assertTrue("Features missing: " + (FEATURE_COUNT - features.length), FEATURE_COUNT == features.length);
+	}
+	
 	
 	public void testPluginFiles() {
 		List result = new ArrayList();
