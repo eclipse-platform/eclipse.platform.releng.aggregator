@@ -19,6 +19,8 @@ import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
+import org.eclipse.team.ui.TeamUI;
+import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
 
 /**
  * This class compares the locally selected projects againsts the versions
@@ -70,6 +72,7 @@ public class CompareLocalToMap extends WorkspaceAction {
 		// Create the synchronize view participant
 		CVSCompareSubscriber s = new CVSCompareSubscriber(resources, tags, "RelEng Map"); //$NON-NLS-1$
 		CompareParticipant participant = new CompareParticipant(s);
+		TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[]{participant});
 		participant.refresh(resources, "Refreshing", "Refreshing", getTargetPart().getSite());
 	}
 	private MapProject getMapProject(){
