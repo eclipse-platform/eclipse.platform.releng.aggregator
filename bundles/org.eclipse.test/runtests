@@ -1,5 +1,11 @@
 # !/bin/sh
 
+#set the DISPLAY for running tests on Linux
+DISPLAY=`HOST`:0.0;export DISPLAY
+
+#this value must be set when using rsh to execute this script, otherwise the script will execute from the user's home directory
+dir=.
+
 # operating system, windowing system and architecture variables
 os=
 ws=
@@ -18,6 +24,7 @@ usage="usage: $0 -os <osType> -ws <windowingSystemType> -arch <architecture> [-n
 while [ $# -gt 0 ]
 do
 	case "$1" in
+		-dir) dir="$2"; shift;;
 		-os) os="$2"; shift;;
 		-ws) ws="$2"; shift;;
 		-arch) arch="$2"; shift;;
@@ -46,10 +53,13 @@ then
 	exit 1
 fi
 
+#necessary when invoking this script through rsh
+cd $dir
+
 # verify os, ws and arch values passed in are valid before running tests
 if [ "$os-$ws-$arch" = "linux-motif-x86" ] || [ "$os-$ws-$arch" = "linux-gtk-x86" ] || [ "$os-$ws-$arch" = "solaris-motif-sparc" ] || [ "$os-$ws-$arch" = "aix-motif-sparc" ] || [ "$os-$ws-$arch" = "hpux-motif-ppc" ] || [ "$os-$ws-$arch" = "qnx-photon-x86" ]
 then
- 	rm -r eclipse
+	rm -r eclipse
 	rm -r workspace
 	unzip -qq -o eclipse-SDK-*.zip
 	unzip -qq -o -C eclipse-junit-tests-*.zip */plugins/org.eclipse.test*
