@@ -7,35 +7,25 @@
   <meta http-equiv="Content-Style-Type" content="text/css">
                                   
   <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
-  <title>Using the buffer factory provided by JDT UI</title>
+  <title>Manipulating code with a preview in a Java editor</title>
                                                            
   <link rel="stylesheet" type="text/css" href="../book.css">
 </head>
   <body bgcolor="#ffffff">
-<h2>Using the buffer factory provided by JDT UI</h2>
-<p>The JDT Core plugin provides several mechanisms to programmatically create,
-delete and modify Java elements. See <a href="jdt_api_manip.htm">here</a>
- for an introducation to the API provided by JDT Core. As outlined in this
-document clients can provide their own buffer factory when they create a
-shared or non-shared working copy. </p>
-<p>Whenever a compilation unit gets opened in a Java editor, JDT-UI uses
-its own buffer factory to create a shared working copy. This buffer factory
-is available to clients via the method <a href="../reference/api/org/eclipse/jdt/ui/JavaUI.html#getBufferFactory()">
-JavaUI.getBufferFactory()</a>
-. Using this buffer factory in plugins that depend on the JDT-UI plugin has
-several advantages:<br>
-</p>
-<ul>
-  <li>the working copy reflects the state of the editor, even if the editor
-is dirty.</li>
-  <li>programmatic changes done to a working copy shared using the JDT UI
-buffer factory are instantaniously propagated to an open editor, if one exists.
-There is no need to commit the working copy to update the editor.</li>
-  <li>if the user <br>
-  </li>
-</ul>
-<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif">
-</a>
+<h2>Manipulating code with a preview in a Java editor</h2>
+<p>The JDT Core plugin provides several mechanisms to programmatically create, 
+  delete and modify Java elements. See <a href="jdt_api_manip.htm">here</a> for 
+  an introducation to the API provided by JDT Core. </p>
+<p>In a UI world it is often desired that the user confirms a preview before the 
+  actual changes are saved. This can be achieved by opening an Java editor on 
+  the compilation unit to be modified. The user can then either save the Java 
+  editor's content to disk or revert it back to its original content. Below is 
+  a code snippet that opens a compilation unit in an editor and then uses the 
+  working copy created by the editor to perfrom the actual changes:</p>
+<pre><font color="#4444CC">void modifyCompilationUnit(ICompilationUnit cunit) throws PartInitException, CoreException {<br>	IEditorPart editor= JavaUI.openInEditor(cunit);<br>	IEditorInput input= editor.getEditorInput();<br>	IWorkingCopyManager manager= JavaUI.getWorkingCopyManager();<br>	try {<br>		manager.connect(input);<br>		ICompilationUnit workingCopy= manager.getWorkingCopy(input);<br>		// do the modifications on workingCopy using the normal JDT Core API.
+	} finally {<br>		manager.disconnect(input);<br>	}<br>	// either keep the editor dirty or use editor.doSave(IProgressMonitor monitor)
+	// to save the changes programmatically.<br>}</font><br></pre>
+<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif"> </a> 
 </p>
 </body>
 </html>
