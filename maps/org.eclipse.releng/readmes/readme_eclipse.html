@@ -18,11 +18,12 @@ OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</stro
 <blockquote>
   <p align="left"><a href="#Target Operating Environments">1. Target Operating
   Environments</a><br>
-  <a href="#Compatibility with Previous Release">2. Compatibility with Previous
-  Releases</a><br>
-  <a href="#Known Issues">3. Known Issues</a><br>
-  <a href="#Interoperability with Previous Releases">4. Defects Fixed<br>
-  5. Interoperability with Previous Releases</a></p>
+  <a href="#Compatibility with Previous Release">2. Compatibility with Previous Releases</a><br>
+  <a href="#Upgrading">3. Upgrading a Workspace from a Previous Release</a><br>
+  <a href="#Known Issues">4. Known Issues</a><br>
+  <a href="#Defects fixed">5. Defects Fixed</a><br>
+  <a href="#Interoperability with Previous Releases">6. Interoperability with Previous Releases</a><br>
+  </p>
 </blockquote>
 <h2>1. <a name="Target Operating Environments"></a> Target Operating
 Environments</h2>
@@ -242,13 +243,8 @@ localized for BIDI locales and its widget orientation cannot be changed.</p>
 <p><i>IMPORTANT: The above BIDI support is available only for Windows operating
 environments.</i></p>
 
-
 <h2>2. <a name="Compatibility with Previous Release"></a> Compatibility with
 Previous Releases</h2>
-<p>
-Read <a href="readme_upgrading.html">here</a> for instructions on upgrading your
-Eclipse workspace from a previous release.
-</p>
 <h3>Compatibility of Release 2.1 with 2.0</h3>
 Eclipse SDK 2.1 is intended to be upwards compatible with Eclipse SDK 2.0. We
 have made exceptions only in areas where slavishly maintaining compatibility
@@ -622,7 +618,92 @@ change.</p>
 features. Consequently, PDE 2.0 supports feature-related development while
 component support has been removed. Features are described in the Eclipse
 Platform Plug-in Developer Guide.</p>
-<h2>3. <a name="Known Issues"></a> Known Issues</h2>
+
+<h2>3. <a name="Upgrading"></a>Upgrading a Workspace from a Previous Release</h2>
+<p>
+If you are upgrading to a newer release of Eclipse from an older release, there are
+simple steps to follow to migrate your workspace to the new release.  Your workspace
+is the directory on disk that contains all of your project files, as well as meta-data such
+as preferences you may have customized.  The steps to follow for upgrading depend on
+whether or not you used the &quot;-data&quot; command line argument when starting 
+Eclipse.  The &quot;-data&quot; argument is recommended because it clearly specifies the 
+location of your workspace.  If this argument is not used, Eclipse will place the workspace
+in the current working directory at the time Eclipse was launched.
+</p>
+<p><i>Tip:</i> It doesn't hurt to make a backup of your workspace before
+upgrading.  After you've upgraded your workspace, you won't be able to use it
+again with an older version of Eclipse.  If you ever want to go &quot;back in time&quot;
+to an earlier release, you'll need that backup!
+</p>
+<h3>Users who don't use &quot;-data&quot;</h3>
+<p>
+If you weren't previously using &quot;-data&quot; to specify your workspace, follow
+these steps to upgrade:
+<ol>
+<li>Find the workspace directory used by your old version of Eclipse.  Typically this
+is located inside the eclipse install directory in a sub-directory called &quot;workspace&quot;.
+If you were using a shortcut or script to launch Eclipse, then it will be under the current
+working directory of that shortcut or script in a sub-directory called &quot;workspace&quot;.
+Windows users, this is specified by the &quot;Start in&quot; argument in your shortcut properties.</li>
+<li>Copy this workspace directory into a new, empty location outside of any Eclipse
+install directory.</li>
+<li>Install the new version of Eclipse in a new location, separate from any old version
+of Eclipse.</li>
+<li>Start this new version of Eclipse, using the &quot;-data&quot; command line argument to 
+point to the workspace location.</li>
+</ol>
+</p>
+<p>
+Example:<br><br>
+Old Eclipse install directory: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\eclipse2_0</code><br><br>
+New Eclipse install directory: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\eclipse2_1</code><br><br>
+Workspace location: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\data\EclipseWorkspace</code><br><br>
+Java VM location: <br>
+&nbsp;&nbsp;&nbsp;<code>c:\jre</code><br><br>
+Command line to start Eclipse: <br>
+&nbsp;&nbsp;&nbsp;<code>&quot;c:\eclipse2_1 -data c:\data\EclipseWorkspace -vm d:\jre\bin\javaw&quot;</code><br>
+</p>
+<p><i>Tip:</i> It's generally a good idea to explicitly specify which Java VM to
+use when running Eclipse.  This is achieved with the &quot;-vm&quot; command line
+argument as illustrated above.  If you don't use &quot;-vm&quot;, Eclipse will look
+on the O/S path.  When you install other products, they may change your path, resulting
+in a different Java VM being used when you next launch Eclipse.
+</p>
+<h3>Users who do use &quot;-data&quot;</h3>
+<p>
+If you were previously using the &quot;-data&quot; argument to start Eclipse, your 
+upgrade path is much easier:
+<ol>
+<li>Install the new version of Eclipse in a new location, separate from any old version
+of Eclipse.</li>
+<li>Start this new version of Eclipse, using the &quot;-data&quot; command line argument to 
+point to your old workspace location.</li>
+</ol>
+See the example in the previous section for an illustration.
+</p>
+<h3>Adding third party plug-ins</h3>
+<p>
+If you have installed extra plugins in your Eclipse environment, you will need to add
+these new plugins to each new build or version of Eclipse you install.  Before you do
+this, refer to the documentation for those plug-ins to ensure they are compatible
+with the version of Eclipse you are moving to.  There are several ways to add these
+extra plug-ins to your new Eclipse install:
+<ol>
+<li>Copy the directories for each plug-in into the &quot;plugins&quot; directory of your
+new Eclipse version.</li>
+<li>Use an Eclipse update site to re-install those extra plug-ins or features in the
+new version of Eclipse.</li>
+<li>If you are using product extensions, simply copy the &quot;links&quot; directory
+into the new Eclipse version install directory.  For more details on product extensions,
+see the documentation in the Platform Plug-in Developer Guide, under <b>Programmer's
+Guide &gt; Packaging and delivering Eclipse based products &gt; Product extensions</b>.</li>
+</ol>
+
+
+<h2>4. <a name="Known Issues"></a> Known Issues</h2>
 <blockquote>
   <p><a href="#I-Platform">3.1 Platform</a><br>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform - Core">3.1.1 Core</a><br>
@@ -1340,7 +1421,7 @@ works. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18108">18108</
 when trying to obtain the timestamp of a newly uploaded file. This causes a
 &quot;file does not exist&quot; error. The workaround is to <b>Synchronize</b>
 again and continue. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19715">19715</a>)</p>
-<h2>4. <a name="Defects fixed"></a>Defects fixed</h2>
+<h2>5. <a name="Defects fixed"></a>Defects fixed</h2>
 <h3>4.1 Release 2.1 over 2.0</h3>
 <p>Release 2.1 improves on release 2.0. The various features and plug-in in this
 release have version id &quot;2.1.0&quot;. The only exceptions are the following
@@ -1359,7 +1440,7 @@ including 2.0.3.)</p>
   </tbody>
 </table>
 <p><i>[TBD]</i></p>
-<h2>5. <a name="Interoperability with Previous Releases">Interoperability with
+<h2>6. <a name="Interoperability with Previous Releases">Interoperability with
 Previous Releases</a></h2>
 <h3>Interoperability of Release 2.1 and 2.0</h3>
 <h4>Sharing projects between heterogeneous Eclipse 2.0 and 2.1</h4>
