@@ -12,10 +12,98 @@
 <H2>
 Content types</H2>
 <p>
-[This documentation is under construction.]
-</P>
 <p>
-Content type registry and encoding, content type manager, etc.
+The <b><a href="../reference/api/org/eclipse/core/runtime/content/package-summary.html">org.eclipse.core.runtime.content</a></b>
+package provides support for defining content-types for data streams.  A content type is used
+when deciding what kind of editor to open on a particular data stream.  A central content registry 
+managed by an <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b>
+allows plug-ins to define content types and specify a class that knows how to read and describe the content.
+In order to contribute content types, a basic understanding of the content framework is necessary.
+</P>
+<i><blockquote>
+Note:&nbsp; For this discussion, we specifically avoid the use of the word <b>file</b> when talking about content.
+The runtime content engine does not assume that content is contained in a file in the file system.  However,
+it does include protocol that allows content types to be associated with file-naming patterns.  In practice, these
+file names represent files in the file system, but nothing in the implementation of the content system assumes
+that the content is located in the file system. 
+<a HREF="resInt_content.htm">File encoding and content types</a> discusses the file-oriented content types
+contributed by the platform resources plug-in.</blockquote></i>
+<h3>Defining and describing content</h3>
+<p>
+The platform defines content types for text and XML data streams.  These content types are defined the same way
+as those contributed by other plug-ins.  We'll look at how the platform defines the text content type in order
+to better understand the content type framework.
+</p>
+<p>Plug-ins define content types by contributing an extension for the extension point
+<b><a href="../reference/extension-points/org_eclipse_runtime_core_contentTypes.html">org.eclipse.runtime.core.contentTypes</b></a>.
+In this extension, a plug-in specifies an id and name for the content type, and an
+<b><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescriber.html">IContentDescriber</a></b>
+which can read an input stream and supply a description of the content.  The following snippet is the
+runtime plug-in's contribution for the text content type:
+</p>
+<font color='#4444CC'><pre>
+	&lt;extension point="org.eclipse.core.runtime.contentTypes"&gt;
+		&lt;content-type id="text" name="%textContentTypeName"&gt;
+			priority="high"
+			file-extensions="txt"&gt;
+			<b>&lt;describer class="org.eclipse.core.internal.content.TextContentDescriber"/&gt;</b>	
+		&lt;/content-type&gt;
+		...
+</pre></font> 
+<p>The <b>TextContentDescriber</b> is responsible for 
+reading an input stream and quickly determining whether the supplied content is a valid sample of text.  
+The method <b>describe(inputStream, description)</b> is called whenever the platform is trying to determine the content
+for a particular data stream.  The <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescriber.html">IContentDescriber</a></b>
+is responsible for quickly determining whether the contents represent a valid sample for its content type and returning 
+a constant that indicates whether the content matches its type.  If the content does match its type, the describer
+should also fill in the supplied <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescription.html">IContentDescription</a></b>
+with information about the data.  
+</p>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/runtime/content/IContentDescription.html">IContentDescription</a></b>
+stores content-specific attributes in key/value pairs.  The platform's text content description
+defines attributes representing the character set and byte order of a text file.  
+</p>
+<h3>Finding out about content types</h3>
+<p>
+<b><a href="../reference/api/org/eclipse/core/runtime/content/IContentTypeManager.html">IContentTypeManager</a></b>
+defines the protocol for the content registry.  Clients can use this class to test a content stream or to find out about
+other content types in the system.
+<ul>
+<li><b>findContentType...</b> methods allow clients to obtain the content type (or types) for a stream and file-name pattern.</li>
+<li><b>getAllContentTypes</b> allows clients to get all of the content types defined in the platform.  </li>
+<li><b>getContentType</b> allows clients to obtain a content type by name.  </li>
+<li><b>getDescriptionFor...</b> methods allow clients to obtain a content description for a given stream and file-name pattern.</li>
+</ul>
+</p>
+<p>
+Content types are represented by 
+<b><a href="../reference/api/org/eclipse/core/runtime/content/IContentType.html">IContentType</a></b>.
+This class represents a unique content type that can be queried for information such as its content description and
+character set.  Content types are hierarchical in nature.  For example, a content type for XML data is considered a
+child of the text content type.  
+</p>
+<font color='#4444CC'><pre>
+		&lt;content-type id="xml" name="%xmlContentTypeName" 	
+			<b>base-type="text"</b>
+			priority="high"			
+			file-extensions="xml"
+			default-charset="UTF-8"&gt;
+			&lt;describer class="org.eclipse.core.internal.content.XMLContentDescriber"/&gt;
+		&lt;/content-type&gt;
+</pre></font> 
+<p>
+This allows new content types to leverage the attributes or behavior of more general
+content types.
+</p>
+<h4>Content type collisions</h4>
+<p>
+It is conceivable that two independent plug-ins contribute a content type for the same kind of content.  In this case,
+the platform will select only one content describer for the content.  The describer selected is determined using a
+<b>priority</b> attribute that can be specified in the contentTypes extension.  If two plug-ins
+contribute a content type for the same content with the same priority, it is indeterminate which content describer
+will be selected.  Once a content describer is selected, however, all registry references to the &quot;losing&quot; content
+describer will be aliased to the one that was chosen.
 </p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
