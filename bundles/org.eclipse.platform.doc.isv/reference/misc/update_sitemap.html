@@ -42,6 +42,12 @@ CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; version&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #IMPLIED</tt>
 <br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt> <tt>&nbsp;&nbsp;&nbsp;  </tt>
+<br><tt>&nbsp;&nbsp;&nbsp; patch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+(false | true) false</tt> <tt>&nbsp;</tt><p><tt>&nbsp;&nbsp;&nbsp; os&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; nl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; arch&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; ws &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #REQUIRED</tt>
 <br><tt>></tt>
 <p><tt>&lt;!ELEMENT archive EMPTY></tt>
@@ -123,11 +129,55 @@ absolute. If relative, it is relative to the location of the site.xml file.
 <b>Note</b>:
 the default site implementation allows features to be accessed without
 being explicitly declared using a &lt;feature> entry. By default, an undeclared
-features reference is interpreted as "features/&lt;id>_&lt;version>.jar"</li>
-</ul>
+features reference is interpreted as "features/&lt;id>_&lt;version>.jar". <b>
+Note</b>: for better lookup performance, always define the id and version 
+attributes.</li>
 
 <li>
-&lt;archive> - identifies referenced "storage" archive (the actual files
+patch - optional attribute to denote that this is a patch (special type of 
+feature). <b>
+Note</b>: for better lookup performance, always define this attribute.</li>
+
+<li>
+os - optional operating system specification. A comma-separated list of os 
+designators defined by Eclipse (see Javadoc for <tt>
+org.eclipse.core.runtime.Platform)</tt>. Indicates this feature should only be 
+installed on one of the specified os systems. If this attribute is not 
+specified, the feature can be installed on all systems (portable 
+implementation). This information is used as a hint by the installation and 
+update support (user can force installation of feature regardless of this 
+setting). </li>
+
+<li>
+arch - optional machine architecture specification. A comma-separated list of 
+architecture designators defined by Eclipse (see Javadoc for <tt>
+org.eclipse.core.runtime.Platform)</tt>. Indicates this feature should only be 
+installed on one of the specified systems. If this attribute is not specified, 
+the feature can be installed on all systems (portable implementation). This 
+information is used as a hint by the installation and update support (user can 
+force installation of feature regardless of this setting). </li>
+
+<li>
+ws - optional windowing system specification. A comma-separated list of ws 
+designators defined by Eclipse (see Javadoc for <tt>
+org.eclipse.core.runtime.Platform)</tt>. Indicates this feature should only be 
+installed on one of the specified ws systems. If this attribute is not 
+specified, the feature can be installed on all systems (portable 
+implementation). This information is used as a hint by the installation and 
+update support (user can force installation of feature regardless of this 
+setting). </li>
+
+<li>
+nl - optional locale specification. A comma-separated list of locale designators 
+defined by Java. Indicates this feature should only be installed on a system 
+running with a compatible locale (using Java locale-matching rules). If this 
+attribute is not specified, the feature can be installed on all systems 
+(language-neutral implementation). This information is used as a hint by the 
+installation and update support (user can force installation of feature 
+regardless of this setting).</li>
+</ul>
+
+<li>&lt;archive> - identifies referenced "storage" archive (the actual files
 referenced via the <tt>&lt;plugin></tt> or <tt>&lt;data></tt> elements
 in the feature manifest). The site simply manages archives as a path-to-URL
 map. The default Eclipse site implementation does not require the &lt;archive>
@@ -135,18 +185,15 @@ section to be included in the site map (site.xml). Any archive reference
 not explicitly defined as part of an &lt;archive> section is assumed to
 be mapped to a url in the form "&lt;archivePath>" relative to the location
 of the site.xml file.</li>
-
 <ul>
-<li>
-path - required archive path identifier. This is a string that is determined
+<li>path - required archive path identifier. This is a string that is determined
 by the feature referencing
 this archive and is not otherwise interpreted by the site (other than as
 a lookup token).</li>
-
-<li>
-url - required URL reference to the archive. Can be relative or absolute.
+<li>url - required URL reference to the archive. Can be relative or absolute.
 If relative, it is relative to the location of the site.xml file.</li>
 </ul>
+</li>
 
 <li>
 &lt;category-def> - an optional definition of a category that can be used
