@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.data;
 
-import java.text.NumberFormat;
-
 /**
  * @since 3.1
  */

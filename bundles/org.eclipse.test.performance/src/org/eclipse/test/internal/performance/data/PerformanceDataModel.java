@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.data;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
