@@ -34,16 +34,9 @@ public class Variations extends Properties {
     }
 
     /**
-     * Creates a set of key/value pairs by parsing the given string.
-     * The strings format is an implementation detail of the database.
-     * @param dbRepresentation
-     */
-    public Variations(String dbRepresentation) {
-        parse(this, dbRepresentation);
-    }
-
-    /**
      * Creates a set of key/value pairs that consists
+     * @param config
+     * @param build
      * @deprecated Use the default constructor instead and fill in key/value pairs explicitely.
      */
     public Variations(String config, String build) {
@@ -51,6 +44,15 @@ public class Variations extends Properties {
             put(PerformanceTestPlugin.CONFIG, config);
         if (build != null)
             put(PerformanceTestPlugin.BUILD, build);
+    }
+
+    /**
+     * Creates a set of key/value pairs by parsing the given string.
+     * The strings format is an implementation detail of the database.
+     * @param dbRepresentation
+     */
+    public Variations(String dbRepresentation) {
+        parse(this, dbRepresentation);
     }
 
     public String toExactMatchString() {
