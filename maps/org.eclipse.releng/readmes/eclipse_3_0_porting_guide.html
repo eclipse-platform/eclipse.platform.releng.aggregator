@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<title>Eclipse 3.0 Porting Guide</title>
+</head>
+
+<body>
+
+<h1>Eclipse 3.0 Porting Guide</h1>
+<p>Draft for 3.0 M1<br>
+Last revised June 17, 2003</p>
+<p>Eclipse 3.0 is not fully compatible with 2.0 and 2.1. The decision to break
+compatibility was taken to give us additional freedom to innovate and make
+Eclipse 3.0 significantly better than it could have been had we tried to
+maintain compatibility. That said, most of the Eclipse APIs are the same in 3.0
+as in 2.1. We have only broken APIs in 3.0 when there is a compelling case for
+doing so, and have tried to do it in a controlled way that minimizes the effort
+required to port an existing plug-in to the 3.0 APIs. This porting guide covers
+all areas of breaking API changes, and describes how to port existing 2.1
+plug-ins to 3.0.</p>
+<p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
+Porting Guide is being included with each milestone build to facilitate climbing
+aboard the 3.0 release wagon at an early stage, or to estimate the amount of
+effort that will be involved in eventually porting existing plug-ins to 3.0. The
+Eclipse APIs will be in their finished form by milestone M5 (see <a href="http://www.eclipse.org/eclipse/development/eclipse_project_plan_3_0.html">Eclipse
+3.0 plan</a> for exact dates).</i></p>
+<h2>General Information on Compatibility</h2>
+<p><b>API Contract Compatibility:</b> Eclipse SDK 3.0 is upwards
+contract-compatible with Eclipse SDK 2.0 and 2.1 except in those areas noted
+below. This means that programs in full compliance with contracts specified in
+Eclipse SDK 2.0 or 2.1 APIs will need to be ported to Eclipse SDK 3.0 APIs. (API
+is construed broadly to include such things as plug-in extension points.)
+Downward contract compatibility is not supported. There is no guarantee that
+compliance with Eclipse SDK 3.0 APIs would ensure compliance with Eclipse SDK
+2.0 or 2.1 APIs. Refer to <i><a href="http://eclipse.org/eclipse/development/java-api-evolution.html">Evolving
+Java-based APIs</a></i> for a discussion of the kinds of API changes that
+maintain contract compatibility.
+<p><b>Binary (plug-in) Compatibility:</b> Eclipse SDK 3.0 is not upwards
+binary-compatible with Eclipse SDK 2.0 and 2.1. Plug-ins built for Eclipse SDK
+2.0 or 2.1 will need to be ported and recompiled for Eclipse SDK 3.0. Downward
+plug-in compatibility is not supported either. Plug-ins for Eclipse SDK 3.0 will
+not be usable in Eclipse SDK 2.0 or 2.1. Refer to <i><a href="http://eclipse.org/eclipse/development/java-api-evolution.html">Evolving
+Java-based APIs</a></i> for a discussion of the kinds of API changes that
+maintain binary compatibility.
+<p><b>Source Compatibility:</b> Eclipse SDK 3.0 is upwards source-compatible
+with Eclipse SDK 2.0 or 2.1 except in the areas noted below. This means that
+source files written to use Eclipse SDK 2.0 or 2.1 APIs might successfully
+compile and run against Eclipse SDK 3.0 APIs, although this is not guaranteed.
+Downward source compatibility is not supported. If source files use new Eclipse
+SDK APIs, they will not be usable with an earlier version of the Eclipse SDK.
+<p><b>Workspace Compatibility:</b> Eclipse SDK 3.0 is upwards
+workspace-compatible with Eclipse SDK 2.0 or 2.1 unless noted. This means that
+workspaces and projects created with Eclipse SDK 2.0 or 2.1 can be successfully
+opened by Eclipse SDK 3.0 and upgraded to a 3.0 workspace. This includes both
+hidden metadata, which is localized to a particular workspace, as well as
+metadata files found within a workspace project (e.g., the .project file), which
+may propagate between workspaces via file copying or team repositories.
+Individual plug-ins developed for Eclipse SDK 3.0 should provide similar upwards
+compatibility for their hidden and visible workspace metadata created by earlier
+versions; 3.0 plug-in developers are responsible for ensuring that their
+plug-ins recognize 3.0, 2.1, and 2.0 metadata and process it appropriately. User
+interface session state may be discarded when a workspace is upgraded. Downward
+workspace compatibility is not supported. A workspace created (or opened) by
+Eclipse SDK 3.0 will be unusable with an earlier version of Eclipse SDK.&nbsp;Visible
+metadata files created (or overwritten) by Eclipse SDK 3.0 will generally be
+unusable with earlier versions of Eclipse SDK.
+<p><b>Non-compliant usage of API's</b>: All non-API methods and classes, and
+certainly everything in a package with &quot;internal&quot; in its name, are
+considered implementation details which may vary between operating environment
+and are subject to change without notice. Client plug-ins that directly depend
+on anything other than what is specified in the Eclipse SDK API are inherently
+unsupportable and receive no guarantees about compatibility within a single
+release much less with an earlier releases. Refer to <i><a href="http://www.eclipse.org/articles/Article-API%20use/eclipse-api-usage-rules.html">How
+to Use the Eclipse API</a></i> for information about how to write compliant
+plug-ins. This porting guide does not cover non-API methods and classes.</p>
+<h2>Summary of Changes by Component</h2>
+<p>Note: Bug numbers refer to the Eclipse project bug database at <a href="http://dev.eclipse.org/bugs/">http://dev.eclipse.org/bugs/</a></p>
+<h3>Platform - Core</h3>
+<p>None.</p>
+<h3>Platform - UI</h3>
+<p>None.</p>
+<h3>Platform - Help</h3>
+<p>None.</p>
+<h3>Platform - Team</h3>
+<p>None.</p>
+<h3>Platform - SWT</h3>
+<p>None.</p>
+<h3>Platform - Install/Update</h3>
+<p>None.</p>
+<h3>Platform - Ant</h3>
+<p>None.</p>
+<h3>Platform - Debug</h3>
+<p>None.</p>
+<h3>Platform - Search</h3>
+<p>None.</p>
+<h3>Platform - Text</h3>
+<p>None.</p>
+<h3>Platform - Compare</h3>
+<p>None.</p>
+<hr>
+<h3>JDT - Core</h3>
+<p>None.</p>
+<h3>JDT - Debug</h3>
+<p>None.</p>
+<h3>JDT - UI</h3>
+<p>None.</p>
+<hr>
+<h3>PDE</h3>
+<p>None.</p>
+<hr>
+<p>(c) Copyright IBM Corp. and others 2003</p>
+
+</body>
+
+</html>
