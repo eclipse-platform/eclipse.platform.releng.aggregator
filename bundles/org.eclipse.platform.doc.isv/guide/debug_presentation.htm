@@ -10,7 +10,35 @@
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h3>Debug model presentation</h3>
-<p>UI code maps debug elements to UI.&nbsp; Show extension point.</p>
+<p>Since there is a generic, uniform model for debug elements in the platform,
+it's possible to provide a starting point for implementing debugger UI
+classes.&nbsp; The heart of the debugger UI support is the <b>debug model
+presentation</b> (<a href="../reference/api/org/eclipse/debug/ui/IDebugModelPresentation.html">IDebugModelPresentation</a>).&nbsp;
+The debug model presentation is responsible for providing labels, images, and
+editors associated with specific debug elements.</p>
+<p>Plug-ins that define their own debug model typically provide a debug model
+presentation for displaying debug elements in the model.&nbsp;&nbsp; This is
+done using the <a href="../reference/extension-points/org_eclipse_debug_ui_debugModelPresentations.html">org.eclipse.debug.ui.debugModelPresentations</a>
+extension point.&nbsp; This extension point allows an implementation of <a href="../reference/api/org/eclipse/debug/ui/IDebugModelPresentation.html">IDebugModelPresentation</a>
+to be associated with the identifier of a particular debug model.&nbsp; </p>
+<p>Recall that <a href="debug_model.htm">debug model elements</a> know the id of
+their originating debug model.&nbsp; This means that given any debug element,
+the debug platform can obtain the id of the debug model and then query the
+plug-in registry for any corresponding debug model presentations.</p>
+<p>The markup for adding a debug model presentation looks like this:</p>
+<pre><font color="#4444CC">&lt;extension point = &quot;org.eclipse.debug.ui.debugModelPresentations&quot;&gt; 
+         &lt;debugModelPresentation
+             class = &quot;org.eclipse.jdt.internal.debug.ui.JDIModelPresentation&quot;
+             id = &quot;org.eclipse.jdt.debug&quot;
+             detailsViewerConfiguration = &quot;org.eclipse.jdt.internal.debug.ui.display.DetailsViewerConfiguration&quot;&gt;
+          &lt;/debugModelPresentation&gt; 
+&lt;/extension&gt;</font></pre>
+<p>An optional <b>detailsViewerConfiguration</b> can be specified in addition to
+the debug model presentation.&nbsp; The details viewer must extend the JFace <a href="../reference/api/org/eclipse/jface/text/source/SourceViewerConfiguration.html">SourceViewerConfiguration</a>
+class. The meaning of &quot;details&quot; is interpreted by the debug
+model.&nbsp; The details are computed by the debug model presentation and passed
+to the details viewer.&nbsp; For example, the Java debugger uses the details
+viewer to show code assist in the variables view when expressions are evaluated.</p>
 <p>&nbsp;</p>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" width="250" height="12"></a></p>
 </BODY>
