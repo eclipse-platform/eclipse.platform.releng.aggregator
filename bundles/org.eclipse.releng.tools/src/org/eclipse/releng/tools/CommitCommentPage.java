@@ -43,7 +43,7 @@ public class CommitCommentPage extends CVSWizardPage {
 	}
 
 	public String getComment() {
-		return commitCommentArea.getComment();
+		return commitCommentArea.getComment(true);
 	}
 	
 	/* (non-Javadoc)
