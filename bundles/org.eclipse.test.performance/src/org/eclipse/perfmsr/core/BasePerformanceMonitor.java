@@ -26,21 +26,28 @@ import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 
-public class BasePerformanceMonitor implements IPerformanceMonitor {
+public class BasePerformanceMonitor implements IPerformanceMonitor0 {
     
     protected HashMap fRunProperties;
     protected List fDataPoints;
     private String fHostName;
-	private static DateFormat fDateFormat= DateFormat.getDateTimeInstance();
 	private String fScenarioName;
 
+	private static DateFormat fDateFormat= DateFormat.getDateTimeInstance();
+    private static BasePerformanceMonitor fgPerformanceMonitor;
 
-    /* (non-Javadoc)
-     * @see org.eclipse.perfmsr.core.IPerformanceMonitor#setLogFile(java.lang.String)
-     */
-    public void setLogFile(String logFile) {
-        // TODO Auto-generated method stub
-
+    
+    public static IPerformanceMonitor0 getPerformanceMonitor(boolean shared) {
+		BasePerformanceMonitor pm;
+		if (!shared)
+		    pm= create();
+		else {
+			if (fgPerformanceMonitor == null) {
+				fgPerformanceMonitor= create();
+			}
+			pm= fgPerformanceMonitor;
+		}
+		return pm;
     }
 
     /* (non-Javadoc)
@@ -176,21 +183,12 @@ public class BasePerformanceMonitor implements IPerformanceMonitor {
 	 * 
 	 * @see PerfMsrCorePlugin#getPerformanceMonitor(boolean) 
 	 */
-	static BasePerformanceMonitor create()
-	{
+	private static BasePerformanceMonitor create() {
 	    String os= System.getProperty("os.name");
 		if (os.startsWith("Windows"))
-		    return new BasePerformanceMonitor(); //return new PerformanceMonitorWindows();
-		    
+		    return new PerformanceMonitor();
 		if (os.startsWith("Mac OS X"))
 		    return new PerformanceMonitorMac();
-	
-		return new BasePerformanceMonitor(); // new PerformanceMonitorLinux();
+		return new PerformanceMonitorLinux();
 	}
-
-    /**
-     * @param string
-     */
-    public static void debug(String string) {
-    }
 }

@@ -20,11 +20,9 @@ package org.eclipse.perfmsr.core;
  * <li>com.ibm.etools.perfmsr.core.perf.common (in project gkcore)
  * <li>org.eclipse.perfmsr.core (in project org.eclipse.perfmsr.core)
  * </ul> 
- * 
- * @version 19
  */
-public interface LoadValueConstants
-{
+public interface LoadValueConstants {
+	
 	/** # - used to start a comment. */
 	String PARM_COMMENT 	= "#";
 	
@@ -162,25 +160,8 @@ public interface LoadValueConstants
 		/** var - This serves the same purpose as vars= this form is deprecated. */
 		String var			= "var"; 
 	}
-			
-	/** c:\\autotest-log - The place where autotest logs are stored */
-	String DIR_AUTOTEST_LOGS 	= "c:\\autotest-log";
-	
-	
-	
-	// This is duplicated in karasiuk.perf.Constants
-	/** StudioPerf - Web application name. */
-	String WEB_APP 					= "StudioPerf";
-	
-	/** /StudioPerf/SimpleUpload - Servlet that knows how to upload a measurement file. */ 
-	String SERVLET_SIMPLE_UPLOAD	= "/" + WEB_APP + "/SimpleUpload";	
-	
-	/** /StudioPerf/UploadZip - Servlet that knows how to upload a measurement file that has been packaged into a zip file. */ 
-	String SERVLET_UPLOAD_ZIP	= "/" + WEB_APP + "/UploadZip";	
-	
-	/** Servlet that knows how to display a unit of work. */
-	String	SERVLET_UOW				= "/" + WEB_APP + "/servlet/DisplayUOW";
-	
+				
+		
 	/**
 	 * Some hard coded measurement id's. The server and the plug need to agreee onwhat these mean.
 	 */
@@ -248,53 +229,6 @@ public interface LoadValueConstants
 		
 		/** The whatId (50) for the amount of memory that Linux reports is used by buffers. From /proc/meminfo. */
 		int buffersLinux		= 50;
-		
-	}
-	
-	/**
-	 * Some hard coded steps.
-	 */
-	interface Step
-	{
-		/** 8 - startup of the workbench. */
-		int startup					= 8;
-	}
-	
-	/**
-	 * Properties in the toc file.
-	 */
-	interface TOC
-	{
-		String userid 	= "userid";
-		String desc	= "desc";
-		
-		/** timestamp of submission. */
-		String ts		= "ts";	
-	}
-	
-	/**
-	 * Some hard coded variations.
-	 */
-	interface Var
-	{	
-		/** 46 - the variation for installable drivers. */
-		int installable			= 46;
-		
-		/** 50 - the variation for a cold run. */
-		int cold				= 50;
-	
-		/** 51 - the variation for a warm run. */
-		int warm 				= 51;
-		
-		/** 25 - Variation number for version 2 of the performance application. */
-		int version2			= 25;
-	
-		/** 28 - Variation number for running in -debug mode. */
-		int debug				= 28;
-	
-		/** 29 - Variation number for collecting plugin statistics. */
-		int plugStat			= 29;
-	
 		
 	}
 }

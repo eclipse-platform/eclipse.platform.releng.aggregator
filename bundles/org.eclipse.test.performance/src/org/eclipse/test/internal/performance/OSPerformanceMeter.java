@@ -11,8 +11,8 @@
 
 package org.eclipse.test.internal.performance;
 
-import org.eclipse.perfmsr.core.IPerformanceMonitor;
-import org.eclipse.perfmsr.core.PerfMsrCorePlugin;
+import org.eclipse.perfmsr.core.BasePerformanceMonitor;
+import org.eclipse.perfmsr.core.IPerformanceMonitor0;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
@@ -28,7 +28,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	/**
 	 * The perfmsr plug-in's performance monitor
 	 */
-	private IPerformanceMonitor fPerformanceMonitor;
+	private IPerformanceMonitor0 fPerformanceMonitor;
 	
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
 
@@ -38,7 +38,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	 * @param scenarioId the scenario id
 	 */
 	public OSPerformanceMeter(String scenarioId) {
-		fPerformanceMonitor= PerfMsrCorePlugin.getPerformanceMonitor(false);
+		fPerformanceMonitor= BasePerformanceMonitor.getPerformanceMonitor(false);
 		fPerformanceMonitor.setTestName(scenarioId);
 		fScenarioId= scenarioId;
 	}
@@ -78,8 +78,8 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 						String dimensionId= before[j].getDimension();
 						Dimension dimension= PerfMsrDimensions.getDimension(dimensionId);
 						String name= dimension != null ? dimension.getName() + " [" + dimension.getUnit().getShortName() + "]" : dimensionId;
-//						System.out.println(name + ":\t" + valueBefore + "\t" + valueAfter + "\t" + (valueAfter - valueBefore));
-						System.out.println(name + ":\t" + (valueAfter - valueBefore));
+						System.out.println(name + ":\t" + valueBefore + "\t" + valueAfter + "\t" + (valueAfter - valueBefore));
+//						System.out.println(name + ":\t" + (valueAfter - valueBefore));
 					}
 				}
 			}

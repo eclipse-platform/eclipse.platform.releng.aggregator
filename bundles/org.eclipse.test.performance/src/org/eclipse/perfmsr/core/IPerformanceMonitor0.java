@@ -10,21 +10,27 @@
  *******************************************************************************/
 package org.eclipse.perfmsr.core;
 
-public class PerfMsrCorePlugin {
-    
-    static BasePerformanceMonitor fgPerformanceMonitor;
+import org.eclipse.test.internal.performance.data.Sample;
 
-    public static IPerformanceMonitor getPerformanceMonitor(boolean shared) {
-		BasePerformanceMonitor pm= null;
-		
-		if (!shared)
-		    pm= BasePerformanceMonitor.create();
-		else {
-			if (fgPerformanceMonitor == null)
-			    fgPerformanceMonitor= BasePerformanceMonitor.create();
-			pm= fgPerformanceMonitor;
-		}
-		BasePerformanceMonitor.debug("PerfMsrCorePlugin.getPerformanceMonitor() returning");
-		return pm;
-    }
+public interface IPerformanceMonitor0 {
+
+    /**
+     * @param scenarioId
+     */
+    void setTestName(String scenarioId);
+
+    /**
+     * @param i
+     */
+    void snapshot(int i);
+
+    /**
+     * @return
+     */
+    void upload();
+
+    /**
+     * @return
+     */
+    Sample getSample();
 }
