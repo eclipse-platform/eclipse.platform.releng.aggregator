@@ -26,7 +26,7 @@ Generating a compilation unit
 The easiest way to programmatically generate a compilation unit is to use <b>IPackageFragment.createCompilationUnit</b>. You specify the name and contents of the compilation unit. The compilation unit is created inside the package and the new
 <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html"> ICompilationUnit</a></b> is returned. </P>
 <P>
-A compilation unit can be created generically by creating a file resource whose extension is &quot;<b>.java&quot;</b> in the appropriate folder that corresponds to the package directory. Using generic resource API goes &quot;behind the back&quot; of the Java tooling, so the Java model is not updated until the generic resource change listeners are
+A compilation unit can be created generically by creating a file resource whose extension is &quot;<b>.java&quot;</b> in the appropriate folder that corresponds to the package directory. Using the generic resource API is a back door to the Java tooling, so the Java model is not updated until the generic resource change listeners are
 notified and the JDT listeners update the Java model with the new compilation unit.</P>
 
 
@@ -36,11 +36,11 @@ Modifying a compilation unit
 <P>
 Most simple modifications of Java source can be done using the Java element API.</P>
 <P>
-For example, you can query a type from a compilation unit. Once you have the <a href="../reference/api/org/eclipse/jdt/core/IType.html"><b>IType</b></a>, you can use protocol such as
+For example, you can query a type from a compilation unit. Once you have the <a href="../reference/api/org/eclipse/jdt/core/IType.html"><b>IType</b></a>, you can use protocols such as
 <b>createField</b>, <b>createInitializer</b>,
 <b>createMethod</b>, or <b> createType</b> to add source code members to the type. The source code and information about the location of the member is supplied in these methods.</P>
 <P>
-The <b><a href="../reference/api/org/eclipse/jdt/core/ISourceManipulation.html"> ISourceManipulation</a></b> interface defines common source manipulations for java elements. This includes methods for renaming, moving, copying, or deleting a type's member. </P>
+The <b><a href="../reference/api/org/eclipse/jdt/core/ISourceManipulation.html"> ISourceManipulation</a></b> interface defines common source manipulations for Java elements. This includes methods for renaming, moving, copying, or deleting a type's member. </P>
 
 
 <H4>
@@ -70,8 +70,8 @@ Finally a working copy can be saved to disk (replacing the original compilation 
 <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#commit(boolean, org.eclipse.core.runtime.IProgressMonitor)">commit</a></b>
 method. </P>
 <P>
-For example the following code snippet creates a working copy on a compilation unit using a custom buffer factory, it
-modifies the buffer, it reconciles the changes, it commits the changes to disk and it finally destroys the working copy. </P>
+For example the following code snippet creates a working copy on a compilation unit using a custom buffer factory. The snippet
+modifies the buffer, reconciles the changes, commits the changes to disk and finally destroys the working copy. </P>
 <font color='#4444CC'><pre>
     // Get original compilation unit
     ICompilationUnit originalUnit = ...;
@@ -94,11 +94,11 @@ modifies the buffer, it reconciles the changes, it commits the changes to disk a
     workingCopy.destroy();
 </pre></font>
 <P>
-Working copies can also be shared by several clients. Such a working copy is created using the
+Working copies can also be shared by several clients. A shared working copy is created using the
 <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getSharedWorkingCopy(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.jdt.core.IBufferFactory, org.eclipse.jdt.core.IProblemRequestor)">getSharedWorkingCopy</a></b>
 method and it can be later retrieved using the
 <b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#findSharedWorkingCopy(org.eclipse.jdt.core.IBufferFactory)">findSharedWorkingCopy</a></b>
-method. A shared working copy is thus keyed on the original compilation unit and a buffer factory.</P>
+method. A shared working copy is thus keyed on the original compilation unit and on a buffer factory.</P>
 <P>
 The following shows how client 1 creates a shared working copy, client 2 retrieves this working copy, client 1 destroys the
 working copy, and client 2 trying to retrieve the shared working copy notices it does not exist any longer: </P>
@@ -129,7 +129,7 @@ working copy, and client 2 trying to retrieve the shared working copy notices it
 <H3>Code modification using the DOM/AST API</h3>
 
 There are two ways to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b>. The first one is to use an existing compilation unit. The second
-is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>.
+is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b> (Abstract Syntax Tree).
 <h4>
 Creating an AST from an existing compilation unit
 </h4>
@@ -155,9 +155,9 @@ bindings are lost.
 From scratch
 </h4>
 <P>It is possible to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>.
-These method names start with <b>new...</b>. Here is a small example that creates a <b>HelloWorld</b> class.
+These method names start with <b>new...</b>. The following is an example that creates a <b>HelloWorld</b> class.
 </P>
-<P>First it is the java source:
+<P>The first snippet is the generated output:
 <font color='#4444CC'><pre>
 	package example;
 	import java.util.*;
@@ -168,7 +168,7 @@ These method names start with <b>new...</b>. Here is a small example that create
 	}
 </pre></font>
 </P>
-<P>Then it is the corresponding code using the factory methods.
+<P>The following snippet is the corresponding code that generates the output.
 <font color='#4444CC'><pre>
 		CompilationUnit unit = this.ast.newCompilationUnit();
 		PackageDeclaration packageDeclaration = this.ast.newPackageDeclaration();
@@ -250,8 +250,9 @@ We could write the following method to achieve this:
 </pre></font>
 The <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IScanner.html">IScanner</a></b> is used to divide the input source into tokens.
 Each token has a specific value that is defined in the <b><a href="../reference/api/org/eclipse/jdt/core/compiler/ITerminalSymbols.html">ITerminalSymbols</a></b> interface. It is 
-fairly simple to iterate and retrieve the right token. This is a general approach. It could be used to retrieve the positions of the
-<i>super</i> keyword in a <b><a href="../reference/api/org/eclipse/jdt/core/dom/SuperMethodInvocation.html">SuperMethodInvocation</a></b>.
+fairly simple to iterate and retrieve the right token. We also recommend that you use the scanner if you want to find the 
+position of the <i>super</i> keyword in a 
+<b><a href="../reference/api/org/eclipse/jdt/core/dom/SuperMethodInvocation.html">SuperMethodInvocation</a></b>.
 <H3>
 Generic source code modification</h3>
 <P>
@@ -334,9 +335,9 @@ Java element change listeners are similar conceptually to resource change listen
 The <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html"><b> IJavaElementDelta</b></a> includes the 
 <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#getElement()">element</a> that was
 changed and <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#getFlags()">flags</a> describing 
-the kind of change that occurred. Most of the time the delta is rooted at the Java Model level. Clients must then navigate
+the kind of change that occurred. Most of the time the delta tree is rooted at the Java Model level. Clients must then navigate
 this delta using <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#getAffectedChildren()"><b>getAffectedChildren</b></a> 
-to find out what projects have changed, and recursively. </P>
+to find out what projects have changed. </P>
 <P>
 The following example method traverses a delta and prints the elements that have been added, removed and changed:</P>
 <font color='#4444CC'><pre>

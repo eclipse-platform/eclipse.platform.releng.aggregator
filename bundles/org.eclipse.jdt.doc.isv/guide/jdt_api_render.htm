@@ -32,37 +32,32 @@ structure    accessible by a tree, table or list viewer</li>
            , <code>IPackageFragmentRoot</code>, <code>IPackageFragment</code>
      and   <code>  IFolder</code>.<br>
 <h3>Adding&nbsp; problem and override decorators</h3>
-  When a viewer is to include problem annotations, then a DecoratingLabelProvider 
-     together with the <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.html">
-           ProblemsLabelDecorator</a>
-   is used. Below is a code snippet that outlines the use of a &nbsp;problem
-     label decorator:<br>
+  When a viewer is supposed to include problem annotations, then a DecoratingLabelProvider 
+together with the <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.html"> 
+ProblemsLabelDecorator</a> is used. Below is a code snippet that outlines the 
+use of a &nbsp;problem label decorator:<br>
 <pre>	<font color="#4444cc">...<br>	DecoratingLabelProvider decorator= new DecoratingLabelProvider(labelProvider, new ProblemsLabelDecorator());	<br>	viewer.setLabelProvider(decorator);<br>	...</font><br><br></pre>
            In the same way the <a href="../reference/api/org/eclipse/jdt/ui/OverrideIndicatorLabelDecorator.html">
            OverrideIndicatorLabelDecorator</a>
             can be used to decorate a normal label provider to show the implement
  and override indicators for methods.<br>
 <h3>Updating the presentation on model changes</h3>
-      Neither the <code>OverrideIndicatorLabelDecorator</code> nor the <code>
-  ProblemsLabelDecorator</code> listen to model changes. Hence, the viewer
- doesn't update its  presentation    if the Java or resource marker model
-changes. The reason for  pushing the  update onto the client for these classes
-is that there isn't a generic implementation  that fulfills all performance
-concerns. Handling Java model delta inspection  and viewer refreshing in
-each label decorator or provider   would lead to  multiple delta inspections
-and unnecessary viewer  updates.<br>
+      Neither the <code>OverrideIndicatorLabelDecorator</code> nor the <code> 
+ProblemsLabelDecorator</code> listen to model changes. Hence, the viewer doesn't 
+update its presentation if the Java or resource marker model changes. The reason 
+for pushing the update onto the client for these classes is that there isn't yet 
+a generic implementation that fulfills all performance concerns. Handling Java 
+model delta inspection and viewer refreshing in each label decorator or provider 
+would lead to multiple delta inspections and unnecessary viewer updates.<br>
 <br>
-           So what does the client need to do in order to update their viewers
- ?<br>
-<br>
+So what does the client need to do in order to update their viewers ?<br>
 <ul>
-  <li><code>OverrideIndicatorLabelDecorator</code>: the client must listen
-     to Java model changes (see <code>JavaCore.addElementChangedListener</code>
-          ) and has to decide if the change(s) described by the delta invalidates
-   the   override indicator of elements presented in the viewer. If so, the
- class   inspecting the delta should trigger a repaint of the corresponding
- Java elements using the standard JFace viewer API (see update methods on
-StructuredViewer).</li>
+  <li><code>OverrideIndicatorLabelDecorator</code>: the client must listen to 
+    Java model changes (see <code>JavaCore.addElementChangedListener</code> ) 
+    and decide if the change(s) described by the delta invalidates the override 
+    indicator of elements presented in the viewer. If so, the class inspecting 
+    the delta should trigger a repaint of the corresponding Java elements using 
+    the standard JFace viewer API (see update methods on StructuredViewer).</li>
   <li><code>ProblemsLabelDecorator</code>: the client should listen to  changes
    notified by the decorator via a <a href="../reference/api/org/eclipse/jdt/ui/ProblemsLabelDecorator.ProblemsLabelChangedEvent.html">
            ProblemsLabelChangedEvent</a>

@@ -14,14 +14,14 @@
   <body bgcolor="#ffffff">
 <h2>Manipulating code with a preview in a Java editor</h2>
 <p>The JDT Core plugin provides several mechanisms to programmatically create, 
-  delete and modify Java elements. See <a href="jdt_api_manip.htm">here</a> for 
-  an introducation to the API provided by JDT Core. </p>
-<p>In a UI world it is often desired that the user confirms a preview before the 
-  actual changes are saved. This can be achieved by opening an Java editor on 
-  the compilation unit to be modified. The user can then either save the Java 
-  editor's content to disk or revert it back to its original content. Below is 
-  a code snippet that opens a compilation unit in an editor and then uses the 
-  working copy created by the editor to perfrom the actual changes:</p>
+  delete and modify Java elements. See <a href="jdt_api_manip.htm">manipulating 
+  Java code</a> for an introducation to the API provided by JDT Core. </p>
+<p>In a UI world it is often useful to have the user confirm a preview before 
+  changes are saved. This can be achieved by opening a Java editor on the compilation 
+  unit to be modified. The user can then either save the Java editor's content 
+  to disk or revert it back to its original content. Below is a code snippet that 
+  opens a compilation unit in an editor and then uses the working copy created 
+  by the editor to perform the changes:</p>
 <pre><font color="#4444CC">void modifyCompilationUnit(ICompilationUnit cunit) throws PartInitException, CoreException {<br>	IEditorPart editor= JavaUI.openInEditor(cunit);<br>	IEditorInput input= editor.getEditorInput();<br>	IWorkingCopyManager manager= JavaUI.getWorkingCopyManager();<br>	manager.connect(input);<br>	try {<br>		ICompilationUnit workingCopy= manager.getWorkingCopy(input);<br>		// do the modifications on workingCopy using the normal JDT Core API.
 	} finally {<br>		manager.disconnect(input);<br>	}<br>	// either keep the editor dirty or use editor.doSave(IProgressMonitor monitor)
 	// to save the changes programmatically.<br>}</font><br></pre>
