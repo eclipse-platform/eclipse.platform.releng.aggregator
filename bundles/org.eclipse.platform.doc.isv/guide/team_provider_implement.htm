@@ -13,19 +13,39 @@
 <H3>
 Implementing a provider</H3>
 <P >
-The class identified in the extension must be a subclass of <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">Repository
-Provider</a></b>. This class ....</P>
+The class identified in the extension must be a subclass of <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.
+Its primary responsibilities are to configure and deconfigure a project for
+repository support, and supply any necessary resource modification hooks.&nbsp;
+The CVS client serves as a good example.&nbsp; Its repository provider is <b>CVSTeamProvider</b>.</P>
 <font color='#4444CC'><pre>
-   public class MyRepositoryProvider extends RepositoryProvider {
+   public class CVSTeamProvider extends RepositoryProvider {
 
-	blah blah blah
-   }
-</font>&nbsp;</pre><p>
-   Discuss configuring the nature, providing a unique id
-</p>
-<p>
-   &nbsp;
-</p>
+	...</pre><p> <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">Repository
+Provider</a> </b>defines two abstract methods, <b>configureProject</b> and <b>deconfigure</b>.&nbsp;
+All providers must implement these methods.&nbsp; </p><p>A project is configured
+when it is first associated with a particular repository provider.&nbsp; This is
+the appropriate time to compute or cache any data about the project.&nbsp; The
+CVS provider simply broadcasts the fact that a project has been configured:</p><pre>public void configureProject() throws CoreException {
+	CVSProviderPlugin.broadcastProjectConfigured(getProject());
+}</pre><p>We won't follow the implementation of the plug-in broadcast
+mechanism.&nbsp; Suffice to say that any parties that need to compute or
+initialize project specific data can do so at this time.</p><p>A project is
+deconfigured when the nature is removed from the project.&nbsp; This is the
+appropriate time to delete any project related caches or remove any references
+to the project in the UI.&nbsp; The CVS provider flushes project related caches
+kept in its views and broadcasts the fact that the project is deconfigured.</p><pre>public void deconfigure() throws CoreException {
+	// when a nature is removed from the project, notify the synchronizer that
+	// we no longer need the sync info cached. This does not affect the actual CVS
+	// meta directories on disk, and will remain unless a client calls unmanage().
+	try {
+		EclipseSynchronizer.getInstance().flush(getProject(), true, true /*flush deep*/, null);
+	} catch(CVSException e) {
+		throw new CoreException(e.getStatus());
+	} finally {
+		CVSProviderPlugin.broadcastProjectDeconfigured(getProject());
+	}
+}</pre><h4>&nbsp;</h4>
+</font>
 
 
 
