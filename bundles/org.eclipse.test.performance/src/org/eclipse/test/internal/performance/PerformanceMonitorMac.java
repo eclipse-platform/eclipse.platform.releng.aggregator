@@ -20,7 +20,6 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 
 	private static boolean fgHasElapsedTime= true;
 	private static long fgStartupTime;
-//	private static long PAGESIZE= 4096;
 
 	/** 
 	 * name of the library that implements the native methods.
@@ -43,8 +42,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
-			    PerformanceTestPlugin.log(e);
-			    //System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
+			    //PerformanceTestPlugin.log(e);
 			    fgIsLoaded= 1;
 			}
 		}
@@ -65,13 +63,8 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 				    int user_time= counters[0]*1000 + counters[1]/1000;
 				    int kernel_time= counters[2]*1000 + counters[3]/1000;
 				    
-			        //addScalar(scalars, InternalDimensions.USER_TIME, user_time);
 					addScalar(scalars, InternalDimensions.KERNEL_TIME, kernel_time);
 					addScalar(scalars, InternalDimensions.CPU_TIME, user_time + kernel_time);
-					//addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[4]*PAGESIZE);		
-					//addScalar(scalars, Dimensions.TRS, counters[5]);
-					//addScalar(scalars, Dimensions.DRS, counters[6] + counters[7]);
-					//addScalar(scalars, Dimensions.HARD_PAGE_FAULTS, counters[9]);
 				}
 			}
 			
