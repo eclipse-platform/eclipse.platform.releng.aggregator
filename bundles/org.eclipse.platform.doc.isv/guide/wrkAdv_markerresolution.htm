@@ -12,72 +12,39 @@ Contributing marker resolution
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <h4>Contributing marker resolution</h4>
-<p>Plug-ins can also define marker resolutions, so that their markers can
-participate in the workbench <b>Quick Fix...</b> feature.&nbsp; Users can select
-a marker and choose <b>Quick Fix...</b> from the popup menu if there is a
-resolution contributed for the marker.</p>
+<p>Plug-ins can also define marker resolutions, so that their problem markers can
+participate in the workbench <b>Quick Fix</b> feature. Users can select
+a problem marker and choose a <b>Quick Fix</b> from a popup containing the list of supplied
+fixes contributed for the marker.</p>
 
 
 <p><img src="images/markerquickfixmenu.gif" alt="Marker quick fix menu" border="0"></p>
 
 
 <p>Marker resolutions are contributed using the <b><a href="../reference/extension-points/org_eclipse_ui_ide_markerResolution.html">org.eclipse.ui.ide.markerResolution</a></b>
-extension point.&nbsp; This extension point allows plug-ins to associate a <b>class</b>
+extension point. This extension point allows plug-ins to associate a <b>class</b>
 that implements <b><a href="../reference/api/org/eclipse/ui/ide/IMarkerResolutionGenerator.html">IMarkerResolutionGenerator</a></b>
 with a particular type of marker.&nbsp; The marker can be qualified
 by marker type only, or it can be further qualified by the value of one or more of its
-attributes.&nbsp; The readme tool declares several different marker resolutions:</p>
+attributes.  The JDT contributes a marker resolution for Java problems:</p>
 
 
-<pre><font color="#4444CC">&lt;extension point=&quot;org.eclipse.ui.ide.markerResolution&quot;&gt; 
-   &lt;markerResolutionGenerator 
-      class=&quot;org.eclipse.ui.examples.readmetool.ReadmeMarkerResolutionGenerator&quot; 
-      markerType=&quot;org.eclipse.ui.examples.readmetool.readmemarker&quot;&gt; 
-      &lt;attribute name=&quot;org.eclipse.ui.examples.readmetool.id&quot; value= &quot;1234&quot;/&gt; 
-   &lt;/markerResolutionGenerator&gt; 
-   &lt;markerResolutionGenerator 
-      class=&quot;org.eclipse.ui.examples.readmetool.ReadmeMarkerResolutionGenerator&quot; 
-      markerType=&quot;org.eclipse.ui.examples.readmetool.readmemarker&quot;&gt; 
-      &lt;attribute name=&quot;org.eclipse.ui.examples.readmetool.level&quot; value= &quot;7&quot;/&gt; 
-   &lt;/markerResolutionGenerator&gt; 
-   &lt;markerResolutionGenerator
-      class=&quot;org.eclipse.ui.examples.readmetool.ReadmeMarkerResolutionGenerator&quot; 
-      markerType=&quot;org.eclipse.ui.examples.readmetool.readmemarker&quot;&gt; 
-      &lt;attribute name=&quot;org.eclipse.ui.examples.readmetool.code&quot; value= &quot;red&quot;/&gt; 
-      &lt;attribute name=&quot;org.eclipse.ui.examples.readmetool.language&quot; value= &quot;english&quot;/&gt; 
-   &lt;/markerResolutionGenerator&gt; 
-&lt;/extension&gt; </font></pre>
-
-
-<p>Each marker resolution generator is defined for the readme marker type, but associated with a different combination of
-attribute values.&nbsp; The first marker resolution generator will be used for markers
-whose <b>id</b> attribute is set to <b>&quot;1234&quot;</b>.&nbsp; In this
-particular example, the readme tool uses the same marker resolution generator
-for all cases.&nbsp; This is not typical, but makes sense in a case where there
-is only one resolution available for specific combinations of attribute
-values.</p>
-
+<pre><font color="#4444CC">
+&lt;extension
+	point="org.eclipse.ui.ide.markerResolution"&gt;
+	&lt;markerResolutionGenerator
+		markerType="org.eclipse.jdt.core.problem"
+		class="org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator"&gt;
+	&lt;/markerResolutionGenerator&gt;
+&lt;/extension&gt;
+</font></pre>
 
 <p>The marker resolution generator is responsible for returning an array of
 marker resolutions (<a href="../reference/api/org/eclipse/ui/ide/IMarkerResolution.html"><b>IMarkerResolution</b></a>)
-that will be shown in the <b>Quick Fix...</b> dialog.&nbsp; The resolution will
-be <b>run()</b> if the user selects it in the dialog.&nbsp; Here is the
-implementation from <b>ReadmeMarkerResolutionGenerator</b>:</p>
+that will be shown in the <b>Quick Fix</b> popup. The resolution will
+be <b>run()</b> if the user selects one of the fixes.</p>
 
-
-<pre><font color="#4444CC">public class ReadmeMarkerResolutionGenerator implements IMarkerResolutionGenerator {
-	public IMarkerResolution[] getResolutions(IMarker marker) {
-		return new IMarkerResolution[] {new AddSentenceResolution()};
-	}
-}
-</font></pre>
-
-
-<p><img src="images/readmemarkerresolution.gif" alt="Marker resolutions" border="0"></p>
-
-
-<p>The <b>AddSentenceResolution</b> defines the resolution's dialog label and
-implements the resolution itself.</p>
+<p><img src="images/markerresolution.gif" alt="Marker resolutions" border="0"></p
 
 
 <p><a href="../notices.html"><img border="0" src="../cpy.gif" alt="Legal notices." border="0" width="324" height="14"></a></p>
