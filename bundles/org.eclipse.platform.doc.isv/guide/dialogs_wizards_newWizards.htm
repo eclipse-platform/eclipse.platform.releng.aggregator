@@ -20,28 +20,27 @@ You can add a wizard to the <b> File-&gt;New </b> menu option in the workbench u
 <a href="../reference/extension-points/org_eclipse_ui_newWizards.html"><b> org.eclipse.ui.newWizards</b></a> extension point. The readme
 tool example uses this extension point definition to add the Readme File wizard:</P>
 <font color='#4444CC'><pre>
-   &lt;extension
+&lt;extension
       point = &quot;org.eclipse.ui.newWizards&quot;&gt;
-      &lt;category
-         id = &quot;org.eclipse.ui.examples.readmetool.new&quot;
-         name=&quot;Example Creation Wizards&quot;&gt;
-      &lt;/category&gt;
-      &lt;wizard
-         id = &quot;org.eclipse.ui.examples.readmetool.wizards.new.file&quot;
-         name = &quot;Readme File&quot;
-         class=&quot;org.eclipse.ui.examples.readmetool.ReadmeCreationWizard&quot;
-         category=&quot;org.eclipse.ui.examples.readmetool.new&quot;
-         icon=&quot;icons/basic/obj16/newreadme_wiz.gif&quot;&gt;
-         &lt;description&gt;
-            An example of a wizard that creates sample Readme file
-         &lt;/description&gt;
-         &lt;selection class=&quot;org.eclipse.core.resources.IResource&quot;/&gt;
-      &lt;/wizard&gt;
-   &lt;/extension&gt;
+	&lt;category
+	   id = &quot;org.eclipse.ui.examples.readmetool.new&quot;
+	   parentCategory=&quot;org.eclipse.ui.Examples&quot;
+	   name=&quot;%NewWizard.category&quot;&gt;
+	&lt;/category&gt;
+ 	&lt;wizard
+	   id = &quot;org.eclipse.ui.examples.readmetool.wizards.new.file&quot;
+      	   name = &quot;%NewWizard.name&quot;
+	   class=&quot;org.eclipse.ui.examples.readmetool.ReadmeCreationWizard&quot;
+	   category=&quot;org.eclipse.ui.Examples/org.eclipse.ui.examples.readmetool.new&quot;
+	   icon=&quot;icons/obj16/newreadme_wiz.gif&quot;&gt;
+    	   &lt;description&gt;%NewWizard.desc&lt;/description&gt;
+	   &lt;selection class=&quot;org.eclipse.core.resources.IResource&quot;/&gt;
+	&lt;/wizard&gt;
+&lt;/extension&gt;
 </pre></font>
 <P >
 The <b> category</b> describes where the wizard will be grouped when the wizard selection dialog is used to find and launch a wizard. The category
-<b> name</b> (&quot;Example Creation Wizards&quot;)
+<b> name</b> 
 defines the label that is used in the wizard.&nbsp; The wizard itself is
 assigned to the category.&nbsp;&nbsp; Its <b>name</b>, <b>icon</b>,
 and <b>description</b> all show up in the new wizard
@@ -72,7 +71,7 @@ The workbench provides base wizard page classes that support the type of process
 <P >
 The goal of the <b> ReadmeCreationWizard</b> is to create a new file, add the required content to the file, and as an option, open an editor on the file. Our page needs to define the controls that let the user specify what content goes in the file and whether an editor should be launched.</P>
 <P >
-We create the wizard page, <b>CreateReadmePage1</b>, by extending
+We create the wizard page, <b>ReadmeCreationPage</b>, by extending
 <a href="../reference/api/org/eclipse/ui/dialogs/WizardNewFileCreationPage.html"><b>WizardNewFileCreationPage</b></a>. The controls for a wizard page are defined in a fashion
 similar to the definition of the controls for a view or an editor. The page implements a
 <b> createControl</b> method, creating the necessary SWT widgets as children of the supplied
@@ -87,24 +86,24 @@ similar to the definition of the controls for a view or an editor. The page impl
       // sample section generation group
       Group group = new Group(composite,SWT.NONE);
       group.setLayout(new GridLayout());
-      group.setText(&quot;Automatic sample section generation&quot;);
+      group.setText(MessageUtil.getString(&quot;Automatic_sample_section_generation&quot;));
       group.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL |
          GridData.HORIZONTAL_ALIGN_FILL));
       ...
       // sample section generation checkboxes
       sectionCheckbox = new Button(group,SWT.CHECK);
-      sectionCheckbox.setText(&quot;Generate sample section titles&quot;);
+      sectionCheckbox.setText(MessageUtil.getString(&quot;Generate_sample_section_titles&quot;));
       sectionCheckbox.setSelection(true);
       sectionCheckbox.addListener(SWT.Selection,this);
 
       subsectionCheckbox = new Button(group,SWT.CHECK);
-      subsectionCheckbox.setText(&quot;Generate sample subsection titles&quot;);
+      subsectionCheckbox.setText(MessageUtil.getString(&quot;Generate_sample_subsection_titles&quot;));
       subsectionCheckbox.setSelection(true);
       subsectionCheckbox.addListener(SWT.Selection,this);
       ...
       // open file for editing checkbox
       openFileCheckbox = new Button(composite,SWT.CHECK);
-      openFileCheckbox.setText(&quot;Open file for editing when done&quot;);
+      openFileCheckbox.setText(MessageUtil.getString(&quot;Open_file_for_editing_when_done&quot;));
       openFileCheckbox.setSelection(true);
       ...
    }
@@ -149,7 +148,7 @@ Implement the <b>init</b> method to set up local variables for context informati
    public void init(IWorkbench workbench,IStructuredSelection selection) {
       this.workbench = workbench;
       this.selection = selection;
-      setWindowTitle(&quot;New Readme File&quot;);
+      setWindowTitle(MessageUtil.getString(&quot;New_Readme_File&quot;));
       setDefaultPageImageDescriptor(ReadmeImages.README_WIZARD_BANNER);
    }
 </pre></font>
@@ -182,7 +181,7 @@ In the case of the readme wizard, we are going to ask our page to handle the fin
 <P >
 The completed wizard looks like this:</P>
 <P >
-<img border="0" src="images/readmewizard.jpg" width="500" height="535"></P>
+<img border="0" src="images/readmewizard.jpg" width="500" height="710"></P>
 
 
 
