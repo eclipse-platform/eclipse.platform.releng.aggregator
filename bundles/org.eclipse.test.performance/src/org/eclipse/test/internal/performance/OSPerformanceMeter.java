@@ -78,7 +78,8 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 						String dimensionId= before[j].getDimension();
 						Dimension dimension= PerfMsrDimensions.getDimension(dimensionId);
 						String name= dimension != null ? dimension.getName() + " [" + dimension.getUnit().getShortName() + "]" : dimensionId;
-						System.out.println(name + ":\t" + valueBefore + "\t" + valueAfter + "\t" + (valueAfter - valueBefore));
+//						System.out.println(name + ":\t" + valueBefore + "\t" + valueAfter + "\t" + (valueAfter - valueBefore));
+						System.out.println(name + ":\t" + (valueAfter - valueBefore));
 					}
 				}
 			}

@@ -15,30 +15,19 @@ import java.util.Map;
 /**
  * The Mac OS X version of the performance monitor.
  */
-public class PerformanceMonitorMac extends PerformanceMonitor {
+public class PerformanceMonitorMac extends BasePerformanceMonitor {
     
 	/**
-	 * Give your subclasses a chance to override this method.
+	 * Write out operating system counters for Mac OS X.
 	 */
 	protected void writeOperatingSystemCounters(Map scalars) {
 	    super.writeOperatingSystemCounters(scalars);
 	}
 
 	/**
-	 * Write out the global machine counters for Linux.
-	 * 
-	 * @param step
-	 * @param displayResults
-	 * @param b a buffer that is being built up when the results are to be displayed.
+	 * Write out the global machine counters for Mac OS X.
 	 */
-	protected void writeGlobalPerformanceInfo(int step, boolean displayResults, StringBuffer b)
-	{
-		if (1==2)step=step+0;	// get rid of the unused warning
-//		LinuxMemInfo mi = LinuxMemInfo.create();
-//		writeValue(LoadValueConstants.What.physicalMemory, mi.total, "Physical Memory", formatEng(mi.total), displayResults, b);
-//		writeValue(LoadValueConstants.What.usedLinuxMemory, mi.used, "Used Memory", formatEng(mi.used), displayResults, b);
-//		writeValue(LoadValueConstants.What.freeLinuxMemory, mi.free, "Free Memory", formatEng(mi.free), displayResults, b);
-//		writeValue(LoadValueConstants.What.buffersLinux, mi.buffers, "Buffers Memory", formatEng(mi.buffers), displayResults, b);
-//		writeValue(LoadValueConstants.What.systemCache, mi.cache, "System Cache", formatEng(mi.cache), displayResults, b);
+	protected void writeGlobalPerformanceInfo(Map scalars) {
+	    super.writeGlobalPerformanceInfo(scalars);
 	}
 }

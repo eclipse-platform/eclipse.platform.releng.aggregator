@@ -12,19 +12,19 @@ package org.eclipse.perfmsr.core;
 
 public class PerfMsrCorePlugin {
     
-    static PerformanceMonitor fgPerformanceMonitor;
+    static BasePerformanceMonitor fgPerformanceMonitor;
 
     public static IPerformanceMonitor getPerformanceMonitor(boolean shared) {
-		PerformanceMonitor pm= null;
+		BasePerformanceMonitor pm= null;
 		
 		if (!shared)
-		    pm= PerformanceMonitor.create();
+		    pm= BasePerformanceMonitor.create();
 		else {
 			if (fgPerformanceMonitor == null)
-			    fgPerformanceMonitor= PerformanceMonitor.create();
+			    fgPerformanceMonitor= BasePerformanceMonitor.create();
 			pm= fgPerformanceMonitor;
 		}
-		PerformanceMonitor.debug("PerfMsrCorePlugin.getPerformanceMonitor() returning");
+		BasePerformanceMonitor.debug("PerfMsrCorePlugin.getPerformanceMonitor() returning");
 		return pm;
     }
 }
