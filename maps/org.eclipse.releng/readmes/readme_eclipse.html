@@ -1131,7 +1131,8 @@ To avoid this situation, disable the new version first, then enable the old one
 i.e. never have two versions of the same feature simultaneously enabled </font>(bug
 <font color="#00FF00"><a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=25236">25236</a>).</font></p>
 <h3>3.1.9 <a name="I-Platform - Debug">Platform - Debug</a></h3>
-<p>[TBD]</p>
+<p>None. (Known problems with the Java debugger appear below in the <a href="#I-Java Development Tools (JDT)">JDT</a>
+section.)</p>
 <h3>3.1.10 <a name="I-Platform - Compare">Platform - Compare</a></h3>
 <p>[TBD]</p>
 <h3>3.2 <a name="I-Java Development Tools (JDT)">Java Development Tools (JDT)</a></h3>
@@ -1141,72 +1142,101 @@ package or class names</font></h4>
 running Java programs with non-Latin characters in the package or class names.
 The workaround is to package the class files as a JAR file and run the program
 out of the JAR and not from the file system directly. </font>(bug <font color="#00FF00"><a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4181">4181</a>)</font>
-<h4><font color="#00FF00">Missing debug attributes</font></h4>
-<font color="#00FF00">The debugger requires that class files be compiled with
-debug attributes if it is to be able to display line numbers and local
-variables. Quite often, class libraries (for example, &quot;<code>rt.jar</code>&quot;)
-are compiled without complete debug attributes, and thus local variables and
-method arguments for those classes are not visible in the debugger.</font>
-<h4><font color="#00FF00">Setting breakpoints</font></h4>
-<font color="#00FF00">In general the debugger will not allow you to place
-breakpoints on lines of code that are not executable (comments, blank lines,
-etc.). However, there are some cases where the debugger will allow breakpoints
-on lines of code that are not executable. For example, the debugger will allow a
-breakpoint to be placed on a variable declaration that does not contain an
-initializer (&quot;int x;&quot;). Note that enabled breakpoints which are
-successfully installed on an executable line in a running (debuggable) VM are
-displayed with a checkmark. Breakpoints that are displayed without a checkmark
-are not installed in a running (debuggable) VM.</font>
-<h4><font color="#00FF00">Using Hot Code Replace</font></h4>
-<font color="#00FF00">Hot code replace is supported on JDK 1.4.x VMs, and IBM J9
-VMs. Hot code replace is limited to changes which do not effect the shape of a
-class. That is, changes within existing methods are supported, but the addition
-or removal of members is not supported.</font>
-<p><font color="#00FF00">Hot code replace and stepping on JDK 1.4.0 VMs is
-unreliable. This appears to be a VM issue that should be fixed in later releases
-of the JDK.</font></p>
-<h4><font color="#00FF00">Scrapbook</font></h4>
-<font color="#00FF00">Setting a breakpoint inside a scrapbook page is not
-supported.</font>
-<p><font color="#00FF00">When a snippet is run in the scrapbook which directly
-or indirectly calls <code>System.exit(int)</code>, the evaluation cannot be
-completed, and will result in a stack trace for a <code>com.sun.jdi.VMDisconnectedException</code>
-being displayed in the scrapbook editor.</font>
-<p><font color="#00FF00">Terminating a scrapbook page while it is performing an
-evaluation results in a <code>com.sun.jdi.VMDisconnectedException</code> being
-displayed in the scrapbook editor.</font>
-<h4><font color="#00FF00">Debugging over slow connections</font></h4>
-<font color="#00FF00">A global Java debug preference specifies the debugger
-timeout, which is the maximum amount of time the debugger waits for a response
-from the target VM after making a request of that VM. Slow connections may
-require that this value be increased. The timeout value can be edited from the <b>Java
-&gt; Debug </b>preference page. Changing the timeout value only effects
-subsequently launched VM, not VMs that are already running.</font>
-<h4><font color="#00FF00">Updating of inspected values</font></h4>
-<font color="#00FF00">When inspecting the result of an evaluated expression in
-the debugger, it is important to note that the result displayed is the result of
-that expression at the time it was evaluated. For example, when inspecting a
-simple integer counter (primitive data type), the value displayed in the
-Expressions view is the value when the expression was evaluated. As the counter
-is changed in the running program, the inspected result will not change (since
-the view is not displaying the value bound to a variable - it is displaying the
-value of an expression, and the value of a primitive data type cannot change).
-However, if an expression results in an object, fields of that object will be
-updated in the inspector as they change in the running program (since the value
-bound to fields in an object can change).</font>
-<h4><font color="#00FF00">Stepping over native methods that perform I/O</font></h4>
-<font color="#00FF00">When the debugger steps over native methods that perform
-I/O to <code>System.out</code> or <code>System.err</code>, the output may not
-appear immediately unless the native performs a flush on the output buffer.</font>
-<h4><font color="#00FF00">VM and process termination running on IBM 1.3 JVM on
-Linux (Linux only)</font></h4>
-<font color="#00FF00">Terminating a launch, debug target, or system process
-associated with a debug target running on the IBM 1.3 JVM on the Linux platform
-does not work when the associated debug target has a suspended thread. To remove
-such debug targets from the debug UI, select <b>Terminate and Remove</b> from
-the debug view's pop-up menu (or use the shortcut &quot;delete&quot; key).
-Associated system processes in the OS may not be properly cleaned up. If a debug
-target has no suspended threads, termination works properly.</font>
+<h4>Cannot run or debug class in a project with GB18030 characters in project
+name</h4>
+<p>Most class libraries do not properly support the creation of a system process
+(via <code>java.lang.Runtime.exec(...)</code>) when the specified command line
+contains GB18030 characters. This limitation means the debugger cannot launch
+applications when the command line it generates contains GB18030 characters.
+(bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=32206">32206</a>)</p>
+<h4>Unable to debug stack overflows</h4>
+<p>If a debug session suspends on a <code>java.lang.StackOverflowError</code>
+exception (due to an exception breakpoint), the debugger may not be able to
+retrieve any debug information from the target JVM. As well, the debugger may
+not be able to reliably interact with the target JVM past this point. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=19217">19217</a>)</p>
+<h4>Evaluation limitation</h4>
+<p>The debugger uses threads in the target JVM to perform evaluations (both
+explicit evaluations that the user requests, and implicit evaluations such as <code>toString()</code>
+invocations in the <b>Variables</b> view). The Java Debug Interface (JDI)
+requires that the thread in which an evaluation is performed be suspended by a
+user event (that is, a breakpoint or step request). Evaluations cannot be
+performed on threads suspended by the suspend action. As well, when a breakpoint
+is configured to suspend the JVM rather than just the individual thread, the
+threads which did not encounter the breakpoint are not in a valid state to
+perform an evaluation. When an evaluation is attempted in a thread that is not
+in a valid state to perform an evaluation, an error message will appear to the
+effect of &quot;Thread must be suspended by step or breakpoint to perform method
+invocation&quot;. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=34440">34440</a>)</p>
+<h4>Breakpoints outside of the build class path</h4>
+<p>Breakpoints can only be created on Java elements that are contained on the
+build class path of a project. The Java debugger automatically deletes
+breakpoints if their associated Java element is removed from the build path of a
+project. However, if the Java debug plug-in is not loaded when a build path is
+changed, such breakpoints will remain in the workspace, and can cause errors
+when the user attempts to go to the file associated with the breakpoint, from
+the Breakpoints view. (bug 34845)</p>
+<h4>Missing debug attributes</h4>
+The debugger requires that class files be compiled with debug attributes if it
+is to be able to display line numbers and local variables. Quite often, class
+libraries (for example, &quot;<code>rt.jar</code>&quot;) are compiled without
+complete debug attributes, and thus local variables and method arguments for
+those classes are not visible in the debugger.
+<h4>Setting breakpoints</h4>
+In general the debugger will not allow you to place breakpoints on lines of code
+that are not executable (comments, blank lines, etc.). However, there are some
+cases where the debugger will allow breakpoints on lines of code that are not
+executable. For example, the debugger will allow a breakpoint to be placed on a
+variable declaration that does not contain an initializer (&quot;int x;&quot;).
+Note that enabled breakpoints which are successfully installed on an executable
+line in a running (debuggable) VM are displayed with a checkmark. Breakpoints
+that are displayed without a checkmark are not installed in a running (debuggable)
+VM. (bugs <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8473">8473</a>, <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=12696">12696</a>)
+<h4>Using Hot Code Replace</h4>
+Hot code replace is supported on JDK 1.4.x VMs, and IBM J9 VMs. Hot code replace
+is limited to changes which do not effect the shape of a class. That is, changes
+within existing methods are supported, but the addition or removal of members is
+not supported.
+<p>Note that hot code replace and stepping on JDK 1.4.0 VMs was unreliable. The
+underlying VM problems were fixed in JDK 1.4.1.</p>
+<h4>Scrapbook</h4>
+Setting a breakpoint inside a scrapbook page is not supported.
+<p>When a snippet is run in the scrapbook which directly or indirectly calls <code>System.exit(int)</code>,
+the evaluation cannot be completed, and will result in a stack trace for a <code>com.sun.jdi.VMDisconnectedException</code>
+being displayed in the scrapbook editor.
+<p>Terminating a scrapbook page while it is performing an evaluation results in
+a <code>com.sun.jdi.VMDisconnectedException</code> being displayed in the
+scrapbook editor.
+<h4>Debugging over slow connections</h4>
+A global Java debug preference specifies the debugger timeout, which is the
+maximum amount of time the debugger waits for a response from the target VM
+after making a request of that VM. Slow connections may require that this value
+be increased. The timeout value can be edited from the <b>Java &gt; Debug </b>preference
+page. Changing the timeout value only effects subsequently launched VM, not VMs
+that are already running.
+<h4>Updating of inspected values</h4>
+When inspecting the result of an evaluated expression in the debugger, it is
+important to note that the result displayed is the result of that expression at
+the time it was evaluated. For example, when inspecting a simple integer counter
+(primitive data type), the value displayed in the Expressions view is the value
+when the expression was evaluated. As the counter is changed in the running
+program, the inspected result will not change (since the view is not displaying
+the value bound to a variable - it is displaying the value of an expression, and
+the value of a primitive data type cannot change). However, if an expression
+results in an object, fields of that object will be updated in the inspector as
+they change in the running program (since the value bound to fields in an object
+can change).
+<h4>Stepping over native methods that perform I/O</h4>
+When the debugger steps over native methods that perform I/O to <code>System.out</code>
+or <code>System.err</code>, the output may not appear immediately unless the
+native performs a flush on the output buffer.
+<h4>VM and process termination running on IBM 1.3 JVM on Linux (Linux only)</h4>
+Terminating a launch, debug target, or system process associated with a debug
+target running on the IBM 1.3 JVM on the Linux platform does not work when the
+associated debug target has a suspended thread. To remove such debug targets
+from the debug UI, select <b>Terminate and Remove</b> from the debug view's
+pop-up menu (or use the shortcut &quot;delete&quot; key). Associated system
+processes in the OS may not be properly cleaned up. If a debug target has no
+suspended threads, termination works properly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1631">1631</a>)
 <h4><font color="#00FF00">Searching for constant field references</font></h4>
 <font color="#00FF00">Search does not find references to constant fields inside
 binaries because the Java Language Specification mandates that constant field
