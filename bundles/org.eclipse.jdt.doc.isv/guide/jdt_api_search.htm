@@ -100,19 +100,35 @@ you can start a search query as follows: </P>
     SearchEngine searchEngine = new SearchEngine();
     searchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 </pre></font>
+<P>
 A notification that the search starts is notified to your search result collector using the
 <b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#aboutToStart()">aboutToStart</a></b>
 method, then each search result is reported using the 
 <b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)">accept</a></b>
 method, finally 
 <b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#done()">done</a></b>
-indicates that the search has ended.
+indicates that the search has ended.</P>
 
 <H3>
 Collecting search results</h3>
+<P>
+Search results are reported using the 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchResultCollector.html#accept(org.eclipse.core.resources.IResource, int, int, org.eclipse.jdt.core.IJavaElement, int)">accept</a></b>
+method. Paragraphs below detail each argument to this method. </P>
 
 <H4>
-Resources and Java elements<h4>
+Resources and Java elements</h4>
+<P>
+A search result can correspond to a Java element (e.g. a type declaration) or it can be contained in a Java element
+(e.g. a reference to a type inside a method.) The search engine always tries to find the inner most Java element that
+corresponds to or that contains the search result. For example, searching for type declarations by name could find
+a local type declaration. Since the Java model doesn't represent local types, the method that contains this local type 
+declaration will be given to the result collector. </P>
+<P>
+The search engine also tries to give the resource that contains the Java element to the result collector. So if the Java
+element is a method in a compilation unit, the resource will be the corresponding IFile. If the element is contained in 
+a .jar file, the resource will be the .jar file if this .jar file is in the workspace. If it is an external .jar file, then the resource
+will be null. </P>
 
 <H4>
 Source positions<h4>
