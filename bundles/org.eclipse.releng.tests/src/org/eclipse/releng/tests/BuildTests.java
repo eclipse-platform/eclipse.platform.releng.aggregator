@@ -234,7 +234,7 @@ public class BuildTests extends TestCase {
 		javaCopyrightLines[2]=" * All rights reserved. This program and the accompanying materials ";
 		javaCopyrightLines[3]=" * are made available under the terms of the Common Public License v1.0";
 		javaCopyrightLines[4]=" * which accompanies this distribution, and is available at";
-		javaCopyrightLines[5]=" * http://www.eclipse.org/legal/cpl-v10.html";
+		javaCopyrightLines[5]=" * http://www.eclipse.org/legal/epl-v10.html";
 		javaCopyrightLines[6]=" * ";
 		javaCopyrightLines[7]=" * Contributors:";
 		
@@ -726,7 +726,7 @@ public class BuildTests extends TestCase {
 
 	}
 
-	public static final String[] REQUIRED_FEATURE_FILES = {"cpl-v10.html", "feature.properties", "feature.xml", "license.html"};
+	public static final String[] REQUIRED_FEATURE_FILES = {"epl-v10.html", "feature.properties", "feature.xml", "license.html"};
 	public static final String REQUIRED_FEATURE_SUFFIX = ".jpg";
 
 	public static final String[] REQUIRED_PLUGIN_FILES = {"about.html", "plugin.properties", "plugin.xml"};
