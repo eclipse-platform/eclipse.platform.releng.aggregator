@@ -15,6 +15,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Properties;
+
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
@@ -72,7 +74,9 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	public void commit() {
 	    Sample sample= getSample();
 	    if (sample != null) {
-	        DB.store(sample);
+	        Properties config= PerformanceTestPlugin.getConfig();
+	        if (config != null)
+	            DB.store(config, sample);
 	        if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 	        	printSample(System.out, sample);
 	    }

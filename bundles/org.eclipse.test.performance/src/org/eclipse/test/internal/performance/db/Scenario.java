@@ -124,7 +124,8 @@ public class Scenario {
             return;
         InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
         
-        long start= System.currentTimeMillis();
+        long start;
+        if (DEBUG) start= System.currentTimeMillis();
         ArrayList buildNames= new ArrayList();
         for (int i= 0; i < fBuildPatterns.length; i++) {
             if (fBuildPatterns[i].indexOf('%') >= 0)
@@ -138,7 +139,7 @@ public class Scenario {
         ArrayList sessions= new ArrayList();
         ArrayList names2= new ArrayList();
         
-        start= System.currentTimeMillis();
+        if (DEBUG) start= System.currentTimeMillis();
         Set dims= new HashSet();
         for (int t= 0; t < names.length; t++) {
             DataPoint[] dps= DB.queryDataPoints(fConfigName, names[t], fScenarioName);

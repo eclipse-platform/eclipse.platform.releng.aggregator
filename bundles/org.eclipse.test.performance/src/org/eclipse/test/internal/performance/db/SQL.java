@@ -17,18 +17,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.sql.Types;
-
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 
 public class SQL {
     
     private Connection fConnection;
-    private PreparedStatement fInsertConfig, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
-    private PreparedStatement fInsertConfigProperty, fInsertSampleProperty;
-    private PreparedStatement fQueryScenario, fQueryAllScenarios, fQueryBuilds, fQueryDatapoints;
-    private PreparedStatement fQueryScalars;
-    private PreparedStatement[] fQueries= new PreparedStatement[20];
+    private PreparedStatement fInsertConfig, fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
+    private PreparedStatement fQueryDatapoints2, fQueryScalars, fQueryVariation, fQueryScenario, fQueryAllScenarios, fQueryBuilds;
+    //private PreparedStatement fQueryDatapoints;
+    //private PreparedStatement[] fQueries= new PreparedStatement[20];
     
 
     SQL(Connection con) {
@@ -37,76 +34,76 @@ public class SQL {
     
     public void dispose() throws SQLException {
     	// TODO: close all prepared statements
-    	if (fQueries != null) {
-    		for (int i= 0; i < fQueries.length; i++) {
-    			if (fQueries[i] != null)
-    				fQueries[i].close();
-    		}
-    		fQueries= null;
-    	}
+//    	if (fQueries != null) {
+//    		for (int i= 0; i < fQueries.length; i++) {
+//    			if (fQueries[i] != null)
+//    				fQueries[i].close();
+//    		}
+//    		fQueries= null;
+//    	}
     }
     
-    PreparedStatement getQueryStatement(int n) throws SQLException {
-    	if (n < 0 || n > 20)
-    		return null;
-    	if (fQueries[n] == null) {
-    		StringBuffer sb= new StringBuffer(
-    				"select SAMPLE.ID, DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG " + //$NON-NLS-1$
-					"where " + //$NON-NLS-1$
-					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME = ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
-					"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
-					"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
-					"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
-			);
-    		
-    		if (n > 0) {
-				sb.append("and (SCALAR.DIM_ID = ?"); //$NON-NLS-1$
-    			for (int i= 1; i < n; i++)
-    				sb.append(" or SCALAR.DIM_ID = ?"); //$NON-NLS-1$
-				sb.append(") "); //$NON-NLS-1$
-    		}
-    		
-			sb.append(
-					"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP" //$NON-NLS-1$
-    		);    		
-    		
-			fQueries[n]= fConnection.prepareStatement(sb.toString());
-    	}
-    	return fQueries[n];
-    }
+//    PreparedStatement getQueryStatement(int n) throws SQLException {
+//    	if (n < 0 || n > 20)
+//    		return null;
+//    	if (fQueries[n] == null) {
+//    		StringBuffer sb= new StringBuffer(
+//    				"select SAMPLE.ID, DATAPOINT.ID, DATAPOINT.STEP, SCALAR.DIM_ID, SCALAR.VALUE from SCALAR, DATAPOINT, SAMPLE, SCENARIO, CONFIG " + //$NON-NLS-1$
+//					"where " + //$NON-NLS-1$
+//					"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME = ? and CONFIG.BUILD LIKE ? and " + //$NON-NLS-1$
+//					"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
+//					"SCALAR.DATAPOINT_ID = DATAPOINT.ID and " + //$NON-NLS-1$
+//					"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
+//			);
+//    		
+//    		if (n > 0) {
+//				sb.append("and (SCALAR.DIM_ID = ?"); //$NON-NLS-1$
+//    			for (int i= 1; i < n; i++)
+//    				sb.append(" or SCALAR.DIM_ID = ?"); //$NON-NLS-1$
+//				sb.append(") "); //$NON-NLS-1$
+//    		}
+//    		
+//			sb.append(
+//					"order by SAMPLE.STARTTIME, DATAPOINT.ID, DATAPOINT.STEP" //$NON-NLS-1$
+//    		);    		
+//    		
+//			fQueries[n]= fConnection.prepareStatement(sb.toString());
+//    	}
+//    	return fQueries[n];
+//    }
     
     void createPreparedStatements() throws SQLException {
         fInsertConfig= fConnection.prepareStatement(
                 "insert into CONFIG (NAME, BUILD) values (?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
-        fInsertConfigProperty= fConnection.prepareStatement(
-                "insert into CONFIG_PROPERTIES values (?, ?, ?)"); //$NON-NLS-1$
+        fInsertVariation= fConnection.prepareStatement(
+                "insert into VARIATION (KEYVALPAIRS) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertScenario= fConnection.prepareStatement(
                 "insert into SCENARIO (NAME) values (?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertSample= fConnection.prepareStatement(
-                "insert into SAMPLE (CONFIG_ID, SCENARIO_ID, STARTTIME) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
+                "insert into SAMPLE (CONFIG_ID, VARIATION_ID, SCENARIO_ID, STARTTIME) values (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertDataPoint= fConnection.prepareStatement(
                 "insert into DATAPOINT (SAMPLE_ID, SEQ, STEP) values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS); //$NON-NLS-1$
         fInsertScalar= fConnection.prepareStatement(
                 "insert into SCALAR values (?, ?, ?)"); //$NON-NLS-1$
-        fInsertSampleProperty= fConnection.prepareStatement(
-        		"insert into SAMPLE_PROPERTIES values (?, ?, ?)"); //$NON-NLS-1$
 
         fQueryScenario= fConnection.prepareStatement(
                 "select ID from SCENARIO where NAME = ?"); //$NON-NLS-1$
+        fQueryVariation= fConnection.prepareStatement(
+        		"select ID from VARIATION where KEYVALPAIRS = ?"); //$NON-NLS-1$
         fQueryAllScenarios= fConnection.prepareStatement(
-        		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE, CONFIG where " +	//$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME LIKE ? and " +	//$NON-NLS-1$
+        		"select DISTINCT SCENARIO.NAME from SCENARIO, SAMPLE, VARIATION where " +	//$NON-NLS-1$
+        		"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
         fQueryBuilds= fConnection.prepareStatement(
-        		"select DISTINCT CONFIG.BUILD from CONFIG, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME LIKE ? and CONFIG.BUILD LIKE ? and " +	//$NON-NLS-1$
+        		"select distinct VARIATION.KEYVALPAIRS from VARIATION, SAMPLE, SCENARIO where " +	//$NON-NLS-1$
+        		"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME LIKE ?"	//$NON-NLS-1$
         ); 
-        fQueryDatapoints= fConnection.prepareStatement(
-        		"select DATAPOINT.ID, DATAPOINT.STEP from CONFIG, SCENARIO, SAMPLE, DATAPOINT " + //$NON-NLS-1$
+        fQueryDatapoints2= fConnection.prepareStatement(
+        		"select DATAPOINT.ID, DATAPOINT.STEP from VARIATION, SCENARIO, SAMPLE, DATAPOINT " + //$NON-NLS-1$
         		"where " + //$NON-NLS-1$
-        		"SAMPLE.CONFIG_ID = CONFIG.ID and CONFIG.NAME = ? and CONFIG.BUILD = ? and " + //$NON-NLS-1$
+        		"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS = ? and " + //$NON-NLS-1$
         		"SAMPLE.SCENARIO_ID = SCENARIO.ID and SCENARIO.NAME = ? and " + //$NON-NLS-1$
          		"DATAPOINT.SAMPLE_ID = SAMPLE.ID " //$NON-NLS-1$
         );
@@ -116,6 +113,33 @@ public class SQL {
         		"where " + //$NON-NLS-1$
 				"SCALAR.DATAPOINT_ID = ?" //$NON-NLS-1$
         );
+    }
+    
+    void initializeVariations() {
+        try {
+            Statement stmt= fConnection.createStatement();
+	        stmt.executeUpdate(
+	                "create table VARIATION (" + //$NON-NLS-1$
+	                    "ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
+	                    "KEYVALPAIRS varchar(10000) not null " + //$NON-NLS-1$
+	                ")" //$NON-NLS-1$
+	            );
+	        stmt.executeUpdate("alter table VARIATION add constraint VA_KVP primary key (KEYVALPAIRS)"); //$NON-NLS-1$
+	        stmt.executeUpdate("alter table SAMPLE add column VARIATION_ID int"); //$NON-NLS-1$
+
+//	        stmt.executeUpdate("alter table SAMPLE add constraint SAMPLE_CONSTRAINT " + //$NON-NLS-1$
+//    							"foreign key (VARIATION_ID) references VARIATION (ID)"); //$NON-NLS-1$
+
+	        stmt.close();
+	        fConnection.commit();
+	        
+        } catch (SQLException e) {
+            try {
+                fConnection.rollback();
+            } catch (SQLException e1) {
+                PerformanceTestPlugin.log(e1);
+            }
+        }
     }
     
     void initialize() {
@@ -129,13 +153,6 @@ public class SQL {
 	                ")" //$NON-NLS-1$
 	            );
 	        stmt.executeUpdate(
-	                "create table CONFIG_PROPERTIES (" + //$NON-NLS-1$
-	                    "CONFIG_ID int not null," + //$NON-NLS-1$
-						 "NAME varchar(128)," + //$NON-NLS-1$
-	                    "VALUE varchar(1000)" + //$NON-NLS-1$
-	                ")" //$NON-NLS-1$
-	            );
-	        stmt.executeUpdate(
 	        		"create table SAMPLE (" + //$NON-NLS-1$
 	        			"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
 						"CONFIG_ID int not null," + //$NON-NLS-1$
@@ -143,13 +160,6 @@ public class SQL {
 						"STARTTIME timestamp" + //$NON-NLS-1$
 					")" //$NON-NLS-1$
 	        );           
-	        stmt.executeUpdate(
-	                "create table SAMPLE_PROPERTIES (" + //$NON-NLS-1$
-	                    "SAMPLE_ID int not null," + //$NON-NLS-1$
-						 "NAME varchar(128)," + //$NON-NLS-1$
-	                    "VALUE varchar(1000)" + //$NON-NLS-1$
-	                ")" //$NON-NLS-1$
-	            );
 	        stmt.executeUpdate(
 	        		"create table SCENARIO (" + //$NON-NLS-1$
 	                	"ID int not null GENERATED ALWAYS AS IDENTITY," + //$NON-NLS-1$
@@ -227,10 +237,11 @@ public class SQL {
         return create(fInsertConfig);
     }
     
-    int createSample(int config_id, int scenario_id, Timestamp starttime) throws SQLException {
+    int createSample(int config_id, int variation_id, int scenario_id, Timestamp starttime) throws SQLException {
         fInsertSample.setInt(1, config_id);
-        fInsertSample.setInt(2, scenario_id);
-        fInsertSample.setTimestamp(3, starttime);
+        fInsertSample.setInt(2, variation_id);
+        fInsertSample.setInt(3, scenario_id);
+        fInsertSample.setTimestamp(4, starttime);
         return create(fInsertSample);
     }
         
@@ -248,22 +259,21 @@ public class SQL {
 		fInsertScalar.executeUpdate();
     }
     
-    ResultSet queryDataPoints(String configName, String buildPattern, String scenario, int[] dim_ids) throws SQLException {
-    	PreparedStatement queryStatement= getQueryStatement(dim_ids.length);
-    	queryStatement.setString(1, configName);
-    	queryStatement.setString(2, buildPattern);
-    	queryStatement.setString(3, scenario);
-    	int j= 4;
-    	for (int i= 0; i < dim_ids.length; i++)
-    		queryStatement.setInt(j++, dim_ids[i]);
-        return queryStatement.executeQuery();
-    }
+//    ResultSet queryDataPoints2(String configName, String buildPattern, String scenario, int[] dim_ids) throws SQLException {
+//    	PreparedStatement queryStatement= getQueryStatement(dim_ids.length);
+//    	queryStatement.setString(1, configName);
+//    	queryStatement.setString(2, buildPattern);
+//    	queryStatement.setString(3, scenario);
+//    	int j= 4;
+//    	for (int i= 0; i < dim_ids.length; i++)
+//    		queryStatement.setInt(j++, dim_ids[i]);
+//        return queryStatement.executeQuery();
+//    }
     
-    ResultSet queryDataPoints(String configName, String buildName, String scenarioName) throws SQLException {
-     	fQueryDatapoints.setString(1, configName);
-    	fQueryDatapoints.setString(2, buildName);
-    	fQueryDatapoints.setString(3, scenarioName);
-    	return fQueryDatapoints.executeQuery();
+    ResultSet queryDataPoints(String variations, String scenarioName) throws SQLException {
+     	fQueryDatapoints2.setString(1, variations);
+    	fQueryDatapoints2.setString(2, scenarioName);
+    	return fQueryDatapoints2.executeQuery();
     }
 
     ResultSet queryDataPoints(int datapointId) throws SQLException {
@@ -271,37 +281,25 @@ public class SQL {
     	return fQueryScalars.executeQuery();
     }
 
-    ResultSet queryScenarios(String configPattern, String scenarioPattern) throws SQLException {
-        fQueryAllScenarios.setString(1, configPattern);
+    ResultSet queryScenarios(String variationPattern, String scenarioPattern) throws SQLException {
+        fQueryAllScenarios.setString(1, variationPattern);
         fQueryAllScenarios.setString(2, scenarioPattern);
         return fQueryAllScenarios.executeQuery();
     }
     
-    ResultSet queryBuildNames(String configPattern, String buildPattern, String scenarioPattern) throws SQLException {
-        fQueryBuilds.setString(1, configPattern);
-        fQueryBuilds.setString(2, buildPattern);
-        fQueryBuilds.setString(3, scenarioPattern);
+    ResultSet queryBuildNames(String keyPattern, String scenarioPattern) throws SQLException {
+        fQueryBuilds.setString(1, keyPattern);
+        fQueryBuilds.setString(2, scenarioPattern);
         return fQueryBuilds.executeQuery();
     }
 
-    void insertSampleProperty(int sample_id, String name, String value) throws SQLException {
-        fInsertSampleProperty.setInt(1, sample_id);
-        fInsertSampleProperty.setString(2, name);
-        if (value == null)
-            fInsertSampleProperty.setNull(3, Types.VARCHAR);
-        else  
-            fInsertSampleProperty.setString(3, value);
-        fInsertSampleProperty.executeUpdate();
-    }
+    public int createVariations(String variation) throws SQLException {
+        fQueryVariation.setString(1, variation);
+        ResultSet result= fQueryVariation.executeQuery();
+        while (result.next())
+            return result.getInt(1);
 
-    void insertConfigProperty(int configID, String name, String value) throws SQLException {
-        //System.out.println(configID + " " + name + " " + value);
-        fInsertConfigProperty.setInt(1, configID);
-        fInsertConfigProperty.setString(2, name);
-        if (value == null)
-            fInsertConfigProperty.setNull(3, Types.VARCHAR);
-        else  
-            fInsertConfigProperty.setString(3, value);
-        fInsertConfigProperty.executeUpdate();
+        fInsertVariation.setString(1, variation);
+        return create(fInsertVariation);
     }
 }

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.eclipse.test.internal.performance.Constants;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -34,13 +33,12 @@ import org.eclipse.test.internal.performance.data.Scalar;
 
 public class DB {
     
-    public static final String DB_NAME= "perfDB";	// default db name //$NON-NLS-1$
+    private static final String LOCALHOST= "localhost"; //$NON-NLS-1$
     
     private static final boolean DEBUG= false;
     private static final boolean AGGREGATE= true;
-    
-    private static final String LOCALHOST= "localhost";  //$NON-NLS-1$
-    
+    private static final boolean VARIATIONS= true;
+        
     private static DB fgDefault;
     
     private Connection fConnection;
@@ -51,16 +49,28 @@ public class DB {
     private boolean fIsEmbedded;
     
     
-    public static boolean store(Sample sample) {
-        return getDefault().internalStore(sample);
+    public static boolean store(Properties config, Sample sample) {
+        return getDefault().internalStore(config, sample);
     }
     
     public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern, Dim[] dims) {
-        return getDefault().internalQueryDataPoints(configName, buildPattern, scenarioPattern, dims);
+        Properties key= new Properties();
+        if (configName != null)
+            key.put(PerformanceTestPlugin.CONFIG, configName); //$NON-NLS-1$
+        key.put(PerformanceTestPlugin.BUILD, buildPattern); //$NON-NLS-1$
+        return getDefault().internalQueryDataPoints(key, scenarioPattern, dims);
     }
    
     public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern) {
-        return getDefault().internalQueryDataPoints(configName, buildPattern, scenarioPattern);
+        Properties key= new Properties();
+        if (configName != null)
+            key.put(PerformanceTestPlugin.CONFIG, configName); //$NON-NLS-1$
+        key.put(PerformanceTestPlugin.BUILD, buildPattern); //$NON-NLS-1$
+        return getDefault().internalQueryDataPoints(key, scenarioPattern, null);
+    }
+   
+    public static DataPoint[] queryDataPoints(Properties keys, String scenarioPattern, Dim[] dims) {
+        return getDefault().internalQueryDataPoints(keys, scenarioPattern, dims);
     }
    
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
@@ -92,7 +102,13 @@ public class DB {
     }
 
     public static void queryBuildNames(List names, String configName, String buildPattern, String scenarioPattern) {
-        getDefault().internalQueryBuildNames(names, configName, buildPattern, scenarioPattern);
+        
+        Properties key= new Properties();
+        if (configName != null)
+            key.put(PerformanceTestPlugin.CONFIG, configName); //$NON-NLS-1$
+        key.put(PerformanceTestPlugin.BUILD, buildPattern); //$NON-NLS-1$
+        
+        getDefault().internalQueryBuildNames(names, key, scenarioPattern);
     }
 
     public static Connection getConnection() {
@@ -146,57 +162,21 @@ public class DB {
         return fSQL;
     }
     
-    private String getConfigName() {
-        String configName= PerformanceTestPlugin.getEnvironment(Constants.CONFIG);
-        if (configName != null)
-            return configName;
-        if (fIsEmbedded)
-            return LOCALHOST;
-        return PerformanceTestPlugin.getHostName();
-    }
-    
-    private int getConfig() throws SQLException {
+    private int getConfig(Properties config) throws SQLException {
         if (fConfigID == 0) {
-
-            String configName= getConfigName();
-            String buildName= PerformanceTestPlugin.getEnvironment(Constants.BUILD);
+            String configName= config.getProperty(PerformanceTestPlugin.CONFIG, LOCALHOST);
+            String buildName= config.getProperty(PerformanceTestPlugin.BUILD);
             fConfigID= fSQL.createConfig(configName, buildName);
-            
-            /*
-            String osname= System.getProperty("os.name"); //$NON-NLS-1$
-            if (osname != null)
-                fSQL.insertConfigProperty(fConfigID, "os.name", osname); //$NON-NLS-1$
-
-            String osversion= System.getProperty("os.version"); //$NON-NLS-1$
-            if (osversion != null)
-                fSQL.insertConfigProperty(fConfigID, "os.version", osversion); //$NON-NLS-1$
-
-            String arch= System.getProperty("os.arch"); //$NON-NLS-1$
-            if (arch != null)
-                fSQL.insertConfigProperty(fConfigID, "os.arch", arch); //$NON-NLS-1$
-
-    		String version= System.getProperty("java.fullversion"); //$NON-NLS-1$
-    		if (version == null)
-    		    version= System.getProperty("java.runtime.version"); //$NON-NLS-1$
-    	    if (version != null)
-    	        fSQL.insertConfigProperty(fConfigID, "jvm", version); //$NON-NLS-1$
-    	    
-    	    String vmargs= System.getProperty("eclipse.vmargs"); //$NON-NLS-1$
-    	    if (vmargs != null)
-    	        fSQL.insertConfigProperty(fConfigID, "eclipse.vmargs", vmargs); //$NON-NLS-1$
-    	    
-    	    String commands= System.getProperty("eclipse.commands"); //$NON-NLS-1$
-    	    if (commands != null) {
-    	        if (commands.length() >= 1000)
-    	            commands= commands.substring(0, 1000);
-    	        fSQL.insertConfigProperty(fConfigID, "eclipse.commands", commands); //$NON-NLS-1$
-    	    }
-    	    */
         }
         return fConfigID;
     }
         
-    private boolean internalStore(Sample sample) {
+    private int getVariation(Properties config) throws SQLException {
+        String variation= PerformanceTestPlugin.toVariations(config);
+        return fSQL.createVariations(variation);
+    }
+        
+    private boolean internalStore(Properties config, Sample sample) {
         
         if (fSQL == null || sample == null)
             return false;
@@ -246,8 +226,10 @@ public class DB {
 		//System.out.println("store started..."); //$NON-NLS-1$
 	    try {
             //long l= System.currentTimeMillis();
+            int config_id= getConfig(config);
+            int variation_id= getVariation(config);
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
-            int sample_id= fSQL.createSample(getConfig(), scenario_id, new Timestamp(sample.getStartTime()));
+            int sample_id= fSQL.createSample(config_id, variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
             if (sc != null) {
 	            int datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
@@ -285,20 +267,36 @@ public class DB {
         }
         return true;
     }
-
-    private DataPoint[] internalQueryDataPoints(String configName, String buildName, String scenarioName) {
+    
+    /*
+     * fixed
+     */
+    private DataPoint[] internalQueryDataPoints(Properties variations, String scenarioName, Dim[] dims) {
         if (fSQL == null)
             return null;
  
          ResultSet rs= null;
          try {
         	
-        	if (configName == null)
-        	    configName= getConfigName();
-        	
+            //String configName= key.getProperty(PerformanceTestPlugin.CONFIG, LOCALHOST);
+            //String buildName= key.getProperty(PerformanceTestPlugin.BUILD);
+        	        	
             ArrayList dataPoints= new ArrayList();
-       	
-            rs= fSQL.queryDataPoints(configName, buildName, scenarioName);
+            
+            /* currently not needed
+        	int[] dim_ids= null;
+        	if (dims != null) {
+        		dim_ids= new int[dims.length];
+        		for (int i= 0; i < dims.length; i++)
+        			dim_ids[i]= dims[i].getId();
+        	}
+        	if (dim_ids == null)
+        		dim_ids= new int[0];
+            */
+            
+            //rs= fSQL.queryDataPoints(configName, buildName, scenarioName);
+            String variationPattern= PerformanceTestPlugin.toVariations(variations);
+            rs= fSQL.queryDataPoints(variationPattern, scenarioName);
 	        while (rs.next()) {
 	            int datapoint_id= rs.getInt(1);
 	            int step= rs.getInt(2);
@@ -337,93 +335,21 @@ public class DB {
         return null;
     }
     
-    private DataPoint[] internalQueryDataPoints(String configName, String buildName, String scenarioName, Dim[] dims) {
-        return internalQueryDataPoints(configName, buildName, scenarioName);
-        /*
-        if (fSQL == null)
-            return null;
- 
-        ResultSet result= null;
-        try {
-        	
-        	if (configName == null)
-        	    configName= getConfigName();
-        	
-        	int[] dim_ids= null;
-        	if (dims != null) {
-        		dim_ids= new int[dims.length];
-        		for (int i= 0; i < dims.length; i++)
-        			dim_ids[i]= dims[i].getId();
-        	}
-        	if (dim_ids == null)
-        		dim_ids= new int[0];
-            result= fSQL.queryDataPoints(configName, buildPattern, scenario, dim_ids);
-            
-            long lastValue= 0;
-            ArrayList dataPoints= new ArrayList();
-            int lastDataPointId= 0;
-            DataPoint dp= null;
-            HashMap map= null;
-            for (int i= 0; result.next(); i++) {
-                
-		        int sample_id= result.getInt(1);
-		        int datapoint_id= result.getInt(2);
-		        int step= result.getInt(3);
-                int dim_id= result.getInt(4);
-                long value= result.getBigDecimal(5).longValue();
-                
-                if (datapoint_id != lastDataPointId) {
-                    map= new HashMap();
-                    dp= new DataPoint(step, map);
-                    dataPoints.add(dp);
-                    lastDataPointId= datapoint_id;
-                }
-                Dim dim= Dim.getDimension(dim_id);
-                if (dim != null)
-                    map.put(dim, new Scalar(dim, value));
-                
-                if (DEBUG) {
-                    if (step == 1) {
-                        //System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value);                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-                        System.out.println(i + ": " + sample_id+','+datapoint_id +' '+ Dim.getDimension(dim_id).getName() + ' ' + (value-lastValue));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-                    } else
-                        lastValue= value;
-                }
-            }
-            int n= dataPoints.size();
-            if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
-            return (DataPoint[])dataPoints.toArray(new DataPoint[n]);
-
-        } catch (SQLException e) {
-            PerformanceTestPlugin.log(e);
-
-        } finally {
-            if (result != null)
-                try {
-                    result.close();
-                } catch (SQLException e1) {
-                	// ignored
-                }
-        }
-        return null;
-        */
-    }
-    
     /*
-     * Returns array of build names
+     * Returns array of scenario names
      */
     private String[] internalQueryScenarioNames(String configPattern, String scenarioPattern) {
         if (fSQL == null)
             return null;
         ResultSet result= null;
-        try {        	
-            result= fSQL.queryScenarios(configPattern, scenarioPattern);
+        try {
+            result= fSQL.queryScenarios("%|"+PerformanceTestPlugin.CONFIG+"="+configPattern+"|%", scenarioPattern);
             ArrayList scenarios= new ArrayList();
             for (int i= 0; result.next(); i++)
 		        scenarios.add(result.getString(1));
             return (String[])scenarios.toArray(new String[scenarios.size()]);
 
-        } catch (SQLException e) {    
+        } catch (SQLException e) {
 	        PerformanceTestPlugin.log(e);
 
         } finally {
@@ -437,14 +363,24 @@ public class DB {
         return null;
     }
     
-    private void internalQueryBuildNames(List buildNames, String hostPattern, String buildPattern, String scenarioPattern) {
+    /*
+     * fixed
+     */
+    private void internalQueryBuildNames(List buildNames, Properties key, String scenarioPattern) {
         if (fSQL == null)
             return;
+        String keyName= PerformanceTestPlugin.toVariations(key);
         ResultSet result= null;
         try {        	
-            result= fSQL.queryBuildNames(hostPattern, buildPattern, scenarioPattern);
-            for (int i= 0; result.next(); i++)
-                buildNames.add(result.getString(1));
+            result= fSQL.queryBuildNames(keyName, scenarioPattern);
+            for (int i= 0; result.next(); i++) {
+                String kvs= result.getString(1);
+                Properties p= new Properties();
+                PerformanceTestPlugin.parseVariations(p, kvs);
+                String build= p.getProperty(PerformanceTestPlugin.BUILD);
+                if (build != null && !buildNames.contains(build))
+                    buildNames.add(build);
+            }
         } catch (SQLException e) {
 	        PerformanceTestPlugin.log(e);
 
@@ -470,19 +406,15 @@ public class DB {
         if (fConnection != null)
             return;
         
-        Properties env= PerformanceTestPlugin.getEnvironmentVariables();
-        
-        String dbloc= env.getProperty(Constants.DB_LOCATION);
-        //dbloc= "net://localhost";
-        //dbloc= "/Users/weinand/Eclipse/cloudscape2";
+        String dbloc= PerformanceTestPlugin.getDBLocation();
         if (dbloc == null)
             return;
                 
-        String dbname= env.getProperty(Constants.DB_NAME, DB_NAME); //$NON-NLS-1$
+        String dbname= PerformanceTestPlugin.getDBName();
         String url= null;
         java.util.Properties info= new java.util.Properties();
-        info.put("user", env.getProperty(Constants.DB_USER, "guest"));	//$NON-NLS-1$ //$NON-NLS-2$
-        info.put("password", env.getProperty(Constants.DB_PASSWD, "guest"));	//$NON-NLS-1$ //$NON-NLS-2$
+        info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
+        info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
         
         try {            
             if (dbloc.startsWith("net://")) { //$NON-NLS-1$
@@ -490,7 +422,7 @@ public class DB {
                 if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
                 Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
                 info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-                url="jdbc:cloudscape:" + dbloc + "/" + dbname;  //$NON-NLS-1$//$NON-NLS-2$
+                url= dbloc + "/" + dbname;  //$NON-NLS-1$//$NON-NLS-2$
             } else {
                 // embedded
                 fIsEmbedded= true;
@@ -504,17 +436,19 @@ public class DB {
                     f= new File(user_home, "cloudscape"); //$NON-NLS-1$
                 } else
                     f= new File(dbloc);
-                String dbpath= new File(f, dbname).getAbsolutePath();
-                url= "jdbc:cloudscape:" + dbpath; //$NON-NLS-1$
+                url= new File(f, dbname).getAbsolutePath();
             }
             info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
-            fConnection= DriverManager.getConnection(url, info);
+            fConnection= DriverManager.getConnection("jdbc:cloudscape:" + url, info); //$NON-NLS-1$
             if (DEBUG) System.out.println("succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
             fSQL= new SQL(fConnection);
 
             doesDBexists();
+            
+            if (VARIATIONS)
+                upgradeVariationSupport();
 
             if (DEBUG) System.out.println("start prepared statements"); //$NON-NLS-1$
             fSQL.createPreparedStatements();
@@ -568,9 +502,8 @@ public class DB {
         Statement stmt= fConnection.createStatement();
         try {
 	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' "); //$NON-NLS-1$
-	        while (rs.next())
-	            if (rs.getInt(1) >= 6)
-	                return;
+	        if (rs.next() && rs.getInt(1) >= 6)
+	            return;
 	        if (DEBUG) System.out.println("initialising DB"); //$NON-NLS-1$
 	        fSQL.initialize();
 			fConnection.commit();
@@ -580,6 +513,21 @@ public class DB {
         }
     }
     
+    private void upgradeVariationSupport() throws SQLException {
+        Statement stmt= fConnection.createStatement();
+        try {
+	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename = 'VARIATION' "); //$NON-NLS-1$
+	        if (rs.next() && rs.getInt(1) > 0)
+	            return;
+	        if (DEBUG) System.out.println("adding VARIATION support"); //$NON-NLS-1$
+	        fSQL.initializeVariations();
+			fConnection.commit();
+	        if (DEBUG) System.out.println("end VARIATION support"); //$NON-NLS-1$
+        } finally {
+            stmt.close();
+        }
+    }
+
     public static void main(String args[]) {
         DB.dump();
     }
