@@ -17,12 +17,12 @@ challenge is even greater in an extensible system, when components that weren't 
 sharing the same resources.  The
 <b><a href="../reference/api/org/eclipse/core/runtime/jobs/package-summary.html"> org.eclipse.core.runtime.jobs</a></b> 
 package addresses this challenge by providing infrastructure for scheduling, executing, and managing 
-concurrently running operations.   This infrastructure is based on the use of <b>jobs</b> to represent
+concurrently running operations.   This infrastructure is based on the use of <i>jobs</i> to represent
 a unit of work that can run asynchronously.
 <h3>Jobs</h3>
 The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> class represents
 a unit of asynchronous work running concurrently with other jobs.  To perform a task, a plug-in creates 
-a job and then <b>schedules</b> it.  Once a job is scheduled, it is added to a job queue managed by the 
+a job and then <i>schedules</i> it.  Once a job is scheduled, it is added to a job queue managed by the 
 platform.  The platform uses a background scheduling thread to manage all of the pending jobs.  As a running
 job completes, it is removed from the queue and the platform decides which job to run next.  When a job 
 becomes active, the platform invokes its <b>run()</b> method.  Jobs are best demonstrated with a simple example:
@@ -102,31 +102,91 @@ with severity <b>IStatus.ERROR</b>), or cancellation (<b>IStatus.CANCEL</b>).
 We've seen how to schedule a job and wait for it complete, but there are many other
 interesting things you can to do jobs.  If you
 schedule a job but then decide it is no longer needed, the job can be stopped using
-the <b>cancel</b> method.  If the job has not yet started running when canceled,
+the <b>cancel()</b> method.  If the job has not yet started running when canceled,
 the job is immediately discarded and will not run.  If, on the other hand, the job 
 has already started running, it is up to the job whether it wants to respond to the cancellation.
-When you are trying to cancel a job, waiting for it using the <b>join</b> method comes in handy.
+When you are trying to cancel a job, waiting for it using the <b>join()</b> method comes in handy.
 Here is a common idiom for canceling a job, and waiting until the job is finished before
 proceeding:
 <font color='#4444CC'><pre>
    if (!job.cancel())
       job.join();
 </pre></font>
-If the cancellation does not take effect immediately, then <b>cancel</b> will return 
-false and the caller will use <b>join</b> to wait for the job to successfully cancel.
+If the cancellation does not take effect immediately, then <b>cancel()</b> will return 
+false and the caller will use <b>join()</b> to wait for the job to successfully cancel.
 </p>
 <p>
-Slightly less drastic than cancellation is the <b>Job.sleep</b> method.  Again,
+Slightly less drastic than cancellation is the <b>sleep()</b> method.  Again,
 if the job has not yet started running, this method will cause the
 job to be put on hold indefinitely.  The job will still be remembered by the platform,
-and a <b>wakeUp</b> call will cause the job to be added to the wait
+and a <b>wakeUp()</b> call will cause the job to be added to the wait
 queue where it will eventually be executed. 
+</p>
+<h3>Job states</h3>
+<p>
+A job goes through several states during its lifetime.  Not only can it be manipulated through API
+such as <b>cancel()</b> and <b>sleep()</b>, but its state also changes as the platform runs and completes the
+job.  Jobs can move through the following states:
+<ul>
+<li><b>WAITING</b> indicates that the job been scheduled to run, but is not running yet.</li>
+<li><b>RUNNING</b> indicates that the job is running.</li>
+<li><b>SLEEPING</b> indicates that the job is sleeping due to a sleep request or because it was scheduled
+to run after a certain delay.</li>
+<li><b>NONE</b> indicates that the job is not waiting, running, or sleeping.  A job is in this state when
+it has been created but is not yet scheduled.  It is also in this state after it is finished running or when
+it has been canceled.</li>
+</ul>
+A job can only be put to sleep if it is currently <b>WAITING</b>.  Waking up a sleeping job will put it back in the
+<b>WAITING</b> state.  Canceling a job will return it to the <b>NONE</b> state.
+</p>
+<p>
+If your plug-in needs to know the state of a particular job, it can register a <i>job change listener</i> that is
+notified as the job moves through its life-cycle.  This is useful for showing progress or otherwise reporting on
+a job.  
+</p>
+<h3>Job change listeners</h3>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> method
+<b>addJobChangeListener</b> can be used to register a listener on a particular job.  
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobChangeListener.html">IJobChangeListener</a></b>
+defines protocol for responding to the state changes in a job:
+<ul>
+<li><b>aboutToRun</b> is sent when the job is about to be run.</li>
+<li><b>awake</b> is sent when a previously sleeping job is now waiting to be run.</li>
+<li><b>done</b> is sent when a job finishes execution.</li>
+<li><b>running</b> is sent when a job starts running.</li>
+<li><b>scheduled</b> is sent when a job is scheduled and waiting in the queue of jobs.</li>
+<li><b>sleeping</b> is sent when a waiting job is put to sleep.</li>
+</ul>
+In all of these cases, the listener is provided with an
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobChangeEvent.html">IJobChangeEvent</a></b>
+that specifies the job undergoing the state change and status on its completion (if it is done).
+</p>
+<i><blockquote>
+Note:  Jobs also define the <b>getState()</b> method for obtaining the (relatively) current
+state of a job.  However, this result is not always reliable since jobs run in a different thread and may
+change state again by the time the call returns.  Job change listeners are the recommended mechanism
+for discovering state changes in a job.
+</i></blockquote>
+<h3>The job manager</h3>
+<p>
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+defines protocol for working with all of the jobs in the system.  Plug-ins that show progress or otherwise
+work with the job infrastructure can use <b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+to perform tasks such as suspending all jobs in the system, finding out which job is running, or receiving progress
+feedback about a particular job.  The platform's job manager can be obtained using 
+<b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> API:
+<font color='#4444CC'><pre>
+   IJobManager jobMan = Platform.getJobManager();
+</pre></font>
+Plug-ins interested in the state of all jobs in the system can register a job change listener on the job manager rather
+than registering listeners on many individual jobs.  
 </p>
 <h3>Job families</h3>
 <p>
-It is sometimes useful to work with a group of related jobs.  This can be accomplished using
-<b>job families</b>.  A job declares that it belongs to a certain family by overriding the 
-<b>belongsTo</b> method:
+It is sometimes easier for a plug-in to work with a group of related jobs as a single unit.
+This can be accomplished using <i>job families</i>.  A job declares that it belongs to a certain family by 
+overriding the <b>belongsTo</b> method:
 <font color='#4444CC'><pre>
    public static final String MY_FAMILY = "myJobFamily";
    ...
@@ -144,9 +204,9 @@ protocol can be used to cancel, join, sleep, or find all jobs in a family:
    jobMan.cancel(MY_FAMILY);
    jobMan.join(MY_FAMILY, null);
 </pre></font>
-Since job families are arbitrary objects, you can store interesting
-state in the job family itself, and jobs can dynamically decide what families
-they belong to as needed. It's important to use family objects that are 
+Since job families are represented using arbitrary objects, you can store interesting
+state in the job family itself, and jobs can dynamically build family objects as needed.
+It is important to use family objects that are 
 fairly unique, to avoid accidental interaction with the families created by
 other plug-ins. 
 </p>
