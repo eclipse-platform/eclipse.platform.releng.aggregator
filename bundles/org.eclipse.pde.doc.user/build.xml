@@ -8,6 +8,7 @@
 		<property name="temp.folder" value="${basedir}/temp.folder"/>
 		<property name="plugin.destination" value="${basedir}"/>
 		<property name="build.result.folder" value="${basedir}"/>
+		<available file="${basedir}/doc.zip" property="doc.zip.present"/>		
 	</target>
 
 	<target name="build.update.jar" depends="init">
@@ -22,14 +23,15 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+		<antcall target="buildDocZip" />
 		<mkdir dir="${destination.temp.folder}/${full.name}"/>
-		<zip zipfile="${destination.temp.folder}/${full.name}/doc.zip"
-			basedir="${basedir}"
-			includes="book.css, hglegal.htm, ngibmcpy.gif, guide/**, tips/**, whatsNew/**, images/**"
-		/>
 		<copy todir="${destination.temp.folder}/${full.name}">
-			<fileset dir="${basedir}" includes="*.properties,*.xml,*.zip,*.html,*.htm,*.gif,book.css" excludes="build.properties,build.xml"/>
+			<fileset dir="${basedir}" includes="*.properties,*.xml,*.zip,*.html,*.htm,*.gif,*.css" excludes="build.properties,build.xml,buildDoc.xml"/>
 		</copy>
+	</target>
+
+	<target name="buildDocZip" depends="init" unless="doc.zip.present">
+		<ant antfile="buildDoc.xml" />
 	</target>
 
 	<target name="build.jars" depends="init">

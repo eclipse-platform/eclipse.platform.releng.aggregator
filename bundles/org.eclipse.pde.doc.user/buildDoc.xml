@@ -1,0 +1,75 @@
+<project name="PDE Doc ISV Build" default="all"  basedir="." >
+
+<target name="all">
+	<antcall target="convertSchemaToHtml" />
+	<antcall target="generateJavadoc" />
+	<antcall target="createDocZip" />
+</target>
+
+<target name="convertSchemaToHtml" if="eclipse.running">
+	<property name="dest" value="reference/extension-points" />
+	    <record name="pdeconvert.txt" action="start"/>
+   
+	    <pde.convertSchemaToHTML manifest="../org.eclipse.pde.core/plugin.xml" destination="${dest}" />
+   	    <pde.convertSchemaToHTML manifest="../org.eclipse.pde.ui/plugin.xml" destination="${dest}" />
+	
+	    <record name="pdeconvert.txt" action="stop"/>
+</target>
+
+<target name="getJavadocPath">
+	<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
+	<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+</target>
+
+
+<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
+
+	<!--HACK to ensure the platform doc is built before PDE - call to this script should be moved to build.jars target-->
+	<available file="../org.eclipse.platform.doc.isv/doc.zip" property="platform.doc.zip.present"/>
+	<antcall target="buildPlatformDoc" />
+
+	<condition property="optionsFile" value="pdeOptions">
+	      <os family="unix" />
+    </condition>
+    <condition property="optionsFile" value="pdeOptions.txt">
+	      <os family="windows" />
+    </condition>
+
+	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
+
+		
+	<!--scrub isv plugin directories of any preexisting api doc content-->
+	<delete dir="reference/api"/>
+	<mkdir dir="reference/api"/>
+
+	<exec dir="." executable="${javadoc}" output="doc.bin.log">
+		<arg line="@${basedir}/${optionsFile} -J-Xmx180m" />
+	</exec>
+</target>
+
+<target name="buildPlatformDoc" unless="platform.doc.zip.present">
+	<ant antfile="buildDoc.xml" dir="../org.eclipse.platform.doc.isv" />
+</target>
+
+<target name="createDocZip">
+	<zip zipfile="${basedir}/doc.zip"
+		basedir="${basedir}"
+		includes="book.css, hglegal.htm, hglegal2002.htm, hglegal2003.htm, ngibmcpy.gif, ngibmcpy2002.gif, ngibmcpy2003.gif, guide/**, tips/**, reference/**, whatsNew/**, images/**"
+	/>
+</target>
+
+</project>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
