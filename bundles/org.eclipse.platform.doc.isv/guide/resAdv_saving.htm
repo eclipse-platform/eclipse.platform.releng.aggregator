@@ -24,6 +24,9 @@ The workspace save process can also be used to track changes that occur between 
 Implementing a save participant</H3>
 <P >
 To participate in workspace saving, you must add a save participant to the workspace. This is typically done during your plug-in's startup method.&nbsp;
+This is also where you read any state that you might have saved
+when your plug-in was last shut down.</P>
+<P >
 Let's look at a simple plug-in which will demonstrate the save process.</P>
 <font color='#4444CC'><pre>
    package com.example.saveparticipant;
@@ -50,28 +53,22 @@ Let's look at a simple plug-in which will demonstrate the save process.</P>
 
       public void startup() throws CoreException {
          super.startup();
-         <b>ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
+         ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
          ISavedState lastState =
-            ResourcesPlugin.getWorkspace().addSaveParticipant(this, saveParticipant);</b>
+            <b>ResourcesPlugin.getWorkspace().addSaveParticipant(this, saveParticipant);</b>
          if (lastState == null)
             return;
-         <b>IPath location = lastState.lookup(new Path(&quot;save&quot;));</b>
+         IPath location = lastState.lookup(new Path(&quot;save&quot;));
          if (location == null)
             return;
          // the plugin instance should read any important state from the file.
-         <b>File f = getStateLocation().append(location).toFile();
-         readStateFrom(f);</b>
+         File f = getStateLocation().append(location).toFile();
+         readStateFrom(f);
       }
 
       protected void writeImportantState(File target) {
       }
-   }
-</pre></font>
-<P >
-To participate in workspace saving, you must add a save participant to the
-workspace.&nbsp; This is typically done during your plug-ins <b>startup</b>
-method.&nbsp; This is also where you read any state that you might have saved
-when your plug-in was last shut down.</P>
+   }</pre></font>
 <P >
 <b><a href="../reference/api/org/eclipse/core/resources/ISaveParticipant.html">
 ISaveParticipant</a></b> defines the protocol for a workspace save participant. Implementors of this

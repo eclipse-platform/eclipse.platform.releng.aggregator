@@ -33,7 +33,7 @@ To track changes to resources, you must register a resource change listener with
 Your listener will be notified after modifications to the workspace resources
 have been made. Resource API methods that modify resources trigger these events as part of their documented behavior. The
 method comment for a resource API method explicitly states whether or not it triggers a resource change event. For example, the following is included in the
-<b> IFile.createContents()</b> comment:</P>
+<b> IFile.setContents()</b> comment:</P>
 <font color='#4444CC'><pre>
    This method changes resources; these changes will be reported in a subsequent
    resource change event, including an indication that this file's content have
@@ -105,8 +105,8 @@ PRE_CLOSE</b></P>
 <TD>
 <P CLASS="CellBody">
 Notifies listeners that a project is about to be closed. This event can be used to extract and save necessary information from the in-memory representation
-(e.g., session properties) of a project before it is closed. (When a project is closed, the in-memory representation is disposed). The workspace is locked (no resources can be updated) during this event. The
-<b> PRE_CLOSE</b> event is also triggered during workspace shutdown since all open projects will be closed. The event contains the project that is being closed.</P>
+(e.g., session properties) of a project before it is closed. (When a project is closed, the in-memory representation is disposed). The workspace is locked (no resources can be updated) during this event.
+The event contains the project that is being closed.</P>
 </TD>
 </TR>
 <TR>
@@ -224,7 +224,7 @@ The implementation for <b> POST_CHANGE </b> uses another class that can be used 
 <P >
 The <b> DeltaPrinter</b> class implements the <b><a href="../reference/api/org/eclipse/core/resources/IResourceDeltaVisitor.html">IResourceDeltaVisitor</a></b> interface to interrogate the resource delta. The
 <b> visit()</b> method is called for each resource change in the resource delta. The visitor uses a return value to indicate whether
-deltas for child resoruces should be visited. </P>
+deltas for child resources should be visited. </P>
 <font color='#4444CC'><pre>
    class DeltaPrinter implements IResourceDeltaVisitor {
       public boolean visit(IResourceDelta delta) {
@@ -259,21 +259,17 @@ the <b>IResourceDelta.CHANGED</b> case could be implemented to further describe 
       System.out.print(&quot;Resource &quot;);
       System.out.print(delta.getFullPath());
       System.out.println(&quot; has changed.&quot;);
-      switch (delta.getFlags()) {
-         case IResourceDelta.CONTENT:
+      int flags = delta.getFlags();
+      if ((flags &amp; IResourceDelta.CONTENT) != 0) {
             System.out.println(&quot;--&gt; Content Change&quot;);
-            break;
-         case IResourceDelta.REPLACED:
+      }
+      if ((flags &amp; IResourceDelta.REPLACED) != 0) {
             System.out.println(&quot;--&gt; Content Replaced&quot;);
-            break;
-         case IResourceDelta.REMOVED:
-            System.out.println(&quot;--&gt; Removed&quot;);
-            break;
-         case IResourceDelta.MARKERS:
+      }
+      if ((flags &amp; IResourceDelta.MARKERS) != 0) {
             System.out.println(&quot;--&gt; Marker Change&quot;);
             IMarkerDelta[] markers = delta.getMarkerDeltas();
             // if interested in markers, check these deltas
-            break;
       }
       break;
    ...
