@@ -359,7 +359,8 @@ public class SQL {
             		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
             		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
             		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
-            		"SUMMARYENTRY.IS_GLOBAL = 1"	//$NON-NLS-1$
+            		"SUMMARYENTRY.IS_GLOBAL = 1 " + //$NON-NLS-1$
+            		"order by SCENARIO.NAME"
             ); 
         fQueryGlobalSummaryEntries.setString(1, variations.toExactMatchString());
         return fQueryGlobalSummaryEntries.executeQuery();
@@ -371,7 +372,8 @@ public class SQL {
             		"select distinct SCENARIO.NAME, SCENARIO.SHORT_NAME, SUMMARYENTRY.DIM_ID from SUMMARYENTRY, VARIATION, SCENARIO where " +	//$NON-NLS-1$
             		"SUMMARYENTRY.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " +	//$NON-NLS-1$
             		"SUMMARYENTRY.SCENARIO_ID = SCENARIO.ID and " + //$NON-NLS-1$
-            		"SCENARIO.NAME like ?"	//$NON-NLS-1$
+            		"SCENARIO.NAME like ? " + //$NON-NLS-1$
+            		"order by SCENARIO.NAME"
             ); 
         fQuerySummaryEntries.setString(1, variations.toExactMatchString());
         fQuerySummaryEntries.setString(2, scenarioPattern);
