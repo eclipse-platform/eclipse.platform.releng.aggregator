@@ -12,12 +12,20 @@
 <H2>
 Concurrency infrastructure</H2>
 <p>
-The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/package-summary.html"> org.eclipse.core.runtime.jobs</a></b> 
-package provides infrastructure for scheduling, executing, and managing concurrently running operations. The basic
-unit of concurrently running work is represented by the <tt>Job</tt> class. When
-a job is scheduled, it is added to a job queue managed by the platform.  A background
-thread will then remove jobs from the queue and invoke the <tt>Job.run</tt> method.
-Let's look at a trivial example of a job:
+One of the major challenges of a complex system is to remain responsive while tasks are being performed.  This
+challenge is even greater in an extensible system, when components that weren't designed to run together are
+sharing the same resources.  The
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/package-summary.html"> org.eclipse.core.runtime.jobs</a></b> 
+package attempts to address this problem by providing infrastructure for scheduling, executing, and managing 
+concurrently running operations.   This infrastructure is based on the use of <b>jobs</b> to represent
+a unit of work that can run asynchronously.
+<h3>Jobs</h3>
+The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> class represents
+a unit of asynchronous work running concurrently with other jobs.  To perform a task, a plug-in creates 
+a job and then <b>schedules</b> it.  Once a job is scheduled, it is added to a job queue managed by the 
+platform.  The platform uses a background scheduling thread to manage all of the pending jobs.  As a running
+job completes, it is removed from the queue and the platform decides which job to run next.  When a job 
+becomes active, the platform invokes its <b>run()</b> method.  Jobs are best demonstrated with a simple example:
 <font color='#4444CC'><pre>
    class TrivialJob extends Job {
       public TrivialJob() {
@@ -29,7 +37,7 @@ Let's look at a trivial example of a job:
       }
    }
 </pre></font>
-This job can be created and scheduled to execute as follows:
+The job is created and scheduled in the following snippet:
 <font color='#4444CC'><pre>
    TrivialJob job = new TrivialJob();
    System.out.println("About to schedule a job");
@@ -37,15 +45,15 @@ This job can be created and scheduled to execute as follows:
    System.out.println("Finished scheduling a job");
 </pre></font>
 The output of this program is timing dependent.  That is, there is no way
-to be sure when the job's <tt>run</tt> method will execute in relation
-to the thread that invoked <tt>schedule</tt>.  In this case, the output
-will either be:
+to be sure when the job's <b>run</b> method will execute in relation
+to the thread that created the job and scheduled it.  The output will
+either be:
 <font color='#4444CC'><pre>
    About to schedule a job
    This is a job
    Finished scheduling a job
 </pre></font>
-Or:
+or:
 <font color='#4444CC'><pre>
    About to schedule a job
    Finished scheduling a job
@@ -54,9 +62,9 @@ Or:
 </p>
 <p>
 If you want to be certain that a job has completed before continuing, you can use
-the <tt>Job.join</tt> method.  As with <tt>java.lang.Thread.join()</tt>, this 
-method will block the caller until the job has completed, or until the calling thread
-is interrupted.  Let's rewrite our snippet from above in a more deterministic manner:
+the <b>join()</b> method.  This method will block the caller until the job has completed, or 
+until the calling thread is interrupted.  Let's rewrite our snippet from above in a more 
+deterministic manner:
 <font color='#4444CC'><pre>
    TrivialJob job = new TrivialJob();
    System.out.println("About to schedule a job");
@@ -67,7 +75,7 @@ is interrupted.  Let's rewrite our snippet from above in a more deterministic ma
    else
       System.out.println("Job did not complete successfully");
 </pre></font>
-Assuming the <tt>join</tt> call is not interrupted, this method is guaranteed to
+Assuming the <b>join()</b> call is not interrupted, this method is guaranteed to
 return the following result:
 <font color='#4444CC'><pre>
    About to schedule a job
@@ -77,48 +85,48 @@ return the following result:
 </p>
 <p>
 Of course, it is generally not useful to join a job immediately after scheduling it,
-since you obtain no concurrency by doing so. In this case you might as well
-call <tt>Job.run</tt> directly in the calling thread.  However, we will see some
-examples later on where <tt>join</tt> is more useful.
+since you obtain no concurrency by doing so. In this case you might as well do the work
+from the job's run method directly in the calling thread.  We'll look at some examples later on where 
+the use of join makes more sense.
 </p>
 <p>
-You'll notice this new example also makes use of the job <i>result</i>.  The result
-is the <tt>IStatus</tt> object that is returned from the Job's <tt>run</tt> method.
-By creating your own subclass of <tt>Status</tt>, you can use the result to pass
-arbitrary objects back from the job's run method. The result can also be used to
-indicate failure (by returning an <tt>IStatus</tt> with severity <tt>IStatus.ERROR</tt>),
-or cancelation (<tt>IStatus.CANCEL</tt>).
+The last snippet also makes use of the job <b>result</b>.  The result
+is the <b><a href="../reference/api/org/eclipse/core/runtime/IStatus.html">IStatus</a></b>
+object that is returned from the job's <b>run()</b> method.  You can use this result
+to pass any necessary objects back from the job's run method.  The result can also be used to
+indicate failure (by returning an <b><a href="../reference/api/org/eclipse/core/runtime/IStatus.html">IStatus</a></b>
+with severity <b>IStatus.ERROR</b>), or cancellation (<b>IStatus.CANCEL</b>).
 </p>
 <h3>Common job operations</h3>
 <p>
-We've seen the <tt>schedule</tt> and <tt>join</tt> methods, but jobs have a 
-number of other interesting methods to allow you to interact with them. If you
+We've seen how to schedule a job and wait for it complete, but there are many other
+interesting things you can to do jobs.  If you
 schedule a job but then decide it is no longer needed, the job can be stopped using
-the <tt>cancel</tt> method.  If the job has not yet started running when <tt>cancel</tt>
-is called, the job is immediately discarded and will not run.  If, on the other hand, the job 
-has already started running, it is up to the job whether it wants to respond to the cancelation.
-This is a situation where joining the job comes in handy.  Here is a common idiom for
-canceling a job, and ensuring that the job has finished before proceeding:
+the <b>cancel</b> method.  If the job has not yet started running when cancelled,
+the job is immediately discarded and will not run.  If, on the other hand, the job 
+has already started running, it is up to the job whether it wants to respond to the cancellation.
+When you are trying to cancel a job, waiting for it using the <b>join</b> method comes in handy.
+Here is a common idiom for cancelling a job, and waiting until the job is finished before
+proceeding:
 <font color='#4444CC'><pre>
    if (!job.cancel())
       job.join();
 </pre></font>
-If the cancelation did not take effect immediately, then <tt>cancel</tt> will return 
-<tt>false</tt>, and the <tt>join</tt> is needed to wait for the job to respond to the
-cancelation request.
+If the cancellation does not take effect immediately, then <b>cancel</b> will return 
+false and the caller will use <b>join</b> to wait for the job to successfully cancel.
 </p>
 <p>
-Slightly less drastic than cancelation is the <tt>Job.sleep</tt> method.  Again,
-if the job has not yet started running, the <tt>sleep</tt> method will cause the
+Slightly less drastic than cancellation is the <b>Job.sleep</b> method.  Again,
+if the job has not yet started running, this method will cause the
 job to be put on hold indefinitely.  The job will still be remembered by the platform,
-and a call to <tt>Job.wakeUp</tt> will cause the job to be added to the wait
+and a <b>wakeUp</b> call will cause the job to be added to the wait
 queue where it will eventually be executed. 
 </p>
 <h3>Job families</h3>
 <p>
-Sometimes you may want to query or modify a whole group of related jobs. This
-can be accomplished using <i>job families</i>.  A job declares that it belongs to
-a certain family by overriding the <tt>belongsTo</tt> method:
+It is sometimes useful to work with a group of related jobs.  This can be accomplished using
+<b>job families</b>.  A job declares that it belongs to a certain family by overriding the 
+<b>belongsTo</b> method:
 <font color='#4444CC'><pre>
    public static final String MY_FAMILY = "myJobFamily";
    ...
@@ -129,19 +137,21 @@ a certain family by overriding the <tt>belongsTo</tt> method:
       }
    }
 </pre></font>
-You can now cancel, join, sleep, or find all jobs in that family by using methods on
-<tt>IJobManager</tt>:
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+protocol can be used to cancel, join, sleep, or find all jobs in a family:
 <font color='#4444CC'><pre>
    IJobManager jobMan = Platform.getJobManager();
    jobMan.cancel(MY_FAMILY);
    jobMan.join(MY_FAMILY, null);
 </pre></font>
-Note that since job families are arbitrary objects, you can store interesting
+Since job families are arbitrary objects, you can store interesting
 state in the job family itself, and jobs can dynamically decide what families
-they belong to as needed. Just be sure to use a family object that is 
+they belong to as needed. It's important to use family objects that are 
 fairly unique, to avoid accidental interaction with the families created by
-other plug-ins. Families are also a convenient way of locating particular
-groups of jobs.  The method <tt>IJobManager.find(Object family)</tt> can
+other plug-ins. 
+</p>
+<p>
+Families are also a convenient way of locating groups of jobs.  The method <b>IJobManager.find(Object family)</b> can
 be used to locate instances of all running, waiting, and sleeping jobs at any
 given time.
 </p>
