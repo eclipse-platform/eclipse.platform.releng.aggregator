@@ -13,9 +13,168 @@
 <h3>
 Activities</h3>
 <P >
-[This document is under construction.]
+An <b>activity</b> is a logical grouping of function that is centered around a certain kind of task.  For
+example, developing Java software is an activity commonly performed by users of the platform, and the JDT 
+defines many UI contributions (views, editors, perspectives, preferences, etc.) that are only useful when performing
+this activity.  Before we look at the mechanics for defining  an activity, let's look at how they are used to help
+&quot;declutter&quot; the UI.
 </P>
+<p>
+The concept of an activity is exposed to the user, although perhaps not apparent to a new user.  When an activity
+is enabled in the platform, the UI contributions associated with that activity are shown.  When an activity is disabled
+in the platform, its UI contributions are not shown.  Users can enable and disable activities as needed.  Certain user
+operations serve as <b>trigger points</b> for enabling an activity.  For example, creating a new Java project could
+trigger the enabling of the Java development activity.  In this way, users are exposed to new function as they need it, and
+gradually learn about the activities that are available to them and how they affect the UI.  When a user first starts the 
+platform, it is desirable for as many activities as possible to be disabled, so that the application is as simple as 
+possible.  Choices made in the welcome page can help determine what activities should be enabled.
+</p>
+<h4>Activities vs. perspectives</h3>
+<p>
+We've seen (in <a href="workbench_perspectives.htm">Perspectives</a>) how perspectives are used to organize different 
+view layouts and action sets into tasks.  Why do we need activities?  While perspectives and activities define similar 
+kinds of tasks, the main difference is how the UI contributions for a plug-in are associated with them.  UI 
+contributions are associated with perspectives in the extension definition of the contribution.  That is, a plug-in is 
+in charge of determining what perspectives its views and action sets belong to.  Plug-ins are also free to define their 
+own perspectives.  Even when a perspective is not active, the user can access the views and actions associated with the 
+perspective through commands such as <b>Show View</b>.  
+</p>
+<p>Activities are a higher level of organization.  Individual UI contributions are not aware of activities and
+do not refer to the activities in their extension definitions.  Rather, the activities are expected to be configured 
+at a higher level such as platform integration/configuration or product install. Individual plug-ins typically do not define new activities, 
+unless the plug-in is a systems-level plug-in defined by a systems integrator.  In a typical scenario, a systems 
+integrator determines how function is grouped into activities and which ones are enabled by default.  Activities are
+associated with UI contributions using <b>activity pattern bindings</b>, patterns that are matched
+against the id of the UI contributions made by plug-ins. An example will help demonstrate these concepts.  
+</p>
+<h4>
+Defining an activity
+</h4>
+<p>
+Activities are defined using the 
+<b><a href="../reference/extension-points/org_eclipse_ui_activities.html">org.eclipse.ui.activities</a></b>
+extension point.  Let's look at a simplified version of how the Eclipse SDK plug-in defines two activities -
+one for developing Java software and one for developing plug-ins:
+<font color='#4444CC'><pre>
+&lt;extension
+	point="org.eclipse.ui.activities"&gt;
+	&lt;activity
+		name="Java Activity"
+		description="Developing Java Software"
+		id="org.eclipse.javaDevelopment"&gt;
+	&lt;/activity&gt;
+	
+	&lt;activity
+		name="Plug-in Activity"
+		description="Developing Eclipse Plug-ins"
+		id="org.eclipse.plugInDevelopment"&gt;
+	&lt;/activity&gt;
+	...
+</pre></font>
+Activities are assigned a name and description that can be shown to the user whenever the user is enabling and disabling
+activities, or otherwise shown information about an activity.  The id of the activity is used when defining
+pattern bindings or other relationships between activities.  For example, we can decide that one activity requires
+another activity.
+<font color='#4444CC'><pre>
+&lt;activityRequirementBinding
+	activityId="org.eclipse.plugInDevelopment"
+	requiredActivityId="org.eclipse.javaDevelopment"&gt;
+&lt;/activityRequirementBinding&gt;
+</pre></font>
+The requirement binding states that the plug-in development activity can only be enabled when the Java development 
+activity is enabled.  Related activities can also be bound into <b>categories</b>, that are shown to the user when
+the user is working with activities.
+<font color='#4444CC'><pre>
+&lt;category
+	name="Development"
+	description="Software Development"
+	id="org.eclipse.categories.developmentCategory"&gt;
+&lt;/category>
 
+&lt;categoryActivityBinding
+	activityId="org.eclipse.javaDevelopment"
+	categoryId="org.eclipse.categories.developmentCategory"&gt;
+&lt;/categoryActivityBinding>
+      
+&lt;categoryActivityBinding
+	activityId="org.eclipse.plugInDevelopment"
+	categoryId="org.eclipse.categories.developmentCategory"&gt;
+&lt;/categoryActivityBinding&gt;
+</pre></font>
+The category groups the related development activities together.  This category is shown to the user when the user
+manually configures activities.
+</p>
+<h4>Binding activities to UI contributions</h4>
+<p>
+Activities are associated with UI contributions using pattern matching.  The pattern matching used in
+activity pattern bindings follows the rules described in the <b>java.util.regex</b> package for regular expressions.
+The patterns used in the SDK are generally a fully qualified extension id - that is, the plug-in identifier followed 
+by the local identifier for the extension.  The following format is used:
+<font color='#4444CC'><pre>
+plug-in-identifier + &quot;/&quot; + local-identifier
+</pre></font>
+For example, the following activity pattern binding states that a UI contribution that is
+prefixed by any JDT plug-in id (<tt>org.eclipse.jdt.*</tt>) is associated with the Java development activity regardless
+of its local identifier (<tt>.*</tt>).
+<font color='#4444CC'><pre>
+&lt;activityPatternBinding
+	activityId="org.eclipse.javaDevelopment"
+	pattern="org\.eclipse\.jdt\..*/.*"&gt;
+&lt;/activityPatternBinding&gt;
+</pre></font>
+The next binding is more specific.  It states that the contribution named <tt>javanature</tt> defined in the
+JDT core (<tt>org.eclipse.jdt.core</tt>) is associated with the Java development activity.
+<font color='#4444CC'><pre>
+&lt;activityPatternBinding
+	activityId="org.eclipse.javaDevelopment"
+	pattern="org\.eclipse\.jdt\.core/javanature"&gt;
+&lt;/activityPatternBinding&gt;
+</pre></font>
+As you can see, activity pattern bindings can be used to associate large groups of contributions with a particular activity,
+or to associate very specific contributions to an activity.  The conventions used by the workbench (plug-in id + local id) 
+are merely conventions that take advantage of the id naming conventions used by the SDK plug-ins.  Plug-ins are free to 
+use their own format for identifying UI contributions and for pattern-matching against those names.
+</p>
+<h4>Using the activities API</h4>
+<p>
+The workbench activity support includes an API for working with the defined activities and changing their 
+enabled state.  Most plug-ins need not be concerned with this API, but it is useful when implementing function that
+allows the user to work with activities, or for implementing the trigger points that enable a particular activity.
+It is assumed that any plug-in that is manipulating activities through API is quite aware of the ways that activities
+are configured for a particular product.  For example, the workbench itself uses the API to trigger the enablement of
+activities such as Java development.  We'll look at how the workbench uses the generic activity API to implement
+triggers.
+</p>
+<p>
+The hub of all activity in the workbench is <a href="../reference/api/org/eclipse/ui/activities/IWorkbenchActivitySupport.html"><b>IWorkbenchActivitySupport</b></a>.
+The activity support works in tandem with an 
+<a href="../reference/api/org/eclipse/ui/activities/IActivityManager.html"><b>IActivityManager</b></a>.
+Plug-ins can obtain the activity support instance from the workbench, and the activity manager from there.
+<font color='#4444CC'><pre>
+IWorkbenchActivitySupport workbenchActivitySupport = PlatformUI.getWorkbench().getActivitySupport();
+IActivityManager activityManager = workbenchActivitySupport.getActivityManager();
+</pre></font>
+The following snippet enables the Java development activity (if it is not already enabled).  It shows a
+simplified version of a trigger.
+<font color='#4444CC'><pre>
+...
+//the user did something Java related.  Enable the Java activity.
+Set enabledActivityIds = new HashSet(activityManager.getEnabledActivityIds());
+if (enabledIds.add(&quot;org.eclipse.javaDevelopment&quot;))
+	workbenchActivitySupport.setEnabledActivityIds(enabledActivityIds);
+</pre></font>
+</p>
+<p>
+<a href="../reference/api/org/eclipse/ui/activities/IActivityManager.html"><b>IActivityManager</b></a> also defines
+protocol for getting all defined activity and category ids, and for getting the associated 
+<a href="../reference/api/org/eclipse/ui/activities/IActivity.html"><b>IActivity</b></a> or
+<a href="../reference/api/org/eclipse/ui/activities/IActivity.html"><b>ICategory</b></a> for a particular id.
+These objects can be used to traverse the definition for an activity or category in API, such as getting the
+pattern bindings or requirement bindings.  Listeners can be registered on the activity manager or on the activities 
+and categories themselves to detect changes in the definition of a particular activity or in the activity manager
+itself.  See the package <b><a href="../reference/api/org/eclipse/ui/activities/package-summary.html">org.eclipse.ui.activities</a></b>
+for more information.
+</p>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 
 </BODY>
