@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -176,12 +176,12 @@ public class DB {
                     dataPoints.add(dp);
                     lastDataPointId= datapoint_id;
                 }
-                Dimension dim= Dimension.getDimension(dim_id);
+                Dim dim= Dim.getDimension(dim_id);
                 if (dim != null)
                     map.put(dim, new Scalar(dim, value));
                 
                 if (DEBUG)
-                	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dimension.getDimension(dim_id).getName() + ' ' + value + ' ' + DATE_FORMAT.format(d));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+                	System.out.println(i + ": " + sample_id+','+datapoint_id +','+step+' '+ Dim.getDimension(dim_id).getName() + ' ' + value + ' ' + DATE_FORMAT.format(d));                 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
             }
             int n= dataPoints.size();
             System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.eclipse.test.internal.performance.data.Assert;
 import org.eclipse.test.internal.performance.data.DataPoint;
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -110,7 +110,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	    	return new Sample(getScenarioName(), fStartDate, properties, data);
     }
 
-	private DataPoint createDataPoint(int step, Dimension dimension, long value) {
+	private DataPoint createDataPoint(int step, Dim dimension, long value) {
 		Map scalars= new HashMap();
 		scalars.put(dimension, new Scalar(dimension, value));
 		return new DataPoint(step, scalars);

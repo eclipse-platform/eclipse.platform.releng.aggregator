@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.eclipse.test.internal.performance.data.DataPoint;
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
@@ -105,11 +105,11 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 		DataPoint[] dataPoints= sample.getDataPoints();
 		if (dataPoints.length > 0) {
 			StatisticsSession s= new StatisticsSession(dataPoints);
-			Dimension[] dimensions= dataPoints[0].getDimensions();
+			Dim[] dimensions= dataPoints[0].getDimensions();
 			if (dimensions.length > 0) {
 				ps.println("(average over " + s.getCount(dimensions[0]) + " samples):"); //$NON-NLS-1$ //$NON-NLS-2$
 				for (int i= 0; i < dimensions.length; i++) {
-				    Dimension dimension= dimensions[i];
+				    Dim dimension= dimensions[i];
 				    ps.println("  " + dimension.getName() + ": " + dimension.getDisplayValue(s.getAverage(dimension))); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}

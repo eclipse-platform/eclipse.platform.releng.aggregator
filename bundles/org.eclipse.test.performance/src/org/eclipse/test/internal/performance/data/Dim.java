@@ -10,32 +10,34 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.data;
 
+import org.eclipse.test.performance.Dimension;
+
 /**
  * @since 3.1
  */
-public class Dimension {
+public class Dim implements Dimension {
     
-    private static Dimension[] fgRegisteredDimensions= new Dimension[100];
+    private static Dim[] fgRegisteredDimensions= new Dim[100];
     
     private final int fId;
 	private final Unit fUnit;
 	private final int fMultiplier;
 	
-	public static Dimension getDimension(int id) {
+	public static Dim getDimension(int id) {
 	    if (id >= 0 && id < fgRegisteredDimensions.length)
 	        return fgRegisteredDimensions[id];
 	    return null;
 	}
 	
-	public Dimension(int id) {
+	public Dim(int id) {
 		this(id, Unit.CARDINAL, 1);
 	}
 
-	public Dimension(int id, Unit unit) {
+	public Dim(int id, Unit unit) {
 		this(id, unit, 1);
 	}
 
-	public Dimension(int id, Unit unit, int multiplier) {
+	public Dim(int id, Unit unit, int multiplier) {
 	    
 	    if (id >= 0 && id < fgRegisteredDimensions.length) {
 		    if (fgRegisteredDimensions[id] == null) {

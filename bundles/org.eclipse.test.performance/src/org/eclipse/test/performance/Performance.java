@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.test.performance;
 
 import junit.framework.TestCase;
@@ -19,6 +18,7 @@ import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.OSPerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.eval.AssertChecker;
 import org.eclipse.test.internal.performance.eval.Evaluator;
 import org.eclipse.test.internal.performance.eval.IEvaluator;
@@ -29,6 +29,8 @@ import org.eclipse.test.internal.performance.eval.RelativeBandChecker;
  * creation and checking of measurements.
  * 
  * This class is not intended to be subclassed by clients.
+ * 
+ * @since 3.1
  */
 public class Performance {
 
@@ -78,6 +80,25 @@ public class Performance {
 			});
 		}
 		fDefaultEvaluator.evaluate(performanceMeter);
+	}
+
+	/**
+	 * Asserts that the measurement specified by the dimension captured in the given
+	 * performance meter is within a certain range with respect to some reference value.
+	 * If the performance meter doesn't provide the specified dimension, the call has no effect.
+	 * 
+	 * @param performanceMeter the performance meter
+	 * @param dim the Dimension to check
+	 * @param lowerPercentage a negative number indicating the percentage the measured value is allowed to be smaller than some reference value
+	 * @param upperPercentage a positive number indicating the percentage the measured value is allowed to be greater than some reference value
+	 * @throws RuntimeException if the properties do not hold
+	 */
+	public void assertPerformanceInRelativeBand(PerformanceMeter performanceMeter, Dimension dim, int lowerPercentage, int upperPercentage) {
+	    Evaluator e= new Evaluator();
+		e.setAssertCheckers(new AssertChecker[] {
+		        new RelativeBandChecker((Dim) dim, 1.0+(lowerPercentage / 100.0), 1.0+(upperPercentage / 100.0)),
+		});
+		e.evaluate(performanceMeter);
 	}
 
 	/**

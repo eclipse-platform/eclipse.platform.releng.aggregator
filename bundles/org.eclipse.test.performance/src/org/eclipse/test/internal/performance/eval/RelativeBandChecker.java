@@ -10,24 +10,24 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.eval;
 
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 
 /**
  * @since 3.1
  */
 public class RelativeBandChecker extends AssertChecker {
 
-	private final float fLowerBand;
-	private final float fUpperBand;
+	private final double fLowerBand;
+	private final double fUpperBand;
 
-	public RelativeBandChecker(Dimension dimension, float lowerBand, float upperBand) {
+	public RelativeBandChecker(Dim dimension, double lowerBand, double upperBand) {
 		super(dimension);
 		fLowerBand= lowerBand;
 		fUpperBand= upperBand;
 	}
 
 	public boolean test(StatisticsSession reference, StatisticsSession measured, StringBuffer message) {
-		Dimension dimension= getDimension();
+		Dim dimension= getDimension();
 		
 		if (!measured.contains(dimension)) {
 			System.err.println("Warning: collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			

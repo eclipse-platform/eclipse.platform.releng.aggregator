@@ -30,12 +30,12 @@ public class DataPoint {
 		return fStep;
 	}
 	
-	public Dimension[] getDimensions() {
+	public Dim[] getDimensions() {
 	    Set set= fScalars.keySet();
-	    return (Dimension[]) set.toArray(new Dimension[set.size()]);
+	    return (Dim[]) set.toArray(new Dim[set.size()]);
 	}
 	
-	public boolean contains(Dimension dimension) {
+	public boolean contains(Dim dimension) {
 		return fScalars.containsKey(dimension);
 	}
 	
@@ -43,7 +43,7 @@ public class DataPoint {
 		return (Scalar[]) fScalars.values().toArray(new Scalar[fScalars.size()]);
 	}
 	
-	public Scalar getScalar(Dimension dimension) {
+	public Scalar getScalar(Dim dimension) {
 		return (Scalar) fScalars.get(dimension);
 	}
 	

@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.test.internal.performance.data.Assert;
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 
 /**
  * @since 3.1
@@ -23,20 +23,20 @@ import org.eclipse.test.internal.performance.data.Dimension;
 public abstract class AssertChecker {
 	private Set fDimensions;
 	
-	public AssertChecker(Dimension dimension) {
-		this(new Dimension[] {dimension});
+	public AssertChecker(Dim dimension) {
+		this(new Dim[] {dimension});
 	}
 	
-	public AssertChecker(Dimension[] dimensions) {
+	public AssertChecker(Dim[] dimensions) {
 		fDimensions= new HashSet();
 		fDimensions.addAll(Arrays.asList(dimensions));
 	}
 	
-	public Dimension[] getDimensions() {
-		return (Dimension[]) fDimensions.toArray(new Dimension[fDimensions.size()]);
+	public Dim[] getDimensions() {
+		return (Dim[]) fDimensions.toArray(new Dim[fDimensions.size()]);
 	}
 
-	protected Dimension getDimension() {
+	protected Dim getDimension() {
 		Assert.isTrue(fDimensions.size() == 1);
 		return getDimensions()[0];
 	}

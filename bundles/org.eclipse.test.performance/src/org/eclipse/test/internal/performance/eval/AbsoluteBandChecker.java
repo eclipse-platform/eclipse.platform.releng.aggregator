@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.eval;
 
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 
@@ -22,14 +22,14 @@ public class AbsoluteBandChecker extends AssertChecker {
 	private long fLowerBand;
 	private long fUpperBand;
 
-	public AbsoluteBandChecker(Dimension dimension, long lowerBand, long upperBand) {
+	public AbsoluteBandChecker(Dim dimension, long lowerBand, long upperBand) {
 		super(dimension);
 		fLowerBand= lowerBand;
 		fUpperBand= upperBand;
 	}
 	
 	public boolean test(StatisticsSession reference, StatisticsSession measured, StringBuffer message) {
-		Dimension dimension= getDimension();
+		Dim dimension= getDimension();
 		double actual= measured.getAverage(dimension);
 		double test= reference.getAverage(dimension);
 		

@@ -12,7 +12,7 @@ package org.eclipse.test.internal.performance;
 
 import java.util.Map;
 
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 
@@ -48,7 +48,7 @@ class PerformanceMonitor {
 		// no default implementation
 	}
 	
-    void addScalar(Map scalars, Dimension dimension, long value) {
+    void addScalar(Map scalars, Dim dimension, long value) {
         scalars.put(dimension, new Scalar(dimension, value));
     }
 }

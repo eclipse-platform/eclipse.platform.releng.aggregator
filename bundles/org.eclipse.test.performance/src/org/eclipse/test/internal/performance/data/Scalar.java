@@ -15,15 +15,15 @@ package org.eclipse.test.internal.performance.data;
  * @since 3.1
  */
 public class Scalar {
-	private Dimension fDimension;
+	private Dim fDimension;
 	private long fMagnitude;
 	
-	public Scalar(Dimension dimension, long extent) {
+	public Scalar(Dim dimension, long extent) {
 		fDimension= dimension;
 		fMagnitude= extent;
 	}
 	
-	public Dimension getDimension() {
+	public Dim getDimension() {
 		return fDimension;
 	}
 	

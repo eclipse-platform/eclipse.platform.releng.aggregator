@@ -17,7 +17,7 @@ import java.util.Set;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.data.DataPoint;
-import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Scalar;
 
 import junit.framework.Assert;
@@ -41,23 +41,23 @@ public class StatisticsSession {
 	    fDataPoints= datapoints;
 	}
 	
-	public double getAverage(Dimension dimension) {
+	public double getAverage(Dim dimension) {
 		return getStats(dimension).average;
 	}
 	
-	public long getSum(Dimension dimension) {
+	public long getSum(Dim dimension) {
 		return getStats(dimension).sum;
 	}
 	
-	public long getCount(Dimension dimension) {
+	public long getCount(Dim dimension) {
 		return getStats(dimension).count;
 	}
 	
-	public double getStddev(Dimension dimension) {
+	public double getStddev(Dim dimension) {
 		return getStats(dimension).stddev;
 	}
 	
-	private Statistics getStats(Dimension dimension) {
+	private Statistics getStats(Dim dimension) {
 		Statistics stats= (Statistics) fStatistics.get(dimension);
 		if (stats == null) {
 			stats= computeStats(dimension);
@@ -66,7 +66,7 @@ public class StatisticsSession {
 		return stats;
 	}
 
-	private Statistics computeStats(Dimension dimension) {
+	private Statistics computeStats(Dim dimension) {
 		
 		Statistics stats= new Statistics();
 		
@@ -117,7 +117,7 @@ public class StatisticsSession {
 		return stats;
 	}
 
-	private Scalar getDelta(DataPoint before, DataPoint after, Dimension dimension) {
+	private Scalar getDelta(DataPoint before, DataPoint after, Dim dimension) {
 		Scalar one= before.getScalar(dimension);
 		Assert.assertTrue("reference has no value for dimension " + dimension, one != null); //$NON-NLS-1$
 
@@ -128,7 +128,7 @@ public class StatisticsSession {
 		return delta;
 	}
 
-	public boolean contains(Dimension dimension) {
+	public boolean contains(Dim dimension) {
 		if (fDataPoints.length > 0)
 			return fDataPoints[0].contains(dimension);
 		return false;
