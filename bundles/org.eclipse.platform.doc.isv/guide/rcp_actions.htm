@@ -14,7 +14,65 @@ Defining the actions
 <H3>
 Defining the actions</H3>
 <P>
-[This document is under construction.]  
+The primary customization provided by the <b>BrowserAdvisor</b> in the browser example is the
+designation of the action bar content for the workbench window:
+<font color='#4444CC'><pre>
+	public void fillActionBars(IWorkbenchWindow window, IActionBarConfigurer configurer, int flags) {
+		...
+		BrowserActionBuilder builder = new BrowserActionBuilder(window);
+		getWorkbenchConfigurer().getWindowConfigurer(window).setData(BUILDER_KEY, builder); 
+		builder.fillActionBars(configurer, flags);
+	}
+</pre></font> 
+Let's take a closer look at how these actions are defined in the <b>BrowserActionBuilder</b>.  In particular,
+let's look at the actions that are handled by the browser view.
+<font color='#4444CC'><pre>
+private void makeActions() {
+		...				
+		backAction = new RetargetAction("back", "&amp;Back");  
+		backAction.setToolTipText("Back");
+		backAction.setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_BACK));
+		window.getPartService().addPartListener(backAction);
+		
+		forwardAction = new RetargetAction("forward", "&amp;Forward");  
+		forwardAction.setToolTipText("Forward");
+		forwardAction.setImageDescriptor(images.getImageDescriptor(ISharedImages.IMG_TOOL_FORWARD));
+		window.getPartService().addPartListener(forwardAction);
+		
+		stopAction = new RetargetAction("stop", "Sto&amp;p"); 
+		stopAction.setToolTipText("Stop");
+		window.getPartService().addPartListener(stopAction);
+		
+		refreshAction = new RetargetAction("refresh", "&amp;Refresh");  
+		refreshAction.setToolTipText("Refresh");
+		window.getPartService().addPartListener(refreshAction);
+		...
+	}
+</pre></font> 
+The actions are defined as retargetable actions so that individual views can implement the actions.
+The <b>BrowserView</b> declares these actions when it creates the controls for the view:
+<font color='#4444CC'><pre>
+	private Browser createBrowser(Composite parent, final IActionBars actionBars) {
+		
+		...
+		actionBars.setGlobalActionHandler("back", backAction); 
+		actionBars.setGlobalActionHandler("forward", forwardAction); 
+		actionBars.setGlobalActionHandler("stop", stopAction); 
+		actionBars.setGlobalActionHandler("refresh", refreshAction); 
+		...
+	}
+</pre></font>
+These actions are created when the view is first initialized.
+<font color='#4444CC'><pre>
+	private Action backAction = new Action() {
+		{ setText("Back"); }
+		public void run() {
+			browser.back();
+		}
+	};
+</pre></font>
+See <a href="wrkAdv_retarget.htm">Retargetable actions</a> for a complete discussion of retargetable actions and how they
+are defined and implemented.
 </p>
 
 <p><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></p>
