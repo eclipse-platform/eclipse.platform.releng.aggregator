@@ -16,21 +16,29 @@
 <p class="Para">There are two parts to CVS watches: <em>watch</em>, and <em>edit</em>. 
   The first, <em>watch</em>, is how you specify which files you wish to be nofitied 
   about. The second, <em>edit</em>, is how you inform the CVS server (and thus 
-  others) that you are about to modify a file. To be specific, only the <em>edit</em> 
-  portion is supported natively by Team CVS; the configuring of the email address 
-  for notification and the setting of watch lists must first be done by the CVS 
-  administrator and via the command line respectively. This is because these are 
-  administrative tasks, the first of which cannot be supported by the client, 
-  and the second of which is infrequently performed.</p>
+  others) that you are about to modify a file.</p>
+<p class="Para"><em>Edit</em> is useful on its own without ever setting up any 
+  watches and lots of people work this way. This is because when you edit a file, 
+  you will be told immediately if someone else is already editing that file. Since 
+  most people just want to know up front that they may have to merge their changes 
+  on commit, <em>edit</em> on its own is sufficient for most. Another advantage 
+  to using just <em>edit</em> is that it doesn't require any administrative changes 
+  to the server, while as <em>watch</em> does. All that <em>watches</em> give 
+  up above this is the email notification that some file you are watching is being 
+  modified.</p>
+<p class="Para">For these reasons, <em>edit</em> is supported natively by Team 
+  CVS while as <em>watch</em> isn't.</p>
 <h3 class="Para">Setting up Watches</h3>
-<p class="Para">To use watches you or your CVS administrator must first do the 
-  following: </p>
+<p class="Para">As mentioned, you can't set watches in Team CVS. If you are interested 
+  in doing this, you should consult your cvs documentation. In brief though, this 
+  is what's involved:</p>
 <ol>
-  <li>First, you will need to modify the CVSROOT/notify file. You should consult 
-    the CVS documentation for watches for details on how to configure this file. 
-  </li>
+  <li>First, you or your CVS administrator will need to modify the CVSROOT/notify 
+    file. Consult the CVS documentation on watches for details on how to configure 
+    this file. </li>
   <li>Next, you will need to perform a command line &quot;cvs watch add &lt;filename&gt;&quot; 
-    for each file that you wish to watch.</li>
+    for each file that you wish to watch. If &lt;filename&gt; is a directory name, 
+    then all files within that directory will be watched.</li>
 </ol>
 <h3>Setting up a Project for Watch/Edit</h3>
 <p>Watches and editing are optional in CVS. To use this facility, you must turn 
@@ -38,29 +46,34 @@
   page. Select &quot;Configure projects to use Watch/Edit on checkout&quot;, accept 
   the preference dialog, and then checkout your project. All the files in the 
   project will be checked out read-only. This tells the CVS client which files 
-  are being edited by you and which aren't (writeable files are being edited).</p>
+  are being edited by you and which aren't (writeable files are being edited). 
+  If you've already checked out the project before you turned on this option, 
+  should must check it out again so that the files will get marked read-only.</p>
 <h3>Editing</h3>
-<p>Watches simply give you email notification that someone is editing the file. 
-  Even if you do not have watch lists configured, <em>edit</em> is still of use 
-  because it will tell you if someone else is editing the file as you go to edit 
-  it. Thus edit, without watches, is a viable (and not uncommon) way of working.</p>
 <p class="Para"></p>
 <p>Although typical CVS clients require you to perform an explicit edit, Team 
   CVS automatically issues an edit as soon as you start to modify a file. This 
   support is built deep into Eclipse, so typing in a text editor, performing Java 
   refactoring, etc., will all issue a CVS edit for you. You can also perform an 
   explit edit via the <strong>Team &gt; Edit</strong> context menu on a resource.</p>
-<p>When an edit is issued, everyone who is watching that file will be notified 
-  by the CVS server. In addition, if someone is already editing that file, you 
-  will be informed immediately that you are not the only editor. You can see the 
-  list of editors on a file at any time by selecting <strong>Team &gt; Show Editors</strong> 
-  from the context menu of that file.</p>
+<p>When an <em>edit</em> is issued, you will be informed immediately if someone 
+  is already editing that file. In addition, everyone who is <em>watching</em> 
+  that file will be notified by the CVS server via email etc. Since watches simply 
+  give you email notification, <em>edit</em> without ever setting up watch lists 
+  is still a useful (and popular) workflow.</p>
+<p>If you prefer, you can turn off automatic issuing of edits. This means you 
+  will need to manually perform a Team &gt; Edit for each file you are working 
+  on. To use this work mode, turn on the <strong>Team &gt; CVS &gt; Watch/Edit</strong> 
+  preference &quot;Edit the file without informing the server&quot;. </p>
+<p>Finally, you can see the list of editors of a file at any time by selecting 
+  <strong>Team &gt; Show Editors</strong> from the context menu of that file. 
+</p>
 <h3>Unediting</h3>
 <p>Just as you can tell CVS that you are editing a file, there also needs to be 
   a way of telling CVS that you are no longer editing that file. This is referred 
-  to as <em>unedit</em>. This way, if someone checks the editors list for a file 
-  they can know if someone else is still working on that file. This happens in 
-  one of two ways:</p>
+  to as <em>unedit</em>. This way, if someone checks the editors list for a file, 
+  they'll know if someone is still working on that file. This happens in one of 
+  two ways:</p>
 <ul>
   <li>When you commit an edited file, an unedit is automatically issued.</li>
   <li>If you discover that you want to back out of the changes to a file, you 
