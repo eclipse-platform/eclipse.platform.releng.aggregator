@@ -43,7 +43,132 @@ For example, you can query a type from a compilation unit. Once you have the <a 
 The <b><a href="../reference/api/org/eclipse/jdt/core/ISourceManipulation.html"> ISourceManipulation</a></b> interface defines common source manipulations for java elements. This includes methods for renaming, moving, copying, or deleting a type's member. </P>
 
 
+<H3>Code modification using the DOM/AST API</h3>
 
+There are two ways to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b>. The first one is to use an existing compilation unit. The second
+is to start from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>.
+<h4>
+Creating an AST from an existing compilation unit
+</h4>
+This is archieved with the parse methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>.
+<ul>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(char[])">parseCompilationUnit(char[])</a> This method should be used if you simply
+want to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> without any binding resolution. Only syntax errors are
+reported using this method.
+</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(char[],%20java.lang.String,%20org.eclipse.jdt.core.IJavaProject)">parseCompilationUnit(char[] source, String unitName, IJavaProject project)</a>. This method can be used to create a
+<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from a byte array. If the IJavaProject is specified, the bindings can be resolved. In this case, the name of the compilation unit is used for
+the binding resolution. 
+</li>
+<li><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html#parseCompilationUnit(org.eclipse.jdt.core.ICompilationUnit,%20boolean)">parseCompilationUnit(ICompilationUnit unit, boolean resolveBindings)</a>. This method can be used to create a
+<b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from an existing <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html">ICompilationUnit</a></b>.
+</li>
+</ul>
+All these methods will properly set the positions for each node in the resulting tree. The resolution of bindings has to be requested
+before the creation of the tree. Resolving the bindings is a costly operation and should be done only when necessary. As soon as the tree has been modified, all positions and
+bindings are lost.
+
+<h4>
+From scratch
+</h4>
+<P>It is possible to create a <b><a href="../reference/api/org/eclipse/jdt/core/dom/CompilationUnit.html">CompilationUnit</a></b> from scratch using the factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/dom/AST.html">AST</a></b>.
+These method names start with <b>new...</b>. Here is a small example that creates a <b>HelloWorld</b> class.
+</P>
+<P>First it is the java source:
+<font color='#4444CC'><pre>
+	package example;
+	import java.util.*;
+	public class HelloWorld {
+		public static void main(String[] args) {
+			System.out.println("Hello" + " world");
+		}
+	}
+</pre></font>
+</P>
+<P>Then it is the corresponding code using the factory methods.
+<font color='#4444CC'><pre>
+		CompilationUnit unit = this.ast.newCompilationUnit();
+		PackageDeclaration packageDeclaration = this.ast.newPackageDeclaration();
+		packageDeclaration.setName(this.ast.newSimpleName("example"));
+		unit.setPackage(packageDeclaration);
+		ImportDeclaration importDeclaration = this.ast.newImportDeclaration();
+		QualifiedName name = 
+			this.ast.newQualifiedName(
+				this.ast.newSimpleName("java"),
+				this.ast.newSimpleName("util"));
+		importDeclaration.setName(name);
+		importDeclaration.setOnDemand(true);
+		unit.imports().add(importDeclaration);
+		TypeDeclaration type = this.ast.newTypeDeclaration();
+		type.setInterface(false);
+		type.setModifiers(Modifier.PUBLIC);
+		type.setName(this.ast.newSimpleName("HelloWorld"));
+		MethodDeclaration methodDeclaration = this.ast.newMethodDeclaration();
+		methodDeclaration.setConstructor(false);
+		methodDeclaration.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
+		methodDeclaration.setName(this.ast.newSimpleName("main"));
+		methodDeclaration.setReturnType(this.ast.newPrimitiveType(PrimitiveType.VOID));
+		SingleVariableDeclaration variableDeclaration = this.ast.newSingleVariableDeclaration();
+		variableDeclaration.setModifiers(Modifier.NONE);
+		variableDeclaration.setType(this.ast.newArrayType(this.ast.newSimpleType(this.ast.newSimpleName("String"))));
+		variableDeclaration.setName(this.ast.newSimpleName("args"));
+		methodDeclaration.parameters().add(variableDeclaration);
+		org.eclipse.jdt.core.dom.Block block = this.ast.newBlock();
+		MethodInvocation methodInvocation = this.ast.newMethodInvocation();
+		name = 
+			this.ast.newQualifiedName(
+				this.ast.newSimpleName("System"),
+				this.ast.newSimpleName("out"));
+		methodInvocation.setExpression(name);
+		methodInvocation.setName(this.ast.newSimpleName("println")); 
+		InfixExpression infixExpression = this.ast.newInfixExpression();
+		infixExpression.setOperator(InfixExpression.Operator.PLUS);
+		StringLiteral literal = this.ast.newStringLiteral();
+		literal.setLiteralValue("Hello");
+		infixExpression.setLeftOperand(literal);
+		literal = this.ast.newStringLiteral();
+		literal.setLiteralValue(" world");
+		infixExpression.setRightOperand(literal);
+		methodInvocation.arguments().add(infixExpression);
+		ExpressionStatement expressionStatement = this.ast.newExpressionStatement(methodInvocation);
+		block.statements().add(expressionStatement);
+		methodDeclaration.setBody(block);
+		type.bodyDeclarations().add(methodDeclaration);
+		unit.types().add(type);
+</pre></font>
+</P>
+<h4>Retrieving extra positions</h4>
+The DOM/AST node contains only a pair of positions (the starting position and the length of the node). This is not always
+sufficient. In order to retrieve intermediate positions, the <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IScanner.html">IScanner</a></b> API should be used. For example,
+we have an <b><a href="../reference/api/org/eclipse/jdt/core/dom/InstanceofExpression.html">InstanceofExpression</a></b> for which we want to know the 
+positions of the <i>instanceof</i> operator.
+We could write the following method to archieve this:
+<font color='#4444CC'><pre>
+	private int[] getOperatorPosition(Expression expression, char[] source) {
+		if (expression instanceof InstanceofExpression) {
+			IScanner scanner = ToolFactory.createScanner(false, false, false, false);
+			scanner.setSource(source);
+			int start = expression.getStartPosition();
+			int end = start + expression.getLength();
+			scanner.resetTo(start, end);
+			int token;
+			try {
+				while ((token = scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+					switch(token) {
+						case ITerminalSymbols.TokenNameinstanceof:
+							return new int[] {scanner.getCurrentTokenStartPosition(), scanner.getCurrentTokenEndPosition()};
+					}
+				}
+			} catch (InvalidInputException e) {
+			}
+		}
+		return null;
+	}
+</pre></font>
+The <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IScanner.html">IScanner</a></b> is used to divide the input source into tokens.
+Each token has a specific value that is defined in the <b><a href="../reference/api/org/eclipse/jdt/core/compiler/ITerminalSymbols.html">ITerminalSymbols</a></b> interface. It is 
+fairly simple to iterate and retrieve the right token. This is a general approach. It could be used to retrieve the positions of the
+<i>super</i> keyword in a <b><a href="../reference/api/org/eclipse/jdt/core/dom/SuperMethodInvocation.html">SuperMethodInvocation</a></b>.
 <H3>
 Generic source code modification</h3>
 <P>
