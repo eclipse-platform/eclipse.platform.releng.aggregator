@@ -91,7 +91,8 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 					} else
 						fgHasElapsedTime= false;
 				}
-				addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, currentTime-fgStartupTime);
+				if (fgHasElapsedTime)
+					addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, currentTime-fgStartupTime);
 			}
 			
 		    super.collectOperatingSystemCounters(scalars);
