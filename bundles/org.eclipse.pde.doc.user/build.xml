@@ -1,66 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="org.eclipse.pde.doc.user" default="build.jars" basedir=".">
 
-
 	<target name="init">
 		<property name="plugin" value="org.eclipse.pde.doc.user"/>
-		<property name="version" value="2.0.0"/>
-		<property name="stamp" value=""/>
+		<property name="version.suffix" value="_2.0.0"/>
+		<property name="full.name" value="${plugin}${version.suffix}"/>
+		<property name="temp.folder" value="${basedir}/temp.folder"/>
+		<property name="plugin.destination" value="${basedir}"/>
+		<property name="build.result.folder" value="${basedir}"/>
 	</target>
 
 	<target name="build.update.jar" depends="init">
-		<property name="base" value="${basedir}/bin.zip.pdetemp"/>
-		<delete dir="${base}"/>
-		<mkdir dir="${base}"/>
+		<delete dir="${temp.folder}"/>
+		<mkdir dir="${temp.folder}"/>
 		<antcall target="build.jars"/>
 		<antcall target="gather.bin.parts">
-			<param name="destination" value="${base}/"/>
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<delete>
-			<fileset dir="${base}" includes="**/*.bin.log"/>
-		</delete>
-		<zip zipfile="${basedir}/${plugin}_${version}.jar" basedir="${base}/${plugin}_${version}"/>
-		<delete dir="${base}"/>
+		<zip zipfile="${plugin.destination}/${full.name}.jar" basedir="${temp.folder}/${full.name}" filesonly="false"/>
+		<delete dir="${temp.folder}"/>
 	</target>
 
-	<target name="gather.bin.parts" depends="init" if="destination">
-<zip zipfile="${basedir}/doc.zip"
-		basedir="${basedir}"
-		includes="book.css, hglegal.htm, ngibmcpy.gif, guide/**"
-	/>	
-
-		<mkdir dir="${destination}/${plugin}_${version}"/>
-		<copy todir="${destination}/${plugin}_${version}">
-			<fileset dir="${basedir}" includes="doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.gif,book.css" excludes="build.properties,build.xml"/>
+	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/${full.name}"/>
+		<zip zipfile="${destination.temp.folder}/${full.name}/doc.zip"
+			basedir="${basedir}"
+			includes="book.css, hglegal.htm, ngibmcpy.gif, guide/**"
+		/>
+		<copy todir="${destination.temp.folder}/${full.name}">
+			<fileset dir="${basedir}" includes="*.properties,*.xml,*.zip,*.html,*.htm,*.gif,book.css" excludes="build.properties,build.xml"/>
 		</copy>
-
 	</target>
 
 	<target name="build.jars" depends="init">
 	</target>
 
-	<target name="gather.sources" depends="init" if="destination">
-		<mkdir dir="${destination}/${plugin}_${version}"/>
+	<target name="gather.sources" depends="init" if="destination.temp.folder">
 	</target>
 
 	<target name="build.sources" depends="init">
 	</target>
 
-	<target name="gather.logs" depends="init">
-		<property name="base" value="${destination}/${plugin}_${version}"/>
-		<mkdir dir="${base}"/>
-		<copy todir="${base}">
-			<fileset dir="${basedir}" includes="*.log"/>
-		</copy>
+	<target name="gather.logs" depends="init" if="destination.temp.folder">
 	</target>
 
 	<target name="clean" depends="init">
+		<delete file="${plugin.destination}/${full.name}.jar"/>
+		<delete file="${plugin.destination}/${full.name}.zip"/>
+		<delete dir="${temp.folder}"/>
+	</target>
+
+	<target name="refresh" depends="init" if="eclipse.running">
+		<eclipse.refreshLocal resource="${plugin}" depth="infinite"/>
+	</target>
+
+	<target name="zip.plugin" depends="init">
+		<delete dir="${temp.folder}"/>
+		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.jars"/>
+		<antcall target="build.sources"/>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<antcall target="gather.sources">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
 		<delete>
-			<fileset dir="${basedir}" includes="**/*.pdetemp"/>
+			<fileset dir="${temp.folder}" includes="**/*.bin.log"/>
 		</delete>
-		<delete file="${plugin}_${version}.jar"/>
-		<delete file="${plugin}_${version}.src.zip"/>
-		<delete file="${plugin}_${version}.log.zip"/>
+		<zip zipfile="${plugin.destination}/${full.name}.zip" basedir="${temp.folder}" filesonly="true"/>
+		<delete dir="${temp.folder}"/>
 	</target>
 
 </project>
