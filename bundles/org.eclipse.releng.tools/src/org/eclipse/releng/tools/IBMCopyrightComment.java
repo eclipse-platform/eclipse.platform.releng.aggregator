@@ -95,8 +95,9 @@ public class IBMCopyrightComment {
    	        String contributor = tokens.nextToken();
    	        if (contributor.indexOf("***********************************") == -1 //$NON-NLS-1$
    	         && contributor.indexOf("###################################") == -1) { //$NON-NLS-1$
-   	            int c = contributor.indexOf(linePrefix) + linePrefix.length();
-   	            contributor = contributor.substring(c);
+   	            int c = contributor.indexOf(linePrefix);
+   	            if (c != -1)
+   	                contributor = contributor.substring(c + linePrefix.length());
    	            contributors.add(contributor.trim());
    	        }
    	    }
@@ -163,7 +164,7 @@ public class IBMCopyrightComment {
 	        writer.print(", " + revisionYear); //$NON-NLS-1$
 		writer.println(" IBM Corporation and others."); //$NON-NLS-1$
 
-		writer.println(linePrefix + "All rights reserved. This program and the accompanying materials "); //$NON-NLS-1$
+		writer.println(linePrefix + "All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
 		writer.println(linePrefix + "are made available under the terms of the Common Public License v1.0"); //$NON-NLS-1$
 		writer.println(linePrefix + "which accompanies this distribution, and is available at"); //$NON-NLS-1$
 		writer.println(linePrefix + "http://www.eclipse.org/legal/cpl-v10.html"); //$NON-NLS-1$
