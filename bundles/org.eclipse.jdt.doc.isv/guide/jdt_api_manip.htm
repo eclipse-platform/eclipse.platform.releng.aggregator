@@ -387,8 +387,9 @@ Several kinds of operations can trigger a Java element change notification. Here
      (the delta indicates that package fragment roots have been <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_ADDED_TO_CLASSPATH">added to the classpath</a>, 
      <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_REMOVED_FROM_CLASSPATH">removed from the classpath</a>, or
      <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_CLASSPATH_REORDER">reordered on the classpath</a>)</li>
-<li>Modifying a classpath variable value, e.g. <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathVariable(java.lang.String, org.eclipse.core.runtime.IPath)"><b>JavaCore.html.setClasspathVariable</b></a></li>
-<li>Changing the source attachment of a .jar file, e.g. <a href="../reference/api/org/eclipse/jdt/core/IPackageFragmentRoot.html#attachSource(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"><b>JIPackageFragmentRoot.html.attachSource</b></a>
+<li>Modifying a classpath variable value, e.g. <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathVariable(java.lang.String, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"><b>JavaCore.html.setClasspathVariable</b></a>
+     (the delta also indicates that package fragment roots have been affected)</li>
+<li>Changing the source attachment of a .jar file, e.g. <a href="../reference/api/org/eclipse/jdt/core/IPackageFragmentRoot.html#attachSource(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"><b>IPackageFragmentRoot.attachSource</b></a>
      (the delta indicates that the source was <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_SOURCEDETACHED">detached</a>
      then <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_SOURCEATTACHED">attached</a>)</li>
 <li>Reconciling a working copy with its buffer, e.g. <a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#reconcile()"><b>IWorkingCopy.reconcile</b></a></li>
@@ -404,20 +405,20 @@ the Java element deltas can be batched using an
 <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IWorkspaceRunnable.html"><b>IWorkspaceRunnable</b></a>. 
 The deltas resulting from several Java Model operations that are run inside a <b>IWorkspaceRunnable</b> are merged and reported at once. </P>
 <P>
-For example the following will trigger 2 java element changes: </P>
+For example the following will trigger 2 Java element change events: </P>
 <font color='#4444CC'><pre>
     // Get package
-    IPackageFragment pkg == ....;
+    IPackageFragment pkg = ...;
     
     // Create 2 compilation units
     ICompilationUnit unitA = pkg.createCompilationUnit("A.java", "public class A {}", false, null);
     ICompilationUnit unitB = pkg.createCompilationUnit("B.java", "public class B {}", false, null);
 </pre></font>
 <P>
-Whereas the following will trigger 1 java element change: </P>
+Whereas the following will trigger 1 Java element change event: </P>
 <font color='#4444CC'><pre>
     // Get package
-    IPackageFragment pkg == ....;
+    IPackageFragment pkg = ...;
     
     // Create 2 compilation units
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
