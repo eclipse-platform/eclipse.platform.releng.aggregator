@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Eclipse 3.0 Plug-in Migration FAQ</title>
+</head>
+
+<body>
+
+<h1>Eclipse 3.0 Plug-in Migration FAQ</h1>
+
+<p><i>[under development]</i></p>
+<p>This guide covers migrating Eclipse 2.1 (or earlier) plug-ins to Eclipse 3.0.</p>
+<p>One of the goals of Eclipse 3.0 was move Eclipse forward while remaining
+compatible with previous versions to the greatest extent possible. That is,
+plug-ins written against the Eclipse 2.1 APIs should continue to work in 3.0 in
+spite of the API changes.</p>
+<p>The key
+kinds of compatibility are API contract compatibility and binary compatibility.
+API contract compatibility means that valid use of 2.1 APIs remains valid for
+3.0, so there is no need to revisit working code. Binary compatibility means that
+the API method signatures, etc. did not change in ways that would cause existing
+compiled (&quot;binary&quot;) code to no longer link and run with the new 3.0 libraries.</p>
+<p>While every effort way made to avoid breakage, there are a few areas of
+incompatibility. This document describes the areas where Eclipse changed in
+incompatible ways between 2.1 and 3.0, and provides instructions for migrating
+2.1 plug-ins to 3.0.</p>
+<p><b>Why did Eclipse API change in incompatible ways between 2.1 and 3.0?</b></p>
+<p>Eclipse 3.0 is an evolution of Eclipse 2.1. There were a few areas where we
+could not evolve Eclipse while maintaining perfect compatibility across the
+board. The four main sources of incompatibilities are:</p>
+<ul>
+  <li>The Eclipse 3.0 runtime is now based on OSGi.</li>
+  <li>The Eclipse 3.0 UI workbench is now split into RCP and IDE parts.</li>
+  <li>The Xerces plug-in has been dropped from 3.0.</li>
+  <li>Eclipse 3.0 performs more work in background threads.</li>
+</ul>
+<p>The specific incompatibilities are cataloged below.</p>
+<p><b>Will a 2.1 plug-in work in Eclipse 3.0?</b></p>
+<p>Yes, except in a few cases. If a plug-in relies only on Eclipse 2.1 APIs, then it will continue to work in
+3.0. The very few exceptions are places in the API where the changes between 2.1
+and 3.0 could not be done in any compatible way; if a plug-in uses one of these, it will not
+work.</p>
+<p><b>My 2.1 plug-in makes use of classes in internal packages. Will it still work in Eclipse 3.0?</b></p>
+<p>If a plug-in relies on internal classes or behavior not specified in
+the Eclipse 2.1 API, it's impossible to make blanket claims one way or the other
+about whether the plug-in might work in 3.0. You'll need to try it.</p>
+<p><b>How do I run my plug-in in Eclipse 3.0 without touching it?</b></p>
+<p>Install your 2.1 plug-in in the eclipse/plugins/ subdirectory of an Eclipse
+3.0-based product and restart Eclipse. Eclipse will recognize that the plug-in
+is an unconverted 2.1 plug-in (by the header on the plugin.xml) and
+automatically make adjustments to compensate for changes to Platform plug-in
+dependencies and renamed Platform extension points.</p>
+<p><b>Will a 2.1 plug-ins need to be changed to compile properly in Eclipse 3.0?</b></p>
+<p>Yes in all cases. There are certain differences between Eclipse 2.1 and 3.0 that
+necessitate changes to all plug-ins going forward. If you have a plug-in written
+for 2.1 and wish to recompile it, it needs to be migrated to 3.0 before it can be developed further
+for 3.0.</p>
+<p><b>How do I migrate my plug-in to Eclipse 3.0?</b></p>
+<p>Once you've loaded (or imported) your plug-in project into an Eclipse 3.0
+workspace, use <b>PDE
+Tools &gt; Migrate to 3.0</b>  (project context menu) to convert the plug-in's manifest to the 3.0
+format and automatically adjust the list of required Platform plug-ins and
+references to Platform extension points that were renamed. In most cases, the code for the
+plug-in should then compile and run successfully. The code for the plug-in
+should then be reviewed to make sure that it is not dependent on one of the
+areas of incompatible API change.</p>
+<p><b>Can I trust that a plug-in will have compile errors or warnings if it relies on API
+that has changed incompatibly?</b></p>
+<p>No. There are some areas of incompatible change that do not get flagged by
+the Java compiler.</p>
+<p><b>Can I safely ignore warnings in the code coming from use of deprecated
+API?</b></p>
+<p>Yes, in the short term. Wherever possible, obsolete APIs are marked as
+deprecated rather than being deleted outright and continue to work (albeit
+possibly only under limited conditions). So while there is usually no urgency to
+get off the deprecated API, the fact that it is now considered obsolete means
+that there is now a better way to do something. Plug-ins should be weaned off
+all usage to deprecated API at the earliest convenience.</p>
+<p><b>Once I migrate my plug-in to Eclipse 3.0, can I still install and run the
+resulting binary plug-in in Eclipse 2.1?</b></p>
+<p>No. This is not supported, and probably wouldn't work due to the renamed
+extension points.</p>
+<p><b>What is the purpose of org.eclipse.core.runtime.compatibility?</b></p>
+<p>The move in 3.0 to an OSGi-base runtime made some of the existing core
+runtime APIs obsolete. Wherever possible, obsolete APIs in the
+org.eclipse.core.runtime.* packages, along with the implementation behind it,
+were moved from the org.eclipse.core.runtime plug-in to a new
+org.eclipse.core.runtime.compatibility plug-in. By default, newly-created
+plug-ins depend on org.eclipse.core.runtime and are expected to use only
+non-deprecated runtime APIs. On the other hand, existing plug-ins migrating from
+2.1 will depend by default on org.eclipse.core.runtime.compatibility and can
+make use of the old APIs as well (the org.eclipse.core.runtime.compatibility
+plug-in re-exports APIs of org.eclipse.core.runtime). While the
+org.eclipse.core.runtime.compatibility plug-in is likely to be included in
+Eclipse IDE configurations, it's dead wood that's unlikely to be included in
+products based on RCP configurations.</p>
+<p><b>What is the purpose of org.eclipse.ui.workbench.compatibility?</b></p>
+<p>org.eclipse.ui.workbench.compatibility is a plug-in fragment that provides
+enhanced binary compatibility for 2.1 plug-ins being run in an Eclipse 3.0-based
+product. In 3.0, six methods with an explicit dependence on IFile or IMarker
+were moved from the org.eclipse.ui.IWorkbenchPage interface in order to cleanly
+separate the workbench from workspace and resources. The
+org.eclipse.ui.workbench.compatibility fragment arranges to add back these
+methods so that existing 2.1 plug-ins can run without modification. Note,
+however, that plug-ins being migrated to 3.0 that reference the moved methods
+will see compile errors that can (only) be resolved by calling the replacement
+methods now located on org.eclipse.ui.ide.IDE.</p>
+<p>The IWorkbenchPage methods in question are: openEditor(IFile),
+openEditor(IFile, String), openEditor(IFile, String, boolean),
+openEditor(IMarker), openEditor(IMarker, boolean), and openSystemEditor(IFile).</p>
+
+<p><a href="../notices.html"><img src="../cpy.gif" border="0" alt="Legal notices" width="324" height="14"></a></p>
+
+</body>
+
+</html>
