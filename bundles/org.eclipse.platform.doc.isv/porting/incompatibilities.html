@@ -272,7 +272,7 @@ org.eclipse.core.boot.</p>
 <p>A new org.eclipse.core.runtime.compatibility plug-in provides an
 implementation bridge between the old and new APIs, and is the new home for many
 of the obsolete APIs formerly found in org.eclipse.core.runtime and
-org.eclipse.core.boot. Platform Runtime extension points were not affected by the
+org.eclipse.core.boot. Platform Runtime extension points are unaffected by the
 restructuring.</p>
 <p>When migrating the existing plug-in to 3.0, the plug-in's
 manifest needs to be updated to reflect the new structure of the Eclipse
@@ -378,7 +378,7 @@ CPU-intensive processing. When doing this, be aware of the deadlock risk
 inherent in <code>Display.syncExec</code>. <code>Display.asyncExec</code> is generally
 safer as it does not introduce deadlock risk, at the expense of losing precise
 control over when the code is executed.</p>
-<p>Other techniques for making thread safe code included:
+<p>Other techniques for making thread safe code include:
 <ul>
   <li>Wrapping unsafe code in semaphores or Java monitors. The new concurrency
     infrastructure includes one such semaphore object: <code>org.eclipse.core.runtime.jobs.ILock</code>.
@@ -703,18 +703,18 @@ thread. Clipboard services are commonly provided automatically by Eclipse
 components such as the text editor, which insulate many clients from this
 breaking change. Existing code that does make direct use of Clipboard should
 ensure that the API methods are called on the correct thread, using
-Display.asyncExec or syncExec as required to shift accesses into the UI thread.</p>
+Display.asyncExec or syncExec when appropriate to shift accesses into the UI thread.</p>
 <h3><a name="Key down events"></a>17. Key down events</h3>
 <p>In 3.0, SWT reports key down events before the work is done in the OS. This
 is much earlier than it was prior to 3.0. This change was made to support key
 bindings in Eclipse which necessitates intercepting key events before any widget
-had a chance to process the character. Consequences of this change are visible
+has a chance to process the character. Consequences of this change are visible
 to code that handles low-level org.eclipse.swt.SWT.KeyDown events directly. For example, it
 means that when a listener on a Text widget receives a key down event, the
 widget's content (getText()) will not yet include the key just typed (it would
 have prior to 3.0). The recommended way to get the full text from the widget
 including the current key is to handle the higher-level SWT.Modify or SWT.Verify
-events rather than the low-level SWT.KeyDown event; code that does it this way
+events rather than the low-level SWT.KeyDown event; code that already does it this way
 is unaffected by this change.</p>
 <h3><a name="Tab traversal of custom controls"></a>18. Tab traversal of custom controls</h3>
 <p>Prior to 3.0, when the focus was in the SWT class org.eclipse.swt.widgets.Canvas or one of its subclasses
@@ -747,7 +747,7 @@ that rely on the set of possible severities being limited to <code>IStatus.OK</c
 <code>getSeverity</code> should update 
 their code to include the new severity.</p>
 <h3><a name="Build-related resource change notifications"></a>21. Build-related resource change notifications</h3>
-<p>In Eclipse 3.0, workspace auto-build now occurs in a background thread. This
+<p>In Eclipse 3.0, workspace auto-builds now occur in a background thread. This
 required an API contract change to <code>org.eclipse.core.resources.IResourceChangeEvent</code>. The contract
 of <code>IResourceChangeEvent</code> previously guaranteed the following ordering of
 events for all workspace changes:
@@ -838,7 +838,7 @@ change also allows users to begin working on a set of resources before the
 operation completes. For example, a user can now begin browsing files in a
 project that is still in the process of being checked out. The new method <code>IWorkspace.run(IWorkspaceRunnable,
 ISchedulingRule, int, IProgressMonitor)</code> has an optional flag, <code>AVOID_UPDATE</code>,
-that operations can use as a hint to the platform to specify whether periodic
+which operations can use as a hint to the platform to specify whether periodic
 updates are desired.</p>
 <h3><a name="URL stream handler extensions"></a>23. URL stream handler extensions</h3>
 <p><strong>What is affected:</strong> Plug-ins that contribute extensions to the <code>org.eclipse.core.runtime.urlHandlers</code>
@@ -877,8 +877,8 @@ prerequisite known to contribute classes in the package being queried or (2b) it
 own classpath entries for the desired class.</p>
 <p>The class loader determines whether to consult self or its prerequisites based
 on its imported and required packages. This information is inferred from the
-plug-in content in the case of legacy plug-ins and directly specified in the
-case of new plug-ins. In either case, it is known <i>a priori</i> which class
+plug-in content in the case of traditional plug-ins and directly specified in the
+case of plug-ins with explicit OSGi bundle manifest. In either case, it is known <i>a priori</i> which class
 loaders will supply the classes for which packages. This offers performance
 improvements as well as a solution to the vexing problem of multiple
 prerequisites contributing the same classes.</p>
@@ -934,7 +934,7 @@ helper class to interpret the entries. See the class Javadoc for more details.</
 <p><b>What is affected:</b> Plug-ins that make assumptions regarding their
 installation structure, location and the local file system layout.</p>
 <p><b>Description:</b> Methods such as <code>IPluginDescriptor.getInstallURL()</code>
-return URLs of a particular form. Despite this form not being specified, various
+return URLs of a particular form. Despite their form being unspecified, various
 plug-ins are making assumptions based on the current implementation. For example, they
 may expect to get a <code>file:</code> URL and use URL.getFile() and use <code>java.io.File</code>
 manipulation on the result. To date, this has been a workable but rather fragile
@@ -983,7 +983,7 @@ changed runtime API.</p>
 <p><b>Description:</b> Various plug-ins expose API that includes elements from
 the runtime API. With the changes to the Eclipse 3.0 runtime outlined here,
 client plug-ins must re-evaluate their use of runtime API in their API.</p>
-<p><b>Action required:</b> This scenario is quite quite rare as very little of
+<p><b>Action required:</b> This scenario is quite rare as very little of
 the Eclipse runtime API is changing. Depending on the scenario, clients may have
 to change their API or continue to rely on the the compatibility layer.</p>
 <h3><a name="Plug-in parsing methods on Platform"></a>32. Plug-in parsing methods on Platform</h3>
@@ -1013,7 +1013,7 @@ be done using PDE to get the initial manifest and then adding in the appropriate
 Provide-Package header.</p>
 <h3><a name="Changes to build scripts"></a>34. Changes to build scripts</h3>
 <p><b>What is affected:</b> Scripts (e.g., Ant build.xml
-files) which define classpaths containing runtime related jars and class
+files) which define classpaths containing runtime-related jars and class
 directories.</p>
 <p><b>Description:</b> The new runtime contains a number of new plug-ins and
 jars. Their introduction was mandated by the refactoring of the runtime into
