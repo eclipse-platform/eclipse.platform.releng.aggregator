@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Incompatibilities between Eclipse 3.0 and 3.1</title>
+</head>
+
+<body>
+
+<h1>Incompatibilities between Eclipse 3.0 and 3.1</h1>
+
+<p> Eclipse changed in
+incompatible ways between 3.0 and 3.1 in ways that affect plug-ins. The
+following entries describe the areas that changed and provide instructions for
+  migrating 3.0 plug-ins to 3.1. Note that you only need to look here if you are experiencing
+  problems running your 3.0 plug-in on 3.1.</p>
+<ol>
+  <li><a href="#Preference Store">Plug-in Preferences</a></li>
+  <li><a href="#IPath Changes">Changes to IPath constraints</a></li>
+</ol>
+<hr>
+
+<h2><a name="Preference Store"></a>1. Plug-in Preferences</h2>
+<ol>
+  <li>Preference Stores. In Eclipse 3.1 the IPreferenceStore obtained from AbstractUIPlugin#getPreferenceStore 
+    was migrated to the 3.0 Eclipse preferences supplied by org.eclipse.core.runtime. 
+    As a result you should check for two possible issues.</li>
+  <li>Your preference listeners should be able to handle both Strings and typed 
+    values as it is possible to get preferences in either form</li>
+  <li>If you continue to use AbstractUIPlugin#initializeDefaultPreferences you 
+    need to be sure that your code loads the runtime compatibility layer as org.eclipse.ui.workbench 
+    will not any longer.</li>
+</ol>
+<p>See the <a href="../reference/misc/preference_store.html">preference store</a> 
+documentation for more details.
+</p>
+<h2><a name="IPath Changes"></a>2. Changes to IPath constraints</h2>
+<p>
+<b>What is affected:</b> Plug-ins that create, manipulate, or store <tt>IPath</tt> objects.
+<p>
+<b>Description:</b> In Eclipse 3.0, <tt>IPath</tt> had a number of restrictions
+on the segments of paths that were more restrictive than the restrictions of the
+underlying operating system. These included:
+<ul>
+<li>Leading and trailing whitespace in path segments were not allowed</li>
+<li>The colon character (':') was reserved as a device separator character</li>
+<li>The backslash character ('\') was reserved as a segment separator character</li>
+</ul>
+These restrictions have been removed in Eclipse 3.1 when the platform's data
+location (workspace) is located on a file system that does not have these restrictions.
+<p>
+<b>Action required:</b> In order to enable the proper treatment of the expanded 
+range of paths, all usage of <tt>Path</tt> and <tt>IPath</tt> within plug-ins 
+should be reviewed and updated as described below. Most unmodified plug-ins 
+will continue to behave exactly as in 3.0 on all paths considered legal in 3.0. 
+However, unless these prescribed changes are made, they are likely to fail in 
+cases involving paths considered legal in 3.1 that were illegal in 3.0.
+<p>
+Plug-ins that store string representations of paths in a format that needs to be 
+readable across different platforms should migrate to the new 
+<tt>Path.fromPortableString</tt> factory method. This method produces
+an <tt>IPath</tt> instance from a platform-independent format. This string 
+representation of paths can be created using the <tt>IPath.toPortableString</tt> method.
+Examples of metadata files that are affected include files that are stored inside Eclipse
+workspace projects (.project, .classpath, etc), and all paths stored in the preference
+store (<tt>org.eclipse.core.runtime.preferences.IPreferencesService</tt>). 
+<p>
+Note: <tt>fromPortableString</tt> will correctly read all path strings that were
+created using the Eclipse 3.0 <tt>IPath.toString</tt> method, but not the
+Eclipse 3.1 <tt>toString</tt> method. Thus in most cases no change is required 
+to existing metadata file formats except to begin writing paths with <tt>toPortableString</tt>
+and reading paths with <tt>fromPortableString</tt>.
+<p>
+Plug-ins that were creating paths from hard-coded string literals that assumed 
+':' and '\' had special meaning on all platforms will need to migrate. The easiest
+solution is to restrict string path literals to the subset that is supported
+on all platforms (avoid colon and backslash characters).  Path literals can support
+the complete set of valid Unix paths by using the portable path string format produced
+by <tt>Path.toPortableString</tt>. This format interprets the first single colon (':') 
+as the device separator, slash ('/') as the segment separator, and double colon ("::") 
+as a literal colon character. For example, the code <tt>new Path("c:/temp")</tt>
+will now create a relative path with two segments on Unix platforms.  Similarly,
+<tt>new Path("a\\b")</tt> will now create a path with a single segment
+on Unix platforms, and a path with two segments on Windows.
+<p>
+Plug-ins constructing paths using the <tt>IPath.append(String)</tt> method 
+that assumed ':' and '\' had special meaning on all platforms may need to update their code.
+In Eclipse 3.1, this method uses operating-system specific device and segment
+delimiters to interpret the provided path string.  For example, calling <tt>append("a\\b")</tt>
+on Unix platforms will now append a single segment, whereas on Windows it will
+continue to append two segments.
+
+
+
+
+
+
+<p><a href="../../notices.html"><img src="../../cpy.gif" border="0" alt="Legal notices" ></a></p>
+</body>
+</html>
