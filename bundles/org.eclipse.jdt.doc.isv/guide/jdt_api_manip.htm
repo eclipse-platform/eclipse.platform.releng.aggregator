@@ -176,50 +176,51 @@ These method names start with <b>new...</b>. The following is an example that cr
 </P>
 <P>The following snippet is the corresponding code that generates the output.
 <font color='#4444CC'><pre>
-		CompilationUnit unit = this.ast.newCompilationUnit();
-		PackageDeclaration packageDeclaration = this.ast.newPackageDeclaration();
-		packageDeclaration.setName(this.ast.newSimpleName("example"));
+		AST ast = new AST();
+		CompilationUnit unit = ast.newCompilationUnit();
+		PackageDeclaration packageDeclaration = ast.newPackageDeclaration();
+		packageDeclaration.setName(ast.newSimpleName("example"));
 		unit.setPackage(packageDeclaration);
-		ImportDeclaration importDeclaration = this.ast.newImportDeclaration();
+		ImportDeclaration importDeclaration = ast.newImportDeclaration();
 		QualifiedName name = 
-			this.ast.newQualifiedName(
-				this.ast.newSimpleName("java"),
-				this.ast.newSimpleName("util"));
+			ast.newQualifiedName(
+				ast.newSimpleName("java"),
+				ast.newSimpleName("util"));
 		importDeclaration.setName(name);
 		importDeclaration.setOnDemand(true);
 		unit.imports().add(importDeclaration);
-		TypeDeclaration type = this.ast.newTypeDeclaration();
+		TypeDeclaration type = ast.newTypeDeclaration();
 		type.setInterface(false);
 		type.setModifiers(Modifier.PUBLIC);
-		type.setName(this.ast.newSimpleName("HelloWorld"));
-		MethodDeclaration methodDeclaration = this.ast.newMethodDeclaration();
+		type.setName(ast.newSimpleName("HelloWorld"));
+		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setConstructor(false);
 		methodDeclaration.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
-		methodDeclaration.setName(this.ast.newSimpleName("main"));
-		methodDeclaration.setReturnType(this.ast.newPrimitiveType(PrimitiveType.VOID));
-		SingleVariableDeclaration variableDeclaration = this.ast.newSingleVariableDeclaration();
+		methodDeclaration.setName(ast.newSimpleName("main"));
+		methodDeclaration.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+		SingleVariableDeclaration variableDeclaration = ast.newSingleVariableDeclaration();
 		variableDeclaration.setModifiers(Modifier.NONE);
-		variableDeclaration.setType(this.ast.newArrayType(this.ast.newSimpleType(this.ast.newSimpleName("String"))));
-		variableDeclaration.setName(this.ast.newSimpleName("args"));
+		variableDeclaration.setType(ast.newArrayType(ast.newSimpleType(ast.newSimpleName("String"))));
+		variableDeclaration.setName(ast.newSimpleName("args"));
 		methodDeclaration.parameters().add(variableDeclaration);
-		org.eclipse.jdt.core.dom.Block block = this.ast.newBlock();
-		MethodInvocation methodInvocation = this.ast.newMethodInvocation();
+		org.eclipse.jdt.core.dom.Block block = ast.newBlock();
+		MethodInvocation methodInvocation = ast.newMethodInvocation();
 		name = 
-			this.ast.newQualifiedName(
-				this.ast.newSimpleName("System"),
-				this.ast.newSimpleName("out"));
+			ast.newQualifiedName(
+				ast.newSimpleName("System"),
+				ast.newSimpleName("out"));
 		methodInvocation.setExpression(name);
-		methodInvocation.setName(this.ast.newSimpleName("println")); 
-		InfixExpression infixExpression = this.ast.newInfixExpression();
+		methodInvocation.setName(ast.newSimpleName("println")); 
+		InfixExpression infixExpression = ast.newInfixExpression();
 		infixExpression.setOperator(InfixExpression.Operator.PLUS);
-		StringLiteral literal = this.ast.newStringLiteral();
+		StringLiteral literal = ast.newStringLiteral();
 		literal.setLiteralValue("Hello");
 		infixExpression.setLeftOperand(literal);
-		literal = this.ast.newStringLiteral();
+		literal = ast.newStringLiteral();
 		literal.setLiteralValue(" world");
 		infixExpression.setRightOperand(literal);
 		methodInvocation.arguments().add(infixExpression);
-		ExpressionStatement expressionStatement = this.ast.newExpressionStatement(methodInvocation);
+		ExpressionStatement expressionStatement = ast.newExpressionStatement(methodInvocation);
 		block.statements().add(expressionStatement);
 		methodDeclaration.setBody(block);
 		type.bodyDeclarations().add(methodDeclaration);
@@ -289,7 +290,7 @@ These techniques include the following:</P>
 <P>
 This technique can result in problem markers being associated with incorrect line numbers, since the Java elements were not updated directly.</P>
 <P>
-The Java element model does not go any finer than methods and fields. The abstract syntax tree (AST) used by the compiler is not available as API, so the techniques used by the JDT to parse source into programmatic structures are not currently available as API.</P>
+The Java element model does not go any finer than methods and fields. The abstract syntax tree used by the compiler is not available as API, so the techniques used by the JDT to parse source into programmatic structures are not currently available as API.</P>
 
 
 <H3>
