@@ -5,10 +5,8 @@
 package org.eclipse.test;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.swt.widgets.Display;
-
+import org.eclipse.jface.window.Window;
 import org.eclipse.ui.internal.Workbench;
 /**
  * A Workbench that runs a test suite specified in the
@@ -18,7 +16,7 @@ public class UITestApplication extends Workbench {
 	/**
 	 * Run an event loop for the workbench.
 	 */
-	protected void runEventLoop() {
+	protected void runEventLoop(Window.IExceptionHandler handler) {
 		// Dispatch all events.
 		Display display = Display.getCurrent();
 		while (true) {
