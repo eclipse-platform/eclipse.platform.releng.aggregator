@@ -29,7 +29,7 @@ public class SQL {
     
     private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
     private PreparedStatement fQueryVariation, fQueryVariations, fQueryScenario, fQueryAllScenarios, fQueryDatapoints, fQueryScalars;
-    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntries;
+    private PreparedStatement fInsertSummaryEntry, fUpdateScenarioShortName, fQuerySummaryEntry, fQuerySummaryEntries;
     
 
     SQL(Connection con) throws SQLException {
@@ -319,7 +319,18 @@ public class SQL {
         return fQueryVariations.executeQuery();
     }
     
-    int createSummaryEntry(int variation_id, int scenario_id, int dim_id, boolean isGlobal) throws SQLException {
+    void createSummaryEntry(int variation_id, int scenario_id, int dim_id, boolean isGlobal) throws SQLException {
+        if (fQuerySummaryEntry == null)
+            fQuerySummaryEntry= fConnection.prepareStatement(
+            	"select count(*) from SUMMARYENTRY where VARIATION_ID = ? and SCENARIO_ID = ? and DIM_ID = ? and IS_GLOBAL = ?"); //$NON-NLS-1$
+        fQuerySummaryEntry.setInt(1, variation_id);
+        fQuerySummaryEntry.setInt(2, scenario_id);
+        fQuerySummaryEntry.setInt(3, dim_id);
+        fQuerySummaryEntry.setShort(4, (short) (isGlobal ? 1 : 0));
+        ResultSet result= fQuerySummaryEntry.executeQuery();
+        if (result.next() && result.getInt(1) > 0)
+            return;
+        
         if (fInsertSummaryEntry == null)
             fInsertSummaryEntry= fConnection.prepareStatement(
                 "insert into SUMMARYENTRY (VARIATION_ID, SCENARIO_ID, DIM_ID, IS_GLOBAL) values (?, ?, ?, ?)"); //$NON-NLS-1$
@@ -327,7 +338,7 @@ public class SQL {
         fInsertSummaryEntry.setInt(2, scenario_id);
         fInsertSummaryEntry.setInt(3, dim_id);
         fInsertSummaryEntry.setShort(4, (short) (isGlobal ? 1 : 0));
-        return fInsertSummaryEntry.executeUpdate();
+        fInsertSummaryEntry.executeUpdate();
     }
 
     public void setScenarioShortName(int scenario_id, String shortName) throws SQLException {
