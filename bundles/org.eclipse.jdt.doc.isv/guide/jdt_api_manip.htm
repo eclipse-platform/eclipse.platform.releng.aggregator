@@ -393,8 +393,34 @@ As for
 <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IResourceDelta.html"><b>IResourceDelta</b></a> 
 the Java element deltas can be batched using an 
 <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IWorkspaceRunnable.html"><b>IWorkspaceRunnable</b></a>. 
-The deltas resulting from several Java Model operations that are run inside a <b>IWorkspaceRunnable</b> are merged and reported at once.
-</P>
+The deltas resulting from several Java Model operations that are run inside a <b>IWorkspaceRunnable</b> are merged and reported at once. </P>
+<P>
+For example the following will trigger 2 java element changes: </P>
+<font color='#4444CC'><pre>
+    // Get package
+    IPackageFragment pkg == ....;
+    
+    // Create 2 compilation units
+    ICompilationUnit unitA = pkg.createCompilationUnit("A.java", "public class A {}", false, null);
+    ICompilationUnit unitB = pkg.createCompilationUnit("B.java", "public class B {}", false, null);
+</pre></font>
+<P>
+Whereas the following will trigger 1 java element change: </P>
+<font color='#4444CC'><pre>
+    // Get package
+    IPackageFragment pkg == ....;
+    
+    // Create 2 compilation units
+    IWorkspace workspace = ResourcesPlugin.getWorkspace();
+    workspace.run(
+        new IWorkspaceRunnable() {
+ 	        public void run(IProgressMonitor monitor) throws CoreException {
+ 	            ICompilationUnit unitA = pkg.createCompilationUnit("A.java", "public class A {}", false, null);
+ 	            ICompilationUnit unitB = pkg.createCompilationUnit("B.java", "public class B {}", false, null);
+ 	        }
+        },
+        null);
+</pre></font>
 
 <P>&nbsp;<a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved." border="0"></a>
 </P>
