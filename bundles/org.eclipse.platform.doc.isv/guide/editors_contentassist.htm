@@ -13,20 +13,37 @@ Content assist
 <BODY BGCOLOR="#ffffff">
 <H2>Content assist</H2>
 <p>&lt;in progress&gt;</p>
-<b><a href="../reference/api/org/eclipse/jface/text/contentassist/package-summary.html">org.eclipse.jface.text.contentassist</a>
-    </b>defines a text viewer add-on that provides user-driven <b>text completion</b> 
-    support.&nbsp; Popup windows are used to propose possible text choices to
+<p>Content assist allows you to provide context sensitive content completion
+upon request of the user.&nbsp; This functionality is implemented by the text
+framework in
+<b><a href="../reference/api/org/eclipse/jface/text/contentassist/package-summary.html">org.eclipse.jface.text.contentassist</a></b>.&nbsp;
+Popup windows are used to propose possible text choices to
     complete a phrase.&nbsp; The user can select these choices for automatic
     insertion in the text.&nbsp; Content assist also
     supports contextual popups for providing the user with information that is
-    related to the current position in the document.&nbsp; <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>
-    is a good place to begin learning about this package.&nbsp; It can be
-    configured with different phrase completion strategies for different
-    partition content types.
-<p>Content assist processors for the ContentAssistant</p>
-<p>Simple Java keyword processors and what they do when context information is
-requested</p>
-<p>How to install it (similar to syntax highlighting)</p>
+    related to the current position in the document.&nbsp;</p>
+<p>An editor provides content assist by providing an appropriate <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>.&nbsp;
+Setting up a content assistant is somewhat similar to setting up syntax
+highlighting.&nbsp; It can be configured with different phrase completion strategies for different
+    partition content types.&nbsp; The contentassistprocessor interface defines
+the behavior....</p>
+<p>The Java editor example defines processors for keywords....&nbsp;</p>
+<pre>public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+	ContentAssistant assistant= new ContentAssistant();
+	assistant.setContentAssistProcessor(new JavaCompletionProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
+	assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(), JavaPartitionScanner.JAVA_DOC);
+
+	assistant.enableAutoActivation(true);
+	assistant.setAutoActivationDelay(500);
+	assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
+	assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+	assistant.setContextInformationPopupBackground(JavaEditorEnvironment.getJavaColorProvider().getColor(new RGB(150, 150, 0)));
+
+	return assistant;
+}</pre>
+<p>Look briefly at the processors and what they do when context information is
+requested.</p>
+<p>&nbsp;</p>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 
