@@ -10,7 +10,7 @@
 <h1>Performance Tests HowTo</h1>
 <p>
 By Christof Marti and Andr&eacute; Weinand, IBM OTI Labs<br>
-2004/10/29<br>
+2004/11/1<br>
 
 <p>
 The Eclipse performance test plugin (org.eclipse.test.performance)
@@ -445,32 +445,45 @@ against the reference data, do the following:
 <h3>Viewing the data</h3>
 
 Since we do not (yet) have fancy visualization tools, the performance
-test plugin provides two classes
-that can be run as standalone programs for "dumping" the data contained
-in the database.
-For both programs you need to specify the database location via the <code>eclipse.perf.dbloc</code>
+test plugin provides a class <code>org.eclipse.test.internal.performance.db.View</code>
+that can be run as a standalone program for viewing the data contained in the database in a tabular format.
+<p>
+You need to specify the database location via the <code>eclipse.perf.dbloc</code>
 property (most easily done via a launch configuration).
-<ul>
-  <li>To view the data in a tabular format use the class <code>org.eclipse.test.internal.performance.db.View</code>.
-It produces the following output:
+Select the data to view by either specifying a variation via the <code>eclipse.perf.config</code> property or
+by directly setting the key/value pairs of the variation at the beginning of the program's <code>main</code> method.
+If you only want to view specific scenarios, use an appropriate pattern for the local variable <code>scenarioPattern</code>.
+The local variable <code>seriesKey</code> specifies what variation is shown on the x-axis of the table.
+<p>
+So the following setup:
 <pre>
-Scenario: org.eclipse.jdt.ui.tests.performance.views.PackageExplorerPerfTest#testOpen()
-Builds:                 base          b0003       b0004       b0007       b0008          b0009
-Kernel time:       30 ms [0]     10 ms [10]    0 ms [0]    0 ms [0]   20 ms [0]   13 ms [12.5]
-Elapsed Process:  325 ms [0]  491 ms [94.5]  358 ms [0]  296 ms [0]  316 ms [0]  304 ms [19.6]
-User time:        240 ms [0]    305 ms [45]  270 ms [0]  270 ms [0]  260 ms [0]   240 ms [8.2]
-System Time:      325 ms [0]  491 ms [94.5]  358 ms [0]  296 ms [0]  316 ms [0]  304 ms [19.6]
-CPU Time:         270 ms [0]    315 ms [55]  270 ms [0]  270 ms [0]  280 ms [0]   253 ms [4.7]
+public class View {
+
+    public static void main(String[] args) {
+        
+        Variations <b>variations</b>= PerformanceTestPlugin.getVariations();
+        variations.put("host", "relengwin");
+        variations.put("build", "I%");
+        
+        String <b>scenarioPattern</b>= "%RevertJavaEditorTest%";
+
+        String <b>seriesKey</b>= "build";
+        
+    	// ...
+</pre>
+creates a table showing all dimensions of the (single) scenario selected by the pattern 
+"<code>%testRevertJavaEditor%</code>" for all integration builds (that is builds starting with a capital 'I').
+<pre>
+Scenario: org.eclipse.jdt.text.tests.performance.RevertJavaEditorTest#testRevertJavaEditor()
+Builds:              I200409240800    I200409281200  I200410050800  I200410190941  I200410260800
+CPU Time:          1.02 s [284 ms]  1.05 s [327 ms]         971 ms            1 s         481 ms
+Committed:              69K [246K]      119K [389K]           103K           111K         -97484
+Elapsed Process:   1.02 s [286 ms]  1.07 s [345 ms]         981 ms         1.01 s         481 ms
+Kernel time:         41 ms [27 ms]    48 ms [40 ms]          46 ms          28 ms          22 ms
+Page Faults:             145 [125]        148 [125]            176            191            143
+System Time:       1.02 s [285 ms]  1.06 s [345 ms]         981 ms         1.01 s         477 ms
 </pre>
 
-If you don't want to see all data in the database you can modify the
-three SQL wildcards ("%") in the call to <code>DB.queryScenarios</code>.
-</li>
-
-<li>To dump the (quite voluminous) contents of all database tables
-run <code>org.eclipse.test.internal.performance.db.DBHelpers</code>.
-</li>
-</ul>
 
 <h3>How to setup a Cloudscape server (on Linux and MacOS X)</h3>
 
