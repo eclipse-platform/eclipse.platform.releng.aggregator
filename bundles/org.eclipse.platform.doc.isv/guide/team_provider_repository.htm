@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1"
- http-equiv="Content-Type">
-  <meta content="text/css" http-equiv="Content-Style-Type">
-  <link type="text/css" charset="ISO-8859-1" href="../book.css"
- rel="STYLESHEET">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+ type="text/css">
   <title>Implementing a repository provider</title>
-  <link href="../book.css" type="text/css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="../book.css">
 </head>
 <body style="background-color: rgb(255, 255, 255);">
 <h2>Repository providers</h2>
@@ -165,6 +165,31 @@ project persistent property to your project.
 method, which is called when its wizard is finished:
 </p>
 <pre><font color="#4444cc">public void setSharing(IProject project, FolderSyncInfo info, IProgressMonitor monitor) throws TeamException {<br>	<br>	// Ensure provided info matches that of the project<br>	...		<br>	// Ensure that the provided location is managed<br>	...		<br>	// Register the project with Team<br><b>	RepositoryProvider.map(project, CVSProviderPlugin.getTypeId());<br></b>}</font></pre>
+<h3> Finding a provider
+</h3>
+<p>Static methods in <font color="#4444cc"><b><a
+ href="file:///C:/Eclipse/workspaces/m8-head-another/org.eclipse.platform.doc.isv/reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b></font>
+make it easy for clients to map projects to providers and to find the
+providers associated with a given project.
+</p>
+<ul>
+  <li><b>map(IProject, String)</b> - instantiates a provider of the
+specified provider id and maps the specified project to it.&nbsp; This
+call sets the proper project persistent property on the project. </li>
+  <li><b>unmap(IProject, String)</b> - removes the association of the
+specified provider id from the specified project.&nbsp; Leaves the
+project unassociated with any team provider. </li>
+  <li><b>getProvider(IProject)</b> - answers the provider for a given
+project.&nbsp; Can be used to find any team provider for a
+project.&nbsp; </li>
+  <li><b>getProvider(IProject, String) </b>- answers the provider for
+a given project with the specified provider id.&nbsp; Can be used to
+check whether a particular team provider type is associated with a
+given project.&nbsp; It is commonly used by providers to quickly check
+whether a given project is under their care.&nbsp; This call is safer
+for clients since it does not return a provider that does not match the
+client's id.</li>
+</ul>
 <h3>Resource modification hooks<a name="hooks"></a></h3>
 <p>Most of the interesting function associated with a repository
 provider occurs as the user works with resources in the project that is
@@ -236,9 +261,9 @@ validateEdit</li>
     </ul>
   </li>
 </ul>
-<p><a href="../hglegal.htm"><img height="14" width="324" border="0"
- alt="Copyright IBM Corporation and others 2000, 2003."
- src="../ngibmcpy.gif"></a>
+<p><a href="../hglegal.htm"><img src="../ngibmcpy.gif"
+ alt="Copyright IBM Corporation and others 2000, 2003." border="0"
+ width="324" height="14"></a>
 </p>
 </body>
 </html>
