@@ -9,8 +9,7 @@
 <BODY BGCOLOR="#ffffff">
 
 <h3>Build configuration</h3>
-
-<p>The feature build mechanism is driven by a build configuration.&nbsp; The
+<p>The build mechanism is driven by a build configuration.&nbsp; The
 build configuration for an individual plug-in, fragment, or feature is found
 in a <b> build.properties</b> file for the corresponding element.</p>
 
@@ -24,29 +23,76 @@ The file itself follows the Java properties format. You need to provide a number
 keys and their corresponding values. Multiple values are separated using a comma
 as the delimiter. </p>
 
-<p>The most important keys to provide are those for mapping of source folders
-into run-time libraries. Those drive the build process, control where to
-find source code to compile and how to package it into the libraries. </p>
+<h4>Common properties</h4>
 <ul>
-  <li><b>source.&lt;library&gt;</b> - lists source folders to include for the library (e.g. <b>source.xyz.jar=src/, src-ant/</b>);
   <li><b>bin.includes</b> - lists files to include in the binary build;</li>
   <li><b>bin.excludes</b> - lists files to exclude from the binary build;</li>
-  <li><b>src.includes</b> - lists files to include in the source build;</li>
-  <li> <b>src.excludes</b> - lists files to exclude from the source build;</li>  
-  <li> <b>custom=true</b> - indicates that the build script is hand-crafted as opposed to automatically generated;</li>
-  <li> <b>jars.extra.classpath</b> - extra classpaths used to perform automated build. Classpath can either be relative paths, or
+  <br>
+  <li> <b>qualifier</b> - when the element version number ends with <b>.qualifier</b> this indicates by which value ".qualifier" must be replaced. The value of the property can either be <b>context</b>, <b>&lt;value&gt;</b> or <b>none</b>. 
+  Context will generate a date according to the system date, or use the CVS tags when the built is automated. Value is an actual value. None will remove ".qualifier";</li> 
+  <br>
+  <li> <b>custom=true</b> - indicates that the build script is hand-crafted as opposed to automatically generated. Therefore no  other value is not consulted.</	li>  
+</ul>
+
+<h4>Plugin specific properties</h4>
+<ul>
+  <li><b>source.&lt;library&gt;</b> - lists source folders to include for the library (e.g. <b>source.xyz.jar=src/, src-ant/</b>);. 
+  If the library is specified in your plugin.xml, the value should match it;</li>
+  <li><b>output.&lt;library&gt;</b> - lists the output folder receiving the result of the compilarion;</li>
+  <li> <b>extra.&lt;library&gt;</b> - extra classpaths used to perform automated build. Classpath can either be relative paths, or
 	platform urls referring to plug-ins and fragments of your development environment (e.g. <b>../someplugin/xyz.jar</b>, <b>platform:/plugins/org.apache.ant/ant.jar</b>).
 	If you use those build files in external build processes, refrains from using platform urls, or complement them 
 	with relative paths;</li>
-  <li> <b>jars.compile.order</b> - defines order in which jars should be compiled (in case there are multiple libraries);</li>
+  <br>	
+  <li><b>src.includes</b> - lists files to include in the source build;</li>
+  <li> <b>src.excludes</b> - lists files to exclude from the source build;</li>
+  <br>  
+  <li> <b>jars.extra.classpath</b> - <b>(deprecated)</b> same effect than extra.&lt;library&gt; except that the entries are applied to all libraries;</li>
+  <li> <b>jars.compile.order</b> - defines the order in which jars should be compiled (in case there are multiple libraries).</li>
 </ul>
+
 <p> The values
-defined for these keys are expressed as Ant "patterns". Standard formats give the expected results.&nbsp; For example, &quot;*<b>.jar</b>&quot; 
+defined for these keys ending with "includes" or "excludes" are expressed as Ant "patterns". Standard formats give the expected results.&nbsp; For example, &quot;*<b>.jar</b>&quot; 
 indicates all jar files in the top level directory. The patterns are not deep by default.&nbsp; If you want to
 describe all Java files for example, you should use the pattern "<b>**/*.java</b>".&nbsp;&nbsp;
 The pattern "<b>**</b>" matches any number of directory levels.&nbsp;
 Similarly, to describe whole sub-trees, use "<b>xyz/</b>".
  </p>
+<h4>Feature specific properties</h4>
+<ul>
+  <li><b>root</b> - list the files and folders that must be included in the root of the product. The different values supported are:
+  	<ul>
+  		<li>&lt;folderName&gt; - a relative path to a folder to be copied;</li>
+  		<li>file:&lt;fileName&gt; - a relative path to a file to be copied;</li>
+  		<li>absolute:&lt;folderName&gt; - an absolute path to a folder to be copied;</li>
+  		<li>absolute:file:&lt;fileName&gt; - an absolute path to a file to be copied;</li>
+  	</ul></li>
+  <li><b>root.&lt;config&gt;</b> - list the files and folders that must be included in the root of 
+the product when it is built for the specified configuration. config is composed of the three (3) segments of a configuration separated with a dot;</li>
+<br>
+	<li><b>root.permissions.&lt;permissionValue&gt;</b> - list the files and folders to chmod to the given value;</li>
+	<li><b>root.permissions.&lt;config&gt;.&lt;permissionValue&gt;</b> - list the files and folders to chmod to the given value for a specific configuration;</li>
+	<br>
+	<li><b>root.link</b> - list by pairs (separated by a comma) the files and folders that need to be symbolicly linked. The first entry indicate the source (target in the unix terminology) and the second entry the link name;</li>
+	<li><b>root.link.&lt;config&gt;</b> - a comma separated list of pairs of files and folders that need to be symbolicly linked for a specific configuration. The first entry indicate the source (target in the unix terminology) and the second entry the link name;</li>
+	<br>
+	<li><b>generate.feature@&lt;featureId&gt;</b> - indicates that the source feature <b>featureId</b> will be the source feature for the feature indicated as value of this property. 
+	The values listed after the first comma indicates elements to be fetched from the repository;</li>
+	<li><b>generate.plugin@&lt;pluginId&gt;</b> - indicates that the source plugin <b>pluginId</b> will be the source plugin for the indicated as value of this property.</li>
+</ul>
+
+The following example has been extracted from the build.properties of the org.eclipse.platform feature. 
+<pre>
+bin.includes=cpl-v10.html,eclipse_update_120.jpg,feature.xml,feature.properties,license.html
+
+root=rootfiles,file:../../plugins/org.eclipse.platform/startup.jar,configuration.files
+root.permissions.755=eclipse
+
+root.linux.motif.x86=../../plugins/platform-launcher/bin/linux/motif,linux.motif
+root.linux.motif.x86.link=libXm.so.2.1,libXm.so.2,libXm.so.2.1,libXm.so
+root.linux.motif.x86.permissions.755=*.so*
+</pre>
+
 <p  >&nbsp;
  </p>
 <p>&nbsp;<br>
