@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-  <meta http-equiv="Content-Type"
- content="text/html; charset=ISO-8859-1">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
- type="text/css">
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
   <title>Implementing a repository provider</title>
-  <link rel="stylesheet" type="text/css" href="../book.css">
+  <link href="../book.css" type="text/css" rel="stylesheet">
 </head>
 <body style="background-color: rgb(255, 255, 255);">
 <h2>Repository providers</h2>
@@ -190,20 +190,39 @@ whether a given project is under their care.&nbsp; This call is safer
 for clients since it does not return a provider that does not match the
 client's id.</li>
 </ul>
+<h3>Repository Providers and Capabilities</h3>
+<p>
+If a product chooses to add a Repository plug-in to a capability, it
+should bind the capability to the repository id. Here are the two steps
+to take to enable a RepositoryProvider as a capability:
+</p><p>
+1. Bind the capability to the repository provider id. This allows the
+Team plug-in to activate/disable based on repository provider ids.<br>
+<pre style="color: rgb(68, 68, 204);">&lt;activityPatternBinding<br>&nbsp;&nbsp;&nbsp; activityId="org.eclipse.team.cvs"<br>&nbsp;&nbsp;&nbsp; pattern="org\.eclipse\.team\.cvs\.core/.*cvsnature"&gt;<br>&lt;/activityPatternBinding&gt;</pre>
+</p><p>
+2. Next bind the capability to all UI packages for the provider:<br>
+<pre style="color: rgb(68, 68, 204);">&lt;activityPatternBinding<br>&nbsp;&nbsp;&nbsp;&nbsp; activityId="org.eclipse.team.cvs"<br>&nbsp;&nbsp;&nbsp;&nbsp; pattern="org\.eclipse\.team\.cvs\.ui/.*"&gt;<br>&lt;/activityPatternBinding&gt;<br></pre>
+
+</p><p>
+There are two capability triggers points defined by the Team plug-ins.
+The first is the <span style="font-weight: bold;">Team &gt; Share
+Project...</span> wizard which allows filtering of repository providers
+based on the enabled/disabled state of workbench capabilities, and the
+other is the Team plug-in auto-enablement trigger.</p>
 <h3>Resource modification hooks<a name="hooks"></a></h3>
-<p>Most of the interesting function associated with a repository provider occurs 
-  as the user works with resources in the project that is configured for the provider.&nbsp; 
-  In order to be aware of changes the user makes to a resource, the provider can 
-  implement <a
- href="resAdv_hooks.htm">resource modification hooks</a>.&nbsp; The resources 
-  plug-in provides these hooks as extension points.&nbsp; The documentation for 
-  <a
- href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>, 
-  <a
- href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html"><b>IFileModificationValidator</b></a> 
-  and <a
- href="../reference/api/org/eclipse/core/resources/team/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a> 
-  describe the details for implementing these hooks.</p>
+<p>Most of the interesting function associated with a repository
+provider occurs as the user works with resources in the project that is
+configured for the provider.&nbsp; In order to be aware of changes the
+user makes to a resource, the provider can implement <a
+ href="resAdv_hooks.htm">resource modification hooks</a>.&nbsp; The
+resources plug-in provides these hooks as extension points.&nbsp; The
+documentation for <a
+ href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>,
+<a
+ href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html"><b>IFileModificationValidator</b></a>
+and <a
+ href="../reference/api/org/eclipse/core/resources/team/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a>
+describe the details for implementing these hooks.</p>
 <p>The team plug-in optimizes and simplifies the association of the
 hook with
 appropriate resources by registering generic hooks with the resources
@@ -243,16 +262,17 @@ any given time.&nbsp; Pessimistic versioning could be implemented by
 checking out a file (if not already checked out) whenever a file is
 edited, and checking the file back in when it is saved. Since CVS uses
 an optimistic versioning scheme, it does not implement this hook.</li>
-  <li><strong>getRuleFactory</strong> - answers a resource rule factory appropriate 
-    for the provider. Providers should always override this method as the default 
-    factory locks the workspace for all operations for backwards compatibility 
-    reasons. Provides should subclass <a
- href="../reference/api/org/eclipse/core/resources/team/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a> 
-    and override those rules required to ensure that the proper rules are obtained 
-    for operations that invoke the move/delete hook and file modification validator. 
-    The rule methods of particular interest to repository providers are: 
+  <li><strong>getRuleFactory</strong> - answers a resource rule factory
+appropriate for the provider. Providers should always override this
+method as the default factory locks the workspace for all operations
+for backwards compatibility reasons. Provides should subclass <a
+ href="../reference/api/org/eclipse/core/resources/team/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a>
+and override those rules required to ensure that the proper rules are
+obtained for operations that invoke the move/delete hook and file
+modification validator. The rule methods of particular interest to
+repository providers are:
     <ul>
-      <li><em>deleteRule</em> - move/delet hook</li>
+      <li><em>deleteRule</em> - move/delete hook</li>
       <li><em>moveRule</em> -move/delete hook</li>
       <li><em>validateEditRule</em> - file modification validator
 validateEdit</li>
@@ -260,9 +280,8 @@ validateEdit</li>
     </ul>
   </li>
 </ul>
-<p><a href="../notices.html"><img src="../cpy.gif"
- alt="Legal notices." border="0"
- width="324" height="14"></a>
+<p><a href="../notices.html"><img height="14" width="324" border="0"
+ alt="Legal notices." src="../cpy.gif"></a>
 </p>
 </body>
 </html>
