@@ -18,8 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -35,7 +33,6 @@ public class DB {
     public static final String DB_NAME= "perfDB";	// default db name //$NON-NLS-1$
     
     private static final boolean DEBUG= false;
-    private static final DateFormat DATE_FORMAT= new SimpleDateFormat();
     
     private static final String LOCALHOST= "localhost";  //$NON-NLS-1$
     
@@ -411,7 +408,7 @@ public class DB {
     private void doesDBexists() throws SQLException {
         Statement stmt= fConnection.createStatement();
         try {
-	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' ");
+	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' "); //$NON-NLS-1$
 	        while (rs.next())
 	            if (rs.getInt(1) >= 6)
 	                return;
@@ -428,58 +425,58 @@ public class DB {
             return;
         Statement stmt= fConnection.createStatement();
         try {
-            System.out.println("CONFIG(ID, HOST, PLATFORM):");
-	        ResultSet rs= stmt.executeQuery("SELECT ID, HOST, PLATFORM FROM CONFIG");
+            System.out.println("CONFIG(ID, HOST, PLATFORM):"); //$NON-NLS-1$
+	        ResultSet rs= stmt.executeQuery("SELECT ID, HOST, PLATFORM FROM CONFIG"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1));
-	            System.out.print(" " + rs.getString(2));
-	            System.out.print(" " + rs.getString(3));
+	            System.out.print(' ' + rs.getInt(1));
+	            System.out.print(' ' + rs.getString(2));
+	            System.out.print(' ' + rs.getString(3));
 	            System.out.println();
 	        }
             System.out.println();
-            System.out.println("SCENARIO(ID, NAME):");
-	        rs= stmt.executeQuery("SELECT ID, NAME FROM SCENARIO");
+            System.out.println("SCENARIO(ID, NAME):"); //$NON-NLS-1$
+	        rs= stmt.executeQuery("SELECT ID, NAME FROM SCENARIO"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1));
-	            System.out.print(" " + rs.getString(2));
+	            System.out.print(' ' + rs.getInt(1));
+	            System.out.print(' ' + rs.getString(2));
 	            System.out.println();
 	        }
             System.out.println();
-            System.out.println("SAMPLE(ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME):");
-	        rs= stmt.executeQuery("SELECT ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME FROM SAMPLE");
+            System.out.println("SAMPLE(ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME):"); //$NON-NLS-1$
+	        rs= stmt.executeQuery("SELECT ID, CONFIG_ID, SCENARIO_ID, TAG_ID, STARTTIME FROM SAMPLE"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1));
-	            System.out.print(" " + rs.getInt(2));
-	            System.out.print(" " + rs.getInt(3));
-	            System.out.print(" " + rs.getInt(4));
-	            System.out.print(" " + rs.getTimestamp(5));
+	            System.out.print(' ' + rs.getInt(1));
+	            System.out.print(' ' + rs.getInt(2));
+	            System.out.print(' ' + rs.getInt(3));
+	            System.out.print(' ' + rs.getInt(4));
+	            System.out.print(' ' + rs.getTimestamp(5).toString());
 	            System.out.println();
 	        }
             System.out.println();
-            System.out.println("TAG(ID, NAME):");
-	        rs= stmt.executeQuery("SELECT ID, NAME FROM TAG");
+            System.out.println("TAG(ID, NAME):"); //$NON-NLS-1$
+	        rs= stmt.executeQuery("SELECT ID, NAME FROM TAG"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1));
-	            System.out.print(" " + rs.getString(2));
+	            System.out.print(' ' + rs.getInt(1));
+	            System.out.print(' ' + rs.getString(2));
 	            System.out.println();
 	        }
             System.out.println();
-            System.out.println("DATAPOINT(ID, SAMPLE_ID, SEQ, STEP):");
-	        rs= stmt.executeQuery("SELECT ID, SAMPLE_ID, SEQ, STEP FROM DATAPOINT");
+            System.out.println("DATAPOINT(ID, SAMPLE_ID, SEQ, STEP):"); //$NON-NLS-1$
+	        rs= stmt.executeQuery("SELECT ID, SAMPLE_ID, SEQ, STEP FROM DATAPOINT"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1));
-	            System.out.print(" " + rs.getInt(2));
-	            System.out.print(" " + rs.getInt(3));
-	            System.out.print(" " + rs.getInt(4));
+	            System.out.print(' ' + rs.getInt(1));
+	            System.out.print(' ' + rs.getInt(2));
+	            System.out.print(' ' + rs.getInt(3));
+	            System.out.print(' ' + rs.getInt(4));
 	            System.out.println();
 	        }
             System.out.println();
-            System.out.println("SCALAR(DATAPOINT_ID, DIM_ID, VALUE):");
-	        rs= stmt.executeQuery("SELECT DATAPOINT_ID, DIM_ID, VALUE FROM SCALAR");
+            System.out.println("SCALAR(DATAPOINT_ID, DIM_ID, VALUE):"); //$NON-NLS-1$
+	        rs= stmt.executeQuery("SELECT DATAPOINT_ID, DIM_ID, VALUE FROM SCALAR"); //$NON-NLS-1$
  	        while (rs.next()) {
-	            System.out.print(" " + rs.getInt(1));
-	            System.out.print(" " + rs.getInt(2));
-	            System.out.print(" " + rs.getBigDecimal(3));
+	            System.out.print(' ' + rs.getInt(1));
+	            System.out.print(' ' + rs.getInt(2));
+	            System.out.print(' ' + rs.getBigDecimal(3).toString());
 	            System.out.println();
 	        }
             System.out.println();
