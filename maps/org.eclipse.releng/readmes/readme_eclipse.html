@@ -834,113 +834,76 @@ Note that J2SE 1.3.1 for Mac OS X does have this problem. (bug <a href="http://d
 Ensure that the AIX installed includes the necessary service updates as
 described in an attachment to the Eclipse bug report. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=34524">34524</a>)</p>
 <b>
-<p><font color="#00FF00">Available colors on 8-bit Linux (Linux only)</font></p>
+<p>Available colors on 8-bit Linux (Linux only)</p>
 </b>
-<p><font color="#00FF00">Typically, in Gnome Linux installs running with 8-bit
-visuals (i.e. 256 color mode), before the Eclipse application is started you
-already do not have any free colors. This may mean that Eclipse is unable to
-allocate the default widget background color, causing it to display a white
-background. The functionality, however, is otherwise unaffected.</font></p>
+<p>Typically, in Gnome Linux installs running with 8-bit visuals (i.e. 256 color
+mode), before the Eclipse application is started you already do not have any
+free colors. This may mean that Eclipse is unable to allocate the default widget
+background color, causing it to display a white background. The functionality,
+however, is otherwise unaffected.</p>
 <b>
-<p><font color="#00FF00">Printing support (Linux only)</font></p>
+<p>List and ComboBox on Windows NT (Windows NT only)</p>
 </b>
-<p><font color="#00FF00">The X printing extension implementation on Linux is
-currently disabled because it can take up to 7 seconds to determine that the X
-print server is not running. Until this is rectified, <code>Printer.getPrinterList()</code>
-will always return an empty array on Linux. (<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8821">bug
-8821</a>)</font></p>
+<p>On Windows NT only, you should avoid creating items in a <code>List</code> or
+<code>ComboBox</code> with strings longer than 1000 characters. Doing so may
+result in a General Protection Fault. This has been fixed in more recent
+versions of Windows.</p>
 <b>
-<p><font color="#00FF00">Disposing in a focus event</font></p>
+<p>BiDi support</p>
 </b>
-<p><font color="#00FF00">Applications should not dispose widgets in focus
-changing events. Doing so on Motif may cause Eclipse to terminate, since Motif
-accesses the disposed widget within their internal focus change event handler. A
-similar (but less serious) issue exists on Windows and occasionally results in
-an SWT exception being thrown.</font></p>
+<p>The <code>StyledText</code> widget provides bidirectional language support
+for Hebrew and Arabic locales. Currently this support is available only on
+Windows and has several known problems.</p>
 <b>
-<p><font color="#00FF00">List and ComboBox on Windows NT (Windows NT only)</font></p>
+<p>Cursor constructor arguments</p>
 </b>
-<p><font color="#00FF00">On Windows NT only, you should avoid creating items in
-a <code>List</code> or <code>ComboBox</code> with strings longer than 1000
-characters. Doing so may result in a General Protection Fault. This has been
-fixed in more recent versions of Windows.</font></p>
+<p>In the constructor <code>Cursor(Device device, ImageData source, ImageData
+mask, int hotspotX, int hotspotY)</code>, when both a source and mask argument
+are specified (that is, the mask is not null), the meaning of the two arguments
+is reversed. That is, the &quot;mask&quot; argument should be the source image
+and the &quot;source&quot; argument should be the mask image. (<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4809">bug
+4809</a>)</p>
 <b>
-<p><font color="#00FF00">BiDi support</font></p>
+<p>Using IBM J9 VM (Photon and AIX)</p>
 </b>
-<p><font color="#00FF00">The <code>StyledText</code> widget provides
-bidirectional language support for Hebrew and Arabic locales. Currently this
-support is available only on Windows and has several known problems.</font></p>
+<p>On QNX Photon and IBM AIX, the SWT library will not be found when running
+with an IBM J9 1.5 VM. This is a bug in the IBM J9 class library in version 1.5.
+You can workaround this problem by adding the SWT library directory to your
+LD_LIBRARY_PATH environment variable.</p>
 <b>
-<p><font color="#00FF00">Cursor constructor arguments</font></p>
+<p>Missing permissions for SWT native libraries in workspace (HP-UX only)</p>
 </b>
-<p><font color="#00FF00">In the constructor <code>Cursor(Device device,
-ImageData source, ImageData mask, int hotspotX, int hotspotY)</code>, when both
-a source and mask argument are specified (that is, the mask is not null), the
-meaning of the two arguments is reversed. That is, the &quot;mask&quot; argument
-should be the source image and the &quot;source&quot; argument should be the
-mask image. (<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=4809">bug 4809</a>)</font></p>
-<b>
-<p><font color="#00FF00">Using IBM J9 VM (Photon and AIX)</font></p>
-</b>
-<p><font color="#00FF00">On QNX Photon and IBM AIX, the SWT library will not be
-found when running with an IBM J9 1.5 VM. This is a bug in the IBM J9 class
-library in version 1.5. You can workaround this problem by adding the SWT
-library directory to your LD_LIBRARY_PATH environment variable.</font></p>
-<b>
-<p><font color="#00FF00">Missing permissions for SWT native libraries in
-workspace (HP-UX only)</font></p>
-</b>
-<p><font color="#00FF00">When retrieving the SWT Motif fragment into an Eclipse
-workspace, the permissions of the native libraries are reset. This creates a
-problem on HP-UX because shared libraries need to have execute permission.
-Attempting to self-host with this fragment throws an UnsatisfiedLinkError...Permission
-Denied error. You must manually change the permissions to make these libraries
-accessible (assume the workspace is at <code>/workspace</code>):</font></p>
+<p>When retrieving the SWT Motif fragment into an Eclipse workspace, the
+permissions of the native libraries are reset. This creates a problem on HP-UX
+because shared libraries need to have execute permission. Attempting to
+self-host with this fragment throws an UnsatisfiedLinkError...Permission Denied
+error. You must manually change the permissions to make these libraries
+accessible (assume the workspace is at <code>/workspace</code>):</p>
 <blockquote>
   <blockquote>
-    <p><code><font color="#00FF00">cd /workspace/org.eclipse.swt.motif/os/hpux/PA_RISC<br>
-    chmod 555 *.sl</font></code></p>
+    <p><code>cd /workspace/org.eclipse.swt.motif/os/hpux/PA_RISC<br>
+    chmod 555 *.sl</code></p>
   </blockquote>
 </blockquote>
-<p><font color="#00FF00">(<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20305">bug
-20305</a> describes a related problem)</font></p>
+<p>(<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20305">bug 20305</a>
+describes a related problem)</p>
 <b>
-<h4><font color="#00FF00">Javadoc not consistent across platforms</font></h4>
+<h4>JAWS requires MSAA for List Views to read checkboxes in Tables (Windows
+only)</h4>
 </b>
-<p><font color="#00FF00">Because of a bug in the way we updated the javadoc in
-SWT source code, the javadoc for protected methods is not consistent across
-platforms. The javadoc for the Windows platform, which is used to generate the
-documentation that appears in the Platform Plug-in Developer guide, is the
-definitive source. The javadoc for the other window systems will be brought into
-line in a future release. (<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20968">bug
-20968</a>)</font></p>
-<b>
-<h4><font color="#00FF00">JAWS requires MSAA for List Views to read checkboxes
-in Tables (Windows only)</font></h4>
-</b>
-<p><font color="#00FF00">In order for JAWS to detect the checkbox information in
-Tables, MSAA support for List Views must be activated as follows:</font></p>
+<p>In order for JAWS to detect the checkbox information in Tables, MSAA support
+for List Views must be activated as follows:</p>
 <blockquote>
   <ol>
-    <li><font color="#00FF00">Open Eclipse and hit INSERT + F2.</font></li>
-    <li><font color="#00FF00">In the Run JAWS Manager dialog select
-      Configuration Manager.</font></li>
-    <li><font color="#00FF00">In the Jaws Configuration Manager that opens up,
-      select Set Options and then select Advanced Options.</font></li>
-    <li><font color="#00FF00">Check &quot;Rely on MSAA for List views&quot;.</font></li>
-    <li><font color="#00FF00">Hit the OK button.</font></li>
-    <li><font color="#00FF00">Choose <b>File &gt; Save</b> from the menu bar.</font></li>
+    <li>Open Eclipse and hit INSERT + F2.</li>
+    <li>In the Run JAWS Manager dialog select Configuration Manager.</li>
+    <li>In the Jaws Configuration Manager that opens up, select Set Options and
+      then select Advanced Options.</li>
+    <li>Check &quot;Rely on MSAA for List views&quot;.</li>
+    <li>Hit the OK button.</li>
+    <li>Choose <b>File &gt; Save</b> from the menu bar.</li>
   </ol>
 </blockquote>
-<b>
-<h4><font color="#00FF00">No accelerators or mnemonics on Solaris (Solaris only)</font></h4>
-</b>
-<p><font color="#00FF00">The Solaris implementation of Motif has a long-standing
-bug with respect to adding and removing accelerators and mnemonics. The behavior
-is such that the time to do so becomes increasingly longer each time it occurs,
-to the point that, in Eclipse's case, it can take more than a minute to switch
-between editors and views! Because of this, accelerators and mnemonics are
-explicitly ignored on Solaris.</font></p>
 <h3>3.1.7 <a name="I-Platform - Team - CVS">Platform - Team - CVS</a></h3>
 <p>Note: Additional information on how to use CVS from Eclipse can be found in
 the <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-vcm-home/docs/online/cvs_features2.0/cvs-faq.html">Eclipse
@@ -1298,149 +1261,72 @@ properly. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20644">bug
 20644</a>)</font></p>
 <h3>3.3 <a name="I-Plug-in Development Environment (PDE)">Plug-in Development
 Environment (PDE)</a></h3>
-<h4><font color="#00FF00">Comments in source pages of PDE XML editors</font></h4>
-<p><font color="#00FF00">PDE provides a number of multi-page editors that
-include a raw source page. Editors that handle XML files (plug-in, fragment and
-feature manifests) will preserve comments in most cases. However, comments will
-not be preserved if added before the root XML element, or if added after the
-last child element contained in the parent element. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=8000">bug
-8000</a>)</font></p>
-<h4><font color="#00FF00">Clipboard operations in the property view</font></h4>
-<p><font color="#00FF00">Clipboard shortcuts (Ctrl+X, Ctrl+C, Ctrl+V etc.) do
-not work in cell editors of properties that belong to the PDE Plug-in Manifest
-Editor. Use pop-up menu to activate these operations. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=13776">bug
-13776</a>)</font></p>
-<h4><font color="#00FF00">Problem while importing fragments</font></h4>
-<p><font color="#00FF00">If a workspace contains binary projects for a plug-in
-and a fragment that references that plug-in, fragment libraries are added to the
-class path of the referenced plug-in project. When an attempt is made to
-overwrite the plug-in and the fragment with versions from another build,
-deletion of the old fragment may fail. If that happens, repeat the operation to
-repair the workspace. Only the affected plug-in and fragment need to be
-re-imported. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=16921">bug
-16921</a>)</font></p>
-<h4><font color="#00FF00">Assumption that output is in bin/ folder</font></h4>
-<p><font color="#00FF00">PDE assumes that all plug-in and fragment projects that
-contain Java code have one or more source folders and build output in the <b>bin/</b>
-folder. Although it is possible to change the name of the output folder in
-Properties dialog, the PDE run-time workbench launcher does not work correctly
-for those plug-ins. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=17444">bug
-17444</a>)</font></p>
-<h4><font color="#00FF00">Preferences not working with import/export</font></h4>
-<p><font color="#00FF00">Preferences set in PDE preference page called <b>Target
-Platform</b> are not preserved the same way as other preferences. Consequently,
-they are not subject to Import/Export operations in the Preferences dialog. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19688">bug
-19688</a>)</font></p>
-<h4><font color="#00FF00">Clipboard operations do not work in the Feature
-Manifest Editor</font></h4>
-<p><font color="#00FF00">GUI pages of the Feature Manifest Editor support pop-up
-menus that contain standard clipboard operations (<b>Cut</b>, <b>Copy</b>, <b>Paste</b>).
-However, none of these operations work for structural widgets (trees and lists).
-The only place where these operations do work is in text widgets in Information
-and Source page (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20460">bug
-20460</a>)</font></p>
-<h4><font color="#00FF00">Choosing Compute Build Path causes Java project to no
-longer build</font></h4>
-<p><font color="#00FF00">PDE computes the build class path of a plug-in project
-by looking up source mappings in the <code>build.properties</code> file. This
-file defines how source folders are compiled into runtime libraries. In the
-absence of this file, PDE will compute the class path that contains no source
-folders, resulting in compilation errors. The required <code>build.properties</code>
-file is generated by PDE when a new plug-in project is created. If the plug-in
-project is created in some other way, a <code>build.properties</code> file must
-be added manually. See the PDE Guide for details on the format of <code>build.properties</code>
-files. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=9765">bug 9765</a>)</font></p>
-<h4><font color="#00FF00">ECLIPSE_HOME produces fragile class paths due to
-version numbers in plug-in directory paths</font></h4>
-<p><font color="#00FF00">Eclipse products are typically built so that plug-ins
-are located in the same directory and each plug-in is in the directory whose
-name includes both a plug-in id and a version id (e.g., &quot;<code>org.eclipse.ui_2.0.0</code>&quot;).
-If external plug-ins are used while self-hosting, these plug-in directory names
-show up in PDE-generated class paths. These class path are sensitive to plug-in
-version changes and must be recomputed if the target platform uses different
-version numbers. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=15199">bug
-15199</a>)</font></p>
-<h4><font color="#00FF00">Plug-in import wizard does not allow plug-ins of
-different versions to be imported</font></h4>
-<p><font color="#00FF00">The Eclipse platform allows two plug-ins with the same
-ID but different versions to coexist if the only thing they contribute is
-run-time libraries. However, PDE cannot handle these plug-ins because it creates
-project names using plug-in IDs during binary project import. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18500">bug
-18500</a>)</font></p>
-<h4><font color="#00FF00">PDE nature required for plug-in manifest syntax
-checking</font></h4>
-<p><font color="#00FF00">PDE will only be able to provide syntax checking and
-error/warning markers for plug-in manifests if the plug-in project has the PDE
-plug-in nature. A plug-in project automatically gets this nature when created by
-a PDE wizard. This situation can only occur if a regular Java project has been
-used to host a plug-in. The problem can be fixed by converting it into a PDE
-project. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19248">bug 19248</a>)</font></p>
-<h4><font color="#00FF00">PDE does not preserve original manifest file layout</font></h4>
-<p><font color="#00FF00">When non-Source page of a PDE manifest editor is used,
-PDE will convert changes back into XML by regenerating the file. Although the
-overall content and the comments are preserved, the actual file layout is not.
-This may cause problems by showing false changes during file compare. If file
-layout is important, perform all editing in the Source page. Alternatively,
-avoid using Source pages altogether. Since XML files are generated in a way that
-respects and preserves the relative order of major elements (extensions,
-extension points etc.), changes made in a non-Source page of a PDE manifest
-editor do not result in false deltas during file compare. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19251">bug
-19251</a>)</font></p>
-<h4><font color="#00FF00">Go To Line in manifest editor causes Outline view to
-go blank</font></h4>
-<p><font color="#00FF00">When the <b>Source &gt; Go To Line</b> command is
-invoked in the Source page of a PDE manifest editor, the Outline view will
-become gray. Since the Source page does not have a functional outline, there is
-no actual loss of function. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19361">bug
-19361</a>)</font></p>
-<h4><font color="#00FF00">New Feature wizard does not generate build.properties
-file</font></h4>
-<p><font color="#00FF00">When creating a new feature project, the PDE wizard
-does not automatically generate a <code>build.properties</code> file. As a
-result, building the feature will create a feature JAR without any content. To
-work around this, create a <code>build.properties</code> manually using the
-instructions provided in the PDE Guide. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20118">bug
-20118</a>)</font></p>
-<h4><font color="#00FF00">Update Classpath attaches source from the wrong
-Eclipse install</font></h4>
-<p><font color="#00FF00">Java libraries are associated with source code
-according to source code locations specified in a PDE preference. By default,
-these locations are registered by plug-ins of the design-time Eclipse instance.
-If the target platform is not the same as the design instance, the source code
-provided by these plug-ins will not be in sync with the libraries. The
-workaround is to uncheck the default locations and define new source code
-locations that point to the source-bearing plug-ins in the target Eclipse
-installation. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20578">bug
-20578</a>)</font></p>
-<h4><font color="#00FF00">No way to specify plug-in library type</font></h4>
-<p><font color="#00FF00">PDE manifest editors do not provide widgets for
-specifying run-time library types as being either &quot;code&quot; or
-&quot;resource&quot;. The only way to specify this attribute is to add it
-manually in the source page. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20757">bug
-20757</a>)</font></p>
-<h4><font color="#00FF00">Run-time libraries exported through more than 2
-plug-ins not in classpath</font></h4>
-<p><font color="#00FF00">If a plug-in requires a runtime library exported
-through more than two plug-ins, it is not automatically added to the compile
-class path when generating the <code>build.xml</code> file. Example: Plug-in A
-export its libraries, plug-in B requires plug-in A and re-exports A, plug-in C
-requires plug-in B and re-exports B. If plug-in D requires plug-in C, when
-generating the <code>build.xml</code> file, plug-in A libraries will not be
-added to the compile path even though they will be available at runtime. The
-problem can be worked around as follows::</font></p>
-<blockquote>
-  <ol>
-    <li><font color="#00FF00">Generate a <code>build.xml</code> using PDE
-      (select the <code>plugin.xml</code> file and click <b>Create Plug-in JARs</b>)</font></li>
-    <li><font color="#00FF00">Edit the <code>build.properties</code> and add the
-      following line:<code><br>
-      custom = true</code></font></li>
-    <li><font color="#00FF00">Add the missing JARs to the classpath of the javac
-      task in <code>build.xml</code>.</font></li>
-  </ol>
-</blockquote>
-<p><font color="#00FF00">(<a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20119">bug
-20119</a>)</font></p>
+<h4>PDE source page colors do not take effect on Apply</h4>
+<p>Changes to the colors PDE uses for source pages of its multi-page editors are
+not immediately visible in opened editors after pressing the Apply button
+on&nbsp; the <b>Plug-in Development &gt; Editors preference</b> page. To work
+around this problem, close the editor and and reopen it. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33640">33640</a>)</p>
+<h4>Icons folder not included in bin.includes of some PDE templates</h4>
+<p>PDE provides a number of templates that can be used to create fully
+functioning plug-in projects and/or extensions. When projects are created, the <code>build.properties</code>
+file is created with the initial content, which includes the property 'bin.includes'
+listing the plug-in manifest and its code JARs. However, it omits mention of
+other files created by the template, such as the <code>icons/</code> folder. As
+a request, these extra files do not end up in the plug-in when built using Ant
+build file or exported using 'Export deployable plug-ins and fragments' wizard.
+To work around this problem, add these files and directories manually in
+build.properties file. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=35554">35554</a>)</p>
+<b><font face="Times New Roman">
+<p>Emacs key bindings do not work in manifest editor fields</p>
+</font></b><font face="Times New Roman">
+<p>Non-default key bindings currently do not work in fields on non-source pages
+of the PDE manifest editors. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19482">19482</a>)</p>
+</font>
+<h4>Comments in source pages of PDE XML editors</h4>
+<p>PDE provides a number of multi-page editors that include a raw source page.
+Editors that handle XML files (plug-in, fragment and feature manifests) will
+preserve comments in most cases. However, comments will not be preserved if
+added before the root XML element, or if added after the last child element
+contained in the parent element. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=8000">bug
+8000</a>)</p>
+<h4>Problem while importing fragments</h4>
+<p>If a workspace contains binary projects for a plug-in and a fragment that
+references that plug-in, fragment libraries are added to the class path of the
+referenced plug-in project. When an attempt is made to overwrite the plug-in and
+the fragment with versions from another build, deletion of the old fragment may
+fail. If that happens, repeat the operation to repair the workspace. Only the
+affected plug-in and fragment need to be re-imported. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=16921">bug
+16921</a>)</p>
+<h4>Plug-in import wizard does not allow plug-ins of different versions to be
+imported</h4>
+<p>The Eclipse platform allows two plug-ins with the same ID but different
+versions to coexist if the only thing they contribute is run-time libraries.
+However, PDE cannot handle these plug-ins because it creates project names using
+plug-in IDs during binary project import. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18500">bug
+18500</a>)</p>
+<h4>PDE nature required for plug-in manifest syntax checking</h4>
+<p>PDE will only be able to provide syntax checking and error/warning markers
+for plug-in manifests if the plug-in project has the PDE plug-in nature. A
+plug-in project automatically gets this nature when created by a PDE wizard.
+This situation can only occur if a regular Java project has been used to host a
+plug-in. The problem can be fixed by converting it into a PDE project. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19248">bug
+19248</a>)</p>
+<h4>PDE does not preserve original manifest file layout</h4>
+<p>When non-Source page of a PDE manifest editor is used, PDE will convert
+changes back into XML by regenerating the file. Although the overall content and
+the comments are preserved, the actual file layout is not. This may cause
+problems by showing false changes during file compare. If file layout is
+important, perform all editing in the Source page. Alternatively, avoid using
+Source pages altogether. Since XML files are generated in a way that respects
+and preserves the relative order of major elements (extensions, extension points
+etc.), changes made in a non-Source page of a PDE manifest editor do not result
+in false deltas during file compare. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19251">bug
+19251</a>)</p>
+<h4>Go To Line in manifest editor causes Outline view to go blank</h4>
+<p>When the <b>Source &gt; Go To Line</b> command is invoked in the Source page
+of a PDE manifest editor, the Outline view will become gray. Since the Source
+page does not have a functional outline, there is no actual loss of function. (<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19361">bug
+19361</a>)</p>
 <h3>3.4 <a name="I-Other - FTP and WebDAV support">Other</a></h3>
 <h3>3.4.1 F<a name="I-Other - FTP and WebDAV support">TP and WebDAV support</a></h3>
 <h4><font color="#00FF00">When mapped to a target, the project folder is ignored</font></h4>
