@@ -23,7 +23,7 @@ following entries describe the areas that changed and provide instructions for
   <li><a href="#Preference Store">Plug-in Preferences</a></li>
   <li><a href="#IPath Changes">Changes to IPath constraints</a></li>
   <li><a href="#Extension Registry">Extension registry</a></li>
-  
+  <li><a href="#Code Formatter Options">Code formatter options</a></li>  
 </ol>
 <hr>
 
@@ -137,11 +137,21 @@ an <code>isValid()</code> pre-check) is the only surefire way to deal with the
 case of a plug-in being removed by a concurrent thread (which, if it happens, it
 almost certainly will be).</p>
 
+<h2><a name="Code Formatter Options"></a>4. Code formatter options</h2>
+<p><b>What is affected:</b> Plug-ins that programmatically access the Java code formatter options.</p>
 
-
-
-
-
+<p><b>Description:</b> In Eclipse 3.0, the values for the code formatter option 
+  <code>org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR</code> 
+  could only be <code>TAB</code> or <code>SPACE</code>. The specification made 
+  no explicit mention that the value type was an enumeration that might grow in 
+  future releases. In Eclipse 3.1, a third possible value, <code>#MIXED</code>, 
+  was added to address bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=73104">73104</a>. 
+  The specification has been changed to include this new value, and to allow for 
+  more values being added in the future.</p>
+<p><b>Action required:</b>Clients programmatically reading or setting this code 
+  formatter option should check their code to take account of the new third value, 
+  and to ensure that it is written in a robust way that fails gracefully if it 
+  ever encounters an option value that it did not anticipate.</p>
 <p><a href="../../notices.html"><img src="../../cpy.png" border="0" alt="Legal notices" ></a></p>
 </body>
 </html>
