@@ -26,16 +26,19 @@ for the Java project and running the class by name. The following code snippet s
    IVMInstall vmInstall = JavaRuntime.getVMInstall(myJavaProject);
    if (vmInstall == null)
       vmInstall = JavaRuntime.getDefaultVMInstall();
-   IVMRunner vmRunner = vmInstall.getVMRunner(ILaunchManager.RUN_MODE);
-   if (vmRunner != null) {
-      String[] classPath = null;
-      try {
-         classPath = JavaRuntime.computeDefaultRuntimeClassPath(myJavaProject);
-      } catch (CoreException e) { }
-      if (classPath != null) {
-         VMRunnerConfiguration vmConfig = 
-            new VMRunnerConfiguration(&quot;MyClass&quot;, classPath);
-         VMRunnerResult result = vmRunner.run(vmConfig);
+   if (vmInstall != null) {
+      IVMRunner vmRunner = vmInstall.getVMRunner(ILaunchManager.RUN_MODE);
+      if (vmRunner != null) {
+         String[] classPath = null;
+         try {
+            classPath = JavaRuntime.computeDefaultRuntimeClassPath(myJavaProject);
+         } catch (CoreException e) { }
+         if (classPath != null) {
+            VMRunnerConfiguration vmConfig = 
+               new VMRunnerConfiguration(&quot;MyClass&quot;, classPath);
+            ILaunch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
+            vmRunner.run(vmConfig, launch, null);
+         }
       }
    }
 </pre></font>
