@@ -14,7 +14,7 @@
 
 <h1>Eclipse 3.0 Porting Guide</h1>
 <p>Draft for 3.0 M6<br>
-Last revised December 11, 2003</p>
+Last revised December 16, 2003</p>
 <p><i>Note: This is a work in progress. An up-to-date draft of the Eclipse 3.0
 Porting Guide is being included with each milestone build to facilitate climbing
 aboard the 3.0 release wagon at an early stage, or to estimate the amount of
@@ -627,6 +627,98 @@ been changed to match the others. Existing code that was functioning correctly
 on {Windows, GTK} and on {Motif, Photon} is unlikely to be affected. But it is
 wise to check your code to ensure that it does not rely on an invalid event
 order.</p>
+<h3>IResourceChangeEvent (org.eclipse.core.resources)</h3>
+<p>In Eclipse 3.0, workspace auto-build now occurs in a background thread. This
+required an API contract change to <tt>IResourceChangeEvent</tt>. The contract
+of <tt>IResourceChangeEvent</tt> previously guaranteed the following ordering of
+events for all workspace changes:
+<ol>
+  <li><tt>PRE_DELETE</tt> or <tt>PRE_CLOSE</tt> event notification if applicable</li>
+  <li>Perform the operation</li>
+  <li><tt>PRE_AUTO_BUILD</tt> event notification</li>
+  <li>If auto-build is on, perform incremental workspace build</li>
+  <li><tt>POST_AUTO_BUILD</tt> event notification</li>
+  <li><tt>POST_CHANGE</tt> event notification</li>
+</ol>
+<p>With auto-build now running in the background, there is no longer any
+guarantee about the temporal relationship between the <tt>AUTO_BUILD</tt> events
+and the <tt>POST_CHANGE</tt> event. In Eclipse 3.0, steps 3-5 in the above
+structure are removed from the operation. The resulting picture looks like this:
+<ol>
+  <li><tt>PRE_DELETE</tt> or <tt>PRE_CLOSE</tt> event notification if applicable</li>
+  <li>Perform the operation</li>
+  <li><tt>POST_CHANGE</tt> event notification</li>
+</ol>
+<p>Periodically, the platform will perform a background workspace build
+operation. Note that this happens regardless of the whether auto-build is on or
+off. The exact timing of when this build occurs will not be specified. The
+structure of the build operation will look like this:
+<ol>
+  <li><tt>PRE_AUTO_BUILD</tt> event notification</li>
+  <li>If auto-build is on, perform incremental workspace build</li>
+  <li><tt>POST_AUTO_BUILD</tt> event notification</li>
+  <li><tt>POST_CHANGE</tt> event notification</li>
+</ol>
+The reference point for the deltas received by auto-build listeners will be
+different from post-change listeners. Build listeners will receive notification
+of all changes since the end of the last build operation. Post-change listeners
+will receive a delta describing all changes since the last post-change
+notification. This new structure retains three characteristics of resource
+change listeners that have been true since Eclipse 1.0:
+<ul>
+  <li><tt>POST_CHANGE</tt> listeners receive notification of absolutely all
+    resource changes that occur during the time they are registered. This
+    includes changes made by builders, and changes made by other listeners.</li>
+  <li><tt>PRE_AUTO_BUILD</tt> listeners receive notification of all resource
+    changes <b>except</b> changes made by builders and resource change
+    listeners.
+  <li><tt>POST_AUTO_BUILD</tt> listeners receive notification of all resource
+    changes <b>except</b> changes made by other <tt>POST_AUTO_BUILD</tt>
+    listeners.
+</ul>
+However, there are some important differences with this approach. Prior to
+Eclipse 3.0, auto-build listeners were always called before <tt>POST_CHANGE</tt>
+listeners. For this reason, the delta received by auto-build listeners was
+always a subset of the delta received by the <tt>POST_CHANGE</tt> listeners.
+This relationship is now essentially reversed. Auto-build listeners will receive
+a delta that is a super-set of all deltas supplied to <tt>POST_CHANGE</tt>
+listeners since the end of the last background build. As before, auto-build
+listeners will be allowed to modify the workspace, and post-change listeners
+will not.
+<p>It will no longer be true that upon completion of a workspace changing
+operation, that <tt>AUTO_BUILD</tt> event listeners will have been notified.
+Client code that registers resource change listeners with <code>IWorkspace.addResourceChangeListener(IResourceChangeListener)</code>
+is&nbsp; unlikely to be affected by this change because <tt>AUTO_BUILD</tt>
+events were never reported to these listeners. However, clients that use <code>IWorkspace.addResourceChangeListener(IResourceChangeListener,int)</code>
+and specify an event mask that includes <tt>AUTO_BUILD</tt> events are likely to
+be broken by this change if they make assumptions about when auto-build
+listeners run or what thread they run in. For example, if an auto-build listener
+is updating a domain model to reflect changes to the workspace, then this update
+might not have happened when the workspace changing operation returns. It is
+worth noting that only UI-level code can be affected in this way. Core-level
+code that is called via API may be called within the scope of an <tt>IWorkspaceRunnable</tt>,
+so it can never be sure about when resource change listeners will be called. The
+suggested fix for this breakage is to use <tt>POST_CHANGE</tt> instead of build
+listeners if it is necessary to have notification occur before the operation
+completes.</p>
+<h3>IWorkspaceRunnable and IWorkspace.run</h3>
+<p>It will no longer be guaranteed that all resource changes that occur during
+the dynamic scope of an <code>IWorkspaceRunnable</code> will be batched in a
+single notification. This mechanism can still be used for batching changes to
+avoid unnecessary builds and notifications, but the platform may now decide to
+perform notifications during the operation. This API contract change is not
+likely to be a breaking change for existing clients. It is equivalent to the
+platform deciding to call <code>IWorkspace.checkpoint</code> periodically during
+a long running operations. The reason for this change is that it is now possible
+for multiple threads to be modifying the workspace concurrently. When one thread
+finishes modifying the workspace, a notification is required to prevent
+responsiveness problems, even if the other operation has not yet completed. This
+change also allows users to begin working on a set of resources before the
+operation completes. For example, a user can now begin browsing files in a
+project that is still in the process of being checked out. The new method <tt>IWorkspace.run(IWorkspaceRunnable,
+ISchedulingRule, int, IProgressMonitor)</tt> has an optional flag, <tt>AVOID_UPDATE</tt>,
+that operations can use as a hint to the platform to specify whether periodic
+updates are desired.</p>
 
 
 <h2><a name="Recommended Changes for 3.0">Recommended Changes for 3.0</a></h2>
@@ -639,14 +731,16 @@ method should revisit their uses of this method and consider using the richer
 method <tt>IWorkspace.run(IWorkspaceRunnable,ISchedulingRule,int,IProgressMonitor)</tt>.
 The old <tt>IWorkspace.run</tt> method acquires a lock on the entire workspace
 for the duration of the <tt>IWorkspaceRunnable</tt>. This means that an
-operation run with this method will never be able to run concurrently with other
+operation done with this method will never be able to run concurrently with other
 operations that are changing the workspace. In Eclipse 3.0, many long-running
 operations have been moved into background threads, so the likelihood of
 conflicts between operations is greatly increased. If a modal foreground
-operation is blocked by a long-running background operation, the UI informs the
-user that it is waiting for a background operation to complete.</p>
+operation is blocked by a long running background operation, the UI becomes
+blocked until the background operation completes, or until one of the operations
+is canceled.
+</p>
 <p>The suggested solution is to switch all references to old <tt>IWorkspace.run</tt>
-to use new method with scheduling rule parameter. The scheduling rule should be
+to use the new method with a scheduling rule parameter. The scheduling rule should be
 the most fine-grained resource that encompasses all changes by that operation.
 If desired, a <tt>MultiRule</tt> can be used to specify multiple resource rules.
 If the operation tries to modify resources outside of the scope of the
