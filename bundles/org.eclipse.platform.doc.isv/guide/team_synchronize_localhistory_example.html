@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+ type="text/css">
+  <title>Synchronization Support</title>
+  <link rel="stylesheet" type="text/css" href="../book.css">
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h2>Local History Example<br>
+</h2>
+<p>The best way to understand the Synchronize APIs is to create a
+simple example that actually works. In this example we will be creating
+a page in the Synchronize View that allows browsing the latest change
+in local history for all files in the workspace. This synchronization
+will update automatically when changes are made to the workspace, and a
+compare editor can open to browse, merge, then changes. We will also
+add a custom decorator to show the last timestamp of the local history
+element and an action to revert the workspace files to their latest
+saved local history state.<br>
+</p>
+<p>This is an excellent example because we already have a store of
+resource variants available and we don't have to manage it. Local
+history provides access to these variants and we will take advantage of
+this to simplify the example.<br>
+</p>
+For the remainder of this example we will make use of a running
+example. The source code can be found <a
+ href="link%20to%20a%20zip%20file">here</a>.<br>
+<br>
+<img src="images/team_synchronize_example_localhistory_overview.gif"
+ alt="" style="width: 1024px; height: 766px;"><br>
+<br>
+This screen shot shows the local history participant in the Synchronize
+View. It has a custom decorator, and action, you can browse the changes
+between the local resource and the latest state in history. Notices
+also that the standard Synchronize View presentation is used: problem
+annotations, compressed folder layout, and navigation buttons.<br>
+<h3><span style="font-weight: bold;">Defining the variants for local
+history</span></h3>
+The first step is to define a variant to represent the elements from
+local history. This will allow the synchronize APIs to access content,
+compare, and display these to the user.<br>
+<br>
+<pre><span style="color: rgb(68, 68, 204);">public class LocalHistoryVariant implements IResourceVariant {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	private final IFileState state;</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public LocalHistoryVariant(IFileState state) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		this.state = state;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	public String getName() {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return state.getName();</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public boolean isContainer() {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return false;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public IStorage getStorage(IProgressMonitor monitor) throws TeamException {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return state;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public String getContentIdentifier() {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return Long.toString(state.getModificationTime());</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public byte[] asBytes() {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return null;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}</span><span
+ style="font-weight: bold;"><br></span></pre>
+Since the IFileState interface already provides access to the contents
+of the file from local history, this was easy. Genrally when creating a
+variant you have to provide a way of accessing the content, an content
+identifier that will be displayed to the user to identify this variant,
+and a name. The asBytes() method is only required if persisting the
+variants between sessions. <br>
+<br>
+Next, lets create a variant comparator that allows the SyncInfo
+calculation to compare local resources and variants. Again, this is
+easy because if a local history state exists, then it implies that the
+local differs compared to the variant. This is because the
+specification for local history says that it won't create a local
+history state if the file hasn't changed.<br>
+<br>
+<pre><span style="color: rgb(68, 68, 204);">public class LocalHistoryVariantComparator implements IResourceVariantComparator {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	public boolean compare(IResource local, IResourceVariant remote) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return true;</span><span
+ style="color: rgb(68, 68, 204);"></span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public boolean compare(IResourceVariant base, IResourceVariant remote) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return false;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><br style="color: rgb(68, 68, 204);"><span
+ style="color: rgb(68, 68, 204);">	public boolean isThreeWay() {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return false;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}</span><br></pre>
+Because we know that the existance of the local history state implies
+that it is different from the local, we can simply return true to all
+comparisons. Note that the synchronize calculation won't call this
+method if the variant doesn't exist. This is only called if both
+elements exist. Also, synchronization with the local history is only
+two-way because we don't have access to a base resource.<br>
+<span style="font-weight: bold;"><br>
+</span>
+<h3><span style="font-weight: bold;">Creating the Subscriber</span></h3>
+In this example we will create a Subscriber that will provide access to
+the resource variants in local history. Since local history can be
+saved for any file in the workspace the local history Subscriber will
+supervise every resource and there will be no need to scope the
+Subscriber to only a set of resources. <br>
+<br>
+<pre><span style="color: rgb(68, 68, 204);">public SyncInfo getSyncInfo(IResource resource) throws TeamException {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	try {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	if(resource.getType() == IResource.FILE) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		IFile file = (IFile)resource;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		IFileState[] states = file.getHistory(new NullProgressMonitor());</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		if(states.length &gt; 0) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			// last state only</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			SyncInfo info = new SyncInfo(file, <br>				null, <br>				new LocalHistoryVariant(states[0]), <br>				comparator);</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			info.init();</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			return info;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		} </span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	} catch (CoreException e) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		ExampleSynchronizeSupportPlugin.getDefault().getLog().log(e.getStatus());</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	return new SyncInfo(resource, null, null, comparator) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		protected int calculateKind() throws TeamException {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			return IN_SYNC;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	};</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}<br><br></span><span
+ style="color: rgb(68, 68, 204);"></span></pre>
+<p>The Subscriber will return a new SyncInfo instance that will contain
+the latest state of the file in local history. The SyncInfo is created
+with the with a null base and a local history variant for the remote
+element. For all other elements in the workspace (e.g. folders and
+projects) they are considered in-sync because they don't have local
+history. The remaining code in the local history subscriber is the
+implementation of the members() method:<br>
+</p>
+<pre><span style="color: rgb(68, 68, 204);">try {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	if(resource.getType() == IResource.FILE) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		return new IResource[0];</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	IContainer container = (IContainer)resource;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	List existingChildren = new ArrayList(Arrays.asList(container.members()));</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	existingChildren.addAll(Arrays.asList(<br>		container.findDeletedMembersWithHistory(IResource.DEPTH_ONE, new NullProgressMonitor())));</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	return (IResource[]) existingChildren.toArray(new IResource[existingChildren.size()]);</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">} catch (CoreException e) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	ExampleSynchronizeSupportPlugin.getDefault().getLog().log(e.getStatus());</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	return new IResource[0];</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}</span><br></pre>
+<p>The interesting detail of this method is that it will return
+nn-existing children if a deleted resource has local history. This will
+allow our Subscriber to return SyncInfo for elements that only exist in
+local history and are no longer in the workspace.<br>
+</p>
+<h3>Adding a Local History Synchronize Participant<br>
+</h3>
+<p>So far we have created the classes which provide access to SyncInfo
+for elements in local history. Next, we will create the UI elements
+that will allow us to have a page in the Synchronize View which will
+display the last history state for every element in local history.
+Since we have a Subscriber, adding this to the Synchronize View is
+easy. Let's start by adding an synchronize participant extension point:<br>
+</p>
+<pre><span style="color: rgb(68, 68, 204);"> &lt;extension</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">         point="org.eclipse.team.ui.synchronizeParticipants"&gt;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">      &lt;participant</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            persistent="false"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            icon="synced.gif"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            class="org.eclipse.team.synchronize.example.LocalHistoryParticipant"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            name="Latest From Local History"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            id="org.eclipse.team.synchronize.example"/&gt;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);"> &lt;/extension&gt;<br><br></span><span
+ style="color: rgb(68, 68, 204);"></span></pre>
+<p>Next we have to implement the LocalHistoryParticipant. It will
+subclass SubscriberParticipant which will provide all the default
+behavior for collecting SyncInfo from the subscriber and updating sync
+states when workspace changes occur. In addition, we will add an action
+to revert the workspace resources to the latest in local history.<br>
+</p>
+<pre><span style="color: rgb(68, 68, 204);">public static final String CONTEXT_MENU_CONTRIBUTION_GROUP = "context_group_1"; //$NON-NLS-1$</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">public class LocalHistoryActionContribution extends SynchronizePageActionGroup {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	public void initialize(ISynchronizePageConfiguration configuration) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		super.initialize(configuration);</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">		appendToGroup(</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			ISynchronizePageConfiguration.P_CONTEXT_MENU, CONTEXT_MENU_CONTRIBUTION_GROUP, </span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			new SynchronizeModelAction("Revert all workspace to latest in local history", configuration) { //$NON-NLS-1$</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">				protected SynchronizeModelOperation getSubscriberOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">					return new RevertAllOperation(configuration, elements);</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">				}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			});</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	}</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}</span><br></pre>
+<p>Here we are adding a specific Synchronize action and operation. The
+behavior we get for free here is the ability to run in the background
+and showing busy status for the nodes that are being worked on. The
+action reverts all resources in the workspace with their latest state
+in local history. The action is added by adding an action contribution
+to the participants configuration. The configuration is used to
+describe the properties used to build the participant page that will
+display the actual synchronize UI. The participant will initialize the
+configure as follows:<br>
+</p>
+<pre><span style="color: rgb(68, 68, 204);">protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	super.initializeConfiguration(configuration);</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	configuration.addMenuGroup(</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			ISynchronizePageConfiguration.P_CONTEXT_MENU, </span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">			CONTEXT_MENU_CONTRIBUTION_GROUP);</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">	configuration.addActionContribution(new LocalHistoryActionContribution());</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">}</span><br></pre>
+<p>This will add the local history action group to the context menu.
+The last and final piece is to provide a wizard that will create the
+local history participant. The Team Synchronizing perspective defines a
+global synchronize action that allows users to quickly create a
+synchronization. In addition the Synchronize View allows the user to
+create synchronizations. To start, create a synchronizeWizards
+extension point:<br>
+</p>
+<pre><span style="color: rgb(68, 68, 204);">&lt;extension</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">         point="org.eclipse.team.ui.synchronizeWizards"&gt;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">      &lt;wizard</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            class="org.eclipse.team.synchronize.example.LocalHistorySynchronizeWizard"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            icon="synced.gif"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            description="Creates a synchronization against the latest local history state of all resources in the workspace"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            name="Latest From Local History Synchronize"</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">            id="ExampleSynchronizeSupport.wizard1"/&gt;</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">   &lt;/extension&gt;<br><br></span></pre>
+This will add our wizard to the list and in the wizards finish() method
+we will simply create our participant and add it to the synchronize
+manager.<br>
+<br>
+<pre><span style="color: rgb(68, 68, 204);">LocalHistoryPartipant participant = new LocalHistoryPartipant();</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">ISynchronizeManager manager = TeamUI.getSynchronizeManager();</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">manager.addSynchronizeParticipants(new ISynchronizeParticipant[] {participant});</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">ISynchronizeView view = manager.showSynchronizeViewInActivePage();</span><br
+ style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">view.display(participant);<br><br></span></pre>
+<h3>Conclusion</h3>
+This is a simple example of using the synchronize APIs and we have
+glossed over some of the details in order to make the example easier to
+understand. Writing a responsive and accurate synchronize support is
+non-trivial and the hardest part is about managing the synchronization
+information and ensuring the events are fired appropriately when
+changes occur. The user interface, if you like the one we have
+provided, is the easy part once the Subscriber implementation is
+complete. For more examples please refer to the
+org.eclipse.team.example.filesystem plugin and browse the subclasses in
+the workspace of Subscriber and ISynchronizeParticipant.<br>
+<br>
+The next example explains the harder part of writing a Subscriber from
+scratch and how to cache synchronization states between workbench
+sessions. The local history example was simple because this was already
+supported by the resources plugin.<br>
+<br>
+<pre><span style="color: rgb(68, 68, 204);"></span><span
+ style="color: rgb(68, 68, 204);"></span></pre>
+<pre><span style="color: rgb(68, 68, 204);"></span><span
+ style="color: rgb(68, 68, 204);"></span></pre>
+<p><a href="../hglegal.htm"><img src="../ngibmcpy.gif"
+ alt="Copyright IBM Corporation and others 2000, 2003." border="0"
+ width="324" height="14"></a></p>
+</body>
+</html>
