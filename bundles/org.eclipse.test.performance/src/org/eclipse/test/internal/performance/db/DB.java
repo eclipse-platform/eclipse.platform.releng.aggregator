@@ -56,6 +56,8 @@ public class DB {
    
     public static Scenario[] queryScenarios(String configPattern, String buildPattern, String scenarioPattern) {
         String[] scenarios= getDefault().internalQueryScenarioNames(configPattern, scenarioPattern); // get all Scenario names
+        if (scenarios == null)
+            return new Scenario[0];
         Scenario[] tables= new Scenario[scenarios.length];
         for (int i= 0; i < scenarios.length; i++)
             tables[i]= new Scenario(configPattern, buildPattern, scenarios[i]);
@@ -386,7 +388,7 @@ public class DB {
             if (DEBUG) System.out.println("finish with prepared statements"); //$NON-NLS-1$
                          
         } catch (SQLException ex) {
-	        PerformanceTestPlugin.log(ex);
+            PerformanceTestPlugin.logError(ex.getMessage());
 
         } catch (ClassNotFoundException e) {
 	        PerformanceTestPlugin.log(e);
