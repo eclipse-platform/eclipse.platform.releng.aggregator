@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.eclipse.perfmsr.core.PerformanceMonitor;
 import org.eclipse.test.internal.performance.PerformanceMonitorLinux;
 import org.eclipse.test.internal.performance.PerformanceMonitorMac;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -186,7 +185,7 @@ public class BasePerformanceMonitor {
 	private static BasePerformanceMonitor create() {
 	    String os= System.getProperty("os.name");
 		if (os.startsWith("Windows"))
-		    return new PerformanceMonitor();
+		    return new PerformanceMonitorWindows();
 		if (os.startsWith("Mac OS X"))
 		    return new PerformanceMonitorMac();
 		return new PerformanceMonitorLinux();

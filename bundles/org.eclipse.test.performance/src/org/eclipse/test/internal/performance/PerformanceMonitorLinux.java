@@ -18,7 +18,7 @@ import java.util.StringTokenizer;
 
 import org.eclipse.test.internal.performance.data.Scalar;
 
-public class PerformanceMonitorLinux extends BasePerformanceMonitor {
+class PerformanceMonitorLinux extends BasePerformanceMonitor {
     
     /**
      * The status values for a Linux process, that is the values that come from /proc/self/stat.
