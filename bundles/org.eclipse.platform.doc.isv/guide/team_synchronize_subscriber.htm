@@ -1,0 +1,184 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Adding synchronization support to your provider</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>Adding synchronization support to your provider</H2>
+<P> This section presents a two perspectives on implementing a subscriber on top 
+  of a provider. The first assumes that there is no exisiting synchronization 
+  infrastructure and illustrates how to use some API that is provided to maintain 
+  the synchronization state. The second assumes that there is an existing synchronization 
+  infrastructure, perhaps associated with a repository provider.</p>
+<h3>Implementing a Subscriber From Scratch</h3>
+<p>This first example assumes that there is no existing infrastructure for maintaining 
+  the synchronization state of the local workspace. When implementing a subscriber 
+  from scratch, you can make use of some additional API provided in the <em>org.eclipse.team.core</em> 
+  plugin. The <em>org.eclipse.team.core.variants</em> package contains two subclasses 
+  of <em>Subscriber</em> which can be used to simplify implementation. The first 
+  is <em>ResourceVariantTreeSubscriber</em> which will be discussed in the second 
+  example below. The second is a subclass of the first: <em>ThreeWaySubscriber</em>. 
+  This subscriber implementation provides several helpful classes for managing 
+  the synchronization state of a local workspace. If you do not have any existing 
+  infrastructure, this is a good place to start. </p>
+<p>Implementing a subscriber from scratch will be illustrated using the file system 
+  example available in the <em>org.eclipse.team.examples.filesystem</em> plugin. 
+  The code in the following description is kept to a minimum since it is available 
+  from the dev.eclipse.org repository. Although not technicaly a three-way subscriber, 
+  the file system example can still make good use of this infrastructure. The 
+  FTP and WebDav plugins also are built using this infrastructure.</p>
+<h4>ThreeWaySubscriber</h4>
+<p>For the file system example, we already had an implementation of a <em>RepositoryProvider</em> 
+  that associated a local project with a file system location where the local 
+  contents were mirrored. <em>FileSystemSubscriber</em> was created as a subclass 
+  of <em>ThreeWaySubscriber</em> in order to make use of a <em>ThreeWaySynchronizer</em> 
+  to manage workpace synchronization state. Subsclasses of this class must do 
+  the following:</p>
+<ul>
+  <li>create a <em>ThreeWaySynchronizer</em> instance to manage the local workspace 
+    synchronization state.</li>
+  <li>create an instance of a <em>ThreeWayRemoteTree</em> subclass to provide 
+    remote tree refresh. </li>
+  <ul>
+    <li>The class <em>FileSystemRemoteTree</em> was defined for this purpose</li>
+  </ul>
+  <li>implement a method to create the resource variant handles used to calculate 
+    the synchronization state. 
+    <ul>
+      <li>The class <em>FileSystemResourceVariant</em> (a subclass of <em>CachedResourceVariant</em>) 
+        was defined for this</li>
+    </ul>
+  </li>
+  <li>implement the <em>roots</em> method. 
+    <ul>
+      <li>The roots for the subscriber are all the projects mapped to the <em>FileSystemProvider</em>. 
+        Callbacks were added to <em>FileSystemProvider</em> in order to allow 
+        the <em>FileSystemSubscriber</em> to generate change events when projects 
+        are mapped and unmapped.</li>
+    </ul>
+  </li>
+</ul>
+<p>In addition to the subscriber implementation, the get and put operations for 
+  the file system provider were modified to update the synchronization state in 
+  the <em>ThreeWaySynchronizer</em>. The operations are implemented in the class 
+  <em>org.eclipse.team.examples.filesystem.FileSystemOperations</em>.</p>
+<h4>ThreeWaySynchronizer</h4>
+<p>ThreeWaySynchronizer manages the synchronization state between the local workspace 
+  and a remote location. It caches and persists the local, base and remote timestamps 
+  in order to support the efficient calculation of the synchronization state of 
+  a resource. It also fires change notifications to any registered listeners. 
+  The <em>ThreeWaySubscriber</em> translates these change events into the proper 
+  format to be sent to listeners registered with the subscriber.</p>
+<p>The <em>ThreeWaySynchronizer</em> makes use of Core scheduling rules and locks 
+  to ensure thread safety and provide change notification batching.</p>
+<h4>ThreeWayRemoteTree</h4>
+<p>A <em>ThreeWayRemoteTree</em> is a subclass of <em>ResourceVariantTree</em> 
+  that is tailored to the <em>ThreeWaySubscriber</em>. It must be overridden by 
+  clients to provide the mechanism for fetching the remote state from the server. 
+  <em>ResourceVariantTree</em> is discussed in more detail in the next example.</p>
+<h4>CachedResourceVariant</h4>
+<p>A <em>CachedResourceVariant</em> is a partial implementation of <em>IResourceVariant</em> 
+  that caches any fetched contents for a period of time (currently 1 hour). This 
+  is helpful since the contents may be accessed several times in a short period 
+  of time (for example, to determine the synchronization state and display the 
+  contents in a compare editor). Subclasses must still provide the unique content 
+  identifier along with the byte array that can be persisted in order to recreate 
+  the resource variant handle.</p>
+<h3>Building on Top of Existing Workspace Synchronization</h3>
+<p>Many repository providers may already have a mechanism for managing their synchronization 
+  state (e.g. if they have exisitng plugins). The <em>ResourceVariantTreeSubscriber</em> 
+  and its related classes provide the ability to build on top of an existing synchronization 
+  infrastrucuter. For example, this is the superclass of all of the CVS subscribers.</p>
+<h4>ResourceVariantTreeSubscriber</h4>
+<p>As was mentioned in the previous example, the <em>ThreeWaySubscriber</em> is 
+  a subclass of <em>ResourceVariantTreeSubscriber</em> that provides local workspace 
+  synchronization using a <em>ThreeWaySynchronizer</em>. Subclasses of <em>ResourceVariantTreeSubscriber</em> 
+  must provide:</p>
+<ul>
+  <li>
+    <p>Subclasses of <em>ResourceVariantTree</em> (or <em>AbstractResourceVariantTree</em>) 
+      that provide the behavior for traversing and refreshing the remote resource 
+      variants and, for subscribers that support three-way comparisons, the base 
+      resource variants.</p>
+  </li>
+  <li>An implementation of <em>IResourceVariantComparator</em> that performs the 
+    two-way or three-way comparison for a local resource and its base and remote 
+    resource variants.It is common to also provide a subclass of <em>SyncInfo</em> 
+    in order to customize the synchronization state determination algorithm. </li>
+  <li>An implementation of the <em>roots</em> method for providing the roots of 
+    the subscriber and an implementation of the <em>isSupervised</em> method for 
+    detemining what resources are supervised by the subscriber.</li>
+</ul>
+<p>The other capabilities of the subscriber are implemented using these facilities.</p>
+<h4>ResourceVariantTree</h4>
+<p><em>ResourceVariantTree</em> is a concrete implementation of <em>IResourceVariantTree</em> 
+  that provides the following:</p>
+<ul>
+  <li>traversal of the resource variant tree</li>
+  <li>logic to merge the previous resource variant tree state with the current 
+    fetched state.</li>
+  <li>caching of the resource variant tree using a <em>ResourceVariantByteStore</em>.</li>
+</ul>
+<p>The following must be implemented by subclasses:</p>
+<ul>
+  <li>creation of resource variant handles from the cached bytes that represent 
+    a resource variant</li>
+  <li>fetching of the current remote state from the server</li>
+  <li>creation of the byte store instance used to cache the bytes that uniquely 
+    identify a resource variant</li>
+</ul>
+<p>Concreate implementations of <em>ResourceVariantByteStore</em> are provided 
+  that persist bytes accross workbench invocations (<em>PersistantResourceVariantByteStore</em>) 
+  or cached the bytes only for the current session (<em>SessionResourceVariantByteStore</em>). 
+  However, building a subscriber on top of an exisiting workspace synchronization 
+  infrastructure will typically requie the implementation of <em>ResourceVariantByteStore</em> 
+  subclasses that interface with the underlying synchronizer. For example the 
+  <em>ThreeWayRemoteTree</em> makes use of a byte store implementation that stores 
+  the remote bytes in the <em>ThreeWaySynchronizer</em>.</p>
+<p>The creation of resource variant handles for this exampel does not differ from 
+  the previous exampel except that the handles are requested from a resource variant 
+  tree instance instead of the subscriber.</p>
+<h4>IResourceVariantComparator</h4>
+<p>Each subscriber has a <em>IResourceVariantComparator</em> which is used by 
+  the <em>SyncInfo</em> class when determining the synchronization state of a 
+  resource. The resource comparator determines whether the comparison is two-way 
+  or three-way and provides a method to compare a local resource with a resource 
+  variant and another method to compare two resource variants (if the comparison 
+  is three-way). The resource comparator needs to access the workspace synchronization 
+  state when comparing a lcoal resource to a resource variant. A <em>ThreeWayResourceComparator 
+  </em>is provided for use with the ThreeWaySynchronizer. Providers that have 
+  their own workspace synchronization infrastructure need to provide an IResourceVariantComparator 
+  implementation that accesses the local resource state.</p>
+<h4>SyncInfo</h4>
+<p>The <em>SyncInfo</em> class is used to communicate the synchronization state 
+  of a resource. In addition the class contains the algorithm used to determine 
+  the synchronization state given the local, base and remote resources as well 
+  as the resource comparator. Although it is possible to use the <em>SyncInfo</em> 
+  class without modification, in practice, it is often necessary for a subscriber 
+  to subclass it in order to tailor the synchronization state determination.</p>
+<h3>How Does IRemoteResource/IRemoteSyncElement Relate to the Subsciber API</h3>
+<p><em>IResourceVariant</em> is similar to <em>IRemoteResource</em>. However, 
+  there is no API on <em>IResourceVariant</em> for obtaining the memebrs of the 
+  variant if it is a container. This has been moved to the <em>IResourceVariantTree</em>. 
+  This was done to allow the traversal and refresh to be expressed more cleanly. 
+  Also, the contents of an <em>IResourceVariant</em> are fetched indirectly by 
+  obtaining an <em>IStorage</em> from the handle and then obtaining the contents 
+  from the <em>IStorage</em>. This was done to support the local caching of remote 
+  contents. The <em>CachedResourceVariant</em> implementation of <em>IResourceVariant</em> 
+  provides API that supports content caching.</p>
+<p>The behavior of <em>IRemoteSyncElement</em>/<em>RemoteSyncElement</em> has 
+  been separated into several classes to get a better separation of concerns. 
+  The <em>SyncInfo</em> class provides the synchronization state determination 
+  while the <em>ResourceVariantTree</em> capture the logic to refresh the remote 
+  state. Traversal is provides by the <em>Subscriber</em> class itself.</p>
+<h3>Implementing a Two-way Compare Subscriber</h3>
+<P>To be added</p>
+
+<p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
+</BODY>
+</HTML>

@@ -4,16 +4,113 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>Adding synchronization support to your provider</TITLE>
+<TITLE>Introduction to workpsace synchronization</TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H2>Adding synchronization support to your provider</H2>
-<P>
-Explain subscriber, variants, sync info, when how to use. Intro to ui components.
-</p>
-
+<h2>Introduction to workpsace synchronization</h2>
+<p>The synchronization API focuses on synchronizing resources in the local workspace 
+  with counterparts at another location. In most cases, the mapping of the local 
+  resources to another location will be associated with a repository provider. 
+  However, the API is general and can be used for other types of mapping, such 
+  as deployment using FTP or WebDAV. </p>
+<h3>Terminology </h3>
+<P>Before the synchronization API is described, it is helpful to present some 
+  of the terminology and concepts that apply when discussing workspace synchronization.</p>
+<blockquote> 
+  <p><em>Provider</em>: A provider manages a mapping from a set of local resources 
+    to a remote location. In many cases, the provider may correspond to an implementaion 
+    of RepositoryProvider but this is not a requirement.</p>
+  <p><em>Resource Variant</em>: A local resource that is mapped to a resource 
+    that exists at another location can be referred to as a variant of that resource. 
+    That is, the resources are usually very similar but may differ slightly (either 
+    due to modificatons to the local resource or changes made the remote copy 
+    made by other users). We take a local workspace centric view of this, referring 
+    to the local copy as the resource and any remote copy as resource variants.</p>
+  <p><em>Resource Variant Tree</em>: A resource variant tree is a tree of resource 
+    variants that correspond to a resource tree in the workspace. A resource variant 
+    tree may represent the latest resource variants on a trunk or branch of a 
+    code repository or a version of project or folder.</p>
+  <p><em>Two-way vs. Three-way Synchronization</em>: There are two basic types 
+    of synchronization state determination: two-way and three-way. A two-way comparison 
+    only considers the local resource and a single resource variant, referred 
+    to as the remote resource variant. This type of comparison can only show the 
+    differences between the two resources but cannot offer hints as to how the 
+    changes interelate. Most code repository systems support a three-way comparison 
+    for synchronization state determination. This type of comparision involves 
+    the local resource, a remote resource variant and a base resource variant. 
+    The base resource variant represents a common ancestor for the local and remote 
+    resources. This allows for more sophisticated synchronization states that 
+    indicate the direction of the change.</p>
+</blockquote>
+<h3>Three-way Synchronization</h3>
+<p>Implemetors of the RepositoryProvider API are typically code repositories that 
+  support three-way synchronization. Underneath the hood, these implementations 
+  provide an infrastructure for managing the synchronization state of resources. 
+  Although the specifics of each implementation differ, there is commonality in 
+  their general operation. The following list descibes that basic states of a 
+  resouce that must be maintained by the provider.</p>
+<ul>
+  <li><em>local resource is synced with the remote</em>: when a resource is loaded 
+    from or written to a remote location, it is consider in-sync with the remote 
+    variant. At this point, the local timestamp and remote timestamp are recorded 
+    to support future synchronization state checks.</li>
+  <li><em>local resource is modified</em>: If the recorded in-sync local modification 
+    timestamp differs from the actual timestamp, the resource is locally modified.</li>
+  <li><em>remote resource is modified</em>: If the timestamp of the remote resource 
+    variant differs from the recorded remote timestamp, then the resource has 
+    been remotely modified (most likely by a 3rd party).</li>
+</ul>
+<p>For each resource, the provider must persist the timestamps obtained when a 
+  resource is synced so that it can later determine if their are local and remote 
+  changes. The synchronization state is actually a bit more complex than this 
+  but these three states cover the basics. For instance, it is possible fro a 
+  resource to be modified both locally and remotely. Also, additon states exist 
+  for cases where resources have been added or removed either locally or remotely.</p>
+<h3>Querying Synchronization State</h3>
+<p>The purpose of the synchronization API is to ease the task of implementing 
+  different ways of presenting the synchronization state of resources. As such, 
+  the API requires a means to query the synchronization state of resources but 
+  does not require a means to affect the state. The means of affecting the state 
+  is left to the provider implementor (although the UI does provide hooks for 
+  adding provider specific menu items to menus). The core API piece for accessing 
+  the synchronization state of resources is the Subscriber API.</p>
+<p>A subscriber provides access to the synchronization state between the resources 
+  in the local workspace and a set of resource variants for these resources using 
+  either a two-way or three-way comparison, depending on the nature of the subscriber. 
+  A subscriber provides the following capabilities:</p>
+<blockquote> 
+  <p><strong>local workspace traversal</strong>: a subscriber supports the traversal 
+    of the local workspace resources that are supervised by the subscriber. As 
+    such, the subscriber has a set of root resources that define the workspace 
+    subtrees under the subscriber's control, as well as a <em>members</em> method 
+    that returns the supervised members of a workspace resource. This traversal 
+    differs from the usual workspace resource traversal in that the resources 
+    being traversed may include resources that do not exist locally, either because 
+    they have been deleted by the user locally or created by a 3rd party.</p>
+  <p><strong>resource synchronization state determination</strong>: For supervised 
+    resources, the subscriber provides access to the synchronization state of 
+    the resource, including access to the variants of the resource. For each supervised 
+    resource, the subscriber provides a <em>SyncInfo</em> object that contains 
+    the synchronization state and the variants used to determine the state. The 
+    subscriber also provides an <em>IResourceVariantComparator</em> which determines 
+    whether two-way or three-way comparison is to be used and provides the logic 
+    used by the <em>SyncInfo</em> to comparing resource variants when determining 
+    the synchronization state.</p>
+  <p><strong>refresh of synchronization state and change notification</strong>: 
+    Clients can react to changes that happen to local resources by listening to 
+    the Core resource deltas. When a local resource is changed, the synchronization 
+    state of the resource can then be re-obtained from the subscriber. However, 
+    clients must explicilty query the server to know if there are changes to the 
+    resource variants. For subscribers, this process is broken up into two parts. 
+    A client can explicitly <em>refresh</em> a subscriber. In response the subscriber 
+    will obtain the latest state of the resource variants from the remote location 
+    and fire synchronization state change events for any resource variants that 
+    have changed. The change notification is separate from the refresh since there 
+    may be other operations that contact the remote location and obtain the latest 
+    remote state.</p>
+</blockquote>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
 </BODY>
 </HTML>
