@@ -26,17 +26,21 @@ following entries describe the areas that changed and provide instructions for
 <hr>
 
 <h2><a name="Preference Store"></a>1. Plug-in Preferences</h2>
+  In Eclipse 3.1 the <code>org.eclipse.jface.preference.IPreferenceStore</code> 
+  object obtained from <code>orge.eclipse.ui.plugin.AbstractUIPlugin#getPreferenceStore</code> 
+    was migrated to live on top of the new 3.0 Eclipse preference framework supplied by the 
+    <code>org.eclipse.core.runtime</code> plug-in. 
+    As a result, clients using the preference APIs should check for two possible issues:
 <ol>
-  <li>Preference Stores. In Eclipse 3.1 the IPreferenceStore obtained from AbstractUIPlugin#getPreferenceStore 
-    was migrated to the 3.0 Eclipse preferences supplied by org.eclipse.core.runtime. 
-    As a result you should check for two possible issues.</li>
-  <li>Your preference listeners should be able to handle both Strings and typed 
-    values as it is possible to get preferences in either form</li>
-  <li>If you continue to use AbstractUIPlugin#initializeDefaultPreferences you 
-    need to be sure that your code loads the runtime compatibility layer as org.eclipse.ui.workbench 
-    will not any longer.</li>
+  <li>The type of the objects contained in preference change events is not guarenteed; both the old value and
+  new value in events can be null, a <code>String</code>, or a typed object. Therefore to be
+  a good client, preference change listeners should be able to handle all three of these possible situations.</li>
+  <li>If your plug-in uses <code>org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences</code> then
+  you must be sure to include the <code>org.eclipse.core.runtime.compatibility</code> plug-in in your plug-in's list
+  of required plug-ins as this dependancy has been removed from the <code>org.eclipse.ui.workbench</code> 
+    plug-in.</li>
 </ol>
-<p>See the <a href="../reference/misc/preference_store.html">preference store</a> 
+<p>See the <a href="../../reference/misc/preference_store.html">preference store</a> 
 documentation for more details.
 </p>
 <h2><a name="IPath Changes"></a>2. Changes to IPath constraints</h2>
