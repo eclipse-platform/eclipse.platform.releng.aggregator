@@ -1,0 +1,122 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Performing CodeAssist on Java code</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Performing CodeAssist on Java code</H2>
+<P>
+JDT API allows to other plugins to perform codeassist or codeselect on some java elements. 
+Elements that allow this manipulation implements <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html"> ICodeAssist</a></b>.
+In the Java model there are two elements that implements this interface: <b><a href="../reference/api/org/eclipse/jdt/core/IClassfile.html"> IClassfile</a></b> and <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html"> ICompilationUnit</a></b>.
+<P>
+There are two kinds of manipulation
+<ul>
+<li>Code completion: compute the completion of a Java token.</li>
+<li>Code selection: give the Java element at a given position.</li>
+</ul>
+</P>
+<P>
+Note: completion and selection give results for a classfile only if it has an attached source.
+</P>
+<H3>
+Code completion</h3>
+
+<H4>
+Performing a code completion
+</h4>
+<P>
+The only way to programmatically perform code completion is to use <b>ICodeAssist.codeComplete</b>.
+You specify the location of the completion in the unit and give an instance of <b><a href="../reference/api/org/eclipse/jdt/core/ICompletionRequestor.html"> ICompletionRequestor</a></b> to accept the possible completions.</P>
+
+<P>
+Each kind of proposals is accepted by a method of the requestor.
+The parameters of these methods gives the description of the proposed element (name, parameters, declaring type, ...), the position and the relevance of the proposal in the current context.</P>
+<P>
+When you are not interested by all the result kinds, a simple way to perform code completion is to use <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestorAdapter.html"> CompletionRequestorAdapter</a></b>.
+<font color='#4444CC'><pre>
+   // Get the compilation unit
+   ICompilationUnit unit = ...;
+   
+   // Get the offset
+   int offset = ...;
+   
+   // Create the requestor
+   ICompletionRequestor requestor = new CompletionRequestorAdapter() {
+      public void acceptClass(
+         char[] packageName,
+         char[] className,
+         char[] completionName,
+         int modifiers,
+         int completionStart,
+         int completionEnd,
+         int relevance) {
+         System.out.println("propose a class named " + new String(className));
+      }
+   };
+   
+   // Compute proposals
+   unit.codeComplete(offset, requestor);
+</pre></font></P>
+
+<H4>
+Code completion options
+</h4>
+
+<P>
+The options of code completion can be change by other plugins. You can modify JDT/Core options to change the completion behavior.</P>
+<P>There are two options:
+<ul>
+<li>Activate Visibility Sensitive Completion: when active, completion doesn't show that you can not see (e.g. you can not see private methods of a super class).</li>
+<li>Automatic Qualification of Implicit Members: when active, completion automatically qualifies completion on implicit field references and message expressions.</li>
+</ul>
+</P>
+
+<P>
+To know how to modify JDT/Core options see: <a href="../guide/jdt_api_options.htm"> What are the JDT/Core options?</a></P>
+
+<H3>
+Code selection</h3>
+
+<H4>
+Performing a code selection
+</h4>
+<P>
+If you want to programmatically perform code selection, the method to use is <b>ICodeAssist.codeSelect</b>. This method needs to know the start location of the selection and the length.
+The result is an array of Java elements. Most of the time there is only one element in the array, but if the selection is ambiguous then all the possible elements are given.
+
+<font color='#4444CC'><pre>
+   // Get the compilation unit
+   ICompilationUnit unit = ...;
+   
+   // Get the offset and length
+   int offset = ...;
+   int length = ...;
+   
+   // perform selection
+   IJavaElement[] elements = unit.codeSelect(offset, length);
+   System.out.println("the selected element is " + element[0].getElementName());
+</pre></font>
+
+<H4>
+Selection at cursor location.
+</h4>
+<P>
+If the length of the selection is equals to 0 then the selection is computed with the complete enclosing token.</P>
+
+<i><pre>
+   public void fooMethod(Object) {
+   }
+</pre></i>
+When the offset is after the first character of <i>fooMethod</i> and the length is 0 then the selection is <i>fooMethod</i>. But if the length is 5 then the selection is <i>ooMet</i>.
+
+
+<P>&nbsp;<a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved." border="0"></a></P>
+</BODY>
+</HTML>
