@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+                                     
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+                                     
+  <meta http-equiv="Content-Style-Type" content="text/css">
+                                      
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>How to create a customized new Java element wizard page</title>
+                                                                  
+  <link rel="stylesheet" type="text/css" href="../book.css">
+</head>
+  <body bgcolor="#ffffff">
+ 
+<h2>How to create a customized 'new Java element' wizard page</h2>
+ 
+<p> The <a href="../reference/api/org/eclipse/jdt/ui/wizards/package-summary.html">org.eclipse.jdt.ui.wizards</a> 
+  package provides wizard pages for creating Java elements. Besides using the 
+  prefabricated pages clients have the possibility to subclass the wizard pages 
+  to add their own input fields or to influence the code generation. Below is 
+  a sample of a new type wizard page that is customized to create JUnit test case 
+  classes. The page initializes the super class field with &quot;junit.framework.TestCase&quot; 
+  and adds a checkbox that controls whether method stubs for the setUp() and tearDown() 
+  method are to be created.</p>
+<pre><font color="#4444CC">public class TestCaseWizardPage extends NewTypeWizardPage {<br>	<br>	private Button fCreateStubs;
+
+	public TestCaseWizardPage() {
+		super(true, &quot;TestCaseWizardPage&quot;);
+	}
+
+	/**
+	 * The wizard managing this wizard page must call this method
+	 * during initialization with a corresponding selection.
+	 */   
+	public void init(IStructuredSelection selection) {
+		IJavaElement jelem= getInitialJavaElement(selection);
+		initContainerPage(jelem);
+		initTypePage(jelem);
+		// define the components for which a status is desired
+		IStatus[] status= new IStatus[] {
+			fContainerStatus,
+			isEnclosingTypeSelected() ? fEnclosingTypeStatus : fPackageStatus,
+			fTypeNameStatus,
+		};
+		updateStatus(status);
+	}
+
+	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
+		Composite composite= new Composite(parent, SWT.NONE);
+		int nColumns= 4;
+		GridLayout layout= new GridLayout();
+		layout.numColumns= nColumns;
+		composite.setLayout(layout);
+
+		// Create the standard input fields
+		createContainerControls(composite, nColumns);
+		createPackageControls(composite, nColumns);
+		createSeparator(composite, nColumns);
+		createTypeNameControls(composite, nColumns);
+		createSuperClassControls(composite, nColumns);
+
+		// Create the checkbox controlling whether we want stubs
+		fCreateStubs= new Button(composite, SWT.CHECK);
+		fCreateStubs.setText(&quot;Add 'setUp()' and 'tearDown()' to new class&quot;);
+		GridData gd= new GridData();
+		gd.horizontalSpan= nColumns;
+		fCreateStubs.setLayoutData(gd);
+
+		setControl(composite);
+
+		// Initialize the super type field and mark it as read-only
+		setSuperClass(&quot;junit.framework.TestCase&quot;, false);
+	}
+
+	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+		if (fCreateStubs.getSelection()) {
+			String setUpMathod= &quot;public void setUp() {}&quot;;
+			newType.createMethod(setUpMathod, null, false, null);
+
+			String tearDownMathod= &quot;public void setUp() {}&quot;
+			newType.createMethod(tearDownMathod, null, false, null); 
+		}
+   }
+}</font></pre>
+<p><a href="../hglegal2002.htm"><img border="0" src="../ngibmcpy2002.gif">
+ </a>
+ </p>
+ 
+</body>
+</html>
