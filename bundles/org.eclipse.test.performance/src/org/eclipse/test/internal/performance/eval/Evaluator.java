@@ -17,8 +17,7 @@ import java.util.StringTokenizer;
 
 import junit.framework.Assert;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
-import org.eclipse.test.internal.performance.LoadValueConstants;
-import org.eclipse.test.internal.performance.PerfMsrConstants;
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.PerformanceDataModel;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -43,13 +42,13 @@ public class Evaluator implements IEvaluator {
 	public void evaluate(PerformanceMeter performanceMeter) {
 		Sample session= ((InternalPerformanceMeter) performanceMeter).getSample();
 		Assert.assertTrue("metering session is null", session != null); //$NON-NLS-1$
-		Sample reference= getReferenceSession(session.getProperty(PerfMsrConstants.TESTNAME_PROPERTY), session.getProperty(PerfMsrConstants.HOSTNAME_PROPERTY));
+		Sample reference= getReferenceSession(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY), session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY));
 		Assert.assertTrue("reference metering session is null", reference != null); //$NON-NLS-1$
 		
 		StatisticsSession referenceStats= new StatisticsSession(reference);
 		StatisticsSession measuredStats= new StatisticsSession(session);
 		
-		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to driver '" + reference.getProperty(PerfMsrConstants.DRIVER_PROPERTY) + "' from " + reference.getProperty(PerfMsrConstants.RUN_TS_PROPERTY) + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to driver '" + reference.getProperty(InternalPerformanceMeter.DRIVER_PROPERTY) + "' from " + reference.getProperty(InternalPerformanceMeter.RUN_TS_PROPERTY) + ":"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
 			pass &= fCheckers[i].test(referenceStats, measuredStats, failMesg);
@@ -59,7 +58,7 @@ public class Evaluator implements IEvaluator {
 	}
 
 	private Sample getReferenceSession(String testname, String hostname) {
-		String specificHost= (String) fFilterProperties.get(PerfMsrConstants.HOSTNAME_PROPERTY);
+		String specificHost= (String) fFilterProperties.get(InternalPerformanceMeter.HOSTNAME_PROPERTY);
 		boolean useSessionsHostname= true;
 		if (specificHost != null)
 			useSessionsHostname= false;
@@ -80,8 +79,8 @@ public class Evaluator implements IEvaluator {
 			}
 			// check properties by specific hostname
 			if (match 
-					&& testname.equals(session.getProperty(PerfMsrConstants.TESTNAME_PROPERTY))
-					&& (!useSessionsHostname || hostname.equals(session.getProperty(PerfMsrConstants.HOSTNAME_PROPERTY))))
+					&& testname.equals(session.getProperty(InternalPerformanceMeter.TESTNAME_PROPERTY))
+					&& (!useSessionsHostname || hostname.equals(session.getProperty(InternalPerformanceMeter.HOSTNAME_PROPERTY))))
 				return session;
 		}
 		return null;
@@ -92,7 +91,7 @@ public class Evaluator implements IEvaluator {
 	}
 
 	private String getXMLDir() {
-		String ctrl= System.getProperty(LoadValueConstants.ENV_PERF_CTRL);
+		String ctrl= System.getProperty(PerformanceTestPlugin.ENV_PERF_CTRL);
 		if (ctrl != null) {
 			StringTokenizer st= new StringTokenizer(ctrl, ";");
 			while(st.hasMoreTokens()) {
@@ -102,7 +101,7 @@ public class Evaluator implements IEvaluator {
 					continue;
 				String value= token.substring(i+1);
 				String parm= token.substring(0,i);
-				if (parm.equals(LoadValueConstants.PerfCtrl.log))
+				if (parm.equals("log"))
 					return value;
 			}
 		}
@@ -116,9 +115,9 @@ public class Evaluator implements IEvaluator {
 	public void setReferenceFilterProperties(String driver, String timestamp) {
 		fFilterProperties= new HashMap();
 		Assert.assertNotNull(driver); // must specify driver;
-		fFilterProperties.put(PerfMsrConstants.DRIVER_PROPERTY, driver);
+		fFilterProperties.put(InternalPerformanceMeter.DRIVER_PROPERTY, driver);
 		if (timestamp != null)
-			fFilterProperties.put(PerfMsrConstants.RUN_TS_PROPERTY, timestamp);
+			fFilterProperties.put(InternalPerformanceMeter.RUN_TS_PROPERTY, timestamp);
 	}
 	
 	public static synchronized IEvaluator getDefaultEvaluator() {

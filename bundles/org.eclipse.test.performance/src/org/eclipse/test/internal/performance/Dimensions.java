@@ -12,6 +12,7 @@ public interface Dimensions {
 //	OS Counters:
     		Dimension
 			SYSTEM_TIME= new Dimension(2, Unit.SECOND, 1000), 		// System.currentTimeMillis. "System Time"
+			USED_JAVA_HEAP= new Dimension(3, Unit.BYTE), 			// Runtime.totalMemory() - Runtime.freeMemory()
     			WORKING_SET= new Dimension(4, Unit.BYTE), 				// the working set (or on Linux the resident set). "Working Set"	
     			USER_TIME= new Dimension(10, Unit.SECOND, 1000),		// the amount of elapsed user time. "User time"
     			KERNEL_TIME= new Dimension(11, Unit.SECOND, 1000),		// the amount of elapsed kernel time. "Kernel time"
@@ -68,5 +69,8 @@ public interface Dimensions {
     	
 // Mac:
 //	OS Counters:
+    		Dimension
+			FREE_MEM= new Dimension(51, Unit.BYTE); // Runtime.getRuntime().freeMemory() "Free Memory"
+    		
 //	OS Info:
 }

@@ -11,8 +11,10 @@
 
 package org.eclipse.test.internal.performance;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -27,33 +29,43 @@ import org.eclipse.test.internal.performance.db.DB;
  */
 public class OSPerformanceMeter extends InternalPerformanceMeter {
 
-	private PerformanceMonitor fPerformanceMonitor;
-	
 	private static final String VERBOSE_PERFORMANCE_METER_PROPERTY= "InternalPrintPerformanceResults";
 
-	private String fScenarioId;
+	private PerformanceMonitor fPerformanceMonitor;
+	private List fDataPoints= new ArrayList();
+    
+	private static Runtime fgRuntime= Runtime.getRuntime();
+
 	
 	/**
 	 * @param scenarioId the scenario id
 	 */
 	public OSPerformanceMeter(String scenarioId) {
-		fPerformanceMonitor= PerformanceMonitor.getPerformanceMonitor(false);
-		fPerformanceMonitor.setTestName(scenarioId);
-		fScenarioId= scenarioId;
+	    super(scenarioId);
+		fPerformanceMonitor= PerformanceMonitor.getPerformanceMonitor();
 	}
 	
+	/*
+	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
+	 */
+	public void dispose() {
+	    fPerformanceMonitor= null;
+	    fDataPoints= null;
+		super.dispose();
+	}
+
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#start()
 	 */
 	public void start() {
-		fPerformanceMonitor.snapshot(1);
+		snapshot(BEFORE);
 	}
 	
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
 	public void stop() {
-		fPerformanceMonitor.snapshot(2);
+		snapshot(AFTER);
 	}
 	
 	/*
@@ -62,12 +74,51 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 	public void commit() {
 	    
 	    if (false) {
-		    DB.store(fScenarioId, getSample());
+		    DB.store(getScenarioName(), getSample());
 	    }
 	    
 		if (System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null)
 			printSample();
 	}
+
+	/*
+	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
+	 */
+	public Sample getSample() {
+	    
+	    PerformanceTestPlugin.processEnvironmentVariables();
+
+	    if (fDataPoints != null) {
+	            
+	        HashMap runProperties= new HashMap();
+	        
+	        collectRunInfo(runProperties);
+	        
+			fPerformanceMonitor.collectGlobalPerformanceInfo(runProperties);
+			    
+	        return new Sample(runProperties, (DataPoint[]) fDataPoints.toArray(new DataPoint[fDataPoints.size()]));
+	    }
+	    return null;
+	}
+	
+	//---- private stuff ------
+	
+    private void snapshot(String step) {
+	    HashMap map= new HashMap();
+	    
+	    if (true) {
+			fgRuntime.gc();
+			long used= fgRuntime.totalMemory() - fgRuntime.freeMemory();
+			addScalar(map, Dimensions.USED_JAVA_HEAP, used);
+		}
+
+	    fPerformanceMonitor.collectOperatingSystemCounters(map);
+	    fDataPoints.add(new DataPoint(step, map));
+    }
+
+    private void addScalar(Map scalars, Dimension dimension, long value) {
+        scalars.put(dimension, new Scalar(dimension, value));
+    }    
 
 	private void printSample() {
 		Sample sample= getSample();
@@ -89,7 +140,7 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 						System.out.println("OSPerformanceMeter.toDisplayString(): Dimensions do not match");
 				}
 			}
-			System.out.println(fScenarioId + ":");
+			System.out.println(getScenarioName() + ":");
 			for (Iterator iter= averages.keySet().iterator(); iter.hasNext();) {
 				Dimension dimension= (Dimension) iter.next();
 				double avgDelta= ((Double) averages.get(dimension)).doubleValue();
@@ -99,19 +150,26 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
+	/**
+	 * Write out the run element if it hasn't been written out yet.
 	 */
-	public void dispose() {
-		fPerformanceMonitor= null;
-	}
-
-	/*
-	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
-	 */
-	public Sample getSample() {
-	    if (fPerformanceMonitor != null)
-	        return fPerformanceMonitor.getSample();
-	    return null;
-	}
+	private void collectRunInfo(HashMap runProperties) {
+	    
+        runProperties.put(DRIVER_PROPERTY, getBuildId());
+        runProperties.put(HOSTNAME_PROPERTY, getHostName());
+        runProperties.put(RUN_TS_PROPERTY, new Long(System.currentTimeMillis()));
+        runProperties.put(TESTNAME_PROPERTY, getScenarioName());
+	    	    
+		String version= System.getProperty("java.fullversion");
+		if (version == null)
+		    version= System.getProperty("java.runtime.version");
+	    runProperties.put("jvm", version);
+	    				
+		StringBuffer b= new StringBuffer(400);
+		b.append("eclipse.vmargs=");
+			b.append(System.getProperty("eclipse.vmargs"));
+		b.append(" eclipse.commands=");
+			b.append(System.getProperty("eclipse.commands"));
+		runProperties.put("cmdArgs", b.toString());		
+	}	
 }

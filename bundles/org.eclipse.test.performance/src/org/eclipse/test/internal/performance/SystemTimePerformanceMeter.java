@@ -11,16 +11,10 @@
 
 package org.eclipse.test.internal.performance;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.eclipse.core.runtime.IBundleGroup;
-import org.eclipse.core.runtime.IBundleGroupProvider;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.test.internal.performance.data.Assert;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -30,22 +24,11 @@ import org.eclipse.test.internal.performance.data.Scalar;
 
 
 public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
-
-	private static final String VERSION_SUFFIX= "-runtime";
-	
-	private static final String UNKNOWN_BUILDID= "unknownBuildId";
-	
-	private static final String BUILDID_PROPERTY= "eclipse.buildId";
-
-	private static final String LOCALHOST= "localhost";
 	
 	private static final int DEFAULT_INITIAL_CAPACITY= 3;
 	
-	private String fScenario;
 	private List fStartTime;
 	private List fStopTime;
-
-	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk";
 	
 	/**
 	 * @param scenarioId the scenario id
@@ -59,7 +42,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	 * @param initalCapacity the initial capacity in the number of measurments
 	 */
 	public SystemTimePerformanceMeter(String scenarioId, int initalCapacity) {
-		fScenario= scenarioId;
+	    super(scenarioId);
 		fStartTime= new ArrayList(initalCapacity);
 		fStopTime= new ArrayList(initalCapacity);
 	}
@@ -83,7 +66,7 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 		Assert.isTrue(fStartTime.size() == fStopTime.size());
-		System.out.println("Scenario: " + fScenario);
+		System.out.println("Scenario: " + getScenarioName());
 		int maxOccurenceLength= String.valueOf(fStartTime.size()).length();
 		for (int i= 0; i < fStartTime.size(); i++) {
 			String occurence= String.valueOf(i + 1);
@@ -102,57 +85,31 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
 	 */
 	public void dispose() {
-		fScenario= null;
 		fStartTime= null;
 		fStopTime= null;
+		super.dispose();
 	}
 
 	public Sample getSample() {
 		Assert.isTrue(fStartTime.size() == fStopTime.size());
 		Map properties= new HashMap();
-		properties.put(PerfMsrConstants.DRIVER_PROPERTY, getBuildId());
-		properties.put(PerfMsrConstants.HOSTNAME_PROPERTY, getHostName());
-		properties.put(PerfMsrConstants.RUN_TS_PROPERTY, String.valueOf(System.currentTimeMillis()));
-		properties.put(PerfMsrConstants.TESTNAME_PROPERTY, getScenarioName());
+		properties.put(DRIVER_PROPERTY, getBuildId());
+		properties.put(HOSTNAME_PROPERTY, getHostName());
+		properties.put(RUN_TS_PROPERTY, String.valueOf(System.currentTimeMillis()));
+		properties.put(TESTNAME_PROPERTY, getScenarioName());
 		
 		DataPoint[] data= new DataPoint[2*fStartTime.size()];
 		for (int i= 0; i < fStartTime.size(); i++) {
-			data[2*i]= createDataPoint(PerfMsrConstants.BEFORE, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
-			data[2*i + 1]= createDataPoint(PerfMsrConstants.AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
+			data[2*i]= createDataPoint(BEFORE, Dimensions.SYSTEM_TIME, ((Long) fStartTime.get(i)).longValue());
+			data[2*i + 1]= createDataPoint(AFTER, Dimensions.SYSTEM_TIME, ((Long) fStopTime.get(i)).longValue());
 		}
 		
 		return new Sample(properties, data);
-	}
-
-	private String getBuildId() {
-		String buildId= System.getProperty(BUILDID_PROPERTY);
-		if (buildId != null)
-			return buildId;
-		IBundleGroupProvider[] providers= Platform.getBundleGroupProviders();
-		for (int i= 0; i < providers.length; i++) {
-			IBundleGroup[] groups= providers[i].getBundleGroups();
-			for (int j= 0; j < groups.length; j++)
-				if (SDK_BUNDLE_GROUP_IDENTIFIER.equals(groups[j].getIdentifier()))
-					return groups[j].getVersion() + VERSION_SUFFIX;
-		}
-		return UNKNOWN_BUILDID;
-	}
-
-	private String getHostName() {
-		try {
-			return InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			return LOCALHOST;
-		}
 	}
 
 	private DataPoint createDataPoint(String kind, Dimension dimension, long value) {
 		Map scalars= new HashMap();
 		scalars.put(dimension, new Scalar(dimension, value));
 		return new DataPoint(kind, scalars);
-	}
-
-	private String getScenarioName() {
-		return fScenario;
 	}
 }

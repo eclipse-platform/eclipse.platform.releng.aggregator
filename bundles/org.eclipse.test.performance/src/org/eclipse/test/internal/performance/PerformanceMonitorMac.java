@@ -18,8 +18,10 @@ import java.util.Map;
  */
 class PerformanceMonitorMac extends PerformanceMonitor {
 
+	private static long PAGESIZE= 4096;
+
 	/** 
-	 * ivjperf - name of the library that implements the native methods.
+	 * name of the library that implements the native methods.
 	 */
 	private static final String NATIVE_LIBRARY_NAME= "perf_3_1_0";
 	
@@ -38,7 +40,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
-			    System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
+			    //System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded");
 			    fgIsLoaded= 1;
 			}
 		}
@@ -51,35 +53,26 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 	 */
 	protected void collectOperatingSystemCounters(Map scalars) {
 		synchronized(this) {
-			if (!isLoaded()) {
-			    super.collectOperatingSystemCounters(scalars);
-			    return;
+		    if (isLoaded()) {
+				int[] counters= new int[18];
+				if (getrusage(0, counters) == 0) {
+				    
+				    int user_time= counters[0]*1000 + counters[1]/1000;
+				    int kernel_time= counters[2]*1000 + counters[3]/1000;
+				    
+			        addScalar(scalars, Dimensions.USER_TIME, user_time);
+					addScalar(scalars, Dimensions.KERNEL_TIME, kernel_time);
+					addScalar(scalars, Dimensions.CPU_TIME, user_time + kernel_time);
+					//addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[4]*PAGESIZE);		
+					//addScalar(scalars, Dimensions.TRS, counters[5]);
+					//addScalar(scalars, Dimensions.DRS, counters[6] + counters[7]);
+					//addScalar(scalars, Dimensions.HARD_PAGE_FAULTS, counters[9]);
+				}
 			}
-			
-			int[] counters= new int[18];
-			if (getrusage(0, counters) == 0) {
-			    
-			    System.out.println();
-			    for (int i= 0; i< counters.length; i++)
-			        System.out.println(i + ": " + counters[i]);
-			    
-				addScalar(scalars, Dimensions.USER_TIME, counters[0]*1000 + counters[1]/1000);
-				addScalar(scalars, Dimensions.SYSTEM_TIME, counters[2]*1000 + counters[3]/1000);
-				addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[4]*1024);		
-				addScalar(scalars, Dimensions.TRS, counters[5]);
-				addScalar(scalars, Dimensions.DRS, counters[6] + counters[7]);
-				addScalar(scalars, Dimensions.HARD_PAGE_FAULTS, counters[9]);
-			}
+		    super.collectOperatingSystemCounters(scalars);
 		}
 	}
 
-	/**
-	 * Write out the global machine counters for Mac OS X.
-	 */
-	protected void collectGlobalPerformanceInfo(Map scalars) {
-	    super.collectGlobalPerformanceInfo(scalars);
-	}
-	
 //		struct rusage {
 //	0,1		struct timeval ru_utime; /* user time used */
 //	2,3		struct timeval ru_stime; /* system time used */

@@ -89,13 +89,13 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 		}
 	}
 	
-	protected String getUUID() {
-		if (org.eclipse.perfmsr.core.PerformanceMonitor.isLoaded()) {
-			try {
-				return org.eclipse.perfmsr.core.PerformanceMonitor.nativeGetUUID();
-			} catch (Exception e) {
-			}
-		}
-		return super.getUUID();
-	}
+//	protected String getUUID() {
+//		if (org.eclipse.perfmsr.core.PerformanceMonitor.isLoaded()) {
+//			try {
+//				return org.eclipse.perfmsr.core.PerformanceMonitor.nativeGetUUID();
+//			} catch (Exception e) {
+//			}
+//		}
+//		return super.getUUID();
+//	}
 }
