@@ -223,7 +223,7 @@ public class DB {
                 // connect over network
                 if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
                 Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
-                String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+                String url="jdbc:cloudscape:" + dbloc + "/" + dbname + ";create=true;retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
                 String dbuser= env.getProperty("dbuser", "guest"); //$NON-NLS-1$ //$NON-NLS-2$
                 String dbpassword= env.getProperty("dbpasswd", "guest"); //$NON-NLS-1$ //$NON-NLS-2$
                 fConnection= DriverManager.getConnection(url, dbuser, dbpassword);
