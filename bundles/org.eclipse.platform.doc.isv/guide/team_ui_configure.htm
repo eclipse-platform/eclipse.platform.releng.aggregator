@@ -11,11 +11,40 @@
 <BODY BGCOLOR="#ffffff">
 <h3>
    Configuring a project
-</h3><p>
-   Give an example of the configurationWizards extension and show screen snaps
+</h3><p>Typically, the first step in building a team UI is implementing a wizard
+page that allows users to configure a project for your plug-in's team
+support.&nbsp; The act of configuring a project is what assigns your team
+project nature to a project.&nbsp; You participate in project configuration by
+contributing to the <a href="../reference/extension-points/org_eclipse_team_ui_configurationWizards.html">org.eclipse.team.ui.configurationWizards</a>
+extension point.&nbsp; This wizard is shown when the user chooses <b>Team-&gt;Share
+Project...</b>
 </p>
-<p>
-   &nbsp;
+<p>We'll look at this in the context of the CVS client implementation.&nbsp;
+Here is the CVS UI markup for its configuration wizard:
+</p>
+<pre><font color="#4444CC">&lt;extension
+      point=&quot;org.eclipse.team.ui.configurationWizards&quot;&gt;
+   &lt;wizard
+        name=&quot;%SharingWizard.name&quot;
+        icon=&quot;icons/full/wizards/newconnect_wiz.gif&quot;
+        class=&quot;org.eclipse.team.internal.ccvs.ui.wizards.SharingWizard&quot;
+        id=&quot;org.eclipse.team.ccvs.ui.SharingWizard&quot;&gt;
+   &lt;/wizard&gt;
+&lt;/extension&gt;</font></pre>
+<p>As usual, plug-ins supply a <b>class</b> that implements the extension and a
+unique <b>id</b> to identify their extension.&nbsp; The <b>name</b> and <b>icon</b>
+are shown in the first page of the project configuration wizard if there are
+multiple providers to choose from.
+</p>
+<p>Once the user has selected a provider, the next page shows the specific
+configuration information for your provider.&nbsp; (If your provider is the only
+team provider plug-in installed, then the wizard skips directly to your
+page.)&nbsp; Your wizard must implement <a href="../reference/api/org/eclipse/team/ui/IConfigurationWizard.html">IConfigurationWizard</a>,
+which initializes the wizard for a specified workbench and project.&nbsp; The
+rest of the implementation depends on the design of your wizard.&nbsp; You must
+gather up any information needed to associate the project with your team
+support.&nbsp; When the wizard is completed, you must set your provider's nature
+on the project to signify that it is now configured by your provider.
 </p>
 
 
