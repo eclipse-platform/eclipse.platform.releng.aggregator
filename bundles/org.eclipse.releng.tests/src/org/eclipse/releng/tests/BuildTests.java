@@ -735,7 +735,7 @@ public class BuildTests extends TestCase {
 	public static final String[] REQUIRED_FEATURE_PLUGIN_FILES = {"about.html", "about.ini", "about.mappings", "about.properties", "plugin.properties", "plugin.xml"};
 	public static final String REQUIRED_FEATURE_PLUGIN_SUFFIX = ".gif";
 
-	public static final String[] REQUIRED_FRAGMENT_FILES = {"fragment.xml"};
+	public static final String[] REQUIRED_FRAGMENT_FILES = {"fragment.properties"};
 	public static final String REQUIRED_FRAGMENT_SUFFIX = "";
 	
 	public static final String[] REQUIRED_SOURCE_FILES = {"about.html"};
