@@ -36,8 +36,8 @@ package org.eclipse.test.performance;
  * Example usage in a test case:
  * <pre>
  * public void testOpenEditor() {
- * 	Performance performance= Performance.getDefault();
- * 	PerformanceMeter performanceMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+ * 	Performance perf= Performance.getDefault();
+ * 	PerformanceMeter performanceMeter= perf.createPerformanceMeter(perf.getDefaultScenarioId(this));
  * 	try {
  * 		for (int i= 0; i &lt; 10; i++) {
  * 			performanceMeter.start();
@@ -46,7 +46,7 @@ package org.eclipse.test.performance;
  * 			closeEditor();
  * 		}
  * 		performanceMeter.commit();
- * 		Performance.getDefault().assertPerformance(performanceMeter);
+ * 		perf.assertPerformance(performanceMeter);
  * 	} finally {
  * 		performanceMeter.dispose();
  * 	}

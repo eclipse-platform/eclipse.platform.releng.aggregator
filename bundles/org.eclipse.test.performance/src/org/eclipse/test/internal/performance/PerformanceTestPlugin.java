@@ -29,6 +29,15 @@ public class PerformanceTestPlugin extends Plugin {
 	 */
 	private static PerformanceTestPlugin fgPlugin;
 
+	
+	/**
+	 * The constructor.
+	 */
+	public PerformanceTestPlugin() {
+	    super();
+		fgPlugin= this;
+	}
+	
 	/**
 	 * The constructor.
 	 */
