@@ -12,23 +12,26 @@
 <H2>
 Manipulating JDT Core options</H2>
 <P>
-JDT Core options are accessible from a few APIs.
-All of these APIs are located in <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">JavaCore</a>.
-Only four methods are necessary to manipulate the options:
+JDT Core options control the behavior of core features such as the Java
+compiler, code formatter, code assist, and other core behaviors.&nbsp; The APIs
+for accessing the options are defined in <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a>.&nbsp;
+Options can be accessed as a group as follows:
 <ul>
 <li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getDefaultOptions()">JavaCore.getDefaultOptions()</a> - Answers the default value of the options.</li>
-<li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getOption(java.lang.String)">JavaCore.getOption(String optionName)</a> - Answers the value of a specific option.</li>
 <li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getOptions()">JavaCore.getOptions()</a> - Answers the current values of the options.</li>
 <li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setOptions(java.util.Hashtable)">JavaCore.setOptions(Hashtable newOptions)</a> - Replaces the options values by new values.</li>
 </ul>
-<p></P>
+<p>Options can also be accessed individually by a string name.</P>
+
+<ul>
+<li><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getOption(java.lang.String)">JavaCore.getOption(String optionName)</a> - Answers the value of a specific option.</li>
+</ul>
+<p>Options are stored as a hashtable of all known configurable options with their values.
+Helper constants have been defined on <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a> for each option ID and its possible constant values.</P>
 
 <P>
-The options are manipulated as a hashtable of all known configurable options with their values.
-Helper constants have been defined on <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html">JavaCore</a> for each option ID and its possible constant values.</P>
-
-<P>
-If you want to configure JDT Core with only your options, the following code fragment would work:
+The following code fragment restores the value of all core options to their
+defaults except for one (<code>COMPILER_PB_DEPRECATION</code>), which is set specifically.
 <font color='#4444CC'><pre>
    // Get the current options
    Hashtable options = JavaCore.getDefaultOptions();
@@ -40,7 +43,8 @@ If you want to configure JDT Core with only your options, the following code fra
    JavaCore.setOptions(options);
 </pre></font>
 
-If you want to keep the current options and modify only one of them:
+The following code fragment keeps the value of the current options and modifies
+only one (<code>COMPILER_PB_DEPRECATION</code>):
 
 <font color='#4444CC'><pre>
    // Get the current options
@@ -51,15 +55,40 @@ If you want to keep the current options and modify only one of them:
    
    // Set the new options
    JavaCore.setOptions(options);
-</pre></font><p></P>
+</pre></font>
+
+<H3>Project specific options</h3>
+
+<p>The values of options can be overridden per project using protocol in <a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html"><b>IJavaProject</b></a>.</p>
+
+<p>The following code fragment retrieves the value of an option (<code>COMPILER_PB_DEPRECATION</code>)
+for a specific project in two different ways.&nbsp; The boolean parameter
+controls whether only the project-specific options should be returned in a query
+or whether the project's option values should be merged with the values in
+JavaCore.</p>
+
+<font color="#4444CC"><pre>
+   // Get the project
+   IJavaProject project = ...;
+
+   // See if the value of an option has been set in this project
+   String value = project.getOption(JavaCore.COMPILER_PB_DEPRECATION, <b>false</b>);
+   if (value == null) {
+     // no specific option was set on the project
+     ...
+   }
+   
+   // Get the value of an option from this project.  Use the value from 
+   // JavaCore value if none is specified for the project
+   String value = project.getOption(JavaCore.COMPILER_PB_DEPRECATION, <b>true</b>);</pre></font>
 
 <H3>JDT Core options descriptions</h3>
 
 <P>
-The list of all the JDT Core options are in the following tables. All of the tables have the same
-organisation with the option id surrounded with parenthesis and the default value printed in bold italics. </P>
+The following tables describe the available JDT Core options.&nbsp; The option
+id is shown in parentheses and the default value is shown in bold italics. </P>
 
-<H4>Options category</h4>
+<H4>Options categories</h4>
 <ul>
 <li><a href="#compiler">Compiler options</a></li>
 <li><a href="#builder">Builder options</a></li>
@@ -70,7 +99,7 @@ organisation with the option id surrounded with parenthesis and the default valu
 
 <H4><a name="#compiler">Compiler options</a></h4>
 
-<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
+<table BORDER="1" CELLSPACING=2 CELLPADDING=2 COLS=2 WIDTH="100%" >
 <tr>
 <th>Description</th>
 <th width=140>Values</th>
@@ -210,6 +239,16 @@ The bytecode generation will always optimize it out.</td>
 </tr>
 
 <tr>
+<td colspan=2><b>Reporting Deprecation Inside Deprecated Code</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE">COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE</a>)</td>
+</tr>
+<tr>
+<td rowspan=2>When enabled, the compiler will signal use of deprecated API either as an error or a warning.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
+</tr>
+<tr>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></i></b></td>
+</tr>
+<tr>
 <td colspan=2><b>Reporting Hidden Catch Block</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_HIDDEN_CATCH_BLOCK">COMPILER_PB_HIDDEN_CATCH_BLOCK</a>)</td>
 </tr>
 <tr valign="top">
@@ -259,6 +298,29 @@ When enabling this option, the compiler will issue an error or a warning for hid
 </tr>
 
 <tr>
+<td colspan=2><b>Reporting Unused Parameter if Implementing Abstract Method</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_PARAMETER_WHEN_IMPLEMENTING_ABSTRACT">COMPILER_PB_UNUSED_PARAMETER_WHEN_IMPLEMENTING_ABSTRACT</a>)</td>
+</tr>
+<tr>
+<td rowspan=2>When enabled, the compiler will signal unused parameters in
+  abstract method implementations.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
+</tr>
+<tr>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></i></b></td>
+</tr>
+<tr>
+<td colspan=2><b>Reporting Unused Parameter if Overriding Concrete Method</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_PARAMETER_WHEN_OVERRIDING_CONCRETE">COMPILER_PB_UNUSED_PARAMETER_WHEN_OVERRIDING_CONCRETE</a>)</td>
+</tr>
+<tr>
+<td rowspan=2>When enabled, the compiler will signal unused parameters in
+  methods overriding concrete ones.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
+</tr>
+<tr>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></i></b></td>
+</tr>
+
+<tr>
 <td colspan=2><b>Reporting Unused Import</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_IMPORT">COMPILER_PB_UNUSED_IMPORT</a>)</td>
 </tr>
 <tr valign="top">
@@ -266,9 +328,25 @@ When enabling this option, the compiler will issue an error or a warning for hid
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
-<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING"><i><b>WARNING</b></i></a></td>
 </tr>
 <tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Unused Private Members </b>(<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_PRIVATE_MEMBER">COMPILER_PB_UNUSED_PRIVATE_MEMBER</a>)</td>
+</tr>
+<tr>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning
+  whenever a private method or field is declared but never used within the same
+  unit. </td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+<tr>
 <td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
 </tr>
 
@@ -315,6 +393,67 @@ When enabling this option, the compiler will issue an error or a warning for hid
 </tr>
 
 <tr>
+<td colspan=2><b>Reporting Non-Static Reference to a Static Member</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_STATIC_ACCESS_RECEIVER">COMPILER_PB_STATIC_ACCESS_RECEIVER</a>)</td>
+</tr>
+<tr>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning
+  whenever a static field or method is accessed with an expression receiver.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING"><b><i>WARNING</i></b></a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+<tr>
+<td colspan=2><b>Reporting Assignment with No Effect</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NO_EFFECT_ASSIGNMENT">COMPILER_PB_NO_EFFECT_ASSIGNMENT</a>)</td>
+</tr>
+<tr>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning
+  whenever an assignment has no effect (e.g. 'x = x').</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING"><b><i>WARNING</i></b></a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+<tr>
+<td colspan=2><b>Reporting Interface Method not Compatible with non-Inherited
+  Methods</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD">COMPILER_PB_INCOMPATIBLE_NON_INHERITED_INTERFACE_METHOD</a>)</td>
+</tr>
+<tr>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning
+  whenever an interface defines a method incompatible with a non-inherited
+  Object one.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING"><b><i>WARNING</i></b></a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+<tr>
+<td colspan=2><b>Reporting Usage of char[] Expressions in String Concatenations</b>
+  (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_CHAR_ARRAY_IN_STRING_CONCATENATION">COMPILER_PB_CHAR_ARRAY_IN_STRING_CONCATENATION</a>)</td>
+</tr>
+<tr>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning
+  whenever a char[] expression is used in String concatenations (e.g.
+  &quot;hello&quot; + new char[]{'w','o','r','l','d'}),</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING"><b><i>WARNING</i></b></a></td>
+</tr>
+<tr>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
 <td colspan=2><b>Setting Source Compatibility Mode</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_SOURCE">COMPILER_SOURCE</a>)</td>
 </tr>
 <tr valign="top">
@@ -344,6 +483,26 @@ When enabling this option, the compiler will issue an error or a warning for hid
 <td>a positive integer. <br><b><i>Default value is 100</i></b></td>
 </tr>
 
+<tr>
+<td colspan=2><b>Define the Automatic Task Tags</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_TASK_TAGS">COMPILER_TASK_TAGS</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the tag is non empty, the compiler will issue a task marker
+  whenever it encounters one of the corresponding tag inside any comment in Java
+  source code.&nbsp; Generated task messages will include the tag, and range
+  until the next line separator or comment ending, and will be trimmed.</td>
+<td>{&lt;tag&gt;[,&lt;tag&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+<tr>
+<td colspan=2><b>Define the Automatic Task Priorities</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_TASK_PRIORITIES">COMPILER_TASK_PRIORITIES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>In parallel with the Automatic Task Tags, this list defines the
+  priorities (high, normal or low) of the task markers issued by the
+  compiler.&nbsp; If the default is specified, the priority of each task marker
+  is &quot;NORMAL&quot;.</td>
+<td>{&lt;priority&gt;[,&lt;priority&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
 
 </table>
 
@@ -376,6 +535,18 @@ When enabling this option, the compiler will issue an error or a warning for hid
 <td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
 </tr>
 
+<tr>
+<td colspan=2><b>Cleaning Output Folder(s)</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_JAVA_BUILD_INVALID_CLASSPATH">CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Indicate whether the JavaBuilder is allowed to clean the output
+  folders when performing full build operations.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CLEAN"><b><i>CLEAN</i></b></a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
 </table>
 
 <H4><a name="#javacore">JavaCore options</a></h4>
@@ -406,6 +577,55 @@ When enabling this option, the compiler will issue an error or a warning for hid
 <td>any of the supported encoding name. <br><b><i>Default value is platform default</i></b></td>
 </tr>
 
+<tr>
+<td colspan=2><b>Reporting Incomplete Classpath</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_INCOMPLETE_CLASSPATH">CORE_INCOMPLETE_CLASSPATH</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Indicate the severity of the problem reported when an entry on the
+  classpath doesn't exist, is not legitimate, or is not visible (e.g. a
+  referenced project is closed).</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR"><b><i>ERROR</i></b></a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Classpath Cycle</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_CIRCULAR_CLASSPATH">CORE_CIRCULAR_CLASSPATH</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>Indicate the severity of the problem reported when a project is
+  involved in a cycle.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR"><b><i>ERROR</i></b></a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Enabling Usage of Classpath Exclusion Patterns</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS">CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When set to &quot;disabled&quot;, no entry on a project classpath
+  can be associated with an exclusion pattern.</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED"><b><i>ENABLED</i></b></a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Enabling Usage of Classpath Multiple Output Locations</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS">CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When set to &quot;disabled&quot;, no entry on a project classpath
+  can be associated with a specific output location, preventing thus usage of
+  multiple output locations</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED"><b><i>ENABLED</i></b></a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></td>
+</tr>
 
 </table>
 
@@ -512,6 +732,17 @@ When enabling this option, the compiler will issue an error or a warning for hid
 <td>a positive integer. <br><b><i>Default value is 4</i></b></td>
 </tr>
 
+<tr>
+<td colspan=2><b>Inserting space in cast expression</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#FORMATTER_SPACE_CASTEXPRESSION">FORMATTER_SPACE_CASTEXPRESSION</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=2>When Insert, a space is added between the type and the expression
+  in a cast expression.</td>
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#INSERT">INSERT</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DO_NOT_INSERT">DO_NOT_INSERT</a></td>
+</tr>
 
 </table>
 
@@ -543,6 +774,78 @@ When enabling this option, the compiler will issue an error or a warning for hid
 </tr>
 <tr valign="top">
 <td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Prefixes for Field Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_FIELD_PREFIXES">CODEASSIST_FIELD_PREFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the prefixes is non empty, completion for field name will
+  begin with one of the proposed prefixes.</td>
+<td>{&lt;prefix&gt;[,&lt;prefix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Prefixes for Static Field Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_STATIC_FIELD_PREFIXES">CODEASSIST_STATIC_FIELD_PREFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the prefixes is non empty, completion for static field name will
+  begin with one of the proposed prefixes.</td>
+<td>{&lt;prefix&gt;[,&lt;prefix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Prefixes for Local Variable Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_LOCAL_PREFIXES">CODEASSIST_LOCAL_PREFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the prefixes is non empty, completion for local variable name will
+  begin with one of the proposed prefixes.</td>
+<td>{&lt;prefix&gt;[,&lt;prefix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Prefixes for Argument Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_ARGUMENT_PREFIXES">CODEASSIST_ARGUMENT_PREFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the prefixes is non empty, completion for argument name will
+  begin with one of the proposed prefixes.</td>
+<td>{&lt;prefix&gt;[,&lt;prefix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Suffixes for Field Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_FIELD_SUFFIXES">CODEASSIST_FIELD_SUFFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the suffixes is non empty, completion for field name will end
+  with one of the proposed suffixes.</td>
+<td>{&lt;suffix&gt;[,&lt;suffix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Suffixes for Static Field Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_STATIC_FIELD_SUFFIXES">CODEASSIST_STATIC_FIELD_SUFFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the suffixes is non empty, completion for static field name will end
+  with one of the proposed suffixes.</td>
+<td>{&lt;suffix&gt;[,&lt;suffix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Suffixes for Local Variable Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_LOCAL_SUFFIXES">CODEASSIST_LOCAL_SUFFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the suffixes is non empty, completion for local variable name will end
+  with one of the proposed suffixes.</td>
+<td>{&lt;suffix&gt;[,&lt;suffix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Define the Suffixes for Argument Name</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#CODEASSIST_ARGUMENT_SUFFIXES">CODEASSIST_ARGUMENT_SUFFIXES</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=1>When the suffixes is non empty, completion for argument name will end
+  with one of the proposed suffixes.</td>
+<td>{&lt;suffix&gt;[,&lt;suffix&gt;]*}.<br><b><i>Default value is ""</i></b></td>
 </tr>
 
 </table>

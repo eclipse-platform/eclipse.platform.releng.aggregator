@@ -10,21 +10,20 @@
 </HEAD>
 <BODY>
 <H2>
-Performing CodeAssist on Java code</H2>
+Performing code assist on Java code</H2>
 <P>
-JDT API allows other plugins to perform codeassist or codeselect on some Java elements. 
-Elements that allow this manipulation implement <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html"> ICodeAssist</a></b>.
-In the Java model there are two elements that implement this interface: <b><a href="../reference/api/org/eclipse/jdt/core/IClassFile.html"> IClassFile</a></b> and <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html"> ICompilationUnit</a></b>.
+The JDT API allows other plugins to perform code assist or code select on some Java elements. 
+Elements that allow this manipulation should implement <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html"> ICodeAssist</a></b>.&nbsp;
 <P>
 There are two kinds of manipulation:
 <ul>
 <li>Code completion - compute the completion of a Java token.</li>
-<li>Code selection - answer the Java element at a given position.</li>
+<li>Code selection - answer the Java element indicated by the selected text of a
+  given offset and length.</li>
 </ul>
-<p></P>
-<P>
-Note: completion and selection answer results for a classfile only if it has attached source.
-</P>
+<p>
+In the Java model there are two elements that implement this interface: <b><a href="../reference/api/org/eclipse/jdt/core/IClassFile.html"> IClassFile</a></b> and <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html"> ICompilationUnit</a></b>.&nbsp;
+Code completion and code selection only answer results for a classfile if it has attached source.</p>
 <H3>
 Code completion</h3>
 
@@ -32,14 +31,40 @@ Code completion</h3>
 Performing a code completion
 </h4>
 <P>
-The only way to programmatically perform code completion is to use <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeComplete(int, org.eclipse.jdt.core.ICompletionRequestor)"> ICodeAssist.codeComplete</a></b>.
-You specify the location of the completion in the unit and provide an instance of <b><a href="../reference/api/org/eclipse/jdt/core/ICompletionRequestor.html"> ICompletionRequestor</a></b> to accept the possible completions.</P>
+The only way to programmatically perform code completion is to invoke <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeComplete(int, org.eclipse.jdt.core.ICompletionRequestor)">ICodeAssist.codeComplete</a></b>.
+You specify the offset in the compilation unit after which the code completion
+is desired.&nbsp; You must also supply an instance of <b><a href="../reference/api/org/eclipse/jdt/core/ICompletionRequestor.html"> ICompletionRequestor</a></b> to accept the possible completions.</P>
 
-<P>
-Each kind of proposal is accepted by a method of the requestor.
-The parameters of these methods describe the element (name, parameters, declaring type, ...) and its position, as well as the relevance of the proposal in the current context.</P>
-<P>
-When you are not interested by all the result kinds, a simple way to perform code completion is to use <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestorAdapter.html"> CompletionRequestorAdapter</a></b>.
+<P>Each method in <b><a href="../reference/api/org/eclipse/jdt/core/ICompletionRequestor.html"> ICompletionRequestor</a>
+</b>accepts a different kind of proposal for code completion.&nbsp; The
+parameters of each method include text that describes the proposed element (its
+name, declaring type, etc.), its proposed position for insertion in the
+compilation unit, and its relevance.&nbsp;&nbsp;</P>
+
+<P>A completion requestor can accept many different types
+of completions including the insertion of the following elements:</P>
+
+<ul>
+  <li>anonymous types</li>
+  <li>classes</li>
+  <li>fields</li>
+  <li>interfaces</li>
+  <li>keywords</li>
+  <li>labels</li>
+  <li>local variables</li>
+  <li>method call</li>
+  <li>method declaration</li>
+  <li>modifier</li>
+  <li>package import or reference</li>
+  <li>type</li>
+  <li>variable name</li>
+</ul>
+<p>The completion requestor must also be able to accept compilation
+errors.&nbsp;&nbsp;</p>
+<p>If your plugin is not interested in every kind of code completion, a <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestorAdapter.html">CompletionRequestorAdapter</a></b>
+can be used so that you need only implement the kinds of completions you are
+interested in.&nbsp; The following example shows an adapter that is only used to
+accept class completions.</p>
 <font color='#4444CC'><pre>
    // Get the compilation unit
    ICompilationUnit unit = ...;
@@ -57,29 +82,41 @@ When you are not interested by all the result kinds, a simple way to perform cod
          int completionStart,
          int completionEnd,
          int relevance) {
-         System.out.println("propose a class named " + new String(className));
+         System.out.println(&quot;propose a class named &quot; + new String(className));
       }
    };
    
    // Compute proposals
-   unit.codeComplete(offset, requestor);
-</pre></font><p></P>
+   unit.codeComplete(offset, requestor);</font>
+</pre><p>Because there may be many different possible completions, the notion of
+relevance is used to compare the relevance of a suggested completion to other
+proposals.&nbsp; Relevance is represented by a positive integer.&nbsp; The value
+has no implicit meaning except to be used relative to the value for other
+proposals.&nbsp; The relevance of a code completion candidate can be affected by
+the expected type of the expression (based on casts and variable types) and the
+expected name of the expression (based on expected prefixes and suffixes).
+</p>
 
 <H4>
 Code completion options
 </h4>
 
 <P>
-The options of code completion can be changed by other plugins. You can modify JDT Core options to change the completion behavior.</P>
-<P>There are two options:
+The JDT Core plugin defines options that control the behavior of code
+completion.&nbsp; These options can be changed by other plugins.&nbsp;&nbsp;</P>
 <ul>
-<li>Activate Visibility Sensitive Completion: when active, completion doesn't answer what you can not see (e.g. you can not see private methods of a super class).</li>
-<li>Automatic Qualification of Implicit Members: when active, completion automatically qualifies completion on implicit field references and message expressions.</li>
+<li>Activate Visibility Sensitive Completion<br>
+  When this option is active, code completion will not answer elements that are
+  not visible in the current context.&nbsp; (For example, it will not answer
+  private methods of a super class.)</li>
+<li>Automatic Qualification of Implicit Members<br>
+  When this option is active, completion automatically qualifies completion on implicit field references and message expressions.</li>
 </ul>
-<p></P>
 
-<P>
-To know how to modify JDT Core options see: <a href="../guide/jdt_api_options.htm"> What are the JDT Core options?</a></P>
+<p>Additional options allow you to specify prefixes and suffixes for the
+proposed completion names for fields, static fields, local variables, and method
+arguments.&nbsp; See <a href="../guide/jdt_api_options.htm"> Manipulating JDT Core options</a>
+for more information about options.</p>
 
 <H3>
 Code selection</h3>
@@ -87,12 +124,14 @@ Code selection</h3>
 <H4>
 Performing a code selection
 </h4>
-<P>
-If you want to programmatically perform code selection, the method to use is <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeSelect(int, int)"> ICodeAssist.codeSelect</a></b>. This method needs to know the start location of the selection and the length.
-The result is an array of Java elements. Most of the time there is only one element in the array, but if the selection is ambiguous then all the possible elements are returned.
+<P>Code selection is used to find the Java element represented by a range of
+text (typically the selected text) in a compilation unit.&nbsp; To programmatically perform code selection,
+you must invoke <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeSelect(int, int)">ICodeAssist.codeSelect</a></b>.
+You must supply the starting index location of hte selection and its
+length.&nbsp; The result is an array of Java elements.&nbsp; Most of the time there is only one element in the array, but if the selection is ambiguous then all the possible elements are returned.<P>In
+the following example, code select is invoked for a compilation unit.
 
-<font color='#4444CC'><pre>
-   // Get the compilation unit
+<font color='#4444CC'><pre>   // Get the compilation unit
    ICompilationUnit unit = ...;
    
    // Get the offset and length
@@ -101,20 +140,28 @@ The result is an array of Java elements. Most of the time there is only one elem
    
    // perform selection
    IJavaElement[] elements = unit.codeSelect(offset, length);
-   System.out.println("the selected element is " + element[0].getElementName());
+   System.out.println(&quot;the selected element is &quot; + element[0].getElementName());
 </pre></font>
 
 <H4>
-Selection at cursor location.
+Selection at cursor location
 </h4>
 <P>
-If the length of the selection equals 0 then the selection is computed with the complete enclosing token.</P>
+When the selection length is specified as 0, a selection will be computed by
+finding the complete token that encloses the specified offset.&nbsp; Consider
+the following example method:</P>
 
-<i><pre>
-   public void fooMethod(Object) {
-   }
-</pre></i>
-When the offset is after the first character of <i>fooMethod</i> and the length is 0 then the selection is <i>fooMethod</i>. But if the length is 5 then the selection is <i>ooMet</i>.
+<P>
+
+<code>&nbsp;&nbsp; public void fooMethod(Object) {<br>
+&nbsp;&nbsp; }<br>
+</P>
+
+</code>
+If you specify an offset after the first character of <i>fooMethod</i>, and you
+specify a length of 0,&nbsp; then the selection will be computed to include the
+entire token <i>fooMethod</i>. If instead, you specify a length of 5, the
+selection will considered as <i>ooMet</i>.
 
 
 <P><a href="../hglegal2002.htm"><img src="../ngibmcpy2002.gif" alt="Copyright IBM Corporation and others 2000, 2002. All Rights Reserved." border="0"></a></P>
