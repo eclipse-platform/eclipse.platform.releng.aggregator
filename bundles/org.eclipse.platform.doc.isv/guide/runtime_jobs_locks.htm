@@ -38,8 +38,8 @@ the lock on it.  The following snippet shows a common idiom for working with a l
 <font color='#4444CC'><pre>
 ...
 // I need to manipulate myObject, so I get its lock first.
-<b>myLock.acquire();</b>
 try {		
+	<b>myLock.acquire();</b>
 	updateState(myObject);  // manipulate the object
 } finally {
 	<b>lock.release();</b>
@@ -48,20 +48,27 @@ try {
 </pre></font>
 The <b>acquire()</b> method will not return until the calling job can be granted exclusive access to the lock.  
 In other words, if some other job has already acquired the lock, then this code will be blocked until the lock 
-is available.  Note that the code that manipulates <b>myObject</b> is wrapped in a <tt>try</tt> block, so that the lock 
-can be released if any exceptions occur while working with the object.  
+is available.  Note that the code that acquires the lock and manipulates <b>myObject</b> is wrapped in 
+a <tt>try</tt> block, so that the lock can be released if any exceptions occur while working with the object.  
 </p>
 <p>Seems simple enough, right?  Fortunately, locks are pretty straightforward to use.  They are also reentrant, which
 means you don't have to worry about your job acquiring the same lock multiple times.  Each lock keeps a count of the
 number of acquires and releases for a particular thread, and will only release from a job when the number of 
 releases equals the number of acquires.
 </p>
-<p>Earlier we noted that locks provided by the job manager are aware of each other and can avoid circular deadlock.  
-You can accept this statement at face value or read on if you are curious about the implementation side of locks.
-The simplest circular deadlock case occurs when &quot;Job A&quot; acquires &quot;Lock A&quot; and 
+<h4>Deadlock</h4>
+<p>Earlier we noted that locks provided by the job manager are aware of each other and can avoid circular deadlock. 
+To understand how deadlock occurs, let's look at a simple scenario.  Suppose &quot;Job A&quot; acquires &quot;Lock A&quot; and 
 subsequently tries to acquire &quot;Lock B.&quot; Meanwhile, &quot;Lock B&quot; is held by &quot;Job B&quot; 
-which is now blocked waiting on &quot;Lock A.&quot; The platform avoids these cases by temporarily granting access to
-the locks owned by a blocked job to other jobs that are waiting on them if needed to break a deadlock.
+which is now blocked waiting on &quot;Lock A.&quot;  This kind of deadlock indicates an underlying design problem
+with the use of the locks between the jobs.  While this simple case can be avoided easily enough, the chances
+of accidentally introducing deadlock increase as the number of jobs and locks used in your design increase.  
+</p> 
+<p>Fortunately, the platform will help you in identifying deadlocks.  When the job manager detects a deadlock 
+condition, it prints diagnostic information to the log describing the deadlock condition.  Then it breaks the 
+deadlock by temporarily granting access to the locks owned by a blocked job to other jobs that are waiting on them.  
+It is important to carefully test any implementation involving multiple locks and fix any deadlock conditions that
+are reported by the platform.
 </P>
 
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corporation and others 2000, 2003." border="0" width="324" height="14"></a></p>
