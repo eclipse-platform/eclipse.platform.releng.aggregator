@@ -30,20 +30,20 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 					addScalar(scalars, InternalDimensions.WORKING_SET, counters[0]);
 					addScalar(scalars, InternalDimensions.WORKING_SET_PEAK, counters[1]);
 					addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, counters[2]);
-					addScalar(scalars, InternalDimensions.USER_TIME, counters[3]);
+					//addScalar(scalars, InternalDimensions.USER_TIME, counters[3]);
 					addScalar(scalars, InternalDimensions.KERNEL_TIME, counters[4]);
+	                addScalar(scalars, InternalDimensions.CPU_TIME, counters[3] + counters[4]);
 					addScalar(scalars, InternalDimensions.PAGE_FAULTS, counters[5]);
 					if (counters[6] != -1)
 						addScalar(scalars, InternalDimensions.COMITTED, counters[6]);
 					addScalar(scalars, InternalDimensions.GDI_OBJECTS, counters[7]);
 					//addScalar(scalars, Dimensions.USER_OBJECTS, counters[8]);
-					if (counters[9] != -1)
-						addScalar(scalars, InternalDimensions.OPEN_HANDLES, counters[9]);
-					addScalar(scalars, InternalDimensions.READ_COUNT, counters[10]);
-					addScalar(scalars, InternalDimensions.WRITE_COUNT, counters[11]);
-					addScalar(scalars, InternalDimensions.BYTES_READ, counters[12]);
-					addScalar(scalars, InternalDimensions.BYTES_WRITTEN, counters[13]);
-	                addScalar(scalars, InternalDimensions.CPU_TIME, counters[3] + counters[4]);
+					//if (counters[9] != -1)
+					//	addScalar(scalars, InternalDimensions.OPEN_HANDLES, counters[9]);
+					//addScalar(scalars, InternalDimensions.READ_COUNT, counters[10]);
+					//addScalar(scalars, InternalDimensions.WRITE_COUNT, counters[11]);
+					//addScalar(scalars, InternalDimensions.BYTES_READ, counters[12]);
+					//addScalar(scalars, InternalDimensions.BYTES_WRITTEN, counters[13]);
 				}
 			}
 		    super.collectOperatingSystemCounters(scalars);
