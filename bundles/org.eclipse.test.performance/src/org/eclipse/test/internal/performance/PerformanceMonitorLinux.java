@@ -21,6 +21,8 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 
 	private static long PAGESIZE= 4096;
 	private static long JIFFIES= 10L;
+	private static boolean fgHasElapsedTime= true;
+	private static long fgStartupTime;
 	
 	/**
 	 * Write out operating system counters for Linux.
@@ -78,6 +80,26 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
 				addScalar(scalars, InternalDimensions.DRS, drs*PAGESIZE);			
 				addScalar(scalars, InternalDimensions.LRS, lrs*PAGESIZE);
 			}
+			
+			long currentTime= System.currentTimeMillis();
+			if (!PerformanceTestPlugin.isOldDB())
+				addScalar(scalars, InternalDimensions.SYSTEM_TIME, currentTime);
+			
+			if (fgHasElapsedTime) {
+				if (fgStartupTime == 0) {
+					String t= System.getProperty("eclipse.startTime"); //$NON-NLS-1$
+					if (t != null) {
+						try {
+							fgStartupTime= Long.parseLong(t);
+						} catch (NumberFormatException e) {
+							fgHasElapsedTime= false;
+						}
+					} else
+						fgHasElapsedTime= false;
+				}
+				addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, currentTime-fgStartupTime);
+			}
+			
 			super.collectOperatingSystemCounters(scalars);
 		}
 	}

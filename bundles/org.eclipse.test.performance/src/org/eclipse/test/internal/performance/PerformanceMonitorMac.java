@@ -18,6 +18,8 @@ import java.util.Map;
  */
 class PerformanceMonitorMac extends PerformanceMonitor {
 
+	private static boolean fgHasElapsedTime= true;
+	private static long fgStartupTime;
 //	private static long PAGESIZE= 4096;
 
 	/** 
@@ -72,12 +74,26 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 					//addScalar(scalars, Dimensions.HARD_PAGE_FAULTS, counters[9]);
 				}
 			}
-		    String st= System.getProperty("eclipse.startTime"); //$NON-NLS-1$
-		    if (st != null) {
-		        long s= Long.parseLong(st);
-		        long e= System.currentTimeMillis();
-				addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, e-s);
-		    }
+			
+			long currentTime= System.currentTimeMillis();
+			if (!PerformanceTestPlugin.isOldDB())
+				addScalar(scalars, InternalDimensions.SYSTEM_TIME, currentTime);
+			
+			if (fgHasElapsedTime) {
+				if (fgStartupTime == 0) {
+					String t= System.getProperty("eclipse.startTime"); //$NON-NLS-1$
+					if (t != null) {
+						try {
+							fgStartupTime= Long.parseLong(t);
+						} catch (NumberFormatException e) {
+							fgHasElapsedTime= false;
+						}
+					} else
+						fgHasElapsedTime= false;
+				}
+				addScalar(scalars, InternalDimensions.ELAPSED_PROCESS, currentTime-fgStartupTime);
+			}
+			
 		    super.collectOperatingSystemCounters(scalars);
 		}
 	}
