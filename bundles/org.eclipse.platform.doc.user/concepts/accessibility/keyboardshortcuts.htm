@@ -22,7 +22,8 @@ do not constitute key strokes.
 A 'key sequence' is one or more key strokes. Traditionally, emacs assigned two or three key stroke key sequences to particular 
 commands. For example, the normal key sequence assigned to <code>Close All</code> in emacs is <code>Ctrl+X Ctrl+C</code>. 
 To enter this key sequence, one presses the key stroke <code>Ctrl+X</code> followed by the key stroke <code>Ctrl+C</code>.
-Eclipse supports key sequences of arbitrary lengths.
+While Eclipse supports key sequences of arbitrary lengths, it is recommended
+that keyboard shortcuts be four key strokes in length (or less).
 </p>
 <p>
 A 'key binding' is the assignment of a key sequence to a command.
@@ -32,50 +33,64 @@ A 'key binding' is the assignment of a key sequence to a command.
 A 'configuration' is a set of key bindings. Eclipse includes two configurations:
 </p>
 <ul>
-<li>Standard</li>
-<li>Emacs (extends Standard)</li>
+<li>Default</li>
+<li>Emacs (extends Default)</li>
 </ul>
 <p>
-The <em>Standard</em> configuration contains a general set of key bindings, in many cases recognizable to 
+The <em>Default</em> configuration contains a general set of key bindings, in many cases recognizable to 
 users as traditional key sequences. For instance, <code>Ctrl+A</code> is assigned to <code>Select All</code>, 
 <code>Ctrl+S</code> is assigned to <code>Save</code>, etc.
 </p>
-The <em>Emacs</em> configuration contains a set of key bindings familiar to users of emacs.
+The <em>Emacs</em> configuration contains a set of key bindings familiar to users of Emacs.
 For instance, <code>Ctrl+X H</code> is assigned to <code>Select All</code>, <code>Ctrl+X S</code> is assigned to <code>Save</code>, etc.
 </p>
 <p>
-It is important to understand why the <em>Emacs</em> configuration says that it 'extends Standard'. The <em>Emacs</em> configuration
-is not a complete set of key bindings like the <em>Standard</em> configuration. Rather, it borrows from the <em>Standard</em>
-configuration where possible, only defining explicit emacs style key bindings where they vary from the
-<em>Standard</em> configuration. Generally, only well known commands like <code>Select All</code>, <code>Save</code>, etc. have specific emacs key sequences associated with them. 
+It is important to understand why the <em>Emacs</em> configuration says that it 'extends Default'. The <em>Emacs</em> configuration
+is not a complete set of key bindings like the <em>Default</em> configuration. Rather, it borrows from the <em>Default</em>
+configuration where possible, only defining explicit Emacs style key bindings where they vary from the
+<em>Default</em> configuration. Generally, only well known commands like <code>Select All</code>, <code>Save</code>, etc. have specific Emacs key sequences associated with them. 
 </p>
 <p>
 The user decides which configuration they are most comfortable using by changing the 'Active Configuration' setting on the
-keys preference page. If the user chooses the <em>Standard</em> configuration, all <em>Emacs</em> key bindings are ignored. If the user chooses
-the <em>Emacs</em> configuration, explicit emacs style key sequence assignments take precedence over any conflicting assignments in the <em>Standard</em> configuration.
+keys preference page. If the user chooses the <em>Default</em> configuration, all <em>Emacs</em> key bindings are ignored. If the user chooses
+the <em>Emacs</em> configuration, explicit Emacs style key sequence assignments take precedence over any conflicting assignments in the <em>Default</em> configuration.
 </p>
 <h2>Contexts</h2>
 <p>
 Key bindings can vary based on the current context of Eclipse. 
 </p>
-<p> Sometimes the active part might be a java file editor, for instance, where 
+<p> Sometimes the active part might be a Java file editor, for instance, where 
   a different set of key sequence assignments may be more appropriate than if 
   the active part was an html file editor. As a specific example, typically <code>Ctrl+B</code> 
-  is assigned to <code>Build</code> in a context such as java file editing, while 
+  is assigned to <code>Build</code> in a context such as Java file editing, while 
   <code>Ctrl+B</code> is assigned to <code>Make Text Bold</code> in a context 
-  such as html file editing. This context is determined by the active part. If 
-  the active part does not choose a particular context, the workbench will set the 
-  active context to <em>Global</em>. </p>
-<p> Eclipse includes three different contexts. They are: </p>
+  such as HTML file editing. This context is usually determined by the active
+  part, but it can be influenced by the active window or dialog as well. If the
+  active part does not choose a particular context, the workbench will set the 
+  active context to <em>In Windows</em>.</p>
+<p>Eclipse includes seven different contexts. They are: </p>
 <ul>
-<li>Global</li>
-<li>Text Editor (extends Global)</li>
-<li>Java Editor (extends Text Editor)</li>
+<li>In Dialogs and Windows</li>
+<li>In Windows (extends In Dialogs and Windows)</li>
+<li>In Dialogs (extends In Dialogs and Windows)</li>
+<li>Editing Text (extends In Windows)</li>
+<li>Editing Java Source (extends Editing Text)</li>
+<li>Debugging (extends In Windows)</li>
+<li>Debugging Java (extends Debugging)</li>
 </ul>
 <p> Much like configurations, contexts can extend other contexts. For example, 
-  the <em>Java Editor</em> context borrows key bindings from the <em>Text Editor</em> 
-  context, which in turn borrows key bindings from the <em>Global</em> context. 
+  the <em>Editing Java Source</em> context borrows key bindings from the <em>Editing Text</em> 
+  context, which in turn borrows key bindings from the <em>In Windows</em> context. 
 </p>
+<p>Note: It is not recommended to promote a key binding to a context which it
+extends.  For example, it is not recommended to move an <em>Editing Text</em> key
+binding to the <em>In Dialogs and Windows</em> context.  This may have unexpected
+results.</p>
+<p>It is possible for some key bindings to work in dialogs.  Those key bindings
+are assigned to the <em>In Dialogs and Windows</em> context.  One example of such a
+key binding is the key binding for "cut".  It is possible to change these key
+bindings.  For example, it is possible to have Ctrl+X as cut in dialogs, but
+Ctrl+W as cut in windows.</p>
 <h2>Platform and Locale</h2>
 <p>
 Key bindings also vary by platform and locale. On the Macintosh platform, <code>Command+S</code> is assigned to <code>Save</code>, instead of the usual <code>Ctrl+S</code>. On Chinese locales (zh), <code>Alt+/</code> is assigned to <code>Content Assist</code>, instead of the usual <code>Ctrl+Space</code>.
@@ -95,33 +110,33 @@ Select <b>Window &gt; Preferences &gt; Workbench &gt; Keys</b> for the Keys pref
 In this example, we have chosen to select <em>Emacs</em> as the active configuration, 
 and have selected the command <code>Close</code> from the list of commands. Information 
 on this command, along with its current key bindings, is shown. </p> 
-<p> Notice that <code>Close</code> has two key sequences assigned to it: <code>Ctrl+F4</code> 
-  in the <em>Standard</em> configuration and <code>Ctrl+X K</code> in the <em>Emacs</em> 
-  configuration. Both are assigned in the <em>Global</em> context. Thus, if the 
-  user sets the active configuration to <em>Standard</em>, <code>Ctrl+F4</code> 
+<p> Notice that <code>Close</code> has three key sequences assigned to it: <code>Ctrl+F4</code>  and <code>Ctrl+W</code>
+  in the <em>Default</em> configuration and <code>Ctrl+X K</code> in the <em>Emacs</em> 
+  configuration. Both are assigned in the <em>In Windows</em> context. Thus, if the 
+  user sets the active configuration to <em>Default</em>, <code>Ctrl+F4</code> and <code>Ctrl+W</code>
   will be assigned to <code>Close</code> while <code>Ctrl+X K</code> will not. 
   If the user sets the active configuration to <em>Emacs</em>, however, <code>Ctrl+X 
   K</code> will be assigned to <code>Close</code>. As well, because the <em>Emacs</em> 
-  configuration also borrows key bindings from the <em>Standard</em> configuration, 
-  <code>Ctrl+F4</code> will also be assigned to <code>Close</code> provided that 
-  <code>Ctrl+F4</code> has not been assigned to another command in the <em>Emacs</em> 
-  configuration. </p>
+  configuration also borrows key bindings from the <em>Default</em> configuration, 
+  <code>Ctrl+F4</code> and <code>Ctrl+W</code> will also be assigned to <code>Close</code> provided that 
+  these key binding have not been assigned to another command in the <em>Emacs</em> 
+  configuration.  In this example, "Ctrl+W" is bound to <code>Cut</code> in the Emacs
+  key configuration.</p>
 <p> Below the list of key sequences assigned to <code>Close</code>, there is a 
-  place to add or remove key bindings. By default, it selects the context as <em>Global</em> 
-  and the configuration to be the user's active configuration (recall above where 
-  we changed this to <em>Emacs</em>). 
-<p>
+  place to add or remove key bindings. By default, it selects the context as <em>In Windows</em>.</p> 
 <p> We type in the key sequence <code>Ctrl+W</code>, and the 'Add' button becomes 
   enabled. Also, a list of all the commands to which the key sequence <code>Ctrl+W</code> 
   is already assigned is show below the Add button. We can see that <code>Ctrl+W</code> 
-  is currently assigned to the command <code>Cut</code> in the <em>Global</em> 
-  context and <em>Emacs</em> configuration. We click the 'Add' button to assign 
-  <code>Ctrl+W</code> to <code>Close</code>. </p>
+  is currently assigned to the command <code>Cut</code> in the <em>In Windows and Dialogs</em> 
+  context. We click the 'Add' button to assign <code>Ctrl+W</code> to <code>Close</code>. </p>
+ <p>
 Now we see <code>Ctrl+W</code> added to the list of key sequences assigned to 
 <code>Close</code>. Notice the small 'change' graphic <img src="../../images/change.gif" alt="Small graphic representing 'change'" width="19" height="19"> 
 indicating that this key binding changes an existing key binding. Our new key 
-binding, effectively removes the previous assignment of <code>Ctrl+W</code> to 
-<code>Cut</code>. We can remove this change at any time by selecting our new key 
+binding, makes sure that the <code>Ctrl+W</code> key binding for <code>Close</code>
+works in the <code>Emacs</code> key configuration.  The binding to <code>Cut</code>
+still exists, but will only work in dialogs (i.e., when we are "in dialogs and windows",
+but not "in windows").  We can remove this change at any time by selecting our new key 
 binding and clicking the 'Remove' button. The previous assignment of <code>Ctrl+W</code> 
 to <code>Cut</code> will automatically be restored. 
 <p> <img src="../../images/keys3.gif" alt="Keys preference page showing the new assignment, including 'change' graphic" width="879" height="655"> 
@@ -155,7 +170,7 @@ Key bindings are provided by plug-ins, and in Eclipse, plug-ins can be added or 
   they can still occur. Two plug-ins, independent of one another, could assign 
   the same key sequence to different commands with the same context, configuration, 
   platform, and locale. Consider if a plug-in assigned <code>Ctrl+F4</code> in 
-  the <em>Global</em> context and <em>Standard</em> configuration to one of its 
+  the <em>In Windows</em> context and <em>Default</em> configuration to one of its 
   commands. This directly conflicts with Eclipse assigning <code>Ctrl+F4</code> 
   to the close command in the same context and configuration. </p>
 This is a conflict. It wouldn't be proper to invoke both commands, nor would it be proper to simply choose one of the two commands to receive the key stroke. The only proper thing to do is to ignore both key bindings, making <code>Ctrl+F4</code> effectively useless in this context and configuration.
