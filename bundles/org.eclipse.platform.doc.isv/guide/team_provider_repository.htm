@@ -76,46 +76,61 @@ kept in its views and broadcasts the fact that the project is deconfigured.</p>
 		CVSProviderPlugin.broadcastProjectDeconfigured(getProject());
 	}
 }</pre>
-</font>
-
-<h3>Resource modification hooks</h3>
-<P >Most of the interesting function associated with a repository provider
-occurs as the user works with resources in the project that is configured for
-the provider.&nbsp; In order to be aware of changes the user makes to a
-resource, the provider can implement <a href="resAdv_hooks.htm">resource
-modification hooks</a>.&nbsp; The resources plug-in provides these hooks as
-extension points.&nbsp; The documentation for <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>
-and <a href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html"><b>IFileModificationValidator</b></a>
-describe the details for implementing these hooks.</P>
+</font> 
+<h3>Resource modification hooks<a name="hooks"></a></h3>
+<P >Most of the interesting function associated with a repository provider occurs 
+  as the user works with resources in the project that is configured for the provider.&nbsp; 
+  In order to be aware of changes the user makes to a resource, the provider can 
+  implement <a href="resAdv_hooks.htm">resource modification hooks</a>.&nbsp; 
+  The resources plug-in provides these hooks as extension points.&nbsp; The documentation 
+  for <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>, 
+  <a href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html"><b>IFileModificationValidator</b></a> 
+  and <a href="../reference/api/org/eclipse/core/resources/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a> 
+  describe the details for implementing these hooks.</P>
 <P >The team plug-in optimizes and simplifies the association of the hook with
 appropriate resources by registering generic hooks with the resources
 plug-in.&nbsp; These generic hooks simply look up the repository provider for a
 given resource and obtain its hook.&nbsp; This has the advantage of calling only
 one provider hook rather than having each provider implementation register a
 hook that must first check whether the resource is managed by the provider.</P>
-<P >What this means to your plug-in is that you provide any necessary hooks by
-overriding methods in <font color="#4444CC"><b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.&nbsp;
-</font>The default implementation of these methods answers null, indicating that
-no hook is necessary.</P>
+<P >What this means to your plug-in is that you provide any necessary hooks by 
+  overriding methods in <font color="#4444CC"><b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.&nbsp; 
+  </font>The default implementation of these methods answers null, indicating 
+  that no hook is necessary (except for the resource rule factory, as described 
+  below): </P>
 <ul>
-  <li><b>getMoveDeleteHook</b> - answers an <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>
-    appropriate for the provider.&nbsp; This hook allows providers to control
-    how moves and deletes occur and includes the ability to prevent them from
-    happening.&nbsp; Implementors can provide alternate implementations for
-    moving or deleting files, folders, and projects.&nbsp; The CVS client uses
-    this hook to monitor folder deletions and ensure that any files contained in
-    deleted folders are remembered so that they can later be deleted from the
-    repository if desired.</li>
-  <li><b>getFileModificationValidator</b> - answers an <a href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html"><b>IFileModificationValidator</b></a>
-    appropriate for the provider.&nbsp; This hook allows providers to pre-check
-    any modifications or saves to files.&nbsp; This hook is typically needed
-    when a repository provider wants to implement <b>pessimistic versioning</b>.&nbsp;
-    In pessimistic versioning, a file must be checked out before modifying it,
-    and only one client can check out a file at any given time.&nbsp;
-    Pessimistic versioning could be implemented by checking out a file (if not
-    already checked out) whenever a file is edited, and checking the file back
-    in when it is saved. Since CVS uses an optimistic versioning scheme, it does
-    not implement this hook.</li>
+  <li><b>getMoveDeleteHook</b> - answers an <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a> 
+    appropriate for the provider.&nbsp; This hook allows providers to control 
+    how moves and deletes occur and includes the ability to prevent them from 
+    happening.&nbsp; Implementors can provide alternate implementations for moving 
+    or deleting files, folders, and projects.&nbsp; The CVS client uses this hook 
+    to monitor folder deletions and ensure that any files contained in deleted 
+    folders are remembered so that they can later be deleted from the repository 
+    if desired.</li>
+  <li><b>getFileModificationValidator</b> - answers an <a href="../reference/api/org/eclipse/core/resources/IFileModificationValidator.html"><b>IFileModificationValidator</b></a> 
+    appropriate for the provider.&nbsp; This hook allows providers to pre-check 
+    any modifications or saves to files.&nbsp; This hook is typically needed when 
+    a repository provider wants to implement <b>pessimistic versioning</b>.&nbsp; 
+    In pessimistic versioning, a file must be checked out before modifying it, 
+    and only one client can check out a file at any given time.&nbsp; Pessimistic 
+    versioning could be implemented by checking out a file (if not already checked 
+    out) whenever a file is edited, and checking the file back in when it is saved. 
+    Since CVS uses an optimistic versioning scheme, it does not implement this 
+    hook.</li>
+  <li><strong>getRuleFactory</strong> - answers a resource rule factory appropriate 
+    for the provider. Providers should always override this method as the default 
+    factory locks the workspace for all operations for backwards compatibility 
+    reasons. Provides should subclass <a href="../reference/api/org/eclipse/core/resources/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a> 
+    and override those rules required to ensure that the proper rules are obtained 
+    for operations that invoke the move/delete hook and file modification validator. 
+    The rule methods of particular interest to repository providers are: 
+    <ul>
+      <li><em>deleteRule</em> - move/delet hook</li>
+      <li><em>moveRule</em> -move/delete hook</li>
+      <li><em>validateEditRule</em> - file modification validator validateEdit</li>
+      <li><em>modifyRule</em> - file modification validator validateSave</li>
+    </ul>
+  </li>
 </ul>
 
 
