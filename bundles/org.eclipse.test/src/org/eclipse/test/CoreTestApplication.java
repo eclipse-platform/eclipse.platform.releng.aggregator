@@ -1,12 +1,10 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2003.
  * All Rights Reserved.
  */
 package org.eclipse.test;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-
 import org.eclipse.core.boot.IPlatformRunnable;
 
 /**
