@@ -24,8 +24,6 @@ import java.util.Random;
 import org.eclipse.test.internal.performance.PerformanceMonitorLinux;
 import org.eclipse.test.internal.performance.PerformanceMonitorMac;
 import org.eclipse.test.internal.performance.data.DataPoint;
-import org.eclipse.test.internal.performance.data.DimensionMessages;
-import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -167,7 +165,7 @@ class PerformanceMonitor {
 	}
 	
     void addScalar(Map scalars, int id, long value) {
-        System.out.println(id + ": " + DimensionMessages.getString(id) + " " + value);
+        // System.out.println(id + ": " + DimensionMessages.getString(id) + " " + value);
         scalars.put("" + id, new Scalar("" + id, value));
     }
     

@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dimension;
+import org.eclipse.test.internal.performance.data.DimensionMessages;
 import org.eclipse.test.internal.performance.data.PerfMsrDimensions;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
@@ -94,7 +95,12 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
 				String dimensionId= (String) iter.next();
 				double avgDelta= ((Double) averages.get(dimensionId)).doubleValue();
 				Dimension dimension= PerfMsrDimensions.getDimension(dimensionId);
-				String name= dimension != null ? dimension.getName() + " [" + dimension.getUnit().getShortName() + "]" : dimensionId;
+				String name= null;
+				if (dimension != null)
+					name= dimension.getName() + " [" + dimension.getUnit().getShortName() + "]";
+				else
+					name= DimensionMessages.getString("Dimension." + dimensionId);
+					
 				System.out.println(name + ":\t" + avgDelta);
 			}
 		}
