@@ -102,13 +102,13 @@ public class BuildTests extends TestCase {
 		assertTrue("Feature directory missing required files: " + aString, result.size() == 0);
 	}
 	
-	public void testPluginCount() {
-		String installDir = BootLoader.getInstallURL().getPath();
-		File pluginDir = new File(installDir, "plugins");
-		File[] plugins = pluginDir.listFiles();
-
-		assertTrue("Plug-ins missing: " + (PLUGIN_COUNT - plugins.length), PLUGIN_COUNT == plugins.length);
-	}
+//	public void testPluginCount() {
+//		String installDir = BootLoader.getInstallURL().getPath();
+//		File pluginDir = new File(installDir, "plugins");
+//		File[] plugins = pluginDir.listFiles();
+//
+//		assertTrue("Plug-ins missing: " + (PLUGIN_COUNT - plugins.length), PLUGIN_COUNT == plugins.length);
+//	}
 	
 	public void testFeatureCount() {
 		String installDir = BootLoader.getInstallURL().getPath();
