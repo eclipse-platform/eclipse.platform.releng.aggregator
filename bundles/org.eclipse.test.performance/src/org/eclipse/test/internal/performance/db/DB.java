@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
@@ -33,46 +32,26 @@ import org.eclipse.test.internal.performance.data.Scalar;
 
 public class DB {
     
-    private static final String LOCALHOST= "localhost"; //$NON-NLS-1$
-    
     private static final boolean DEBUG= false;
     private static final boolean AGGREGATE= true;
-    private static final boolean VARIATIONS= true;
         
     private static DB fgDefault;
     
     private Connection fConnection;
     private SQL fSQL;
-    private int fConfigID;
     private int fStoredSamples;
     private boolean fStoreCalled;
     private boolean fIsEmbedded;
     
     
-    public static boolean store(Variations variations, Sample sample) {
-        return getDefault().internalStore(variations, sample);
-    }
-    
-    public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern, Dim[] dims) {
-        Variations variations= new Variations(configName, buildPattern);
-        return getDefault().internalQueryDataPoints(variations, scenarioPattern, dims);
+    // Datapaoints
+    public static DataPoint[] queryDataPoints(Variations variations, String scenarioName, Set dims) {
+        return getDefault().internalQueryDataPoints(variations, scenarioName, dims);
     }
    
-    public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern) {
-        Variations variations= new Variations(configName, buildPattern);
-        return getDefault().internalQueryDataPoints(variations, scenarioPattern, null);
-    }
-   
-    public static DataPoint[] queryDataPoints(Variations variations, String scenarioPattern, Dim[] dims) {
-        return getDefault().internalQueryDataPoints(variations, scenarioPattern, dims);
-    }
-   
+    // Scenarios
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
-        return queryScenarios(configName, buildPattern, scenarioPattern, null);
-    }
-
-    public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern, Dim[] dimensions) {
-        return queryScenarios(configName, new String[] { buildPattern }, scenarioPattern, dimensions);
+        return queryScenarios(configName, new String[] { buildPattern }, scenarioPattern, null);
     }
 
     public static Scenario[] queryScenarios(String configName, String[] buildPatterns, String scenarioPattern, Dim[] dimensions) {
@@ -95,19 +74,20 @@ public class DB {
         return new Scenario(config, builds, scenarioName, null);
     }
 
-    public static void queryBuildNames(List names, String configName, String buildPattern, String scenarioPattern) {
-        Variations variations= new Variations(configName, buildPattern);
-        getDefault().internalQueryBuildNames(names, variations, scenarioPattern);
+    // build names
+    public static void queryBuildNames(List names, Variations variationPatterns, String scenarioPattern) {
+        getDefault().internalQueryBuildNames(names, variationPatterns, scenarioPattern);
     }
 
+
+    public static boolean store(Variations variations, Sample sample) {
+        return getDefault().internalStore(variations, sample);
+    }
+    
     public static Connection getConnection() {
         return getDefault().fConnection;
     }
     
-    public static void dump() {
-        System.err.println("DB.dump: disabled"); //$NON-NLS-1$
-    }
-
     public static boolean isActive() {
         return fgDefault != null && fgDefault.getSQL() != null;
     }
@@ -151,15 +131,6 @@ public class DB {
         return fSQL;
     }
     
-    private int getConfig(Properties config) throws SQLException {
-        if (fConfigID == 0) {
-            String configName= config.getProperty(PerformanceTestPlugin.CONFIG, LOCALHOST);
-            String buildName= config.getProperty(PerformanceTestPlugin.BUILD);
-            fConfigID= fSQL.createConfig(configName, buildName);
-        }
-        return fConfigID;
-    }
-                
     private boolean internalStore(Variations variations, Sample sample) {
         
         if (fSQL == null || sample == null)
@@ -210,10 +181,9 @@ public class DB {
 		//System.out.println("store started..."); //$NON-NLS-1$
 	    try {
             //long l= System.currentTimeMillis();
-            int config_id= getConfig(variations);
-            int variation_id= fSQL.createVariations(variations);
+            int variation_id= fSQL.getVariations(variations);
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
-            int sample_id= fSQL.createSample(config_id, variation_id, scenario_id, new Timestamp(sample.getStartTime()));
+            int sample_id= fSQL.createSample(variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
             if (sc != null) {
 	            int datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
@@ -252,43 +222,28 @@ public class DB {
         return true;
     }
     
-    /*
-     * fixed
-     */
-    private DataPoint[] internalQueryDataPoints(Variations variations, String scenarioName, Dim[] dims) {
+    private DataPoint[] internalQueryDataPoints(Variations variations, String scenarioName, Set dimSet) {
         if (fSQL == null)
             return null;
- 
-         ResultSet rs= null;
-         try {
-        	
-            ArrayList dataPoints= new ArrayList();
-            
-            /* currently not needed
-        	int[] dim_ids= null;
-        	if (dims != null) {
-        		dim_ids= new int[dims.length];
-        		for (int i= 0; i < dims.length; i++)
-        			dim_ids[i]= dims[i].getId();
-        	}
-        	if (dim_ids == null)
-        		dim_ids= new int[0];
-            */
-            
-            //rs= fSQL.queryDataPoints(configName, buildName, scenarioName);
+        
+        ResultSet rs= null;
+        try {
+            ArrayList dataPoints= new ArrayList(); 
             rs= fSQL.queryDataPoints(variations, scenarioName);
 	        while (rs.next()) {
 	            int datapoint_id= rs.getInt(1);
 	            int step= rs.getInt(2);
 
 	            HashMap map= new HashMap();      
-	            ResultSet rs2= fSQL.queryDataPoints(datapoint_id);
+	            ResultSet rs2= fSQL.queryScalars(datapoint_id);
 		        while (rs2.next()) {
 	                int dim_id= rs2.getInt(1);
 	                long value= rs2.getBigDecimal(2).longValue();		            
 	                Dim dim= Dim.getDimension(dim_id);
-	                if (dim != null)
-	                    map.put(dim, new Scalar(dim, value));
+	                if (dim != null) {
+	                    if (dimSet == null || dimSet.contains(dim))
+	                        map.put(dim, new Scalar(dim, value));
+	                }
 		        }
 		        if (map.size() > 0)
 		            dataPoints.add(new DataPoint(step, map));
@@ -343,9 +298,6 @@ public class DB {
         return null;
     }
     
-    /*
-     * fixed
-     */
     private void internalQueryBuildNames(List buildNames, Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return;
@@ -390,11 +342,11 @@ public class DB {
         String dbname= PerformanceTestPlugin.getDBName();
         String url= null;
         java.util.Properties info= new java.util.Properties();
-        info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
-        info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
         
         try {            
             if (dbloc.startsWith("net://")) { //$NON-NLS-1$
+                info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
+                info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 // connect over network
                 if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
                 Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
@@ -424,13 +376,6 @@ public class DB {
 
             doesDBexists();
             
-            if (VARIATIONS)
-                upgradeVariationSupport();
-
-            if (DEBUG) System.out.println("start prepared statements"); //$NON-NLS-1$
-            fSQL.createPreparedStatements();
-            if (DEBUG) System.out.println("finish with prepared statements"); //$NON-NLS-1$
-                         
         } catch (SQLException ex) {
             PerformanceTestPlugin.logError(ex.getMessage());
 
@@ -479,7 +424,7 @@ public class DB {
         Statement stmt= fConnection.createStatement();
         try {
 	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' "); //$NON-NLS-1$
-	        if (rs.next() && rs.getInt(1) >= 6)
+	        if (rs.next() && rs.getInt(1) >= 5)
 	            return;
 	        if (DEBUG) System.out.println("initialising DB"); //$NON-NLS-1$
 	        fSQL.initialize();
@@ -488,24 +433,5 @@ public class DB {
         } finally {
             stmt.close();
         }
-    }
-    
-    private void upgradeVariationSupport() throws SQLException {
-        Statement stmt= fConnection.createStatement();
-        try {
-	        ResultSet rs= stmt.executeQuery("SELECT count(*) FROM sys.systables WHERE sys.systables.tablename = 'VARIATION' "); //$NON-NLS-1$
-	        if (rs.next() && rs.getInt(1) > 0)
-	            return;
-	        if (DEBUG) System.out.println("adding VARIATION support"); //$NON-NLS-1$
-	        fSQL.initializeVariations();
-			fConnection.commit();
-	        if (DEBUG) System.out.println("end VARIATION support"); //$NON-NLS-1$
-        } finally {
-            stmt.close();
-        }
-    }
-
-    public static void main(String args[]) {
-        DB.dump();
     }
 }

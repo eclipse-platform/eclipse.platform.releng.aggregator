@@ -62,13 +62,12 @@ public class Evaluator extends EmptyEvaluator {
 			for (int j= 0; j < dims.length; j++)
 				allDimensions.add(dims[j]);
 		}
-		Dim[] allDims= (Dim[]) allDimensions.toArray(new Dim[allDimensions.size()]);
 		
 		// get data for this session
 		DataPoint[] sessionDatapoints;
 		Variations config= PerformanceTestPlugin.getVariations();
 		if (config != null)
-		    sessionDatapoints= DB.queryDataPoints(config, scenarioName, allDims);
+		    sessionDatapoints= DB.queryDataPoints(config, scenarioName, allDimensions);
 		else
 			sessionDatapoints= session.getDataPoints();
 	    if (sessionDatapoints == null || sessionDatapoints.length == 0) {
@@ -76,7 +75,7 @@ public class Evaluator extends EmptyEvaluator {
 	    	return;
 	    }
 
-		DataPoint[] datapoints= DB.queryDataPoints(refKeys, scenarioName, allDims);
+		DataPoint[] datapoints= DB.queryDataPoints(refKeys, scenarioName, allDimensions);
 	    if (datapoints == null || datapoints.length == 0) {
 	        PerformanceTestPlugin.logWarning("no reference data named '" + refKeys + "' found"); //$NON-NLS-1$ //$NON-NLS-2$
 	        return;

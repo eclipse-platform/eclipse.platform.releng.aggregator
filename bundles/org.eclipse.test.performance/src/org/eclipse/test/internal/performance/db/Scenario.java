@@ -38,7 +38,7 @@ public class Scenario {
     private String[] fBuildNames;
     private StatisticsSession[] fSessions;
     private Dim[] fDimensions;
-    //private Dim[] fQueryDimensions;
+    private Set fQueryDimensions;
     private Map fSeries= new HashMap();
 
     
@@ -50,7 +50,11 @@ public class Scenario {
     	fConfigName= configName;
     	fBuildPatterns= buildPatterns;
         fScenarioName= scenario;
-        //fQueryDimensions= dimensions;
+        if (dimensions != null && dimensions.length > 0) {
+            fQueryDimensions= new HashSet();
+            for (int i= 0; i < dimensions.length; i++)
+                fQueryDimensions.add(dimensions[i]);
+        }
     }
     
    public String getScenarioName() {
@@ -128,9 +132,10 @@ public class Scenario {
         if (DEBUG) start= System.currentTimeMillis();
         ArrayList buildNames= new ArrayList();
         for (int i= 0; i < fBuildPatterns.length; i++) {
-            if (fBuildPatterns[i].indexOf('%') >= 0)
-                DB.queryBuildNames(buildNames, fConfigName, fBuildPatterns[i], fScenarioName);
-            else
+            if (fBuildPatterns[i].indexOf('%') >= 0) {
+                Variations variations= new Variations(fConfigName, fBuildPatterns[i]);
+                DB.queryBuildNames(buildNames, variations, fScenarioName);
+            } else
                 buildNames.add(fBuildPatterns[i]);
         }
         String[] names= (String[])buildNames.toArray(new String[buildNames.size()]);
@@ -142,7 +147,8 @@ public class Scenario {
         if (DEBUG) start= System.currentTimeMillis();
         Set dims= new HashSet();
         for (int t= 0; t < names.length; t++) {
-            DataPoint[] dps= DB.queryDataPoints(fConfigName, names[t], fScenarioName);
+            Variations variations= new Variations(fConfigName, names[t]);
+            DataPoint[] dps= DB.queryDataPoints(variations, fScenarioName, fQueryDimensions);
             if (DEBUG) System.err.println("  dps length: " + dps.length); //$NON-NLS-1$
             if (dps.length > 0) {
             	dims.addAll(dps[0].getDimensions2());
