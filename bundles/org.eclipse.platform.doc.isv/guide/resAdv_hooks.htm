@@ -52,17 +52,6 @@ which is called by the platform whenever a resource is moved or deleted.&nbsp;
 The team plug-in installs a move delete hook manager that can determine which
 team provider is managing a resource and invoke its specific hook.</P>
 
-<blockquote>
-
-  <P ><i>Note:&nbsp; The move delete hook was designed specifically for use by the 
-    team core plug-in and other team repository provider clients.&nbsp; It is 
-    not intended for general use.&nbsp; Team providers should not install the 
-    hook using the extension point, but instead implement their hook in their 
-    RepositoryProvider class.&nbsp; See <a href="team_provider_repository.htm#hooks">Team 
-    resource modification hooks</a> for more information about using these hooks.</i></P>
-
-</blockquote>
-
 <h3 >
 File modification validators</h3>
 
@@ -81,12 +70,39 @@ opened.&nbsp;&nbsp; The team plug-in installs a file modification manager that
 can determine which team provider is managing a resource and invoke its specific
 validator.</P>
 
+<h3 >General team hook</h3>
+<p>
+Repository providers sometimes need to hook into additional workspace operations
+in order to impose extra restrictions or customize workspace behavior.  The
+<a href="../reference/extension-points/org_eclipse_core_resources_teamHook.html"><b>org.eclipse.core.resources.teamHook</b></a>
+extension point provides some other special functions for team providers.  In particular,
+this hook allows a team provider to decide whether linked folders and files should
+be allowed for a given project.  Some repository systems have strict rules about the
+physical layout of projects on disk, and are not able to handle resources linked to
+arbitrary locations.
+<p>
+The team hook also allows a repository provider to supply a 
+<a href="runtime_jobs_rules.htm">scheduling rule</a>
+factory that will be used by all workspace operations.  Each time an API method is called
+that modifies the workspace in some way, a scheduling rule is obtained by the workspace.
+This scheduling rule prevents other threads from modifying those resources during
+the invocation of the API method.  If a repository provider is performing additional
+work inside a file modification validator or move/delete hook, the provider must
+also tell the workspace what additional scheduling rules it will need. See
+the section on <a href="resAdv_batching.htm">resource batching</a> for more
+details on how the workspace uses scheduling rules.
+
+<P >The supplied class for the team hook must implement <a href="../reference/api/org/eclipse/core/resources/TeamHook.html"><b>TeamHook</b></a>.
+The team plug-in installs the single team hook that
+can determine which team provider is managing a resource and invoke its specific
+hook.</P>
+
 <blockquote>
 
-  <P ><i>Note:&nbsp; The file modification validator hook was designed specifically 
-    for use by the team core plug-in.&nbsp; It is not intended for general use.&nbsp; 
-    Team providers should not install the hook using the extension point, but 
-    instead implement their hook in their Repository Provider class.&nbsp;&nbsp; 
+  <P ><i>Note:&nbsp; All three of these team hooks are designed specifically 
+    for use by the team core plug-in.&nbsp; They are not intended for general use.&nbsp; 
+    Team providers should not install hooks using these extension points, but 
+    instead implement their hooks in their Repository Provider class.&nbsp;&nbsp; 
     See <a href="team_provider_repository.htm#hooks">Team resource modification 
     hooks</a> for more information about using these hooks.</i></P>
 
