@@ -728,7 +728,7 @@ public class BuildTests extends TestCase {
 
 	public static final String[] REQUIRED_PLUGIN_FILES = {"about.html", "plugin.properties", "plugin.xml"};
 	public static final String REQUIRED_PLUGIN_SUFFIX = ".jar";
-
+		
 	public static final String[] REQUIRED_FEATURE_PLUGIN_FILES = {"about.html", "about.ini", "about.mappings", "about.properties", "plugin.properties", "plugin.xml"};
 	public static final String REQUIRED_FEATURE_PLUGIN_SUFFIX = ".gif";
 
@@ -737,6 +737,9 @@ public class BuildTests extends TestCase {
 	
 	public static final String[] REQUIRED_SOURCE_FILES = {"about.html"};
 	public static final String REQUIRED_SOURCE_SUFFIX = ".zip";
+	
+	public static final String[] REQUIRED_BUNDLE_FILES = {"about.html", "plugin.properties", "META-INF/MANIFEST.MF"};
+	public static final String REQUIRED_BUNDLE_SUFFIX = ".jar";
 	
 	public static final String[] SUFFIX_EXEMPT_LIST = {"org.eclipse.swt","org.apache.ant"};
 	
@@ -855,7 +858,7 @@ public class BuildTests extends TestCase {
 		// Are we a regular plugin
 		if (testDirectory(aPlugin, REQUIRED_PLUGIN_FILES, REQUIRED_PLUGIN_SUFFIX)) {
 			return true;
-		}
+		}			
 		
 		// Are we a source plugin
 		if (testSourcePlugin(aPlugin)) {
@@ -864,6 +867,11 @@ public class BuildTests extends TestCase {
 		
 		// Are we a fragment
 		if (testDirectory(aPlugin, REQUIRED_FRAGMENT_FILES, REQUIRED_FRAGMENT_SUFFIX)) {
+			return true;
+		}
+		
+		// Are we a bundle?
+		if (testDirectory(aPlugin, REQUIRED_BUNDLE_FILES, REQUIRED_BUNDLE_SUFFIX)) {
 			return true;
 		}
 		
