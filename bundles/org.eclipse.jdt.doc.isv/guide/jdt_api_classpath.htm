@@ -74,7 +74,7 @@ It is possible to use multiple source folders, as long as they don't overlap. A
   (see <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setOutputLocation(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)">IJavaProject.setOutputLocation</a></b>).<P>The
   following is an example classpath entry that denotes the source folder 'src' of project
   'MyProject':
-	<font color='#4444CC'><pre>   IClassPathEntry srcEntry = JavaCore.newSourceEntry(new Path(&quot;/MyProject/src&quot;);</pre></font>
+	<font color='#4444CC'><pre>   IClassPathEntry srcEntry = JavaCore.newSourceEntry(new Path(&quot;/MyProject/src&quot;));</pre></font>
 </li>
 <li><b>a binary library</b> - either a class file folder (contained inside the workspace) or a class file archive file (contained inside or outside the workspace).
 Archive libraries can have attached source archives, which are extracted when asking a class file element  for
@@ -100,7 +100,7 @@ The following is an example classpath entry that denotes the class file folder '
 	</pre></font><p>The source archive root path describes the location of the
   root within the source archive.&nbsp; If set to null, the root of the archive
   will be inferred dynamically.</p>
-  </li>
+  <br></li>
 <li><b>a prerequisite project</b> - another Java project.&nbsp; A prerequisite project always contributes its source folders to dependent projects.
 It can also optionally contribute any of its classpath entries which are tagged as exported (see factory methods supporting
   the extra boolean argument 'isExported').
@@ -146,7 +146,7 @@ variables&nbsp; 'SRC_HOME' and 'SRC_ROOT' :
   describe a complex library structure.&nbsp; Like classpath variables,
   classpath containers <b><a href="../reference/api/org/eclipse/jdt/core/IClasspathContainer.html">(IClasspathContainer)</a></b>
 are dynamically resolved.&nbsp; Classpath containers may be used by different
-  projects, causing them their path entries to resolve to distinct values per
+  projects, causing their path entries to resolve to distinct values per
   project.&nbsp; They also provide meta information about the library that they
   represent (name, kind, description of library.)&nbsp; Classpath containers can be manipulated through JavaCore methods 
 <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#getClasspathContainer(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)">getClasspathContainer</a></b> and
@@ -199,8 +199,73 @@ more detail on exclusion patterns.</p>
 
 <p>
 The Java project API <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#isOnClasspath(IResource)">isOnClasspath</a>
-</b> checks the exclusion patterns before determining
+</b> checks both inclusion and exclusion patterns before determining
 whether a particular resource is on the classpath.</p>
+
+<P>
+Remarks:
+<ul>
+<li>
+Exclusion patterns have higher precedence than inclusion patterns; in other
+words, exclusion patterns can remove files for the ones that are to be included, not the
+other way around.
+</li>
+<li>
+A nested source folder excluded from build path can be set as an output location.
+ The following is an example classpath entry that denotes the source folder 'src' of project
+ 'MyProject' with an excluded nested source folder used as an output location:
+	<font color='#4444CC'><pre>
+  IPath sourceFolder = new Path(&quot;/MyProject/src&quot;);
+  IPath outputLocation = sourceFolder.append(&quot;bin&quot;);
+  IClassPathEntry srcEntry = JavaCore.newSourceEntry(
+    sourceFolder, // source folder location
+    new Path[] { outputLocation }, // excluded nested folder
+    outputLocation); // output location
+    </pre></font>
+</li>
+</ul>
+
+<h3>
+Inclusion patterns</h3>
+
+<p>A classpath source entry may also be assigned an inclusion pattern, which explicitely
+ defines resources to be visible on the classpath.&nbsp;
+When no inclusion patterns are specified, the source entry includes all relevent files
+ in the resource tree rooted at this source entry's path.
+Specifying one or more inclusion patterns means that only the specified portions of
+ the resource tree are to be included. Each path specified must be a relative path,
+ and will be interpreted relative to this source entry's path. File patterns are
+ case-sensitive. A file matched by one or more of these patterns is included in
+ the corresponding package fragment root unless it is excluded by one or more of
+ this entry's exclusion patterns.</p>
+
+<p> See <b><a href="../reference/api/org/eclipse/jdt/core/IClasspathEntry.html#getExclusionPatterns()">getExclusionPatterns()</b></a>
+ for a discussion of the syntax and semantics of path patterns. The absence of any inclusion patterns
+ is semantically equivalent to the explicit inclusion pattern <code>&#42;&#42;</code>.</p>
+
+<p>
+The Java project API <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#isOnClasspath(IResource)">isOnClasspath</a>
+</b> checks both inclusion and exclusion patterns before determining
+whether a particular resource is on the classpath.</p>
+
+<p>
+Examples:
+<ul>
+<li>
+The inclusion pattern <code>src/&#42;&#42;</code> by itself includes all files under a root
+ folder named <code>src</code>.
+</li>
+<li>
+The inclusion patterns <code>src/&#42;&#42;</code> and <code>tests/&#42;&#42;</code>
+ includes all files under the root folders named <code>src</code> and <code>tests</code>.
+</li>
+<li>
+The inclusion pattern <code>src/&#42;&#42;</code> together with the exclusion pattern
+ <code>src/&#42;&#42;/Foo.java</code> includes all files under a root folder named
+ <code>src</code> except for ones named <code>Foo.java</code>.
+</li>
+</ul>
+</p>
 
 <H2>
 Classpath resolution</H2>
