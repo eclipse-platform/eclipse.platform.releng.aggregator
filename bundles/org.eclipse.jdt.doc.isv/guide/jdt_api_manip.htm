@@ -93,7 +93,38 @@ modifies the buffer, it reconciles the changes, it commits the changes to disk a
     // Destroy working copy
     workingCopy.destroy();
 </pre></font>
-
+<P>
+Working copies can also be shared by several clients. Such a working copy is created using the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#getSharedWorkingCopy(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.jdt.core.IBufferFactory, org.eclipse.jdt.core.IProblemRequestor)">getSharedWorkingCopy</a></b>
+method and it can be later retrieved using the
+<b><a href="../reference/api/org/eclipse/jdt/core/IWorkingCopy.html#findSharedWorkingCopy(org.eclipse.jdt.core.IBufferFactory)">findSharedWorkingCopy</a></b>
+method. A shared working copy is thus keyed on the original compilation unit and a buffer factory.</P>
+<P>
+The following shows how client 1 creates a shared working copy, client 2 retrieves this working copy, client 1 destroys the
+working copy, and client 2 trying to retrieve the shared working copy notices it does not exist any longer: </P>
+<font color='#4444CC'><pre>
+    // Client 1: Get original compilation unit
+    ICompilationUnit originalUnit = ...;
+    
+    // Client 1: Get buffer factory
+    IBufferFactory factory = ...;
+    
+    // Client 1: Create shared working copy
+    IWorkingCopy workingCopyForClient1 = originalUnit.getSharedWorkingCopy(null, factory, null);
+    
+    // Client 2: Retrieve shared working copy
+    IWorkingCopy workingCopyForClient2 = originalUnit.findSharedWorkingCopy(factory);
+     
+    // This is the same working copy
+    assert workingCopyForClient1 == workingCopyForClient2;
+    
+    // Client 1: Destroy shared working copy
+    workingCopyForClient1.destroy();
+    
+    // Client 2: Attempt to retrieve shared working copy and find out it's null
+    workingCopyForClient2 = originalUnit.findSharedWorkingCopy(factory);
+    assert workingCopyForClient2 == null;
+</pre></font>
 
 <H3>Code modification using the DOM/AST API</h3>
 
