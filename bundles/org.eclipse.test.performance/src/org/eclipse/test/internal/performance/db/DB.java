@@ -328,7 +328,9 @@ public class DB {
         return null;
     }
     
-    private DataPoint[] internalQueryDataPoints(String configName, String buildPattern, String scenario, Dim[] dims) {
+    private DataPoint[] internalQueryDataPoints(String configName, String buildName, String scenarioName, Dim[] dims) {
+        return internalQueryDataPoints(configName, buildName, scenarioName);
+        /*
         if (fSQL == null)
             return null;
  
@@ -395,6 +397,7 @@ public class DB {
                 }
         }
         return null;
+        */
     }
     
     /*
