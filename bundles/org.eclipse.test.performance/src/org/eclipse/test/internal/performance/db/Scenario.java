@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.Assert;
 
@@ -139,7 +141,6 @@ public class Scenario {
         
         long start;
         if (DEBUG) start= System.currentTimeMillis();
-        ArrayList buildNames= new ArrayList();
         
         String[] seriesPatterns= null;        
         Object object= fVariations.get(fSeriesKey);
@@ -152,6 +153,7 @@ public class Scenario {
         
         Variations v= (Variations) fVariations.clone();
         
+        ArrayList buildNames= new ArrayList();
         for (int i= 0; i < seriesPatterns.length; i++) {
             if (seriesPatterns[i].indexOf('%') >= 0) {
                 v.put(fSeriesKey, seriesPatterns[i]);
@@ -162,6 +164,37 @@ public class Scenario {
         
         String[] names= (String[])buildNames.toArray(new String[buildNames.size()]);
         if (DEBUG) System.err.println("names: " + (System.currentTimeMillis()-start)); //$NON-NLS-1$
+        
+        boolean sort= true;
+        Pattern pattern= Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
+        final Matcher matcher= pattern.matcher(""); //$NON-NLS-1$
+        for (int i= 0; i < names.length; i++) {
+            matcher.reset(names[i]);
+            if (! matcher.find()) {
+                sort= false;
+                break;
+            }
+        }
+        if (sort) {
+	        Arrays.sort(names,
+	            new Comparator() {
+	            	public int compare(Object o1, Object o2) {
+	            	    String s1= (String)o1;
+	            	    String s2= (String)o2;
+	            	    
+	            	    matcher.reset(s1);
+	            	    if (matcher.find())
+	            	        s1= s1.substring(matcher.start());
+
+		            	matcher.reset(s2);
+		            	if (matcher.find())
+		            	    s2= s2.substring(matcher.start());
+
+	            	    return s1.compareTo(s2);
+	            	}
+	        	}
+	        );
+        }
        
         ArrayList sessions= new ArrayList();
         ArrayList names2= new ArrayList();
