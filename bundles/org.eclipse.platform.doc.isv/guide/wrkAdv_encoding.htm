@@ -23,29 +23,27 @@ preference in the workbench.&nbsp; </p>
 locale.&nbsp; Most of the time, using the default text file encoding for the
 locale of the host operating system is good enough.&nbsp; However, a user may
 want to work with text files that originate from another source.&nbsp; Given the
-ability to use Eclipse in a networked team environment, it's certainly possible
+ability to use the platform in a networked team environment, it's certainly possible
 that users will want to work with text files that use a different encoding
 scheme than their native encoding scheme so that they can easily interchange
 files with another team.</p>
 
 
 <p>For this reason, the workbench defines its own encoding profile that is
-specified by the user in the <b>Preferences</b> dialog.&nbsp; Plug-ins that
+specified by the user in the <b>Preferences</b> dialog.&nbsp; Users may choose
+from the available encoding choices in the <b>Workbench &gt; Editors</b>
+preference page or type in their own encoding.&nbsp; Plug-ins that
 interpret text files, such as editors and builders, should consult the workbench
 encoding preference rather than assume that the installed operating system
 encoding is in use.</p>
 
 
-<p>The current encoding preference can be obtained from the resources plug-in
-using <b><a href="../reference/api/org/eclipse/core/resources/ResourcesPlugin.html">ResourcesPlugin</a>.getEncoding().&nbsp;
+<p>You can obtain the encoding preference using <b><a href="../reference/api/org/eclipse/core/resources/ResourcesPlugin.html">ResourcesPlugin</a>.getEncoding().&nbsp;
 </b>This encoding should be passed to <b>java.io </b>readers instead of using
-the default system encoding. </p>
-
-
-<p>If you need to track changes to this preference, you can hook a listener on
+the default system encoding.&nbsp; If you need to track changes to this preference, you can hook a listener on
 the <b><a href="../reference/api/org/eclipse/core/resources/ResourcesPlugin.html">ResourcesPlugin</a>
 </b>preferences and react to changes in <b>ResourcesPlugin.PREF_ENCODING.&nbsp; </b>The
-following example comes from the default text editor:</p>
+following example comes from the default text editor: </p>
 
 
 <pre><font color="#4444CC">public void initialize(StatusTextEditor textEditor) {
@@ -65,9 +63,15 @@ following example comes from the default text editor:</p>
 	fEncodingActionGroup= new EncodingActionGroup(fTextEditor);
 	fEncodingActionGroup.update();
 }</font></pre>
-<p>&nbsp;</p>
+<p>Users may also change the encoding for a particular file in the <b>Edit &gt;
+Encoding</b> menu of an editor.&nbsp; If you are manipulating text inside an
+open editor, you should use <b><a href="../reference/api/org/eclipse/ui/editors/text/IEncodingSupport.html">IEncodingSupport</a>.getEncoding()</b>
+instead in order to get the encoding for the particular editor.&nbsp; The
+following example shows how to obtain this information from an editor:
+<pre><font color="#4444CC">IEncodingSupport encodingSupport = (IEncodingSupport) editor.getAdapter(IEncodingSupport.class);
+String encoding = encodingSupport.getEncoding();
 
-
+</font></pre>
 <p><a href="../hglegal.htm"><img border="0" src="../ngibmcpy.gif" alt="Copyright IBM Corp. and others 2000,2002." width="250" height="12"></a></p>
 </BODY>
 </HTML>
