@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -19,6 +23,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 import org.eclipse.test.internal.performance.Constants;
@@ -50,8 +55,12 @@ public class DB {
         return getDefault().internalStore(sample);
     }
     
-    public static DataPoint[] queryDataPoints(String configPattern, String buildPattern, String scenarioPattern, Dim[] dims) {
-        return getDefault().internalQueryDataPoints(configPattern, buildPattern, scenarioPattern, dims);
+    public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern, Dim[] dims) {
+        return getDefault().internalQueryDataPoints(configName, buildPattern, scenarioPattern, dims);
+    }
+   
+    public static DataPoint[] queryDataPoints(String configName, String buildPattern, String scenarioPattern) {
+        return getDefault().internalQueryDataPoints(configName, buildPattern, scenarioPattern);
     }
    
     public static Scenario[] queryScenarios(String configPattern, String buildPattern, String scenarioPattern) {
@@ -68,8 +77,12 @@ public class DB {
         return tables;
     }
 
-    public static String[] queryBuildNames(String configPattern, String buildPattern, String scenarioPattern) {
-        return getDefault().internalQueryBuildNames(configPattern, buildPattern, scenarioPattern);
+    public static Scenario queryScenario(String config, String[] builds, String scenarioName) {
+        return new Scenario(config, builds, scenarioName);
+    }
+
+    public static void queryBuildNames(List names, String configName, String buildPattern, String scenarioPattern) {
+        getDefault().internalQueryBuildNames(names, configName, buildPattern, scenarioPattern);
     }
 
     public static Connection getConnection() {
@@ -210,23 +223,79 @@ public class DB {
 			    }
 			}
 			//System.err.println(System.currentTimeMillis()-l);
-			fConnection.commit();
             
         } catch (SQLException e) {
             PerformanceTestPlugin.log(e);
+        } finally {
+			try {
+                fConnection.commit();
+            } catch (SQLException e1) {
+                PerformanceTestPlugin.log(e1);
+            }       
         }
         return true;
     }
 
-    private DataPoint[] internalQueryDataPoints(String configPattern, String buildPattern, String scenario, Dim[] dims) {
+    private DataPoint[] internalQueryDataPoints(String configName, String buildName, String scenarioName) {
+        if (fSQL == null)
+            return null;
+ 
+         ResultSet rs= null;
+         try {
+        	
+        	if (configName == null)
+        	    configName= getConfigName();
+        	
+            ArrayList dataPoints= new ArrayList();
+       	
+            rs= fSQL.queryDataPoints(configName, buildName, scenarioName);
+	        while (rs.next()) {
+	            int datapoint_id= rs.getInt(1);
+	            int step= rs.getInt(2);
+
+	            HashMap map= new HashMap();
+	            DataPoint dp= new DataPoint(step, map);
+                dataPoints.add(dp);
+
+	            ResultSet rs2= fSQL.queryDataPoints(datapoint_id);
+		        while (rs2.next()) {
+	                int dim_id= rs2.getInt(1);
+	                long value= rs2.getBigDecimal(2).longValue();		            
+	                Dim dim= Dim.getDimension(dim_id);
+	                if (dim != null)
+	                    map.put(dim, new Scalar(dim, value));
+		        }
+	            rs2.close();
+	        }			       
+	        rs.close();
+        	
+            int n= dataPoints.size();
+            if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
+            return (DataPoint[])dataPoints.toArray(new DataPoint[n]);
+
+        } catch (SQLException e) {
+            PerformanceTestPlugin.log(e);
+
+        } finally {
+            if (rs != null)
+                try {
+                    rs.close();
+                } catch (SQLException e1) {
+                	// ignored
+                }
+        }
+        return null;
+    }
+    
+    private DataPoint[] internalQueryDataPoints(String configName, String buildPattern, String scenario, Dim[] dims) {
         if (fSQL == null)
             return null;
  
         ResultSet result= null;
         try {
         	
-        	if (configPattern == null)
-        		configPattern= getConfigName();
+        	if (configName == null)
+        	    configName= getConfigName();
         	
         	int[] dim_ids= null;
         	if (dims != null) {
@@ -236,7 +305,7 @@ public class DB {
         	}
         	if (dim_ids == null)
         		dim_ids= new int[0];
-            result= fSQL.queryDataPoints(configPattern, buildPattern, scenario, dim_ids);
+            result= fSQL.queryDataPoints(configName, buildPattern, scenario, dim_ids);
             
             long lastValue= 0;
             ArrayList dataPoints= new ArrayList();
@@ -315,17 +384,14 @@ public class DB {
         return null;
     }
     
-    private String[] internalQueryBuildNames(String hostPattern, String buildPattern, String scenarioPattern) {
+    private void internalQueryBuildNames(List buildNames, String hostPattern, String buildPattern, String scenarioPattern) {
         if (fSQL == null)
-            return null;
+            return;
         ResultSet result= null;
         try {        	
             result= fSQL.queryBuildNames(hostPattern, buildPattern, scenarioPattern);
-            ArrayList buildNames= new ArrayList();
             for (int i= 0; result.next(); i++)
                 buildNames.add(result.getString(1));
-            return (String[])buildNames.toArray(new String[buildNames.size()]);
-
         } catch (SQLException e) {
 	        PerformanceTestPlugin.log(e);
 
@@ -337,7 +403,6 @@ public class DB {
                 	// ignored
                 }
         }
-        return null;
     }
     
 
@@ -451,7 +516,21 @@ public class DB {
     private void internalDump() throws SQLException {
         if (fConnection == null)
             return;
-        Statement stmt= fConnection.createStatement();
+
+		String outFile= null;
+		outFile= "/tmp/dbdump";	//$NON-NLS-1$
+		PrintStream ps= null;
+		if (outFile != null) {
+		    try {
+                ps= new PrintStream(new BufferedOutputStream(new FileOutputStream(outFile)));
+            } catch (FileNotFoundException e) {
+                System.err.println("can't create output file"); //$NON-NLS-1$
+            }
+		}
+		if (ps == null)
+		    ps= System.out;
+
+		Statement stmt= fConnection.createStatement();
         try {
             System.out.println("CONFIG(ID, NAME, BUILD):"); //$NON-NLS-1$
 	        ResultSet rs= stmt.executeQuery("SELECT ID, NAME, BUILD FROM CONFIG"); //$NON-NLS-1$
@@ -520,6 +599,8 @@ public class DB {
             System.out.println();
         } finally {
             stmt.close();
+            if (ps != System.out)
+                ps.close();
         }
     }
 
