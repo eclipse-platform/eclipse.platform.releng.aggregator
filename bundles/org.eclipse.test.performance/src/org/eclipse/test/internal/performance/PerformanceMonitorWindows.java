@@ -29,14 +29,14 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 				if (org.eclipse.perfmsr.core.PerformanceMonitor.nativeGetPerformanceCounters(counters)) {
 					addScalar(scalars, Dimensions.WORKING_SET, counters[0]);
 					addScalar(scalars, Dimensions.WORKING_SET_PEAK, counters[1]);
-					addScalar(scalars, Dimensions.ELAPSED_PROCESS, counters[2]);
+					//addScalar(scalars, Dimensions.ELAPSED_PROCESS, counters[2]);
 					addScalar(scalars, Dimensions.USER_TIME, counters[3]);
 					addScalar(scalars, Dimensions.KERNEL_TIME, counters[4]);
 					addScalar(scalars, Dimensions.PAGE_FAULTS, counters[5]);
 					if (counters[6] != -1)
 						addScalar(scalars, Dimensions.COMITTED, counters[6]);
 					addScalar(scalars, Dimensions.GDI_OBJECTS, counters[7]);
-					addScalar(scalars, Dimensions.USER_OBJECTS, counters[8]);
+					//addScalar(scalars, Dimensions.USER_OBJECTS, counters[8]);
 					if (counters[9] != -1)
 						addScalar(scalars, Dimensions.OPEN_HANDLES, counters[9]);
 					addScalar(scalars, Dimensions.READ_COUNT, counters[10]);
