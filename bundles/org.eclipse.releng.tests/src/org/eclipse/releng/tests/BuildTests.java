@@ -183,6 +183,10 @@ public class BuildTests extends TestCase {
 	
 	private void initializeCVSTypes() {
 		cvsTypes = new HashMap();
+		cvsDirectoryTypes = new ArrayList();
+		cvsExcludeDirectories = new ArrayList();
+		
+		
 		cvsTypes.put("gif", CVS_BINARY);
 		cvsTypes.put("jpg", CVS_BINARY);
 		cvsTypes.put("zip", CVS_BINARY);
@@ -205,10 +209,10 @@ public class BuildTests extends TestCase {
 		cvsTypes.put("jnilib", CVS_BINARY);
 		cvsTypes.put("a", CVS_BINARY);
 		
-		cvsDirectoryTypes = new ArrayList();
+		// Define directories with all binary types	
 		cvsDirectoryTypes.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
 		
-		cvsExcludeDirectories = new ArrayList();
+		// Define exclude directories
 		cvsExcludeDirectories.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
 
 	}
@@ -381,6 +385,9 @@ public class BuildTests extends TestCase {
 		// We know what type to expect for this file.  Are we the right one?
 				
 		String entryType = fields[ENTRY_TYPE_INDEX];
+		if (entryType.length() == 0) {
+			entryType = CVS_KKV;
+		}
 		
 		try {
 			if (expectedType.equals(CVS_BINARY)) {
@@ -441,10 +448,19 @@ public class BuildTests extends TestCase {
 	 * @return String[]
 	 */
 	private String[] split(String aLine, String delimeter) {
-		StringTokenizer tokenizer = new StringTokenizer(aLine, delimeter);
+		StringTokenizer tokenizer = new StringTokenizer(aLine, delimeter, true);
 		List list = new ArrayList();
+		String lastToken = "";
 		while (tokenizer.hasMoreTokens()) {
-			list.add(tokenizer.nextToken());
+			String aToken = (String) tokenizer.nextToken();
+			if (aToken.equals(delimeter)) {
+				if (lastToken.equals(delimeter)) {
+					list.add("");
+				}
+			} else {
+				list.add(aToken);
+			}
+			lastToken=aToken;
 		}
 		return (String[]) list.toArray(new String[0]);
 	}
