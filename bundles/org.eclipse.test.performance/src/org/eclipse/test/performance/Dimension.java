@@ -47,17 +47,25 @@ public interface Dimension {
      */
     public Dimension WORKING_SET= InternalDimensions.WORKING_SET;
 
-    
-    // Dimensions not available on all platforms!
-    
     /**
      * The total elapsed time this process has been running.
+     * Since it starts at 0 on process start it can be used to measure startup time.
      * On Windows it is calculated by subtracting the creation time of the process from the current system time.
-     * Please note that in contrast to the CPU_TIME the elapsed time of a process is influenced by other processes running in parallel.
-     * Currently this dimension is only available on Windows.
+     * On Linux it is calculated by subtracting the value of the system property "eclipse.startTime" from
+     * System.currentTimeMillis()
+     * Please note that in contrast to the CPU_TIME the elapsed time of a process is influenced by other
+     * processes running in parallel.
      */
     public Dimension ELAPSED_PROCESS= InternalDimensions.ELAPSED_PROCESS;
 
+    /**
+     * The amount of memory used in the JVM.
+     * It is calculated by subtracting <code>Runtime.freeMemory()</code> from <code>Runtime.totalMemory()</code>.
+     */
+    public Dimension USED_JAVA_HEAP= InternalDimensions.USED_JAVA_HEAP;
+
+    // the following Dimensions not available on all platforms!
+    
     /**
 	 * WORKING_SET_PEAK is the maximum amount of memory in the working set of this process at any point in time.
 	 * The working set is the set of memory pages touched recently by the threads in the process.
@@ -66,13 +74,6 @@ public interface Dimension {
      * Currently this dimension is only available on Windows.
      */
     public Dimension WORKING_SET_PEAK= InternalDimensions.WORKING_SET_PEAK;
-
-    /**
-     * The amount of memory used in the JVM.
-     * It is calculated by subtracting <code>Runtime.freeMemory()</code> from <code>Runtime.totalMemory()</code>.
-     * Currently this dimension is only available on MacOS X.
-     */
-    public Dimension USED_JAVA_HEAP= InternalDimensions.USED_JAVA_HEAP;
 
     /**
      * The total amount of committed memory (for the entire machine).
