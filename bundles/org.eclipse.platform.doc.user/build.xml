@@ -25,6 +25,7 @@
 	<target name="build.update.jar" depends="init" description="Build the plug-in: org.eclipse.platform.doc.user for an update site.">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
@@ -40,11 +41,15 @@
 			includes="book.css, about.html, notices.html, cpy.png, no_help_exists.htm, concepts/**, gettingStarted/**, images/**, reference/**, tasks/**, tips/**, whatsNew/**"
 		/>
 		<copy todir="${destination.temp.folder}/org.eclipse.platform.doc.user_3.1.0">
-			<fileset dir="${build.result.folder}" includes="META-INF/,doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,book.css" excludes="build.properties,build.xml"			/>
+			<fileset dir="${build.result.folder}" includes="META-INF/,doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,book.css,index/" excludes="build.properties,build.xml"			/>
 		</copy>
 	</target>
 
 	<target name="build.jars" depends="init" description="Build all the jars for the plug-in: org.eclipse.platform.doc.user.">
+	</target>
+	
+	<target name="build.index" depends="init" description="Builds search index for the plug-in: org.eclipse.platform.doc.user.">
+		<help.buildHelpIndex manifest="plugin.xml" destination="."/>
 	</target>
 
 	<target name="build.sources" depends="init">
@@ -74,6 +79,7 @@
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
 		<antcall target="build.jars"/>
+		<antcall target="build.index"/>
 		<antcall target="build.sources"/>
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
