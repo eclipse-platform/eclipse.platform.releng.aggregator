@@ -25,6 +25,7 @@
 	<target name="build.update.jar" depends="init" description="Build the plug-in: org.eclipse.jdt.doc.user for an update site.">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
@@ -40,11 +41,15 @@
 			includes="*.css, cpy.png, notices.html, about.html, concepts/**, gettingStarted/**, images/**, reference/**, tasks/**, tips/**, whatsNew/**"
 		/>
 		<copy todir="${destination.temp.folder}/org.eclipse.jdt.doc.user_3.1.0">
-			<fileset dir="${basedir}" includes="doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,META-INF/**" excludes="build.properties,build.xml"			/>
+			<fileset dir="${basedir}" includes="doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,META-INF/**,index/**" excludes="build.properties,build.xml"			/>
 		</copy>
 	</target>
 
 	<target name="build.jars" depends="init" description="Build all the jars for the plug-in: org.eclipse.jdt.doc.user.">
+	</target>
+	
+	<target name="build.index" depends="init" description="Builds search index for the plug-in: org.eclipse.jdt.doc.user.">
+		<help.buildHelpIndex manifest="plugin.xml" destination="."/>
 	</target>
 
 	<target name="build.sources" depends="init">
@@ -73,6 +78,7 @@
 	<target name="zip.plugin" depends="init" description="Create a zip containing all the elements for the plug-in: org.eclipse.jdt.doc.user.">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="build.sources"/>
 		<antcall target="gather.bin.parts">

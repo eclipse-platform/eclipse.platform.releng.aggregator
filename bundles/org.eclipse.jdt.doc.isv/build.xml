@@ -15,6 +15,7 @@
 	<target name="build.update.jar" depends="init">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
@@ -27,7 +28,7 @@
 		<antcall target="buildDocZip" />
 		<mkdir dir="${destination.temp.folder}/${full.name}"/>
 		<copy todir="${destination.temp.folder}/${full.name}">
-			<fileset dir="${basedir}" includes="*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,META-INF/**" excludes="build.properties,build.xml,buildDoc.xml"/>
+			<fileset dir="${basedir}" includes="*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,META-INF/**,index/**" excludes="build.properties,build.xml,buildDoc.xml"/>
 		</copy>
 	</target>
 
@@ -36,6 +37,10 @@
 	</target>
 
 	<target name="build.jars" depends="init">
+	</target>
+	
+	<target name="build.index" depends="init" description="Builds search index for the plug-in: org.eclipse.jdt.doc.isv.">
+		<help.buildHelpIndex manifest="plugin.xml" destination="."/>
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
@@ -60,6 +65,7 @@
 	<target name="zip.plugin" depends="init">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="build.sources"/>
 		<antcall target="gather.bin.parts">
