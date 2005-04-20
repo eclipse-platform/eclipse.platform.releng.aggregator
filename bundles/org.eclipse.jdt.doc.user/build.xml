@@ -25,7 +25,6 @@
 	<target name="build.update.jar" depends="init" description="Build the plug-in: org.eclipse.jdt.doc.user for an update site.">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
-		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
@@ -36,12 +35,13 @@
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
 		<mkdir dir="${destination.temp.folder}/org.eclipse.jdt.doc.user_3.1.0"/>
+		<antcall target="build.index"/>		
 		<zip zipfile="${plugin.destination}/doc.zip"
 			basedir="${plugin.destination}"
 			includes="*.css, cpy.png, notices.html, about.html, concepts/**, gettingStarted/**, images/**, reference/**, tasks/**, tips/**, whatsNew/**"
 		/>
 		<copy todir="${destination.temp.folder}/org.eclipse.jdt.doc.user_3.1.0">
-			<fileset dir="${basedir}" includes="doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,META-INF/**,index/**" excludes="build.properties,build.xml"			/>
+			<fileset dir="${basedir}" includes="doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,META-INF/**,index/**" excludes="build.properties,build.xml"/>
 		</copy>
 	</target>
 
@@ -78,7 +78,6 @@
 	<target name="zip.plugin" depends="init" description="Create a zip containing all the elements for the plug-in: org.eclipse.jdt.doc.user.">
 		<delete dir="${temp.folder}"/>
 		<mkdir dir="${temp.folder}"/>
-		<antcall target="build.index"/>
 		<antcall target="build.jars"/>
 		<antcall target="build.sources"/>
 		<antcall target="gather.bin.parts">
