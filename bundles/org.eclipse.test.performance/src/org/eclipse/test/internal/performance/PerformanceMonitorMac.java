@@ -42,6 +42,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
+				//e.printStackTrace();
 			    //PerformanceTestPlugin.log(e);
 			    fgIsLoaded= 1;
 			}

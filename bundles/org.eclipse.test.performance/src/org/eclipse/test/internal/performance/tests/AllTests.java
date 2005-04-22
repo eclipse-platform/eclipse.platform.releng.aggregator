@@ -19,8 +19,10 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite= new TestSuite("Performance Test plugin tests"); //$NON-NLS-1$
 		
+		//suite.addTestSuite(SimplePerformanceMeterTest.class);
 		suite.addTestSuite(VariationsTests.class);
 		suite.addTestSuite(DBTests.class);
+		suite.addTestSuite(PerformanceMeterFactoryTest.class);
 		
 		return suite;
 	}

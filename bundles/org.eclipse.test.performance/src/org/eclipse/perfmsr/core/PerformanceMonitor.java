@@ -39,7 +39,7 @@ public class PerformanceMonitor {
 				System.loadLibrary(NATIVE_LIBRARY_NAME);
 				fgIsLoaded= 2;
 			} catch (Throwable e) {
-			    System.err.println("The DLL " + NATIVE_LIBRARY_NAME + " could not be loaded"); //$NON-NLS-1$ //$NON-NLS-2$
+				e.printStackTrace();
 			    fgIsLoaded= 1;
 			}
 		}
