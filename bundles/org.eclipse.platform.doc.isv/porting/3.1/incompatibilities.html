@@ -23,13 +23,14 @@ following entries describe the areas that changed and provide instructions for
   <li><a href="#Preference Store">Plug-in Preferences</a></li>
   <li><a href="#IPath Changes">Changes to IPath constraints</a></li>
   <li><a href="#Extension Registry">Extension registry</a></li>
-  <li><a href="#Code Formatter Options">Code formatter options</a></li>  
+  <li><a href="#Code Formatter Options">Code formatter options</a></li>
+  <li><a href="#AntCorePreferences">Changes to AntCorePreferences</a></li>
 </ol>
 <hr>
 
 <h2><a name="Preference Store"></a>1. Plug-in Preferences</h2>
   In Eclipse 3.1 the <code>org.eclipse.jface.preference.IPreferenceStore</code> 
-  object obtained from <code>orge.eclipse.ui.plugin.AbstractUIPlugin#getPreferenceStore</code> 
+  object obtained from <code>org.eclipse.ui.plugin.AbstractUIPlugin#getPreferenceStore</code> 
     was migrated to live on top of the new 3.0 Eclipse preference framework supplied by the 
     <code>org.eclipse.core.runtime</code> plug-in. 
     As a result, clients using the preference APIs should check for two possible issues:
@@ -148,10 +149,22 @@ almost certainly will be).</p>
   was added to address bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=73104">73104</a>. 
   The specification has been changed to include this new value, and to allow for 
   more values being added in the future.</p>
-<p><b>Action required:</b>Clients programmatically reading or setting this code 
+<p><b>Action required:</b> Clients programmatically reading or setting this code 
   formatter option should check their code to take account of the new third value, 
   and to ensure that it is written in a robust way that fails gracefully if it 
   ever encounters an option value that it did not anticipate.</p>
+  
+<h2><a name="AntCorePreferences"></a>5. Changes to AntCorePreferences</h2>
+<p><b>What is affected:</b> Plug-ins that subclass or instantiate <code>org.eclipse.ant.core.AntCorePreferences</code></p>
+
+<p><b>Description:</b> In Eclipse 3.0, the class <code>org.eclipse.ant.core.AntCorePreferences</code> 
+  was not marked that clients may not instantiate or subclass.
+  This was an oversight that has been addressed in Eclipse 3.1 with the class marked as not intended to be subclassed or instantiated.
+  </p>
+<p><b>Action required:</b> Clients programmatically creating an instance of <code>org.eclipse.ant.core.AntCorePreferences</code>
+ 	should migrate their code to retrieve the preferences using: <code>org.eclipse.ant.core.AntCorePlugin.getPreferences()</code>.
+	Any subclass will need to be reworked to no longer subclass <code>org.eclipse.ant.core.AntCorePreferences</code>.</p>
+	
 <p><a href="../../notices.html"><img src="../../cpy.png" border="0" alt="Legal notices" ></a></p>
 </body>
 </html>
