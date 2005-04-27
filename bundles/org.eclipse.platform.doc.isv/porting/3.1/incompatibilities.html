@@ -26,6 +26,7 @@ following entries describe the areas that changed and provide instructions for
   <li><a href="#Code Formatter Options">Code formatter options</a></li>
   <li><a href="#AntCorePreferences">API contract changes to AntCorePreferences</a></li>
   <li><a href="#JFaceLogPolicy">API contract changes to Policy class in JFace</a></li>
+  <li><a href="#NullDefaultPerspective">API contract changes to allow a null default perspective</a></li>
 </ol>
 <hr>
 
@@ -181,6 +182,20 @@ almost certainly will be).</p>
   log set by the workbench, but if they previously called <code>Policy.setLog(ILog)</code>, 
   they will need to be changed to pass an <code>ILogger</code> instead.</p>
 	
+<h2><a name="NullDefaultPerspective"></a>7. API contract changes to allow a null default 
+  perspective</h2>
+<p><b>What is affected:</b> RCP applications expecting a non-null default perspective.</p>
+<p><b>Description:</b> In order to allow RCP applications to start with an empty 
+  window with no perspectives open (enhancement <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=71150">71150</a>), 
+  <code>WorkbenchAdvisor.getInitialWindowPerspectiveId()</code> and <code>IPerspectiveRegistry.getDefaultPerspective()</code> 
+  have been changed to allow null to be returned. In the IDE, there is always 
+  a default perspective, so <code>IPerspectiveRegistry.getDefaultPerspective()</code> 
+  will not return null. Similarly, if an existing RCP app previously returned 
+  a non-null value from <code>WorkbenchAdvisor.getInitialWindowPerspectiveId()</code>, 
+  then <code>IPerspectiveRegistry.getDefaultPerspective()</code> will still return 
+  a non-null value.</p>
+<p><b>Action required:</b> No action should be required by clients.</p>
+  
 <p><a href="../../notices.html"><img src="../../cpy.png" border="0" alt="Legal notices" ></a></p>
 </body>
 </html>
