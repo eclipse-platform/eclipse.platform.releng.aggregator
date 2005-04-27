@@ -25,6 +25,7 @@ following entries describe the areas that changed and provide instructions for
   <li><a href="#Extension Registry">Extension registry</a></li>
   <li><a href="#Code Formatter Options">Code formatter options</a></li>
   <li><a href="#AntCorePreferences">API contract changes to AntCorePreferences</a></li>
+  <li><a href="#JFaceLogPolicy">API contract changes to Policy class in JFace</a></li>
 </ol>
 <hr>
 
@@ -164,6 +165,21 @@ almost certainly will be).</p>
 <p><b>Action required:</b> Clients programmatically creating an instance of <code>org.eclipse.ant.core.AntCorePreferences</code>
  	should migrate their code to retrieve the preferences using: <code>org.eclipse.ant.core.AntCorePlugin.getPreferences()</code>.
 	Any subclass will need to be reworked to no longer subclass <code>org.eclipse.ant.core.AntCorePreferences</code>.</p>
+	
+<h2><a name="JFaceLogPolicy"></a>6. API contract changes to Policy class in JFace</h2>
+<p><b>What is affected:</b> RCP applications that override the JFace log set by 
+  the workbench.</p>
+<p><b>Description:</b> In Eclipse 3.0, the workbench set the workbench's log as 
+  the log to use for logging JFace errors, by passing the workbench plug-in's 
+  log directly to <code>org.eclipse.jface.util.Policy.setLog(ILog)</code>. In 
+  3.1, the dependency on <code>ILog</code> has been removed from JFace in order 
+  to enable standalone applications using SWT and JFace outside of the eclipse 
+  runtime. A new interface, <code>ILogger</code>, has been introduced to meet 
+  JFace's needs. The workbench has been changed to provide an <code>ILogger</code> 
+  wrapping the workbench <code>ILog</code>.</p>
+<p><b>Action required:</b> Most RCP applications should not need to override the 
+  log set by the workbench, but if they previously called <code>Policy.setLog(ILog)</code>, 
+  they will need to be changed to pass an <code>ILogger</code> instead.</p>
 	
 <p><a href="../../notices.html"><img src="../../cpy.png" border="0" alt="Legal notices" ></a></p>
 </body>
