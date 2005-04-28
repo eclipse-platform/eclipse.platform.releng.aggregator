@@ -13,10 +13,31 @@
 <body>
 
 <h1>Eclipse 3.1 Plug-in Migration FAQ</h1>
-<p>
-The migration FAQ for Eclipse 3.1 has not yet been written.
-
-</p>
+<h2> 1) IPreferenceStore has more explicit API</h2>
+<p>Although the behavior of the IPreferenceStore provided by <code>AbstractUIPlugin#getPreferenceStore() 
+  </code>hasn't changed we have updated the specification of IPreferenceStore 
+  to explicitly define the behavior that we have provided.</p>
+<p><strong>Typing of PropertyChangeEvents</strong></p>
+<p>Any property change event from an IPreferenceStore must have an old and new 
+  value of the same type that is consistent with the setValue call that generated 
+  it.</p>
+<p>For instance if you call<code> IPreferenceStore#setValue(String name, long 
+  value) </code>the values in the PropertyChangeEvent generated from this method 
+  will both be of type <code>long</code>.</p>
+<p><strong>putValue</strong></p>
+<p>Calls to <code>#putValue</code> will not generate a <code>PropertyChangedEvent</code>. 
+  Calls to the various <code>#setValue</code> methods will.</p>
+<p><strong>Relationship between the OSGI Preference and an IPreferenceStore</strong></p>
+<p>The IPreferenceStore provided by <code>AbstractUIPlugin#getPreferenceStore()</code>is 
+  an instance of <code>ScopedPreferenceStore</code> which uses <code>org.osgi.service.prefs.Preferences</code> 
+  as a back end. <code>org.osgi.service.prefs.Preferences</code> propagates change 
+  events as Strings only. </p>
+<p>The <code>ScopedPreferenceStore</code> wrappers those OSGI events generated 
+  by <code>IPreferenceStore#setValue(String name, String value)</code> and one 
+  of it's own <code>PropertyChangeEvents</code> and forwards that event to it's 
+  listeners. For the other implementations of <code>IPreferenceStore#setValue</code> 
+  the <code>ScopedPreferenceStore</code> will create it's own events of the correct 
+  type and not propagate the events from the OSGI preferences.</p>
 
 
 
