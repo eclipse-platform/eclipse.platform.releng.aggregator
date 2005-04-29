@@ -47,6 +47,8 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 	private String fShortName;
 	private Dimension[] fSummaryDimensions;
 	private boolean fSummaryIsGlobal;
+	private int fCommentType;
+	private String fComment;
 
 	
 	public InternalPerformanceMeter(String scenarioId) {
@@ -74,7 +76,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 	    Sample sample= getSample();
 	    if (sample != null) {
 	        if (fSummaryDimensions != null)
-	            sample.tagAsSummary(fSummaryIsGlobal, fShortName, fSummaryDimensions);
+	            sample.tagAsSummary(fSummaryIsGlobal, fShortName, fSummaryDimensions, fCommentType, fComment);
 	        Variations variations= PerformanceTestPlugin.getVariations();
 	        if (variations != null)
 	            DB.store(variations, sample);
@@ -106,4 +108,9 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
         fShortName= shortName;
         fSummaryDimensions= dims;
      }
+
+	public void setComment(int commentType, String comment) {
+		fCommentType= commentType;
+		fComment= comment;
+	}
 }

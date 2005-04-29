@@ -18,12 +18,23 @@ public class SummaryEntry {
     public String shortName;
     public Dim dimension;
     public boolean isGlobal;
+    public int commentKind;
+    public String comment;
     
     SummaryEntry(String scenarioName, String shortName, Dim dimension, boolean isGlobal) {
         this.scenarioName= scenarioName;
         this.shortName= shortName;
         this.dimension= dimension;
         this.isGlobal= isGlobal;
+    }
+    
+    SummaryEntry(String scenarioName, String shortName, Dim dimension, boolean isGlobal, int commentKind, String comment) {
+        this.scenarioName= scenarioName;
+        this.shortName= shortName;
+        this.dimension= dimension;
+        this.isGlobal= isGlobal;
+        this.commentKind= commentKind;
+        this.comment= comment;
     }
     
     public String toString() {

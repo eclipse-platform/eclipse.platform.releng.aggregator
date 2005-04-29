@@ -36,6 +36,7 @@ import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.Performance;
 
 public class DB {
     
@@ -358,11 +359,18 @@ public class DB {
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
             if (sample.isSummary()) {
                 boolean isGlobal= sample.isGlobal();
+                
+                int commentId= 0;
+                int commentKind= sample.getCommentType();
+                String comment= sample.getComment();
+                if (commentKind == Performance.EXPLAINS_DEGRADATION_COMMENT && comment != null)
+                		commentId= fSQL.getCommentId(commentKind, comment);
+                
                 Dimension[] summaryDimensions= sample.getSummaryDimensions();
                 for (int i= 0; i < summaryDimensions.length; i++) {
                     Dimension dimension= summaryDimensions[i];
                     if (dimension instanceof Dim)
-                        fSQL.createSummaryEntry(variation_id, scenario_id, ((Dim)dimension).getId(), isGlobal);
+                        fSQL.createSummaryEntry(variation_id, scenario_id, ((Dim)dimension).getId(), isGlobal, commentId);
                 }
                 String shortName= sample.getShortname();
                 if (shortName != null)
@@ -528,7 +536,17 @@ public class DB {
                 String shortName= rs.getString(2);
                 int dim_id= rs.getInt(3);
                 boolean isGlobal= rs.getShort(4) == 1;
-                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id), isGlobal));
+                int comment_id= rs.getInt(5);
+                int commentKind= 0;
+                String comment= null;
+                if (comment_id != 0) {
+                		ResultSet rs2= fSQL.getComment(comment_id);
+                		if (rs2.next()) {
+                			commentKind= rs2.getInt(1);
+                			comment= rs2.getString(2);
+                		}
+                }
+                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id), isGlobal, commentKind, comment));
             }
             return (SummaryEntry[])fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
         } catch (SQLException e) {

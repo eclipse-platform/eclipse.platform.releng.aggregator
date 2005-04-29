@@ -37,9 +37,13 @@ import org.osgi.framework.Bundle;
  * @since 3.1
  */
 public class Performance {
+	
+	/**
+	 *  A comment kind of a comment that explains a performance degradation.
+	 */
+	public static final int EXPLAINS_DEGRADATION_COMMENT= 1;
 
 	private static final String PERFORMANCE_METER_FACTORY= "/option/performanceMeterFactory"; //$NON-NLS-1$
-	
 	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory"; //$NON-NLS-1$
 
 	private static Performance fgDefault;
@@ -285,5 +289,24 @@ public class Performance {
 	        InternalPerformanceMeter ipm= (InternalPerformanceMeter) pm;
 	        ipm.tagAsSummary(false, shortName, dimensions);
 	    }
+	}
+
+	/**
+	 * Set a comment for the scenario represented by the given PerformanceMeter.
+	 * Currently only comments with a commentKind of EXPLAINS_DEGRADATION_COMMENT are used.
+	 * Their commentText is shown in a hover of the performance summaries graph if a performance
+	 * degradation exists.
+	 * 
+	 * @param pm the PerformanceMeter
+	 * @param commentKind kind of comment. Must be EXPLAINS_DEGRADATION_COMMENT to have an effect.
+	 * @param commentText the comment (shorter than 400 characters)
+	 */
+	public void setComment(PerformanceMeter pm, int commentKind, String commentText) {
+		if (commentKind == EXPLAINS_DEGRADATION_COMMENT) {
+		    if (pm instanceof InternalPerformanceMeter) {
+		        InternalPerformanceMeter ipm= (InternalPerformanceMeter) pm;
+		        ipm.setComment(commentKind, commentText);
+		    }
+		}
 	}
 }

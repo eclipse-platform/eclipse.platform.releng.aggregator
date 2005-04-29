@@ -120,6 +120,20 @@ public class PerformanceTestCase extends TestCase {
 	}
 	
 	/**
+	 * Set a comment for the scenario represented by this TestCase.
+	 * Currently only comments with a commentKind of EXPLAINS_DEGRADATION_COMMENT are used.
+	 * Their commentText is shown in a hover of the performance summaries graph if a performance
+	 * degradation exists.
+	 * 
+	 * @param commentKind kind of comment. Must be EXPLAINS_DEGRADATION_COMMENT to have an effect.
+	 * @param commentText the comment (shorter than 400 characters)
+	 */
+	public void setComment(int commentKind, String commentText) {
+		Performance performance= Performance.getDefault();
+		performance.setComment(fPerformanceMeter, commentKind, commentText);
+	}
+	
+	/**
 	 * Called from within a test case immediately before the code to measure is run.
 	 * It starts capturing of performance data.
 	 * Must be followed by a call to {@link PerformanceTestCase#stopMeasuring()} before subsequent calls

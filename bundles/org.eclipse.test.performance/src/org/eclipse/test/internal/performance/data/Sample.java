@@ -30,6 +30,9 @@ public class Sample {
 	boolean fSummaryIsGlobal;
 	String fShortName;
 	Dimension[] fSummaryDimensions;
+	int fCommentType;
+	String fComment;
+	
 	
 	public Sample(String scenarioID, long starttime, Map properties, DataPoint[] dataPoints) {
 		Assert.assertTrue("scenarioID is null", scenarioID != null); //$NON-NLS-1$
@@ -43,11 +46,13 @@ public class Sample {
         fDataPoints= dataPoints;
     }
     
-    public void tagAsSummary(boolean global, String shortName, Dimension[] summaryDimensions) {
+    public void tagAsSummary(boolean global, String shortName, Dimension[] summaryDimensions, int commentType, String comment) {
         fIsSummary= true;
         fSummaryIsGlobal= global;
         fShortName= shortName;
         fSummaryDimensions= summaryDimensions;
+        fCommentType= commentType;
+        fComment= comment;
     }
     
 	public String getScenarioID() {
@@ -94,4 +99,12 @@ public class Sample {
     public Dimension[] getSummaryDimensions() {
         return fSummaryDimensions;
     }
+
+	public int getCommentType() {
+		return fCommentType;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
 }
