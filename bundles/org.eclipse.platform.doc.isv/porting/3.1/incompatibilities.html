@@ -32,6 +32,7 @@ following entries describe the areas that changed and provide instructions for
   <li><a href="#SelectionEnabler.SelectionClass">SelectionEnabler.SelectionClass 
     made package-visible</a></li>
   <li><a href="#ContributionItem.getParent">ContributionItem.getParent() can return null</a></li>
+  <li><a href="#IPropertySource.isPropertySet">Changes to isPropertySet(boolean) in IPropertySource and IPropertySource2</a></li>
 </ol>
 <hr>
 
@@ -228,6 +229,27 @@ almost certainly will be).</p>
   return null. For more details, see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=92777">92777</a>.</p>
 <p><b>Action required:</b> Any code calling <tt>ContributionItem.getParent()</tt> 
   must ensure that it can handle a null result.</p>
+
+<h2><a name="IPropertySource.isPropertySet"></a>11. Changes to isPropertySet(boolean) 
+  in IPropertySource and IPropertySource2</h2>
+<p><b>What is affected:</b> Plug-ins that implement <code>org.eclipse.ui.views.properties.IPropertySource</code> 
+  or <code>IPropertySource2.</code></p>
+<p><b>Description:</b> In Eclipse 3.0, the specification for the method <code>org.eclipse.ui.views.properties.IPropertySource.isPropertySet(boolean)</code> 
+  was incorrectly changed to specify that true should be returned if the specified 
+  property did not have a meaningful default value. In previous versions, it specified 
+  that false should be returned in this case. This was an inadvertent breaking 
+  API change, although the implementation worked the same as before if the property 
+  source implemented <code>IPropertySource</code> and not <code>IPropertySource2</code>. 
+  This has been corrected in 3.1, with <code>IPropertySource.isPropertySet(boolean)</code> 
+  being reverted back to its earlier specification (that false should be returned 
+  in this case), and IPropertySource2.isPropertySet(boolean) overriding this to 
+  specify that true should be returned in this case. For more details, see bug 
+  <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=21756 ">21756</a>.</p>
+<p><b>Action required:</b> Any classes implementing IPropertySource or IPropertySource2, 
+  where some of the properties do not have meaningful default values, should be 
+  checked to ensure that they return the appropriate value for isPropertySource(boolean). 
+  Clients should check that the Restore Default Value button in the Properties 
+  view works as expected for their property source.</p>
 <p>&nbsp;</p>
   
 <p><a href="../../notices.html"><img src="../../cpy.png" border="0" alt="Legal notices" ></a></p>
