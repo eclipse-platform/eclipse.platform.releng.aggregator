@@ -50,13 +50,4 @@ public class TagAndReleaseAction extends CVSAction implements IWorkbenchWindowAc
 	public void init(IWorkbenchWindow window) {
 		this.shell = window.getShell();	
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#getSelectedResources()
-	 * Overwrite the method to eliminate null ponter exception when first time start the wizard
-	 */
-	protected IResource[] getSelectedResources() {
-		if (selection == null) return new IResource[0];
-		return super.getSelectedResources();
-	}
 }
