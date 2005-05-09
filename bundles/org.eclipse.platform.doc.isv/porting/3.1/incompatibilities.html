@@ -29,10 +29,13 @@ following entries describe the areas that changed and provide instructions for
   <li><a href="#NullDefaultPerspective">API contract changes to allow a null default 
     perspective</a></li>
   <li><a href="#IViewLayout">API contract changes to IViewLayout</a> 
+  <li><a href="#IVMInstall">API contract changes to IVMInstall</a> 
   <li><a href="#SelectionEnabler.SelectionClass">SelectionEnabler.SelectionClass 
     made package-visible</a></li>
-  <li><a href="#ContributionItem.getParent">ContributionItem.getParent() can return null</a></li>
-  <li><a href="#IPropertySource.isPropertySet">Changes to isPropertySet(boolean) in IPropertySource and IPropertySource2</a></li>
+  <li><a href="#ContributionItem.getParent">ContributionItem.getParent() can return 
+    null</a></li>
+  <li><a href="#IPropertySource.isPropertySet">Changes to isPropertySet(boolean) 
+    in IPropertySource and IPropertySource2</a></li>
 </ol>
 <hr>
 
@@ -210,8 +213,18 @@ almost certainly will be).</p>
   by clients. </p>
 <p><b>Action required:</b> Any implementing classes will need to be reworked to 
   no longer implement <code>org.eclipse.ui.IViewLayout</code>.</p>
-  
-<h2><a name="SelectionEnabler.SelectionClass"></a>9. SelectionEnabler.SelectionClass made package-visible</h2>
+<h2><a name="IVMInstall"></a>9. API contract changes to IVMInstall</h2>
+<p><b>What is affected:</b> Plug-ins that implement <code>org.eclipse.jdt.launching.IVMInstall.</code></p>
+<p><b>Description:</b> In Eclipse 3.0, the class <code>org.eclipse.jdt.launching.IVMInstall</code> 
+  was not marked that clients may not implement directly. This was an oversight 
+  that has been addressed in Eclipse 3.1 with the class marked as not intended 
+  to be implemented directly by clients. Three new methods have been added to 
+  this interface with default implementations provided by <code>org.eclipse.jdt.launching.AbstractVMInstall</code>.</p>
+<p><b>Action required:</b> Any implementing classes that do not already subclass 
+  <code>org.eclipse.jdt.launching.AbstractVMInstall</code> will need to be reworked 
+  to subclass <code>org.eclipse.jdt.launching.AbstractVMInstall.</code></p>
+<h2><a name="SelectionEnabler.SelectionClass"></a>10. SelectionEnabler.SelectionClass 
+  made package-visible</h2>
 <p><b>What is affected:</b> Plug-ins that use <code>org.eclipse.ui.SelectionEnabler.SelectionClass.</code></p>
 <p><b>Description:</b> In Eclipse 3.0, the nested implementation class <code>org.eclipse.ui.SelectionEnabler.SelectionClass</code> 
   was public, with no restrictions on its usage. This was an oversight that has 
@@ -219,7 +232,7 @@ almost certainly will be).</p>
 <p><b>Action required:</b> Any classes instantiating or extending <code>org.eclipse.ui.SelectionEnabler.SelectionClass</code> 
   will need to be reworked to no longer refer to this class<code></code>.</p>
   
-<h2><a name="ContributionItem.getParent"></a>10. ContributionItem.getParent() 
+<h2><a name="ContributionItem.getParent"></a>11. ContributionItem.getParent() 
   can return null</h2>
 <p><b>What is affected:</b> Plug-ins that call <code>getParent()</code> on a subclass 
   of <code>org.eclipse.jface.action.ContributionItem.</code></p>
@@ -230,7 +243,7 @@ almost certainly will be).</p>
 <p><b>Action required:</b> Any code calling <tt>ContributionItem.getParent()</tt> 
   must ensure that it can handle a null result.</p>
 
-<h2><a name="IPropertySource.isPropertySet"></a>11. Changes to isPropertySet(boolean) 
+<h2><a name="IPropertySource.isPropertySet"></a>12. Changes to isPropertySet(boolean) 
   in IPropertySource and IPropertySource2</h2>
 <p><b>What is affected:</b> Plug-ins that implement <code>org.eclipse.ui.views.properties.IPropertySource</code> 
   or <code>IPropertySource2.</code></p>
