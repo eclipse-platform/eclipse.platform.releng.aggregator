@@ -222,7 +222,7 @@ public class BuildTests extends TestCase {
 		
 		// Define exclude directories
 		cvsExcludeDirectories.add("org.eclipse.jdt.ui.tests.refactoring" + File.separator + "resources");
-		cvsExcludeDirectories.add("platform-launcher");
+		cvsExcludeDirectories.add("org.eclipse.platform.launcher");
 
 	}
 	
