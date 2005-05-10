@@ -262,28 +262,22 @@ before the operation is undone or redone.</p>
 <h4>Operation approvers</h4>
 <a href="../reference/api/org/eclipse/core/commands/operations/IOperationApprover.html"><b>IOperationApprover</b></a>
 defines the protocol for approving undo and redo of a particular operation.  An operation approver is installed on an operation history.  Specific
-operation approvers may in turn consult the undo contexts themselves for further approval.
-The following snippet shows how an application could configure the operation history to enforce a linear undo model within
-one of its contexts.
+operation approvers may in turn check all operations for their validity, check operations of only certain contexts,
+or prompt the user when unexpected conditions are found in an operation. 
+The following snippet shows how an application could configure the operation history to enforce a linear undo model for all
+operations.
 <pre><font color="#4444CC">
 IOperationHistory history = OperationHistoryFactory.getOperationHistory();
 
-// set an approver on the history that will consult the contexts involved
-history.addOperationApprover(new ContextConsultingOperationApprover());
-
-// create my undo context
-IUndoContext myContext = new ObjectUndoContext(myModel, "Workbench Context"); 
-
-// set a linear undo model on my context
-undoContext.setOperationApprover(new LinearUndoEnforcer());
-IContextConsultingOperationApprover = new ContextConsultingOperationApprover();
+// set an approver on the history that will disallow any undo that is not the most recent operation
+history.addOperationApprover(new LinearUndoEnforcer());
 
 </font></pre>
 <p>
 In this case, an operation approver provided by the framework, 
 <a href="../reference/api/org/eclipse/core/commands/operations/LinearUndoEnforcer.html"><b>LinearUndoEnforcer</b></a>,
-is installed on the context.  Another approver is installed on the history to ensure that it consults each context
-on an operation before allowing undo or redo.</p>
+is installed on the history to prevent the undo or redo of any operation that is not the most recently done or undone
+operation in all of its undo contexts.</p>
 
 <h3>Undo and the IDE Workbench</h3>
 <p>
@@ -310,9 +304,7 @@ if (workspaceContext != null) {
 }
 
 </font></pre>
-Action handlers that operate on the workspace undo context should typically be created with pruning
-enabled.</p>
-<p>Other plug-ins are encouraged to use this same technique for registering
+Other plug-ins are encouraged to use this same technique for registering
 model-based undo contexts.
 </p>
 <p><a href="../notices.html"><img border="0" src="../cpy.png" alt="Legal notices." border="0" ></a></p>
