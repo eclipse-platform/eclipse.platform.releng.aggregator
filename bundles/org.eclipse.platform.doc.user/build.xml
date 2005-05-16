@@ -35,14 +35,19 @@
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
 		<mkdir dir="${destination.temp.folder}/org.eclipse.platform.doc.user_3.1.0"/>
+		<available file="${basedir}/doc.zip" property="doc.zip.present"/>
+		<antcall target="build.doc.zip"/>
+		<copy todir="${destination.temp.folder}/org.eclipse.platform.doc.user_3.1.0">
+			<fileset dir="${build.result.folder}" includes="META-INF/,doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,book.css,index/**" excludes="build.properties,build.xml"			/>
+		</copy>
+	</target>
+
+	<target name="build.doc.zip" unless="doc.zip.present">
 		<antcall target="build.index"/>		
 		<zip zipfile="${plugin.destination}/doc.zip"
 			basedir="${plugin.destination}"
 			includes="book.css, about.html, notices.html, cpy.png, no_help_exists.htm, concepts/**, gettingStarted/**, images/**, reference/**, tasks/**, tips/**, whatsNew/**"
 		/>
-		<copy todir="${destination.temp.folder}/org.eclipse.platform.doc.user_3.1.0">
-			<fileset dir="${build.result.folder}" includes="META-INF/,doc.zip,*.properties,*.xml,*.zip,*.html,*.htm,*.png,book.css,index/**" excludes="build.properties,build.xml"			/>
-		</copy>
 	</target>
 
 	<target name="build.jars" depends="init" description="Build all the jars for the plug-in: org.eclipse.platform.doc.user.">
