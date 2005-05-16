@@ -1,62 +1,71 @@
 <project name="PDE Doc ISV Build" default="all"  basedir="." >
 
-<target name="all">
-	<antcall target="convertSchemaToHtml" />
-	<antcall target="generateJavadoc" />
-	<antcall target="createDocZip" />
-</target>
+	<target name="init">
+		<available file="${basedir}/doc.zip" property="doc.zip.present"/>
+	</target>
 
-<target name="convertSchemaToHtml" if="eclipse.running">
-	<property name="dest" value="reference/extension-points" />
-	    <record name="${basedir}/pdeconvert.txt" action="start"/>
-   
-	    <pde.convertSchemaToHTML manifest="../org.eclipse.pde.core/plugin.xml" destination="${dest}" />
-   	    <pde.convertSchemaToHTML manifest="../org.eclipse.pde.ui/plugin.xml" destination="${dest}" />
-	
-	    <record name="${basedir}/pdeconvert.txt" action="stop"/>
-</target>
+	<target name="all" depends="init" unless="doc.zip.present">
+		<antcall target="convertSchemaToHtml" />
+		<antcall target="generateJavadoc" />
+		<antcall target="build.index" />
+		<antcall target="createDocZip" />
+	</target>
 
-<target name="getJavadocPath">
-	<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
-	<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
-</target>
+	<target name="build.index" description="Builds search index for the plug-in: org.eclipse.pde.doc.user." if="eclipse.running">
+		<help.buildHelpIndex manifest="${basedir}/plugin.xml" destination="${basedir}"/>
+	</target>
+
+	<target name="convertSchemaToHtml" if="eclipse.running">
+		<property name="dest" value="reference/extension-points" />
+		<record name="${basedir}/pdeconvert.txt" action="start"/>
+
+		<pde.convertSchemaToHTML manifest="../org.eclipse.pde.core/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.pde.ui/plugin.xml" destination="${dest}" />
+
+		<record name="${basedir}/pdeconvert.txt" action="stop"/>
+	</target>
+
+	<target name="getJavadocPath">
+		<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
+		<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+	</target>
 
 
-<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
+	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
-	<!--HACK to ensure the platform doc is built before PDE - call to this script should be moved to build.jars target-->
-	<available file="../org.eclipse.jdt.doc.isv/doc.zip" property="jdt.doc.zip.present"/>
-	<antcall target="buildJdtDoc" />
+		<!--HACK to ensure the jdt doc is built before PDE - call to this script should be moved to build.jars target-->
+		<available file="../org.eclipse.jdt.doc.isv/doc.zip" property="jdt.doc.zip.present"/>
+		<antcall target="buildJdtDoc" />
 
-	<condition property="optionsFile" value="pdeOptions">
-	      <os family="unix" />
-    </condition>
-    <condition property="optionsFile" value="pdeOptions.txt">
-	      <os family="windows" />
-    </condition>
+		<condition property="optionsFile" value="pdeOptions">
+			<os family="unix" />
+		</condition>
+		<condition property="optionsFile" value="pdeOptions.txt">
+			<os family="windows" />
+		</condition>
 
-	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
+		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 
-		
-	<!--scrub isv plugin directories of any preexisting api doc content-->
-	<delete dir="reference/api"/>
-	<mkdir dir="reference/api"/>
 
-	<exec dir="." executable="${javadoc}" output="doc.bin.log">
-		<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
-	</exec>
-</target>
+		<!--scrub isv plugin directories of any preexisting api doc content-->
+		<delete dir="reference/api"/>
+		<mkdir dir="reference/api"/>
 
-<target name="buildJdtDoc" unless="jdt.doc.zip.present">
-	<ant antfile="buildDoc.xml" dir="../org.eclipse.jdt.doc.isv" />
-</target>
+		<exec dir="." executable="${javadoc}" output="doc.bin.log">
+			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
+		</exec>
+	</target>
 
-<target name="createDocZip">
-	<zip zipfile="${basedir}/doc.zip"
+	<target name="buildJdtDoc" unless="jdt.doc.zip.present">
+		<ant antfile="buildDoc.xml" dir="../org.eclipse.jdt.doc.isv" />
+	</target>
+
+	<target name="createDocZip">
+		<zip zipfile="${basedir}/doc.zip"
 		basedir="${basedir}"
 		includes="schema.css, book.css, cpy.png, notices.html, about.html, guide/**, tips/**, reference/**, whatsNew/**, images/**"
 	/>
-</target>
+	</target>
 
 </project>
 

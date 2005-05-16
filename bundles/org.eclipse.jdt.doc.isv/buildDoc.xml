@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Jdt Doc Isv Build" default="all"  basedir="." >
 
-<target name="all">
+<target name="init">
+	<available file="${basedir}/doc.zip" property="doc.zip.present"/>
+</target>
+	
+<target name="all" depends="init">
 	<antcall target="convertSchemaToHtml" />
 	<antcall target="examplesDocCopy" />
 	<antcall target="generateJavadoc" />
+	<antcall target="build.index" />
 	<antcall target="createDocZip" />
 </target>
 
 
+<target name="build.index" description="Builds search index for the plug-in: org.eclipse.jdt.doc.isv" if="eclipse.running">
+	<help.buildHelpIndex manifest="${basedir}/plugin.xml" destination="${basedir}"/>
+</target>
 
 <target name="convertSchemaToHtml" if="eclipse.running">
 	<property name="dest" value="reference/extension-points" />

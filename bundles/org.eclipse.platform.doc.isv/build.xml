@@ -8,7 +8,6 @@
 		<property name="temp.folder" value="${basedir}/temp.folder"/>
 		<property name="plugin.destination" value="${basedir}"/>
 		<property name="build.result.folder" value="${basedir}"/>
-		<available file="${basedir}/doc.zip" property="doc.zip.present"/>
 	</target>
 
 	<target name="build.update.jar" depends="init">
@@ -23,25 +22,16 @@
 	</target>
 
 	<target name="gather.bin.parts" depends="init" if="destination.temp.folder" >
-		<antcall target="build.index"/>		
-		<antcall target="buildDocZip" />
+		<ant antfile="buildDoc.xml" />
 		<mkdir dir="${destination.temp.folder}/${full.name}"/>
 		<copy todir="${destination.temp.folder}/${full.name}">
 			<fileset dir="${basedir}" includes="META-INF/,*.properties,*.xml,*.zip,*.html,*.htm,*.png,*.css,activeHelpSample.jar,index/**" excludes="build.properties,build.xml,buildDoc.xml" />
 		</copy>
 	</target>
 
-	<target name="buildDocZip" depends="init" unless="doc.zip.present">
-		<ant antfile="buildDoc.xml" />
+	<target name="build.jars" depends="init">
 	</target>
 
-	<target name="build.jars" depends="init" >
-	</target>
-	
-	<target name="build.index" depends="init"  description="Builds search index for the plug-in: org.eclipse.platform.doc.isv." if="eclipse.running">
-		<help.buildHelpIndex manifest="plugin.xml" destination="."/>
-	</target>
-	
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
 	</target>
 
