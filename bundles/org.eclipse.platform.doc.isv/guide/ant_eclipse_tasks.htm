@@ -33,11 +33,16 @@ IResource.refreshLocal()</b></a> method. Example:</p>
 eclipse.incrementalBuild</h3>
 
 <p>
-This task is a wrapper to <b>
+When the <b>project</b> attribute is supplied, this task is a wrapper to<b>
 <a href="../reference/api/org/eclipse/core/resources/IProject.html#build(int, org.eclipse.core.runtime.IProgressMonitor)">
-IProject.build()</a></b> and <b>
+IProject.build()</a></b>.  Otherwise, this task is a wrapper to the method:<b>
 <a href="../reference/api/org/eclipse/core/resources/IWorkspace.html#build(int, org.eclipse.core.runtime.IProgressMonitor)">
-IWorkspace.build()</a></b> methods. Examples:</p>
+IWorkspace.build()</a></b>.  In both cases, the kind of build is always 
+<b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#INCREMENTAL_BUILD">
+IncrementalProjectBuilder#INCREMENTAL_BUILD</a></b>
+</p>
+<p>
+Examples:
 
 <pre><font color="#4444CC">&lt;eclipse.incrementalBuild/&gt;</font></pre>
 
@@ -47,15 +52,26 @@ IWorkspace.build()</a></b> methods. Examples:</p>
 </pre>
 
 <ul>
-  <li> <b>project</b> the project to be built</li>
+  <li> <b>project</b> the name of the project to be built</li>
 </ul>
 
 <h3 >
 eclipse.convertPath</h3>
 
 <p>
-Converts a file system path to a resource path and vice-versa. The resulting value is
-assigned to the given property. Examples:</p>
+Converts a file system path to a resource path or vice-versa. The resulting value is
+assigned to the given property. The <b>property</b> attribute must be specified, as well as
+either the <b>fileSystemPath</b> or <b>resourcePath</b> attribute.  When 
+a file system path is supplied, this task is a wrapper to
+<b>
+<a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html#getContainerForLocation(org.eclipse.core.runtime.IPath)">
+IWorkspaceRoot.getContainerForLocation(IPath)</a></b>.  When a resource path
+is supplied, this task is a wrapper to
+<b>
+<a href="../reference/api/org/eclipse/core/resources/IResource.html#getLocation()">IResource.getLocation()</a></b>.
+</p>
+<p>
+Examples:</p>
 
 <pre><font color="#4444CC">&lt;eclipse.convertPath fileSystemPath=&quot;${basedir}&quot; property=&quot;myPath&quot;/&gt;</font></pre>
 
