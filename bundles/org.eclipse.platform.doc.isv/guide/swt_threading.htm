@@ -102,13 +102,17 @@ The following code snippet demonstrates the pattern for using these methods:</P>
    // so use async.
    display.asyncExec (new Runnable () {
       public void run () {
-         myWindow.redraw ();
+         if (!myWindow.isDisposed())
+            myWindow.redraw ();
       }
    });
    // now do more computations
    ...
 </pre></font>
-
+It is good practice to check if your widget is disposed from within the runnable
+when using asyncExec.  Since other things can happen in the UI thread between
+the call to <code>asyncExec</code> and the execution of your runnable,
+you can never be sure what state your widgets are in by the time your runnable executes.
 
 <H3>
 The workbench and threads</H3>
