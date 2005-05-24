@@ -32,8 +32,8 @@ public class ActiveHelpOpenDialogAction implements ILiveHelpAction {
                          // Open a message dialog
                          MessageDialog.openInformation(
                               window.getShell(),
-                              "Hello World.",
-                              "Hello World.");
+                              "Hello World.", //$NON-NLS-1$
+                              "Hello World."); //$NON-NLS-1$
                     }
                }
           });
