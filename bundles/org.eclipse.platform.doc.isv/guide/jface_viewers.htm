@@ -136,8 +136,64 @@ Note:&nbsp; Instances of particular content and label providers are not intended
 its own instance of the provider class. The provider life cycle protocol is
 designed for a 1-to-1 relationship between a provider and its
 viewer.&nbsp;&nbsp;</blockquote></i>
-<P >
-Input elements, content providers, and label providers allow viewers to hide most of the implementation details for populating widgets. Clients of a viewer need only worry about populating a viewer with the right kind of input and content provider. The label provider must know how to derive the UI information from the viewer content.</P>
+<P > Input elements, content providers, and label providers allow viewers to hide 
+  most of the implementation details for populating widgets. Clients of a viewer 
+  need only worry about populating a viewer with the right kind of input and content 
+  provider. The label provider must know how to derive the UI information from 
+  the viewer content.</P>
+<P >A label provider can show more than just text and an image. JFace provides 
+  several classes and interfaces to support the most popular extra functionality. 
+  The following classes are supported by the TableViewer, AbstractTreeViewer and 
+  TableTreeViewer. </P>
+<ul>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IColorProvider.html">
+IColorProvider</a></b> . If an label provider implements IColorProvider it will set 
+    the foreground and background color of an item in the viewer when it returns 
+    a color. It is recommended that unless system colors are used that these colors 
+    are cached to minimize the amount of system resources used.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IFontProvider.html">
+IFontProvider</a></b> . If an label provider implements IFontProvider it will set 
+    the font of an item in the viewer when it returns a color. Fonts should also 
+    be cached. <b><a href="../reference/api/org/eclipse/swt/widgets/IFontProvider.html">
+Control#getFont()</a></b>
+ should be called as little as possible as this 
+    will create a new instance of Font whenever it is called.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/ILabelDecorator.html">
+ILabelDecorator</a></b>  An ILabelDecorator is an object that can take an image or 
+    text and add adornments to them.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/DecoratingLabelProvider.html">
+DecoratingLabelProvider</a></b>  The DecoratingLabelProvider is a compound object 
+    that takes both a label provider and an ILabelDecorator. This allows a label 
+    provider to hook into a decorator mechanism such as the one provided in the 
+    Workbench.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IViewerLabelProvider.html">
+IViewerLabelProvider</a></b>  The IViewerLabelProvider is a label provider that allows 
+    for building of labels by an external object such as a decorator. The DecoratingLabelProvider 
+    is an IViewerLabelProvider.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IDelayedLabelDecorator.html">
+IDelayedLabelDecorator</a></b>  The IDelayedLabelDecorator is an ILabelDecorator 
+    that supports decoration that is delayed (such as an IDecoratorManager that 
+    decorates in a Thread). IDecoratorManagers are IDelayedLabelDecorators. You 
+    can get the Workbench <b><a href="../reference/api/org/eclipse/ui/IDecoratorManager.html">
+IDecoratorManager</a></b> 
+
+IDecoratorManager by calling <b><a href="../reference/api/org/eclipse/ui/IWorkbench.html">
+IWorkbench#getDecoratorManager()</a></b> 	
+	.</li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IColorDecorator.html">
+IColorDecorator</a></b>  An IColorDecorator is an object that can support decorating 
+    foreground and background colors. This is supported internally in the Workbench 
+    DecoratorManager. </li>
+  <li><b><a href="../reference/api/org/eclipse/jface/viewers/IFontDecorator.html">
+IFontDecorator</a></b>  An IFontDecorator is an object that can support decorating 
+    fonts. This is supported internally in the Workbench DecoratorManager. </li>
+</ul>
+<P >It is possible to affect the colors of a view in two ways as of Eclipse 3.1 
+  - either with its own label provider or with a decorator that sets colors and 
+  fonts. Generally it is better to use the color and font support in label providers 
+  as decorators affect every view that show a particular type. If you do use a 
+  color or font decorator make sure it's values can be set in the Colors and Fonts 
+  preference page.</P>
 
 
 
@@ -159,9 +215,11 @@ is a label provider that obtains an <b><a href="../reference/api/org/eclipse/ui/
 <b><a href="../reference/api/org/eclipse/ui/model/WorkbenchLabelProvider.html">WorkbenchLabelProvider</a></b> obtains an image to use for an
 <b><a href="../reference/api/org/eclipse/core/resources/IProject.html">IProject</a></b>, it can cache that image and use it for all
 <b><a href="../reference/api/org/eclipse/core/resources/IProject.html"> IProject</a></b> objects shown in the viewer.</P>
-<P >
-By defining a common adapter, <b><a href="../reference/api/org/eclipse/ui/model/IWorkbenchAdapter.html">IWorkbenchAdapter</a></b>, and registering it for many of the platform types, we make it possible for these types to be represented correctly in many of the common viewers and the workbench views that contain them. </P>
-
+<P > By defining a common adapter, <b><a href="../reference/api/org/eclipse/ui/model/IWorkbenchAdapter.html">IWorkbenchAdapter</a></b>, 
+  and registering it for many of the platform types, we make it possible for these 
+  types to be represented correctly in many of the common viewers and the workbench 
+  views that contain them. </P>
+<P >&nbsp;</P>
 <p><a href="../notices.html"><img border="0" src="../cpy.png" alt="Legal notices." border="0" ></a></p>
 
 </BODY>
