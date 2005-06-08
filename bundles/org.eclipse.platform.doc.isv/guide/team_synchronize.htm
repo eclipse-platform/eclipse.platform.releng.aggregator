@@ -154,14 +154,14 @@ of the subscriber. A subscriber provides the following capabilities:
     location and obtain the latest remote state.&nbsp;</li>
 </ul>
 <p> The APIs do not not define how a Subscriber is created, this is left to the 
-  specific implementations. For example the CVS plugin creates a Subscriber when 
+  specific implementations. For example the CVS plug-in creates a Subscriber when 
   a merge is performed, another for a comparison, and another when synchronizing 
   the local workspace with the current branch. </p>
 <p>
 So let's revisit our first example of using SyncInfo and see how a
 Subscriber could be used to access SyncInfo.</p>
 
-<pre><span style="color: rgb(68, 68, 204);">// Create a file system subscriber and specificy that the<br>// subscriber will synchronize with the provided file system location<br>Subscriber subscriber = new FileSystemSubscriber("c:\temp\repo");<br><br>// Allow the subscriber to refresh its state<br>subscriber.refresh(subscriber.roots(), IResource.DEPTH_INFINITE, monitor);<br><br>// Collect all the synchronization states and print<br>IResource[] children = subscriber.roots();<br>for(int i=0; i &lt; children.length; i++) {<br>  printSyncState(children[i]);<br>}<br><br>...<br><br>void printSyncState(Subscriber subscriber, IResource resource) {<br>  System.out.println(subscriber.getSyncInfo(resource).toString());<br></span><span
+<pre><span style="color: rgb(68, 68, 204);">// Create a file system subscriber and specify that the<br>// subscriber will synchronize with the provided file system location<br>Subscriber subscriber = new FileSystemSubscriber("c:\temp\repo");<br><br>// Allow the subscriber to refresh its state<br>subscriber.refresh(subscriber.roots(), IResource.DEPTH_INFINITE, monitor);<br><br>// Collect all the synchronization states and print<br>IResource[] children = subscriber.roots();<br>for(int i=0; i &lt; children.length; i++) {<br>  printSyncState(children[i]);<br>}<br><br>...<br><br>void printSyncState(Subscriber subscriber, IResource resource) {<br>  System.out.println(subscriber.getSyncInfo(resource).toString());<br></span><span
  style="color: rgb(68, 68, 204);"><span style="color: rgb(68, 68, 204);">  IResource[] children = subscriber.members(resource);<br>  for(int i=0; i &lt; children.length; i++) {<br>    IResource child = children[i];<br>    if(! child.exists()) {<br>      System.out.println(resource.getFullPath() + " doesn't exist in the workspace");<br>    }<br>    printSyncState(subscriber, children[i]);<br>  }<br>}<br></span></span></pre>
 <p>
 The important point to remember is that the Subscriber knows about
