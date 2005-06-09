@@ -12,7 +12,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Pre-release 3.1.0<br>
-Last revised June 8, 2005</p>
+Last revised June 9, 2005</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -270,7 +270,8 @@ problem set their configuration area explicitly using the -configuration command
 line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719">67719</a>)</p>
 <h4>XML files with UTF-8 byte order mark fail to have content type detected</h4>
 <p>Eclipse will fail to detect the proper content type for XML files that have a
-UTF-8 byte order mark if Crimson is the XML parser (as it is on Sun 1.4 JRE). This
+UTF-8 byte order mark if Crimson is the XML parser (as it is on Sun 1.4 JREs,
+but not on Sun 1.5 JREs). This
 problem will prevent actions normally available when files of the affected
 content types are selected from being presented to the user. The workaround is
 to ensure the default XML parser supports UTF-8 BOMs (such as Xerces does). (bug
@@ -312,6 +313,7 @@ extension in Plugin.startup</h4>
 as creating an executable extension, a deadlock situation can be created. Only
 simple bookkeeping tasks should be performed in <code>Plugin.startup</code>
 code. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>)</p>
+
 <h3>3.1.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
 <h4>UTF-8 encoded buildfiles with Byte Order Mark</h4>
 <p>UTF-8 encoded buildfiles with byte order marks will fail to be parsed correctly depending on the XML parser being used for the build. Therefore a valid buildfile will fail to build with an error message similar to: "BUILD FAILED: C:\workspace\bom.xml:1: Document root element is missing.". To succeed in building with these files, ensure to include Xerces jars on the Ant runtime classpath so that the Xerces parser is used to parse the XML. As well the context menu for these files in the Navigator or Package Explorer will not have the run shortcuts for Ant builds. (bug
@@ -354,6 +356,7 @@ task, which works correctly within Eclipse. (bug <a href="http://bugs.eclipse.or
 only)</h4>
 <p>On Windows 9X, using:&lt;property environment="env"/> will cause Eclipse to hang if the build occurs in the same VM as Eclipse. Running the build in a separate VM will hang the build but not Eclipse.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44196">44196</a>)</p>
+
 <h3>3.1.3 <a name="I-Platform-Help">Platform - Help</a></h3>
 <b>
 <h4>Help browser tool bar buttons do not work for some documents</h4>
@@ -418,6 +421,7 @@ be caused by a conflict between libraries in org.eclipse.tomcat plug-in and jars
 optionally installed in JRE jre/lib/ext directory. To fix the problem, ensure
 that the JRE used for running Eclipse does not contain any J2EE or Apache jars
 in the jre/lib/ext directory. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=63970">63970</a>)</p>
+
 <h3>3.1.4 <a name="I-Platform-UI">Platform - UI</a></h3>
 <h4>High contrast settings</h4>
 <p>Eclipse was tested for High Contrast using 1162 x 864 resolution in Windows
@@ -478,6 +482,7 @@ closed, even if the contents have already been saved. (bug <a href="http://bugs.
 cause Eclipse to also crash (Windows only)</h4>
 <p>If an OLE document crashes, Eclipse can crash, or the workbench menus can
 become inconsistent.</p>
+
 <h3>3.1.5 <a name="I-Platform-Text">Platform - Text</a></h3>
 <h4>Problems opening external files</h4>
 <p><b>File &gt; Open External File</b> can fail when the editor opened for the external
@@ -487,6 +492,7 @@ external files. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=5817
 <p>A text editor opened on a file external to the workspace does not show a vertical ruler.
 So if you set breakpoints in the file, you won't see the breakpoints in the
 editor (the breakpoints only show up in the Breakpoints view). (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=54900">54900</a>)</p>
+
 <h3>3.1.6 <a name="I-Platform-SWT">Platform - SWT</a></h3>
 <h4>Eclipse plug-in based on the SWT Browser throws exception</h4>
 <p>The SWT Browser widget uses a platform-specific web browser to render HTML.
@@ -575,6 +581,7 @@ accessible (assume the workspace is at <code>/workspace</code>):</p>
 </blockquote>
 <p>(bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=20305">20305</a>
 describes a related problem)</p>
+
 <h3>3.1.7 <a name="I-Platform-Team-CVS">Platform - Team - CVS</a></h3>
 <p>The following are known problems with the CVS repository provider only, and
 do not apply to other repository providers. Additional information on how to use
@@ -585,9 +592,9 @@ CVS FAQ</a>.</p>
 of these messages is not as expected, some of the plug-in's functionality may be
 missing. The CVS plug-in is compatible with all stable 1.11.X builds of the CVS
 server, and should be compatible with future releases in that stream unless text
-message formats change (the last tested server was 1.11.16). As for the 1.12.X
+message formats change (the last tested server was 1.11.20). As for the 1.12.X
 feature releases of CVS, the Eclipse CVS client has been tested with builds up
-to 1.12.8. However, future releases could easily break the Eclipse CVS client.
+to 1.12.12. However, future releases could easily break the Eclipse CVS client.
 Basic functionality, such as Checkout, Commit, and Update, should always work,
 but there may be problems with more advanced commands such as Synchronizing and
 Browsing the repository. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67627">67627</a>)</p>
@@ -596,29 +603,23 @@ Browsing the repository. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cg
 3.0. Because of this, authorization information cached with a workspace created
 with an earlier version of Eclipse will be unusable, and the user will need to
 re-authenticate.</p>
-<h4>Issues upgrading from 2.x to 3.0</h4>
+<h4>Issues upgrading from 2.x to 3.x</h4>
 <p>In 2.x, CVS used markers to identify outgoing additions and outgoing
-deletions. In 3.0, these markers no longer exist because the Synchronize view
+deletions. In 3.x, these markers no longer exist because the Synchronize view
 can be used to show the same information. If CVS markers exist in a workspace
-that is upgraded to 3.0, they can be removed by performing a Project&gt;Clean.
+that is upgraded to 3.x, they can be removed by performing a Project&gt;Clean.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=40593">40593</a>)</p>
-<h4>Issues upgrading from 1.0 to 3.0</h4>
+<h4>Issues upgrading from 1.0 to 3.x</h4>
 <p>In 1.0, CVS used a .vcm_meta file to store project configuration information.
 In 2.0, this file was replaced by the .project file but CVS still read the
-.vcm_meta file for backwards compatibility. In 3.0, the .vcm_meta file is no
-longer read by CVS. Users who wish to upgrade from 1.0 to 3.0 must first upgrade
-to 2.x and then upgrade to 3.0 if they wish to keep their project configuration
+.vcm_meta file for backwards compatibility. In 3.x, the .vcm_meta file is no
+longer read by CVS. Users who wish to upgrade from 1.0 to 3.x must first upgrade
+to 2.x and then upgrade to 3.x if they wish to keep their project configuration
 information (e.g. java project). (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=43296">43296</a>)</p>
 <h4>Connection cannot be found after initially missing</h4>
 <p>If a connection initially fails due to a network problem, the connection may
 continue to fail even when the network problem is fixed. In order to establish
 the connection you must exit and restart Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=9295">9295</a>)</p>
-<h4>CVS meta-folders appear in some cases</h4>
-<p>There are some cases where CVS folders are not hidden from the UI as the user
-would expect. For instance, CVS folders will appear if a user imports a CVS
-project into Eclipse before the CVS plug-in is loaded. To avoid this, open the
-CVS Repositories view (thus loading the CVS plug-in) before importing CVS
-projects into Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21128">21128</a>)</p>
 <h4>&quot;Received broken pipe signal&quot; error from server</h4>
 <p>Eclipse sometimes performs multiple commands within a single connection to
 the server. This may cause problems with CVS servers that are running server
@@ -635,9 +636,6 @@ using an external communications client (e.g. rsh or ssh) that adds CRs to the
 communications channel (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21180">21180</a>).
 Another involves Eclipse not properly reading the stderr output of the external
 communications tool. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=11633">11633</a>)</p>
-<h4>No way to update folder excluding subfolders</h4>
-<p>There is currently no way in Eclipse to run a non-recursive update on a
-folder (i.e., there is nothing equivalent to the cvs -l option). (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33210">33210</a>)</p>
 <h4>A disabled CVS capability may not be auto-enabled in existing workspaces</h4>
 <p>New in 3.0 is the ability to disable capabilities and the CVS support in
 Eclipse can be disabled. However, for backwards compatibility the CVS capability
@@ -647,6 +645,7 @@ startup. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66977">6697
 <h4>Builder output files may appear as changed</h4>
 <p>When folders containing build output are shared they may get improperly
 marked as dirty when build output is generated. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=50965">50965</a>)</p>
+
 <h3>3.1.8 <a name="I-Platform-Install-Update">Platform - Install/Update</a></h3>
 <h4>Manually installing features and plug-ins on a FAT file system (Windows only)</h4>
 <p>When features and plug-ins are manually installed on top of an Eclipse-based
@@ -673,17 +672,14 @@ live indefinitely. Update manager limits the number of active connection threads
 and will refuse to create more once the limit is reached. To work around the
 problem, exit and restart Eclipse. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18598">18598</a>,
 <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19775">19775</a>)</p>
-<h4> URL validity checking on
-input</h4>
-<p>URL syntax is currently not completely checked on input. Ensure that the
-entered URL uses forward&nbsp; slash ('/') separators and does not contain
-invalid characters. (bugs <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19685">19685</a>,
-<a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=20247">20247</a>)
+
 <h3>3.1.9 <a name="I-Platform-Debug">Platform - Debug</a></h3>
 <p>None. (Known problems with the Java debugger appear below in the <a href="#I-JDT">JDT</a>
 section.)</p>
+
 <h3>3.1.10 <a name="I-Platform-Compare">Platform - Compare</a></h3>
 <p>None.</p>
+
 <h3>3.2 <a name="I-JDT">Java Development Tools (JDT)</a></h3>
 <h4>Searching for constant field references</h4>
 <p>Search does not find references to constant fields inside binaries because
@@ -884,6 +880,7 @@ from the debug UI, select <b>Terminate and Remove</b> from the debug view's
 pop-up menu (or use the shortcut &quot;delete&quot; key). Associated system
 processes in the OS may not be properly cleaned up. If a debug target has no
 suspended threads, termination works properly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1631">1631</a>)
+
 <h3>3.3 <a name="I-PDE">Plug-in Development Environment (PDE)</a></h3>
 <h4>Feature manifest editor does not preserve all comments</h4>
 <p>When a non-source page of the feature manifest editor is used, PDE will convert
@@ -984,6 +981,7 @@ when you next launch Eclipse.</p>
 </ol>
 <p>Opening this shortcut launches Eclipse. (You can
 drag the shortcut to the Windows Desktop if you want to keep it in easy reach.)</p>
+
 <h3>Mac OS X</h3>
 <p>On Mac OS X, you start Eclipse by double clicking the Eclipse application. If you need to pass arguments to Eclipse, you'll have to edit the <code>Info.plist</code> file
 inside the Eclipse application bundle: select the Eclipse application bundle icon while holding down the Control Key.
@@ -995,11 +993,12 @@ top-level eclipse folder. It refers to the eclipse executable inside the applica
 the same arguments as &quot;eclipse.exe&quot; on other platforms. Due to a platform limitation you cannot
 pass an arbitrary Java VM to the &quot;<code>-vm</code>&quot; option, but must use the program &quot;<code>java_swt</code>&quot; found inside
 the application bundle; for example:</p>
-
 <pre>	cd <i>&lt;eclipse directory&gt;</i>
 	./eclipse -vm Eclipse.app/Contents/MacOS/java_swt
 </pre>
+
 <h2>5. <a name="Upgrading"></a>Upgrading Workspace from a Previous Release</h2>
+
 <h3>Users who don't use &quot;-data&quot;</h3>
 <p>If you weren't previously using &quot;-data&quot; to specify your workspace,
 follow these steps to upgrade:
