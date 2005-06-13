@@ -19,7 +19,7 @@ Retargetable editor actions
 <h4>Retargetable editor actions</h4><p>Recall that the <a href="../samples/org.eclipse.ui.examples.readmetool/doc-html/ui_readmetool_ex.html">readme
 tool</a> defines its own editor which contributes actions
 to the workbench menu bar using its <b>ReadmeEditorActionBarContributor</b>.&nbsp;&nbsp;</p>
-<font color='#4444CC'><pre>&lt;extension
+<pre>&lt;extension
     point = &quot;org.eclipse.ui.editors&quot;&gt;
 	&lt;editor
   	   id = &quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
@@ -29,9 +29,9 @@ to the workbench menu bar using its <b>ReadmeEditorActionBarContributor</b>.&nbs
 	   extensions=&quot;readme&quot;
            <b>contributorClass=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditorActionBarContributor</b>&quot;&gt;
 	&lt;/editor&gt;
-&lt;/extension&gt;</pre></font>
+&lt;/extension&gt;</pre>
 <p>Let's look closer at what happens in the contributor class.</p>
-<pre><font color="#4444CC">public ReadmeEditorActionBarContributor() {
+<pre>public ReadmeEditorActionBarContributor() {
 	...
 	action2 = new <b>RetargetAction</b>(<b>IReadmeConstants.RETARGET2</b>, MessageUtil.getString(&quot;Editor_Action2&quot;));
 	action2.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action2&quot;));
@@ -45,7 +45,7 @@ to the workbench menu bar using its <b>ReadmeEditorActionBarContributor</b>.&nbs
 	<b>handler2</b> = new EditorAction(MessageUtil.getString(&quot;Editor_Action2&quot;)); 
 	...
 	<b>handler3</b> = new EditorAction(MessageUtil.getString(&quot;Editor_Action3&quot;)); 
-	...</font></pre>
+	...</pre>
 <p>When the contributor is created, it creates two retargetable actions (one
 that allows label update and one that does not).&nbsp; Creation of the actions
 uses the same technique that the workbench uses.&nbsp; It also creates two
@@ -58,16 +58,16 @@ tracking the active view and hooking different handlers as different views or
 the editor itself becomes active.&nbsp; (The workbench does this for you when
 you set a handler for one of its global actions).&nbsp; Here's how the <b>ReadmeEditorActionBarContributor</b>
 sets things up:</p>
-<pre><font color="#4444CC">public void init(IActionBars bars, IWorkbenchPage page) {
+<pre>public void init(IActionBars bars, IWorkbenchPage page) {
 	super.init(bars, page);
 	bars.setGlobalActionHandler(IReadmeConstants.RETARGET2, handler2);
 	bars.setGlobalActionHandler(IReadmeConstants.LABELRETARGET3, handler3);
-	...</font></pre>
+	...</pre>
 <p>First, the contributor registers its handlers for the retargeted
 actions.&nbsp; This ensures that the contributor's actions will be run when the
 editor itself is active.&nbsp; The next step is to register each <b><a href="../reference/api/org/eclipse/ui/actions/RetargetAction.html">RetargetAction</a>
 </b>as a part listener on the page.</p>
-<pre><font color="#4444CC">	...
+<pre>	...
 	// Hook retarget actions as page listeners
 	page.addPartListener(action2);
 	page.addPartListener(action3);
@@ -76,7 +76,7 @@ editor itself is active.&nbsp; The next step is to register each <b><a href="../
 		action2.partActivated(activePart);
 		action3.partActivated(activePart);
 	}
-}</font></pre>
+}</pre>
 <p>Adding each <b><a href="../reference/api/org/eclipse/ui/actions/RetargetAction.html">RetargetAction</a>
 </b>as a part listener means that it will be notified when the active part
 changes.&nbsp; The action can get the correct global handler from the newly
@@ -85,21 +85,21 @@ activated part.&nbsp; (See the implementation of <b><a href="../reference/api/or
 with the currently active part. </p>
 <p>When the editor contributor is disposed, it should unhook the retargetable
 actions as page listeners.</p>
-<pre><font color="#4444CC">public void dispose() {
+<pre>public void dispose() {
 	// Remove retarget actions as page listeners
 	getPage().removePartListener(action2);
 	getPage().removePartListener(action3);
-}</font></pre>
+}</pre>
 <p>Finally, recall that action bar contributors are shared among instances of
 the same editor class.&nbsp; For this reason, the handlers must be notified when
 the active editor changes so that they can connect to the proper editor
 instance.</p>
-<pre><font color="#4444CC">public void setActiveEditor(IEditorPart editor) {
+<pre>public void setActiveEditor(IEditorPart editor) {
 	...
 	handler2.setActiveEditor(editor);
 	handler3.setActiveEditor(editor);
 	...
-}</font></pre>
+}</pre>
 <p>That completes the setup on the editor side.&nbsp; When the editor is open
 and active, the handlers (and their labels) as defined by the <b>ReadmeEditorActionBarContributor
 </b>will appear in the workbench menu bar.</p>
@@ -108,7 +108,7 @@ and active, the handlers (and their labels) as defined by the <b>ReadmeEditorAct
 is similar to registering a handler for a workbench action, except that the
 action id is the one defined by the plug-in's editor.&nbsp; The <b>ReadmeContentOutlinePage</b>
 registers a handler for these actions.</p>
-<pre><font color="#4444CC">public void createControl(Composite parent) {
+<pre>public void createControl(Composite parent) {
 	super.createControl(parent);
 	...
 	getSite().getActionBars().<b>setGlobalActionHandler(
@@ -120,7 +120,7 @@ registers a handler for these actions.</p>
 	getSite().getActionBars().<b>setGlobalActionHandler(
 		IReadmeConstants.LABELRETARGET3, </b>
 		action);  
-	...</font></pre>
+	...</pre>
 <p>Note that the outliner sets tool tip text and a label on the second action,
 since it allows relabeling.&nbsp; When the readme outliner view is made active,
 its handlers (and their labels) will now appear in the workbench menu bar.</p>

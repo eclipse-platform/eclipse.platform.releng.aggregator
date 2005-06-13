@@ -63,7 +63,7 @@ Activities are defined using the
 <b><a href="../reference/extension-points/org_eclipse_ui_activities.html">org.eclipse.ui.activities</a></b>
 extension point.  Let's look at a simplified version of how the Eclipse SDK plug-in defines two activities -
 one for developing Java software and one for developing plug-ins:
-<font color='#4444CC'><pre>
+<pre>
 &lt;extension
 	point="org.eclipse.ui.activities"&gt;
 	&lt;activity
@@ -78,21 +78,21 @@ one for developing Java software and one for developing plug-ins:
 		id="org.eclipse.plugInDevelopment"&gt;
 	&lt;/activity&gt;
 	...
-</pre></font>
+</pre>
 Activities are assigned a name and description that can be shown to the user whenever the user is enabling and disabling
 activities, or otherwise shown information about an activity.  The id of the activity is used when defining
 pattern bindings or other relationships between activities.  For example, we can decide that one activity requires
 another activity.
-<font color='#4444CC'><pre>
+<pre>
 &lt;activityRequirementBinding
 	activityId="org.eclipse.plugInDevelopment"
 	requiredActivityId="org.eclipse.javaDevelopment"&gt;
 &lt;/activityRequirementBinding&gt;
-</pre></font>
+</pre>
 The requirement binding states that the plug-in development activity can only be enabled when the Java development 
 activity is enabled.  Related activities can also be bound into <b>categories</b>, that are shown to the user when
 the user is working with activities.
-<font color='#4444CC'><pre>
+<pre>
 &lt;category
 	name="Development"
 	description="Software Development"
@@ -108,7 +108,7 @@ the user is working with activities.
 	activityId="org.eclipse.plugInDevelopment"
 	categoryId="org.eclipse.categories.developmentCategory"&gt;
 &lt;/categoryActivityBinding&gt;
-</pre></font>
+</pre>
 The category groups the related development activities together.  This category is shown to the user when the user
 manually configures activities.
 </p>
@@ -120,26 +120,26 @@ The patterns used by the workbench are composed of two parts.  The first part us
 that is contributing the UI extension.  The second part is the id used by plug-in itself when defining
 the contribution (which may or may not also include the plug-in id as part of the identifier).  
 The following format is used:
-<font color='#4444CC'><pre>
+<pre>
 plug-in-identifier + &quot;/&quot; + local-identifier
-</pre></font>
+</pre>
 For example, the following activity pattern binding states that a UI contribution from any
 JDT plug-in id (<tt>org.eclipse.jdt.*</tt>) is associated with the Java development activity regardless
 of its local identifier (<tt>.*</tt>).
-<font color='#4444CC'><pre>
+<pre>
 &lt;activityPatternBinding
 	activityId="org.eclipse.javaDevelopment"
 	pattern="org\.eclipse\.jdt\..*/.*"&gt;
 &lt;/activityPatternBinding&gt;
-</pre></font>
+</pre>
 The next binding is more specific.  It states that the contribution named <tt>javanature</tt> defined in the
 JDT core (<tt>org.eclipse.jdt.core</tt>) is associated with the Java development activity.
-<font color='#4444CC'><pre>
+<pre>
 &lt;activityPatternBinding
 	activityId="org.eclipse.javaDevelopment"
 	pattern="org\.eclipse\.jdt\.core/javanature"&gt;
 &lt;/activityPatternBinding&gt;
-</pre></font>
+</pre>
 As you can see, activity pattern bindings can be used to associate large groups of contributions with a particular activity,
 or to associate very specific contributions to an activity.  The following contributions are affected by activities:
 <ul>
@@ -162,12 +162,12 @@ for UI contributions.  The second part of the identifier (the local identifier)
 indicates the name of the table of contents (TOC) file.
 For example, the following activity pattern binding associates all TOC files
 contributed by JDT plug-ins (org.eclipse.jdt.*) with the Java development activity:
-<font color='#4444CC'><pre>
+<pre>
 &lt;activityPatternBinding
 	activityId="org.eclipse.javaDevelopment"
 	pattern="org\.eclipse\.jdt\..*/.*"&gt;
 &lt;/activityPatternBinding&gt;
-</pre></font>
+</pre>
 When the Java development activity is disabled, help books contributed by JDT plug-ins,
 or any sub-books (TOCs linked to, or linked by JDT books), even if contributed
 by a different plug-in, will not show in the help UI.  The topics defined in these books
@@ -180,12 +180,12 @@ appear to define less topics in the UI.
 Using more specific binding, it is possible to associate activities with selected TOCs from plug-ins
 that contribute multiple TOCs to the help system.  For example, the following
 activity pattern binding associates the "Examples" TOC with the Java development examples activity.
-<font color='#4444CC'><pre>
+<pre>
 &lt;activityPatternBinding
 	activityId="org.eclipse.javaDevelopmentExamples"
 	pattern="org\.eclipse\.jdt\.doc\.isv\.topics_Samples.xml"&gt;
 &lt;/activityPatternBinding&gt;
-</pre></font>
+</pre>
 With such pattern binding, disabling the Java development examples activity will
 hide the "Examples" section from the "JDT Plug-in Developer Guide" book.
 </p>
@@ -204,19 +204,19 @@ The hub of all activity in the workbench is <a href="../reference/api/org/eclips
 The activity support works in tandem with an 
 <a href="../reference/api/org/eclipse/ui/activities/IActivityManager.html"><b>IActivityManager</b></a>.
 Plug-ins can obtain the activity support instance from the workbench, and the activity manager from there.
-<font color='#4444CC'><pre>
+<pre>
 IWorkbenchActivitySupport workbenchActivitySupport = PlatformUI.getWorkbench().getActivitySupport();
 IActivityManager activityManager = workbenchActivitySupport.getActivityManager();
-</pre></font>
+</pre>
 The following snippet enables the Java development activity (if it is not already enabled).  It shows a
 simplified version of a trigger.
-<font color='#4444CC'><pre>
+<pre>
 ...
 //the user did something Java related.  Enable the Java activity.
 Set enabledActivityIds = new HashSet(activityManager.getEnabledActivityIds());
 if (enabledIds.add(&quot;org.eclipse.javaDevelopment&quot;))
 	workbenchActivitySupport.setEnabledActivityIds(enabledActivityIds);
-</pre></font>
+</pre>
 </p>
 <p>
 <a href="../reference/api/org/eclipse/ui/activities/IActivityManager.html"><b>IActivityManager</b></a> also defines

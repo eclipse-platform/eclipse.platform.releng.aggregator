@@ -37,7 +37,7 @@ can choose to extend the
 We implemented a minimal view extension in the hello world example. Now we'll look at one that is aware of other workbench views and responds to user navigation and selection
 changes in the workbench. First,
 let's take a look at the declaration of the extension in the <b>plugin.xml</b>.</P>
-<font color='#4444CC'><pre>&lt;extension 
+<pre>&lt;extension 
    point=&quot;org.eclipse.ui.views&quot;&gt;
 	&lt;category 
 	   id=&quot;org.eclipse.ui.examples.readmetool&quot;
@@ -51,7 +51,7 @@ let's take a look at the declaration of the extension in the <b>plugin.xml</b>.<
 	   class=&quot;org.eclipse.ui.examples.readmetool.ReadmeSectionsView&quot;&gt;
 	&lt;/view&gt;
 &lt;/extension&gt;
-</pre></font>
+</pre>
 <P >
 This should look pretty familiar. We see that a new view, <b>ReadmeSectionsView</b>, is contributed to the workbench. The
 <b>view id</b>, <b>name</b>,
@@ -75,7 +75,7 @@ We'll start with the familiar <b>createPartControl</b>
 method.&nbsp; As we saw in the Hello World example, this is where the widgets
 that represent a view are created.&nbsp; We'll ignore some of the code to get
 started.</P>
-<font color='#4444CC'><pre>
+<pre>
    public void createPartControl(Composite parent) {
       viewer = new ListViewer(parent);
       ...
@@ -85,20 +85,20 @@ started.</P>
       // prime the selection
       selectionChanged(null, getSite().getPage().getSelection());
    }
-</pre></font>
+</pre>
 <P >
 The view creates and stores a ListViewer and registers itself as a selection listener
 on its page. It obtains the page from an
 <b><a href="../reference/api/org/eclipse/ui/IViewSite.html">IViewSite</a></b>, which contains information about the view's context, such as its workbench window,
 its containing page, and its plug-in. When we are notified of a selection change, what happens?&nbsp;
 The following code is executed:</P>
-<font color='#4444CC'><pre>
+<pre>
    public void selectionChanged(IWorkbenchPart part, ISelection sel) {
       //if the selection is a readme file, get its sections.
       AdaptableList input = ReadmeModelFactory.getInstance().getSections(sel);
       viewer.setInput(input);
    }
-</pre></font>
+</pre>
 <P >
 It looks like the <b> ReadmeModelFactory</b> class is responsible for turning the selection into readme
 sections and these sections are input for
@@ -111,7 +111,7 @@ its list widget with the information - it is a ListViewer, after all.&nbsp; If y
 We still do not know how readme files are detected or where the file's section
 information comes from.&nbsp; A quick look at the
 <b> ReadmeModelFactory</b> sheds some light.</P>
-<font color='#4444CC'><pre>
+<pre>
    public AdaptableList getSections(ISelection sel) {
       // If sel is not a structured selection just return.
       if (!(sel instanceof IStructuredSelection))
@@ -131,7 +131,7 @@ information comes from.&nbsp; A quick look at the
       //the selected object is not a readme file
       return null;
    }
-</pre></font>
+</pre>
 <P >We check the selection to see if it is a structured (multiple)
 selection.&nbsp; (The concept of a structured selection comes from JFace <a href="jface_viewers.htm">viewers</a>.)&nbsp;
 For the first object in the selection, we check to see whether it is a file (<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b>)

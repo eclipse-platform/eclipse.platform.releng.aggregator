@@ -24,9 +24,9 @@ protocol for accessing the resources it contains.  An <b><a href="../reference/a
 instance represents an associated collection of files and directories in the local file system.  You can access the 
 workspace from the resources plug-in class (defined in 
 <b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>). </P>
-<font color='#4444CC'><pre>
+<pre>
    IWorkspace workspace = ResourcesPlugin.getWorkspace(); 
-</pre></font>
+</pre>
 <P >
 When the resources plug-in is not running, the workspace exists solely in the local file system and is viewed or manipulated by the user
 via standard file-based tools. Let's look at what a workspace looks like on disk as we explain the
@@ -51,7 +51,7 @@ Inside each directory, we find the files and folders within the project, laid ou
 workspace's resource tree.  All file names are the same, and the files' contents are the same
 whether accessed from the file system or from the workspace. The only surprise
 is the <b>.project</b> file, explained in a moment.</P>
-<font color='#4444CC'><pre>
+<pre>
    C:\MySDK\workspace  (workspace root)
       .metadata\ (platform metadata directory
       MyWeb\ (project content directory for MyWeb)
@@ -64,7 +64,7 @@ is the <b>.project</b> file, explained in a moment.</P>
          src\
             main.java
          bin\
-            main.class</pre></font>
+            main.class</pre>
 <P >
 The platform has a special <b>.metadata</b> directory for holding platform internal information.  The
 <b>.metadata</b> directory of a workspace is considered to be a &quot;black box.&quot;  Important information about the 
@@ -108,16 +108,16 @@ exist, you can use <b>exists</b> method to ensure
 this is the case.&nbsp;&nbsp;  </P>
 <P >
 To navigate the workspace from a plug-in, we must first obtain the <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>, which represents the top of the resource hierarchy in the workspace.</P>
-<font color='#4444CC'><pre>
-   IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();</pre></font>
+<pre>
+   IWorkspaceRoot myWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot();</pre>
 <P >
 Once we have a workspace root, we can access the projects in the workspace. </P>
-<font color='#4444CC'><pre>
+<pre>
    IProject myWebProject = myWorkspaceRoot.getProject(&quot;MyWeb&quot;);
    // open if necessary
    if (myWebProject.exists() &amp;&amp; !myWebProject.isOpen())
       myWebProject.open(null);
-</pre></font>
+</pre>
 <P >
 Before we can manipulate a project, we must open it.  Opening the project reads the project's
 structure from disk and creates the in-memory object representation of the project's resource tree.  Opening a project is an explicit operation since each open project consumes memory to represent the resource tree
@@ -136,7 +136,7 @@ progress monitor.</P>
 Once we have an open project, we can access its folders and files, as well as create additional ones.&nbsp;
 In the following example we create a file resource from the contents of a file
 located outside of our workspace.  </P>
-<font color='#4444CC'><pre>
+<pre>
    IFolder imagesFolder = myWebProject.getFolder(&quot;images&quot;);
    if (imagesFolder.exists()) {
       // create a new file
@@ -146,7 +146,7 @@ located outside of our workspace.  </P>
       newLogo.create(fileStream, false, null);
       // create closes the file stream, so no worries.   
    }
-</pre></font>
+</pre>
 <P >
  In the example above, the
 first line obtains a handle to the images folder.&nbsp; We must check that the
@@ -158,7 +158,7 @@ contents of <b>logo.png</b>.  </P>
 <P >
 The next snippet is similar to the previous one, except that it copies the <b> newLogo</b> file from the original logo rather than create a new
 one from its contents.</P>
-<font color='#4444CC'><pre>
+<pre>
    IFile logo = imagesFolder.getFile(&quot;logo.png&quot;);
    if (logo.exists()) {
       IPath newLogoPath = new Path(&quot;newLogo.png&quot;);
@@ -166,17 +166,17 @@ one from its contents.</P>
       IFile newLogo = imagesFolder.getFile(&quot;newLogo.png&quot;);
       ...
    }
-</pre></font>
+</pre>
 <P >
 Finally, we'll create another images folder and move the newly created file to it.  We rename the file as a side effect of moving it.</P>
-<font color='#4444CC'><pre>
+<pre>
    ...
    IFolder newImagesFolder = myWebProject.getFolder(&quot;newimages&quot;);
    newImagesFolder.create(false, true, null);
    IPath renamedPath = newImagesFolder.getFullPath().append(&quot;renamedLogo.png&quot;);
    newLogo.move(renamedPath, false, null);
    IFile renamedLogo = newImagesFolder.getFile(&quot;renamedLogo.png&quot;);
-</pre></font>
+</pre>
 
 
 <P>Many of the resource API methods include a <b>force</b>

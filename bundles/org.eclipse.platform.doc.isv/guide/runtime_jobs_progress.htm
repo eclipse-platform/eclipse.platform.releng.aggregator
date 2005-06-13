@@ -35,9 +35,8 @@ check the cancellation status of a job and respond to a cancellation by
 exiting the <b>run</b> method as soon as possible once it detects a
 cancellation. The following <b>run</b> method reports progress
 and responds to job cancellation:
-<font color="#4444cc">
 <pre>   public IStatus run(IProgressMonitor monitor) {<br>      final int ticks = 6000;<br>      monitor.<b>beginTask</b>("Doing some work", ticks);<br>      try {<br>         for (int i = 0; i &lt; ticks; i++) {<br>            if (monitor.<b>isCanceled</b>())<br>               return Status.CANCEL_STATUS;<br>            monitor.<b>subTask</b>("Processing tick #" + i);<br>            //... do some work ...<br>            monitor.<b>worked</b>(1);<br>         }<br>      } finally {<br>         monitor.<b>done</b>();<br>      }<br>      return Status.OK_STATUS;<br>   }<br></pre>
-</font>The <b>beginTask</b> method is used to name the task in the
+The <b>beginTask</b> method is used to name the task in the
 corresponding progress view and to
 establish the total amount of work to be done so that the view can
 compute progress. The
@@ -68,9 +67,8 @@ affordances associated with running a job. If your job is not either
 directly initiated by a user, or a periodic task that can be configured
 by a user, then your job should be a system job. The protocol for
 setting a system job is simple:
-<font color="#4444cc">
 <pre>   class TrivialJob extends Job {<br>      public TrivialJob() {<br>         super("Trivial Job");<br>         <b>setSystem(true)</b>;<br>      }<br>      ...<br>   }<br></pre>
-</font>The <b>setSystem</b> call must be made before the job is
+The <b>setSystem</b> call must be made before the job is
 scheduled. An exception will be triggered if you attempt this call on a
 job that is currently waiting, sleeping, or running.
 </p>
@@ -86,9 +84,8 @@ progress feedback will
 automatically conform with the user preference for progress viewing.
 The protocol for setting a user job
 is similar:
-<font color="#4444cc">
 <pre>   class TrivialJob extends Job {<br>      public TrivialJob() {<br>         super("Trivial Job");<br>         <b>setUser(true)</b>;<br>      }<br>      ...<br>   }<br></pre>
-</font>The <b>setUser</b> call must also be made before the job is
+The <b>setUser</b> call must also be made before the job is
 scheduled. </p>
 <h3>Progress groups</h3>
 <p>
@@ -103,9 +100,8 @@ a group of related jobs can be created. This monitor is created using <b><a
  href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
 protocol. The following snippet shows how to create a progress group
 and associate it with a job.
-<font color="#4444cc">
 <pre>   ...<br>   IJobManager jobMan = Platform.getJobManager();<br>   myGroup = jobMan.createProgressGroup();<br>   job.setProgressGroup(myGroup, 600);  // specify the units of work the job needs to show.<br>   job.schedule()<br>   ...<br></pre>
-</font>The group facility allows plug-ins to break tasks into multiple
+The group facility allows plug-ins to break tasks into multiple
 jobs if needed, but to report them to the user as if
 they are a single task. The progress group monitor will handle the
 details for computing the percentage completion

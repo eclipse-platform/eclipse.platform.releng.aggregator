@@ -23,7 +23,7 @@ from running concurrently in situations where concurrency can lead to inconsiste
 results. They also allow you to guarantee the execution order of a series of jobs.
 The power of scheduling rules is best illustrated by an example. Let's start by 
 defining two jobs that are used to turn a light switch on and off concurrently:
-<font color='#4444CC'><pre>
+<pre>
    public class LightSwitch {
       private boolean isOn = false;
       public boolean isOn() {
@@ -56,21 +56,21 @@ defining two jobs that are used to turn a light switch on and off concurrently:
          }
       }
    }
-</pre></font>
+</pre>
 Now we create a simple program that creates a light switch and turns it
 on and off again:
-<font color='#4444CC'><pre>
+<pre>
    LightSwitch light = new LightSwitch();
    light.on();
    light.off();
    System.out.println("The light is on? " + switch.isOn());
-</pre></font>
+</pre>
 If we run this little program enough times, we will eventually obtain the following output:
-<font color='#4444CC'><pre>
+<pre>
    Turning the light off
    Turning the light on
    The light is on? true
-</pre></font>
+</pre>
 How can that be?  We told the light to turn on and then off, so its final state
 should be off!  The problem is that there was nothing preventing the
 <tt>LightOff</tt> job from running at the same time as the <tt>LightOn</tt>
@@ -83,7 +83,7 @@ that's where scheduling rules come in.
 <p>
 We can fix this example by creating a simple scheduling rule that acts as a 
 <i>mutex</i> (also known as a <i>binary semaphore</i>):
-<font color='#4444CC'><pre>
+<pre>
    class Mutex implements ISchedulingRule {
       public boolean isConflicting(ISchedulingRule rule) {
          return rule == this;
@@ -92,9 +92,9 @@ We can fix this example by creating a simple scheduling rule that acts as a
          return rule == this;
       }
    }
-</pre></font>
+</pre>
 This rule is then added to the two light switch jobs from our previous example:
-<font color='#4444CC'><pre>
+<pre>
    public class LightSwitch {
       <b>final MutextRule rule = new MutexRule();</b>
       ...
@@ -113,7 +113,7 @@ This rule is then added to the two light switch jobs from our previous example:
          ...
       }
    }
-</pre></font>
+</pre>
 <p>
 Now, when the two light switch jobs are scheduled, the job infrastructure will
 call the <tt>isConflicting</tt> method to compare the scheduling rules of the
@@ -121,17 +121,17 @@ two jobs. It will notice that the two jobs have conflicting scheduling rules, an
 will make sure that they run in the correct order. It will also make sure they never
 run at the same time. Now, if you run the example program a million times,
 you will always get the same result:
-<font color='#4444CC'><pre>
+<pre>
    Turning the light on
    Turning the light off
    The light is on? false
-</pre></font>
+</pre>
 <p>
 Rules can also be used independently from jobs as a general locking mechanism.
 The following example acquires a rule within a try/finally block, preventing other
 threads and jobs from running with that rule for the duration between 
 invocations of <tt>beginRule</tt> and <tt>endRule</tt>.
-<font color='#4444CC'><pre>
+<pre>
    IJobManager manager = Platform.getJobManager();
    try {
       manager.beginRule(rule, monitor);
@@ -139,7 +139,7 @@ invocations of <tt>beginRule</tt> and <tt>endRule</tt>.
    } finally {
       manager.endRule(rule);
    }
-</pre></font>
+</pre>
 You should exercise extreme caution when acquiring and releasing scheduling
 rules using such a coding pattern. If you fail to end a rule for which you
 have called <tt>beginRule</tt>, you will have locked that rule forever.
@@ -183,7 +183,7 @@ to simply call <tt>isConflicting</tt>.
 <p>
 Here is an example of a hierarchical lock for controlling write access to <tt>java.io.File</tt> handles.
 
-<font color='#4444CC'><pre>
+<pre>
    public class FileLock implements ISchedulingRule {
       private String path;
       public FileLock(java.io.File file) {
@@ -211,7 +211,7 @@ Here is an example of a hierarchical lock for controlling write access to <tt>ja
          return path.startsWith(otherPath) || otherPath.startsWith(path);
       }
    }
-</pre></font>
+</pre>
 The <tt>contains</tt> method comes into play if a thread tries to acquire
 a second rule when it already owns a rule. To avoid the possibility of deadlock,
 any given thread can only own <em>one</em> scheduling rule at any given time.

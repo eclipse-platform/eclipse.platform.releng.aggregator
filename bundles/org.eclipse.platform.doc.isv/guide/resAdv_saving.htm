@@ -32,7 +32,7 @@ This is also where you read any state that you might have saved
 when your plug-in was last shut down.</P>
 <P >
 Let's look at a simple plug-in which will demonstrate the save process.</P>
-<font color='#4444CC'><pre>
+<pre>
    package com.example.saveparticipant;
 
    import org.eclipse.core.runtime.*;
@@ -72,7 +72,7 @@ Let's look at a simple plug-in which will demonstrate the save process.</P>
 
       protected void writeImportantState(File target) {
       }
-   }</pre></font>
+   }</pre>
 <P >
 <b><a href="../reference/api/org/eclipse/core/resources/ISaveParticipant.html">
 ISaveParticipant</a></b> defines the protocol for a workspace save participant. Implementors of this
@@ -85,16 +85,16 @@ implements each of these steps.</P>
 prepareToSave</b> notifies the participant that the workspace is about to be saved and that it should suspend normal operation until further notice.&nbsp;
 Our save particpant does nothing here.</li>
 </ul>
-<font color='#4444CC'><pre>
+<pre>
       public void prepareToSave(ISaveContext context) throws CoreException {
       }
-</pre></font>
+</pre>
 <ul>
   <li>
 <b>
 saving</b> tells the participant to save its important state.</li>
 </ul>
-<font color='#4444CC'><pre>
+<pre>
       public void saving(ISaveContext context) throws CoreException {
          switch (context.getKind()) {
             case ISaveContext.FULL_SAVE:
@@ -120,7 +120,7 @@ saving</b> tells the participant to save its important state.</li>
                break;
          }
       }
-</pre></font>
+</pre>
 <blockquote>
   <p>The <a href="../reference/api/org/eclipse/core/resources/ISaveContext.html"><b> ISaveContext</b></a> describes information about the save operation.&nbsp;
 There are three kinds of save operations:&nbsp; <b>FULL_SAVE</b>,
@@ -149,7 +149,7 @@ The save numbers can be used to create data files as above.&nbsp;</P>
 <b>
 doneSaving</b> notifies the participant that the workspace has been saved and the participant can continue normal operation.</li>
 </ul>
-<font color='#4444CC'><pre>
+<pre>
       public void doneSaving(ISaveContext context) {
          MyPlugin myPluginInstance = MyPlugin.getDefault();
 
@@ -159,7 +159,7 @@ doneSaving</b> notifies the participant that the workspace has been saved and th
          File f = myPluginInstance.getStateLocation().append(oldFileName).toFile();
          f.delete();
       }
-</pre></font>
+</pre>
 <blockquote>
   <p>Here, we clean up the save information from the previous save
   operation.&nbsp; We use <b>getPreviousSaveNumber</b> 
@@ -174,7 +174,7 @@ doneSaving</b> notifies the participant that the workspace has been saved and th
 <b>
 rollback</b> tells the participant to rollback the important state because the save operation has failed.</li>
 </ul>
-<font color='#4444CC'><pre>
+<pre>
       public void rollback(ISaveContext context) {
          MyPlugin myPluginInstance = MyPlugin.getDefault();
 
@@ -184,7 +184,7 @@ rollback</b> tells the participant to rollback the important state because the s
          File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
          f.delete();
       }
-</pre></font>
+</pre>
 <blockquote>
   <p>Here, we delete the state that we just saved.&nbsp; Note that we use the
   current save number to construct the file name of the file we just saved.&nbsp;
@@ -215,7 +215,7 @@ object can be used to access information from the previous save file (using the 
 Accessing the save files</H4>
 <P >
 If a file map was used to save logically named files according to the save number, this same map can be used to retrieve the data from the last known save state.</P>
-<font color='#4444CC'><pre>
+<pre>
    ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
    ISavedState lastState =
       ResourcesPlugin.getWorkspace().addSaveParticipant(myPluginInstance, saveParticipant);
@@ -226,7 +226,7 @@ If a file map was used to save logically named files according to the save numbe
       // the plugin instance should read any important state from the file.
       myPluginInstance.readStateFrom(f);
    }
-</pre></font>
+</pre>
 
 
 <H4>
@@ -236,23 +236,23 @@ Recall that any number of resource change events could occur in the workspace be
 deactivated, you can use the save mechanism to do so, even if you don't need to save any other data.</P>
 <P >
 The save participant must request that the platform keep a resource delta on its behalf. This is done as part of the save operation.</P>
-<font color='#4444CC'><pre>
+<pre>
    public void saving(ISaveContext context) throws CoreException {
       // no state to be saved by the plug-in, but request a
       // resource delta to be used on next activation.
       context.needDelta();
    }
-</pre></font>
+</pre>
 <P >
 During plug-in startup, the previous saved state can be accessed and change events will be created for all changes that have occurred since the last save.</P>
-<font color='#4444CC'><pre>
+<pre>
    ISaveParticipant saveParticipant = new MyWorkspaceSaveParticipant();
    ISavedState lastState =
       ResourcesPlugin.getWorkspace().addSaveParticipant(myPluginInstance, saveParticipant);
    if (lastState != null) {
       lastState.processResourceChangeEvents(new MyResourceChangeReporter());
    }
-</pre></font>
+</pre>
 <P >
 The provided class must implement <a href="../reference/api/org/eclipse/core/resources/IResourceChangeListener.html"><b>IResourceChangeListener</b></a>, as described in
 <a HREF="resAdv_events.htm" CLASS="XRef"> Tracking resource changes</a>.&nbsp; The changes since the last save are reported as part of the <b> POST_AUTO_BUILD</b> resource change event.</P>

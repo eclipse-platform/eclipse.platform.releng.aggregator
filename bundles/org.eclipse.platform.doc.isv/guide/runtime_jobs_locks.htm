@@ -25,13 +25,13 @@ for that object.  When it is finished manipulating the object, it <i>releases</i
 A lock is typically created when the shared object is created or first accessed by a plug-in.  That is, code that
 has a reference to the shared object also has a reference to its lock.  We'll start by creating a lock, <b>myLock</b>, that
 will be used to control access to <b>myObject</b>:
-<font color='#4444CC'><pre>
+<pre>
    ...
    myObject = initializeImportantObject();
    IJobManager jobMan = Platform.getJobManager();
    <b>myLock = jobMan.newLock();</b>
    ...
-</pre></font>
+</pre>
 A robust implementation of  <b><a href="../reference/api/org/eclipse/core/runtime/jobs/ILock.html">ILock</a></b> 
 is provided by the platform.  The job manager provides instances of this lock for use by clients.  These locks
 are aware of each other and can avoid circular deadlock.(We'll explain more about that statement in a moment.)
@@ -39,7 +39,7 @@ are aware of each other and can avoid circular deadlock.(We'll explain more abou
 <p>
 Whenever code in a job requires access to <b>myObject</b>, it must first acquire 
 the lock on it.  The following snippet shows a common idiom for working with a lock:
-<font color='#4444CC'><pre>
+<pre>
 ...
 // I need to manipulate myObject, so I get its lock first.
 try {		
@@ -49,7 +49,7 @@ try {
 	<b>lock.release();</b>
 }
 ...
-</pre></font>
+</pre>
 The <b>acquire()</b> method will not return until the calling job can be granted exclusive access to the lock.  
 In other words, if some other job has already acquired the lock, then this code will be blocked until the lock 
 is available.  Note that the code that acquires the lock and manipulates <b>myObject</b> is wrapped in 

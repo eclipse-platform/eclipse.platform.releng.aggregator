@@ -48,9 +48,7 @@ The <a
 add a
 repository definition.&nbsp;
 Here is the markup for the CVS client.</p>
-<font color="#4444cc">
 <pre>&lt;extension<br>    point="org.eclipse.team.core.repository"&gt;<br>      &lt;repository<br>            class="org.eclipse.team.internal.ccvs.core.CVSTeamProvider"<br>            id="org.eclipse.team.cvs.core.cvsprovider"&gt;<br>      &lt;/repository&gt;<br>&lt;/extension&gt;<br></pre>
-</font>
 <p>This registers your team provider with the team support plug-in and
 assigns
 an id that should be used when your provider is associated with a
@@ -68,9 +66,8 @@ repository support, and supply any necessary resource modification
 hooks.&nbsp;
 The CVS client serves as a good example.&nbsp; Its repository provider
 is <b>CVSTeamProvider</b>.</p>
-<font color="#4444cc">
+
 <pre>public class CVSTeamProvider extends RepositoryProvider {<br>...<br>	</pre>
-</font>
 <p> <b><a
  href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a>
 </b>defines two abstract methods, <b>configureProject</b> and <b>deconfigure</b>.&nbsp;
@@ -93,7 +90,7 @@ your configuration wizard.)</p>
 <p>The
 CVS provider simply broadcasts the fact that a project has been
 configured:</p>
-<pre style="color: rgb(68, 68, 204);">public void configureProject() throws CoreException {<br>	CVSProviderPlugin.broadcastProjectConfigured(getProject());<br>}</pre>
+<pre>public void configureProject() throws CoreException {<br>	CVSProviderPlugin.broadcastProjectConfigured(getProject());<br>}</pre>
 <p>We won't follow the implementation of the plug-in broadcast
 mechanism.&nbsp; Suffice to say that any parties that need to compute
 or
@@ -112,9 +109,7 @@ to the project in the UI.&nbsp; The CVS provider flushes project
 related caches
 kept in its views and broadcasts the fact that the project is
 deconfigured.</p>
-<font color="#4444cc">
 <pre>public void deconfigure() throws CoreException {<br>	...<br>	try {<br>		EclipseSynchronizer.getInstance().flush(getProject(), true, true /*flush deep*/, null);<br>	} catch(CVSException e) {<br>		throw new CoreException(e.getStatus());<br>	} finally {<br>		CVSProviderPlugin.broadcastProjectDeconfigured(getProject());<br>	}<br>}</pre>
-</font> 
 <h3> <a name="ui_conf"></a>Configuring a project </h3>
 <p>Typically, the first step in building a team UI is implementing a
 wizard
@@ -131,7 +126,7 @@ Project...</b>
 implementation.&nbsp;
 Here is the CVS UI markup for its configuration wizard:
 </p>
-<pre><font color="#4444cc">&lt;extension<br>      point="org.eclipse.team.ui.configurationWizards"&gt;<br>   &lt;wizard<br>        name="%SharingWizard.name"<br>        icon="icons/full/wizards/newconnect_wiz.png"<br>        class="org.eclipse.team.internal.ccvs.ui.wizards.SharingWizard"<br>        id="org.eclipse.team.ccvs.ui.SharingWizard"&gt;<br>   &lt;/wizard&gt;<br>&lt;/extension&gt;</font></pre>
+<pre>&lt;extension<br>      point="org.eclipse.team.ui.configurationWizards"&gt;<br>   &lt;wizard<br>        name="%SharingWizard.name"<br>        icon="icons/full/wizards/newconnect_wiz.png"<br>        class="org.eclipse.team.internal.ccvs.ui.wizards.SharingWizard"<br>        id="org.eclipse.team.ccvs.ui.SharingWizard"&gt;<br>   &lt;/wizard&gt;<br>&lt;/extension&gt;</pre>
 <p>As usual, plug-ins supply a <b>class</b> that implements the
 extension and a
 unique <b>id</b> to identify their extension.&nbsp; The <b>name</b>
@@ -153,20 +148,20 @@ team support.
 </p>
 <p> When the wizard is completed, you must map your team provider to
 the project
-using <b><font color="#4444cc"><a
+using <b><a
  href="../reference/api/org/eclipse/team/core/RepositoryProvider.html#map(org.eclipse.core.resources.IProject, java.lang.String)">RepositoryProvider.map(IProject,
-String)</a></font></b>.&nbsp; Mapping handles the assignment of the
+String)</a></b>.&nbsp; Mapping handles the assignment of the
 correct
 project persistent property to your project.
 </p>
 <p> The CVS client does this work in its provider's <b>setSharing</b>
 method, which is called when its wizard is finished:
 </p>
-<pre><font color="#4444cc">public void setSharing(IProject project, FolderSyncInfo info, IProgressMonitor monitor) throws TeamException {<br>	<br>	// Ensure provided info matches that of the project<br>	...		<br>	// Ensure that the provided location is managed<br>	...		<br>	// Register the project with Team<br><b>	RepositoryProvider.map(project, CVSProviderPlugin.getTypeId());<br></b>}</font></pre>
+<pre>public void setSharing(IProject project, FolderSyncInfo info, IProgressMonitor monitor) throws TeamException {<br>	<br>	// Ensure provided info matches that of the project<br>	...		<br>	// Ensure that the provided location is managed<br>	...		<br>	// Register the project with Team<br><b>	RepositoryProvider.map(project, CVSProviderPlugin.getTypeId());<br></b>}</pre>
 <h3> Finding a provider
 </h3>
-<p>Static methods in <font color="#4444cc"><b><a
- href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b></font> 
+<p>Static methods in <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b> 
   make it easy for clients to map projects to providers and to find the providers 
   associated with a given project. </p>
 <ul>
@@ -232,9 +227,9 @@ register a
 hook that must first check whether the resource is managed by the
 provider.</p>
 <p>What this means to your plug-in is that you provide any necessary
-hooks by overriding methods in <font color="#4444cc"><b><a
+hooks by overriding methods in <b><a
  href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.&nbsp;
-</font>The default implementation of these methods answers null,
+The default implementation of these methods answers null,
 indicating that no hook is necessary (except for the resource rule
 factory, as described below): </p>
 <ul>

@@ -30,7 +30,7 @@ a job and then <i>schedules</i> it.  Once a job is scheduled, it is added to a j
 platform.  The platform uses a background scheduling thread to manage all of the pending jobs.  As a running
 job completes, it is removed from the queue and the platform decides which job to run next.  When a job 
 becomes active, the platform invokes its <b>run()</b> method.  Jobs are best demonstrated with a simple example:
-<font color='#4444CC'><pre>
+<pre>
    class TrivialJob extends Job {
       public TrivialJob() {
          super("Trivial Job");
@@ -40,36 +40,36 @@ becomes active, the platform invokes its <b>run()</b> method.  Jobs are best dem
          return Status.OK_STATUS;
       }
    }
-</pre></font>
+</pre>
 The job is created and scheduled in the following snippet:
-<font color='#4444CC'><pre>
+<pre>
    TrivialJob job = new TrivialJob();
    System.out.println("About to schedule a job");
    job.schedule();
    System.out.println("Finished scheduling a job");
-</pre></font>
+</pre>
 The output of this program is timing dependent.  That is, there is no way
 to be sure when the job's <b>run</b> method will execute in relation
 to the thread that created the job and scheduled it.  The output will
 either be:
-<font color='#4444CC'><pre>
+<pre>
    About to schedule a job
    This is a job
    Finished scheduling a job
-</pre></font>
+</pre>
 or:
-<font color='#4444CC'><pre>
+<pre>
    About to schedule a job
    Finished scheduling a job
    This is a job
-</pre></font>
+</pre>
 </p>
 <p>
 If you want to be certain that a job has completed before continuing, you can use
 the <b>join()</b> method.  This method will block the caller until the job has completed, or 
 until the calling thread is interrupted.  Let's rewrite our snippet from above in a more 
 deterministic manner:
-<font color='#4444CC'><pre>
+<pre>
    TrivialJob job = new TrivialJob();
    System.out.println("About to schedule a job");
    job.schedule();
@@ -78,14 +78,14 @@ deterministic manner:
       System.out.println("Job completed with success");
    else
       System.out.println("Job did not complete successfully");
-</pre></font>
+</pre>
 Assuming the <b>join()</b> call is not interrupted, this method is guaranteed to
 return the following result:
-<font color='#4444CC'><pre>
+<pre>
    About to schedule a job
    This is a job
    Job completed with success
-</pre></font>
+</pre>
 </p>
 <p>
 Of course, it is generally not useful to join a job immediately after scheduling it,
@@ -112,10 +112,10 @@ has already started running, it is up to the job whether it wants to respond to 
 When you are trying to cancel a job, waiting for it using the <b>join()</b> method comes in handy.
 Here is a common idiom for canceling a job, and waiting until the job is finished before
 proceeding:
-<font color='#4444CC'><pre>
+<pre>
    if (!job.cancel())
       job.join();
-</pre></font>
+</pre>
 If the cancellation does not take effect immediately, then <b>cancel()</b> will return 
 false and the caller will use <b>join()</b> to wait for the job to successfully cancel.
 </p>
@@ -180,9 +180,9 @@ work with the job infrastructure can use <b><a href="../reference/api/org/eclips
 to perform tasks such as suspending all jobs in the system, finding out which job is running, or receiving progress
 feedback about a particular job.  The platform's job manager can be obtained using 
 <b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> API:
-<font color='#4444CC'><pre>
+<pre>
    IJobManager jobMan = Platform.getJobManager();
-</pre></font>
+</pre>
 Plug-ins interested in the state of all jobs in the system can register a job change listener on the job manager rather
 than registering listeners on many individual jobs.  
 </p>
@@ -191,7 +191,7 @@ than registering listeners on many individual jobs.
 It is sometimes easier for a plug-in to work with a group of related jobs as a single unit.
 This can be accomplished using <i>job families</i>.  A job declares that it belongs to a certain family by 
 overriding the <b>belongsTo</b> method:
-<font color='#4444CC'><pre>
+<pre>
    public static final String MY_FAMILY = "myJobFamily";
    ...
    class FamilyJob extends Job {
@@ -200,14 +200,14 @@ overriding the <b>belongsTo</b> method:
          return family == MY_FAMILY;
       }
    }
-</pre></font>
+</pre>
 <b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
 protocol can be used to cancel, join, sleep, or find all jobs in a family:
-<font color='#4444CC'><pre>
+<pre>
    IJobManager jobMan = Platform.getJobManager();
    jobMan.cancel(MY_FAMILY);
    jobMan.join(MY_FAMILY, null);
-</pre></font>
+</pre>
 Since job families are represented using arbitrary objects, you can store interesting
 state in the job family itself, and jobs can dynamically build family objects as needed.
 It is important to use family objects that are 

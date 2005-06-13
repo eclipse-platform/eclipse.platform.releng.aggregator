@@ -41,7 +41,7 @@ Defining a nature</H3>
 <P >
 The <a href="../reference/extension-points/org_eclipse_core_resources_natures.html"> <b> org.eclipse.core.resources.natures</b></a> extension point is used to add a project nature definition. The following markup adds a nature for the hypothetical
 <b> com.example.natures</b> plug-in.</P>
-<font color='#4444CC'><pre>
+<pre>
    &lt;extension
       point=&quot;org.eclipse.core.resources.natures&quot;
       id=&quot;mynature&quot;
@@ -51,12 +51,12 @@ The <a href="../reference/extension-points/org_eclipse_core_resources_natures.ht
          &lt;/run&gt;
       &lt;/runtime&gt;
    &lt;/extension&gt;
-</pre></font>
+</pre>
 <P >
 The class identified in the extension must implement the platform interface
 <b><a href="../reference/api/org/eclipse/core/resources/IProjectNature.html">IProjectNature</a></b>. This class implements plug-in specific behavior for associating nature-specific information with a project when
 the nature is configured.</P>
-<font color='#4444CC'><pre>
+<pre>
    public class MyNature implements IProjectNature {
 
       private IProject project;
@@ -76,7 +76,7 @@ the nature is configured.</P>
          project = value;
       }
    }
-</pre></font>
+</pre>
 <P >
 The <b> configure()</b> and <b> deconfigure()</b> methods are sent by the platform
 when natures are added and removed from a project.&nbsp; You can implement the
@@ -92,7 +92,7 @@ assign a nature to a project by updating the project's description to include
 your nature.&nbsp; This usually happens when the user creates a new project with a specialized new project wizard that assigns the
 nature.&nbsp; The following snippet
 shows how to assign our new nature to a given project.</P>
-<font color='#4444CC'><pre>
+<pre>
    try {
       IProjectDescription description = project.getDescription();
       String[] natures = description.getNatureIds();
@@ -104,7 +104,7 @@ shows how to assign our new nature to a given project.</P>
    } catch (CoreException e) {
       // Something went wrong
    }
-</pre></font>
+</pre>
 <P>
 <b>NOTE:</b> The nature id is the fully qualified id
 of the nature extension. The fully qualified id of an extension is created by combining
@@ -118,7 +118,7 @@ until you set the project description into the project.&nbsp; Also note that the
 If the nature has been defined with constraints, then workspace API can be used
 to validate the new nature.&nbsp; For example, suppose a nature is defined with
 a prerequisite: </P>
-<pre><font color='#4444CC'>   &lt;extension
+<pre>   &lt;extension
       point=&quot;org.eclipse.core.resources.natures&quot;
       <b>id=&quot;myOtherNature&quot;</b>
       name=&quot;My Other Nature&quot;&gt;
@@ -128,7 +128,7 @@ a prerequisite: </P>
       &lt;/runtime&gt;
 <b>   &lt;requires-nature id=&quot;com.example.natures.mynature&quot;/&gt;
 </b>   &lt;/extension&gt;
-</font></pre>
+</pre>
 <P >
 The new nature is not valid unless the first nature exists for the
 project.&nbsp; Depending on the design of your plug-in, you may want to check
@@ -136,7 +136,7 @@ whether the prerequisite nature has been installed, or you may want to add the
 prerequisite nature yourself.&nbsp; Either way, you can check on the validity of
 proposed combinations of project natures using workspace API. </P>
 
-<font color='#4444CC'><pre>   try {
+<pre>   try {
       IProjectDescription description = project.getDescription();
       String[] natures = description.getNatureIds();
       String[] newNatures = new String[natures.length + 1];
@@ -155,7 +155,7 @@ proposed combinations of project natures using workspace API. </P>
    } catch (CoreException e) {
       // Something went wrong
    }
-</pre></font>
+</pre>
 
 
 <H3>
@@ -166,10 +166,10 @@ which describes a nature, its constraints, and its label.&nbsp; You can query a
 particular nature for its descriptor, or get descriptors from the
 workspace.&nbsp; The following snippet gets the project nature descriptor for
 our new nature:</p>
-<font color='#4444CC'><pre>      IProjectNatureDescriptor descriptor = workspace.getNatureDescriptor(&quot;com.example.natures.myOtherNature&quot;);<b>
+<pre>      IProjectNatureDescriptor descriptor = workspace.getNatureDescriptor(&quot;com.example.natures.myOtherNature&quot;);<b>
 </b></pre><p>You can also get an array of descriptors for all installed natures:
 </p><pre>      IProjectNatureDescriptor[] descriptors = workspace.getNatureDescriptors();<b>
-</b></pre></font>
+</b></pre>
 <p>&nbsp;</p>
 
 

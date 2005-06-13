@@ -58,9 +58,9 @@ Marker creation</H4>
 <P >
 Markers are not directly created using a constructor. They are created using a factory method
 (<b>IResource.createMarker()</b>) on the associated resource. </P>
-<font color='#4444CC'><pre>
+<pre>
    IMarker marker = file.createMarker(IMarker.TASK);
-</pre></font>
+</pre>
 <P >
 To create a marker that has global scope (not associated with any specific resource), you can use
 the workspace root
@@ -71,27 +71,27 @@ the workspace root
 Marker deletion</H4>
 <P >
 The code for deleting a marker is straightforward.</P>
-<font color='#4444CC'><pre>
+<pre>
    try {
       marker.delete();
    } catch (CoreException e) {
       // Something went wrong
    }
-</pre></font>
+</pre>
 <P >
 When a marker is deleted, its marker object (handle) becomes &quot;stale.&quot; Plug-ins should use the
 <b> IMarker.exists()</b> protocol to make sure a marker object is still valid.</P>
 <P >
 Markers can be deleted in batch by asking a resource to delete its markers. This method is useful when removing
 many markers at once or if individual marker references or ids are not available.</P>
-<font color='#4444CC'><pre>
+<pre>
    int depth = IResource.DEPTH_INFINITE;
    try {
       resource.deleteMarkers(IMarker.PROBLEM, true, depth);
    } catch (CoreException e) {
       // something went wrong
    }
-</pre></font>
+</pre>
 <P >
 When deleting a group of markers, you specify a marker <b> type</b> to delete, such as <b> IMarker.PROBLEM</b>, or
 <b> null</b> to delete all markers. The second argument
@@ -114,7 +114,7 @@ Each type of marker has a specific set of attributes that are defined by the
 creator of the marker type using naming conventions.&nbsp; The
 <b><a href="../reference/api/org/eclipse/core/resources/IMarker.html"> IMarker</a></b> interface defines a set of constants containing
 the standard attribute names (and some of the expected values) for the platform marker types.  The following method manipulates attributes using the platform constants.</P>
-<font color='#4444CC'><pre>
+<pre>
    IMarker marker = file.createMarker(IMarker.TASK);
    if (marker.exists()) {
       try {
@@ -122,7 +122,7 @@ the standard attribute names (and some of the expected values) for the platform 
          marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
       } catch (CoreException e) {
          // You need to handle the case where the marker no longer exists      }
-   }</pre></font>
+   }</pre>
 
 
 <P>
@@ -134,7 +134,7 @@ Attributes are maintained generically as name/value pairs, where the names are s
 Querying markers</H4>
 <P >
 Resources can be queried for their markers and the markers of their children. For example, querying the workspace root with infinite depth considers all of the markers in the workspace.</P>
-<font color='#4444CC'><pre>
+<pre>
    IMarker[] problems = null;
    int depth = IResource.DEPTH_INFINITE;
    try {
@@ -142,7 +142,7 @@ Resources can be queried for their markers and the markers of their children. Fo
    } catch (CoreException e) {
       // something went wrong
    }
-</pre></font>
+</pre>
 <P >
 The result returned by <b>findMarkers</b>  depends on
 the arguments passed.&nbsp; In the snippet above, we are looking for all markers
@@ -180,7 +180,7 @@ Extending the platform with new marker types</a></H3>
 <P >
 Plug-ins can declare their own marker types using the <b><a href="../reference/extension-points/org_eclipse_core_resources_markers.html"> org.eclipse.core.resources.markers</a></b> 
 extension point. The standard marker types for problems, tasks and bookmarks are declared by the platform in the resources plug-in's markup.</P>
-<font color='#4444CC'><pre>
+<pre>
    &lt;extension
       id=&quot;problemmarker&quot; 
       point=&quot;org.eclipse.core.resources.markers&quot; 
@@ -211,13 +211,13 @@ extension point. The standard marker types for problems, tasks and bookmarks are
       &lt;attribute name=&quot;message&quot;/&gt;
       &lt;attribute name=&quot;location&quot;/&gt;
    &lt;/extension&gt;
-</pre></font>
+</pre>
 <P >
 New marker types are derived from existing ones using multiple inheritance. New marker types inherit all of the attributes from their
 super types and add any new attributes defined as part of the declaration. They also transitively inherit
 attributes from the super types of their super types.  The following markup defines a new kind of marker in a hypothetical
 <b>com.example.markers</b> plug-in.</P>
-<font color='#4444CC'><pre>
+<pre>
    &lt;extension
       id=&quot;mymarker&quot;
       point=&quot;org.eclipse.core.resources.markers&quot; /&gt;
@@ -229,7 +229,7 @@ attributes from the super types of their super types.  The following markup defi
       &lt;attribute name=&quot;myAttribute&quot; /&gt;
       &lt;persistent value=&quot;true&quot; /&gt;
    &lt;/extension&gt;
-</pre></font>
+</pre>
 <P >
 Note that the type <b> org.eclipse.core.resources.problemmarker</b> is actually one of the pre-defined types (aka
 <b>IMarker.PROBLEM</b>).&nbsp; </P>
@@ -247,7 +247,7 @@ After declaring the new marker type in your plug-in manifest file, you can creat
 Declaring new attributes allows you to associate data with markers that you plan to use elsewhere (in your
 views and editors).  Markers of a particular type do not have to have values for all of the declared attributes.  The attribute declarations are more for solving naming convention problems (so everyone uses &quot;message&quot; to talk about a marker's description) than
 for constraining content. </P>
-<font color='#4444CC'><pre>
+<pre>
    public IMarker createMyMarker(IResource resource) {
       try {
          IMarker marker = resource.createMarker(&quot;com.example.markers.myproblem&quot;);
@@ -257,21 +257,19 @@ for constraining content. </P>
          // You need to handle the cases where attribute value is rejected
       }
    }
-</pre></font>
+</pre>
 <P >
 You can query your own marker types in the same way you query the platform marker
 types.&nbsp; The method below finds all <b>mymarkers</b> associated with the given target resource and all
 of its descendents.  Note that this will also find all
 <b>myproblems</b> since true is passed for the <b>includeSubtypes</b>
 argument.</P>
-<font color='#4444CC'><pre>
+<pre>
    public IMarker[] findMyMarkers(IResource target) {
       String type = &quot;com.example.markers.mymarker&quot;;
       IMarker[] markers = target.findMarkers(type, true, IResource.DEPTH_INFINITE);
    }
-</pre></font>
-
-
+</pre>
 
 </BODY>
 </HTML>
