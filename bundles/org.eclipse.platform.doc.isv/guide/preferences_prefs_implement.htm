@@ -28,7 +28,7 @@ method that creates the SWT controls representing the page content.  This method
 should also add listeners for any events of interest. The page is responsible for 
 creating and returning the composite that will parent all of the controls in the page.
 The following snippet shows the highlights:</p>
-<pre><font color='#4444CC'>
+<pre>
 protected Control createContents(Composite parent)
 {
 	...
@@ -66,7 +66,7 @@ protected Control createContents(Composite parent)
 	initializeValues();
 
 	return new Composite(parent, SWT.NULL);
-}</font></pre>
+}</pre>
 <p>
 Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.&nbsp;
 Here is what the corresponding page looks like:</p>
@@ -98,17 +98,17 @@ appropriate scope and location, and initializing the preference store using the 
 <p>
 The following code in the <b> ReadmePreferencePage</b> obtains the preference store for the
 <b>ReadmePlugin</b>.</p>
-<pre><font color='#4444CC'>
+<pre>
    protected IPreferenceStore doGetPreferenceStore() {
       return ReadmePlugin.getDefault().getPreferenceStore();
    }
-</font></pre>
+</pre>
 <p>
 Because <b> ReadmePlugin</b> extends the <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> class, it automatically inherits a preference store. 
 This preference store is initialized using the platform preferences service. The only thing the <b>ReadmePlugin</b> has 
 to do is implement a method that initializes the preference controls to their default values. These values are used the 
 first time the preference page is shown or when the user presses the <b>Defaults</b> button in the preferences page.</p>
-<pre><font color='#4444CC'>
+<pre>
 protected void initializeDefaultPreferences(IPreferenceStore store) {
 	// These settings will show up when Preference dialog
 	// opens up for the first time.
@@ -117,7 +117,7 @@ protected void initializeDefaultPreferences(IPreferenceStore store) {
 	store.setDefault(IReadmeConstants.PRE_CHECK3, false);
 	store.setDefault(IReadmeConstants.PRE_RADIO_CHOICE, 2);
 	store.setDefault(IReadmeConstants.PRE_TEXT, MessageUtil.getString(&quot;Default_text&quot;)); //$NON-NLS-1$
-}</font></pre>
+}</pre>
 
 <blockquote><i>
 Note:&nbsp; If there are no preferences saved anywhere for a plug-in, the plug-in will get an empty preference
@@ -131,38 +131,38 @@ Preference pages are responsible for initializing the values of their controls u
 process is similar to initializing dialog control values from dialog settings. The
 <b> ReadmePreferencePage</b> initializes all of its controls in a single method,
 <b>initializeValues</b>, which is called from its <b> createContents</b> method.</p>
-<pre><font color='#4444CC'>private void initializeValues() {
+<pre>private void initializeValues() {
 	IPreferenceStore store = getPreferenceStore();
 	checkBox1.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK1));
 	checkBox2.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK2));
 	checkBox3.setSelection(store.getBoolean(IReadmeConstants.PRE_CHECK3));
 	...
-}</font></pre>
+}</pre>
 <p>
 When the <b>OK</b> (or <b>Apply</b>) button is pressed, the current values of the controls on the preference page should be stored back into the
 preference store. The
 <b> ReadmePreferencePage</b> implements this logic in a separate method,
 <b>storeValues</b>.</p>
-<pre><font color='#4444CC'>
+<pre>
 private void storeValues() {
 	IPreferenceStore store = getPreferenceStore();
 	store.setValue(IReadmeConstants.PRE_CHECK1, checkBox1.getSelection());
 	store.setValue(IReadmeConstants.PRE_CHECK2, checkBox2.getSelection());
 	store.setValue(IReadmeConstants.PRE_CHECK3, checkBox3.getSelection());
 	...
-}</font></pre>
+}</pre>
 <p>
 When the user presses the <b>Defaults</b> button, the platform will restore all preference store values to the default values specified in the plug-in class. However, your preference page is responsible for reflecting these default values
 in the controls on the preference page. The
 <b> ReadmePreferencePage</b> implements this in <b>initializeDefaults</b>.</p>
-<pre><font color='#4444CC'>
+<pre>
    private void initializeDefaults() {
       IPreferenceStore store = getPreferenceStore();
       checkBox1.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK1));
       checkBox2.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK2));
       checkBox3.setSelection(store.getDefaultBoolean(IReadmeConstants.PRE_CHECK3));
       ...
-   }</font></pre>
+   }</pre>
 
 </BODY>
 </HTML>

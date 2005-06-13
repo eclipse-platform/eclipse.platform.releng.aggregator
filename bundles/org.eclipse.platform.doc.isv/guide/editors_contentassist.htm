@@ -33,7 +33,7 @@ viewer configuration must be <a href="editors_sourceviewers.htm">configured</a>
 to define a content assistant.&nbsp; This is done in the Java editor example
 inside the <b>JavaSourceViewerConfiguration</b>.</p>
 
-<pre><font color="#4444CC">public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+<pre>public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 	ContentAssistant assistant= new ContentAssistant();
 <b>	assistant.setContentAssistProcessor(new JavaCompletionProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
@@ -41,7 +41,7 @@ inside the <b>JavaSourceViewerConfiguration</b>.</p>
 </b>
 	...
 	return assistant;
-}</font></pre>
+}</pre>
 <p>Content assist behavior is defined in the interface <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>.&nbsp;
 Setting up a content assistant is somewhat similar to setting up syntax
 highlighting.&nbsp; The assistant should be configured with different phrase completion strategies for different
@@ -59,22 +59,22 @@ keywords as completion candidates.&nbsp; The keywords are defined in a field,
 <code>fgProposals</code>, and these keywords are always proposed as the
 candidates:</p>
 
-<pre><font color="#4444CC">public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
+<pre>public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 	ICompletionProposal[] result= new ICompletionProposal[fgProposals.length];
 	for (int i= 0; i &lt; fgProposals.length; i++) {
 		IContextInformation info= new ContextInformation(fgProposals[i], MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.Proposal.ContextInfo.pattern&quot;), new Object[] { fgProposals[i] })); //$NON-NLS-1$
 		result[i]= new CompletionProposal(fgProposals[i], documentOffset, 0, fgProposals[i].length(), null, fgProposals[i], info, MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.Proposal.hoverinfo.pattern&quot;), new Object[] { fgProposals[i]})); //$NON-NLS-1$
 	}
 	return result;
-}</font></pre>
+}</pre>
 <p><img src="images/javacontentassist.png" alt="Keyword content assist" border="0"></p>
 
 <p>Completion can be triggered by user request or can be automatically triggered
 when the &quot;(&quot; or &quot;.&quot; character is typed:</p>
 
-<pre><font color="#4444CC">public char[] getCompletionProposalAutoActivationCharacters() {
+<pre>public char[] getCompletionProposalAutoActivationCharacters() {
 	return new char[] { '.', '(' };
-}</font></pre>
+}</pre>
 <p>In addition to proposing completions, the <b>JavaCompletionProcessor</b> 
 defines context information that can be requested by the user.&nbsp; Context
 information includes a description of the pieces of information available in a
@@ -88,30 +88,30 @@ given context and the detailed information message.&nbsp;&nbsp;</p>
   as long as the cursor is within the context of the five characters around the offset. 
 </p>
 
-<pre><font color="#4444CC">public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
+<pre>public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 	IContextInformation[] result= new IContextInformation[5];
 	for (int i= 0; i &lt; result.length; i++)
 		result[i]= new ContextInformation(
 			MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.ContextInfo.display.pattern&quot;), new Object[] { new Integer(i), new Integer(documentOffset) }),
 			MessageFormat.format(JavaEditorMessages.getString(&quot;CompletionProcessor.ContextInfo.value.pattern&quot;), new Object[] { new Integer(i), new Integer(documentOffset - 5), new Integer(documentOffset + 5)}));
 	return result;
-}</font></pre>
+}</pre>
 <p><img src="images/javacontextassist.png" alt="Jva context assist" border="0"></p>
 <p>&nbsp;</p>
 <p>This context information is shown automatically when the &quot;#&quot; character 
   is typed:</p>
-<pre><font color="#4444CC">public char[] getContextInformationAutoActivationCharacters() {
+<pre>public char[] getContextInformationAutoActivationCharacters() {
 	return new char[] { '#' };
-}</font></pre>
+}</pre>
 <h3>Content assist configuration</h3>
 <p>The appearance and behavior of content assist can be configured using <a href="../reference/api/org/eclipse/jface/text/contentassist/IContentAssistant.html"><b>IContentAssistant</b></a>.&nbsp;
 For example, you can configure the auto activation time out, and the orientation
 and color of information popups.</p>
 
-<pre><font color="#4444CC">public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+<pre>public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 	ContentAssistant assistant= new ContentAssistant();
-<b>	</b>...
+	...
 	assistant.enableAutoActivation(true);
 	assistant.setAutoActivationDelay(500);
 	assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
@@ -119,7 +119,7 @@ and color of information popups.</p>
 	assistant.setContextInformationPopupBackground(JavaEditorEnvironment.getJavaColorProvider().getColor(new RGB(150, 150, 0)));
 
 	return assistant;
-}</font></pre>
+}</pre>
 <p>&nbsp;</p>
 
 

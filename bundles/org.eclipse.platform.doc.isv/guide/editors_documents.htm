@@ -43,7 +43,7 @@ Documents and partitions
   <b><a href="../reference/extension-points/org_eclipse_ui_editors_documentProviders.html">org.eclipse.ui.editors.documentProviders</a></b> 
   is used to define mappings between editor input types (or file extensions)
   and document providers. The editors plug-in defines its document provider as follows:</p>
-<pre><font color="#4444CC">
+<pre>
    &lt;extension
          point="org.eclipse.ui.editors.documentProviders"&gt;
       &lt;provider
@@ -52,7 +52,7 @@ Documents and partitions
             id="org.eclipse.ui.editors.text.StorageDocumentProvider"&gt;
       &lt;/provider&gt;
    &lt;/extension&gt;
-</font></pre>
+</pre>
 <p>This extension point allows plug-ins to register document providers and associate them
   with either a file extension or an editor input class.  Since the Java editor example does
   not define its own document provider extension, it inherits the generic document provider
@@ -70,7 +70,7 @@ for handling Java files?</p>
 The extension <b><a href="../reference/extension-points/org_eclipse_core_filebuffers_documentSetup.html">org.eclipse.core.filebuffers.documentSetup</a></b> 
 is used to define mappings between file extensions and an <a href="../reference/api/org/eclipse/core/filebuffers/IDocumentSetupParticipant.html"><b>IDocumentSetupParticipant</b></a>.
 The setup participant will set up the document with any special features once it has been provided to the editor.
-<pre><font color="#4444CC"> 
+<pre>
 &lt;extension
 	id="ExampleJavaDocumentSetupParticipant"
 	name="%documentSetupParticipantName"
@@ -80,18 +80,18 @@ The setup participant will set up the document with any special features once it
 		<b>class="org.eclipse.ui.examples.javaeditor.JavaDocumentSetupParticipant"</b>&gt;
 	&lt;/participant&gt;
 &lt;/extension&gt;
-</font></pre>
+</pre>
 This extension definition is what gives the example a chance to setup the document for Java specific
 tasks.  So what does <b>JavaDocumentSetupParticipant</b> do?  We'll look at a simplified version of the
 <b>setup</b> method.
-<pre><font color="#4444CC"> 
+<pre> 
 	public void setup(IDocument document) {
 		...
 		IDocumentPartitioner partitioner= new DefaultPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
 		partitioner.connect(document);
 		...
 	}
-</font></pre>
+</pre>
 The setup code configures an object called a <b>partitioner</b>.
 <h4>Partitions</h4>
 <p>The partitioner (<a href="../reference/api/org/eclipse/jface/text/IDocumentPartitioner.html"><b>IDocumentPartitioner</b></a>)
@@ -109,17 +109,17 @@ document partitioner.&nbsp; Support is provided in <b><a href="../reference/api/
  for rule-based document scanning.&nbsp; Using a rule-based scanner allows an editor to use
 the <a href="../reference/api/org/eclipse/jface/text/rules/DefaultPartitioner.html"><b>DefaultPartitioner</b></a>
 provided by the framework.
-<pre><font color="#4444CC">
+<pre>
 IDocumentPartitioner partitioner= new DefaultPartitioner(JavaEditorExamplePlugin.getDefault().getJavaPartitionScanner(), JavaPartitionScanner.JAVA_PARTITION_TYPES);
-</font></pre>
-<p><a href="../reference/api/org/eclipse/jface/text/rules/RuleBasedPartitionScanner.html"><b>RuleBasedPartitionScanner</b></a><b>
-</b>is the superclass for rule based scanners.&nbsp; Subclasses are responsible
+</pre>
+<p><a href="../reference/api/org/eclipse/jface/text/rules/RuleBasedPartitionScanner.html"><b>RuleBasedPartitionScanner</b></a>
+is the superclass for rule based scanners.&nbsp; Subclasses are responsible
 for enumerating and implementing the rules that should be used to distinguish
 tokens such as line delimiters, white space, and generic
     patterns when scanning a document.&nbsp; The example's <b>JavaPartitionScanner</b>
 defines rules for distinguishing single line comments, character constants, javadoc, multi
 line comments, and&nbsp;words.&nbsp; This is done in the scanner's constructor:
-<pre><font color="#4444CC">public JavaPartitionScanner() {
+<pre>public JavaPartitionScanner() {
 	super();
 	IToken javaDoc= new Token(JAVA_DOC);
 	IToken comment= new Token(JAVA_MULTILINE_COMMENT);
@@ -142,7 +142,7 @@ line comments, and&nbsp;words.&nbsp; This is done in the scanner's constructor:
 	IPredicateRule[] result= new IPredicateRule[rules.size()];
 	rules.toArray(result);
 	setPredicateRules(result);
-}</font></pre>
+}</pre>
 <p>See the classes in <b><a href="../reference/api/org/eclipse/jface/text/rules/package-summary.html">org.eclipse.jface.text.rules</a></b>
  for more details about defining rules and the types of rules availables.&nbsp;
 We'll look at the scanners again when we look at <a href="editors_highlighting.htm">syntax

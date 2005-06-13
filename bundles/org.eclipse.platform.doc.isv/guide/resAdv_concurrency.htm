@@ -37,7 +37,7 @@ it is scheduled.
 </p>
 <p>
 Let's look at an example workspace runnable and what we should do to make it a job:
-<font color='#4444CC'><pre>
+<pre>
 IWorkspaceRunnable myRunnable = 
 	new IWorkspaceRunnable() {
 		public void run(IProgressMonitor monitor) throws CoreException {
@@ -46,11 +46,11 @@ IWorkspaceRunnable myRunnable =
 			...
 		}
 }
-</pre></font>
+</pre>
 The work is moved to the appropriate method of our
 <b><a href="../reference/api/org/eclipse/core/resources/WorkspaceJob.html">WorkspaceJob</a></b>
 subtype.
-<font color='#4444CC'><pre>
+<pre>
 class MyWorkspaceJob extends WorkspaceJob {
 	public MyWorkspaceJob() {
 		super("My Workspace Job");
@@ -61,20 +61,20 @@ class MyWorkspaceJob extends WorkspaceJob {
 		return Status.OK_STATUS;
 	}
 }
-</pre></font>
+</pre>
 Our runnable had to be invoked specifically:
-<font color='#4444CC'><pre>
+<pre>
 IWorkspace workspace = ResourcesPlugin.getWorkspace();
 workspace.run(myRunnable, myProject, IWorkspace.AVOID_UPDATE, null);
-</pre></font>
+</pre>
 Our job is scheduled like any other job.  The platform job manager will run it according to its
 priority, other jobs in the queue, and the scheduling rules.  Note that we must attach the 
 scheduling rule to the job in order to prevent simultaneous modification of <tt>myProject</tt>.
-<font color='#4444CC'><pre>
+<pre>
 MyWorkspaceJob job = new MyWorkspaceJob();
 <b>job.setRule(myProject);</b>
 job.schedule();
-</pre></font>
+</pre>
 Now that the operation has been structured as a job, all of the scheduling mechanisms (priority, delay, rescheduling) can
 be used.  Resource change events will be batched until the job is finished running.
 </p>

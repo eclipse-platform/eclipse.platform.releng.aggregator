@@ -28,7 +28,7 @@ actions for the workbench menu bar, see the section discussing <a href="workbenc
 We won't rehash that information here.&nbsp;&nbsp;We'll just take a quick look
 at the markup where the Java example editor registers its editor.</p>
 
-<pre><font color="#4444CC">&lt;extension
+<pre>&lt;extension
       point=&quot;org.eclipse.ui.editors&quot;&gt;
    &lt;editor
          name=&quot;%javaEditorName&quot;
@@ -38,20 +38,20 @@ at the markup where the Java example editor registers its editor.</p>
          class=&quot;org.eclipse.ui.examples.javaeditor.JavaEditor&quot;
          id=&quot;org.eclipse.ui.JavaEditor&quot;&gt;
    &lt;/editor&gt;
-&lt;/extension&gt;</font></pre>
+&lt;/extension&gt;</pre>
 
 <p>Workbench menu bar actions are contributed by the <b>JavaActionContributor</b>.&nbsp; 
   It implements actions that are placed in the workbench <b>Edit</b> menu and 
   the workbench tool bar.</p>
 
-<pre><font color="#4444CC">public JavaActionContributor() {
+<pre>public JavaActionContributor() {
 	super();
 	fContentAssistProposal= <b>new RetargetTextEditorAction</b>(JavaEditorMessages.getResourceBundle(), &quot;ContentAssistProposal.&quot;); //$NON-NLS-1$
 	...
 	fContentAssistTip= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), &quot;ContentAssistTip.&quot;); //$NON-NLS-1$
 	...
 	fTogglePresentation= new PresentationAction();
-}</font></pre>
+}</pre>
 <p>The first two actions are defined as retargetable text editor actions. The 
   principle is similar to the <a href="wrkAdv_retarget.htm">retargetable actions</a> 
   provided by the workbench. Retargetable text editor actions represent menu entries 
@@ -60,13 +60,13 @@ at the markup where the Java example editor registers its editor.</p>
   retargetable text editor action is bound changes as well. The following snippet 
   shows that the editor action contributor finds the corresponding action by asking 
   the editor for an action of a given id:</p>
-<pre><font color="#4444CC">protected final IAction getAction(ITextEditor editor, String actionId) {<br>	return (editor == null ? null : editor.getAction(actionId));<br>}
+<pre>protected final IAction getAction(ITextEditor editor, String actionId) {<br>	return (editor == null ? null : editor.getAction(actionId));<br>}
 
-public void setActiveEditor(IEditorPart part) {<br>	super.setActiveEditor(part);<br>	ITextEditor editor= null;<br>	if (part instanceof ITextEditor)<br>		editor= (ITextEditor) part;<br>	fContentAssistProposal.setAction(getAction(editor, &quot;ContentAssistProposal&quot;));<br>	fContentAssistTip.setAction(getAction(editor, &quot;ContentAssistTip&quot;));<br>	fTogglePresentation.setEditor(editor);<br>	fTogglePresentation.update();<br>}</font></pre>
+public void setActiveEditor(IEditorPart part) {<br>	super.setActiveEditor(part);<br>	ITextEditor editor= null;<br>	if (part instanceof ITextEditor)<br>		editor= (ITextEditor) part;<br>	fContentAssistProposal.setAction(getAction(editor, &quot;ContentAssistProposal&quot;));<br>	fContentAssistTip.setAction(getAction(editor, &quot;ContentAssistTip&quot;));<br>	fTogglePresentation.setEditor(editor);<br>	fTogglePresentation.update();<br>}</pre>
 <p>The id must be the same under which the action is registered with the editor 
   as given here for the <b>JavaTextEditor</b>. (See also next section.):<br>
 </p>
-<pre><font color="#4444CC">protected void createActions() {
+<pre>protected void createActions() {
 	super.createActions();
 		
 	IAction a= new TextOperationAction(JavaEditorMessages.getResourceBundle(), &quot;ContentAssistProposal.&quot;, this, ISourceViewer.CONTENTASSIST_PROPOSALS); //$NON-NLS-1$
@@ -76,7 +76,7 @@ public void setActiveEditor(IEditorPart part) {<br>	super.setActiveEditor(part);
 	a= new TextOperationAction(JavaEditorMessages.getResourceBundle(), &quot;ContentAssistTip.&quot;, this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION);  //$NON-NLS-1$
 	a.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);
 	setAction(&quot;ContentAssistTip&quot;, a); 
-}</font></pre>
+}</pre>
 
 <p>The third action in the contributor is a concrete action added to the workbench 
   tool bar.&nbsp; It toggles the state of the editor between showing the highlighted 
@@ -95,8 +95,8 @@ The editor context menus are created and managed in the <a href="../reference/ap
   the Java example editor also inherits the actions created by <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a> 
   and its superclasses.&nbsp; These actions can be used in the editor context 
   menus.</p>
-<p>The <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a><b>
-</b>method <b>editorContextMenuAboutToShow</b> is used in the framework to allow
+<p>The <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a>
+method <b>editorContextMenuAboutToShow</b> is used in the framework to allow
 editors to add actions to the context menu for the editing area.&nbsp; You can
 use a menu path to decide exactly where your action should appear.&nbsp; Valid
 menu paths inside the editor context menu are defined in the implementation of
@@ -106,20 +106,20 @@ this method in <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextE
   editor.&nbsp; For example, the <b>JavaTextEditor</b> adds its actions for content 
   assistance to the menu when this method is called.&nbsp; Actions will not appear 
   in the menu when no action is registered under the used id.</p>
-<pre><font color="#4444CC">public void editorContextMenuAboutToShow(MenuManager menu) {
+<pre>public void editorContextMenuAboutToShow(MenuManager menu) {
 	super.editorContextMenuAboutToShow(menu);
 	addAction(menu, &quot;ContentAssistProposal&quot;); 
 	addAction(menu, &quot;ContentAssistTip&quot;); 
-}</font></pre>
+}</pre>
 <p>The superclass <a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"><b>TextEditor</b></a> 
   adds actions a second way - by specifying a menu group in the context menu 
   for placing the action.&nbsp; In this case the actions (<b>Shift Left</b>, <b>Shift 
   Right</b>) do appear in the context menu in the group defined by <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>.</p>
-<pre><font color="#4444CC">protected void editorContextMenuAboutToShow(IMenuManager menu) {
+<pre>protected void editorContextMenuAboutToShow(IMenuManager menu) {
 	super.editorContextMenuAboutToShow(menu);
 	addAction(menu, ITextEditorActionConstants.GROUP_EDIT, ITextEditorActionConstants.SHIFT_RIGHT);
 	addAction(menu, ITextEditorActionConstants.GROUP_EDIT, ITextEditorActionConstants.SHIFT_LEFT);
-}</font></pre>
+}</pre>
 <p><img src="images/javaeditorcontextmenu.png" alt="Editor context menu" border="0"> </p>
 <p>The method <b>rulerContextMenuAboutToShow</b>  is used in the same way before
 the ruler's context menu is shown.&nbsp; The implementation of this method in <a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html"><b>AbstractTextEditor</b></a>
@@ -142,16 +142,16 @@ to control this behavior.&nbsp; The default setting is true. </p>
   For example, the <b>JavaTextEditor</b> in the example resets its context menu 
   ids to be Java specific in order to prevent inheriting any generic text contributions 
   from other plug-ins. </p>
-<pre><font color="#4444CC">protected void initializeEditor() {
+<pre>protected void initializeEditor() {
 	super.initializeEditor();
 	JavaEditorEnvironment.connect(this);
 	setSourceViewerConfiguration(new JavaSourceViewerConfiguration());
 	<b>setEditorContextMenuId(&quot;#JavaEditorContext&quot;); 
 	setRulerContextMenuId(&quot;#JavaRulerContext&quot;); </b>
-}</font></pre>
-<p><font color="#4444CC"><font color="#000000">If no id is set anywhere in the 
+}</pre>
+<p>If no id is set anywhere in the 
   concrete hierarchy, the default ids defined by <b><a href="../reference/api/org/eclipse/ui/texteditor/AbstractTextEditor.html">AbstractTextEditor</a></b> 
-  </font></font><font color="#000000">will be used. </font></p>
+  will be used. </p>
 <h4>1.0 non-compatible menu ids </h4>
 <p>The editor context menu id is always <code>&lt;editor id&gt;.EditorContext</code>, 
   where <code>&lt;editor id&gt;</code> is the id of the editor . The id of an 

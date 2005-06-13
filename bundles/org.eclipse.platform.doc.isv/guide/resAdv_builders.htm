@@ -85,7 +85,7 @@ Defining an incremental project builder</H3>
 The <a href="../reference/extension-points/org_eclipse_core_resources_builders.html"> <b> org.eclipse.core.resources.builders</b></a> extension point is used to contribute an
 incremental project builder to the platform. The following markup shows how the hypothetical plug-in
 <b> com.example.builders</b> could contribute an incremental project builder.</P>
-<font color='#4444CC'><pre>
+<pre>
    &lt;extension
       id=&quot;mybuilder&quot; name=&quot;My Sample Builder&quot; point=&quot;org.eclipse.core.resources.builders&quot;&gt;
       &lt;builder
@@ -96,11 +96,11 @@ incremental project builder to the platform. The following markup shows how the 
          &lt;/run&gt;
       &lt;/builder&gt;
    &lt;/extension&gt;
-</pre></font>
+</pre>
 <P >
 The <b> class</b> identified in the extension point must extend the platform class 
 <b><a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html">IncrementalProjectBuilder</a></b>. </P>
-<font color='#4444CC'><pre>
+<pre>
    public class BuilderExample extends IncrementalProjectBuilder {
       IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
@@ -114,7 +114,7 @@ The <b> class</b> identified in the extension point must extend the platform cla
          // add builder clean logic here
       }
    }
-</pre></font>
+</pre>
 <P >
 Build processing begins with the <b> build()</b> method, which includes information about the kind of build that 
 has been requested.  The build is one of the following values:
@@ -127,7 +127,7 @@ resource has changed and the autobuild feature is on.</li>
 If an incremental build has been requested, a resource delta is provided to describe the changes in the 
 resources since the last build. The following snippet further refines the
 <b> build() </b> method.</P>
-<font color='#4444CC'><pre>
+<pre>
    protected IProject[] build(int kind, Map args, IProgressMonitor monitor
          throws CoreException {
       if (kind == IncrementalProjectBuilder.FULL_BUILD) {
@@ -142,7 +142,7 @@ resources since the last build. The following snippet further refines the
       }
       return null;
    }
-</pre></font>
+</pre>
 
 <P>It sometimes happens that when building project &quot;X,&quot; a builder
 needs information about changes in some other project &quot;Y.&quot;&nbsp; (For
@@ -160,17 +160,17 @@ Full build</H4>
 The logic required to process a full build request is specific to the plug-in. It may involve visiting every 
 resource in the project or even examining other projects if there are dependencies between projects.
 The following snippet suggests how a full build might be implemented.</P>
-<font color='#4444CC'><pre>
+<pre>
    protected void fullBuild(final IProgressMonitor monitor) throws CoreException {
       try {
          getProject().accept(new MyBuildVisitor());
       } catch (CoreException e) { }
    }
-</pre></font>
+</pre>
 <P >
 The build visitor would perform the build for the specific resource (and answer true to continue visiting all 
 child resources).</P>
-<font color='#4444CC'><pre>
+<pre>
    class MyBuildVisitor implements IResourceVisitor {
       public boolean visit(IResource res) {
          //build the specified resource.
@@ -178,7 +178,7 @@ child resources).</P>
          return true;
       }
    }
-</pre></font>
+</pre>
 <P >
 The visit process continues until the full resource tree has been traveled.</P>
 
@@ -188,13 +188,13 @@ Incremental build</H4>
 <P >
 When performing an incremental build, the builder works with a resource change delta instead of a complete
 resource tree.</P>
-<font color='#4444CC'><pre>
+<pre>
    protected void incrementalBuild(IResourceDelta delta, 
          IProgressMonitor monitor) throws CoreException {
       // the visitor does the work.
       delta.accept(new MyBuildDeltaVisitor());
    }
-</pre></font>
+</pre>
 <P >
 The visit process continues until the complete resource delta tree has been traveled. The specific nature of changes
 is similar to that described in
@@ -224,7 +224,7 @@ id &quot;mybuilder&quot; in the plug-in &quot;com.example.builders&quot; would h
 name &quot;com.example.builders.mybuilder&quot;
 <P >
 The following snippet adds a new builder as the first builder in the existing list of builders.</P>
-<font color='#4444CC'><pre>
+<pre>
    final String BUILDER_ID = "com.example.builders.mybuilder";
    IProjectDescription desc = project.getDescription();
    ICommand[] commands = desc.getBuildSpec();
@@ -248,7 +248,7 @@ The following snippet adds a new builder as the first builder in the existing li
       desc.setBuildSpec(newCommands);
       project.setDescription(desc, null);
    }
-</pre></font>
+</pre>
 <P >
 Configuring a project's builder is done just once, usually as the project is being created.</P>
 

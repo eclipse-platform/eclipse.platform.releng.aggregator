@@ -23,7 +23,7 @@ org.eclipse.ui.newWizards</H3><P >
 You can add a wizard to the <b> File &gt; New &gt; </b>menu options in the workbench using the
 <a href="../reference/extension-points/org_eclipse_ui_newWizards.html"><b> org.eclipse.ui.newWizards</b></a> extension point. The readme
 tool example uses this extension point definition to add the Readme File wizard:</P>
-<font color='#4444CC'><pre>
+<pre>
 &lt;extension
       point = &quot;org.eclipse.ui.newWizards&quot;&gt;
 	&lt;category
@@ -41,20 +41,20 @@ tool example uses this extension point definition to add the Readme File wizard:
 	   &lt;selection class=&quot;org.eclipse.core.resources.IResource&quot;/&gt;
 	&lt;/wizard&gt;
 &lt;/extension&gt;
-</pre></font>
+</pre>
 <P >The <b>category</b> describes the grouping for the wizard.&nbsp; An optional
 <b>parentCategory</b>  establishes the new category as a child of an existing
 category.&nbsp;&nbsp;
 <P > Top level categories will appear in the <b> File &gt; New </b>menu.&nbsp;
 In this example, the <b>parentCategory</b> is set to an &quot;Examples&quot;
 category.&nbsp; Where did the parent category come from?&nbsp; The <b>org.eclipse.ui
-</b>plug-in defines a standard examples category in its markup:<font color='#4444CC'><pre>&lt;extension
+</b>plug-in defines a standard examples category in its markup:<pre>&lt;extension
         point=&quot;org.eclipse.ui.newWizards&quot;&gt;
     &lt;category
           name=&quot;%NewWizards.Category.Examples&quot;
           id=&quot;org.eclipse.ui.Examples&quot;&gt;
     &lt;/category&gt;
-    ...</font></pre>
+    ...</pre>
 <P >This category appears in the <b> File &gt; New </b> menu.</P>
 <P >
 <img src="images/newwizardmenu.png" alt="New menu with Examples category" border="0"></P>
@@ -99,7 +99,7 @@ similar to the definition of the controls for a view or an editor. The page impl
 <b> createControl</b> method, creating the necessary SWT widgets as children of the supplied
 <a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><b>Composite</b></a>. Since the superclass already adds widgets that support new file processing, we need only extend the
 <b> createControl</b> method in our wizard page to add the additional checkboxes that control generation of sections and opening of the editor.</P>
-<font color='#4444CC'><pre>
+<pre>
    public void createControl(Composite parent) {
       // inherit default container and name specification widgets
       super.createControl(parent);
@@ -129,7 +129,7 @@ similar to the definition of the controls for a view or an editor. The page impl
       openFileCheckbox.setSelection(true);
       ...
    }
-</pre></font>
+</pre>
 <P >
 You should be able to follow this code if you understand the concepts in
 <a HREF="swt.htm" CLASS="XRef">Standard Widget Toolkit</a>.</P>
@@ -163,56 +163,41 @@ The wizard is responsible for creating the pages and providing the &quot;finish&
 The basic patterns for implementing a wizard include:</P>
 <ul>
   <li>
-    
-Implement the <b>init</b> method to set up local variables for context information such as the workbench and the current selection.</p></li>
-
-<font color='#4444CC'><pre>
+Implement the <b>init</b> method to set up local variables for context information such as the workbench and the current selection.<br>
+<pre>
    public void init(IWorkbench workbench,IStructuredSelection selection) {
       this.workbench = workbench;
       this.selection = selection;
       setWindowTitle(MessageUtil.getString(&quot;New_Readme_File&quot;));
       setDefaultPageImageDescriptor(ReadmeImages.README_WIZARD_BANNER);
    }
-</pre></font>
-  <li>
-    
-Implement <b> addPages</b> by creating instances of the pages.</p></li>
+</pre></li>
 
-<font color='#4444CC'><pre>
+  <li>
+Implement <b> addPages</b> by creating instances of the pages.<br>
+<pre>
    public void addPages() {
       mainPage = new ReadmeCreationPage(workbench, selection);
       addPage(mainPage);
    }
-</pre></font>
+</pre></li>
 
   <li>
-    
-Implement <b> performFinish</b> to finish the task.</li>
-
+Implement <b> performFinish</b> to finish the task.<br>
 
   Multi-page wizards typically handle the finish logic in the wizard itself, since each page will contribute information that determines how the task is implemented. Single page wizards can implement the logic in the wizard or ask the page to finish the job.
 The approach you take largely depends on where your important state is kept.&nbsp;
 In the case of the readme wizard, we are going to ask our page to handle the finish processing.&nbsp;
-
-<font color='#4444CC'><pre>
+<pre>
    public boolean performFinish() {
       return mainPage.finish();
    }
-</pre></font>
+</pre></li>
 </ul>
 <P >
 The completed wizard looks like this:</P>
 <P >
 <img src="images/readmewizard.png" alt="Readme file creation wizard page" border="0"></P>
-
-
-
-<font color='#4444CC'><pre>
-    </pre></font>
-
-
-
-
 
 </BODY>
 </HTML>

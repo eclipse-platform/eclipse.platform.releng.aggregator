@@ -28,13 +28,13 @@ to define a pluggable hover object.</p>
 <p>Let's look again at <b>JavaSourceViewerConfiguration</b>
  to see which methods define the hover behavior:</p>
 
-<pre><font color="#4444CC">public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
+<pre>public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
 	return new JavaTextHover();
 }
 public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 	return new JavaAnnotationHover();
 }
-</font></pre>
+</pre>
 <p>Hover helper classes can also be installed dynamically using <b><a href="../reference/api/org/eclipse/jface/text/source/SourceViewer.html">SourceViewer</a></b>
  protocol (<b>setTextHover</b> and <b>setAnnotationHover</b>).&nbsp; There is no
 particular runtime benefit to doing it either way, but putting all of the
@@ -51,7 +51,7 @@ pluggable behavior overrides in a subclass of <b><a href="../reference/api/org/e
   if the supplied offset for hover is contained inside the text selection.&nbsp;&nbsp;&nbsp; 
   If so, it supplies the selection range as hover region.&nbsp;</p>
 
-<pre><font color="#4444CC">public class JavaTextHover implements ITextHover {
+<pre>public class JavaTextHover implements ITextHover {
 
 	...
 	
@@ -61,11 +61,11 @@ pluggable behavior overrides in a subclass of <b><a href="../reference/api/org/e
 			return new Region(selection.x, selection.y);
 		return new Region(offset, 0);
 	}
-}</font></pre>
+}</pre>
 <p>Given its own computed hover region, it obtains the selected text from its
 document and returns that as the hover info.</p>
 
-<pre><font color="#4444CC">public class JavaTextHover implements ITextHover {
+<pre>public class JavaTextHover implements ITextHover {
 
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		if (hoverRegion != null) {
@@ -78,7 +78,7 @@ document and returns that as the hover info.</p>
 		return JavaEditorMessages.getString(&quot;JavaTextHover.emptySelection&quot;); 
 	}
 	...
-}</font></pre>
+}</pre>
 <p>Sure enough, we can see that if we hover over a selection in the editor, the
 hover text shows the selection.</p>
 <p><img src="images/javatexthover.png" alt="Hover information on selected region" border="0"></p>
@@ -96,7 +96,7 @@ particular line number, regardless of the presence of markers on that line.&nbsp
 all lines.&nbsp; It uses the line number to
 obtain all of the text on the hover line and returning it as the info string.</p>
 
-<pre><font color="#4444CC">public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
+<pre>public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
 	IDocument document= sourceViewer.getDocument();
 
 	try {
@@ -105,7 +105,7 @@ obtain all of the text on the hover line and returning it as the info string.</p
 	} catch (BadLocationException x) {
 	}
 	return null;
-}</font></pre>
+}</pre>
 <p><img src="images/javarulerhover.png" alt="Hoever information on ruler" border="0">
 <p>Since the hover has access to the document and the
 source viewer, it has all the context needed to make more complicated contextual
