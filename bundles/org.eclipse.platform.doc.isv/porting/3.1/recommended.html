@@ -85,17 +85,22 @@ and <tt>ITextEditorActionConstants.UNDO</tt>).
 </p>
 <p><b>AbstractTextEditor</b> has been migrated so that it creates the common action handlers, while
 still assigning them to the TextOperationAction table with their legacy id's.  In this way, the
-new undo and redo action handlers can be retrieved using the legacy techniques.  Text editors in the
-<b>AbstractTextEditor</b> framework will inherit this behavior.  However, editors that do not
-inherit this behavior from <b>AbstractTextEditor</b> should consider migrating their
-actions to use the new handlers.  Editors that do not use the new action handlers
-will still have working local undo support, since the JFace Text undo manager API used
-by the legacy actions is still supported.  However, the undo and redo action labels will 
-not be consistent with the new SDK actions, which show the name of the available undo or redo 
-operation.  See <b><tt>AbstractTextEditor.createUndoRedoActions()</tt></b> for a detailed
-example of creating the actions and registering them with the proper text operation action id.</p>
-
-
+new undo and redo action handlers can be retrieved using the legacy techniques for retrieving
+the action and performing an operation.  Text editors in the <b>AbstractTextEditor</b> hierarchy 
+will inherit this behavior.  </p>
+<p>Editors that do not inherit this behavior from <b>AbstractTextEditor</b> should consider 
+migrating any existing undo and redo actions to use the new handlers.  Editors with
+legacy undo and redo TextOperationActions will still have working local undo support, since 
+the JFace Text undo manager API used by these actions is still supported.  However, the 
+undo and redo action labels will not be consistent with the new SDK actions, which show 
+the name of the available undo or redo operation.  To create the common undo and redo
+action handlers, the undo context used by the text viewer's undo manager should
+be used when creating the action handlers, and those handlers should be set into the
+editor using the appropriate text operaiton ID.  See 
+<b><tt>AbstractTextEditor.createUndoRedoActions()</tt></b> and <b><tt>AbstractTextEditor.getUndoContext()</tt></b>
+for a detailed example.  Editors that rely on an <b>EditorActionBarContributor</b> subclass to 
+add to the action bars of their editors can use a similar technique by creating undo and redo action
+handlers and setting them when the active editor is set. </p>
 </body>
 
 </html>
