@@ -22,7 +22,7 @@ sharing the same resources.  The
 <b><a href="../reference/api/org/eclipse/core/runtime/jobs/package-summary.html"> org.eclipse.core.runtime.jobs</a></b> 
 package addresses this challenge by providing infrastructure for scheduling, executing, and managing 
 concurrently running operations.   This infrastructure is based on the use of <i>jobs</i> to represent
-a unit of work that can run asynchronously.
+a unit of work that can run asynchronously.</p>
 <h3>Jobs</h3>
 The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> class represents
 a unit of asynchronous work running concurrently with other jobs.  To perform a task, a plug-in creates 
@@ -63,14 +63,14 @@ or:
    Finished scheduling a job
    This is a job
 </pre>
-</p>
+
 <p>
 If you want to be certain that a job has completed before continuing, you can use
 the <b>join()</b> method.  This method will block the caller until the job has completed, or 
 until the calling thread is interrupted.  Let's rewrite our snippet from above in a more 
 deterministic manner:
-<pre>
-   TrivialJob job = new TrivialJob();
+</p>
+<pre>   TrivialJob job = new TrivialJob();
    System.out.println("About to schedule a job");
    job.schedule();
    job.join();
@@ -86,7 +86,6 @@ return the following result:
    This is a job
    Job completed with success
 </pre>
-</p>
 <p>
 Of course, it is generally not useful to join a job immediately after scheduling it,
 since you obtain no concurrency by doing so. In this case you might as well do the work
@@ -111,12 +110,11 @@ the job is immediately discarded and will not run.  If, on the other hand, the j
 has already started running, it is up to the job whether it wants to respond to the cancellation.
 When you are trying to cancel a job, waiting for it using the <b>join()</b> method comes in handy.
 Here is a common idiom for canceling a job, and waiting until the job is finished before
-proceeding:
-<pre>
-   if (!job.cancel())
+proceeding:</p>
+<pre>   if (!job.cancel())
       job.join();
 </pre>
-If the cancellation does not take effect immediately, then <b>cancel()</b> will return 
+<p>If the cancellation does not take effect immediately, then <b>cancel()</b> will return 
 false and the caller will use <b>join()</b> to wait for the job to successfully cancel.
 </p>
 <p>
@@ -130,7 +128,7 @@ queue where it will eventually be executed.
 <p>
 A job goes through several states during its lifetime.  Not only can it be manipulated through API
 such as <b>cancel()</b> and <b>sleep()</b>, but its state also changes as the platform runs and completes the
-job.  Jobs can move through the following states:
+job.  Jobs can move through the following states:</p>
 <ul>
 <li><b>WAITING</b> indicates that the job been scheduled to run, but is not running yet.</li>
 <li><b>RUNNING</b> indicates that the job is running.</li>
@@ -140,7 +138,7 @@ to run after a certain delay.</li>
 it has been created but is not yet scheduled.  It is also in this state after it is finished running or when
 it has been canceled.</li>
 </ul>
-A job can only be put to sleep if it is currently <b>WAITING</b>.  Waking up a sleeping job will put it back in the
+<p>A job can only be put to sleep if it is currently <b>WAITING</b>.  Waking up a sleeping job will put it back in the
 <b>WAITING</b> state.  Canceling a job will return it to the <b>NONE</b> state.
 </p>
 <p>
@@ -154,6 +152,7 @@ The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a>
 <b>addJobChangeListener</b> can be used to register a listener on a particular job.  
 <b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobChangeListener.html">IJobChangeListener</a></b>
 defines protocol for responding to the state changes in a job:
+</p>
 <ul>
 <li><b>aboutToRun</b> is sent when the job is about to be run.</li>
 <li><b>awake</b> is sent when a previously sleeping job is now waiting to be run.</li>
@@ -162,11 +161,11 @@ defines protocol for responding to the state changes in a job:
 <li><b>scheduled</b> is sent when a job is scheduled and waiting in the queue of jobs.</li>
 <li><b>sleeping</b> is sent when a waiting job is put to sleep.</li>
 </ul>
-In all of these cases, the listener is provided with an
+<p>In all of these cases, the listener is provided with an
 <b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobChangeEvent.html">IJobChangeEvent</a></b>
 that specifies the job undergoing the state change and status on its completion (if it is done).
 </p>
-<i><blockquote>
+<blockquote><i>
 Note:  Jobs also define the <b>getState()</b> method for obtaining the (relatively) current
 state of a job.  However, this result is not always reliable since jobs run in a different thread and may
 change state again by the time the call returns.  Job change listeners are the recommended mechanism
@@ -179,18 +178,17 @@ defines protocol for working with all of the jobs in the system.  Plug-ins that 
 work with the job infrastructure can use <b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
 to perform tasks such as suspending all jobs in the system, finding out which job is running, or receiving progress
 feedback about a particular job.  The platform's job manager can be obtained using 
-<b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> API:
-<pre>
-   IJobManager jobMan = Platform.getJobManager();
+<b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> API:</p>
+<pre>   IJobManager jobMan = Platform.getJobManager();
 </pre>
-Plug-ins interested in the state of all jobs in the system can register a job change listener on the job manager rather
+<p>Plug-ins interested in the state of all jobs in the system can register a job change listener on the job manager rather
 than registering listeners on many individual jobs.  
 </p>
 <h3>Job families</h3>
 <p>
 It is sometimes easier for a plug-in to work with a group of related jobs as a single unit.
 This can be accomplished using <i>job families</i>.  A job declares that it belongs to a certain family by 
-overriding the <b>belongsTo</b> method:
+overriding the <b>belongsTo</b> method:</p>
 <pre>
    public static final String MY_FAMILY = "myJobFamily";
    ...
@@ -208,7 +206,7 @@ protocol can be used to cancel, join, sleep, or find all jobs in a family:
    jobMan.cancel(MY_FAMILY);
    jobMan.join(MY_FAMILY, null);
 </pre>
-Since job families are represented using arbitrary objects, you can store interesting
+<p>Since job families are represented using arbitrary objects, you can store interesting
 state in the job family itself, and jobs can dynamically build family objects as needed.
 It is important to use family objects that are 
 fairly unique, to avoid accidental interaction with the families created by

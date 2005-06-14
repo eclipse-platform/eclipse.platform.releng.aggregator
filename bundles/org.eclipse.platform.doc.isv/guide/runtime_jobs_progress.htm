@@ -35,15 +35,32 @@ check the cancellation status of a job and respond to a cancellation by
 exiting the <b>run</b> method as soon as possible once it detects a
 cancellation. The following <b>run</b> method reports progress
 and responds to job cancellation:
-<pre>   public IStatus run(IProgressMonitor monitor) {<br>      final int ticks = 6000;<br>      monitor.<b>beginTask</b>("Doing some work", ticks);<br>      try {<br>         for (int i = 0; i &lt; ticks; i++) {<br>            if (monitor.<b>isCanceled</b>())<br>               return Status.CANCEL_STATUS;<br>            monitor.<b>subTask</b>("Processing tick #" + i);<br>            //... do some work ...<br>            monitor.<b>worked</b>(1);<br>         }<br>      } finally {<br>         monitor.<b>done</b>();<br>      }<br>      return Status.OK_STATUS;<br>   }<br></pre>
-The <b>beginTask</b> method is used to name the task in the
+</p>
+<pre>   public IStatus run(IProgressMonitor monitor) {
+      final int ticks = 6000;
+      monitor.<b>beginTask</b>("Doing some work", ticks);
+      try {
+         for (int i = 0; i &lt; ticks; i++) {
+            if (monitor.<b>isCanceled</b>())
+               return Status.CANCEL_STATUS;
+            monitor.<b>subTask</b>("Processing tick #" + i);
+            //... do some work ...
+            monitor.<b>worked</b>(1);
+         }
+      } finally {
+         monitor.<b>done</b>();
+      }
+      return Status.OK_STATUS;<br>   }
+</pre>
+<p>The <b>beginTask</b> method is used to name the task in the
 corresponding progress view and to
 establish the total amount of work to be done so that the view can
 compute progress. The
 <b>subTask</b> messages will appear as a child in the progress tree as
 work is done. The progress view will calculate and display a percent
 completion based on the amount of work
-reported in the <b>worked</b> calls. </p>
+reported in the <b>worked</b> calls.
+</p>
 <h3>Progress monitors and the UI</h3>
 <p>
 As you can see, the <b><a
@@ -58,8 +75,8 @@ you can control how they are presented.<br>
 for a detailed look at the APIs available for showing progress for jobs.<br>
 </p>
 <h4>System jobs</h4>
-<p>
-What if your job is a low-level implementation detail that you don't
+
+<p>What if your job is a low-level implementation detail that you don't
 want to show to users? You can flag your job as a <i>system job</i>. A
 system job is just like any other job, except the corresponding UI
 support will not set up a progress view or show any other UI
@@ -67,14 +84,22 @@ affordances associated with running a job. If your job is not either
 directly initiated by a user, or a periodic task that can be configured
 by a user, then your job should be a system job. The protocol for
 setting a system job is simple:
-<pre>   class TrivialJob extends Job {<br>      public TrivialJob() {<br>         super("Trivial Job");<br>         <b>setSystem(true)</b>;<br>      }<br>      ...<br>   }<br></pre>
-The <b>setSystem</b> call must be made before the job is
+</p>
+<pre>   class TrivialJob extends Job {
+      public TrivialJob() {
+         super("Trivial Job");
+         <b>setSystem(true)</b>;
+      }
+      ...
+   }
+</pre>
+<p>The <b>setSystem</b> call must be made before the job is
 scheduled. An exception will be triggered if you attempt this call on a
 job that is currently waiting, sleeping, or running.
 </p>
 <h4>User jobs</h4>
-<p>
-If your job is a long running operation that is initiated by a user,
+
+<p>If your job is a long running operation that is initiated by a user,
 then you should flag your job as a <i>user job</i>. A user job will
 appear in a modal progress dialog that provides a button
 for moving the dialog into the background. The workbench defines a user
@@ -84,12 +109,21 @@ progress feedback will
 automatically conform with the user preference for progress viewing.
 The protocol for setting a user job
 is similar:
-<pre>   class TrivialJob extends Job {<br>      public TrivialJob() {<br>         super("Trivial Job");<br>         <b>setUser(true)</b>;<br>      }<br>      ...<br>   }<br></pre>
-The <b>setUser</b> call must also be made before the job is
-scheduled. </p>
+</p>
+<pre>   class TrivialJob extends Job {
+      public TrivialJob() {
+         super("Trivial Job");
+         <b>setUser(true)</b>;
+      }
+      ...
+   }
+</pre>
+<p>The <b>setUser</b> call must also be made before the job is scheduled. 
+</p>
+
 <h3>Progress groups</h3>
-<p>
-<i>Progress groups</i> are another mechanism that can be used to
+
+<p><i>Progress groups</i> are another mechanism that can be used to
 influence the way that a job is shown in the UI. When it is more
 appropriate to show the aggregate progress of several related jobs in
 the UI, a special
@@ -100,8 +134,15 @@ a group of related jobs can be created. This monitor is created using <b><a
  href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
 protocol. The following snippet shows how to create a progress group
 and associate it with a job.
-<pre>   ...<br>   IJobManager jobMan = Platform.getJobManager();<br>   myGroup = jobMan.createProgressGroup();<br>   job.setProgressGroup(myGroup, 600);  // specify the units of work the job needs to show.<br>   job.schedule()<br>   ...<br></pre>
-The group facility allows plug-ins to break tasks into multiple
+</p>
+<pre>   ...
+   IJobManager jobMan = Platform.getJobManager();
+   myGroup = jobMan.createProgressGroup();
+   job.setProgressGroup(myGroup, 600);  // specify the units of work the job needs to show.
+   job.schedule()
+   ...
+</pre>
+<p>The group facility allows plug-ins to break tasks into multiple
 jobs if needed, but to report them to the user as if
 they are a single task. The progress group monitor will handle the
 details for computing the percentage completion

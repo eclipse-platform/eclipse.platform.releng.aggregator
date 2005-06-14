@@ -23,9 +23,9 @@ the workspace with other plug-ins (and their threads) that are modifying the wor
 is using batching and rules (see <a href="resAdv_batching.htm">Batching resource changes</a>), it is
 easy to perform the same work using the platform concurrency mechanisms.
 </p>
+
 <h4>Workspace jobs</h4>
-<p>
-A <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> is a basic unit of 
+<p>A <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> is a basic unit of 
 asynchronous work running concurrently with other jobs.  The resources plug-in defines 
 <b><a href="../reference/api/org/eclipse/core/resources/WorkspaceJob.html">WorkspaceJob</a></b>
 as a convenient mechanism for defining asynchronous resource modifications.  Code that would
@@ -35,10 +35,9 @@ is instead put in the <b>runInWorkspace</b> method of a workspace job subtype.  
 the job is scheduled just like any other job.  The appropriate scheduling rules must be added on the job before 
 it is scheduled.
 </p>
-<p>
-Let's look at an example workspace runnable and what we should do to make it a job:
-<pre>
-IWorkspaceRunnable myRunnable = 
+<p>Let's look at an example workspace runnable and what we should do to make it a job:
+</p>
+<pre>IWorkspaceRunnable myRunnable = 
 	new IWorkspaceRunnable() {
 		public void run(IProgressMonitor monitor) throws CoreException {
 			//do the actual work in here
@@ -47,11 +46,11 @@ IWorkspaceRunnable myRunnable =
 		}
 }
 </pre>
-The work is moved to the appropriate method of our
+<p>The work is moved to the appropriate method of our
 <b><a href="../reference/api/org/eclipse/core/resources/WorkspaceJob.html">WorkspaceJob</a></b>
 subtype.
-<pre>
-class MyWorkspaceJob extends WorkspaceJob {
+</p>
+<pre>class MyWorkspaceJob extends WorkspaceJob {
 	public MyWorkspaceJob() {
 		super("My Workspace Job");
 	}
@@ -62,24 +61,22 @@ class MyWorkspaceJob extends WorkspaceJob {
 	}
 }
 </pre>
-Our runnable had to be invoked specifically:
-<pre>
-IWorkspace workspace = ResourcesPlugin.getWorkspace();
+<p>Our runnable had to be invoked specifically:
+</p>
+<pre>IWorkspace workspace = ResourcesPlugin.getWorkspace();
 workspace.run(myRunnable, myProject, IWorkspace.AVOID_UPDATE, null);
 </pre>
-Our job is scheduled like any other job.  The platform job manager will run it according to its
+<p>Our job is scheduled like any other job.  The platform job manager will run it according to its
 priority, other jobs in the queue, and the scheduling rules.  Note that we must attach the 
 scheduling rule to the job in order to prevent simultaneous modification of <tt>myProject</tt>.
-<pre>
-MyWorkspaceJob job = new MyWorkspaceJob();
+</p>
+<pre>MyWorkspaceJob job = new MyWorkspaceJob();
 <b>job.setRule(myProject);</b>
 job.schedule();
 </pre>
-Now that the operation has been structured as a job, all of the scheduling mechanisms (priority, delay, rescheduling) can
+<p>Now that the operation has been structured as a job, all of the scheduling mechanisms (priority, delay, rescheduling) can
 be used.  Resource change events will be batched until the job is finished running.
 </p>
-
-
 
 </BODY>
 </HTML>
