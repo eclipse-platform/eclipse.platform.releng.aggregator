@@ -18,10 +18,82 @@
 <h2>Changes required when adopting 3.1 mechanisms and APIs</h2><p>This section describes changes that are required if you are trying to change
   your 3.0 plug-ing to adopt the 3.1 mechanisms and APIs.</p>
   
-<h3>First topic</h3>
-There are currently no recommended changes when porting from Eclipse 3.0 to 3.1.
-
-
+<h3>Platform undo/redo support</h3>
+<p>
+Eclipse 3.1 provides a new infrastructure for defining <b>undoable operations</b> and a shared
+<b>operation history</b> that keeps track of operations that have been executed, undone, and
+redone.  It is hoped that the various undo frameworks provided by add-on plug-ins will
+be migrated over time to the platform operation support, so that clients of these frameworks 
+can integrate more deeply with the platform and make their undoable operations available
+for undo in other plug-in views and editors.  See the 
+<a href="../../guide/wrkAdv_undo.htm">Undoable operations</a> documentation for basic
+information about adding undo support to a plug-in.  Plug-ins that already define undo support
+or use another framework can be migrated to the SDK undo support in a staged fashion, as
+described below.</p>
+<h4>Migrating plug-in specific operation (command) classes to IUndoableOperation</h4>
+<p>Plug-ins that already define classes describing their undoable operations should add
+an implementation for the interface <b>IUndoableOperation</b> to their operation/command
+classes.  Plug-ins may still use older frameworks for managing the history (command stack)
+if necessary, but providing an interface for <b>IUndoableOperation</b> allows a plug-in's
+clients to use the same operations in the platform operations history, and to mix and match
+undoable operations from different plug-ins.  This strategy is similar to that used by
+the SDK text editors to migrate to the new operations framework.  If a direct mapping of
+the interface is not possible, wrappers can be used to map <b>IUndoableOperation</b>
+protocol to legacy undo objects.  This strategy is used by the Platform/JDT
+refactoring support.  Migration of the operation/command classes to <b>IUndoableOperation</b>
+is an important step because it allows the undoable operations from different frameworks
+to be utilized by other plug-ins without either plug-in having to migrate completely.</p>
+<h4>Migrating command stacks with IOperationHistory</h4>
+<p>Once undoable operations or commands are expressed in terms of <b>IUndoableOperation</b>, plug-ins 
+that define an undo history (command stack) for keeping track of the undoable and redoable 
+operations can migrate to the platform operations history by defining an <b>IUndoContext</b>
+that represents their undo history.  Undo histories that were previously managed locally 
+by a workbench part can be merged into the common operation history by defining a unique 
+undo context for each part, adding the appropriate undo context to each operation, and
+then adding the operation to the platform operation history.  Undo histories with more 
+global scope can be implemented by defining a unique undo context representing that undo scope,
+assigning that context to each operation, and then adding the operation to the platform
+operation history.  See the 
+<a href="../../guide/wrkAdv_undo.htm">Undoable operations</a> documentation for examples of
+creating undo contexts, assigning them, and adding operations to the platform operation history.
+</p>
+<h4>Defining undoable operations global to the workbench</h4>
+<p>Plug-ins that wish their operations to be undoable from workbench views such as the 
+Navigator or Package Explorer should assign the workbench undo context to their operations.
+See the <a href="../../guide/wrkAdv_undo.htm">Undoable operations</a> documentation for more information
+about this undo context and how it can be retrieved by both workbench and headless plug-ins.
+</p>
+<h3>Platform undo/redo action handlers</h3>
+<p>
+Plug-ins that do not define an undo infrastructure or undoable operations, but wish to 
+provide access to the platform's undo history, should consider retargeting the global 
+undo and redo action handlers with the new common undo and redo action handlers.  The action
+handlers should be assigned an undo context specifying which undo and redo history
+is to be shown.  Plug-ins can use their locally defined undo contexts for showing "part-local"
+undo and redo history.  The workbench undo context can be used for showing workbench-wide
+undo and redo history.  Again, the 
+<a href="../../guide/wrkAdv_undo.htm">Undoable operations</a> documentation 
+has a complete example.</p>
+<h4>Migrating text operation actions to the common action handlers</h4>
+<p>Migrating text editor undo and redo actions is a bit different than simple retargeting
+of the global undo/redo action handlers.  The <b>AbstractTextEditor</b> framework defines 
+common text actions using a parameterized <b>TextOperationAction</b>.  These actions are stored
+locally in the framework and used to dispatch various commands to an editor's text operation
+target.  For text undo to work properly, the text editor framework relies on the presence 
+of text operation actions with the proper id's (<tt>ITextEditorActionConstants.REDO</tt>
+and <tt>ITextEditorActionConstants.UNDO</tt>). 
+</p>
+<p><b>AbstractTextEditor</b> has been migrated so that it creates the common action handlers, while
+still assigning them to the TextOperationAction table with their legacy id's.  In this way, the
+new undo and redo action handlers can be retrieved using the legacy techniques.  Text editors in the
+<b>AbstractTextEditor</b> framework will inherit this behavior.  However, editors that do not
+inherit this behavior from <b>AbstractTextEditor</b> should consider migrating their
+actions to use the new handlers.  Editors that do not use the new action handlers
+will still have working local undo support, since the JFace Text undo manager API used
+by the legacy actions is still supported.  However, the undo and redo action labels will 
+not be consistent with the new SDK actions, which show the name of the available undo or redo 
+operation.  See <b><tt>AbstractTextEditor.createUndoRedoActions()</tt></b> for a detailed
+example of creating the actions and registering them with the proper text operation action id.</p>
 
 
 </body>
