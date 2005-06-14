@@ -33,8 +33,7 @@ apart from implementing the undo and redo behavior itself.</p>
 We'll start by looking at a very simple example.  Recall the simple 
 <b>ViewActionDelegate</b> provided in the readme example plug-in.  When
 invoked, the action simply launches a dialog that announces it was executed.</p>
-<pre>
-public void run(org.eclipse.jface.action.IAction action) {
+<pre>public void run(org.eclipse.jface.action.IAction action) {
 	MessageDialog.openInformation(view.getSite().getShell(),
 		MessageUtil.getString(&quot;Readme_Editor&quot;),  
 		MessageUtil.getString(&quot;View_Action_executed&quot;)); 
@@ -80,7 +79,6 @@ class ReadmeOperation extends AbstractOperation {
 	}
 }
 </pre>
-</p>
 <p>
 When an action launches a wizard, then the operation is typically created as part of the wizard's 
 <tt>performFinish()</tt> method or a wizard page's <tt>finish()</tt> method.  Converting the <tt>finish</tt> method
@@ -91,8 +89,8 @@ and executing an operation that does the work previously done inline.
 <p>
 So far we've used an <b>operations history</b> without really explaining it.
 Let's look again at the code that creates our example operation.
-<pre>
-public void run(org.eclipse.jface.action.IAction action) {
+</p>
+<pre>public void run(org.eclipse.jface.action.IAction action) {
 	IUndoableOperation operation = new ReadmeOperation(
 		view.getSite().getShell()); 
 	...
@@ -106,20 +104,18 @@ executes an operation, it first executes the operation, and then adds it to the 
 Clients that wish to undo and redo operations do so by using 
 <a href="../reference/api/org/eclipse/core/commands/operations/IOperationHistory.html"><b>IOperationHistory</b></a>
 protocol.  
-</p>
 <p>
 The operation history used by an application can be retrieved in several ways.  The simplest way is to use the
 <a href="../reference/api/org/eclipse/core/commands/operations/OperationHistoryFactory.html"><b>OperationHistoryFactory</b></a>.
-<pre>
-IOperationHistory operationHistory = OperationHistoryFactory.getOperationHistory();
-</pre>
 </p>
+<pre>IOperationHistory operationHistory = OperationHistoryFactory.getOperationHistory();
+</pre>
 <p>
 The workbench can also be used to retrieve the operations history.  The workbench configures the default
 operation history and also provides protocol to access it.  The following snippet demonstrates how to
 obtain the operation history from the workbench. 
-<pre>
-IWorkbench workbench = view.getSite().getWorkbenchWindow().getWorkbench();
+</p>
+<pre>IWorkbench workbench = view.getSite().getWorkbenchWindow().getWorkbench();
 IOperationHistory operationHistory = workbench.getOperationSupport().getOperationHistory();
 </pre>
 Once an operation history is obtained, it can be used to query the undo or redo history, find out which operation
@@ -128,7 +124,6 @@ is the next in line for undo or redo, or to undo or redo particular operations. 
 in order to receive notifications about changes to the history.  Other protocol allows clients
 to set limits on the history, remove particular operations, or notify listeners about changes to a particular operation.  Before
 we look at the protocol in detail, we need to understand the <b>undo context</b>.
-</p>
 <h4>Undo contexts</h4>
 <p>
 When an operation is created, it is assigned an <b>undo context</b> that describes the user context in which the original
@@ -181,8 +176,8 @@ workspace.
 Now that we understand what an undo context does, we can look again at the protocol for
 <a href="../reference/api/org/eclipse/core/commands/operations/IOperationHistory.html"><b>IOperationHistory</b></a>.
 The following snippet is used to perform an undo on the some context:
-<pre>
-IOperationHistory operationHistory = workbench.getOperationSupport().getOperationHistory();
+</p>
+<pre>IOperationHistory operationHistory = workbench.getOperationSupport().getOperationHistory();
 try {
 	IStatus status = operationHistory.undo(myContext, progressMonitor, someInfo);
 } catch (ExecutionException e) {
@@ -197,7 +192,6 @@ that will be undone in a particular context.
 IOperationHistory operationHistory = workbench.getOperationSupport().getOperationHistory();
 String label = history.getUndoOperation(myContext).getLabel();
 </pre>
-</p>
 <p>
 Whenever an operation is executed, undone, or redone using operation history protocol, clients can
 provide a progress monitor and additional UI info that may be needed for performing the operation.
@@ -206,7 +200,7 @@ example, the readme action constructed an operation with a shell parameter that 
 the dialog.  Instead of storing the shell in the operation, a better approach is to pass parameters
 to the execute, undo, and redo methods that provide any UI information needed to run the operation.  These
 parameters will be passed on to the operation itself.
-<pre>
+</p><pre>
 public void run(org.eclipse.jface.action.IAction action) {
 	IUndoableOperation operation = new ReadmeOperation();
 	...
@@ -230,22 +224,20 @@ be used when launching dialogs.  Our example operation would use this parameter 
 		// do something else...
 	}
 </pre> 
-</p>
 <h3>Undo and redo action handlers</h3>
-<p>The platform provides standard undo and redo <a href="wrkAdv_retarget.htm"><b>retargetable action handlers</a></b> 
+<p>The platform provides standard undo and redo <a href="wrkAdv_retarget.htm"><b>retargetable action handlers</b></a> 
 that can be configured by views and editors to provide undo and redo support for their particular context.  When the 
 action handler is created, a context is assigned to it so that the operations history is filtered in a way appropriate for
 that particular view.  The action handlers take care of updating the undo and redo labels to show the current
 operation in question, providing the appropriate progress monitor and UI info to the operation history, and
 optionally pruning the history when the current operation is invalid.  An action group that creates the action handlers
 and assigns them to the global undo and redo actions is provided for convenience.
-<pre>
-new UndoRedoActionGroup(this.getSite(), undoContext, true);
+</p>
+<pre>new UndoRedoActionGroup(this.getSite(), undoContext, true);
 </pre>
 The last parameter is a boolean indicating whether the undo and redo histories for the specified context should
 be disposed when the operation currently available for undo or redo is not valid.  The setting for this parameter
 is related to the undo context provided and the validation strategy used by operations with that context.
-</p>
 <h3>Application undo models</h3>
 <p>
 Earlier we looked at how undo contexts can be used to implement different kinds of application undo models.
@@ -297,8 +289,8 @@ This context is used by views that manipulate the workspace, such as the Resourc
 the workspace for <a href="../reference/api/org/eclipse/core/commands/operations/IUndoContext.html"><b>IUndoContext</b></a> that returns the
 workbench undo context.  This model-based registration allows plug-ins that manipulate the workspace to obtain the appropriate undo context, even if they are headless and
 do not reference any workbench classes.  
-<pre>
-// get the operation history
+</p>
+<pre>// get the operation history
 IOperationHistory history = OperationHistoryFactory.getOperationHistory();
 
 // obtain the appropriate undo context for my model
@@ -310,7 +302,6 @@ if (workspaceContext != null) {
 </pre>
 Other plug-ins are encouraged to use this same technique for registering
 model-based undo contexts.
-</p>
 
 </BODY>
 </HTML>
