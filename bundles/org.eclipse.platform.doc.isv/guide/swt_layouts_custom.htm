@@ -7,45 +7,68 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>
-Custom Layouts
-</TITLE>
+<TITLE>Custom Layouts</TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 
+<H3>Custom layouts</H3>
+<P>Occasionally you may need to write your own custom
+<a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><strong>Layout</strong></a>
+class. This is most appropriate when you have a complex layout that is used
+in many different places in your application. It may be appropriate when you
+can optimize layout using application specific knowledge. Before building a
+custom layout you should consider the following:</P>
 
-<H3>
-Custom layouts</H3><P >
-Occasionally you may need to write your own custom <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><strong> Layout</strong></a> class. This is most appropriate when you have a complex layout that is used
-in many different places in your application. It may be appropriate when you can optimize layout using application specific knowledge. Before building a custom layout you should consider the following:</P>
 <ul>
-  <li>Can the layout be achieved with an existing layout such as <a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><strong>
-GridLayout</strong></a><strong> </strong>or by nesting several different layouts?</li>
+  <li>Can the layout be achieved with an existing layout such as
+      <a href="../reference/api/org/eclipse/swt/layout/GridLayout.html"><strong>GridLayout</strong></a>
+      or by nesting several different layouts?</li>
   <li>Can the layout be isolated into a common resize listener?</li>
-  <li>Are you defining a general layout algorithm with programmer supplied configuration parameters or just positioning widgets specifically for your application?</li>
+  <li>Are you defining a general layout algorithm with programmer supplied
+      configuration parameters or just positioning widgets specifically for
+      your application?</li>
 </ul>
-<P >
-Unless you are writing a very generic layout that will be used by several <strong><a href="../reference/api/org/eclipse/swt/widgets/Composite.html"> Composite</a></strong> widgets, it is often simpler and easier to calculate sizes and position children in a resize listener. Many of the SWT custom widgets were written this way. Although a new widget can be implemented as a
-<strong>Composite</strong>/<strong>Layout </strong> pair, implementing it as a
-<strong><a href="../reference/api/org/eclipse/swt/widgets/Composite.html"> Composite</a></strong>
-that does its layout in a resize listener and computes its preferred size in <strong> computeSize(...)</strong> is clearer, and does not require the writing of an extra class.</P>
-<P >
-If you still believe that you need a custom layout class then it is a good idea to first implement the layout algorithm in a resize listener. This makes for simpler debugging of the algorithm itself. Be sure to test the various cases for layout, which are resizing smaller, resizing larger, wrapping, and clipping.&nbsp;
+
+<P>Unless you are writing a very generic layout that will be used by several
+<strong><a href="../reference/api/org/eclipse/swt/widgets/Composite.html">Composite</a></strong>
+widgets, it is often simpler and easier to calculate sizes and position children
+in a resize listener. Many of the SWT custom widgets were written this way.
+Although a new widget can be implemented as a <strong>Composite</strong>/<strong>Layout</strong>
+pair, implementing it as a
+<strong><a href="../reference/api/org/eclipse/swt/widgets/Composite.html">Composite</a></strong>
+that does its layout in a resize listener and computes its preferred size in
+<strong>computeSize(...)</strong> is clearer, and does not require the writing
+of an extra class.</P>
+
+<P>If you still believe that you need a custom layout class then it is a good
+idea to first implement the layout algorithm in a resize listener. This makes for
+simpler debugging of the algorithm itself.  Be sure to test the various cases for
+layout, which are resizing smaller, resizing larger, wrapping, and clipping.
 Once you have the algorithm working, the code can be refactored into a subclass of
 <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><strong> Layout</strong></a>.&nbsp;</P>
-<P >
- Layouts are responsible for implementing two methods:</P>
-<ul>
-  <li><strong>computeSize(...)</strong> calculates the width and height of a rectangle that encloses all of the composite's children once they have been sized and placed according to the layout algorithm. The hint parameters allow the width and/or height to be constrained. For example, a layout may choose to grow in one dimension if constrained in another.</li>
-  <li><strong>layout(...)</strong> positions and sizes the composite's children. A layout can choose to cache layout-related information, such as the preferred extent of each of the children. The
-    <strong> flushCache</strong> parameter tells the <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><strong> Layout</strong></a>
-    to flush cached data, which is necessary when other factors besides the size of the composite have changed, such as the creation of removal of children, or a change in the widget's font.</li>
-</ul>
-<p>Further discussion of custom layouts can be found in <a href="http://www.eclipse.org/articles/Understanding%20Layouts/Understanding%20Layouts.htm">Understanding
-layouts in SWT</a>.</p>
 
+<P>Layouts are responsible for implementing two methods:</P>
+
+<ul>
+  <li><strong>computeSize(...)</strong> calculates the width and height of a
+      rectangle that encloses all of the composite's children once they have
+      been sized and placed according to the layout algorithm. The hint
+      parameters allow the width and/or height to be constrained.  For example,
+      a layout may choose to grow in one dimension if constrained in another.</li>
+  <li><strong>layout(...)</strong> positions and sizes the composite's children.
+      A layout can choose to cache layout-related information, such as the
+      preferred extent of each of the children. The <strong>flushCache</strong>
+      parameter tells the <a href="../reference/api/org/eclipse/swt/widgets/Layout.html"><strong>Layout</strong></a>
+      to flush cached data, which is necessary when other factors besides the
+      size of the composite have changed, such as the creation of removal of
+      children, or a change in the widget's font.</li>
+</ul>
+
+<p>Further discussion of custom layouts can be found in
+<a href="http://www.eclipse.org/articles/Understanding%20Layouts/Understanding%20Layouts.htm">Understanding
+layouts in SWT</a>.</p>
 
 </BODY>
 </HTML>

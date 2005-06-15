@@ -12,62 +12,93 @@
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
-<H1>
-Standard Widget Toolkit</H1><P >
-The Standard Widget Toolkit (SWT) is a widget toolkit for Java developers that provides a portable API and tight integration with the underlying native OS GUI platform.</P>
-<P >
-Many low level UI programming tasks are handled in higher layers of the Eclipse platform. For example, the
-<strong> plugin.xml</strong> markup for UI contributions specifies menu and toolbar content without requiring any SWT programming. Additionally, JFace viewers and actions provide implementations for the common
-interactions between applications and widgets. However, knowledge of the underlying SWT architecture and design philosophy is important for understanding how the rest of the platform
-works.</P>
 
-<h2>
-Portability and platform integration</h2>
-<P >
-A common issue in widget toolkit design is the tension between portable toolkits and platform integration. The Java AWT
-(Abstract Window Toolkit) provides platform integrated widgets for lower level widgets such as lists, texts, and buttons, but does not provide access to higher level platform components such as trees or rich text. This forces application developers into a &quot;least common denominator&quot; situation in which they can only use widgets that are available on all platforms.</P>
-<P >
-The Swing toolkit attempts to address this problem by providing non-native implementations of high level widgets like trees, tables, and text.
-This provides a great deal of functionality, but makes applications developed in Swing stand out as being different. Platform look and feel emulation layers help the applications look more like the platform, but the user interaction is different enough to be noticed. This makes it difficult to use emulated toolkits to build applications that compete with shrink-wrapped applications developed specifically for a particular OS platform.</P>
-<P >
-SWT addresses this problem by defining a common portable API that is provided on all supported platforms,
-and implementing the API on each platform using native widgets wherever possible. This allows the toolkit to immediately reflect any changes in the underlying OS GUI look and feel while maintaining a consistent programming model on all platforms.</P>
-<P >
-The &quot;least common denominator&quot; problem is solved by SWT in several ways:</P>
+<H1>The Standard Widget Toolkit</H1>
+<P>The Standard Widget Toolkit (SWT) is a widget toolkit for Java developers that
+provides a portable API and tight integration with the underlying native OS GUI
+platform.</P>
+
+<P>Many low level UI programming tasks are handled in higher layers of the
+Eclipse platform. For example, the <strong>plugin.xml</strong> markup for UI
+contributions specifies menu and toolbar content without requiring any SWT
+programming. Additionally, JFace viewers and actions provide implementations for
+the common interactions between applications and widgets. However, knowledge of
+the underlying SWT architecture and design philosophy is important for
+understanding how the rest of the platform works.</P>
+
+<h2>Portability and platform integration</h2>
+
+<P>A common issue in widget toolkit design is the tension between portable
+toolkits and platform integration. The Java AWT (Abstract Window Toolkit) provides
+platform integrated widgets for lower level widgets such as lists, texts, and
+buttons, but does not provide access to higher level platform components such as
+trees or rich text. This forces application developers into a &quot;least common
+denominator&quot; situation in which they can only use widgets that are available
+on all platforms.</P>
+
+<P>The Swing toolkit attempts to address this problem by providing non-native
+implementations of high level widgets like trees, tables, and text.  This provides
+a great deal of functionality, but makes applications developed in Swing stand
+out as being different. Platform look and feel emulation layers help the
+applications look more like the platform, but the user interaction is different
+enough to be noticed. This makes it difficult to use emulated toolkits to build
+applications that compete with shrink-wrapped applications developed specifically
+for a particular OS platform.</P>
+
+<P>SWT addresses this problem by defining a common portable API that is provided
+on all supported platforms, and implementing the API on each platform using native
+widgets wherever possible. This allows the toolkit to immediately reflect any
+changes in the underlying OS GUI look and feel while maintaining a consistent
+programming model on all platforms.</P>
+
+<P>The &quot;least common denominator&quot; problem is solved by SWT in several
+ways:</P>
 <ul>
-  <li>
-Features that are not available on all platforms but are generally useful for the workbench and tooling plug-ins can be emulated on platforms that provide no native support. For example, the
-OSF/Motif 2.1 widget toolkit does not contain a tree widget, so SWT provides an emulated tree widget on Motif
-    2.1 that is API compatible with the Windows native implementation.</li>
-  <li>
-Features that are not available on all platforms but are not widely used can be omitted from
-SWT. For example, Windows provides a widget that implements a calendar, but this is not provided in
-SWT.</li>
-  <li>
-Features that are specific to a platform, such as ActiveX integration, are only provided on the relevant platform. Platform specific features are separated into separate packages that clearly denote the platform name in the package.</li>
+  <li>Features that are not available on all platforms but are generally useful
+      for the workbench and tooling plug-ins can be emulated on platforms that
+      provide no native support. For example, the OSF/Motif 2.1 widget toolkit
+      does not contain a tree widget, so SWT provides an emulated tree widget
+      on Motif 2.1 that is API compatible with the Windows native implementation.</li>
+  <li>Features that are not available on all platforms but are not widely used
+      can be omitted from SWT. For example, Windows provides a widget that
+      implements a calendar, but this is not provided in SWT.</li>
+  <li>Features that are specific to a platform, such as ActiveX integration, are
+      only provided on the relevant platform. Platform specific features are
+      separated into separate packages that clearly denote the platform name
+      in the package.</li>
 </ul>
 
 
-<h2>
-Consistency with the platform</h2>
-<P >
-Platform integration is not strictly a matter of look and feel. Tight integration includes the ability to
-interact with native desktop features such as drag and drop, to integrate with OS desktop applications, and to use components developed with OS component models like Win32
-ActiveX.</P>
-<P >
-<img alt="Windows Only" border="0" src="images/win_only.png" >SWT ActiveX support is discussed in
-the article <a href="http://www.eclipse.org/articles/Article-ActiveX%20Support%20in%20SWT/ActiveX%20Support%20in%20SWT.html">ActiveX
+<h2>Consistency with the platform</h2>
+
+<P>Platform integration is not strictly a matter of look and feel. Tight integration
+includes the ability to interact with native desktop features such as drag and drop,
+to integrate with OS desktop applications, and to use components developed
+with OS component models like Win32 ActiveX.</P>
+
+<P>
+<img alt="Windows Only" border="0" src="images/win_only.png" >SWT ActiveX support is
+discussed in the article
+<a href="http://www.eclipse.org/articles/Article-ActiveX%20Support%20in%20SWT/ActiveX%20Support%20in%20SWT.html">ActiveX
 Support in SWT</a>.</P>
-<P >
-Consistency is also achieved in the code itself by providing an implementation that looks familiar to the native OS developer. Rather than hide OS differences in native C code or attempt to build portable and non-portable layers in the Java implementation, SWT provides separate and distinct implementations in Java for each platform. </P>
-<P >
-One important implementation rule is that natives in C map one-to-one with calls to the OS. A Windows programmer will immediately recognize the implementation of the SWT toolkit on Windows, because it uses natives that directly map to the system calls used in C. None of the &quot;platform magic&quot; is hidden in C code. A platform developer can eyeball the code and know exactly which platform calls are executed by the toolkit. This greatly simplifies debugging.
+
+<P>Consistency is also achieved in the code itself by providing an implementation
+that looks familiar to the native OS developer. Rather than hide OS differences
+in native C code or attempt to build portable and non-portable layers in the
+Java implementation, SWT provides separate and distinct implementations in Java
+for each platform.</P>
+
+<P>One important implementation rule is that natives in C map one-to-one with
+calls to the OS. A Windows programmer will immediately recognize the implementation
+of the SWT toolkit on Windows, because it uses natives that directly map to
+the system calls used in C. None of the &quot;platform magic&quot; is hidden
+in C code. A platform developer can eyeball the code and know exactly which
+platform calls are executed by the toolkit. This greatly simplifies debugging.
 If a failure occurs when calling a native method, calling the platform API with
 the same parameters from C code will exhibit the same failure.&nbsp; (A complete
-discussion of this issue can be found in <a href="http://www.eclipse.org/articles/Article-SWT-Design-1/SWT-Design-1.html">SWT
+discussion of this issue can be found i
+ <a href="http://www.eclipse.org/articles/Article-SWT-Design-1/SWT-Design-1.html">SWT
 Implementation Strategy for Java Natives</a>.)</P>
-
-
 
 </BODY>
 </HTML>
