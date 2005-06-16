@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+   <title>Third party libraries and classloading</title>
+</head>
+<body>
+<h1>Third party libraries and classloading</h1>
+Because OSGi makes use of multiple classloaders, the transparent usage of extensible / configurable third party libraries 
+in eclipse requires the usage of an eclipse specific mechanism called "buddy loading". This mechanism allows a 
+bundle to indicate that it needs assistance to load classes or resources when it can not find them 
+among its prerequisites. Note that we call "extensible libraries", libraries that needs to see classes or resources provided
+by user code.
+<p>
+To indicate its need for buddy loading, a bundle must modify its manifest and add the following header:
+<pre>
+    Eclipse-BuddyPolicy: &lt;value&gt
+</pre>
+<p>
+&lt;value&gt; refers to the policy used to look for the classes. Here are the
+supported policies:
+<ul>
+  <li> registered -  indicates that the buddy mechanism will consult bundles
+that have been registered to it. Bundle willing to be registered to a particular
+  bundle add in their manifest: "Eclipse-RegisterBuddy: <bundleSymbolicName>";</li>
+  <li> dependent - indicates that the classes/resources will be looked up
+transitively in all the dependent of the bundle;</li>
+  <li> global - indicates that the classes/resources will be looked up in the
+global pool of exported package;</li>
+  <li> app - indicates that the application classloader will be consulted;</li>
+  <li> ext - indicates that the extensiont classloader will be consulted;</li>
+  <li> boot - indicates that the boot classloader will be consulted.</li>
+</ul>
