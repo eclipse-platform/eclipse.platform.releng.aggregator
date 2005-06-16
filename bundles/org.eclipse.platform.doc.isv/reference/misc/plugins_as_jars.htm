@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Untitled Document</title>
+</head>
+
+<body>
+<h1>Shipping Your Plug-in As A Single JAR</h1>
+<p>Eclipse 3.0 and previous was shipped such that each plug-in was a directory 
+  that contained code in a JAR, along with multiple other files. In order to improve 
+  the number of files that we ship along with the size of the Eclipse distributions, 
+  we have added support in Eclipse to be able to ship each plug-in as a single 
+  JAR file containing its code and other resources. </p>
+<p><strong>Converting A Plug-in to be Shipped as a JAR</strong></p>
+<ol>
+  <li>Change the classpath:</li>
+  <ul>
+    <li> If you have a <code>manifest.mf </code>then simply delete the <code>Bundle-Classpath</code> 
+      header.</li>
+    <li>Otherwise if you have a <code>plugin.xml</code> then change the library 
+      entry to be a dot like this: <br>
+      <code>&nbsp;&nbsp;&nbsp;&lt;runtime&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;library name=&quot;.&quot;&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;export name=&quot;*&quot;/&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;/library&gt;<br>
+      &nbsp;&nbsp;&nbsp;&lt;/runtime&gt;</code></li>
+  </ul>
+  <li>Change the <code>build.properties</code>:</li>
+  <ul>
+    <li>Change all occurences of the old jar name to simply a dot. <code>(.)</code></li>
+    <li> There should be one on the <code>bin.includes</code> line. For instance, 
+      if your <code>bin.includes</code> line used to have <code>core.jar</code>, 
+      that will be replaced with a <code>.</code>.For instance: <code>bin.includes=about.html,.,META-INF/MANIFEST.MF</code></li>
+    <li> Change <code>source.foo.jar= </code> to <code>source..= </code>(that 
+      is source dot dot)</li>
+    <li> Change <code>output.foo.jar= </code> to <code>output..= </code> (that 
+      is output dot dot)</li>
+    <li>There may be others like <code>jars.compile.order</code>, etc</li>
+    <li> If you newly generated a <code>manifest.mf</code>, then add <code>META-INF/</code> 
+      to the <code>bin.includes</code>.</li>
+  </ul>
+  <li>Change the feature</li>
+  <ul>
+    <li>find all features that list your plug-in and add following to the related 
+      <code>&lt;plugin&gt;</code> tag:<br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;unpack=&quot;false&quot;</code></li>
+  </ul>
+  <li>Change <code>about.html</code> linked content.</li>
+  <ul>
+    <li>If you have a basic <code>about.html</code> with no linked files, then 
+      you don't need to do anything.</li>
+    <li>If you have content in your plug-in which is linked from your <code>about.html</code> 
+      file, then that content must be placed in a directory named <code>&quot;about_files&quot;</code> 
+      at the root of the plug-in.</li>
+    <li>Make sure to change the links in the <code>about.html</code> to point 
+      to the new location of the files!</li>
+  </ul>
+</ol>
+      
+<p> If you have a custom build script (<code>build.xml</code>):</p>
+      <ul>
+        <li>You need to ensure that your script will still work against plug-ins 
+          that are JAR'd as well as plug-ins which aren't JAR'd.</li>
+      </ul>
+      <p>If you have other scripts (e.g. javadoc generation scripts):</p>
+      
+<ul>
+  <li>If the script assumes the layout of plug-ins and needs to add code JAR files 
+    to the classpath, then it must be modified to put the whole JAR'd plug-in 
+    on the classpath rather than the individual JARs.</li>
+</ul>
+
+      </body>
+</html>
