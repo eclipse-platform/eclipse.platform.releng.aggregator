@@ -1,0 +1,257 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2005. This page is made available under license. Full for details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>OSGi Bundle Manifest</title>
+</head>
+
+<body lang="EN-US" link=blue vlink=blue style='tab-interval:.5in'>
+
+<div class=Section1>
+
+<h1>OSGi Bundle Manifest Headers</h1>
+
+<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.1 - Last revised June 15, 2005</span></p>
+
+<p>
+A bundle can carry descriptive information about itself in the manifest file 
+named META-INF/MANIFEST.MF.  The Framework defines OSGi manifest headers such as 
+Export-Package and Bundle-Classpath, which bundle developers use to supply 
+descriptive information about a bundle. The Eclipse OSGi Framework supports the 
+OSGi R4 specification. For information on OSGi R4 supported manifest headers refer 
+to the OSGi R4 specifation.
+<p>
+
+<h2>Eclipse Bundle Manifest Headers</h2>
+
+<p>
+The Eclipse OSGi Framework supports a number of additional bundle manifest headers 
+and directives.  A bundle developer may use these additional headers and directives 
+to take advantage of some additional features of the Eclipse OSGi Framework which 
+are not specified as part of a standard OSGi R4 Framework.
+</p>
+<h3>Additional Export-Package Directives</h3>
+
+<p>
+The Eclipse OSGi Framework supports additional directives on the Export-Package 
+header.  These directives are used to specify the access restriction rules of an 
+exported package.
+</p>
+
+<h4>The x-internal Directive</h4>
+
+<p>
+The x-internal directive can be used in an Export-Package header to specify whether 
+package is an internal package.  The Plug-in Development Environment will discourage 
+other bundles from using an internal package.  If the x-internal directive is not 
+specified then a default value of 'false' is used.  The x-internal directive must 
+use the following syntax:
+</p>
+
+<pre>
+x-internal ::= ( 'true' | 'false' )
+</pre>
+
+<p>
+The following is an example of the x-internal directive:
+</p>
+
+<pre>
+Export-Package: org.eclipse.foo.internal; x-internal=true
+</pre>
+
+<h4>The x-friends Directive</h4>
+
+<p>
+The x-friends directive can be used in an Export-Package header to specify a list 
+of bundles which are allowed access to the package.  The Plug-in Development 
+Environment will discourage other bundles from using the package.  The x-friends 
+directive must use the following syntax:
+</p>
+
+<pre>
+x-friends ::= '"' ( target-bundle ) ( ',' target-bundle ) * '"'
+target-bundle ::= a bundle symbolic name
+</pre>
+
+<p>
+The following is an example of the x-friends directive:
+</p>
+
+<pre>
+Export-Package: org.eclipse.foo.formyfriends; x-friends="org.eclispe.foo.friend1, org.eclipse.foo.friend2"
+</pre>
+
+<p>
+The example specifies that only the bundles org.eclispe.foo.friend1 and 
+org.eclipse.foo.friend2 should be encouraged to use the org.eclipse.foo.formyfriends 
+package.  The x-internal package takes priority over the x-friends directive.  If 
+the x-internal directive specifies 'true' then The Plug-in Development 
+Environment will discourage all bundles from using the package even if they are
+specified as a friend.
+</p>
+
+<h3>The Eclipse-AutoStart Header</h3>
+
+<p>
+The Eclipse-AutoStart header is used to specify if a bundle should be started 
+automatically before the first class or resource is accessed from that bundle. 
+This feature allows Eclipse to activate bundles on demand the first time they are
+needed.  Using this model Eclipse can startup with as few active bundles as 
+possible.  The Eclipse-AutoStart header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-AutoStart ::= ( 'true' | 'false' ) ( ';' 'exceptions' '=' exeptions-list ) ?
+exeptions-list ::= a comma ',' separated list of packages
+</pre>
+
+<p>
+The 'exceptions' attribute is used to specify a list of packages which must not cause
+the bundle to be activated when classes or resources are loaded from them.  
+If the Eclipse-AutoStart header is not defined in the bundle manifest then a default 
+value of 'false' is used.  The following is an example of the Eclipse-AutoStart header:
+</p>
+
+<pre>
+Eclipse-AutoStart: true; exceptions="org.eclipse.foo1, org.eclipse.foo2"
+</pre>
+
+<p>
+The example specifies that this bundle must be activated for any classes or resources 
+that are loaded from this bundle, except the classes and resources in the packages
+'org.eclipse.foo1' and 'org.eclipse.foo2'.
+</p>
+
+<h3>The Eclipse-PlatformFilter Header</h3>
+
+<p>
+The Eclipse-PlatformFilter is used to specify a platform filter for a bundle.  A platform
+filter must evaluate to true in a running platform in order for a bundle to be allowed
+to resolve.  The Eclipse-PlatformFilter header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-PlatformFilter ::= a valid LDAP filter string
+</pre>
+
+<p>
+The Framework supports filtering on the following system properties:
+</p>
+
+<ul type=disc>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>osgi.nl</b> - the platform 
+     language setting.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>osgi.os</b> - the platform 
+     operating system.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>osgi.arch</b> - the platform 
+     architecture.</li>
+ <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>osgi.ws</b> - the platform 
+     windowing system.</li>
+</ul>
+
+<p>
+The following is an example of the Eclipse-PlatformFilter header:
+</p>
+
+<pre>
+Eclipse-PlatformFilter: (& (osgi.ws=win32) (osgi.os=win32) (osgi.arch=x86))
+</pre>
+
+<p>
+This example specifies that this bundle can only be resolved if the platform 
+properties are osgi.ws=win32 and osgi.os=win32 and osgi.arch=x86.  In other words 
+a platform running on an x86 architecture, using a win32 operating system and 
+the win32 windowing system.
+</p>
+
+<h3>The Eclipse-BuddyPolicy Header</h3>
+
+<p>
+The Eclipse-BuddyPolicy header is used to specify the buddy classloading policies for a bundle.
+The Eclipse-BuddyPolicy header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-BuddyPolicy ::= ( policy-name ) ( ',' policy-name ) *
+policy-name ::= ( 'dependent' | 'global' | 'registered' | 
+                  'app' | 'ext' | 'boot' | 'parent' )
+</pre>
+
+<p>
+The following is an example of the Eclipse-BuddyPolicy header:
+</p>
+
+<pre>
+Eclipse-BuddyPolicy: dependent
+</pre>
+
+<h3>The Eclipse-RegisterBuddy Header</h3>
+
+<p>
+The Eclipse-RegisterBuddy header is used to specify a list of bundles for which this bundle is 
+a registered buddy.  The Eclipse-RegisterBuddy header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-RegisterBuddy ::= ( target-bundle ) ( ',' target-bundle ) *
+target-bundle ::= a bundle symbolic name
+</pre>
+
+<p>
+The following is an example of the Eclipse-RegisterBuddy header:
+</p>
+
+<pre>
+Eclipse-RegisterBuddy: org.eclipse.foo.bundle1, org.eclipse.foo.bundle2
+</pre>
+
+<h3>The Eclipse-ExtensibleAPI Header</h3>
+
+<p>
+The Eclipse-ExtensibleAPI is used to specify whether a host bundle allows fragment bundles 
+to add addtional API to the host.  This header should be used if a host bundle wants to allow 
+fragments to add additional packages to the API of the host.  If this header is not 
+specified then a default value of 'false' is used.  The Eclipse-ExtensibleAPI 
+header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-ExtensibleAPI ::= ( 'true' | 'false' )
+</pre>
+
+<p>
+The following is an example of the Eclipse-ExtensibleAPI header:
+</p>
+
+<pre>
+Eclipse-ExtensibleAPI: true
+</pre>
+
+<h3>The Plugin-Class Header</h3>
+
+<p>
+The Plugin-Class header is only used to support plugins developed for the Eclipse 2.1 
+platform.  This header is used to specify a class name that will be used to activate 
+a plugin using the old Eclipse 2.1 activation model.  New bundles developed for the 
+Eclipse 3.0 or greater platform should not use this header.
+The following is an example of the Plugin-Class header:
+</p>
+
+<pre>
+Plugin-Class: org.eclipse.foo.FooPlugin
+</pre>
+
+</div>
+
+</body>
+
+</html>

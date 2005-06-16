@@ -13,12 +13,12 @@
 
 <body>
 
-<h1>The Eclipse runtime options</h1><p>Last modified 14:45 Wednesday August 4, 2004</p>
+<h1>The Eclipse runtime options</h1><p>Version 3.1 - Last revised June 15, 2005</p>
 <p>The Eclipse platform is highly configurable. Configuration input takes the
   form of command line arguments and System property settings. In many cases
   the command line arguments are simply short cuts for setting the related System
   properties. In fact, there are many more System property settings than command
-line arguments.</p>
+line arguments. </p>
 <h2><a name="commandline"></a>Command line arguments </h2>
 <p>Listed below are the command line arguments processed by various parts of
   the Eclipse runtime. Many of these values can also be specified using System
@@ -83,6 +83,8 @@ line arguments.</p>
   <dd>The name to be displayed in task bar item when the application starts up. When not set, the name is the name of the executable.</dd>
   <dt>-nl &lt;locale&gt; (OSGi)</dt>
   <dd>equivalent to setting <a href="#osginl">osgi.nl</a> to &lt;locale&gt;</dd>
+  <dt>-noExit (OSGi)</dt>
+  <dd>equivalent to setting <a href="#osginoshutdown">osgi.noShutdown</a> to &quot;true&quot;</dd>
   <dt>-noLazyRegistryCacheLoading (Runtime) </dt>
   <dd>equivalent to setting <a href="#eclipsenolazyregistrycacheloading">eclipse.noLazyRegistryCacheLoading</a>
     to &quot;true&quot;</dd>
@@ -201,9 +203,16 @@ line arguments.</p>
   <dd>&lt;description&gt;</dd>
   <dt><a name="eclipseexitdata" id="eclipseexitdata"></a>eclipse.exitdata</dt>
   <dd>&lt;description&gt;</dd>
-  <dt><a name="eclipsemanifestconverter" id="eclipsemanifestconverter"></a>eclipse.manifestConverter</dt>
-  <dd>the class name of the manifest converter class to use when converting legacy
-    plugin.xml files to manifest.mf files</dd>
+  <dt><a name="eclipselogbackupmax" id="eclipse.log.backup.max"></a>eclipse.log.backup.max</dt>
+  <dd>the max number of backup log files to allow.  The oldest backup log file will be deleted
+     after the max number of backup log files is reached as a result of rotating the log file.
+     The default value is &quot;10&quot;.  A negative or zero value will cause the default
+     value to be used.</dd>
+  <dt><a name="eclipselogsizemax" id="eclipselogsizemax"></a>eclipse.log.size.max</dt>
+  <dd>the max size in Kb that the log file is allowed to grow.  The log file is rotated when
+     the file size exceeds the max size.  The default value is &quot;1000&quot;.
+     A negative value will cause the default value to be used.  A zero value indicates
+     no max log size.</dd>
   <dt><a name="eclipsenoextensionmunging" id="eclipsenoextensionmunging"></a>eclipse.noExtensionMunging</dt>
   <dd>if &quot;true&quot;, legacy registry extension are left as-is. By default such extensions
     are updated to use the new extension point ids found in Eclipse 3.0.</dd>
@@ -223,6 +232,10 @@ line arguments.</p>
   <dt><a name="eclipseproduct" id="eclipseproduct"></a>eclipse.product {-product}</dt>
   <dd>the identifier of the product being run. This controls various branding
   information and what application is used.</dd>
+  <dt><a name="eclipsestarttime" id="eclipsestarttime"></a>eclipse.startTime</dt>
+  <dd>This property is set at the time eclipse is started.  The value of this property a string 
+      representation of the value returned by System.currentTimeMillis().  This value is not
+      intended to be set by users.</dd>
   <dt><a name="eclipsevm" id="eclipsevm"></a>eclipse.vm {-vm}</dt>
   <dd>the path to the Java executable used to run Eclipse. This information is
   used to construct relaunch command lines.</dd>
@@ -235,7 +248,8 @@ line arguments.</p>
   <dt><a name="osgiarch"></a>osgi.arch {-arch}</dt>
   <dd>see -arch</dd>
   <dt><a name="osgibaseconfigurationarea"></a>osgi.baseConfiguration.area</dt>
-  <dd>asf</dd>
+  <dd>specifies a base configuration that is used when 
+      <a href="#osgiconfigurationarea">osgi.configuration.area</a> is not specified.</dd>
   <dt><a name="osgibundles"></a>osgi.bundles</dt>
   <dd>The comma-separated list of bundles which are automatically installed
     and optionally started
@@ -255,8 +269,8 @@ dependency resolution and eclipse extension registry data.  Using this option
 will force eclipse to reinitialize these caches.</dd>
   <dt><a name="osgiconfigurationcascaded"></a>osgi.configuration.cascaded</dt>
   <dd>if set to &quot;true&quot;, this configuration is cascaded to a parent
-    configuration. See the section on <a href="#locations">locations</a> for
-    more details.</dd>
+    configuration.  The parent configuration is specified by the <a href="#osgisharedconfigurationarea">osgi.sharedConfiguration.area</a>. 
+    See the section on <a href="#locations">locations</a> for more details.</dd>
   <dt><a name="osgiconfigurationarea"></a>osgi.configuration.area {-configuration}</dt>
   <dd>the configuration location for this run of the platform. The configuration
     determines what plug-ins will run as well as various other system settings.
@@ -304,6 +318,54 @@ Handy for investigating
   <dd>a comma separated list of classpath entries for the OSGi framework implementation.
     Relative locations are interpreted as relateve to the framework location
     (see <a href="#o.pngramework">osgi.framework</a>)</dd>
+  <dt><a name="osgiframeworkextensions"></a>osgi.framework.extensions</dt>
+  <dd>a comma-separated list of framework extensions.  Each entry is of the form:<br>
+	 <pre>    &lt;URL | simple bundle location&gt;</pre>
+      If a simple bundle location is specified (not a URL) then a search is done in parent directory of the 
+      org.eclipse.osgi bundle.  Framework extensions may be used to run Eclipse with a different
+      framework adaptor.  The framework extension may contain an eclipse.properties file to set 
+      system properties.  For example, a framework extension that provides a framework adaptor 
+      implemetnation can specify what the adaptor class is by setting the 
+      <a href="#osgiadaptor">osgi.adaptor</a> property.</dd>
+  <dt><a name="osgiframeworkshape"></a>osgi.framework.shape</dt>
+  <dd>set to the shape of the Eclipse OSGi Framework implementation.  This property is set when
+  the Eclipse platform is started and is not intended by be set by the user.  The value
+  &quot;jar&quot; indicates that the Eclipse OSGi Framework is contained in a single jar.
+  The value &quot;folder&quot; indicates that the Eclipse OSGi Framework is contained in a 
+  directory.</dd>
+  <dt><a name="osgijavaprofile"></a>osgi.java.profile</dt>
+  <dd>a URL to the JRE profile file to use.  A JRE profile contains values for the properties
+     org.osgi.framework.system.packages and org.osgi.framework.bootdelegation.  If 
+     the osgi.java.profile is not set then a profile is selected based on the 
+     java.specification.version value of the running JRE.</dd>
+  <dt><a name="osgijavaprofilebootdelegation"></a>osgi.java.profile.bootdelegation</dt>
+  <dd>
+    a java profile <a href="#osgijavaprofile">osgi.java.profile</a> may contain a 
+    &quot;org.osgi.framework.bootdelegation&quot; property.  This value may be used to set the system 
+	property &quot;org.osgi.framework.bootdelegation&quot;.  The osgi.java.profile.bootdelegation 
+	indicates the policy for bootdelegation to be used.  The following values are valid 
+	(default is ignore):
+    <ul type=disc>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>ignore</b> - indicates that
+          the &quot;org.osgi.framework.bootdelegation&quot; value in the java profile should be ingored.  
+          The system property &quot;org.osgi.framework.bootdelegation&quot; will be used to 
+          determine which packages should be delegated to boot.
+      </li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>override</b> - 
+          indicates that the &quot;org.osgi.framework.bootdelegation&quot; in the java profile should 
+          override the system property &quot;org.osgi.framework.bootdelegation&quot;.
+      </li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>none</b> - 
+          indicates that the &quot;org.osgi.framework.bootdelegation&quot; in the java profile AND 
+          the system properties should be ignored.  This is the most strict option.  
+          Running with this option causes the framework to use the OSGi R4 strict boot 
+          delegation model.
+      </li>
+    </ul>
+  </dd>
   <dt><a name="osgiinstallarea" id="osgiinstallarea"></a>osgi.install.area {-install}</dt>
   <dd>the install location of the platform. This setting indicates the location
     of the basic Eclipse plug-ins and is useful if the Eclipse install is disjoint.
@@ -321,6 +383,11 @@ Handy for investigating
     default setting) is only used if no value for the osgi.instance.area
     is set. See the section on <a href="#locations">locations</a> for
     more details.</dd>
+  <dt><a name="osgilocking"></a>osgi.locking</dt>
+  <dd>the locking type to use for this run of the platform.  The valid locking types
+  are &quot;java.io&quot;, &quot;java.nio&quot;, and &quot;none&quot;.  The default value is
+  &quot;java.nio&quot; unless the JRE does not support &quot;java.nio&quot; then &quot;java.io&quot;
+  is the default.</dd>
   <dt><a name="osgimanifestcache"></a>osgi.manifest.cache</dt>
   <dd>the location where generated manifests are discovered and generated. The
     default is in the configuration area but the manifest cache can be stored
@@ -328,15 +395,51 @@ Handy for investigating
   <dt><a name="osginl"></a>osgi.nl {-nl}</dt>
   <dd>the name of the locale on which Eclipse platform will run. NL values should
     follow the standard Java locale naming conventions.</dd>
+  <dt><a name="osginoshutdown"></a>osgi.noShutdown {-noExit}</dt>
+  <dd>if &quot;true&quot;, the VM will not exit after the eclipse application has ended.  This
+      is useful for examining the OSGi framework after the eclipse application has ended.</dd>
   <dt><a name="osgios"></a>osgi.os {-os}</dt>
   <dd>the operating system value. The value should be one of the Eclipse processor
     architecture names known to Eclipse (e.g., x86, sparc, ...).</dd>
+  <dt><a name="osgiparentclassloader"></a>osgi.parentClassLoader</dt>
+  <dd>the classloader type to use as the parent classloader for all bundles installed
+  in the Framework.  The valid types are the following:
+    <ul type=disc>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>app</b> - the application classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>boot</b> - the boot classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>ext</b> - the extension classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>fwk</b> - the framework classloader.</li>
+    </ul>
+  </dd>
+  <dt><a name="osgirequiredjavaversion"></a>osgi.requiredJavaVersion</dt>
+  <dd>The minimum java version that is required to launch Eclipse.  The default value is
+      &quot;1.4.1&quot;.</dd>
+  osgi.resolverMode
+  <dt><a name="osgiresolvermode"></a>osgi.resolverMode</dt>
+  <dd>the mode used to resolve bundles installed in the Framework.  A value of 
+      &quot;strict&quot; puts the resolver in strict mode.  The default resolver
+      mode is not strict.  When the resolver is in strict mode the Framework will 
+      enforce access restriction rules when loading classes and resources from 
+      exported packages which specify the x-internal or x-friends directives.</dd>
+  <dt><a name="osgisharedconfigurationarea"></a>osgi.sharedConfiguration.area</dt>
+  <dd>the shared configuration location for this run of the platform.  If the
+  <a href="#osgiconfigurationcascaded">osgi.configuration.cascaded</a> property is set
+  to &quot;true&quot; then shared configuration area is used as the parent configuration.</dd>
   <dt><a name="osgisplashlocation"></a>osgi.splashLocation</dt>
   <dd>the absolute URL location of the splash screen (.bmp file) to to show while
     starting Eclipse. This property overrides any value set in <a href="#osgisplashpath">osgi.splashPath</a>.</dd>
   <dt><a name="osgisplashpath"></a>osgi.splashPath</dt>
   <dd>a comma separated list of URLs to search for a file called splash.bmp.
   This property is overriden by any value set in <a href="#osgisplashlocation">osgi.splashLocation</a>.</dd>
+  <dt><a name="osgisyspath"></a>osgi.syspath</dt>
+  <dd>set to the path where the eclipse OSGi Framework (org.eclipse.osgi) implementation 
+  is located.  For example, &quot;&lt;eclipse install path&gt/eclipse/plugins&quot;.
+  This property is set when the Eclipse platform is started and is not intended by be 
+  set by the user.</dd>
   <dt><a name="osgiuserarea"></a>osgi.user.area {-user}</dt>
   <dd>the location of the user area. The user area contains data (e.g., preferences)
     specific to the OS user and independent of any Eclipse install, configuration
@@ -519,7 +622,33 @@ results in a value of <br>
 <p>* indicates that this setup is technically possible but pragmatically quite
   difficult to manage. In particular, without a configuration location the Eclipse
   runtime may only get as far as starting the OSGi framework.</p>
- 
+
+<h3>Read-only Locations</h3>
+
+<p>
+A location may be specified as a read-only location by appending &quot;.readOnly&quot; 
+to the location property and setting it to the value &quot;true&quot;.  The following properties
+can be used to specify their corresponding locations as read-only:
+    <ul type=disc>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'>
+          osgi.configuration.area.readOnly <a href="#osgiconfigurationarea">osgi.configuration.area</a>
+      </li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'>
+          osgi.sharedConfiguration.area.readOnly <a href="#osgisharedconfigurationarea">osgi.sharedConfiguration.area</a>
+      </li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'>
+          osgi.instance.area.readOnly <a href="#osgiinstancearea">osgi.instance.area</a>
+      </li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'>
+          osgi.user.area.readOnly <a href="#osgiuserarea">osgi.user.area</a>
+      </li>
+    </ul>
+</p>
+
 <h2>Launcher ini file</h2>
 <p>
 The eclipse.exe and more generally executables for RCP applications now read their parameters from an associated 
