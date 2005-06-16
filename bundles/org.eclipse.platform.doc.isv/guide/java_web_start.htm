@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Deploying eclipse based application with Java Web Start
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h2>Deploying eclipse based application with Java Web Start</h2>
+<p>
+Applications built on eclipse 3.1 can now be deployed using Java Web Start.<p>
+Java Web Start "is an application-deployment technology that gives you the power to launch full-featured 
+applications with a single click from your web browser".
+ <p>
+The prerequisites to start eclipse from Java Web Start are:
+<ul>
+<li> The deployed application must be eclipse 3.1 based; </li>
+<li> All deployed plug-ins must be jar'ed;</li>
+<li> All plug-ins must be signed since the application need full permission from the client.</li>
+</ul> The following steps describe how to setup a Java Web Start site serving up a feature based RCP application.
+
+<h3>Step 1, creating a wrappering feature</h3>
+<ul>
+<li> Create a feature including all the features that are listed in your product definition;</li>
+<li> Copy in a folder of your feature the startup.jar;</li>
+<li> Add the following line to the build.properties of the feature.
+<pre>
+root=&lt;folderContainingStartup.jar&gt;/
+</pre>
+</li>
+</ul>
+
+<h3> Step 2, exporting the wrappering feature and the startup.jar</h3>
+Note. Before proceeding with this step make sure to have a keystore available. Eclipse does not provide any
+facility to create keystores. You need to use keytool. In addition, ensure that the eclipse you are developing 
+with is running on a Java SDK instead of a JRE. If this constraint is not satisfied, the jar signing will fail.
+<p>
+<ul>
+<li> Select the wrappering feature and do File > Export > Feature. In the wizard, select the wrappering feature, 
+choose the "directory" option to export your jnlp application to, and check the option "package features and 
+plug-ins as individual JAR archives". On the next page of the wizard, fill in the information relative to your keystore 
+in the "Signing JAR Archives" section. Then in the "JNLP section", enter the name of the server that will serve up your 
+application and the level of JRE required to start your application. That last value will be used to in the generated JNLP 
+files to fill in the value of <code>&lt;j2se version="1.4+" /&gt; </code>. Click finish.</li>
+ 
+<li> Once the export is done you should have the following structure on disk
+<pre>
+site/   <i>(The root of your jnlp site)</i>
+  startup.jar
+  features/
+    WrapperingFeature_1.0.0.jar
+    WrapperingFeature_1.0.0.jnlp
+    com.xyz.abc_1.0.0.jar
+    com.xyz.abc_1.0.0.jnlp
+    ...
+  plugins/
+    org.eclipse.core.runtime_3.1.0.jar
+    com.foo.baz_1.0.0.jnlp
+    ...
+</pre>
+</li>
+
+<li>Using the same keystore than the one used to export the feature, sign startup.jar using jarsigner.<br/>
+Tips: if you don't change keystore, replace the startup.jar from the feature with this signed version so you don't 
+have to do this manual step on every export.</li>
+</ul>
+
+<h3>Step 3, creating the main jnlp file</h3>
+A Java Web Start application is described by JNLP files. They replace the eclipse.exe and the config.ini
+files by some equivalent mechanism. For example, JNLP has its own mechanism to control splash screen, ways
+to pass parameters and define what constitutes the application.
+<p>
+When you did the export, all the simple JNLP files have been created, so you are left with writing
+the main file that will control the application. Because the majority of the main file is common to all 
+applications, it is recommended to start from the following self documented template.
+<p>
+On the site serving up your application, the file must be located in the same folder than startup.jar.
+Once you will be done editing this file, your application will be ready.
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;jnlp 
+    spec="1.0+" 
+    codebase="http://myCompany.org/jnlpServer" 
+    href="mail.jnlp"&gt; &lt;!-- URL to the site containing the jnlp application. It should match the value used on  export. Href, the name of this file --&gt;
+  &lt;information&gt;
+    &lt;!-- user readable name of the application --&gt;
+    &lt;title&gt; Mail Application &lt;/title&gt;  
+    &lt;!-- vendor name --&gt;
+    &lt;vendor&gt;My company&lt;/vendor&gt;
+    &lt;!-- vendor homepage --&gt; 
+    &lt;homepage href="My company website" /&gt; 
+    &lt;!-- product description --&gt;
+    &lt;description&gt;This is a mail client&lt;/description&gt; 
+    &lt;icon kind="splash" href="splash.gif"/&gt;
+  &lt;/information&gt;
+ 
+  &lt;!--request all permissions from the application. This does not change--&gt;
+  &lt;security&gt;
+    &lt;all-permissions/&gt;
+  &lt;/security&gt;
+ 
+  &lt;!-- The name of the main class to execute. This does not change--&gt;
+  &lt;application-desc main-class="org.eclipse.core.launcher.WebStartMain"&gt;
+    &lt;argument&gt;-nosplash&lt;/argument&gt;
+  &lt;/application-desc&gt;
+ 
+  &lt;resources&gt;
+    &lt;!-- Reference to the startup.jar. This does not change --&gt;
+    &lt;jar href="startup.jar"/&gt;
+ 
+    &lt;!-- Reference to all the plugins and features consituting the application --&gt;
+    &lt;!-- Here we are refering to the wrappering feature since it transitively refers to all the other plug-ins  necessary --&gt;
+    &lt;extension 
+        name="Wrappering feature"
+        href="features/Wrappering_1.0.0.jnlp"/&gt;
+ 
+    &lt;!-- Information usually specified in the config.ini --&gt;
+    &lt;property 
+        name="osgi.instance.area" 
+        value="@user.home/Application Data/mail"/&gt;
+    &lt;property 
+        name="osgi.configuration.area" 
+        value="@user.home/Application Data/mail"/&gt;
+        
+    &lt;!-- The id of the product to run, like found in the overview page of the product editor --&gt;
+    &lt;property 
+        name="eclipse.product" 
+        value="mail.product"/&gt;
+  &lt;/resources&gt;
+
+  &lt;!-- Indicate on a platform basis which JRE to use --&gt; 
+  &lt;resources os="Mac"&gt;
+    &lt;j2se version="1.5+" java-vm-args="-XstartOnFirstThread"/&gt;
+  &lt;/resources&gt;
+  &lt;resources os="Windows"&gt;
+    &lt;j2se version="1.4+"/&gt;
+  &lt;/resources&gt;
+  &lt;resources os="Linux"&gt;
+    &lt;j2se version="1.4+"/&gt;
+  &lt;/resources&gt;
+&lt;/jnlp&gt;
+</pre>
+Tips: once you have created this file, you can store it in the wrappering feature in the same folder than the startup.jar, such 
+that on every export you will get the complete structure.
+
+<h3>Plug-ins based application</h3>
+Even though your RCP application does not use features, Java Web Start-ing it is possible.<p>
+To do so, it is recommended to create a wrappering feature in order to facilitate the creation of the 
+main jnlp file and ease the deployement. This wrappering feature will list all the plug-ins of your application. Once the feature has been updated
+copy the generated JNLP file and modify it to become your main JNLP file.
+
+
+<h3>Known limitations</h3>
+<ul>
+<li>Eclipse Update and Java Web Start<br/>
+Those two deployment technologies can work together but under the following restrictions:
+plug-ins installed by Java Web Start can not be updated by Update and vice-versa. Features and plug-ins installed
+by Java Web Start can't be refered in the prerequisites of features that needs to be installed by Update;</li>
+<li> Help can not be deployed through Java Web Start. However it could be installed using eclipse Update, 
+or the server serving your application could run a help server;</li>
+<li> Request to exit the application with a restart code are ignored;</li>
+<li>On the mac, applications can only be webstarted by clients using java 1.5.</li>
+
+</BODY>
+</HTML>
