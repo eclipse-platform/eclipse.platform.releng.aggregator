@@ -3,8 +3,6 @@
 
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
 <title>Eclipse Project Release Notes 3.1.0</title>
 </head>
 
@@ -261,8 +259,19 @@ Eclipse SDK only on Windows operating environments.
 <h3>3.1 <a name="I-Platform">Platform</a></h3>
 
 <h3>3.1.1 <a name="I-Platform-Core">Platform - Core</a></h3>
-<h4>Eclipse fails to start on some file systems</h4>
-<p>Java sometimes has difficulty detecting whether a file system is writable. In
+<h4>Installation/Configuration issues that can cause Eclipse to fail start</h4>
+<p>Here are some common problems that can cause Eclipse not to start:</p>
+<ul>
+<li>As shown <a href="#TargetOperatingEnvironments">above</a>, Eclipse 3.1 requires at least a 1.4 VM. Perhaps an older
+version of the VM is being found in your path. To explicitly specify which VM to
+run with, use the Eclipse <tt>-vm</tt> command-line argument. (See also the
+<a href="#Running Eclipse">Running Eclipse</a> section below.)</li>
+<li>Eclipse must be installed to a clean directory and not installed over top of
+a previous installation. If you have done this then please re-install to a new
+directory. If your workspace is in a child directory of your old installation
+directory, then see the instructions below on <a href="#upgrading">Upgrading Workspace from a
+Previous Release"</a>.</li>
+<li>Java sometimes has difficulty detecting whether a file system is writable. In
 particular, the method java.io.File.canWrite() appears to return true in
 unexpected cases (e.g., using Windows drive sharing where the share is a
 read-only Samba drive). The Eclipse runtime generally needs a writable
@@ -271,7 +280,13 @@ current configuration location as writable. The net result is that Eclipse will
 fail to start and depending on the circumstances, may fail to write a log file
 with any details. To work around this, we suggest users experiencing this
 problem set their configuration area explicitly using the -configuration command
-line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719">67719</a>)</p>
+line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719">67719</a>)</li>
+</ul>
+<h4>Installing plug-ins by unzipping them into the plugins directory</h4>
+<p>If you have installed new plug-ins and they aren't showing up when you run,
+then perhaps you unzipped them into your "plugins" directory and your
+configuration might need to be refreshed. This can be accomplished by starting
+Eclipse with the -clean command line argument.</p>
 <h4>XML files with UTF-8 byte order mark fail to have content type detected</h4>
 <p>Eclipse will fail to detect the proper content type for XML files that have a
 UTF-8 byte order mark if Crimson is the XML parser (as it is on Sun 1.4 JREs,
@@ -311,13 +326,19 @@ competing with other users of the thread (all of Eclipse), so the results will
 be unpredictable. However, there should be no problem in practice provided you
 reset the context class loader back to its original value when your use in the
 current thread is&nbsp;complete. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=8907">8907</a>)</p>
-<h4> Deadlock creating executable
+<h4>Deadlock creating executable
 extension in Plugin.startup</h4>
 <p>If <code>Plugin.startup</code> code is too complex and performs tasks such
 as creating an executable extension, a deadlock situation can be created. Only
 simple bookkeeping tasks should be performed in <code>Plugin.startup</code>
 code. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>)</p>
-
+<h4>Potential Problems Converting Plug-in Manifests</h4>
+<p>If your plug-in ships with a plug-in manifest and not an OSGi bundle manifest,
+is shipped as a JAR file, and contains a nested JAR file then there may be
+problems in the automatic generation of the bundle manifest file. The packages
+defined in the nested JAR may not be exported correctly in the Export-packages
+bundle manifest header. To work around this you should ship your plug-in with a
+bundle manifest. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=97689">97689</a>)</p>
 <h3>3.1.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
 <h4>UTF-8 encoded buildfiles with Byte Order Mark</h4>
 <p>UTF-8 encoded buildfiles with byte order marks will fail to be parsed correctly depending on the XML parser being used for the build. Therefore a valid buildfile will fail to build with an error message similar to: "BUILD FAILED: C:\workspace\bom.xml:1: Document root element is missing.". To succeed in building with these files, ensure to include Xerces jars on the Ant runtime classpath so that the Xerces parser is used to parse the XML. As well the context menu for these files in the Navigator or Package Explorer will not have the run shortcuts for Ant builds. (bug
@@ -362,9 +383,7 @@ only)</h4>
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44196">44196</a>)</p>
 
 <h3>3.1.3 <a name="I-Platform-Help">Platform - Help</a></h3>
-<b>
 <h4>Help browser tool bar buttons do not work for some documents</h4>
-</b>
 <p>The Help browser's Print, Synchronize, and Bookmark buttons do not work for
 pages that are not actually installed with the product. However, you can always
 use the print command in the browser's context menu to print the page you're
@@ -417,9 +436,7 @@ to set High Contrast as follows: Right click the desktop, chose properties,
 select Windows Classic style from the Windows and buttons drop down on the
 Appearance tab, and choose your scheme (for example High Contrast Black) from
 Color Scheme drop down. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=28609">28609</a>)</p>
-<b>
 <h4>Help browser displays a blank page</h4>
-</b>
 <p>If you see a help launched with a blank page, and no errors displayed, it can
 be caused by a conflict between libraries in org.eclipse.tomcat plug-in and jars
 optionally installed in JRE jre/lib/ext directory. To fix the problem, ensure
@@ -428,7 +445,7 @@ in the jre/lib/ext directory. (bug <a href="https://bugs.eclipse.org/bugs/show_b
 
 <h3>3.1.4 <a name="I-Platform-UI">Platform - UI</a></h3>
 <h4>High contrast settings</h4>
-<p>Eclipse was tested for High Contrast using 1162 x 864 resolution in Windows
+<p>Eclipse was tested for High Contrast using 1152 x 864 resolution in Windows
 XP High Contrast mode. You can select this mode by selecting Accessibility
 Options &gt; Display &gt; Use High Contrast from the Windows XP Control Panel
 menu.</p>
@@ -725,10 +742,11 @@ New Folder... &gt; Advanced. Then a folder name can be associated with an
 arbitrary file system location by checking &quot;Link to folder on the file
 system). Once mounted, the linked class folder can normally be referenced on a
 build path, and from there on programs can be compiled against it. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67631">67631</a>)</p>
-<h4>Package Explorer not asking for filter removal</h4>
-<p>Show In &gt; Package Explorer normally asks for removal of filters when the
-compilation unit to be shown in the Package Explorer is filtered out. However,
-this currently is not happening if only a single filter is selected. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67814">67814</a>)</p>
+<h4>Plug-in Working sets in Java views</h4>
+<p>The Java views (e.g. Package explorer, Type Hiararchy, Open Type dialig, etc.)
+support filtering their elements based on a working set. Although the dialog offers
+to select a Plug-in working set, applying such a working set results in an empty view
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67814">67814</a>).</p>
 <h4>Hierarchical layout and inclusion filters</h4>
 <p>Packages explicitly included on the build path using inclusion filters will
 not be visible in either the Package Explorer or Packages views when the views
@@ -762,34 +780,26 @@ process (via <code>java.lang.Runtime.exec(...)</code>) when the specified
 command line contains GB18030 characters. Since Javadoc is created using the
 Javadoc executable provided with the JDK, generating Javadoc fails if the
 package or class name contains GB18030 characters. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=32215">32215</a>)</p>
-<b>
 <h4>Side effects of Step into Selection and Run to Line</h4>
-</b>
 <p>The actions &quot;Step into Selection&quot; and &quot;Run to Line&quot;
 optimistically set breakpoints on the line the user has chosen to step into or
 run to. However, the debugger can not determine if or when execution will ever
 reach the chosen line. The breakpoints set by the underlying implementation are
 not visible to the user and can cause execution to suspend unexpectedly at a
 later time, when the associated line is actually executed. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=51507">51507</a>)</p>
-<b>
 <h4>Default locale initialization incorrect</h4>
-</b>
 <p>The default locale is generally initialized from the settings in the
 operating system when a target VM is launched. However, when using javaw.exe on
 JDK1.4.2, Windows XP, the default locale is incorrectly initialized to en_US, no
 matter what the operating system settings are. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=65945">65945</a>)</p>
-<b>
 <h4>Suspend on uncaught exception overrides exception breakpoint location filters</h4>
-</b>
 <p>Exception breakpoints can be configured with location filters (inclusive and
 exclusive). When an unchecked exception is configured to <b>not</b> suspend
 execution in a specific class, execution will still suspend when the user
 preference to suspend on uncaught exceptions is on. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66770">66770</a>)</p>
-<b>
 <h4>Multiple references to the same object do not update in Variables view</h4>
-</b>
 <p>When more than one variable references the same object in the Variables view,
-only one variable will update while stepping through source code. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58768">58768</a>)</p>
+only one variable will update while stepping through source code. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58768">58768</a> and <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=98147">98147</a>)</p>
 <h4> Running Java programs with
 non-Latin-1 characters in package or class names</h4>
 You get a <code>java.lang.NoClassDefFoundError</code> when running Java
@@ -803,9 +813,7 @@ process (via <code>java.lang.Runtime.exec(...)</code>) when the specified
 command line contains GB18030 characters. This limitation means the debugger
 cannot launch applications when the command line it generates contains GB18030
 characters. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=32206">32206</a>)</p>
-<b>
-<p>Cannot detect installed JRE with GB18030 characters in path name</p>
-</b>
+<h4>Cannot detect installed JRE with GB18030 characters in path name</h4>
 <p>Automatic JRE detection fails when the JRE is stored in a directory
 containing GB18030 characters in its name. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=33844">33844</a>)</p>
 <h4> Unable to debug stack
@@ -885,6 +893,11 @@ pop-up menu (or use the shortcut &quot;delete&quot; key). Associated system
 processes in the OS may not be properly cleaned up. If a debug target has no
 suspended threads, termination works properly. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=1631">1631</a>)
 
+<h4> Memory View (Linux only)</h4>
+The feature to automatically load segments of memory while scrolling in the Memory
+view does not work on Linux. Instead the user must use the &quot;Next Page&quot; and &quot;Previous Page&quot; actions
+to manually load memory segments (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=74559">74559</a>)
+
 <h3>3.3 <a name="I-PDE">Plug-in Development Environment (PDE)</a></h3>
 <h4>Feature manifest editor does not preserve all comments</h4>
 <p>When a non-source page of the feature manifest editor is used, PDE will convert
@@ -919,22 +932,33 @@ the result may include a false hit. The false hit would result only if another
 plug-in in the product had declared an extension point by the same id.
 Workaround in this case would be to perform the search through the Plug-in
 search page. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=62177">62177</a>)</p>
-<h4> PDE source page colors do
+<h4>PDE source page colors do
 not take effect on Apply</h4>
 <p>Changes to the colors PDE uses for source pages of its multi-page editors
 are not immediately visible in opened editors after pressing the Apply button
 on&nbsp; the <b>Plug-in Development &gt; Editors preference</b> page. To work
 around this problem, close the editor and and reopen it. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=33640">33640</a>)</p>
-<h4> Emacs key bindings do not
+<h4>Emacs key bindings do not
 work in manifest editor fields</h4>
 <p>Non-default key bindings currently do not work in fields on non-source
 pages of the PDE manifest editors. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=19482">19482</a>)</p>
-<h4> Plug-in import wizard does
+<h4>Plug-in import wizard does
 not allow plug-ins of different versions to be imported</h4>
 <p>The Eclipse platform allows two plug-ins with the same ID but different
 versions to coexist if the only thing they contribute is run-time libraries.
 However, PDE cannot handle these plug-ins because it creates project names using
 plug-in IDs during binary project import. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=18500">18500</a>)</p>
+<h4>Export of plug-in may silently drop classes</h4>
+<p>When exporting a plug-in using the plug-in, feature or product wizards, some classes
+might be dropped from the resulting archive if their fully qualified name is too long.
+This typical path limitation can be worked around by creating the jar of the problematic
+plug-in by using the Jar export wizard.
+(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=97150">97150</a>)</p>
+<h4>Compilation errors when exporting projects not stored outside of the workspace</h4>
+<p>When exporting multiple plug-ins and one is stored outside of the workspace,
+compile errors occurs on export. To work around the problem, you can either export
+the plug-ins one by one, or change their location.
+(bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=98579">98579</a>)</p>
 <h2>4. <a name="Running Eclipse">Running Eclipse</a></h2>
 <p>After installing the Eclipse SDK in a directory, you can start the Workbench
 by running the Eclipse executable included with the release (you also need a 1.4
@@ -942,25 +966,27 @@ JRE, not included with the Eclipse SDK). On Windows, the executable file is call
 and is located in the <code>eclipse</code> subdirectory of the install. If
 installed at <code>c:\eclipse-SDK-3.1-win32</code>, the executable is <code>c:\eclipse-SDK-3.1-win32\eclipse\eclipse.exe</code>.
 <b>Note:</b> Set-up on most other operating environments is analogous. Special
-instructions for Mac OS X are listed below.</p>
-<p>Depending on the JRE that you are running, the number of plug-ins you are using, and
-the number of files you will be working with, you may have to increase the amount of memory that
-is available to the Java VM running Eclipse. Eclipse allows you to pass arguments directly to the
-Java VM using the
+instructions for Mac OS X are listed <a href="#macosx">below</a>.</p>
+<p>By default, Eclipse will allocate up to 256 megabytes of Java memory. This should
+be ample for all typical development tasks. However, depending on the JRE
+that you are running, the number of additional plug-ins you are using, and
+the number of files you will be working with, you could conceivably have to increase this amount. 
+Eclipse allows you to pass arguments directly to the Java VM using the
 <code>-vmargs</code> command line argument, which must follow all other Eclipse specific arguments.
-To increase the available memory, you would typically use:</p>
+Thus, to increase the available memory, you would typically use:</p>
 <blockquote>
   <p><code>eclipse -vmargs -Xmx&lt;memory size&gt;</code></p>
 </blockquote>
-<p>The <code>&lt;memory size&gt;</code> value should typically be at least
-&quot;128M&quot; (128 megabytes).
-Usually, &quot;256M&quot; (256 megabytes) is ample. You should
-not set this value to be larger than the amount of physical memory on your machine.</p>
+<p>with the <code>&lt;memory size&gt;</code> value set to greater than
+&quot;256M&quot; (256 megabytes -- the default). 
+Note that setting this value to be larger than the amount of available physical
+memory on your machine will cause Java to &quot;thrash&quot; as it copies objects
+back and forth to virtual memory, which will severely degrade your performance.</p>
 <p>When the Workbench is launched, the first thing you see is a 
 dialog that allows you to select where the workspace will be located. The
 workspace is the directory where your work will be stored.
-If you do not specify otherwise, Eclipse creates the workspace
-as a sibling of the executable (that is, at <code>c:\eclipse-SDK-3.1-win32\eclipse\workspace</code>).
+If you do not specify otherwise, Eclipse creates the workspace in your
+user directory.
 This workspace directory is used as the default content area for your projects
 as well as for holding any required metadata. For shared or multi-workspace
 installs you must explicitly specify the location for your workspace using the
@@ -986,7 +1012,7 @@ when you next launch Eclipse.</p>
 <p>Opening this shortcut launches Eclipse. (You can
 drag the shortcut to the Windows Desktop if you want to keep it in easy reach.)</p>
 
-<h3>Mac OS X</h3>
+<h3><a name="macosx">Mac OS X</a></h3>
 <p>On Mac OS X, you start Eclipse by double clicking the Eclipse application. If you need to pass arguments to Eclipse, you'll have to edit the <code>Info.plist</code> file
 inside the Eclipse application bundle: select the Eclipse application bundle icon while holding down the Control Key.
 This will present you with a popup menu. Select &quot;Show Package Contents&quot; in the popup menu.
