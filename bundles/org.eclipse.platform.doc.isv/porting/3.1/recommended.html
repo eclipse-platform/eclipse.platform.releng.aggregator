@@ -22,13 +22,13 @@
 <p>
 Eclipse 3.1 provides a new infrastructure for defining <b>undoable operations</b> and a shared
 <b>operation history</b> that keeps track of operations that have been executed, undone, and
-redone.  It is hoped that the various undo frameworks provided by add-on plug-ins will
-be migrated over time to the platform operation support, so that clients of these frameworks 
+redone. The various undo frameworks provided by add-on plug-ins should
+migrated over time to the platform operation support, so that clients of these frameworks 
 can integrate more deeply with the platform and make their undoable operations available
 for undo in other plug-in views and editors.  See the 
 <a href="../../guide/wrkAdv_undo.htm">Undoable operations</a> documentation for basic
 information about adding undo support to a plug-in.  Plug-ins that already define undo support
-or use another framework can be migrated to the SDK undo support in a staged fashion, as
+or use another framework can be migrated to the new undo support in a staged fashion, as
 described below.</p>
 <h4>Migrating plug-in specific operation (command) classes to IUndoableOperation</h4>
 <p>Plug-ins that already define classes describing their undoable operations should add
@@ -48,8 +48,8 @@ to be utilized by other plug-ins without either plug-in having to migrate comple
 that define an undo history (command stack) for keeping track of the undoable and redoable 
 operations can migrate to the platform operations history by defining an <b>IUndoContext</b>
 that represents their undo history.  Undo histories that were previously managed locally 
-by a workbench part can be merged into the common operation history by defining a unique 
-undo context for each part, adding the appropriate undo context to each operation, and
+can be merged into the common operation history by defining a unique 
+undo context either for each part or for each model object, adding the appropriate undo context to each operation, and
 then adding the operation to the platform operation history.  Undo histories with more 
 global scope can be implemented by defining a unique undo context representing that undo scope,
 assigning that context to each operation, and then adding the operation to the platform
@@ -92,7 +92,7 @@ will inherit this behavior.  </p>
 migrating any existing undo and redo actions to use the new handlers.  Editors with
 legacy undo and redo TextOperationActions will still have working local undo support, since 
 the JFace Text undo manager API used by these actions is still supported.  However, the 
-undo and redo action labels will not be consistent with the new SDK actions, which show 
+undo and redo action labels will not be consistent with the new Eclipse SDK undo/redo actions, which show 
 the name of the available undo or redo operation.  To create the common undo and redo
 action handlers, the undo context used by the text viewer's undo manager should
 be used when creating the action handlers, and those handlers should be set into the
