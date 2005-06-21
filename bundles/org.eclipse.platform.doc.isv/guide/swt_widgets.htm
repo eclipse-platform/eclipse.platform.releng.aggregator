@@ -21,9 +21,8 @@ to implement useful and robust applications.</P>
 
 <H3>Widget application structure</H3>
 
-<P>When you are contributing UI elements using platform workbench
-extensions, the mechanics of starting up SWT are handled for you by the
-workbench.</P>
+<P>When you are contributing UI elements using platform workbench extensions,
+the mechanics of starting up SWT are handled for you by the workbench.</P>
 
 <P>If you are writing an SWT application from scratch outside of the
 workbench, you must understand more about SWT's application structure.</P>
@@ -112,31 +111,14 @@ application, there may be a single child of the shell, several children, or
 nested layers of composites with children.</P>
 
 
-<H3>Widget life cycle</H3>
-
-<P>When your application creates a widget, SWT immediately creates the underlying
-platform widget. This eliminates the need for code that operates differently
-depending upon whether the underlying OS widget exists. It also allows a
-majority of the widget's data to be kept in the platform layer rather than
-replicating it in the toolkit. This means that the toolkit's concept of a widget
-lifecycle must conform to the rules of the underlying GUI system.</P>
-
-
-<H4>Widget creation</H4>
-
-<P>Most GUI platforms require you to specify a parent when you create a widget.
-Since SWT creates a platform widget as soon as you create a toolkit widget, the
-parent widget must be specified in the constructor for the widget.</P>
-
-
 <H4>Style bits</H4>
 
-<P>Some widget properties must be set in the OS at the time a widget is created
-and cannot be subsequently changed. For example, a list may be single or
+<P>Some widget properties must be set at the time a widget is created and
+cannot be subsequently changed. For example, a list may be single or
 multi-selection, and may or may not have scroll bars.</P>
 
-<P>These properties, called <em>styles</em>, must be set in the constructor.
-All widget constructors take an <strong>int</strong> argument that specifies
+<P>These properties, called <em>styles</em>, are set in the constructor.  All
+widget constructors take an <strong>int</strong> argument that specifies
 the bitwise <strong>OR</strong> of all desired styles. In some cases, a
 particular style is considered a hint, which means that it may not be
 available on all platforms, but will be gracefully ignored on platforms that
@@ -151,10 +133,10 @@ widget class is contained in the API Reference for
 
 <H4>Resource disposal</H4>
 
-<P>The OS platforms underneath SWT require explicit allocation and freeing of
-OS resources. In keeping with the SWT design philosophy of reflecting the
+<P>The platforms underneath SWT require explicit allocation and freeing of
+OS resources.  In keeping with the SWT design philosophy of reflecting the
 platform application structure in the widget toolkit, SWT requires that you
-explicitly free any OS resources that you have allocated. In SWT, the
+explicitly free any OS resources that you have allocated.  In SWT, the
 <strong>Widget.dispose()</strong> method is used to free resources associated
 with a particular toolkit object.</P>
 
@@ -162,6 +144,11 @@ with a particular toolkit object.</P>
 Here are some specific ground rules that further explain this philosophy:</P>
 
 <ul>
+  <li>When the user closes a
+      <a href="../reference/api/org/eclipse/swt/widgets/Shell.html"><strong>Shell</strong></a>,
+      the shell and all of its child widgets are recursively disposed. In this
+      case, you do not need to dispose of the widgets themselves. However, you
+      must free any graphics resources allocated in conjunction with those widgets.</li>
   <li>If you create a widget or graphic object using a constructor, you must
       dispose of it manually when you are finished using it.</li>
   <li>If you get a widget or graphic object without using a constructor, you
@@ -171,11 +158,6 @@ Here are some specific ground rules that further explain this philosophy:</P>
       being used.  (Similar to the rule described in
       <a HREF="jface_resources.htm#jface_resources_patterns" CLASS="XRef">Plug-in
       patterns for using images</a>.)</li>
-  <li>When the user closes a
-      <a href="../reference/api/org/eclipse/swt/widgets/Shell.html"><strong>Shell</strong></a>,
-      the shell and all of its child widgets are recursively disposed. In this
-      case, you do not need to dispose of the widgets themselves. However, you
-      must free any graphics resources allocated in conjunction with those widgets.</li>
   <li>If you create a graphic object for use during the lifetime of one of your
       widgets, you must dispose of the graphic object when the widget is
       disposed. This can be done by registering a dispose listener for your
@@ -183,14 +165,12 @@ Here are some specific ground rules that further explain this philosophy:</P>
       event is received.</li>
 </ul>
 
-
 <p>There is one exception to these rules.  Simple data objects, such as
 <strong><a href="../reference/api/org/eclipse/swt/graphics/Rectangle.html">Rectangle</a></strong> and
 <strong><a href="../reference/api/org/eclipse/swt/graphics/Point.html">Point</a></strong>,
 do not use operating system resources. They do not have a
 <strong>dispose()</strong> method and you do not have to free them.  If in
 doubt, check the javadoc for a particular class.</p>
-
 
 <p>See <a href="http://www.eclipse.org/articles/swt-design-2/swt-design-2.html">Managing
 operating resources</a> for further discussion of this topic.</p>
