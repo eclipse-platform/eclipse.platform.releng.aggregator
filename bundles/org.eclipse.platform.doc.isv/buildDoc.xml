@@ -1,116 +1,118 @@
 <project name="Platform Doc Isv Build" default="all"  basedir="." >
 
-<target name="init">
-	<available file="${basedir}/doc.zip" property="doc.zip.present"/>
-</target>
-	
-<target name="all" depends="init" unless="doc.zip.present">
-	<antcall target="convertSchemaToHtml" />
-	<antcall target="examplesDocCopy" />
-	<antcall target="generateJavadoc" />
-	<antcall target="build.index" />
-	<antcall target="createDocZip" />
-</target>
+	<target name="init">
+		<available file="${basedir}/doc.zip" property="doc.zip.present"/>
+	</target>
+
+	<target name="all" depends="init" unless="doc.zip.present">
+		<antcall target="convertSchemaToHtml" />
+		<antcall target="examplesDocCopy" />
+		<antcall target="generateJavadoc" />
+		<antcall target="build.index" />
+		<antcall target="createDocZip" />
+	</target>
 
 
-<target name="build.index" description="Builds search index for the plug-in: org.eclipse.jdt.doc.isv" if="eclipse.running">
-	<help.buildHelpIndex manifest="${basedir}/plugin.xml" destination="${basedir}"/>
-</target>
+	<target name="build.index" description="Builds search index for the plug-in: org.eclipse.jdt.doc.isv" if="eclipse.running">
+		<help.buildHelpIndex manifest="${basedir}/plugin.xml" destination="${basedir}"/>
+	</target>
 
-<target name="convertSchemaToHtml" if="eclipse.running">
-	<property name="dest" value="reference/extension-points" />
+	<target name="convertSchemaToHtml" if="eclipse.running">
+		<property name="dest" value="reference/extension-points" />
 
-    <record name="${basedir}/platformconvert.txt" action="start"/>
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ant.core/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ant.ui/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.compare/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.core.expressions/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.core.filebuffers/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.core.resources/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.core.runtime/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.core.variables/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.debug.core/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.debug.ui/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.help/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.help.base/plugin.xml" destination="${dest}" />
-	<pde.convertSchemaToHTML manifest="../org.eclipse.ltk.core.refactoring/plugin.xml" destination="${dest}" />
-	<pde.convertSchemaToHTML manifest="../org.eclipse.ltk.ui.refactoring/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.search/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.team.core/plugin.xml" destination="${dest}" />
- 	<pde.convertSchemaToHTML manifest="../org.eclipse.team.ui/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.cheatsheets/plugin.xml" destination="${dest}" />
-	<!--copy extra files linked to by generated extension point doc-->
- 	<copy file="../org.eclipse.ui.cheatsheets/schema/cheatSheetContentFileSpec.html" todir="${dest}"/>
- 	<copy file="../org.eclipse.ui.cheatsheets/schema/contentFile.xsd" todir="${dest}"/>
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.console/plugin.xml" destination="${dest}" />	
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.editors/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.externaltools/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.ide/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.intro/plugin.xml" destination="${dest}" />
-	<!--copy extra HTML file linked to by generated extension point doc-->
- 	<copy file="../org.eclipse.ui.intro/schema/introContentFileSpec.html" todir="${dest}"/>
-    <pde.convertSchemaToHTML manifest="../org.eclipse.ui.workbench.texteditor/plugin.xml" destination="${dest}" />
-    <pde.convertSchemaToHTML manifest="../org.eclipse.update.core/plugin.xml" destination="${dest}" />
-    <record name="${basedir}/platformconvert.txt" action="stop"/>
-</target>
+		<record name="${basedir}/platformconvert.txt" action="start"/>
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ant.core/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ant.ui/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.compare/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.core.expressions/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.core.filebuffers/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.core.resources/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.core.runtime/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.core.variables/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.debug.core/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.debug.ui/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.help/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.help.base/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ltk.core.refactoring/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ltk.ui.refactoring/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.search/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.team.core/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.team.ui/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.cheatsheets/plugin.xml" destination="${dest}" />
+		<!--copy extra files linked to by generated extension point doc-->
+		<copy file="../org.eclipse.ui.cheatsheets/schema/cheatSheetContentFileSpec.html" todir="${dest}"/>
+		<copy file="../org.eclipse.ui.cheatsheets/schema/contentFile.xsd" todir="${dest}"/>
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.console/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.editors/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.externaltools/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.ide/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.intro/plugin.xml" destination="${dest}" />
+		<!--copy extra HTML file linked to by generated extension point doc-->
+		<copy file="../org.eclipse.ui.intro/schema/introContentFileSpec.html" todir="${dest}"/>
+		<pde.convertSchemaToHTML manifest="../org.eclipse.ui.workbench.texteditor/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="../org.eclipse.update.core/plugin.xml" destination="${dest}" />
+		<record name="${basedir}/platformconvert.txt" action="stop"/>
+	</target>
 
-<target name="examplesDocCopy" >
-	<copy todir="samples">
-    	<fileset dir="..">
-    		<include name="org.eclipse.compare.examples/doc-html/"/>
-    		<include name="org.eclipse.compare.examples.xml/doc-html/"/>
-    		<include name="org.eclipse.help.examples.ex1/doc-html/"/>
-	    	<include name="org.eclipse.swt.examples/doc-html/"/>
-	    	<include name="org.eclipse.swt.examples.browser/doc-html/"/>
-	    	<include name="org.eclipse.swt.examples.controls/doc-html/"/>
-	    	<include name="org.eclipse.swt.examples.launcher/doc-html/"/>
-	        <include name="org.eclipse.swt.examples.layouts/doc-html/"/>
-	   		<include name="org.eclipse.swt.examples.ole.win32/doc-html/"/>
-	    	<include name="org.eclipse.swt.examples.paint/doc-html/"/>
-	   		<include name="org.eclipse.ui.examples.javaeditor/doc-html/"/>
-	    	<include name="org.eclipse.ui.examples.multipageeditor/doc-html/"/>
-	    	<include name="org.eclipse.ui.examples.propertysheet/doc-html/"/>
-	   		<include name="org.eclipse.ui.examples.readmetool/doc-html/"/>
-	   		<include name="org.eclipse.ui.examples.undo/doc-html/"/>
-	   		<include name="org.eclipse.team.examples.filesystem/doc-html/"/>
-	    </fileset>
-	 </copy>
-</target>
+	<target name="examplesDocCopy" >
+		<copy todir="samples">
+			<fileset dir="..">
+				<include name="org.eclipse.compare.examples/doc-html/"/>
+				<include name="org.eclipse.compare.examples.xml/doc-html/"/>
+				<include name="org.eclipse.help.examples.ex1/doc-html/"/>
+				<include name="org.eclipse.swt.examples/doc-html/"/>
+				<include name="org.eclipse.swt.examples.browser/doc-html/"/>
+				<include name="org.eclipse.swt.examples.controls/doc-html/"/>
+				<include name="org.eclipse.swt.examples.launcher/doc-html/"/>
+				<include name="org.eclipse.swt.examples.layouts/doc-html/"/>
+				<include name="org.eclipse.swt.examples.ole.win32/doc-html/"/>
+				<include name="org.eclipse.swt.examples.paint/doc-html/"/>
+				<include name="org.eclipse.ui.examples.javaeditor/doc-html/"/>
+				<include name="org.eclipse.ui.examples.multipageeditor/doc-html/"/>
+				<include name="org.eclipse.ui.examples.propertysheet/doc-html/"/>
+				<include name="org.eclipse.ui.examples.readmetool/doc-html/"/>
+				<include name="org.eclipse.ui.examples.undo/doc-html/"/>
+				<include name="org.eclipse.team.examples.filesystem/doc-html/"/>
+			</fileset>
+		</copy>
+	</target>
 
-<target name="getJavadocPath">
-	<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
-	<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
-</target>
+	<target name="getJavadocPath">
+		<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
+		<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+	</target>
 
-<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
+	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
-	<condition property="optionsFile" value="platformOptions">
-	      <os family="unix" />
-	</condition>
-    <condition property="optionsFile" value="platformOptions.txt">
-	      <os family="windows" />
-    </condition>
+		<condition property="optionsFile" value="platformOptions">
+			<os family="unix" />
+		</condition>
+		<condition property="optionsFile" value="platformOptions.txt">
+			<os family="windows" />
+		</condition>
 
-	<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
-		
-	<!--scrub isv plugin directories of any preexisting api doc content-->
-	<delete dir="reference/api"/>
-	<mkdir dir="reference/api"/>
+		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 
-	<!--retrieve osgi javadoc-->
-	<unzip src="../org.eclipse.osgi/osgi/osgiJavaDoc.zip" dest="reference/osgi" />
-	<exec dir="." executable="${javadoc}" output="doc.bin.log">
-		<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
-	</exec>
-	
-</target>
+		<!--scrub isv plugin directories of any preexisting api doc content-->
+		<delete dir="reference/api"/>
+		<mkdir dir="reference/api"/>
 
-<target name="createDocZip">
-		<zip zipfile="${basedir}/doc.zip"
-			basedir="${basedir}"
-			includes="book.css, notices.html, about.html, no_help_exists.htm, concepts/**, gettingStarted/**, images/**, reference/**, porting/**, tasks/**,samples/**,guide/**,questions/**"
-		/>
-</target>
+		<!--retrieve osgi javadoc-->
+		<unzip src="../org.eclipse.osgi/osgi/osgiJavaDoc.zip" dest="reference/osgi" />
+		<exec dir="." executable="${javadoc}" output="doc.bin.log">
+			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
+		</exec>
+
+		<!--workaround for bug 101048-->
+		<replace dir="reference/api" token="=&quot;/../misc/api-usage-rules.html" value="=&quot;./../misc/api-usage-rules.html">
+			<include name="*htm*" />
+		</replace>
+
+	</target>
+
+	<target name="createDocZip">
+		<zip zipfile="${basedir}/doc.zip" basedir="${basedir}" includes="book.css, notices.html, about.html, no_help_exists.htm, concepts/**, gettingStarted/**, images/**, reference/**, porting/**, tasks/**,samples/**,guide/**,questions/**" />
+	</target>
 </project>
 
