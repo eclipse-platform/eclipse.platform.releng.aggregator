@@ -15,7 +15,8 @@ User interface resources
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H2>
-User interface resources</H2><P >
+User interface resources</H2>
+<P >
 The <b><a href="../reference/api/org/eclipse/jface/resource/package-summary.html"> org.eclipse.jface.resource</a></b> package defines classes that help plug-ins manage UI resources such as fonts and icons.</P>
 <P >
 Many of the workbench extension points allow plug-ins to supply icons that can be used to show their contributions in the workbench. Since GUI operating systems support a limited number of images or fonts in memory at once, a plug-in's UI resources must be carefully managed and sometimes shared between widgets.</P>
@@ -133,83 +134,25 @@ Plug-in wide image class</H4>
 When fine-tuning a plug-in, it is common to experiment with all of these different image creation patterns. It
 can be useful to isolate the decision making regarding image creation in a separate class and instruct all clients to use the class to obtain all images. This way, the creation sequence can be tuned to reflect the actual performance characteristics of the plug-in.&nbsp;</P>
 
-
-
-<H3> ImageCache</H3>
-<P >Managing images in applications can be a complex task. Because there is a 
-  limit on the number of images that can be in memory at any one time, improper 
-  usage of images can greatly harm an application's performance. There are several 
-  ways to handle image resources issues, such as using a global image registry. 
-  However, the image registry will only dispose the images when the SWT Display 
-  that creates them is disposed, potentially on shutdown. This implies that images 
-  might be kept in the registry longer than needed. For large scale applications, 
-  this can be a problem. </P>
-<P >The ImageCache is a weakly referenced cache of equivalent image descriptors 
-  to arrays of image instances, representing normal, gray and disabled images. 
-  The cache is used to hold images in memory while their corresponding image descriptors 
-  are defined. When the image descriptors become weakly referred to, a cleaner 
-  thread disposes the corresponding images in the array of images. </P>
-<P >The goal of the ImageCache is to partially remove the burden from the user 
-  to clean-up the images they request. The key concept behind the ImageCache is 
-  to rely on the garbage collector for image clean-up. The idea is to map weakly 
-  referenced image descriptors to images and dispose images when their corresponding 
-  image descriptors are not referenced anymore. The disposal of the images is 
-  performed by a cleaner thread and not by the user. The ImageCache is a centralized 
-  cache of shared images that will ensure uniqueness of images, as well as guaranteed 
-  image clean-up, either when the garbage collector determines that the image 
-  descriptors are no longer referenced, or on shut down by calling the ImageCache's 
-  <strong>dispose()</strong>.</P>
-<P >It is recommended to use this class as a singleton, since it creates a thread 
-  for image clean-up. Requesting images and disposing the ImageCache should be 
-  done via the UI Thread. Upon request of a disabled or gray image, the normal 
-  image will be created as well, if it was not already in the cache, in order 
-  to create the disabled or gray version of the image. <br>
-</P>
-<P > The ImageCache serves two main purposes: image retrieval and image clean-up. 
-  The image retrieval is performed by the <strong>getImage()</strong> methods 
-  that query the image map for the requested images. The image clean-up is performed 
-  by the image cleaner thread and the <strong>dispose()</strong> method when it 
-  is invoked. </P>
-<ul>
-  <li><strong>Image Retrieval:</strong> The ImageCache maps a set of weak references 
-    to equivalent image descriptors to the corresponding array of images (disabled, 
-    gray and regular images). When an image is requested for a particular image 
-    descriptor, the image map is queried for the corresponding equivalence set. 
-    <ul>
-      <li>If no equivalence set for that image descriptor exists in the image 
-        map, the equivalence set, with the weak reference to the image descriptor 
-        added to the set, and the requested image are created and added to the 
-        image map. The newly created image is returned. </li>
-    </ul>
-    <ul>
-      <li>If an equivalence set corresponding to the passed image descriptor is 
-        found, a weak reference to that image descriptor is added to the set if 
-        a weak reference to the same image descriptor did not already exist. The 
-        requested image for the corresponding array of images is returned or is 
-        created if it had not been previously created. The image, newly created 
-        or from the cache, is returned. </li>
-    </ul>
-  </li>
-  <li><strong>Image Clean-Up:</strong> The cleaner thread is started in the ImageCache's 
-    constructor. The thread monitors the reference queue for potential images 
-    to clean-up. When a weak reference is put into the reference queue, it is 
-    removed from its corresponding equivalence set in the image map. Once the 
-    equivalence set becomes empty, it is removed from the image map and the created 
-    images in its corresponding array of images are disposed. </li>
-</ul>
-
-<p><strong>Note:</strong> It is the responsibility of the user to ensure that 
-  the image descriptors are kept around as long as the images are needed, since 
-  the images will be disposed of with no warning when all descriptors associated 
-  with a particular array of images become weakly referenced. To avoid duplicate 
-  images, the user should ensure that equivalency in their implementation of image 
-  descriptors are properly defined. The users of this cache should not explicitly 
-  dispose the images themselves since they could be shared by other objects. This 
-  cache makes no guarantees on how long the cleaning process will take, or when 
-  exactly it will occur since it is dependent on when the garbage collector will 
-  run. It is, however, guaranteed that upon calling the ImageCache's dispose(), 
-  all images in the cache will be disposed immediately.<br>
-</p>
+<H3> ResourceManager</H3>
+<P > The <a href="../reference/api/org/eclipse/jface/resource/ResourceManager.html"><b> 
+  ResourceManager</b></a> class is used to keep a mapping of ImageDescriptors 
+  to Images so that an Image can be reused be referring to it via it's descriptor.When 
+  an image is requested by descriptor from the registry, the registry will return 
+  the image if it has been created, or create one from the descriptor. This allows 
+  clients of the registry to share images. </P>
+<P >The top level ResourceManager is a <a href="../reference/api/org/eclipse/jface/resource/DeviceResourceManager.html"><strong>DeviceResourceManager</strong></a> 
+  which is created on a Display. The ResourceManager defined by <strong><a href="../reference/api/org/eclipse/jface/resource/JFaceResources.html">JFaceResources</a></strong>.<strong>getResources() 
+  </strong>is a DeviceResourceManager and can be used as the top level ResourceManager. 
+  If you need a ResourceManager with a shorter lifecycle than the DeviceResourceManager 
+  you can create a <strong><a href="../reference/api/org/eclipse/jface/resource/LocalResourceManager.html">LocalResourceManager</a></strong> 
+  as a child and dispose of it when you are done with it.</P>
+<P >A DeviceResourceManager will be disposed when the Display used to create it 
+  is disposed so no special management code is required.</P>
+<P > Images that are added to or retrieved from the manager must not be disposed 
+  by any client. The manager is responsible for disposing of the image since the 
+  images are shared by multiple clients. The registry will dispose of the images 
+  when the ResourceManager that holds onto them is disposed.</P>
 <H3> Font registry</H3>
 <P >
 Fonts are another limited resource in platform operating systems. The creation and disposal issues are the same for fonts as
