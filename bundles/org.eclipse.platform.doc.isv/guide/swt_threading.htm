@@ -14,89 +14,47 @@
 <BODY BGCOLOR="#ffffff">
 
 <H2>Threading issues</H2>
-<P>When working with a widget toolkit, it is important to understand the
+<p>When working with a widget toolkit, it is important to understand the
 underlying thread model that is used for reading and dispatching platform
 GUI events.  The implementation of the UI thread affects the rules that
-applications must follow when using Java threads in their code.</P>
+applications must follow when using Java threads in their code.</p>
 
 
-<H3>Native event dispatching</H3>
+<h3>Native event dispatching</h3>
 
-<P>Underneath any GUI application, regardless of its language or UI toolkit,
+<p>Underneath any GUI application, regardless of its language or UI toolkit,
 the OS platform detects GUI events and places them in application event queues.
 Although the mechanics are slightly different on different OS platforms, the
 basics are similar. As the user clicks the mouse, types characters, or surfaces
 windows, the OS generates application GUI events, such as mouse clicks,
 keystrokes, or window paint events. It determines which window and application
-should receive each event and places it in the application's event queue.</P>
+should receive each event and places it in the application's event queue.</p>
 
-<P>The underlying structure for any windowed GUI application is an event loop.
+<p>The underlying structure for any windowed GUI application is an event loop.
 Applications initialize and then start a loop which simply reads the GUI events
 from the queue and reacts accordingly. Any work that is done while handling one
 of these events must happen quickly in order to keep the GUI system responsive
-to the user.</P>
+to the user.</p>
 
-<P>Long operations triggered by UI events should be performed in a separate
+<p>Long operations triggered by UI events should be performed in a separate
 thread in order to allow the event loop thread to return quickly and fetch the
 next event from the application's queue. However, access to the widgets and
 platform API from other threads must be controlled with explicit locking and
 serialization.  An application that fails to follow the rules can cause an OS
-call to fail, or worse, lock up the entire GUI system.</P>
-
-
-<H3>Toolkit UI threads</H3>
-
-<P>Native GUI programmers using C are quite familiar with the design
-considerations for working with the platform event loop. However, higher level
-widget toolkits in Java often attempt to shield application developers from UI
-threading issues by hiding the platform event loop.</P>
-
-<P>A common way to achieve this is to set up a dedicated toolkit UI thread for
-reading and dispatching from the event loop, and posting the events to an
-internal queue that is serviced by applications running in separate threads.
-This allows the toolkit to respond in sufficient time to the operating system,
-while not placing any restrictions on the application's timing in handling the
-event. Applications must still use special locking techniques to access UI
-code from their application thread, but it is done consistently throughout
-the code since all application code is running in a non-UI thread.</P>
-
-<P>Although it sounds tempting to &quot;protect&quot; applications from UI
-threading issues, it causes many problems in practice.</P>
-
-<P>It becomes difficult to debug and diagnose problems when the timing of GUI
-events is dependent on the Java threading implementation and application
-performance.</P>
-
-<P>Modern GUI platforms perform many optimizations with the event queue. A
-common optimization is to collapse consecutive paint events in the queue. Every
-time that part of a window must be repainted, the queue can be checked for
-overlapping or redundant paint events that have not been dispatched yet.  These
-events can be merged into one paint event, causing less flicker and less
-frequent execution of the application's paint code.  This optimization will be
-defeated if the widget toolkit is pulling the events off the queue quickly and
-posting them to an internal queue.</P>
-
-<P>Changing the developer's perception of the threading model causes confusion
-for programmers that have experience with programming the native GUI system
-in other languages and toolkits.</P>
+call to fail, or worse, lock up the entire GUI system.</p>
 
 
 <H3>SWT UI thread</H3>
 
 <P>SWT follows the threading model supported directly by the platforms.  The
 application program runs the event loop in its main thread and dispatches
-events directly from this thread. This is the application's &quot;UI
-thread.&quot;</P>
-
-<blockquote><em>Note:  Technically, the UI thread is the thread that
-creates the
-<strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>.
-In practice, this is also the thread that runs the event loop and creates the
-widgets.</em></blockquote>
+events directly from this thread.  The UI thread is the thread in which the
+<strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
+was created.  All other widgets must be created in the UI thread.</p>
 
 <P>Since all event code is triggered from the application's UI thread,
 application code that handles events can freely access the widgets and
-make graphics calls without any special techniques. However, the application
+make graphics calls without any special techniques.  However, the application
 is responsible for forking computational threads when performing long
 operations in response to an event.</P>
 
@@ -105,8 +63,8 @@ operations in response to an event.</P>
 for any calls made from a non-UI thread that must be made from the UI
 thread.</em></blockquote>
 
-<P>The main thread, including the event loop, for an SWT application looks
-like the following:</P>
+<P>The main thread, including the event loop, for an SWT application has
+the following structure:</p>
 
 <pre>
    public static void main (String [] args) {
@@ -128,12 +86,6 @@ reads and dispatches events from the OS queue until the shell window is
 disposed. If there are no events available for us in the queue, we tell the
 display to sleep to give other applications a chance to run.</P>
 
-<blockquote><em>Note:  The most common threading model for an SWT application
-is to run a single UI thread and perform long operations in computational
-threads. However, SWT does not restrict developers to this model. An
-application could run multiple UI-threads with a separate event loop in
-each thread.</em></blockquote>
-
 <P>SWT provides special access methods for calling widget and graphics code
 from a background thread.</P>
 
@@ -144,8 +96,8 @@ from a background thread.</P>
 <strong>Runnable</strong> that calls the UI code. The methods
 <strong>syncExec(Runnable)</strong> and <strong>asyncExec(Runnable)</strong>
 in the <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
-class are used to execute these runnables in the UI thread at an appropriate
-time.</P>
+class are used to execute these runnables in the UI thread during the event
+loop.</p>
 
 <ul>
   <li><strong>syncExec(Runnable)</strong> should be used when the application
@@ -201,8 +153,8 @@ straightforward:</P>
 
 <ul>
   <li>Your workbench plug-in code executes in the workbench's UI thread.</li>
-  <li>If you receive an event from the workbench, it is always executing in the UI thread of the
-      workbench.</li>
+  <li>If you receive an event from the workbench, it is always executing in the
+      UI thread of the workbench.</li>
   <li>If your plug-in forks a computational thread, it must use the
       <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
       <strong>asyncExec(Runnable)</strong> or <strong>syncExec(Runnable)</strong>

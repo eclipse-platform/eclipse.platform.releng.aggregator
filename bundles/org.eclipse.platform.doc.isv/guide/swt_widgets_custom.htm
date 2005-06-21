@@ -14,9 +14,7 @@
 <BODY BGCOLOR="#ffffff">
 
 <h3>Custom widgets</h3>
-<P>Occasionally, you may find that none of the controls provided in SWT meet
-the need of your application. In these cases, you may want to extend SWT by
-implementing your own custom widget. SWT itself provides a package,
+<P>You may want to extend SWT by implementing your own custom widget. SWT itself provides a package,
 <strong><a href="../reference/api/org/eclipse/swt/custom/package-summary.html">org.eclipse.swt.custom</a></strong>,
 which contains custom controls that are not in the core set of SWT controls but are
 needed to implement the platform workbench.</P>
@@ -32,14 +30,19 @@ needed to implement the platform workbench.</P>
 </tr>
 
 <TR>
+<td><strong><a href="../reference/api/org/eclipse/swt/custom/CBanner.html">CBanner</a></strong></td>
+<td>CBanner is used in the workbench to layout the toolbar area and
+perspective switching toolbar.</td>
+</tr>
+
+<TR>
 <td><strong><a href="../reference/api/org/eclipse/swt/custom/CCombo.html">CCombo</a></strong></td>
-<td>Similar to Combo, but custom drawn to allow for using a combo without a
-border. This class was developed for using combos inside table cells.</td>
+<td>Similar to Combo, but is vertically resizable allowing it to fit inside table cells.</td>
 </tr>
 
 <TR>
 <td><strong><a href="../reference/api/org/eclipse/swt/custom/CLabel.html">CLabel</a></strong></td>
-<td>Similar to Label, but supports clipping of text with ellipsis. Also supports
+<td>Similar to Label, but supports shortening of text with an ellipsis. Also supports
 a gradient effect for the background color as seen in the active workbench view.
 Does not support wrapping.</td>
 </TR>
@@ -71,15 +74,12 @@ contents to fill the available space.</td>
 <TR>
 <td><strong><a href="../reference/api/org/eclipse/swt/custom/StyledText.html">StyledText</a></strong></td>
 <td>Editable control that allows the user to type text.  Ranges of text inside
-the control can have distinct colors (foreground and background) and font styles
-(bold and regular).</td>
+the control can have distinct colors and font styles.</td>
 </TR>
 
 <TR>
 <td><strong><a href="../reference/api/org/eclipse/swt/custom/ViewForm.html">ViewForm</a></strong></td>
-<td>Composite control that lays out three children horizontally and allows
-programmatic control of layout and border parameters. Used in the workbench to
-implement a view's label/toolbar/menu local bar.</td>
+<td>ViewForm is used in the workbench to position and size a view's label/toolbar/menu local bar.</td>
 </tr>
 </table>
 </center>
@@ -87,153 +87,45 @@ implement a view's label/toolbar/menu local bar.</td>
 
 <h4>Implementing a custom widget</h4>
 
-<p>Before implementing a custom widget, you should consider several important
-issues:</p>
-<ul>
-  <li>Can an existing SWT control be used as a simpler or plainer version of
-      your widget? If so, consider using the existing control and finishing
-      your application. You can always write a custom widget later that is
-      API compatible with the simpler control.</li>
-  <li>Does the widget have to be portable? If so, does a native widget exist
-      on all platforms? If you are comfortable writing native platform code,
-      you can provide a native implementation for each platform that your
-      application supports. If it does not exist on any (or all) platforms,
-      you will also have to provide a portable implementation.</li>
-  <li>Can the function be achieved by extending the behavior of an existing
-      control? If so, consider using an existing control and wrapping it with
-      additional behavior.</li>
-  <li>Will your widget contain other controls from the user's point of view?
-      It's useful to think about this issue in advance because it influences
-      your implementation and API.</li>
-</ul>
-
-<P>Once you've determined that you need a custom widget and have decided which
+<p>Once you've determined that you need a custom widget and have decided which
 platforms must be supported, you can consider several implementation techniques
 for your widget. These techniques can be mixed and matched depending on what
-is available in the underlying OS platform.</P>
+is available in the underlying OS platform.</p>
 
 
 <h4>Native implementation</h4>
 
 <p>If your application requires a native widget that is not provided by SWT,
 you will need to implement it natively. This may be a platform widget, a third
-party widget, or any other widget in a platform shared library.</p>
-
-<p>Each SWT platform is shipped with both a shared library (for example, a DLL
-on Windows) and a JAR (for the Java class files). The shared library contains
-all of the native function required for SWT, but it was not meant to be a
-complete set of the functions available on the platform. To expose native
-function or native widgets that were not exposed by SWT, you need to write
-your own shared library. If you are using a combination of native code on one
-platform and portable code on another, make sure you call your shared library
-on the platform with the native widget, and your jar on the platform with the
-portable widget.</p>
-
-<p>To implement a native widget, you must understand the Java Native Interface
-(JNI), the API of the widget in the shared library, and the underlying OS
-platform APIs in C.</p>
-
-<p>The basic process for implementation is to decide which part of the API of
-the native widget will be exposed in the Java API and writing the Java code
-that calls the natives to implement the behavior. JNI C code must be written
-to call the shared library.</p>
-
-<p>It is a good idea to follow the design principles used to implement SWT when
-building your own native widget implementation. For example, your JNI natives
-should map one to one with the API calls being made into the shared library.</p>
-
-<p>A complete example of a native custom widget implementation can be found in
+party widget, or any other widget in a platform shared library.  A complete
+example of a native custom widget implementation can be found in
 <a href="http://www.eclipse.org/articles/Article-Writing%20Your%20Own%20Widget/Writing%20Your%20Own%20Widget.htm">Creating
-Your Own Widgets using SWT..</a></p>
+Your Own Widgets using SWT</a>.</p>
 
 
-<h4>Extending an existing widget</h4>
+<h4>Combining existing widgets</h4>
 
-<p>If your new widget is similar in concept or implementation to an existing
-widget, you may want to wrap an existing SWT widget. This technique is used
-for the implementation of
-<strong><a href="../reference/api/org/eclipse/swt/custom/TableTree.html">TableTree</a></strong>.</p>
-
-<p>To wrap a widget, you create a subclass of the
-<a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a> or
-<a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a>
-widget (depending on whether your control will have children). In the
-constructor for the custom widget, create the wrapped widget. The resulting
-widget will be 100% Java portable since you are calling the wrapped widget's
-API for your implementation.</p>
-
-<p>Wrapping a widget is often a simpler way to implement custom widgets than
-starting from scratch. However, you must be careful in designing the API of
-your new widget. Here are some important tips:</p>
-
-<p>Consider whether your widget is a &quot;kind of&quot; wrapped widget or
-whether it just uses one for its implementation. For example, a table tree
-is not a kind of table. It doesn't refer to items by row number index. The
-<strong><a href="../reference/api/org/eclipse/swt/custom/TableTree.html">TableTree</a></strong>
-just uses a table to implement the presentation and adds tree behavior. If
-you are wrapping a widget purely for implementation reasons, then your API
-may not look similar to the underlying widget's API.</p>
-
-<p>Forward as few methods and events as possible. Don't reimplement the entire
-API of the wrapped widget or you'll be constantly playing catch-up when the
-wrapped API changes in a future release. Methods that are common to most
-widgets, such as <strong>setFont</strong>, <strong>setForeground</strong>,
-<strong>setBackground</strong>, should be forwarded.</p>
-
-<p>If you find yourself implementing most of the wrapped widget's API, consider
-exposing the wrapped widget at the API level and letting the application
-code use the wrapped widget directly. In this case, you may want to
-reconsider whether providing a new widget makes sense at all. It may be better
-to implement your feature as an &quot;adapter&quot; which adds behavior to a
-widget but does not pretend to be a widget. (JFace viewers follow this
-pattern.)</p>
-
-<blockquote><em>Note:&nbsp; This discussion has focused solely on extending
-the behavior of a widget by wrapping it. Extending a widget by subclassing it
-is highly discouraged, since it will make your widget dependent on the
-implementation of the superclass.</em></blockquote>
-
-
-<H4>Custom drawn implementation</H4>
-
-<P>In some cases, you don't have any native code or existing widgets that help
-you in the implementation of your new widget. This means you must draw the
-widget yourself using SWT graphics calls. Although this technique can become
-quite complicated, it has the advantage of producing a completely portable
-implementation.</P>
-
-<P>Custom drawn controls are implemented by subclassing the
-<a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a> or
+<p>Widgets can be combined to form widgets that are more sophisticated.  For
+example, a Combo can be implemented using a text entry widget along with a
+button and a drop-down list.  To implement a combined widget, you create a
+subclass of
 <a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>
-class using these rules:</P>
+and manage the children internally.</p>
 
-<ul>
-  <li>Subclass <a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a>
-    if your widget will not have any children. This means you do not intend to
-    allow applications to create children of your widget, and that you do not
-    intend to create any children in order to implement your widget.
-    <a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a>
-    is used for both simple controls, such as stylized labels, and for more
-    complex controls, such as the styled text editor. In both cases, the widget
-    is implemented completely internally using graphics calls and no children
-    are added by applications.</li>
-  <li>Subclass <a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>
-    if your widget will have children from the application's perspective, or if
-    you will be creating children to implement your widget.
-    <a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>
-    is used when you are combining widgets to create a new widget, such as
-    using a text and list to implement a combo control. It is also used
-    when you implement a widget without children that allows clients to add
-    children. This is the case with the
-    <a href="../reference/api/org/eclipse/swt/custom/ViewForm.html"><strong>ViewForm</strong></a> control.  The
-    <a href="../reference/api/org/eclipse/swt/custom/SashForm.html"><strong>SashForm</strong></a>
-    widget represents both cases: it uses widgets (sashes) internally for its
-    implementation and allows clients to add their own children.</li>
-</ul>
 
-<P>In a custom drawn control, your internal state is kept in Java instance
-variables.  You define your API and styles according to the requirements of
-your widget.</P>
+<h4>Custom drawn implementation</h4>
+
+<p>In some cases, you don't have any native code or existing widgets that help
+you in the implementation of your new widget. This means you must draw the
+widget yourself in the handler for the Paint event.  Although this technique
+can become quite complicated, it has the advantage of producing a completely
+portable implementation.</p>
+
+<p>Custom drawn controls are implemented by subclassing the
+<a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a> or
+<a href="../reference/api/org/eclipse/swt/widgets/Composite.html"><strong>Composite</strong></a>.
+Subclass <a href="../reference/api/org/eclipse/swt/widgets/Canvas.html"><strong>Canvas</strong></a>
+if your widget will not contain any child controls.</p>
 
 <P>The internal implementation of a custom drawn widget usually involves these
 major tasks:</P>
