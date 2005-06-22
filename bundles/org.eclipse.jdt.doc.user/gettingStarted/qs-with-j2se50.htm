@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html>
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+<title>Getting Started with Eclipse 3.1 and J2SE 5.0</title>
+</head>
+<body>
+<h1>Getting Started with Eclipse 3.1 and J2SE 5.0</h1>
+<p>
+Eclipse 3.1 includes full support for the new features of J2SE 5.0 (codenamed "Tiger").
+One of the most important consequences of this support is that you 
+may not notice it at all--everything you expect to work for J2SE 1.4, 
+including editing, compiling, debugging, quick fixes, refactorings, source
+actions, searching, etc., will
+work seamlessly with J2SE 5.0's new types and syntax.  In this document,
+we will introduce some of the more interesting capabilities Eclipse users
+will find when working with J2SE 5.0.
+</p>
+
+<h2>Prerequisites</h2>
+
+<p>
+In order to develop code compliant with J2SE 5.0, you will need a J2SE 5.0 Java Runtime Environment (JRE).
+If you start Eclipse for the first time using a J2SE 5.0 JRE, then it will use it by default.
+Otherwise, you will need to use the <strong>Installed JRE's</strong> dialog 
+(<strong>Windows &gt; Preferences &gt; Java &gt; Installed JRE's</strong>) to register it with Eclipse.
+</p>
+
+<p>
+This document introduces some of the 
+<a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/">new language features</a> 
+in J2SE 5.0 very briefly, but it is not a proper tutorial for these features.
+</p>
+
+<h3>Compiler Compliance Level</h3>
+
+<p>
+To use the new J2SE 5.0 features, you must be working on a project that has a 5.0 compliance level enabled.
+New projects can easily be marked as 5.0-compliant on the first page of the <strong>New &gt; Project</strong> wizard:
+<p><img src="../images/j2se50/new-project.png" alt="New Project Wizard"></p>
+To convert an existing J2SE 1.4 project to J2SE 5.0, you can simply:
+<ol>
+<li>Make sure you have a J2SE 5.0 JRE installed.
+<li>Start using the 5.0 features in your code.
+<li>When a compiler error is flagged, use Quick Fix to update the project's compliance level:
+</ol> 
+<p><img src="../images/j2se50/quick-fix.png" alt="Quick fix to enable J2SE 5.0"</p>
+</p>
+
+<p>
+For more fine-tuned control, 
+the compiler compliance level can be set globally for a workspace (<strong>Windows &gt; Preferences &gt; Java &gt; Compiler</strong>)
+or individually for each project (From the project's context menu, choose <strong>Properties &gt; Java Compiler</strong>.
+Projects with different compliance levels can co-exist in the workspace, and depend on each other.
+You can also fine-tune the kinds of compiler warnings and errors produced for each project 
+using <strong>Properties &gt; Java Compiler &gt; Errors/Warnings &gt; J2SE 5.0 Options</strong>
+</p>
+
+<h2>Generic Types</h2>
+
+<p>
+Generic types allow objects of the same class to safely operate on objects of different types.
+For example, they allow compile-time assurances that a 
+<code>List&lt;String&gt;</code> always contains <code>String</code>s, and a <code>List&lt;Integer&gt;</code> always contains <code>Integer</code>s.
+</p>
+
+<p>
+Anywhere that Eclipse handles a non-generic type, it can handle a generic type:
+<ul>
+<li> Generic types can be safely renamed.
+<li> Type variables can be safely renamed.
+<li> Generic methods can be safely extracted from / inlined into generic code.
+<li> Code assist can automatically insert appropriate type parameters in parameterized types.
+</ul>
+</p>
+
+In addition, a new refactoring has been added: <strong>Infer Generic Type Arguments</strong> can infer
+type parameters for every type reference in a class, a package, or an entire project:
+
+<p><img src="../images/j2se50/infer-generic.png" alt="Invoking Infer Generic Type Arguments"></p>
+
+Invoking the refactoring produces:
+
+<p><img src="../images/j2se50/inferred-generic.png" alt="Invoked Infer Generic Type Arguments"></p>
+</p>
+
+
+<p>
+Eclipse 3.1 provides new options when searching for references to generic types.  Consider this example:
+
+<p><img src="../images/j2se50/foo.png" alt="Example with four different parameterized instantiations of List"></p>
+
+Selecting the reference to <code>List&lt;Integer&gt;</code> and using 
+<strong>Search &gt; References &gt; Project</strong> 
+will highlight the List types on all four lines:
+
+<p><img src="../images/j2se50/no-filters.png" alt="Search with no filters"></p>
+
+Using the Search View menu, the results can be filtered:
+
+<p>
+<strong>Filter Incompatible</strong> leaves only references to types that are assignment-compatible with
+the selected type:
+<p><img src="../images/j2se50/filter-incompatible.png" alt="Filter incompatible"></p>
+</p>
+
+
+<p><strong>Filter Inexact</strong> leaves only type references with the exact same signature:
+<p><img src="../images/j2se50/filter-inexact.png" alt="Filter inexact"></p>
+</p>
+
+<h2>Annotations</h2>
+
+<p>
+Annotations attach metadata about how Java types and methods are used 
+and documented to the Java source and can then affect compilation or 
+be queried at run-time.  For example, <code>@Override</code> will trigger
+a compiler warning if the annotated method does not override a method in
+a superclass:
+</p>
+
+<p><img src="../images/j2se50/override.png" alt="Override annotation"></p>
+
+<p>
+Everything you can do with a Java type, you can do with an annotation:
+<ul>
+<li> Create new annotations using <strong>New &gt; Annotation</strong>
+<li> Refactor: rename, move, change signatures of members, etc.
+<li> Search for occurrences
+<li> Use code assist to fill in names and values
+</ul>
+</p>
+
+<p>
+A very useful annotation with full support in Eclipse is <code>@SuppressWarnings</code>.
+For example, consider a private method that is currently unused, but you'd rather not delete:
+<p><img src="../images/j2se50/unused-warning.png" alt="Warning: unused private method"></p>
+
+Invoking quick fix on the warning proposes adding a <code>@SuppressWarnings</code> annotation:
+<p><img src="../images/j2se50/suppress-proposed.png" alt="SuppressWarnings proposed"></p>
+
+Selecting the quick fix adds the annotation.  The Eclipse compiler honors the annotation by
+removing the warning on <code>foo</code>:
+<p><img src="../images/j2se50/suppress-applied.png" alt="SuppressWarnings inserted"></p>
+
+</p>
+
+<h2>Enumerations</h2>
+
+<p>
+Enumerations are types that are instantiated at runtime by a known, finite set of objects:
+
+<p><img src="../images/j2se50/enum.png" alt="enum type"></p>
+</p>
+
+<p>
+Again, anything you can do to a Java class can be done to an enumeration:
+
+<ul>
+<li> Create new enumeratons using <strong>New &gt; Enum</strong>
+<li> Refactor: rename, move, rename constants, etc.
+<li> Search for occurrences
+<li> Use code assist to fill in constants
+</ul>
+</p>
+
+<h2>Autoboxing</h2>
+
+<p>
+Autoboxing and auto unboxing allow for elegant syntax when primitive types are assigned
+to or retrieved from Object references:
+
+<p><img src="../images/j2se50/autobox.png" alt="autoboxing highlighted"></p>
+</p>
+
+<p>
+Eclipse's source manipulation features handle autoboxing seamlessly, 
+giving the correct types to new local variables and correct code assists.
+For code understanding, it is also possible to flag instances of 
+autoboxing or autounboxing as compile warnings 
+(<strong>Window &gt; Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; J2SE 5.0 Options &gt; Boxing and unboxing conversions</strong>), 
+or highlight them using syntax coloring
+(<strong>Window &gt; Preferences &gt; Java &gt; Editor &gt; Syntax Coloring &gt; Java &gt; Auto(un)boxed expressions</strong>):
+<p><img src="../images/j2se50/autobox-coloring.png" alt="Enabling highlighting for autoboxing"></p>
+</p>
+
+<h2>Enhanced for loop</h2>
+
+<p>
+For the common case of operating on each element of an array or collection in turn, 
+J2SE 5.0 allows a new, cleaner syntax.  
+Eclipse 3.1 provides a "foreach" code template that can automatically guess 
+the collection to be iterated:
+
+<p><img src="../images/j2se50/foreach-proposal.png" alt="foreach template proposed"></p>
+
+Choosing the template produces:
+
+<p><img src="../images/j2se50/foreach-inserted.png" alt="foreach template inserted"></p>
+
+<p>
+Eclipse 3.1 also provides a "Convert to enhanced for loop" quick-assist to
+upgrade 1.4-style <code>for</code> loops.
+</p>
+
+<h2>Other</h2>
+
+<p>
+All other features of J2SE 5.0 are handled flexibly by Eclipse's editing, searching, and code manipulation tools:
+
+<ul>
+<li> Static imports
+<li> Varargs
+<li> Covariant return types
+</ul>
+
+Happy coding!
+</p>
+</body>
+</html>
