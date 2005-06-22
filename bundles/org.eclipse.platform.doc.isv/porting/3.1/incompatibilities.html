@@ -43,6 +43,8 @@ following entries describe the areas that changed and provide instructions for
     point</a></li>
   <li><a href="#teamUI">Static non-final API field GLOBAL_IGNORES_CHANGED 
   in TeamUI made final</a></li>
+  <li><a href="#FillData">ClassCastException using FillLayout</a></li>
+  <li><a href="#DisposedParent">Creating a widget with a disposed parent</a></li>
 </ol>
 <hr>
 
@@ -315,6 +317,31 @@ removed.</p>
   has been made final in 3.1.</p>
 <p><b>Action required:</b> Any plugins that were setting the above field can no 
   longer do so.</p>
+
+<h2><a name="FillData"></a>15. ClassCastException using FillLayout</h2>
+<p><b>What is affected:</b> Plug-ins that incorrectly use FillLayout.</p>
+<p><b>Description:</b> In Eclipse 3.0, no layout data was associated with 
+the FillLayout and if an application assigned layout data to a child that was 
+managed by a FillLayout, it was ignored. In Eclipse 3.1, support was added to
+FillLayout to cache size information in order to improve resize performance.
+The cached data is stored in a FillData object associated with each child
+managed by the FillLayout.  If an application has incorrectly assigned  
+layout data to a child, a ClassCastException will be thrown when computeSize 
+is called on the parent.</p>
+<p><b>Action required:</b> Find any children in a FillLayout that have layout 
+data assigned and stop assigning the layout data.</p>
+
+<h2><a name="DisposedParent"></a>16. IllegalArgumentException thrown creating a 
+widget with a disposed parent</h2>
+<p><b>What is affected:</b> Plug-ins that catch exceptions while creating widgets.<p>
+<p><b>Description:</b> In Eclipse 3.0, if a widget was created with a disposed 
+parent, no exception was thrown and the widget code failed at a later point or 
+an SWTException with text "Widget Is Disposed" was thrown.  In Eclipse 3.1, 
+if a widget is created with a disposed parent, the constructor will throw an
+IllegalArgumentException with text "Argument not valid".
+<p><b>Action required:</b>Any code that handles the SWTException when creating
+a widget will also need to handle the IllegalArgumentException.
+
 <p>&nbsp;</p>
 
 </body>
