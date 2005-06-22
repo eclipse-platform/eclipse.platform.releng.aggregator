@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2002, 2005 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Sample Active Help action.
+ * Sample Active Help action.  This is the source code for the sample
+ * active help action that is shown in the Platform Plug-in Developer Guide
+ * in the Programmer's Guide.  This class is marked public because
+ * it must be called from the active help servlet.  However, this class
+ * is not intended to be used as API and should not be called by clients.
  */
 public class ActiveHelpOpenDialogAction implements ILiveHelpAction {
 
