@@ -236,10 +236,16 @@ almost certainly will be).</p>
 <p><b>Description:</b> In Eclipse 3.0, the class <code>org.eclipse.jdt.launching.IVMInstall</code> 
   was not marked that clients may not implement directly. This was an oversight 
   that has been addressed in Eclipse 3.1 with the class marked as not intended 
-  to be implemented directly by clients. Three new methods have been added to 
-  this interface with default implementations provided by <code>org.eclipse.jdt.launching.AbstractVMInstall</code>.</p>
+  to be implemented directly by clients. To maintain binary compatibility, we 
+  still allow clients to implement the interface directly, but strongly recommend 
+  that clients subclass <code>org.eclipse.jdt.launching.AbstractVMInstall</code> 
+  instead. Clients that implement <code>IVMInstall</code> should also implement 
+  the new optional interface <code>org.eclipse.jdt.launching.IVMInstall2</code>, 
+  which <code>AbstractVMInstall</code> now implements. It is recommended that 
+  clients implement the new interface, <code>IVMInstall2</code>, to avoid the 
+  problem noted in bug 73493. The recommended migration is to subclass <code>AbstractVMInstall</code>.</p>
 <p><b>Action required:</b> Any implementing classes that do not already subclass 
-  <code>org.eclipse.jdt.launching.AbstractVMInstall</code> will need to be reworked 
+  <code>org.eclipse.jdt.launching.AbstractVMInstall</code> should be reworked 
   to subclass <code>org.eclipse.jdt.launching.AbstractVMInstall.</code></p>
 <h2><a name="SelectionEnabler.SelectionClass"></a>10. SelectionEnabler.SelectionClass 
   made package-visible</h2>
