@@ -145,9 +145,9 @@ Eclipse on a reference platform.</span></p>
 <p>Although untested, Eclipse should work fine on other OSes that support the
 same window system. For Win32: Windows 98, ME, NT, 2000, and Server 2003; SWT
 HTML viewer requires Internet Explorer 5 (or higher). For GTK on other Linux
-systems: version 2.2.1 of the GTK+ widget toolkit and associated librares (GLib,
-Pango); SWT HTML viewer requires Mozilla 1.4GTK2. For Motif on other Linux
-systems: Open Motif 2.1 (included); SWT HTML viewer requires Mozilla 1.4GTK2.</p>
+systems: version 2.2.1 (or higher) of the GTK+ widget toolkit and associated librares (GLib,
+Pango); SWT HTML viewer requires  a GTK2 build of Mozilla 1.4 (or higher). For Motif on other Linux
+systems: Open Motif 2.1 (included); SWT HTML viewer requires a GTK2 build of Mozilla 1.4 (or higher).</p>
 <p>An early access version of Eclipse is also available for 64-bit Linux GTK. 
   Testing has been limited to early access 64-bit J2SEs running on x86-64 processors.</p>
 <p>SWT is also supported on the QNX Neutrino operating system, x86 processor,
@@ -534,31 +534,56 @@ The org.eclipse.swt.SWTError exception (&quot;No more handles&quot;) is thrown
 on platforms that don't meet the requirements for running the Browser widget.
 Supported platforms and prerequisites are listed on the SWT FAQ item <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/platform-swt-home/faq.html#browserplatforms">&quot;Which
 platforms are supported by the SWT Browser?&quot;</a>.</p>
+
+<h4>Crash when using the file dialog on Windows XP with SP2</h4>
+<p>With some versions of Synergy from Telelogic, Eclipse will crash when you try to open a file 
+dialog.  This is due to a problem with the CMExplorer.dll.  The workaround is to
+upgrade to Synergy 6.4 (or higher) or to run <code>"regsvr32 /u CMExplorer.dll"</code> and 
+reboot (note that this will disable Active CM).
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=87798">87798</a>)</p>
+
+<h4>InternetExplorer sometimes freezes on PDF documents with Acrobat Reader 6.</h4>
+<p>With Acrobat Reader 6 or 7, some users have experienced an unresponsive user 
+interface for up to two minutes when closing a browser which is displaying a PDF document.
+The workaround is to disable displaying PDF in the browser. In Adobe Reader
+select Edit &gt; Preferences... &gt; Internet and uncheck 'Display PDF in browser'.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=56184">56184</a>)</p>
+
+<h4>Crash while editing text on Windows XP with SP2.</h4>
+<p>Some users who have installed Service Pack 2 on Windows XP have experienced
+crashes while using editors in Eclipse.  The workaround is to place a working version 
+of Windows\System32\USP10.DLL in the Eclipse startup directory or uninstall
+Service Pack 2.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=56390">56390</a>)</p>
+
+<h4>Input Method broken on Motif</h4>
+<p>Some versions of RedHat Linux such as Fedora Core 3 and Enterprise Linux WS 
+release 4 use a new technology called IIIM (Intranet/Internet Input Method
+Framework) to replace the old XIM (X input method).   When running on these 
+new systems, Eclipse will crash if you attempt to enter any DBCS character.  The 
+workaround is to use a XIM based input method such as chinput.  This problem 
+may be fixed in newer releases of RedHat.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=89722">89722</a>)</p>
+
+<h4>Eclipse does not start on Linux-Motif with Xinerama and a UTF-8 locale</h4>
+<p>The Linux-motif build of Eclipse does not launch properly when run on a 
+computer with Xinerama (provides support for dual head monitors) and a UTF-8 
+locale.  The workaround for this problem is to change the locale to a non-UTF-8 
+value, or to disable Xinerama.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=38843">38843</a>)
+</p>
+
 <h4>Eclipse crashes on RedHat Linux 9 with Bluecurve (GTK+ only)</h4>
 <p>Users of the Bluecurve theme shipped with RedHat Linux 9 may experience problems running Eclipse.  
-These problems may include crashes or reduced performance.
+These problems may include crashes or reduced performance.  We recommend changing to a different theme.
 (bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=38305">38305</a>, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67906">67906</a>, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37683">37683</a>, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58738">58738</a>)</p>
-<p>We recommend changing to a different theme.
-Under GNOME, open RedHat Menu > Preferences > Theme.  Select a theme other than Bluecurve.  All applications should update at this point.
-Under KDE, open RedHatMenu > Run Command...  And then type in "gnome-theme-manager" and click "Run".  Select a theme other than Bluecurve.  The selection may jump to "Custom Theme" afterward; this is normal, and happens because the GNOME window manager is not running.  All GTK+ applications should update to the new theme at this point.
-</p>
+
 <h4>Eclipse hangs when pasting from an unresponsive application (GTK only)</h4>
 <p>If the application that is supplying the clipboard material is unresponsive,
 the paste operation hangs Eclipse for several minutes. This situation can be
 encountered when copying from an Eclipse target workbench, suspending the target
 workbench at a breakpoint and pasting into the hosting Eclipse workbench. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44915">44915</a>)</p>
-<h4>Drag and drop on Mac (Mac OS X Carbon only)</h4>
-<p>The Mac OS X Carbon implementation of SWT does not support dragging from an SWT application to another application. (bug
-<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=68212">68212</a>)</p>
-<h4>Components in SWT_AWT are not displayed (Motif only)</h4>
-<p>On Motif systems (verified on Linux and Solaris) problems have been reported
-by some developers in the support for embedding AWT widgets within SWT layouts.
-These can range from the AWT widgets not being properly displayed to Java VM
-crashes. The cause(s) of these problems has not yet been determined. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=68353">68353</a>)</p>
-<h4>Can't expand/collapse TableTree item with mouse (GTK only)</h4>
-<p>Under certain conditions and on certain versions of GTK, TableTree items,
-such as those found in Property Sheets, cannot be expanded or collapsed using
-the mouse. The workaround is to use the right and left arrow keys. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=38855">38855</a>)</p>
+
 <h4> Unable to drag data between
 applications in simplified Chinese locale (Motif only)</h4>
 <p>When configured for the simplified Chinese locale, it is not possible to
@@ -682,14 +707,14 @@ marked as dirty when build output is generated. (bug <a href="https://bugs.eclip
 
 <h3>3.1.8 <a name="I-Platform-Install-Update">Platform - Install/Update</a></h3>
 <h4>Manually installing features and plug-ins on a FAT file system (Windows only)</h4>
+
 <p>When features and plug-ins are manually installed on top of an Eclipse-based
-product install located on a FAT file system that has already been run at least
-once, the product must be explicitly restarted with the system property
-osgi.checkConfiguration set to true. This property can be set in the
-eclipse/configuration/config.ini file, or passed to the eclipse command line via
-the -vmargs option. For example, restart with the following command: eclipse.exe
--vmargs -Dosgi.checkConfiguration=true. Then, open Help &gt; Software Updates &gt; Manage
-Configuration dialog and toggle on the &quot;Show disabled features&quot; button
+ product install located on a FAT file system that has already been run at least 
+ once, the product must be explicitly restarted with -clean. That is,</p>
+<pre>eclipse.exe -clean
+</pre>
+<p>Then, open the Help &gt; Software Updates &gt; Manage
+Configuration dialog and toggle on the &quot;Show disabled features&quot; button in
 its toolbar. Select the newly &quot;installed&quot; feature and press on the
 &quot;Enable feature&quot; action on the right pane (or select the action from
 the feature's context menu). (bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=52525">52525</a>,
