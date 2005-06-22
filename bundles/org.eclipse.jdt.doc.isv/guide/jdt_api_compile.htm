@@ -98,8 +98,24 @@ In order to use the Eclipse compiler, you simply need to define the <b>build.com
 &lt;/project&gt;
 </pre>
 </font> The syntax used for the javac Ant task can be found in the <a href="http://jakarta.apache.org/ant/manual/CoreTasks/javac.html">
- Ant javac task documentation</a>
- . The current adapter supports the Javac Ant task 1.4.1 and 1.5.3 versions.  
+ Ant javac task documentation</a>. The current adapter supports the Javac Ant task 1.4.1 up to 1.6.5 versions.
+<p>If you are using a version above 1.5.0, you can use the nested compiler argument element to specify compiler
+specific options.
+</p>
+<font color="#4444cc">
+<pre>...
+&lt;javac srcdir=&quot;${root}&quot; destdir=&quot;${destdir}&quot; debug=&quot;on&quot; nowarn=&quot;on&quot; extdirs=&quot;d:/extdirs&quot; source=&quot;1.4&quot;&gt;
+    &lt;classpath&gt;
+      &lt;pathelement location=&quot;${basedir}/../org.eclipse.jdt.core/bin&quot;/&gt;
+    &lt;/classpath&gt;
+    &lt;compilerarg compiler=&quot;org.eclipse.jdt.core.JDTCompilerAdapter&quot; line=&quot;-1.5 -warn:+boxing&quot;/&gt;
+&lt;/javac&gt;		
+...
+</pre>
+</font>
+<p>To prevent from getting compiler dependant scripts, we advice you to use the compiler argument set to <code>org.eclipse.jdt.core.JDTCompilerAdapter</code>.
+If this is not set, the script cannot be used with the Eclipse compiler. If set, the nested compiler argument is ignored if the compiler specified
+by the <code>build.compiler</code> property is different from the name specified in the <code>compiler</code> argument.</p>
 <h3> Problem determination</h3>
 <p> JDT Core defines a specialized marker (marker type "<b>org.eclipse.jdt.core.problem</b>
   ") to denote compilation problems. To programmatically discover problems
