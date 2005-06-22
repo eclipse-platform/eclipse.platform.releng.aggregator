@@ -269,7 +269,7 @@ run with, use the Eclipse <tt>-vm</tt> command-line argument. (See also the
 <li>Eclipse must be installed to a clean directory and not installed over top of
 a previous installation. If you have done this then please re-install to a new
 directory. If your workspace is in a child directory of your old installation
-directory, then see the instructions below on <a href="#upgrading">Upgrading Workspace from a
+directory, then see the instructions below on "<a href="#upgrading">Upgrading Workspace from a
 Previous Release"</a>.</li>
 <li>Java sometimes has difficulty detecting whether a file system is writable. In
 particular, the method java.io.File.canWrite() appears to return true in
@@ -279,14 +279,14 @@ configuration area and as a result of this problem, may erroneously detect the
 current configuration location as writable. The net result is that Eclipse will
 fail to start and depending on the circumstances, may fail to write a log file
 with any details. To work around this, we suggest users experiencing this
-problem set their configuration area explicitly using the -configuration command
+problem set their configuration area explicitly using the <tt>-configuration</tt> command
 line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719">67719</a>)</li>
 </ul>
 <h4>Installing plug-ins by unzipping them into the plugins directory</h4>
 <p>If you have installed new plug-ins and they aren't showing up when you run,
 then perhaps you unzipped them into your "plugins" directory and your
 configuration might need to be refreshed. This can be accomplished by starting
-Eclipse with the -clean command line argument.</p>
+Eclipse with the <tt>-clean</tt> command line argument.</p>
 <h4>XML files with UTF-8 byte order mark fail to have content type detected</h4>
 <p>Eclipse will fail to detect the proper content type for XML files that have a
 UTF-8 byte order mark if Crimson is the XML parser (as it is on Sun 1.4 JREs,
@@ -336,9 +336,23 @@ code. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=5875">5875</a>)<
 <p>If your plug-in ships with a plug-in manifest and not an OSGi bundle manifest,
 is shipped as a JAR file, and contains a nested JAR file then there may be
 problems in the automatic generation of the bundle manifest file. The packages
-defined in the nested JAR may not be exported correctly in the Export-packages
+defined in the nested JAR may not be exported correctly in the <tt>Export-packages</tt>
 bundle manifest header. To work around this you should ship your plug-in with a
 bundle manifest. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=97689">97689</a>)</p>
+<h4>Location for Debug Options File on Mac OS</h4>
+<p>If you are running in debug mode on Mac OS, the default location for the
+.options file is inside the application bundle in the Eclipse.app/Contents/MacOS
+directory (like the eclipse.ini). (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=88782">88782</a>)</p>
+<h4>Configuration can become invalid when removing org.eclipse.update.configurator</h4>
+<p>When launching an Eclipse Application from within the Eclipse IDE it is possible
+to select the set of plug-ins that are included in the Eclipse Application. 
+Removing the org.eclipse.update.configurator plug-in from the set of plug-ins to
+an existing configuration can cause the configuration to become invalid.  This
+can result in extra plug-ins installed in the target application that are not
+resolved.  To work around this, after the org.eclipse.update.configurator
+plug-in has been removed, the target configuration area should be cleared before
+launching. (bug <a href="http://dev.eclipse.org/bugs/show_bug.cgi?id=85835">85835</a>)</p>
+
 <h3>3.1.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
 <h4>UTF-8 encoded buildfiles with Byte Order Mark</h4>
 <p>UTF-8 encoded buildfiles with byte order marks will fail to be parsed correctly depending on the XML parser being used for the build. Therefore a valid buildfile will fail to build with an error message similar to: "BUILD FAILED: C:\workspace\bom.xml:1: Document root element is missing.". To succeed in building with these files, ensure to include Xerces jars on the Ant runtime classpath so that the Xerces parser is used to parse the XML. As well the context menu for these files in the Navigator or Package Explorer will not have the run shortcuts for Ant builds. (bug
@@ -365,9 +379,6 @@ lock up workspace</h4>
 <p>As with using Ant from the command line, prompts for input from the
 console is not handled. This is not the same as making use of the &lt;input&gt;
 task, which works correctly within Eclipse. (bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=21748">21748</a>)</p>
-<h4>No input handler supplied for &lt;input> task when running Ant in a separate VM</h4>
-<p>By default, no input handler is supplied for the &lt;input> task for a build running in a separate VM. Therefore the input requests will always fail. The user can supply an input handler using the -inputhandler argument. (bug
-<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=45484">45484</a>)</p>
 <h4>&quot;version&quot; property is always set when running Ant in the same VM as Eclipse</h4>
 <p>The Xalan libraries set system properties including a version property. These get set as properties within the Ant build and therefore the "version" property cannot be set within an Ant buildfile due to the immutable nature of Ant properties. This property will always be set to "2.4.1" for Ant builds in the same VM as Eclipse. (bug
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=45717">45717</a>)</p>
@@ -381,6 +392,8 @@ task, which works correctly within Eclipse. (bug <a href="http://bugs.eclipse.or
 only)</h4>
 <p>On Windows 9X, using:&lt;property environment="env"/> will cause Eclipse to hang if the build occurs in the same VM as Eclipse. Running the build in a separate VM will hang the build but not Eclipse.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44196">44196</a>)</p>
+<h4> Setting build loggers not supported when debugging Ant builds</h4>
+<p>When debugging Ant builds within Eclipse, setting -logger as a program argument will be ignored.</p>
 
 <h3>3.1.3 <a name="I-Platform-Help">Platform - Help</a></h3>
 <h4>Help browser tool bar buttons do not work for some documents</h4>
@@ -1108,7 +1121,9 @@ between users of Eclipses 3.1 and 3.0:</p>
     2.1 workspace. Builders created in 2.1 use the old format and continue to
     work in 2.1. Builders from a 2.1 workspace can be viewed in a 3.0 workspace
     in read-only mode. Recommendation: Always create or edit external tools
-    builders from a 2.1 workspace.</li>
+    builders from a 2.1 workspace. The builder information also changed between 3.0 and 3.1. 
+    Changes will be seen in the <code>.project</code> file and associated <code>.launch</code> file. The new 3.1 format is
+    backwards compatible with 3.0.</li>
   <li> <b>Optional inclusion patterns on Java source entries on the build class path</b><br>
     This support was added in 3.0. This information is recorded in the project's
     <code>.classpath</code> file. Recommendation: do not specify inclusion patterns.&nbsp; Better still, disable
