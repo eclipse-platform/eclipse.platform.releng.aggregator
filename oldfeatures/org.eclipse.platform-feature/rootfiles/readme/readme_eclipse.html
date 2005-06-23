@@ -744,18 +744,6 @@ section.)</p>
 <p>Search does not find references to constant fields inside binaries because
 the Java Language Specification mandates that constant field values be inlined
 in the class file's bytecodes, leaving no trace of a field reference.&nbsp;(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=12044">12044</a>)</p>
-<h4>Developing programs with J2SE 1.5</h4>
-<p>The Java tools do not yet fully support J2SE 1.5. You can run or debug programs against
-a 1.5 JRE, and safely compile 1.4 programs against 1.5 libraries (the Eclipse compiler tolerates
-them with the
-exception of covariance scenarios which are forbidden byJava Language Specification (JLS) 2nd edition).
-However, the Eclipse Java compiler and IDE are unable to handle source files
-containing uses of any of the new Java language features being added in 1.5 (generics, enhanced for loops, static
-imports, metadata annotations, varargs), which will be
-codified in the forthcoming JLS 3rd edition. An
-early preview of the full Eclipse support for J2SE 1.5 developed in parallel
-with 3.0, and is available from the <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/jdt-core-home/r3.0/main.html#updates">Cheetah</a>
-page.&nbsp;(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=36938">36938</a>)</p>
 <h4>Missing secondary types in editor</h4>
 <p>When referencing a secondary type defined in another compilation unit (i.e., a
 top level type whose name does not match its file name), the editor may
@@ -780,6 +768,9 @@ New Folder... &gt; Advanced. Then a folder name can be associated with an
 arbitrary file system location by checking &quot;Link to folder on the file
 system). Once mounted, the linked class folder can normally be referenced on a
 build path, and from there on programs can be compiled against it. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67631">67631</a>)</p>
+<h4>Access rules not propagating to inherited members</h4>
+<p>When a type inherits some member from a restricted super type, no access violation is diagnosed when
+using the offending member indirectly through this type. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=76266">76266</a>)</p>
 <h4>Plug-in Working sets in Java views</h4>
 <p>The Java views (e.g. Package explorer, Type Hiararchy, Open Type dialig, etc.)
 support filtering their elements based on a working set. Although the dialog offers
@@ -1149,11 +1140,14 @@ between users of Eclipses 3.1 and 3.0:</p>
     builders from a 2.1 workspace. The builder information also changed between 3.0 and 3.1. 
     Changes will be seen in the <code>.project</code> file and associated <code>.launch</code> file. The new 3.1 format is
     backwards compatible with 3.0.</li>
-  <li> <b>Optional inclusion patterns on Java source entries on the build class path</b><br>
-    This support was added in 3.0. This information is recorded in the project's
-    <code>.classpath</code> file. Recommendation: do not specify inclusion patterns.&nbsp; Better still, disable
-    exclusion patterns via the<b> Java
-    &gt; Compiler &gt; Build Path</b>&nbsp; preference page.</li>
+
+  <li> <b>Enhancements on the Java build class path</b><br>
+  	Extra information is now stored on a project build path, such as access rules, native library locations and javadoc locations.
+    This information is recorded in the project's <code>.classpath</code> file. 
+    Recommendation: do not commit a change to the <code>.classpath</code> file performed by a 3.0 client,
+    as it may erase extra information which got added by a 3.1 client. Note, though access rules and native library locations
+    usage can be avoided by a 3.1 client; javadoc locations are now automatically shared in the <code>.classpath</code> file. </li>    
+  </li>
 </ul>
 <h4>Using Eclipse 3.1 to develop plug-ins that work in Eclipse 3.0</h4>
 <p>It is also possible (and reasonable) to use Eclipse 3.1 to develop a plug-in
