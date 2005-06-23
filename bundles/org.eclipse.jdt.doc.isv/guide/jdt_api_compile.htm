@@ -14,7 +14,7 @@
 </head>
 <body>
 <h2> Compiling Java code</h2>
-<p> The JDT plug-ins include an incremental and batch Java compiler for building 
+<p> The JDT Core plugin includes an incremental and batch Java compiler for building 
 Java .class files from source code. There is no direct API provided by the 
 compiler. It is installed as a builder on Java projects. Compilation is triggered 
 using standard platform build mechanisms.</p>
@@ -54,12 +54,12 @@ folders are filtered if their name matches one of the supplied folder names
 which end in a path separator.</p>
 <p> The incremental and batch builders can also be configured to only generate
  a single error when the .classpath file has errors. This option is set by
- default and eliminates numerous errors.&nbsp; See <a href="jdt_api_options.htm##builder">JDT
+ default and eliminates numerous errors.&nbsp; See <a href="jdt_api_options.htm#builder">JDT
 Core Builder Options</a> for a complete list of builder-related options and
 their defaults. </p>
 <p>The compiler can also be configured using <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b>JavaCore</b></a>
 options.&nbsp; For example, you can define the severity that should be used for
-different kinds of problems that are found during compilation.&nbsp; See <a href="jdt_api_options.htm##compiler">JDT
+different kinds of problems that are found during compilation.&nbsp; See <a href="jdt_api_options.htm#compiler">JDT
 Core Compiler Options </a>for a complete list of compiler-related options and t
 heir defaults. </p>
 <p>When programmatically configuring options for the builder or compiler, you
@@ -74,7 +74,474 @@ project. </p>
    myProject.setOptions(options);
 </pre>
 </font>
+<h3>Using the batch compiler</h3>
 
+<h4>Finding the batch compiler</h4>
+
+<p>The batch compiler class is located in the internal classes of the
+JDT/Core plugin. So it is in the <i>jdtcore.jar</i> file in the directory
+<i>plugins/org.eclipse.jdt.core</i>.
+The name of the class is <i>org.eclipse.jdt.internal.compiler.batch.Main</i>.
+</p>
+<h4>Running the batch compiler</h4>
+<ul>
+<li>Using the main method.</li>
+Using the main method. The Main class has a main method. This
+is the classical way to invoke the batch compiler on a command-line.
+<ul>
+<li>
+For example on a command-line:
+<p><code><font color="#3366FF">java -classpath org.eclipse.jdt.core_3.1.0.jar org.eclipse.jdt.internal.compiler.batch.Main
+-classpath rt.jar A.java</font></code></p>
+<p>or:</p>
+<p><code><font color="#3366FF">java -jar org.eclipse.jdt.core_3.1.0.jar -classpath rt.jar A.java</font></code></p>
+</li>
+<li>For example in a java source:
+<p><code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.main(new
+String[] {"-classpath", "rt.jar", "A.java"});</font></code></p>
+</li></ul>
+<li>
+Using the static compile(String) method.
+<p>The <code>compile(String)</code> method is a convenient method to invoke
+the batch compiler in a java application. Instead of 
+<code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.main(new
+String[] {"-classpath", "rt.jar", "A.java"});</font></code>
+you can simply write <code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.compile("-classpath
+rt.jar A.java");</font></code></p></li>
+</ul>
+
+<h4>Which options are available?</h4>
+<p>
+With the orange background, these are suggested options.
+</p>
+<table BORDER CELLSPACING=2 CELLPADDING=2 COLS=2>
+<tr>
+<th>Name</th>
+<th>Usage</th>
+</tr>
+<tr>
+<th colspan="2">Classpath options</th>
+</tr>
+<tr>
+<td valign=top bgcolor="#FFCCAA" width="250">-bootclasspath &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign=top bgcolor="#FFCCAA">This is a list of directory or jar files used to bootstrap the class files used by the compiler. By default the libraries of the running
+VM are used. Entries are separated by the platform path separator.</td>
+</tr>
+<tr>
+<td valign="top" bgcolor="#FFCCAA" width="250">-cp<br>-classpath &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign=top bgcolor="#FFCCAA">This is a list of directory or jar files used to compile the source files. The default value is the value of the property "java.class.path".
+ Entries are separated by the platform path separator.
+</td>
+</tr>
+<tr>
+<td valign=top width="250">-extdirs &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign=top>This is a list of directory used to specify the location of extension zip/jar files. Entries are separated by the platform path separator.</td>
+</tr>
+<tr>
+<td valign=top width="250">-sourcepath &lt;dir&nbsp;1&gt;;&lt;dir&nbsp;2&gt;;...;&lt;dir&nbsp;P&gt;</td>
+<td valign=top>This is a list of directory used to specify the source files. Entries are separated by the platform path separator.</td>
+</tr>
+<tr>
+<td valign=top bgcolor="#FFCCAA" width="250">-d &lt;dir 1&gt;|none</td>
+<td bgcolor="#FFCCAA">This is used to specify in which directory the generated .class files should be dumped. If it is omitted, no package directory structure is created.<br>
+If you don't want to generate .class files, use <font color="#3366FF">-d none</font>.</td>
+</tr>
+<tr>
+<td valign=top width="250">-encoding &lt;encoding name&gt;</td>
+<td>Specify default source encoding format (custom encoding can also be specified on a per file basis by suffixing each input source file/folder name with <font color="#3366FF">[encoding &lt;encoding name&gt;]</font>).</td>
+</tr>
+<tr>
+<th colspan="2">Compliance options</th>
+</tr>
+<tr>
+<td valign=top width="250">-target 1.1|1.2|1.3|1.4|1.5|5|5.0</td>
+<td>This specifies the .class file target setting.
+The possible value are:
+<ul>
+<li><font color="#3366FF">1.1</font> (major version: 45 minor: 3)</li>
+<li><font color="#3366FF">1.2</font> (major version: 46 minor: 0)</li>
+<li><font color="#3366FF">1.3</font> (major version: 47 minor: 0)</li>
+<li><font color="#3366FF">1.4</font> (major version: 48 minor: 0)</li>
+<li><font color="#3366FF">1.5</font>, <font color="#3366FF">5</font> or <font color="#3366FF">5.0</font> (major version: 49 minor: 0)</li>
+</ul>
+Defaults are:
+<ul>
+<li><font color="#3366FF">1.1</font> in <font color="#3366FF">-1.3</font> mode</li>
+<li><font color="#3366FF">1.2</font> in <font color="#3366FF">-1.4</font> mode</li>
+<li><font color="#3366FF">1.5</font> in <font color="#3366FF">-1.5</font> mode</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td valign=top>-1.3</td>
+<td>Set compliance level to <font color="#3366FF">1.3</font>. Implicit -source 1.3 -target 1.1.</td>
+</tr>
+<tr>
+<td valign=top>-1.4</td>
+<td>Set compliance level to <font color="#3366FF">1.4</font> (default). Implicit -source 1.3 -target 1.2.</td>
+</tr>
+<tr>
+<td valign=top>-1.5</td>
+<td>Set compliance level to <font color="#3366FF">1.5</font>. Implicit -source 1.5 -target 1.5.</td>
+</tr>
+<tr>
+<td valign=top width="250">-source 1.3|1.4|1.5|5|5.0</td>
+<td>This is used to enable the source level of the compiler.<br>
+The possible value are:
+<ul>
+<li><font color="#3366FF">1.3</font></li>
+<li><font color="#3366FF">1.4</font></li>
+<li><font color="#3366FF">1.5</font>, <font color="#3366FF">5</font> or <font color="#3366FF">5.0</font></li>
+</ul>
+Defaults are:
+<ul>
+<li><font color="#3366FF">1.3</font> in <font color="#3366FF">-1.3</font> mode</li>
+<li><font color="#3366FF">1.4</font> in <font color="#3366FF">-1.4</font> mode</li>
+<li><font color="#3366FF">1.5</font> in <font color="#3366FF">-1.5</font> mode</li>
+</ul>
+In <font color="#3366FF">1.4</font>, <font color="#3366FF"><I>assert</I></font> is treated as a keyword. In <font color="#3366FF">1.5</font>, <font color="#3366FF"><I>enum</I></font> and <font color="#3366FF"><i>assert</i></font> are treated as a keyword.</td>
+</tr>
+<tr>
+<th colspan="2">Warning options</th>
+</tr>
+<tr>
+<td valign=top width="250">-warn:<blockquote>allDeprecation<br>allJavadoc<br><font color="#FF0000">assertIdentifier</font><br>boxing<br><font color="#FF0000">charConcat</font><br>conditionAssign<br><font color="#FF0000">constructorName</font>
+<br>dep-ann<br><font color="#FF0000">deprecation</font><br>emptyBlock<br>enumSwitch<br>fieldHiding<br>finalBound<br><font color="#FF0000">finally</font><br>hiding<br>incomplete-switch<br>indirectStatic
+<br><font color="#FF0000">intfAnnotation</font><br><font color="#FF0000">intfNonInherited</font><br>javadoc<br>localHiding
+<br><font color="#FF0000">maskedCatchBlocks</font><br>nls<br><font color="#FF0000">noEffectAssign</font><br>null<br>over-ann<br><font color="#FF0000">pkgDefaultMethod</font><br>semicolon<br><font color="#FF0000">serial</font><br>
+specialParamHiding<br>static-access<br><font color="#FF0000">staticReceiver</font><br><font color="#FF0000">suppress</font><br>synthetic-access<br>syntheticAccess<br>tasks(&lt;task1&gt;|...|&lt;taskN&gt;)<br>
+<font color="#FF0000">typeHiding</font><br><font color="#FF0000">unchecked</font><br>unnecessaryElse<br>unqualified-field-access<br>unqualifiedField<br>uselessTypeCheck
+<br>unused<br>unusedArgument<br><font color="#FF0000">unusedImport</font><br><font color="#FF0000">unusedLocal</font><br><font color="#FF0000">unusedPrivate</font><br>unusedThrown
+<br><font color="#FF0000">varargsCast</font><br><font color="#FF0000">warningToken</font>
+</blockquote>
+</td>
+<td valign=top>Set warning level.<br>e.g. <font color="#3366FF">-warn:unusedLocals,deprecation</font><br>
+<p>In <font color="#FF0000">red</font> are the default settings.</p>
+<p>
+<pre>
+    -warn:&lt;warnings separated by ,&gt;    enable exactly the listed warnings
+    -warn:+&lt;warnings separated by ,&gt;   enable additional warnings
+    -warn:-&lt;warnings separated by ,&gt;   disable specific warnings
+</pre>
+<table>
+<tr>
+<th align=left valign=top>allDeprecation</th>
+<td valign=top>deprecation even inside deprecated code</td>
+</tr>
+<tr>
+<th align=left valign=top>allJavadoc</th>
+<td valign=top>invalid or missing javadoc</td>
+</tr>
+<tr>
+<th align=left valign=top>assertIdentifier</th>
+<td valign=top>occurrence of <i>assert</i> used as identifier</td>
+</tr>
+<tr>
+<th align=left valign=top>boxing</th>
+<td valign=top>autoboxing conversion</td>
+</tr>
+<tr>
+<th align=left valign=top>charConcat</th>
+<td valign=top>when a char array is used in a string concatenation without being converted explicitly to 
+a string</td>
+</tr>
+<tr>
+<th align=left valign=top>conditionAssign</th>
+<td valign=top>possible accidental boolean assignment</td>
+</tr>
+<tr>
+<th align=left valign=top>constructorName</th>
+<td valign=top>method with constructor name</td>
+</tr>
+<tr>
+<th align=left valign=top>dep-ann</th>
+<td valign=top>missing @Deprecated annotation</td>
+</tr>
+<tr>
+<th align=left valign=top>deprecation</th>
+<td valign=top>usage of deprecated type or member outside deprecated code</td>
+</tr>
+<tr>
+<th align=left valign=top>emptyBlock</th>
+<td valign=top>undocumented empty block</td>
+</tr>
+<tr>
+<th align=left valign=top>enumSwitch,<br>incomplete-switch</th>
+<td valign=top>incomplete enum switch</td>
+</tr>
+<tr>
+<th align=left valign=top>fieldHiding</th>
+<td valign=top>field hiding another variable</td>
+</tr>
+<tr>
+<th align=left valign=top>finalBound</th>
+<td valign=top>type parameter with final bound</td>
+</tr>
+<tr>
+<th align=left valign=top>finally</th>
+<td valign=top>finally block not completing normally</td>
+</tr>
+<tr>
+<th align=left valign=top>hiding</th>
+<td valign=top>macro for fieldHiding, localHiding, typeHiding and maskedCatchBlock</td>
+</tr>
+<tr>
+<th align=left valign=top>indirectStatic</th>
+<td valign=top>indirect reference to static member</td>
+</tr>
+<tr>
+<th align=left valign=top>intfAnnotation</th>
+<td valign=top>annotation type used as super interface</td>
+</tr>
+<tr>
+<th align=left valign=top>intfNonInherited</th>
+<td valign=top>interface non-inherited method compatibility</td>
+</tr>
+<tr>
+<th align=left valign=top>javadoc</th>
+<td valign=top>invalid javadoc</td>
+</tr>
+<tr>
+<th align=left valign=top>localHiding</th>
+<td valign=top>local variable hiding another variable</td>
+</tr>
+<tr>
+<th align=left valign=top>maskedCatchBlocks</th>
+<td valign=top>hidden catch block</td>
+</tr>
+<tr>
+<th align=left valign=top>nls</th>
+<td>non-nls string literals (lacking of tags //$NON-NLS-&lt;n&gt;)</td>
+</tr>
+<tr>
+<th align=left valign=top>noEffectAssign</th>
+<td valign=top>for assignment with no effect</td>
+</tr>
+<tr>
+<th align=left valign=top>null</th>
+<td>missing or redundant null check</td>
+</tr>
+<tr>
+<th align=left valign=top>over-ann</th>
+<td>missing @Override annotation</td>
+</tr>
+<tr>
+<th align=left valign=top>pkgDefaultMethod</th>
+<td valign=top>attempt to override package-default method</td>
+</tr>
+<tr>
+<th align=left valign=top>serial</th>
+<td valign=top>missing serialVersionUID</td>
+</tr>
+<tr>
+<th align=left valign=top>semicolon</th>
+<td valign=top>unnecessary semicolon or empty statement</td>
+</tr>
+<tr>
+<th align=left valign=top>specialParamHiding</th>
+<td valign=top>constructor or setter parameter hiding another field</td>
+</tr>
+<tr>
+<th align=left valign=top>static-access</th>
+<td valign=top>macro for indirectStatic and staticReceiver</td>
+</tr>
+<tr>
+<th align=left valign=top>staticReceiver</th>
+<td valign=top>if a non static receiver is used to get a static field or call a static method</td>
+</tr>
+<tr>
+<th align=left valign=top>suppress</th>
+<td valign=top>enable @SuppressWarnings</td>
+</tr>
+<tr>
+<th align=left valign=top>syntheticAccess,<br>synthetic-access</th>
+<td valign=top>when performing synthetic access for innerclass</td>
+</tr>
+<tr>
+<th align=left valign=top>tasks</th>
+<td valign=top>enable support for tasks tags in source code</td>
+</tr>
+<tr>
+<th align=left valign=top>typeHiding</th>
+<td valign=top>type parameter hiding another type</td>
+</tr>
+<tr>
+<th align=left valign=top>unchecked</th>
+<td valign=top>unchecked type operation</td>
+</tr>
+<tr>
+<th align=left valign=top>unnecessaryElse</th>
+<td valign=top>unnecessary else clause</td>
+</tr>
+<tr>
+<th align=left valign=top>unqualified-field-access,<br>unqualifiedField</th>
+<td valign=top>unqualified reference to field</td>
+</tr>
+<tr>
+<th align=left valign=top>unused</th>
+<td valign=top>macro for unusedArgument, unusedImport, unusedLocal, unusedPrivate and unusedThrown</td>
+</tr>
+<tr>
+<th align=left valign=top>unusedArgument</th>
+<td valign=top>unused method argument</td>
+</tr>
+<tr>
+<th align=left valign=top>unusedImport</th>
+<td valign=top>unused import reference</td>
+</tr>
+<tr>
+<th align=left valign=top>unusedLocal</th>
+<td valign=top>unused local variable</td>
+</tr>
+<tr>
+<th align=left valign=top>unusedPrivate</th>
+<td valign=top>unused private member declaration</td>
+</tr>
+<tr>
+<th align=left valign=top>unusedThrown</th>
+<td valign=top>unused declared thrown exception</td>
+</tr>
+<tr>
+<th align=left valign=top>uselessTypeCheck</th>
+<td valign=top>unnecessary cast/instanceof operation</td>
+</tr>
+<tr>
+<th align=left valign=top>varargsCast</th>
+<td valign=top>varargs argument need explicit cast</td>
+</tr>
+<tr>
+<th align=left valign=top>warningToken</th>
+<td valign=top>unhandled warning token in @SuppressWarningsb</td>
+</tr>
+</table>
+</p>
+</td>
+</tr>
+<tr>
+<td valign=top>-nowarn</td>
+<td>No warning (equivalent to <font color="#3366FF">-warn:none</font>)</td>
+</tr>
+<tr>
+<td valign=top>-deprecation</td>
+<td>Equivalent to <font color="#3366FF">-warn:deprecation</font>.</td>
+</tr>
+<tr>
+<th colspan="2">Debug options</th>
+</tr>
+<tr>
+<td valign=top>-g[:none|:lines,vars,source]
+</td>
+<td>Set the debug attributes level<br>
+<table>
+<tr>
+<th align=left>-g</th>
+<td>All debug info (equivalent to <font color="#3366FF">-g:lines,vars,source</font>)
+</td>
+</tr>
+<tr>
+<th align=left>-g:none</th>
+<td>No debug info</td>
+</tr>
+<tr>
+<th align=left>-g:[lines,vars,source]</th>
+<td>Selective debug info</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td valign=top>-preserveAllLocals</td>
+<td>Explicitly request the compiler to preserve all local variables (for debug purpose). If omitted, the compiler will removed unused locals.</td>
+</tr>
+<tr>
+<th colspan="2">Advanced options</th>
+</tr>
+<tr>
+<td>@&lt;file&gt;</td>
+<td valign=top>Read command-line arguments from file</td>
+</tr>
+<tr>
+<td>-maxProblems&nbsp;&lt;n&gt;</td>
+<td valign=top>Max number of problems per compilation unit (100 by default)</td>
+</tr>
+<tr>
+<td valign=top>-log &lt;filename&gt;</td>
+<td>Specify a log file in which all output from the compiler will be dumped. This is really useful if you want to debug the batch
+compiler or get a file which contains all errors and warnings from a batch build. If the extension is <b>.xml</b>, the generated log
+will be a xml file.
+</td>
+</tr>
+<tr>
+<td valign=top>-proceedOnError</td>
+<td>Keep compiling when error, dumping class files with problem methods or problem types. This is recommended only if you want
+to be able to run your application even if you have remaining errors.</td>
+</tr>
+<tr>
+<td valign=top>-verbose</td>
+<td>Print accessed/processed compilation units in the console or the log file if specified.</td>
+</tr>
+<tr>
+<td valign=top>-referenceInfo</td>
+<td>Compute reference info. This is useful only if connected to the builder. The reference infos are useless otherwise.</td>
+</tr>
+<tr>
+<td valign=top>-progress</td>
+<td>Show progress (only in -log mode)</td>
+</tr>
+<tr>
+<td valign=top>-time
+</td>
+<td>Display speed information</td>
+</tr>
+<tr>
+<td valign=top>-noExit</td>
+<td>Do not call <font color="#3366FF">System.exit(n)</font> at end of compilation (<font color="#3366FF">n=0</font> if no error)</td>
+</tr>
+<tr>
+<td valign=top>-repeat &lt;n&gt;
+</td>
+<td>Repeat compilation process <font color="#3366FF">&lt;n&gt;</font> times (perf analysis).</td>
+</tr>
+<tr>
+<td valign=top>-inlineJSR</td>
+<td>Inline JSR bytecode (implicit if target >= 1.5)</td>
+</tr>
+<tr>
+<td valign=top>-enableJavadoc</td>
+<td>Consider references inside javadoc</td>
+</tr>
+<tr>
+<th colspan="2">Helping options</th>
+</tr>
+<tr>
+<td>-? -help</td>
+<td valign=top>Display the help message</td>
+</tr>
+<tr>
+<td valign=top>-v -version</td>
+<td>Display the build number of the compiler. This is very useful to report a bug.</td>
+</tr>
+<tr>
+<td valign=top>-showversion</td>
+<td>Display the build number of the compiler and continue. This is very useful to report a bug.</td>
+</tr>
+</table>
+<h4>Examples</h4>
+<table>
+<tr>
+<td valign=top><code><font color="#3366FF">d:\temp -classpath rt.jar -time -g -d d:/tmp</font></code>
+</td>
+<td valign=top>It compiles all source files in d:\temp and its subfolders. The classpath is simply rt.jar. It generates all debug
+attributes and all generated .class files are dumped in d:\tmp. The speed of the compiler will be displayed once the batch process
+is completed.</td>
+</tr>
+<tr>
+<td valign=top><code><font color="#3366FF">d:\temp\Test.java -classpath d:\temp;rt.jar -g:none</font></code>
+</td>
+<td valign=top>It compiles only Test.java and it will retrieve any dependant files from d:\temp. The classpath is rt.jar and d:\temp, which means that all necessary classes
+are searched first in d:\temp and then in rt.jar. It generates no debug attributes and all generated .class files are dumped in d:\tmp.</td>
+</tr>
+</table>
 <h3>Using the ant javac adapter</h3>
   The Eclipse compiler can be used inside an Ant script using the javac adapter. 
 In order to use the Eclipse compiler, you simply need to define the <b>build.compiler</b>
