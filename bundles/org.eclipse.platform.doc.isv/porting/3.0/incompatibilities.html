@@ -78,7 +78,7 @@ similar):</p>
 <u>&lt;?eclipse version=&quot;3.0&quot;?&gt;<br>
 </u>&lt;plugin ...&gt;<br>
 &nbsp;&nbsp;&nbsp; ...<br>
-&lt;/plugin&gt;</code>
+&lt;/plugin&gt;</code></p>
 <p>Plug-in manifests created by PDE 3.0 automatically have this form. <strong>It
     is strongly recommended that you use the PDE plug-in migration tool.</strong> It
     automatically inserts the indicated line into the
@@ -115,9 +115,9 @@ changes.</p>
 <table border="1" width="80%">
   <tr>
     <td width="50%">
-      <p align="center"><b>Old extension point id</b></td>
+      <p align="center"><b>Old extension point id</b></p></td>
     <td width="50%">
-      <p align="center"><b>New extension point id</b></td>
+      <p align="center"><b>New extension point id</b></p></td>
   </tr>
   <tr>
     <td width="50%">org.eclipse.ui.markerHelp</td>
@@ -174,11 +174,11 @@ up the dependencies, and help to determine a minimal set.)</p>
 <table border="1" width="80%">
   <tr>
     <td width="33%">
-      <p align="center"><b>API package</b></td>
+      <p align="center"><b>API package</b></p></td>
     <td width="33%">
-      <p align="center"><b>2.1 plug-in</b></td>
+      <p align="center"><b>2.1 plug-in</b></p></td>
     <td width="34%">
-      <p align="center"><b>Corresponding 3.0 plug-in(s)</b></td>
+      <p align="center"><b>Corresponding 3.0 plug-in(s)</b></p></td>
   </tr>
   <tr>
     <td width="33%">org.eclipse.jface.text.*</td>
@@ -325,9 +325,9 @@ run some or all of their code in a background thread in Eclipse 3.0:</p>
 <table border="1" width="80%">
   <tr>
     <td width="50%">
-      <p align="center"><b>Extension point or API class</b></td>
+      <p align="center"><b>Extension point or API class</b></p></td>
     <td width="50%">
-      <p align="center"><b>Notes</b></td>
+      <p align="center"><b>Notes</b></p></td>
   </tr>
   <tr>
     <td width="50%">org.eclipse.core.runtime.IRegistryChangeListener</td>
@@ -384,7 +384,7 @@ CPU-intensive processing. When doing this, be aware of the deadlock risk
 inherent in <code>Display.syncExec</code>. <code>Display.asyncExec</code> is generally
 safer as it does not introduce deadlock risk, at the expense of losing precise
 control over when the code is executed.</p>
-<p>Other techniques for making thread safe code include:
+<p>Other techniques for making thread safe code include:</p>
 <ul>
   <li>Wrapping unsafe code in semaphores or Java monitors. The new concurrency
     infrastructure includes one such semaphore object: <code>org.eclipse.core.runtime.jobs.ILock</code>.
@@ -451,7 +451,7 @@ information should implement or adapt to org.eclipse.ui.ide.IGotoMarker.
 <p>Since IGotoMarker's only method is gotoMarker(IMarker) and has the same
 signature and specification as the old IEditorPart.gotoMarker(IMarker), existing
 editor implementations can adapt to this change simply by including IGotoMarker
-in the implements clause of the class definition.
+in the implements clause of the class definition.</p>
 <p>A 2.1 binary plug-ins with code that calls this method will get an class
 linking error exception when run in a standard Eclipse 3.0
 configuration.</p>
@@ -640,9 +640,9 @@ are:</p>
   <li>The IEditorPart method gotoMarker(IMarker marker) has been deprecated to
     allow a future change of its visibility. Clients of this method must follow
     the migration instructions in the deprecation message.</li>
-  <li>AbstractDecoratedTextEditor returns an adapter for IGotoMarker.
+  <li>AbstractDecoratedTextEditor returns an adapter for IGotoMarker.</li>
   <li>AbstractDecoratedTextEditor implements the concept of implicit/explicit document
-    providers previously provided by AbstractTextEditor, as discussed above.
+    providers previously provided by AbstractTextEditor, as discussed above.</li>
 </ul>
 <h2><a name="Headless annotation support"></a>13. Headless annotation support</h2>
 <p>As part of the introduction of headless annotation support, the following changes to Annotation were made:</p>
@@ -756,7 +756,7 @@ their code to include the new severity.</p>
 <p>In Eclipse 3.0, workspace auto-builds now occur in a background thread. This
 required an API contract change to <code>org.eclipse.core.resources.IResourceChangeEvent</code>. The contract
 of <code>IResourceChangeEvent</code> previously guaranteed the following ordering of
-events for all workspace changes:
+events for all workspace changes:</p>
 <ol>
   <li><code>PRE_DELETE</code> or <code>PRE_CLOSE</code> event notification if applicable</li>
   <li>Perform the operation</li>
@@ -768,7 +768,7 @@ events for all workspace changes:
 <p>With auto-build now running in the background, there is no longer any
 guarantee about the temporal relationship between the <code>AUTO_BUILD</code> events
 and the <code>POST_CHANGE</code> event. In Eclipse 3.0, steps 3-5 in the above
-structure are removed from the operation. The resulting picture looks like this:
+structure are removed from the operation. The resulting picture looks like this:</p>
 <ol>
   <li><code>PRE_DELETE</code> or <code>PRE_CLOSE</code> event notification if applicable</li>
   <li>Perform the operation</li>
@@ -777,7 +777,7 @@ structure are removed from the operation. The resulting picture looks like this:
 <p>Periodically, the platform will perform a background workspace build
 operation. Note that this happens regardless of the whether auto-build is on or
 off. The exact timing of when this build occurs will not be specified. The
-structure of the build operation will look like this:
+structure of the build operation will look like this:</p>
 <ol>
   <li><code>PRE_BUILD</code> event notification (<code>PRE_BUILD</code> is the
     new name for <code>PRE_AUTO_BUILD)</code></li>
@@ -786,24 +786,24 @@ structure of the build operation will look like this:
     new name for <code>POST_AUTO_BUILD)</code></li>
   <li><code>POST_CHANGE</code> event notification</li>
 </ol>
-The reference point for the deltas received by auto-build listeners will be
+<p>The reference point for the deltas received by auto-build listeners will be
 different from post-change listeners. Build listeners will receive notification
 of all changes since the end of the last build operation. Post-change listeners
 will receive a delta describing all changes since the last post-change
 notification. This new structure retains three characteristics of resource
-change listeners that have been true since Eclipse 1.0:
+change listeners that have been true since Eclipse 1.0:</p>
 <ul>
   <li><code>POST_CHANGE</code> listeners receive notification of absolutely all
     resource changes that occur during the time they are registered. This
     includes changes made by builders, and changes made by other listeners.</li>
   <li><code>PRE_AUTO_BUILD</code> listeners receive notification of all resource
     changes <b>except</b> changes made by builders and resource change
-    listeners.
+    listeners.</li>
   <li><code>POST_AUTO_BUILD</code> listeners receive notification of all resource
     changes <b>except</b> changes made by other <code>POST_AUTO_BUILD</code>
-    listeners.
+    listeners.</li>
 </ul>
-However, there are some important differences with this approach. Prior to
+<p>However, there are some important differences with this approach. Prior to
 Eclipse 3.0, auto-build listeners were always called before <code>POST_CHANGE</code>
 listeners. For this reason, the delta received by auto-build listeners was
 always a subset of the delta received by the <code>POST_CHANGE</code> listeners.
@@ -811,7 +811,7 @@ This relationship is now essentially reversed. Auto-build listeners will receive
 a delta that is a super-set of all deltas supplied to <code>POST_CHANGE</code>
 listeners since the end of the last background build. As before, auto-build
 listeners will be allowed to modify the workspace, and post-change listeners
-will not.
+will not.</p>
 <p>It will no longer be true that upon completion of a workspace changing
 operation, that <code>AUTO_BUILD</code> event listeners will have been notified.
 Client code that registers resource change listeners with <code>IWorkspace.addResourceChangeListener(IResourceChangeListener)</code>
@@ -1060,11 +1060,10 @@ but they serve no purpose and should be removed. Look to remove:
 <p><b>What is affected:</b> Scripts (e.g., Ant build.xml
 files) using the eclipse.buildScript task.</p>
 <p><b>Description:</b> PDE Build introduced a new property to the eclipse.buildScript task to control the generation of plug-ins build
-scripts. 
-This was mandated by the introduction of the new OSGi-based runtime.
-<p><b>Action required:</b> If you want to use Eclipse 3.0 to build a 2.1 based product, 
+scripts. This was mandated by the introduction of the new OSGi-based runtime.
+</p><p><b>Action required:</b> If you want to use Eclipse 3.0 to build a 2.1 based product, 
 then introduce in eclipse.buildScript the property "buildingOSGi" and set it to false.
-For example: <pre>&lt;eclipse.buildScript ... buildingOSGi=&quot;false&quot;/&gt;</pre>
+For example: </p><pre>&lt;eclipse.buildScript ... buildingOSGi=&quot;false&quot;/&gt;</pre>	
 
 <h2><a name="Changes to eclipse.buildScript Ant task"></a>36. Changes to
 eclipse.build Ant task</h2>
@@ -1088,9 +1087,9 @@ only support one entry at a time and the scriptName is always ignored.
 &quot;elements&quot; tag of an eclipse.fetch call, spread them out over several
 call to eclipse.fetch. If you use to set the scriptName, note that now the
 generated fetch script is always called &quot;fetch_{elementId}&quot;. For
-example:
+example:</p>
 <pre>&lt;eclipse.fetch elements=&quot;plugin@org.eclipse.core.runtime, feature@org.eclipse.platform&quot; .../&gt;</pre>
-becomes
+<p>becomes</p>
 <pre>&lt;eclipse.fetch elements=&quot;plugin@org.eclipse.core.runtime&quot; .../&gt;
 &lt;eclipse.fetch elements=&quot;feature@org.eclipse.platform&quot; .../&gt;</pre>
 
