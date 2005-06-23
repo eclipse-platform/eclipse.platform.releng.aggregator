@@ -142,28 +142,39 @@ you can never be sure what state your widgets are in by the time your runnable
 executes.</p>
 
 
-<H3>The workbench and threads</H3>
+<H3><a name="workbench_threads">The workbench and threads</H3>
 
 <p>The threading rules are very clear when you are implementing an SWT
 application from the ground up since you control the creation of the event
 loop and the decision to fork computational threads in your application.</P>
 
-<P>If you are contributing plug-in code to the workbench, there is no threading
-&quot;magic&quot; hidden in the JFace or workbench code. The rules are
-straightforward:</P>
+<P>Things get a bit more complicated when you are contributing plug-in code
+to the workbench.  The following rules can be considered "rules of engagement"
+when using platform UI classes, although from release to release there may be
+exceptions to these rules:</P>
 
 <ul>
-  <li>Your workbench plug-in code executes in the workbench's UI thread.</li>
-  <li>If you receive an event from the workbench, it is always executing in the
-      UI thread of the workbench.</li>
-  <li>If your plug-in forks a computational thread, it must use the
+  <li>In general, any workbench UI extensions you add to the platform will be
+  executing in the workbench's UI thread, unless they are specifically related
+  to threads or background jobs (such as background job progress indication).</li>
+  <li>If you receive an event from the workbench, it is not guaranteed that it is
+  executing in the UI thread of the workbench.  Consult the javadoc for the particular
+  class that defines the listener or event.  If there is no specific documentation
+  discussing threading, and the class is clearly a UI-related class, you may expect that
+  the event arrives in the UI thread of the workbench.</li>
+  <li>Likewise, a platform UI library should not be considered thread-safe unless it is
+  specifically documented as such.  Note that most platform UI classes dispatch listeners
+  from the calling thread that triggered the event.  Workbench and JFace API calls do not 
+  check that the caller is executing in the UI thread.This means that your plug-in may
+  introduce a problem if you call a method that triggers an event from a non-UI thread.
+  SWT triggers an <strong><a href="../reference/api/org/eclipse/swt/SWTException.html">SWTException</a></strong>
+  for all API calls made from a non-UI thread. In general, avoid calling platform UI code from 
+  another thread unless the javadoc specifically allows it.</li>
+   <li>If your plug-in forks a computational thread or uses a workbench Job, it must use the
       <strong><a href="../reference/api/org/eclipse/swt/widgets/Display.html">Display</a></strong>
       <strong>asyncExec(Runnable)</strong> or <strong>syncExec(Runnable)</strong>
-      methods when calling any API for the workbench, JFace, or SWT.</li>
-  <li>Workbench and JFace API calls do not check that the caller is executing
-      in the UI thread. However, SWT triggers an
-      <strong><a href="../reference/api/org/eclipse/swt/SWTException.html">SWTException</a></strong>
-      for all API calls made from a non-UI thread.</li>
+      methods when calling any API for the workbench, JFace, or SWT, unless the API specifically
+      allows call-in from a background thread.</li>
   <li>If your plug-in uses the JFace
       <a href="../reference/api/org/eclipse/jface/operation/IRunnableContext.html"><strong>IRunnableContext</strong></a>
       interface to invoke a progress monitor and run an operation, it supplies
