@@ -19,10 +19,29 @@
 <p>When user searches help contents of a product, the search is performed
 within a documentation index. &nbsp;By default, this index &nbsp;is created
 on the first invocation of help search, but can be pre-built and delivered
-to the user with a product. &nbsp;This avoids indexing from occurring on
-the user machine and lets user obtain first search results faster.<br>
-</p>
+to the user with each plug-in, since 3.1, or as a complete index for a product. &nbsp;This
+prevents
+indexing
+from
+occurring
+on
+the user machine and lets the user obtain first search results faster.</p>
+<h2><b>Building a documentation index for a plug-in.</b></h2>
+<p>To build an index follow the steps:</p>
+<ul>
+  <li>add an <code>index</code> element to the <code>org.eclipse.help.toc
+      extension</code> in a documentation plug-in, to specify directory where
+      index will exist,</li>
+  <li>create an index for a desired locale by running the <code>help.buildHelpIndex</code> ANT
+    task for each plug-in and fragment with documentation.<br>
+</li>
+</ul>
 <h2><b>Building an index for a product</b></h2>
+<p>Per-product index is a one aggregate index of all documentation in the product.
+  It should be used in scenarios in which the set of documentation plug-ins is
+  not changing. For example an info-center installation will benefit
+  from per-product
+  index.</p>
 <p>To build an index follow the steps:<br>
 </p>
 <ul>
@@ -35,7 +54,7 @@ need to be set :<br>
     <b>outputDirectory</b> - specifies path of the directory where the index
 is to be saved<br>
     <b>locale</b> - specifies locale for which the index will be built<br>
-   </li>
+  </li>
 </ul>
 <p>For example, running<br>
 </p>
@@ -45,7 +64,7 @@ directory that will be created under <b>d:/build/com.my.plugin</b>. &nbsp;The
 zip will contain index of contents of documents that are available to users
 when they run the product in the <b>en</b> locale.<br>
 </p>
-<h2><b>Packaging and Installation of pre-built index</b> </h2>
+<h2><b>Packaging and Installation of the product's pre-built index</b> </h2>
 Pre-built indices, the <b>doc_index.zip</b> files, need to be packaged as
 a plug-in. &nbsp; You can choose to use a plug-in associated with the primary
 feature, or choose to package the index for each language into separate fragments.<br>
@@ -54,8 +73,9 @@ For example, if product's documentation is available in three languages, say
 English, German and Simplified Chinese, a plug-in com.my.plugin can have the following structure:<br>
 <pre>com.my.plugin/<br>              plugin.xml<br>              nl/<br>                 de/<br>                    doc_index.zip<br>                 en/<br>                    doc_index.zip<br>                 zh/<br>                    CN/<br>                       doc_index.zip<br>              other files of this plugin</pre>
 <br>
- The ID of the plugin needs to be specified as a <b>productIndex</b> preference
-for org.eclipse.help.base plugin. &nbsp;For plugin in the above example, the plugin_customization.ini
+ The ID of the plug-in needs to be specified as a <b>productIndex</b> preference
+for org.eclipse.help.base plug-in.&nbsp;For plug-in in the above example, the
+plugin_customization.ini
 file needs to contain the entry<br>
 <pre>org.eclipse.help.base/productIndex=com.my.plugin<br></pre>
 
