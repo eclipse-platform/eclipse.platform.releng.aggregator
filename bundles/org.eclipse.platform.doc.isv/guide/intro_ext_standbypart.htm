@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Intro support</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h3>Contributing a standby content part</h3>
+<p>
+Plug-ins can also implement a part for displaying alternative content when the intro page is in standby mode.  For
+example, the platform defines a standby part that will show a cheat sheet for related intro content.  The part is launched using a page
+link with a specialized URL.  Standby parts are launched using a URL containing a special command for showing
+a standby part, such as <tt>http://org.eclipse.ui.intro/showStandby?partId=somePartId</tt>.
+The part is defined in the <b>standbyContentPart</b> subelement in the 
+<b><a href="../reference/extension-points/org_eclipse_ui_intro_configExtension.html">org.eclipse.ui.intro.configExtension</a></b>
+extension. An <b>id</b>, <b>pluginId</b>, and <b>class</b> must be specified for the part.  The class must implement
+<a href="../reference/api/org/eclipse/ui/intro/config/IStandbyContentPart.html"><b>IStandbyContentPart</b></a>.
+The following snippet shows how the platform defines a standby part for showing cheat sheets.
+</p>
+<pre>&lt;extension point="org.eclipse.ui.intro.configExtension"&gt;
+	&lt;standbyContentPart
+		id="org.eclipse.platform.cheatsheet"
+		class="org.eclipse.platform.internal.CheatSheetStandbyContent"
+		pluginId="org.eclipse.platform"/&gt;
+&lt;/extension&gt;
+</pre>
+This cheat sheet could be launched from an intro page using a <b>link</b> subelement whose
+URL is <tt>http://org.eclipse.ui.intro/showStandby?partId=org.eclipse.platform.cheatsheet&amp;input=org.eclipse.pde.helloworld</tt>.
+This IntroURL would launch the org.eclipse.platform.cheatsheet standby content part and set its input to
+"org.eclipse.pde.helloworld".  The detailed mechanics for implementing a standby part are beyond the scope
+of this discussion.   See <a href="../reference/api/org/eclipse/ui/intro/config/IStandbyContentPart.html"><b>IStandbyContentPart</b></a>
+and its related classes for more information.
+<h5>&nbsp;</h5>
+</BODY>
+</HTML>
