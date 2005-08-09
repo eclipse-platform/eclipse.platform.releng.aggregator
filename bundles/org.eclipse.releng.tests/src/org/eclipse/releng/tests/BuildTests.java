@@ -515,11 +515,6 @@ public class BuildTests extends TestCase {
 	}
 	
 	public void testChkpii() {
-			if (!new File(getExec()).exists()){
-				System.out.println(getExec()+" not installed.  Skipping chkpii testing.");
-				assertTrue(true);
-				return;
-			}
 			
 			String zipFile = locateEclipseZip();
 

@@ -5,6 +5,7 @@
   <!-- sets the properties eclipse-home, and library-file -->
   <property name="eclipse-home" value="${basedir}/../../"/>
   <property name="library-file" value="${eclipse-home}/plugins/org.eclipse.test/library.xml"/>
+  <property name="location" value="/builds/t"/>
   <property name="org.eclipse.releng.tests" value="org.eclipse.releng.tests_3.0.0" />
   
   <!-- This target holds all initialization code that needs to be done for -->
@@ -13,12 +14,8 @@
   <target name="init">
     <tstamp/>
   	<condition property="tar.gz">
-  		<contains string="${runtimeArchive}" substring=".tar.gz" />
+  		<equals arg1="${os}" arg2="linux" />
   	</condition>
-  	<condition property="location" value="/builds/t">
-  		<equals arg1="${os}" arg2="win32" />
-  	</condition>
-  	<property name="location" value="${basedir}/releng"/>
   </target>
 
   <!-- This target holds code to cleanup the testing environment after the tests -->
@@ -33,7 +30,7 @@
 	<delete dir="${location}" />
 	<mkdir dir="${location}" />
 	<exec dir="${location}" executable="tar">
-		<arg line="-xzf ${archiveDir}/${runtimeArchive}"/>
+		<arg line="-xzf ${archiveDir}/eclipse-SDK-${buildId}-linux-gtk.tar.gz"/>
     </exec>
   </target>
 	
