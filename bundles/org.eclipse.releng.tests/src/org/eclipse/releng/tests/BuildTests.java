@@ -515,24 +515,6 @@ public class BuildTests extends TestCase {
 	}
 	
 	public void testChkpii() {
-		
-			try {
-				//test that chkpii is on path
-				Runtime aRuntime = Runtime.getRuntime();
-				Process aProcess = aRuntime.exec(getExec()+" /?");
-				BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
-				String line=null;
-				while ( (line+=aBufferedReader.readLine()) != null) {
-				}
-				aProcess.waitFor();
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				System.out.println("Skipping chkpii test.");
-				assertTrue(true);
-				return;
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			
 			String zipFile = locateEclipseZip();
 
