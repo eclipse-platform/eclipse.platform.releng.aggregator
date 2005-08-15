@@ -561,8 +561,7 @@ public class BuildTests extends TestCase {
 			try {
 				Process aProcess = aRuntime.exec(chkpiiString);
 				BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
-				String line = null;
-				while ( (line = aBufferedReader.readLine()) != null) {
+				while ( aBufferedReader.readLine() != null) {
 				}
 				aProcess.waitFor();
 			} catch (IOException e) {
