@@ -1,14 +1,14 @@
 <project name="PDE Doc ISV Build" default="all"  basedir="." >
 
 	<target name="init">
-		<available file="${basedir}/doc.zip" property="doc.zip.present"/>
+		<available file="${basedir}/index" property="index.present"/>
 	</target>
 
-	<target name="all" depends="init" unless="doc.zip.present">
+	<target name="all" depends="init" unless="index.present">
 		<antcall target="convertSchemaToHtml" />
 		<antcall target="generateJavadoc" />
 		<antcall target="build.index" />
-		<antcall target="createDocZip" />
+		<!--antcall target="createDocZip" /-->
 	</target>
 
 	<target name="build.index" description="Builds search index for the plug-in: org.eclipse.pde.doc.user." if="eclipse.running">
@@ -34,7 +34,7 @@
 	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
 		<!--HACK to ensure the jdt doc is built before PDE - call to this script should be moved to build.jars target-->
-		<available file="../org.eclipse.jdt.doc.isv/doc.zip" property="jdt.doc.zip.present"/>
+		<available file="../org.eclipse.jdt.doc.isv/index" property="jdt.index.present"/>
 		<antcall target="buildJdtDoc" />
 
 		<condition property="optionsFile" value="pdeOptions">
@@ -56,7 +56,7 @@
 		</exec>
 	</target>
 
-	<target name="buildJdtDoc" unless="jdt.doc.zip.present">
+	<target name="buildJdtDoc" unless="jdt.index.present">
 		<ant antfile="buildDoc.xml" dir="../org.eclipse.jdt.doc.isv" />
 	</target>
 

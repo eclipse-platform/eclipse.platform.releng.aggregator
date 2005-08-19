@@ -2,15 +2,15 @@
 <project name="Jdt Doc Isv Build" default="all"  basedir="." >
 
 <target name="init">
-	<available file="${basedir}/doc.zip" property="doc.zip.present"/>
+	<available file="${basedir}/index" property="index.present"/>
 </target>
 	
-<target name="all" depends="init" unless="doc.zip.present">
+<target name="all" depends="init" unless="index.present">
 	<antcall target="convertSchemaToHtml" />
 	<antcall target="examplesDocCopy" />
 	<antcall target="generateJavadoc" />
 	<antcall target="build.index" />
-	<antcall target="createDocZip" />
+	<!--antcall target="createDocZip" /-->
 </target>
 
 
@@ -50,7 +50,7 @@
 <target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
 	<!--HACK to ensure the platform doc is built before JDT - call to this script should be moved to build.jars target-->
-	<available file="../org.eclipse.platform.doc.isv/doc.zip" property="platform.doc.zip.present"/>
+	<available file="../org.eclipse.platform.doc.isv/index" property="platform.index.present"/>
 	<antcall target="buildPlatformDoc" />
 
 	<condition property="optionsFile" value="jdtOptions">
@@ -72,7 +72,7 @@
 	</exec>
 </target>
 
-<target name="buildPlatformDoc" unless="platform.doc.zip.present">
+<target name="buildPlatformDoc" unless="platform.index.present">
 	<ant antfile="buildDoc.xml" dir="../org.eclipse.platform.doc.isv" />
 </target>
 
