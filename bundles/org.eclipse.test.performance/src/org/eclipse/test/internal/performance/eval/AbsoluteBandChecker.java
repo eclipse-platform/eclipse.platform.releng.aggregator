@@ -33,11 +33,11 @@ public class AbsoluteBandChecker extends AssertChecker {
 		Dim dimension= getDimension();
 
 		if (!measured.contains(dimension)) {
-	        PerformanceTestPlugin.logWarning("collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+	        PerformanceTestPlugin.logWarning("collected data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$
 			return true;
 		}
 		if (!reference.contains(dimension)) {
-		    PerformanceTestPlugin.logWarning("reference data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$ //$NON-NLS-2$			
+		    PerformanceTestPlugin.logWarning("reference data provides no dimension '"+dimension.getName()+'\''); //$NON-NLS-1$
 			return true;
 		}
 		

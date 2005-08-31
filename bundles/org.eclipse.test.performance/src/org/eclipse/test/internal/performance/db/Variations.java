@@ -81,7 +81,7 @@ public class Variations extends Properties {
      * @param separator
      */
     private void parse(String keyvaluepairs, String separator) {
-		StringTokenizer st= new StringTokenizer(keyvaluepairs, separator); //$NON-NLS-1$
+		StringTokenizer st= new StringTokenizer(keyvaluepairs, separator);
 		while (st.hasMoreTokens()) {
 			String token= st.nextToken();
 			int i= token.indexOf('=');

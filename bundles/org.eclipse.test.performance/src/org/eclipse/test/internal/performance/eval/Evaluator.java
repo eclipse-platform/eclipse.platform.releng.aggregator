@@ -88,7 +88,7 @@ public class Evaluator extends EmptyEvaluator {
 		StatisticsSession referenceStats= new StatisticsSession(datapoints);
 		StatisticsSession measuredStats= new StatisticsSession(sessionDatapoints);
 
-		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refKeys + "':"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		StringBuffer failMesg= new StringBuffer("Performance criteria not met when compared to '" + refKeys + "':"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		boolean pass= true;
 		for (int i= 0; i < fCheckers.length; i++) {
 			AssertChecker chk= fCheckers[i];

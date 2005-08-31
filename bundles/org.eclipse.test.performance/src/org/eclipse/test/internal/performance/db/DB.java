@@ -189,7 +189,7 @@ public class DB {
                 return name;
             
         Pattern pattern= Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
-        Matcher matcher= pattern.matcher(name); //$NON-NLS-1$
+        Matcher matcher= pattern.matcher(name);
         
         if (!matcher.find())
             return name;

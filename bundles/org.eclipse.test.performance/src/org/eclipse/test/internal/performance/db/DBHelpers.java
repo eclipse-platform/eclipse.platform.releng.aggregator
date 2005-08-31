@@ -79,8 +79,8 @@ public class DBHelpers {
     
     void renameVariation(String oldName, String newName) throws SQLException {
         PreparedStatement update= fConnection.prepareStatement("update VARIATION set KEYVALPAIRS = ? where KEYVALPAIRS = ? "); //$NON-NLS-1$
-        update.setString(1, newName); //$NON-NLS-1$
-        update.setString(2, oldName); //$NON-NLS-1$
+        update.setString(1, newName);
+        update.setString(2, oldName);
         update.executeUpdate();
         update.close();
     }
