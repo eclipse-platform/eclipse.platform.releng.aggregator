@@ -680,7 +680,7 @@ public class BuildTests extends TestCase {
 		
 		private String getExec() {
 
-			return new File("chkpw708.exe").getPath();
+			return new File("chkpw709.exe").getPath();
 		}
 		
 		/**
