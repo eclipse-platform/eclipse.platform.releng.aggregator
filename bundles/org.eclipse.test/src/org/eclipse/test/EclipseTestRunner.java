@@ -34,6 +34,7 @@ import org.apache.tools.ant.taskdefs.optional.junit.FormatterElement;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters
@@ -47,6 +48,10 @@ public class EclipseTestRunner implements TestListener {
 
 		TestFailedException(String message) {
 			super(message);
+		}
+    
+		TestFailedException(Throwable e) {
+		    super(e);
 		}
 	} 
 	/**
@@ -229,13 +234,16 @@ public class EclipseTestRunner implements TestListener {
 		try {
 			testClass= loadSuiteClass(suiteClassName);
 		} catch (ClassNotFoundException e) {
+		    if (e.getCause() != null) {
+		        runFailed(e.getCause());
+		    }
 			String clazz= e.getMessage();
 			if (clazz == null) 
 				clazz= suiteClassName;
 			runFailed("Class not found \""+clazz+"\"");
 			return null;
 		} catch(Exception e) {
-			runFailed("Error: "+e.toString());
+		    runFailed(e);
 			return null;
 		}
 		Method suiteMethod= null;
@@ -269,6 +277,11 @@ public class EclipseTestRunner implements TestListener {
 		throw new TestFailedException(message);
 	}
 
+    protected void runFailed(Throwable e) throws TestFailedException {
+      e.printStackTrace();
+      throw new TestFailedException(e);
+    }
+
 	protected void clearStatus() {
 	}
 
@@ -279,8 +292,12 @@ public class EclipseTestRunner implements TestListener {
 	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		if (fTestPluginName == null)
 			return Class.forName(suiteClassName);
-		Class loader= Platform.getBundle(fTestPluginName).loadClass(suiteClassName);
-		return loader;
+        Bundle bundle = Platform.getBundle(fTestPluginName);
+        if (bundle == null) {
+            throw new ClassNotFoundException(suiteClassName, new Exception("Could not find plugin \""
+                    + fTestPluginName + "\""));
+        }
+        return bundle.loadClass(suiteClassName);
 	}
 	
 	public void run() {
