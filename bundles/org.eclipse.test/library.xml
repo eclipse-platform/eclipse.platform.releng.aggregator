@@ -36,12 +36,14 @@
 	<equals arg1="${test.target}" arg2="performance" />
     </condition>
     <property name="vmargs" value=""/>
-    <property name="launcher" value="org.eclipse.core.launcher.Main"/>
     <property name="formatter" value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter"/>
     <property name="extraVMargs" value=""/>
 	<property name="plugin-path" value="" />
 	<property name="timeout" value="7200000" />
   	<property name="test-output" value="${classname}.xml" />
+  	
+  	<!--set default jvm to use for testing-->
+   	<property name="jvm" value="java" />
 
   	<!--Load value for eclipse.buildId from the config.ini file-->
  	<property file="${eclipse-home}/configuration/config.ini" />
@@ -49,10 +51,7 @@
 	<echo message="Running ${classname}"/>
 
 	<!-- Produces the file '${default-filename}' -->
-	<java classname="${launcher}" fork="true" dir="." timeout="${timeout}">
-		<classpath>
-	    	<pathelement location="${eclipse-home}/startup.jar"/>
-	    </classpath>
+	<java jar="${eclipse-home}/startup.jar" fork="true" dir="." timeout="${timeout}" jvm="${jvm}">
 	    <arg line="-application ${application}"/>
 	    <arg line="-dev bin -data ${data-dir}"/>
 	    <arg line="formatter=${formatter},${test-output}"/>
