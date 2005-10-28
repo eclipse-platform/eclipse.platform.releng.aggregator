@@ -11,18 +11,17 @@
 package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.ui.actions.CVSAction;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 
 /**
  *This class respond the "release..." menu action and try to open a wizard
  */
-public class TagAndReleaseAction extends CVSAction implements IWorkbenchWindowActionDelegate {
+public class TagAndReleaseAction extends CVSAction {
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.TagAction#execute(org.eclipse.jface.action.IAction)
@@ -42,12 +41,5 @@ public class TagAndReleaseAction extends CVSAction implements IWorkbenchWindowAc
 	 */
 	protected boolean isEnabled() throws TeamException {
 		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
-	 */
-	public void init(IWorkbenchWindow window) {
-		this.shell = window.getShell();	
 	}
 }
