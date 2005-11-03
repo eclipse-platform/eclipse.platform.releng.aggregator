@@ -603,6 +603,7 @@ public class BuildTests extends TestCase {
 				for (int i=0;i<javadocLog.logs.size();i++)
 					message=message.concat(javadocLog.logs.get(i).toString()+"\n");
 			}
+			message=message.concat("See the javadoc logs linked from the test results page for details");
 			assertTrue(message, !problemLogsExist);
 		}
 	}
