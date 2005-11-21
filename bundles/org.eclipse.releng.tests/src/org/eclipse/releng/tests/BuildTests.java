@@ -617,6 +617,8 @@ public class BuildTests extends TestCase {
 		private void findProblems(URL[] javadocLogs) {
 			String JAVADOC_WARNING = ": warning";
 			String JAVADOC_ERROR = ": error";
+			String JAVADOC_JAVA = ".java:";
+
 			BufferedReader in = null;
 			for (int i = 0; i < javadocLogs.length; i++) {
 				try {
@@ -624,7 +626,7 @@ public class BuildTests extends TestCase {
 					String tmp;
 					while ((tmp = in.readLine()) != null) {
 						tmp = tmp.toLowerCase();
-						if (tmp.indexOf(JAVADOC_ERROR) != -1 || tmp.indexOf(JAVADOC_WARNING) != -1) {
+						if (tmp.indexOf(JAVADOC_ERROR) != -1 || tmp.indexOf(JAVADOC_WARNING) != -1|| tmp.indexOf(JAVADOC_JAVA) != -1) {
 							String fileName=new File(javadocLogs[i].getFile()).getName();
 							if (!logs.contains(fileName))
 								logs.add(fileName);
