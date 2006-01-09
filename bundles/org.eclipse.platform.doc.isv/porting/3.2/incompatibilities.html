@@ -21,8 +21,11 @@
   here if you are experiencing problems running your 3.1 plug-in on 3.2.</p>
 <ol>
   <li><a href="#NullClassLoaderObject">API contract changes to IJavaReferenceType</a></li>
+  <li><a href="#nonLocalResources">Resources are no longer necessarily in the local file system</a></li>
 </ol>
 <hr>
+
+<!-- ############################################## ->
 <h2>1. <a name="NullClassLoaderObject"></a>API contract changes to IJavaReferenceType</h2>
 <p><strong>What is affected:</strong> Clients that call <code>IJavaReferenceType.getClassLoaderObject()</code>.</p>
 <p><strong>Description:</strong> In Eclipse 3.1, the method <code>org.eclipse.jdt.debug.core.IJavaReferenceType.getClassLoaderObject()</code> 
@@ -33,6 +36,135 @@
   can be returned and should add appropriate checks.</p>
 <p><strong>Action required:</strong> Clients calling <code>IJavaReferenceType.getClassLoaderObject()</code> 
   should be modified to handle <code>null</code> as a return value.</p>
+
+<!-- ############################################## ->
+<h2>2. <a name="nonLocalResources"/>Resources are no longer necessarily in the local file system</h2>
+<p><strong>What is affected:</strong>Clients of the <code>IWorkspace</code> API
+that assume the underlying resource is stored in the local file system</p>.
+<p><strong>Description:</strong></p>
+Prior to Eclipse 3.2, each existing <code>IResource</code> had a corresponding
+file or directory in a file system accessible by <code>java.io.File</code>.
+
+<p><strong>Action required:</strong></p>
+<p>
+The old method <tt>IResource.getLocation()</tt> returns the local file
+system path of a resource.  This method returns null for resources
+that are not stored in the local file system.  Most callers of <tt>getLocation()</tt>
+did so in order to obtain an instance of <tt>java.io.File</tt>, which can
+no longer be used for resources that are not stored in the local file system.
+</p>
+<p>
+The new <tt>org.eclipse.core.filesystem</tt> plugin provides a generic file
+system API that can be used in place of <tt>java.io.File</tt>.  In particular,
+an instance of <tt>org.eclipse.core.filesystem.IFileStore</tt> provides most
+of the same methods that are available on <tt>java.io.File</tt>. The following 
+snippet of code obtains an instance of <tt>IFileStore</tt> for a given resource:
+<pre>
+   IResource resource = ...;//some resource
+   IFileStore store = EFS.getStore(resource.getLocationURI());
+</pre>
+<p>
+The following table provides equivalent methods on <tt>IFileStore</tt>
+for operations usually done with <tt>java.io.File</tt>:
+</p>
+<p>
+<table border=1>
+<th align=left>java.io.File</th><th align=left>IFileStore</th>
+<tr><td>delete</td><td>delete</td></tr>
+<tr><td>getName</td><td>getName</td></tr>
+<tr><td>getParent</td><td>getParent</td></tr>
+<tr><td>list</td><td>childNames</td></tr>
+<tr><td>mkdir</td><td>mkdir(EFS.SHALLOW, null)</td></tr>
+<tr><td>mkdirs</td><td>mkdir(EFS.NONE, null)</td></tr>
+<tr><td>renameTo</td><td>move</td></tr>
+<tr><td>new FileInputStream(file)</td><td>openInputStream</td></tr>
+<tr><td>new FileOutputStream(file)</td><td>openOutputStream</td></tr>
+</table>
+</p>
+<p>
+In the <tt>IFileStore</tt> API, most information about a file is stored in a 
+structure called <tt>IFileInfo</tt>, obtained by calling <tt>IFileStore.fetchInfo()</tt>.
+This design allows for greater optimization over code using <tt>java.io.File</tt>,
+because many attributes about a file can often be obtained with a single file system
+call.  Note that the information in an <tt>IFileInfo</tt> will become stale
+if the underlying file is changed, so instances should only be held onto
+as long as they are needed.  Here are some methods on <tt>java.io.File</tt>
+that have equivalent methods on <tt>IFileInfo</tt>:
+</p>
+<p>
+<table border=1>
+<th align=left>java.io.File</th><th align=left>IFileInfo</th>
+<tr><td>canWrite</td><td>isReadOnly</td></tr>
+<tr><td>exists</td><td>exists</td></tr>
+<tr><td>getName</td><td>getName</td></tr>
+<tr><td>isDirectory</td><td>isDirectory</td></tr>
+<tr><td>isFile</td><td>!isDirectory()</td></tr>
+<tr><td>isHidden</td><td>isHidden</td></tr>
+<tr><td>lastModified</td><td>getLastModified</td></tr>
+<tr><td>length</td><td>getLength</td></tr>
+<tr><td>setLastModified</td><td>setLastModified</td></tr>
+<tr><td>setReadOnly</td><td>setAttribute(EFS.ATTRIBUTE_READ_ONLY, true)</td></tr>
+</table>
+</p>
+<p>
+As a concrete example, code that was previously calling <tt>java.io.File.exists()</tt>
+can now call <tt>IFileStore.fetchInfo().exists()</tt>.  When a <tt>IFileInfo</tt>
+is modified, the result needs to be stored back using the <tt>IFileStore.putInfo</tt>
+method. For example, this snippet flips the read only attribute on a file
+<pre>
+   IFileStore store = ...;//some file store
+   IFileInfo info = store.fetchInfo();
+   boolean readOnly = info.getAttribute(EFS.ATTRIBUTE_READ_ONLY);
+   info.setAttribute(EFS.ATTRIBUTE_READ_ONLY, !readOnly);
+   store.putInfo(info, EFS.SET_ATTRIBUTES, null);
+</pre>
+</p>
+<h4>IProjectDescription.getLocation()</h4>
+<p>
+As with the <tt>getLocation()</tt> method, the project description's location
+may no longer be in the local file system.  The method
+<tt>IProjectDescription.getLocationURI()</tt> can be used to obtain the location
+of a resource in an arbitrary file system.
+</p>
+<h4>Graceful failure</h4>
+<p>
+Clients that cannot handle resources outside the local file system may still
+want to adapt their code to fail more gracefully. Clients can check if a resource
+is in the local file system, and either ignore the resource or alert the user when
+they encouter a resource they cannot handle.  To determine if a resource is
+in the local file system, you need to find out its file system <i>scheme</i>. 
+This can be obtained from a resource as follows:
+<pre>
+   IResource resource = ...;//some resource
+   URI uri = resource.getLocationURI();
+   if (uri != null && EFS.SCHEME_LOCAL.equals(uri.getScheme())) {
+      //file is in local file system
+   } else {
+      //file is not in the local file system
+   }
+</pre>
+If you have an <tt>IFileStore</tt> instance in hand, you can obtain the scheme
+as follows:
+<pre>
+   IFileStore store = ...;//a file store
+   store.getFileSystem().getScheme();
+</pre>
+</p>
+<!-- ############################################## ->
+
+
+<p>
+<p>
+<p>
+(The following is a template for editing this draft)
+<!-- ############################################## ->
+<h2>2. <a name="anchorNameHere"/>Title goes here</h2>
+<p><strong>What is affected:</strong></p>
+<p><strong>Description:</strong></p>
+<p><strong>Action required:</strong></p>
+<!-- ############################################## ->
+  
+
 
 </body>
 </html>
