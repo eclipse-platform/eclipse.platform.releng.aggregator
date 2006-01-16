@@ -40,13 +40,15 @@
 <!-- ############################################## -->
 <h2>2. <a name="nonLocalResources"></a>Resources are no longer necessarily in the local file system</h2>
 <p><strong>What is affected:</strong>Clients of the <code>IWorkspace</code> API
-that assume the underlying resource is stored in the local file system</p>.
-<p><strong>Description:</strong></p>
+that assume resources are stored in the local file system.</p>
+<p><strong>Description:</strong>
 Prior to Eclipse 3.2, each existing <code>IResource</code> had a corresponding
-file or directory in a file system accessible by <code>java.io.File</code>.
-
-<p><strong>Action required:</strong></p>
-<p>
+file or directory in a file system accessible by <code>java.io.File</code>.  In
+Eclipse 3.2, support was added for creating resources whose contents are stored
+in an arbitrary backing file system.  Resources using this support can no longer
+be represented directly as a <tt>java.io.File</tt>.
+</p>
+<p><strong>Action required:</strong>
 The old method <tt>IResource.getLocation()</tt> returns the local file
 system path of a resource.  This method returns null for resources
 that are not stored in the local file system.  Most callers of <tt>getLocation()</tt>
@@ -126,6 +128,24 @@ may no longer be in the local file system.  The method
 <tt>IProjectDescription.getLocationURI()</tt> can be used to obtain the location
 of a resource in an arbitrary file system.
 </p>
+<h4>Local caching</h4>
+<p>
+Some clients absolutely must have a local representation of a file.  For example,
+they may be launching a native tool against that file, or using non Eclipse-aware
+libraries that can only handle file system resources (such as <tt>java.util.zip.ZipFile</tt>).  
+In these cases, you can ask an IFileStore to return a cached local copy of its contents:
+<pre>
+   IFileStore store = ...;//some file store
+   //see if it can directly be represented as a local file
+   java.io.File local = store.toLocalFile(EFS.NONE, null);
+   //if not, ask for a cached local copy of the file
+   if (local == null)
+      local = store.toLocalFile(EFS.CACHE, null);
+</pre>
+Note that once a cached copy of a file is obtained, it does not remain in sync with 
+the actual file system it came from.  Modifying the cached copy will not cause the 
+underlying file to be modified.
+</p>
 <h4>Graceful failure</h4>
 <p>
 Clients that cannot handle resources outside the local file system may still
@@ -150,6 +170,7 @@ as follows:
    store.getFileSystem().getScheme();
 </pre>
 </p>
+
 <!-- ############################################## -->
 
 
@@ -159,9 +180,12 @@ as follows:
 (The following is a template for editing this draft)
 <!-- ############################################## -->
 <h2>2. <a name="anchorNameHere"></a>Title goes here</h2>
-<p><strong>What is affected:</strong></p>
-<p><strong>Description:</strong></p>
-<p><strong>Action required:</strong></p>
+<p><strong>What is affected:</strong> Describe what clients are affected.
+</p>
+<p><strong>Description:</strong> Describe the incompatible changes.
+</p>
+<p><strong>Action required:</strong> Describe the action required.
+</p>
 <!-- ############################################## -->
   
 
