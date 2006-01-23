@@ -63,13 +63,31 @@ The following snippet runs the workspace runnable that we created earlier:
 <pre>IWorkspace workspace = ResourcesPlugin.getWorkspace();
 workspace.run(myRunnable, <b>myProject</b>, <b>IWorkspace.AVOID_UPDATE</b>, null);
 </pre>
-<p>The runnable is passed to the workspace, followed by the project that the code is manipulating.  This tells the
-workspace that all of the changes in the runnable are confined to <tt>myProject</tt>.  Any requests by other threads
-to change <tt>myProject</tt> will be blocked until this runnable completes.  Likewise, this call will block if some
-other thread is already modifying <tt>myProject</tt>.  By specifying which part of the resource tree will be modified by
-the runnable, you are allowing other threads to continue modifying other portions of the workspace.  It is important
-to be sure that your resource rule matches the work being done inside the runnable.  Any attempt to access a 
-resource outside the scope of the scheduling rule will trigger an exception.
+<p>The runnable is passed to the workspace, followed by the project that the 
+code is manipulating.  This tells the workspace that all of the changes in the 
+runnable are confined to <tt>myProject</tt>.  Any requests by other threads
+to change <tt>myProject</tt> will be blocked until this runnable completes.  
+Likewise, this call will block if some other thread is already modifying 
+<tt>myProject</tt>.  By specifying which part of the resource tree will be 
+modified by the runnable, you are allowing other threads to continue modifying 
+other portions of the workspace.  It is important to be sure that your resource rule 
+matches the work being done inside the runnable.  When a non-null scheduling 
+rule is used, any attempt to access a resource outside the scope of the scheduling 
+rule will trigger an exception.
+</p>
+<p>
+There are two special scheduling rules that are important to consider.  First,
+if you use an instance of <tt>IWorkspaceRoot</tt> as the scheduling rule,
+it means your thread is blocking access to <b>all</b> resources in the tree.
+While a thread holds the root rule, no other thread is allowed to modify the
+workspace.  Conversely, a rule of <tt>null</tt> indicates that the thread
+will block access to <b>no</b> resources in the tree.  While a thread with the
+null rule is free to modify the workspace itself, other threads will not be prevented
+from performing their own modifications.  The <tt>IWorkspaceRoot</tt> and
+<tt>null</tt> scheduling rules occupy opposite ends of the concurrency spectrum.  
+With <tt>IWorkspaceRoot</tt> there is no concurrency
+and only one thread is modifying the workspace at a time.  With a <tt>null</tt> rule,
+there is maximum concurrency as all threads can modify the workspace concurrently.
 </p>
 <p>The third parameter to the <b>run</b> method specifies whether any periodic resource change events should
 be broadcast during the scope of this call.  Using <tt>IWorkspace.AVOID_UPDATE</tt> tells the platform to suppress any
