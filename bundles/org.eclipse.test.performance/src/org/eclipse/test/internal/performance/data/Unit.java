@@ -107,27 +107,28 @@ public class Unit {
 	 * @return the formatted time
 	 */
 	public static String formatedTime(long diff) {
-		if (diff < 0)
-		    diff *= -1;
+		long sign= diff < 0 ? -1 : 1;
+		diff = Math.abs(diff);
+		
 		if (diff < 1000)
-			return String.valueOf(diff) + " ms"; //$NON-NLS-1$
+			return String.valueOf(sign * diff) + "ms"; //$NON-NLS-1$
 		
 		NumberFormat nf= NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(2);
 		double d = diff / 1000.0;	
 		if (d < 60)
-			return nf.format(d) + " s"; //$NON-NLS-1$
+			return nf.format(sign * d) + "s"; //$NON-NLS-1$
 		
 		d = d / 60.0;
 		if (d < 60.0)
-			return nf.format(d) + " m"; //$NON-NLS-1$
+			return nf.format(sign * d) + "m"; //$NON-NLS-1$
 	
 		d = d / 60.0;
 		if (d < 24.0)
-			return nf.format(d) + " h"; //$NON-NLS-1$
+			return nf.format(sign * d) + "h"; //$NON-NLS-1$
 	
 		d = d / 24.0;
-		return nf.format(d) + " d"; //$NON-NLS-1$
+		return nf.format(sign * d) + "d"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -139,25 +140,27 @@ public class Unit {
 	 * @return the formatted number
 	 */
 	public String formatEng(long n) {
+		long sign= n < 0 ? -1 : 1;
+		n = Math.abs(n);
 	    int TSD= fIsBinary ? T_BINARY : T_DECIMAL;
 		if (n < TSD)
-			return String.valueOf(n);
+			return String.valueOf(sign*n);
 		double d = ((double)n) / TSD;
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(2);
 		if (d < TSD)
-			return nf.format(d) + "K"; //$NON-NLS-1$
+			return nf.format(sign * d) + "K"; //$NON-NLS-1$
 		
 		d = d / TSD;
 		if ( d < TSD)
-			return nf.format(d) + "M"; //$NON-NLS-1$
+			return nf.format(sign * d) + "M"; //$NON-NLS-1$
 		
 		d = d / TSD;
 		if ( d < TSD)
-			return nf.format(d) + "G"; //$NON-NLS-1$
+			return nf.format(sign * d) + "G"; //$NON-NLS-1$
 		
 		d = d / TSD;
-		return nf.format(d) + "T"; //$NON-NLS-1$
+		return nf.format(sign * d) + "T"; //$NON-NLS-1$
 	}
 
 }
