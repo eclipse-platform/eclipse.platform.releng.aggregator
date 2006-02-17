@@ -15,11 +15,13 @@ public class TimeSeries {
     private String[] fBuildNames;
     private double[] fAverages;
     private double[] fStddev;
+    private long[] fCount;
     
-    TimeSeries(String[] tags, double[] averages, double[] stddev) {
+    TimeSeries(String[] tags, double[] averages, double[] stddev, long[] sizes) {
         fBuildNames= tags;
         fAverages= averages;
         fStddev= stddev;
+        fCount= sizes;
     }
     
     /**
@@ -55,5 +57,15 @@ public class TimeSeries {
      */
     public String getLabel(int ix) {
         return fBuildNames[ix];
+    }
+
+    /**
+     * Returns the sample size at the given index.
+     * 
+     * @param ix
+     * @return the sample size at the given index
+     */
+    public long getCount(int ix) {
+        return fCount[ix];
     }
 }

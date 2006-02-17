@@ -136,11 +136,13 @@ public class Scenario {
         if (ts == null) {
             double[] ds= new double[fSessions.length];
             double[] sd= new double[fSessions.length];
+            long[] sizes= new long[fSessions.length];
             for (int i= 0; i < ds.length; i++) {
                 ds[i]= fSessions[i].getAverage(dim);
                 sd[i]= fSessions[i].getStddev(dim);                
+                sizes[i]= fSessions[i].getCount(dim);
             }
-            ts= new TimeSeries(fSeriesNames, ds, sd);
+            ts= new TimeSeries(fSeriesNames, ds, sd, sizes);
             fSeries.put(dim, ts);
         }
         return ts;

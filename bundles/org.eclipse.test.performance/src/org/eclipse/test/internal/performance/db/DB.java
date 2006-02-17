@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +34,7 @@ import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
+import org.eclipse.test.internal.performance.eval.StatisticsSession;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 
@@ -315,43 +315,6 @@ public class DB {
 		if (n <= 0)
 		    return false;
 
-		Scalar[] sc= null;
-		long[] averages= null;
-	    if (AGGREGATE) {
-
-		    sc= dataPoints[0].getScalars();
-		    averages= new long[sc.length];
-
-			Set set= new HashSet();
-			for (int j= 0; j < dataPoints.length; j++) {
-			    DataPoint dp= dataPoints[j];
-			    set.add(new Integer(dp.getStep()));
-			}
-			switch (set.size()) {
-			case 2:	// BEFORE/AFTER pairs -> calculate deltas
-				for (int i= 0; i < dataPoints.length-1; i+= 2) {
-				    Scalar[] s1= dataPoints[i].getScalars();
-				    Scalar[] s2= dataPoints[i+1].getScalars();
-				    for (int j= 0; j < sc.length; j++)
-				        averages[j] += s2[j].getMagnitude() - s1[j].getMagnitude();
-				}
-				n= n/2;
-				break;
-				
-			case 1:	// single values
-				for (int i= 0; i < dataPoints.length; i++) {
-				    Scalar[] s= dataPoints[i].getScalars();
-				    for (int j= 0; j < sc.length; j++)
-				        averages[j] += s[j].getMagnitude();
-				}
-				break;
-				
-			default:	// not expected
-	            PerformanceTestPlugin.logError("DB.internalStore: too many steps in DataPoint"); //$NON-NLS-1$
-			    return false;
-			}
-	    }
-		
 		//System.out.println("store started..."); //$NON-NLS-1$
 	    try {
             //long l= System.currentTimeMillis();
@@ -378,12 +341,29 @@ public class DB {
             }
             int sample_id= fSQL.createSample(variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
-            if (sc != null) {
-	            int datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
-				for (int k= 0; k < sc.length; k++) {
-			        int dim_id= sc[k].getDimension().getId();
-					fSQL.insertScalar(datapoint_id, dim_id, averages[k] / n);
-				}
+            if (AGGREGATE) {
+                StatisticsSession stats= new StatisticsSession(dataPoints);
+                Dim[] dims= dataPoints[0].getDimensions();
+
+                int datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.AVERAGE);
+                for (int i= 0; i < dims.length; i++) {
+                    Dim dim= dims[i];
+                    fSQL.insertScalar(datapoint_id, dim.getId(), (long) stats.getAverage(dim));
+                }
+                
+                datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.STDEV);
+                for (int i= 0; i < dims.length; i++) {
+                    Dim dim= dims[i];
+                    // see StatisticsSession
+                    long value= Double.doubleToLongBits(stats.getStddev(dim));
+                    fSQL.insertScalar(datapoint_id, dim.getId(), value);
+                }
+                
+                datapoint_id= fSQL.createDataPoint(sample_id, 0, InternalPerformanceMeter.SIZE);
+                for (int i= 0; i < dims.length; i++) {
+                    Dim dim= dims[i];
+                    fSQL.insertScalar(datapoint_id, dim.getId(), stats.getCount(dim));
+                }
 		    } else {
 				for (int i= 0; i < dataPoints.length; i++) {
 				    DataPoint dp= dataPoints[i];
@@ -523,7 +503,6 @@ public class DB {
     private SummaryEntry[] internalQuerySummaries(Variations variationPatterns, String scenarioPattern) {
         if (fSQL == null)
             return null;
-        ResultSet result= null;
         try {
             List fingerprints= new ArrayList();
             ResultSet rs;
@@ -551,14 +530,6 @@ public class DB {
             return (SummaryEntry[])fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
         } catch (SQLException e) {
 	        PerformanceTestPlugin.log(e);
-
-        } finally {
-            if (result != null)
-                try {
-                    result.close();
-                } catch (SQLException e1) {
-                	// ignored
-                }
         }
         return null;
     }
