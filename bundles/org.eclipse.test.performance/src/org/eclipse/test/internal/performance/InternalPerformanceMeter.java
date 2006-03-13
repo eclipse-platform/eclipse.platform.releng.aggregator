@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
@@ -183,8 +181,8 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 		double fivePercentEffect= 0.05 * base;
 		long requiredSampleSizeForFivePercentEffect= Math.round(16 * stdev * stdev / fivePercentEffect / fivePercentEffect + 0.5);
 		
-		if (requiredSampleSizeForFivePercentEffect > 1000 || Double.isNaN(stdev))
-			throw new CoreException(new Status(IStatus.OK, "org.eclipse.text.performance", IStatus.OK, "no message", null)); //$NON-NLS-1$ //$NON-NLS-2$
+//		if (requiredSampleSizeForFivePercentEffect > 1000 || Double.isNaN(stdev))
+//			throw new CoreException(new Status(IStatus.OK, "org.eclipse.text.performance", IStatus.OK, "no message", null)); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		NumberFormat numberInstance= NumberFormat.getNumberInstance();
 		numberInstance.setMaximumFractionDigits(1);
@@ -205,7 +203,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 		return length;
 	}
 
-	private void printSampleCSV(PrintStream ps, Sample sample) {
+	void printSampleCSV(PrintStream ps, Sample sample) {
 		final char SEPARATOR= '\t';
 		DataPoint[] dataPoints= sample.getDataPoints();
 		if (dataPoints.length > 0) {
