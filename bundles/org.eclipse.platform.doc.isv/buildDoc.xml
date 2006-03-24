@@ -89,13 +89,17 @@
 
 	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
-		<condition property="optionsFile" value="platformOptions">
+		<property name="optionsFile" value="platformOptions.tmp.txt" />
+		<copy file="platformOptions.txt" tofile="${optionsFile}" overwrite="true" />
+		
+		<condition property="argsListDelimiter" value=":">
 			<os family="unix" />
 		</condition>
-		<condition property="optionsFile" value="platformOptions.txt">
+		<condition property="argsListDelimiter" value=";">
 			<os family="windows" />
 		</condition>
-
+		
+		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\r);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 
 		<!--scrub isv plugin directories of any preexisting api doc content-->
