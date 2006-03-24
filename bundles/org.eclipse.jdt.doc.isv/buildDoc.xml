@@ -53,13 +53,17 @@
 		<available file="../org.eclipse.platform.doc.isv/index" property="platform.index.present"/>
 		<antcall target="buildPlatformDoc" />
 
-		<condition property="optionsFile" value="jdtOptions">
+		<property name="optionsFile" value="jdtOptions.tmp.txt" />
+		<copy file="jdtOptions.txt" tofile="${optionsFile}" overwrite="true" />
+		
+		<condition property="argsListDelimiter" value=":">
 			<os family="unix" />
 		</condition>
-		<condition property="optionsFile" value="jdtOptions.txt">
+		<condition property="argsListDelimiter" value=";">
 			<os family="windows" />
 		</condition>
 
+		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\r);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 		<replace file="${basedir}/${optionsFile}" token="@baseLocation@" value="${baseLocation}" />
 
@@ -76,13 +80,18 @@
 	
 	<target name="generateJdtAptJavadoc">
 		<property name="javadoc15" value="${javadoc}" />
-		<condition property="jdtaptoptionsFile" value="jdtaptOptions">
+		
+		<property name="jdtaptoptionsFile" value="jdtaptOptions.tmp.txt" />
+		<copy file="jdtaptOptions.txt" tofile="${jdtaptoptionsFile}" overwrite="true" />
+		
+		<condition property="argsListDelimiter" value=":">
 			<os family="unix" />
 		</condition>
-		<condition property="jdtaptoptionsFile" value="jdtaptOptions.txt">
+		<condition property="argsListDelimiter" value=";">
 			<os family="windows" />
 		</condition>
 
+		<replaceregexp file="${basedir}/${jdtaptoptionsFile}" flags="g" match="(\r\n?|\r);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${jdtaptoptionsFile}" token="@rt@" value="${bootclasspath}" />
 
 		<!--scrub isv plugin directories of any preexisting api doc content-->
