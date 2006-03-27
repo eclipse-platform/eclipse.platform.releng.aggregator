@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Cheat sheets</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2>
+Contributing Composite Cheat Sheets</h2>
+<p>
+<a href="../../org.eclipse.platform.doc.user/reference/ref-composite-cheatsheets.htm">
+Composite cheat sheets</a> provide guidance through complex problems by breaking 
+the problem into a set of smaller tasks. Composite cheat sheets are registered 
+using the&nbsp; the <b>
+<a href="../reference/extension-points/org_eclipse_ui_cheatsheets_cheatSheetContent.html">
+org.eclipse.ui.cheatsheets.cheatSheetContent</a></b> extension point. </p>
+<h3>Content file format</h3>
+<p>The composite cheat sheet content itself is defined in a separate file which 
+conforms to the&nbsp; <a href="workbench_advext_compositeContentFile.html">
+composite cheat sheet schema</a>. The content file is&nbsp; an XML file and 
+consists of&nbsp; a set of tasks organized in groups into a tree structure. </p>
+<p>&lt;compositeCheatsheet&gt; is the root element of a composite cheat sheet. It will 
+have a single root task which may be a &lt;task&gt; or &lt;taskGroup&gt;. &lt;taskGroup&gt; 
+elements may have one or more children each of which can be a &lt;task&gt; or &lt;taskGroup&gt;. 
+A &lt;task&gt; does not have child tasks.</p>
+<p>Tasks and task groups may contain &lt;intro&gt; elements which contain the text to 
+be displayed before the task has been started and &lt;onCompletion&gt; elements which 
+contain the text to be displayed once the task is completed. Both the &lt;intro&gt; 
+and &lt;onCompletion&gt; elements may contain form text markup, in the example below 
+the tags &lt;b&gt; and &lt;/b&gt; are used to make text bold.</p>
+<p>Tasks may also contain &lt;param&gt; elements. A cheat sheet task may have any 
+of the following parameters: &quot;id&quot; is the id of a registered cheatsheet, &quot;path&quot; 
+is the relative path or URL of the cheat sheet content file and &quot;skipIntro&quot; is&nbsp; 
+a boolean parameter which if true causes&nbsp; the cheat sheet to start at the 
+first step rather than at the introduction. Either &quot;id&quot; or &quot;path&quot; but not both 
+must be specified.</p>
+<p>A &lt;dependency&gt; node from task &quot;B&quot; to task &quot;A&quot; represents a requirement that 
+task A is completed before task B can be started.</p>
+<h4>Example of a composite cheat sheet</h4>
+<p>The file below is an example of how to create a composite cheat sheet from 
+existing cheat sheets and how to create task groups and make tasks skippable.</p>
+<pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;compositeCheatsheet name=&quot;Building and Publishing Plugins&quot;&gt;
+    &lt;taskGroup name= &quot;Introduction to the PDE&quot;&gt;
+         &lt;intro&gt; This composite cheat sheet contains tasks which can guide you through the &lt;b&gt;PDE&lt;/b&gt;, 
+                 from creating a simple project to deploying a feature 
+         &lt;/intro&gt;
+         &lt;taskGroup name= &quot;Build and deploy a plugin project&quot; kind = &quot;sequence&quot;&gt;
+             &lt;intro&gt; First you will learn how to create a java project, then you will deploy 
+                     that project.
+             &lt;/intro&gt;
+         &lt;task kind=&quot;cheatsheet&quot; name= &quot;Create a java project&quot; id = &quot;createJavaProject&quot;&gt;
+             &lt;param name=&quot;id&quot; value = &quot;org.eclipse.jdt.helloworld&quot;/&gt;
+             &lt;intro&gt;This task guide walks through the process of creating a simple hello world application. 
+                    The guide can launch wizards to create a new project and a new class. 
+             &lt;/intro&gt;
+             &lt;onCompletion&gt;Congratulations you have succeeded in creating a hello world application&lt;/onCompletion&gt;
+         &lt;/task&gt;
+         &lt;task kind=&quot;cheatsheet&quot; name= &quot;Deploy a java project&quot;&gt;
+             &lt;intro&gt;In this task the hello world project created in a previous task will be deployed. 
+                     This task guide shows show to create &lt;b&gt;features&lt;/b&gt; and &lt;b&gt;update sites&lt;/b&gt; 
+             &lt;/intro&gt;
+             &lt;dependsOn task = &quot;createJavaProject&quot; /&gt;
+             &lt;param name = &quot;id&quot; value = &quot;org.eclipse.pde.updates&quot; /&gt;
+         &lt;/task&gt;
+         
+         &lt;/taskGroup&gt;
+       
+         &lt;taskChoice name= &quot;Next Steps&quot;&gt;
+             &lt;intro&gt;Once you have learned how to create and deploy a java project you may want to learn 
+                     about SWT and Rich Clients. 
+             &lt;/intro&gt;
+             &lt;task kind=&quot;cheatsheet&quot; name= &quot;Create an SWT application&quot;&gt;
+                  &lt;param name = &quot;id&quot; value = &quot;org.eclipse.jdt.helloworld.swt&quot; /&gt;
+                  &lt;intro&gt;Eclipse plugins which contribute to the user interface use The Standard Widget Toolkit (SWT). 
+                        This task guide can be used to learn more about SWT. 
+                  &lt;/intro&gt;
+             &lt;/task&gt;
+             &lt;task kind=&quot;cheatsheet&quot; name= &quot;Create a Rich Client application&quot;&gt; 
+                &lt;param name = &quot;id&quot; value =&quot;org.eclipse.pde.rcpapp&quot; /&gt;
+                &lt;intro&gt;
+                     The minimal set of plug-ins needed to build a rich client application is 
+                     collectively known as the Rich Client Platform. This task guide walks through the steps 
+                     to create a rich client application.
+                &lt;/intro&gt;
+             &lt;/task&gt;
+         &lt;/taskGroup&gt;
+    &lt;/taskGroup&gt;
+&lt;/compositeCheatsheet&gt;</pre>
+<h3>Composite Cheat Sheet Extensibility - Provisional in Eclipse 3.2</h3>
+<p>Composite cheat sheets are extensible, however in Eclipse 3.2 this 
+extensibility is provisional and the classes could change before they become 
+API. Composite cheat sheet support can be extended by using the extension point 
+org.eclipse.ui.cheatsheets.cheatSheetContent which has two new elements 
+taskEditor and taskExplorer which allow for contribution of task editors and 
+task explorers.</p>
+<p>Contributing a task editor defines a new kind of task which displays in the 
+task detail section. To contribute a task editor implement a concrete subclass 
+of&nbsp; TaskEditor, then&nbsp; add a taskEditor element to plugin.xml.</p>
+<p>The representation of the task explorer is also configurable with an 
+extension point,&nbsp; a tree explorer&nbsp; is included with the Eclipse platform. By 
+default the explorer for a composite cheat sheet when first opened is a tree, an 
+attribute on the &lt;compositeCheatSheet&gt; element will allow that default to be 
+overridden. If more than one explorer is registered the view menu will contain a 
+menu item to switch between explorers. To contribute a task explorer first 
+implement a concrete subclass of&nbsp; TaskExplorer, then&nbsp; add a taskExplorer element 
+to plugin.xml.</p>
+<pre>&nbsp;</pre>
+
+
+</BODY>
+</HTML>
