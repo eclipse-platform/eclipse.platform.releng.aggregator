@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<meta name=copyright content="Copyright (c) IBM Corporation and others 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+</head>
+
+<body bgcolor="white">
+
+<h3>Filters</h3>
+
+<p>If certain sections of your document should only appear within a specific
+context, you can use filtering markup to specify criteria that must be
+met in order for the section of the document to appear. If the criteria are not
+met, that section of the document will not be visible to the user. Filters can
+be specified on <i>any</i> XML element as long as the markup will still be valid
+after processing. If an element is filtered, all elements and text contained under
+that element will also be filtered.</p>
+
+<p>The table below contains a complete list of all the filter properties and
+their possible values.</p>
+
+<table border="1">
+   <tr>
+      <td>
+         <b>Property</b>
+      </td>
+      <td>
+         <b>Meaning</b>
+      </td>
+      <td>
+         <b>Possible Values</b>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>os</code>
+      </td>
+      <td>
+         operating system
+      </td>
+      <td>
+         <code>win32, win32, linux, macosx, aix, solaris, hpux, qnx</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>ws</code>
+      </td>
+      <td>
+         windowing system
+      </td>
+      <td>
+         <code>win32, motif, gtk, photon, carbon</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>arch</code>
+      </td>
+      <td>
+         processor architecture
+      </td>
+      <td>
+         <code>x86, x86_64, ia64, ia64_32, ppc, PA_RISC, sparc</code>
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>product</code>
+      </td>
+      <td>
+         eclipse product identifier
+      </td>
+      <td>
+         Any product identifier (e.g., for SDK, <code>org.eclipse.sdk.ide</code>)
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>plugin</code>
+      </td>
+      <td>
+         plug-in presence
+      </td>
+      <td>
+         Any plug-in identifier (e.g. <code>org.eclipse.help</code>)
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>category</code>
+      </td>
+      <td>
+         category of activities
+      </td>
+      <td>
+         Any activity category identifier (e.g. for Team category,
+         <code>org.eclipse.categories.teamCategory</code>)
+      </td>
+   </tr>
+   <tr>
+      <td>
+         <code>activity</code>
+      </td>
+      <td>
+         activity (capability)
+      </td>
+      <td>
+         Any activity identifier (e.g. for CVS Support activity, 
+         <code>org.eclipse.team.cvs</code>)
+      </td>
+   </tr>
+</table>
+
+<p>If the name does not match any pre-defined property, the help system will
+use the JVM's system property of that name. For example, you can pass in any
+user-defined property at launch, such as <code>-Dlocation=paris,france</code>
+and filter by that property.</p>
+
+<p>There are two ways to specify filters on an element; using attributes, or
+elements.</p>
+
+<p><b>Filter Attribute</b></p>
+
+<p>The first form is to add a <font color="blue"><code>filter</code></font> attribute
+to the element. The general form is:</p>
+
+<pre>
+   &lt;element <font color="blue">filter="[name][operator][value]"</font>&gt;
+      Some text.
+   &lt;/element&gt;
+</pre>
+
+<p>The <font color="blue"><code>name</code></font> is the name of the property
+by which to filter, for example, <code>os</code> for operating system. The
+<font color="blue"><code>operator</code></font> is either <code>=</code> to denote
+a <i>match</i> (exact match, case sensitive), or <code>!=</code> to denote <i>does
+not match</i>. The <font color="blue"><code>value</code></font> is what the property
+should (or shouldn't) match. For example, for <code>os</code>, one of the possible
+values is <code>win32</code> (Windows). A complete list of filter properties and their
+values is available in a table below.</p>
+
+<p>The example below shows how to display a paragraph of text in an XHTML document
+when running on Linux only.</p>
+
+<pre>
+   &lt;p filter="os=linux"&gt;
+      This message will only appear when viewed on Linux.
+   &lt;/p&gt;
+</pre>
+
+<p>In this second example, the link will only appear when plugin
+<code>com.my.plugin</code> is not installed:</p>
+
+<pre>
+   &lt;a href="..." filter="plugin!=com.my.plugin"&gt;
+      Click here to download plugin com.my.plugin.
+   &lt;/a&gt;
+</pre>
+
+<p><b>Filter Element</b></p>
+
+<p>The second form is to use a <code>filter</code> element as a <i>child</i> of
+the element you wish to filter. This form is slightly longer than the attribute
+form, but it is more powerful because you can specify any number of filters on an
+element. The general form is:</p>
+
+<pre>
+   &lt;element attribute="value"&gt;
+      <font color="blue"><code>&lt;filter name="[name]" value="[modifier][value]"/&gt;</code></font>
+   &lt;/element&gt;
+</pre>
+
+<p>The <font color="blue"><code>name</code></font> and <font color="blue"><code>
+value</code></font> here are the same as with the attribute. However, since they
+are separated, we need another way to specify whether or not it should match. By
+default, if you do not provide a <font color="blue"><code>modifier</code></font>,
+match is assumed. If it should <i>not</i> match, set the modifier to "<code>!</code>
+"</p>
+
+<p>Here is the first example shown above in the second form:</p>
+
+<pre>
+   &lt;p&gt;
+      &lt;filter name="os" value="linux"/&gt;
+      This message will only appear when viewed on Linux.
+   &lt;/p&gt;
+</pre>
+
+<p>And the second example:</p>
+
+<pre>
+   &lt;a href="..."&gt;
+      &lt;filter name="plugin" value="!com.my.plugin"/&gt;
+      Click here to download plugin com.my.plugin.
+   &lt;/a&gt;
+</pre>
+
+<p><b>Where can I use filters?</b></p>
+
+<p>
+Filtering can be used in the following types of documents:
+</p>
+
+<ul>
+   <li><a href="ua_intro_define_content.htm">Welcome XML</a></li>
+   <li><a href="ua_intro_xhtml.htm">Welcome XHTML</a></li>
+   <li><a href="ua_help_content.htm">Help XHTML</a>*</li>
+   <li><a href="ua_help_content_toc.htm">Help table of contents</a></li>
+   <li><a href="ua_help_context_xml.htm">Help topics in context-help</a></li>
+</ul>
+
+<p>
+* Note: There are a few <a href="ua_help_content_xhtml.htm">extra steps</a> required
+to enable dynamic content in your XHTML documents.
+</p>
+
+<p>
+In any case, you <b>must not</b> place filters on any element where removing that
+element would result in <i>invalid</i> XML. For example, you should not place a
+filter on the <code>html</code> element in XHTML, because without that element it
+is no longer valid
+XHTML.
+</p>
+
+</body>
+</html>
