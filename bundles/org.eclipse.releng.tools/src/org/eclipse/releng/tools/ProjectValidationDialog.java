@@ -65,9 +65,12 @@ public class ProjectValidationDialog extends ParticipantPageDialog {
 		cc.setLeftEditable(false);
 		cc.setRightEditable(false);
 		ParticipantPageSaveablePart part = new ParticipantPageSaveablePart(shell, cc, configuration, participant);
-		
-		ProjectValidationDialog dialog = new ProjectValidationDialog(shell, part, participant); //$NON-NLS-1$
-		dialog.open();
+		try {
+			ProjectValidationDialog dialog = new ProjectValidationDialog(shell, part, participant); //$NON-NLS-1$
+			dialog.open();
+		} finally {
+			part.dispose();
+		}
 	}
 
 	public ProjectValidationDialog(Shell shell, SaveablePartAdapter input,
