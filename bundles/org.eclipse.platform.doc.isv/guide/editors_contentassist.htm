@@ -119,6 +119,46 @@ and color of information popups.</p>
 
 	return assistant;
 }</pre>
+
+<h3>Create the content assist action and hook it with a key binding</h3>
+<p>
+In order to allow users to invoke content assist an action has to be created and configured. This is
+normally done in the sub-class implementation of AbstractTextEditor.createActions()</code>:
+</p>
+<pre>protected void createActions() {
+	...
+	IAction action= new ContentAssistAction(aResourceBundle, "ContentAssistProposal.", this); //$NON-NLS-1$
+	action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+	setAction(actionId, action); //$NON-NLS-1$
+	markAsStateDependentAction(actionId, true); //$NON-NLS-1$
+	PlatformUI.getWorkbench().getHelpSystem().setHelp(action, helpContextId);
+	...
+}
+</pre>
+
+The editor action bar contributor has to be extended to make the action appear in the main menu:
+<pre>
+...
+private RetargetTextEditorAction fContentAssist;
+
+public MyEditorActionContributor() {
+	fContentAssist= new RetargetTextEditorAction();
+	String commandId= ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS;
+	fContentAssist.setActionDefinitionId(commandId);
+}
+
+public void contributeToMenu(IMenuManager menu) {
+	IMenuManager editMenu= menu.findMenuUsingPath(M_EDIT);
+	editMenu.appendToGroup(MB_ADDITIONS, fContentAssist);
+}
+
+public void setActiveEditor(IEditorPart part) {
+	IAction editorAction= getAction(part, "ContentAssist");
+	fContentAssist.setAction(editorAction);
+}
+...
+</pre>
+
 <p>&nbsp;</p>
 
 
