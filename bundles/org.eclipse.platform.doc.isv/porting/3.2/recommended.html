@@ -56,9 +56,29 @@
   when the new attribute is unspecified for a launch mode, the cascade menu labels 
   are generated as before, via MessageFormat with &quot;<code>{0} As</code>&quot;. 
   See related bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=105235">105235</a>.</p>
-  
-<p><em>[No items. See the corresponding section of the <a href="../3.1/recommended.html">3.1 
-  Migration Guide</a> for format.]</em></p>
+  <h3>International Components for Unicode for Java (ICU4J)</h3>
+  <p>ICU4J is a set of Java libraries that provides more comprehensive  support for Unicode, software globalization, and internationalization.  In order to provide this functionality to the Eclipse community, ICU4J  was added to the  platform build for Eclipse 3.2. You  will see it in the build as a plugin named <strong>com.ibm.icu</strong>. The Eclipse  platform will be utilizing  ICU APIs in Eclipse 3.2. </p>
+  <h4>Migration </h4>
+  <p>Migration of application code can be done incrementally, meaning full  adoption of all ICU4J function is not necessary to reap the benefits of  using ICU4J. See the <a href="http://wiki.eclipse.org/index.php/ICU4J">ICU4J page</a> on the Eclipse wiki for more details on how to migrate your code to use ICU4J. </p>
+  <h4>ICU4J Replacement Plug-in</h4>
+  <p>The  addition of the ICU4J plug-in adds on the order of 3MB to the footprint.  Some applications may not want to absorb ICU4J if application size takes precedence over adopting  ICU4J function. If this is the case, a  replacement plug-in (<strong>com.ibm.icu.base</strong>) is available from the <a href="http://download.eclipse.org/eclipse/downloads/">Eclipse platform build page</a>. Download the plug-in, remove the <strong>com.ibm.icu</strong> plug-in and its source counterpart from the /plugins directory, and drop in the replacement  plug-in. This is required because the Eclipse platform adopted the ICU APIs for  3.2  so just removing the ICU plug-in will result in compilation  errors in platform code. The replacement plug-in is about 100KB in size and simply calls  through to the default JDK's implementation  of the most  commonly used classes and APIs in ICU4J. Again, you can read the <a href="http://wiki.eclipse.org/index.php/ICU4J">ICU4J  page</a> on the Eclipse wiki for more details using the ICU replacement plug-in.</p> 
+  <h4>Effect on JFace - ViewerSorter and StructuredViewer </h4> 
+  <p> 
+In order to support ICU4J in JFace, some creative API additions were required to prevent referencing ICU classes in API.  This resulted in the addition of:
+  <dd>1. a new class called <code>org.eclipse.jface.viewers.ViewerComparator</code>, of which <code>org.eclipse.jface.viewers.ViewerSorter</code> is now a subclass.
+  <dd>2. two new methods to <code>org.eclipse.jface.viewers.StructuredViewer</code>, to support the addition of  <code>org.eclipse.jface.viewers.ViewerComparator</code>.</dd>   
+    
+  <h5>Rationale</h5>
+
+The <code>ViewerSorter</code> class has a public method <code>getCollator()</code> that returns a <code>java.text.Collator</code>.  Since this method is API it could not simply be changed to use an ICU Collator.  Also, ICU classes cannot be part of the API (signatures) as a direct plug-in dependency on ICU would prevent JFace from being used standalone (with SWT).  To accomodate these constraints, the <code>ViewerComparator</code> class that uses a <code>java.util.Comparator</code>, rather than an ICU Collator, was added.  This was done because ICU's Collator class implements <code>java.util.Comparator</code>, so any <code>StructuredViewer</code> can now use ICU's Collator rather than <code>java.text.Collator</code>, but JFace doesn't have to add a dependency on the ICU4J plug-in.  
+
+The two new methods added to <code>StructuredViewer</code> support using ICU's Collator to sort the contents of the viewer via a <code>ViewerComparator</code>, rather than a <code>ViewerSorter</code>.  It is recommended that any <code>StructuredViewer</code> now use these methods to get/set the viewer's sorter (comparator), instead of the <code>getSorter()</code> and <code>setSorter(ViewerSorter)</code> methods.
+<ul>
+<li><code>public ViewerComparator getComparator()</code></li>
+<li><code>public void setComparator(ViewerComparator comparator)</code></li>
+</ul>
+
+</p> 
 </body>
 
 </html>
