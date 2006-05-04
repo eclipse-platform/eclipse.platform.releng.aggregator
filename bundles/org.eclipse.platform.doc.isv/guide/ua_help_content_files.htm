@@ -87,24 +87,32 @@ locale directory structure inside the doc.zip file.)</p>
   the root of the plug-in, until the resource is located. Documents, and other
   resource, like images which differ between system, should be placed under ws
   or os directories for specific platform.</p>
+  
 <h4 ><a name="help_plugin_files_xref">Cross plug-in referencing</a></h4>
-
 
 <P >The <b>href</b> argument can also refer to content from another
 plug-in.&nbsp; This is done by using a special cross plug-in referencing
 notation that is resolved by the help server: </P>
 
+<pre >   &lt;topic label=&quot;Ref1&quot; href=&quot;<b>PLUGINS_ROOT/another_plugin_id</b>/ref/ref1.html&quot;/&gt;</pre>
 
-<pre >   &lt;topic label=&quot;Ref1&quot; href=&quot;<b>../&quot;another_plugin_id&quot;</b>/ref/ref1.html&quot;/&gt;</pre>
+<p>
+Here <code><b>PLUGINS_ROOT</b></code> will be resolved at runtime and replaced with
+the root directory for the plugins. You can specify your own plug-in id for
+<code><b>another_plugin_id</b></code>. For example, you could link to this chapter
+of the programmer's guide using the following topic:
+</p>
 
+<pre >   &lt;topic label=&quot;Help Chapter in Platform Doc&quot; href=&quot;<b>PLUGINS_ROOT/org.eclipse.platform.doc.isv/guide/help.html</b>&quot;/&gt;</pre>
 
-<P >
-For example, you could link to this chapter of the programmer's guide using the
-following topic: </P>
-
-
-<pre >   &lt;topic label=&quot;Help Chapter in Platform Doc&quot; href=&quot;<b>../org.eclipse.platform.doc.isv/guide/help.html</b>&quot;/&gt;</pre>
-
+<p>
+Prior to 3.2, references to documents in other plug-ins were made by using '..'
+to go up to the plug-in level, then referencing the plug-in Id followed by the
+HREF to the topic inside the plug-in. The recommended way to do this now is
+to use <code>PLUGINS_ROOT</code> instead of '..'. Using this variable avoids
+avoids these up/down trips in references, and can be used for all the resource
+URLs in the help documents (images, links, CSS files, java script files etc.)
+</p>
 
 <p class="Note">Note:&nbsp; When referencing content from another plug-in, be
 sure to use the plug-in's <b>id</b>, as declared in its <b>plugin.xml </b>file,
@@ -116,10 +124,11 @@ important to check that you are using the id and not the directory name.</p>
 <p>Branding information is often placed in a plug-in defining a
   product as explained in <a href="product_def.htm">Defining a Product</a>. Help
   resources in the product plug-in can be referenced from the table of contents
-  or topics using special identifier &quot;PRODUCT_PLUGIN&quot; for the plug-in ID. For
-  example,</p>
-<pre >   href=&quot;../<b>PRODUCT_PLUGIN</b>/book.css&quot;</pre>
-<p>refers to a style sheet residing in the plug-in for the currently
-  running product. </p>
+  or topics using special identifier <code><b>PRODUCT_PLUGIN</b></code> for the
+  plug-in ID. For example,</p>
+<pre >   href=&quot;PLUGINS_ROOT/<b>PRODUCT_PLUGIN</b>/book.css&quot;</pre>
+<p>refers to a style sheet residing in the plug-in for the currently running
+product.
+  </p>
 </BODY>
 </HTML>
