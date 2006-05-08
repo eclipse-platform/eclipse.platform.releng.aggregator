@@ -14,7 +14,7 @@
 <body>
 
 <h1>The Eclipse runtime options</h1>
-<p>Version 3.1 - Last revised June 15, 2005</p>
+<p>Version 3.2 - Last revised May 8, 2006</p>
 <p>The Eclipse platform is highly configurable. Configuration input takes the
   form of command line arguments and System property settings. In many cases
   the command line arguments are simply short cuts for setting the related System
@@ -247,6 +247,12 @@ line arguments. </p>
   <dd>This property is set at the time eclipse is started.  The value of this property a string 
       representation of the value returned by System.currentTimeMillis().  This value is not
       intended to be set by users.</dd>
+  <dt><a name="eclipsestateSaveDelayInterval" id="eclipsestateSaveDelayInterval"></a>eclipse.stateSaveDelayInterval</dt>
+  <dd>the delay interval (in milliseconds) for persisting state change requests.  The default 
+    is 30000 ms (30 seconds).  State change requests are delayed to prevent massive amounts 
+    of disk writes while performing administrative operations (e.g. installing bundles).  
+    The delay interval is used to wait for a period of inactivity before persisting the 
+    framework state information.</dd>
   <dt><a name="eclipsevm" id="eclipsevm"></a>eclipse.vm {-vm}</dt>
   <dd>the path to the Java executable used to run Eclipse. This information is
   used to construct relaunch command lines.</dd>
@@ -261,6 +267,9 @@ line arguments. </p>
   <dt><a name="osgibaseconfigurationarea"></a>osgi.baseConfiguration.area</dt>
   <dd>specifies a base configuration that is used when 
       <a href="#osgiconfigurationarea">osgi.configuration.area</a> is not specified.</dd>
+  <dt><a name="osgibundlefilelimit"></a>osgi.bundlefile.limit</dt>
+  <dd>specifies a limit on the number of jar files the framework will keep open.  
+      The minimum value allowed is 10.  By default the value is unlimited.</dd>
   <dt><a name="osgibundles"></a>osgi.bundles</dt>
   <dd>The comma-separated list of bundles which are automatically installed
     and optionally started
@@ -296,13 +305,32 @@ will force eclipse to reinitialize these caches.</dd>
   <dt><a name="osgiconsole"></a>osgi.console {-console} </dt>
   <dd>if set to a non-null value, the OSGi console (if installed) is enabled.
     If the value is a suitable integer, it is interpreted as the port on which
-    the console listens and directs its output
-    to the
-    given port.
-Handy for investigating
-  the state of the system.   </dd>
+    the console listens and directs its output to the given port. Handy for investigating
+    the state of the system.</dd>
   <dt><a name="osgiconsoleclass"></a>osgi.console.class</dt>
   <dd>the class name of the console to run if requested</dd>
+  <dt><a name="osgiconsoleencoding"></a>osgi.console.encoding</dt>
+  <dd>if set then the specified value is used as the encoding for the console (see
+    <a href="#osgiconsole">osgi.console</a>).  If not set then the value of the file.encoding 
+    property is used.  If file.encoding is not set then iso8859-1 is used as the default.
+  </dd>
+  <dt><a name="osgicontextClassLoaderParent"></a>osgi.contextClassLoaderParent</dt>
+  <dd>the classloader type to use as the parent classloader of the context
+    classloader used by the Framework.  The valid types are the following:
+    <ul type=disc>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+          mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>app</b> - the application classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>boot</b> - the boot classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>ext</b> - the extension classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>fwk</b> - the framework classloader.</li>
+      <li class=MsoNormal style='mso-margin-top-alt:auto;mso-margin-bottom-alt:auto;
+     mso-list:l2 level1 lfo3;tab-stops:list .5in'><b>ccl</b> - the original context classloader 
+     that was set when the framework launched (default value).</li>
+    </ul>
+  </dd>
   <dt><a name="osgidebug"></a>osgi.debug {-debug}</dt>
   <dd>if set to a non-null value, the platform is put in debug mode. If the value
     is a string it is interpreted as the location of the
@@ -322,6 +350,14 @@ Handy for investigating
     the file will contain an entry of the form<br>
 <pre>    &lt;plug-in id&gt;=&lt;comma separated list of classpath entries to add&gt;</pre>
     where plug-in id &quot;*&quot; matches any plug-in not otherwise mentioned.</dd>
+  <dt><a name="osgifilepermissionscommand"></a>osgi.filepermissions.command</dt>
+  <dd>specifies an optional OS specific command to set file permissions on extracted
+      native code.  On some operating systems it is required that native libraries be 
+      set to executable.  This optional property allows you to specify the command. 
+      For example, on a UNIX style OS you could have the following value:
+      <pre>    osgi.filepermissions.command=&quot;chmod +rx [fullpath]&quot;</pre>
+      The [fullpath] is used to substitute the actual file path by the framework.
+  </dd>
   <dt><a name="o.pngramework"></a>osgi.framework</dt>
   <dd>the URL location of the OSGi framework. Useful if the Eclipse install
   is disjoint. See the section on <a href="#locations">locations</a> for more details. </dd>
@@ -331,8 +367,8 @@ Handy for investigating
     (see <a href="#o.pngramework">osgi.framework</a>)</dd>
   <dt><a name="osgiframeworkextensions"></a>osgi.framework.extensions</dt>
   <dd>a comma-separated list of framework extensions.  Each entry is of the form:<br>
-	 <pre>    &lt;URL | simple bundle location&gt;</pre>
-      If a simple bundle location is specified (not a URL) then a search is done in parent directory of the 
+	 <pre>    &lt;simple bundle location&gt;</pre>
+      Simple bundle locations are searched in the parent directory of the 
       org.eclipse.osgi bundle.  Framework extensions may be used to run Eclipse with a different
       framework adaptor.  The framework extension may contain an eclipse.properties file to set 
       system properties.  For example, a framework extension that provides a framework adaptor 
@@ -344,6 +380,31 @@ Handy for investigating
   &quot;jar&quot; indicates that the Eclipse OSGi Framework is contained in a single jar.
   The value &quot;folder&quot; indicates that the Eclipse OSGi Framework is contained in a 
   directory.</dd>
+  <dt><a name="osgiframeworklibraryextensions"></a>osgi.framework.library.extensions</dt>
+  <dd>a comma separated list of additional library file extensions that
+    must be searched for.  If not set then only the library name returned by
+    System.mapLibraryName(String) will be used to search.  This is needed for
+    certain operating systems which allow more than one extension for a library. 
+    For example AIX allows library extensions of .a and .so, but
+    System.mapLibraryName(String) will only return names with the .a extension.</dd>
+  <dt><a name="osgiframeworkuseSystemProperties"></a>osgi.framework.useSystemProperties</dt>
+  <dd>controls whether the framework properties are backed by the global System properties 
+    or held privately for each instance of the framework.  By default the framework properties
+    are backed by the System properties (e.g. true).  This property is useful when running 
+    multiple instances of the OSGi Framework within the same VM and each instance has a separate
+    set of configuration properties (e.g. set in the config.ini).</dd>
+  <dt><a name="osgihookconfigurators"></a>osgi.hook.configurators</dt>
+  <dd>a comma separated list of hook configurators.  If this property is set then the list of 
+    configurators specified will be the only configurators used.  Any hook configurators 
+    specified in hookconfigurators.properties files will be ignored.</dd>
+  <dt><a name="osgihookconfiguratorsinclude"></a>osgi.hook.configurators.include</dt>
+  <dd>a comma separated list of additional hook configuratiors.  This is helpful for 
+    configuring optional hook configurators.  This option is ignored if the 
+    <a href="#osgihookconfigurators">osgi.hook.configurators</a> option is used.</dd>
+  <dt><a name="osgihookconfiguratorsexclude"></a>osgi.hook.configurators.exclude</dt>
+  <dd>a comma separated list of hook configurators to exclude.  This is helpful for disabling 
+    hook configurators that are specified in hook configurator properties files.  This option 
+    is ignored if the <a href="#osgihookconfigurators">osgi.hook.configurators</a> option is used.</dd>
   <dt><a name="osgijavaprofile"></a>osgi.java.profile</dt>
   <dd>a URL to the JRE profile file to use.  A JRE profile contains values for the properties
      org.osgi.framework.system.packages and org.osgi.framework.bootdelegation.  If 
@@ -406,6 +467,8 @@ Handy for investigating
   <dt><a name="osginl"></a>osgi.nl {-nl}</dt>
   <dd>the name of the locale on which Eclipse platform will run. NL values should
     follow the standard Java locale naming conventions.</dd>
+  <dt><a name="osginluser"></a>osgi.nl.user</dt>
+  <dd>the name of the locale when the user explicitly adds -nl to the command-line arguments.</dd>
   <dt><a name="osginoshutdown"></a>osgi.noShutdown {-noExit}</dt>
   <dd>if &quot;true&quot;, the VM will not exit after the eclipse application has ended.  This
       is useful for examining the OSGi framework after the eclipse application has ended.</dd>
@@ -445,6 +508,10 @@ Handy for investigating
   <dt><a name="osgisplashpath"></a>osgi.splashPath</dt>
   <dd>a comma separated list of URLs to search for a file called splash.bmp.
   This property is overriden by any value set in <a href="#osgisplashlocation">osgi.splashLocation</a>.</dd>
+  <dt><a name="osgisupportsignatureverify"></a>osgi.support.signature.verify</dt>
+  <dd>valid values are &quot;true&quot; or &quot;false&quot; default is &quot;false&quot;.  
+    When set to &quot;true&quot; the framework will load certificates from signed jars and
+    verify the content is not corrupted at runtime.</dd>
   <dt><a name="osgisyspath"></a>osgi.syspath</dt>
   <dd>set to the path where the eclipse OSGi Framework (org.eclipse.osgi) implementation 
   is located.  For example, &quot;&lt;eclipse install path&gt;/eclipse/plugins&quot;.
