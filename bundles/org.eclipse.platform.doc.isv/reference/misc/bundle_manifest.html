@@ -95,7 +95,7 @@ The following is an example of the x-friends directive:
 </p>
 
 <pre>
-Export-Package: org.eclipse.foo.formyfriends; x-friends:="org.eclipse.foo.friend1, org.eclipse.foo.friend2"
+Export-Package: org.eclipse.foo.formyfriends; x-friends:=&quot;org.eclipse.foo.friend1, org.eclipse.foo.friend2&quot;
 </pre>
 
 <p>
@@ -107,36 +107,41 @@ Environment will discourage all bundles from using the package even if they are
 specified as a friend.
 </p>
 
-<h3>The Eclipse-AutoStart Header</h3>
+<h3>The Eclipse-LazyStart Header</h3>
 
 <p>
-The Eclipse-AutoStart header is used to specify if a bundle should be started 
+The Eclipse-LazyStart header is used to specify if a bundle should be started 
 automatically before the first class or resource is accessed from that bundle. 
-This feature allows Eclipse to activate bundles on demand the first time they are
+This feature allows Eclipse to activate bundles lazily the first time they are
 needed.  Using this model Eclipse can startup with as few active bundles as 
-possible.  The Eclipse-AutoStart header must use the following syntax:
+possible.  The Eclipse-LazyStart header must use the following syntax:
 </p>
 
 <pre>
-Eclipse-AutoStart ::= ( 'true' | 'false' ) ( ';' 'exceptions' '=' '&quot;' exceptions-list '&quot;' ) ?
+Eclipse-LazyStart ::= ( 'true' | 'false' ) ( ';' 'exceptions' '=' '&quot;' exceptions-list '&quot;' ) ?
 exceptions-list ::= a comma ',' separated list of packages
 </pre>
 
 <p>
 The 'exceptions' attribute is used to specify a list of packages which must not cause
 the bundle to be activated when classes or resources are loaded from them.  
-If the Eclipse-AutoStart header is not defined in the bundle manifest then a default 
-value of 'false' is used.  The following is an example of the Eclipse-AutoStart header:
+If the Eclipse-LazyStart header is not defined in the bundle manifest then a default 
+value of 'false' is used.  The following is an example of the Eclipse-LazyStart header:
 </p>
 
 <pre>
-Eclipse-AutoStart: true; exceptions="org.eclipse.foo1, org.eclipse.foo2"
+Eclipse-LazyStart: true; exceptions=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
 </pre>
 
 <p>
 The example specifies that this bundle must be activated for any classes or resources 
 that are loaded from this bundle, except the classes and resources in the packages
 'org.eclipse.foo1' and 'org.eclipse.foo2'.
+</p>
+
+<p>
+The Eclipse-AutoStart header has been deprecated in Eclipse 3.2.  The Eclipse-LazyStart 
+header should be used instead.
 </p>
 
 <h3>The Eclipse-PlatformFilter Header</h3>
@@ -246,6 +251,98 @@ The following is an example of the Eclipse-ExtensibleAPI header:
 
 <pre>
 Eclipse-ExtensibleAPI: true
+</pre>
+
+<h3>The Eclipse-GenericCapabilty Header</h3>
+
+<p>
+The Eclipse-GenericCapability header is used to specify a generic capability 
+of a bundle.  Generic capabilities can be used to describe features of your 
+bundle which can be required by other bundles in the system (using the 
+Eclipse-GenericRequire header).  Generic capabilities are given a name 
+and a capability type.  Capability types are defined by the bundle which is 
+offering the capability.  Capabilities can also have a set of typed matching
+attributes which are used to match against when resolving Eclipse-GenericRequire 
+headers.  Matching attributes may be one of the following types; 
+[string | version | uri | long | double | set].  The set type can be used 
+to define a set of strings as a comma separated list of strings.
+
+The Eclipse-GenericCapability header must use the following syntax:
+</p>
+
+<pre>
+  Eclipse-GenericCapability ::= capability ( ',' capability ) *
+  capability                ::= typed-name ( ';' typed-name ) * 
+                                ( ';' typed-param ) *
+  typed-name                ::= name ( ':' capability-type )
+  typed-param               ::= typed-key '=' quouted-string
+  typed-key                 ::= name ( ':' 
+                                [string | version | uri | long | double | set] )</pre>
+
+<p>
+The following is an example of the Eclipse-GenericCapabilty header that could be used
+to specify a bundle with an OSGi service org.acme.stuff.SomeService implementation:
+</p>
+
+<pre>
+  Eclipse-GenericCapability: 
+   org.acme.stuff.SomeService:osgi.service; 
+   version:version=&quot;1.0.1&quot;</pre>
+
+<h3>The Eclipse-GenericRequire Header</h3>
+
+<p>
+The Eclipse-GenericRequire header is used to specify a requirement on ageneric 
+capability which is offered by another bundle (using the Eclipse-GenericCapability
+header).  Generic requirements are given a name and a capability type.  Capability 
+types are defined by the bundle which is offering the capability.  Generic 
+requirements can specify an LDAP filter string which is used as a selection filter
+to resolve against matching generic capabilities.
+
+The Eclipse-GenericRequire header must use the following syntax:
+</p>
+
+<pre>
+  Eclipse-GenericRequire   ::= generic-require ( ',' generic-require ) *
+  generic-require          ::= typed-name ( ';' typed-name ) *
+                               ( ';' selection-filter '=' quoated-ldapFilter )
+                               ( ';' optional '=' [true|false] )
+                               ( ';' multiple '=' [true|false] )
+  typed-name                ::= name ( ':' capability-type )</pre>
+
+<p>
+The following is an example of the Eclipse-GenericRequire header that could be used
+to specify a bundle that depends on an OSGi service org.acme.stuff.SomeService 
+implementation:
+</p>
+
+<pre>
+  Eclipse-GenericRequire: 
+   org.acme.stuff.SomeService:osgi.service; 
+   selection-filter=&quot;(version>=1.0.1)&quot;</pre>
+
+<h3>Generic Aliases</h3>
+<p>
+The <a href="runtime-options.html#osgigenericAliases">osgi.genericAliases</a> option 
+can be used to map existing OSGi manifest headers onto Eclipse-GenericCapability and
+Eclipse-GenericRequire manifest headers.  For example, consider the following manifest 
+headers
+</p>
+<pre>
+  Export-Service: org.acme.stuff.SomeService
+  Import-Service: org.acme.stuff.SomeService</pre>
+
+<p>
+These headers can be mapped to Eclipse-GenericCapability and Eclipse-GenericRequire 
+headers using the following property:
+</p>
+<pre>  osgi.genericAliases=Export-Service:Import-Service:osgi.service</pre>
+<p>
+Under the covers this would translate into the following generic headers:
+</p>
+<pre>
+  Eclipse-GenericRequire: org.acme.stuff.SomeService:osgi.service
+  Eclipse-GenericCapability: org.acme.stuff.SomeService:osgi.service
 </pre>
 
 <h3>The Plugin-Class Header</h3>
