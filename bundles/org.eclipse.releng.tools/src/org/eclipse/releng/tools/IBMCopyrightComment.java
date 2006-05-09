@@ -22,6 +22,9 @@ public class IBMCopyrightComment {
     public static final int UNKNOWN_COMMENT = -1;
     public static final int JAVA_COMMENT = 1;
     public static final int PROPERTIES_COMMENT = 2;
+    public static final int C_COMMENT = 3;
+    public static final int SHELL_MAKE_COMMENT = 4;
+    public static final int BAT_COMMENT = 5;
 
     private static final int DEFAULT_CREATION_YEAR = 2005;
 
@@ -29,16 +32,21 @@ public class IBMCopyrightComment {
     private int creationYear = -1;
     private int revisionYear = -1;
     private List contributors;
+    private int yearRangeStart, yearRangeEnd;
+    private String originalText;
 
-    private IBMCopyrightComment(int commentStyle, int creationYear, int revisionYear, List contributors) {
+    private IBMCopyrightComment(int commentStyle, int creationYear, int revisionYear, List contributors, int yearRangeStart, int yearRangeEnd, String originalText) {
         this.commentStyle = commentStyle;
         this.creationYear = creationYear == -1 ? DEFAULT_CREATION_YEAR : creationYear;
         this.revisionYear = revisionYear;
         this.contributors = contributors;
+        this.yearRangeStart = yearRangeStart;
+        this.yearRangeEnd = yearRangeEnd;
+        this.originalText = originalText;
     }
 
     public static IBMCopyrightComment defaultComment(int commentStyle) {
-        return new IBMCopyrightComment(commentStyle, DEFAULT_CREATION_YEAR, -1, null);
+        return new IBMCopyrightComment(commentStyle, DEFAULT_CREATION_YEAR, -1, null, 0, 0, null);
     }
 
     /**
@@ -57,16 +65,21 @@ public class IBMCopyrightComment {
    	    int start = body.indexOf(copyrightLabel); //$NON-NLS-1$
    	    if (start == -1) return null;
    	    int contrib = body.indexOf("Contributors:", start); //$NON-NLS-1$
-   	    int end = body.indexOf(" IBM Corp", start); //$NON-NLS-1$ // catch both IBM Corporation and IBM Corp.
+   	    int rangeEnd = body.indexOf(" IBM Corp", start); //$NON-NLS-1$ // catch both IBM Corporation and IBM Corp.
 
-   	    if (end == -1 || end > contrib) // IBM must be on the copyright line, not the contributor line
+   	    if (rangeEnd == -1 || rangeEnd > contrib) // IBM must be on the copyright line, not the contributor line
    	        return null;
 
-   	    String yearRange = body.substring(start + copyrightLabel.length(), end);
+   	    int rangeStart = start + copyrightLabel.length();
+   	    String yearRange = body.substring(rangeStart, rangeEnd);
 
    	    int comma = yearRange.indexOf(","); //$NON-NLS-1$
+   	    if (comma == -1) {
+   	   	    comma = yearRange.indexOf("-"); //$NON-NLS-1$
+   	    }
 
    	    String startStr = comma == -1 ? yearRange : yearRange.substring(0, comma);
+   	    if (comma != -1 && Character.isWhitespace(yearRange.charAt(comma))) comma++;
    	    String endStr = comma == -1 ? null : yearRange.substring(comma + 1);
 
    	    int startYear = -1;
@@ -97,15 +110,19 @@ public class IBMCopyrightComment {
    	        if (contributor.indexOf("***********************************") == -1 //$NON-NLS-1$
    	         && contributor.indexOf("###################################") == -1) { //$NON-NLS-1$
    	            int c = contributor.indexOf(linePrefix);
+   	            if (c == -1 && linePrefix.equals(" *")) {
+   	            	// special case: old prefix was "*" and new prefix is " *"
+   	            	c = contributor.indexOf("*");
+   	            }
    	            if (c == 0) {
-					// it has to be at the beginning of the line
+					// prefix has to be at the beginning of the line
    	                contributor = contributor.substring(c + linePrefix.length());
    	            }
    	            contributors.add(contributor);
    	        }
    	    }
 
-        return new IBMCopyrightComment(commentStyle, startYear, endYear, contributors);
+        return new IBMCopyrightComment(commentStyle, startYear, endYear, contributors, rangeStart, rangeEnd, body);
     }
 
     public int getRevisionYear() {
@@ -120,10 +137,15 @@ public class IBMCopyrightComment {
     private static String getLinePrefix(int commentStyle) {
         switch(commentStyle) {
 	        case JAVA_COMMENT:
+	        case C_COMMENT:
 	            return " *";  //$NON-NLS-1$
 	        case PROPERTIES_COMMENT:
 	            return "#"; //$NON-NLS-1$
-	        default:
+	        case SHELL_MAKE_COMMENT:
+	            return "#"; //$NON-NLS-1$
+	        case BAT_COMMENT:
+	            return "rem "; //$NON-NLS-1$
+		    default:
 	            return null;
         }
 	}
@@ -149,14 +171,39 @@ public class IBMCopyrightComment {
 		}
 	}
 
+	/**
+	 * Return the body of the original copyright comment with new dates.
+	 */
+	public String getOriginalCopyrightComment() {
+	    StringWriter out = new StringWriter();
+		PrintWriter writer = new PrintWriter(out);
+		try {
+			writer.print(originalText.substring(0, yearRangeStart));
+			writer.print(creationYear);
+			if (revisionYear != -1 && revisionYear != creationYear)
+		        writer.print(", " + revisionYear); //$NON-NLS-1$
+			writer.print(originalText.substring(yearRangeEnd));
+			return out.toString();
+		} finally {
+		    writer.close();
+		}
+	}
+
 	private void writeCommentStart(PrintWriter writer) {
 	    switch(commentStyle) {
 	    case JAVA_COMMENT:
+	    case C_COMMENT:
 			writer.println("/*******************************************************************************"); //$NON-NLS-1$
 			break;
 	    case PROPERTIES_COMMENT:
 		    writer.println("###############################################################################"); //$NON-NLS-1$
 		    break;
+	    case SHELL_MAKE_COMMENT:
+			writer.println("#*******************************************************************************"); //$NON-NLS-1$
+			break;
+	    case BAT_COMMENT:
+			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
+			break;
 	    }
 	}
 
@@ -198,11 +245,18 @@ public class IBMCopyrightComment {
 	private void writeCommentEnd(PrintWriter writer) {
 	    switch(commentStyle) {
 	    case JAVA_COMMENT:
+	    case C_COMMENT:
 			writer.println(" *******************************************************************************/"); //$NON-NLS-1$
 			break;
 	    case PROPERTIES_COMMENT:
 		    writer.println("###############################################################################"); //$NON-NLS-1$
 		    break;
+	    case SHELL_MAKE_COMMENT:
+			writer.println("#*******************************************************************************"); //$NON-NLS-1$
+			break;
+	    case BAT_COMMENT:
+			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
+			break;
 	    }
 	}
 }

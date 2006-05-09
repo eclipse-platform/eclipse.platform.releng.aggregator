@@ -37,10 +37,9 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 		}
 	}
 
-	private String propertiesCopyright;
-	private String javaCopyright;
 	private String newLine = System.getProperty("line.separator");
 	private Map log = new HashMap();
+	private boolean swt = false;
 
 	// The current selection
 	protected IStructuredSelection selection;
@@ -126,15 +125,23 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 						monitor.beginTask("Fixing copyrights...", results.length);
 						System.out.println("Start Fixing Copyrights");
 						System.out.println("Resources selected: " + results.length);
+						if (results.length > 0) {
+							IProject project = results[0].getProject();
+							if (project.getName().equals("org.eclipse.swt")) swt = true;
+						}
 						for (int i = 0; i < results.length; i++) {
 							IResource resource = results[i];
-							System.out.println("Resource selected: " + resource.getName());
+							System.out.println("Resource selected: " + resource.getFullPath());
 							processFile((IFile) resource, monitor);
 							monitor.worked(1);
+							if (monitor.isCanceled()) {
+								monitor.setCanceled(true);
+								break;
+							}
 						}
 
 						writeLogs();
-						//		displayLogs();
+						if (swt) displayLogs();
 						System.out.println("Done Fixing Copyrights");
 
 					} finally {
@@ -162,6 +169,13 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 				if (cvsFile != null) {
 					// get the log entry for the revision loaded in the workspace
 					ILogEntry entry = ((ICVSRemoteFile) cvsFile).getLogEntry(new SubProgressMonitor(monitor, 100));
+					if (swt) {
+						String logComment = entry.getComment();
+						if (logComment.indexOf("CPL") != -1 && logComment.indexOf("EPL") != -1) {
+							// the last modification was the copyright comment update for the transition from CPL to EPL, so ignore
+							return 0;
+						}
+					}
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(entry.getDate());
 					return calendar.get(Calendar.YEAR);
@@ -233,17 +247,28 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 		SourceFile aSourceFile;
 
 		String extension = file.getFileExtension();
-		if (extension == null)
+		if (extension == null) {
+			warn(file, null, "File has no extension.  File UNCHANGED."); //$NON-NLS-1$
 			return;
+		}
 		monitor.subTask(file.getFullPath().toOSString());
 		int fileType = IBMCopyrightComment.UNKNOWN_COMMENT;
 		extension = extension.toLowerCase();
 		if (extension.equals("java")) { //$NON-NLS-1$
 			fileType = IBMCopyrightComment.JAVA_COMMENT;
 			aSourceFile = new JavaFile(file);
+        } else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$
+        	fileType = IBMCopyrightComment.C_COMMENT;
+            aSourceFile = new CFile(file);
 		} else if (extension.equals("properties")) { //$NON-NLS-1$
 			fileType = IBMCopyrightComment.PROPERTIES_COMMENT;
 			aSourceFile = new PropertiesFile(file);
+        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak")) { //$NON-NLS-1$
+        	fileType = IBMCopyrightComment.SHELL_MAKE_COMMENT;
+            aSourceFile = new ShellMakeFile(file);
+        } else if (extension.equals("bat")) { //$NON-NLS-1$
+        	fileType = IBMCopyrightComment.BAT_COMMENT;
+            aSourceFile = new BatFile(file);
 		} else
 			return;
 
@@ -252,16 +277,22 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 			return;
 		}
 
-		boolean hasCPL = true;
+		boolean hasCPL = false, hasGPL = false, hasMPL = false, hasApple = false;
 
 		BlockComment copyrightComment = aSourceFile.firstCopyrightComment();
-		if (copyrightComment != null && (copyrightComment.getContents().indexOf("Common Public License") == -1)) {
-			hasCPL = false;
+		if (copyrightComment != null) {
+			String copyrightString = copyrightComment.getContents();
+			if (copyrightString.indexOf("Common Public License") != -1) hasCPL = true;
+			if (swt) {
+				if (copyrightString.indexOf("GPL") != -1) hasGPL = true;
+				if (copyrightString.indexOf("MPL") != -1) hasMPL = true;
+				if (copyrightString.indexOf("Apple Computer") != -1) hasApple = true; 
+			}
 		}
 
 		IBMCopyrightComment ibmCopyright = IBMCopyrightComment.parse(copyrightComment, fileType);
 		if (ibmCopyright == null) {
-			warn(file, copyrightComment, "Could not interpret copyright comment"); //$NON-NLS-1$
+			warn(file, copyrightComment, "Could not interpret copyright comment.  File UNCHANGED."); //$NON-NLS-1$
 			return;
 		}
 
@@ -274,7 +305,7 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 			lastMod = getCVSModificationYear(file, new NullProgressMonitor());
 
 		if (lastMod <= revised && !hasCPL) {
-			return;
+			return; // no update necessary
 		}
 
 		// either replace old copyright or put the new one at the top of the file
@@ -282,9 +313,15 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 		if (copyrightComment == null) {
 			aSourceFile.insert(ibmCopyright.getCopyrightComment());
 		} else {
-			if (!copyrightComment.atTop())
-				warn(file, copyrightComment, "Old copyright not at start of file, new copyright replaces old in same location"); //$NON-NLS-1$
-			aSourceFile.replace(copyrightComment, ibmCopyright.getCopyrightComment());
+			if (!copyrightComment.atTop()) {
+				warn(file, copyrightComment, "Old copyright not at start of file, new copyright replaces old in same location."); //$NON-NLS-1$
+			}
+			if (hasGPL || hasMPL || hasApple) {
+				warn(file, copyrightComment, "Old copyright contains GPL, MPL, or Apple. Copyright unchanged. Date updated if necessary."); //$NON-NLS-1$
+				aSourceFile.replace(copyrightComment, ibmCopyright.getOriginalCopyrightComment());
+			} else {
+				aSourceFile.replace(copyrightComment, ibmCopyright.getCopyrightComment());
+			}
 		}
 	}
 
@@ -294,7 +331,7 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 			aList = new ArrayList();
 			log.put(errorDescription, aList);
 		}
-		aList.add(file.getName());
+		aList.add(file.getFullPath().toOSString());
 	}
 
 	/**

@@ -160,8 +160,6 @@ public abstract class SourceFile {
 			InputStream fileStream = file.getContents();
 			ByteArrayOutputStream result = new ByteArrayOutputStream();
 		
-			result.write(string.getBytes());
-			
 			BufferedReader fileReader = new BufferedReader(new InputStreamReader(fileStream));
 
 			for (int i = 0; i < aComment.start; i++) {
@@ -170,8 +168,10 @@ public abstract class SourceFile {
 				result.write(newLine.getBytes());
 			}
 			
+			result.write(string.getBytes());
+			
 			for (int i = aComment.start; i < aComment.end + 1; i++) {
-				String aLine = fileReader.readLine();
+				fileReader.readLine();
 			}
 			
 			String aLine = fileReader.readLine();
