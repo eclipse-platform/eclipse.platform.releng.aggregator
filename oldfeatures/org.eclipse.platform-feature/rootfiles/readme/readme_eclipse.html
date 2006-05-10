@@ -577,11 +577,10 @@ or <code>antTypes</code> extension point (and not declared as a library in the
 plug-in's manifest). This ensures that the Ant tasks and types are loaded by the
 special Ant class loader and not by a plug-in classloader. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=34466">34466</a>).</p>
 
-<h4> Concurrent Ant builds not
-supported</h4>
-<p>Eclipse runs Ant in the same JVM as the rest of Eclipse. Several aspects
+<h4> Concurrent Ant builds not supported</h4>
+<p>Eclipse can run Ant in the same JVM as the rest of Eclipse. Several aspects
 of Ant and its use of global Java resources (such as System.out and System.err),
-make it unsafe to run more than one Ant build concurrently. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=24129">24129</a>).</p>
+make it unsafe to run more than one Ant build concurrently in the same JVM. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=24129">24129</a>).</p>
 <h4> Running certain Ant tasks
 cause memory leakage</h4>
 <p>Certain Ant tasks are known to leak memory. Please see the bug report for
@@ -600,7 +599,7 @@ task, which works correctly within Eclipse. (bug <a href="https://bugs.eclipse.o
 <p>Since there are differences when running Ant from the commandline and within Eclipse, some extra steps may be needed to have XDoclet support function correctly within Eclipse. Problems may occur creating XDoclet subtasks. The workarounds and full discussion can be found in bug report. (bug
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=37070">37070</a>)</p>
 <h4>Ant Editor code completion based on Ant 1.6.1</h4>
-<p>Code completion provided by the Ant editor does not respect the user-specified version of org.eclipse.ant.core plug-in or ANT_HOME. Code completion proposals are always based on Ant 1.6.1 (bug
+<p>Code completion provided by the Ant editor does not respect the user-specified version of org.eclipse.ant.core plug-in or ANT_HOME. Code completion proposals are mostly based on Ant 1.6.1 with some updates to Ant 1.6.5 (bug
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=30886">30886</a>)</p>
 <h4> Eclipse can hang due to implementation of the Ant &lt;property> task (Windows 9X
 only)</h4>
@@ -609,6 +608,19 @@ only)</h4>
 
 <h4> Setting build loggers not supported when debugging Ant builds</h4>
 <p>When debugging Ant builds within Eclipse, setting -logger as a program argument will be ignored.</p>
+
+<h4>Renaming an External Tool builder set to run during auto-build will cause errors</h4>
+<p>If you rename an existing external tool builder that is configured to run during auto-builds, you will get the following error:
+ Errors during build.
+      Errors running builder "Integrated External Tool Builder" on project
+      <PROJECT_NAME>.
+      The builder launch configuration could not be found.
+The workaround is to first disable the builder for auto-builds and then rename the builder.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=118294">118294</a>)</p>
+
+<h4>Slow typing/saving of the Ant editor with imports that define numerous macrodefs</h4>
+<p>The Ant editor is slow on saving with buildfiles that have &lt;import&gt; declarations of buildfiles that have numerous &lt;macrodef&gt;s.
+See bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=92640">92640</a> and <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=125117">125117</a> for possible workarounds</p>
 
 <h3>3.1.3 <a name="I-Platform-User-Assistance">Platform - User Assistance</a></h3>
 <h4>Welcome page not displayed properly (Linux/Unix)</h4>
@@ -1076,16 +1088,18 @@ operating system when a target VM is launched. However, when using javaw.exe on
 JDK1.4.2, Windows XP, the default locale is incorrectly initialized to en_US, no
 matter what the operating system settings are. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=65945">65945</a>)</p>
 <h4>Suspend on uncaught exception overrides exception breakpoint location filters</h4>
-<p>Exception breakpoints can be configured with location filters (inclusive and
-exclusive). When an unchecked exception is configured to <b>not</b> suspend
-execution in a specific class, execution will still suspend when the user
-preference to suspend on uncaught exceptions is on. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66770">66770</a>)</p>
+<p>Exception breakpoints can be configured with location filters (inclusive and 
+  exclusive). When an unchecked exception is configured to <b>not</b> suspend 
+  execution in a specific class, execution will still suspend when the user preference 
+  to suspend on uncaught exceptions is on. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66770">66770</a>)</p>
 
-<h4>Multiple references to the same object do not update in Variables view</h4>
-<p>When more than one variable references the same object in the Variables view,
-only one variable will update while stepping through source code. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=58768">58768</a> and <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=98147">98147</a>)</p>
-<h4> Running Java programs with
-non-Latin-1 characters in package or class names</h4>
+<h4>Debugger cannot connect when Eclipse runs on IBM JRE 5.0</h4>
+<p>When Eclipse is running on IBM JRE 5.0, the debugger cannot connect to other 
+  VMs for the purpose of debugging. The IBM JRE 5.0 prepends its bin directory 
+  to the system path such that the other VMs do not find their required compatible 
+  libraries required for debugging. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=128605">128605</a>) 
+</p>
+<h4>Running Java programs with non-Latin-1 characters in package or class names</h4>
 You get a <code>java.lang.NoClassDefFoundError</code> when running Java
 programs with non-Latin characters in the package or class names. The workaround
 is to package the class files as a JAR file and run the program out of the JAR
@@ -1202,7 +1216,7 @@ the editor. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67582">6
 <h4>PDE will not unzip source zips of some plug-ins</h4>
 <p>In the plug-in import wizard, when you choose to import plug-ins as
 &quot;projects with source folders&quot;, PDE will not unzip the source for the
-org.apache.ant, org.eclipse.osgi.util and org.eclipse.osgi.services. This is
+org.apache.ant, org.eclipse.core.runtime.compatibility.registry, org.eclipse.osgi.util and org.eclipse.osgi.services. This is
 because the source ZIPs contains code that will not compile when unzipped as it
 requires additional JARs that are not part of the SDK. To avoid the creation of
 plug-in projects that won't compile, PDE will import these plug-ins as binary
@@ -1214,22 +1228,6 @@ require circular dependencies between the plug-in and fragment projects. These
 circular dependencies are at minimum marked as warnings by the JDT compiler and
 may result in unpredictable build behavior. Therefore, PDE always imports
 org.eclipse.swt as binary with source attached. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=66314">66314</a>)</p>
-
-<h4>Search for an extension point reference may include a false hit</h4>
-<p>It is possible for an extension point search result to include a false hit in
-the following specific scenario. If you open the plug-in manifest editor on a
-plug-in that contains both a plugin.xml and manifest.mf, go to the Extension
-Points page, select one of the extension points and click on 'Find references',
-the result may include a false hit. The false hit would result only if another
-plug-in in the product had declared an extension point by the same id.
-Workaround in this case would be to perform the search through the Plug-in
-search page. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=62177">62177</a>)</p>
-<h4>PDE source page colors do
-not take effect on Apply</h4>
-<p>Changes to the colors PDE uses for source pages of its multi-page editors
-are not immediately visible in opened editors after pressing the Apply button
-on&nbsp; the <b>Plug-in Development &gt; Editors preference</b> page. To work
-around this problem, close the editor and and reopen it. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=33640">33640</a>)</p>
 
 <h4>Emacs key bindings do not
 work in manifest editor fields</h4>
@@ -1253,6 +1251,13 @@ plug-in by using the Jar export wizard.
 compile errors occurs on export. To work around the problem, you can either export
 the plug-ins one by one, or change their location.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=98579">98579</a>)</p>
+
+<h4>Headless build needs to be run from a fully qualified path</h4>
+<p>When running a headless build using the scripts provided by pde build, the properties <code>builder</code> 
+and <code>buildDirectory</code> must refer to a fully qualified path.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=139554">139554</a>)
+</p>
+
 <h2>4. <a name="Running Eclipse">Running Eclipse</a></h2>
 <p>After installing the Eclipse SDK in a directory, you can start the Workbench
 by running the Eclipse executable included with the release (you also need a 1.4
