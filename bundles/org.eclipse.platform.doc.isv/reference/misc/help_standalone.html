@@ -1,26 +1,27 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-   <head>
-
+<head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
-
-      <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-      <meta name="Author" content="eclipse.org">
-      <title>
-         Installing Standalone Help
-      </title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Author" content="eclipse.org">
+<title>Installing the stand-alone help system</title>
 <link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-   </head>
+</head>
 <body>
 
 <h1>Installing the stand-alone help system</h1>
+
 <p>If you are creating an application that is not based on 
 the Eclipse framework, you can still use the Eclipse help system. Your 
 application can package and install the stand-alone help system, a very small 
-version of Eclipse that has  everything except the help system stripped out 
+version of Eclipse that has everything except the help system stripped out 
 of it. Then, your application can make API calls from its Help menu, or from UI 
 objects, to launch the help browser. The stand-alone help system has all the 
-features of the integrated help system, except infopops and active help. When an application is not Java based, or help is required when the application is not running, it is possible to use stand-alone help from a system shell, a shell script or a desktop shortcut and provide command line options instead of calling Java APIs.</p>
+features of the integrated help system, except workbench-integrated context help,
+the help view, and active help. When an application is not Java based, or help is
+required when the application is not running, it is possible to use stand-alone
+help from a system shell, a shell script or a desktop shortcut and provide command
+line options instead of calling Java APIs.</p>
 <P>The stand-alone help system allows passing number of options that can be used to customize various aspects of the help system. The following options are supported:</P><UL>
 	<LI><B>-eclipsehome</B> <I>eclipseInstallPath</I> - specifies Eclipse
 	installation directory. This directory is a parent to "plugins" directory
@@ -30,53 +31,59 @@ features of the integrated help system, except infopops and active help. When an
 	<LI><B>-host</B> <I>helpServerHost</I> - specifies host name of the
 	interface that help server will use. It overrides host name specified
 	the application server plugin preferences.</LI>
-
 	<LI><B>-data</B> <I>instanceArea</I> - specifies a path that Eclipse
 	can use to write instance data.  The value can be an absolute path of
 	a directory, or a path relative to Eclipse installation directory.
 	The option must be provided when Eclipse is installed in the read only
 	location, or has been customized to override osgi.instance.area or
 	osgi.instance.area.default properties. </LI>
-
 	<LI><B>-port</B> <I>helpServerPort</I> - specifies port number that
 	help server will use. It overrides port number specified the
 	application server plugin preferences.</LI>
-
 	<LI><B>-dir ltr </B> or<B> -dir rtl</B> - sets left-to right or right-to-left
 	  rendering direction of help UI in the browser.</LI>
-
 	<LI>Additionally, most <A
 		href="../../../org.eclipse.platform.doc.user/tasks/running_eclipse.htm">options
 	accepted by Eclipse executable</A> can be passed. They are especially useful during debugging and for applying customization to Eclipse.
 	For example, passing an option
 	<PRE><EM><SPAN style="font-style: normal">-nl fr_FR</SPAN></EM> </PRE>
 	will start help system in French language instead of a language specified by the machine's locale.</LI>
-
 </UL>
+
 <h2><b>Installation/packaging</b> </h2>
-These steps are for the help system 
-  integrator and are not meant to address all the possible scenarios. It is 
-  assumed   that 
-  all your documentation is delivered as Eclipse plug-ins and, in general, you are 
-  familiar with the eclipse help system.
+
+These steps are for the help system integrator and are not meant to address all the
+possible scenarios. It is assumed that all your documentation is delivered as eclipse
+plug-ins and, in general, you are familiar with the eclipse help system.
 <ol>
-  <li>Download the Eclipse Platform Runtime Binary driver from
-  <a target="_blank" href="http://www.eclipse.org/downloads/">www.eclipse.org</a>.</li>
+  <li>Download the eclipse Platform Runtime Binary driver from
+  <a target="_blank" href="http://eclipse.org/downloads/">eclipse.org</a>.</li>
   <li>Install (unzip) the driver under your application directory, for 
-  example, <var>d:\myApp</var>. This will create an eclipse sub-directory, d:\myApp\eclipse that 
-  contains the code required for the Eclipse platform (which includes the help 
-  system). </li>
+  example, <var>d:\myApp</var>. This will create an eclipse sub-directory,
+  d:\myApp\eclipse that contains the code required for the eclipse platform
+  (which includes the help system). </li>
 </ol>
+
 <h2><b>How to call the help classes from Java</b></h2>
+
 <ol>
-  <li>Make sure <em><span style="font-style: normal">d:\myApp\eclipse\plugins\org.eclipse.help.base_3.1.0.jar</span></em> is 
-  on your app classpath. The class you use to start, launch, and shut down the help system is 
-  org.eclipse.help.standalone.Help. </li>
-  <li>Create an array of String containing options that you want to pass to help system support. Typically, the eclipsehome option is needed.
-  <PRE><EM><SPAN style="font-style: normal">String[] options = new String[] { &quot;-eclipsehome&quot;, &quot;d:\\myApp\\eclipse&quot; };</SPAN></EM> </PRE></li>
-	<LI>In your application, create an instance of the Help class by
-	passing the options. This object should be held onto until
-	the end of your application.<PRE><EM><SPAN style="font-style: normal">Help helpSystem = new Help(options);</SPAN></EM> </PRE>
+  <li>Make sure <code>d:\myApp\eclipse\plugins\org.eclipse.help.base_[version].jar</code>
+  is on your classpath, where <code>[version]</code> is the version of the plugin
+  you're using (e.g. <code>org.eclipse.help.base_3.2.0.jar</code>). The class you use
+  to start, launch, and shut down the help system is
+  <code>org.eclipse.help.standalone.Help</code>.
+  </li>
+  <li>Create an array of <code>String</code> objects containing options that you want
+  to pass to help system support. Typically, the <code>eclipsehome</code> option is
+  needed.
+    
+  <pre>String[] options = new String[] { &quot;-eclipsehome&quot;, &quot;d:\\myApp\\eclipse&quot; };</pre>
+  
+  </li>
+	<LI>In your application, create an instance of the <code>Help</code> class by
+	passing in the options. This object should be held onto until the end of your
+	application.
+	<pre>Help helpSystem = new Help(options);</pre>
 	</LI>
 	<li>To start the help system:
   <pre><em><span style="font-style: normal">helpSystem.start();</span></em> </pre>
@@ -95,66 +102,59 @@ helpSystem.displayHelp(&quot;/com.mycompany.mytool.doc/tasks/task1.htm&quot;);</
 	<P>At the end of your application, to shutdown the help system:</P>
 	<PRE><EM><SPAN style="font-style: normal">helpSystem.shutdown();</SPAN></EM> </PRE></LI>
 </ol>
-<h2><b>How to call the help from command line</b> </h2>
-<p>The org.eclipse.help.standalone.Help class has a  main method that you 
-can use to launch stand-alone help from a command 
-line. The command line arguments syntax is:</p>
+
+<h2><b>How to call the help from the command line</b></h2>
+
+<p>
+The <code>org.eclipse.help.standalone.Help</code> class has a main method you can
+use to launch stand-alone help from the command line. The command line arguments
+syntax is:
+</p>
 <pre><em><span style="font-style: normal">-command start | shutdown | (displayHelp [href]) [-eclipsehome eclipseInstallPath] [-data instanceArea] [-host helpServerHost] [-port helpServerPort] [-dir rtl] [platform options] [-vmargs JavaVMarguments]</span></em></pre>
 <P>A simple way to display help is to invoke</P>
-<pre>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help.base_3.1.0.jar org.eclipse.help.standalone.Help -command displayHelp</pre><P>from within d:\myApp\eclipse directory. To display specific TOC file or topic use</P>
-
-<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help.base_3.1.0.jar org.eclipse.help.standalone.Help -command displayHelp /com.mycompany.mytool.doc/tasks/task1.htm</PRE>
+<pre>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help.base_[version].jar org.eclipse.help.standalone.Help -command displayHelp</pre><P>from within d:\myApp\eclipse directory, where <code>version</code> is the plug-in's version. To display a specific TOC file or topic use</P>
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help.base_[version].jar org.eclipse.help.standalone.Help -command displayHelp /com.mycompany.mytool.doc/tasks/task1.htm</PRE>
 <P>The calls above to display help will cause help system to start, display help, and keep running to allow a user to continue browsing  help after the command is executed. To control the life cycle of the help system, use start and shutdown commands, in addition to the displayHelp command. For example, you may call</P>
-<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help.base_3.1.0.jar org.eclipse.help.standalone.Help -command start</PRE>
+<PRE>java -classpath d:\myApp\eclipse\plugins\org.eclipse.help.base_[version].jar org.eclipse.help.standalone.Help -command start</PRE>
 
+<h2>[Optional] Installing a minimal stand-alone help system</h2>
 
-<H2>[Optional] Installing a minimal set of plug-ins</H2>
- <p>The stand-alone help does not require the entire &nbsp;Eclipse Platform package.
-It is possible to run the stand-alone help with the following plug-ins (located
-in the&nbsp; eclipse\plugins directory):<br>
+<p>
+The stand-alone help does not require the entire eclipse Platform package.
+It is possible to run the stand-alone help with the RCP Runtime Binary with the
+following plug-ins added to the <code>eclipse/plugins</code> directory):
 </p>
-<p><code>
+
+<p>
+<code>
 org.apache.lucene<br>
-org.eclipse.core.runtime<br>
 org.eclipse.help<br>
 org.eclipse.help.appserver<br>
 org.eclipse.help.base<br>
+org.eclipse.help.ui<br>
 org.eclipse.help.webapp<br>
-org.eclipse.osgi<br>
 org.eclipse.tomcat<br>
-org.eclipse.update.configurator<br>
+org.eclipse.ui.forms<br>
 </code>
 </p>
 
 <p>
-On Windows and Linux, the following plugins and fragments 
-are required on top of the minimal configuration to provide robust browser support
-(an SWT-embedded Internet Explorer on Windows and Mozilla on Linux or stand-alone
- system browser on Windows).</p>
-<p><code> 
-org.eclipse.core.expressions<br>
-org.eclipse.help.ui<br>
-org.eclipse.jface<br>
-org.eclipse.swt<br>
-org.eclipse.swt.win32 or org.eclipse.swt.gtk<br>
-org.eclipse.ui<br>
-org.eclipse.ui.workbench<br>
-</code>
+Note: You must ensure that the following line is present in the
+<code>eclipse/configuration/config.ini</code> file:
 </p>
+
+<pre>osgi.bundles=org.eclipse.equinox.common@2:start, org.eclipse.update.configurator@3:start, org.eclipse.core.runtime@start</pre>
+
 <p>
-Some documentation plug-ins may have dependencies on other plug-ins,
-usually by specifying required plug-ins in their plugin.xml.
-The dependent plug-ins need to be installed on the infocenter as well.
-Additionally, plug-ins that were designed for earlier than 3.0 version of Eclipse
-implicitly require an <code>org.eclipse.core.runtime.compatibility</code>
-being present plug-in to work.
+Some documentation plug-ins may have dependencies on other plug-ins, usually by
+specifying required plug-ins in their manifest. The dependent plug-ins need to be
+installed as well. Additionally, plug-ins that were designed for earlier than 3.0
+version of eclipse implicitly require
+<code>org.eclipse.core.runtime.compatibility</code> plug-in being present to work.
 </p>
 
 <p>See <a href="help_preferences.html">Help System Preferences</a> for more
-information on customizing help system.</p>
-
-<A href="../../../org.eclipse.help.base/preferences.ini">
-org.eclipse.help.base preferences</A>
+information on customizing the help system.</p>
 
 </body>
 </html>
