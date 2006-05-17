@@ -49,8 +49,8 @@ are not copied to the output folder:
    JavaCore.setOptions(options);
 </pre>
 </font></p>
-<p> Filenames are filtered if they match one of the supplied patterns. Entire 
-folders are filtered if their name matches one of the supplied folder names 
+<p> Filenames are filtered out if they match one of the supplied patterns. Entire 
+folders are filtered out if their name matches one of the supplied folder names 
 which end in a path separator.</p>
 <p> The incremental and batch builders can also be configured to only generate
  a single error when the .classpath file has errors. This option is set by
@@ -62,7 +62,7 @@ options.&nbsp; For example, you can define the severity that should be used for
 different kinds of problems that are found during compilation.&nbsp; See <a href="jdt_api_options.htm#compiler">JDT
 Core Compiler Options </a>for a complete list of compiler-related options and their defaults. </p>
 <p>When programmatically configuring options for the builder or compiler, you
-should determine the scope of the option.&nbsp; For example, setting up a
+should specify the scope of the option.&nbsp; For example, setting up a
 resource filter may apply to a particular project only:</p>
 <font color="#4444cc">
 <pre>   
@@ -76,14 +76,14 @@ resource filter may apply to a particular project only:</p>
 <h4>Finding the batch compiler</h4>
 
 <p>The batch compiler class is located in the internal classes of the
-JDT/Core plug-in. So it is in the <i>jdtcore.jar</i> file in the directory
-<i>plugins/org.eclipse.jdt.core</i>.
-The name of the class is <i>org.eclipse.jdt.internal.compiler.batch.Main</i>.
+JDT Core plug-in.
+The name of the class is <i>org.eclipse.jdt.internal.compiler.batch.Main</i>. It
+is packaged into <code>plugins/org.eclipse.jdt.core_3.2.0.jar</code>.
 </p>
 <h4>Running the batch compiler</h4>
 <ul>
 <li>Using the main method.</li>
-Using the main method. The Main class has a main method. This
+The Main class has a main method. This
 is the classical way to invoke the batch compiler on a command-line.
 <ul>
 <li>
@@ -150,11 +150,12 @@ discourage access to type X, [+p/X:-p/*] to forbid access to all types in packag
 <tr>
 <td valign=top bgcolor="#FFCCAA" width="250">-d &lt;dir 1&gt;|none</td>
 <td bgcolor="#FFCCAA">This is used to specify in which directory the generated .class files should be dumped. If it is omitted, no package directory structure is created.<br>
-If you don't want to generate .class files, use <font color="#3366FF">-d none</font>.</td>
+If you want to generate no .class file at all, use <font color="#3366FF">-d none</font>.</td>
 </tr>
 <tr>
 <td valign=top width="250">-encoding &lt;encoding name&gt;</td>
-<td>Specify default source encoding format (custom encoding can also be specified on a per file basis by suffixing each input source file/folder name with <font color="#3366FF">[encoding &lt;encoding name&gt;]</font>).</td>
+<td>Specify default source encoding format (custom encoding can also be specified on a per file basis by suffixing each input source file/folder name with <font color="#3366FF">[&lt;encoding name&gt;]</font>, 
+    for example <font color="#3366FF">X.java[utf8]</font>).</td>
 </tr>
 <tr>
 <th colspan="2">Compliance options</th>
@@ -226,15 +227,15 @@ and <font color="#3366FF">1.6</font>, <font color="#3366FF"><I>enum</I></font> a
 <br><font color="#FF0000">intfAnnotation</font><br><font color="#FF0000">intfNonInherited</font><br>javadoc<br>localHiding
 <br><font color="#FF0000">maskedCatchBlocks</font><br>nls<br><font color="#FF0000">noEffectAssign</font><br>null<br>over-ann<br>paramAssign<br><font color="#FF0000">pkgDefaultMethod</font><br>raw<br>semicolon<br><font color="#FF0000">serial</font><br>
 specialParamHiding<br>static-access<br><font color="#FF0000">staticReceiver</font><br><font color="#FF0000">suppress</font><br>synthetic-access<br>syntheticAccess<br>tasks(&lt;task1&gt;|...|&lt;taskN&gt;)<br>
-<font color="#FF0000">typeHiding</font><br><font color="#FF0000">unchecked</font><br>unnecessaryElse<br>unqualified-field-access<br>unqualifiedField<br>uselessTypeCheck
-<br>unused<br>unusedArgument<br><font color="#FF0000">unusedImport</font><br><font color="#FF0000">unusedLabel</font><br><font color="#FF0000">unusedLocal</font><br><font color="#FF0000">unusedPrivate</font><br>unusedThrown
-<br><font color="#FF0000">varargsCast</font><br><font color="#FF0000">warningToken</font>
+<font color="#FF0000">typeHiding</font><br><font color="#FF0000">unchecked</font><br>unnecessaryElse<br>unqualified-field-access<br>unqualifiedField<br>unused<br>unusedArgument<br><font color="#FF0000">unusedImport</font><br><font color="#FF0000">unusedLabel</font><br><font color="#FF0000">unusedLocal</font><br><font color="#FF0000">unusedPrivate</font><br>unusedThrown
+<br>uselessTypeCheck<br><font color="#FF0000">varargsCast</font><br><font color="#FF0000">warningToken</font>
 </blockquote>
 </td>
 <td valign=top>Set warning level.<br>e.g. <font color="#3366FF">-warn:unusedLocal,deprecation</font><br>
 <p>In <font color="#FF0000">red</font> are the default settings.</p>
 <p>
 <pre>
+    -warn:none                               disable all warnings
     -warn:&lt;warnings separated by ,&gt;    enable exactly the listed warnings
     -warn:+&lt;warnings separated by ,&gt;   enable additional warnings
     -warn:-&lt;warnings separated by ,&gt;   disable specific warnings
@@ -343,7 +344,7 @@ a string</td>
 </tr>
 <tr>
 <th align=left valign=top>noEffectAssign</th>
-<td valign=top>for assignment with no effect</td>
+<td valign=top>assignment with no effect</td>
 </tr>
 <tr>
 <th align=left valign=top>null</th>
@@ -512,6 +513,17 @@ will be an xml file.
 </td>
 </tr>
 <tr>
+<td valign=top>-Xemacs</td>
+<td>Use emacs style to present errors and warnings locations into the console
+    and regular text logs. XML logs are unaffected by this option. With this option
+    active, the message:
+    <br><code><font color="#3366FF">
+2. WARNING in /workspace/X.java<br>
+ (at line 8)...</font></code><br>is presented as:
+    <br><code><font color="#3366FF">
+/workspace/X.java:8: warning: The method...</font></code></td>
+</tr>
+<tr>
 <td valign=top>-proceedOnError</td>
 <td>Keep compiling in spite of errors, dumping class files with problem methods or problem types. This is recommended only if you want
 to be able to run your application even if you have remaining errors.</td>
@@ -526,16 +538,16 @@ to be able to run your application even if you have remaining errors.</td>
 </tr>
 <tr>
 <td valign=top>-progress</td>
-<td>Show progress (only in -log mode)</td>
+<td>Show progress (only in -log mode).</td>
 </tr>
 <tr>
 <td valign=top>-time
 </td>
-<td>Display speed information</td>
+<td>Display speed information.</td>
 </tr>
 <tr>
 <td valign=top>-noExit</td>
-<td>Do not call <font color="#3366FF">System.exit(n)</font> at end of compilation (<font color="#3366FF">n=0</font> if no error)</td>
+<td>Do not call <font color="#3366FF">System.exit(n)</font> at end of compilation (<font color="#3366FF">n=0</font> if no error).</td>
 </tr>
 <tr>
 <td valign=top>-repeat &lt;n&gt;
@@ -544,18 +556,18 @@ to be able to run your application even if you have remaining errors.</td>
 </tr>
 <tr>
 <td valign=top>-inlineJSR</td>
-<td>Inline JSR bytecode (implicit if target >= 1.5)</td>
+<td>Inline JSR bytecode (implicit if target >= 1.5).</td>
 </tr>
 <tr>
 <td valign=top>-enableJavadoc</td>
-<td>Consider references inside javadoc</td>
+<td>Consider references inside javadoc.</td>
 </tr>
 <tr>
 <th colspan="2">Helping options</th>
 </tr>
 <tr>
 <td>-? -help</td>
-<td valign=top>Display the help message</td>
+<td valign=top>Display the help message.</td>
 </tr>
 <tr>
 <td valign=top>-v -version</td>
@@ -578,8 +590,8 @@ is completed.</td>
 <tr>
 <td valign=top><code><font color="#3366FF">d:\temp\Test.java -classpath d:\temp;rt.jar -g:none</font></code>
 </td>
-<td valign=top>It compiles only Test.java and it will retrieve any dependant files from d:\temp. The classpath is rt.jar and d:\temp, which means that all necessary classes
-are searched first in d:\temp and then in rt.jar. It generates no debug attributes and all generated .class files are dumped in d:\tmp.</td>
+<td valign=top>It compiles only Test.java and its dependant files if any, retrieving dependant files from d:\temp. The classpath is d:\temp followed by rt.jar, which means that all necessary classes
+are searched first in d:\temp and then in rt.jar. It generates no debug attributes and all generated .class files are dumped in d:\temp.</td>
 </tr>
 </table>
 <h3>Using the ant javac adapter</h3>
@@ -620,7 +632,7 @@ specific options.
 ...
 </pre>
 </font>
-<p>To prevent from getting compiler dependant scripts, we advice you to use the compiler argument set to <code>org.eclipse.jdt.core.JDTCompilerAdapter</code>.
+<p>To prevent from getting compiler dependant scripts, we advise you to use the compiler argument set to <code>org.eclipse.jdt.core.JDTCompilerAdapter</code>.
 If this is not set, the script can only be used with the Eclipse compiler. If set, the nested compiler argument is ignored if the name is different from the 
 compiler name specified by the <code>build.compiler</code> property.</p>
 <h3> Problem determination</h3>
@@ -644,7 +656,7 @@ unit.</p>
 </font>
 <p> Java problem markers are maintained by the Java project builder and are 
 removed automatically as problems are resolved and the Java source is recompiled.</p>
-<p>The problem id value is set by one of the constants in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">
+<p>The problem id value is set to one of the constants defined in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">
  IProblem</a>
 </b>. The problem's id is reliable, but the message is localized and therefore 
 can be changed according to the default locale. The constants defined in <b><a href="../reference/api/org/eclipse/jdt/core/compiler/IProblem.html">
@@ -690,7 +702,7 @@ the annotation <code>java.lang.SuppressWarning</code>.</p>
 	}
 </pre>
 <p>Without the annotation, the compiler would complain that the local variable <code>s</code> is never used.
-With the annotation, the compiler silently ignore this warning locally to the <code>foo</code> method. This enables to
+With the annotation, the compiler silently ignores this warning locally to the <code>foo</code> method. This enables to
 keep the warnings in other locations of the same compilation unit or the same project.</p>
 <p>The list of tokens that can be used inside an <code>SuppressWarning</code> annotation is:</p>
 <ul>
@@ -703,7 +715,7 @@ keep the warnings in other locations of the same compilation unit or the same pr
 <li><font color="green">finally</font> to suppress warnings relative to finally block that don't return</li>
 <li><font color="green">hiding</font> to suppress warnings relative to locals that hide variable</li>
 <li><font color="green">incomplete-switch</font> to suppress warnings relative to missing entries in a switch statement (enum case)</li>
-<li><font color="green">nls</font> to suppress warnings relative to nls warnings</li>
+<li><font color="green">nls</font> to suppress warnings relative to non-nls string literals</li>
 <li><font color="green">null</font> to suppress warnings relative to null analysis</li>
 <li><font color="green">restriction</font> to suppress warnings relative to usage of discouraged or forbidden references</li>
 <li><font color="green">serial</font> to suppress warnings relative to missing serialVersionUID field for a serializable class</li>
