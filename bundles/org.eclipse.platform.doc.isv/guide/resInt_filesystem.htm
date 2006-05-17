@@ -8,41 +8,41 @@
 
 <LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
 <TITLE>
-Resources and the local file system
+Resources and the file system
 </TITLE>
 
 <link rel="stylesheet" type="text/css" HREF="../book.css">
 </HEAD>
 <BODY BGCOLOR="#ffffff">
 <H2>
-Resources and the local file system</H2>
+Resources and the file system</H2>
 <P >
 When the platform is running and the resources plug-in is active, the workspace is represented by an instance of
 <b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b>, which provides 
 protocol for accessing the resources it contains.  An <b><a href="../reference/api/org/eclipse/core/resources/IWorkspace.html"> IWorkspace</a></b> 
-instance represents an associated collection of files and directories in the local file system.  You can access the 
+instance represents an associated collection of files and directories in one or more file systems.  You can access the 
 workspace from the resources plug-in class (defined in 
 <b><a href="../reference/api/org/eclipse/core/resources/package-summary.html">org.eclipse.core.resources</a></b>). </P>
 <pre>
    IWorkspace workspace = ResourcesPlugin.getWorkspace(); 
 </pre>
 <P >
-When the resources plug-in is not running, the workspace exists solely in the local file system and is viewed or manipulated by the user
-via standard file-based tools. Let's look at what a workspace looks like on disk as we explain the
+When the resources plug-in is not running, the workspace exists solely in the file 
+system and is viewed or manipulated by the user via standard file-based tools. 
+Let's look at what a workspace looks like on disk as we explain the
 resources plug-in API. </P>
 
 <H3>
 Our sample tree on disk</H3>
 <P >
-When you installed the platform SDK, you unzipped the files into a directory of your choosing.  We will call this 
-directory the platform root directory.  This is the directory that contains the <b> plugins</b> directory, among others.  
-Inside the platform root directory, there is a <b>workspace</b> directory which is used to hold the resources that are 
-created and manipulated by the platform. If you look in your <b>workspace</b> directory, you'll see separate subdirectories 
-for each project that exists in the workspace.  Within these subdirectories are the folders and files that
-each project contains.  </P>
+When you started the platform SDK, you were prompted to provide a <b>workspace</b>
+directory.  This is the directory where various plug-ins store interesting metadata
+that is unique to a particular instance of the platform.  By default, the resources
+plug-in stores each project in a sub-directory of the workspace directory. 
+Within these subdirectories are the folders and files that each project contains.  </P>
 <P >
-If the SDK in our example is installed in <b> c:\MySDK</b>, then inside
-the <b>c:\MySDK\workspace</b> directory we find subdirectories named after the workspace's projects,
+Let's say your chose the directory <b>c:\MySDK\workspace</b> for your workspace.
+Inside this directory we find subdirectories named after the workspace's projects,
 <b> MyWeb</b> and <b>MyServlet</b>.  These are called the projects' content directories.
 Content directories are created by the platform when the user creates a project.</P>
 <P >
@@ -81,9 +81,8 @@ utilities.&nbsp; The only issue is that the user must be careful when editing
 these files both in the workbench and externally.&nbsp; (This is no
 different than when a user edits a file using two independent stand-alone
 tools.)&nbsp; The workbench provides refresh operations to reconcile the
-workspace view of resources with the actual state in the file system and periodically refreshes
-the workspace based on the state of the file system.</P>
-
+workspace view of resources with the actual state in the file system and 
+there is an option to periodically refresh the workspace based on the state of the file system.</P>
 
 <H3>
 Our sample tree in code</H3>
@@ -147,7 +146,7 @@ located outside of our workspace.  </P>
    }
 </pre>
 <P >
- In the example above, the
+In the example above, the
 first line obtains a handle to the images folder.&nbsp; We must check that the
 folder <b>exists</b> before we can do anything
 interesting with it.&nbsp; Likewise, when we get the file <b>newLogo</b>,
@@ -177,13 +176,11 @@ Finally, we'll create another images folder and move the newly created file to i
    IFile renamedLogo = newImagesFolder.getFile(&quot;renamedLogo.png&quot;);
 </pre>
 
-
 <P>Many of the resource API methods include a <b>force</b>
 boolean flag which specifies whether resources that are out of synch with the
-corresponding files in the local file system will be updated anyway.&nbsp; See <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>
+corresponding files in the file system will be updated anyway.&nbsp; See <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>
 for more information.&nbsp; You can also use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a><b>.isSynchronized
 </b>to determine whether a particular resource is in synch with the file system.</P>
-
 
 <H3>
 <a name="mapping">
@@ -192,24 +189,26 @@ Mapping resources to disk locations</a></H3>
   In the sample resource tree, we've assumed that all of the project content directories are
 in the <b>workspace</b> directory underneath the platform root
 directory (<b>C:\MySDK\workspace)</b>.  This is the default configuration
-for projects.&nbsp; However, a project's content directory can be remapped to any arbitrary directory in the file system, perhaps on a different disk drive.</P>
+for projects.&nbsp; However, a project's content directory can be mapped to any 
+arbitrary directory in some backing file system, perhaps even on a different machine.</P>
 <P >
 The ability to map the location of a project independent of other projects allows the user to
-store the contents of a project in a place that makes sense for the project and the project team.  A project's content directory should be considered &quot;out in the open.&quot;  This means that users can create, modify, and delete resources
+store the contents of a project in a place that makes sense for the project and the project team.  
+A project's content directory should be considered &quot;out in the open.&quot;  
+This means that users can create, modify, and delete resources
 by using the workbench and plug-ins, or by directly using file system based tools and editors.</P>
 <P> Resource path names are not complete file system paths.  Resource paths are always
 based on the project's location (usually the <b>workspace</b>
 directory).&nbsp; To obtain the full file system path to a resource, you must query its location using
 <b>
-<a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.getLocation.&nbsp;
+<a href="../reference/api/org/eclipse/core/resources/IResource.html">IResource</a>.getLocationURI.&nbsp;
 </b>Howevever, you cannot use
 <b> <a href="../reference/api/org/eclipse/core/resources/IProjectDescription.html">IProjectDescription</a>.setLocation
 </b>to change its location, because that method is just a simple setter for a
 data structure.&nbsp;&nbsp;</P>
 <P>Conversely, if you want to get the corresponding resource object given a file
-system path, you can use <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>.<b>getFileForLocation</b>
-or <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>.<b>getContainerForLocation</b>.</P>
-
+system path, you can use <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>.<b>findFilesForLocationURI</b>
+or <a href="../reference/api/org/eclipse/core/resources/IWorkspaceRoot.html"><b>IWorkspaceRoot</b></a>.<b>findContainersForLocationURI</b>.</P>
 
 <H3>
 Resource API and the file system</H3>
