@@ -31,64 +31,40 @@ Code completion</h3>
 Performing a code completion
 </h4>
 <P>
-The only way to programmatically perform code completion is to invoke <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeComplete(int, org.eclipse.jdt.core.ICompletionRequestor)">ICodeAssist.codeComplete</a></b>.
+One way to programmatically perform code completion is to invoke <b><a href="../reference/api/org/eclipse/jdt/core/ICodeAssist.html#codeComplete(int, org.eclipse.jdt.core.CompletionRequestor)">ICodeAssist.codeComplete</a></b>.
 You specify the offset in the compilation unit after which the code completion
-is desired.&nbsp; You must also supply an instance of <b><a href="../reference/api/org/eclipse/jdt/core/ICompletionRequestor.html"> ICompletionRequestor</a></b> to accept the possible completions.</P>
+is desired.&nbsp; You must also supply an instance of <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestor.html"> CompletionRequestor</a></b> to accept the possible completions.</P>
 
-<P>Each method in <b><a href="../reference/api/org/eclipse/jdt/core/ICompletionRequestor.html"> ICompletionRequestor</a>
-</b>accepts a different kind of proposal for code completion.&nbsp; The
-parameters of each method include text that describes the proposed element (its
+
+
+<P>The method in <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestor.html#accept(org.eclipse.jdt.core.CompletionProposal)">CompletionRequestor.accept</a>
+</b>accepts all kinds of proposals for code completion.&nbsp;
+The methods of <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html">CompletionProposal</a>
+</b> give information that describes the proposed element (its
 name, declaring type, etc.), its proposed position for insertion in the
 compilation unit, and its relevance.&nbsp;&nbsp;</P>
 
-<P>A completion requester can accept many different types
-of completions including the insertion of the following elements:</P>
+<P>A completion requestor can accept many different kinds of completions.
+This kind is given by <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#getKind()">CompletionProposal.getKind</a></b>.
+</P><P>Some of the possible completion kinds are (The complete list of possible completion kinds can be seen on <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html">
+CompletionProposal</a></b>):</P>
 
 <ul>
-  <li>anonymous types</li>
-  <li>classes</li>
-  <li>fields</li>
-  <li>interfaces</li>
-  <li>keywords</li>
-  <li>labels</li>
-  <li>local variables</li>
-  <li>method call</li>
-  <li>method declaration</li>
-  <li>modifier</li>
-  <li>package import or reference</li>
-  <li>type</li>
-  <li>variable name</li>
+  <li>anonymous type - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#ANONYMOUS_CLASS_DECLARATION">ANONYMOUS_CLASS_DECLARATION</a></b></li>
+  <li>type reference - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#TYPE_REF">TYPE_REF</a></b></li>
+  <li>field reference- <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#FIELD_REF">FIELD_REF</a></b></li>
+  <li>keyword - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#KEYWORD">KEYWORD</a></b></li>
+  <li>label reference - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#LABEL_REF">LABEL_REF</a></b></li>
+  <li>local variable reference - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#LOCAL_VARIABLE_REF">LOCAL_VARIABLE_REF</a></b></li>
+  <li>method refence - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#METHOD_REF">METHOD_REF</a></b></li>
+  <li>method declaration - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#METHOD_DECLARATION">METHOD_DECLARATION</a></b></li>
+  <li>package import or reference - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#PACKAGE_REF">PACKAGE_REF</a></b></li>
+  <li>variable name - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#VARIABLE_DECLARATION">VARIABLE_DECLARATION</a></b></li>
 </ul>
-<p>The completion requester must also be able to accept compilation
+
+<p>The completion requestor must also be able to accept compilation
 errors.&nbsp;&nbsp;</p>
-<p>If your plug-in is not interested in every kind of code completion, a <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestorAdapter.html">CompletionRequestorAdapter</a></b>
-can be used so that you need only implement the kinds of completions you are
-interested in.&nbsp; The following example shows an adapter that is only used to
-accept class completions.</p>
-<font color='#4444CC'><pre>
-   // Get the compilation unit
-   ICompilationUnit unit = ...;
-   
-   // Get the offset
-   int offset = ...;
-   
-   // Create the requester
-   ICompletionRequestor requestor = new CompletionRequestorAdapter() {
-      public void acceptClass(
-         char[] packageName,
-         char[] className,
-         char[] completionName,
-         int modifiers,
-         int completionStart,
-         int completionEnd,
-         int relevance) {
-         System.out.println(&quot;propose a class named &quot; + new String(className));
-      }
-   };
-   
-   // Compute proposals
-   unit.codeComplete(offset, requestor);</font>
-</pre><h4>Completion relevance
+<h4>Completion relevance
 </h4>
 
 <p>Because there may be many different possible completions, the notion of
