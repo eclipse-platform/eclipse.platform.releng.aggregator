@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+ type="text/css">
+  <title>Fetching from Repositories</title>
+</head>
+<body>
+<h2>Fetching from Repositories</h2>
+<p>
+The infrastructure offered by PDE Build provides steps to fetch the
+source code to build from a repository as part of the build process.
+Two possibilities are available: let PDE build automatically fetch the
+source, or fetch the source code manually.</p>
+<h3>Automated source code fetching from CVS</h3>
+<p>
+Given the identifier of a feature that needs to be built, the build
+infrastructure is able to fetch from CVS all the included features and
+plug-ins.</p>
+<p>
+In order to know where to get things from, PDE uses map files. A map
+file is a java property file which maps feature and plug-in ids to a
+location and a tag in a repository. The format of a map file entry for
+fetching from CVS is:</p>
+<div style="text-align: center;">
+<pre>&lt;elementType&gt;@&lt;elementID&gt; = CVS, &lt;TAG&gt;, &lt;CVSROOT&gt;[,&lt;PASSWORD&gt;[,&lt;PATH&gt;[,&lt;CVSPASSFILE&gt;]]]</pre>
+</div>
+<p>where <tt>elementType</tt> is one of <tt>bundle</tt>, <tt>feature</tt>,
+<tt>plug-in</tt> or <tt>fragment</tt>.&nbsp;
+If the path is not specified then the element name will be used as CVS
+module instead, for example:&nbsp;
+</p>
+<div style="text-align: center;">
+<pre>plugin@org.foo.bar=CVS,v20060501,:pserver:anonymous@cvs.example.org:/cvsroot/foo</pre>
+</div>
+<p>will fetch the plug-in <tt>org.foo.bar</tt> that has been labeled
+with
+the tag
+<tt>v20060501</tt> from <tt>cvs.eclipse.org/cvsroot/foo/org.foo.bar</tt></p>
+<h4>Setting up for CVS source fetching</h4>
+To set up fetching your source from CVS, you should do the following:<br>
+<ul>
+  <li>Create a folder called maps in the build directory.</li>
+  <li>Create a file with extension .map in the maps folder.</li>
+  <li>Fill in this map file with all the elements that needs to be
+fetched from a repository.</li>
+  <li>Edit the build.properties file from the configuration folder and
+comment out the line <tt>skipFetch=true</tt>.&nbsp; If that property
+is set, then PDE build will skip the entire fetch phase.&nbsp; If you
+want the tag specified in the map files to be ignored you can set the
+property <tt>fetchTag</tt> to a specific value. This is useful when
+doing a nightly build from HEAD instead of from the tagged versions. </li>
+</ul>
+<h4>Getting the map files from CVS</h4>
+Map files are usually stored in a repository. PDE Build offers default
+infrastructure to get those map files from a CVS repository.
+To enable this function change the following properties in your
+configuration's build.properties:
+<ul>
+  <li><span style="font-weight: bold;">skipMaps</span>:&nbsp; Comment
+out this property.&nbsp; If this property is set, then PDE build will
+not fetch the map files.<br>
+  </li>
+  <li><span style="font-weight: bold;">mapsRepo</span> =
+:pserver:anonymous@example.com/path/to/repo.&nbsp; The CVS repository
+from which to get the map files.<br>
+  </li>
+  <li><span style="font-weight: bold;">mapsRoot</span> =
+/path/to/maps.&nbsp; The path in the CVS repository to the directory
+containing the map files.<br>
+  </li>
+  <li><span style="font-weight: bold;">mapsCheckoutTag</span> =
+HEAD.&nbsp; The CVS tag to use to checkout the map files.</li>
+</ul>
+Fetching the map files from CVS occurs during the Pre-Build phase of
+the build.&nbsp; Scripts to
+fetch all the features and plug-ins included in the feature you are
+building will be generated and
+run during the fetch phase of the build.&nbsp;
+<h3>Automatic fetching from other repositories</h3>
+<p>PDE Build provides an extension point where fetch script generators
+for
+different repositories can be plugged in.&nbsp; When your eclipse
+install contains a bundle that provides a script generator extension
+for a different type of repository, you can use that repository by
+specifying it in your map file entries:&nbsp;&nbsp;</p>
+<div style="text-align: center;">
+<pre>&lt;elementType&gt;@&lt;elementID&gt; = &lt;REPOSITORY&gt;, &lt;TAG&gt;, [...] </pre>
+</div>
+<p>The format of the map entry after the
+TAG will depend on the extension.</p>
+<p>
+If&nbsp; you are automatically fetching your map files from the
+repository, you will need to copy the customTarget.xml file from
+org.eclipse.pde.build/templates/headless-build into your configuration
+directory.&nbsp; The target&nbsp; getMapFiles is used to fetch the map
+files, this should be modified to fetch from your repository.</p>
+<h3>Getting source code manually</h3>
+You can write custom fetch targets to retrieve your plug-ins and
+features which can be invoked from
+the preSetup or postSetup targets in the customTargets.xml file.&nbsp;
+Features and plug-ins should
+be fetched to
+<tt>${buildDirectory}/features</tt>
+and
+<tt>${buildDirectory}/plug-ins</tt>
+respectively.&nbsp;
+<br>
+<br>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+ type="text/css">
+  <title>Using version qualifiers</title>
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h1>Using Version Qualifiers<br>
+</h1>
+<p>Eclipse bundles and features have version numbers of the form <span
+ style="font-style: italic;">major</span>.<span
+ style="font-style: italic;">minor</span>.<span
+ style="font-style: italic;">micro</span>.<span
+ style="font-style: italic;">qualifier</span>.&nbsp; The qualifier
+segment of the version is often used to indicated a specific
+build.&nbsp; If you set your feature or plug-in version qualifier to
+"<tt style="font-weight: bold;">qualifier</tt>" (ie a version of <tt>1.0.0.qualifier</tt>),
+then PDE build
+will
+automatically replace the word "qualifier" with a generated qualifier.<br>
+</p>
+<h2>Controlling the Generated Qualifier</h2>
+The value of the generated qualifier is determined by the first of the
+following items that apply:<br>
+<ol>
+  <li>If the property <tt style="font-weight: bold;">forceContextQualifier</tt><span
+ style="font-weight: bold;"> </span>is set in your build
+configuration build.properties file,&nbsp; then the value of this
+property is used as the qualifier.&nbsp; This property can also be set
+on the command line with -D when invoking ant.<br>
+  </li>
+  <li>If you are using map files to fetch your bundles from a
+repository,
+then the tag that was used to fetch the bundle will be used as the
+qualifier.</li>
+  <li>If neither forceContextQualifier nor map files are used, then the
+qualifier will be a time stamp in the form YYYYMMDDHHMM (ie
+200605121600)<br>
+  </li>
+</ol>
+<h2>Feature Version Suffixes</h2>
+You can turn on the generation of qualifier suffixes for features by
+setting the property <tt style="font-weight: bold;">generateFeatureVersionSuffix="true"
+</tt>in the build configuration build.properties file.<br>
+<br>
+The idea of a version is that it should increment each time something
+changes, the version qualifier increments and captures changes from
+build to build.&nbsp; Features rarely change, however, they do contain
+plug-ins which may change often.&nbsp; When version suffixes are turned
+on, a feature version will have the form <span
+ style="font-style: italic;">major.minor.micro.qualifier-suffix</span>.&nbsp;&nbsp;
+The suffix is in effect the sum of the version qualifiers of all the
+features and plug-ins included by the feature.&nbsp; This means that
+when one of the included plug-ins increments its version, then the
+version of the feature will automatically increment as well.&nbsp; This
+is particularly useful when the feature is deployed via an update site.<br>
+<br>
+<br>
+</body>
+</html>
