@@ -34,7 +34,7 @@ Helper constants have been defined on <a href="../reference/api/org/eclipse/jdt/
 The following code fragment restores the value of all core options to their
 defaults except for one (<code>COMPILER_PB_DEPRECATION</code>), which is set specifically.
 <font color='#4444CC'><pre>
-   // Get the current options
+   // Get the default options
    Hashtable options = JavaCore.getDefaultOptions();
    
    // Change the value of an option
@@ -83,11 +83,6 @@ JavaCore.</p>
    // JavaCore value if none is specified for the project
    String value = project.getOption(JavaCore.COMPILER_PB_DEPRECATION, <b>true</b>);</pre></font>
 
-<H3>Major change in default JDT Core 3.0 options </h3>
-
-<p>Default compliance level has been changed. Now default compliance level is <code>1.4</code> instead of <code>1.3</code> and default target
-platform is <code>1.2</code> instead of <code>1.1</code>.</p>
-
 <H3>JDT Core options descriptions</h3>
 
 <P>
@@ -115,10 +110,14 @@ id is shown in parentheses and the default value is shown in bold italics. </P>
 <td colspan=2><b>Inline JSR Bytecode Instruction</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_INLINE_JSR_BYTECODE">COMPILER_CODEGEN_INLINE_JSR_BYTECODE</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=2>When enabled, the compiler will no longer generate JSR instructions, but rather inline corresponding
+<td rowspan=2>When enabled in conjunction with a Java target platform lesser than or 
+equal to "1.4", the compiler will no longer generate JSR instructions, but rather inline corresponding
 subroutine code sequences (mostly corresponding to try finally blocks). The generated code will thus
 get bigger, but will load faster on virtual machines since the verification process is then much simpler. 
-This mode is anticipating support for the Java Specification Request 202.</td>
+This mode is adding support for the Java Specification Request 202 to pre-"1.5" Java 
+target platforms.<br>
+For a Java target platform greater than or equal to "1.5", the inlining of the JSR 
+bytecode instruction is mandatory and this option is ignored.</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
 </tr>
 <tr valign="top">
@@ -126,11 +125,15 @@ This mode is anticipating support for the Java Specification Request 202.</td>
 </tr>
 
 <tr>
-<td colspan=2><b>Defining Target Java Platform</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_TARGET_PLATFORM">COMPILER_CODEGEN_TARGET_PLATFORM</a>)</td>
+<td colspan=2><b>Setting Target Java Platform</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_TARGET_PLATFORM">COMPILER_CODEGEN_TARGET_PLATFORM</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=4>For binary compatibility reason, .class files can be tagged with certain VM versions and later.
-Note that the "1.4" target requires you to toggle the compliance mode to "1.4" also.</td>
+<td rowspan=6>For binary compatibility reason, .class files are tagged with VM versions
+that are defined for each level of the reference specification. The target Java platform
+specifies the minimum runtime level required to execute the generated class files.<br>
+The compliance, source and target levels must satisfy a set of constraints summarized 
+in a <a HREF="#compatibility">compability table</a> below.
+</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_1">VERSION_1_1</a></td>
 </tr>
 <tr valign="top">
@@ -141,6 +144,12 @@ Note that the "1.4" target requires you to toggle the compliance mode to "1.4" a
 </tr>
 <tr valign="top">
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">VERSION_1_4</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_5">VERSION_1_5</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_6">VERSION_1_6</a></td>
 </tr>
 
 <tr>
@@ -158,13 +167,22 @@ Note that the "1.4" target requires you to toggle the compliance mode to "1.4" a
 <td colspan=2><b>Setting Compliance Level</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_COMPLIANCE">COMPILER_COMPLIANCE</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=2>Select the compliance level for the compiler. In "1.3" mode, source and target settings should not go beyond "1.3" level.</td>
+<td rowspan=4>Select the compliance level for the compiler, which will then behave 
+according to the said level of the reference specification.<br>
+The compliance, source and target levels must satisfy a set of constraints summarized 
+in a <a HREF="#compatibility">compability table</a> below.
+</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">VERSION_1_3</a></td>
 </tr>
 <tr valign="top">
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4"><b><i>VERSION_1_4</i></b></a></td>
 </tr>
-
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_5">VERSION_1_5</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_6">VERSION_1_6</a></td>
+</tr>
 <tr>
 <td colspan=2><b>Javadoc Comment Support</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_DOC_COMMENT_SUPPORT">COMPILER_DOC_COMMENT_SUPPORT</a>)</td>
 </tr>
@@ -193,7 +211,7 @@ DOM AST Javadoc node will be only a flat text instead of having structured tag e
 <td colspan=2><b>Generating Local Variable Debug Attribute</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_LOCAL_VARIABLE_ATTR">COMPILER_LOCAL_VARIABLE_ATTR</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=2>When generated, this attribute will enable local variable names to be displayed in the debugger, only in places where variables are definitely assigned (.class file is then bigger)</td>
+<td rowspan=2>When generated, this attribute will enable local variable names to be displayed in the debugger, only in places where variables are definitely assigned (.class file is then bigger).</td>
 <td><i><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#GENERATE">GENERATE</a></b></i></td>
 </tr>
 <tr valign="top">
@@ -215,24 +233,24 @@ DOM AST Javadoc node will be only a flat text instead of having structured tag e
 </tr>
 
 <tr>
-<td colspan=2><b>Reporting Boxing/Unboxing Conversion</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_ASSERT_IDENTIFIER">COMPILER_PB_ASSERT_IDENTIFIER</a>)</td>
-</tr>
-<tr valign="top">
-<td rowspan=3>When enabled, the compiler will issue an error or a warning whenever a boxing or an unboxing conversion is performed.</td>
-<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
-</tr>
-<tr valign="top">
-<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
-</tr>
-<tr valign="top">
-<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
-</tr>
-
-<tr>
-<td colspan=2><b>Reporting Usage of 'assert' Identifier</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_AUTOBOXING">COMPILER_PB_AUTOBOXING</a>)</td>
+<td colspan=2><b>Reporting Usage of 'assert' Identifier</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_ASSERT_IDENTIFIER">COMPILER_PB_ASSERT_IDENTIFIER</a>)</td>
 </tr>
 <tr valign="top">
 <td rowspan=3>When enabled, the compiler will issue an error or a warning whenever 'assert' is used as an identifier (reserved keyword in 1.4)</td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
+</tr>
+<tr valign="top">
+<td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></i></b></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></td>
+</tr>
+
+<tr>
+<td colspan=2><b>Reporting Boxing/Unboxing Conversion</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_AUTOBOXING">COMPILER_PB_AUTOBOXING</a>)</td>
+</tr>
+<tr valign="top">
+<td rowspan=3>When enabled, the compiler will issue an error or a warning whenever a boxing or an unboxing conversion is performed.</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -249,7 +267,7 @@ DOM AST Javadoc node will be only a flat text instead of having structured tag e
 <tr valign="top">
 <td rowspan=3>When enabled, the compiler will issue an error or a warning
   whenever a char[] expression is used in String concatenations (e.g.
-  &quot;hello&quot; + new char[]{'w','o','r','l','d'}),</td>
+  &quot;hello&quot; + new char[]{'w','o','r','l','d'}).</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -277,7 +295,8 @@ DOM AST Javadoc node will be only a flat text instead of having structured tag e
 <td colspan=2><b>Reporting Deprecation Inside Deprecated Code</b> (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE">COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=2>When enabled, the compiler will signal use of deprecated API either as an error or a warning.</td>
+<td rowspan=2>When enabled, the compiler will signal use of deprecated API 
+              inside deprecated code either as an error or a warning.</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></td>
 </tr>
 <tr valign="top">
@@ -328,7 +347,7 @@ DOM AST Javadoc node will be only a flat text instead of having structured tag e
 <td colspan=2><b>Reporting Usage of 'enum' Identifier</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_ENUM_IDENTIFIER">COMPILER_PB_ENUM_IDENTIFIER</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=3>When enabled, the compiler will issue an error or a warning whenever 'enum' is used as an identifier (reserved keyword in 1.5)</td>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning whenever 'enum' is used as an identifier (reserved keyword in 1.5).</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -421,7 +440,7 @@ bound corresponding to a final type; since final types cannot be further extende
    } catch (java.io.CharConversionException e) {
    } catch (java.io.IOException e) {}.
 </pre>
-When enabling this option, the compiler will issue an error or a warning for hidden catch blocks corresponding to checked exceptions</td>
+When enabling this option, the compiler will issue an error or a warning for hidden catch blocks corresponding to checked exceptions.</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -472,7 +491,7 @@ type has no case label matching an enum constant.</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
-<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING></a></td>
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></td>
 </tr>
 <tr valign="top">
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE"><b><i>IGNORE</i></b></a></td>
@@ -749,7 +768,7 @@ also see the setting "org.eclipse.jdt.core.compiler.problem.invalidJavadocTagsVi
 <td colspan=2><b>Reporting Non-Externalized String Literal</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NON_NLS_STRING_LITERAL">COMPILER_PB_NON_NLS_STRING_LITERAL</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=3>When enabled, the compiler will issue an error or a warning for non externalized String literal (i.e. non tagged with //$NON-NLS-&lt;n&gt;$)</td>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for non externalized String literal (i.e. non tagged with //$NON-NLS-&lt;n&gt;$).</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -975,7 +994,7 @@ invalidates type safety since involving raw types (e.g. invoking #foo(X&lt;Strin
 <td colspan=2><b>Reporting Unused Import</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_IMPORT">COMPILER_PB_UNUSED_IMPORT</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused import reference </td>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused import reference.</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -989,7 +1008,7 @@ invalidates type safety since involving raw types (e.g. invoking #foo(X&lt;Strin
 <td colspan=2><b>Reporting Unused Local</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_LOCAL">COMPILER_PB_UNUSED_LOCAL</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused local variables (i.e. variables never read from)</td>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused local variables (i.e. variables never read from).</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -1003,7 +1022,7 @@ invalidates type safety since involving raw types (e.g. invoking #foo(X&lt;Strin
 <td colspan=2><b>Reporting Unused Parameter</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_UNUSED_PARAMETER">COMPILER_PB_UNUSED_PARAMETER</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused method parameters (i.e. parameters never read from)</td>
+<td rowspan=3>When enabled, the compiler will issue an error or a warning for unused method parameters (i.e. parameters never read from).</td>
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></td>
 </tr>
 <tr valign="top">
@@ -1073,11 +1092,25 @@ invoked with arguments ("foo", null)).</td>
 <td colspan=2><b>Setting Source Compatibility Mode</b>   (<a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_SOURCE">COMPILER_SOURCE</a>)</td>
 </tr>
 <tr valign="top">
-<td rowspan=2>Specify whether source is 1.3 or 1.4 compatible. From 1.4 on, 'assert' is a keyword reserved for assertion support. Also note, than when toggling to 1.4 mode, the target VM level should be set to "1.4" and the compliance mode should be "1.4".</td>
+<td rowspan=4>
+Specify the compatibility level of the Java source code.<br>
+Source level "1.4" enables assertions. From "1.4" on, 'assert' is a reserved keyword.<br>
+Source level "1.5" enables generics, autoboxing, covariance, annotations, enumerations
+enhanced for loops, static imports and varargs. From "1.5" on, 'enum' is a reserved 
+keyword.<br>
+The compliance, source and target levels must satisfy a set of constraints summarized 
+in a <a HREF="#compatibility">compability table</a> below.
+</td>
 <td><b><i><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">VERSION_1_3</a></i></b></td>
 </tr>
 <tr valign="top">
 <td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">VERSION_1_4</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_5">VERSION_1_5</a></td>
+</tr>
+<tr valign="top">
+<td><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_6">VERSION_1_6</a></td>
 </tr>
 
 <tr>
@@ -1127,6 +1160,53 @@ invoked with arguments ("foo", null)).</td>
   tags, they will be reported separately.</td>
 <td>{&lt;tag&gt;[,&lt;tag&gt;]*}.<br><b><i>Default value is "TODO,FIXME,<br>XXX"</i></b></td>
 </tr>
+</table>
+<a NAME="compatibility"></a>
+<p>The following table summarizes the compatible combinations of Java compliance, 
+   target and source levels.</p>
+
+<table border="1">
+<tr>                         <th>Compliance</th>               
+                                         <th>Target</th>
+                                                     <th>Source</th></tr>
+<tr>
+   <td valign="top" rowspan="12">1.6</td>
+                <td valign="top" rowspan="4">1.6</td><td>1.6</td></tr>
+<tr>                                                 <td>1.5</td></tr>
+<tr>                                                 <td>1.4</td></tr>
+<tr>                                                 <td>1.3</td></tr>
+<tr>            <td valign="top" rowspan="3">1.5</td><td>1.5</td></tr>
+<tr>                                                 <td>1.4</td></tr>
+<tr>                                                 <td>1.3</td></tr>
+<tr>            <td valign="top" rowspan="2">1.4</td><td>1.4</td></tr>
+<tr>                                                 <td>1.3</td></tr>
+<tr>                                     <td>1.3</td> 
+                            <td valign="top" rowspan="3">1.3</td></tr>
+<tr>                                     <td>1.2</td>            </tr>
+<tr>                                     <td>1.1</td>            </tr>
+<tr><td valign="top" rowspan="8">1.5</td>
+                <td valign="top" rowspan="3">1.5</td><td>1.5</td></tr>
+<tr>                                                 <td>1.4</td></tr>
+<tr>                                                 <td>1.3</td></tr>
+<tr>            <td valign="top" rowspan="2">1.4</td><td>1.4</td></tr>
+<tr>                                                 <td>1.3</td></tr>
+<tr>                                     <td>1.3</td> 
+                            <td valign="top" rowspan="3">1.3</td></tr>
+<tr>                                     <td>1.2</td>            </tr>
+<tr>                                     <td>1.1</td>            </tr>
+<tr><td valign="top" rowspan="5">
+                           <b><i>1.4</i></b></td>
+                <td valign="top" rowspan="2">1.4</td><td>1.4</td></tr>
+<tr>                                                 <td>1.3</td></tr>
+<tr>                                     <td>1.3</td> 
+                      <td valign="top" rowspan="3"><b><i>1.3</i></b></td></tr>
+<tr>                               <td><b><i>1.2</i></b></td>    </tr>
+<tr>                                     <td>1.1</td>            </tr>
+<tr><td valign="top" rowspan="3">1.3</td>
+                                         <td>1.3</td> 
+                            <td valign="top" rowspan="3">1.3</td></tr>
+<tr>                                     <td>1.2</td>            </tr>
+<tr>                                     <td>1.1</td>            </tr>
 </table>
 
 <H4><a name="builder">Builder options</a></h4>
