@@ -138,8 +138,9 @@ indicates that the search has ended.</p>
 Collecting search results</h3>
 <p>
 Search results are reported using the 
-<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)">acceptSearchMatch</a></b>
-method. Paragraphs below detail the search match. </p>
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)">acceptSearchMatch(SearchMatch)</a></b>
+method. Paragraphs below highlight some features of 
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchMatch.html">SearchMatch</a></b>. </p>
 
 <h4>
 Resources and Java elements</h4>
@@ -149,15 +150,16 @@ A search result can correspond to a Java element (e.g. a type declaration) or it
 corresponds to or that contains the search result. For example, searching for references to a method could find
 such a reference in an initializer. The initializer that contains this method reference is the element of the search match. </p>
 <p>
-The search engine also tries to find the resource that contains the Java element. So if the Java
-element is a method in a compilation unit, the resource is the corresponding 
+The search engine also tries to find the resource that contains the Java element. If the Java
+element is contained in a compilation unit or a class file, the resource is the corresponding 
 <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a>. 
-If the element is contained in a .jar file, the resource is the .jar file, if this .jar file is in the workspace. If it is an external 
-.jar file, then the resource is <b>null</b>. </p>
+If the Java element is contained in a .jar file, the returned resource is that .jar
+file if it is in the workspace, <b>null</b> otherwise. </p>
 
 <h4>
 Source positions</h4>
-<p> Source positions are given relative to the compilation unit that contains
+<p>Source positions <b><a HREF="../reference/api/org/eclipse/jdt/core/search/SearchMatch.html#getOffset()">
+getOffset</a></b> and <b><a HREF="../reference/api/org/eclipse/jdt/core/search/SearchMatch.html#getLength()">getLength</a></b> are given relative to the compilation unit that contains
 the search result. If the search result is contained in  a .jar file, the
 source positions are relative to the attached source. They are (-1, -1) if
 there is no source attached to  the .jar file. </p>
