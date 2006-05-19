@@ -36,7 +36,44 @@ system tree.  Thus any given hierarchical URI represents a potential file or
 directory in some arbitrary file system.
 </p>
 <p>
-The central API type is 
-IFileStore
+The API for working with files and file systems is found in the 
+<b><a href="../reference/api/org/eclipse/core/filesystem/package-summary.html">org.eclipse.core.filesystem</a></b>)
+package. The central API type is 
+<b><a href="../reference/api/org/eclipse/core/filesystem/IFileStore.html">IFileStore</a></b>
+Each instance of <tt>IFileStore</tt> represents
+a single file in the file system.  As with <tt>IResource</tt>, the existence of
+an <tt>IFileStore</tt> instance does not mean that such a file exists on disk. You
+can use an <tt>IFileStore</tt> instance to create, delete, copy, move, or open
+streams on files.  For a given <tt>URI</tt>, you can get your hands on an <tt>IFileStore</tt>
+instance using the static method <tt>EFS.getStore(URI)</tt>
+</p>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/filesystem/IFileSystem.html">IFileSystem</a></b>
+interface can be used to find out things about the file system as a whole.  Each
+<tt>IFileSystem</tt> instance represents a single URI scheme, such as "file:",
+"ftp:", etc.  You can use this type to ask questions such as what file attributes
+are supported, or whether the file system is case-sensitive.  You can also use
+this type to obtain an <tt>IFileStore</tt> for a given <tt>URI</tt>.
+</p>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/filesystem/IFileInfo.html">IFileInfo</a></b>
+interface represents the state of a file at a particular moment in time. In particular,
+you can find out if the file exists, whether it is a directory, what its attributes are,
+and so on.  This information can be modified and then set back into the file.  For
+example, here is a snippet that sets the read only attribute on a directory:
+<pre>
+	IFileStore store = ...//some file store
+	IFileInfo info = store.fetchInfo();
+	if (info.exists() && info.isDirectory()) {
+		info.setAttribute(EFS.ATTRIBUTE_READ_ONLY, true);
+		store.putInfo(info, EFS.SET_ATTRIBUTES, null);
+	}
+</pre>
+This style of API allows you to obtain and change file information with
+a single call to the file system. In the above example, there is only
+one file system call to fetch the info, and then you can perform as many
+operations as you want on the <tt>IFileInfo</tt> object without hitting
+the disk again.
+</p>
 </BODY>
 </HTML>
