@@ -95,10 +95,42 @@ okButtonPressed</b> is overridden to perform whatever action is necessary when t
 <P >
 Dialogs can be as simple or as complicated as necessary. When you implement a dialog, most of your dialog code is concerned with creating the SWT controls that represent its content area and handling any events necessary while the dialog is up. Once a button is pressed by the user, the dialog can query the state of the various controls (or viewers) that make up the dialog to determine what to do.</P>
 
+<h3> Popup dialogs</h3>
+<p>
+In some cases, you might want to show information about something in a dialog, but in a way that is more &quot;lightweight&quot; than
+launching a regular dialog.  For example, a dialog may be intended to provide transient information that can be easily dismissed, without taking the
+focus away from the user's work.  If this is the case, you can use the
+<a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> class to implement the dialog.  The look and feel of
+a <a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> is different than a regular 
+<a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b>Dialog</b></a> in several ways.  It does not have any buttons across the bottom,
+it does not have the standard window title bar, and its borders, spacing, and fonts are smaller and more compact.  
+</p>
+<p>
+Although a <a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> looks very different than
+a regular dialog, the code in your plug-in's subclass that defines the dialog content is almost the same.  You still implement the <b>createDialogArea</b> method
+to create the SWT controls for the dialog.  The main difference in the application code is that the constructor that creates the dialog has many
+more parameters than the regular <a href="../reference/api/org/eclipse/jface/dialogs/Dialog.html"><b>Dialog</b></a> class.  For example, the <b>SectionsDialog</b>
+could be turned into a <a href="../reference/api/org/eclipse/jface/dialogs/PopupDialog.html"><b>PopupDialog</b></a> by simply changing the superclass
+of the dialog and configuring the dialog in the constructor:
+</p>
+<pre>
+   public class SectionsDialog extends <b>PopupDialog</b> {
+      protected IAdaptable input;
 
-
-
-
+      /**
+      * Creates a new SectionsDialog.
+      */
+      public SectionsDialog(Shell parentShell, IAdaptable input) {
+        <b>super(parentShell, SWT.DEFAULT, false, // do not take focus when opened
+        	false, // do not persist the bounds
+        	false, // do not show a resize menu
+        	false, // do not show a menu item for persisting bounds
+        	null, //  no title
+        	null); // no info text</b>
+        this.input = input;
+      }
+      ...
+</pre>
 
 
 </BODY>
