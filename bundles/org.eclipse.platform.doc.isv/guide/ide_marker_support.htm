@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Markers in the Eclipse IDE
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</head>
+
+<body>
+<h2>Markers in the Eclipse IDE </h2>
+<p>Markers created using the <a href="../reference/extension-points/org_eclipse_core_markers.html">org.eclipse.core.markers</a> support can be shown in 
+  the user interface using the <a href="../reference/extension-points/org_eclipse_ui_ide_markerHelp.html">org.eclipse.ui.ide.markerHelp</a>, 
+<a href="../reference/extension-points/org_eclipse_ui_ide_markerResolution.html">org.eclipse.ui.ide.markerResolution</a> 
+  and <a href="../reference/extension-points/org_eclipse_ui_ide_markerSupport.html">org.eclipse.ui.ide.markerSupport</a> extension points. 
+  The  org.eclipse.ui.ide.markerImageProvider API is internal of release 3.2.</p>
+<p><strong>org.eclipse.ui.ide.markerHelp</strong></p>
+<p><code>org.eclipse.ui.ide.markerHelp</code> is the extension point that allows 
+  you to associate a help context with your marker type.</p>
+<p><strong>org.eclipse.ui.ide.markerResolution</strong></p>
+<p><code>org.eclipse.ui.ide.markerResolution</code> is the extension point that 
+  allows you to contribute Quick Fixes for markers. The Java Editor and the Problems 
+  View are two places where these can be applied currently. This extension point 
+  allows the plug-in developer to specify the <code>IMarkerResolutionGenerator</code> 
+  that can determine the possible resolutions to a marker.</p>
+<p>As of release 3.2 the Problems View supports multiple resolutions allowing 
+  the user to add other matching problems to the list of problems to fix and applying 
+  the selected fix to all of them at once. If <a href="../reference/api/org/eclipse/ui/IMarkerResolution.html">IMarkerResolutions</a> 
+  are instances of <a href="../reference/api/org/eclipse/ui/views/markers/WorkbenchMarkerResolution.html">WorkbenchMarkerResolution</a> 
+  it is possible for users to add other matching <code>WorkbenchMarkerResolutions</code> 
+  in the Quick Fix dialog.</p>
+<p><img src="images/quickfix.png" width="543" height="523"></p>
+<p><strong>Quick Fix dialog with two missing externalizations</strong></p>
+<p><strong>org.eclipse.ui.ide.markerSupport </strong></p>
+<p><code>org.eclipse.ui.ide.markerSupport</code> is the extension for specifying 
+  how markers are displayed in the Problems View. This extension point handles 
+  filters and grouping.</p>
+<p><strong>Filters</strong></p>
+<p>As of Eclipse 3.2 the Problems View handles multiple filters. Note that these 
+  filters sum their results rather than find their union. New filters can be added 
+  using the problemFilter extension element or manually by the user. Below is 
+  the filters section of the Problems View showing user filters and filters added 
+  via the extension point (system filters).</p>
+<p><img src="images/problems_view_filters.png" width="258" height="459"></p>
+<p><strong>Grouped</strong></p>
+<p>Markers can be grouped into two ways. The first way is to group marker types 
+  into groups using the <code>markerTypeCategory</code> extension. This is shown 
+  when the user selects Group By - &gt; Type. Below is an example showing Java 
+  Problems and some using a test grouping.</p>
+<p><img src="images/problems_view_groupByType.png" width="497" height="178"></p>
+<p>When marker types are grouped together they will be shown in those groups in 
+  the filters dialog.</p>
+<p><img src="images/problems_view_markerTypeCat.png" width="225" height="212"></p>
+<p>It is also possible to create your own grouping using the <code>markerGrouping</code> 
+  extension which will show up as an extra entry in the Group By-&gt;Menu of the 
+  Problems view. The IDE provides a grouping based on severity (the default). 
+  JDT provides a Java Type grouping as well in the SDK.</p>
+<p><code>markerGroupings</code> are resolved by checking attributes on the <a href="../reference/api/org/eclipse/core/resources/IMarker.html">IMarker</a>. 
+  <code>markerAttributeMappings</code> are used to specify these mappings. Below 
+  is the Group By menu with the extra <code>markerGroupings</code> that have been 
+  added. The Problems view is currently grouped by severity.</p>
+<p><img src="images/problemsview_groups.png" width="498" height="180"></p>
+<p></p>
+</body>
+</html>
