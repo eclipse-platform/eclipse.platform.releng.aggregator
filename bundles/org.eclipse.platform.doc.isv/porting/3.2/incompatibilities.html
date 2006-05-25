@@ -72,7 +72,6 @@ snippet of code obtains an instance of <tt>IFileStore</tt> for a given resource:
 The following table provides equivalent methods on <tt>IFileStore</tt>
 for operations usually done with <tt>java.io.File</tt>:
 </p>
-<p>
 <table border=1>
 <tr>
 <th align=left>java.io.File</th><th align=left>IFileStore</th>
@@ -87,7 +86,6 @@ for operations usually done with <tt>java.io.File</tt>:
 <tr><td>new FileInputStream(file)</td><td>openInputStream</td></tr>
 <tr><td>new FileOutputStream(file)</td><td>openOutputStream</td></tr>
 </table>
-</p>
 <p>
 In the <tt>IFileStore</tt> API, most information about a file is stored in a 
 structure called <tt>IFileInfo</tt>, obtained by calling <tt>IFileStore.fetchInfo()</tt>.
@@ -98,7 +96,6 @@ if the underlying file is changed, so instances should only be held onto
 as long as they are needed.  Here are some methods on <tt>java.io.File</tt>
 that have equivalent methods on <tt>IFileInfo</tt>:
 </p>
-<p>
 <table border=1>
 <tr><th align=left>java.io.File</th><th align=left>IFileInfo</th></tr>
 <tr><td>canWrite</td><td>isReadOnly</td></tr>
@@ -112,12 +109,12 @@ that have equivalent methods on <tt>IFileInfo</tt>:
 <tr><td>setLastModified</td><td>setLastModified</td></tr>
 <tr><td>setReadOnly</td><td>setAttribute(EFS.ATTRIBUTE_READ_ONLY, true)</td></tr>
 </table>
-</p>
 <p>
 As a concrete example, code that was previously calling <tt>java.io.File.exists()</tt>
 can now call <tt>IFileStore.fetchInfo().exists()</tt>.  When a <tt>IFileInfo</tt>
 is modified, the result needs to be stored back using the <tt>IFileStore.putInfo</tt>
 method. For example, this snippet flips the read only attribute on a file
+</p>
 <pre>
    IFileStore store = ...;//some file store
    IFileInfo info = store.fetchInfo();
@@ -125,7 +122,6 @@ method. For example, this snippet flips the read only attribute on a file
    info.setAttribute(EFS.ATTRIBUTE_READ_ONLY, !readOnly);
    store.putInfo(info, EFS.SET_ATTRIBUTES, null);
 </pre>
-</p>
 <h4>IProjectDescription.getLocation()</h4>
 <p>
 As with the <tt>getLocation()</tt> method, the project description's location
@@ -139,6 +135,7 @@ Some clients absolutely must have a local representation of a file.  For example
 they may be launching a native tool against that file, or using non Eclipse-aware
 libraries that can only handle file system resources (such as <tt>java.util.zip.ZipFile</tt>).  
 In these cases, you can ask an IFileStore to return a cached local copy of its contents:
+</p>
 <pre>
    IFileStore store = ...;//some file store
    //see if it can directly be represented as a local file
@@ -147,6 +144,7 @@ In these cases, you can ask an IFileStore to return a cached local copy of its c
    if (local == null)
       local = store.toLocalFile(EFS.CACHE, null);
 </pre>
+<p>
 Note that once a cached copy of a file is obtained, it does not remain in sync with 
 the actual file system it came from.  Modifying the cached copy will not cause the 
 underlying file to be modified.
@@ -159,6 +157,7 @@ is in the local file system, and either ignore the resource or alert the user wh
 they encouter a resource they cannot handle.  To determine if a resource is
 in the local file system, you need to find out its file system <i>scheme</i>. 
 This can be obtained from a resource as follows:
+</p>
 <pre>
    IResource resource = ...;//some resource
    URI uri = resource.getLocationURI();
@@ -168,13 +167,14 @@ This can be obtained from a resource as follows:
       //file is not in the local file system
    }
 </pre>
+<p>
 If you have an <tt>IFileStore</tt> instance in hand, you can obtain the scheme
 as follows:
+</p>
 <pre>
    IFileStore store = ...;//a file store
    store.getFileSystem().getScheme();
 </pre>
-</p>
 
 <!-- ############################################## -->
 <h2>3. <a name="MultiPageEditorSiteProgress"></a>API changes to MultiPageEditorSite</h2>
