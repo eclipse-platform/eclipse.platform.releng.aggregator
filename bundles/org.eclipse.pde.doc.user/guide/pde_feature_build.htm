@@ -28,9 +28,8 @@ place. This directory will be referred to as the <i>build directory</i>
 and will contain the
 plug-ins and features to build as well as all the generated artifacts.
 Next, copy your plug-ins and
-features respectively into "plug-ins" and "features" subdirectories.
-Your product configuration file
-is expected to be in one of these plug-ins/features.</p>
+features respectively into "plugins" and "features" subdirectories.
+The feature folder is expected to contain the feature being built.</p>
 The second step in setting up a build is to copy the template
 build.properties file from
 org.eclipse.pde.build/templates/headless-build to a new directory which
@@ -60,21 +59,22 @@ path of the build directory created previously.</li>
 configurations for which you want your feature to be built. You can
 uncomment the configuration(s) provided (be careful of the line
 continuations). If the feature you are building is platform
-independent, nothing needs to be done.</li>
-  <li><span style="font-weight: bold;">archivePrefix</span>: the name
-for the root directory of your resulting build.</li>
+independent, this property does not need to be set or can be set 
+to <tt>*,*,*</tt>.</li>
+  <li><span style="font-weight: bold;">archivePrefix</span>: 
+ the name of the directory in which your feature will be unzipped on disk.</li>
 </ul>
 <h2>Controlling what will be built: allElements.xml</h2>
 Copy the allElements.xml file from
 org.eclipse.pde.build/templates/headless-build to your configuration
-directory.&nbsp; This is the file that tells the build which feature
+directory. This is the file that tells PDE which feature
 you are building.&nbsp; This
-file contains two kinds of targets:&nbsp; the allElementsDelegator
+file contains two kinds of targets:&nbsp; the <tt>allElementsDelegator</tt>
 which specifies the feature being built, and
 the assemble targets which are called to assemble individual
 configurations.&nbsp; The
-allElementsDelegator for a feature named <code>org.foo.Feature</code>
-looks like this:
+<tt>allElementsDelegator</tt> for a feature named <code>org.foo.Feature</code>
+is:
 <br>
 <div style="text-align: left; margin-left: 40px;">
 <pre> 	&lt;target name="allElementsDelegator"&gt;<br> 		&lt;ant antfile="${genericTargets}" target="${target}"&gt;<br>	 		&lt;property name="type" value="feature" /&gt;<br>	 		&lt;property name="id" value="<span
@@ -86,12 +86,11 @@ basis.&nbsp; You should have one target for each configuration you are
 building.&nbsp; For example,
 when building
 <code>org.foo.Feature</code>
-for windows you should have the following target:
+for windows (when <tt>configs</tt> is set to win32, win32, x86) you should have the following target:
 <br>
-<pre style="margin-left: 80px;">&lt;!--Target for assembling  os=win32, ws=win32, arch=x86 --&gt;<br>&lt;target name="assemble.org.foo.feature.win32.win32.x86"&gt;<br>	&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}"&gt;	<br>		&lt;property name="archiveName" value="${archiveNamePrefix}-win32.win32.x86.zip"/&gt;<br>	&lt;/ant&gt;<br>&lt;/target&gt; <br></pre>
-When building a platform independent configuration, the target looks
-like this:
-<pre style="margin-left: 80px;">&lt;!--The platform independent assemble target--&gt;<br>&lt;target name="assemble.org.foo.Feature"&gt;<br> 	&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}"&gt;<br>		&lt;property name="archiveName" value="${archiveNamePrefix}.zip"/&gt;<br>	&lt;/ant&gt;<br>&lt;/target&gt;<br>	<br></pre>
+<pre style="margin-left: 80px;">&lt;!--Target for assembling  os=win32, ws=win32, arch=x86 --&gt;<br>&lt;target name="assemble.<span  style="font-weight: bold;">org.foo.Feature</span>.win32.win32.x86"&gt;<br>	&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}/"&gt;<br>&lt;/target&gt; <br></pre>
+When building a platform independent configuration (when <tt>configs</tt> is not set or is set to <tt>*,*,*</tt>), you should a target like the following:
+<pre style="margin-left: 80px;">&lt;!--The platform independent assemble target--&gt;<br>&lt;target name="assemble.<span  style="font-weight: bold;">org.foo.Feature</span>"&gt;<br> 	&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}"/&gt;<br>&lt;/target&gt;<br>	<br></pre>
 <h2>Running the build</h2>
 To run the build you will use the org.elipse.ant.core.antRunner
 application. When invoking eclipse
