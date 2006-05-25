@@ -38,6 +38,25 @@ and <b>setLocation</b> methods should be avoided because they are
 only effective in the local file system. The URI-based location methods should
 be used instead.
 </p>
+<h4>Local caching</h4>
+<p>
+Say you are working with resources that are not in the local file system, but you
+really need a local file.  For example, you may be using a library that has a 
+dependency on <tt>java.io.File</tt>). In this case you can use the 
+<tt>IFileStore.toLocalFile</tt> method to obtain a local copy of the file. Note that
+this will only cause one file or directory to be cached locally, rather than an entire
+directory tree.  Here is an example of using local caching to open a zip file on
+an IFileStore:
+<pre>
+   IFileStore store = ...;//some file store
+   java.io.File file = store.toLocalFile(EFS.NONE, null);
+   if (file == null) {
+      //we are not a local file store, so we need to cache a local copy
+      file = store.toLocalFile(EFS.CACHE, null);
+   }
+   java.util.zip.ZipFile zip = new java.util.ZipFile(file);
+</pre>
+</p>
 <h4>Linking to other file systems</h4>
 <p>
 You can use linked resources to create projects that draw together resources
@@ -46,7 +65,15 @@ from multiple file systems.  Simply use the method
 <b><a href="../reference/api/org/eclipse/core/resources/IFolder.html">IFolder</a>.createLink(URI, int, IProgressMonitor)</b>
 to create a resource in an existing project whose contents are stored in another location in
 an arbitrary file system.  You can even create links below other linked resources to
-create arbitrary resource trees drawing from many different file systems.
+create arbitrary resource trees drawing from many different file systems.  Here
+is a simple example that creates a sibling linked file that shares the same file
+system location as the source:
+<pre>
+   IFile source = ...;//some source file
+   IFile link = source.getParent().getFile(new Path(source.getName() + ".link"));
+   link.createLink(source.getLocationURI(), IResource.NONE, null);
+</pre>
 </p>
+
 </BODY>
 </HTML>
