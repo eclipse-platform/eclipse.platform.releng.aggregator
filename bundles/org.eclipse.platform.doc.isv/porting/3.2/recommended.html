@@ -75,10 +75,11 @@
   <h3>ICU4J Replacement Plug-in</h3>
   <p>The  addition of the ICU4J plug-in adds on the order of 3MB to the footprint.  Some applications may not want to absorb ICU4J if application size takes precedence over adopting  ICU4J function. If this is the case, a  replacement plug-in (<strong>com.ibm.icu.base</strong>) is available from the <a href="http://download.eclipse.org/eclipse/downloads/">Eclipse platform build page</a>. Download the plug-in, remove the <strong>com.ibm.icu</strong> plug-in and its source counterpart from the /plugins directory, and drop in the replacement  plug-in. This is required because the Eclipse platform adopted the ICU APIs for  3.2  so just removing the ICU plug-in will result in compilation  errors in platform code. The replacement plug-in is about 100KB in size and simply calls  through to the default JDK's implementation  of the most  commonly used classes and APIs in ICU4J. Again, you can read the <a href="http://wiki.eclipse.org/index.php/ICU4J">ICU4J  page</a> on the Eclipse wiki for more details using the ICU replacement plug-in.</p> 
 <h3>Effect on JFace - ViewerSorter and StructuredViewer </h3> 
-  <p> In order to support ICU4J in JFace, some creative API additions were required to prevent referencing ICU classes in API.  This resulted in the addition of:
-  <dd>1. a new class called <code>org.eclipse.jface.viewers.ViewerComparator</code>, of which <code>org.eclipse.jface.viewers.ViewerSorter</code> is now a subclass.
-  <dd>2. two new methods to <code>org.eclipse.jface.viewers.StructuredViewer</code>, to support the addition of  <code>org.eclipse.jface.viewers.ViewerComparator</code>.</dd>   
-  </p>  
+  <p> In order to support ICU4J in JFace, some creative API additions were required to prevent referencing ICU classes in API.  This resulted in the addition of:</p>
+  <ol>
+  <li>a new class called <code>org.eclipse.jface.viewers.ViewerComparator</code>, of which <code>org.eclipse.jface.viewers.ViewerSorter</code> is now a subclass.</li>
+  <li>two new methods to <code>org.eclipse.jface.viewers.StructuredViewer</code>, to support the addition of  <code>org.eclipse.jface.viewers.ViewerComparator</code>.</li>
+  </ol>
 <h4>Rationale</h4>
   <p>The <code>ViewerSorter</code> class has a public method <code>getCollator()</code> that returns a <code>java.text.Collator</code>.  Since this method is API it could not simply be changed to use an ICU Collator.  Also, ICU classes cannot be part of the API (signatures) as a direct plug-in dependency on ICU would prevent JFace from being used standalone (with SWT).  To accomodate these constraints, the <code>ViewerComparator</code> class that uses a <code>java.util.Comparator</code>, rather than an ICU Collator, was added.  This was done because ICU's Collator class implements <code>java.util.Comparator</code>, so any <code>StructuredViewer</code> can now use ICU's Collator rather than <code>java.text.Collator</code>, but JFace doesn't have to add a dependency on the ICU4J plug-in.  
 
