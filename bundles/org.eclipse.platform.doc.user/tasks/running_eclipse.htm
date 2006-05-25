@@ -13,39 +13,100 @@
 <BODY BGCOLOR="#ffffff">
 
 <h1>Running Eclipse</h1>
-<p>After you install (unzip) the Eclipse driver in a directory (such as c:\eclipse),
-start the Workbench by running the Eclipse executable file found in the
-top level install directory. The executable file is called <samp>eclipse.exe</samp> on Windows
-systems and <samp>eclipse</samp> on Linux systems. 
+<!-- ************* BEGIN SECTION COPIED FROM README FILE **************** -->
+<p>After installing the Eclipse SDK in a directory, you can start the Workbench
+by running the Eclipse executable included with the release (you also need a 1.4.2
+JRE, not included with the Eclipse SDK). On Windows, the executable file is called <samp>eclipse.exe</samp>,
+and is located in the <code>eclipse</code> subdirectory of the install. If
+installed at <code>c:\eclipse-SDK-3.2-win32</code>, the executable is <code>c:\eclipse-SDK-3.2-win32\eclipse\eclipse.exe</code>.
 
-<b>Note:</b> the following discussion describes setting up on Windows systems. Setup on Linux is
-analogous.</p>
+<b>Note:</b> Set-up on most other operating environments is analogous. Special
+instructions for Mac OS X are listed <a href="#macosx">below</a>.</p>
 
-<p>If you do not specify otherwise, Eclipse will prompt you for a 
-workspace directory.  The default location for this directory will be a 
-child of your user home directory called "workspace" 
-(for example, c:\Documents and Settings\My Name\workspace). This workspace 
-directory is used as the default content area for your projects
-as well as for holding any required metadata. For shared or
-multi-workspace installs you should explicitly state the location of your
-workspace rather than using the default.  In addition to simply entering a 
-different location at the prompt you may also use the -data command line argument.</p>
-
-<h2>Setting a specific location for the workspace with -data</h2>
-
-<p>To use the <code>-data</code> command line argument, simply add <code>-data <var>your_workspace_location</var></code>
- (for example, <code>-data c:\users\robert\myworkspace</code>)
-to the <b>Target</b> field in the shortcut properties, or include it explicitly on your
-command line.</p>
-
-<h2>Setting the Java VM using -vm</h2>
-
-<p>It is recommended that you explicitly specify which Java VM to
-use when running Eclipse.  This is achieved with the <code>-vm</code> command line
-argument (for example, <code>-vm c:\jre\bin\javaw.exe</code>).  If you don't use 
-<code>-vm</code>, Eclipse will use the first Java VM found on the O/S path.  When you install other products, 
-they may change your path, resulting in a different Java VM being used when you next launch Eclipse.
+<h3>Allocating enough memory and solving OutOfMemoryErrors</h3>
+<p>By default, Eclipse will allocate up to 256 megabytes of Java heap memory. This should
+be ample for all typical development tasks. However, depending on the JRE
+that you are running, the number of additional plug-ins you are using, and
+the number of files you will be working with, you could conceivably have to increase this amount. 
+Eclipse allows you to pass arguments directly to the Java VM using the
+<code>-vmargs</code> command line argument, which must follow all other Eclipse specific arguments.
+Thus, to increase the available heap memory, you would typically use:</p>
+<blockquote>
+  <p><code>eclipse -vmargs -Xmx&lt;memory size&gt;</code></p>
+</blockquote>
+<p>with the <code>&lt;memory size&gt;</code> value set to greater than
+&quot;256M&quot; (256 megabytes -- the default). 
 </p>
+<p>
+When using a Sun VM, you may also need to increase the size of the permanent
+generation memory.  The default maximum is 64 megabytes, but more may
+be needed depending on your plug-in configuration and use.  The maximum
+permanent generation size is increased using the -XX:MaxPermSize=&lt;memory size&gt; argument:
+<blockquote>
+  <p><code>eclipse -vmargs -XX:MaxPermSize=&lt;memory size&gt;</code></p>
+</blockquote>
+This argument may not be available for all VM versions and platforms; consult your VM documentation
+for more details.
+</p>
+<p>
+Note that setting memory sizes to be larger than the amount of available physical
+memory on your machine will cause Java to &quot;thrash&quot; as it copies objects
+back and forth to virtual memory, which will severely degrade your performance.
+</p>
+<h3>Selecting a workspace</h3>
+<p>When the Workbench is launched, the first thing you see is a 
+dialog that allows you to select where the workspace will be located. The
+workspace is the directory where your work will be stored. If you do not specify 
+otherwise, Eclipse creates the workspace in your user directory.
+This workspace directory is used as the default content area for your projects
+as well as for holding any required metadata. For shared or multi-workspace
+installs you must explicitly specify the location for your workspace using the
+dialog (or via the &quot;<code>-data</code>&quot; command line argument).</p>
+<p>Here is a typical Eclipse command line:&nbsp;</p>
+
+<blockquote>
+  <p><code>eclipse -vm c:\jdk1.4.2\jre\bin\javaw</code></p>
+</blockquote>
+<p><i>Tip:</i> It's generally a good idea to explicitly specify which Java VM to
+use when running Eclipse. This is achieved with the &quot;<code>-vm</code>&quot;
+command line argument as illustrated above. If you don't use &quot;<code>-vm</code>&quot;,
+Eclipse will look on the O/S path. When you install other Java-based products,
+they may change your path and could result in a different Java VM being used
+when you next launch Eclipse.</p>
+<p>To create a Windows shortcut to an installed Eclipse:</p>
+<ol>
+  <li>Navigate to <code>eclipse.exe</code> in Windows Explorer and use Create
+    Shortcut on the content menu.
+  <li>Select the shortcut and edit its Properties. In the Target: field append
+    the command line arguments.
+</ol>
+<p>Opening this shortcut launches Eclipse. (You can drag the shortcut to the 
+Windows Desktop if you want to keep it in easy reach.)</p>
+
+<h3><a name="macosx">Mac OS X</a></h3>
+<p>On Mac OS X, you start Eclipse by double clicking the Eclipse application. If 
+you need to pass arguments to Eclipse, you'll have to edit the 
+<code>eclipse.ini</code> file inside the Eclipse application bundle: select the 
+Eclipse application bundle icon while holding down the Control Key. This will 
+present you with a popup menu. Select &quot;Show Package Contents&quot; in 
+the popup menu. Locate <code>eclipse.ini</code> file in the <code>Contents/MacOS</code> 
+subfolder and open it with your favorite text editor to edit the command line options.
+</p>
+
+<p>If you need to launch Eclipse from the command line, you can use the symbolic link &quot;eclipse&quot; in the
+top-level eclipse folder. It refers to the eclipse executable inside the application bundle and takes
+the same arguments as &quot;eclipse.exe&quot; on other platforms. 
+</p>
+<p>On Mac OS X 10.4 and later, you may notice a slowdown when working with significant
+numbers of resources if you allow Spotlight to index your workspace. To prevent this, start
+System Preferences, select the Spotlight icon, then the Privacy tab, then click the Add button
+(&quot;+&quot;) and find your workspace directory in the dialog that appears.</p>
+<h3><a name="SharedInstall">Shared Install</a></h3>
+<p>The startup speed of a shared install can be improved if proper cache information is stored in the shared 
+install area. To achieve this, after unzipping Eclipse distribution, run Eclipse once with the &quot;-initialize&quot; 
+option from an account that has a write access to the install directory.
+</p>
+<!-- ************* END SECTION COPIED FROM README FILE **************** -->
 
 <h1>Advanced Topics in Running Eclipse </h1>
 
@@ -253,38 +314,6 @@ before the class to run).  <b>Note:</b> If an Eclipse startup argument, such as 
 is provided after the Java vm arguments (-vmargs), Eclipse will not start and you will receive 
 a &quot;JVM terminated. Exit code=1&quot; error.
 </p>
-
-<h2>Running on Different VMs&nbsp;</h2>
-<h3>Running Eclipse on J9</h3>
-<p>
-When running Eclipse on J9 version 1.5, it is recommended that you use the following VM
-options:
-</p>
-<blockquote>
-  <pre>eclipse.exe [eclipse arguments] -vm <var>path_to_j9w.exe</var> 
-            -vmargs -ms:32 -mm:2048 -mo:32768 -moi:32768 -mca:32 -mco:128 -mx:2000000</pre>
-</blockquote>
-<p> When running Eclipse on J9 version 2.0, the default arguments chosen by J9W 
-  should be suitable. However, to override the parameters which are automatically 
-  set internally by the Eclipse executable, you must specify -vmargs with no following arguments 
-  as follows: </p>
-<blockquote>
-  <pre>eclipse.exe [eclipse arguments] -vm <var>path_to_j9w.exe</var> -vmargs</pre>
-</blockquote>
-<p>Please refer to the J9 VM documentation and help for further information.</p>
-
-<h3>Running Eclipse on the IBM Developer Kit, Java(TM) Technology Edition VM</h3>
-
-<p>The default VM settings for IBM Developer Kit, Java(TM) Technology Edition 1.3 Linux work well for initial exploration, but
-are not sufficient for large scale development. For large scale development you
-should modify your VM arguments
-to make more heap available. For example, the following setting will allow the Java heap to grow to 256MB:&nbsp;
-</p>
-<blockquote>
-<pre>-vmargs -Xmx256M </pre>
-</blockquote>
-
-
 
 </body>
 </html>
