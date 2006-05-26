@@ -90,31 +90,54 @@ concerned with this API, but it is useful when defining specialized views or edi
 new contexts.  
 </p>
 <p>
-The starting point for working with contexts in the workbench is <a href="../reference/api/org/eclipse/ui/contexts/IWorkbenchContextSupport.html"><b>IWorkbenchContextSupport</b></a>.
-Plug-ins can obtain the context support instance from the workbench.  
+The starting point for working with contexts in the workbench is 
+<a href="../reference/api/org/eclipse/ui/contexts/IContextService.html"><b>IContextService</b></a>.
+Plug-ins can obtain the global context support instance from the workbench.  
 </p>
-<pre>IWorkbenchContextSupport workbenchContextSupport = PlatformUI.getWorkbench().getContextSupport();
-</pre>
-The workbench context support API can be used to add or remove an 
-<a href="../reference/api/org/eclipse/ui/contexts/EnabledSubmission.html"><b>EnabledSubmission</b></a>,
-which describes criteria that should cause a particular context to become enabled.  Criteria include
-information such as the active part or active shell.  The workbench support also provides access to an
-<a href="../reference/api/org/eclipse/ui/contexts/IContextManager.html"><b>IContextManager</b></a>.
-<pre>
-IContextManager contextManager = workbenchContextSupport.getContextManager();
+<pre>IContextService contextService = (IContextService)PlatformUI.getWorkbench()
+	.getService(IContextService.class);
 </pre>
 <p>
-<a href="../reference/api/org/eclipse/ui/contexts/IContextManager.html"><b>IContextManager</b></a> defines
-protocol for getting all defined or enabled context ids, and for getting the associated 
-<a href="../reference/api/org/eclipse/ui/contexts/IContext.html"><b>IContext</b></a> for a particular id.
+Services like <a href="../reference/api/org/eclipse/ui/contexts/IContextService.html"><b>IContextService</b></a>,
+<a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html"><b>IHandlerService</b></a>,
+and <a href="../reference/api/org/eclipse/ui/keys/IBindingService.html"><b>IBindingService</b></a>
+can be retrieved using an
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html"><b>IServiceLocator</b></a>. 
+<a href="../reference/api/org/eclipse/ui/IWorkbench.html"><b>IWorkbench</b></a>,
+<a href="../reference/api/org/eclipse/ui/IWorkbenchWindow.html"><b>IWorkbenchWindow</b></a>,
+and <a href="../reference/api/org/eclipse/ui/IWorkbenchSite.html"><b>IWorkbenchSite</b></a>
+are all <a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html"><b>IServiceLocator</b></a>.
+</p>
+<p>
+<b>IContextService</b> defines 
+protocol for getting all defined or enabled context ids, and for getting the associated
+<a href="../reference/api/org/eclipse/core/commands/contexts/Context.html"><b>Context</b></a>
+for a particular id.
 These objects can be used to traverse the definition for a context in API, such as getting the
-id, name, or id of the parent context.  Listeners can be registered on the context manager or on the contexts 
+id, name, or id of the parent context.
+Listeners can be registered on the context manager or on the contexts 
 themselves to detect changes in the definition of a particular context or in the context manager
-itself.  See the package <b><a href="../reference/api/org/eclipse/ui/contexts/package-summary.html">org.eclipse.ui.contexts</a></b>
+itself. 
+See the package <b><a href="../reference/api/org/eclipse/core/commands/contexts/package-summary.html">org.eclipse.core.commands.contexts</a></b>
 for more information.
 </p>
 
+<p><b>Contexts</b> can be enabled programmatically:</p>
+<pre>IContextActivation activation = contextService.activateContext(&quot;org.eclipse.ui.textEditorScope&quot;);
+</pre>
+<p>
+The <a href="../reference/api/org/eclipse/ui/contexts/IContextActivation.html"><b>IContextActivation</b></a>
+is a token that can be used to deactivate an active context.  You should ensure
+that you only activate defined <b>Context</b>s.
+</p>
 
+<p>
+If you are activating a more specific <b>Context</b> within your part (either 
+View or Editor) you can use the part site service locator to active your <b>Context</b>.
+The part's <b>IContextService</b> will take care of activating and deactivating the
+<b>Context</b> as your part is activated or deactivated.  It will also dispose the
+<b>Context</b> when the part is disposed.
+</p>
 
 </BODY>
 </HTML>
