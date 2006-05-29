@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<h3>Contributing a HelloWorld intro Part</h3>
+<h2>Contributing a HelloWorld intro Part</h2>
 
 <p>
  We will now contribute a very basic intro part just to illustrate the steps needed to contribute a part implementation to the Workbench and get it to show up as the welcome page. To do this:</p>
@@ -20,38 +20,41 @@
   <li>run your Eclipse based product with the correct product id. </li>
 </ol>
 <p> Here is the <em>org.eclipse.ui.intro </em>extension point registration needed: </p>
-<pre>
 
-&lt;extension point="org.eclipse.ui.intro"&gt; 
-	&lt;intro class="org.eclipse.ui.intro.HelloWorldIntroPart" &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		id="org.eclipse.ui.intro.examples.basic001_introId" &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		icon="some_icon.jpg"/&gt;
-	&lt;introProductBinding
-		introId="org.eclipse.ui.intro.HelloWorld_introId" &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		productId="org.eclipse.ui.intro.HelloWorld_product"&gt; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-	&lt;/introProductBinding&gt;
-&lt;/extension&gt; 
+<pre>
+   &lt;extension point="org.eclipse.ui.intro"&gt; 
+      &lt;intro
+            class="org.eclipse.ui.intro.HelloWorldIntroPart"
+            id="org.eclipse.ui.intro.examples.basic001_introId"
+            icon="some_icon.jpg"/&gt;
+      &lt;introProductBinding
+            introId="org.eclipse.ui.intro.HelloWorld_introId"
+            productId="org.eclipse.ui.intro.HelloWorld_product"&gt;
+      &lt;/introProductBinding&gt;
+   &lt;/extension&gt; 
 </pre>
+
 <p>An <em>intro </em> part is registered with the workbench. The class that implements this intro part is <em>org.eclipse.ui.intro..HelloWorldIntroPart </em>. An icon is also registered with the intro part and it will appear at the top right corner of the intro part window. An <em>introProductBinding </em> contribution tells the workbench that the intro part we just created is bound to our product with the id <em>org.eclipse.ui.intro.HelloWorld_product</em>. On startup, the workbench looks for the first intro bound to the current product, and instantiates the class registered with this intro contribution.</p>
 <p>The second step is to implement the <em>org.eclipse.ui.intro.IIntroPart </em> interface. The following is sample code that simply creates a label and centers it in the parent composite. This code can be used to actually create the IntroPart:</p> 
-<pre>public void <strong>createPartControl </strong>(Composite container) { &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		Composite outerContainer = new Composite(container, SWT.NONE); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		GridLayout gridLayout = new GridLayout(); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		outerContainer.setLayout(gridLayout); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		outerContainer.setBackground
-			(outerContainer.getDisplay().getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT)); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		label = new Label(outerContainer, SWT.CENTER); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		label.setText("WELCOME TO ECLIPSE"); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		GridData gd = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		gd.horizontalAlignment = GridData.CENTER; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		gd.verticalAlignment = GridData.CENTER;
-		label.setLayoutData(gd); &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-		label.setBackground(outerContainer.getDisplay().
-				getSystemColor(SWT.COLOR_TITLE_BACKGROUND_GRADIENT)); &nbsp;&nbsp;&nbsp; 
-			
-		}
 
+<pre>
+   public void createPartControl(Composite container) {
+        Composite outerContainer = new Composite(container, SWT.NONE);
+        GridLayout gridLayout = new GridLayout();
+        outerContainer.setLayout(gridLayout);
+        outerContainer.setBackground(outerContainer.getDisplay().getSystemColor(
+             SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+        label = new Label(outerContainer, SWT.CENTER);
+        label.setText("WELCOME TO ECLIPSE");
+        GridData gd = new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL);
+        gd.horizontalAlignment = GridData.CENTER;
+        gd.verticalAlignment = GridData.CENTER;
+        label.setLayoutData(gd);
+        label.setBackground(outerContainer.getDisplay().getSystemColor(
+             SWT.COLOR_TITLE_BACKGROUND_GRADIENT));
+   }
 </pre>
+
 <p> The third and last step is to make sure you run the correct product. For example, if you are self hosting, create a new runtime-workbench launch configuration, choose the "Run a product" option, and select <em>org.eclipse.ui.intro.HelloWorld_product </em>from the dropdown. <br>
 This is what you will see if you run the above HelloWorld sample:</p>
 <p align="center">	 <img src="images/basicIntro.png" border="0"></p>
