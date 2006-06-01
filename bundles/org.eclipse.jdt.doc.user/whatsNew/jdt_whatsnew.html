@@ -20,11 +20,12 @@ tr {vertical-align: top;}
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools
 for the 3.2 release of Eclipse. They are grouped into:</p>
 <ul>
-	<li><a href="#JavaUI">General Java Tools</a></li>
 	<li><a href="#JavaRefactoring">Java Refactoring</a></li>
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<li><a href="#JavaCompiler">Java Compiler</a></li>
+	<li><a href="#JUnit">JUnit Tooling</a></li>
 	<li><a href="#Debug">Java Debugger</a></li>
+	<li><a href="#Miscellaneous">Miscellaneous</a></li>
 </ul>
 <p>
 See also the <a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New in 3.2</a>
@@ -39,38 +40,63 @@ document for changes in the Platform.
   <col width="80%">
   </colgroup>
   <tbody>
-      <!-- *************** General Java Tools ************************************ -->
+    
+      <!-- *************** Java Refactoring ************************************ -->
     <tr> 
-      <td colspan="2"><a name="JavaUI"></a> <div style="font-size: 20px; font-weight: bold;"> 
-          General Java Tools </div></td>
+      <td colspan="2"><a name="JavaRefactoring"></a> <div style="font-size: 20px; font-weight: bold;"> 
+          Java Refactoring</div></td>
     </tr>
     
     <tr> 
-      <td  valign="top"> <p align="right"><b> JUnit 4 support </b></p></td>
-      <td  valign="top"> <p>The JUnit support has been updated to run and write JUnit 4 tests.  Check out <a href="http://www.junit.org/">www.junit.org</a> for more about JUnit 4.</p>
+      <td  valign="top"> <p align="right"><b> Introduce Indirection refactoring 
+          </b></p></td>
+      <td  valign="top"> <p> <b>Introduce Indirection</b> is a new refactoring that 
+          lets you redirect all callers of a method to a new method. The new 
+          method calls the original one. You can replace the default implementation 
+          of the new method by any other if you like. </p>
+        <p> Such an indirection is useful when new behavior needs to be introduced 
+          to a method but: </p>
         <ul>
-	    <li>use the <b>New JUnit Test Case</b> wizard to generate a JUnit 4 test class:
-        <br><img alt="JUnit 4 support in the New Test Case wizard" src="images/junit-40.png"> 
-        </li>
-          <li>use the provided JUnit library to add to the build path
-          <br><img alt="Add JUnit 4 library with quick fix" src="images/junit4-quickfix.png">
-          </li> 
-          <li>launch JUnit 4 tests as usual with <b>Run As JUnit</b></li>
-          <li>ignore tests by tagging them with <code><b>@Ignore</b></code></li>
-        </ul></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> JUnit view history </b></p></td>
-      <td  valign="top"> <p> The JUnit view can now handle multiple concurrent 
-          test runs. You can switch between active and recent test runs using 
-          the new history. Tests can be rerun from the history without stopping already running tests.</p>
-        <p> <img alt="JUnit History" src="images/junit-history.png"> 
+          <li>The method cannot be changed because it is from a library.</li>
+          <li>The method must not be changed because it is an API method.</li>
+        </ul>
+        <p>
+        Use the indirection for bug fixes to the original method or as a quick 
+        way to add code before or after all calls to a method. </p> <p> To execute 
+          the <b>Introduce Indirection</b> refactoring select a method, invoke 
+          <b>Refactor &gt; Introduce Indirection...</b>, provide a name and the 
+          declaring class for the new method. </p>
+        <p> <img alt="Introduce Indirection dialog" src="images/introduce-indirection.png"> 
         </p>
-        <p> This works with JUnit 3 as well as with JUnit 4. </p></td>
+        <p> The method is added to the selected declaring class. </p>
+        <p> <img alt="Introduce Indirection preview with updated reference" src="images/introduce-indirection3.png"> 
+        </p>
+        <p> And all references are updated to call the new method. </p>
+        <p> <img alt="Result after Introduce Indirection" src="images/introduce-indirection2.png"> 
+        </p></td>
     </tr>
     
     <tr> 
+      <td  valign="top"> <p align="right"><b> Extract Superclass refactoring </b></p></td>
+      <td  valign="top"> <p> A new refactoring called <b>Extract Superclass</b> 
+          extracts a common superclass from a set of sibling types. The selected 
+          sibling types become direct subclasses of the extracted superclass after 
+          applying the refactoring. Moreover, <b>Extract Superclass</b> allows 
+          to use the extracted superclass wherever possible in the code. </p>
+        <p> <code>JavaEditorTests</code> and <code>PropertiesEditorTests</code> 
+          are the sibling types in the following example. The first picture shows 
+          the type hierarchy before the refactoring. </p>
+        <p> <img alt="Hierarchy before extracting EditorTests" src="images/extract-superclass-before.png"> 
+        </p>
+        <p> The next picture shows the type hierarchy after extracting <code>EditorTests</code> 
+          with the <b>Extract Superclass</b> refactoring. </p>
+        <p> <img alt="Hierarchy after extracting EditorTests" src="images/extract-superclass-after.png"> 
+        </p>
+        <p> To invoke this refactoring, use <b>Refactor &gt; Extract Superclass...</b>. 
+        </p></td>
+    </tr>
+    
+     <tr> 
       <td  valign="top"> <p align="right"><b> Clean Up wizard </b></p></td>
       <td  valign="top"> <p> <b>Clean Up</b> can be invoked on any number of Java source files, packages or on a whole Java project. It helps to:
       <ul>
@@ -94,142 +120,7 @@ document for changes in the Platform.
         </p>
         <p> Select a project, package, or file and use <b>Source &gt; Clean Up...</b> 
           to start this wizard. </p></td>
-    </tr>
-
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Find broken externalized strings
-          </b></p></td>
-      <td  valign="top"> <p> A new action can search for broken externalized strings. 
-          The search reports missing, unused and duplicate keys. </p>
-        <p> <img title="Find Broken Externalized Strings action" alt="Find Broken Externalized Strings action" src="images/search-nlskeys.png"> 
-        </p>
-        <p> To start the search select a properties file, a package, or a whole 
-          project and use <b>Source &gt; Find Broken Externalized Strings</b> 
-        </p></td>
-    </tr>
-
-    <tr> 
-      <td  valign="top"> <p align="right"><b> New quick fixes </b></p></td>
-      <td  valign="top"> <p> Several new quick fixes have been added, for example: 
-        </p>
-        <ul>
-          <li> 
-            <p>fix raw type accesses </p>
-            
-              <p> <img alt="Raw access correction proposal" src="images/rawaccess-quickfix.png"> 
-              </p>
-              <p> The quick fix gleans information from usages within the same 
-                file. For a more sophisticated analysis, use the <b>Infer Generic 
-                Type Arguments</b> refactoring.
-          </li>
-          <li> 
-            <p>add missing annotation attribute </p>
-            
-              <p> <img alt="Quick fix for missing annotation attribute" src="images/missing_attribute_quickfix1.png" align="top"> 
-              </p>
-            
-          </li>
-          <li> 
-            <p>add a new annotation member</p>
-            
-              <p> <img alt="Quick fix for new annotation member" src="images/new_annotation_member_quickfix.png"> 
-              </p>
-            
-          </li>
-        </ul></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Generate hashCode() and equals() 
-          </b></p></td>
-      <td  valign="top"> <p> A new action can be used to generate the methods 
-          <code>hashCode()</code> and <code>equals()</code>. You can select the 
-          fields on which the implementation should be based. </p>
-        <p> <img alt="Generate hash and equals wizard" src="images/generate-hash-equals.png"> 
-        </p>
-        <p> To invoke this action select a type and use <b>Source &gt; Generate 
-          hashCode() and equals()...</b> </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b>Surround lines with code</b></p></td>
-      <td  valign="top"> <p> The new <b>Surround With</b> quick menu allows to surround a selection of 
-          lines with code. The menu is extendable with custom templates. The templates 
-          are now aware of variables that need to be pulled out or made final. 
-        </p>
-        <p> <img alt="Surround with runnable code transformation" src="images/surround_with_template.png"> 
-        </p>
-        <p> Use <b>Source &gt; Surround With</b> or press <b>Alt+Shift+Z</b> to directly see the menu.
-        </p>
-        <p> You can add your custom templates on the <b>Java &gt; Editor &gt; 
-          Templates</b> preference page. All the template needs is a <code>${line_selection}</code> 
-          variable. </p></td>
-    </tr>
-    
-		<tr>
-			<td  valign="top"> <p align="right"><b>Create a type from an example snippet</b>
-			</td>
-			<td valign="top">You can paste a snippet of code containing a Java type directly
-			into a package or source folder to create a new compilation unit.
-			For example select and copy this source code
-			<pre>
-package pack;
-public class HelloWorld {
-    public static void main(String[] args) {
-        System.out.println("Hello World");
-    }
-}
-</pre>
-			then select a source folder in the Package Explorer use <b>Ctrl+V (Edit &gt; Paste)</b>.
-			This automatically creates a new package 'pack' and file 'HelloWorld.java' with the copied content.
-			</td>
-		</tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Java type indicator </b></p></td>
-      <td  valign="top">
-      <p> Enable the <b>Java Type Indicator</b> on the
-		<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Decorators)")'>
-		<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Decorators preference page">
-		<b>General &gt; Appearance &gt; Label Decoration</b></a> preference page to find 
-        out what the first type in a compilation unit or class file is.
-        An adornment is shown for interfaces, annotations, and enums, while an ordinary class stays undecorated.</p>
-        <p> <img title="Java Type Indicator Label Decorator" alt="Type Indicator label decorator" src="images/type-indicator.png"> 
-        </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Command line code formatter </b></p></td>
-      <td  valign="top"> <p> It is now possible to format source code without 
-          starting the Eclipse UI using the new headless formatter application. 
-          The command line formatter works as a standard Eclipse application. 
-        </p>
-        <p> The following command will format the source files in the folder <tt>src</tt> 
-          with the options specified in the <tt>config.prefs</tt> file: </p>
-        <p> <code>eclipse -application org.eclipse.jdt.core.JavaCodeFormatter 
-          -config d:/config.prefs c:/src</code> </p>
-        <p> See <a href="../tasks/tasks-230.htm">Using the Formatter Application</a> for details. </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Support for Java-like extensions 
-          </b></p></td>
-      <td  valign="top"> <p> Files with a file extension other than <tt>.java</tt> 
-          and containing pure Java code are now supported. A Java-like extension 
-          can be added using the
-          <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.ContentTypes)")'>
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Content Type preference page">
-          <b>General &gt; Content Types</b></a> preference page (type <b>Text &gt; Java Source File</b>).
-          </p>
-        <p> <img alt="Package explorer with 'Y.abc' as compilation unit" src="images/javalikeextension.png"> 
-        </p></td>
-    </tr>
-    
-      <!-- *************** Java Refactoring ************************************ -->
-    <tr> 
-      <td colspan="2"><a name="JavaRefactoring"></a> <div style="font-size: 20px; font-weight: bold;"> 
-          Java Refactoring</div></td>
-    </tr>
+    </tr> 
     
     <tr> 
       <td  valign="top"> <p align="right"><b> Refactoring history </b></p></td>
@@ -278,83 +169,6 @@ public class HelloWorld {
     </tr>
     
     <tr> 
-      <td  valign="top"> <p align="right"><b> Filter the refactoring preview
-          </b></p></td>
-      <td  valign="top"> <p> The refactoring preview page now supports filtering 
-          of changes. This is especially helpful when updating textual matches 
-          in comments and strings is requested while renaming Java elements. </p>
-        <p> <img alt="Filtered refactoring preview page" src="images/refactoring_filter.png"> 
-        </p>
-        <p> The screen shot shows the rename dialog filtered for textual matches 
-          while renaming the class <code>TestCase</code> to <code>TestCasee</code>. 
-        </p>
-        <p> Changes related to the visibility of Java elements can now be filtered 
-          as well. </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Extract Superclass refactoring </b></p></td>
-      <td  valign="top"> <p> A brand new refactoring called <b>Extract Superclass</b> 
-          extracts a common superclass from a set of sibling types. The selected 
-          sibling types become direct subclasses of the extracted superclass after 
-          applying the refactoring. Moreover, <b>Extract Superclass</b> allows 
-          to use the extracted superclass wherever possible in the code. </p>
-        <p> <code>JavaEditorTests</code> and <code>PropertiesEditorTests</code> 
-          are the sibling types in the following example. The first picture shows 
-          the type hierarchy before the refactoring. </p>
-        <p> <img alt="Hierarchy before extracting EditorTests" src="images/extract-superclass-before.png"> 
-        </p>
-        <p> The next picture shows the type hierarchy after extracting <code>EditorTests</code> 
-          with the <b>Extract Superclass</b> refactoring. </p>
-        <p> <img alt="Hierarchy after extracting EditorTests" src="images/extract-superclass-after.png"> 
-        </p>
-        <p> To invoke this refactoring, use <b>Refactor &gt; Extract Superclass...</b>. 
-        </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Introduce Indirection refactoring 
-          </b></p></td>
-      <td  valign="top"> <p> Another new refactoring is <b>Introduce Indirection</b>. 
-          It lets you redirect all callers of a method to a new method. The new 
-          method calls the original one. You can replace the default implementation 
-          of the new method by any other if you like. </p>
-        <p> Such an indirection is useful when new behavior needs to be introduced 
-          to a method but: </p>
-        <ul>
-          <li>The method cannot be changed because it is from a library.</li>
-          <li>The method must not be changed because it is an API method.</li>
-        </ul>
-        <p>
-        Use the indirection for bug fixes to the original method or as a quick 
-        way to add code before or after all calls to a method. </p> <p> To execute 
-          the <b>Introduce Indirection</b> refactoring select a method, invoke 
-          <b>Refactor &gt; Introduce Indirection...</b>, provide a name and the 
-          declaring class for the new method. </p>
-        <p> <img alt="Introduce Indirection dialog" src="images/introduce-indirection.png"> 
-        </p>
-        <p> The method is added to the selected declaring class. </p>
-        <p> <img alt="Introduce Indirection preview with updated reference" src="images/introduce-indirection3.png"> 
-        </p>
-        <p> And all references are updated to call the new method. </p>
-        <p> <img alt="Result after Introduce Indirection" src="images/introduce-indirection2.png"> 
-        </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Rename Type updates similarly named 
-          elements </b></p></td>
-      <td  valign="top"> <p> The <b>Rename Type</b> refactoring can now rename 
-          variables and methods with names similar to the renamed type. This feature 
-          helps to keep method and variable names synchronized with type names. 
-        </p>
-        <p> <img alt="Update Similar Declarations UI" src="images/update_similar_declarations.png"> 
-        </p>
-        <p> To invoke this refactoring, select a type and use <b>Refactor &gt; 
-          Rename...</b></p> </td>
-    </tr>
-    
-    <tr> 
       <td  valign="top"> <p align="right"><b> API aware refactorings </b></p></td>
       <td  valign="top"> <p> There are a number of existing refactorings which 
           have been extended to support API compatibility by keeping the original 
@@ -374,6 +188,19 @@ public class HelloWorld {
     </tr>
     
     <tr> 
+      <td  valign="top"> <p align="right"><b> Rename Type updates similarly named 
+          elements </b></p></td>
+      <td  valign="top"> <p> The <b>Rename Type</b> refactoring can now rename 
+          variables and methods with names similar to the renamed type. This feature 
+          helps to keep method and variable names synchronized with type names. 
+        </p>
+        <p> <img alt="Update Similar Declarations UI" src="images/update_similar_declarations.png"> 
+        </p>
+        <p> To invoke this refactoring, select a type and use <b>Refactor &gt; 
+          Rename...</b></p> </td>
+    </tr>
+    
+    <tr> 
       <td  valign="top"> <p align="right"><b> Rename Package refactoring renames 
           subpackages </b></p></td>
       <td  valign="top"> <p> The <b>Rename Package</b> refactoring does now also 
@@ -384,6 +211,21 @@ public class HelloWorld {
         </p>
         <p> To invoke this refactoring, select a package and use <b>Refactor &gt; 
           Rename...</b></p> </td>
+    </tr>
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> Filter the refactoring preview
+          </b></p></td>
+      <td  valign="top"> <p> The refactoring preview page now supports filtering 
+          of changes. This is especially helpful when updating textual matches 
+          in comments and strings is requested while renaming Java elements. </p>
+        <p> <img alt="Filtered refactoring preview page" src="images/refactoring_filter.png"> 
+        </p>
+        <p> The screen shot shows the rename dialog filtered for textual matches 
+          while renaming the class <code>TestCase</code> to <code>TestCasee</code>. 
+        </p>
+        <p> Changes related to the visibility of Java elements can now be filtered 
+          as well. </p></td>
     </tr>
 
         <!-- ******************* Java Editor ************************************* -->
@@ -422,24 +264,53 @@ public class HelloWorld {
         <p> <img alt="Java editor completing on NPE" src="images/completiononcamelcase.png"> 
         </p></td>
     </tr>
-
-    <tr> 
-      <td  valign="top"> <p align="right"><b>@link proposals</b></p></td>
-      <td  valign="top"> <p> Content assist in Javadoc comments now includes both: a <code>@link</code> proposal and a regular reference 
-          proposal:</p>
-        <p> <img alt="Java editor with text area Javadoc completion" src="images/completioninjavadoc.png"> 
-        </p></td>
-    </tr>
     
     <tr> 
-      <td  valign="top"> <p align="right"><b> Ruler support and outline for Java 
-          files outside workspace </b></p></td>
-      <td  valign="top"> <p> The Java editor now shows vertical rulers and the 
-          Outline page as well as the Quick Outline are able to show the outline for external 
-          Java files and Java files from repositories. </p>
-        <p> <img alt="Ruler support" src="images/ruler-support.png"> 
-        </p></td>
+      <td  valign="top"> <p align="right"><b>Quick menu to surround code</b></p></td>
+      <td  valign="top"> <p> The new <b>Surround With</b> quick menu allows to surround a selection of 
+          lines with code. The menu is extendable with custom templates. The templates 
+          are now aware of variables that need to be pulled out or made final. 
+        </p>
+        <p> <img alt="Surround with runnable code transformation" src="images/surround_with_template.png"> 
+        </p>
+        <p> Use <b>Source &gt; Surround With</b> or press <b>Alt+Shift+Z</b> to directly see the menu.
+        </p>
+        <p> You can add your custom templates on the <b>Java &gt; Editor &gt; 
+          Templates</b> preference page. All the template needs is a <code>${line_selection}</code> 
+          variable. </p></td>
     </tr>
+    
+     <tr> 
+      <td  valign="top"> <p align="right"><b> New quick fixes </b></p></td>
+      <td  valign="top"> <p> Several new quick fixes have been added, for example: 
+        </p>
+        <ul>
+          <li> 
+            <p>fix raw type accesses </p>
+            
+              <p> <img alt="Raw access correction proposal" src="images/rawaccess-quickfix.png"> 
+              </p>
+              <p> The quick fix gleans information from usages within the same 
+                file. For a more sophisticated analysis, use the <b>Infer Generic 
+                Type Arguments</b> refactoring.
+          </li>
+          <li> 
+            <p>add missing annotation attribute </p>
+            
+              <p> <img alt="Quick fix for missing annotation attribute" src="images/missing_attribute_quickfix1.png" align="top"> 
+              </p>
+            
+          </li>
+          <li> 
+            <p>add a new annotation member</p>
+            
+              <p> <img alt="Quick fix for new annotation member" src="images/new_annotation_member_quickfix.png"> 
+              </p>
+            
+          </li>
+        </ul></td>
+    </tr>   
+
     
 	<tr> 
       <td  valign="top"> <p align="right"><b> Category support </b></p></td>
@@ -466,26 +337,13 @@ public class HelloWorld {
     </tr>
     
     <tr> 
-      <td  valign="top"> <p align="right"><b> Improved support for Eclipse's string 
-          externalization mechanism </b></p></td>
-      <td  valign="top"> <p> The Eclipse string externalization mechanism has now 
-          the same kind of support as traditional string externalization. The 
-          associated externalized value is shown in a hover, when you linger over 
-          a key for an externalized string in the Java editor. </p>
-        <p> <img alt="NLS hover" src="images/nls-hover.png"> 
-        </p>
-        <p> <b>Ctrl+Click</b> on the key to navigate directly to the entry in 
-          the corresponding properties file. In the properties file editor you 
-          can use <b>Ctrl+Click</b> to find out where the key is used in the code. 
+      <td  valign="top"> <p align="right"><b> Ruler support and outline for Java 
+          files outside workspace </b></p></td>
+      <td  valign="top"> <p> The Java editor now shows vertical rulers and the 
+          Outline page as well as the Quick Outline are able to show the outline for external 
+          Java files and Java files from repositories. </p>
+        <p> <img alt="Ruler support" src="images/ruler-support.png"> 
         </p></td>
-    </tr>
-    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Javadoc view and tool tips from 
-          attached Javadoc </b></p></td>
-      <td  valign="top"> <p> The Javadoc view and the Javadoc hovers now extract 
-          the information from the attached Javadoc for libraries that do not 
-          have source attached. </p></td>
     </tr>
     
     <!-- ******************* Java Compiler ************************************* -->
@@ -658,7 +516,46 @@ public class HelloWorld {
           <b>Java &gt; Compiler &gt; Building</b></a> preference page
           using the <b>Output folder &gt; Rebuild class files modified by others</b> preference. 
         </p></td>
-    </tr>    
+    </tr> 
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> Javadoc view and tool tips from 
+          attached Javadoc </b></p></td>
+      <td  valign="top"> <p> The Javadoc view and the Javadoc hovers now extract 
+          the information from the attached Javadoc for libraries that do not 
+          have source attached. </p></td>
+    </tr>
+   <!-- ******************* JUnit Tooling************************************* -->
+     
+     <tr> 
+      <td colspan="2"><a name="JUnit"></a> <div style="font-size: 20px; font-weight: bold;"> 
+          JUnit Tooling </div></td>
+    </tr>
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> JUnit 4 support </b></p></td>
+      <td  valign="top"> <p>The JUnit support has been updated to run and write JUnit 4 tests.  Check out <a href="http://www.junit.org/">www.junit.org</a> for more about JUnit 4.</p>
+        <ul>
+	    <li>use the <b>New JUnit Test Case</b> wizard to generate a JUnit 4 test class:
+        <br><img alt="JUnit 4 support in the New Test Case wizard" src="images/junit-40.png"> 
+        </li>
+          <li>use the provided JUnit library to add to the build path
+          <br><img alt="Add JUnit 4 library with quick fix" src="images/junit4-quickfix.png">
+          </li> 
+          <li>launch JUnit 4 tests as usual with <b>Run As JUnit</b></li>
+          <li>ignore tests by tagging them with <code><b>@Ignore</b></code></li>
+        </ul></td>
+    </tr>
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> JUnit view history </b></p></td>
+      <td  valign="top"> <p> The JUnit view can now handle multiple concurrent 
+          test runs. You can switch between active and recent test runs using 
+          the new history. Tests can be rerun from the history without stopping already running tests.</p>
+        <p> <img alt="JUnit History" src="images/junit-history.png"> 
+        </p>
+        <p> This works with JUnit 3 as well as with JUnit 4. </p></td>
+    </tr>       
   
     <!-- ******************* Java Debugger ************************************* -->
     <tr> 
@@ -741,6 +638,108 @@ public class HelloWorld {
           a single thread or the entire VM. </p>
         <p> <img src="images/suspend-pref.png" alt="Debug preference page"></p></td>
     </tr>
+       <!-- *************** Miscellaneous ************************************ -->
+        <tr> 
+      <td colspan="2"><a name="Miscellaneous"></a> <div style="font-size: 20px; font-weight: bold;"> 
+          Miscellaneous</div></td>
+    	</tr> 
+        <tr> 
+      <td  valign="top"> <p align="right"><b> Java type indicator </b></p></td>
+      <td  valign="top">
+      <p> Enable the <b>Java Type Indicator</b> on the
+		<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Decorators)")'>
+		<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Decorators preference page">
+		<b>General &gt; Appearance &gt; Label Decoration</b></a> preference page to find 
+        out what the first type in a compilation unit or class file is.
+        An adornment is shown for interfaces, annotations, and enums, while an ordinary class stays undecorated.</p>
+        <p> <img title="Java Type Indicator Label Decorator" alt="Type Indicator label decorator" src="images/type-indicator.png"> 
+        </p></td>
+    </tr>
+
+    <tr> 
+      <td  valign="top"> <p align="right"><b> Find broken externalized strings
+          </b></p></td>
+      <td  valign="top"> <p> A new action can search for broken externalized strings. 
+          The search reports missing, unused and duplicate keys. </p>
+        <p> <img title="Find Broken Externalized Strings action" alt="Find Broken Externalized Strings action" src="images/search-nlskeys.png"> 
+        </p>
+        <p> To start the search select a properties file, a package, or a whole 
+          project and use <b>Source &gt; Find Broken Externalized Strings</b> 
+        </p></td>
+    </tr>
+     <tr> 
+      <td  valign="top"> <p align="right"><b> Improved support for Eclipse's string 
+          externalization mechanism </b></p></td>
+      <td  valign="top"> <p> The Eclipse string externalization mechanism has now 
+          the same kind of support as traditional string externalization. The 
+          associated externalized value is shown in a hover, when you linger over 
+          a key for an externalized string in the Java editor. </p>
+        <p> <img alt="NLS hover" src="images/nls-hover.png"> 
+        </p>
+        <p> <b>Ctrl+Click</b> on the key to navigate directly to the entry in 
+          the corresponding properties file. In the properties file editor you 
+          can use <b>Ctrl+Click</b> to find out where the key is used in the code. 
+        </p></td>
+    </tr>
+
+		<tr>
+			<td  valign="top"> <p align="right"><b>Create a type from an example snippet</b>
+			</td>
+			<td valign="top">You can paste a snippet of code containing a Java type directly
+			into a package or source folder to create a new compilation unit.
+			For example select and copy this source code
+			<pre>
+package pack;
+public class HelloWorld {
+    public static void main(String[] args) {
+        System.out.println("Hello World");
+    }
+}
+</pre>
+			then select a source folder in the Package Explorer use <b>Ctrl+V (Edit &gt; Paste)</b>.
+			This automatically creates a new package 'pack' and file 'HelloWorld.java' with the copied content.
+			</td>
+		</tr>
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> Generate hashCode() and equals() 
+          </b></p></td>
+      <td  valign="top"> <p> A new action can be used to generate the methods 
+          <code>hashCode()</code> and <code>equals()</code>. You can select the 
+          fields on which the implementation should be based. </p>
+        <p> <img alt="Generate hash and equals wizard" src="images/generate-hash-equals.png"> 
+        </p>
+        <p> To invoke this action select a type and use <b>Source &gt; Generate 
+          hashCode() and equals()...</b> </p></td>
+    </tr>
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> Command line code formatter </b></p></td>
+      <td  valign="top"> <p> It is now possible to format source code without 
+          starting the Eclipse UI using the new headless formatter application. 
+          The command line formatter works as a standard Eclipse application. 
+        </p>
+        <p> The following command will format the source files in the folder <tt>src</tt> 
+          with the options specified in the <tt>config.prefs</tt> file: </p>
+        <p> <code>eclipse -application org.eclipse.jdt.core.JavaCodeFormatter 
+          -config d:/config.prefs c:/src</code> </p>
+        <p> See <a href="../tasks/tasks-230.htm">Using the Formatter Application</a> for details. </p></td>
+    </tr>
+    
+    <tr> 
+      <td  valign="top"> <p align="right"><b> Support for Java-like extensions 
+          </b></p></td>
+      <td  valign="top"> <p> Files with a file extension other than <tt>.java</tt> 
+          and containing pure Java code are now supported. A Java-like extension 
+          can be added using the
+          <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.ContentTypes)")'>
+          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Content Type preference page">
+          <b>General &gt; Content Types</b></a> preference page (type <b>Text &gt; Java Source File</b>).
+          </p>
+        <p> <img alt="Package explorer with 'Y.abc' as compilation unit" src="images/javalikeextension.png"> 
+        </p></td>
+    </tr>
+
         
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
