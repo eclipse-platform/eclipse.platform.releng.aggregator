@@ -25,6 +25,7 @@
   <li><a href="#MultiPageEditorSiteProgress">API changes to MultiPageEditorSite</a></li>
   <li><a href="#configIni">Content changes in config.ini</a></li>
   <li><a href="#jwsConfigIni">Content changes in jnlp deployed applications</a></li>
+  <li><a href="#bundleStart">Explicit calls to Bundle.start() force the bundle to be activated on next restart</a></li>
 </ol>
 <hr>
 
@@ -214,6 +215,43 @@ Because of the <a href="recommended.html#runtimeSplit">runtime refactoring</a>, 
 </p>
 <p><strong>Action required:</strong>Change the value of osgi.bundles to includes <code>org.eclipse.equinox.common@2:start, org.eclipse.update.configurator@3:start,
 org.eclipse.core.runtime@start.</code>
+</p>
+<!-- ############################################## -->
+
+<!-- ############################################## -->
+<h2>4. <a name="bundleStart"></a>Explicit calls to Bundle.start() force the bundle to be activated on next restart</h2>
+<p><strong>What is affected:</strong> Clients that call <code>Bundle.start()</code>.
+</p>
+<p><strong>Description:</strong> 
+  In Eclipse a bundle is specified to be a lazy start bundle 
+  by using the <code>Eclipse-LazyStart</code> header (or the deprecated 
+  <code>Eclipse-AutoStart</code> header).  In Eclipse 3.1, the method 
+  <code>org.osgi.framework.Bundle.start()</code> did not mark lazy start bundles as 
+  persistently started.  Since lazy start bundles never got marked as persistently 
+  started they would not be automatically started when eclipse was restarted.  The 
+  javadoc for <code>Bundle.start()</code> states that the following must occur when the method is called: 
+</p>
+<p>
+  &quot;Persistently record that this bundle has been started. When the Framework is restarted, this bundle must be automatically started.&quot;
+</p>
+<p>
+  In Eclipse 3.2 the <code>Bundle.start()</code> method has been fixed to properly mark
+  the bundle as persistently started even if the bundle is a lazy start bundle.  This fix 
+  was required to comply with the OSGi Framework specification.  As a result callers of 
+  <code>Bundle.start()</code> will force the bundle to be started when Eclipse is restarted.  
+  In general this is considered a bad practice because it will cause unnecessary bundles to 
+  be activated each time Eclipse is started.  In some cases it can cause unexpected results 
+  such as <a href=https://bugs.eclipse.org/bugs/show_bug.cgi?id=134412>bug 134412</a>.
+</p>
+<p><strong>Action required:</strong> Clients of <code>Bundle.start()</code> need to evaluate 
+  if their intention is to persistently activate the bundle for every restart.  If that is 
+  not the intention then clients should find another way to activate the bundle.  In most 
+  cases calls <code>Bundle.start()</code> can be avoided by simply allowing the target bundle 
+  to be lazily activated when classes are loaded from them.  There are rare scenarios that 
+  require a lazy start bundle to be agressively activated, but not persistenly marked for 
+  activation on a restart.  These types of scenarios should use <code>Bundle.loadClass()</code>
+  to load a class from the bundle which needs to be activated instead of calling 
+  <code>Bundle.start()</code>.
 </p>
 <!-- ############################################## -->
 
