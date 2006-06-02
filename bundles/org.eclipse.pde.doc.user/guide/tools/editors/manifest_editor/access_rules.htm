@@ -6,6 +6,7 @@
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
 <LINK REL="STYLESHEET" HREF="../book.css" TYPE="text/css">
 <title>Access Rules</title>
+<script language="JavaScript" type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
 <link href="../../../../book.css" rel="stylesheet" type="text/css">
 <style type="text/css">
 <!--
@@ -23,9 +24,8 @@
 
 <BODY>
 <p align="left" class="style1">Access Rules</p>
-<p align="left">The Eclipse 3.1 runtime gives the plug-in developer the <em><strong>option</strong></em> 
-  to control on a per-package basis the visibility of the plug-in code to downstream 
-  plug-ins. </p>
+<p align="left">The Eclipse 3.1 runtime gives the plug-in developer the option
+  to control plug-in code visibility to downstream plug-ins on a per-package basis. </p>
 <p align="left">A package may be classified as one of the following:</p>
 <ol>
   <li>Accessible</li>
@@ -35,11 +35,11 @@
 </ol>
 <p align="left">PDE translates these runtime visibility rules into compiler access 
   restriction rules at compile time. As a result, a violation of a visibility 
-  rule is flagged by the compiler as a warning or an error, depending on the severity 
+  rule is flagged by the compiler as a warning or an error - depending on the severity 
   of that violation. </p>
-<p align="left">With the availability of this support at compile time, one is 
-  never get caught by surprise by classloading errors at runtime, and is always 
-  aware when referencing internal types.</p>
+<p align="left">With this type of support at compile time, one is 
+  never caught by surprise by runtime class loading errors and is always 
+  aware of internal type references.</p>
 <p align="left">&nbsp;</p>
 <p align="left" class="style2">Accessible Packages</p>
 <p align="left">Accessible packages are visible to downstream plug-ins unconditionally.&nbsp;&nbsp; 
@@ -55,24 +55,25 @@ manifest editor and leave the default visibility setting as-is.</p>
 <p align="left">You can hide a package from downstream plug-ins at all times by 
   <b>excluding</b> it from the list in the <b> Exported Packages</b> section on 
   the <b>Runtime</b> page of the plug-in manifest editor.</p>
-<p align="left">References to types from a forbidden package result in classloading 
+<p align="left">References to types from a <em>forbidden</em> package result in class loading 
   errors at runtime.</p>
 <p align="left">&nbsp;To avoid such unpleasant situations:</p>
 <ol>
-  <li>The compiler will flag references to forbidden packages with an ERROR.</li>
+  <li>The compiler will flag references to forbidden packages with an error.</li>
   <li>Types from forbidden packages are NOT available 
     as proposals in the content assist.</li>
 </ol>
-<p align="left"><u>Notes:</u></p>
+<p align="left"><em>Notes:</em></p>
 <ol>
-  <li> All plug-ins in the Eclipse SDK enumerate all their packages in the Exported 
-    Packages section.&nbsp; Therefore, none of the packages in the SDK have forbidden 
+  <li> All plug-ins in the Eclipse SDK enumerate all their packages in the <strong>Exported 
+    Packages</strong> section; therefore, none of the packages in the SDK have forbidden 
     access.</li>
-  <li> The severity level for forbidden references is set on the <b>Java &gt; 
-    Compiler &gt; Errors/Warnings &gt; Deprecated and restricted API</b> preference 
+  <li> The severity level for forbidden references is set on the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png">
+<strong>Java &gt; Compiler &gt; Errors/Warnings &gt; Deprecated and restricted API</strong></a> preference 
     page.
     <p> It is strongly recommended that the severity of a forbidden reference 
-      is kept at ERROR.</p>
+      is kept at error.</p>
   </li>
 </ol>
 <p align="left">&nbsp;&nbsp;&nbsp; <img src="../../../images/access_restrictions/forbidden.png" alt="Forbidden preferences" hspace="30" border="0"></p>
@@ -91,16 +92,17 @@ manifest editor and leave the default visibility setting as-is.</p>
 <p align="left">Two measures are taken to discourage downstream plug-ins from 
   referencing internal packages:</p>
 <ul>
-  <li>The compiler flags references to such packages with a WARNING.</li>
+  <li>The compiler flags references to internal packages with a <em>warning</em>.</li>
 </ul>
 <p align="left"><img src="../../../images/access_restrictions/compiler.png" alt="discouraged access" hspace="30"></p>
 <ul>
-  <li>Types from discouraged packages are available as proposals in the content 
-    assist but with a LOWER PRIORITY.</li>
+  <li>Types from discouraged packages are available as content assist proposals; but, with a lower priority.</li>
 </ul>
 <p align="left"><img src="../../../images/access_restrictions/content_assist.png" alt="discouraged content assist" hspace="30"></p>
 <p align="left">The severity level for discouraged references can be set on the
-<b>Java &gt; Compiler &gt; Errors/Warnings &gt; Deprecated and restricted API</b> 
+<a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png">
+<strong>Java &gt; Compiler &gt; Errors/Warnings &gt; Deprecated and restricted API</strong></a> 
 preference page.</p>
 <p align="left"> <img src="../../../images/access_restrictions/discouraged.png" alt="Discouraged preferences" hspace="30" border="0"></p>
 <p align="left">&nbsp;</p>
@@ -110,24 +112,23 @@ preference page.</p>
   the PDE code is split across multiple plug-ins, and the <em>org.eclipse.pde.ui</em> 
   plug-in should have full access to <em>org.eclipse.pde.core</em>'s internal 
   packages.</p>
-<p align="left">In the example below, the friends (the <em>org.eclipse.pde</em> 
-  and <em>org.eclipse.pde.ui</em> plug-ins) have full access to the <em>org.eclipse.pde.internal.core.bundle</em> 
+<p align="left">In the example below, the the <em>org.eclipse.pde.ui</em> friend plug-in has full access to the <em>org.eclipse.pde.internal.core.bundle</em> 
   package from the <em>org.eclipse.pde.core </em>plug-in.</p>
 <p align="left"><img src="../../../images/access_restrictions/friend.png" alt="Friends" hspace="30"></p>
 <p align="left">The friends are free to reference any type from the <em>org.eclipse.pde.internal.core.bundle</em> 
   package with the compiler's blessing. </p>
-<p align="left">If, on the other hand, any other plug-in references a type from 
+<p align="left">On the other hand, if any other plug-in references a type from 
   the <em>org.eclipse.pde.internal.core.bundle</em> package, the compiler flags 
   the reference as a discouraged reference as described in the previous section.</p>
 <p align="left">&nbsp;</p>
 <p align="left" class="style2">How to enable access restrictions</p>
 <p align="left">To take advantage of the PDE access restriction support, the only 
-  requirement is that the plug-ins in question contain an OSGi bundle manifest.mf. 
-  PDE, which manages the plug-in classpath, then takes care of the rest.</p>
-<p align="left">If the plug-in does not contain a manifest.mf file, that file 
+  requirement is that the plug-ins in question contain an OSGi bundle <em>MANIFEST.MF</em>. 
+  PDE will take care of the rest including the management of the plug-in classpath.</p>
+<p align="left">If the plug-in does not contain a <em>MANIFEST.MF</em> file, that file 
   can be created as follows:</p>
 <ol>
-  <li>Open the plugin.xml in the plug-in manifest editor.</li>
+  <li>Open the <em>plugin.xml</em> in the plug-in manifest editor.</li>
   <li>In the <strong>Plug-in Content</strong> section of the <strong>Overview</strong> 
     page, click on the '<strong>create an OSGi bundle manifest</strong>' link.</li>
 </ol>
