@@ -515,6 +515,75 @@ resolved.  To work around this, after the org.eclipse.update.configurator
 plug-in has been removed, the target configuration area should be cleared before
 launching. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=85835">85835</a>)</p>
 
+<h4>Issues with JNI that use FindClass</h4>
+<p>
+There may be issues when using a JNI implementation that uses FindClass 
+in a function where the JNIEnv pointer is not available, such as in a C 
+callback (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=125250">125250</a>).  The reason is that FindClass, in this case, uses the application
+class loader to find the class.
+If the desired class is in the classpath used for the application classloader
+(e.g. defined by the VM argument -cp &lt;classpath&gt;), as it would typically be in 
+a stand-alone application, there is no problem.  However, under
+Eclipse, the application classloader does not have access to classes 
+contained in plug-ins.  Eclipse uses its own class loader to find classes 
+contained in plug-ins.
+</p>
+<p>
+The proper plug-in class loader is used by FindClass in JNI functions which are 
+passed the JNIEnv pointer, but not when you have to use AttachCurrentThread to get the 
+JNIEnv pointer.  In this case the application classloader is used.
+</p>
+<p>
+For example, the following will fail because AttachCurrentThread is used to 
+get the JNIEnv pointer:
+<pre>
+static JavaVM* jvm;  // Global variable
+
+void myCallback(void) {
+    JNIEnv* env;
+    jvm->AttachCurrentThread((void**)&amp;env, NULL);
+    // Fails if some/class is not in the application classloader:
+    jclass cls = env->FindClass(&quot;some/class&quot;);
+    jmethodID methodID = env->GetMethodID(cls, &quot;methodName&quot;,
+      &quot;(Ljava/lang/String;)V or whatever signature&quot;);
+    env->CallVoidMethod(callback, methodID, ...);
+    jvm->DetachCurrentThread();
+  }
+}
+</pre>
+<p>
+A solution is to cache the method ID, for example:
+</p>
+<pre>
+static jmethodID mid;  // Global variable
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
+...
+  // Store the JavaVM pointer
+    jvm = vm;
+
+  // Find the class and store the method ID
+  // Will use the class loader that loaded the JNI library
+    jclass cls = env->FindClass(className&quot;some/class&quot;);
+    if(!cls) goto ERR;
+
+    mid = env->GetMethodID(cls, &quot;methodName&quot;,
+      &quot;(Ljava/lang/String;)V or whatever signature&quot;);
+    if(!mid) goto ERR;
+...
+}
+
+void myCallback(void) {
+    JNIEnv* env;
+    jvm->AttachCurrentThread((void**)&amp;env, NULL);
+    env->CallVoidMethod(callback, mid, ...);
+     // Handle error ...
+    jvm->DetachCurrentThread();
+  }
+}
+</pre>
+
+
 <h3>3.1.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
 <h4>UTF-8 encoded buildfiles with Byte Order Mark</h4>
 <p>UTF-8 encoded buildfiles with byte order marks will fail to be parsed correctly depending on the XML parser being used for the build. Therefore a valid buildfile will fail to build with an error message similar to: "BUILD FAILED: C:\workspace\bom.xml:1: Document root element is missing.". To succeed in building with these files, ensure to include Xerces jars on the Ant runtime classpath so that the Xerces parser is used to parse the XML. As well the context menu for these files in the Navigator or Package Explorer will not have the run shortcuts for Ant builds. (bug
@@ -1278,6 +1347,15 @@ pass arguments to Eclipse, you'll have to edit the <code>eclipse.ini</code> file
 inside the Eclipse application bundle: select the Eclipse application bundle icon while holding down the Control Key.
 This will present you with a popup menu. Select &quot;Show Package Contents&quot; in the popup menu.
 Locate <code>eclipse.ini</code> file in the <code>Contents/MacOS</code> sub-folder and open it with your favorite text editor to edit the command line options.
+</p>
+
+<p>
+On MacOS X you can only launch a UI program more then once if you have separate
+copies of the program on disk. The reason for this behavior is that every UI
+application on Mac can open multiple documents, so typically there is no need
+to open a program twice. Since Eclipse cannot open more than one workspace, this means you have to make
+a copy of the Eclipse install if you want to open more then one workspace at
+the same time (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=139319">139319</a>).
 </p>
 
 <p>If you need to launch Eclipse from the command line, you can use the symbolic link &quot;eclipse&quot; in the
