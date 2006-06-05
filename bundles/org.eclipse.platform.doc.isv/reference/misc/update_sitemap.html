@@ -26,11 +26,15 @@ processing). The site map site.xml format is defined by the following dtd:
 <p><tt>&lt;?xml encoding="ISO-8859-1"?&gt;</tt></p>
 <p><tt>&lt;!ELEMENT site (description?, feature*, archive*, category-def*)&gt;</tt>
 <br><tt>&lt;!ATTLIST site</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp;&nbsp;&nbsp; type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #IMPLIED</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 CDATA #IMPLIED</tt>
-<br><tt>&nbsp;&nbsp;&nbsp; mirrorsURL&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; mirrorURL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; availableLocales&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; digestURL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; associateSitesURL&nbsp;&nbsp; CDATA #IMPLIED</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; pack200&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #IMPLIED</tt>
 <br><tt>&gt;</tt></p>
 <p><tt>&lt;!ELEMENT description (#PCDATA)&gt;</tt>
 <br><tt>&lt;!ATTLIST description</tt>
@@ -89,6 +93,23 @@ default is the URL location of the site.xml file.</li>
 <li>mirrorsURL - optional URL pointing to a file that contains update site mirror 
 definitions. This URL can be absolute or relative to this site. The mirrors file 
 is described later in this document.</li>
+<li>availableLocales - optional list of locales for which digests are available</li>
+<li>digestURL - optional URL that points to the directory that contains digests. At runtime, 
+based on availableLocales one of the digests from directory specified in digestURL will be 
+selected using the same algorithm that is used to select properties in the class 
+java.util.ResourceBundle. Digest files should be named digest&lt;locale&gt;.zip where locale is 
+either empty string (default digest) or locale as defined in java.util.Locale.</li>
+<li>associateSitesURL - optional URL that points to the xml file that lists sites that should be open 
+at the same time as this site</li>
+<li>pack200 - This attribute tells the update manager that there may be packed content that it 
+should download instead of the normal jar.  If this attribute is not set, the update manager will 
+never look for packed content and will always download the normal jar. To get a jar from an update 
+site that specifies pack200="true", the update manager will first look for a pack.gz file beside 
+the jar it wants.  For example, when downloading foo.jar, the update manager will first look for 
+foo.jar.pack.gz.  If the pack.gz file exists, then it will be downloaded instead of the jar. 
+Once the pack.gz file is downloaded, it is then unpacked to yield the original jar file.  
+If the pack.gz file does not exist on the update site, then the normal jar file will be downloaded 
+as normal.
 </ul>
 </li>
 
@@ -239,7 +260,34 @@ CDATA #REQUIRED</tt> <tt>&nbsp;&nbsp;&nbsp;  </tt>
 </ul>
 </li>
 </ul>
-
+<h3>Digest File</h3>
+<p>Digest files (the ones pointed by the digestURL attribute of 
+&lt;site&gt;)are zipped xml file with following DDT:</p>
+<p><tt>&lt;?xml encoding="ISO-8859-1"?&gt;</tt></p>
+<p><tt>&lt;!ELEMENT digest (feature*)&gt;</tt></p>
+<p>Where feature definition is the same as in feature manifest.</p>
+<h3>
+Associate Sites File</h3>
+<p>The associate sites file (the one pointed at by the associateSitesURL attribute of 
+&lt;site&gt;) contains definition of associated sites. Its format is defined by the following dtd:
+</p>
+<p><tt>&lt;?xml encoding="ISO-8859-1"?&gt;</tt></p>
+<p><tt>&lt;!ELEMENT associateSites (associateSite*)&gt;</tt>
+<br>&nbsp;</p><p><tt>&lt;!ELEMENT associateSites EMPTY&gt;</tt>
+<br><tt>&lt;!ATTLIST associateSite</tt>
+<br><tt>&nbsp;&nbsp;&nbsp; url&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+CDATA #REQUIRED</tt> <tt>&nbsp;&nbsp;&nbsp;  </tt>
+<br><tt>&nbsp;&nbsp;&nbsp; label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CDATA #REQUIRED</tt>
+<br><tt>&gt;</tt></p>
+<ul>
+<li>&lt;associateSites&gt; - defines the sites that are assoicated with this update site</li>
+<li>&lt;associateSite&gt; - defines an associate site
+<ul>
+<li>url - the URL of the associated site</li>
+<li>label - displayable label. Intended to be translated.</li>
+</ul>
+</li>
+</ul>
 <h3>Controlling Access</h3>
 <p>The default Eclipse site implementation provides support for http access
 with basic user authentication (userid and password).</p>
