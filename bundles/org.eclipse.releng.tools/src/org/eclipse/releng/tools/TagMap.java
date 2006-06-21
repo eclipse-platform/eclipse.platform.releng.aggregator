@@ -10,22 +10,12 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
-import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
+import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.actions.TagInRepositoryAction;
@@ -127,7 +117,7 @@ public class TagMap extends TagInRepositoryAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
-	protected boolean isEnabled() throws TeamException {
+	public boolean isEnabled() {
 		IResource[] resources = getSelectedResources();
 		return (resources.length >= 0  && MapProject.getDefaultMapProject().mapsAreLoaded());
 	}

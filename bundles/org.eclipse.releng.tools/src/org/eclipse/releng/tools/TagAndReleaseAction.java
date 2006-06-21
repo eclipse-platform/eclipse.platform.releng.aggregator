@@ -39,7 +39,7 @@ public class TagAndReleaseAction extends CVSAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
-	protected boolean isEnabled() throws TeamException {
+	public boolean isEnabled() {
 		return true;
 	}
 }

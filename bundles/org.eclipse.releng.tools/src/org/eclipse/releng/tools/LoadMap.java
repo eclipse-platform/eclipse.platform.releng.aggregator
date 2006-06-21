@@ -107,7 +107,7 @@ public class LoadMap extends CVSAction {
 	/**
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
-	protected boolean isEnabled() throws TeamException {
+	public boolean isEnabled() {
 		IResource[] resources = getSelectedResources();
 		if (resources.length == 0) return false;
 		for (int i = 0; i < resources.length; i++) {

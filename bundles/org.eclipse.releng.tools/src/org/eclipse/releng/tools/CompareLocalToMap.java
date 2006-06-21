@@ -50,7 +50,7 @@ public class CompareLocalToMap extends WorkspaceAction {
 	 * 
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
-	protected boolean isEnabled() throws TeamException {
+	public boolean isEnabled() {
 		
 		boolean result = super.isEnabled();
 		if (!result) {
