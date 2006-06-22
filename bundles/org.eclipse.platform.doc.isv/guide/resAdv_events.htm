@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
 <HEAD>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -120,29 +120,32 @@ the project from your plug-in's directory.&nbsp; The workspace is locked (no res
 </TR>
 <TR>
 <TD>
-<P CLASS="CellBody"><b>PRE_AUTOBUILD</b></P>
+<P CLASS="CellBody"><b>PRE_BUILD</b></P>
 </TD>
 <TD>
 <P CLASS="CellBody">
-Notifies listeners before any auto-building occurs.&nbsp; This event is
-broadcast when the platform detects an auto-build needs to occur, regardless of
-whether auto-building is actually enabled.&nbsp; The workspace is <b> not</b> locked during this event (resources can be updated). 
-The event contains a resource delta describing the changes that have occurred since the last
-<b>POST_CHANGE</b> event was reported.</P>
+Notifies listeners before any building occurs.&nbsp; This event is
+broadcast when an explicit build is requested, or when the platform detects a 
+build needs to occur, regardless of whether auto-building is actually enabled. 
+The workspace is <b> not</b> locked during this event (resources can be updated). 
+The event contains a resource delta describing the changes that have occurred since the end of the last
+<b>POST_BUILD</b> event.</P>
 </TD>
 </TR>
 <tr>
 <TD>
 <P CLASS="CellBody">
 <b>
-POST_AUTOBUILD</b></P>
+POST_BUILD</b></P>
 </TD>
 <TD>
 <P CLASS="CellBody">
-Notifies listeners after any auto-building has occurred. This event is broadcast
-after the platform would have performed an auto-build, regardless of whether
-auto-building is actually enabled.&nbsp; The workspace is <b> not</b> locked during this event (resources can be updated). The event contains a resource delta describing the changes that have occurred since the last
-<b>POST_CHANGE</b> event was reported.</P>
+Notifies listeners after any building occurs.&nbsp; This event is
+broadcast after an explicit build is requested, or when the platform detects a 
+build needs to occur, regardless of whether auto-building is actually enabled. 
+The workspace is <b> not</b> locked during this event (resources can be updated). 
+The event contains a resource delta describing the changes that have occurred since the end of the last
+<b>POST_BUILD</b> event.</P>
 </TD>
 </tr>
 <tr>
@@ -153,8 +156,10 @@ POST_CHANGE</b></P>
 </TD>
 <TD>
 <P CLASS="CellBody">
-Describes a set of changes that have occurred to the workspace since the last <b> POST_CHANGE</b> event was reported. Triggered after a resource change API is used individually or in a batched set of workspace changes. Also triggered after any
-<b>PRE_AUTOBUILD</b> or <b>POST_AUTOBUILD</b>
+Describes a set of changes that have occurred to the workspace since the last 
+<b> POST_CHANGE</b> event was reported. Triggered after a resource change
+API is used individually or in a batched set of workspace changes. Also triggered 
+before any <b>PRE_BUILD</b> and after any <b>POST_BUILD</b>
 notification is complete. The event contains a resource delta describing the net changes since the last
 <b> POST_CHANGE</b> event.&nbsp; The workspace is
 locked (no resources can be updated) during this event.</P>
@@ -171,17 +176,18 @@ is registered for specific types of events and information about these events is
    ResourcesPlugin.getWorkspace().addResourceChangeListener(listener,
       IResourceChangeEvent.PRE_CLOSE
       | IResourceChangeEvent.PRE_DELETE
-      | IResourceChangeEvent.PRE_AUTO_BUILD
-      | IResourceChangeEvent.POST_AUTO_BUILD
+      | IResourceChangeEvent.PRE_BUILD
+      | IResourceChangeEvent.POST_BUILD
       | IResourceChangeEvent.POST_CHANGE);
 </pre>
-<p>The listener checks for each event type and reports information about the resource that was changed and the kinds of changes that occurred.&nbsp;
+<p>The listener checks for each event type and reports information about the 
+resource that was changed and the kinds of changes that occurred.&nbsp;
 Although this example is designed to show a general listener that handles all
 the types of resource events, a typical listener would register for just one
 type of event.
 </p>
-<p>The implementation for <b> POST_CHANGE </b> uses another class that can be used to
-visit the changes in the resource delta.
+<p>The implementation for <b> POST_CHANGE </b> uses another class that can 
+be used to visit the changes in the resource delta.
 </p>
 <pre>   import org.eclipse.resources.*;
    import org.eclipse.runtime.*;
@@ -204,12 +210,12 @@ visit the changes in the resource delta.
                System.out.println(&quot;Resources have changed.&quot;);
                event.getDelta().accept(new DeltaPrinter());
                break;
-            case IResourceChangeEvent.PRE_AUTO_BUILD:
-               System.out.println(&quot;Auto build about to run.&quot;);
+            case IResourceChangeEvent.PRE_BUILD:
+               System.out.println(&quot;Build about to run.&quot;);
                event.getDelta().accept(new DeltaPrinter());
                break;
-            case IResourceChangeEvent.POST_AUTO_BUILD:
-               System.out.println(&quot;Auto build complete.&quot;);
+            case IResourceChangeEvent.POST_BUILD:
+               System.out.println(&quot;Build complete.&quot;);
                event.getDelta().accept(new DeltaPrinter());
                break;
          }
@@ -284,8 +290,6 @@ Note:&nbsp; Some resource change events are triggered during processing that occ
 change listeners should be thread-safe.  See <a href="swt_threading.htm">Threading issues</a> for a discussion about
 thread safety with the UI.
 </i></blockquote>
-
-
 
 </BODY>
 </HTML>
