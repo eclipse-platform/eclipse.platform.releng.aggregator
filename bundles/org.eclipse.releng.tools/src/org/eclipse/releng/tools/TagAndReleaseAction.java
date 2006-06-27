@@ -14,7 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.ui.actions.CVSAction;
 
 
