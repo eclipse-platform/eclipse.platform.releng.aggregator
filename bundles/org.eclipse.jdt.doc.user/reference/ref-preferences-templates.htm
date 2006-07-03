@@ -79,6 +79,30 @@
         <tr>
           <td valign="top">
             <p>
+              Restore Removed
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              Restores any preconfigured templates that have been removed.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <p>
+              Revert to Default
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              Restores any preconfigured templates to their default. This does not modify user-created templates.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <p>
               Import...
             </p>
           </td>
@@ -97,42 +121,6 @@
           <td valign="top">
             <p>
               Exports all selected templates to the file system.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">
-            <p>
-              Export All...
-            </p>
-          </td>
-          <td valign="top">
-            <p>
-              Exports all templates to the file system.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">
-            <p>
-              Enable All
-            </p>
-          </td>
-          <td valign="top">
-            <p>
-              Enables all templates.
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">
-            <p>
-              Disable All
-            </p>
-          </td>
-          <td valign="top">
-            <p>
-              Disables all templates.
             </p>
           </td>
         </tr>
@@ -267,6 +255,26 @@
     <h2>
       Template variables
     </h2>
+    <p>
+      Template variables may be used in the template pattern. Variables are resolved
+      to their concrete value when the template is evaluated in its context. Variables may be specified
+      using <i>simple</i> or <i>full</i> syntax: 
+      <ul>
+        <li><strong>Simple</strong> variables take the following form:
+        <p>
+        <strong><code>${array}</code></strong>
+        </p><p>This defines a variable with name 'array' that will resolve to an array. It can be referenced multiple times as is.
+        </p></li>
+        <li><strong>Full</strong> variables take the following form:
+        <p><strong><code>${it:var(java.util.Iterator)}</code></strong>
+        </p><p>This defines a variable with name 'it' that will resolve to an local variable of type <code>java.util.Iterator</code>. It can be referenced multiple times by simply giving its name without the type: <code>${it}</code>.
+        </p></li>
+      </ul>
+    </p>
+    <p>
+    If there are several possible matches for a variable, they may be presented as proposals to the user.
+    </p>
+    
     <p>
       Both Java and Javadoc context define the following variables:
     </p>
@@ -506,12 +514,71 @@
         <tr>
           <td valign="top">
             <p>
+              <strong>${<i>id</i>:var(<i>type&nbsp;name</i>)}</strong>
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              Evaluates to a local variable visible in the current scope that is a
+              subtype of the given type. If no type is specified, any local variable matches.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <p>
+              <strong>${<i>id</i>:arg(<i>reference,&nbsp;n</i>)}</strong>
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              Evaluates to the <i>nth</i> type argument of the referenced template variable. The reference should be the name of another
+              template variable. Resolves to <code>java.lang.Object</code> if the referenced variable cannot be found or is not
+              a parameterized type.
+            </p>
+            <p>Example:<br>
+            <code>${type:arg(vector)}&nbsp;${first:name(type)}&nbsp;=&nbsp;${vector:var(java.util.Vector)}.get(0)</code>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <p>
+              <strong>${<i>id</i>:elem(<i>reference</i>)}</strong>
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              Evaluates to the element type of the referenced template variable. 
+              The reference should be the name of another
+              template variable that resolves to an array or an instance of <code>java.lang.Iterable</code>.
+              The <strong>elem</strong> variable type is similar to <strong><code>${:arg(<i>reference</i>,0)}</code></strong>, the difference
+              being that it also resolves the element type of an array.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <p>
+              <strong>${<i>id</i>:name(<i>reference</i>)}</strong>
+            </p>
+          </td>
+          <td valign="top">
+            <p>
+              Evaluates to an non-conflicting name for a new local variable of the type specified
+              by the reference. The reference may either be a Java type name or the name of another
+              template variable. The generated name respects the code style settings.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">
+            <p>
               <strong>${array}</strong>
             </p>
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for a declared array name.
+              Evaluates to a proposal for an array visible in the current scope.
             </p>
           </td>
         </tr>
@@ -523,7 +590,7 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for an element name of a declared array.
+              Evaluates to a name for a new local variable for an element of the <code>${array}</code> variable match.
             </p>
           </td>
         </tr>
@@ -535,7 +602,7 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for the element type of a declared array.
+              Evaluates to the element type of the <code>${array}</code> variable match.
             </p>
           </td>
         </tr>
@@ -547,7 +614,8 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for a declared collection implementing <code>java.util.Collection</code>.
+             Evaluates to a proposal for a collection visible in the current scope.
+             This is equivalent to <strong>${collection:var(java.util.Collection)}</strong>.
             </p>
           </td>
         </tr>
@@ -559,7 +627,8 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for an undeclared array index iterator.
+              Evaluates to a proposal for an undeclared array index. 
+             This is equivalent to <strong>${index:var(int)}</strong>.
             </p>
           </td>
         </tr>
@@ -571,7 +640,8 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for an undeclared collection iterator.
+              Evaluates to an unused name for a new local variable of type <code>java.util.Iterator</code>.
+             This is equivalent to <strong>${iterator:name(java.util.Iterator)}</strong>.
             </p>
           </td>
         </tr>
@@ -583,7 +653,7 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for a declared iterable name.
+              Evaluates to a proposal for an iterable or array visible in the current scope.
             </p>
           </td>
         </tr>
@@ -595,7 +665,7 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for an element name of a declared iterable.
+              Evaluates to a name for a new local variable for an element of the <code>${iterable}</code> variable match.
             </p>
           </td>
         </tr>
@@ -607,7 +677,7 @@
           </td>
           <td valign="top">
             <p>
-              Evaluates to a proposal for the element type of a declared iterable.
+             Evaluates to the element type of the <code>${iterable}</code> variable match.
             </p>
           </td>
         </tr>
