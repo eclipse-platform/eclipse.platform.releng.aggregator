@@ -33,7 +33,7 @@
     </p>
     <p>If there are several possible matches for a variable, they may be presented as proposals to the user.</p>
     
-    <h3><a name="general_vars">Generial Template Variables</a></h3>
+    <h3><a name="general_vars">General Template Variables</a></h3>
     <p>Both Java and Javadoc context define the following variables:</p>
     <table border="1" cellspacing="0" cellpadding="5" width="100%">
       <thead>
@@ -112,7 +112,8 @@
     </table>
     
     <h3><a name="java_vars">Java-Specific Template Variables</a></h3>
-    <p>The Java context additionally defines the following variables:</p>
+    <p>The Java context additionally defines the following variables.
+    	<b>Note:</b> In the table below, <i>id</i> is a user-chosen name of a new variable.</p>
     <table border="1" cellspacing="0" cellpadding="5" width="100%">
       <thead>
         <tr>
@@ -124,7 +125,13 @@
         <tr>
           <td><strong>${<i>id</i>:var(<i>type&nbsp;name</i>)}</strong></td>
           <td>Evaluates to a local variable visible in the current scope that is a
-              subtype of the given type. If no type is specified, any local variable matches.</td>
+              subtype of the given type. If no type is specified, any local variable matches.
+              <p>
+	              <strong>${array}</strong> is a shortcut for <strong>${array:var(java.lang.Object[])}</strong>, but also matches arrays of primitive types.<br>
+    	          <strong>${collection}</strong> is a shortcut for <strong>${collection:var(java.util.Collection)}</strong>.<br>
+        	      <strong>${iterable}</strong> is a shortcut for <strong>${collection:var(java.lang.Iterable)}</strong>, but also matches arrays.
+              </p>
+          </td>
         </tr>
         <tr>
           <td><strong>${<i>id</i>:arg(<i>reference,&nbsp;n</i>)}</strong></td>
@@ -133,7 +140,7 @@
             template variable. Resolves to <code>java.lang.Object</code> if the referenced variable cannot be found or is not
             a parameterized type.
             <p>Example:<br>
-              <code>${type:arg(vector)}&nbsp;${first:name(type)}&nbsp;=&nbsp;${vector:var(java.util.Vector)}.get(0)</code>
+              <code>${type:arg(vector, 0)}&nbsp;${first:name(type)}&nbsp;=&nbsp;${vector:var(java.util.Vector)}.get(0)</code>
             </p>
           </td>
         </tr>
@@ -144,13 +151,24 @@
               template variable that resolves to an array or an instance of <code>java.lang.Iterable</code>.
               The <strong>elem</strong> variable type is similar to <strong><code>${:arg(<i>reference</i>,0)}</code></strong>, the difference
               being that it also resolves the element type of an array.
+              <p>
+	              <strong>${array_type}</strong> is a shortcut for <strong>${array_type:elem(array)}</strong>.<br>
+	              <strong>${iterable_type}</strong> is a shortcut for <strong>${iterable_type:elem(iterable)}</strong>.
+              </p>
           </td>
         </tr>
         <tr>
           <td><strong>${<i>id</i>:name(<i>reference</i>)}</strong></td>
           <td>Evaluates to an non-conflicting name for a new local variable of the type specified
               by the reference. The reference may either be a Java type name or the name of another
-              template variable. The generated name respects the code style settings.</td>
+              template variable. The generated name respects the code style settings.
+              <p>
+	              <strong>${index}</strong> is a shortcut for <strong>${index:name(int)}</strong>.<br>
+	              <strong>${iterator}</strong> is a shortcut for <strong>${index:name(java.util.Iterator)}</strong>.<br>
+	              <strong>${array_element}</strong> is a shortcut for <strong>${array_element:name(array)}</strong>.<br>
+	              <strong>${iterable_element}</strong> is a shortcut for <strong>${iterable_element:name(iterable)}</strong>.
+              </p>
+          </td>
         </tr>
         <tr>
           <td><strong>${array}</strong></td>
@@ -158,11 +176,11 @@
         </tr>
         <tr>
           <td><strong>${array_element}</strong></td>
-          <td>Evaluates to a name for a new local variable for an element of the <code>${array}</code> variable match.</td>
+          <td>Evaluates to a name for a new local variable for an element of the <strong>${array}</strong> variable match.</td>
         </tr>
         <tr>
           <td><strong>${array_type}</strong></td>
-          <td>Evaluates to the element type of the <code>${array}</code> variable match.</td>
+          <td>Evaluates to the element type of the <strong>${array}</strong> variable match.</td>
         </tr>
         <tr>
           <td><strong>${collection}</strong></td>
@@ -172,7 +190,7 @@
         <tr>
           <td><strong>${index}</strong></td>
           <td>Evaluates to a proposal for an undeclared array index. 
-             This is equivalent to <strong>${index:var(int)}</strong>.</td>
+             This is equivalent to <strong>${index:name(int)}</strong>.</td>
         </tr>
         <tr>
           <td><strong>${iterator}</strong></td>
@@ -185,11 +203,11 @@
         </tr>
         <tr>
           <td><strong>${iterable_element}</strong></td>
-          <td>Evaluates to a name for a new local variable for an element of the <code>${iterable}</code> variable match.</td>
+          <td>Evaluates to a name for a new local variable for an element of the <strong>${iterable}</strong> variable match.</td>
         </tr>
         <tr>
           <td><strong>${iterable_type}</strong></td>
-          <td>Evaluates to the element type of the <code>${iterable}</code> variable match.</td>
+          <td>Evaluates to the element type of the <strong>${iterable}</strong> variable match.</td>
         </tr>
         <tr>
           <td><strong>${todo}</strong></td>
