@@ -15,10 +15,8 @@ import java.util.*;
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.CVSTeamProvider;
 import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
 import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
@@ -122,7 +120,7 @@ public class MapProject implements IResourceChangeListener {
 		}
 	}
 	
-	public void commitMapProject(String comment, IProgressMonitor  monitor) throws CoreException{;
+	public void commitMapProject(String comment, IProgressMonitor  monitor) throws CoreException{
 		try {
 			new CommitOperation(null, RepositoryProviderOperation.asResourceMappers(new IResource[] { project }), new Command.LocalOption[0], comment).run(monitor);
 		} catch (InvocationTargetException e) {
@@ -130,10 +128,6 @@ public class MapProject implements IResourceChangeListener {
 		} catch (InterruptedException e) {
 			// Ignore;
 		}
-	}
-
-	private  CVSTeamProvider getProvider(IResource resource) {
-		return (CVSTeamProvider)RepositoryProvider.getProvider(resource.getProject());
 	}
 	
 	public MapFile[] getMapFilesFor(IProject[] projects){
@@ -246,17 +240,6 @@ public class MapProject implements IResourceChangeListener {
 				return mapFiles[i];
 		}
 		return new MapFile(file);
-	}
-	private void removeMapFile(MapFile aFile){
-		ArrayList list = new ArrayList(Arrays.asList(mapFiles));
-		if(list.contains(aFile)){
-			if(list.size() <= 1){
-				mapFiles = null;
-			}else{
-				list.remove(aFile);
-				mapFiles = (MapFile[])list.toArray(new MapFile[list.size()]);
-			}
-		}	
 	}
 	private void addMapFile(MapFile aFile){
 		Set set = new HashSet(Arrays.asList(mapFiles));

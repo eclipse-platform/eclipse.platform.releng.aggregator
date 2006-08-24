@@ -64,8 +64,6 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
         }
     }
 
-    private String propertiesCopyright;
-    private String javaCopyright;
     private String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
     private Map log = new HashMap();
 

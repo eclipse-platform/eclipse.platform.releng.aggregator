@@ -84,15 +84,6 @@ public class MapProjectSelectionPage extends WizardPage {
 		
 		projectTree = createTree(topContainer);
 		projectTree.setInput(RelEngPlugin.getWorkspace().getRoot());
-		Runnable refresh = new Runnable() {
-			public void run() {
-				getShell().getDisplay().syncExec(new Runnable() {
-					public void run() {
-						projectTree.refresh();
-					}
-				});
-			}
-		};
 
         Dialog.applyDialogFont(parent);
         initializedViewer();

@@ -64,7 +64,7 @@ public class TagMap extends TagInRepositoryAction {
 					if (location == null) return new ICVSRemoteResource[0];
 				}
 				String module = tokenizer.nextToken();
-				String projectName = tokenizer.nextToken();
+				tokenizer.nextToken(); /* project name */
 				CVSTag tag = CVSTag.DEFAULT;
 				if (tokenizer.hasMoreTokens()) {
 					String tagName = tokenizer.nextToken();

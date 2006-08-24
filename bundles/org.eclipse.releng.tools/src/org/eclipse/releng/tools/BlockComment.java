@@ -27,7 +27,6 @@ public class BlockComment {
 	private static String newLine = System.getProperty("line.separator");
 	private String copyrightHolder;
 	private List nonIBMContributors = new ArrayList();
-	private String commentStart;
 	private String commentEnd;
 
 	
@@ -39,7 +38,6 @@ public class BlockComment {
 	public BlockComment(int commentStartLine, int commentEndLine, String comment, String commentStartString, String commentEndString) {
 		start = commentStartLine;
 		end = commentEndLine;
-		commentStart = commentStartString;
 		commentEnd = commentEndString;
 		contents = comment;
 	}

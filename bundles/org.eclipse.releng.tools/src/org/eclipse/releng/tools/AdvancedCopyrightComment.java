@@ -13,7 +13,6 @@ package org.eclipse.releng.tools;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -31,7 +30,6 @@ public class AdvancedCopyrightComment {
     private int commentStyle = 0;
     private int creationYear = -1;
     private int revisionYear = -1;
-    private List contributors;
     private String preYearComment = null;
     private String postYearComment = null;
 
@@ -39,7 +37,6 @@ public class AdvancedCopyrightComment {
         this.commentStyle = commentStyle;
        	this.creationYear = creationYear == -1 ? getPreferenceStore().getInt(RelEngCopyrightConstants.CREATION_YEAR_KEY) : creationYear;
         this.revisionYear = revisionYear;
-        this.contributors = contributors;
         this.preYearComment = preYearComment;
         this.postYearComment = postYearComment;
     }
@@ -81,19 +78,6 @@ public class AdvancedCopyrightComment {
 		    writer.println("###############################################################################"); //$NON-NLS-1$
 		    break;
 	    }
-	}
-
-	private void writeContributions(PrintWriter writer, String linePrefix) {
-		writer.println(linePrefix);
-		writer.println(linePrefix + "Contributors:"); //$NON-NLS-1$
-
-		if (contributors == null || contributors.size() <= 0)
-		    writer.println(linePrefix + "    IBM Corporation - initial API and implementation"); //$NON-NLS-1$
-		else {
-			Iterator i = contributors.iterator();
-			while (i.hasNext())
-			    writer.println(linePrefix + "    " + (String)i.next());  //$NON-NLS-1$
-		}
 	}
 
 	private void writeCommentEnd(PrintWriter writer) {
