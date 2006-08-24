@@ -60,7 +60,7 @@ public class CoreTestApplication implements IPlatformRunnable {
 			if (i == args.length - 1 || args[i + 1].startsWith("-")) {
 				continue;
 			}
-			String arg = args[++i];
+			++i;
 
 			// done checking for args.  Remember where an arg was found 
 			if (found) {
