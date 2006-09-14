@@ -445,6 +445,15 @@ line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719
 then perhaps you unzipped them into your "plugins" directory and your
 configuration might need to be refreshed. This can be accomplished by starting
 Eclipse with the <tt>-clean</tt> command line argument.</p>
+
+<h4>Hanging during class loading when out of permanent generation memory</h4>
+<p>
+The Sun VM may hang indefinitely during class loading if it runs out of permanent
+generation memory.  This will cause CPU usage to stay at 100% until the process
+is ended.  See the section <a href="#Running Eclipse">Running Eclipse</a> for details
+on addressing this VM problem.
+</p>
+
 <h4>XML files with UTF-8 byte order mark fail to have content type detected</h4>
 
 <p>Eclipse will fail to detect the proper content type for XML files that have a
@@ -1311,8 +1320,10 @@ Thus, to increase the available heap memory, you would typically use:</p>
 <p>
 When using a Sun VM, you may also need to increase the size of the permanent
 generation memory.  The default maximum is 64 megabytes, but more may
-be needed depending on your plug-in configuration and use.  The maximum
-permanent generation size is increased using the -XX:MaxPermSize=&lt;memory size&gt; argument:
+be needed depending on your plug-in configuration and use.  When the VM runs
+out of permanent generation memory, it may crash or hang during class loading.
+This failure is less common when using Sun JRE version 1.5.0_07 or greater.
+The maximum permanent generation size is increased using the -XX:MaxPermSize=&lt;memory size&gt; argument:
 <blockquote>
   <p><code>eclipse -vmargs -XX:MaxPermSize=&lt;memory size&gt;</code></p>
 </blockquote>
