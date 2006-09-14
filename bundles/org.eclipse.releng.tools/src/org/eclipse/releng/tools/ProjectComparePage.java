@@ -98,7 +98,7 @@ public class ProjectComparePage extends WizardPage{
 		noneChangeMessage.setFont(font);
 		
 		buildNotesButton = new Button(composite,SWT.CHECK);
-		buildNotesButton.setText("Generate Build Notes");
+		buildNotesButton.setText(Messages.getString("ProjectComparePage.2")); //$NON-NLS-1$
 		buildNotesButton.setFont(font);
 		buildNotesButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -118,8 +118,8 @@ public class ProjectComparePage extends WizardPage{
 	
 	private void initBuildNotesButton() {
 		if( settings == null || settings.get(NOTES_BUTTON_KEY) == null) {
-			buildNotesButton.setSelection(true);
-			buildNotesButtonChecked = true;
+			buildNotesButton.setSelection(false);
+			buildNotesButtonChecked = false;
 			return;
 		}else{
 			boolean b = settings.getBoolean(NOTES_BUTTON_KEY);
@@ -186,7 +186,7 @@ public class ProjectComparePage extends WizardPage{
 	}
 	
 	private ParticipantPageSaveablePart createCompareInput() {	
-		ISynchronizeParticipant participant = new CompareParticipant(new CVSCompareSubscriber(new IResource[0], new CVSTag[0], "RelEng Release"));
+		ISynchronizeParticipant participant = new CompareParticipant(new CVSCompareSubscriber(new IResource[0], new CVSTag[0], Messages.getString("ProjectComparePage.3"))); //$NON-NLS-1$
 		configuration = participant.createPageConfiguration();
 		configuration.setMenuGroups(ISynchronizePageConfiguration.P_TOOLBAR_MENU, new String[] { 
 				ISynchronizePageConfiguration.NAVIGATE_GROUP,  

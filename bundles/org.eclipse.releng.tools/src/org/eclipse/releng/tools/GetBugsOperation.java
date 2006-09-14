@@ -39,6 +39,7 @@ import org.eclipse.team.internal.ccvs.core.ICVSResource;
 import org.eclipse.team.internal.ccvs.core.ILogEntry;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.ResourceSyncInfo;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.operations.RemoteLogOperation;
 import org.eclipse.team.internal.ccvs.ui.operations.RemoteLogOperation.LogEntryCache;
 
@@ -61,14 +62,16 @@ public class GetBugsOperation {
 			wizard.getContainer().run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor) {
 					final int totalWork = 101;
-					monitor.beginTask("Beginning Bug Operation", totalWork);
+					monitor
+							.beginTask(
+									Messages.getString("GetBugsOperation.0"), totalWork); //$NON-NLS-1$
 
 					// task 1 -- get bug number from comments
 					syncInfos = syncInfoSet.getSyncInfos();
 					Set bugTree = getBugNumbersFromComments(syncInfos,
 							new SubProgressMonitor(monitor, 5,
 									SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-					
+
 					// task 2 -- create map of bugs and summaries
 					Integer[] bugs = (Integer[]) bugTree
 							.toArray(new Integer[0]);
@@ -84,9 +87,9 @@ public class GetBugsOperation {
 				}
 			});
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 		}
 	}
 
@@ -110,8 +113,11 @@ public class GetBugsOperation {
 				ICVSResource cvsLocal = CVSWorkspaceRoot
 						.getCVSResourceFor(localResource);
 				ResourceSyncInfo rsync = cvsLocal.getSyncInfo();
-				localTag = new CVSTag(rsync.getRevision(), CVSTag.VERSION);
-			} else {
+				if (rsync != null) {
+					localTag = new CVSTag(rsync.getRevision(), CVSTag.VERSION);
+				}
+			}
+			if (localTag == null) {
 				localTag = getProjectTag(localResource.getProject());
 			}
 
@@ -122,15 +128,20 @@ public class GetBugsOperation {
 						.getRemoteResourceFor(localResource);
 				remoteTag = TAG_1_1;
 			} else {
-				remoteTag = new CVSTag(cvsRemoteResource.getSyncInfo()
-						.getRevision(), CVSTag.VERSION);
+				ResourceSyncInfo rsync = cvsRemoteResource.getSyncInfo();
+				if (rsync != null) {
+					remoteTag = new CVSTag(rsync.getRevision(), CVSTag.VERSION);
+				}
+			}
+			if (remoteTag == null) {
+				remoteTag = TAG_1_1;
 			}
 
 			LogEntryCache cache = new RemoteLogOperation.LogEntryCache();
 
 			RemoteLogOperation logOp = new RemoteLogOperation(null,
-					new ICVSRemoteResource[] { cvsRemoteResource }, localTag, remoteTag,
-					cache);
+					new ICVSRemoteResource[] { cvsRemoteResource }, localTag,
+					remoteTag, cache);
 			logOp.run(monitor);
 			ILogEntry[] logEntries = cache.getLogEntries(cvsRemoteResource);
 			for (int i = 0; i < logEntries.length; i++) {
@@ -141,13 +152,11 @@ public class GetBugsOperation {
 				}
 			}
 		} catch (CVSException e) {
-			e.printStackTrace();
+			CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 		}
 	}
 
@@ -157,13 +166,14 @@ public class GetBugsOperation {
 			ICVSResource cvsResource = CVSWorkspaceRoot
 					.getCVSResourceFor(dotProject);
 			try {
-				CVSTag tag = cvsResource.getSyncInfo().getTag();
-				if (tag != null) {
-					return tag;
+				if (cvsResource != null && cvsResource.getSyncInfo() != null) {
+					CVSTag tag = cvsResource.getSyncInfo().getTag();
+					if (tag != null) {
+						return tag;
+					}
 				}
 			} catch (CVSException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 			}
 		}
 		return new CVSTag();
@@ -186,7 +196,8 @@ public class GetBugsOperation {
 	 * bug
 	 */
 	protected Map getBugzillaSummaries(Integer[] bugs, IProgressMonitor monitor) {
-		monitor.beginTask("Fetching Bugzilla Summaries.", bugs.length + 1);
+		monitor.beginTask(
+				Messages.getString("GetBugsOperation.1"), bugs.length + 1); //$NON-NLS-1$
 		final String BUG_DATABASE_PREFIX = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=";
 		final String BUG_DATABASE_POSTFIX = "&ctype=xml";
 		int summaryStartIndex = 0;
@@ -232,7 +243,7 @@ public class GetBugsOperation {
 					}
 				}
 			} catch (IOException e) {
-				e.printStackTrace();
+				CVSUIPlugin.openError(wizard.getShell(), null, null, e);
 			}
 			monitor.worked(1);
 		}

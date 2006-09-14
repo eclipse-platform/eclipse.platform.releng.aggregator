@@ -48,23 +48,41 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.core.synchronize.SyncInfoSet;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 public class BuildNotesPage extends WizardPage {
 
+	private static final String FOLDER_BIN = "bin";
+
+	private static final String EXT_HTML = "html";
+
+	private static final String BUILD_NOTES_HTML = "/build_notes.html";
+
 	private String FILE_PATH_KEY = "BuildNotesPage.filePath";
+
 	private String UPDATE_FILE_KEY = "BuildNotesPage.updateNotesButton";
+
 	private Button updateNotesButton;
+
 	private boolean updateNotesButtonChecked;
+
 	private SyncInfoSet syncInfoSet;
+
 	private IDialogSettings settings;
-	private Text text;
-	private Map map;
+
+	private Text reportText;
+
+	private Map bugSummaryMap;
+
 	private boolean validPath;
+
 	private Text filePath;
+
 	private Button browse;
+
 	private IFile iFile;
 
 	protected BuildNotesPage(String pageName, String title,
@@ -82,7 +100,7 @@ public class BuildNotesPage extends WizardPage {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 3;
 		updateNotesButton = new Button(composite, SWT.CHECK);
-		updateNotesButton.setText("Update Build Notes File");
+		updateNotesButton.setText(Messages.getString("BuildNotesPage.2")); //$NON-NLS-1$
 		updateNotesButton.setLayoutData(data);
 		updateNotesButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -101,7 +119,7 @@ public class BuildNotesPage extends WizardPage {
 		});
 
 		Label label = new Label(composite, SWT.LEFT);
-		label.setText("Build Notes File:");
+		label.setText(Messages.getString("BuildNotesPage.3")); //$NON-NLS-1$
 
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		filePath = new Text(composite, SWT.BORDER);
@@ -115,26 +133,27 @@ public class BuildNotesPage extends WizardPage {
 							.getWorkspace().getRoot()).getFile(path);
 					if (path.isValidPath(filePath.getText())
 							&& file.getParent().exists()) {
-						if (path.getFileExtension().equals("html")) {
+						if (path.getFileExtension().equals(EXT_HTML)) {
 							setErrorMessage(null);
 							validPath = true;
 							iFile = file;
 						} else {
-							setErrorMessage("Invalid file extension.");
+							setErrorMessage(Messages
+									.getString("BuildNotesPage.5")); //$NON-NLS-1$
 						}
 					} else {
-						setErrorMessage("Invalid path.");
+						setErrorMessage(Messages.getString("BuildNotesPage.6")); //$NON-NLS-1$
 					}
 				} else {
 					// path is empty
-					setErrorMessage("Input a file path.");
+					setErrorMessage(Messages.getString("BuildNotesPage.7")); //$NON-NLS-1$
 				}
 				updateButtons();
 			}
 		});
 
 		browse = new Button(composite, SWT.PUSH);
-		browse.setText("Browse");
+		browse.setText(Messages.getString("BuildNotesPage.8")); //$NON-NLS-1$
 		browse.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				IResource iResource = buildNotesFileDialog();
@@ -144,47 +163,48 @@ public class BuildNotesPage extends WizardPage {
 				} else if (iResource instanceof IFolder) {
 					IFolder iFolder = (IFolder) iResource;
 					filePath.setText(iFolder.getFullPath().toString()
-							+ "/build_notes.html");
+							+ BUILD_NOTES_HTML);
 				} else if (iResource instanceof IProject) {
 					IProject iProject = (IProject) iResource;
 					filePath.setText(iProject.getFullPath().toString()
-							+ "/build_notes.html");
+							+ BUILD_NOTES_HTML);
 				}
 			}
 		});
 
 		data = new GridData(GridData.FILL_BOTH);
 		data.horizontalSpan = 3;
-		text = new Text(composite, SWT.READ_ONLY | SWT.MULTI | SWT.BORDER
+		reportText = new Text(composite, SWT.READ_ONLY | SWT.MULTI | SWT.BORDER
 				| SWT.WRAP | SWT.V_SCROLL);
-		text.setLayoutData(data);
-	
+		reportText.setLayoutData(data);
+
 		initialize();
 		setControl(composite);
 	}
 
 	private void initialize() {
-		initSelections();		
+		initSelections();
 	}
 
 	/*
 	 * initialize the controls on the page
 	 */
 	private void initSelections() {
-		if( settings == null || settings.get(UPDATE_FILE_KEY) == null || settings.get(FILE_PATH_KEY) == null) {
+		if (settings == null || settings.get(UPDATE_FILE_KEY) == null
+				|| settings.get(FILE_PATH_KEY) == null) {
 			updateNotesButton.setSelection(false);
 			updateNotesButtonChecked = false;
 			browse.setEnabled(false);
 			filePath.setEnabled(false);
 			return;
-		}else{
+		} else {
 			boolean b = settings.getBoolean(UPDATE_FILE_KEY);
 			updateNotesButton.setSelection(b);
 			updateNotesButtonChecked = b;
 			filePath.setText(settings.get(FILE_PATH_KEY));
 			browse.setEnabled(true);
 			filePath.setEnabled(true);
-		}		
+		}
 	}
 
 	/*
@@ -199,8 +219,8 @@ public class BuildNotesPage extends WizardPage {
 	}
 
 	/*
-	 * if file doesn't already exist, prepare new one
-	 * otherwise call method to write to existing file
+	 * if file doesn't already exist, prepare new one otherwise call method to
+	 * write to existing file
 	 */
 	public void updateNotesFile() {
 		if (!filePath.isDisposed()) {
@@ -218,8 +238,11 @@ public class BuildNotesPage extends WizardPage {
 									public void run(IProgressMonitor monitor)
 											throws InvocationTargetException,
 											InterruptedException {
-										monitor.beginTask("Creating file...",
-												100);
+										monitor
+												.beginTask(
+														Messages
+																.getString("BuildNotesPage.11"), //$NON-NLS-1$
+														100);
 										StringBuffer buffer = new StringBuffer();
 										buffer
 												.append("<!doctype html public \"-//w3c//dtd html 4.0 transitional//en\">\n");
@@ -230,11 +253,11 @@ public class BuildNotesPage extends WizardPage {
 										buffer
 												.append("   <meta name=\"Build\" content=\"Build\">\n");
 										buffer
-												.append("   <title>Eclipse Platform Release Notes (3.2) - JFace and Workbench</title>\n");
+												.append("   <title>Eclipse Platform Release Notes (3.3) - JFace and Workbench</title>\n");
 										buffer.append("</head>\n\n");
 										buffer.append("<body>\n\n");
 										buffer
-												.append("<h1>Eclipse Platform Build Notes (3.2)<br>\n");
+												.append("<h1>Eclipse Platform Build Notes (3.3)<br>\n");
 										buffer
 												.append("JFace and Workbench</h1>");
 
@@ -243,21 +266,23 @@ public class BuildNotesPage extends WizardPage {
 										try {
 											file.create(c, true, monitor);
 										} catch (CoreException e) {
-											e.printStackTrace();
+											CVSUIPlugin.openError(getShell(),
+													null, null, e);
 										}
 
 										try {
 											c.close();
 										} catch (IOException e) {
-											e.printStackTrace();
+											CVSUIPlugin.openError(getShell(),
+													null, null, e);
 										}
 										monitor.done();
 									}
 								});
 					} catch (InvocationTargetException e) {
-						e.printStackTrace();
+						CVSUIPlugin.openError(getShell(), null, null, e);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						CVSUIPlugin.openError(getShell(), null, null, e);
 					}
 					writeUpdate(file);
 				}
@@ -295,7 +320,7 @@ public class BuildNotesPage extends WizardPage {
 				insertBuffer.append("  <p>Problem reports updated</p>\n");
 				insertBuffer.append("  <p>\n");
 
-				Iterator i = map.entrySet().iterator();
+				Iterator i = bugSummaryMap.entrySet().iterator();
 				while (i.hasNext()) {
 					Map.Entry entry = (Map.Entry) i.next();
 					Integer bug = (Integer) entry.getKey();
@@ -316,47 +341,47 @@ public class BuildNotesPage extends WizardPage {
 						public void run(IProgressMonitor monitor)
 								throws InvocationTargetException,
 								InterruptedException {
-							monitor.beginTask("Updating File...", 100);
+							monitor.beginTask(Messages
+									.getString("BuildNotesPage.38"), 100); //$NON-NLS-1$
 							ByteArrayInputStream c = new ByteArrayInputStream(
 									buffer.toString().getBytes());
 							try {
 								file.setContents(c, true, true, monitor);
 								c.close();
 							} catch (CoreException e) {
-								e.printStackTrace();
+								CVSUIPlugin
+										.openError(getShell(), null, null, e);
 							} catch (IOException e) {
-								e.printStackTrace();
+								CVSUIPlugin
+										.openError(getShell(), null, null, e);
 							}
 							monitor.done();
 						}
 					});
 				} catch (InvocationTargetException e) {
-					e.printStackTrace();
+					CVSUIPlugin.openError(getShell(), null, null, e);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					CVSUIPlugin.openError(getShell(), null, null, e);
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			CVSUIPlugin.openError(getShell(), null, null, e);
 		} catch (CoreException e) {
-			e.printStackTrace();
+			CVSUIPlugin.openError(getShell(), null, null, e);
 		}
 	}
 
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
-			text.setText("");
+			reportText.setText("");
 			GetBugsOperation getBugsOperation = new GetBugsOperation(
 					(ReleaseWizard) getWizard(), syncInfoSet);
 			getBugsOperation.run(this);
 			String tempText = outputReport();
-			if(tempText != null) {
-				text.setText(tempText);
+			if (tempText != null) {
+				reportText.setText(tempText);
 			}
-			System.out.println(text.getText());
-			System.out.println();
-			System.out.println();
 		}
 	}
 
@@ -372,12 +397,12 @@ public class BuildNotesPage extends WizardPage {
 				if (element instanceof IFile) {
 					IFile file = (IFile) element;
 					IPath path = file.getFullPath();
-					if (path.getFileExtension().equals("html")) {
+					if (path.getFileExtension().equals(EXT_HTML)) {
 						return true;
 					}
 				} else if (element instanceof IFolder) {
 					IFolder folder = (IFolder) element;
-					if (folder.getName().equals("bin")) {
+					if (folder.getName().equals(FOLDER_BIN)) {
 						return false;
 					}
 					return true;
@@ -390,9 +415,8 @@ public class BuildNotesPage extends WizardPage {
 
 		dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());
 		dialog.setAllowMultiple(false);
-		dialog.setTitle("Select Build Notes File");
-		dialog
-				.setMessage("Select the file to update with the new build notes.");
+		dialog.setTitle(Messages.getString("BuildNotesPage.42")); //$NON-NLS-1$
+		dialog.setMessage(Messages.getString("BuildNotesPage.43")); //$NON-NLS-1$
 		if (dialog.open() == Window.OK) {
 			Object[] elements = dialog.getResult();
 			if (elements != null && elements.length > 0) {
@@ -410,7 +434,7 @@ public class BuildNotesPage extends WizardPage {
 		}
 		return null;
 	}
-	
+
 	public boolean isUpdateNotesButtonChecked() {
 		return updateNotesButtonChecked;
 	}
@@ -420,16 +444,16 @@ public class BuildNotesPage extends WizardPage {
 	}
 
 	/**
-	 *  return string of report
+	 * return string of report
 	 */
 	public String outputReport() {
 		StringBuffer buffer = new StringBuffer();
-		if (map.size() < 1) {
+		if (bugSummaryMap.size() < 1) {
 			buffer.append("The map file has been updated.\n");
 		} else {
 			buffer
-					.append("The map file has been updated for the following fixes:\n");
-			Iterator i = map.entrySet().iterator();
+					.append("The map file has been updated for the following Bug changes:\n");
+			Iterator i = bugSummaryMap.entrySet().iterator();
 
 			while (i.hasNext()) {
 				Map.Entry entry = (Map.Entry) i.next();
@@ -448,7 +472,7 @@ public class BuildNotesPage extends WizardPage {
 	}
 
 	public void setMap(Map map) {
-		this.map = map;
+		this.bugSummaryMap = map;
 	}
 
 	public boolean getValidPath() {

@@ -120,10 +120,10 @@ public class ReleaseWizard extends Wizard {
 	 */
 	public void addPages() {
 		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage",
-				"Map Project Selection",
+				Messages.getString("ReleaseWizard.4"), //$NON-NLS-1$
 				section,
 				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
-		mapSelectionPage.setDescription("Specify a map project to release projects");
+		mapSelectionPage.setDescription(Messages.getString("ReleaseWizard.3")); //$NON-NLS-1$
 		addPage(mapSelectionPage);
 		
 		projectSelectionPage = new ProjectSelectionPage(Messages.getString("ReleaseWizard.5"), //$NON-NLS-1$
@@ -146,10 +146,10 @@ public class ReleaseWizard extends Wizard {
 		projectComparePage.setDescription(Messages.getString("ReleaseWizard.13")); //$NON-NLS-1$
 		addPage(projectComparePage);
 		
-		buildNotesPage = new BuildNotesPage("Build Notes Page",
-				"Notes for Build Changes", section, TeamUIPlugin
+		buildNotesPage = new BuildNotesPage(Messages.getString("ReleaseWizard.2"), //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.1"), section, TeamUIPlugin //$NON-NLS-1$
 				.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
-		buildNotesPage.setDescription("List of Changes for Build");
+		buildNotesPage.setDescription(Messages.getString("ReleaseWizard.0")); //$NON-NLS-1$
 		addPage(buildNotesPage);
 		
 		mapComparePage = new MapFileComparePage(Messages.getString("ReleaseWizard.14"), //$NON-NLS-1$
@@ -176,7 +176,7 @@ public class ReleaseWizard extends Wizard {
 							InterruptedException {
 						IFile iFile = buildNotesPage.getIFile();
 						IProject iProject = iFile.getProject();
-						monitor.beginTask("Releasing build notes file", 100);
+						monitor.beginTask(Messages.getString("ReleaseWizard.20"), 100); //$NON-NLS-1$
 						new CommitOperation(
 								null,
 								RepositoryProviderOperation
@@ -233,7 +233,7 @@ public class ReleaseWizard extends Wizard {
 					if (tagPage.isMoveButtonSelected()) {
 						operation.moveTag();
 					}
-					monitor.beginTask("Releasing", 100);
+					monitor.beginTask(Messages.getString("ReleaseWizard.21"), 100); //$NON-NLS-1$
 					operation.run(new SubProgressMonitor(monitor, 90));
 					if (operation.isMapFileUpdated()) {
 						try {						
@@ -253,14 +253,14 @@ public class ReleaseWizard extends Wizard {
 						IStatus[] errors = operation.getErrors();
 						IStatus status;
                         if (errors.length == 0) {
-                            status = new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "Map file was not committed", null);
+                            status = new Status(IStatus.ERROR, RelEngPlugin.ID, 0, Messages.getString("ReleaseWizard.22"), null); //$NON-NLS-1$
                         } else if (errors.length == 1) {
 							status = errors[0];
 						} else {
-							status = new MultiStatus(RelEngPlugin.ID, 0, errors, "Errors occurred during release", null);
+							status = new MultiStatus(RelEngPlugin.ID, 0, errors, Messages.getString("ReleaseWizard.23"), null); //$NON-NLS-1$
 						}
-						ErrorDialog.openError(getShell(), "Release Failed", 
-								"There were errors reported during the release. The map files have not been updated", 
+						ErrorDialog.openError(getShell(), Messages.getString("ReleaseWizard.24"),  //$NON-NLS-1$
+								Messages.getString("ReleaseWizard.25"),  //$NON-NLS-1$
 								status, IStatus.ERROR | IStatus.WARNING);
 					}
 				}
