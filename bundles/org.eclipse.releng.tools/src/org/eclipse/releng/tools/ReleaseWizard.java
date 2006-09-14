@@ -13,12 +13,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jface.dialogs.*;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.*;
@@ -30,7 +29,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.client.Command;
 import org.eclipse.team.internal.ccvs.ui.*;
+import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
+import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
 import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
@@ -51,6 +53,7 @@ public class ReleaseWizard extends Wizard {
 	private ProjectComparePage projectComparePage;
 	private MapFileComparePage mapComparePage;
 	private CommitCommentPage commentPage;
+	private BuildNotesPage buildNotesPage;
 
 	private Dialog parentDialog;
 	private IDialogSettings section;
@@ -139,9 +142,15 @@ public class ReleaseWizard extends Wizard {
 		
 		projectComparePage = new ProjectComparePage(Messages.getString("ReleaseWizard.11"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.12"), 
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
+				section, TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
 		projectComparePage.setDescription(Messages.getString("ReleaseWizard.13")); //$NON-NLS-1$
 		addPage(projectComparePage);
+		
+		buildNotesPage = new BuildNotesPage("Build Notes Page",
+				"Notes for Build Changes", section, TeamUIPlugin
+				.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+		buildNotesPage.setDescription("List of Changes for Build");
+		addPage(buildNotesPage);
 		
 		mapComparePage = new MapFileComparePage(Messages.getString("ReleaseWizard.14"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.15"), 
@@ -153,11 +162,67 @@ public class ReleaseWizard extends Wizard {
 				Messages.getString("ReleaseWizard.18"), TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE), Messages.getString("ReleaseWizard.19")); //$NON-NLS-1$ //$NON-NLS-2$
 		addPage(commentPage);
 	}
+	
+	/*
+	 * commit buildnotes file if update option selected
+	 */
+    public boolean buildNotesOperation() {
+		if (buildNotesPage.isUpdateNotesButtonChecked()) {
+			buildNotesPage.updateNotesFile();
+			try {
+				getContainer().run(true, true, new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor)
+							throws InvocationTargetException,
+							InterruptedException {
+						IFile iFile = buildNotesPage.getIFile();
+						IProject iProject = iFile.getProject();
+						monitor.beginTask("Releasing build notes file", 100);
+						new CommitOperation(
+								null,
+								RepositoryProviderOperation
+										.asResourceMappers(new IResource[] { iProject }),
+								new Command.LocalOption[0], commentPage
+										.getComment()).run(monitor);
+						monitor.done();
+					}
+				});
+			} catch (InterruptedException e) {
+				// Cancelled.
+				return false;
+			} catch (InvocationTargetException e) {
+				CVSUIPlugin.openError(getShell(), null, null, e);
+			}
+			checkProjects();
+		}
+		return true;
+	}
+
+    /*
+     * add project of build notes file if not already in selected projects
+     */
+	public void checkProjects() {
+		IProject[] temp = new IProject[selectedProjects.length + 1];
+		for (int i = 0; i < selectedProjects.length; i++) {
+			if (selectedProjects[i] == buildNotesPage.getIFile().getProject()) {
+				return;
+			}
+		}
+		System.arraycopy(selectedProjects, 0, temp, 0, selectedProjects.length);
+		temp[temp.length - 1] = buildNotesPage.getIFile().getProject();
+		selectedProjects = temp;
+	}
+	
 	/**
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
 	public boolean performFinish() {
 		if(!isProjectSelected())return false;
+		
+		// Build notes file update cancelled. Close dialog.
+		if (!buildNotesOperation()) {
+			return true;
+		}
+		
 		try {
 			getContainer().run(true, true, new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)
@@ -202,6 +267,8 @@ public class ReleaseWizard extends Wizard {
 			});
 			mapSelectionPage.saveSettings();
 			projectSelectionPage.saveSettings();
+			projectComparePage.saveSettings();
+			buildNotesPage.saveSettings();
 			tagPage.saveSettings();
 			return true;
 		} catch (InterruptedException e) {
@@ -248,8 +315,18 @@ public class ReleaseWizard extends Wizard {
 		}
 		if (page == mapComparePage)
 			return commentPage;
-		if (page == projectComparePage)
+		if (page == projectComparePage) {
+			if (projectComparePage.isBuildNotesButtonChecked()) {
+				buildNotesPage.setSyncInfoSet(projectComparePage
+						.getSyncInfoSet());
+				return buildNotesPage;
+			} else {
+				return tagPage;
+			}
+		}
+		if (page == buildNotesPage) {
 			return tagPage;
+		}
 		return null;
 	}
 
@@ -364,7 +441,7 @@ public class ReleaseWizard extends Wizard {
 
 	public MapProject getMapProject(){
 		return mapProject;
-	}
+	}	
 	public void boadcastMapProjectChange(MapProject m){
 		mapProject = m;
 		projectSelectionPage.updateMapProject(m);

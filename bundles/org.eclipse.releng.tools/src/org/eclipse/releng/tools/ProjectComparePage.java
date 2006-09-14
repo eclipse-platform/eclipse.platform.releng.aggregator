@@ -13,22 +13,35 @@ package org.eclipse.releng.tools;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.core.resources.*;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.core.synchronize.SyncInfoSet;
+import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
 import org.eclipse.team.internal.ui.synchronize.ChangeSetModelManager;
-import org.eclipse.team.ui.synchronize.*;
+import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
+import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
+import org.eclipse.team.ui.synchronize.ParticipantPageSaveablePart;
 import org.eclipse.ui.part.PageBook;
 
 /**
@@ -38,6 +51,11 @@ import org.eclipse.ui.part.PageBook;
  */
 public class ProjectComparePage extends WizardPage{
 
+	private IDialogSettings settings;
+	private String NOTES_BUTTON_KEY = "ProjectComparePage.buildNotesButton";
+	private SyncInfoSet syncInfoSet;
+	private Button buildNotesButton;
+	private boolean buildNotesButtonChecked;
 	private PageBook pageBook;
 	private Control compareView;
 	private Label noneChangeMessage;
@@ -46,9 +64,11 @@ public class ProjectComparePage extends WizardPage{
 	private ParticipantPageSaveablePart input;
 
 	public ProjectComparePage(String pageName, 
-			String title, 
+			String title,
+			IDialogSettings settings,
 			ImageDescriptor image) {
 		super(pageName, title, image);
+		this.settings = settings;
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -63,7 +83,6 @@ public class ProjectComparePage extends WizardPage{
 		composite.setFont(font);
 		
 		pageBook = new PageBook(composite, SWT.NONE);
-		composite.setLayout(new GridLayout());
 		pageBook.setLayoutData(new GridData(GridData.FILL_BOTH));
 		pageBook.setFont(font);
 		
@@ -78,7 +97,35 @@ public class ProjectComparePage extends WizardPage{
 		noneChangeMessage.setLayoutData(data);
 		noneChangeMessage.setFont(font);
 		
+		buildNotesButton = new Button(composite,SWT.CHECK);
+		buildNotesButton.setText("Generate Build Notes");
+		buildNotesButton.setFont(font);
+		buildNotesButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				buildNotesButtonChecked = buildNotesButton.getSelection();
+			}
+		});
+		
+		initialize();
 		setControl(composite);
+	}
+	
+	
+	private void initialize() {
+		initBuildNotesButton();
+	}
+	
+	
+	private void initBuildNotesButton() {
+		if( settings == null || settings.get(NOTES_BUTTON_KEY) == null) {
+			buildNotesButton.setSelection(true);
+			buildNotesButtonChecked = true;
+			return;
+		}else{
+			boolean b = settings.getBoolean(NOTES_BUTTON_KEY);
+			buildNotesButton.setSelection(b);
+			buildNotesButtonChecked = b;
+		}		
 	}
 	
 	
@@ -182,7 +229,22 @@ public class ProjectComparePage extends WizardPage{
 		}
 		participant.refreshNow(projects, "", monitor);
 		IResource[] r = participant.getSyncInfoSet().members(ResourcesPlugin.getWorkspace().getRoot());
+		syncInfoSet = participant.getSyncInfoSet();
 		return r;
 	}
+	
+	/**
+	 * Return true if button is checked 
+	 */
+	public boolean isBuildNotesButtonChecked(){
+		return buildNotesButtonChecked;
+	}
+	
+	public SyncInfoSet getSyncInfoSet(){
+		return syncInfoSet;
+	}
+	
+	public void saveSettings() {
+		settings.put(NOTES_BUTTON_KEY, buildNotesButtonChecked);		
+	}
 }
-
