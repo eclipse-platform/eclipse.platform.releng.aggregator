@@ -52,9 +52,13 @@ public class GetBugsOperation {
 
 	private SyncInfo[] syncInfos;
 
+	private Pattern bugPattern;
+
 	protected GetBugsOperation(ReleaseWizard wizard, SyncInfoSet syncInfoSet) {
 		this.wizard = wizard;
 		this.syncInfoSet = syncInfoSet;
+		bugPattern = Pattern.compile("bug (\\d+)", Pattern.CASE_INSENSITIVE
+				| Pattern.UNICODE_CASE);
 	}
 
 	protected void run(final BuildNotesPage page) {
@@ -186,10 +190,9 @@ public class GetBugsOperation {
 		if (comment == null) {
 			return;
 		}
-		Pattern pattern = Pattern.compile("[0-9][0-9][0-9][0-9][0-9]*");
-		Matcher matcher = pattern.matcher(comment);
+		Matcher matcher = bugPattern.matcher(comment);
 		while (matcher.find()) {
-			Integer bugNumber = new Integer(matcher.group());
+			Integer bugNumber = new Integer(matcher.group(1));
 			set.add(bugNumber);
 		}
 	}

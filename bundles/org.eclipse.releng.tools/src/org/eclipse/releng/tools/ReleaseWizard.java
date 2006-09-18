@@ -167,7 +167,7 @@ public class ReleaseWizard extends Wizard {
 	 * commit buildnotes file if update option selected
 	 */
     public boolean buildNotesOperation() {
-		if (buildNotesPage.isUpdateNotesButtonChecked()) {
+		if (buildNotesPage.isUpdateNotesButtonChecked() && projectComparePage.isBuildNotesButtonChecked()) {
 			buildNotesPage.updateNotesFile();
 			try {
 				getContainer().run(true, true, new IRunnableWithProgress() {
