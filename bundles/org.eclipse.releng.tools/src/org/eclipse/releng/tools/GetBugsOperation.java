@@ -69,14 +69,14 @@ public class GetBugsOperation {
 					// task 1 -- get bug number from comments
 					syncInfos = syncInfoSet.getSyncInfos();
 					Set bugTree = getBugNumbersFromComments(syncInfos,
-							new SubProgressMonitor(monitor, 5,
+							new SubProgressMonitor(monitor, 85,
 									SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 
 					// task 2 -- create map of bugs and summaries
 					Integer[] bugs = (Integer[]) bugTree
 							.toArray(new Integer[0]);
 					final TreeMap map = (TreeMap) getBugzillaSummaries(bugs,
-							new SubProgressMonitor(monitor, 95,
+							new SubProgressMonitor(monitor, 15,
 									SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 					page.getShell().getDisplay().asyncExec(new Runnable() {
 						public void run() {
@@ -95,11 +95,14 @@ public class GetBugsOperation {
 
 	protected Set getBugNumbersFromComments(SyncInfo[] syncInfos,
 			IProgressMonitor monitor) {
+		monitor.beginTask("Scanning comments for bug numbers", syncInfos.length);
 		TreeSet set = new TreeSet();
 		for (int i = 0; i < syncInfos.length; i++) {
 			SyncInfo info = syncInfos[i];
 			getBugNumbersForSyncInfo(info, monitor, set);
+			monitor.worked(1);
 		}
+		monitor.done();
 		return set;
 	}
 
