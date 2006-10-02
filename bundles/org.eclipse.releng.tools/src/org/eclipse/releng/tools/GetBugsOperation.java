@@ -45,7 +45,16 @@ import org.eclipse.team.internal.ccvs.ui.operations.RemoteLogOperation.LogEntryC
 
 public class GetBugsOperation {
 	private static final CVSTag TAG_1_1 = new CVSTag("1.1", CVSTag.VERSION);
-
+	private static final String BUG_DATABASE_PREFIX = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=";
+	private static final String BUG_DATABASE_POSTFIX = "&ctype=xml";
+	private static final String SUM_OPEN_TAG = "<short_desc>";
+	private static final String SUM_CLOSE_TAG = "</short_desc>";
+	private static final String STATUS_OPEN_TAG = "<bug_status>";
+	private static final String STATUS_CLOSE_TAG = "</bug_status";
+	private static final String RES_OPEN_TAG = "<resolution>";
+	private static final String RES_CLOSE_TAG = "</resolution>";
+	private static final String RESOLVED = "RESOLVED";
+	private static final String VERIFIED = "VERIFIED";
 	private ReleaseWizard wizard;
 
 	private SyncInfoSet syncInfoSet;
@@ -204,10 +213,6 @@ public class GetBugsOperation {
 	protected Map getBugzillaSummaries(Integer[] bugs, IProgressMonitor monitor) {
 		monitor.beginTask(
 				Messages.getString("GetBugsOperation.1"), bugs.length + 1); //$NON-NLS-1$
-		final String BUG_DATABASE_PREFIX = "https://bugs.eclipse.org/bugs/show_bug.cgi?id=";
-		final String BUG_DATABASE_POSTFIX = "&ctype=xml";
-		int summaryStartIndex = 0;
-		int summaryEndIndex = 0;
 		HttpURLConnection hURL;
 		DataInputStream in;
 		URLConnection url;
@@ -234,19 +239,37 @@ public class GetBugsOperation {
 						hURL.disconnect();
 					}
 					String webPage = buffer.toString();
-					summaryStartIndex = webPage.indexOf("<short_desc>") + 12;
-					summaryEndIndex = webPage.indexOf("</short_desc>",
+					int summaryStartIndex = webPage.indexOf(SUM_OPEN_TAG);
+					int summaryEndIndex = webPage.indexOf(SUM_CLOSE_TAG,
 							summaryStartIndex);
 					if (summaryStartIndex != -1 & summaryEndIndex != -1) {
-						String summary = webPage.substring(summaryStartIndex,
+						String summary = webPage.substring(summaryStartIndex + SUM_OPEN_TAG.length(),
 								summaryEndIndex);
 						summary = summary.replaceAll("&quot;", "\"");
 						summary = summary.replaceAll("&lt;", "<");
 						summary = summary.replaceAll("&gt;", ">");
 						summary = summary.replaceAll("&amp;", "&");
-						summary = summary.replaceAll("&apos;", "'");
+						summary = summary.replaceAll("&apos;", "'");						
+						int statusStartIndex = webPage.indexOf(STATUS_OPEN_TAG);
+						int statusEndIndex = webPage.indexOf(STATUS_CLOSE_TAG);
+						if(statusStartIndex != -1 && statusEndIndex != -1) {
+							String bugStatus = webPage.substring(statusStartIndex + STATUS_OPEN_TAG.length(), statusEndIndex);
+							if(bugStatus.equalsIgnoreCase(RESOLVED) || bugStatus.equalsIgnoreCase(VERIFIED)) {
+								int resStartIndex = webPage.indexOf(RES_OPEN_TAG);	
+								int resEndIndex = webPage.indexOf(RES_CLOSE_TAG);
+								if(resStartIndex != -1 && resEndIndex != -1) {
+									String resolution = webPage.substring(resStartIndex + RES_OPEN_TAG.length(), resEndIndex);
+									if(resolution != null && !resolution.equals("")) {
+										summary = summary + " (" + resolution + ")";
+									}
+								}
+							}
+							else {
+								summary = summary + " (" + bugStatus + ")";
+							}
+						}						
 						map.put(bugs[i], summary);
-					}
+					}					
 				}
 			} catch (IOException e) {
 				CVSUIPlugin.openError(wizard.getShell(), null, null, e);
