@@ -12,8 +12,6 @@ package org.eclipse.pde.tools.internal.versioning;
 
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileReader;

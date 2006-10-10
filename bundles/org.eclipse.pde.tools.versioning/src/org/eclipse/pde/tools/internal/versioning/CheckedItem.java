@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.pde.tools.internal.versioning;
 
+import org.eclipse.pde.tools.versioning.IVersionCompare;
 import org.osgi.framework.Version;
 
 /**
