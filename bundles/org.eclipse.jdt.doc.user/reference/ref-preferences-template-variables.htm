@@ -4,7 +4,7 @@
   <head>
     <meta name="copyright" content="Copyright (c) IBM Corporation and others 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-    <title>Templates</title>
+    <title>Template Variables</title>
     <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
     <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
   </head>
@@ -12,8 +12,8 @@
   <body>
     <h2>Template Variables</h2>
     <ul>
-      <li><a href="#general_vars">General Variables</a></li>
-      <li><a href="#java_vars">Java-Specific Variables</a></li>
+      <li><a href="#general_vars">General Template Variables</a></li>
+      <li><a href="#java_vars">Java Specific Template Variables</a></li>
     </ul>
 
     <p>
@@ -111,7 +111,7 @@
       </tbody>
     </table>
     
-    <h3><a name="java_vars">Java-Specific Template Variables</a></h3>
+    <h3><a name="java_vars">Java Specific Template Variables</a></h3>
     <p>The Java context additionally defines the following variables.
     	<b>Note:</b> In the table below, <i>id</i> is a user-chosen name of a new variable.</p>
     <table border="1" cellspacing="0" cellpadding="5" width="100%">
@@ -123,50 +123,67 @@
       </thead>
       <tbody valign="baseline">
         <tr>
-          <td><strong>${<i>id</i>:var(<i>type&nbsp;name</i>)}</strong></td>
-          <td>Evaluates to a local variable visible in the current scope that is a
-              subtype of the given type. If no type is specified, any local variable matches.
+          <td><strong>${<i>id</i>:field(<i>type</i>)}</strong></td>
+          <td>Evaluates to a field in the current scope that is a subtype of the given type. If no type is specified, any non-primitve field matches.
+              <p>Example:<br>
+              <code>${count:field(int)}</code>
+            </p>
+          
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:var(<i>type</i>)}</strong></td>
+          <td>Evaluates to a field, local variable or parameter visible in the current scope that is a subtype of the given type. If no type is specified, any non-primitve variable matches.
+              <p>Example:<br>
+              <code>${array:var(java.lang.Object[])}</code>
+            </p>
+          
+          </td>
+        </tr>
+        <tr>
+          <td><strong>${<i>id</i>:localVar(<i>type</i>)}</strong></td>
+          <td>Evaluates to a local variable or parameter visible in the current scope that is a subtype of the given type. If no type is specified, any non-primitve local variable matches.
               <p>
-	              <strong>${array}</strong> is a shortcut for <strong>${array:var(java.lang.Object[])}</strong>, but also matches arrays of primitive types.<br>
-    	          <strong>${collection}</strong> is a shortcut for <strong>${collection:var(java.util.Collection)}</strong>.<br>
-        	      <strong>${iterable}</strong> is a shortcut for <strong>${iterable:var(java.lang.Iterable)}</strong>, but also matches arrays.
+	              <strong>${array}</strong> is a shortcut for <strong>${array:localVar(java.lang.Object[])}</strong>, but also matches arrays of primitive types.<br>
+    	          <strong>${collection}</strong> is a shortcut for <strong>${collection:localVar(java.util.Collection)}</strong>.<br>
+        	      <strong>${iterable}</strong> is a shortcut for <strong>${iterable:localVvar(java.lang.Iterable)}</strong>, but also matches arrays.
               </p>
           </td>
         </tr>
         <tr>
-          <td><strong>${<i>id</i>:arg(<i>reference,&nbsp;n</i>)}</strong></td>
+          <td><strong>${<i>id</i>:argType(<i>variable,&nbsp;n</i>)}</strong></td>
           <td>
             Evaluates to the <i>nth</i> type argument of the referenced template variable. The reference should be the name of another
             template variable. Resolves to <code>java.lang.Object</code> if the referenced variable cannot be found or is not
             a parameterized type.
             <p>Example:<br>
-              <code>${type:arg(vector, 0)}&nbsp;${first:name(type)}&nbsp;=&nbsp;${vector:var(java.util.Vector)}.get(0)</code>
+              <code>${type:argType(vector, 0)}&nbsp;${first:name(type)}&nbsp;=&nbsp;${vector:var(java.util.Vector)}.get(0)</code>
             </p>
           </td>
         </tr>
         <tr>
-          <td><strong>${<i>id</i>:elem(<i>reference</i>)}</strong></td>
+          <td><strong>${<i>id</i>:elemType(<i>variable</i>)}</strong></td>
           <td>Evaluates to the element type of the referenced template variable. 
               The reference should be the name of another
               template variable that resolves to an array or an instance of <code>java.lang.Iterable</code>.
-              The <strong>elem</strong> variable type is similar to <strong><code>${<i>id</i>:arg(<i>reference</i>,0)}</code></strong>, the difference
+              The <strong>elemType</strong> variable type is similar to <strong><code>${<i>id</i>:argType(<i>reference</i>,0)}</code></strong>, the difference
               being that it also resolves the element type of an array.
               <p>
-	              <strong>${array_type}</strong> is a shortcut for <strong>${array_type:elem(array)}</strong>.<br>
-	              <strong>${iterable_type}</strong> is a shortcut for <strong>${iterable_type:elem(iterable)}</strong>.
+	              <strong>${array_type}</strong> is a shortcut for <strong>${array_type:elemType(array)}</strong>.<br>
+	              <strong>${iterable_type}</strong> is a shortcut for <strong>${iterable_type:elemType(iterable)}</strong>.
               </p>
           </td>
         </tr>
         <tr>
-          <td><strong>${<i>id</i>:name(<i>reference</i>)}</strong></td>
+          <td><strong>${<i>id</i>:newName(<i>reference</i>)}</strong></td>
           <td>Evaluates to an non-conflicting name for a new local variable of the type specified
               by the reference. The reference may either be a Java type name or the name of another
               template variable. The generated name respects the code style settings.
               <p>
-	              <strong>${index}</strong> is a shortcut for <strong>${index:name(int)}</strong>.<br>
-	              <strong>${iterator}</strong> is a shortcut for <strong>${iterator:name(java.util.Iterator)}</strong>.<br>
-	              <strong>${array_element}</strong> is a shortcut for <strong>${array_element:name(array)}</strong>.<br>
-	              <strong>${iterable_element}</strong> is a shortcut for <strong>${iterable_element:name(iterable)}</strong>.
+	              <strong>${index}</strong> is a shortcut for <strong>${index:newName(int)}</strong>.<br>
+	              <strong>${iterator}</strong> is a shortcut for <strong>${iterator:newName(java.util.Iterator)}</strong>.<br>
+	              <strong>${array_element}</strong> is a shortcut for <strong>${array_element:newName(array)}</strong>.<br>
+	              <strong>${iterable_element}</strong> is a shortcut for <strong>${iterable_element:newName(iterable)}</strong>.
               </p>
           </td>
         </tr>
