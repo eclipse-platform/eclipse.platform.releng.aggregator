@@ -312,33 +312,5 @@ If this is the case, your operation approver should also implement
 <a href="../reference/api/org/eclipse/core/commands/operations/IOperationApprover2.html"><b>IOperationApprover2</b></a>,
 which approves the execution of the operation.  When asked to execute an operation, the platform operation history 
 will seek approval from any operation approver that implements this interface.  </p>
-<h3>Undo and the IDE Workbench</h3>
-<p>
-We've seen code snippets that use workbench protocol for accessing the operations history and the workbench undo
-context.  This is achieved using <a href="../reference/api/org/eclipse/ui/operations/IWorkbenchOperationSupport.html"><b>IWorkbenchOperationSupport</b></a>,
-which can be obtained from the workbench.  The notion of a workbench-wide undo context is fairly general.  It is up to the workbench application
-to determine what specific scope is implied by the workbench undo context, and which views or editors use the
-workbench context when providing undo support.
-</p>
-<p>
-In the case of the Eclipse IDE workbench, the workbench undo context should be assigned to any operation that affects the IDE workspace at large.
-This context is used by views that manipulate the workspace, such as the Resource Navigator.  The IDE workbench installs an adapter on
-the workspace for <a href="../reference/api/org/eclipse/core/commands/operations/IUndoContext.html"><b>IUndoContext</b></a> that returns the
-workbench undo context.  This model-based registration allows plug-ins that manipulate the workspace to obtain the appropriate undo context, even if they are headless and
-do not reference any workbench classes.</p>
-<pre>// get the operation history
-IOperationHistory history = OperationHistoryFactory.getOperationHistory();
-
-// obtain the appropriate undo context for my model
-IUndoContext workspaceContext = (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
-if (workspaceContext != null) {
-	// create an operation and assign it the context
-}
-
-</pre>
-Other plug-ins are encouraged to use this same technique for registering
-model-based undo contexts.
-
-
 </BODY>
 </HTML>
