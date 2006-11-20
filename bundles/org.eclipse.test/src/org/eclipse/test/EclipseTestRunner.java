@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -251,6 +252,10 @@ public class EclipseTestRunner implements TestListener {
 			clearStatus();			
 			return new TestSuite(testClass);
 		}
+	 	if (!Modifier.isStatic(suiteMethod.getModifiers())) {
+	 		runFailed("suite() method must be static");
+	 		return null;
+	 	}
 		Test test= null;
 		try {
 			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
