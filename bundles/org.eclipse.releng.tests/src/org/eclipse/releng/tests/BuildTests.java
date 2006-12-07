@@ -820,10 +820,35 @@ protected void setUp() throws Exception {
 			return;
 		}
 		
-		String outputFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "results.xml";  // A tad bogus but this is where the build wants to copy the results from!
+		String outputFileName = properties.getProperty("compare.output");
+		File compareOutputFile = outputFileName == null ? null : new File(
+				outputFileName);
+		if (compareOutputFile == null) {
+			msg = "Output directory not specified.";
+			unableToRunCompare(msg);
+			assertTrue(msg, msg == null);
+			return;
+		}
+		
+		/* String outputFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "results.xml";  // A tad bogus but this is where the build wants to copy the results from!
 
+		//create the output file
+		try {
+	        File outputfile = new File(outputFileName);	    
+	       		boolean created = outputfile.createNewFile();
+	        if (created) {
+	        } else {	          
+	        	msg = "Output dir could not be created.";
+	        	assertTrue(msg, msg == null);
+	        	
+	        }
+    	} catch (IOException e) {
+	    	e.printStackTrace();
+	    } */
 				
 		String command = buildCommandLine(compareNewPath,compareOldPath, outputFileName);
+		
+		System.out.println("command "+ command);
 		
 		try {
 			Process aProcess = Runtime.getRuntime().exec(command);
