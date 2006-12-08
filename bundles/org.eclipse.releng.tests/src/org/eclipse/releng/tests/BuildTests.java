@@ -810,6 +810,16 @@ protected void setUp() throws Exception {
 			return;
 		}		
 		
+		/* Determine if the build is a nightly
+		Nightly builds have qualifiers identical the buildId - for instance N200612080010 
+		which means that they are lower than v20060921-1945 from an promoted integration build
+		and thus cannot be compared */		
+		
+		if (! compareOldPath.matches("N2") ) {
+			//is  nightly build, skip test
+			return;
+		}		
+		
 		String compareNewPath = properties.getProperty("compare.new");
 		File compareNewFile = compareNewPath == null ? null : new File(
 				compareNewPath);
@@ -848,7 +858,7 @@ protected void setUp() throws Exception {
 				
 		String command = buildCommandLine(compareNewPath,compareOldPath, outputFileName);
 		
-		System.out.println("command "+ command);
+		//System.out.println("command "+ command);
 		
 		try {
 			Process aProcess = Runtime.getRuntime().exec(command);
