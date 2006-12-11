@@ -815,8 +815,8 @@ protected void setUp() throws Exception {
 		which means that they are lower than v20060921-1945 from an promoted integration build
 		and thus cannot be compared */		
 		
-		if (! compareOldPath.matches("N2") ) {
-			//is  nightly build, skip test
+		if (compareOldPath.matches("N2") ) {
+			//if nightly build, skip test		
 			return;
 		}		
 		
