@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
 
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
@@ -31,14 +33,15 @@ import org.eclipse.ui.testing.TestableObject;
  * A Workbench that runs a test suite specified in the
  * command line arguments.
  */ 
-public class UITestApplication  implements IPlatformRunnable, ITestHarness {
+public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApplication {
 
-	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.workbench"; //$NON-NLS-1$
+	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.application.workbench"; //$NON-NLS-1$
 	private static final String DEFAULT_APP_PRE_3_0 = "org.eclipse.ui.workbench"; //$NON-NLS-1$
 	
 	private boolean fInDeprecatedMode = false;
 	private TestableObject fTestableObject;
 	private int fTestRunnerResult = -1;
+	private IApplicationContext appContext;
 	
 	
 	/* (non-Javadoc)
@@ -46,13 +49,12 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 	 */
 	public Object run(final Object args) throws Exception {
 		// Get the application to test
-		IPlatformRunnable application = getApplication((String[])args);
-		
+		Object application = getApplication((String[])args);
 		Assert.assertNotNull(application);
 		
 		Object result;
-		if (fInDeprecatedMode) {
-			result = runDeprecatedApplication(application, args);
+		if (fInDeprecatedMode && (application instanceof IPlatformRunnable)) {
+			result = runDeprecatedApplication((IPlatformRunnable)application, args);
 		}
 		else {
 			result = runApplication(application, args);
@@ -68,7 +70,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 	 * return the application to run, or null if not even the default application
 	 * is found.
 	 */
-	private IPlatformRunnable getApplication(String[] args) throws CoreException {
+	private Object getApplication(String[] args) throws CoreException {
 		// Assume we are in 3.0 mode.
 		// Find the name of the application as specified by the PDE JUnit launcher.
 		// If no application is specified, the 3.0 default workbench application
@@ -101,6 +103,8 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 				Object runnable = runs[0].createExecutableExtension("class"); //$NON-NLS-1$
 				if (runnable instanceof IPlatformRunnable)
 					return (IPlatformRunnable) runnable;
+				if (runnable instanceof IApplication)
+					return (IApplication) runnable;
 			}
 		}
 		return null;
@@ -125,10 +129,13 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 	 * In 3.0 mode
 	 * 
 	 */
-	private Object runApplication(IPlatformRunnable application, Object args) throws Exception {
+	private Object runApplication(Object application, Object args) throws Exception {
 		fTestableObject = PlatformUI.getTestableObject();
 		fTestableObject.setTestHarness(this);
-		return application.run(args);
+		if (application instanceof IPlatformRunnable) {
+			return ((IPlatformRunnable) application).run(args);
+		} 
+		return ((IApplication) application).start(appContext);
 		
 	}
 	
@@ -192,6 +199,21 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness {
 			}
 		});
 		fTestableObject.testingFinished();
+	}
+
+
+	public Object start(IApplicationContext context) throws Exception {
+		this.appContext = context;
+		String[] args = (String[]) appContext.getArguments().get("application.args");
+		if (args == null)
+			args = new String[0];
+		return run(args);
+	}
+
+
+	public void stop() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
