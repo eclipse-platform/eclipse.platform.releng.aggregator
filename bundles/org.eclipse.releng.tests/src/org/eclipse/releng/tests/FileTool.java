@@ -309,8 +309,8 @@ public class FileTool {
 		InputStream is = null;
 		OutputStream os = null;
 		try {
-			is = new FileInputStream(source);
-			os = new FileOutputStream(destination);
+			is = new BufferedInputStream(new FileInputStream(source));
+			os = new BufferedOutputStream(new FileOutputStream(destination));
 			transferData(is, os);
 		} finally {
 			if(os != null){

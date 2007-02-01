@@ -708,7 +708,7 @@ protected void setUp() throws Exception {
 
 		Properties properties = new Properties();
 		try {
-			properties.load(new FileInputStream(CONFIG_FILENAME));
+			properties.load(new BufferedInputStream(new FileInputStream(CONFIG_FILENAME)));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
