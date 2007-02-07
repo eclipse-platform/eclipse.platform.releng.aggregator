@@ -10,12 +10,11 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
+import java.util.*;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.ICVSFolder;
+import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
 
@@ -24,16 +23,18 @@ import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
  */
 public class MapEntry {
 	
-	private static final String FRAGMENT = "fragment";
-	private static final String FEATURE = "feature";
-	private static final String PLUGIN = "plugin";
+	private static final String KEY_TAG = "tag"; //$NON-NLS-1$
+	private static final String KEY_PATH = "path"; //$NON-NLS-1$
+	private static final String KEY_CVSROOT = "cvsRoot"; //$NON-NLS-1$
+	private static final String KEY_PASSWORD = "password"; //$NON-NLS-1$
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
+
 	private boolean valid = false;
-	private String type = "";
-	private String id = "";
-	private String tagName = "";
-	private String repo = "";
-	private String password = "";
-	private String cvsModule = "";
+	private String type = EMPTY_STRING;
+	private String id = EMPTY_STRING;
+	private OrderedMap arguments = new OrderedMap();
+	private boolean legacy = false;
+	private String version;
 
 	public static void main (String[] args)  {
 		// For testing only
@@ -57,17 +58,17 @@ public class MapEntry {
 			"=",
 			",,,",
 			"@=,,,,",
+			"type@id,version=CVS,tag=myTag,cvsRoot=myCvsRoot,password=password,path=myPath",
 		};
 		
 		for (int i = 0; i < strings.length; i++) {
 			String string = strings[i];
 			MapEntry anEntry = new MapEntry(string);
 
-			System.out.println("");
-			System.out.println(string);
-			System.out.println(anEntry.getMapString());
+			System.out.println("-----------------------------------------------");
+			System.out.println("input: " + string);
+			System.out.println("map string: " + anEntry.getMapString());
 //			System.out.println(anEntry.getReferenceString());
-			System.out.println("");
 			anEntry.display();
 		}
 		
@@ -81,7 +82,9 @@ public class MapEntry {
 		System.out.println("Is Valid: " + isValid());
 		System.out.println("Type: " + getType());
 		System.out.println("Project Name: " + getId());
-		System.out.println("Version: " + getTagName());
+		System.out.println("Tag: " + getTagName());
+		if (version != null)
+			System.out.println("Version: " + version);
 		System.out.println("Connect: " + getRepo());
 		System.out.println("Password: " + getPassword());
 		System.out.println("CVS Module: " + getCVSModule());
@@ -92,34 +95,10 @@ public class MapEntry {
 	}
 
 	/**
-	 * Create a map entry for the given project and tag
-	 * @param project
-	 * @param tag
-	 */
-	public MapEntry(IProject project, CVSTag tag) throws CVSException {
-		type = internalGetType(project);
-		id = project.getName();
-		tagName = tag.getName();
-		FolderSyncInfo info = CVSWorkspaceRoot.getCVSFolderFor(project).getFolderSyncInfo();
-		repo = info.getRoot();
-		password = "";
-		cvsModule = info.getRepository();
-		valid = true;
-	}
-	
-	private String internalGetType(IProject project) {
-		if (project.getFile("plugin.xml").exists()) return PLUGIN;
-		if (project.getFile("feature.xml").exists()) return FEATURE;
-		if (project.getFile("fragment.xml").exists()) return FRAGMENT;
-		return PLUGIN;
-	}
-
-	/**
 	 * Parse a map file entry line
 	 * @param entryLine
 	 */	
 	private void init(String entryLine) {
-
 		valid = false;
 	
 		// Type	
@@ -133,49 +112,96 @@ public class MapEntry {
 		end = entryLine.indexOf('=', start);
 		if (end == -1) return;
 		id = entryLine.substring(start, end).trim();
-		
-		// Version
-		start = end + 1;
-		end = entryLine.indexOf(',', start);
-		if (end == -1) return;
-		tagName = entryLine.substring(start, end).trim();
-	
-		// Repo Connect String
-		start = end + 1;
-		if (start == entryLine.length()) return; // No connect string - invalid
-		end = entryLine.indexOf(',', start);
-		if (end == -1)  {
-			// Tailing , not required if connect string is last entry on line.
-			repo = entryLine.substring(start).trim();
-			valid = true;
-			return;
-		} else  {
-			repo = entryLine.substring(start, end).trim();
+		// we have a version that we have to strip off
+		int comma = id.indexOf(',');
+		if (comma != -1) {
+			version = id.substring(comma + 1);
+			id = id.substring(0, comma);
 		}
-	
-		// All required fields met.
+
+		String[] args = getArrayFromStringWithBlank(entryLine.substring(end + 1), ",");
+		this.arguments = populate(args);
+		String tag = (String) arguments.get(KEY_TAG);
+		String repo = (String) arguments.get(KEY_CVSROOT);
+		if (tag == null || tag.length() == 0 || repo == null || repo.length() == 0)
+			return;
 		valid = true;
-		
-		// Optional Password.
-		start = end + 1;
-		if (start == entryLine.length()) return;  // End of line reached.  No password
-		end = entryLine.indexOf(',', start);
-		if (end == -1)  {
-			// No trailing , but password present.
-			password = entryLine.substring(start).trim();
-			return;
+	}
+
+	/*
+	 * Build a table from the given array. In the new format,the array contains
+	 * key=value elements. Otherwise we fill in the key based on the old format.
+	 */
+	private OrderedMap populate(String[] entries) {
+		OrderedMap result = new OrderedMap();
+		for (int i=0; i<entries.length; i++) {
+			String entry = entries[i];
+			int index = entry.indexOf('=');
+			if (index == -1) {
+				// we only handle CVS entries
+				if (i == 0 && "CVS".equalsIgnoreCase(entry)) 
+					continue;
+				// legacy story...
+				return legacyPopulate(entries);
+			}
+			String key = entry.substring(0, index);
+			String value = entry.substring(index + 1);
+			result.put(key, value);
 		}
-		// , after password
-		password = entryLine.substring(start, end).trim();
-		
-		// Optional CVS Module Name
-		start = end + 1;
-		if (start == entryLine.length())  return;  // No module name
-		cvsModule = entryLine.substring(start).trim();
+		result.toString();
+		return result;
+	}
+	
+	private OrderedMap legacyPopulate(String[] entries) {
+		legacy = true;
+		OrderedMap result = new OrderedMap();
+		// must have at least tag and connect string
+		if (entries.length >= 2) {
+			// Version
+			result.put(KEY_TAG, entries[0]);
+			// Repo Connect String
+			result.put(KEY_CVSROOT, entries[1]);
+			
+			// Optional Password.
+			if (entries.length >= 3)
+				result.put(KEY_PASSWORD, entries[2]);
+			
+			// Optional CVS Module Name
+			if (entries.length >= 4)
+				result.put(KEY_PATH, entries[3]);
+		}
+		return result;
+	}
+
+	/**
+	 * Convert a list of tokens into an array. The list separator has to be
+	 * specified. The specificity of this method is that it returns an empty
+	 * element when to same separators are following each others. For example
+	 * the string a,,b returns the following array [a, ,b]
+	 *  
+	 */
+	public static String[] getArrayFromStringWithBlank(String list, String separator) {
+		if (list == null || list.trim().length() == 0)
+			return new String[0];
+		List result = new ArrayList();
+		boolean previousWasSeparator = true;
+		for (StringTokenizer tokens = new StringTokenizer(list, separator, true); tokens.hasMoreTokens();) {
+			String token = tokens.nextToken().trim();
+			if (token.equals(separator)) {
+				if (previousWasSeparator)
+					result.add(""); //$NON-NLS-1$
+				previousWasSeparator = true;
+			} else {
+				result.add(token);
+				previousWasSeparator = false;
+			}
+		}
+		return (String[]) result.toArray(new String[result.size()]);
 	}
 
 	public String getTagName() {
-		return tagName;
+		String value = (String) arguments.get(KEY_TAG);
+		return value == null ? EMPTY_STRING : value;
 	}
 	
 	public CVSTag getTag() {
@@ -184,7 +210,8 @@ public class MapEntry {
 	}
 	
 	public String getPassword() {
-		return password;
+		String value = (String) arguments.get(KEY_PASSWORD);
+		return value == null ? EMPTY_STRING : value;
 	}
 
 	public String getId() {
@@ -192,19 +219,18 @@ public class MapEntry {
 	}
 
 	private String internalGetCVSModule()  {
-		if (cvsModule.equals(""))  {
-			return id;
-		} else  {
-			return cvsModule;
-		}
+		String module = (String) arguments.get(KEY_PATH);
+		return module == null ? id : module;
 	}
 	
 	public String getCVSModule() {
-		return cvsModule;
+		String value = (String) arguments.get(KEY_PATH);
+		return value == null ? EMPTY_STRING : value;
 	}
 
 	public String getRepo() {
-		return repo;
+		String value = (String) arguments.get(KEY_CVSROOT);
+		return value == null ? EMPTY_STRING : value;
 	}
 
 	public String getType() {
@@ -223,15 +249,53 @@ public class MapEntry {
 	}
 
 	public String getMapString() {
-		String result = getType() + "@" + getId() + "=" + getTagName() + "," + getRepo() + "," + getPassword();
-		if (!getCVSModule().equals("") || !getPassword().equals(""))  {
-			result = result + ",";
+		StringBuffer result = new StringBuffer();
+		if (legacy) {
+			result.append(getType());
+			result.append('@');
+			result.append(getId());
+			if (version != null) {
+				result.append(',');
+				result.append(version);
+			}
+			result.append('=');
+			result.append(getTagName());
+			result.append(',');
+			result.append(getRepo());
+			result.append(',');
+			result.append(getPassword());
+			if (!getCVSModule().equals("") || !getPassword().equals(""))
+				result.append(',');
+			result.append(getCVSModule());
+			return result.toString();
 		}
-		return result + getCVSModule();		
+		result.append(getType());
+		result.append('@');
+		result.append(getId());
+		if (version != null) {
+			result.append(',');
+			result.append(version);
+		}
+		result.append('=');
+		result.append("CVS");
+		for (Iterator iter = arguments.keys().iterator(); iter.hasNext(); ) {
+			String key = (String) iter.next();
+			String value = (String) arguments.get(key);
+			if (value != null && value.length() > 0)
+				result.append(',' + key + '=' + value);
+		}
+		return result.toString();
+	}
+
+	/*
+	 * Return the version specified for this entry. Can be null.
+	 */
+	public String getVersion() {
+		return version;
 	}
 	
 	public void setPassword(String password) {
-		this.password = password;
+		arguments.put(KEY_PASSWORD, password);
 	}
 
 	public void setId(String projectID) {
@@ -239,15 +303,15 @@ public class MapEntry {
 	}
 
 	public void setCVSModule(String path) {
-		this.cvsModule = path;
+		arguments.put(KEY_PATH, path);
 	}
 
 	public void setRepo(String repo) {
-		this.repo = repo;
+		arguments.put(KEY_CVSROOT, repo);
 	}
 
 	public void setTagName(String tagName) {
-		this.tagName = tagName;
+		arguments.put(KEY_TAG, tagName);
 	}
 
 	public void setType(String type) {
@@ -275,7 +339,6 @@ public class MapEntry {
 	/**
 	 * Return true if this map entry is mapped to the given CVS module
 	 * @param moduleName
-	 * @return
 	 */
 	public boolean isMappedTo(String moduleName) {
 		IPath entryPath = new Path(internalGetCVSModule());
