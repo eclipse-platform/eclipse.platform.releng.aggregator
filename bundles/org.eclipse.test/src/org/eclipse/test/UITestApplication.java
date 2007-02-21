@@ -35,7 +35,7 @@ import org.eclipse.ui.testing.TestableObject;
  */ 
 public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApplication {
 
-	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.application.workbench"; //$NON-NLS-1$
+	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.workbench"; //$NON-NLS-1$
 	private static final String DEFAULT_APP_PRE_3_0 = "org.eclipse.ui.workbench"; //$NON-NLS-1$
 	
 	private boolean fInDeprecatedMode = false;
