@@ -33,7 +33,8 @@
 		<!--default launch target for launching tests-->
 		<property name="launchTarget" value="java-test" />
 		<property name="formatter" value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter"/>
-	    <!--default heap sizes when running performance tests-->
+	    
+		<!--default heap sizes when running performance tests-->
 	    <condition property="vmargs" value=" -Xms256M -Xmx256M">
 			<equals arg1="${test.target}" arg2="performance" />
 	    </condition>
@@ -162,52 +163,6 @@
 				<include name="${includes}"/>
 			</fileset>
 		</junitreport>
-	</target>
-
-	<target name="test-regressions">
-		<!--
-			Parameters to this target:
-			oldfile			- the name of the baseline XML file to test against
-			newfile			- the name of the XML file containing most recent test results
-			outfile			- the name of the file produced
-		-->
-
-		<echo message="Running Regression Tests"/>
-		<property name="test-plugin-dir" value="${basedir}/fragments/org.eclipse.test"/>
-		<property name="rt-stylesheet" value="${test-plugin-dir}/regression-test.xsl"/>
-		<property name="rt-classname" value="org.eclipse.test.RegressionTest"/>
-
-		<!-- Ensure that the file exists, and give sensible behaviour if not -->
-		<style style="${rt-stylesheet}" in="${newfile}" out="${newfile}.tmp"/>
-		<style style="${rt-stylesheet}" in="${oldfile}" out="${oldfile}.tmp"/>
-		<java classname="${rt-classname}">
-			<classpath>
-				<pathelement location="${test-plugin-dir}/bin"/>
-			</classpath>
-			<arg value="${oldfile}.tmp"/>
-			<arg value="${newfile}.tmp"/>
-			<arg value="${outfile}"/>
-		</java>
-
-		<delete file="${oldfile}.tmp"/>
-		<delete file="${newfile}.tmp"/>
-	</target>
-
-	<target name="notfiy">
-		<!--
-			Parameters to this target:
-			infile	- the name of the file that contains the message body
-			address	- the e-mail address to notify
-		-->
-		<echo message="Sending Notification"/>
-		<property name="email-from" value="Eclipse Automated Test@oti.com"/>
-		<property name="email-subject" value="Nightly Build Report"/>
-		<property name="email-server" value="mail.ott.oti.com"/>
-
-		<mail from="${email-from}" tolist="${address}"
-          subject="${email-subject}" files="${infile}"
-          mailhost="${email-server}"/>
-
 	</target>
 
 </project>
