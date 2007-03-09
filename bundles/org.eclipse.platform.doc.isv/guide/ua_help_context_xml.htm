@@ -12,36 +12,54 @@
 
 <h2>Describing and packaging context-sensitive help content</h2>
 
-<p>Content-sensitive help is described by associating the context id declared in the UI code
-with a description and list of links to related topics in the online help.&nbsp;
-These associations are made inside an XML file located within the plug-in that contains the topics in question.&nbsp; You can create any number
-of XML files containing context help associations for each plug-in.&nbsp; The
-description and links for each context id is made inside <b>&lt;context&gt;</b>
-elements in the XML file.&nbsp; Each context element can have an optional <b>&lt;description&gt;</b>
-element which is used to describe the UI object and any number of <b>&lt;topic&gt;</b>
-elements which link to the on-line documentation.</p>
-<p>Since 3.1, context elements can optionally override the default title used to 
-present the context help information in the Help view.</p>
-<pre>&lt;contexts&gt;
+<p>
+Content-sensitive help is described by associating the context id declared in
+the UI code with a description and list of links to related topics or commands
+in the online help. These associations are made inside an XML file located
+within the plug-in that contains the topics in question. You can create any number
+of XML files containing context help associations for each plug-in. The
+description and links for each context id is made inside
+<strong>&lt;context&gt;</strong> elements in the XML file. Each context element
+can have an optional <strong>&lt;description&gt;</strong> element which is used
+to describe the UI object and any number of <strong>&lt;topic&gt;</strong>
+elements which link to the on-line documentation, as well as command links
+to perform any operation for the user, e.g. open a cheat sheet.
+</p>
+
+<p>
+Since 3.1, context elements can optionally override the default title used to 
+present the context help information in the Help view.
+</p>
+
+<pre>
+&lt;contexts&gt;
 	&lt;context id=&quot;panic_button&quot; title=&quot;Panic Button Title&quot;&gt;
 		&lt;description&gt;This is the panic button.&lt;/description&gt;
-		&lt;topic href=&quot;tasks/pushing_the_panic_button.htm&quot; label=&quot;Pushing the panic button&quot;/&gt;
+		&lt;command serialization=&quot;org.eclipse.ui.cheatsheets.openCheatSheet(cheatSheetId=org.eclipse.panic.button.cheatsheet)quot; label=&quot;Pushing the panic button&quot;/&gt;
 		&lt;topic href=&quot;reference/panic_button.htm&quot; label=&quot;Panic Button Reference&quot;/&gt;
 	&lt;/context&gt;
 	...
-&lt;/contexts&gt;</pre>
-<p>Once the contexts have been described in the XML file (or files), you are
-ready to refer to the context files in your plug-in manifest.&nbsp; Note that
-the context id is not fully qualified above.&nbsp; This is allowed, as long as
-the context file is contributed in the manifest of the plug-in that defined the
-context id.&nbsp; In other words, if the context id is not fully qualified, it is resolved to the id of the
-plug-in that contributed the XML file.&nbsp;&nbsp;</p>
-<p>A plug-in containing context files contributes them using the <b><a href="../reference/extension-points/org_eclipse_help_contexts.html">org.eclipse.help.contexts</a></b>
-extension point.&nbsp;&nbsp;</p>
+&lt;/contexts&gt;
+</pre>
 
-<pre>   &lt;extension point=&quot;org.eclipse.help.contexts&quot;&gt;
+<p>
+Once the contexts have been described in the XML file (or files), you are ready
+to refer to the context files in your plug-in manifest. Note that the context id
+is not fully qualified above. This is allowed, as long as the context file is
+contributed in the manifest of the plug-in that defined the context id. In other
+words, if the context id is not fully qualified, it is resolved to the id of the
+plug-in that contributed the XML file.
+</p>
+
+<p>A plug-in containing context files contributes them using the <b><a href="../reference/extension-points/org_eclipse_help_contexts.html">org.eclipse.help.contexts</a></b>
+extension point.&nbsp;&nbsp;
+</p>
+
+<pre>
+   &lt;extension point=&quot;org.eclipse.help.contexts&quot;&gt;
       &lt;contexts file=&quot;myContextHelp.xml&quot;  /&gt;
-   &lt;/extension&gt;</pre>
+   &lt;/extension&gt;
+</pre>
 
 <p>You can reference context files from other plug-ins by including the <b>plugin</b>
 attribute.&nbsp; This allows you to group all of your documentation, including
