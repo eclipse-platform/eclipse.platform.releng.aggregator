@@ -19,19 +19,31 @@
 <p></p>
 <p>
 <ol>
-  <li><a href="#anchorNameHere">Title goes here</a></li>
+  <li><a href="#anchorNameHere">Nested Launch Configuration Working Copies</a></li>
 </ol>
 <hr>
 
 (The following is a template for editing this draft - add a section like this, including comment separators, for each issue)</p>
 <!-- ############################################## -->
-<h2>1. <a name="anchorNameHere"></a>Title goes here</h2>
-<p><strong>What is affected:</strong> Describe what clients are affected.
-</p>
-<p><strong>Description:</strong> Describe the incompatible changes.
-</p>
-<p><strong>Action required:</strong> Describe the action required.
-</p>
+<h2>1. <a name="anchorNameHere"></a>Nested Launch Configuration Working Copies</h2>
+<p><strong>What is affected:</strong> Launch configuration working copies support 
+  nesting in 3.3. Clients that programmatically create and save launch configurations 
+  may be affected by the change in behavior of the <code>ILaunchConfigurationWorkingCopy.doSave() 
+  </code> method. </p>
+<p><strong>Description:</strong> When a working copy (B) is created from a working 
+  copy (A) which was created from a launch configuration (X), the newly created 
+  working copy (B) is initialized with the attributes from the first working copy 
+  (A). In 3.3, whenever a working copy is saved, it is written back to the configuration 
+  from which it was created. In this example working copy B will saves changes 
+  back to working copy A, and A will save changes back to the original launch 
+  configuration. A nested working copy has a parent working copy that can be retrieved 
+  by calling <code>getParent()</code> (newly added in 3.3). In 3.2, working copies 
+  were not nested and saving a working copy always resulted in the changes being 
+  saved back to the original launch configuration.</p>
+<p><strong>Action required:</strong> Examine calls to <code>ILaunchConfiguration.getWorkingCopy()</code> 
+  and <code>ILaunchConfigurationWorkingCopy.doSave()</code> to determine if nested 
+  working copies might be created. Note that saving a nested working copy will 
+  not save changes back to the original launch configuration.</p>
 <!-- ############################################## -->
 
 </body>
