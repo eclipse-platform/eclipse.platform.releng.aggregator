@@ -10,18 +10,37 @@
  *******************************************************************************/
 package org.eclipse.releng.tests;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-import javax.xml.parsers.*;
-import junit.framework.TestCase;
-import org.eclipse.core.runtime.*;
-import org.osgi.framework.Bundle;
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+
+import junit.framework.TestCase;
+
+import org.eclipse.core.runtime.Platform;
+import org.osgi.framework.Bundle;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class BuildTests extends TestCase {
 
@@ -128,10 +147,10 @@ public class BuildTests extends TestCase {
 
 		boolean result1 = testChkpii(HTML);
 		boolean result2 = testChkpii(XML);
-		boolean result3 = testChkpii(PROPERTIES);  
+		boolean result3 = testChkpii(PROPERTIES);
 		assertTrue(
 				"Translation errors in files.  See the chkpii logs linked from the test results page for details.",
-				(result1 && result2 && result3)); 
+				(result1 && result2 && result3));
 	}
 
 	private boolean testChkpii(int type) {
@@ -181,7 +200,7 @@ public class BuildTests extends TestCase {
 		File aFile = new File(installDir);
 		if (aFile == null) {
 			System.out.println("File is null");
-		}		
+		}
 
 		File[] files = aFile.listFiles();
 		for (int i = 0; i < files.length; i++) {
@@ -363,11 +382,12 @@ public class BuildTests extends TestCase {
 			"org.apache.ant" };
 
 	public static final int PLUGIN_COUNT = 84; // - 20; // Note this number
-												// must include non-shipping
-												// test plugins
+	// must include non-shipping
+	// test plugins
 	public static final int FEATURE_COUNT = 9; // - 1; // Note this number must
-												// include non-shipping test
-												// feature
+
+	// include non-shipping test
+	// feature
 
 	/**
 	 * Constructor for EmptyDirectoriesTest.
@@ -381,23 +401,27 @@ public class BuildTests extends TestCase {
 	/**
 	 * @see TestCase#setUp()
 	 */
-protected void setUp() throws Exception {
-		
-		// Autoamted Test
-		logFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii";  // A tad bogus but this is where the build wants to copy the results from!
+	protected void setUp() throws Exception {
 
-		String javadocUrls=System.getProperty("RELENGTEST.JAVADOC.URLS");
-		if (javadocUrls!=null){
-			String [] urls=javadocUrls.split(",");
-			javadocLogs=  new URL[urls.length];
-			for (int i=0;i<urls.length;i++){
-				javadocLogs[i]=new URL(urls[i]);
+		// Autoamted Test
+		logFileName = Platform.getInstallLocation().getURL().getPath() + ".."
+				+ File.separator + ".." + File.separator + "results"
+				+ File.separator + "chkpii"; // A tad bogus but this is where
+		// the build wants to copy the
+		// results from!
+
+		String javadocUrls = System.getProperty("RELENGTEST.JAVADOC.URLS");
+		if (javadocUrls != null) {
+			String[] urls = javadocUrls.split(",");
+			javadocLogs = new URL[urls.length];
+			for (int i = 0; i < urls.length; i++) {
+				javadocLogs[i] = new URL(urls[i]);
 			}
 		}
-		
+
 		// Runtime Workbench - TODI Put me back to Automated status
-//		logFileName = "d:\\results";
-//		sourceDirectoryName = "d:\\sourceFetch";
+		// logFileName = "d:\\results";
+		// sourceDirectoryName = "d:\\sourceFetch";
 	}
 
 	/**
@@ -407,10 +431,10 @@ protected void setUp() throws Exception {
 		super.tearDown();
 	}
 
-	 public void testFeatureFiles() {
+	public void testFeatureFiles() {
 		List result = new ArrayList();
 		String installDir = Platform.getInstallLocation().getURL().getPath();
-		
+
 		File featureDir = new File(installDir, "features");
 		File[] features = featureDir.listFiles();
 		for (int i = 0; i < features.length; i++) {
@@ -460,7 +484,7 @@ protected void setUp() throws Exception {
 		}
 		assertTrue("Plugin directory missing required files: " + aString,
 				result.size() == 0);
-	} 
+	}
 
 	private boolean testPluginFile(File aPlugin) {
 
@@ -508,7 +532,7 @@ protected void setUp() throws Exception {
 
 		// No then we are bad
 		return false;
-	} 
+	}
 
 	private boolean testPluginJar(File aDirectory, String[] requiredFiles) {
 		ArrayList list = new ArrayList();
@@ -650,8 +674,8 @@ protected void setUp() throws Exception {
 					.concat("See the javadoc logs linked from the test results page for details");
 			assertTrue(message, !problemLogsExist);
 		}
-	} 
-	
+	}
+
 	private class JavadocLog {
 		private ArrayList logs = new ArrayList();
 
@@ -701,14 +725,15 @@ protected void setUp() throws Exception {
 	 * Load the configuration file which should be included in this bundle
 	 */
 	private Properties loadCompareConfiguration() {
-		
+
 		String aString = System.getProperty("PLUGIN_PATH");
 		final String CONFIG_FILENAME = aString + File.separator
 				+ "compare.properties";
 
 		Properties properties = new Properties();
 		try {
-			properties.load(new BufferedInputStream(new FileInputStream(CONFIG_FILENAME)));
+			properties.load(new BufferedInputStream(new FileInputStream(
+					CONFIG_FILENAME)));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
@@ -716,24 +741,25 @@ protected void setUp() throws Exception {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		return properties;
 	}
 
 	// private String buildCommandLine(String source, String destination, String
 	// options, String output) {
 	private String buildCommandLine(String source, String destination,
-		String output) {
-		
-		String javadir = System.getProperty("java.home");		
+			String output) {
+
+		String javadir = System.getProperty("java.home");
 		javadir += File.separator + "bin" + File.separator + "java";
-		
-		String command =javadir +" -cp org.eclipse.equinox.launcher.jar org.eclipse.core.launcher.Main -application org.eclipse.pde.tools.versioning.application -clean";
+
+		String command = javadir
+				+ " -cp org.eclipse.equinox.launcher.jar org.eclipse.core.launcher.Main -application org.eclipse.pde.tools.versioning.application -clean";
 
 		command += " -new " + source;
 		command += " -old " + destination;
-		command += " -output " + output;		
-		
+		command += " -output " + output;
+
 		return command;
 	}
 
@@ -754,7 +780,7 @@ protected void setUp() throws Exception {
 					+ destination + "\".\n";
 			msg += "There are " + errorNumber + " error messages and "
 					+ warningNumber + " warning messages.\n";
-			msg += "See the version compare logs linked from the test results page for details";	
+			msg += "See the version compare logs linked from the test results page for details";
 			assertTrue(msg, msg == null);
 		}
 	}
@@ -774,15 +800,15 @@ protected void setUp() throws Exception {
 	 * configuration, against a known previous Eclipse configuration.
 	 */
 	public void testVersionCompare() {
-		
-		String os = System.getProperty("os.name");		
-		
+
+		String os = System.getProperty("os.name");
+
 		/* Only run compare tool on Linux to save time during tests */
-		if (! os.equalsIgnoreCase("Linux")) {			 
-				return;
-		}		
+		if (!os.equalsIgnoreCase("Linux")) {
+			return;
+		}
 		String msg = null;
-		
+
 		Bundle bundle = Platform.getBundle("org.eclipse.pde.tools.versioning");
 		if (bundle == null) {
 			msg = "Version comparison bundle (org.eclipse.pde.tools.versioning) not installed.";
@@ -808,18 +834,20 @@ protected void setUp() throws Exception {
 			unableToRunCompare(msg);
 			assertTrue(msg, msg == null);
 			return;
-		}		
-		
-		/* Determine if the build is a nightly
-		Nightly builds have qualifiers identical the buildId - for instance N200612080010 
-		which means that they are lower than v20060921-1945 from an promoted integration build
-		and thus cannot be compared */		
-		
-		if (compareOldPath.indexOf("N2") > 0 ) {
-			//if nightly build, skip test		
-			return;
-		}		
-		
+		}
+
+		/*
+		 * Determine if the build is a nightly Nightly builds have qualifiers
+		 * identical the buildId - for instance N200612080010 which means that
+		 * they are lower than v20060921-1945 from an promoted integration build
+		 * and thus cannot be compared
+		 */
+
+		/*
+		 * if (compareOldPath.indexOf("N2") > 0 ) { //if nightly build, skip
+		 * test return; }
+		 */
+
 		String compareNewPath = properties.getProperty("compare.new");
 		File compareNewFile = compareNewPath == null ? null : new File(
 				compareNewPath);
@@ -829,7 +857,7 @@ protected void setUp() throws Exception {
 			assertTrue(msg, msg == null);
 			return;
 		}
-		
+
 		String outputFileName = properties.getProperty("compare.output");
 		File compareOutputFile = outputFileName == null ? null : new File(
 				outputFileName);
@@ -839,27 +867,26 @@ protected void setUp() throws Exception {
 			assertTrue(msg, msg == null);
 			return;
 		}
-		
-		/* String outputFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "results.xml";  // A tad bogus but this is where the build wants to copy the results from!
 
-		//create the output file
-		try {
-	        File outputfile = new File(outputFileName);	    
-	       		boolean created = outputfile.createNewFile();
-	        if (created) {
-	        } else {	          
-	        	msg = "Output dir could not be created.";
-	        	assertTrue(msg, msg == null);
-	        	
-	        }
-    	} catch (IOException e) {
-	    	e.printStackTrace();
-	    } */
-				
-		String command = buildCommandLine(compareNewPath,compareOldPath, outputFileName);
-		
-		//System.out.println("command "+ command);
-		
+		/*
+		 * String outputFileName =
+		 * Platform.getInstallLocation().getURL().getPath() + ".." +
+		 * File.separator + ".." + File.separator + "results" + File.separator +
+		 * "results.xml"; // A tad bogus but this is where the build wants to
+		 * copy the results from!
+		 * 
+		 * //create the output file try { File outputfile = new
+		 * File(outputFileName); boolean created = outputfile.createNewFile();
+		 * if (created) { } else { msg = "Output dir could not be created.";
+		 * assertTrue(msg, msg == null); } } catch (IOException e) {
+		 * e.printStackTrace(); }
+		 */
+
+		String command = buildCommandLine(compareNewPath, compareOldPath,
+				outputFileName);
+
+		// System.out.println("command "+ command);
+
 		try {
 			Process aProcess = Runtime.getRuntime().exec(command);
 			try {
@@ -868,14 +895,13 @@ protected void setUp() throws Exception {
 			} catch (InterruptedException e) {
 				// ignore
 			}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		// analyze compare result
-		verifyCompareResults(compareNewPath, compareOldPath,outputFileName);
-		
+		verifyCompareResults(compareNewPath, compareOldPath, outputFileName);
+
 	}
 
 	/**
@@ -934,10 +960,9 @@ protected void setUp() throws Exception {
 	 * 
 	 * @return <code>true</code> if <code>file</code> is a configuration
 	 *         file <code>false</code> otherwise
-	 
-	private boolean isConfiguration(File file) {
-		IPath path = new Path(file.getAbsolutePath());
-		return file.isFile()
-				&& "platform.xml".equalsIgnoreCase(path.lastSegment());
-	} */
+	 * 
+	 * private boolean isConfiguration(File file) { IPath path = new
+	 * Path(file.getAbsolutePath()); return file.isFile() &&
+	 * "platform.xml".equalsIgnoreCase(path.lastSegment()); }
+	 */
 }
