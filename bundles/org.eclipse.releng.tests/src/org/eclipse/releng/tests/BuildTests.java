@@ -843,10 +843,11 @@ public class BuildTests extends TestCase {
 		 * and thus cannot be compared
 		 */
 
-		/*
-		 * if (compareOldPath.indexOf("N2") > 0 ) { //if nightly build, skip
-		 * test return; }
-		 */
+		
+		  if (compareOldPath.indexOf("N2") > 0 ) { //if nightly build, skip test 
+			  return; 
+		  }
+		 
 
 		String compareNewPath = properties.getProperty("compare.new");
 		File compareNewFile = compareNewPath == null ? null : new File(
