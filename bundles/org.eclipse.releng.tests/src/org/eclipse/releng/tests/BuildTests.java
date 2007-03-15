@@ -815,10 +815,10 @@ protected void setUp() throws Exception {
 		which means that they are lower than v20060921-1945 from an promoted integration build
 		and thus cannot be compared */		
 		
-		/*if (compareOldPath.indexOf("N2") > 0 ) {
+		if (compareOldPath.indexOf("N2") > 0 ) {
 			//if nightly build, skip test		
 			return;
-		}*/		
+		}		
 		
 		String compareNewPath = properties.getProperty("compare.new");
 		File compareNewFile = compareNewPath == null ? null : new File(
