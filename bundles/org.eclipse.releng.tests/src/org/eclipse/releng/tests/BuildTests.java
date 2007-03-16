@@ -843,8 +843,8 @@ public class BuildTests extends TestCase {
 		 * and thus cannot be compared
 		 */
 
-		
-		  if (compareOldPath.indexOf("N2") > 0 ) { //if nightly build, skip test 
+		//disable temporarily		
+		  if ((compareOldPath.indexOf("I2") > 0 ) || (compareOldPath.indexOf("N2") > 0 )) { //if nightly build, skip test 
 			  return; 
 		  }
 		 
