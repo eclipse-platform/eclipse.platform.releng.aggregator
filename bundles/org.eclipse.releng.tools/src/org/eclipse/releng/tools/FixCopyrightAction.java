@@ -10,18 +10,51 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteFile;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
+import org.eclipse.team.internal.ccvs.core.ILogEntry;
 import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
-import org.eclipse.ui.*;
+import org.eclipse.ui.IActionDelegate;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 public class FixCopyrightAction implements IObjectActionDelegate {
@@ -40,6 +73,7 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 	private String newLine = System.getProperty("line.separator");
 	private Map log = new HashMap();
 	private boolean swt = false;
+	private String filterString;
 
 	// The current selection
 	protected IStructuredSelection selection;
@@ -116,6 +150,49 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 	public void run(IAction action) {
 		log = new HashMap();
 		try {
+			final String[] filterArray = new String[1];
+			Dialog filterCriteria = new Dialog(PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()) {
+				Text text;
+
+				protected Control createDialogArea(Composite parent) {
+					Composite parentComposite = (Composite) super
+							.createDialogArea(parent);
+					Composite composite = new Composite(parentComposite,
+							SWT.NONE);
+					composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
+							true, true));
+					composite.setLayout(new GridLayout(2, false));
+					Label header = new Label(composite, SWT.WRAP);
+					header.setText(Messages.getString("CopyrightDialog.1"));
+					GridData gridData = new GridData(SWT.FILL, SWT.FILL, true,
+							false);
+					gridData.horizontalSpan = 2;
+					header.setLayoutData(gridData);
+					Label label = new Label(composite, SWT.NONE);
+					label.setText(Messages.getString("CopyrightDialog.2"));
+					text = new Text(composite, SWT.NONE);
+					text.setText("copyright");
+					text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+							false));
+					return parentComposite;
+				}
+
+				protected void okPressed() {
+					filterArray[0] = text.getText();
+					super.okPressed();
+				}
+				
+			};
+			filterCriteria.setBlockOnOpen(true);
+			int result = filterCriteria.open();
+			if (result == Dialog.CANCEL)
+				return;
+			
+			if (!filterArray[0].trim().equals("")) {
+				filterString = filterArray[0];
+			}
+			
 			final IResource[] results = getSelectedResources();
 			PlatformUI.getWorkbench().getProgressService().run(true, /* fork */
 			true, /* cancellable */
@@ -168,14 +245,23 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 				ICVSRemoteResource cvsFile = CVSWorkspaceRoot.getRemoteResourceFor(file);
 				if (cvsFile != null) {
 					// get the log entry for the revision loaded in the workspace
-					ILogEntry entry = ((ICVSRemoteFile) cvsFile).getLogEntry(new SubProgressMonitor(monitor, 100));
-					if (swt) {
-						String logComment = entry.getComment();
-						if (logComment.indexOf("CPL") != -1 && logComment.indexOf("EPL") != -1) {
-							// the last modification was the copyright comment update for the transition from CPL to EPL, so ignore
-							return 0;
-						}
+					ILogEntry entry = ((ICVSRemoteFile) cvsFile)
+							.getLogEntry(new SubProgressMonitor(monitor, 100));
+
+					String logComment = entry.getComment();
+					if (swt && logComment.indexOf("CPL") != -1
+							&& logComment.indexOf("EPL") != -1) {
+						// the last modification was the copyright comment
+						// update for the transition from CPL to EPL, so
+						// ignore
+						return 0;
+
 					}
+					else if (filterString != null && logComment.indexOf(filterString) != -1) {
+						//the last update was a copyright checkin - ignore
+						return 0;
+					}
+					
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(entry.getDate());
 					return calendar.get(Calendar.YEAR);
