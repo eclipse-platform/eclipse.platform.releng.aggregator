@@ -65,7 +65,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		Font font = parent.getFont();
 
 		//The main composite
 		fComposite = new Composite(parent, SWT.NONE);
@@ -75,7 +74,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		layout.marginHeight = 0;
 		fComposite.setLayout(layout);
 		fComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		fComposite.setFont(font);
 
 		// copyright template editor
 		fEditor = createEditor(fComposite);
@@ -148,6 +146,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 //		fReplaceAllExisting.addSelectionListener(listener2);
 		
 		initializeValues();
+		applyDialogFont(fComposite);
 		return fComposite;
 	}
 
