@@ -19,13 +19,13 @@
 <p></p>
 <p>
 <ol>
-  <li><a href="#anchorNameHere">Nested Launch Configuration Working Copies</a></li>
+  <li><a href="#launchConfigWorkingCopies">Nested Launch Configuration Working Copies</a></li>
+  <li><a href="#FileEditorInput">Incompatible source change to getStorage() on FileEditorInput</a></li>
 </ol>
 <hr>
 
-(The following is a template for editing this draft - add a section like this, including comment separators, for each issue)</p>
 <!-- ############################################## -->
-<h2>1. <a name="anchorNameHere"></a>Nested Launch Configuration Working Copies</h2>
+<h2>1. <a name="launchConfigWorkingCopies"></a>Nested Launch Configuration Working Copies</h2>
 <p><strong>What is affected:</strong> Launch configuration working copies support 
   nesting in 3.3. Clients that programmatically create and save launch configurations 
   may be affected by the change in behavior of the <code>ILaunchConfigurationWorkingCopy.doSave() 
@@ -44,6 +44,16 @@
   examine calls to <code>ILaunchConfiguration.getWorkingCopy()</code> and <code>ILaunchConfigurationWorkingCopy.doSave()</code> 
   to determine if nested working copies might be created. Note that saving a nested 
   working copy will not save changes back to the original launch configuration.</p>
+<!-- ############################################## -->
+<h2>2. <a name="FileEditorInput"></a>Incompatible source change to getStorage() on FileEditorInput</h2>
+<p><strong>What is affected:</strong> Clients that call getStorage() on FileEditorInput.</p>
+<p><strong>Description:</strong> The signature of getStorage() was changed to
+no longer throw a checked exception. This may cause compile errors in source code
+previously compiled against Eclipse 3.2 that is recompiled against 3.3. This change
+does not break binary compatibility - existing clients built against Eclipse 3.2 or
+earlier will continue to function normally.</p>
+<p><strong>Action required:</strong> Clients should recompile against Eclipse 3.3,
+and remove any catch block that is now unnecessary due to the removed exception.</p>
 <!-- ############################################## -->
 
 </body>
