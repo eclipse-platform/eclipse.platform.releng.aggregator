@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
          
   <meta http-equiv="Content-Type"
@@ -34,8 +34,8 @@ REM ****************************************************
 REM The JRE java.exe to be used
 set JAVAEXE="C:\jdk1.4.2\jre\bin\java.exe"
 
-REM The Eclipse startup.jar
-set STARTUPJAR="C:\eclipse\startup.jar"
+REM The Eclipse launcher jar
+set LAUNCHERJAR="C:\eclipse\plugins\org.eclipse.equinox.launcher_1.0.0.v20070319.jar"
 
 REM The location of your workspace
 set WORKSPACE=C:\runtime-workspace
@@ -48,8 +48,8 @@ REM ****************************************************
 if not exist %JAVAEXE% echo ERROR: incorrect java.exe=%JAVAEXE%, edit this file and correct the JAVAEXE envar
 if not exist %JAVAEXE% goto done
 
-if not exist %STARTUPJAR% echo ERROR: incorrect startup.jar=%STARTUPJAR%, edit this file and correct the STARTUPJAR envar
-if not exist %STARTUPJAR% goto done
+if not exist %LAUNCHERJAR% echo ERROR: incorrect equinox.launcher jar=%LAUNCHERJAR%, edit this file and correct the LAUNCHERJAR envar
+if not exist %LAUNCHERJAR% goto done
 
 if not exist %WORKSPACE% echo ERROR: incorrect workspace=%WORKSPACE%, edit this file and correct the WORKSPACE envar
 if not exist %WORKSPACE% goto done
@@ -59,8 +59,7 @@ if not exist %BUILDFILE% goto done
 
 :run
 @echo on
-%JAVAEXE% -cp %STARTUPJAR% org.eclipse.core.launcher.Main -noupdate -application
-org.eclipse.ant.core.antRunner -data %WORKSPACE% -buildfile %BUILDFILE%
+%JAVAEXE% -cp %LAUNCHERJAR% org.eclipse.equinox.launcher.Main -noupdate -application org.eclipse.ant.core.antRunner -data %WORKSPACE% -buildfile %BUILDFILE%
 
 :done
 pause
