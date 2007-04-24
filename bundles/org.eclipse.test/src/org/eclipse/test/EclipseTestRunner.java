@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Dictionary;
 import java.lang.reflect.Modifier;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -36,7 +37,10 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters
@@ -289,7 +293,7 @@ public class EclipseTestRunner implements TestListener {
 
 	/**
 	 * Loads the class either with the system class loader or a
-	 * plugin clsas loader if a plugin name was specified
+	 * plugin class loader if a plugin name was specified
 	 */
 	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		if (fTestPluginName == null)
@@ -299,6 +303,24 @@ public class EclipseTestRunner implements TestListener {
             throw new ClassNotFoundException(suiteClassName, new Exception("Could not find plugin \""
                     + fTestPluginName + "\""));
         }
+        
+        //is the plugin a fragment?
+		Dictionary headers = bundle.getHeaders();
+		String hostHeader = (String) headers.get(Constants.FRAGMENT_HOST);
+		if (hostHeader != null) {
+			// we are a fragment for sure
+			// we need to find which is our host
+			ManifestElement[] hostElement = null;
+			try {
+				hostElement = ManifestElement.parseHeader(Constants.FRAGMENT_HOST, hostHeader);
+			} catch (BundleException e) {
+				throw new RuntimeException("Could not find host for fragment:" + fTestPluginName,e);
+			}
+			Bundle host = Platform.getBundle(hostElement[0].getValue());
+			//we really want to get the host not the fragment
+			bundle = host;
+		} 
+
         return bundle.loadClass(suiteClassName);
 	}
 	
