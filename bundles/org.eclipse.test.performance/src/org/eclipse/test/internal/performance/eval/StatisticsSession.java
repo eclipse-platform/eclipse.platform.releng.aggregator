@@ -202,12 +202,16 @@ public class StatisticsSession {
         
         if (stats.count > 0) {
             stats.average= (double) stats.sum / stats.count;
-            double squaredDeviations= 0;
-            for (int i= 0; i < mags.length; i++) {
-                double deviation= stats.average - mags[i];
-                squaredDeviations += deviation * deviation;
+            if (stats.count == 1) {
+	            stats.stddev= 0;
+            } else {
+	            double squaredDeviations= 0;
+	            for (int i= 0; i < mags.length; i++) {
+	                double deviation= stats.average - mags[i];
+	                squaredDeviations += deviation * deviation;
+	            }
+	            stats.stddev= Math.sqrt(squaredDeviations / (stats.count - 1)); // unbiased sample stdev
             }
-            stats.stddev= Math.sqrt(squaredDeviations / stats.count - 1); // unbiased sample stdev
         } else {
             stats.average= 0;
             stats.stddev= 0;
