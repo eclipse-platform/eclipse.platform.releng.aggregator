@@ -23,15 +23,15 @@ import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 public class View {
 
     public static void main(String[] args) {
-        
+
         Variations variations= PerformanceTestPlugin.getVariations();
-        variations.put("config", "relengbuildwin2");  //$NON-NLS-1$//$NON-NLS-2$
-        variations.put("build", "I%");  //$NON-NLS-1$//$NON-NLS-2$
-        
-        String scenarioPattern= "%RevertJavaEditorTest%"; //$NON-NLS-1$
+        variations.put("config", "eclipseperfwin2_R3.3");  //$NON-NLS-1$//$NON-NLS-2$
+        variations.put("build", "I200704%");  //$NON-NLS-1$//$NON-NLS-2$
+        variations.put("jvm", "sun");  //$NON-NLS-1$//$NON-NLS-2$
 
-        String seriesKey= "build"; //$NON-NLS-1$
+		String scenarioPattern= "%RevertJavaEditorTest%"; //$NON-NLS-1$
 
+        String seriesKey= PerformanceTestPlugin.BUILD;
 
         String outFile= null;
         // outfile= "/tmp/dbdump"; //$NON-NLS-1$

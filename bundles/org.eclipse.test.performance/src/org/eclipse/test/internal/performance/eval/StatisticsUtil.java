@@ -93,30 +93,54 @@ public final class StatisticsUtil {
      */
     public static boolean hasSignificantDifference(TimeSeries series1, int index1, TimeSeries series2, int index2, Percentile percentile) {
         // see http://bmj.bmjjournals.com/collections/statsbk/7.shtml
+    
+    	double[] values = new double[] { series1.getValue(index1), series2.getValue(index2) };
+    	long[] counts = new long[] { series1.getCount(index1), series2.getCount(index2) };
+    	double[] stddevs = new double[] { series1.getStddev(index1), series2.getStddev(index2) };
+		double t = studentTtest(values, stddevs, counts, percentile);
+		return t == -1 || getStudentsT((int) (counts[0] + counts[1] - 2), percentile) < t;
+    }
 
-        double ref= series1.getValue(index1);
-        double val= series2.getValue(index2);
+    public static double[] statisticsForTimeSeries(TimeSeries series1, int index1, TimeSeries series2, int index2, Percentile percentile) {
+        // see http://bmj.bmjjournals.com/collections/statsbk/7.shtml
+    
+    	double[] values = new double[] { series1.getValue(index1), series2.getValue(index2) };
+    	long[] counts = new long[] { series1.getCount(index1), series2.getCount(index2) };
+    	double[] stddevs = new double[] { series1.getStddev(index1), series2.getStddev(index2) };
+		double ttest = studentTtest(values, stddevs, counts, percentile);
+		return new double[] {
+			getStudentsT((int) (counts[0] + counts[1] - 2), percentile),
+			ttest,
+			standardError(values, stddevs, counts),
+		};
+    }
+
+    public static double studentTtest(double[] values, double[] stddevs, long[] counts, Percentile percentile) {
+    
+        double ref = values[0];
+        double val= values[1];
         
         double delta= ref - val;
-        long df1= series1.getCount(index1) - 1;
-        double sd1= series1.getStddev(index1);
-        long df2= series2.getCount(index2) - 1;
-        double sd2= series2.getStddev(index2);
+        long df1= counts[0] - 1;
+        double sd1= stddevs[0];
+        long df2= counts[1];
+        double sd2= stddevs[1];
         // TODO if the stdev's are not sufficiently similar, we have to take a different approach
-        
-        boolean rejectNullHypothesis= true;
         
         if (!Double.isNaN(sd1) && !Double.isNaN(sd2) && df1 > 0 && df2 > 0) {
             long df= df1 + df2;
             double sp_square= (df1 * sd1 * sd1 + df2 * sd2 * sd2) / df;
-
+    
             double se_diff= Math.sqrt(sp_square * (1.0 / (df1 + 1) + 1.0 / (df2 + 1)));
-            double t= Math.abs(delta / se_diff);
-            rejectNullHypothesis= getStudentsT((int) df, percentile) < t;
+            return Math.abs(delta / se_diff);
         }
         
-        return rejectNullHypothesis;
+        return -1;
     }
+
+    public static double standardError(double[] values, double[] stddevs, long[] counts) {
+    	return Math.sqrt((stddevs[0] * stddevs[0] / counts[0]) + (stddevs[1] * stddevs[1] / counts[1])) / values[0];
+	    }
 
     /**
      * The (two-tailed) T-table. [degrees_of_freedom][percentile]
