@@ -7,9 +7,7 @@
 <link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
 <title>Incompatibilities between Eclipse 3.2 and 3.3</title>
 </head>
-
 <body>
-
 <h1>Incompatibilities between Eclipse 3.2 and 3.3</h1>
 
 <p> Eclipse changed in incompatible ways between 3.2 and 3.3 in ways that affect 
@@ -21,6 +19,9 @@
 <ol>
   <li><a href="#launchConfigWorkingCopies">Nested Launch Configuration Working Copies</a></li>
   <li><a href="#FileEditorInput">Incompatible source change to getStorage() on FileEditorInput</a></li>
+  <li><a href="#BootDelegation">Boot delegation changes</a></li>
+  <li><a href="#LazyActivation">Lazy activation changes</a></li>
+  <li><a href="#getEntryPaths">Clarification to Bundle.getEntryPaths</a></li>
 </ol>
 <hr>
 
@@ -55,6 +56,71 @@ earlier will continue to function normally.</p>
 <p><strong>Action required:</strong> Clients should recompile against Eclipse 3.3,
 and remove any catch block that is now unnecessary due to the removed exception.</p>
 <!-- ############################################## -->
-
+<h2>3. <a name="BootDelegation"></a>Boot delegation changes</h2>
+<p><strong>What is affected:</strong> The boot delegation order has changed in 3.3.  Bundles that depend on delegating 
+to the boot (parent) class loader first may be affected by this change.</p>
+<p><strong>Description:</strong> In Eclipse 3.3 the default class loader delegation model has been changed to the following order:
+<ol>
+<li>Imported packages (i.e. packages specified in the Import-Package manifest header).</li>
+<li>Required bundles (i.e. bundles specified in the Require-Bundle manifest header).</li>
+<li>Local bundle and fragments.</li>
+<li>Boot (parent) class loader as a last resort.  This is only done if no source was found in the previous steps. </li>
+</ol>
+In 3.2 the boot (parent) class loader is always delegated to first.  This provides no isolation from the 
+classes provided by the VM.  It also affects performance because the boot class loader must be delegated to for every 
+load even though it is known that the class or resource is located in a bundle.  Because of the boot delegation changes 
+in 3.3, a bundle can now provide their own version of a package which is also available from the VM boot classpath.
+See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=162231"> bug 162231</a>.
+</p>
+<p><strong>Action required:</strong> Bundles that export packages which may be available by the boot (parent) class loader 
+need to evaluate whether the classes/resources they export should be added to the content from the boot class loader or replace it.
+If the exporting bundle should replace the content of the boot class loader then no action is required.  If the exporting bundle should 
+add to the content of the boot class loader then the exporting bundle should add &quot;system.bundle&quot; as a required bundle
+(i.e. Require-Bundle: system.bundle).  To revert back to the behavior in 3.2 the configuration property 
+&quot;org.osgi.framework.bootdelegation=*&quot; can be added to the config.ini file. </p>
+<!-- ############################################## -->
+<h2>3. <a name="LazyActivation">Lazy activation changes</a></h2>
+<p><strong>What is affected:</strong> Bundles that use the lazy activation policy (i.e. &quot;Eclipse-LazyStart: true&quot;) 
+will enter the Bundle.STARTING state as soon as they are eligible for lazy activation.  Clients that monitor the Bundle.STARTING 
+state may be affected by this change.
+</p>
+<p><strong>Description:</strong> Eclipse 3.3 implements the OSGi R4.1 specification.  The OSGi R4.1 specification  
+standardizes the lazy activation policy implemented in Eclipse.  Part of the standardization work changed the behavior of how 
+bundles states are transitioned when a lazy activation policy is used.  When a bundle becomes available for lazy activation the bundle 
+enters the Bundle.STATING state and a BundleEvent.LAZY_ACTIVATION event is fired.  This occurs before any class load 
+request is made to the bundle.  The bundle will remain in the Bundle.STARTING state until the first class load is made and 
+the bundle is activated.  When the bundle is activated a BundleEvent.STARTING event is fired and the BundleActivator.start method
+is called.  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=135885">bug 135885</a>.
+</p>
+<p>
+Bundles with a lazy activation policy could remain in the Bundle.STARTING state for a long time waiting for the first class load 
+(trigger load) to occur.  Entering the Bundle.STARTING state does not mean the BundleActivator.start method has been called.  
+The BundleActivator.start method is only called right after the BundleEvent.STARTING event is fired.  Bundles that monitor calls to 
+BundleActivators must use a SynchronousBundleListener to listen for the BundleEvent.STARTING and BundleEvent.STOPPING 
+events.
+</p>
+<p><strong>Action required:</strong> A SynchronousBundleListener must be used to monitor BundleEvent.STARTING and 
+BundleEvent.STOPPING events for clients that are monitoring the calls to BundleActivators.</p>
+<!-- ############################################## -->
+<h2>3. <a name="getEntryPaths">Clarification to Bundle.getEntryPaths</a></h2>
+<p><strong>What is affected:</strong> Clients of the Bundle.getEntryPaths method.
+</p>
+<p><strong>Description:</strong> The OSGi R4.1 specification has made a clarification on the behavior of the 
+org.osgi.framework.Bundle#getEntryPaths method.  The javadoc for the method Bundle#getEntryPaths did not 
+make it clear whether the String paths returned had a leading &quot;/&quot; character or not.  The following clarification has 
+been made: 
+<p>
+The returned paths are all relative to the root of this bundle and must not begin with &quot;/&quot;. 
+</p>
+Eclipse 3.2 had a bug for directory (non-jarred) bundles where a leading &quot;/&quot; character was included in the result if 
+the client used a path argument that contained a leading &quot;/&quot;.  For jarred bundles Eclipse 3.2 always ensures 
+the returned paths do not have a leading &quot;/&quot; character.  This is inconsistent behavior.  Directory bundles have  
+been fixed to be consistent with jarred bundles.  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=174101"> bug 174101</a>.
+</p>
+<p><strong>Action required:</strong> Some clients may have a dependency on the old behavior for directory bundles.  If a client 
+uses the method Bundle#getEntryPaths then ensure that it can handle returned paths that do not begin with a &quot;/&quot; character.
+This dependency is a bug in the client code because it would have failed for jarred bundles.
+</p>
+<!-- ############################################## -->
 </body>
 </html>
