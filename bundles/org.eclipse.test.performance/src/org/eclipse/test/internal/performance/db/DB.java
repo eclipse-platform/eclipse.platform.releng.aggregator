@@ -399,10 +399,18 @@ public class DB {
         if (fSQL == null)
             return null;
         
+        long start = System.currentTimeMillis();
+        if (DEBUG) 
+        	System.out.print("	- query data points from DB for scenario "+scenarioName+"..."); //$NON-NLS-1$ //$NON-NLS-2$
         ResultSet rs= null;
         try {
             ArrayList dataPoints= new ArrayList(); 
             rs= fSQL.queryDataPoints(variations, scenarioName);
+            if (DEBUG) {
+		        long time = System.currentTimeMillis();
+            	System.out.println("done in "+(time-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
+            	start = time;
+            }
 	        while (rs.next()) {
 	            int datapoint_id= rs.getInt(1);
 	            int step= rs.getInt(2);
@@ -426,7 +434,10 @@ public class DB {
 	        rs.close();
         	
             int n= dataPoints.size();
-            if (DEBUG) System.out.println("query resulted in " + n + " datapoints from DB"); //$NON-NLS-1$ //$NON-NLS-2$
+            if (DEBUG) {
+		        long time = System.currentTimeMillis();
+            	System.out.println("		+ " + n + " datapoints created in "+(time-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            }
             return (DataPoint[])dataPoints.toArray(new DataPoint[n]);
 
         } catch (SQLException e) {
@@ -449,6 +460,8 @@ public class DB {
     private String[] internalQueryScenarioNames(Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return null;
+        long start = System.currentTimeMillis();
+        if (DEBUG) System.out.print("	- query scenario names from DB for scenario pattern '"+scenarioPattern+"'..."); //$NON-NLS-1$ //$NON-NLS-2$
         ResultSet result= null;
         try {
             result= fSQL.queryScenarios(variations, scenarioPattern);
@@ -461,12 +474,17 @@ public class DB {
 	        PerformanceTestPlugin.log(e);
 
         } finally {
-            if (result != null)
+            if (result != null) {
                 try {
                     result.close();
                 } catch (SQLException e1) {
                     // ignored
                 }
+            }
+            if (DEBUG) {
+		        long time = System.currentTimeMillis();
+            	System.out.println("done in "+(time-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
+            }
         }
         return null;
     }
@@ -477,6 +495,8 @@ public class DB {
     private void internalQueryDistinctValues(List values, String seriesKey, Variations variations, String scenarioPattern) {
         if (fSQL == null)
             return;
+        long start = System.currentTimeMillis();
+        if (DEBUG) System.out.print("	- query distinct values from DB for scenario pattern '"+scenarioPattern+"'..."); //$NON-NLS-1$ //$NON-NLS-2$
         ResultSet result= null;
         try {        	
             result= fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
@@ -491,31 +511,38 @@ public class DB {
 	        PerformanceTestPlugin.log(e);
 
         } finally {
-            if (result != null)
+            if (result != null) {
                 try {
                     result.close();
                 } catch (SQLException e1) {
                 	// ignored
                 }
+            }
+            if (DEBUG) {
+		        long time = System.currentTimeMillis();
+            	System.out.println("done in "+(time-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
+            }
         }
     }
     
     private SummaryEntry[] internalQuerySummaries(Variations variationPatterns, String scenarioPattern) {
         if (fSQL == null)
             return null;
+        long start = System.currentTimeMillis();
+        if (DEBUG) System.out.print("	- query summaries from DB for scenario pattern '"+scenarioPattern+"'..."); //$NON-NLS-1$ //$NON-NLS-2$
+		ResultSet result = null;
         try {
             List fingerprints= new ArrayList();
-            ResultSet rs;
             if (scenarioPattern != null)
-                rs= fSQL.querySummaryEntries(variationPatterns, scenarioPattern);
+                result= fSQL.querySummaryEntries(variationPatterns, scenarioPattern);
             else
-                rs= fSQL.queryGlobalSummaryEntries(variationPatterns);
-            while (rs.next()) {
-                String scenarioName= rs.getString(1);
-                String shortName= rs.getString(2);
-                int dim_id= rs.getInt(3);
-                boolean isGlobal= rs.getShort(4) == 1;
-                int comment_id= rs.getInt(5);
+                result= fSQL.queryGlobalSummaryEntries(variationPatterns);
+            while (result.next()) {
+                String scenarioName= result.getString(1);
+                String shortName= result.getString(2);
+                int dim_id= result.getInt(3);
+                boolean isGlobal= result.getShort(4) == 1;
+                int comment_id= result.getInt(5);
                 int commentKind= 0;
                 String comment= null;
                 if (comment_id != 0) {
@@ -530,6 +557,18 @@ public class DB {
             return (SummaryEntry[])fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
         } catch (SQLException e) {
 	        PerformanceTestPlugin.log(e);
+        } finally {
+            if (result != null) {
+                try {
+                    result.close();
+                } catch (SQLException e1) {
+                	// ignored
+                }
+            }
+            if (DEBUG) {
+		        long time = System.currentTimeMillis();
+            	System.out.println("done in "+(time-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
+            }
         }
         return null;
     }
@@ -598,6 +637,8 @@ public class DB {
     private Map internalQueryFailure(String scenarioPattern, Variations variations) {
         if (fSQL == null)
             return null;
+        long start = System.currentTimeMillis();
+        if (DEBUG) System.out.print("	- query failure from DB for scenario pattern '"+scenarioPattern+"'..."); //$NON-NLS-1$ //$NON-NLS-2$
         ResultSet result= null;
         try {
             Map map= new HashMap();
@@ -612,12 +653,17 @@ public class DB {
 	        PerformanceTestPlugin.log(e);
 
         } finally {
-            if (result != null)
+            if (result != null) {
                 try {
                     result.close();
                 } catch (SQLException e1) {
                 	// ignored
                 }
+            }
+            if (DEBUG) {
+		        long time = System.currentTimeMillis();
+            	System.out.println("done in "+(time-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
+            }
         }
         return null;
     }

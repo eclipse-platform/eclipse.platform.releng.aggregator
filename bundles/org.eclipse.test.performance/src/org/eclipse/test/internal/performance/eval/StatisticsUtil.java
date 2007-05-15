@@ -83,35 +83,26 @@ public final class StatisticsUtil {
      * XXX the current implementation assumes that the standard deviations are sufficiently similar.
      * </p>
      * 
-     * @param series1 the time series containing the first data set
+     * @param refSeries the time series containing the first data set
      * @param index1 the index into <code>series1</code> for the first data set
-     * @param series2 the time series containing the second data set
+     * @param testSeries the time series containing the second data set
      * @param index2 the index into <code>series2</code> for the second data set
      * @param percentile the percentile level to use
      * @return <code>true</code> if the null hypothesis is rejected on the <code>percentile</code>
      *         level, <code>false</code> if it cannot be rejected based on the given data
      */
-    public static boolean hasSignificantDifference(TimeSeries series1, int index1, TimeSeries series2, int index2, Percentile percentile) {
+    public static double[] statisticsForTimeSeries(TimeSeries refSeries, int index1, TimeSeries testSeries, int index2, Percentile percentile) {
         // see http://bmj.bmjjournals.com/collections/statsbk/7.shtml
     
-    	double[] values = new double[] { series1.getValue(index1), series2.getValue(index2) };
-    	long[] counts = new long[] { series1.getCount(index1), series2.getCount(index2) };
-    	double[] stddevs = new double[] { series1.getStddev(index1), series2.getStddev(index2) };
-		double t = studentTtest(values, stddevs, counts, percentile);
-		return t == -1 || getStudentsT((int) (counts[0] + counts[1] - 2), percentile) < t;
-    }
-
-    public static double[] statisticsForTimeSeries(TimeSeries series1, int index1, TimeSeries series2, int index2, Percentile percentile) {
-        // see http://bmj.bmjjournals.com/collections/statsbk/7.shtml
-    
-    	double[] values = new double[] { series1.getValue(index1), series2.getValue(index2) };
-    	long[] counts = new long[] { series1.getCount(index1), series2.getCount(index2) };
-    	double[] stddevs = new double[] { series1.getStddev(index1), series2.getStddev(index2) };
+    	double[] values = new double[] { refSeries.getValue(index1), testSeries.getValue(index2) };
+    	long[] counts = new long[] { refSeries.getCount(index1), testSeries.getCount(index2) };
+    	double[] stddevs = new double[] { refSeries.getStddev(index1), testSeries.getStddev(index2) };
 		double ttest = studentTtest(values, stddevs, counts, percentile);
 		return new double[] {
 			getStudentsT((int) (counts[0] + counts[1] - 2), percentile),
 			ttest,
 			standardError(values, stddevs, counts),
+			deviation(values),
 		};
     }
 
@@ -138,9 +129,13 @@ public final class StatisticsUtil {
         return -1;
     }
 
+    public static double deviation(double[] values) {
+    	return (values[1] - values[0]) / values[0];
+    }
+
     public static double standardError(double[] values, double[] stddevs, long[] counts) {
     	return Math.sqrt((stddevs[0] * stddevs[0] / counts[0]) + (stddevs[1] * stddevs[1] / counts[1])) / values[0];
-	    }
+    }
 
     /**
      * The (two-tailed) T-table. [degrees_of_freedom][percentile]
