@@ -25,25 +25,23 @@ burden on the user.  The user must identify which fields require content, whethe
 field contains valid content, and what choices are expected.  The JFace <b>field assist</b> 
 support provides classes that help guide the user through input tasks.</P>
 <P >The <b><a href="../reference/api/org/eclipse/jface/fieldassist/package-summary.html">org.eclipse.jface.fieldassist</a></b> package 
-provides assistance in two ways.  Support for <b>decorated fields</b> allows you to include
-image decorations that cue the user about the status of a particular
-field.  <b>Content proposal</b> support allows you to provide a content assist popup that 
+provides assistance in two ways.  <b>Control decorations</b> allow you to place
+image decorations adjacent to a control in order to cue the user about the status of a 
+particular field.  <b>Content proposal</b> support allows you to provide a content assist popup that 
 provides content choices for the user.</P>
-<h3>Decorated fields</h3>
-<p>Decorated fields allow you to place image decorations adjacent to fields defined
-in a window or dialog.  Decorations may be placed adjacent to one of the four corners 
-of a field.  Much like viewers, decorated fields are intended to add functionality
-to an SWT control, while still providing access to the underlying control.  The
-API for <b><a href="../reference/api/org/eclipse/jface/fieldassist/DecoratedField.html">
-DecoratedField</a></b> allows you to add, hide, and show decorations adjacent to a field.
-Access to the underlying control is provided so that you can use the existing SWT 
-API to affect the underlying control, such as setting its content, color, or font.
+<h3>Control decorations</h3>
+<p>A control decoration is a rendered image that can be placed adjacent to a field
+in a window or dialog.  Decorations may be placed adjacent to a control in one of
+six positions (top, center, or bottom to the left or right of the control).  One or 
+more control decorations may be defined for a control.  The
+API for <b><a href="../reference/api/org/eclipse/jface/fieldassist/ControlDecoration.html">
+ControlDecoration</a></b> allows you to hide and show the decoration, assign descriptive
+text to the decoration, and listen to events associated with the decoration.
 </p>
-<h4>Creating a decorated field</h4>
-<p>From the outside, a decorated field behaves like a single control.  Internally, decorated 
-fields use a composite control to manage the layout of the field and its decorations.  For the
-most part, this shouldn't matter to the client application.  However, it means that the decorated
-field must perform the actual creation of the control.  For example, consider this snippet, in
+<h4>Creating a control decoration</h4>
+<p>Creating a control decoration is straightforward.  Clients simply specify the control to
+be decorated and SWT constants describing the position of the decoration relative to the
+control.  Consider this snippet, in
 which an application creates a text control inside one of its dialogs:</p>
 <pre>
 ...
@@ -53,116 +51,59 @@ text.setText("some text");
 ...
 </pre>
 <p>
-In order to decorate this field, the field would be created in this manner:
+A decoration can then be created for the control.
 </p>
 <pre>
 ...
-// Create a decorated field for a text control
-DecoratedField field = new DecoratedField(parent, SWT.BORDER, new TextControlCreator());
-Text text = (Text)field.getControl();
-text.setText("some text");
+// Create a control decoration for the control.
+ControlDecoration dec = new ControlDecoration(text, SWT.TOP | SWT.LEFT);
 ...
 </pre>
-<p>The same parent and style bits that would be used to create the basic control are
-also used to create a decorated field.  The primary difference in the code is that an
-instance of <b><a href="../reference/api/org/eclipse/jface/fieldassist/IControlCreator.html">
-IControlCreator</a></b> is provided that creates the specific kind of control desired in the
-field.  You can use the creation convenience classes such as
-<b><a href="../reference/api/org/eclipse/jface/fieldassist/TextControlCreator.html">
-TextControlCreator</a></b> or 
-<b><a href="../reference/api/org/eclipse/jface/fieldassist/ComboControlCreator.html">
-ComboControlCreator</a></b> or to create the control.  You also have the flexibility
-to implement <b><a href="../reference/api/org/eclipse/jface/fieldassist/IControlCreator.html">
-IControlCreator</a></b> to create any other kind of control inside the field, such as a
-spinner or scale. 
-</p>
-<h4>Using decorations</h4>
-<p>Once a decorated field is created, decorations may be added to it, in one
-of four locations.  SWT location constants are used to specify where the
-decoration should be placed.  To add a decoration, you must specify a
-<b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecoration.html">
-FieldDecoration</a></b>, which defines the image for the decoration, and (optional) descriptive 
-text that can be shown when the user hovers over the decoration.
+<p>Once the decoration is created, its image and text can be specified.
 </p>
 <pre>
 ...
-// Create a field decoration and add it to the field
+// Specify the decoration image and description
 Image image = JFaceResources.getImage("myplugin.specialimage");
-FieldDecoration mySpecialDecoration = new FieldDecoration(image, "This field is special");
-field.addFieldDecoration(mySpecialDecoration, SWT.TOP | SWT.LEFT, false);
-...
+dec.setImage(image);
+dec.setDescriptionText("This field is special");
 </pre>
 <p>
-The boolean parameter is used to specify whether the decoration should be shown only
-when the control has focus, or whether it should be shown at all times.  In this case,
-the decoration will be shown all of the time.  However, there may be other times when
-the decoration should be hidden or shown.  The following snippet hides a decoration
-that has already been created.  
+Clients can use the <b>setShowOnlyOnFocus</b> method to specify whether the decoration 
+should be shown only when the control has focus, or whether it should be shown at all times.  
+The <b>setShowHover</b> method allows clients to configure whether the description text is
+shown in a hover when the mouse hovers over the decoration.
+</p>
+<h4>Laying out decorated controls</h4>
+<p>
+When adding decorations to controls that appear inside a dialog or window, you should 
+make sure there is enough space adjacent to the control to render the decoration without
+overlapping other controls.  For example, when using a grid layout in a dialog, there should
+be enough margin space between the cells in the grid so that a decoration can be shown adjacent to
+controls in the cells. 
 </p>
 <pre>
 ...
-// Something has occurred that makes me want to hide the decoration
-field.hideDecoration(mySpecialDecoration);
+// Set the layout data to ensure there is enough space for the decoration
+GridData data = new GridData(IDialogConstants.ENTRY_FIELD_WIDTH, SWT.DEFAULT);
+<b>data.horizontalIndent = image.getBounds().width;</b>
+text.setLayoutData(data);
 ...
 </pre>
 <p>
-If the image or description for a decoration is updated, the field should be 
-notified, so that the decoration can be redrawn.  
-</p>
-<pre>
-...
-// Something has made the field extra special
-mySpecialDecoration.setDescription("This field is extra-special");
-field.updateDecoration(mySpecialDecoration);
-...
-</pre>
-<h4>Laying out decorated and non-decorated fields</h4>
-<p>
-When laying out a decorated field inside a dialog or window, you should lay out the
-field's <b>layout control</b> rather than the underlying simple control.  Consider again
-the code for creating a text control.  When laying out a text control, the application
-sets layout data on the control. 
-</p>
-<pre>
-...
-// Create a text field
-Text text = new Text(parent, SWT.BORDER);
-text.setText("some text");
-// Set the layout data
-<b>GridData data = new GridData(IDialogConstants.ENTRY_FIELD_WIDTH, SWT.DEFAULT);
-text.setLayoutData(data);</b> 
-...
-</pre>
-<p>
-When laying out a decorated field, the application should set the layout data on the
-field's layout control.  Depending on the desired layout, the size of the field may
-have to be adjusted for the size of the decoration.
-</p>
-<pre>
-...
-// Create a decorated field for a text control
-DecoratedField field = new DecoratedField(main, SWT.BORDER, new TextControlCreator());
-Text text = (Text)field.getControl();
-text.setText("some text");
-// Set the layout data
-<b>GridData data = new GridData(IDialogConstants.ENTRY_FIELD_WIDTH + 
-   FieldDecorationRegistry.getDefault().getMaximumDecorationWidth(), SWT.DEFAULT);
-field.getLayoutControl().setLayoutData(data);</b> 
-...
-</pre>
-<p>
-The field assist support does not require or assume that you are using only decorated fields inside
-a particular dialog or window.  However, the layout of your window may become a bit more
-complicated when decorated fields are mixed with simple controls.  In order to align
-decorated and non-decorated fields, you must take into account the indent created by
-the decoration width.  The width of a decoration is simply the width of its image.  However,
-things can get more complicated if you are using decorations with different widths.
-If this is the case, you can simplify things by registering all of your decorations in the
+The width of a decoration is simply the width of its image.  However,
+layout can get more complicated if you are using decorations with different widths.
+If this is the case, you can simplify things by first creating field decorations to represent
+all of your control decorations.  
+<h4>Field decorations</h4>
+A <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecoration.html">
+FieldDecoration</a></b> is simply a data object that combines the image and text used to
+show a decoration.  Once created, these field decorations can be registered in the
 <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
 FieldDecorationRegistry</a></b>.  
 </p>
 <h4>Field decoration registry</h4>
-<p>The field decoration registry allows you to register and access your field decorations 
+<p>The field decoration registry allows you to register and access field decorations 
 using a string id.  This provides a convenient way for you to refer to decorations used throughout your
 application.  You may choose to define API that exposes your decoration ids if you wish to
 make them available to other plug-ins.  Note that registering a decoration does not manage
@@ -171,41 +112,32 @@ these images.  For example, the JFace image registry may be used to register and
 image's life-cycle.  Alternatively, your application may wish to create the image on demand
 and dispose of it when it is no longer needed.  The javadoc for the registration methods in
 <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
-FieldDecorationRegistry</a></b> explain the different ways that images can be specified when
-registering a decoration.
-</p>
-<p>Registering your decorations in the field decoration registry can also simplify the layout
-process when mixing decorated (and non-decorated) fields.  By default, a decorated field will
-consult the field decoration registry to determine the maximum width of a decoration, and ensure
-that all decorations use this width.  This means that all of your decorated fields will align
-properly, regardless of the width of any particular decoration.  To align non-decorated fields,
-you can use the <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
+FieldDecorationRegistry</a></b> explains the different ways that images can be specified when
+registering a decoration. To determine the margin width needed for decorations, you can use 
+the <b><a href="../reference/api/org/eclipse/jface/fieldassist/FieldDecorationRegistry.html">
 FieldDecorationRegistry</a></b> protocol to access the width of the largest decoration and create
 the necessary indent.
 </p>
 <pre>
 ...
-// Create a text field
-Text text = new Text(parent, SWT.BORDER);
-text.setText("some text");
 // Set the layout data
-<b>GridData data = new GridData();
-data.horizontalAlignment = SWT.FILL;
-data.horizontalIndent = FieldDecorationRegistry.getDefault().getMaximumDecorationWidth();
-text.setLayoutData(data);</b> 
+GridData data = new GridData(IDialogConstants.ENTRY_FIELD_WIDTH, SWT.DEFAULT);
+<b>data.horizontalIndent = FieldDecorationRegistry.getDefault().getMaximumDecorationWidth();</b> 
+text.setLayoutData(data);
 ...
 </pre>
 <p>Although the field assist support does not dictate how decorations should be used,
-the registry also defines standard decorations that can be used by applications to show certain
+the registry does define standard decorations that can be used by applications to show certain
 states for a field.  For example, the following snippet uses a standard
-decoration for required fields:</p>
+decoration for indicating an error in a field:</p>
 <pre>
 ...
-// Create a decorated field with a required field decoration.
-DecoratedField field = new DecoratedField(main, SWT.BORDER, new TextControlCreator());
-FieldDecoration requiredFieldIndicator = FieldDecorationRegistry.getDefault().
-   getFieldDecoration(FieldDecorationRegistry.DEC_REQUIRED);
-field.addDecoratedField(requiredFieldIndicator, SWT.BOTTOM | SWT.LEFT, false);
+// Create a control decoration to indicate an error.
+ControlDecoration dec = new ControlDecoration(text, SWT.TOP | SWT.LEFT);
+FieldDecoration errorFieldIndicator = FieldDecorationRegistry.getDefault().
+   getFieldDecoration(FieldDecorationRegistry.DEC_ERROR);
+dec.setImage(errorFieldIndicator.getImage());
+dec.setDescriptionText(errorFieldIndicator.getDescription());
 ...
 </pre>
 <h3>Content proposals</h3>
@@ -284,11 +216,16 @@ content proposal popup using an explicit key sequence that does not affect the c
 The <b>Field Assist Example</b> allows you to configure these various options in the example preferences
 and try out the different combinations.  For example, the adapter can be configured so that
 it is invoked explicitly with a keystroke and inserts the proposal content into the
-control, causing it to behave much like the text editor content assist.  Or it can
-be configured with no explicit keystroke, autoactivation characters, and content 
-replacement, so that it behaves more like the type-ahead completion style used in
-web browser URL or search fields.  See the javadoc for more specifics about each of these methods and how they interact with each other.
+control, causing it to behave much like the text editor content assist.  
+See the javadoc for more specifics about each of these methods and how they interact with each other.
 </p>
+<h4>Auto complete fields</h4>
+The content proposal adapter methods can be used to configure an adapter so that it behaves
+more like the type-ahead field completion used in web browser URL or search fields.  
+<b><a href="../reference/api/org/eclipse/ui/fieldassist/AutoCompleteField.html">
+AutoCompleteField</a></b> can be used when this style of interaction is desired.  Clients need
+only specify the list of completions when defining an auto complete field.  Configuration
+of the content proposal adapter and proposal provider will be handled internally.
 <h3>Workbench field assist</h3>
 <p>Field assist support at the JFace level gives your application a lot of flexibility in determining
 how to decorate fields and show proposals for field content.  This is desirable for stand-alone
@@ -297,14 +234,14 @@ with other plug-ins, such as the Eclipse SDK or third-party plug-ins, you will p
 use the field assist support in a way that is consistent with other plug-ins.  The workbench 
 defines utility classes that use field assist for specific kinds of interactions.  </p>
 <p>For example,
-the class <b><a href="../reference/api/org/eclipse/ui/fieldassist/ContentAssistField.html">
-ContentAssistField</a></b> creates a field that includes a light bulb decoration to cue the 
-user that content assist is available.  It also configures a content proposal adapter for
-content-assist style insertion.  Finally, it provides a handler for the workbench-level content assist
+the class <b><a href="../reference/api/org/eclipse/ui/fieldassist/ContentAssistCommandAdapter.html">
+ContentAssistCommandAdapter</a></b> configures a content proposal adapter for
+content-assist style insertion.  It provides a handler for the workbench-level content assist
 command, so that the content proposal popup is opened when the user invokes the keystroke or 
-trigger sequence that has been specified in the workbench key bindings.  See the 
+trigger sequence that has been specified in the workbench key bindings.  It can optionally
+provide a control decoration with the content assist light bulb image.  See the 
 <b><a href="../reference/api/org/eclipse/ui/fieldassist/package-summary.html">org.eclipse.ui.fieldassist</a></b> package 
-for more detail about these utility classes.
+for more detail about workbench-level field assist.
 </p>
 <p>This package is expected to evolve as the workbench expands its use of field assist and
 standardizes the use of decorations for certain field states.
