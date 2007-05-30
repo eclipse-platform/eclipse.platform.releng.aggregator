@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<meta HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>View command - org.eclipse.ui.menus</title>
+
+<link rel="stylesheet" type="text/css" href="../book.css">
+</head>
+<body bgcolor="#ffffff">
+<h3>View command - org.eclipse.ui.menus</h3>
+
+<p>
+You can contribute a command to your view menu or view toolbar using the
+<b><a href="../reference/extension-points/org_eclipse_ui_menus.html"> org.eclipse.ui.menus</a></b>
+extension point.  First you have to define a command for your view. 
+</p>
+<p>
+<pre>
+   &lt;extension 
+         point="org.eclipse.ui.commands"&gt;
+      &lt;category 
+            id="org.eclipse.ui.examples.readmetool.category"
+            name="%Readme.commands.category"&gt;
+      &lt;/category&gt;
+      &lt;command 
+            categoryId="org.eclipse.ui.examples.readmetool.category"
+            defaultHandler="org.eclipse.ui.examples.readmetool.ViewHandler"
+            id="org.eclipse.ui.examples.readmetool.viewCmd"
+            name="%Readme.viewCmd.name"&gt;
+      &lt;/command&gt;
+   &lt;/extension&gt;
+</pre>
+</p>
+<p>We've defined a command with a name, category, and default handler.  The
+name and category are for display purposes, and the default handler will
+be executed by the command when no other handler is active.  As we
+have only contributed this one handler, it will always be active.  The
+handler contains the behaviour for the command, which can simply be
+in the execute method:
+<pre>
+	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IWorkbenchPart activePart = HandlerUtil.getActivePart(event);
+		if (activePart instanceof IViewPart) {
+			IViewPart view = (IViewPart) activePart;
+			MessageDialog.openInformation(view.getSite().getShell(),
+					MessageUtil.getString("Readme_Editor"), //$NON-NLS-1$
+					MessageUtil.getString("View_Command_executed")); //$NON-NLS-1$
+		}
+		return null;
+	}
+</pre>
+</p>
+<p>
+See <a href="wrkAdv_commands_handlers.htm" class="XRef">Commands and Handler</a> for more options when defining handlers
+for commands, like activating the handler only for a specific view type, enabling the
+command for only for certain selections types, or extracting information from
+the application context using
+<b><a href="../reference/api/org/eclipse/ui/handlers/HandlerUtil.html">HandlerUtil</a></b>.
+</p>
+<p>
+Now that you have the <b>org.eclipse.ui.examples.readmetool.viewCmd</b> command
+you can use
+<b><a href="../reference/extension-points/org_eclipse_ui_menus.html"> org.eclipse.ui.menus</a></b>
+to place the command in a menu and/or toolbar, and
+<b><a href="../reference/extension-points/org_eclipse_ui_bindings.html"> org.eclipse.ui.bindings</a></b>
+to have a keybinding execute the command.
+</p>
+<p>
+<img src="images/readmeviewcommand.png" alt="" border="0">
+</p>
+<p>
+We'll add our command next to the <b>org.eclipse.ui.examples.readmetool.va1</b>
+action from the <a href="workbench_basicext_viewActions.htm" class="XRef">org.eclipse.ui.viewActions</a>
+section.
+</p>
+<p>
+<pre>
+   &lt;extension
+         point="org.eclipse.ui.menus"&gt;
+      &lt;menuContribution
+            locationURI="menu:org.eclipse.ui.navigator.ProjectExplorer?after=additions"&gt;
+         &lt;command
+               commandId="org.eclipse.ui.examples.readmetool.viewCmd"
+               icon="$nl$/icons/view16/sections.gif"
+               mnemonic="%Readme.viewCmd.mnemonic"&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+      &lt;menuContribution
+            locationURI="toolbar:org.eclipse.ui.navigator.ProjectExplorer?after=additions"&gt;
+         &lt;command
+               commandId="org.eclipse.ui.examples.readmetool.viewCmd"
+               icon="$nl$/icons/view16/sections.gif"
+               tooltip="%Readme.viewCmd.tooltip"&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+   &lt;/extension&gt;
+</pre>
+</p>
+<p>
+The first <b>menuContribution</b> is adding the command to the menu of the view
+with the id <b>org.eclipse.ui.navigator.ProjectExplorer</b>, after the
+<b>additions</b> group.  In the <b>command</b> element, if you don't specify
+the label the menu item will pick it up from the command definition.
+The second <b>menuContribution</b> is adding the
+command to <b>org.eclipse.ui.navigator.ProjectExplorer</b>'s toolbar, also
+after the toolbar's <b>additions</b> group.
+</p>
+<p>
+See the <a href="workbench_basicext_trim.htm" 
+class="XRef">org.eclipse.ui.menus</a> section for more 
+information on the menuContributions. 
+</p>
+
+</body>
+</html>
