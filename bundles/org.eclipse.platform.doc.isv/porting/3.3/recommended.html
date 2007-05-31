@@ -18,6 +18,7 @@
   <li><a href="#AppModel">Application model changes</a></li>
   <li><a href="#ContextLaunch">Launch selection versus launch last</a></li>
   <li><a href="#HyperlinkDetector">Replacing a hard-coded <code>IHyperlinkDetector</code> with an extension</a></li>
+  <li><a href="#FileBufferPerformance">Improve performance when working with file buffers</a></li>
 </ol>
 <hr>
 
@@ -47,6 +48,7 @@ reference <b>org.eclipse.core.runtime</b> might need to add the <b>org.eclipse.e
   for more details. </p> 
 </p>
 <!-- ############################################## -->
+<p>&nbsp;</p>
 <h2><a name="ContextLaunch">2. Launch selection versus launch last</a></h2>
 <p>By default, running and debugging applications has been simplified to run or 
   debug the selected file or active editor. When the selected resource (or active 
@@ -118,6 +120,7 @@ reference <b>org.eclipse.core.runtime</b> might need to add the <b>org.eclipse.e
 </ol>
 </p>
 <!-- ############################################## -->
+<p>&nbsp;</p>
 <h2><a name="HyperlinkDetector">3. Replacing a hard-coded <code>IHyperlinkDetector</code> with an extension</a></h2>
 Before 3.3 it was not possible to contribute hyperlink detectors to existing source viewers and textual editors. Only
 their implementors could add them directly through code by providing their hyper link detectors via
@@ -130,6 +133,18 @@ their own hyperlink detectors to such targets via the following extension points
 	<li><a href="../../reference/extension-points/org_eclipse_ui_workbench_texteditor_hyperlinkDetectors.html">org.eclipse.ui.workbench.texteditor.hyperlinkDetectors</a></li>
 </ul>
 </p>  
+<!-- ############################################## -->
 <p>&nbsp;</p>
+<h2><a name="FileBufferPerformance">4. Improve performance when working with file buffers</a></h2>
+In earlier versions file buffer manager API methods used to take an <code>IPath</code> and it was
+up to the file buffer manager to detect whether that path pointed to a workspace or an external location.
+Those API methods have been deprecated in 3.3 in order to improve performance as in most cases clients already
+know whether their path is a workspace path or an external path. New methods with same names have been
+that take one of the following location kind arguments:
+<ul>
+	<li><a href="../../reference/api/org/eclipse/core/filebuffers/LocationKind.html#IFILE">IFile</a></li>
+	<li><a href="../../reference/api/org/eclipse/core/filebuffers/LocationKind.html#LOCATION">LOCATION</a></li>
+	<li><a href="../../reference/api/org/eclipse/core/filebuffers/LocationKind.html#NORMALIZE">NORMALIZE</a></li>
+</p>  
 </body>
 </html>
