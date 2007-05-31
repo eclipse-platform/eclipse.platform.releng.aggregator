@@ -3,7 +3,7 @@
 
 <head>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2006. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
@@ -14,7 +14,7 @@
 <body>
 
 <h1>The Eclipse runtime options</h1>
-<p>Version 3.2 - Last revised May 8, 2006</p>
+<p>Version 3.3 - Last revised May 31, 2007</p>
 <p>The Eclipse platform is highly configurable. Configuration input takes the
   form of command line arguments and System property settings. In many cases
   the command line arguments are simply short cuts for setting the related System
@@ -60,9 +60,6 @@ line arguments. </p>
   <dt>-dev [entries] (OSGi)</dt>
   <dd>equivalent to setting <a href="#osgidev">osgi.dev</a> to [entries] or
     the empty string to simply enable dev mode (i.e., if entries are not specified)</dd>
-  <dt>-endSplash &lt;command&gt; (Main)</dt>
-  <dd>specifies the command to use to take down the splash screen. Typically
-    supplied by the Eclipse executable.</dd>
   <dt>-feature &lt;feature id&gt;    (Runtime)</dt>
   <dd>equivalent to setting  <a href="#eclipseproduct">eclipse.product</a>
     to &lt;feature id&gt;</dd>
@@ -80,6 +77,37 @@ line arguments. </p>
   <dt>-keyring &lt;location&gt; (Runtime)</dt>
   <dd>the location of the authorization database on disk. This argument has to
     be used together with the -password argument. </dd>
+  <dt>--launcher.library &lt;location&gt; (Executable) <span
+ style="font-style: italic;">NEW</span></dt>
+  <dd>the location of the eclipse executable's companion shared
+library.&nbsp; If not specified the executable looks in the plugins
+directory for the appropriate org.eclipse.equinox.launcher.[platform]
+fragment with the highest version and uses the shared library named
+eclipse_* inside.</dd>
+  <dt>--launcher.ini &lt;location&gt; (Executable) <span
+ style="font-style: italic;">NEW</span></dt>
+  <dd>the location of the product .ini file to use.&nbsp; If not
+specified the executable will look for a file beside the launcher with
+the same name and the extension .ini.&nbsp; (ie eclipse.exe looks for
+eclipse.ini, product.exe looks for product.ini)</dd>
+  <dt>--launcher.suppressErrors (Executable) <span
+ style="font-style: italic;">NEW</span></dt>
+  <dd>If specified the executable will not display any error or message
+dialogs.&nbsp; This is useful if the executable is being used in an
+unattended situation.</dd>
+  <dt>--launcher.secondThread (Executable)&nbsp; <span
+ style="font-style: italic;">NEW MACOSX ONLY</span></dt>
+  <dd>If specified the executable will create the Java VM on a
+secondary thread.&nbsp; This should used if a swing application is
+being run. <span style="font-weight: bold;">SWT will NOT work</span>
+if this option is specified.</dd>
+  <dt>--launcher.XXMaxPermSize &lt;value&gt; (Executable) <span
+ style="font-style: italic;">NEW</span></dt>
+  <dd>If specified, and the executable detects that the VM being used
+is a Sun VM, then the launcher will automatically add the
+-XX:MaxPermSize=&lt;value&gt; vm argument.&nbsp; The executable is not
+capable of detecting Sun VMs on all platforms.<br>
+  </dd>
   <dt>-name &lt;string&gt; <em>NEW</em></dt>
   <dd>The name to be displayed in task bar item when the application starts up. When not set, the name is the name of the executable.</dd>
   <dt>-nl &lt;locale&gt; (OSGi)</dt>
@@ -105,22 +133,33 @@ line arguments. </p>
   <dt> -product &lt;id&gt; (OSGi) </dt>
   <dd>equivalent to setting  <a href="#eclipseproduct">eclipse.product</a> to
   &lt;id&gt;</dd>
-  <dt>-showSplash &lt;command&gt; (Main)</dt>
-  <dd>specifies the command to use to show the splash screen. Typically supplied
-    by the Eclipse executable.</dd>
+  <dt>-showSplash &lt;bitmap&gt; (Executable, Main) <span
+ style="font-style: italic;">NEW</span><br>
+  </dt>
+  <dd>specifies the bitmap to use in the splash screen. If specified,
+the launcher may be able to show the splash screen before starting the
+Java VM.&nbsp; If not specified, Main will find the bitmap using the
+osgi.splashLocation and osgi.splashPath properties.<br>
+  </dd>
   <dt>-startup &lt;location&gt; (Executable) <em>NEW</em></dt>
-  <dd>The location of jar used to startup eclipse. The jar referred to must have the Main-Class attribute set. 
-  If this parameter is not set, the startup.jar located in the same folder than the executable is used.</dd>
+  <dd>The location of jar used to startup eclipse. The jar referred to
+should have the Main-Class attribute set to
+org.eclipse.equinox.launcher.Main. If this parameter is not set, the
+executable will look in the plugins directory for
+theorg.eclipse.equinox.launcher bundle with the highest version.<br>
+  </dd>
   <dt>-user &lt;location&gt; (OSGi) </dt>
   <dd>equivalent to setting <a href="#osgiuserarea">osgi.user.area</a> to &lt;location&gt;</dd>
-  <dt>-vm &lt;path to java executable&gt;    (Executable, Main) </dt>
-  <dd>when passed to the Eclipse executable, this option is used to locate the
-    Java VM to use to run Eclipse. It must be the full file system path to an
-    appropriate Java executable. If not specified, the Eclipse executable uses
-    a search
-    algorithm to locate a suitable VM. In any event, the executable then passes
-    the path to the actual VM used to Java Main using the -vm argument. Java
-    Main then stores this value in <a href="#eclipsevm">eclipse.vm</a>.</dd>
+  <dt>-vm &lt;path to java vm&gt; (Executable, Main) </dt>
+  <dd>when passed to the Eclipse executable, this option is used to
+locate the Java VM to use to run Eclipse. It should be the full file
+system path to an appropriate: Java jre/bin directory, Java Executable,
+Java shared library (jvm.dll or libjvm.so), or a Java VM Execution
+Environment description file.&nbsp; If not specified,
+the Eclipse executable uses a search algorithm to locate a suitable VM.
+In any event, the executable then passes the path to the actual VM used
+to Java Main using the -vm argument. Java Main then stores this value
+in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   <dt>-vmargs [vmargs*] (Executable,
     Main) </dt>
   <dd>when passed to the Eclipse, this option is used to customize the operation
@@ -142,6 +181,10 @@ line arguments. </p>
   <dd>see -configuration</dd>
   <dt>-classLoaderProperties</dt>
   <dd>no longer relevant</dd>
+  <dt>-endSplash &lt;command&gt; <br>
+  </dt>
+  <dd>no longer relevant<br>
+  </dd>
   <dt>-firstUse</dt>
   <dd>no longer relevant</dd>
   <dt>-newUpdates</dt>
