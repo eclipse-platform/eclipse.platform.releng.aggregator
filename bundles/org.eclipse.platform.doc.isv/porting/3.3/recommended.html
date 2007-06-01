@@ -22,6 +22,7 @@
   <li><a href="#FileBufferPerformance">Improve performance when working with file 
     buffers</a></li>
   <li><a href="#LaunchDelegate">Launch delegate names and descriptions</a></li>
+  <li><a href="#Compare">Support for file buffers added to Compare</a></li>
 </ol>
 <hr>
 
@@ -172,5 +173,26 @@ that take one of the following location kind arguments:
   <li><code>name</code></li>
   <li><code>delegateDescription</code></li>
 </ul>
+
+<h2><a name="Compare">6. Support for file buffers added to Compare</a></h2>
+
+<p>Compare editors can now be configured to use the same file buffers that are used by regular editors.
+This means that changes made in a compare editor will immediately be reflected in any other
+editor on the same file buffer or vice versa. Both the compare client and the provider of the compare
+viewer must make changes to enable this feature.
+
+<ul>
+<li>In order for compare viewer providers to enable this feature, they must subclass TextMergeViewer and
+override both the getDocumentPartitioning and getDocumentPartitioning methods if they provide custom syntax highlighting.
+File buffer support in the basic TextMergeViewer is enabled. It is only subclasses that provide syntax highlighting that
+need to makes changes to adopt the feature. Also, providers of structure creators should subclass StructureCreator and
+override the getDocumentPartition and getDocumentPartitioning in order for their structure merge viewer to use the file buffer
+as well. This is described in more detail in the 
+<a href="../../guide/compare_contentviewer.htm">Implementing a Content Viewer</a> section.</li>
+<li>Client can enable the use of file buffers by using the SaveableCompareEditorInput. The static method
+<code>createFileElement</code> can be used to create a typed element that wraps a file in order to enable the 
+file buffer support for the file. This is described in more detail in the 
+<a href="../../guide/compare_beyond.htm">Advanced compare techniques</a> section.</li>
+
 </body>
 </html>
