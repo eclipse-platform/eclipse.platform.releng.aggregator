@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
 <html>
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
@@ -146,6 +146,12 @@
   navigator view.</p>
 <p><img src="images/javanavigator.png"  border="0" alt="Resource Navigator showing elements implementing the IOpenable interface"> 
 </p>
+<p>Since 3.3, <b><a href="../reference/api/org/eclipse/jdt/core/IOpenable.html">IOpenable</a></b>s that are the root of 
+  <b><a href="../reference/api/org/eclipse/jdt/core/IType.html">IType</a></b>s implement 
+  <b><a href="../reference/api/org/eclipse/jdt/core/ITypeRoot.html">ITypeRoot</a> </b>. These are 
+  <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html">ICompilationUnit</a></b> and
+  <b><a href="../reference/api/org/eclipse/jdt/core/IClassFile.html">IClassFile</a></b>.
+</p>
 <p> Other elements correspond to the items that make up a Java compilation unit. 
   The figure below shows a Java compilation unit and a content outliner that displays 
   the source elements in the compilation unit.</p>
@@ -160,7 +166,7 @@
   JavaCore</b></a> is the best starting point. The following code snippet shows 
   how to get Java elements from their corresponding resources.</p>
 <font color="#4444cc"> <pre>    
-        private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) {
+    private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) {
         IJavaProject myJavaProject= JavaCore.create(myProject);
         if (myJavaProject == null)
             // the project is not configured for Java (has no Java nature)
@@ -176,12 +182,13 @@
 <p>Once you have a Java element, you can use the JDT API to traverse and query
 the model.&nbsp; You may also query the non-Java resources contained in a Java
 element.&nbsp;</p>
-<font color="#4444cc"><pre>         private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) {
+<font color="#4444cc"><pre>
+    private void createJavaElementsFrom(IProject myProject, IFolder myFolder, IFile myFile) throws JavaModelException {
         ...
         // get the non Java resources contained in my project.
         Object[] nonJavaChildren = myJavaProject.getNonJavaResources();
         ...
-            </pre></font> 
+    }</pre></font> 
 <h3> Java projects</h3>
 <p>When you create a Java project from a simple project, <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html"><b> 
   JavaCore</b></a> will check to see if the project is configured with the Java 
