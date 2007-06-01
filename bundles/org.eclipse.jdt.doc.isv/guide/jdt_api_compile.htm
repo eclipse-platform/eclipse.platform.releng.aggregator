@@ -78,25 +78,21 @@ resource filter may apply to a particular project only:</p>
 <p>The batch compiler class is located in the internal classes of the
 JDT Core plug-in.
 The name of the class is <i>org.eclipse.jdt.internal.compiler.batch.Main</i>. It
-is packaged into <code>plugins/org.eclipse.jdt.core_3.2.0.jar</code>. Since 3.2, it is also available as a separate download.
+is packaged into <code>plugins/org.eclipse.jdt.core_3.3.0.&lt;qualifier&gt;.jar</code>. Since 3.2, it is also available as a separate download.
 The name of the file is <code>ecj.jar</code>. Its corresponding source is also available. To get them, go to the <a href="http://download.eclipse.org/eclipse/downloads/">download page</a> and 
 search for the section <b>JDT Core Batch Compiler</b>. This jar contains the batch compiler and the javac ant adapter.</p>
+<p>Since 3.3, this jar also contains the support for jsr199 (Compiler API) and the support for jsr269 (Annotation processing).<b>In order to use the annotations
+processing support, a 1.6 VM is required.</b></p>
 <p>So it can be used as a standalone application and inside an Ant build outside of Eclipse.</p>
 <h4>Running the batch compiler</h4>
 <ul>
 <li>Using the main method.
 <p>The Main class has a main method. This
-is the classical way to invoke the batch compiler on a command-line.<p>
+is the classical way to invoke the batch compiler on a command-line.</p>
 <ul>
 <li>
 For example on a command-line:
-<p><code><font color="#3366FF">java -classpath org.eclipse.jdt.core_3.2.0.jar org.eclipse.jdt.internal.compiler.batch.Main
--classpath rt.jar A.java</font></code></p>
-<p>or:</p>
-<p><code><font color="#3366FF">java -jar org.eclipse.jdt.core_3.2.0.jar -classpath rt.jar A.java</font></code></p>
-<p>or:</p>
-<p><code><font color="#3366FF">java -classpath ecj.jar org.eclipse.jdt.internal.compiler.batch.Main
--classpath rt.jar A.java</font></code></p>
+<p><code><font color="#3366FF">java -jar org.eclipse.jdt.core_3.3.0&lt;qualifier&gt;.jar -classpath rt.jar A.java</font></code></p>
 <p>or:</p>
 <p><code><font color="#3366FF">java -jar ecj.jar -classpath rt.jar A.java</font></code></p>
 </li>
@@ -107,20 +103,17 @@ String[] {"-classpath", "rt.jar", "A.java"});</font></code></p>
 <li>
 Using the static compile(String) method.
 <p>The <code>compile(String)</code> method is a convenient method to invoke
-the batch compiler in a java application. Instead of 
+the batch compiler in a java application. Instead of:<br>
 <code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.main(new
-String[] {"-classpath", "rt.jar", "A.java"});</font></code>
-you can simply write <code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.compile("-classpath
+String[] {"-classpath", "rt.jar", "A.java"});</font></code><br>
+you can simply write:<br><code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.compile("-classpath
 rt.jar A.java");</font></code></p></li>
 </ul>
 
 <h4>Which options are available?</h4>
 <p>
-With the orange background, these are suggested options.
+The recommended options have an orange background.
 </p>
-<!-- cross-checked with the batch compiler help message for 3.2 RC4 by maxime 20060517
-     opened bugs against the help message when needed
-     pending: status of ignored options in this doc - asked olivier to decide -->
 <table BORDER CELLSPACING="2" CELLPADDING="2">
 <tr>
 <th>Name</th>
@@ -134,6 +127,8 @@ With the orange background, these are suggested options.
 <td valign=top bgcolor="#FFCCAA">This is a list of directories or jar files used to bootstrap the class files used by the compiler. By default the libraries of the running
 VM are used. Entries are separated by the platform path separator.
 <br>Each directory or file can specify access rules for types between '[' and ']'.
+<p>If no bootclasspath is specified, the compiler will infer it using the following system properties <code>sun.boot.class.path</code>,
+<code>vm.boot.class.path</code> or <code>org.apache.harmony.boot.class.path</code> in this order respectively.</p>
 </td>
 </tr>
 <tr>
@@ -171,7 +166,7 @@ If you want to generate no .class file at all, use <font color="#3366FF">-d none
 <th colspan="2">Compliance options</th>
 </tr>
 <tr>
-<td valign=top width="250">-target 1.1|1.2|1.3|1.4|1.5|5|5.0|1.6|6|6.0</td>
+<td valign=top width="250">-target 1.1 to 1.7 or (5, 5.0, etc)</td>
 <td>This specifies the .class file target setting.
 The possible value are:
 <ul>
@@ -181,6 +176,7 @@ The possible value are:
 <li><font color="#3366FF">1.4</font> (major version: 48 minor: 0)</li>
 <li><font color="#3366FF">1.5</font>, <font color="#3366FF">5</font> or <font color="#3366FF">5.0</font> (major version: 49 minor: 0)</li>
 <li><font color="#3366FF">1.6</font>, <font color="#3366FF">6</font> or <font color="#3366FF">6.0</font> (major version: 50 minor: 0)</li>
+<li><font color="#3366FF">1.7</font>, <font color="#3366FF">7</font> or <font color="#3366FF">7.0</font> (major version: 51 minor: 0)</li>
 </ul>
 Defaults are:
 <ul>
@@ -188,6 +184,7 @@ Defaults are:
 <li><font color="#3366FF">1.2</font> in <font color="#3366FF">-1.4</font> mode</li>
 <li><font color="#3366FF">1.5</font> in <font color="#3366FF">-1.5</font> mode</li>
 <li><font color="#3366FF">1.6</font> in <font color="#3366FF">-1.6</font> mode</li>
+<li><font color="#3366FF">1.7</font> in <font color="#3366FF">-1.7</font> mode</li>
 </ul>
 </td>
 </tr>
@@ -208,7 +205,11 @@ Defaults are:
 <td>Set compliance level to <font color="#3366FF">1.6</font>. Implicit -source 1.6 -target 1.6.</td>
 </tr>
 <tr>
-<td valign=top width="250">-source 1.3|1.4|1.5|5|5.0|1.6|6|6.0</td>
+<td valign=top>-1.7</td>
+<td>Set compliance level to <font color="#3366FF">1.7</font>. Implicit -source 1.7 -target 1.7.</td>
+</tr>
+<tr>
+<td valign=top width="250">-source 1.1 to 1.7 or (5, 5.0, etc)</td>
 <td>This is used to specify the source level expected by the compiler.<br>
 The possible value are:
 <ul>
@@ -216,6 +217,7 @@ The possible value are:
 <li><font color="#3366FF">1.4</font></li>
 <li><font color="#3366FF">1.5</font>, <font color="#3366FF">5</font> or <font color="#3366FF">5.0</font></li>
 <li><font color="#3366FF">1.6</font>, <font color="#3366FF">6</font> or <font color="#3366FF">6.0</font></li>
+<li><font color="#3366FF">1.7</font>, <font color="#3366FF">7</font> or <font color="#3366FF">7.0</font></li>
 </ul>
 Defaults are:
 <ul>
@@ -223,6 +225,7 @@ Defaults are:
 <li><font color="#3366FF">1.3</font> in <font color="#3366FF">-1.4</font> mode</li>
 <li><font color="#3366FF">1.5</font> in <font color="#3366FF">-1.5</font> mode</li>
 <li><font color="#3366FF">1.6</font> in <font color="#3366FF">-1.6</font> mode</li>
+<li><font color="#3366FF">1.7</font> in <font color="#3366FF">-1.7</font> mode</li>
 </ul>
 In <font color="#3366FF">1.4</font>, <font color="#3366FF"><I>assert</I></font> is treated as a keyword. In <font color="#3366FF">1.5</font>
 and <font color="#3366FF">1.6</font>, <font color="#3366FF"><I>enum</I></font> and <font color="#3366FF"><i>assert</i></font> are treated as a keywords.</td>
@@ -503,7 +506,11 @@ a string</td>
 <td>Explicitly request the compiler to preserve all local variables (for debug purpose). If omitted, the compiler will remove unused locals.</td>
 </tr>
 <tr>
-<th colspan="2">Annotation processing options (for Java 6 and higher)</th>
+<th colspan="2">Annotation processing options (require a 1.6 VM or above and are used only if the compliance is 1.6)</th>
+</tr>
+<tr>
+<td>-Akey[=value]</td>
+<td valign=top>Annotation processors options that are made to annotation processors. <code>key</code> are identifiers separated by dots</td>
 </tr>
 <tr>
 <td>-proc:[only|none]</td>
@@ -515,7 +522,7 @@ processors, so specifying <code>-proc:none</code> may speed compilation if annot
 not required.</td>
 </tr>
 <tr>
-<td>-processor &lt;class1&gt;[,&lt;class2&gt;,...]</td>
+<td>-processor &lt;class1[,class2,...]&gt;</td>
 <td valign=top>Qualified class names of annotation processors to run. If specified, the normal
 <a href="http://java.sun.com/javase/6/docs/api/javax/annotation/processing/Processor.html">
 processor discovery process</a> will be skipped.</td>
@@ -529,6 +536,19 @@ Entries are separated by the platform path separator. If not specified, the clas
 <td>-s &lt;dir&gt;</td>
 <td valign=top>The directory where generated source files will be created.</td>
 </tr>
+<tr>
+<td>-XprintProcessorInfo</td>
+<td valign=top>print information about which annotations and which elements a processor is asked to process</td>
+</tr>
+<tr>
+<td>-XprintRounds</td>
+<td valign=top>print information about annotation processing rounds</td>
+</tr>
+<tr>
+<td>-classNames &lt;class1[,class2,...]&gt;</td>
+<td valign=top>Qualified names of the classes that need to be processed (binary types)</td>
+</tr>
+<tr>
 <th colspan="2">Ignored options (for compatibility with javac options)</th>
 </tr>
 <tr>
@@ -652,7 +672,7 @@ are searched first in d:\temp and then in rt.jar. It generates no debug attribut
 In order to use the Eclipse compiler, you simply need to define the <b>build.compiler</b>
  property in your buildfile.</p>
 <p>In order to get the batch compiler working in an ant buildfile, the ant runtime classpath needs to contain the 
-Eclipse batch compiler. When you run your ant buildfile:<p>
+Eclipse batch compiler. When you run your ant buildfile:</p>
 <ol>
 <li>outside of Eclipse: the easiest way to set up the ant runtime classpath is to add the <code>ecj.jar</code> file using the <code>-lib</code>
 argument or dumping it inside the <code>ANT_HOME</code> location.</li>
