@@ -11,8 +11,31 @@
 <body>
 
 <h1>Eclipse 3.3 Plug-in Migration FAQ</h1>
-<p><em>[No items. See the corresponding section of the <a href="../3.2/faq.html">3.2 
-  Migration Guide</a> for format.]</em></p>
-</body>
+<ol>
+	<li><a href="#signing">Impact of JAR signing</a></li>
+</ol>
+<h2><a name="signing">Impact of JAR signing</a></h2>
+<p>
+In Eclipse 3.3, plug-ins in the Eclipse platform are signed with a cryptographic
+signature supplied by the Eclipse Foundation. Signing of plug-ins can have an impact
+in three areas:
+  <ul>
+    <li>Code that uses non-Eclipse class loaders.  Eclipse class loaders have a flag
+    that controls load-time verification of signature, and it is turned off by default.  Loaders in
+    the JDK such as URLClassLoader do not have this option, and will always verify
+    any JAR file that contains signatures.  If this performance impact is not acceptable,
+    the only solution is to avoid signing of JARs that are loaded by other class loaders.
+    A common example is JARs that are intended to be run with Ant. </li>
+    <li> Use of the constructor <tt>java.util.jar.JarFile(File)</tt> (i.e., without verify = false). 
+    JarFile will perform verification of signatures unless explicitly told not to. This will
+    have a performance impact when the JAR is signed. If you don't need signature verification,
+    be sure to use the <tt>JarFile</tt> API that does not perform verification.</li>
+    <li>Use of <tt>java.util.jar.Manifest</tt>.  Since the manifest file of a signed JAR can
+    be quite large, anyone reading and parsing entire manifest.mf files will see a
+    performance hit. The best solution in this case is to only read the manifest
+    main attribute rather than parsing the entire file.</li>
+  </ul>
+</p>
 
+</body>
 </html>
