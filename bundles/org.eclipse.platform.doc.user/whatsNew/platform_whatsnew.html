@@ -11,20 +11,20 @@ td {border-top: solid thin black;}
 img[alt] {background-color:#ffdddd;}
 tr {vertical-align: top;}
 </style>
-<title>Eclipse Platform What's New in 3.2</title>
+<title>Eclipse Platform What's New in 3.3</title>
 </head>
 
 <body>
 
-<h2>What's New in 3.2</h2>
+<h2>What's New in 3.3</h2>
 
 <p>Here are descriptions of some of the more interesting or significant changes 
-made to the Eclipse Platform for the 3.2 release of Eclipse. They are grouped into:</p>
+made to the Eclipse Platform for the 3.3 release of Eclipse. They are grouped into:</p>
 
 <ul>
 <li><a href="#Platform">Platform Changes</a></li>
+<li><a href="#Text">Text Editor Changes</a></li>
 <li><a href="#TeamCVS">Team/CVS Changes</a></li>
-<li><a href="#Ant">Ant Changes</a></li>
 <li><a href="#Debug">Debug Changes</a></li>
 </ul>
 
@@ -46,401 +46,547 @@ document in the plug-in developer's guide.
       <td colspan="2"><a name="Platform"></a> <div style="font-size: 20px; font-weight: bold;">Platform 
           Changes</div></td>
     </tr>
-    <tr> 
-      <td> <p align="right"><b>Integrated progress on startup</b></p></td>
-      <td>Startup progress is now integrated directly into the splash screen. 
-        <p><img src="images/startup.png" alt="Picture of the startup progress in the splash screen"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Problems, Tasks and Bookmarks view supports multiple 
-          filters</b></p></td>
-      <td><p>It is now possible to define more than one filter on the Problems, 
-          Tasks, and Bookmarks views. These filters are additive so the view will 
-          show the union of the markers that satisfy these filters.</p>
-        <p>You can add, remove, enable, or disable filters as desired.</p>
-        <p><img src="images/problem_filters.png" alt="Picture showing multiple filters"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><strong>Window-level working set selection</strong></p></td>
-      <td><p>The notion of window-level working set selection has been introduced. 
-          By default, there is a &quot;Working Sets&quot; action in the window 
-          tool bar that allows you to select an arbitrary selection of working 
-          sets.</p>
-        <p><img src="images/workingsetpulldown.png" alt="Picture showing window-level working sets"></p>
-        <p>Any view that is set to use the &quot;Window Working Set&quot; (via 
-          the traditional selection dialog) will show the contents of all selected 
-          working sets.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Linked resources anywhere</b></p></td>
-      <td>You can now create linked resources at any depth within your projects. 
-        This allows you to put resources from different places in the file system 
-        anywhere you like in the project structure, including below other linked 
-        resources. 
-        <p><img src="images/nn-links.png" alt="Picture showing linked resources"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Mac OS X on X86/Intel</b></p></td>
-      <td> <p>The Eclipse launcher and native libraries have been compiled as 
-          universal binaries so that you can run Eclipse on Mac OS X X86/Intel 
-          platforms using the Mac OS X (Mac/Carbon) downloads.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Draggable window trim</b></p></td>
-      <td><p>The window 'trim' (that is, Status Line, Heap Status, Fast View Bar...) 
-          can now be repositioned around the workbench window. Each trim element 
-          has its own grab handle that you can either click and drag to move the 
-          trim or right-click to get a context menu.</p>
-        <p><img src="images/trimdrag.png" alt="Picture showing draggable window trim"> 
-        </p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Pervasive filtering support</b></p></td>
-      <td><p>Support for filtering content based on provided filter text is 
-      now supported in several places.  This now appears in the <b>Import</b>, 
-      <b>Export</b>, and <b>New</b> wizards, and in the <b>Show View</b> dialog.
-		 This is the same feature that already exists in the Preferences and Show View dialogs.</p>
-        <p><img src="images/show-view-unfiltered.png" alt="Picture showing unfiltered Show view dialog">&nbsp;
-              <img src="images/show-view-filtered.png" alt="Picture showing filtered Show view dialog"></p></td>
+
+  <tr>
+    <td><p align="right"><b>Eclipse on Vista</b></td>
+    <td>The win32 version of Eclipse now runs beautifully on Windows Vista. SWT now exploits
+    native features of the Vista platform, such as native double-buffering to make
+    painting in double-buffered canvases twice as fast.
+      <p><img src="images/vista-win32.png" alt="Eclipse on Vista (win32)" border="0"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>New Eclipse WPF port</b></td>
+    <td><p>Eclipse is now available on Windows Presentation
+        Foundation (WPF), a new window system that comes pre-installed on Microsoft Windows Vista.<br>
+        <br>
+        This port is in early access form for 3.3.  While this port is stable enough for 
+        exploration and development, it has not yet matured to the level of stability
+        and performance you have come to expect from the Eclipse platform. Stay
+        tuned for more improvements on this platform in future releases.
+      <p><img src="images/eclipse-vista-wpf.png" alt="Eclipse on Vista (WPF)"></p></td>
+    </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Quick access</b></td>
+    <td>To quickly access UI elements such as views,
+      commands, preference pages, and others, use the new Quick Access dialog,
+      available under <b>Window &gt; Navigation</b> and bound to <b>Ctrl+3</b> by
+      default. Start typing in the filter field to see matches. For example,
+      to open the console view, type Ctrl+3 followed by "con". One
+      of the first matches will be to open the console view. You can use the
+      arrow keys to select a different match for a given filter string. Press
+      Enter to select the highlighted entry. This will execute the command, or
+      open the view, perspective, or wizard etc.
+      <p><img src="images/ctrl-3-1.png" alt="Ctrl+3 shot 1"></p>
+      <p>Your previous choices will be remembered and shown the next time the
+        dialog opens. If you enter the same filter string again, the entry you
+        picked last time will be selected automatically.</p>
+      <p><img src="images/ctrl-3-2.png" alt="Ctrl+3 shot 2"></p>
+      <p>Using the initials of the words you are trying to find, you can narrow
+        down your choices using very few letters.</p>
+      <p><img src="images/ctrl-3-3.png" alt="Ctrl+3 shot 3"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Undo support for resource operations</b></td>
+    <td>Undo and redo are now available for most resource
+      changes. When you manipulate projects, folders, or files, you now have
+      the ability to undo and redo the changes you have made. This includes resource
+      creation, deletion, move, copy, and rename.  Use the <strong>Edit</strong> menu
+      from the Navigator view to undo the operation. Note that operations from
+      other views (such as the Java Package Explorer or Project Explorer) may not support undo.
+      <p> <img src="images/navundo.png" title="Undo available for resource operations" alt="Screenshot showing the undo available after deleting resources from the Navigator"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Undo support for task and bookmark operations</b></td>
+    <td>Undo is now available for many task and bookmark 
+      operations. When you create, update, add, or delete a task or bookmark, 
+      you now have the ability to undo that change. Use the <strong>Edit</strong> 
+      menu from the Navigator, Package Explorer, Tasks, or Bookmarks views to 
+      undo the operation. 
+      <p><img src="images/marker-undo.png" alt="Screenshot showing the undo available after adding a task to the tasks view"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>A new look</b></td>
+    <td>Eclipse has a new default presentation. Some of the key features
+    of this presentation are:
+    <ul>
+      <li>New Minimize/Maximize behaviour. The new 'Minimize' behavior is to move the 
+      view stack to the nearest trim area, showing a 'Restore' button along with the 
+      icons for the views in the stack. When in the trim, clicking on a view icon will show 
+      the view as a fast view. Minimized trays can be drag and dropped to new locations 
+      along the workbench trim. Maximization of any stack triggers minimization of all others.
+      Maximizing an editor now maximizes the entire editor area, allowing you to view
+      multiple editors side-by-side while maximized.</li>
+      <li>New workbench tab treatments. Workbench tabs have a new color
+      scheme based on your system title background color, and unselected tabs
+      now also have rounded corners to match the appearance of
+      selected tabs. When tabs become crowded, they now maintain their icon and
+      no longer show an ellipsis in order to maximize the amount of useful information. 
+      <p><img src="images/trim.png" alt="Trim"></p>
+  </tr>
+      <p>The old presentation can be reinstated via the <b>General &gt; Appearance</b> preference
+        page.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Improved workspace switching</b></td>
+    <td><p>When you switch workspaces you can now transfer some of your current 
+    settings with you. The most recently used workspaces now appear on the file menu
+      under the <b>Switch Workspace</b> item for quick access.
+      <p><img src="images/settings-transfer.png" alt="Setting transfer while switching workspaces"></p>
+  </tr>
+
+  <tr>
+    <td align="left" valign="top"><b>Improved resource selection dialog</b></td>
+    <td valign="top">The resource selection dialog (<b>Navigate &gt; Open Resource</b>) 
+    now allows you to filter based on working set, and supports camel-case search. 
+    For example, searching with the string "TIMF" will match a file called "ThisIsMyFile". 
+    <p> The dialog also now shows the history of recently opened items, and allows
+    multi-selection to open several resources at once.
+    <p><img src="images/openresource.png" alt="Resource selection dialog"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>All plug-ins are now signed</b></td>
+    <td>All plug-ins in Eclipse project builds are now signed using a cryptographic 
+      signature provided by the Eclipse Foundation.  This allows you to authenticate that 
+      the content you receive from the download server matches the content on 
+      eclipse.org. Eclipse update manager will also authenticate the signatures on these 
+      plug-ins when they are provided from an update site.  You can see information
+      about plug-in signatures under <b>Help &gt; About Eclipse &gt; Plug-in Details</b></td>
+  </tr>
+
+  <tr> 
+    <td align="left" valign="top" width="30%"><strong>Working set usability improvements</strong></td>
+    <td>You can now add and remove selected elements 
+      to and from working sets in your workspace. This functionality is found in the 
+      Edit menu as well as in the toolbar. You can also create a new working set
+      directly from the <b>Add to working set</b> toolbar dropdown.
+      <p><img src="images/addtoworkingset.png" alt="Add to working set"></p></td>
+  </tr>
+
+  <tr> 
+    <td align="left" valign="top" width="30%"> <b>Hiding the window toolbar</b> 
+    </td>
+    <td>You can now hide the window toolbar by clicking <b>Window &gt; Hide Toolbar</b> 
+      <p><img src="images/hidetoolbar.png" alt="Hide window toolbar"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Working sets for the Project Explorer</b></td>
+    <td>The Project Explorer can now group and filter elements by working set. The working sets 
+        can be displayed as top-level groupings or aggregated into a flat list. The window 
+        working sets can also be selected and grouped or aggregated based on a user setting. </p>
+      <p><img src="images/px-workingsets2.png" alt="Working Sets menu in Project Explorer"></p>
+      <p><img src="images/px-workingsets3.png" alt="Working Sets top level groupings submenu in Project Explorer"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Patch wizard improvements</b></td>
+    <td>The Apply Patch wizard now allows you to preview 
+      the patch changes against the contents of the local workspace. When applying
+      CVS patches, you can also now manually apply unmatched patch segments to 
+      the local file. No more digging through *.rej files!
+      <p><img src="images/patch.png" alt="Apply Patch wizard"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Compare editor improvements</b></td>
+      <td>The compare editor has a number of significant improvements:
+      <ul>
+        <li>The contents of compare editors are now kept in sync with other editors
+        currently open on the same file.</li>
+        <li>Comparisons that used to take a long time now take a matter of seconds,
+        thanks to a new text differencing algorithm.</li>
+        <li>Compare editors are now initialized in the background so that the UI remains 
+        responsive while the files are being fetched and compared.</li>
+        <li>Many of your favorite editor commands are now available in compare editors,
+        including find/replace, show whitespace characters, show line numbers, and the Show In
+        sub-menu.</li>
+        <li>Compare editors now highlight individual changes within a block of changes.</li>
+      </ul>
+      <p><img src="images/highlight.png" alt="Highlighting of changes in compare editors"></p></td>
+    </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Compare Structure in Outline view</b></td>
+    <td>You can now view the structure pane of a compare editor
+      in the Outline view. To enable this, go to the <b>General &gt; Compare/Patch</b> preference
+      page and check <i>Show structure compare in Outline view when possible</i>.
+      Selecting structure elements in the Outline view will scroll the content
+      pane in the Compare editor to reveal the change in the selected element.
+      <p><img src="images/outline.png" alt="Structure compare pane in Outline view"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Long resource paths on Windows</b></td>
+    <td>Where the underlying file system allows it, you can now create resources with 
+      paths longer than 260 characters on Windows.  This requires a Java 1.5 VM or greater.
+      <p><img src="images/long-names.png" alt="Navigator view showing long resource path names"> </p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Open files with other editors</b></td>
+    <td>
+      You can now open files with editors that are not registered for the specific
+      file extension. Right-click on your file and select <b>Open with &gt; Other</b>.
+      You will be presented with a list of editors to choose from.
+      <p><img src="images/openwith-other.png" alt="Open with-&gt;Other..."></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Forms enhancements</b></td>
+    <td>UI forms have many visual and functional enhancements, including rendering 
+      and layout of the heading area, with drop-down menu, drag and drop, and shared-header support. Form validation
+      now supports multiple messages, and shows which field the error occurred in. 
+      <p><img src="images/forms-enhancements.png" alt="Sample forms editor"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Platform level proxy and SSH2 settings</b></td>
+    <td>A new <b>General &gt; Network Connections</b> preference
+      page has been added for managing proxy settings.
+      <p>In addition, the <a href="http://www.jcraft.com/jsch/" target="_blank">JSch
+          SSH2 client</a> used by the Eclipse CVS client has been
+          pushed down to the Eclipse Platform so that it can be used by other
+          clients as well. Use the new <b>General &gt; Network Connections &gt; SSH2</b> preference
+          page to configure it.</p>
+      <p><img src="images/proxy.png" alt="Network Connections preference page"> </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Keys preference page improvements</b></td>
+    <td>The Keys preference page displays your key bindings
+      and can optionally display all available commands that can be bound to
+      keys. Customized key bindings are marked by the "delta" 
+      icon <img src="images/change-obj.gif" alt="delta" height="16" width="16"> in
+      the User column.
+      <p>You can now:</p>
+      <ul>
+        <li>Update a selected binding immediately by modifying the Binding or
+          When fields</li>
+        <li>Create a binding from a command by modifying the Binding field</li>
+        <li>Create a command from a binding using the Copy Command button</li>
+        <li>Remove all 	changes from the system with Restore Defaults</li>
+      </ul>
+      <p><img src="images/new-keys-preferences.png" alt="keys preference"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Editor area drag and drop </b></td>
+    <td><p>Dragging external files (i.e., from the Windows file explorer) on to the 
+        editor area of  a workbench window has the same effect as <b>Open
+        File</b>. Also, you can now drag an editor between workbench windows
+        associated with the same workspace.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Properties view facelift</b></td>
+    <td><p>The Properties view has adapted to the new
+        look and feel of UI forms. Visual enhancements include new title bar
+        layout, colors and gradient, and new tab design and colors.</p>
+      <p><img src="images/tabbed-properties-view.png" alt="tabbed properties view"></p></td>
+  </tr>
+
+    <tr>
+      <td><p align="right"><b>Console launcher for Windows<br>
+      </b></td>
+      <td>There is now a second launcher "eclipsec.exe" on Windows that behaves as 
+      expected for a console application. This allows piping the output from Eclipse, 
+      sending the Ctrl+Break signal to the VM to generate a stack dump, and better 
+      behavior in general for the standard -console, -consoleLog and -debug options.</td>
     </tr>
 
-   <tr>
-    <td> <p align="right"><b>Project Explorer view</b></p></td>
-    <td>
-      A new <b>Project Explorer</b> view has been added.  This view presents
-      a domain-oriented view of the projects in the workspace.  General projects
-      are shown in the same way as the <b>Navigator</b> view, but other
-      projects are presented in a hierarchy that makes sense for their particular domain.
-      For example, Java projects appear as a hierarchy of source folders and packages
-      rather than folders.
-      <p><img src="images/project_explorer_view.png" alt="Picture showing the project explorer view" border="0"></p>
-	</td>
+  <tr>
+    <td><p align="right"><b>Improved detection of Mozilla plug-ins</b></td>
+    <td>Users of Mozilla-based browsers can now augment
+      the default set of Mozilla plug-in paths that are searched by defining
+      environment variable <code>MOZ_PLUGIN_PATH</code>. For example:<p>
+      <code>export MOZ_PLUGIN_PATH=/usr/lib/browser-plugins</code></p></td>
   </tr>
-    
+
+  <tr> 
+    <td><p align="right"><b>Easier help navigation</b></td>
+    <td>The help window now has a <strong>Home</strong> button in the navigation 
+       toolbar, which brings you back to the initial home page. You can also find your
+       way home by following the bread crumbs at the top of each document. These links 
+       allow for easier navigation and provide more information about the context of the 
+       document being viewed.
+      <p> <img src="images/help-breadcrumbs.png" alt="Help breadcrumbs"> </p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Help search term highlighting</b></td>
+    <td>If you open a help document as a result of a 
+      search, a new toggle button will appear in the toolbar allowing you to toggle 
+      the search term highlighting on and off, making the document easier to read. 
+      <p> <img src="images/help-highlight.png" alt="Search highlighting toogle button"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Categorized help search</b></td>
+    <td>You can now categorize help search hits by book
+      in the help window via the new toolbar toggle button. Similarly, you can
+      also toggle the search descriptions.
+      <p> <img src="images/help-categories.png" alt="Categorized help search"> </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Print multiple help topics</b></td>
+    <td>You can now print multiple topics in the help
+      window with a single action. The new print drop-down button above the table
+      of contents allows you to print a complete topic sub-tree at any level,
+      and will automatically generate a table of contents in the printed document.
+      <p><img src="images/help-print.png" alt="Print drop-down menu"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Cheat sheet improvements</b></td>
+    <td>A cheat sheet can be opened from the Web by
+      specifying its URL in the open cheat sheet dialog.
+      <p><img src="images/cheatsheet-url.png" alt="Opening a cheat sheet from a URL"></p>
+      <p>Sub steps in a cheat sheet are now clearly separated using horizontal
+        lines. Sub steps can now be previewed. The background colors in the cheat
+        sheet view have been adjusted to make the active step stand out more.</p></td>
+  </tr>
+
+    <!-- ******************** Text ********************** -->
     <tr> 
-      <td> <p align="right"><b>Import Existing Projects with copy</b></p></td>
-      <td>The Import Existing Projects into Workspace wizard now provides the 
-        option to copy a project's files into the current workspace location when 
-        importing from a directory. The original behavior is still maintained 
-        simply by ensuring the <b>Copy projects into workspace</b> option is not 
-        checked. 
-        <p><img src="images/import-project-copy.png" alt="Picture showing copying a project's files"></p></td>
+      <td colspan="2"><a name="Text"></a> <div style="font-size: 20px; font-weight: bold;">Text Editor 
+          Changes</div></td>
     </tr>
-    <tr> 
-      <td><div align="right"><b>Problems view filters use Window Working Set by 
-          default</b></div></td>
-      <td><p>Problems view filters are tied to the Window Working Set by default 
-          when they are created. You do not have to update the Problems 
-          view when you set up your working sets if default settings are used. 
-          If there are no working sets, the filter is applied to all elements.</p>
-        <p><img src="images/workingsetproblems.png" alt="Picture showing Problems view filters"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Install/Update enhancements</b></p></td>
-      <td>Install/Update now supports multiple selections for most Update operations 
-        in the Manage Configuration window (disable, uninstall, enable). In addition, 
-        the uninstall operation can now be performed on currently enabled features. 
-        Update will disable them, restart Eclipse, and perform the actual uninstall 
-        on the way back up.</td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Alternative file systems</b></p></td>
-      <td><p>Projects and linked resources can now be created with file systems 
-          other than the local file system.</p>
-        <p><img src="images/efs.png" alt="Picture showing a non-local file system"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Problems can be grouped</b></p></td>
-      <td><p>Problems in the Problems view can now be grouped by severity, type, 
-          or other criteria provided by plug-ins.</p> 
-        <p><img src="images/problemgroups.png" alt="Picture showing problem grouping"> 
-        </p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Multiple problems can be fixed at once</b></p></td>
-      <td><p>The Problems view now allows you to add other problems that have 
-          the same potential resolution so that you may fix many at once.</p>
-        <p><img src="images/markerresolution.png" alt="Picture showing multiple problems being fixed at once"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Close unrelated projects</b></p></td>
-      <td>A new command, <b>Close Unrelated Projects</b>, is available in the 
-        context menu when a project is selected. This command is a great way to 
-        focus your workspace on what you are working on right now, eliminating 
-        the clutter and overhead of any unrelated projects in the workspace. 
-        <p> <img src="images/close.png" alt="Picture showing the closing of unrelated projects"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Marker Limits moved to preferences </b></p></td>
-      <td><p>Marker Limits are now applied to all filters rather than defined 
-          one per filter.</p>
-        <p><img src="images/markerlimits.png" alt="Picture showing marker limits"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Improved hyperlink navigation</b></p></td>
-      <td><p>Hyperlink navigation is now also available if the editor does not 
-          have focus.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Improved help in dialogs</b></p></td>
-      <td>Most dialogs in Eclipse now have a standard help button on the bottom 
-        left corner. This button summons context help, same as pressing F1 (on 
-        Windows). In addition, the help content will now appear in the same dialog 
-        in the dialog's tray instead of in a separate window. Cheat sheets can 
-        also follow you into dialogs (in the tray) for those steps that involve 
-        opening dialogs. 
-        <p><img border="0" src="images/dialog_help.png" alt="Picture showing improved help"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Direct text search action</b></p></td>
-      <td>Select text in an editor and invoke <b>Search &gt; Text &gt; Workspace</b> 
-        (Ctrl+Alt+G) to search in all (non-binary) files.</td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Multiple search views</b></p></td>
-      <td>It is now possible to have more than one Search view open at a time. 
-        Pin a search view to avoid it being reused for the next search, or select 
-        to open a search from the history in a new view. 
-        <p> <img alt="Pin the search view" src="images/pin-search-view.png"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Open cheat sheet from a content file</b></p></td>
-      <td>The cheat sheet selection dialog has added an option to select a cheat 
-        sheet to open from a file. 
-        <p> <img border="0" src="images/cheatsheet-selection.png" alt="Picture showing the opening of a cheatsheet from a file"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>New look for welcome</b></p></td>
-      <td> Welcome has a new look in 3.2. It is encapsulated in the 'Circles' 
-        theme that is the default for the Eclipse SDK 3.2 product. If you want, 
-        you can also switch back to the previous Welcome look from the 'Welcome' 
-        preference page (choose 'Purple Mesh' instead). 
-        <p> <img border="0" src="images/circles-theme.png" alt="Picture showing a new Welcome"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Live news in the Eclipse SDK Welcome</b></p></td>
-      <td> The <b>What's New</b> section of Welcome now has <i>Live News</i>. 
-        The content is provided by the Eclipse.org RSS news feed (requires internet 
-        connection). You can click on the links to see the full story. 
-        <p> <img src="images/live-news.png" alt="Picture showing RSS in the Welcome"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Animated message area for displaying errors and 
-          warnings</b></p></td>
-      <td>A new animated message area has been added to better draw your attention 
-        to potential problems. The animated tray will slide up from the bottom 
-        of a page's title area to cover the page description and will be used 
-        to convey error and warning messages. This is used in both wizards and 
-        the preference dialog. 
-        <p><img src="images/animated-messages.png" alt="Picture showing animated messages"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>System Default theme</b></p></td>
-      <td><p>The System Default theme is a theme that uses fonts and colors available 
-          from the operating system rather than those defined by Eclipse.</p>
-        <p>This theme is the default theme for High Contrast mode. You will be 
-          prompted to restart when switching to High Contrast mode and the theme 
-          change will be applied then.</p>
-        <p><img src="images/settings.png" alt="Picture showing a theme from the operating system"></p></td>
-    </tr>
-            
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Tooltips for annotations in text 
-          editors </b></p></td>
-      <td  valign="top"> <p> Annotation hovering that was previously only available
-      in Java editors is now available in all text editors.</p>
-        <p> <img alt="Picture of annotation tooltip" title="Annotation tooltip" src="images/tooltip.png"> 
-        </p></td>
-    </tr>
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Annotation navigation in text editors 
-          </b></p></td>
-      <td  valign="top"> <p> Annotation navigation is now available in all text editors.</p>
-        <p> <img alt="Picture of navigation icons" title="Navigation icons" src="images/navigation.png"> 
-        </p></td>
-    </tr>
-        
+
+  <tr>
+    <td><p align="right"><b>Spell checking in text editors</b></td>
+    <td>Spell checking is now available in text editors. An American and a British English dictionary
+      are now part of the SDK:
+      <p> <img alt="Picture showing the dictionary section from the Spelling preference page" title="Dictionary Section from Spelling Preference Page" src="images/dictionary.png"></p>
+      <p> Spell checking is now enabled per default. The feature can be disabled
+        with the new <b>Disable Spell Checking</b> quick assist.</p>
+      <p> <b>Tip:</b> It's recommended that you set a user dictionary to collect
+        custom words that are not part of the lexicon. This can be configured
+        on the <b>General &gt; Editors &gt; Text Editors &gt;
+        Spelling </b>preference page. </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Text drag and drop in text editors</b> </td>
+    <td>You can now drag and drop text to and from text editors:
+      <p><img alt="Screenshot showing text drag and drop in the editor" title="Text Drag And Drop in The Editor" src="images/text-dnd.png"></p>
+      <p> This feature can be controlled via <b>General &gt; Editors &gt; Text
+          Editors &gt; Enable drag and drop of text </b>preference.</p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Scroll by pages using Ctrl + mouse wheel</b></td>
+    <td>The mouse wheel scrolls the content of a textual 
+      editor by pages while the <strong>Ctrl</strong> key is pressed.</td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>More annotation options</b> </td>
+    <td>Revision information in text editor rulers can now be configured in a number 
+      of ways: you can select from three different coloring schemes and choose 
+      whether author and revision information should be displayed as text in addition 
+      to the coloring. The following screen shot shows the revision numbers, background 
+      colored by author, and additional information in the hover: 
+      <p><img alt="Screenshot of an annotated Java editor - the ruler shows revision numbers, while its background is colored by committer" src="images/annotate_version.png"> 
+      </p>
+      <p>Below we see the author names, with background colored by date. The options 
+        are configurable via the ruler context menu (<b>Ctrl+F10</b>):</p>
+      <p><img alt="Screenshot of an annotated Java editor - the ruler shows revision numbers, while its background is colored by committer" src="images/annotate_menu.png"> 
+      </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Select by word or line</b></td>
+    <td>Double-click and drag now grows or shrinks the selection by a word at a time.
+    Triple click will select a whole line, and those with nimble fingers can triple-click and
+    drag to grow or shrink the selection by a line at a time.
+    </td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Recenter command</b> </td>
+    <td>A new command has been added that allows recentering 
+      the line that contains the caret. By default, this command is only bound 
+      to a key binding (<b>Ctrl+L</b>) when using the Emacs scheme. To bind it 
+      in the Default scheme, simply assign a key sequence to the <b>Recenter</b> 
+      command which can be found in the <b>Text Editing</b> category. </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Joining lines in text editors</b></td>
+    <td>You can now use the new command <b>Ctrl+Alt+J</b> in a text editor to join lines.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Smart Home/End</b> </td>
+    <td> Pressing <b>Home</b> and <b>End</b> keys now
+      ignores whitespace at the start and end of a line. Pressing the key a second
+      time goes to the real start and end. <b>Home</b>/<b>End</b> inside a linked area
+      now jumps to the beginning or end of the linked area (for example when filling in a template).
+    </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Show invisible whitespace characters</b></td>
+    <td>It is now possible to see the invisible whitespace characters in textual editors:
+      <p> <img alt="Screenshot showing whitespace characters in the editor" title="Whitespace characters in the editor" src="images/show-whitespace.png"></p>
+      <p> This feature can either be controlled via <b>General &gt; Editors &gt; Text
+          Editors &gt;
+        Show whitespace characters </b>preference, or via the [<img alt="Screenshot of the Show Whitespace tool bar button" title="Show whitespace tool bar button" src="images/show-whitespace-chars.png" align="top">] tool bar button when the <b>Editor Presentation </b>action set
+        is enabled.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Convert tabs to spaces </b></td>
+    <td>Text editors now allow you to convert tabs to spaces when typing.
+      <p> This feature can be enabled via <b>General
+        &gt; Editors &gt; Text Editors &gt; Insert spaces for tabs </b>preference.</p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>More flexible templates</b> </td>
+    <td>The syntax for templates has evolved to allow 
+      typed and parameterized template variables. This allows the same variable 
+      type to be used multiple times in the same template. As an example, consider 
+      the following template for generating a doubly nested for loop: 
+      <p> <img src="images/doubleloop.png" title="Template: Double loop over two different arrays" alt="Screenshot showing a template for a double loop over two different arrays"></p></td>
+  </tr>
+
     <!-- ******************* Team/CVS ******************** -->
     <tr> 
       <td colspan="2"><a name="TeamCVS"></a> <div style="font-size: 20px; font-weight: bold;">Team/CVS 
           Changes</div></td>
     </tr>
-    <tr> 
-      <td> <p align="right"><b>Import Team Project Set improvements</b></p></td>
-      <td><p>Team Project Sets that are stored in the workspace can now be imported 
-          directly using the <b>Import Project Set</b> operation available in 
-          the context menu of any *.psf file.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Commit comment templates</b></p></td>
-      <td><p>You can specify templates for commit comments via the <strong>Team 
-          &gt; CVS &gt; Comment Templates</strong> preference page. The templates 
-          will appear in the commit dialog off the history drop down menu.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Improved patching support </b></p></td>
-      <td><p>Improvements have been made to the CVS Create Patch wizard. </p>
-        <p><img src="images/create-patch.png" alt="Picture showing patch-creation improvements"></p>
-        <p>Improvements to create patch include:</p>
-        <ul>
-          <li>The ability to create a patch that contains changes from multiple 
-            projects (this uses an Eclipse specific patch format)</li>
-          <li>The ability to save the patch to the clipboard, workspace or file-system.</li>
-          <li>The ability to exclude files from the patch</li>
-        </ul>
-        <p>Changes have been made to the Apply Patch wizard to accommodate multi-project 
-          patches.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Improved conflict handling for CVS Team&gt;Update 
-          operation</b></p></td>
-      <td><p>When performing an update, CVS has a file based markup for indicating 
-          conflicts. This markup can be cumbersome to work with. When performing 
-          a <strong>Team&gt;Update</strong>, Eclipse will now update any non-conflicting 
-          files and then show any conflicts in the synchronize view. You can then 
-          resolve the conflicts manually from there. </p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>CVS shows model content in synchronizations</b></p></td>
-      <td><p>CVS can now be configured to include model content in synchronizations 
-          by enabling the associated option on the <strong>Team &gt; CVS &gt; 
-          Synchronize/Compare</strong> preference page. </p>
-        <p><img src="images/sync.png" alt="Picture showing the Synchronize/Compare preference page"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Expand All in CVS Repositories view</b></p></td>
-      <td><p>An <b>Expand All</b> menu action has been added to folders in the 
-          CVS Repositories view. This action will fetch the entire subtree in 
-          a single round trip and expand it in the view.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>History view improvements</b></p></td>
-      <td>There is now a generic History view in Eclipse. This view combines history 
-        from repositories such as CVS with content in the Eclipse local history. 
-        <ol>
-          <li>The view can show the history for any selected element and not just 
-            files.</li>
-          <li>When in Link mode, the view links to editor and view selection and 
-            updates the contents in the background to avoid blocking the UI.</li>
-          <li>Pinning the view will cause it to lock on to the current history 
-            being displayed. Another History view will be opened if the history 
-            is requested for another file or object.</li>
-          <li>The CVS History page includes the local history of files. Toolbar 
-            buttons can be used to control whether local, remote, or both histories 
-            should be visible.</li>
-          <li>CVS Compare with and Replace with Revision operations all populate 
-            the History view. Actions have been added to the CVS History page 
-            to launch comparisons and replace contents.</li>
-        </ol>
-        <p><img src="images/history.png" alt="Picture showing the History view"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><strong>Local and remote history operations combined 
-          for CVS projects</strong></p></td>
-      <td><p>For projects mapped to CVS, the local history and CVS history operations 
-          in the <strong>Compare With</strong> and <strong>Replace With</strong> 
-          menus have now been combined into a single <strong>History</strong> 
-          operation.</p>
-        <p><img src="images/menu.png" alt="Picture showing the History operation"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><strong>Date categories in CVS history</strong></p></td>
-      <td><p>The history for a CVS file can now be categorized by date. Icons 
-          have also been added to help distinguish local changes from remote revisions.</p>
-        <p><img src="images/history.png" alt="Picture showing the History icons"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Proxy support for CVS pserver connections</b></p></td>
-      <td><p>Proxy support is now available for CVS pserver connections. </p>
-        <p><img src="images/proxy.png" alt="Picture showing proxy support"> </p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><strong>CVS Quick Diff annotations</strong></p></td>
-      <td><p>CVS now supports Quick Diff annotations for local files. Perform 
-          a <strong>Team &gt; Show Annotation</strong>s on a local file and you 
-          will see color-based annotations of who did what in the file. The bar 
-          on the left hand side shows a different color for each user. Hovering 
-          over a section shows the details of that revision and highlights the 
-          sections of code contributed by that revision in the right hand bar.</p>
-        <p> <img alt="Picture of CVS Annotate in editor" title="CVS Annotate in editor" src="images/cvs-annotate-in-editor.png"> 
-        </p></td>
-    </tr>
-    <!-- *********************** Ant ********************** -->
-    <tr> 
-      <td colspan="2"><a name="Ant"></a> <div style="font-size: 20px; font-weight: bold;">Ant 
-          Changes</div></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Ant launch configuration refactoring</b></p></td>
-      <td><p>Renaming buildfiles (or projects containing buildfiles) will correctly 
-          update the launch configurations associated with the buildfile.</p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Java problem markers from a &quot;javac&quot; build</b></p></td>
-      <td><p>Running an Ant build that contains a &quot;javac&quot; declaration 
-          can produce JDT problem markers for the code that is compiled. The marker 
-          generation is controlled by an Ant UI preference: <strong>Window &gt; 
-          Preferences &gt; Ant &gt; Create problem markers from &quot;javac&quot; 
-          results</strong>. As well, the &quot;javac&quot; declaration needs to 
-          set the &quot;listfiles&quot; attribute to &quot;true&quot; and an Eclipse 
-          console must be allocated for the build output.</p></td>
-    </tr>
+
+  <tr> 
+    <td><p align="right"><b>Import CVS projects directly into working sets</b></td>
+    <td>You can now assign CVS projects to a working 
+      set during import. This is available from both the CVS Repository 
+      View (via <strong>Check Out As</strong>) and through the CVS Import Wizard.
+<p> <img alt="Checkout As" src="images/checkoutas.png"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Export working sets as part of team project set<br>
+      </b></td>
+    <td>The export wizard can now persist active working sets as part of a Team Project set.
+      <p> <img alt="Export Project Set" src="images/exportteamprojectset.png"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>History view search<br>
+      </b></td>
+    <td>The History view has a new search field that allows you to filter the history
+    based on text in the author, comment, revision, and tags. 
+      <p> <img alt="History Search Field" src="images/historysearch.png"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>History view now has view history</b></td>
+    <td>The History view now allows you to navigate
+      back to previously viewed elements.
+      <p> <img src="images/history.png" alt="History view has view history"> </p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Spell check in Commit dialog</b></td>
+    <td>The Commit dialog now uses the Eclipse spell 
+      checker to highlight spelling errors in commit messages. 
+      <p><img src="images/commit.png" alt="Commit dialog"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Flat presentation in model-based
+        synchronizations</b></td>
+    <td>A flat presentation has been added to model-based
+      synchronizations. For CVS, model-based synchronizations are the default.
+      <p><img src="images/flat.png" alt="Flat presentation in Synchronize view"></p></td>
+  </tr>
+
     <!-- ******************** Debug ********************* -->
     <tr> 
       <td colspan="2"><a name="Debug"></a> <div style="font-size: 20px; font-weight: bold;">Debug 
           Changes</div></td>
     </tr>
-    <tr> 
-      <td> <p align="right"><b>Breakpoint import and export</b></p></td>
-      <td><p>Breakpoints can now be exported to a file. The export wizard lets 
-          you select the breakpoints to export together; the import wizard lets 
-          you optionally create a breakpoint working set.</p>
-        <p><img src="images/brkpt_export.png" alt="Picture showing Breakpoint import/export"></p></td>
-    </tr>
-    <tr> 
-      <td> <p align="right"><b>Launch dialog</b></p></td>
-      <td><p>A toolbar and name filter have been added to the launch dialog. The 
-          toolbar provides actions to create, duplicate, delete, and collapse 
-          all configurations, as well as manage the filters for the dialog. The 
-          name filter dynamically filters entries in the dialog as you type to 
-          show only those configurations matching the entered text, similar to 
-          the preferences dialog.</p>
-        <p><img src="images/lcd.png" alt="Picture of the launch dialog"></p></td>
-    </tr>
-    <tr> 
-      <td><div align="right"><b>Launch filters</b></div></td>
-      <td><p>The launch dialog and launch history menu support a set of filters 
-          that can be configured on the <strong>Run/Debug &gt; Launching &gt; 
-          Launch Configurations</strong> preference page. You can filter configurations 
-          from closed, deleted, or unavailable projects. As well, you can filter 
-          specific kinds of configurations. The dialog and history menus optionally 
-          support the current workbench window working sets.</p>
-        <p><img src="images/lcd-filter-prefs.png" alt="Picture of the launch configuration filter preferences"></p>
-        <p>For resource based filtering to work, you need to migrate your existing 
-          launch configurations. This can be done by pressing the <strong>Migrate</strong> 
-          button on the preference page.</p>
-        <p>The filters are also available for easy access in a new toolbar in 
-          the launch dialog.</p>
-        <p><img src="images/lcd-menu.png" alt="Picture of the launch dialog menu"></p></td>
-    </tr>
-    <tr> 
-      <td><div align="right"><b>Run/Debug perspective settings</b></div></td>
-      <td><p>The perspective settings for running and debugging have been centralized 
-          on the <strong>Run/Debug &gt; Perspectives</strong> preference page.</p>
-        <p><img src="images/perspective-settings.png" alt="Picture of the Run/Debug preference page"></p></td>
-    </tr>
-    <tr> 
-      <td><p align="right"><b>Variable columns</b></p></td>
-      <td><p>Variables can be displayed using columns or a standard tree. To toggle 
-          columns on/off use the view menu's <strong>Layout &gt; Show Columns</strong> 
-          action. You can select the columns to be displayed using the <strong>Layout 
-          &gt; Select Columns</strong> action. Recently changed variables are 
-          displayed with a yellow background (controlled by the &quot;Changed 
-          value background color&quot; user preference via the <strong>Run/Debug</strong> 
-          preference page). The Java debugger supports editing of Strings and 
-          primitive values inline.</p>
-        <p><img src="images/columns.png" alt="Picture showing variables in columns"></p></td>
-    </tr>
+
+  <tr>
+    <td><p align="right"><b>Hyperlink stepping</b></td>
+    <td>When debugging you can use hyperlinks to step
+      into a method. Use <b>Ctrl+Alt</b> mouse click to step into the method (rather
+      than <b>Ctrl</b> which will navigate to the source code).
+      <p><img src="images/hyperlink-step.png" alt="Step into using hyperlink (Ctrl+Alt)"></p></td>
+  </tr>
+
+  <tr>
+    <td align="left" valign="top"><b>Simplified launching</b></td>
+    <td>The Run and Debug commands have been simplified to run or debug the 
+        selected file or active editor. When no launch configuration exists for a file and 
+        there is only one way to launch it, the file will simply be launched. When there is 
+        more than one way to launch a file you will be prompted to select how to run or 
+        debug the application. For example, when running a JUnit test you can run as a 
+        Java application or JUnit test. When the same resource is launched again, the 
+        most recent configuration in the launch history associated with that resource is re-launched.</p>
+      <p><img src="images/select-way.png" alt="Select a way to run the application"></p>
+        Use the <b>Run/Debug &gt; Launching &gt; Launch Operation</b> preference
+      to configure this behavior.
+      <p><img src="images/launch-pref2.png" alt="Preference for launch selection vs. launch last"> </p>
+      <p></p></td>
+  </tr>
+
+   <tr> 
+    <td><p align="right"><b>Double-click and Ctrl+Shift+B 
+      for all kinds of breakpoints</b></td>
+    <td> Double-clicking in the vertical ruler, or invoking 
+      Toggle Breakpoint (<strong>Ctrl+Shift+B</strong>), now creates an appropriate 
+      kind of breakpoint based on the cursor location - line breakpoint, watchpoint, 
+      method breakpoint, or class load breakpoint. To create a class load breakpoint, 
+      double click on the class declaration line. 
+      <p><img src="images/classload-bp.png" alt="Class load breakpoint"></p></td>
+  </tr>
+
+  <tr>
+    <td align="left" valign="top"><b>Automatically showing console</b></td>
+    <td valign="top"><p>Toggle buttons have been added to the console toolbar
+        controlling when the console is automatically displayed. The buttons
+        provide quick access to the workspace preferences to show the console
+        when output is written to standard out or standard error.</p>
+      <p><img src="images/showconsole.png" alt="Toggle buttons for console settings"> </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Run/Debug settings</b></td>
+    <td>A new properties page has been added to manage
+      launch configurations associated with a resource. For example, selecting
+      the <b>Run/Debug Settings</b> property page for a project will display
+      all launch configurations associated with that project. Configurations
+      can be created, deleted, and edited from this page.
+      <p><img src="images/run-settings.png" alt="Run/Debug Settings property page"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Step through filters vs. step return</b></td>
+    <td>You can configure step filters to always return
+      from a filtered location or step through to a non-filtered location. For
+      example, if <code>java.util</code> is a filtered location, stepping into
+      code in <code>HashMap</code> could result in a call-back to your application
+      code to check the equality of an object. If you choose to <b>Step through
+      filters</b> a step into would end up in your application code. However,
+      when the <b>Step through filters</b> option is disabled, a step into <code>HashMap</code> would
+      behave like a step over.
+      <p>Use the <b>Step though filters</b> preferences setting on the <b>Java 
+        &gt; Debug &gt; Step Filtering</b> preference to toggle the feature.</p></td>
+  </tr>
+
+
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
 </table>
