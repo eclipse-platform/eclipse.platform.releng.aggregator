@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2006. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page.">
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2007. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page.">
 
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -11,16 +11,16 @@ td {border-top: solid thin black;}
 img[alt] {background-color:#ffdddd;}
 tr {vertical-align: top;}
 </style>
-<title>Eclipse Platform What's New in 3.2</title>
+<title>Eclipse Platform What's New in 3.3</title>
 </head>
 
 <body>
 
-<h2>What's New in 3.2</h2>
+<h2>What's New in 3.3</h2>
 
 <p>Here are descriptions of some of the changes of interest to plug-in developers
 made to the Eclipse <a href="#Platform">Platform</a> and
-<a href="#SWT">SWT</a> for the 3.2 release of Eclipse.</p>
+<a href="#SWT">SWT</a> for the 3.3 release of Eclipse.</p>
 
 <p>
 There are also many new features oriented towards end-users of the platform
@@ -45,691 +45,396 @@ section of the Workbench User Guide.
 </td>
 </tr>
 
-<tr>
-    <td>
-      <p align="right"><b>Runtime refactoring</b></p>
+  <tr>
+    <td><p align="right"><b>Advanced tooltips</b></td>
+    <td><p>JFace now supports tooltips that supply a
+        Composite for more complex tooltips. See <code>org.eclipse.jface.window.Tooltip.</code></p>
+      <p><img src="images/tooltip.png" alt="Tool tip"></p>
+      <p>&nbsp;</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Custom tooltips for tree and table cells</b></td>
+    <td><p>TreeViewer and TableViewer now support custom
+        tooltips on a per cell basis. See <code>org.eclipse.jface.viewers.CellLabelProvider.</code></p>
+      <p><code><img src="images/tabletoolip.png" alt="Tool tip on cell of table"></code></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Busy spinner in view tab</b></td>
+    <td><p>Where <code>IWorkbenchSiteProgressService#showBusyForFamily </code>is
+        used, the view will now show a busy spinner in the tab. There is also new API
+        on <tt>IWorkbenchSiteProgressService</tt> to manually mark a view as busy.</p>
+      <p><img src="images/busy.png" alt="Busy spinner in view tab"></p></td>
+  </tr>
+
+  <tr>
+    <td align="left" valign="top"><b>Custom splash screens</b></td>
+    <td valign="top">API is now in place to provide custom splash screens using
+      SWT. You can use the new <tt>org.eclipse.osgi.service.runnable.StartupMonitor</tt>
+      API to update the splash screen as the platform is being started.
+      <p><img src="images/splash.png" alt="Custom splash screens"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>IDE application moved to new plug-in</b></td>
+    <td>The portion of the <tt>org.eclipse.ui.ide</tt> plug-in that defines the 
+    application has been moved into a new plug-in: <tt>org.eclipse.ui.ide.application</tt>.
+    This allows people writing their own RCP application to use existing views or APIs
+    defined by <tt>org.eclipse.ui.ide</tt> without having a dependency on the application.
+  </td>
+  <tr>
+
+  <tr>
+    <td><p align="right"><b>New Application Model</b></td>
+    <td>The Eclipse application model now implements
+      the Application Admin Service from the OSGi specification. The net result
+      is a more flexible application container. For example, applications can
+      now be specified to allow more than one to run at a time. The lifecycle
+      of an application has also been improved to allow applications to be properly
+      shut down if the framework is shut down unexpectedly.
+      <p> Eclipse applications can now implement org.eclipse.equinox.app.IApplication
+        to take full advantage of the new application model. See the org.eclipse.core.runtime.applications
+        extension point for more details on the options that can be specified
+        for application extensions.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Equinox launcher</b></td>
+    <td>The native Eclipse launcher has been rewritten
+      to use JNI calls as much as possible. The Java VM will be started in-process
+      using the JNI Invocation API unless the -vm argument points directly to
+      a Java launcher.
+      <p> Among other advantages, this change allows for SWT widgets to be used
+        in the splash screen. As well, the splash screen can appear much earlier
+        if the product is set up properly.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>OSGi R4.1</b></td>
+    <td>The Equinox Framework implements all the new
+      features being proposed in the OSGi R4.1 (Draft) specification. The most
+      noteworthy change is the standardization of the <a href="http://www2.osgi.org/Design/LazyStart" target="_blank"> lazy
+      activation policy</a>.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Equinox HTTP service</b></td>
+    <td>The Jetty-based implementation of the OSGi HTTP
+      service has been added to the Platform SDK along with the bundles that
+      provide JSP and extension registry support. Help is now using this service
+      instead of Apache Tomcat.</td>
+  </tr>
+  
+  <tr>
+    <td><p align="right"><b>Platform proxy settings</b></td>
+    <td>The platform now has a common place for configuring HTTP/Socks proxies.
+    The new <tt>org.eclipse.core.net</tt> plug-in has API for accessing, storing,
+    and monitoring changes to proxy settings.</td>
+  <tr>
+
+  <tr> 
+    <td><p align="right"><b>Contribute columns to vertical ruler</b> </td>
+    <td>A new extension point, <b>org.eclipse.ui.workbench.texteditor.rulerColumns</b> 
+      allows the contribution of columns to the vertical ruler of any text editor. 
+      <p> <img src="images/photoruler.png" title="A contributed photoruler is displayed along the Java editor" alt="Screenshot showing a ruler to display photos along the Java editor"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Extensible hyperlink detection<br> </b></td>
+    <td>Clients can use the<code> org.eclipse.ui.workbench.texteditor.hyperlinkDetectors </code>extension
+        point to add their own hyperlink detectors and can enable their viewers using the
+        corresponding methods in the source viewer configuration along with the
+        <code> org.eclipse.ui.workbench.texteditor.hyperlinkDetectorTargets</code>
+        extension point.</p>
+      <p> <img alt="Screenshot showing the hyperlinking preference page" title="Hyperlinking Preference Page" src="images/hyperlinking-preference.png"></p>
     </td>
-    <td><p>In order to make the Eclipse runtime more 
-        flexible and allow independent use of runtime components, the <b>org.eclipse.core.runtime</b> 
-        plug-in has been split into several plug-ins:</p>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Mixed mode launch APIs and more</b></td>
+    <td>The debug platform's launch API now supports
+      mixed mode launching. For example, an ISV could contribute a launcher to
+      profile and debug an application at the same time. See enhancements to
+      the <code>launchDelegates </code>and <code>launchConfgurationTypes </code>extension
+      points.
+      <p>ISVs can also contribute one or more tabs to existing tab groups in
+        the launch dialog to extend existing launch types with new function.
+        For example, a profiling tool could provide a tab to configure profile
+        options for Java applications. See the new extension point <code>launchConfigurationTabs</code>.</p>
+      <p>The platform also allows more than one toolset to exist for launching
+        the same kind of application. For example, two profilers could exist
+        for Java applications and the user would be prompted to choose which
+        profiler to use.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Debug context API</b></td>
+    <td>The debug platform has new API to access the
+      active debug context. A debug context represents the active state of a
+      program being debugged and drives the enabled state of debug actions (step,
+      terminate, etc.), as well as source lookup, visible variables, and watch
+      expression values. A set of classes and interfaces have been added to the
+      new package <code>org.eclipse.debug.ui.contexts </code>allowing clients
+      to listen to and drive the active debug context.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Debug command API</b></td>
+    <td>Debug commands represent common operations implemented
+      by debuggers - for example, step over, suspend, resume, and terminate.
+      The debug platform has added API allowing debuggers to provide custom implementations
+      of the operations by implementing the debug command interfaces. See the
+      new package <code>org.eclipse.debug.ui.commands</code>.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Pluggable detail panes</b></td>
+    <td><p>API has been added to the debug platform
+        allowing custom detail panes to be contributed to the Variables view.
+        Clients may use any SWT control to render custom details for their variables.
+        A context menu allows users to choose between available detail panes
+        for each variable. See the new extension point <code>org.eclipse.debug.ui.detailPaneFactories</code>.</p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Remote help content</b></td>
+    <td>Packaging a comprehensive set of help documentation 
+      with a product can often significantly increase its download size. To alleviate 
+      this, Help now allows you to host your documentation remotely on an <a href="http://help.eclipse.org/help32/topic/org.eclipse.platform.doc.isv/guide/ua_help_setup_infocenter.htm">infocenter</a>, 
+      and will display the remote contents alongside any locally installed content 
+      you may have, giving you significant savings on initial download size. 
+      <p> <img src="images/remote-help.png" alt="Remote help preference page"> 
+      </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Plug in help in any format</b></td>
+    <td>Teams are no longer restricted to the specific
+      XML formats defined by the Help system, such as table of contents XML,
+      keyword index XML, etc. A new <a href="http://www.eclipse.org/eclipse/platform-ua/documents/providers_api.html"> set
+      of API</a> has been added to enable Java code to generate the content at
+      runtime. This allows teams who work with other formats, such as <a href="http://www.oasis-open.org/committees/dita/" target="_blank">DITA</a>,
+      to write an adapter plug-in that will perform the conversion, thus avoiding
+      a build-time conversion and allowing them to ship documentation in the
+      format of their choice.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Improved dynamic user assistance content</b></td>
+    <td>Dynamic content is now fully supported for all
+      user assistance XML documents, which means you can filter, include, extend
+      or replace sections of documents for any of the user assistance document
+      types. These include:
       <ul>
-        <li><b>org.eclipse.equinox.common</b> - common code used by more than one piece of the former runtime plug-in (i.e. IPath, IStatus, IProgressMonitor).</li> 
-        <li><b>org.eclipse.equinox.registry</b> - Extension registry</li>
-        <li><b>org.eclipse.equinox.preferences</b> - Preferences mechanism</li>
-        <li><b>org.eclipse.core.jobs</b> - Jobs mechanism</li> 
-        <li><b>org.eclipse.core.contenttype</b> - Content mechanism</li>
-        <li><b>org.eclipse.equinox.supplement</b> - A supplemental "plug-in" that is used to support running without OSGi.</li> 
+        <li><b>Welcome</b> pages (XML or XHTML) and contributions</li>
+        <li><b>Help</b> XHTML topics, table of contents, keyword index,
+          and context-sensitive help</li>
+        <li><b>Cheat sheets</b>, both simple and composite</li>
       </ul>
-      <p>New APIs were added to facilitate control of the split runtime pieces.</p>
-      <p>The runtime refactoring should be transparent to other plug-ins. For 
-        more details, see the Eclipse 3.2 migration guide.</p>
-	  </td>
+      <p>You can also define your own filter criteria and use boolean operators
+        to achieve greater flexibility with filtering by using <b>XML expressions</b> in
+        any of the documents listed above.</p></td>
   </tr>
 
   <tr>
-    <td> <p align="right"><b>Common navigator</b></p></td>
-    <td>
-      A new plug-in, <b>org.eclipse.ui.navigator</b>, introduces a framework
-      for building viewers that combine content from multiple domain models.
-      The framework allows declarative contribution of content, labels, actions,
-      filters, and other capabilities.  The <b>org.eclipse.ui.navigator.resources</b>
-      plug-in provides a concrete use of this framework in the form of a <b>Project Explorer</b>
-      view, and declarative viewer extensions for the <b>IResource</b> model.
-      <p><img src="images/project_explorer_view.png" alt="Picture showing the project explorer view" border="0"></p>
-	</td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Tabbed properties framework</b></p></td>
-    <td>A tabbed properties framework has been added. The tabbed 
-      properties framework provides a replacement property sheet page, allowing 
-      properties to be shown in the Properties view using arbitrary controls, 
-      organized by tabs and sections that are contributed via the extension registry. 
-      <p><img src="images/tabbed_properties_view.png" alt="Picture showing a tabbed properties framework" border="0"></p>
-      <p>See the article <a href="http://www.eclipse.org/articles/Article-Tabbed-Properties/tabbed_properties_view.html">The Eclipse Tabbed Properties View</a> for details.
-		</p>
-	</td>
-  </tr>
-  
-  <tr> 
-    <td> <p align="right"><b>File system API</b></p></td>
-    <td><p>A new plug-in, <b>org.eclipse.core.filesystem</b>, introduces
-    a new generic API for interacting with file systems.  The platform has been migrated
-    to use this file system API rather than <b>java.io</b> APIs.  This means resources
-    can be created in arbitrary backing file systems, and plug-ins can provide support
-    new kinds of file systems.
-    </p>
-
-   <p>
-    Support has been added to the project and linked resource wizards
- 	for creating resources that are linked to other file systems.  Plug-ins that define
-   	alternate file systems can hook into this wizard support by using the 
-   	<b>org.eclipse.ui.ide.filesystemSupport</b> extension point.</p> 
-    <p><img src="images/efs.png" alt="Picture showing a non-local file system"></p>
-    </td>
-  </tr>
-
-  <tr> 
-    <td>
-      <p align="right"><b>Categorization added to Import and Export</b></p></td>
-    <td><p>The <code>org.eclipse.ui.importWizards</code> and <code>org.eclipse.ui.exportWizards 
-        </code> extension points now support categorization.</p>
-      <p><img src="images/importexport.png" alt="Picture showing extension points"></p></td>
+    <td><p align="right"><b>Added control of help/welcome content ordering</b></td>
+    <td>The help table of contents and welcome items
+      will now be arranged in a more meaningful order when multiple products
+      and documentation sets are installed. All available products' preferences
+      will be taken into consideration, and products may now use an external
+      XML file similar to welcome's to specify their preferred order and visibility
+      of entries in the table of contents.</td>
   </tr>
 
   <tr>
-    <td>
-      <p align="right"><b>Tooltips for annotations in Text editors<br>
-	</b></p></td>
-    <td>Annotation hovering has been pushed down from JDT Text to Platform Text. Text, vertical and overview
-		ruler hover support is installed by <code>TextSourceViewerConfiguration</code> which is used by text editors:
-      <p>
-      <img alt="Picture of annotation tooltip" title="Annotation tooltip" src="images/tooltip.png"></p>
-   </td>
+    <td><p align="right"><b>Link to anything from context-sensitive help</b></td>
+    <td>You can now add arbitrary command links in context-sensitive
+      help, allowing applications to perform any operation. For example, you
+      can link to a related cheat sheet:
+      <p> <img src="images/help-commands.png" alt="Linking to a cheat sheet"> </p></td>
   </tr>
 
-    <tr>
-      <td>
-      <p align="right"><b>Annotation navigation in Text editors</b></p></td>
-      <td>Annotation navigation has been pushed down from JDT Text to Platform Text 
-      and is now available in all text editors:
-      <p>
-      <img alt="Picture of navigation icons" title="Navigation icons" src="images/navigation.png"></p>
-      </td>
-    </tr>
-
-  <tr> 
-    <td> <p align="right"><b>JFace field assistance</b></p></td>
-    <td><p>JFace introduces new support for assisting the 
-		user in completing fields inside dialogs and forms.  The <b>org.eclipse.jface.fieldassist</b>
-		package provides classes that let you decorate arbitrary controls with images and 
-		corresponding hover text.  These can be used for purposes such as marking required 
-		fields in a dialog, showing field-based error conditions, or showing content-assist 
-		prompts.  The package also allows you to install content proposals on a control, 
-		including a pop-up dialog with content proposals, secondary pop-ups for further information, 
-		and options for invoking proposals explicitly or in an automatic (type-ahead) style. </p>
-      <p><img src="images/fieldassist.png" alt="Picture showing field assistance"> </p>
-      </td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>JFace TreeViewer enhancements</b></p></td>
-    <td><p>AbstractTreeViewer now supports multiple equal elements in the tree,
-     	each with a different parent chain. This support requires that clients
-        enable the element map by calling <b>setUseHashLookup(true)</b>.</p>
-        <p>TreeViewer now supports <b>SWT.VIRTUAL</b> trees. There is a corresponding
-        lazy content provider <b>ILazyTreeContentProvider</b> that only returns contents
-        as they are needed.</p>
-      </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Support for dynamic Help content</b></p>
-
-    </td>
-    <td>Help system now supports dynamic composition 
-      of help content. Topics authored in XHMTL can contain additional Eclipse-specific 
-      markup for on-the-fly filtering of content based on os/ws/arch values, presence 
-      of plug-ins, enabled capabilities, etc. Shared content can be included into 
-      multiple documents. Finally, plug-ins can contribute XHTML fragments that 
-      plug into anchors in other documents. All this now enables information developers 
-      to provide dynamic documents that tailor themselves to the context at the 
-      time of viewing. 
-	</td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Help search enhancements</b></p></td>
-    <td><p>User assistance indexing and searching has been 
-      enhanced in various ways. Additional search participants can be registered 
-      via extension point that can add content to the Lucene index. Help now contributes 
-      an XHTML search participant that can index dynamic help documents authored 
-      in XHMTL (see above). In addition, documents that were previously not in 
-      the index will now appear (for example, cheat sheets and Welcome pages). Search 
-      hits can now have different icons and the 'open' action can be delegated 
-      to the search engine.</p>
-	  <p><img border="0" src="images/search-enhancements.png" alt="Picture showing Search enhancements"></p></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Problems can be grouped</b></p></td>
-    <td><p>Problems in the Problems view can now be grouped.  There are
-    	default groupings by severity and problem type, and additional groups
-    	can be defined via the <b>org.eclipse.ui.ide.markerSupport</b> 
-        extension point.</p> 
-     </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Improved help in dialogs</b></p>
-    </td>
-    <td>Most dialogs in Eclipse now have a standard 
-      help button on the bottom left corner. This button summons context help, 
-      same as pressing F1 (on Windows). In addition, the help content will now 
-      appear in the dialog's tray instead of in a separate 
-      window. Custom dialogs can inherit this functionality by subclassing the 
-      new <b>TrayDialog</b> class rather than <b>Dialog</b>. Cheatsheets can also follow you 
-      into dialogs (in the tray) for those steps that involve opening dialogs.
-    </td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Embed command links in User Assistance content<br>
-        </b></p></td>
-    <td>Links in Help, cheat sheets, and Introduction content 
-      can now execute commands when activated by the user. Command links can be 
-      used to open preference pages, launch wizards, show views, open perspectives 
-      and for many other purposes. The command framework is extensible so many 
-      more uses of command links are possible. The <span style="font-weight: bold;">Workbench 
-      User Guide</span> has been enhanced with command links in many places. The 
-      picture below shows two command links in a help topic: 
-      <p> <img alt="Command links in help topic" src="images/command-links.png"></p>
-
-    </td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Support for 
-        launching commands from cheat sheets</b></p></td>
-    <td>Commands can now be launched from cheat sheets. 
-      The content file below contains commands to open the Search view and Package 
-      Explorer. 
-<pre><span style="color:#808080;">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
-<span style="color:#800000;">&lt;cheatsheet</span> title=<span style="color:#008000;">&quot;Example of Commands in a Cheat Sheet&quot;</span>&gt;
-  &lt;<span style="color:#800000;">intro</span>&gt;
-
-    &lt;<span style="color:#800000;">description</span>&gt;A cheat sheet shows the 
-			package explorer<span style="color:#800000;">&lt;/description&gt;</span>
-  <span style="color:#800000;">&lt;/intro&gt;</span>
-  <span style="color:#800000;">&lt;item</span> title=<span style="color:#008000;">&quot;Show Search View&quot;</span>&gt;
-     <span style="color:#800000;">&lt;description&gt;</span>This is a step with a command 
-		which shows the search view.<span style="color:#800000;">&lt;/description&gt;</span>
-
-     <b><span style="color:#000080;">&lt;command serialization=
-		&quot;org.eclipse.search.ui.views.SearchView&quot;/&gt;</span>  </b>
-  <span style="color:#800000;">&lt;/item&gt;</span>
-  <span style="color:#800000;">&lt;item</span> title=<span style="color:#008000;">&quot;Step 2&quot;</span>&gt;
-    <span style="color:#800000;">&lt;description&gt;</span>This is a step with a command and 
-		parameters, shows package explorer.<span style="color:#800000;">&lt;/description&gt;</span>
-
-     <b><span style="color:#000080;">&lt;command serialization=&quot;org.eclipse.ui.views.showView(
-		org.eclipse.ui.views.showView.viewId=
-		org.eclipse.jdt.ui.PackageExplorer)&quot;/&gt; </span></b>
-     <span style="color:#800000;">&lt;onCompletion&gt;</span>
-         Command example completed.
-     <span style="color:#800000;">&lt;/onCompletion&gt;</span>
-  <span style="color:#800000;">&lt;/item&gt;</span>
-<span style="color:#800000;">&lt;/cheatsheet&gt;</span>
-</pre></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Completion message</b></p></td>
-    <td>A completion message can be added to a step in 
-      a cheat sheet that is displayed when that step is completed. 
-      <p> <img border="0" src="images/cheatsheet-completion.png" alt="Picture showing a cheatsheet completion message"></p></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Composite cheat sheets</b></p></td>
-    <td>Composite cheat sheets are new for Eclipse 3.2. 
-      A composite cheat sheet provides guidance for a large problem by dividing 
-      it into smaller tasks each of which has its own cheat sheet. Tasks can be 
-      organized into groups. Composite cheat sheets open in the cheat sheet view 
-      and are launched using the cheat sheet selection dialog. Each task has a 
-      description, hyperlinks direct the user through a sequence of tasks. 
-      <p> <img border="0" src="images/composite-cheatsheet1.png" alt="Picture showing a composite cheatsheet"></p>
-      <p>Composite cheat sheets have a tree which shows the tasks and their status. 
-        The right hand/lower panel contains the individual tasks.</p>
-      <p><img border="0" src="images/composite-cheatsheet2.png" alt="Picture showing a composite cheatsheet"></p>
-      <p>The content of a composite cheat sheets is defined in an XML file. The 
-        content file can specify what dependencies exist between tasks so that 
-        a task can only be started after any prerequisite tasks have been completed.</p></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Help keyword index</b></p></td>
-    <td>Help now has a keyword index, where you can 
-      register keywords from your documentation and supply a link to an appropriate 
-      help document. The index is available in both the Help view and Help window 
-      (view shown below). 
-      <p> <i>Note: Index content is not yet available for the SDK (the index will 
-        only appear if content is available).</i> </p>
-      <p> <img src="images/keyword-index.png" alt="Picture showing the Help view"> 
-      </p></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>XHTML help docs conversion tool</b></p></td>
-    <td> PDE has a new utility to quickly convert a plug-in's 
-      HTML help documents to XHTML. In addition to converting the HTML to valid 
-      XHTML, the tool will update the filename extension, the table of contents, 
-      and add the necessary bindings to enable dynamic content and searching of 
-      the XHTML content. After this conversion, users can take advantage of the 
-      new 3.2 Help features such as dynamic content filtering, content reuse, 
-      and dynamic content contribution that all require XHTML as the content format. 
-      <p> This function can be invoked via <b>PDE Tools &gt; Convert Help files to 
-        XHTML</b> from the context menu of plug-in projects. </p>
-      <p> <img src="images/xhtml-tool.png" alt="Picture showing the XHTML conversion tool"> 
-      </p></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Universal welcome</b></p></td>
-    <td> Based on our experience with concrete Welcome 
-      implementations, we now offer a configurable Universal Welcome to be used 
-      by any product. Products can choose between 7 predefined main sections: 
-      Overview, First Steps, Tutorials, Samples, What's New, Web Resources, and 
-      Migrate (Eclipse SDK uses 4 of them). Universal Welcome has configurable 
-      page layouts and importance levels for each contribution, and is fully theme-aware. 
-      It also offers both HTML and SWT presentations for 100% platform coverage. 
-      <p> A Welcome preference page provided by Universal Welcome opens up Welcome 
-        customization to the end users, and can be included in any product that 
-        wants to offer it. You can read more about this in the <a href="http://www.eclipse.org/eclipse/platform-ua/proposals/shared-intro/shared-intro.htm"> 
-        Universal Welcome specification</a>.</p>
-      <p> <img border="0" src="images/universal-welcome.png" alt="Picture showing the Universal Welcome"></p></td>
-
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Support for configuration and themes in Welcome</b></p></td>
-    <td> The Intro framework has more configurability 
-      support. An intro configurer can be contributed that offers one-time computation 
-      of the group children, variable substitution support, and late anchor path 
-      resolution. This support is heavily used by Universal Welcome but can also 
-      be used by other Welcome implementations. 
-      <p>Themes represent named collections of CSS files, properties, and images 
-        that collectively define the look of the Welcome content. Universal Welcome 
-        takes advantage of this support by providing theme selection capability 
-        and two concrete themes in 3.2: 'Circles' and 'Purple Mesh'.</p>
-      <p> <img border="0" src="images/welcome-themes.png" alt="Picture showing themes in Welcome"></p></td>
-  </tr>
-
-  <tr> 
-    <td> <p align="right"><b>Namespace support for the Ant extension points</b></p></td>
-    <td> <p>The <b>org.eclipse.ant.core</b> <b>antTasks</b> and <b>antTypes</b> extension 
-        points now allow for the designation of a URI that the definition should 
-        live in. See <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=133190">bug 
-        133190</a> for full details of all the changes.</p></td>
-  </tr>
-  
-    <tr> 
-    <td> <p align="right"><b>Team support for logical model integration</b></p></td>
-    <td>API has been added that allows logical models to participate in Team operation. With this
-    API, Team providers can:
-    <ul>
-    <li>Consult models to ensure all required resources are included in a Team operation.</li>
-    <li>Use model semantics to aid in resolving merge conflicts.</li>
-    <li>Allow models to participate in the display of resources during Team Operations
-    </li>
-    </ul>
-    <p> <img border="0" src="images/modelsync.png" alt="Synchronization with Java and Resource models"></p>
-	</td>
-  </tr>
 
 <!-- *********************** SWT *********************** -->
 <tr>
 <td colspan="2"><a name="SWT"></a>
 <div style="font-size: 20px; font-weight: bold;">SWT Changes</div>
 </td>
-
 </tr>
-<tr>
-    <td>
-      <p align="right"><b>Sort indicator in tables and trees</b></p>
-    </td>
-    <td><p>Table and Tree now support a sort 
-    direction indicator in the header of the column.</p>
-      <p><img border="0" src="images/sort.png" alt="Picture showing a sort direction indicator"></p>
-      <p>SWT snippets showing <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet2.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">sorting 
-        by column (simple)</a> and <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet192.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">sorting 
-        by column (virtual table)</a>. </p>
+
+  <tr> 
+    <td><p align="right"><b>Printing support added on GTK+</b></td>
+    <td>Printing support has been added to SWT for GTK+. You must be running with 
+      GTK+ 2.10 or newer in order to print.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>New DateTime control</b></td>
+    <td>Your users can now enter dates or times using
+      the new DateTime control. You can see the DateTime control in action on
+      the DateTime tab of the SWT control example.
+      <p><img src="images/datetime-short-date.png" alt="DateTime control with SWT.DATE | SWT.SHORT style on Windows" border="0"></p>
+      <p><img src="images/datetime-time.png" alt="DateTime control with SWT.TIME style" border="0"></p>
+      <p><img src="images/datetime-calendar.png" alt="DateTime control with SWT.CALENDAR style on Windows" border="0"></p>
       </td>
   </tr>
 
-  <tr>
-    <td>
-      <p align="right"><b>Reorderable columns in trees</b></p>
-    </td>
-    <td><p>In Eclipse 3.1, we added the ability 
-      to reorder columns in a Table. That support has now been added to Tree.</p>
-	<p>The display order of columns in a tree can be changed by dragging the column 
-        header, or it can be set programmatically. </p>
-      <p><img border="0" src="images/moveable.png" alt="Picture showing reorderable columns"></p>
-      <p>Example <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet193.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">snippet</a>.</p>
-    </td>
+  <tr> 
+    <td><p align="right"><b>Option to print line numbers added to StyledText</b></td>
+    <td>When printing a StyledText widget, line numbers 
+      can now be printed by setting the <code>StyledTextPrintOptions.printLineNumbers</code> 
+      field to <em>true</em>.</td>
   </tr>
 
   <tr>
-    <td>
-      <p align="right"><b>Improved XP theme support</b></p>
-    </td>
-    <td>
-    <p>On Windows XP, SWT now shows the textured background in tab folders. The groups, labels, check boxes, etc. 
-	are all transparent to this background.  Also, custom widgets, such as StyledText, now show the correct border for 
-	the prevailing Windows XP theme.</p>
-      <p><img border="0" src="images/xptheme.png" alt="Picture showing XP theme support"></p>
-      <p>See the <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/platform-swt-home/faq.html#xpthemes">SWT 
-        FAQ</a> for instructions on how to run with a Windows XP skin.</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Animated GIFs</b></p>
-    </td>
-    <td>
-    <p>Animated GIF images can be saved to file.</p>
-    <p><img border="0" src="images/animated_gif.gif" alt="Picture showing animated GIF support"></p>
-    <p>For an example see the SWT  
-     <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet194.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">snippet</a>.</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Desktop appearance notification</b></p>
-    </td>
-    <td>
-    <p>When appearance settings such as theme, font, or default colors are 
-    changed for the desktop, an <code>SWT.Settings</code> event is issued for
-    the <code>Display</code>.</p>
-    <p><img border="0" src="images/settings.png" alt="Picture showing a desktop appearance notification"></p>
-    </td>
-  </tr> 
-
-  <tr>
-    <td>
-      <p align="right"><b>Dispose notification</b></p>
-    </td>
-    <td>
-    <p>Previously, when an <code>SWT.Dispose</code> event was received for a parent composite, all 
-    the children were disposed and therefore could not be referenced.  For 3.2,
-    the Dispose event is received before the children have been released in the OS. </p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Tool tips for columns</b></p>
-    </td>
-    <td><p>Tooltip text can be set on a table 
-    or tree column header using <code>TableColumn/TreeColumn.setTooltipText(String)</code>.</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Vertical CoolBar</b></p>
-    </td>
-    <td><p>A vertical coolbar can be created
-    by using the <code>SWT.VERTICAL</code> style.</p>
-    <p><img border="0" src="images/vertical_coolbar.png" alt="Picture showing a vertical CoolBar"></p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>OpenGL support</b></p>
-    </td>
-    <td>
-    <p>You can now use <a href="http://www.eclipse.org/swt/opengl/">
-    OpenGL in SWT applications</a>. 
-    The OpenGL interface works with third-party OpenGL libraries such as LWJGL.</p>
-    <p><img border="0" src="images/lwjglexample.png" alt="Picture showing an OpenGL example"></p>
-    <p>For examples, see the SWT snippets</p>
-    <ul>
-      <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet174.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">org.eclipse.opengl snippet</a></li>
-      <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet195.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">LWJGL snippet</a></li>
-    </ul>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Virtual tree</b></p>
-    </td>
-    <td>
-    <p>Tree now supports the SWT.VIRTUAL style. This allows you to create trees 
-    with large amounts of data quickly. When TreeItems are needed, they are 
-    created on-demand.</p>
-    <p>For an example see the SWT  
-     <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet202.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">snippet</a>.</p>
-    </td>
-  </tr>
-  
-  <tr>
-    <td>
-      <p align="right"><b>Buttons with image and text</b></p>
-    </td>
-    <td>
-    <p>Buttons can now show an image as well as text.  This feature is supported
-    on Windows XP, Mac OS X, and GTK.</p>
-    <p><img border="0" src="images/button-image-text.png" alt="Picture showing a button with an image"></p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>HIView on Mac OS X</b></p>
-    </td>
-    <td>
-    <p>SWT now makes use of HIView on Mac OS X.  This resolves many clipping and 
-    sizing issues.</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Embedding objects in text</b></p>
-    </td>
-    <td>
-    <p>Using TextLayout, it is now possible to embed objects such as images or 
-    widgets inside text.  Glyph metrics such as ascent, descent and width can be
-    specified.  Objects wrap with the text.</p>
-    <p><img border="0" src="images/text-objects.png" alt="Picture showing an image embedded in text"></p>
-
-    <p>For an example see the SWT  
-     <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet205.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">snippet</a>.</p>
-    </td>
-  </tr>
-  
-  <tr>
-    <td>
-      <p align="right"><b>Indent, align and justify text</b></p>
-    </td>
-    <td>
-    <p>TextLayout now supports indenting, justifying, and aligning text.</p> 
-    <p><img border="0" src="images/indent-justify-align.png" alt="Picture showing text being aligned"></p>
-    <p>For an example see the SWT  
-     <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet203.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">snippet</a>.
-    </p>
-	</td>
-  </tr>
-  
-  <tr>
-    <td>
-      <p align="right"><b>Text baseline rise</b></p>
-    </td>
-    <td>
-    <p>Using TextLayout and TextStyle, it is now possible to specify the baseline rise for a range of text.</p>
-    <p><img border="0" src="images/rise.png" alt="Picture showing text being given a baseline rise"></p>
-    <p>For an example see the SWT  
-     <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet204.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">snippet</a>.
-    </p>
-	</td>
-  </tr>
-
- <tr>
-   <td>
-     <p align="right"><b>HSB color support</b></p>
-   </td>
-   <td>
-   <p>A color can be created by specifying the hue, saturation, and brightness. 
-        In addition, for a given color, the hue, saturation, and brightness values 
-        can be queried.</p>
-      <p><img border="0" src="images/hsb.png" alt="Picture showing HSB support"></p>
-	   <p>For an example, see the 
-	   <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet208.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">
-	   SWT snippet</a></p>
-   </td>
- </tr>
-
- <tr>
-   <td>
-     <p align="right"><b>StyledText alignment, indentation, justification</b></p>
-   </td>
-   <td>
-   <p>StyledText now supports indenting, justifying and aligning text.</p>
-   <p><img border="0" src="images/styled_align.png" alt="Picture showing StyledText being aligned"></p>
-   <p>For an example, see the 
-   <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet213.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">
-   SWT snippet</a></p>
-   </td>
- </tr>
- 
- <tr>
-   <td>
-     <p align="right"><b>Embedded objects in StyledText</b></p>
-   </td>
-   <td>
-   <p>StyledText now allows you to embed objects such as images or widgets 
-   inside the text.  Objects wrap with the text.</p>
-   <p><img border="0" src="images/styled_object.png" alt="Picture showing an embedded image in text"></p>
-   <p>For an example, see the 
-   <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet212.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">
-   SWT snippet</a></p>
-   </td>
- </tr>
- 
- <tr>
-   <td>
-     <p align="right"><b>Background image</b></p>
-   </td>
-   <td>
-   <p>
-   A background image can be set into a control.  In addition, the background 
-   can be inherited by child widgets such as labels.
-   </p>
-   <p><img border="0" src="images/back_image.png" alt="Picture showing a background image in a control"></p>
-   <p>For an example, see the 
-   <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet214.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">
-   SWT snippet</a></p>
-   </td>
- </tr>
- 
- <tr>
-   <td>
-     <p align="right"><b>Native image loading</b></p>
-   </td>
-   <td>
-   <p>The constructor <code>Image(Device device, String filename)</code> will 
-        now load images using native operating system calls. This has improved 
-        performance of image loading and increased the maximum size of image that 
-        can be loaded.</p>
-   </td>
- </tr>
-
- <tr>
-   <td>
-     <p align="right"><b>Dragging text</b></p>
-   </td>
-   <td>
-   <p>If the <code>SWT.DragDetect</code> event is hooked on Text or StyledText, 
-   the selection will not be cleared when the user drags from within a selected
-   range of text.  This makes it possible to support dragging from the Text and
-   StyledText widgets.</p>
-      <p>For an example, see this<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet210.java?rev=HEAD&content-type=text/vnd.viewcvs-markup"> 
-        SWT snippet</a></p>
-   </td>
- </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>New ExpandBar widget</b></p>
-    </td>
-    <td>
-    <p>The ExpandBar widget allows the user to show and hide collections of widgets 
-    by clicking on a header.  The ExpandBar contains multiple items which each 
-    may have an image and title in the header.</p>
-    <p><img border="0" src="images/expandbar.png" alt="Picture showing widgets being hidden"></p>
-    <p>For an example, see this 
-    <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet223.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">
-    SWT snippet</a>.</p>
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-      <p align="right"><b>Bullets in StyledText</b></p>
-    </td>
-    <td> <p>StyledText can now show lists 
-        formatted in a variety of styles, including bullets, numbered, upper case 
-        or lower case letters, and custom-defined styles.</p> 
-      <p><img border="0" src="images/bullets.png" alt="Picture showing bullets in StyledText"></p>
-      <p>For an example, see this <a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet222.java?rev=HEAD&content-type=text/vnd.viewcvs-markup"> 
-        SWT snippet</a>.</p></td>
+    <td><p align="right"><b>Text SEARCH style</b></td>
+    <td>On platforms that have this concept, <code>Text</code> controls
+      can now have the look and feel of a search field with the <code>SWT.SEARCH</code> style.
+      Adding the <code>SWT.CANCEL</code> style gives the user a way to cancel
+      the search. This <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet258.java">example
+      snippet</a> created the <code>Text</code> control shown in the snapshot
+      below.
+      <p><img src="images/search-text.png" alt="A search Text on the Mac"></p></td>
   </tr>
 
   <tr> 
-    <td> <p align="right"><b>Custom draw 
-        Tree</b></p></td>
-    <td> <p>The Tree widget now supports 
-        custom draw for individual cells. Applications can enhance the native 
-        look and feel of the tree by custom rendering of the data. The application 
-        has control over row height so multiple lines of text can be drawn. In 
-        addition, it can present multiple images in the same cell, change font 
-        or color multiple times, and change the way selections are drawn. </p>
-      <p><img border="0" src="images/custom-tree.png" alt="Picture showing custom draw for individual tree cells"></p>
-      <p>For examples, see the following snippets: </p>
-      <ul>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet220.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Images 
-          on right side of TreeItem</a> </li>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet232.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Show 
-          results as a bar chart in Tree</a> </li>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet226.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Custom 
-          gradient selection for Tree</a> </li>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet227.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Multiple 
-          lines in a TreeItem</a></li> </ul></td>
+    <td><p align="right"><b>System tray support added on Mac OS X</b></td>
+    <td>Icons placed on the system tray will now appear in the Mac OS X status bar.
+      <p><img src="images/osxtray.png" alt="System tray on Mac OS X"></p></td>
   </tr>
 
   <tr> 
-    <td> <p align="right"><b>Custom draw Table</b></p></td>
-    <td> <p>The Table widget now supports 
-        custom draw for individual cells. While still maintaining the native look 
-        and feel of the table, users can customize how cells are drawn to display 
-        data in a form other than text with an image, to show multiple lines of 
-        text in one cell, to change font and color multiple times within the same 
-        cell, to override the native selection drawing, etc. </p>
-      <p><img border="0" src="images/custom-table.png" alt="Picture showing custom draw for individual table cells"></p>
-      <p>For examples, see the following snippets: </p>
-      <ul>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet230.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Images 
-          on right side of TableItem</a> </li>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet228.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Show 
-          results as a bar chart in Table</a> </li>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet229.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Custom 
-          gradient selection for Table</a> </li>
-        <li><a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet231.java?rev=HEAD&content-type=text/vnd.viewcvs-markup">Multiple 
-          lines in a TableItem</a></li> </ul></td>
+    <td><p align="right"><b>Writing PNGs now supported</b></td>
+    <td>Images can now be written to disk in PNG format 
+      <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet246.java">(example 
+      snippet)</a>. </td>
   </tr>
 
   <tr> 
-    <td> <p align="right"><b>Drag over effects for Table and Tree</b></p></td>
-    <td> <p>The Table and Tree widgets now 
-        provide visual feedback of what is being dragged. </p>
-      <p><img border="0" src="images/drag-effect.png" alt="Picture showing drag feedback"></p></td>
+    <td><p align="right"><b>Browser profiles on GTK+ and linux-motif</b></td>
+    <td>The Browser widget now uses profiles on GTK+ and linux-motif. This fixes
+      many previous shortcomings, including the inability to display https pages, not 
+      rendering visited links properly, and not caching visited pages. </td>
   </tr>
-  
+
   <tr> 
-    <td> <p align="right"><b>New Tooltip class</b></p></td>
-    <td> <p>The new ToolTip class can be used to display tooltips that are not directly tied to a
-        Control.  These tooltips can be placed anywhere, and can have either the platform default
-        appearance or a BALLOON appearance as shown below.</p>
-      <p><img border="0" src="images/balloon.png" alt="Picture showing tooltip with style BALLOON"></p></td>
+    <td><p align="right"><b>Browser support added on PowerPC</b></td>
+    <td>Browser support has been added for the PowerPC architecture (GTK+). </td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Native GTK Combo box</b></td>
+    <td>You now get a native combo box when running with GTK+ version 2.4 or newer. 
+      <p><img src="images/gtkcombobox.png" alt="GtkComboBox"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Faster JPEG/PNG image loading</b></td>
+    <td>JPEG images now load from 30 to 70 percent faster, 
+      and PNG images load 2 to 3 times faster, depending on the image. </td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Color cursors on Mac OS X and GTK</b></td>
+    <td>You can now create color cursors on Mac OS X and GTK. 
+      <p><img src="images/mac-cursor.png" alt="A Color Cursor on the Mac"></p>
+      <p>This <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet119.java">example 
+        snippet</a> created the cursor pictured above.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>New graphics line drawing capabilities</b></td>
+    <td>SWT graphics now supports much finer control
+      of line attributes, including fractional line widths, dashed line offsets,
+      and miter limits. These capabilities are provided by the new <code>LineAttributes</code> class
+      and the new <code>GC</code> methods <code>get/setLineAttributes</code>.
+      <p><img src="images/line-attributes.png" alt="LineAttributes" border="0"></p>
+      <p> (This <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet252.java">example
+          snippet</a> created the above snapshot.)</p></td>
+  </tr>
+
+  </tr>
+  <tr>
+    <td><p align="right"><b>SWT libraries automatically found</b></td>
+    <td>The SWT libraries are now loaded from the SWT
+      jar when an SWT application is launched. Within Eclipse, you can just use
+      the <b>Run As &gt; Java Application</b> menu item and the libraries will
+      be found. When launching from the command line, you no longer need to specify
+      the SWT library path. </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Mozilla everywhere</b></td>
+    <td>Mozilla can now be used as the underlying browser
+      control on Windows and OS X, providing that you have <a href="http://developer.mozilla.org/en/docs/XULRunner" target="_blank">XULRunner</a> installed
+      and registered. To use this just create your Browser with the <code>SWT.MOZILLA</code> style.
+	  This <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet260.java">example
+      snippet</a> created the snapshot below.
+    <p><img src="images/mozilla.png" alt="Mozilla on Windows"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>DragDetect API</b></td>
+    <td>Custom widget implementers can now use <code>Control.setDragDetect()</code> to
+      disable the default drag detection and <code>Control.dragDetect()</code> to
+      implement their own. For example, a custom list control could start dragging
+      only when an item is selected. Typed events for drag detection are now
+      available (see <code>DragDetectListener</code> and <code>DragDetectEvent</code>).
+      This <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet259.java">example
+      snippet</a> created the snapshot shown below.
+      <p><img src="images/drag-detect-api.png" alt="Drag detect in a custom control"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Drag over and drag under effects</b></td>
+    <td>Custom drag over and drag under effects can
+      now be implemented for any control. Custom widget implementers can provide
+      feedback that is appropriate for their control by subclassing <code>DragSourceEffect</code> and <code>DropTargetEffect</code>.
+      The default effects for the <code>Table</code>, <code>Tree</code> and <code>StyledText</code> controls
+      have been changed to use these classes (see <code>TreeDragSourceEffect</code>, <code>TreeDropTargetEffect</code> and
+      the corresponding classes for these controls). This <code>StyledText</code> <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet257.java">example
+      snippet</a> created the snapshot shown below.
+      <p><img src="images/drag-under.png" alt="StyledText dragging selected text to show 'insert cursor' drag under effect"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>JavaXPCOM support</b></td>
+    <td><code>SWT.MOZILLA</code>-style Browsers can
+      now be programmed to via JavaXPCOM. This requires that <a href="http://developer.mozilla.org/en/docs/XULRunner" target="_blank">XULRunner</a> 1.8.1.2
+      be installed, whose current release status is summarized <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=173117#c2">here</a>.
+      This <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet267.java">example
+      snippet</a> created the snapshot below.
+    <p><img src="images/javaxpcom.png" alt="Browser JavaXPCOM"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>OLEExample and OLE improvements</b></td>
+    <td>The new OLEExample showcases SWT OLE (win32)
+      support. We now do a better job of hosting OLE documents in SWT. For example,
+      OleClientSite in-place activation scrollbars work correctly.
+      <p><img src="images/oleexample.png" alt="OLEExample"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Reparenting support on Mac OSX</b></td>
+    <td>SWT on Mac OSX now supports widget reparenting.</td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Advanced graphics supports mirroring</b></td>
+    <td>Advanced graphics now renders correctly in RTL
+      mode. The snapshot below shows bidirectional text drawn using transforms
+      and patterns on a Canvas.
+    <p><img src="images/advanced-bidi.png" alt="Advanced graphics in RTL mode"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>SWT graphics showcase</b></td>
+    <td>Try out the new SWT Graphics example, which showcases 
+      some of SWT's graphics capabilities. This example is included with the other 
+      <a href="http://www.eclipse.org/swt/examples.php">example plug-ins</a>. 
+      <p><img src="images/graphicsexample.png" alt="GraphicsExample" border="0"></p></td>
   </tr>
 
 <!-- ****************** END OF N&N TABLE ****************** -->
@@ -738,4 +443,3 @@ section of the Workbench User Guide.
 
 </body>
 </html>
-
