@@ -85,12 +85,12 @@ modifies the buffer, reconciles the changes, commits the changes to disk and fin
     WorkingCopyOwner owner = ...;
     
     // Create working copy
-    ICompilationUnit workingCopy = originalUnit.getWorkingCopy(owner, null, null);
+    ICompilationUnit workingCopy = originalUnit.getWorkingCopy(owner, null);
     
     // Modify buffer and reconcile
     IBuffer buffer = ((IOpenable)workingCopy).getBuffer();
     buffer.append(&quot;class X {}&quot;);
-    workingCopy.reconcile(NO_AST, false, null, null);
+    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
     
     // Commit changes
     workingCopy.commitWorkingCopy(false, null);
@@ -113,7 +113,7 @@ working copy, and client 2 trying to retrieve the shared working copy notices it
     WorkingCopyOwner owner = ...;
     
     // Client 1: Create shared working copy
-    ICompilationUnit workingCopyForClient1 = originalUnit.getWorkingCopy(owner, null, null);
+    ICompilationUnit workingCopyForClient1 = originalUnit.getWorkingCopy(owner, null);
     
     // Client 2: Retrieve shared working copy
     ICompilationUnit workingCopyForClient2 = originalUnit.findWorkingCopy(owner);
@@ -186,7 +186,7 @@ These method names start with <b>new...</b>. The following is an example that cr
 </pre></font></p>
 <P>The following snippet is the corresponding code that generates the output.
 <font color='#4444CC'><pre>
-		AST ast = new AST();
+		AST ast = AST.newAST(AST.JLS3);
 		CompilationUnit unit = ast.newCompilationUnit();
 		PackageDeclaration packageDeclaration = ast.newPackageDeclaration();
 		packageDeclaration.setName(ast.newSimpleName(&quot;example&quot;));
@@ -201,15 +201,16 @@ These method names start with <b>new...</b>. The following is an example that cr
 		unit.imports().add(importDeclaration);
 		TypeDeclaration type = ast.newTypeDeclaration();
 		type.setInterface(false);
-		type.setModifiers(Modifier.PUBLIC);
+		type.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
 		type.setName(ast.newSimpleName(&quot;HelloWorld&quot;));
 		MethodDeclaration methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setConstructor(false);
-		methodDeclaration.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
+		List modifiers = methodDeclaration.modifiers();
+		modifiers.add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+		modifiers.add(ast.newModifier(Modifier.ModifierKeyword.STATIC_KEYWORD));
 		methodDeclaration.setName(ast.newSimpleName(&quot;main&quot;));
-		methodDeclaration.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
+		methodDeclaration.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 		SingleVariableDeclaration variableDeclaration = ast.newSingleVariableDeclaration();
-		variableDeclaration.setModifiers(Modifier.NONE);
 		variableDeclaration.setType(ast.newArrayType(ast.newSimpleType(ast.newSimpleName(&quot;String&quot;))));
 		variableDeclaration.setName(ast.newSimpleName(&quot;args&quot;));
 		methodDeclaration.parameters().add(variableDeclaration);
@@ -276,25 +277,25 @@ position of the <i>super</i> keyword in a
 Some source code modifications are not provided via the Java element API.
 A more general way to edit source code (such as changing the source code for existing elements) is accomplished using the compilation unit's raw source code and the rewrite API of the DOM/AST.</P>
 <P>
-To perform DOM/AST rewriting, there two set of API: the descriptive rewriting and the modifying rewriting.
+To perform DOM/AST rewriting, there are two sets of API: the descriptive rewriting and the modifying rewriting.
 </p>
 <p>
-The descriptive API does not modify the AST but use <b><a href="../reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html">ASTRewrite</a></b> API to generate the descritions of modifications.
+The descriptive API does not modify the AST but use <b><a href="../reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html">ASTRewrite</a></b> API to generate the descriptions of modifications.
 The AST rewriter collects descriptions of modifications to nodes and translates these descriptions into text edits that can then be applied to the original source.
 
 <font color='#4444CC'><pre>
    // creation of a Document
    ICompilationUnit cu = ... ; // content is "public class X {\n}"
-   String source = cu.getBuffer().getContents();
+   String source = cu.getSource();
    Document document= new Document(source);
 
    // creation of DOM/AST from a ICompilationUnit
-   ASTParser parser = ASTParser.newParser(AST.JLS2);
+   ASTParser parser = ASTParser.newParser(AST.JLS3);
    parser.setSource(cu);
    CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
 
    // creation of ASTRewrite
-   ASTRewrite rewrite = new ASTRewrite(astRoot.getAST());
+   ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
 
    // description of the change
    SimpleName oldName = ((TypeDeclaration)astRoot.types().get(0)).getName();
@@ -322,11 +323,11 @@ The modifying API allows to modify directly the AST:
 <font color='#4444CC'><pre>
    // creation of a Document
    ICompilationUnit cu = ... ; // content is "public class X {\n}"
-   String source = cu.getBuffer().getContents();
+   String source = cu.getSource();
    Document document= new Document(source);
 
    // creation of DOM/AST from a ICompilationUnit
-   ASTParser parser = ASTParser.newParser(AST.JLS2);
+   ASTParser parser = ASTParser.newParser(AST.JLS3);
    parser.setSource(cu);
    CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
 
@@ -334,7 +335,7 @@ The modifying API allows to modify directly the AST:
    astRoot.recordModifications();
 
    // modify the AST
-   TypeDeclaration typeDeclaration = (TypeDeclaration)astRoot.types().get(0)
+   TypeDeclaration typeDeclaration = (TypeDeclaration)astRoot.types().get(0);
    SimpleName newName = astRoot.getAST().newSimpleName("Y");
    typeDeclaration.setName(newName);
 
@@ -443,9 +444,6 @@ Several kinds of operations can trigger a Java element change notification. Here
      <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_CLASSPATH_REORDER">reordered on the classpath</a>)</li>
 <li>Modifying a classpath variable value, e.g. <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#setClasspathVariable(java.lang.String, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"><b>JavaCore.setClasspathVariable</b></a>
      (the delta also indicates that package fragment roots have been affected)</li>
-<li>Changing the source attachment of a .jar file, e.g. <a href="../reference/api/org/eclipse/jdt/core/IPackageFragmentRoot.html#attachSource(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)"><b>IPackageFragmentRoot.attachSource</b></a>
-     (the delta indicates that the source was <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_SOURCEDETACHED">detached</a>
-     then <a href="../reference/api/org/eclipse/jdt/core/IJavaElementDelta.html#F_SOURCEATTACHED">attached</a>)</li>
 <li>Reconciling a working copy with its buffer, e.g. <a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#reconcile(int, boolean, org.eclipse.jdt.core.WorkingCopyOwner, org.eclipse.core.runtime.IProgressMonitor)"><b>ICompilationUnit.reconcile</b></a></li>
 <li>Modifying an <a HREF="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a> that ends with ".java" and that is on the
       project's classpath, e.g. using <b>IFile.setContents</b> (the delta indicates that a compilation unit was changed, but 
@@ -472,7 +470,7 @@ For example, the following code fragment will trigger 2 Java element change even
 Whereas the following code fragment will trigger 1 Java element change event: </P>
 <font color='#4444CC'><pre>
     // Get package
-    IPackageFragment pkg = ...;
+    final IPackageFragment pkg = ...;
     
     // Create 2 compilation units
     JavaCore.run(
