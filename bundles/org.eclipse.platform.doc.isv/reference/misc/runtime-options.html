@@ -236,9 +236,24 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   <dt><a name="activateRuntimePlugins" id="activateRuntimePlugins"></a>eclipse.activateRuntimePlugins</dt>
   <dd>controls activation of runtime plug-ins. RCP applications not requiring services provided by runtime 
     plug-ins can set this property to &quot;false&quot; to avoid activation of runtime plug-ins on Eclipse startup</dd>
+  <dt><a name="eclipseallowAppRelaunch" id="eclipseallowAppRelaunch"></a>eclipse.allowAppRelaunch</dt>
+  <dd>if set to &quot;true&quot; then the main thread will continue to  wait for another application descriptor to be 
+  launched after the currently running application has quit.  Stopping the system.bundle (i.e. the bundle with a 
+  bundle ID equel to zero) will force the main thread to stop waiting for another application to launch.  
+  The default value is &quot;false&quot;</dd>
   <dt><a name="eclipseapplication" id="eclipseapplication"></a>eclipse.application {-application}</dt>
   <dd>the identifier of the application to run. The value given here overrides
     any application defined by the product (see <a href="#eclipseproduct">eclipse.product</a>) being run</dd>
+  <dt><a name="eclipseapplicationlaunchdefault" id="eclipseapplicationlaunchdefault"></a>eclipse.application.launchDefault</dt>
+  <dd>Controls launching the default application automatically once the platform is running.  A default application is identified 
+  by the <a href="#eclipseproduct">eclipse.product</a> or the <a href="#eclipseapplication">eclipse.application</a> 
+  options.  The default value is &quot;true&quot;.  Setting this property to &quot;false&quot; will prevent the default 
+  application from launching automatically.  Once the platform is running the main thread will wait for an application to be 
+  launched using an application descriptor service.</dd>
+  <dt><a name="eclipseapplicationregisterDescriptors"  id="eclipseapplicationregisterDescriptors"></a>eclipse.application.registerDescriptors</dt>
+  <dd>Controls registration of application descriptor services for all installed applications.  The default value is 
+  &quot;false&quot;.  If set to &quot;false&quot; only the default application will have an application descriptor service 
+  registered.  If set to &quot;true&quot; then all installed applications will have an application descriptor service registered.</dd>
   <dt><a name="eclipsecommands" id="eclipsecommands"></a>eclipse.commands</dt>
   <dd>a new-line separated list of all command-line arguments passed in when launching 
     Eclipse </dd>
@@ -250,6 +265,15 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   <dt><a name="eclipseeeinstallverify" id="eclipseeeinstallverify"></a>eclipse.ee.install.verify</dt>
   <dd>if set to &quot;true&quot; then the framework will check the required execution 
     environment at bundle install time.  The default value is &quot;false&quot;.</dd>
+  <dt><a name="eclipseexitOnError" id="eclipseexitOnError"></a>eclipse.exitOnError</dt>
+  <dd>if set to &quot;true&quot; then the platform will exit if an unhandled error occurs.  The default value is
+  &quot;true&quot;.</dd>
+  <dt><a name="eclipseignoreApp" id="eclipseignoreApp"></a>eclipse.ignoreApp</dt>
+  <dd>if set to &quot;true&quot; then the main launching thread will not start the default application and 
+  will proceed in shutting down the platform and exiting.
+  The default value is &quot;false&quot;.  This is different than the 
+  <a href="#eclipseapplicationlaunchDefault">eclipse.application.launchDefault</a> option because the main thread will 
+  not wait for an application descriptor service to be launched.</dd>
   <dt><a name="eclipselogbackupmax" id="eclipselogbackupmax"></a>eclipse.log.backup.max</dt>
   <dd>the max number of backup log files to allow.  The oldest backup log file will be deleted
      after the max number of backup log files is reached as a result of rotating the log file.
@@ -329,6 +353,16 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   Bundles which are specified on the <a href="#osgibundles">osgi.bundles</a> list can specify a particular startlevel.  
   If they do not specify a startlevel then they default to the value of 
   osgi.bundles.defaultStartLevel.  The default value of osgi.bundles.defaultStartLevel is 4.</dd>
+  <dt><a name="osgicompatibilitybootdelegation" id="osgicompatibilitybootdelegation"></a>osgi.compatibility.bootdelegation</dt>
+  <dd>if set to &quot;true&quot; then the parent (boot by default) classloader is delegated to as a last resort if a 
+  class or resource cannot be found.  The default value is &quot;true&quot;.</dd>
+  <dt><a name="osgicheckConfiguration" id="osgicheckConfiguration"></a>osgi.checkConfiguration</dt>
+  <dd>if set to &quot;true&quot; then timestamps are check in the configuration cache to ensure that the cache 
+  is up to date with respect to the contents of the installed bundles.  The default value is &quot;false&quot;.</dd>
+  <dt><a name="osgiclassloadersingleThreadLoads" id="osgiclassloadersingleThreadLoads"></a>osgi.classloader.singleThreadLoads</dt>
+  <dd>if set to &quot;true&quot; then only one thread is allowed to load a class at a time.  The default value is 
+  &quot;false&quot;.  This option can be used to work around certain VM bugs which can cause deadlock.
+  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=121737">bug 121737</a></dd>
   <dt><a name="osgiclean"></a>osgi.clean</dt>
   <dd>if set to &quot;true&quot;, any cached data used by the OSGi framework and eclipse runtime 
 will be wiped clean.  This will clean the caches used to store bundle 
@@ -429,6 +463,15 @@ will force eclipse to reinitialize these caches.</dd>
     certain operating systems which allow more than one extension for a library. 
     For example AIX allows library extensions of .a and .so, but
     System.mapLibraryName(String) will only return names with the .a extension.</dd>
+  <dt><a name="osgiframeworkParentClassloader"></a>osgiframeworkParentClassloader</dt>
+  <dd>the classloader type to use as the parent classloader for the the Framework.  The valid types are the following:
+    <ul type=disc>
+      <li><b>app</b> - the application classloader.</li>
+      <li><b>boot</b> - the boot classloader.</li>
+      <li><b>ext</b> - the extension classloader.</li>
+      <li><b>current</b> - the classloader used to load the equinox launcher.</li>
+    </ul>
+  </dd>
   <dt><a name="osgiframeworkuseSystemProperties"></a>osgi.framework.useSystemProperties</dt>
   <dd>controls whether the framework properties are backed by the global System properties 
     or held privately for each instance of the framework.  By default the framework properties
