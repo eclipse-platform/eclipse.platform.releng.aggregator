@@ -40,6 +40,12 @@ of the Team logical model support:</p>
 	<li>Use the <a href="#Decoration">SynchronizationStateTester</a>
 	API to ensure proper decoration of model elements that do not have a
 	one-to-one mapping to resources.</li>
+	<li>Use the <a href="#Saveable">Saveable</a>
+	API to manage the save life cycle of model elements.)</li>
+    <li>Use the <a href="#ElementHistory">ElementLocalHistoryPageSource</a>
+	API to show local history for sub-file model elements (e.g. Java methods)</li>
+	<li>Use the <a href="#ChangeTracker">ChangeTracker</a>
+	API to group related changes together.</li>
 </ol>
 
 <p>The following sections describe each of these points in more
@@ -441,6 +447,28 @@ repository providers (and other tools) can determine which resources would be af
 if the saveable was saved. For instance, this is important in the case where a repository
 provider wants to ensure that there are no open dirty editors on a set of resources before a repository
 operation is performed.
+
+<h2><a name="#ElementHistory"></a>Showing the history of sub-file elements</h2>
+
+<p>The <code><a href="../reference/api/org/eclipse/team/ui/history/ElementLocalHistoryPageSource.html">ElementLocalHistoryPageSource</a></code>
+class can be used by models to show the local history for a sub-file element such as a Java method. 
+History can be shown in the History view by calling the 
+<code><a href="../reference/api/org/eclipse/team/ui/TeamUI.html">TeamUI</a>#showHistory</code> method with the model element 
+and history page source as arguments. Models that call this also need to provide a subclass of
+<a href="../reference/api/org/eclipse/compare/structuremergeviewer/StructureCreator.html"><code>StructureCreator</code></a>
+as described in the <a href="compare_beyond.htm#Patch">Advanced compare techniques</a> section.
+The history can also be shown in a dialog using the 
+<code><a href="../reference/api/org/eclipse/team/ui/history/HistoryPageCompareEditorInput.html">HistoryPageCompareEditorInput</a></code>
+class. Subclasses can control whether the dialog is to be used for comparison purposes or as a dialog that supports
+replacing the current element with an element from the history.
+</p>
+
+<h2><a name="ChangeTracker"></a>Grouping related changes</h2>
+
+Model providers that wish to ensure that changes to sets of resources are committed or checked-in to a repository together
+can subclass the 
+<code><a href="../reference/api/org/eclipse/team/ui/mapping/ChangeTracker.html">ChangeTracker</a></code> class. This class
+is used to track local changes and issue requests to the repository provider to group related changes together.
 
 </body>
 </html>
