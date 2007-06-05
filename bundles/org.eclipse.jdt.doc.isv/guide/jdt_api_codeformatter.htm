@@ -16,49 +16,48 @@ The JDT API allows other plug-ins to use the default code formatter or to implem
 <ul>
 <li>To use the default code formatter, the two methods to consider are:</li>
 <ul>
-<li><code><a href="../reference/api/org/eclipse/jdt/core/ToolFactory.html#createCodeFormatter(java.util.Map)">org.eclipse.jdt.core.ToolFactory.createCodeFormatter(Map)</a></code></li>
-<li><code><a href="../reference/api/org/eclipse/jdt/core/ToolFactory.html#createCodeFormatter(java.util.Map, int)">org.eclipse.jdt.core.ToolFactory.createCodeFormatter(Map, int)</a></code></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/ToolFactory.html#createCodeFormatter(java.util.Map)">ToolFactory.createCodeFormatter(Map)</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/ToolFactory.html#createCodeFormatter(java.util.Map, int)">ToolFactory.createCodeFormatter(Map, int)</a></b></li>
 </ul>
-<li>To define a new code formatter, you need to define a subclass of <code><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">org.eclipse.jdt.core.formatter.CodeFormatter</a></code>.
+<li>To define a new code formatter, you need to define a subclass of <b><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">CodeFormatter</a></b>.
 </li>
 </ul>
 <h3>Using the default code formatter</h3>
 
 <h4>Getting a code formatter instance</h4>
 <p>
-The method on <code>ToolFactory</code> can be invoked to retrieve a new instance of the default code formatter. Before invoking it,
-you need to define a map that contains the code formatter options. In order to create such a map, you can use the methods defined in the class
-<code><a href="../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants</a></code> like 
-<code><a href="../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html#getEclipseDefaultSettings()">org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#getEclipseDefaultSettings()</a></code>.
-</p>
+The factory methods on <b><a href="../reference/api/org/eclipse/jdt/core/ToolFactory.html">ToolFactory</a></b> can be invoked to create a new instance of the default code formatter. 
+Before invoking one of those, you need to define a map that contains the code formatter options. In order to create such a map, you can use the methods defined in the class
+<b><a href="../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">DefaultCodeFormatterConstants</a></b> like 
+<b><a href="../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html#getEclipseDefaultSettings()">DefaultCodeFormatterConstants.getEclipseDefaultSettings()</a></b></p>
 <p>NOTE: These predefined maps contain only the code formatter specific options. In order to invoke the code formatter, you also need to specify what kind of source 
 the code formatter will format. In order to do so, specify the three options:</p>
 <ul>
-<li><code>org.eclipse.jdt.core.JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.COMPILER_SOURCE</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.COMPILER_COMPLIANCE</code></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_TARGET_PLATFORM">JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_SOURCE">JavaCore.COMPILER_SOURCE</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_COMPLIANCE">JavaCore.COMPILER_COMPLIANCE</a></b></li>
 </ul>
 <p>The possible values of these options are given by the constants:</p>
 <ul>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_1</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_2</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_3</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_4</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_5</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_6</code></li>
-<li><code>org.eclipse.jdt.core.JavaCore.VERSION_1_7</code></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_1">JavaCore.VERSION_1_1</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_2">JavaCore.VERSION_1_2</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">JavaCore.VERSION_1_3</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">JavaCore.VERSION_1_4</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_5">JavaCore.VERSION_1_5</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_6">JavaCore.VERSION_1_6</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_7">JavaCore.VERSION_1_7</a></b></li>
 </ul>
-<p>If you want to modify the default maps, it is recommended that you use the methods defined on <code><a href="../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants</a></code>
+<p>If you want to modify the default maps, it is recommended that you use the methods defined on <b><a href="../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">DefaultCodeFormatterConstants</a></b>
 to create the values of the corresponding options. This is especially true for the options relative to code wrapping.
 </p>
 
 <h4>Invoking the code formatter</h4>
 <p>Once you have the code formatter instance, the goal is to use it to format code snippets. The default code formatter allows you to 
-format different kind of code snippets. These kinds are specified in the documentation of the <code><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int, java.lang.String, int, int, int, java.lang.String)">format</a></code> method.
-The returned value of this method is a text edit. This text edit then needs to be applied to a <code><a href="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/jface/text/IDocument.html">IDocument</a></code> instance
+format different kind of code snippets. These kinds are specified in the documentation of the <b><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int, java.lang.String, int, int, int, java.lang.String)">format</a></b> method.
+The returned value of this method is a text edit. This text edit then needs to be applied to an <b><a href="../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/jface/text/IDocument.html">IDocument</a></b> instance
 in order to get the formatted result.</p>
 
 <h3>Defining a new code formatter</h3>
-To do so, you need to implement the class <code><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">org.eclipse.jdt.core.formatter.CodeFormatter</a></code>.
+To do so, you need to implement the class <b><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">CodeFormatter</a></b>.
 </body>
 </html>
