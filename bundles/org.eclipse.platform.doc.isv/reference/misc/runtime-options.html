@@ -356,6 +356,20 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   <dt><a name="osgicompatibilitybootdelegation" id="osgicompatibilitybootdelegation"></a>osgi.compatibility.bootdelegation</dt>
   <dd>if set to &quot;true&quot; then the parent (boot by default) classloader is delegated to as a last resort if a 
   class or resource cannot be found.  The default value is &quot;true&quot;.</dd>
+  <dt><a name="osgicompatibilityerrorOnFailedStart" id="osgicompatibilityerrorOnFailedStart"></a>osgi.compatibility.errorOnFailedStart</dt>
+  <dd>A bundle may specify a lazy activation policy using the bundle manifest headers Eclipse-LazyStart or Bundle-ActivationPolicy.  According 
+  to the OSGi R4.1 specification, if a bundle with a lazy activation policy fails to start then class loads must still succeed.  Before the OSGi
+  R4.1 specification Eclipse defined the lazy activation policy such that failed starts would cause class loading errors to be thrown.  If 
+  osgi.compatibility.errorOnFailedStart is set to &quot;true&quot; then failed starts will result in class loading errors; otherwise the 
+  activation error is logged and the classes are allowed to load from bundles which failed to start.  The default value is &quot;true&quot;.</dd>
+  <dt><a name="osgicompatibilityeagerStart.LazyActivation" id="osgicompatibilityeagerStart.LazyActivation"></a>osgi.compatibility.eagerStart.LazyActivation</dt>
+  <dd>The OSGi R4.1 specification mandates that all bundles must be marked for start before they are allowed to activate.  This includes bundles 
+  which specify a lazy activation policy.  A new method Bundle.start(options) has been added to allow lazy activated bundles to be activated 
+  according to their lazy activation policy.  Before the OSGi R4.1 specification Eclipse defined the lazy activation policy such that 
+  lazy activated were automatically activated on first class load even though they were not marked for activation.
+  If osgi.compatibility.eagerStart.LazyActivation is set to &quot;true&quot; then bundles with the lazy activation policy will automatically be
+  marked for activation; otherwise bundles with the lazy activation policy must be started with the new Bundle.start(options) method before 
+  being allowed to lazy activate.  The default value is &quot;true&quot;.</dd>
   <dt><a name="osgicheckConfiguration" id="osgicheckConfiguration"></a>osgi.checkConfiguration</dt>
   <dd>if set to &quot;true&quot; then timestamps are check in the configuration cache to ensure that the cache 
   is up to date with respect to the contents of the installed bundles.  The default value is &quot;false&quot;.</dd>
@@ -602,9 +616,18 @@ will force eclipse to reinitialize these caches.</dd>
   <dt><a name="osgistartlevel"></a>osgi.startLevel</dt>
   <dd>the start level value the framework will be set to at startup.  The default value is 6.</dd>
   <dt><a name="osgisupportsignatureverify"></a>osgi.support.signature.verify</dt>
-  <dd>valid values are &quot;true&quot; or &quot;false&quot; default is &quot;false&quot;.  
-    When set to &quot;true&quot; the framework will load certificates from signed jars and
-    verify the content is not corrupted at runtime.</dd>
+  <dd>A comma separated list of options for signed bundle signature verification.  The valid types are the following:
+    <ul type=disc>
+      <li><b>certificate</b> - enables parsing and verification of certificates.</li>
+      <li><b>trust</b> - enables verification of certificate trust.  This option implies
+      &quot;certificate&quot;.</li>
+      <li><b>runtime</b> - enables verification of signed bundle content at runtime.  
+      This option implies &quot;certificate&quot;.</li>
+      <li><b>all</b> - same as &quot;certificate,trust,runtime&quot;.</li>
+      <li><b>true</b> - same as &quot;all&quot;.
+     that was set when the framework launched (default value).</li>
+    </ul>
+  </dd>
   <dt><a name="osgisyspath"></a>osgi.syspath</dt>
   <dd>set to the path where the eclipse OSGi Framework (org.eclipse.osgi) implementation 
   is located.  For example, &quot;&lt;eclipse install path&gt;/eclipse/plugins&quot;.
