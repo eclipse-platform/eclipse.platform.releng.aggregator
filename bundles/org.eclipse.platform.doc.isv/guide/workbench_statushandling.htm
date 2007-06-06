@@ -1,22 +1,188 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
-<HEAD>
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+<title>Status handling</title>
+</head>
+<body>
 
-<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
-<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<h2>Status handling</h2>
 
-<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
-<TITLE>
-Status handling
-</TITLE>
+Status handling is a facility that allows to introduce a custom way of showing problems 
+in the Eclipse based applications to users. The facility can be configured at both 
+the application and the product level.
 
-<link rel="stylesheet" type="text/css" HREF="../book.css">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-<H2>
-Status handling
-</H2>
+<h3><a name="statusHandlers">Status handlers</a></h3>
 
-</BODY>
-</HTML>
+<p>
+The handlers are responsible for presenting problems by logging or showing appropriate 
+feedback to the user (generally dialogs). 
+</p>
+
+<p>
+All status handlers extend <em>org.eclipse.ui.statushandlers.AbstractStatusHandler</em> 
+which requires each handler to implement <em>handle(StatusAdapter status, int style)</em>. 
+This method handles statuses based on a handling style. The style indicates how status 
+handler should handle a status. See <a href="#acceptableStyles">Acceptable styles</a>.
+</p>
+
+<p>
+There are two ways for contributing handlers to the Workbench:
+<ol>
+	<li>
+    	using <em>org.eclipse.ui.statusHandlers</em> extension point, see 
+    	<a href="ua_statushandling.htm">User assistance and status handling</a>
+    </li><li>
+    	using the workbench advisor and its method <em>WorkbenchAdvisor#getWorkbenchErrorHandler()</em>
+    </li>
+</ol>
+<b>NOTE!</b> if a handler is associated with the product, it is used instead of this defined in advisor.
+</p>
+
+
+A status handler has the id and a set of parameters. The handler can use them during handling. 
+If the handler is added as an extension, both are set during initialization of the handler using 
+elements and attributes of <b>statusHandler</b> element.
+
+<h4>Logging using the default logging mechanism</h4>
+
+<p>
+We have to take the extra action when something has to be logged using the default logging mechanism, 
+because the facility is hooked into it. For this special case the status manager provides API.
+
+<pre>
+   StatusManager#addLoggedStatus(IStatus status)
+</pre>
+</p>
+
+<p>
+And below is the example of <em>addLoggedStatus(IStatus status)</em> proper usage.
+
+<pre>
+   public void handle(final StatusAdapter statusAdapter, int style) {
+      ...
+   
+      if ((style & StatusManager.LOG) == StatusManager.LOG) {
+         StatusManager.getManager().addLoggedStatus(statusAdapter.getStatus());
+         WorkbenchPlugin.getDefault().getLog().log(statusAdapter.getStatus());
+      }
+   }
+</pre>
+</p>
+
+<h4>The default status handler</h4>
+
+<p>
+The platform supplies its own status handler implementation <em>org.eclipse.ui.statushandlers.WorkbenchErrorHandler</em>.
+It respects all <a href="#acceptableStyles">acceptable styles</a>. It uses the default logging mechanism
+and a dialog based on the JFace dialog <em>org.eclipse.jface.dialogs.ErrorDialog</em>.
+</p>
+
+<h4>Registering ErrorSupportProvider with your status handler</h4>
+
+<p>
+There is a simple way to contribute a support area in the JFace <em>ErrorDialog</em>. 
+It is <em>ErrorSupportProvider</em> which can be set in the JFace policy. Because the default workbench handler 
+uses a subclass of <em>ErrorDialog</em> for its dialog, setting the provider on the JFace policy 
+will affect this dialog too.
+</p>
+
+<p>
+When a handler like this below is created
+
+<pre>
+   public class CustomStatusHandler extends WorkbenchErrorHandler {
+      public CompanyStatusHandler() {
+         ErrorSupportProvider provider = createSupportProvider();
+         Policy.setErrorSupportProvider(provider);
+      }
+	
+      private ErrorSupportProvider createSupportProvider() {
+         ...
+      }
+   }
+</pre>
+
+and is contributed to the Workbench in one of two available ways, all dialogs based on
+<em>ErrorDialog</em> including the one shown by the default handler will have an extra 
+support area.
+</p>
+
+<h3>Status manager</h3>
+
+<p>
+The status manager is the entry point for all statuses to be reported in the user interface. 
+Handlers are not intended to be used directly. They should be referenced via the StatusManager 
+which selects the appropriate handler to apply.
+
+The following methods are the API entry points to the StatusManager
+
+<pre>
+   StatusManager#handle(IStatus)
+   
+   StatusManager#handle(IStatus, int)
+   
+   StatusManager#handle(StatusAdapter)
+   
+   StatusManager#handle(StatusAdapter, int)
+</pre>
+
+The StatusManager singleton is accessed using
+
+<pre>
+   StatusManager.getManager()
+</pre>
+
+The int parameter are for supplying style for handling. See <a href="#acceptableStyles">Acceptable styles</a>.
+</p>
+
+<p>
+<b>NOTE!</b> the style is a suggestion and may not be honored by the current handler. 
+For instance a handler may choose to not show the user anything when the SHOW flag is sent. 
+See <a href="#statusHandlers">Status handlers</a> for more details.
+</p>
+
+<p>
+If a handler is associated with a product, it is used instead of this defined in advisor. 
+However because product handler is lazy initialized, it is possible that initialization error can occur during
+first accessing to it. If any creation error occurs in product handler, the workbench handler 
+will process the error.
+</p>
+
+<h3><a name="acceptableStyles">Acceptable styles</a></h3>
+
+<p>
+Below is a list of StatusManager styles which can be combined with logical OR.
+
+<ol>
+	<li>
+  		<b>NONE</b> - a style indicating that the status should not be acted on. This is used by objects such as log listeners that do not want to report a status twice
+    </li><li>
+    	<b>LOG</b> - a style indicating that the status should be logged only
+    </li><li>
+    	<b>SHOW</b> - a style indicating that handlers should show a problem to an user without blocking the calling method while awaiting user response. This is generally done using a non modal dialog
+    </li><li>	
+    	<b>BLOCK</b> - a style indicating that the handling should block the calling method until the user has responded. This is generally done using a modal window such as a dialog 
+	</li>
+</ol>
+</p>
+
+
+<h3><a name="statusAdapter">StatusAdapter</a></h3>
+
+<p>
+The StatusAdapter wraps an instance of IStatus subclass and can hold additional information 
+either by using properties or by adding a new adapter. Used during status handling process.
+</p>
+
+<p>
+Each handler should specify what properties or types it accepts. Knowing that 
+developers can pass status adapters with such extra informations.
+</p>
+
+</body>
+</html>
