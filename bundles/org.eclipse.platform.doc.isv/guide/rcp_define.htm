@@ -27,15 +27,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.ui.examples.rcp.browser; singleton:=true
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-ClassPath: browser.jar
 Bundle-Activator: org.eclipse.ui.examples.rcp.browser.BrowserPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui
-Eclipse-AutoStart: true
-Eclipse-AutoStart-comment: Use Eclipse-AutoStart instead of Eclipse-LazyStart because the browser example should run against 3.1 as well as 3.2.
+Eclipse-LazyStart: true
 </pre>
 
 <p>
@@ -58,15 +57,16 @@ extension.</p>
    &lt;/extension&gt;
 </pre> 
 <p>In this extension, we specify the class that should be run when the platform is first started.
-This class must implement <b><a href="../reference/api/org/eclipse/core/runtime/IPlatformRunnable.html">IPlatformRunnable</a></b>,
-which simply means that it must implement a <b>run</b> method.  The run method is responsible for creating the SWT display and
+This class must implement <b><a href="../reference/api/org/eclipse/equinox/app/IApplication.html">IApplication</a></b>,
+which simply means that it must implement a <b>start</b> and <b>stop</b> method.  The start method is responsible for creating the SWT display and
 starting up a workbench.  The class <b><a href="../reference/api/org/eclipse/ui/PlatformUI.html">PlatformUI</a></b>
 implements convenience methods for performing these tasks.</p>
-<pre>	public Object run(Object args) throws Exception {
+<pre>
+	public Object start(IApplicationContext context) throws Exception {
 		Display display = PlatformUI.createDisplay();
 		try {
 			int code = PlatformUI.createAndRunWorkbench(display,
-					<b>new BrowserAdvisor()</b>);
+					new BrowserAdvisor());
 			// exit the application with an appropriate return code
 			return code == PlatformUI.RETURN_RESTART
 					? EXIT_RESTART
@@ -79,9 +79,31 @@ implements convenience methods for performing these tasks.</p>
 </pre>
 <p>The call to <b>createAndRunWorkbench</b> will not return until the workbench is closed.  The SWT event loop and other
 low-level logistics are handled inside this method.  At this stage, it's not so important
-that you understand the underlying mechanics in running an SWT application.  This code can be copied to your rich client
+that you understand the underlying mechanics in running an SWT application.
+<p>
+The stop method is used to force the application to shutdown.  In the browser example the workbench is closed to 
+force the application to shutdown.
+<pre>
+	public void stop() {
+		final IWorkbench workbench = PlatformUI.getWorkbench();
+		if (workbench == null)
+			return;
+		final Display display = workbench.getDisplay();
+		display.syncExec(new Runnable() {
+			public void run() {
+				if (!display.isDisposed())
+					workbench.close();
+			}
+		});
+	}
+</pre>
+The call to <b>syncExec</b> will not return until the workbench is closed.  This will force the application to exit 
+and the call to <b>createAndRunWorkbench</b> to return.
+</p>
+<p>
+This code can be copied to your rich client
 application with minimal changes.  In fact, the hook for you to add your own functionality is the <b>WorkbenchAdvisor</b>
 that is passed as an argument when the workbench is created.  Let's take a closer look.</p>
-
+</p>
 </BODY>
 </HTML>
