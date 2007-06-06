@@ -27,7 +27,8 @@
   <li><a href="#startup.jar">Launching Eclipse with startup.jar</a></li>
   <li><a href="#DeviceResourceDescriptor">Incompatible source change to DeviceResourceDescriptor#createResource</a></li>
   <li><a href="#ResourceManager">Incompatible source change to ResourceManager resource creation methods</a></li>
-  </ol>
+   <li><a href="#jface-backcalls">JFace viewers and recursive back-calls</a></li>
+</ol>
 <hr>
 
 <!-- ############################################## -->
@@ -162,7 +163,7 @@ use
 the eclipse launcher executable.
 </p>
 <!-- ############################################## -->
-<h2>9. <a name="DeviceResourceDescriptor"></a>Incompatible source change to DeviceResourceDescriptor#createResource</h2>
+<h2>9. <a name="DeviceResourceDescriptor">Incompatible source change to DeviceResourceDescriptor#createResource</a></h2>
 <p><strong>What is affected:</strong> Clients that call createResource(Device) on 
 DeviceResourceDescriptor.</p>
 <p><strong>Description:</strong> The DeviceResourceException thrown by JFace has been
@@ -175,7 +176,7 @@ earlier will continue to function normally.</p>
 <p><strong>Action required:</strong> Clients should recompile against Eclipse 3.3,
 and remove any catch block that is now unnecessary due to the removed exception.</p>
 <!-- ############################################## -->
-<h2>10. <a name="ResourceManager"></a>Incompatible source change to ResourceManager resource creation methods</h2>
+<h2>10. <a name="ResourceManager">Incompatible source change to ResourceManager resource creation methods</a></h2>
 <p><strong>What is affected:</strong> Clients that call resource creation methods on 
 ResourceManager.</p>
 <p><strong>Description:</strong> The DeviceResourceException thrown by JFace has been
@@ -196,6 +197,29 @@ does not break binary compatibility - existing clients built against Eclipse 3.2
 earlier will continue to function normally.</p>
 <p><strong>Action required:</strong> Clients should recompile against Eclipse 3.3,
 and remove any catch block that is now unnecessary due to the removed exception.</p>
+<!-- ############################################## -->
+
+<h2>11. <a name="jface-backcalls">JFace viewers and recursive back-calls</a></h2>
+<p><strong>What is affected:</strong> Clients of <tt>TableViewer</tt> and <tt>TreeViewer</tt>, implementers of <tt>IStructuredContentProvider</tt> or <tt>IBaseLabelProvider</tt></p>
+<p><strong>Description:</strong> <tt>StructuredViewer</tt> and its subclasses were never designed to handle
+recursive back-calls to methods such as <tt>setInput()</tt>, <tt>refresh()</tt>, <tt>add()</tt>,
+<tt>remove()</tt>, <tt>update()</tt> etc. In the past, calls to one of these update
+methods that happened while the viewer was already in the process of
+processing another update, lead to unpredictable behavior or even
+runtime errors later on that were hard to debug. Starting with 3.3,
+subclasses of ColumnViewer detect recursive back-calls, log an error and
+ignore the nested update request. This helps uncover programming errors
+such as spinning the event loop from a content provider or label
+provider, but potentially changes the behavior in cases where clients
+used recursive back-calls but didn't see immediate problems in the past in
+their particular usage scenarios. See <a
+	href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=154571">bug
+154571</a> for details.</p>
+<p><strong>Action required:</strong> No action required if you don't see
+entries about ignored calls in the .log file. If you do see log entries,
+the provided stack trace should have sufficient information to find the
+problematic back-call. Depending on the situation, you might need to post
+an asyncExec runnable to avoid the back-call.</p>
 <!-- ############################################## -->
 </body>
 </html>
