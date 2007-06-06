@@ -14,35 +14,75 @@
 <h2>Fetching from Repositories</h2>
 <p>
 The infrastructure offered by PDE Build provides steps to fetch the
-source code to build from a repository as part of the build process (see the <a href="pde_feature_generating_antcommandline.htm#eclipseFetch">eclipse.fetch</a> task 
+source code and pre-built plug-ins from a repository as part of the build process (see the <a href="pde_feature_generating_antcommandline.htm#eclipseFetch">eclipse.fetch</a> task 
 and the <a href="../../reference/pde_builder_config.htm#fetchControl">properties to control fetching</a>).
 Two possibilities are available: let PDE build automatically fetch the
 source, or fetch the source code manually.</p>
-<h3>Automated source code fetching from CVS</h3>
+
+<h3>First step to automation, the map file</h3>
 <p>
-Given the identifier of a feature that needs to be built, the build
-infrastructure is able to fetch from CVS all the included features and
+Given the identifier of a feature or a plug-in that needs to be built, the build
+infrastructure is able to fetch from a repository all the included features and
 plug-ins.</p>
 <p>
 In order to know where to get things from, PDE uses map files. A map
 file is a java property file which maps feature and plug-in ids to a
-location and a tag in a repository. The format of a map file entry for
-fetching from CVS is:</p>
+location and a tag in a repository. The format of map files is open and but  
+the <b>key</b> part is fixed by PDE Build:</p>
 <div style="text-align: center;">
-<pre>&lt;elementType&gt;@&lt;elementID&gt;[,&lt;elementVersion&gt;] = CVS, &lt;TAG&gt;, &lt;CVSROOT&gt;[,&lt;PASSWORD&gt;[,&lt;PATH&gt;[,&lt;CVSPASSFILE&gt;]]]</pre>
+<pre>&lt;elementType&gt;@&lt;elementID&gt;[,&lt;elementVersion&gt;] = &lt;repo specific content&gt;</pre>
 </div>
 <p>where <tt>elementType</tt> is one of <tt>bundle</tt>, <tt>feature</tt>,
-<tt>plugin</tt> or <tt>fragment</tt>.&nbsp;
-If the path is not specified then the element name will be used as CVS
-module instead, for example:&nbsp;
-</p>
+<tt>plugin</tt> or <tt>fragment</tt>, and <tt>elementId</tt> and <tt>elementVersion</tt> give the specifics of the element.
+
+<h4>Map file entry for CVS</h4>
+The format of a map file entry to fetch content from CVS is the following:
 <div style="text-align: center;">
-<pre>plugin@org.foo.bar,1.3.0=CVS,v20060501,:pserver:anonymous@cvs.example.org:/cvsroot/foo</pre>
+	<pre>&lt;key&gt; = CVS, [,args]</pre>
 </div>
-<p>will fetch the <tt>1.3.0</tt> version of the plug-in <tt>org.foo.bar</tt> that has been labeled
-with the tag
-<tt>v20060501</tt> from <tt>cvs.eclipse.org/cvsroot/foo/org.foo.bar</tt></p>
-<h4>Setting up for CVS source fetching</h4>
+where <tt>args</tt> is a comma-separated list of key/value pairs described below:
+<ul>
+	<li><tt>cvsRoot</tt>, a CVS connection string;</li>
+	<li><tt>path</tt>, an optional CVS module and path where to get the folder containing the element. By default the element name is used as module name;</li>
+	<li><tt>prebuilt</tt>, an optional boolean indicating if the element downloaded is prebuilt. By default this is false;</li>
+	<li><tt>cvsPassFile</tt>, an option path to a cvs pass file;</li>
+	<li><tt>password</tt>, an optional password to use to connect to CVS;</li>li
+</ul>
+	
+Example:
+<div style="text-align: center;">
+<pre>plugin@com.ibm.icu,3.6.1=CVS,tag=v200704191630,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,path=org.eclipse.orbit/com.ibm.icu/bin,prebuilt=true</pre>
+</div>
+
+<h4>Map file entry for Ant GET</h4>
+<p>
+The format of a map file entry to fetch content from any URL supported by <a href="http://ant.apache.org/manual/CoreTasks/get.html">Ant GET</a> is the following:
+<div style="text-align: center;">
+<pre>&lt;key&gt; = GET, &lt;url&gt; [,args]</pre>
+</div>
+where <tt>url</tt> is the url to retrieve the data from and <tt>args</tt> is an optional comma-separated list of key/value pairs described below:  
+<ul>
+	<li><tt>unpack</tt>, set to true the indicate that the downloaded element should be unzipped;</li> 
+	<li><tt>verbose</tt>, set to true to show verbose progress information when downloading. The default value is false;</li>
+	<li><tt>ignoreerrors</tt>, set to true to log errors during the transport. The default value is false;</li>
+	<li><tt>usetimestamp</tt>, conditionally download a file based on the timestamp of the local copy (for http URLs only) when set to true. The default value is false;</li>
+	<li><tt>username</tt>, the username for "BASIC" http authentication;</li>
+	<li><tt>password</tt>, the password to perform the download.</li>
+</ul>
+
+Example:
+<div style="text-align: center;">
+   <pre>plugin@com.ibm.icu,3.4.5=GET,http://download.eclipse.org/tools/orbit/downloads/drops/S200705301823/bundles/com.ibm.icu_3.4.5.jar, unpack=true</pre>
+</div>
+
+<h4>Map file entry for other repositories</h4>
+<p>PDE Build provides an <a href="../../reference/extension-points/org_eclipse_pde_build_fetchFactories.html">extension point</a> 
+where fetch script generators for different repositories can be plugged in. When your eclipse
+install contains a bundle that provides a script generator extension
+for a different type of repository, you can use that repository by
+specifying it in your map file entries and adhering to the format specified by the extension provider.</p>
+
+<h3>Setting up for CVS source fetching</h3>
 To set up fetching your source from CVS, you should do the following:<br>
 <ul>
   <li>Make sure you have a cvs.exe on your system search path.&nbsp;
@@ -85,19 +125,8 @@ the build.&nbsp; Scripts to
 fetch all the features and plug-ins included in the feature you are
 building will be generated and
 run during the fetch phase of the build.&nbsp;
+
 <h3>Automatic fetching from other repositories</h3>
-<p>PDE Build provides an extension point where fetch script generators
-for
-different repositories can be plugged in.&nbsp; When your eclipse
-install contains a bundle that provides a script generator extension
-for a different type of repository, you can use that repository by
-specifying it in your map file entries:&nbsp;&nbsp;</p>
-<div style="text-align: center;">
-<pre>&lt;elementType&gt;@&lt;elementID&gt;[,&lt;elementVersion&gt;] = &lt;REPOSITORY&gt;, &lt;TAG&gt;, [...] </pre>
-</div>
-<p>The format of the map entry after the
-TAG will depend on the extension.</p>
-<p>
 If&nbsp; you are automatically fetching your map files from the
 repository, you will need to copy the customTarget.xml file from
 org.eclipse.pde.build/templates/headless-build into your configuration
