@@ -1,0 +1,64 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Handlers
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h3>Handlers</h3>
+
+
+<p>
+A <b>handler</b> is the implementation of a command's behaviour.  Any plugin can
+contribute a handler implementation for any command.  The workbench uses core
+expressions and programmatic scoping rules to determine which handler is active
+at any time.  There can either be one handler active for the command, or no handlers
+active for the command (the command is effectively disabled).
+</p>
+
+<h4>Associating the handler with a command</h4>
+
+<h4>Implementing the handler</h4>
+<p>
+A handler must implement 
+<a href="../reference/api/org/eclipse/core/commands/IHandler.html">org.eclipse.core.commands.IHandler</a>
+although in most cases it is easier to subclass
+<a href="../reference/api/org/eclipse/core/commands/AbstractHandler.html">org.eclipse.core.commands.AbstractHandler</a>.
+</p>
+<p>
+The bulk of the work is done in the <b>execute(ExecutionEvent)</b> method.  From the
+<a href="../reference/api/org/eclipse/core/commands/ExecutionEvent.html">org.eclipse.core.commands.ExecutionEvent</a>
+you can get any parameters from the calling command object as well as the application context
+the command was executed in.
+</p>
+<p>
+<pre>
+		Object object = event.getApplicationContext();
+		if (object instanceof IEvaluationContext) {
+			IEvaluationContext appContext = (IEvaluationContext) object;
+			...
+		}
+</pre>
+</p>
+<p>
+See 
+<a href="../reference/api/org/eclipse/ui/handlers/HandlerUtil.html">org.eclipse.ui.handlers.HandlerUtil</a>
+for an example of extracting variables from the application context and
+<a href="../reference/api/org/eclipse/ui/ISources.html">org.eclipse.ui.ISources</a>
+for a list of variables that are currently supported.
+</p>
+
+
+
+
+</BODY>
+</HTML>
