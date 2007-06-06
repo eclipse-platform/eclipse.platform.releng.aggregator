@@ -241,13 +241,6 @@ replace the .qualifier being by plug-ins and features.&nbsp; (See also <a
         </tr>
         <tr>
           <td style="vertical-align: top;"><span
- style="font-style: italic;">generateFeatureVersionSuffix:&nbsp;</span>
-          </td>
-          <td style="vertical-align: top;">optional, whether or not to
-generate the feature version suffix. </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;"><span
  style="font-style: italic;"></span> <span style="font-style: italic;">groupConfiguration</span>
 : <br>
           </td>
@@ -264,6 +257,38 @@ generate properties files listing the versions of features and plug-ins
 that were built.<br>
           </td>
         </tr>
+
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">filteredDependencyCheck</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, constraint the set of plug-ins and features
+          to be considered during the build to the one reachable from the features / plugins being built .<br>
+          </td>
+        </tr>
+        
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">generateFeatureVersionSuffix:&nbsp;</span>
+          </td>
+          <td style="vertical-align: top;">optional, whether or not to
+generate the feature version suffix. </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">generatedVersionLength</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, the length of the generated feature version suffix. By default it is set to 28.<br>
+          </td>
+        </tr>
+        
+       <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">significantVersionDigits</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, the number of significant digits used when generating feature version suffixes.<br>
+          </td>
+        </tr>            
       </tbody>
     </table>
   </li>
@@ -289,7 +314,7 @@ generated Feature.<br>
  style="font-style: italic;">buildDirectory</span>:&nbsp;&nbsp;&nbsp; <br>
           </td>
           <td style="vertical-align: top;">the directory where the
-features and plug-ins (in /features and /plugins subdirectories) to
+features and plug-ins (in <tt>/features</tt> and <tt>/plugins</tt> subdirectories) to
 include are located.&nbsp; The generated feature will be placed in the
 /features subdirectory.<br>
           </td>
@@ -376,32 +401,13 @@ list of fragment ids to include in the generated feature.<br>
 <pre>&lt;eclipse.fetch elements="bundle@org.eclipse.osgi"<br>		buildDirectory="c:\toBuild"<br>		directory="directory.txt"<br>		configInfo="win32,win32,x86 &amp; linux, motif, x86"<br>		/&gt;<br>		<br>&lt;eclipse.buildScript elements="bundle@org.eclipse.osgi" <br>		buildDirectory="c:\toBuild"<br>		archivesFormat="macosx, carbon, ppc - tar"/&gt;<br></pre>
 <h3><a name="directoryFileFormat">Directory file format</a></h3>
 Directory files are used to indicate where the plug-ins and features
-are located, as well as indicating which version
-should be fetched. It is a Java property file whose line format is
-"type@id=version, repositoryLocation, password,path".&nbsp; When using
+can be obtained, as well as their versions. It is a Java property file whose keys are always of the form 
+<tt>type@id[,version]</tt> but where the value is open ended. When using
 map files to fetch your elements, the directory file is a concatenation
 of all the map files, for more details on map files see <a
  href="pde_fetch_phase.htm">Fetching From
 Repositories</a>.
-<ul>
-  <li><i>type</i>: a string describing the type of the element. It must
-be one of the following: plug-in, fragment, feature, bundle;</li>
-  <li><i>id</i>: the name of the CVS module where the element is
-located. Note that the feature/plug-in/fragment.xml must be in the root
-of this module;</li>
-  <li><i>version</i>: an existing version tag in the repository;</li>
-  <li><i>repositoryLocation</i>: a CVS repository location;</li>
-  <li><i>password</i>: optional, a password to connect to this
-repository;</li>
-  <li><i>path</i>: optional, the cvs module name and path to the
-element manifest.</li>
-</ul>
-<h4>Example of a directory file</h4>
-<tt>
-plugin@org.eclipse.pde.build=v20040622,:pserver:anonymous@dev.eclipse.org:/home/eclipse,<br>
-feature@org.eclipse.pde.builder=v20040622,:pserver:anonymous@dev.eclipse.org:/home/eclipse,,org.eclipse.pde.build/feature<br>
-plugin@org.eclipse.osgi=v20040617a,:pserver:anonymous@dev.eclipse.org:/home/eclipse,
-</tt>
+
 <h3>Using the targets</h3>
 <p>The tasks previously described only work if Eclipse is running. In
 the particular scenario of executing Ant scripts using Eclipse
