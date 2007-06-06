@@ -26,6 +26,7 @@
   <li><a href="#Proxy">Proxy settings are now managed by the platform</a></li>
   <li><a href="#startup.jar">Launching Eclipse with startup.jar</a></li>
   <li><a href="#DeviceResourceDescriptor">Incompatible source change to DeviceResourceDescriptor#createResource</a></li>
+  <li><a href="#ResourceManager">Incompatible source change to ResourceManager resource creation methods</a></li>
   </ol>
 <hr>
 
@@ -162,9 +163,34 @@ the eclipse launcher executable.
 </p>
 <!-- ############################################## -->
 <h2>9. <a name="DeviceResourceDescriptor"></a>Incompatible source change to DeviceResourceDescriptor#createResource</h2>
-<p><strong>What is affected:</strong> Clients that call createResource(Device) on DeviceResourceDescriptor.</p>
-<p><strong>Description:</strong> The signature of createResource(Device) was changed to
-no longer throw a checked exception. This may cause compile errors in source code
+<p><strong>What is affected:</strong> Clients that call createResource(Device) on 
+DeviceResourceDescriptor.</p>
+<p><strong>Description:</strong> The DeviceResourceException thrown by JFace has been
+changed to a runtime exception.  As part of this change, the method signature of 
+createResource(Device) was changed to no longer throw the exception. This may cause 
+compile errors in source code
+previously compiled against Eclipse 3.2 that is recompiled against 3.3. This change
+does not break binary compatibility - existing clients built against Eclipse 3.2 or
+earlier will continue to function normally.</p>
+<p><strong>Action required:</strong> Clients should recompile against Eclipse 3.3,
+and remove any catch block that is now unnecessary due to the removed exception.</p>
+<!-- ############################################## -->
+<h2>10. <a name="ResourceManager"></a>Incompatible source change to ResourceManager resource creation methods</h2>
+<p><strong>What is affected:</strong> Clients that call resource creation methods on 
+ResourceManager.</p>
+<p><strong>Description:</strong> The DeviceResourceException thrown by JFace has been
+changed to a runtime exception.  As part of this change, the following method signatures
+were changed to no longer throw the exception. 
+</p>
+<ul>
+<li>ResourceManager#create(DeviceResourceDescriptor)</li>
+<li>ResourceManager#createColor(ColorDescriptor)</li>
+<li>ResourceManager#createColor(RGB)</li>
+<li>ResourceManager#createFont(FontDescriptor)</li>
+<li>ResourceManager#createImage(ImageDescriptor)</li>
+</ul>
+<p>
+These changes may cause compile errors in source code
 previously compiled against Eclipse 3.2 that is recompiled against 3.3. This change
 does not break binary compatibility - existing clients built against Eclipse 3.2 or
 earlier will continue to function normally.</p>
