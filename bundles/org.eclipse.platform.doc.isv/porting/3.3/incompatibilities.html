@@ -28,11 +28,12 @@
   <li><a href="#DeviceResourceDescriptor">Incompatible source change to DeviceResourceDescriptor#createResource</a></li>
   <li><a href="#ResourceManager">Incompatible source change to ResourceManager resource creation methods</a></li>
    <li><a href="#jface-backcalls">JFace viewers and recursive back-calls</a></li>
+   <li><a href="#IIDEActionConstants">IIDEActionConstants.FIND_EXT corrected to conform to specification</a></li>
 </ol>
 <hr>
 
 <!-- ############################################## -->
-<h2>1. <a name="launchConfigWorkingCopies"></a>Nested Launch Configuration Working Copies</h2>
+<h2>1. <a name="launchConfigWorkingCopies">Nested Launch Configuration Working Copies</a></h2>
 <p><strong>What is affected:</strong> Launch configuration working copies support 
   nesting in 3.3. Clients that programmatically create and save launch configurations 
   may be affected by the change in behavior of the <code>ILaunchConfigurationWorkingCopy.doSave() 
@@ -52,7 +53,7 @@
   to determine if nested working copies might be created. Note that saving a nested 
   working copy will not save changes back to the original launch configuration.</p>
 <!-- ############################################## -->
-<h2>2. <a name="FileEditorInput"></a>Incompatible source change to getStorage() on FileEditorInput</h2>
+<h2>2. <a name="FileEditorInput">Incompatible source change to getStorage() on FileEditorInput</a></h2>
 <p><strong>What is affected:</strong> Clients that call getStorage() on FileEditorInput.</p>
 <p><strong>Description:</strong> The signature of getStorage() was changed to
 no longer throw a checked exception. This may cause compile errors in source code
@@ -62,7 +63,7 @@ earlier will continue to function normally.</p>
 <p><strong>Action required:</strong> Clients should recompile against Eclipse 3.3,
 and remove any catch block that is now unnecessary due to the removed exception.</p>
 <!-- ############################################## -->
-<h2>3. <a name="BootDelegation"></a>Boot delegation changes</h2>
+<h2>3. <a name="BootDelegation">Boot delegation changes</a></h2>
 <p><strong>What is affected:</strong> The boot delegation order has changed in 3.3.  Bundles that depend on delegating 
 to the boot (parent) class loader first may be affected by this change.</p>
 <p><strong>Description:</strong> In Eclipse 3.3 the default class loader delegation model has been changed to the following order:
@@ -77,7 +78,7 @@ classes provided by the VM.  It also affects performance because the boot class 
 load even though it is known that the class or resource is located in a bundle.  Because of the boot delegation changes 
 in 3.3, a bundle can now provide their own version of a package which is also available from the VM boot classpath.
 See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=162231"> bug 162231</a>.
-</p>
+
 <p><strong>Action required:</strong> Bundles that export packages which may be available by the boot (parent) class loader 
 need to evaluate whether the classes/resources they export should be added to the content from the boot class loader or replace it.
 If the exporting bundle should replace the content of the boot class loader then no action is required.  If the exporting bundle should 
@@ -122,7 +123,7 @@ Eclipse 3.2 had a bug for directory (non-jarred) bundles where a leading &quot;/
 the client used a path argument that contained a leading &quot;/&quot;.  For jarred bundles Eclipse 3.2 always ensures 
 the returned paths do not have a leading &quot;/&quot; character.  This is inconsistent behavior.  Directory bundles have  
 been fixed to be consistent with jarred bundles.  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=174101"> bug 174101</a>.
-</p>
+
 <p><strong>Action required:</strong> Some clients may have a dependency on the old behavior for directory bundles.  If a client 
 uses the method Bundle#getEntryPaths then ensure that it can handle returned paths that do not begin with a &quot;/&quot; character.
 This dependency is a bug in the client code because it would have failed for jarred bundles.
@@ -220,6 +221,13 @@ entries about ignored calls in the .log file. If you do see log entries,
 the provided stack trace should have sufficient information to find the
 problematic back-call. Depending on the situation, you might need to post
 an asyncExec runnable to avoid the back-call.</p>
+<!-- ############################################## -->
+<h2>12. <a name="IIDEActionConstants"> IIDEActionConstants.FIND_EXT corrected to conform to specification</a></h2>
+<p><strong>What is affected:</strong> Clients of <tt>IIDEActionConstants</tt> who use the values directly instead of via the constant.</p>
+<p><strong>Description:</strong> Edit menu: name of group for extra Find-like actions (value <code>"find.ext"</code>).
+<p>The value of this constant has changed in 3.3 to match the specification; before 3.3, its value was incorrect (<code>"cut.ext"</code>).
+See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=155856">bug 155856</a> for details.</p>
+<p><strong>Action required:</strong> No action required if you refer to the constant rather than its value.</p>
 <!-- ############################################## -->
 </body>
 </html>
