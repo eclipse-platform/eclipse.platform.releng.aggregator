@@ -2,42 +2,38 @@
 <html>
 <head>
 <meta name="copyright"
-	content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+	content="Copyright (c) IBM Corporation and others 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
 	type="text/css">
 <script language="JavaScript"
 	src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
-<title>Contributing a Search Dialog</title>
+<title>Advanced use of the filtered item selection dialog</title>
 </head>
 <body>
 
-<h2>Advanced use of the FilteredItemsSelectionDialog</h2>
+<h2>Advanced use of the filtered item selection dialog</h2>
 
-This section will present present how to extend basic functionality of
-our example FilteredItemsSelectionDialog.
-<br>
-
-<a href="#history">Adding selected items history</a>
-<br />
-<a href="#filter">Extend filter functionality</a>
-<br />
-<a href="#checkbox">Extra check-box</a>
-<br />
-
-
+In the <a href="dialogs_FilteredItemsSelectionDialog_example.htm">previous example</a>, 
+we saw how to create a simple subclass of FilteredItemsSelectionDialog. Now let's 
+explore some of the advanced capabilities provided by this dialog:
+<ul>
+<li><a href="#history">Adding selected items history</a></li>
+<li><a href="#filter">Adding custom filters</a></li>
+<li><a href="#checkbox">Adding an extra check-box to the dialog</a></li>
+</ul>
 
 <h3><a name="history">Adding selected items</a> history</h3>
+The dialog can be configured to save and restore the history of items that have
+been selected.
 <ol>
-	<li>Extend <em>FilteredItemsSelectionDialog#SelectionHistory</em>
-	and implement abstract methods for saving and loading objects. Eg.:</li>
+	<li>Create a subclass of <em>FilteredItemsSelectionDialog.SelectionHistory</em>
+	and implement the abstract methods for saving and loading objects:</li>
 	<pre>
   	private class ResourceSelectionHistory extends SelectionHistory {
 
 		/*
-		 * (non-Javadoc)
-		 * 
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#restoreItemFromMemento(org.eclipse.ui.IMemento)
 		 */
 		protected Object restoreItemFromMemento(IMemento element) {
@@ -45,8 +41,6 @@ our example FilteredItemsSelectionDialog.
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
 		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
 		 *      org.eclipse.ui.IMemento)
 		 */
@@ -57,28 +51,27 @@ our example FilteredItemsSelectionDialog.
 	}
   </pre>
 
-	<li>Define the implementation of SelectionHistory to use. <pre>
+	<li>On your subclass of FilteredItemsSelectionDialog, define the implementation of SelectionHistory to use. 
+	<pre>
   	setSelectionHistory(new ResourceSelectionHistory());
   </pre></li>
-	<li>Your dialog will look like:
-	<p align="center"><img
+	<li>Our example dialog now looks like this:
+	<p><img
 		src="images/filteredResourcesSelectionDialogExampleAdvance1.png"
 		border="0" alt="Image of a simple search dialog"></p>
 	</li>
 </ol>
 
-
-<h3><a name="filter">Extend filter functionality</a></h3>
-Next we will expand the filter to filter all strings which start with lower
-case character.
+<h3><a name="filter">Adding custom filters</a></h3>
+Next we will expand the filter to hide all strings that start with a lower case character.
 <ol>
-	<li>Extend <em>FilteredItemsSelectionDialog#ItemsFilter</em>,
-	implement necessary abstract methods and override <em>equalsFilter(ItemsFilter)</em>
-	and <em>isSubFilter(ItemsFilter)</em>. This two method decide about
-	filtering method. If last used filter equals to the new one we do
-	nothing - we simply show the last filtering result. If the new filter
-	is a sub-filter of the last applied filter we search elements using
-	cache only. Eg.: <pre>
+	<li>Create a subclass of <em>FilteredItemsSelectionDialog.ItemsFilter</em>, 
+	implement the necessary abstract methods and override <em>equalsFilter(ItemsFilter)</em>
+	and <em>isSubFilter(ItemsFilter)</em>. These two methods are used to optimize
+	filtering of the view.  If a new filter is added that is equal to the existing filter,
+	no further filtering is required.  If the new filter is a sub-filter of the existing filter, then
+	filtering is only done on the items that matched the existing filter.
+   <pre>
   	private boolean onlyLowerCase = true;
   	
   	private class ResourceFilter extends ItemsFilter {
@@ -112,24 +105,23 @@ case character.
 
 	}
 	</pre></li>
-	<li>Override <i>createFilter()</i> method: <pre>
+	<li>On your subclass of FilteredItemsSelectionDialog, override the <i>createFilter()</i> method: 
+	<pre>
   	protected ItemsFilter createFilter() {
 		return new ResourceFilter();
 	}
   </pre></li>
-	<li>Now all of the  dialog strings will start
-	with lower case. <p align="center"><img
-		src="images/filteredResourcesSelectionDialogExampleAdvance2.png"
+	<li>Now the dialog will only display strings that start with a lower case letter. 
+	<p><img src="images/filteredResourcesSelectionDialogExampleAdvance2.png"
 		border="0" alt="Image of a simple search dialog"></p>
 	</li>
 </ol>
 
-<h3><a name="checkbox">Adding an extra widget and context menu
-entry</a></h3>
+<h3><a name="checkbox">Adding an extra check-box to the dialog</a></h3>
 <p>We will use a check-box and a menu action to indicate whether
-to filter string starting with lower case character.</p>
+to filter strings that start with a lower case character.</p>
 <ol>
-	<li>Extend dialog's content area by implementing <em>createExtendedContentArea(Composite)</em>
+	<li>Extend the dialog's content area by implementing <em>createExtendedContentArea(Composite)</em>
 	method: <pre>
   	private Button checkButton;
   	
@@ -150,7 +142,7 @@ to filter string starting with lower case character.</p>
 		return checkButton;
 	}
   	</pre></li>
-	<li>Next, create new Action and add it to the menu by overriding <em>fillViewMenu(IMenuManager)</em>.
+	<li>Next, create a new action and add it to the menu by overriding <em>fillViewMenu(IMenuManager)</em>.
 	Eg.: <pre>
   	private class ShowOnlyLowerCaseStringsAction extends Action {
 
@@ -176,12 +168,10 @@ to filter string starting with lower case character.</p>
 	}
   </pre></li>
 
-	<li>Now open the dialog<p align="center"><img
-		src="images/filteredResourcesSelectionDialogExampleAdvance3.png"
+	<li>Now open the dialog: 
+	<p><img src="images/filteredResourcesSelectionDialogExampleAdvance3.png"
 		border="0" alt="Image of a simple search dialog"></p>
 	</li>
-
 </ol>
-
 </body>
 </html>

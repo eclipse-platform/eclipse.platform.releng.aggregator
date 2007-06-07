@@ -2,21 +2,21 @@
 <html>
 <head>
 <meta name="copyright"
-	content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+	content="Copyright (c) IBM Corporation and others 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
 	type="text/css">
 <script language="JavaScript"
 	src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
-<title>Contributing a Search Dialog</title>
+<title>Creating a custom filtered item selection dialog</title>
 </head>
 <body>
 
-<h2>Contributing a Search Dialog</h2>
-<p>We will now contribute a very basic search dialog to illustrate the steps needed to contribute a <a
-	href="../reference/api/org/eclipse/ui/dialogs/FilteredItemsSelectionDialog.html">
-<b> FilteredItemsSelectionDialog</b></a> implementation.</p>
+<h2>Creating a custom filtered item selection dialog</h2>
+<p>In this example, we will contribute a basic search dialog to illustrate the steps 
+needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/dialogs/FilteredItemsSelectionDialog.html">
+<b> FilteredItemsSelectionDialog</b></a>.</p>
 
 <ol>
 	<li>
@@ -24,9 +24,8 @@
 	Let's name it <em>FilteredResourcesSelectionDialogExample</em>.
 	</li>
 	<li>
-	Choose a source of  the resources which will be used during
-	filtering. In our example we will generate our own set of resources as
-	below:
+	Choose a source of  the resources that will be used during filtering. In our 
+	example we will generate our own set of random strings as follows:
 	<pre>
 	private static ArrayList resources = new ArrayList();
 	
@@ -54,11 +53,11 @@
 	Now, let's implement abstract methods from the <em>FilteredItemsSelectionDialog</em>
 	class.
 	<ul>
-		<li><em>createExtendedContentArea(Composite)</em>: The method
-		creates an extra content area located above the details. Due to the
-		fact that it is supposed to be the simplest example we will return
-		null for an extended area. This way there will be no extra field
-		added. Eg.: <pre>
+		<li><em>createExtendedContentArea(Composite)</em>: This method
+		creates an extra content area located above the details. For now,
+		we will just return null because we don't need any extra fields for this simple
+		example: 
+		<pre>
 	protected Control createExtendedContentArea(Composite parent) {
 		return null;
 	}
@@ -66,7 +65,7 @@
 
 		<li><em>createFilter()</em>: Creates a new instance of a filter.
 		In the simplest implementation you should also extend <em>
-		FilteredItemsSelectionDialog#ItemsFilter </em> and implement necessary
+		FilteredItemsSelectionDialog.ItemsFilter </em> and implement the abstract
 		methods. Eg.: <pre>
 	protected ItemsFilter createFilter() {
 		return new ItemsFilter() {
@@ -104,22 +103,24 @@
 	}
 		</pre></li>
 
-		<li><em>getDialogSettings()</em>: Returns settings of the dialog.
-		Returned object can't be null. Eg.:<pre>
+		<li><em>getDialogSettings()</em>: Returns the settings object that stores
+		information about how the dialog information is persisted. This method can't
+		return null, so we'll just return a simple settings object: 
+		<pre>
 	protected IDialogSettings getDialogSettings() {
 		return new DialogSettings("TEST"); //$NON-NLS-1$
 	}
 		</pre></li>
 
 		<li><em>getElementName(Object)</em>: Returns a name for the given
-		object. It is used to check duplicates. Eg.: <pre>
+		object. This is used to check duplicates. <pre>
 	public String getElementName(Object item) {
 		return item.toString();
 	}
 		</pre></li>
 
 		<li><em>getItemsComparator()</em>: Returns a comparator used to
-		sort items. Eg.: <pre>
+		sort items. In our example we will just use standard string comparison:<pre>
 	protected Comparator getItemsComparator() {
 		return new Comparator() {
 		
@@ -131,9 +132,11 @@
 	}
 		</pre></li>
 
-		<li><em>validateItem(Object)</em>: Validates an item. Eg.: <pre>
+		<li><em>validateItem(Object)</em>: Validates that the item is a valid
+		selection.  In our example we just return an OK status, because all items
+		are valid:<pre>
 	protected IStatus validateItem(Object item) {
-		return new Status(IStatus.OK, WorkbenchPlugin.PI_WORKBENCH, 0, "", null); //$NON-NLS-1$
+		return Status.OK_STATUS;
 	}
 		</pre></li>
 
@@ -141,8 +144,8 @@
 	</li>
 
 	<li>
-	This is how the dialog should look:
-	<p align="center"><img
+	The resulting dialog looks as follows:
+	<p><img
 		src="images/filteredResourcesSelectionDialogExample.png" border="0"
 		alt="Screen shot of a simple search dialog"></p>
 	</li>
