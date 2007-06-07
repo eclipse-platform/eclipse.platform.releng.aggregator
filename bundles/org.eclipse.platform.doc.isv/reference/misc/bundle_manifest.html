@@ -15,15 +15,15 @@
 
 <h1>OSGi Bundle Manifest Headers</h1>
 
-<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.3 - Last revised May 4, 2007</span></p>
+<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.3 - Last revised June 7, 2007</span></p>
 
 <p>
 A bundle can carry descriptive information about itself in the manifest file 
-named META-INF/MANIFEST.MF.  The OSGi R4 Framework specification defines a set of 
+named META-INF/MANIFEST.MF.  The OSGi R4.1 Framework specification defines a set of 
 manifest headers such as Export-Package and Bundle-Classpath, which bundle developers 
 use to supply descriptive information about a bundle.  The Eclipse OSGi Framework 
-implements the complete OSGi R4 Framework specification and all of the Core Framework 
-services. The OSGi R4 Core Framework services include the following:</p>
+implements the complete OSGi R4.1 Framework specification and all of the Core Framework 
+services. The OSGi R4.1 Core Framework services include the following:</p>
 <ul>
   <li>Package Admin Service Specification</li>
   <li>URL Handlers Service Specification</li>
@@ -31,9 +31,9 @@ services. The OSGi R4 Core Framework services include the following:</p>
   <li>Conditional Permission Admin Specification</li>
   <li>Permission Admin Service Specification</li>
 </ul>
-  <p> There are a number of optional services defined in the OSGi R4 specification. 
+  <p> There are a number of optional services defined in the OSGi R4.1 specification. 
     The optional services are not included with the Eclipse OSGi Framework implementation. 
-    For information on OSGi R4 manifest headers and services refer to the <a href="http://eclipse.org/osgi/main.html">OSGi 
+    For information on OSGi R4.1 manifest headers and services refer to the <a href="http://www2.osgi.org/Download/Release4V41">OSGi 
     specifications</a>. </p>
 
 <h2>Eclipse Bundle Manifest Headers</h2>
@@ -111,7 +111,7 @@ specified as a friend.
 
 <p>
 The Eclipse-LazyStart header is used to specify if a bundle should be started 
-automatically before the first class or resource is accessed from that bundle. 
+before the first class or resource is accessed from that bundle. 
 This feature allows Eclipse to activate bundles lazily the first time they are
 needed.  Using this model Eclipse can startup with as few active bundles as 
 possible.  The Eclipse-LazyStart header must use the following syntax:
@@ -150,7 +150,11 @@ that are loaded from this bundle, except the classes in the packages
 
 <p>
 The Eclipse-AutoStart header has been deprecated in Eclipse 3.2.  The Eclipse-LazyStart 
-header should be used instead.
+header should be used instead.  As of the OSGi R4.1 specification the lazy activation
+policy has been adopted by the OSGi specification.  The new OSGi bundle manifest 
+header Bundle-ActivationPolicy can be used to specify a lazy activation policy.
+Eclipse 3.3 fully supports both the Eclipse-LazyStart header and the Bundle-ActivationPolicy 
+headers for specifying the lazy start policy.
 </p>
 
 <h3>The Eclipse-PlatformFilter Header</h3>
@@ -244,10 +248,13 @@ Eclipse-RegisterBuddy: org.eclipse.foo.bundle1, org.eclipse.foo.bundle2
 
 <p>
 The Eclipse-ExtensibleAPI is used to specify whether a host bundle allows fragment bundles 
-to add addtional API to the host.  This header should be used if a host bundle wants to allow 
+to add additional API to the host.  This header should be used if a host bundle wants to allow 
 fragments to add additional packages to the API of the host.  If this header is not 
-specified then a default value of 'false' is used.  The Eclipse-ExtensibleAPI 
-header must use the following syntax:
+specified then a default value of 'false' is used.  Note that this header is only used by tooling
+(PDE) to construct proper class paths for building. <b>The runtime does not use this header 
+at all.</b>  At runtime a fragment is always allowed to add additional packages, classes and 
+resources to the API of the host.  The Eclipse-ExtensibleAPI header must use the following 
+syntax:
 </p>
 
 <pre>
