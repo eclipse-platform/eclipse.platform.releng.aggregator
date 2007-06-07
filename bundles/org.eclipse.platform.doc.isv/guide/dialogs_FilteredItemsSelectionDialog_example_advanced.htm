@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2000, 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
+<script language="JavaScript"
+	src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+<title>Contributing a Search Dialog</title>
+</head>
+<body>
+
+<h2>Advanced use of the FilteredItemsSelectionDialog</h2>
+
+This section will present present how to extend basic functionality of
+our example FilteredItemsSelectionDialog.
+<br>
+
+<a href="#history">Adding selected items history</a>
+<br />
+<a href="#filter">Extend filter functionality</a>
+<br />
+<a href="#checkbox">Extra check-box</a>
+<br />
+
+
+
+<h3><a name="history">Adding selected items</a> history</h3>
+<ol>
+	<li>Extend <em>FilteredItemsSelectionDialog#SelectionHistory</em>
+	and implement abstract methods for saving and loading objects. Eg.:</li>
+	<pre>
+  	private class ResourceSelectionHistory extends SelectionHistory {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#restoreItemFromMemento(org.eclipse.ui.IMemento)
+		 */
+		protected Object restoreItemFromMemento(IMemento element) {
+			return element.getString("resource"); //$NON-NLS-1$
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
+		 *      org.eclipse.ui.IMemento)
+		 */
+		protected void storeItemToMemento(Object item, IMemento element) {
+			element.putString("resource", item.toString()); //$NON-NLS-1$
+		}
+
+	}
+  </pre>
+
+	<li>Define the implementation of SelectionHistory to use. <pre>
+  	setSelectionHistory(new ResourceSelectionHistory());
+  </pre></li>
+	<li>Your dialog will look like:
+	<p align="center"><img
+		src="images/filteredResourcesSelectionDialogExampleAdvance1.png"
+		border="0" alt="Image of a simple search dialog"></p>
+	</li>
+</ol>
+
+
+<h3><a name="filter">Extend filter functionality</a></h3>
+Next we will expand the filter to filter all strings which start with lower
+case character.
+<ol>
+	<li>Extend <em>FilteredItemsSelectionDialog#ItemsFilter</em>,
+	implement necessary abstract methods and override <em>equalsFilter(ItemsFilter)</em>
+	and <em>isSubFilter(ItemsFilter)</em>. This two method decide about
+	filtering method. If last used filter equals to the new one we do
+	nothing - we simply show the last filtering result. If the new filter
+	is a sub-filter of the last applied filter we search elements using
+	cache only. Eg.: <pre>
+  	private boolean onlyLowerCase = true;
+  	
+  	private class ResourceFilter extends ItemsFilter {
+
+		public final boolean onlyLowerCase = FilteredResourcesSelectionDialog.this.onlyLowerCase;
+
+		public boolean matchItem(Object item) {
+			String resource = item.toString();
+			if (onlyLowerCase && Character.isUpperCase(resource.charAt(0)))
+				return false;
+			return matches(resource);
+		}
+
+		public boolean equalsFilter(ItemsFilter filter) {
+			ResourceFilter resourceFilter = (ResourceFilter) filter;
+			if (onlyLowerCase != resourceFilter.onlyLowerCase)
+				return false;
+			return super.equalsFilter(filter);
+		}
+
+		public boolean isSubFilter(ItemsFilter filter) {
+			ResourceFilter resourceFilter = (ResourceFilter) filter;
+			if (onlyLowerCase == resourceFilter.onlyLowerCase)
+				return false;
+			return super.isSubFilter(filter);
+		}
+
+		public boolean isConsistentItem(Object item) {
+			return true;
+		}
+
+	}
+	</pre></li>
+	<li>Override <i>createFilter()</i> method: <pre>
+  	protected ItemsFilter createFilter() {
+		return new ResourceFilter();
+	}
+  </pre></li>
+	<li>Now all of the  dialog strings will start
+	with lower case. <p align="center"><img
+		src="images/filteredResourcesSelectionDialogExampleAdvance2.png"
+		border="0" alt="Image of a simple search dialog"></p>
+	</li>
+</ol>
+
+<h3><a name="checkbox">Adding an extra widget and context menu
+entry</a></h3>
+<p>We will use a check-box and a menu action to indicate whether
+to filter string starting with lower case character.</p>
+<ol>
+	<li>Extend dialog's content area by implementing <em>createExtendedContentArea(Composite)</em>
+	method: <pre>
+  	private Button checkButton;
+  	
+  	protected Control createExtendedContentArea(Composite parent) {
+		checkButton = new Button(parent, SWT.CHECK);
+		checkButton.setText("Only Lower Case Strings"); //$NON-NLS-1$
+		checkButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				if (onlyLowerCase != ((Button) e.widget).getSelection()) {
+				onlyLowerCase = ((Button) e.widget).getSelection();
+				applyFilter();
+				}
+			}
+		});
+		return checkButton;
+	}
+  	</pre></li>
+	<li>Next, create new Action and add it to the menu by overriding <em>fillViewMenu(IMenuManager)</em>.
+	Eg.: <pre>
+  	private class ShowOnlyLowerCaseStringsAction extends Action {
+
+		/**
+		 * Creates a new instance of the action.
+		 */
+		public ShowOnlyLowerCaseStringsAction() {
+			super("Only Lower Case String", //$NON-NLS-1$
+					IAction.AS_CHECK_BOX);
+		}
+
+		public void run() {
+			if (FilteredResourcesSelectionDialog.this.onlyLowerCase != isChecked()) {
+				FilteredResourcesSelectionDialog.this.onlyLowerCase = isChecked();
+				applyFilter();
+			}
+		}
+	}
+  </pre> <pre> 
+  	protected void fillViewMenu(IMenuManager menuManager) {
+		super.fillViewMenu(menuManager);
+		menuManager.add(showOnlyLowerCaseStringsAction);
+	}
+  </pre></li>
+
+	<li>Now open the dialog<p align="center"><img
+		src="images/filteredResourcesSelectionDialogExampleAdvance3.png"
+		border="0" alt="Image of a simple search dialog"></p>
+	</li>
+
+</ol>
+
+</body>
+</html>
