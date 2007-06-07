@@ -67,7 +67,7 @@
   linked resources.</p>
 <h4>Technical Details for Being &quot;Link Friendly&quot;</h4>
 <p>Repository provider implementations can be upgraded to support linked resources 
-  by overriding the <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a>.canHandleLinkedResources()</b> 
+  by overriding the <b><a href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a>.canHandleLinkedResourceURI()</b> 
   method to return <strong>true</strong>. Once this is done, linked resources 
   will be allowed to exist in projects shared with that repository provider. However, 
   the repository provider must take steps to ensure that linked resources are 
@@ -77,13 +77,8 @@
   provider. Furthermore, the repository provider should use the default move and 
   delete behavior for linked resources if the repository provider implementation 
   overrides the default <a href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>.</p>
-<p>Team providers can use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>.<b>isLinked() 
-  </b>to determine if a resource is a link. However, this method only returns 
-  true for the root of a link. The following code segment can be used to determine 
-  if a resource is the child of a link.</p>
-<pre>String linkedParentName = resource.getProjectRelativePath().segment(0);
-IFolder linkedParent = resource.getProject().getFolder(linkedParentName);
-boolean isLinked = linkedParent.isLinked();</pre>
+<p>Team providers can use <a href="../reference/api/org/eclipse/core/resources/IResource.html"><b>IResource</b></a>.<b>isLinked(IResource.CHECK_ANCESTORS) 
+  </b>to determine if a resource is a link or is the descendant of a link.
 <p>Repository providers should ignore any resource for which the above code evaluates 
   to <strong>true</strong>.</p>
 
