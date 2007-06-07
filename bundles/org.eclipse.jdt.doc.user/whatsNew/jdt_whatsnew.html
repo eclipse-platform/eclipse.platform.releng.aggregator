@@ -8,6 +8,7 @@
 	type="text/css">
 <style type="text/css">
 td {border-top: solid thin black;}
+td table tbody tr td {border-top: none;} /* no border for nested tables */
 img[alt] {background-color:#ffdddd;}
 tr {vertical-align: top;}
 </style>
@@ -112,6 +113,181 @@ document for changes in the Platform.
           Java Editor </div></td>
     </tr>
 
+  <tr>
+    <td><p align="right"><b>Code clean up on save</b> </td>
+    <td><p>It is now possible to automatically invoke
+        code clean up whenever the Java editor is saved.
+        This feature can be enabled globally on the
+        <b>Java &gt; Editor &gt; Save Actions</b> preference page.
+      </p>
+      <p>The save actions can also be configured per project, which
+        makes it easy to enforce a project-wide standard by sharing
+        the settings across a team:</p>
+      <p> <img src="images/save-actions.png" alt="Save Action property page"> </p>
+  </tr>
+  
+  <tr>
+    <td><p align="right"><b>Completion using favorite static
+        imports</b> </td>
+    <td><p>Content Assist (<strong>Ctrl+Space</strong>) can now propose completions
+      for static members from a list of favorite imports that can be configured
+      on the <b>Java &gt; Editor &gt; Content Assist &gt; Favorites</b> preference
+      page.</p>
+      <p>For example, if you have added <code>java.util.Arrays.*</code> to
+        this list, then all static methods of this type matching the completion
+        prefix will be added to the proposals list:</p>
+      <p><img src="images/content-assist-proposals.png" alt="Content Assist proposals"></p>
+      <p> The import preferences from the <b>Java &gt; Editor &gt; Content Assist</b> preference
+        page are honored when inserting such a proposal.</p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Content Assist for variables
+        with unresolved type</b> </td>
+    <td><p>The Java editor now supports the new member
+      proposals with unresolved types: depending on the <b>Java &gt; Editor &gt; Content
+      Assist &gt; Add import instead of qualified name</b> preference the editor
+      will either automatically add imports or fully qualify the types for such
+      proposals.</p>
+      <p>Pressing <b>;</b> in the following scenario:</p>
+      <p>
+      <img title="Content Assist For Variables With Unresolved Types" alt="Screenshot showing Content Assist for variables with unresolved types" src="images/code-assist.png">
+      </p>
+      <p>results in:</p>
+      <p>
+      <img title="Content Assist Result When Pressing ';'" alt="Screenshot showing the content assist result when pressing ';'" src="images/code-assist-result.png">
+      </p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Declaration proposals for undefined
+        local variables</b> </td>
+    <td><p>Code Assist can now infer the name of a declared
+      local variable by detecting the presence of unresolved names in subsequent
+      code, as shown in the example below:</p>
+      <p><img src="images/unresolved-names-for-locals.png" alt="Unresolved Names Proposals example"></p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Other content assist improvements</b> </td>
+    <td>
+      <ul>
+        <li>Content Assist (<strong>Ctrl+Space</strong>) inside a <b>try-catch</b> clause can
+          now infer exception type names based on exceptions detected to be thrown
+          in the corresponding try block. These exceptions are now listed before
+          other possible exceptions.
+<!--
+      <p>Note that it will automatically filter out the exceptions caught prior
+        to the completion location, as shown in this example:</p>
+      <p><img src="images/content-assist-exceptions.png" alt="Completion in catch block"></p></td>
+-->
+        </li>
+        
+        <li>When completing a name reference, content assist
+          now proposes <b>unresolved names</b> found in other parts of the code.
+<!--
+      <p><img src="images/unresolved-names.png" alt="Unresolved Names Proposals example"></p>
+-->
+        </li>
+        
+        <li> Code completions in the empty statement now include the <b>local types</b>
+          of the current compilation unit in the list of proposals.
+<!--
+      <p><img src="images/empty-type-completion.png" alt="Empty Completion Type example"></p>
+-->
+        </li>
+        
+        <li>Code completion after an at sign "<code>@"</code> proposes all visible
+          <b>annotation types</b>. 
+<!--
+      <p><img src="images/completion-annotation.png" alt="Completion Annotation example"></p>
+-->
+        </li>
+        
+        <li>Completing in an <b>annotation member</b> proposes all possible attributes which 
+          are not already specified.
+<!--
+      <p><img src="images/completion-anno-members.png" alt="Completion Annotation Members example" height="248" width="405"></p>
+-->
+        </li>
+      </ul>
+    </td>
+  </tr>
+  
+  <tr>
+    <td><p align="right"><b>More quick assists<br>
+      </b> </td>
+    <td><p>Functionality that was previously only available
+      in the Refactoring menu is now also offered as quick assists (<b>Ctrl+1</b>).
+      As always, quick assists don't show a dialog, but enter the linked mode
+      where you can change names or types that have been introduced.</p>
+      <ul>
+        <li><b>Extract to local variable </b>and <b>Extract to constant</b>:
+          select an expression in the code</li>
+        <li><b>Inline local variable</b>: available on a variable name</li>
+        <li><b>Convert local variable to field</b>: available on a variable name
+          <br><img alt="Screenshot of the Extract Local Quick Assist" title="Extract Local Quick Assist" src="images/extractlocal.png">
+        </li>
+        <li><b>Convert anonymous to local type</b>: available on the type name of an
+          anonymous class
+          <br><img style="margin-top: .5em" src="images/convert-anonymous-before.png" alt="Convert anonymous to nested class example - before">
+          <br>When applied, use the <b>Tab</b> key to navigate through the generated
+          code and to modify the new type name and choose from the offered field
+          and parameter names.
+          <br><img style="margin-top: .5em" src="images/convert-anonymous-after.png" alt="Convert anonymous to nested class example - after">
+        </li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Quick fix to create method
+        from @Override</b> </td>
+    <td><p>When you add an @Override annotation to a
+      method that does not override yet, quick fix (<b>Ctrl+1</b>) will offer
+      you to create the method in one of the super types.</p>
+    </td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Quick fix to create and use
+        getter and setter</b></td>
+    <td><p>A new quick fix is available for a field not
+      accessible due to visibility restrictions. In the following scenario, use <b>Ctrl+1</b> to
+      invoke quick fix:</p>
+      <p><img src="images/not-visible.png" alt="Invisible field"></p>
+      <p>If a getter exists for this field, you can choose to <b>use</b> it.</p>
+      <p><img src="images/use-getter.png" alt="Use getter"></p>
+      <p>And if there is no getter for this field, you can choose to <b>create</b> one.</p>
+      <p><img src="images/create-getter.png" alt="Create getter"></p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Template for adding JUnit 4 test 
+      methods</b></td>
+    <td><p>A new <strong>Test</strong> template has been 
+      added to speed up adding JUnit 4 test methods.</p></td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>No more "I don't see the full 
+      source" questions on the newsgroup</b> </td>
+    <td>The command group that contains the <b>Show Source 
+      of Selected Element Only</b> tool bar button <img alt="Picture of the tool bar button" title="The Show Source of Selected Element Only Button" src="images/segment_edit.gif"> 
+      is now hidden by default. It can be toggled using the <b>Java &gt; Editor 
+      &gt; Only show the selected Java element</b> preference.</td>
+  </tr>
+
+  <tr> 
+    <td><p align="right"><b>Syntax coloring for brackets</b> 
+    </td>
+    <td><p>Brackets may now be colored separately from operators 
+      in the Java editor via the <b>Java &gt; Editor &gt; Syntax Coloring</b> 
+      preference page.</p>
+      <p> <img src="images/bracketcoloring.png" title="Java editor with red brackets and blue operators" alt="Screenshot of the Java editor showing bracket highlighting"> </p></td>
+  </tr>
+
   <tr> 
     <td><p align="right"><b>Configurable Javadoc font</b></td>
     <td><p>The font for displaying Javadoc is now configurable 
@@ -130,200 +306,14 @@ document for changes in the Platform.
   </tr>
   
   <tr> 
-    <td><p align="right"><b>Syntax coloring for brackets</b> 
-    </td>
-    <td><p>Brackets may now be colored separately from operators 
-      in the Java editor via the <b>Java &gt; Editor &gt; Syntax Coloring</b> 
-      preference page.</p>
-      <p> <img src="images/bracketcoloring.png" title="Java editor with red brackets and blue operators" alt="Screenshot of the Java editor showing bracket highlighting"> </p></td>
-  </tr>
-
-  <tr> 
-    <td><p align="right"><b>Improved completion on empty 
-      statement</b></td>
-    <td> Code completion (<strong>Ctrl+Space</strong>) 
-      in the empty statement now include the local types of the current compilation 
-      unit in the list of proposals. 
-      <p><img src="images/empty-type-completion.png" alt="Empty Completion Type example"></p></td>
-  </tr>
-  <tr> 
-    <td><p align="right"><b>Improved completion in annotations</b></td>
-    <td> Code completion (<strong>Ctrl+Space</strong>) 
-      after an at sign "<code>@"</code> proposes all visible annotation 
-      types. 
-      <p><img src="images/completion-annotation.png" alt="Completion Annotation example"></p>
-      <p>Completing in an annotation member propose all possible attributes which 
-        are not already specified.</p>
-      <p><img src="images/completion-anno-members.png" alt="Completion Annotation Members example" height="248" width="405"></p></td>
-  </tr>
-
-  <tr> 
-    <td><p align="right"><b>No more "I don't see the full 
-      source" questions on the newsgroup</b> </td>
-    <td>The command group that contains the <b>Show Source 
-      of Selected Element Only</b> tool bar button <img alt="Picture of the tool bar button" title="The Show Source of Selected Element Only Button" src="images/segment_edit.gif"> 
-      is now hidden by default. It can be toggled using the <b>Java &gt; Editor 
-      &gt; Only show the selected Java element</b> preference.</td>
-  </tr>
-
-  <tr> 
     <td><p align="right"><b>Class file editor shows disassembled 
       code</b> </td>
-    <td>The Java class file editor now shows the disassembled 
-      bytecodes when source code is not available. 
+    <td><p>The Java class file editor now shows the disassembled 
+      bytecodes when source code is not available.</p> 
       <p> <img alt="Screenshot showing the Class File Editor with disassembled code" src="images/class_file_editor.png"> 
       </p></td>
   </tr>
    
-     <tr>
-    <td><p align="right"><b>Declaration proposals for undefined
-        local variables</b> </td>
-    <td> Code Assist can now infer the name of a declared
-      local variable by detecting the presence of unresolved names in subsequent
-      code, as shown in the example below:
-      <p><img src="images/unresolved-names-for-locals.png" alt="Unresolved Names Proposals example"></p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Content Assist for variables
-        with unresolved type</b> </td>
-    <td> The Java editor now supports the new member
-      proposals with unresolved types: depending on the <b>Java &gt; Editor &gt; Content
-      Assist &gt; Add import instead of qualified name</b> preference the editor
-      will either automatically add imports or fully qualify the types for such
-      proposals.<br>
-      <br>
-      Pressing <b>;</b> in the following scenario:<br>
-      <br>
-      <img title="Content Assist For Variables With Unresolved Types" alt="Screenshot showing Content Assist for variables with unresolved types" src="images/code-assist.png"><br>
-      <br>
-      results in:<br>
-      <br>
-      <img title="Content Assist Result When Pressing ';'" alt="Screenshot showing the content assist result when pressing ';'" src="images/code-assist-result.png"><br>
-      <br>
-    </td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Code clean up on save</b> </td>
-    <td> It is now possible to automatically invoke
-      code clean up whenever the Java editor is saved.
-      <p>This feature can be enabled on the <b>Java &gt; Editor &gt; Save Participants</b> preference
-        page.</p>
-      <img src="images/save-participant-pp.png" alt="The Save Participant preference page"> </td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>New quick fix: Create method
-        from @Override</b> </td>
-    <td> When you add an @Override annotation to a
-      method that does not override yet, quick fix (<b>Ctrl+1</b>) will offer
-      you to create the method in one of the super types. </td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b> Improved quick assist for extracting
-    local variable</b> </td>
-    <td> The <b>Extract to local variable</b> quick
-      assist is now providing alternative name proposals for the new local variable.
-      Select an expression and press <b>Ctrl+1</b> to get the proposal. </td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>More quick assists<br>
-      </b> </td>
-    <td>Functionality that was previously only available
-      in the Refactoring menu is now also offered as quick assists (<b>Ctrl+1</b>).
-      As always, quick assists don't show a dialog, but enters the linked mode
-      where you can change names or types that have been introduced.<br>
-      <ul>
-        <li><b>Extract to local variable </b>and <b>Extract to constant</b>:
-          select an expression in the code</li>
-        <li><b>Inline local variable</b>: available on a variable name</li>
-        <li><b>Convert local variable to field</b>: available on a variable name</li>
-        <li><b>Convert anonymous to local type</b>: Select the type name of an
-          anonymous class</li>
-      </ul>
-      <p><img alt="Screenshot of the Extract Local Quick Assist" title="Extract Local Quick Assist" src="images/extractlocal.png"></p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Convert anonymous to nested
-        class as quick assist</b> </td>
-    <td><p>The <b>Convert anonymous to nested class</b> refactoring
-        is now also available as quick assist. Select the type of an anonymous
-        class and press <b>Ctrl+1</b>.</p>
-      <img src="images/convert-anonymous-before.png" alt="Convert anonymous to nested class example - before">
-      <p>When applied, use the <b>Tab</b> key to navigate through the generated
-        code and to modify the new type name and choose from the offered field
-        and parameter names.</p>
-      <img src="images/convert-anonymous-after.png" alt="Convert anonymous to nested class example - after"> </td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Quick Fix to create and use
-        getter and setter</b></td>
-    <td> A new quick fix is available for a field not
-      accessible due to visibility restrictions. In the following scenario, use <b>Ctrl+1</b> to
-      invoke quick fix:
-      <p><img src="images/not-visible.png" alt="Invisible field"></p>
-      <p>If a getter exists for this field, you can choose to <b>use</b> it.</p>
-      <p><img src="images/use-getter.png" alt="Use getter"></p>
-      <p>And if there is no getter for this field, you can choose to <b>create</b> one.</p>
-      <p><img src="images/create-getter.png" alt="Create getter"></p></td>
-  </tr>
-    
-  <tr>
-    <td><p align="right"><b>Project-specific
-          settings for Save actions</b></td>
-    <td>The actions executed when a Java editor is saved
-      can now be configured per project:
-      <p> <img src="images/save-actions.png" alt="Save Action property page"> </p>
-      <p> This makes it easy to enforce a
-    project-wide standard by sharing the settings across a team.</p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Completion using favorite static
-        imports</b> </td>
-    <td> Content Assist can now propose completions
-      for static members from a list of favorite imports that can be configured
-      on the <b>Java &gt; Editor &gt; Content Assist &gt; Favorites</b> preference
-      page.
-      <p>For example, if you have added <code>java.util.Arrays.*</code> to
-        this list, then all static methods of this type matching the completion
-        prefix will be added to the proposals list:</p>
-      <p><img src="images/content-assist-proposals.png" alt="Content Assist proposals"></p>
-      <p> The import preferences from the <b>Java &gt; Editor &gt; Content Assist</b> preference
-        page are honored when inserting such a proposal.</p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Completion in catch clause</b> </td>
-    <td>Content Assist inside a try-catch clause can
-      now infer exception type names based on exceptions detected to be thrown
-      in the corresponding try block. These exceptions are now listed before
-      other possible exceptions.
-      <p>Note that it will automatically filter out the exceptions caught prior
-        to the completion location, as shown in this example:</p>
-      <p><img src="images/content-assist-exceptions.png" alt="Completion in catch block"></p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Content assist proposes unresolved
-        names</b></td>
-    <td> When completing a name reference, content assist
-      now proposes unresolved names found in other parts of the code. For example:
-      <p><img src="images/unresolved-names.png" alt="Unresolved Names Proposals example"></p></td>
-  </tr>
-
-  <tr> 
-    <td><p align="right"><b>Template for adding JUnit 4 test 
-      methods</b></td>
-    <td><p>A new <strong>Test</strong> template has been 
-      added to speed up adding JUnit 4 test methods.</p></td>
-  </tr>
-
     <!-- ******************* Java Compiler ************************************* -->
     <tr> 
       <td colspan="2"><a name="JavaCompiler"></a> <div style="font-size: 20px; font-weight: bold;"> 
@@ -482,8 +472,7 @@ document for changes in the Platform.
   </tr>
 
   <tr>
-    <td><p align="right"><b>Filter method invoked via super
-        types</b> </td>
+    <td><p align="right"><b>Search filter for references to overridden method</b> </td>
     <td><p>The Java search engine has introduced a new
       criterion for categorizing method reference matches. It can now distinguish
       an invocation via a type or one of its subtypes from an invocation via
@@ -491,10 +480,11 @@ document for changes in the Platform.
       a filter for further narrowing references to the searched method.</p>
       <p> In the following example, the user searched for references to the <code>A.toString()</code> method
         and got 3 matches. Since <code>o.toString()</code> denotes an invocation
-        via a super type of <code>A</code>, it can be filtered out from the Search
-        view by activating the "Super Invocation" filter as shown below:</p>
-      <p><img src="images/search-super-invocation.png" alt="Filter Super Invocation example"></p>
-      Note: The "Super Invocation" filter is <b>not</b> activated by
+        of a method that is overridden by the search target <code>A.toString()</code>,
+        it can be filtered out from the Search
+        view by activating the "References to Overridden" filter as shown below:</p>
+      <p><img src="images/search-super-invocation.png" alt="Filter References to Overridden example"></p>
+      Note: The "References to Overridden" filter is <b>not</b> activated by
       default.</td>
   </tr>
 
@@ -511,13 +501,13 @@ document for changes in the Platform.
         <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.debug.ui.jreProfiles)")'> 
           <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Execution Environments preference page">
           <b>Java &gt; Installed JREs &gt; Execution Environments</b></a> preference page.</p>
-      <p> <img alt="Screenshot of the 'New Java project' wizard" src="images/new-project-with-ee.png"></p></td>
+      <p> <img alt="Screenshot of the 'New Java Project' wizard" src="images/new-project-with-ee.png"></p></td>
   </tr>
     
   <tr>
     <td><p align="right"><b>Add new Java project to a working
         set </b></td>
-    <td><p>The new Java project wizard got additional input
+    <td><p>The New Java Project wizard got additional input
       fields to specify the working sets to which the new project gets added.
       The fields are initialized from the current selection or the active working
       set filter in the Package Explorer.</p>
@@ -556,7 +546,7 @@ document for changes in the Platform.
         while nothing is selected:</p>
       <table border="0" cellpadding="10" cellspacing="0" width="466">
         <tbody><tr>
-          <td valign="top" style="border-top: none"><pre>package a;
+          <td valign="top"><pre>package a;
 public class Target {
 }
 
@@ -686,11 +676,11 @@ public class Test {
    <tr> 
     <td><p align="right"><b>Double-click and Ctrl+Shift+B 
       for all kinds of breakpoints</b></td>
-    <td> Double-clicking in the vertical ruler, or invoking 
+    <td> <p> Double-clicking in the vertical ruler, or invoking 
       Toggle Breakpoint (<strong>Ctrl+Shift+B</strong>), now creates an appropriate 
       kind of breakpoint based on the cursor location - line breakpoint, watchpoint, 
       method breakpoint, or class load breakpoint. To create a class load breakpoint, 
-      double click on the class declaration line. 
+      double click on the class declaration line.</p> 
       <p><img src="images/classload-bp.png" alt="Class load breakpoint"></p></td>
   </tr>    
     <tr> 
@@ -738,6 +728,8 @@ public class Test {
           the collection.</p>
         <p><img alt="Exporting logical structures" src="images/export-logical-structures.png"></p></td>
     </tr>
+
+
     <!-- *************** Miscellaneous ************************************ -->
     <tr> 
       <td colspan="2"><a name="Miscellaneous"></a> <div style="font-size: 20px; font-weight: bold;"> 
@@ -746,15 +738,41 @@ public class Test {
 
   <tr> 
     <td><p align="right"><b>Clean Up preference page</b></td>
-    <td> A preference page has replaced the <b>Source 
+    <td><p> A preference page has replaced the <b>Source 
       &gt; Clean Up</b> wizard. Clean Up profiles can be defined on this preference 
       page. A profile can be attached to the workspace or to individual projects. 
       Project settings can be shared in a team through a version control system. 
-      It is also possible to export and import each profile. 
+      It is also possible to export and import each profile.</p>
       <p> <img src="images/cleanupprofiles.png" alt="Clean Up preference page"> 
       </p></td>
   </tr>
 
+  <tr>
+    <td><p align="right"><b>New clean ups
+          and save actions</b></td>
+    <td><p>Two new Clean Ups have been implemented:</p>
+      <ul>
+        <li>Remove trailing whitespace</li>
+        <li>Sort members</li>
+      </ul>
+      <p> You can choose to remove trailing whitespace on all lines or to ignore
+        empty lines. Sort members can sort either all members of a compilation
+        unit, or ignore fields, enum constants, and initializers (because sorting
+        such members may result in semantic changes). </p>
+      <p> <img src="images/cleanup-dialog.png" alt="Clean Up modification dialog"> </p>
+      <p> Remove trailing whitespace and sort members are also available as Save
+        actions. </p></td>
+  </tr>
+
+  <tr>
+    <td><p align="right"><b>Organize imports on Clean Up</b> </td>
+    <td><p>You can now organize imports during code clean
+      up.</p>
+      <p>This Clean Up can be enabled on the <b>Java &gt; Code Style &gt; Clean
+          Up &gt; Edit</b> preference page.</p>
+      <img src="images/clean-up-pp.png" alt="The clean up modify dialog"> </td>
+  </tr>
+        
   <tr> 
     <td><p align="right"><b>Formatting during Clean Up</b></td>
     <td> <p>It is now possible to format source code 
@@ -766,20 +784,11 @@ public class Test {
   </tr>
 
   <tr>
-    <td><p align="right"><b>Organize imports on Clean Up</b> </td>
-    <td> You can now organize imports during code clean
-      up.
-      <p>This Clean Up can be enabled on the <b>Java &gt; Code Style &gt; Clean
-          Up &gt; Edit</b> preference page.</p>
-      <img src="images/clean-up-pp.png" alt="The clean up modify dialog"> </td>
-  </tr>
-        
-  <tr>
     <td><p align="right"><b>New code formatter options</b> </td>
-    <td> Some new options have been added to the code
+    <td><p>Some new options have been added to the code
       formatter preference page (<b>Java
       &gt; Code Style &gt;
-      Formatter</b>)
+      Formatter</b>):</p>
       <ul>
         <li>The number of blank lines that Organize Imports (<b>Ctrl+Shift+O</b>)
           inserts between import groups can be configured on the 'Blank Lines'
@@ -796,20 +805,19 @@ public class Test {
   </tr>
 
   <tr>
-    <td><p align="right"><b>New clean ups
-          and save actions</b></td>
-    <td>Two new Clean Ups have been implemented:
+    <td><p align="right"><b>New code formatter options</b> </td>
+    <td><p> New options have been added to the Java code
+      formatter page:</p>
       <ul>
-        <li>Remove trailing whitespace</li>
-        <li>Sort members</li>
+        <li>Binary expressions can now be wrapped before or after the operator
+          <p><img src="images/formatter-operator.png" alt="Screenshot showing the formatter preferences modify dialog"></p>
+        </li>
       </ul>
-      <p> You can choose to remove trailing whitespace on all lines or to ignore
-        empty lines. Sort members can sort either all members of a compilation
-        unit, or ignore fields, enum constants, and initializers (because sorting
-        such members may result in semantic changes). </p>
-      <p> <img src="images/cleanup-dialog.png" alt="Clean Up modification dialog"> </p>
-      <p> Remove trailing whitespace and sort members are also available as Save
-        actions. </p></td>
+      <ul>
+        <li>Block and line comments on first column can be excluded from indentation
+          <p> <img src="images/formatter-comments.png" alt="Screenshot showing the formatter preferences modify dialog"></p>
+        </li>
+      </ul></td>
   </tr>
 
   <tr>
@@ -843,27 +851,11 @@ public class Test {
   <tr>
     <td><p align="right"><b>Workspace relative paths for
         Javadoc location</b></td>
-    <td>Workspace relative paths are now accepted as
-      Javadoc locations for archives and class folders:
+    <td><p>Workspace relative paths are now accepted as
+      Javadoc locations for archives and class folders:</p>
       <p> <img alt="Screenshot of the Javadoc location configuration dialog" src="images/javadoc-location.png"></p></td>
   </tr>
 
-
-  <tr>
-    <td><p align="right"><b>New code formatter options</b> </td>
-    <td> New options have been added to the Java code
-      formatter page:
-      <ul>
-        <li>Binary expressions can now be wrapped before or after the operator
-          <p><img src="images/formatter-operator.png" alt="Screenshot showing the formatter preferences modify dialog"></p>
-        </li>
-      </ul>
-      <ul>
-        <li>Block and line comments on first column can be excluded from indentation
-          <p> <img src="images/formatter-comments.png" alt="Screenshot showing the formatter preferences modify dialog"></p>
-        </li>
-      </ul></td>
-  </tr>
 
   <tr>
     <td><p align="right"><b>Runtime type generation</b></td>
