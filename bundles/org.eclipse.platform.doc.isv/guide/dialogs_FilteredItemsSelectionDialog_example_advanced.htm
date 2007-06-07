@@ -31,29 +31,25 @@ been selected.
 	<li>Create a subclass of <em>FilteredItemsSelectionDialog.SelectionHistory</em>
 	and implement the abstract methods for saving and loading objects:</li>
 	<pre>
-  	private class ResourceSelectionHistory extends SelectionHistory {
-
-		/*
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#restoreItemFromMemento(org.eclipse.ui.IMemento)
-		 */
-		protected Object restoreItemFromMemento(IMemento element) {
-			return element.getString("resource"); //$NON-NLS-1$
-		}
-
-		/*
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
-		 *      org.eclipse.ui.IMemento)
-		 */
-		protected void storeItemToMemento(Object item, IMemento element) {
-			element.putString("resource", item.toString()); //$NON-NLS-1$
-		}
-
-	}
-  </pre>
+   private class ResourceSelectionHistory extends SelectionHistory {
+      /*
+       * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#restoreItemFromMemento(org.eclipse.ui.IMemento)
+       */
+      protected Object restoreItemFromMemento(IMemento element) {
+         return element.getString("resource"); //$NON-NLS-1$
+      }
+      /*
+       * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
+       *      org.eclipse.ui.IMemento)
+       */
+      protected void storeItemToMemento(Object item, IMemento element) {
+         element.putString("resource", item.toString()); //$NON-NLS-1$
+      }
+   }</pre>
 
 	<li>On your subclass of FilteredItemsSelectionDialog, define the implementation of SelectionHistory to use. 
 	<pre>
-  	setSelectionHistory(new ResourceSelectionHistory());
+   setSelectionHistory(new ResourceSelectionHistory());
   </pre></li>
 	<li>Our example dialog now looks like this:
 	<p><img
@@ -72,45 +68,38 @@ Next we will expand the filter to hide all strings that start with a lower case 
 	no further filtering is required.  If the new filter is a sub-filter of the existing filter, then
 	filtering is only done on the items that matched the existing filter.
    <pre>
-  	private boolean onlyLowerCase = true;
+   private boolean onlyLowerCase = true;
   	
-  	private class ResourceFilter extends ItemsFilter {
+   private class ResourceFilter extends ItemsFilter {
+   public final boolean onlyLowerCase = FilteredResourcesSelectionDialog.this.onlyLowerCase;
 
-		public final boolean onlyLowerCase = FilteredResourcesSelectionDialog.this.onlyLowerCase;
-
-		public boolean matchItem(Object item) {
-			String resource = item.toString();
-			if (onlyLowerCase &amp;&amp; Character.isUpperCase(resource.charAt(0)))
-				return false;
-			return matches(resource);
-		}
-
-		public boolean equalsFilter(ItemsFilter filter) {
-			ResourceFilter resourceFilter = (ResourceFilter) filter;
-			if (onlyLowerCase != resourceFilter.onlyLowerCase)
-				return false;
-			return super.equalsFilter(filter);
-		}
-
-		public boolean isSubFilter(ItemsFilter filter) {
-			ResourceFilter resourceFilter = (ResourceFilter) filter;
-			if (onlyLowerCase == resourceFilter.onlyLowerCase)
-				return false;
-			return super.isSubFilter(filter);
-		}
-
-		public boolean isConsistentItem(Object item) {
-			return true;
-		}
-
-	}
-	</pre></li>
+      public boolean matchItem(Object item) {
+         String resource = item.toString();
+         if (onlyLowerCase &amp;&amp; Character.isUpperCase(resource.charAt(0)))
+            return false;
+         return matches(resource);
+      }
+      public boolean equalsFilter(ItemsFilter filter) {
+         ResourceFilter resourceFilter = (ResourceFilter) filter;
+         if (onlyLowerCase != resourceFilter.onlyLowerCase)
+            return false;
+         return super.equalsFilter(filter);
+      }
+      public boolean isSubFilter(ItemsFilter filter) {
+         ResourceFilter resourceFilter = (ResourceFilter) filter;
+         if (onlyLowerCase == resourceFilter.onlyLowerCase)
+            return false;
+         return super.isSubFilter(filter);
+      }
+      public boolean isConsistentItem(Object item) {
+         return true;
+      }
+   }</pre></li>
 	<li>On your subclass of FilteredItemsSelectionDialog, override the <i>createFilter()</i> method: 
 	<pre>
-  	protected ItemsFilter createFilter() {
-		return new ResourceFilter();
-	}
-  </pre></li>
+   protected ItemsFilter createFilter() {
+      return new ResourceFilter();
+   }</pre></li>
 	<li>Now the dialog will only display strings that start with a lower case letter. 
 	<p><img src="images/filteredResourcesSelectionDialogExampleAdvance2.png"
 		border="0" alt="Image of a simple search dialog"></p>
@@ -123,49 +112,44 @@ to filter strings that start with a lower case character.</p>
 <ol>
 	<li>Extend the dialog's content area by implementing <em>createExtendedContentArea(Composite)</em>
 	method: <pre>
-  	private Button checkButton;
+   private Button checkButton;
   	
-  	protected Control createExtendedContentArea(Composite parent) {
-		checkButton = new Button(parent, SWT.CHECK);
-		checkButton.setText("Only Lower Case Strings"); //$NON-NLS-1$
-		checkButton.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				if (onlyLowerCase != ((Button) e.widget).getSelection()) {
-				onlyLowerCase = ((Button) e.widget).getSelection();
-				applyFilter();
-				}
-			}
-		});
-		return checkButton;
-	}
-  	</pre></li>
+   protected Control createExtendedContentArea(Composite parent) {
+      checkButton = new Button(parent, SWT.CHECK);
+      checkButton.setText("Only Lower Case Strings"); //$NON-NLS-1$
+      checkButton.addSelectionListener(new SelectionListener() {
+         public void widgetDefaultSelected(SelectionEvent e) {
+         }
+         public void widgetSelected(SelectionEvent e) {
+            if (onlyLowerCase != ((Button) e.widget).getSelection()) {
+               onlyLowerCase = ((Button) e.widget).getSelection();
+               applyFilter();
+            }
+         }
+      });
+      return checkButton;
+   }</pre></li>
 	<li>Next, create a new action and add it to the menu by overriding <em>fillViewMenu(IMenuManager)</em>.
 	Eg.: <pre>
-  	private class ShowOnlyLowerCaseStringsAction extends Action {
-
-		/**
-		 * Creates a new instance of the action.
-		 */
-		public ShowOnlyLowerCaseStringsAction() {
-			super("Only Lower Case String", //$NON-NLS-1$
-					IAction.AS_CHECK_BOX);
-		}
-
-		public void run() {
-			if (FilteredResourcesSelectionDialog.this.onlyLowerCase != isChecked()) {
-				FilteredResourcesSelectionDialog.this.onlyLowerCase = isChecked();
-				applyFilter();
-			}
-		}
-	}
-  </pre> <pre> 
-  	protected void fillViewMenu(IMenuManager menuManager) {
-		super.fillViewMenu(menuManager);
-		menuManager.add(showOnlyLowerCaseStringsAction);
-	}
+   private class ShowOnlyLowerCaseStringsAction extends Action {
+      /**
+       * Creates a new instance of the action.
+       */
+      public ShowOnlyLowerCaseStringsAction() {
+         super("Only Lower Case String", //$NON-NLS-1$
+            IAction.AS_CHECK_BOX);
+      }
+      public void run() {
+         if (FilteredResourcesSelectionDialog.this.onlyLowerCase != isChecked()) {
+            FilteredResourcesSelectionDialog.this.onlyLowerCase = isChecked();
+            applyFilter();
+         }
+      }
+   } 
+   protected void fillViewMenu(IMenuManager menuManager) {
+      super.fillViewMenu(menuManager);
+      menuManager.add(showOnlyLowerCaseStringsAction);
+   }
   </pre></li>
 
 	<li>Now open the dialog: 
