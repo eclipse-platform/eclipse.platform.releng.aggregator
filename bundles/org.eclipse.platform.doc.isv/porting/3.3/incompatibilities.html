@@ -15,7 +15,6 @@
   instructions for migrating 3.2 plug-ins to 3.3. Note that you only need to look 
   here if you are experiencing problems running your 3.2 plug-in on 3.3.</p>
 <p></p>
-<p>
 <ol>
   <li><a href="#launchConfigWorkingCopies">Nested Launch Configuration Working Copies</a></li>
   <li><a href="#FileEditorInput">Incompatible source change to getStorage() on FileEditorInput</a></li>
@@ -68,18 +67,18 @@ and remove any catch block that is now unnecessary due to the removed exception.
 <h2>3. <a name="BootDelegation">Boot delegation changes</a></h2>
 <p><strong>What is affected:</strong> The boot delegation order has changed in 3.3.  Bundles that depend on delegating 
 to the boot (parent) class loader first may be affected by this change.</p>
-<p><strong>Description:</strong> In Eclipse 3.3 the default class loader delegation model has been changed to the following order:
+<p><strong>Description:</strong> In Eclipse 3.3 the default class loader delegation model has been changed to the following order:</p>
 <ol>
 <li>Imported packages (i.e. packages specified in the Import-Package manifest header).</li>
 <li>Required bundles (i.e. bundles specified in the Require-Bundle manifest header).</li>
 <li>Local bundle and fragments.</li>
 <li>Boot (parent) class loader as a last resort.  This is only done if no source was found in the previous steps. </li>
 </ol>
-In 3.2 the boot (parent) class loader is always delegated to first.  This provides no isolation from the 
+<p>In 3.2 the boot (parent) class loader is always delegated to first.  This provides no isolation from the 
 classes provided by the VM.  It also affects performance because the boot class loader must be delegated to for every 
 load even though it is known that the class or resource is located in a bundle.  Because of the boot delegation changes 
 in 3.3, a bundle can now provide their own version of a package which is also available from the VM boot classpath.
-See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=162231"> bug 162231</a>.
+See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=162231"> bug 162231</a>.</p>
 
 <p><strong>Action required:</strong> Bundles that export packages which may be available by the boot (parent) class loader 
 need to evaluate whether the classes/resources they export should be added to the content from the boot class loader or replace it.
@@ -117,7 +116,7 @@ BundleEvent.STOPPING events for clients that are monitoring the calls to BundleA
 <p><strong>Description:</strong> The OSGi R4.1 specification has made a clarification on the behavior of the 
 org.osgi.framework.Bundle#getEntryPaths method.  The javadoc for the method Bundle#getEntryPaths did not 
 make it clear whether the String paths returned had a leading &quot;/&quot; character or not.  The following clarification has 
-been made: 
+been made:</p> 
 <p>
 The returned paths are all relative to the root of this bundle and must not begin with &quot;/&quot;. 
 </p>
@@ -226,7 +225,7 @@ an asyncExec runnable to avoid the back-call.</p>
 <!-- ############################################## -->
 <h2>12. <a name="IIDEActionConstants"> IIDEActionConstants.FIND_EXT corrected to conform to specification</a></h2>
 <p><strong>What is affected:</strong> Clients of <tt>IIDEActionConstants</tt> who use the values directly instead of via the constant.</p>
-<p><strong>Description:</strong> Edit menu: name of group for extra Find-like actions (value <code>"find.ext"</code>).
+<p><strong>Description:</strong> Edit menu: name of group for extra Find-like actions (value <code>"find.ext"</code>).</p>
 <p>The value of this constant has changed in 3.3 to match the specification; before 3.3, its value was incorrect (<code>"cut.ext"</code>).
 See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=155856">bug 155856</a> for details.</p>
 <p><strong>Action required:</strong> No action required if you refer to the constant rather than its value.</p>
@@ -244,7 +243,7 @@ It was deleted in the 3.3 release. </p>
 <p><strong>What is affected:</strong> Subbclasses of <tt>ErrorDialog</tt>.</p>
 <p><strong>Description:</strong> <code>ErrorDialogs</code> will have an extra column in their client area
 if there is an <code>ErrorSupportProvider</code> regsitered in an install. ErrorDialog subclasses that assume
-there are 2 columns should call <code>IconAndMessageDialog#getColumnCount</code> instead.
+there are 2 columns should call <code>IconAndMessageDialog#getColumnCount</code> instead.</p>
 <p><strong>Action required:</strong> Update hard coded column counts to call to  <code>IconAndMessageDialog#getColumnCount</code> .</p>
 <!-- ############################################## -->
 </body>
