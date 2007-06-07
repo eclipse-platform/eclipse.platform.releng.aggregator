@@ -18,50 +18,62 @@ Key bindings
 
 
 <p>The association between a command and the key combinations that should
-invoke the command is called a <b>key binding</b>.&nbsp; Plug-ins can define key
-bindings along with commands in the <b><a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a></b>
-extension point.</p>
+invoke the command is called a <b>key binding</b> Plug-ins can define key
+bindings along with commands in the
+<a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a>
+extension point. From our InfoView example:</p>
+
+<pre>
+   &lt;extension
+         point=&quot;org.eclipse.ui.bindings&quot;&gt;
+      &lt;key
+            commandId=&quot;org.eclipse.ui.examples.contributions.view.edit&quot;
+            contextId=&quot;org.eclipse.ui.examples.contributions.view.context&quot;
+            sequence=&quot;M1+O&quot;
+            schemeId=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;
+      &lt;/key&gt;
+   &lt;/extension&gt;
+</pre>
 
 
-<pre>...
-&lt;key
-      <b>sequence=&quot;Ctrl+S&quot;</b>
-      <b>commandId=&quot;org.eclipse.ui.file.save&quot;</b>
-      schemeId=&quot;org.eclipse.ui.defaultAcceleratorConfiguration&quot;&gt;
-&lt;/key&gt;
-...</pre>
-
-
-<p>There is our friend <b>org.eclipse.ui.file.save</b>.&nbsp; Recall our
-hypothetical action definition:</p>
-
-<pre>&lt;extension point = &quot;org.eclipse.ui.actionSets&quot;&gt;
-	   &lt;actionSet id=&quot;com.example.actions.actionSet&quot;
-		   label=&quot;Example Actions&quot;
-		   visible=&quot;true&quot;&gt;
-		   &lt;action id=&quot;com.example.actions.action1&quot;
-			   menubarPath=&quot;additions&quot;
-			   label=&quot;Example Save Action&quot;
-			   class=&quot;org.example.actions.ExampleActionDelegate&quot;
-			   <b>definitionId=&quot;org.eclipse.ui.file.save&quot;</b>&gt;
-		   &lt;/action&gt;
-		   ...
-	   &lt;/actionSet&gt;
-&lt;/extension&gt;</pre>
 <p>The <b>sequence</b> attribute for a key binding defines the key
-combination that is used to invoke a command.&nbsp; So, it follows that when our example action set is active, our save action will be invoked
-when the user chooses <b>Ctrl+S</b>.</p>
-
-
-<p> Likewise, when the
-workbench <b>SaveAction</b> is active, the same key combination will invoke it
-instead, since the workbench uses the same command id for its <b>SaveAction</b>.</p>
-
-
-<p>To complete the example, we need to understand what the <b>configuration</b>
-is all about.</p>
-
-
+combination that is used to invoke a command. As long as our InfoView
+context is active, we will try and execute the InfoView edit command when the
+user chooses <b>CTRL+O</b>.  The mapping of <b>M1</b> to <b>CTRL</b>
+is described in the extension point description for
+<a href="../reference/extension-points/org_eclipse_ui_bindings.html">org.eclipse.ui.bindings</a>.
+</p>
+<p>
+The <b>contextId</b> indicates what active context this key binding will
+be active in.  More information on defining contexts declaratively and
+activating them programmatically can be found in 
+<a href="workbench_advext_contexts.htm" 
+   class="XRef">Contexts</a>.  In this case, this key binding will be active
+when the <b>org.eclipse.ui.examples.contributions.view.context</b> context
+is active.
+</p>
+<p>
+In our InfoView we have code called from the end of createPartControl(Composite):
+<pre>
+	private static final String VIEW_CONTEXT_ID = &quot;org.eclipse.ui.examples.contributions.view.context&quot;; //$NON-NLS-1$
+	...
+	/**
+	 * Activate a context that this view uses. It will be tied to this view
+	 * activation events and will be removed when the view is disposed.
+	 */
+	private void activateContext() {
+		IContextService contextService = (IContextService) getSite()
+				.getService(IContextService.class);
+		contextService.activateContext(VIEW_CONTEXT_ID);
+	}
+</pre>
+</p>
+<p>
+As mentioned in <a href="workbench_cmd_handlers.htm" 
+   class="XRef">org.eclipse.ui.handlers</a> this context will be active
+only when the InfoView part is active.  It will also be deactivated when
+the InfoView part is disposed.
+</p>
 
 </BODY>
 </HTML>
