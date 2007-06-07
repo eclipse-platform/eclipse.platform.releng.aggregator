@@ -27,20 +27,17 @@ The prerequisites to start eclipse from Java Web Start are:</p>
 <li> All deployed plug-ins must be jar'ed;</li>
 <li> All plug-ins must be signed since the application needs full permission from the client.</li>
 </ul> 
-The following steps describe how to setup a Java Web Start site serving up a feature based RCP application.
+The following steps describe how to setup a Java Web Start site serving up a feature based RCP application. 
+These steps are for applications based on eclipse 3.3. Instructions on how to achieve the same for eclipse
+3.1 and 3.2 can respectively be found in the 3.1 and 3.2 SDKs.
 
 <h3>Step 1, creating a wrapper feature</h3>
 <ul>
 <li> Create a feature including all the features that are listed in your product definition;</li>
-<li> Copy in a folder of your feature the startup.jar;</li>
-<li> Add the following line to the build.properties of the feature.
-<pre>
-root=&lt;folderContainingStartup.jar&gt;/
-</pre>
-</li>
+<li> Ensure that the <tt>org.eclipse.equinox.launcher</tt> plug-in is in the feature or in one of the included feature;</li>
 </ul>
 
-<h3> Step 2, exporting the wrapper feature and the startup.jar</h3>
+<h3> Step 2, exporting the wrapper feature</h3>
 Note. Before proceeding with this step make sure to have a key store available. Eclipse does not provide any
 facility to create key stores. You can use the <tt>keytool</tt> application that
 comes with the JDK. In addition, ensure that the eclipse you are developing 
@@ -63,7 +60,6 @@ files to fill in the value of <code>&lt;j2se version="1.4+" /&gt; </code>. Click
 <li> Once the export is done you should have the following structure on disk
 <pre>
 site/   <i>(The root of your jnlp site)</i>
-  startup.jar
   features/
     WrapperingFeature_1.0.0.jar
     WrapperingFeature_1.0.0.jnlp
@@ -73,13 +69,10 @@ site/   <i>(The root of your jnlp site)</i>
   plugins/
     org.eclipse.core.runtime_3.1.0.jar
     com.foo.baz_1.0.0.jnlp
+    org.eclipse.equinox.launcher_&lt;version&gt;.jar
     ...
 </pre>
 </li>
-
-<li>Using the same key store than the one used to export the feature, sign startup.jar using <tt>jarsigner</tt>.<br>
-Tips: if you don't change key store, replace the startup.jar from the feature with this signed version so you don't 
-have to do this manual step on every export.</li>
 </ul>
 
 <h3>Step 3, creating the main JNLP file</h3>
@@ -91,7 +84,7 @@ When you did the export, all the simple JNLP files have been created, so you are
 the main file that will control the application. Because the majority of the main file is common to all 
 applications, it is recommended to start from the following self documented template.</p>
 <p>
-On the site serving up your application, the file must be located in the same folder than startup.jar.
+On the site serving up your application, the file must be located at the root.
 Once you will be done editing this file, your application will be ready.</p>
 <pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 &lt;jnlp 
@@ -121,8 +114,8 @@ Once you will be done editing this file, your application will be ready.</p>
   &lt;/application-desc&gt;
  
   &lt;resources&gt;
-    &lt;!-- Reference to the startup.jar. This does not change --&gt;
-    &lt;jar href="startup.jar"/&gt;
+    &lt;!-- Reference to the launcher jar. The version segment must be updated to the version being used--&gt;
+    &lt;jar href="plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar"/&gt;
  
     &lt;!-- Reference to all the plugins and features constituting the application --&gt;
     &lt;!-- Here we are referring to the wrapper feature since it transitively refers to all the other plug-ins  necessary --&gt;
@@ -156,8 +149,9 @@ Once you will be done editing this file, your application will be ready.</p>
   &lt;/resources&gt;
 &lt;/jnlp&gt;
 </pre>
-<p>Tip: once you have created this file, you can store it in the wrapper feature in the same folder than the startup.jar, such 
-that on every export you will get the complete structure.</p>
+<p>Tip: once you have created this file, you can store it in the wrapper feature in a folder such that on every export you will get the complete structure.
+This folder needs to be referenced from the <tt>root</tt> property of the build.properties (e.g: <tt>root=&lt;folderContainingMainJNLPFile&gt;/</tt>).
+</p>
 
 <h3>Plug-ins based application</h3>
 <p>Even though your RCP application does not use features, Java Web Start-ing it is possible.</p><p>
