@@ -92,7 +92,13 @@ needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/
 		return null, so we'll just return a simple settings object: 
 		<pre>
    protected IDialogSettings getDialogSettings() {
-      return new DialogSettings("TEST"); //$NON-NLS-1$
+      	IDialogSettings settings = Activator.getDefault().getDialogSettings()
+				.getSection(DIALOG_SETTINGS);
+		if (settings == null) {
+			settings = Activator.getDefault().getDialogSettings()
+					.addNewSection(DIALOG_SETTINGS);
+		}
+		return settings;
    }</pre></li>
 
 		<li><em>getElementName(Object)</em>: Returns a name for the given
