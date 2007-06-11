@@ -13,12 +13,15 @@
 </head>
 <body>
 
-<h2>Creating a custom filtered item selection dialog</h2>
+<h2>Creating a custom filtered items selection dialog</h2>
 <p>In this example, we will contribute a basic search dialog to illustrate the steps 
 needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/dialogs/FilteredItemsSelectionDialog.html">
 <b> FilteredItemsSelectionDialog</b></a>.</p>
 
 <ol>
+	<li>
+	Create a new Plug-in Project using Hello, world template. 
+	</li>
 	<li>
 	Create a class extending <em>org.eclipse.ui.dialogs.FilteredItemsSelectionDialog</em>.
 	Let's name it <em>FilteredResourcesSelectionDialogExample</em>.
@@ -28,6 +31,7 @@ needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/
 	example we will generate our own set of random strings as follows:
 	<pre>
    private static ArrayList resources = new ArrayList();
+   
    static {
       generateRescourcesTestCases('A', 'C', 8, ""); //$NON-NLS-1$
       generateRescourcesTestCases('a', 'c', 4, ""); //$NON-NLS-1$
@@ -91,6 +95,8 @@ needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/
 		information about how the dialog information is persisted. This method can't
 		return null, so we'll just return a simple settings object: 
 		<pre>
+   private static final String DIALOG_SETTINGS = "FilteredResourcesSelectionDialogExampleSettings";	
+		
    protected IDialogSettings getDialogSettings() {
       	IDialogSettings settings = Activator.getDefault().getDialogSettings()
 				.getSection(DIALOG_SETTINGS);
@@ -126,7 +132,35 @@ needed to create a custom subclass of  <a href="../reference/api/org/eclipse/ui/
 
 	</ul>
 	</li>
-
+	<li>
+	Add title of dialog and set simple implementation of <em>SelectionHistory</em> on dialog:<pre>
+	public FilteredResourcesSelectionDialogExample(Shell shell, boolean multi) {
+	   super(shell, multi);
+	   setTitle("Filtered Resources Selection Dialog Example");
+	   setSelectionHistory(new ResourceSelectionHistory());
+	}
+	
+	private class ResourceSelectionHistory extends SelectionHistory {
+	   protected Object restoreItemFromMemento(IMemento element) {
+		  return null; 
+	   }
+	   protected void storeItemToMemento(Object item, IMemento element) {
+	   }
+	}</pre></li>
+	<li>
+	Change <em>run(IAction)</em> method from <em>SimpleAction</em> to:<pre>
+	public void run(IAction action) {
+	   Shell shell = new Shell();
+	   FilteredItemsSelectionDialog dialog = new FilteredResourcesSelectionDialogExample(shell, true);
+	   dialog.setInitialPattern("a");
+	   dialog.open();
+	}</pre></li>	
+	<li>
+	Change tooltip of SimpleAction from <em>"Hello, Eclipse world"</em> to <em>"Filtered Items Selection Dialog Example"</em>.
+	</li>
+	<li>
+	Run Eclipse with created plug-in.
+	</li>
 	<li>
 	The resulting dialog looks as follows:
 	<p><img

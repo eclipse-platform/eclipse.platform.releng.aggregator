@@ -13,7 +13,7 @@
 </head>
 <body>
 
-<h2>Advanced use of the filtered item selection dialog</h2>
+<h2>Advanced use of the filtered items selection dialog</h2>
 
 In the <a href="dialogs_FilteredItemsSelectionDialog_example.htm">previous example</a>, 
 we saw how to create a simple subclass of FilteredItemsSelectionDialog. Now let's 
@@ -28,8 +28,8 @@ explore some of the advanced capabilities provided by this dialog:
 The dialog can be configured to save and restore the history of items that have
 been selected.
 <ol>
-	<li>Create a subclass of <em>FilteredItemsSelectionDialog.SelectionHistory</em>
-	and implement the abstract methods for saving and loading objects:</li>
+	<li>In the <a href="dialogs_FilteredItemsSelectionDialog_example.htm">previous part</a> we created a subclass of <em>FilteredItemsSelectionDialog.SelectionHistory</em> but it do nothing.
+	Now, we should fill out methods responsible for saving and loading objects:</li>
 	<pre>
    private class ResourceSelectionHistory extends SelectionHistory {
       /*
@@ -47,10 +47,45 @@ been selected.
       }
    }</pre>
 
-	<li>On your subclass of FilteredItemsSelectionDialog, define the implementation of SelectionHistory to use. 
-	<pre>
-   setSelectionHistory(new ResourceSelectionHistory());
-  </pre></li>
+    <li>Open the dialog.
+    </li>
+    <li>Select listed elements and click OK:
+    	<ul>
+    		<li>
+    			<em>AbCdEfGh</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfGi</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfGj</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfHh</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfHi</em>
+    		</li>
+    		<li>
+    			<em>AbCdEfHj</em>
+    		</li>
+    		<li>
+    			<em>abCd</em>
+    		</li>
+    		<li>
+    			<em>abCe</em>
+    		</li>
+    		<li>
+    			<em>abCf</em>
+    		</li>
+    		<li>
+    			<em>abDd</em>
+    		</li>
+    		<li>
+    			<em>abDe</em>
+    		</li>
+    	</ul>
+    </li>
 	<li>Our example dialog now looks like this:
 	<p><img
 		src="images/filteredResourcesSelectionDialogExampleAdvance1.png"
@@ -131,6 +166,8 @@ to filter strings that start with a lower case character.</p>
    }</pre></li>
 	<li>Next, create a new action and add it to the menu by overriding <em>fillViewMenu(IMenuManager)</em>.
 	Eg.: <pre>
+   private Action showOnlyLowerCaseStringsAction = new ShowOnlyLowerCaseStringsAction();
+   
    private class ShowOnlyLowerCaseStringsAction extends Action {
       /**
        * Creates a new instance of the action.
@@ -145,12 +182,20 @@ to filter strings that start with a lower case character.</p>
             applyFilter();
          }
       }
-   } 
+   }
+   
    protected void fillViewMenu(IMenuManager menuManager) {
       super.fillViewMenu(menuManager);
       menuManager.add(showOnlyLowerCaseStringsAction);
    }
   </pre></li>
+  <li>At the end override <em>applyFilter()</em> as follows:<pre>
+   protected void applyFilter() {
+      super.applyFilter();
+      checkButton.setSelection(onlyLowerCase);
+      showOnlyLowerCaseStringsAction.setChecked(onlyLowerCase);
+   }</pre>
+  </li>
 
 	<li>Now open the dialog: 
 	<p><img src="images/filteredResourcesSelectionDialogExampleAdvance3.png"
