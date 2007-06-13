@@ -206,8 +206,9 @@
 			This action is available for all selected nodes except for 
 			the <strong>extension</strong> <em>element</em> node.
 			For non-shared schemas, the <strong>extension</strong> 
-			<em>element</em> node is the special root element used to define
-			the extension point schema's grammar.  Any extension 
+			<em>element</em> node is the special root element used 
+			to define the entry point to the edited schema's grammar.
+			Any extension 
 			defined in the <strong>Plug-in Manifest Editor</strong> must use an
 			<strong>extension</strong> parent element to specify it's XML 
 			related mark-up.
@@ -265,6 +266,15 @@
 			<em>Element B</em> as a child and <em>Element B</em> requires <em>Element A</em> as a child.
 		</p>
 
+		<p>
+			To specify that an element has no children and allows text to be
+			specified within it's start and end XML tags (character content), 
+			simply leave the element's structure as is by 
+			not adding attributes, compositors and element references to it (element content).
+			Note:  An element cannot specify mixed content
+			(both character content and element content).
+		</p>
+
 		<a name="description"></a>
 		<h3>Description Section</h3>
 
@@ -300,13 +310,32 @@
 		<h3>Element Details Section</h3>
 
 		<p>
-			This <strong>TODO</strong> section allows you to TODO. 
-			It is activated by selecting the TODO node in the <strong>TODO</strong> section.
+			This section allows you to edit the properties of an element.
+			There are two kinds of elements: extension element, non-extension element. 
+			An extension element is the special root element declaration used 
+			to define the entry point to the edited schema's grammar.
+			A non-extension element is a global element declaration used as a basic
+			structural building block within the edited schema's grammar.
+		</p>
+
+		<p>
+			This section is activated by selecting either a <strong>extension</strong> 
+			<em>element</em> node or non-extension <em>element</em> node in the 
+			<strong>Extension Point Elements</strong> section.
+		</p>
+		
+		<p>
+			The <strong>Element Details</strong> section for an <strong>extension</strong> 
+			element.
 		</p>
 		
 		<p>
 			<img src="../../../images/schema_editor/section_element-details_1.png" alt="Element Details Section 1">
 		</p>		
+
+		<p>
+			The <strong>Element Details</strong> section for a non-extension element.
+		</p>
 		
 		<p>
 			<img src="../../../images/schema_editor/section_element-details_2.png" alt="Element Details Section 2">
@@ -315,8 +344,110 @@
 		<h3>Element Details Section Fields</h3>
 		
 		<p>
-			TODO.
+			Edit the <strong>Name</strong> field to specify the element name.
 		</p>
+
+		<p>
+			Click either the <strong>true</strong> button or <strong>false</strong> button
+			within the <strong>Deprecated</strong> field to indicate whether the element
+			is deprecated or not.  The <strong>Plug-in Manifest Editor</strong> will flag
+			any extension XML mark-up that is deprecated with a warning (by default).
+			This field is analogous to Java's <em>Javadoc</em> <em>@deprecated</em> tag.
+		</p>
+
+		<p>
+			If an extension element is marked as deprecated, edit the 
+			<strong>Replacement</strong> field to specify the non-deprecated
+			extension point the user should use in it's place to achieve
+			the same functionality.
+		</p>
+
+		<p>
+			Select one of the element's defined attributes from the 
+			<strong>Label Property</strong> field to specify the attribute value to
+			use as the element's label in the <strong>Plug-in Manifest Editor</strong>.
+			For instance, if a value is selected, the element's node label in the 
+			<strong>All Extensions</strong> section of the 
+			<strong>Extensions</strong> page in the <strong>Plug-in Manifest Editor</strong> will
+			be as follows:  <em>selected-attribute-value</em> (<em>element-name</em>).
+			Otherwise, if no value is selected, the element's node label will be as follows: 
+			(<em>element-name</em>).
+		</p>
+
+		<p>
+			Select one of the element's defined resource type attributes 
+			from the <strong>Icon</strong> field to specify the 
+			icon resource to use to represent the element's node in the 
+			<strong>Plug-in Manifest Editor</strong>.  
+			In order for the element's node icon to show up correctly in the 
+			<strong>All Extensions</strong> section of the 
+			<strong>Extensions</strong> page in the 
+			<strong>Plug-in Manifest Editor</strong>, the following conditions
+			must be met:
+		</p>
+		
+		<ul>
+			<li>
+				The element must define a resource type attribute.
+			</li>
+			<li>
+				That attribute must be selected as the value of this field.
+			</li>			
+			<li>
+				The contributed XML mark-up supplying the attribute value 
+				must point to a valid icon resource file.
+			</li>
+		</ul>
+
+		<p>
+			Click either the <strong>true</strong> button or <strong>false</strong> button
+			within the <strong>Translatable</strong> field to indicate whether the element's
+			character content is translatable or not.  This field is only applicable for
+			elements that have no specified children (element content) or attributes and 
+			allow text to be specified within it's start and end XML tags (character content).
+			If an element's character content is marked as translatable, then PDE tools 
+			can be used on contributed extension XML mark-up to externalize the content 
+			into a properties file for multi-language support.
+		</p>
+
+		<p>
+			Use the read-only <strong>DTD approximation</strong> field to view 
+			an approximate one-to-one mapping of the element schema grammar to the equivalent 
+			element DTD grammar.  A DTD (Document Type Definition) is
+			an easier to read, less-powerful alternative to XML Schema for 
+			specifying an XML document's formal grammar.
+			The following notation is used to specify the DTD approximation:
+		</p>
+
+		<ul>
+			<li>
+				<em>element-name</em> - Represents an element in the defined grammar.
+			</li>
+			<li>
+				<strong>EMPTY</strong> - Indicates that no element content or character 
+				content is allowed (only attribute declarations).
+			</li>
+			<li>
+				<strong>#PCDATA</strong> - Indicates that only character content is 
+				allowed (Parsed Character Data).
+			</li>		
+					
+			<li>
+				<strong>()</strong> - Used to group an element's defined sequence and choice compositors.
+			</li>	
+			<li>
+				<strong>|</strong> - Used to delimit element choices.  Represents a logical <em>or</em> disjunction.
+			</li>	
+			<li>
+				<strong>,</strong> - Used to delimit element sequences.  Represents a logical <em>and</em> conjunction.
+			</li>
+			<li>
+				<strong>+</strong> - A qualifier used to indicate one or more instances are allowed.
+			</li>	
+			<li>
+				<strong>*</strong> - A qualifier used to indicate zero or more instances are allowed.
+			</li>																
+		</ul>
 
 		<a name="compositor"></a>
 		<h3>Compositor Details Section</h3>
