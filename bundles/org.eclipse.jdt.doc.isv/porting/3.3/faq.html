@@ -20,7 +20,7 @@
 <h2><a name="deprecatedWorkingCopyMethods">How can I remove deprecation warning I get on <code>*WorkingCopy(...IProblemRequestor...)</code> methods and keep same behavior?</a></h2>
 <p>
 While implementing bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=175243">175243</a>, following methods
-have been deprecated:
+have been deprecated:</p>
 <ol>
 <li><code>ICompilationUnit#becomeWorkingCopy(IProblemRequestor, IProgressMonitor)</code></li>
 <li><code>ICompilationUnit#getWorkingCopy(WorkingCopyOwner, IProblemRequestor, IProgressMonitor)</code></li>
@@ -29,7 +29,6 @@ have been deprecated:
 </ol>
 This answer gives some advice to use new API corresponding methods without changing
 the behavior of the existing code.
-</p>
 How to re-write the code depends on the fact that given problem requestor was null or not
 (i.e. if the client code was interested in reporting problems of the working copy):
 <ol>
@@ -37,7 +36,7 @@ How to re-write the code depends on the fact that given problem requestor was nu
 	<p>
 	There's no specific migration issue when the given requestor was null.
 	</p><p>
-	So, following snippet warned for calls to deprecated methods...:
+	So, following snippet warned for calls to deprecated methods...:</p>
 	<pre>
 	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
 	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
@@ -50,9 +49,8 @@ How to re-write the code depends on the fact that given problem requestor was nu
 	ICompilationUnit newWorkingCopy = compilationUnit.becomeWorkingCopy(null, null);
 	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, null, null);
 	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(null, owner, null);</b>
-	</pre>
-	</p><p>
-	... can now be easily rewritten as follow due to the fact that default owner's problem requestor is null:
+	</pre><p>
+	... can now be easily rewritten as follow due to the fact that default owner's problem requestor is null:</p>
 	<pre>
 	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
 	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
@@ -67,7 +65,6 @@ How to re-write the code depends on the fact that given problem requestor was nu
 	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, null);
 	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(null, owner, null);</b>
 	</pre>
-	</p>
 	</li>
 	<li><strong>Problem requestor was not null</strong>
 	<p>
@@ -75,7 +72,7 @@ How to re-write the code depends on the fact that given problem requestor was nu
 	the one given as parameter to the deprecated method. The simplest way to to this is to make
 	the working copy owner returning this requestor.
 	</p><p>
-	So, following snippet warned for calls to deprecated methods...:
+	So, following snippet warned for calls to deprecated methods...:</p>
 	<pre>
 	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
 	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
@@ -96,9 +93,8 @@ How to re-write the code depends on the fact that given problem requestor was nu
 	ICompilationUnit newWorkingCopy = compilationUnit.becomeWorkingCopy(requestor, null);
 	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, requestor, null);
 	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(requestor, owner, null);</b>
-	</pre>
-	</p><p>
-	... needs to be rewritten as follow to keep the same behavior:
+	</pre><p>
+	... needs to be rewritten as follow to keep the same behavior:</p>
 	<pre>
 	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
 	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
@@ -128,7 +124,6 @@ How to re-write the code depends on the fact that given problem requestor was nu
 	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(owner, null);
 	</b>
 	</pre>
-	</p>
 	</li>
 </ol>
 </body>
