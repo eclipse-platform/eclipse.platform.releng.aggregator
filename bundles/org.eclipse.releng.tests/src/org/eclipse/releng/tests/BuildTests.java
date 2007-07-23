@@ -35,6 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
@@ -750,11 +751,27 @@ public class BuildTests extends TestCase {
 	private String buildCommandLine(String source, String destination,
 			String output) {
 
+		Bundle bundle = Platform.getBundle("org.eclipse.equinox.launcher");
+		URL u = null;
+		String temp, t = null;
+		try {
+			u = FileLocator.resolve(bundle.getEntry("/"));
+			temp = u.toString();
+			// remove extraneous characters from string that specifies equinox
+			// launcher filesystem location!
+			t = temp.substring(temp.indexOf("/"), temp.lastIndexOf("/") - 1);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+
 		String javadir = System.getProperty("java.home");
 		javadir += File.separator + "bin" + File.separator + "java";
 
 		String command = javadir
-				+ " -cp org.eclipse.equinox.launcher.jar org.eclipse.core.launcher.Main -application org.eclipse.pde.tools.versioning.application -clean";
+				+ " -cp "
+				+ t
+				+ " org.eclipse.core.launcher.Main -application org.eclipse.pde.tools.versioning.application -clean";
 
 		command += " -new " + source;
 		command += " -old " + destination;
@@ -843,11 +860,11 @@ public class BuildTests extends TestCase {
 		 * and thus cannot be compared
 		 */
 
-		//disable temporarily		
-		  if ((compareOldPath.indexOf("I2") > 0 ) || (compareOldPath.indexOf("N2") > 0 )) { //if nightly build, skip test 
-			  return; 
-		  }
-		 
+		// disable temporarily
+		if (compareOldPath.indexOf("N2") > 0) { 
+			// if nightly build, skip test
+			return;
+		}
 
 		String compareNewPath = properties.getProperty("compare.new");
 		File compareNewFile = compareNewPath == null ? null : new File(
