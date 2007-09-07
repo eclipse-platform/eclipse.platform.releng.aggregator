@@ -44,6 +44,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.ICVSRemoteFile;
@@ -152,7 +153,13 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 			final String[] filterArray = new String[1];
 			Dialog filterCriteria = new Dialog(PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()) {
+				
 				Text text;
+				
+				protected void configureShell(Shell newShell) {
+					super.configureShell(newShell);
+					newShell.setText(Messages.getString("CopyrightDialog.1"));
+				}
 
 				protected Control createDialogArea(Composite parent) {
 					Composite parentComposite = (Composite) super
@@ -162,18 +169,20 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 					composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL,
 							true, true));
 					composite.setLayout(new GridLayout(2, false));
+
+					Label label = new Label(composite, SWT.NONE);
+					label.setText(Messages.getString("CopyrightDialog.2"));
+					text = new Text(composite, SWT.BORDER | SWT.SINGLE);
+					text.setText("copyright");
+					text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
+							false));
+					
 					Label header = new Label(composite, SWT.WRAP);
-					header.setText(Messages.getString("CopyrightDialog.1"));
+					header.setText(Messages.getString("CopyrightDialog.3"));
 					GridData gridData = new GridData(SWT.FILL, SWT.FILL, true,
 							false);
 					gridData.horizontalSpan = 2;
 					header.setLayoutData(gridData);
-					Label label = new Label(composite, SWT.NONE);
-					label.setText(Messages.getString("CopyrightDialog.2"));
-					text = new Text(composite, SWT.NONE);
-					text.setText("copyright");
-					text.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,
-							false));
 					return parentComposite;
 				}
 
