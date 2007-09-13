@@ -101,6 +101,10 @@ public class MapEntry {
 	private void init(String entryLine) {
 		valid = false;
 	
+		// check for commented out entry
+		if (entryLine.startsWith("#") || entryLine.startsWith("!"))
+			return;
+
 		// Type	
 		int start = 0;
 		int end = entryLine.indexOf('@');
