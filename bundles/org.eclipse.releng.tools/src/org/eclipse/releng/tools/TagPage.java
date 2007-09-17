@@ -304,6 +304,7 @@ public class TagPage extends WizardPage{
 			//In case the wizard switches to this page from Project Selection Page and there are some projects have outgoing changes
 			wizard.updateSelectedProject();
 		}
+		tagCombo.setFocus();
 	}
 	
 	public boolean isValidateButtonSelected(){
