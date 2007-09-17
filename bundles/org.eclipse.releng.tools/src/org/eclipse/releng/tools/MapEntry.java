@@ -23,6 +23,7 @@ import org.eclipse.team.internal.ccvs.core.syncinfo.FolderSyncInfo;
  */
 public class MapEntry {
 	
+	private static final String HEAD = "HEAD";
 	private static final String KEY_TAG = "tag"; //$NON-NLS-1$
 	private static final String KEY_PATH = "path"; //$NON-NLS-1$
 	private static final String KEY_CVSROOT = "cvsRoot"; //$NON-NLS-1$
@@ -205,11 +206,11 @@ public class MapEntry {
 
 	public String getTagName() {
 		String value = (String) arguments.get(KEY_TAG);
-		return value == null ? EMPTY_STRING : value;
+		return value == null  || HEAD.equals(value) ? EMPTY_STRING : value;
 	}
 	
 	public CVSTag getTag() {
-		if (getTagName().equals("HEAD")) return CVSTag.DEFAULT;
+		if (getTagName().equals(HEAD)) return CVSTag.DEFAULT;
 		return new CVSTag(getTagName(), CVSTag.VERSION);
 	}
 	
