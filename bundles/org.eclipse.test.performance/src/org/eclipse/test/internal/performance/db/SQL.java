@@ -25,7 +25,7 @@ public class SQL {
 
 	private boolean fCompatibility= false;
 
-	private Connection fConnection;
+	protected Connection fConnection;
 
 	private PreparedStatement fInsertVariation, fInsertScenario, fInsertSample, fInsertDataPoint, fInsertScalar;
 	private PreparedStatement fQueryComment, fInsertComment, fQueryComment2;
@@ -35,7 +35,7 @@ public class SQL {
 			fQuerySummaryEntries;
 	private PreparedStatement fInsertFailure, fQueryFailure;
 
-	SQL(Connection con) throws SQLException {
+	protected SQL(Connection con) throws SQLException {
 		fConnection= con;
 
 		boolean needsUpgrade= true;
@@ -78,7 +78,7 @@ public class SQL {
 		}
 	}
 
-	public void dispose() throws SQLException {
+	protected void dispose() throws SQLException {
 		if (fInsertVariation != null)
 			fInsertVariation.close();
 		if (fInsertScenario != null)

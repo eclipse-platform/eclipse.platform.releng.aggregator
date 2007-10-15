@@ -11,6 +11,7 @@
 package org.eclipse.test.internal.performance.db;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -679,6 +680,7 @@ public class DB {
         if (fConnection != null)
             return;
 
+        if (DEBUG) DriverManager.setLogWriter(new PrintWriter(System.out));
         String dbloc= PerformanceTestPlugin.getDBLocation();
         if (dbloc == null)
             return;
@@ -723,6 +725,8 @@ public class DB {
                 } else
                     f= new File(dbloc);
                 url= new File(f, dbname).getAbsolutePath();
+				info.put("user", PerformanceTestPlugin.getDBUser()); //$NON-NLS-1$
+				info.put("password", PerformanceTestPlugin.getDBPassword()); //$NON-NLS-1$
                 info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
             }
             try {
