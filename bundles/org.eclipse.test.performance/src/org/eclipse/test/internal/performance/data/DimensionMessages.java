@@ -26,9 +26,13 @@ public class DimensionMessages {
 	private DimensionMessages() {
 		// emtpy
 	}
-	
+
 	public static String getString(int id) {
-	    return getString("Dimension." + id); //$NON-NLS-1$
+	    return getString("dimension." + id); //$NON-NLS-1$
+	}
+
+	public static String getDescription(int id) {
+	    return getString("dimension.description." + id); //$NON-NLS-1$
 	}
 
 	public static String getString(String key) {

@@ -701,6 +701,17 @@ public class DB {
                 info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
                 url= dbloc + "/" + dbname + ";create=true";  //$NON-NLS-1$//$NON-NLS-2$
+			} else if (dbloc.startsWith("//")) { //$NON-NLS-1$
+				// remote
+				fIsEmbedded = false;
+				// connect over network
+				if (DEBUG)
+					System.out.println("Trying to connect over network..."); //$NON-NLS-1$
+				Class.forName("org.apache.derby.jdbc.ClientDriver"); //$NON-NLS-1$
+				info.put("user", PerformanceTestPlugin.getDBUser()); //$NON-NLS-1$
+				info.put("password", PerformanceTestPlugin.getDBPassword()); //$NON-NLS-1$
+				info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
+				url = dbloc + '/' + dbname;
             } else {
                 
                 // workaround for Derby issue: http://nagoya.apache.org/jira/browse/DERBY-1

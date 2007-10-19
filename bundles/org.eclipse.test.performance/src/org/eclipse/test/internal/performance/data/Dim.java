@@ -69,8 +69,12 @@ public class Dim implements Dimension {
 	public boolean largerIsBetter() {
 	    return fLargerIsBetter;
 	}
-	
+
 	public String getName() {
+		return DimensionMessages.getString(fId);
+	}
+
+	public String getDescription() {
 		return DimensionMessages.getString(fId);
 	}
 	
