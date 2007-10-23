@@ -61,6 +61,7 @@ void cleanValues() {
 			PerformanceTestPlugin.log(status);
 		}
 		*/
+		this.average[dim_id] = 0;
 		for (int i=0; i<vLength; i++) {
 			this.average[dim_id] += values[dim_id][i];
 		}
@@ -342,6 +343,12 @@ void setValue(int dim_id, int step, long value) {
 		this.stddev = new double[length];
 		this.count = new long[length];
 		this.dimensions[0] = dimension;
+		for (int i=0; i<length; i++) {
+			// init average numbers with an impossible value
+			// to clearly identify whether it's already set or not
+			// when several measures are made for the same build
+			this.average[i] = -1;
+		}
 	} else {
 		length = this.dimensions.length;
 		for (int i=0; i<length; i++) {
@@ -358,18 +365,18 @@ void setValue(int dim_id, int step, long value) {
 	}
 	switch (step) {
 		case InternalPerformanceMeter.AVERAGE:
-			if (this.average[idx] != 0) {
+			if (this.average[idx] != -1) {
 				if (values == null) {
 					values = new double[length][];
 					values[idx] = new double[2];
 					values[idx][0] = this.average[idx];
 					values[idx][1] = value;
-					this.average[idx] = 0;
+					this.average[idx] = -1;
 				} else if (this.values[idx] == null) {
 					values[idx] = new double[2];
 					values[idx][0] = this.average[idx];
 					values[idx][1] = value;
-					this.average[idx] = 0;
+					this.average[idx] = -1;
 				}
 			} else if (this.values != null && this.values[idx] != null) {
 				int vLength = values[idx].length;
