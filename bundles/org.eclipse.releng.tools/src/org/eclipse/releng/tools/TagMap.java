@@ -119,7 +119,13 @@ public class TagMap extends TagInRepositoryAction {
 	 */
 	public boolean isEnabled() {
 		IResource[] resources = getSelectedResources();
-		return (resources.length >= 0  && MapProject.getDefaultMapProject().mapsAreLoaded());
+		if (resources.length == 0) return false;
+		for (int i = 0; i < resources.length; i++) {
+			IResource resource = resources[i];
+			if (resource.getType() != IResource.FILE) return false;
+			if (!resource.getFileExtension().equals("map")) return false;
+		}
+		return true;
 	}
 
 }
