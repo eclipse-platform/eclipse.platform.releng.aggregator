@@ -11,12 +11,13 @@
 package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
-
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
+import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
 import org.eclipse.team.ui.TeamUI;
@@ -28,19 +29,6 @@ import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
  * org.eclipse.releng project in the folder named maps
  */
 public class CompareLocalToMap extends WorkspaceAction {
-
-	/*
-	 * Get the tag from the map files in the org.eclipse.releng project
-	 * 
-	 * @param resource
-	 * @return
-	 * @throws CVSException
-	 */
-	protected CVSTag getTag(IResource resource) {
-		MapEntry entry = getMapProject().getMapEntry(resource.getProject());
-		if (entry == null) return CVSTag.DEFAULT;
-		return entry.getTag();
-	}
 	
 	/**
 	 * Returns true if the super would enable the option *and*
@@ -50,27 +38,51 @@ public class CompareLocalToMap extends WorkspaceAction {
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
 	public boolean isEnabled() {
-		
-		boolean result = super.isEnabled();
-		if (!result) {
+		if (!super.isEnabled())
 			return false;
-		}	
-		return (getMapProject() != null && getMapProject().mapsAreLoaded());
+		
+		//if any of the projects in the current workspace contain valid map files, return true
+		IProject[] workspaceProjects = RelEngPlugin.getWorkspace().getRoot().getProjects();
+        for (int i=0; i<workspaceProjects.length; i++) {
+        	try {
+    			if (new MapProject(workspaceProjects[i]).getValidMapFiles().length != 0)
+    				return true;
+    		} catch (CoreException e) {
+        		//do nothing
+    		}
+        }
+        return false;
 	}
 
 	/**
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
 	 */
-	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {		
+	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
+		//Start the MapProjectSelectionWizard
+		IPreferenceStore preferenceStore = RelEngPlugin.getDefault().getPreferenceStore();
+		if (!(preferenceStore.getBoolean(MapProjectPreferencePage.USE_DEFAULT_MAP_PROJECT)) || 
+				!(preferenceStore.getString(MapProjectPreferencePage.SELECTED_MAP_PROJECT_PATH).length() > 0)) {
+			MapProjectSelectionWizard wizard = new MapProjectSelectionWizard(Messages.getString("CompareLocalToMap.0")); //$NON-NLS-1$
+			wizard.execute(getShell());
+			
+			//check if the "cancel" button was used in the wizard dialog.  Return if so.
+			if (wizard.operationCancelled())
+				return;
+		}
+			
 		IResource[] resources = getSelectedResources();
 		if (resources.length == 0) return;
-		CVSTag[] tags = new CVSTag[resources.length];		
-		for (int i = 0; i < resources.length; i++) {
-			tags[i] = getTag(resources[i]);
-		}
-
+		
+		//check for projects for which a map entry cannot be found
+		CVSTagHelper tagHelper = new CVSTagHelper();
+		CVSTag[] tags = tagHelper.findMissingMapEntries(resources);
+		
+		//warn the user if any projects were found to not have a corresponding map entry
+		if (tags == null || tagHelper.warnAboutUnfoundMapEntries(Messages.getString("CompareLocalToMap.1"))) //$NON-NLS-1$
+			return;
+		
 		// Create the synchronize view participant
-		CVSCompareSubscriber s = new CVSCompareSubscriber(resources, tags, "RelEng Map"); //$NON-NLS-1$
+		CVSCompareSubscriber s = new CVSCompareSubscriber(resources, tags, "Map Project"); //$NON-NLS-1$
 		try {
 			s.primeRemoteTree();
 		} catch (CVSException e) {
@@ -79,9 +91,6 @@ public class CompareLocalToMap extends WorkspaceAction {
 		}
 		CompareParticipant participant = new CompareParticipant(s);
 		TeamUI.getSynchronizeManager().addSynchronizeParticipants(new ISynchronizeParticipant[]{participant});
-		participant.refresh(resources, "Refreshing", "Refreshing", getTargetPart().getSite());
-	}
-	private MapProject getMapProject(){
-		return MapProject.getDefaultMapProject();
+		participant.refresh(resources, "Refreshing", "Refreshing", getTargetPart().getSite()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

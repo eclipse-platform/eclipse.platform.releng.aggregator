@@ -10,13 +10,7 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
+import java.io.*;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.core.resources.IProject;
@@ -49,7 +43,7 @@ public class MapContentDocument implements ITypedElement, IStreamContentAccessor
 					inputStream));
 			String aLine = aReader.readLine();
 			while (aLine != null) {
-				if (aLine.trim().length() != 0 && !aLine.startsWith("!")) {
+				if (aLine.trim().length() != 0 && !aLine.startsWith("!") && !aLine.startsWith("#")) {
 					// Found a possible match
 					MapEntry entry = new MapEntry(aLine);
 					if (!entry.isValid()) {

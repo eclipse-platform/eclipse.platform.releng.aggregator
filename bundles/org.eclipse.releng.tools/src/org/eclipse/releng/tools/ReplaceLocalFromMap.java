@@ -13,14 +13,13 @@ package org.eclipse.releng.tools;
 import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.*;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
 import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.CVSException;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.ICVSResource;
+import org.eclipse.team.internal.ccvs.core.*;
 import org.eclipse.team.internal.ccvs.core.syncinfo.ResourceSyncInfo;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.operations.ReplaceOperation;
@@ -32,18 +31,7 @@ import org.eclipse.team.internal.core.InfiniteSubProgressMonitor;
  */
 public class ReplaceLocalFromMap extends WorkspaceAction {
 
-	/*
-	 * Get the tag from the map files in the org.eclipse.releng project
-	 * 
-	 * @param resource
-	 * @return
-	 * @throws CVSException
-	 */
-	protected CVSTag getTag(IResource resource) {
-		MapEntry entry = MapProject.getDefaultMapProject().getMapEntry((IProject)resource);
-		if (entry == null) return CVSTag.DEFAULT;
-		return entry.getTag();
-	}
+	private CVSTag[] tags;
 	
 	/**
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction#isEnabledForAddedResources()
@@ -70,7 +58,7 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 				if (info != null && info.getTag() != null) {
 					String revision = info.getRevision();
 					String tag = info.getTag().getName();
-					if (revision.equals(tag)) return false;
+						if (revision.equals(tag)) return false;
 				}
 			}
 			return true;
@@ -87,11 +75,8 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
 	public boolean isEnabled() {
-		
-		boolean result = super.isEnabled();
-		if (!result) {
+		if (!(super.isEnabled()))
 			return false;
-		}
 		
 		IResource[] resources = super.getSelectedResources();
 		for (int i = 0; i < resources.length; i++) {
@@ -101,7 +86,17 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 			}
 		}
 		
-		return (getMapProject() != null && getMapProject().mapsAreLoaded());
+		//if any of the projects in the current workspace contain valid map files, return true
+		IProject[] workspaceProjects = RelEngPlugin.getWorkspace().getRoot().getProjects();
+        for (int i=0; i<workspaceProjects.length; i++) {
+        	try {
+    			if (new MapProject(workspaceProjects[i]).getValidMapFiles().length != 0)
+    				return true;
+    		} catch (CoreException e) {
+        		//this is ok, we will move on to the next project
+    		}
+        }
+        return false;
 	}
 
 	/* (non-Javadoc)
@@ -109,20 +104,33 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	 */
 	protected void performReplace(IResource[] resources, IProgressMonitor monitor) throws TeamException, InvocationTargetException, InterruptedException {
 		monitor.beginTask(null, 100 * resources.length);
-		for (int i = 0; i < resources.length; i++) {
-			IResource resource = resources[i];
-			new ReplaceOperation(getTargetPart(), new IResource[] { resource }, getTag(resource), true).run(new SubProgressMonitor(monitor, 100));
+		try {
+			if (tags.length != resources.length)
+				return;
+			for (int i = 0; i < resources.length; i++) {
+				IResource resource = resources[i];
+				new ReplaceOperation(getTargetPart(), new IResource[] { resource }, tags[i], true).run(new SubProgressMonitor(monitor, 100));
+			}
+		} finally {
+			monitor.done();
 		}
-		monitor.done();
-	}
-	private MapProject getMapProject(){
-		return MapProject.getDefaultMapProject();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
 	 */
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
+		//Start the MapProjectSelectionWizard
+		IPreferenceStore preferenceStore = RelEngPlugin.getDefault().getPreferenceStore();
+		if (!(preferenceStore.getBoolean(MapProjectPreferencePage.USE_DEFAULT_MAP_PROJECT)) || 
+				!(preferenceStore.getString(MapProjectPreferencePage.SELECTED_MAP_PROJECT_PATH).length() > 0)) {
+			MapProjectSelectionWizard wizard = new MapProjectSelectionWizard(Messages.getString("ReplaceLocalFromMap.0")); //$NON-NLS-1$
+			wizard.execute(getShell());
+			
+			//check if the "cancel" button was used in the wizard dialog.  Return if so.
+			if (wizard.operationCancelled())
+				return;
+		}
 		
 		final IResource[][] resources = new IResource[][] {null};
 		run(new IRunnableWithProgress() {
@@ -139,6 +147,15 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 		}, false /* cancelable */, PROGRESS_BUSYCURSOR);
 		
 		if (resources[0] == null || resources[0].length == 0) return;
+		
+		//check for projects for which a map entry cannot be found
+		CVSTagHelper tagHelper = new CVSTagHelper();
+		tags = tagHelper.findMissingMapEntries(resources[0]);
+		
+		//warn the user if any projects were found to not have a corresponding map entry
+		boolean operationCancelled = tagHelper.warnAboutUnfoundMapEntries(Messages.getString("ReplaceLocalFromMap.1")); //$NON-NLS-1$
+		if (operationCancelled || tags == null)
+			return;
 		
 		run(new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {

@@ -210,7 +210,7 @@ public class MapEntry {
 	}
 	
 	public CVSTag getTag() {
-		if (getTagName().equals(HEAD)) return CVSTag.DEFAULT;
+		if (getTagName().equals(HEAD) || getTagName().equals("")) return CVSTag.DEFAULT; //$NON-NLS-1$
 		return new CVSTag(getTagName(), CVSTag.VERSION);
 	}
 	

@@ -9,19 +9,19 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.releng.tools;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
 import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.*;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.graphics.Rectangle;
@@ -61,6 +61,8 @@ public class ReleaseWizard extends Wizard {
 	private MapProject mapProject;
 	private IProject[] preSelectedProjects;
 	private IProject[] selectedProjects;
+	private IPreferenceStore preferenceStore;
+	private boolean defaultBeingUsed;
 	
 
 	public ReleaseWizard() {
@@ -71,6 +73,7 @@ public class ReleaseWizard extends Wizard {
 			section = settings.addNewSection("ReleaseWizard");//$NON-NLS-1$
 		}
 		setDialogSettings(section);
+		preferenceStore = RelEngPlugin.getDefault().getPreferenceStore();
 	}
 	
 	/*
@@ -119,30 +122,39 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.IWizard#addPages()
 	 */
 	public void addPages() {
-		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage",
-				Messages.getString("ReleaseWizard.4"), //$NON-NLS-1$
-				section,
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
-		mapSelectionPage.setDescription(Messages.getString("ReleaseWizard.3")); //$NON-NLS-1$
-		addPage(mapSelectionPage);
+		defaultBeingUsed = false;
+		if (preferenceStore.getBoolean(MapProjectPreferencePage.USE_DEFAULT_MAP_PROJECT) &&
+				(preferenceStore.getString(MapProjectPreferencePage.SELECTED_MAP_PROJECT_PATH).length() > 1)) {
+			String path = preferenceStore.getString(MapProjectPreferencePage.SELECTED_MAP_PROJECT_PATH);
+			
+			try {
+				mapProject = new MapProject(ResourcesPlugin.getWorkspace().getRoot().getProject(path));
+				defaultBeingUsed = true;
+			}
+			catch (CoreException e) {
+				//this is ok, we will use the mapSelectionPage instead
+			}			
+		}
+		
+		if (!defaultBeingUsed) addMapSelectionPage();
 		
 		projectSelectionPage = new ProjectSelectionPage(Messages.getString("ReleaseWizard.5"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.6"), 
+				Messages.getString("ReleaseWizard.6"),  //$NON-NLS-1$
 				section, 
 				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
 		projectSelectionPage.setDescription(Messages.getString("ReleaseWizard.7")); //$NON-NLS-1$
 		addPage(projectSelectionPage);
 		
-		tagPage = new TagPage(Messages.getString("ReleaseWizard.8"), 
-				Messages.getString("ReleaseWizard.9"), 
+		tagPage = new TagPage(Messages.getString("ReleaseWizard.8"),  //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.9"),  //$NON-NLS-1$
 				section, 
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$ //$NON-NLS-2$
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
 		tagPage.setDescription(Messages.getString("ReleaseWizard.10")); //$NON-NLS-1$
 		addPage(tagPage);
 		
 		projectComparePage = new ProjectComparePage(Messages.getString("ReleaseWizard.11"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.12"), 
-				section, TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.12"),  //$NON-NLS-1$
+				section, TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
 		projectComparePage.setDescription(Messages.getString("ReleaseWizard.13")); //$NON-NLS-1$
 		addPage(projectComparePage);
 		
@@ -153,16 +165,27 @@ public class ReleaseWizard extends Wizard {
 		addPage(buildNotesPage);
 		
 		mapComparePage = new MapFileComparePage(Messages.getString("ReleaseWizard.14"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.15"), 
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE)); //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.15"),  //$NON-NLS-1$
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
 		mapComparePage.setDescription(Messages.getString("ReleaseWizard.16")); //$NON-NLS-1$
 		addPage(mapComparePage);
 		
 		commentPage = new CommitCommentPage(parentDialog, Messages.getString("ReleaseWizard.17"), //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.18"), TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE), Messages.getString("ReleaseWizard.19")); //$NON-NLS-1$ //$NON-NLS-2$
 		addPage(commentPage);
+		
+		if (defaultBeingUsed) broadcastMapProjectChange(mapProject);
 	}
 	
+	private void addMapSelectionPage() {
+		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.4"), //$NON-NLS-1$
+				section,
+				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+		mapSelectionPage.setDescription(Messages.getString("ReleaseWizard.3")); //$NON-NLS-1$
+		addPage(mapSelectionPage);
+	}
+
 	/*
 	 * commit buildnotes file if update option selected
 	 */
@@ -265,7 +288,10 @@ public class ReleaseWizard extends Wizard {
 					}
 				}
 			});
-			mapSelectionPage.saveSettings();
+			if (!defaultBeingUsed) {
+				mapSelectionPage.saveSettings();
+				updatePreferenceStore();
+			}
 			projectSelectionPage.saveSettings();
 			projectComparePage.saveSettings();
 			buildNotesPage.saveSettings();
@@ -280,6 +306,12 @@ public class ReleaseWizard extends Wizard {
 		return false;
 	}
 	
+	private void updatePreferenceStore() {
+		preferenceStore.setValue(MapProjectPreferencePage.USE_DEFAULT_MAP_PROJECT, mapSelectionPage.useDefaultMapProject());	
+		String fullPath = mapSelectionPage.getSelectedMapProject().getProject().getFullPath().toString();
+		preferenceStore.setValue(MapProjectPreferencePage.SELECTED_MAP_PROJECT_PATH, fullPath);
+	}
+
 	public void setParentDialog(Dialog p) {
 		this.parentDialog = p;
 	}
@@ -301,7 +333,7 @@ public class ReleaseWizard extends Wizard {
 
 			if (projectSelectionPage.isCompareButtonChecked()){
 				return projectComparePage;
-			}			
+			}
 			else
 				return tagPage;
 		}
@@ -320,9 +352,8 @@ public class ReleaseWizard extends Wizard {
 				buildNotesPage.setSyncInfoSet(projectComparePage
 						.getSyncInfoSet());
 				return buildNotesPage;
-			} else {
-				return tagPage;
-			}
+			} 
+			return tagPage;
 		}
 		if (page == buildNotesPage) {
 			return tagPage;
@@ -346,7 +377,7 @@ public class ReleaseWizard extends Wizard {
 	protected IProject[] performPrompting(IProject[] projects)  {
 		IResource[] resources;
 		PromptingDialog prompt = new PromptingDialog(getShell(), projects,
-			getPromptCondition(projects), CVSUIMessages.TagAction_uncommittedChangesTitle);//$NON-NLS-1$
+			getPromptCondition(projects), CVSUIMessages.TagAction_uncommittedChangesTitle);
 		try {
 			 resources = prompt.promptForMultiple();
 		} catch(InterruptedException e) {
@@ -364,13 +395,13 @@ public class ReleaseWizard extends Wizard {
 	}
 	
 
-	protected IPromptCondition getPromptCondition(IResource[] resource) {
+	protected IPromptCondition getPromptCondition(IResource[] resources) {
 		return new IPromptCondition() {
 			public boolean needsPrompt(IResource resource) {
 				return CVSLightweightDecorator.isDirty(resource);
 			}
 			public String promptMessage(IResource resource) {
-				return NLS.bind(CVSUIMessages.TagAction_uncommittedChanges, new String[] { resource.getName() });//$NON-NLS-1$
+				return NLS.bind(CVSUIMessages.TagAction_uncommittedChanges, new String[] { resource.getName() });
 			}
 		};
 	}
@@ -442,7 +473,7 @@ public class ReleaseWizard extends Wizard {
 	public MapProject getMapProject(){
 		return mapProject;
 	}	
-	public void boadcastMapProjectChange(MapProject m){
+	public void broadcastMapProjectChange(MapProject m){
 		mapProject = m;
 		projectSelectionPage.updateMapProject(m);
 		projectComparePage.updateMapProject(m);
