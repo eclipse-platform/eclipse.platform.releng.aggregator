@@ -15,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
@@ -60,10 +62,14 @@ public abstract class AbstractResults implements Comparable {
 		"RHEL 3.0 Sun 1.4.2_10 (2 GHz 512 MB)", //$NON-NLS-1$
 	};
 
-	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm"); //$NON-NLS-1$
+	protected static final SimpleDateFormat DATE_FORMAT;
+	static {
+		DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm"); //$NON-NLS-1$
+		DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));	//$NON-NLS-1$
+	}
 
 	// Initialize constant fields depending on DB version
-	protected final static String VERSION_REF, VERSION;
+	public final static String VERSION_REF, VERSION;
 	static {
 		String dbName = PerformanceTestPlugin.getDBName();
 		String version;

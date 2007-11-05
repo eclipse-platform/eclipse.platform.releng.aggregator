@@ -101,7 +101,7 @@ void read(List scenarios, File dataDir) {
 			dirty = true;
 			addChild(scenarioResults, true);
 		}
-		if (dataDir != null && dirty && (System.currentTimeMillis() - time) > 300000) {
+		if (dataDir != null && dirty && (System.currentTimeMillis() - time) > 300000) { // save every 5mn
 			writeData(dataDir);
 			time = System.currentTimeMillis();
 			dirty = false;
@@ -125,21 +125,25 @@ boolean readData(File dir, List scenarios) throws IOException {
 	boolean valid = false, dirty = false;
 	int size = 0;
 	try {
+		long time = System.currentTimeMillis();
 		String lastBuildName = stream.readUTF();
 		size = stream.readInt();
 		for (int i=0; i<size; i++) {
 			int scenario_id = stream.readInt();
 			ScenarioResults scenarioResults = getScenarioResults(scenarios, scenario_id);
-			if (scenarioResults == null) {
-				// scenario should always have been created while reading all scenarios from database
-				return dirty;
+			if (scenarioResults != null) {
+				scenarioResults.parent = this;
+				scenarioResults.print = this.print;
+				if (scenarioResults.readData(stream, lastBuildName)) {
+					dirty = true;
+				}
+				addChild(scenarioResults, true);
 			}
-			scenarioResults.parent = this;
-			scenarioResults.print = this.print;
-			if (scenarioResults.readData(stream, lastBuildName)) {
-				dirty = true;
+			if (dirty && (System.currentTimeMillis() - time) > 300000) { // save every 5mn
+				writeData(dir);
+				time = System.currentTimeMillis();
+				dirty = false;
 			}
-			addChild(scenarioResults, true);
 		}
 		valid = true;
 	} finally {

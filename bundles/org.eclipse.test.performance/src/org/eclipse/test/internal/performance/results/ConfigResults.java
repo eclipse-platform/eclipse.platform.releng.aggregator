@@ -175,18 +175,20 @@ public double[] getStatistics(List prefixes, int dim_id) {
 	for (int i=0; i<size; i++) {
 		BuildResults buildResults = (BuildResults) children.get(i);
 		String buildName = buildResults.getName();
-		if (prefixes == null) {
-			double value = buildResults.getValue(dim_id);
-			values[count] = value;
-			mean += value;
-			count++;
-		} else {
-			for (int j=0; j<length; j++) {
-				if (buildName.startsWith((String)prefixes.get(j))) {
-					double value = buildResults.getValue(dim_id);
-					values[count] = value;
-					mean += value;
-					count++;
+		if (isBuildConcerned(buildResults)) {
+			if (prefixes == null) {
+				double value = buildResults.getValue(dim_id);
+				values[count] = value;
+				mean += value;
+				count++;
+			} else {
+				for (int j=0; j<length; j++) {
+					if (buildName.startsWith((String)prefixes.get(j))) {
+						double value = buildResults.getValue(dim_id);
+						values[count] = value;
+						mean += value;
+						count++;
+					}
 				}
 			}
 		}
@@ -210,7 +212,13 @@ public double[] getStatistics(List prefixes, int dim_id) {
 public boolean isBaselined() {
 	return this.baselined;
 }
-
+boolean isBuildConcerned(BuildResults buildResults) {
+	String buildDate = buildResults.getDate();
+	String currentBuildDate = getCurrentBuildResults() == null ? null : getCurrentBuildResults().getDate();
+	String baselineBuildDate = getBaselineBuildResults() == null ? null : getBaselineBuildResults().getDate();
+	return ((currentBuildDate == null || buildDate.compareTo(currentBuildDate) <= 0) &&
+		(baselineBuildDate == null || buildDate.compareTo(baselineBuildDate) <= 0));
+}
 /**
  * Returns whether the configuration has results for the performance
  * current build or not.
@@ -231,11 +239,13 @@ public boolean isValid() {
 public List lastNightlyBuildNames(int n) {
 	List labels = new ArrayList();
 	for (int i=size()-2; i>=0; i--) {
-		AbstractResults buildResults = (AbstractResults) this.children.get(i);
-		String buildName = buildResults.getName();
-		if (buildName.startsWith("N")) { //$NON-NLS-1$
-			labels.add(buildName);
-			if (labels.size() >= n) break;
+		BuildResults buildResults = (BuildResults) this.children.get(i);
+		if (isBuildConcerned(buildResults)) {
+			String buildName = buildResults.getName();
+			if (buildName.startsWith("N")) { //$NON-NLS-1$
+				labels.add(buildName);
+				if (labels.size() >= n) break;
+			}
 		}
 	}
 	return labels;
