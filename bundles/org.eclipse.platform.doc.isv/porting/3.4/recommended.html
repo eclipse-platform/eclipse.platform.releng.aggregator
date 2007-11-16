@@ -18,6 +18,7 @@
 
 <ol>
   <li><a href="#quickAssistContext">Quick Fix command moved to Dialogs and Windows context</a></li>
+  <li><a href="#getCharset">IFile.getCharset() caches character set values</a></li>
 </ol>
 
 <hr>
@@ -28,6 +29,18 @@
 In order to enable Quick Fix in dialogs we moved the <code>org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals</code>
 command to the <b>Dialogs and Windows</b> context. Clients who registered that command for the <b>Dialogs</b> or
 <b>Dialogs and Windows</b> context can now remove their contribution from their <code>plugin.xml</code>.
+</p>
+
+<!-- ############################################## -->
+
+<h2>2. <a name="getCharset">IFile.getCharset() caches character set values</a></h2>
+<p>
+The method <code>IFile.getCharset</code> returns a cached value for the file's encoding. 
+If the file's encoding has been changed externally, and has not since been synchronized with 
+the workspace using <code>IResource.refreshLocal</code>, it may return a stale result.  
+Clients that call this method should revisit their usage to determine if a cached result 
+is acceptable. While using a cached encoding has better performance, it could lead 
+to data corruption if the wrong encoding is used to write a file.
 </p>
 
 <!-- ############################################## -->
