@@ -136,13 +136,6 @@ ResultSet queryDimScalars(int datapointId) throws SQLException {
 ResultSet queryScenarioTimestampDataPoints(String config, int scenarioID, String lastBuildName, long lastBuildTime) throws SQLException {
 	if (DB_Results.LOG) DB_Results.LOG_WRITER.starts("		+ SQL query (config="+config+", scenario ID="+scenarioID+", build name="+lastBuildName); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	if (this.queryScenarioTimestampDataPoints== null) {
-//		String statement = "select DATAPOINT.ID, DATAPOINT.STEP, VARIATION.KEYVALPAIRS from VARIATION, SAMPLE, DATAPOINT where " + //$NON-NLS-1$
-//			"DATAPOINT.SAMPLE_ID = SAMPLE.ID " + //$NON-NLS-1$
-//			"VARIATION.KEYVALPAIRS like ? and NOT VARIATION.KEYVALPAIRS like ? and " + //$NON-NLS-1$
-//			"SAMPLE.VARIATION_ID = VARIATION.ID and " + //$NON-NLS-1$
-//			"SAMPLE.SCENARIO_ID = ? and " + //$NON-NLS-1$
-//			"SAMPLE.STARTTIME > ? and " + //$NON-NLS-1$
-//			"ORDER BY DATAPOINT.ID, DATAPOINT.STEP"; //$NON-NLS-1$
 		String statement = "select DATAPOINT.ID, DATAPOINT.STEP, VARIATION.KEYVALPAIRS from SAMPLE, DATAPOINT, VARIATION where " + //$NON-NLS-1$
 			"SAMPLE.SCENARIO_ID = ? and " + //$NON-NLS-1$
 			"DATAPOINT.SAMPLE_ID = SAMPLE.ID and " + //$NON-NLS-1$
@@ -151,13 +144,8 @@ ResultSet queryScenarioTimestampDataPoints(String config, int scenarioID, String
 			"ORDER BY DATAPOINT.ID, DATAPOINT.STEP"; //$NON-NLS-1$
 		this.queryScenarioTimestampDataPoints = fConnection.prepareStatement(statement);
 	}
-//	this.queryScenarioTimestampDataPoints.setString(1, "%"+config+"%"); //$NON-NLS-1$ //$NON-NLS-2$
-//	this.queryScenarioTimestampDataPoints.setString(2, "|build="+lastBuildName+"%"); //$NON-NLS-1$ //$NON-NLS-2$
-//	this.queryScenarioTimestampDataPoints.setInt(3, scenarioID);
-//	Timestamp timestamp = new Timestamp(lastBuildTime+(24*3600L*1000));
-//	this.queryScenarioTimestampDataPoints.setTimestamp(4, timestamp);
 	this.queryScenarioTimestampDataPoints.setInt(1, scenarioID);
-	Timestamp timestamp = new Timestamp(lastBuildTime+(24*3600L*1000));
+	Timestamp timestamp = new Timestamp(lastBuildTime+(12*3600L*1000));
 	this.queryScenarioTimestampDataPoints.setTimestamp(2, timestamp);
 	ResultSet resultSet =  this.queryScenarioTimestampDataPoints.executeQuery();
 	if (DB_Results.LOG) DB_Results.LOG_WRITER.ends(")"); //$NON-NLS-1$

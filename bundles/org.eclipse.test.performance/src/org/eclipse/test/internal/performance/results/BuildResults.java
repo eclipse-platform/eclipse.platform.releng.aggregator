@@ -14,7 +14,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.StringTokenizer;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
@@ -279,7 +278,7 @@ boolean match(String pattern) {
  */
 void readData(DataInputStream stream) throws IOException {
 	long timeBuild = stream.readLong();
-	this.date = DATE_FORMAT.format(new Date(timeBuild));
+	this.date = new Long(timeBuild).toString();
 	byte kind = stream.readByte();
 	this.baseline = kind == 0;
 	if (this.baseline) {
@@ -422,8 +421,8 @@ public String toString() {
 void write(DataOutputStream stream) throws IOException {
 	long timeBuild = -1;
     try {
-	    timeBuild = DATE_FORMAT.parse(getDate()).getTime();
-    } catch (ParseException e) {
+	    timeBuild = Long.parseLong(getDate());
+    } catch (NumberFormatException nfe) {
 	    // do nothing
     }
 	stream.writeLong(timeBuild);

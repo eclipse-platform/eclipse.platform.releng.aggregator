@@ -625,7 +625,9 @@ private void internalQueryScenarioValues(ScenarioResults scenarioResults, String
 			while (rs2.next()) {
 				int dim_id = rs2.getInt(1);
 				long value = rs2.getBigDecimal(2).longValue();
-				scenarioResults.setValue(build_id, dim_id, config_id, step, value);
+				if (build_id >= 0) { // build id may be negative (i.e. not stored in the array) if new run starts while we're getting results
+					scenarioResults.setValue(build_id, dim_id, config_id, step, value);
+				}
 				count++;
 			}
 		}
