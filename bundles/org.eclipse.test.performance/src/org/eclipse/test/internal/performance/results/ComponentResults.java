@@ -102,13 +102,13 @@ void read(List scenarios, File dataDir) {
 			addChild(scenarioResults, true);
 		}
 		if (dataDir != null && dirty && (System.currentTimeMillis() - time) > 300000) { // save every 5mn
-			writeData(dataDir);
+			writeData(dataDir, true, true);
 			time = System.currentTimeMillis();
 			dirty = false;
 		}
 	}
-	if (dataDir != null && dirty) {
-		writeData(dataDir);
+	if (dataDir != null) {
+		writeData(dataDir, false, dirty);
 	}
 	printGlobalTime(start);
 }
@@ -140,7 +140,7 @@ boolean readData(File dir, List scenarios) throws IOException {
 				addChild(scenarioResults, true);
 			}
 			if (dirty && (System.currentTimeMillis() - time) > 300000) { // save every 5mn
-				writeData(dir);
+				writeData(dir, true, true);
 				time = System.currentTimeMillis();
 				dirty = false;
 			}
@@ -161,14 +161,34 @@ boolean readData(File dir, List scenarios) throws IOException {
 /*
  * Write the component results data to the file '<component name>.dat' in the given directory.
  */
-public void writeData(File dir) {
+public void writeData(File dir, boolean temp, boolean dirty) {
 	if (!dir.exists() && !dir.mkdirs()) {
 		System.err.println("can't create directory "+dir); //$NON-NLS-1$
 	}
 	File tmpFile = new File(dir, getName()+".tmp"); //$NON-NLS-1$
-	File logFile = new File(dir, getName()+".dat");	//$NON-NLS-1$
+	File dataFile = new File(dir, getName()+".dat"); //$NON-NLS-1$
+	if (!dirty) { // only possible on final write
+		if (tmpFile.exists()) {
+			if (dataFile.exists()) dataFile.delete();
+			tmpFile.renameTo(dataFile);
+			println("		=> rename temporary file to "+dataFile); //$NON-NLS-1$
+		}
+		return;
+	}
+	if (tmpFile.exists()) {
+		tmpFile.delete();
+	}
+	File file;
+	if (temp) {
+		file = tmpFile;
+	} else {
+		if (dataFile.exists()) {
+			dataFile.delete();
+		}
+		file = dataFile;
+	}
 	try {
-		DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(tmpFile)));
+		DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		int size = this.children.size();
 		stream.writeUTF(getPerformance().getName());
 		stream.writeInt(size);
@@ -177,11 +197,9 @@ public void writeData(File dir) {
 			scenarioResults.write(stream);
 		}
 		stream.close();
-		if (logFile.exists()) logFile.delete();
-		tmpFile.renameTo(logFile);
-		println("		=> extracted data written in file "+logFile); //$NON-NLS-1$
+		println("		=> extracted data "+(temp?"temporarily ":"")+"written in file "+file); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	} catch (FileNotFoundException e) {
-		System.err.println("can't create output file"+tmpFile); //$NON-NLS-1$
+		System.err.println("can't create output file"+file); //$NON-NLS-1$
 	} catch (IOException e) {
 		e.printStackTrace();
 	}

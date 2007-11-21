@@ -44,7 +44,7 @@ public class BuildResults extends AbstractResults {
 BuildResults(AbstractResults parent, int id) {
 	super(parent, id);
 	this.name = DB_Results.getBuildName(id);
-	this.baseline = this.name.startsWith(parent.getPerformance().getBaselinePrefix());
+	this.baseline = this.name.startsWith(AbstractResults.VERSION_REF);
 }
 
 /*
@@ -424,6 +424,7 @@ void write(DataOutputStream stream) throws IOException {
 	    timeBuild = Long.parseLong(getDate());
     } catch (NumberFormatException nfe) {
 	    // do nothing
+    	nfe.printStackTrace();
     }
 	stream.writeLong(timeBuild);
 	byte kind = 0; // baseline
