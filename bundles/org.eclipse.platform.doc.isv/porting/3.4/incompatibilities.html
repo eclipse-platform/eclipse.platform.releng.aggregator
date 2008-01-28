@@ -18,21 +18,46 @@
 </p>
 
 <ol>
-  <li><a href="#FileEditorInput">FileEditorInput#getPath </a></li>
+  <li><a href="#FileEditorInput">FileEditorInput#getPath throws IllegalArgumentException for non local files</a></li>
+  <li><a href="#ModifyRule">Changed scheduling rules for IProject#setDescription</a></li>
 </ol>
 
 <hr>
 
 <!-- ############################################## -->
-<h2>1. <a name="FileEditorInput">FileEditorInput#getPath throws IllegalArgumentExceptions for non local files</a></h2>
-<p>
-Any calls <code>FileEditorInput#getPath</code> on an <code>IFile</code> will result in an
-<code>IllegalArgumentException</code> being thrown. The convenience method <code>FileEditorInput#isLocalFile</code>
+<h2>1. <a name="FileEditorInput">FileEditorInput#getPath throws IllegalArgumentException for non local files</a></h2>
+<p><strong>What is affected:</strong> Clients that call getPath() on FileEditorInput.</p>
+<p><strong>Description:</strong>In release 3.3 and earlier, <code>FileEditorInput#getPath</code>
+returned <code>null</code> when called on an input whose file was not in the local
+file system.  This violated the contract of <code>IPathEditorInput#getPath</code> which
+did not allow a null result. The method now throws <code>IllegalArgumentException<</code>
+in this case. The convenience method <code>FileEditorInput#isLocalFile</code>
 has been added so that callers who are unsure of the state of a supplied <code>IFile</code> can check
-before calling <code>#getPath</code>.
-</p>
-
+before calling <code>#getPath</code>.</p>
+<p><strong>Action required:</strong> Clients that call <code>FileEditorInput#getPath</code>
+should check if they are calling it on an input that is not in the local file system, and react
+accordingly.</p>
 <!-- ############################################## -->
+<h2>2. <a name="ModifyRule">Changed scheduling rules for IProject#setDescription</a></h2>
+<p><strong>What is affected:</strong> Clients that call <code>IProject#setDescription</code>.</p>
+<p><strong>Description:</strong> In the 3.3 release, all calls to <code>IProject#setDescription</code>
+required the caller to own <code>IResourceRuleFactory#modifyRule</code>, which
+was implemented with the <code>IWorkspaceRoot</code> scheduling rule.  This was
+too restrictive in most cases, and unnecessarily prevented other threads from modifying 
+other projects in the workspace while <code>modifyRule</code> was held.  In the 3.4
+release, the <code>IWorkspaceRoot</code> scheduling rule is now only needed when configuring project
+natures: clients calling <code>IProject#setDescription</code> without the <code>AVOID_NATURE_CONFIG</code>
+flag.  <code>IResourceRuleFactory#modifyRule</code> now only locks the project resource by default, allowing
+more concurrency when opening or closing projects, or when setting the description but
+not configuring project natures.
+<p><strong>Action required:</strong> Clients calling <code>IProject#setDescription</code>
+should ensure they own the correct scheduling rule. See the API javadoc for a description
+of what rules are required for this and other workspace operations.</p>
+<!-- ############################################## -->
+<h2>3. <a name="AnchorName">Title</a></h2>
+<p><strong>What is affected:</strong> </p>
+<p><strong>Description:</strong></p>
+<p><strong>Action required:</strong> .</p>
 
 </body>
 </html>
