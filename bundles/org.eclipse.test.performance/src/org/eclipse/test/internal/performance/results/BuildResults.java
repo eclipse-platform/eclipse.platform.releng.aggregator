@@ -128,7 +128,11 @@ public String getDate() {
 		} else {
 			char first = this.name.charAt(0);
 			if (first == 'N' || first == 'I' || first == 'M') { // TODO (frederic) should be buildIdPrefixes...
-				this.date = this.name.substring(1, 9)+this.name.substring(10, 14);
+				if (this.name.length() == 14) {
+					this.date = this.name.substring(1, 9)+this.name.substring(10, 14);
+				} else {
+					this.date = this.name.substring(1);
+				}
 			} else {
 				int length = this.name.length() - 12 /* length of date */;
 				for (int i=0; i<=length; i++) {
@@ -312,6 +316,13 @@ void readData(DataInputStream stream) throws IOException {
 		this.stddev[i] = stream.readDouble();
 	}
 	this.id = DB_Results.getBuildId(this.name);
+}
+
+/*
+ * Set the build summary and its associated comment.
+ */
+void setComment(String comment) {
+	this.comment = comment;
 }
 
 /*

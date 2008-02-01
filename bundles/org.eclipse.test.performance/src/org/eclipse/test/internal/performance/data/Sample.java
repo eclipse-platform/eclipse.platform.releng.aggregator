@@ -45,6 +45,11 @@ public class Sample {
     public Sample(DataPoint[] dataPoints) {
         fDataPoints= dataPoints;
     }
+
+    public void setComment(int commentType, String comment) {
+        fCommentType= commentType;
+        fComment= comment;
+    }
     
     public void tagAsSummary(boolean global, String shortName, Dimension[] summaryDimensions, int commentType, String comment) {
         fIsSummary= true;

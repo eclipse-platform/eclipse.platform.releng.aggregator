@@ -339,6 +339,20 @@ public class DB {
                 String shortName= sample.getShortname();
                 if (shortName != null)
                     fSQL.setScenarioShortName(scenario_id, shortName);
+            } else {
+                
+                int commentId= 0;
+                int commentKind= sample.getCommentType();
+                String comment= sample.getComment();
+                if (commentKind == Performance.EXPLAINS_DEGRADATION_COMMENT && comment != null)
+                		commentId= fSQL.getCommentId(commentKind, comment);
+                
+                Dimension[] summaryDimensions= sample.getSummaryDimensions();
+                for (int i= 0; i < summaryDimensions.length; i++) {
+                    Dimension dimension= summaryDimensions[i];
+                    if (dimension instanceof Dim)
+                        fSQL.createSummaryEntry(variation_id, scenario_id, 0/*invalid dim id*/, false, commentId);
+                }
             }
             int sample_id= fSQL.createSample(variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
@@ -553,7 +567,9 @@ public class DB {
                 			comment= rs2.getString(2);
                 		}
                 }
-                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id), isGlobal, commentKind, comment));
+                if (dim_id != 0) {
+	                fingerprints.add(new SummaryEntry(scenarioName, shortName, Dim.getDimension(dim_id), isGlobal, commentKind, comment));
+                }
             }
             return (SummaryEntry[])fingerprints.toArray(new SummaryEntry[fingerprints.size()]);
         } catch (SQLException e) {

@@ -85,8 +85,11 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 	public void commit() {
 		Sample sample= getSample();
 		if (sample != null) {
-			if (fSummaryDimensions != null)
+			if (fSummaryDimensions != null) {
 				sample.tagAsSummary(fSummaryIsGlobal, fShortName, fSummaryDimensions, fCommentType, fComment);
+			} else if (this.fComment != null) {
+				sample.setComment(this.fCommentType, this.fComment);
+			}
 			Variations variations= PerformanceTestPlugin.getVariations();
 			if (variations != null)
 				DB.store(variations, sample);

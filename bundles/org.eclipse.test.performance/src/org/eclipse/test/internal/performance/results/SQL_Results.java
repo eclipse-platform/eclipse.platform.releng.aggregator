@@ -211,21 +211,23 @@ ResultSet queryScenarioFailures(int scenarioID, String config, String currentBui
  * @param scenarioID The id of the scenario
  * @param currentBuildName The name of the current build
  * @param baselineBuildName The name of the baseline build
+ * @param dim_id The dim id
  * @return Set of the query result
  * @throws SQLException
  */
-ResultSet queryScenarioSummaries(int scenarioID, String config, String currentBuildName, String baselineBuildName) throws SQLException {
+ResultSet queryScenarioSummaries(int scenarioID, String config, String currentBuildName, String baselineBuildName, int dim_id) throws SQLException {
 	if (this.queryScenarioSummaries == null) {
 		this.queryScenarioSummaries= fConnection.prepareStatement("select KEYVALPAIRS, IS_GLOBAL, COMMENT_ID from VARIATION, SUMMARYENTRY where " + //$NON-NLS-1$
 			"(KEYVALPAIRS like ? or KEYVALPAIRS like ?) and " + //$NON-NLS-1$
 			"VARIATION_ID = VARIATION.ID and " + //$NON-NLS-1$
 			"SCENARIO_ID = ? and " + //$NON-NLS-1$
-			"DIM_ID = " + InternalDimensions.ELAPSED_PROCESS.getId() + //$NON-NLS-1$
+			"DIM_ID = ? " + //$NON-NLS-1$
 			" order by VARIATION_ID"); //$NON-NLS-1$
 	}
 	this.queryScenarioSummaries.setString(1, "|build=" + currentBuildName+ "||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	this.queryScenarioSummaries.setString(2, "|build=" + baselineBuildName+ "||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	this.queryScenarioSummaries.setInt(3, scenarioID);
+	this.queryScenarioSummaries.setInt(4, dim_id);
 	return this.queryScenarioSummaries.executeQuery();
 }
 
