@@ -321,12 +321,12 @@ public class DB {
             //long l= System.currentTimeMillis();
             int variation_id= fSQL.getVariations(variations);
             int scenario_id= fSQL.getScenario(sample.getScenarioID());
+			String comment= sample.getComment();
             if (sample.isSummary()) {
                 boolean isGlobal= sample.isGlobal();
                 
                 int commentId= 0;
                 int commentKind= sample.getCommentType();
-                String comment= sample.getComment();
                 if (commentKind == Performance.EXPLAINS_DEGRADATION_COMMENT && comment != null)
                 		commentId= fSQL.getCommentId(commentKind, comment);
                 
@@ -339,20 +339,13 @@ public class DB {
                 String shortName= sample.getShortname();
                 if (shortName != null)
                     fSQL.setScenarioShortName(scenario_id, shortName);
-            } else {
-                
+            } else if (comment != null) {
                 int commentId= 0;
                 int commentKind= sample.getCommentType();
-                String comment= sample.getComment();
-                if (commentKind == Performance.EXPLAINS_DEGRADATION_COMMENT && comment != null)
-                		commentId= fSQL.getCommentId(commentKind, comment);
-                
-                Dimension[] summaryDimensions= sample.getSummaryDimensions();
-                for (int i= 0; i < summaryDimensions.length; i++) {
-                    Dimension dimension= summaryDimensions[i];
-                    if (dimension instanceof Dim)
-                        fSQL.createSummaryEntry(variation_id, scenario_id, 0/*invalid dim id*/, false, commentId);
+                if (commentKind == Performance.EXPLAINS_DEGRADATION_COMMENT) {
+                	commentId= fSQL.getCommentId(commentKind, comment);
                 }
+				fSQL.createSummaryEntry(variation_id, scenario_id, 0, false, commentId); // use special dim id '0' to identify summary entry created to only handle a comment
             }
             int sample_id= fSQL.createSample(variation_id, scenario_id, new Timestamp(sample.getStartTime()));
 
