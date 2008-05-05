@@ -2,7 +2,7 @@
 <html>
 
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2005. This page is made available under license. Full for details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2005, 2008. This page is made available under license. Full for details see the LEGAL in the documentation book that contains this page." >
 
 <meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
 <link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
@@ -15,7 +15,7 @@
 
 <h1>OSGi Bundle Manifest Headers</h1>
 
-<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.3 - Last revised June 7, 2007</span></p>
+<p class=MsoNormal><span style='font-size:10.0pt'>Version 3.3 - Last revised May 5, 2008</span></p>
 
 <p>
 A bundle can carry descriptive information about itself in the manifest file 
@@ -149,13 +149,54 @@ that are loaded from this bundle, except the classes in the packages
 </p>
 
 <p>
-The Eclipse-AutoStart header has been deprecated in Eclipse 3.2.  The Eclipse-LazyStart 
-header should be used instead.  As of the OSGi R4.1 specification the lazy activation
-policy has been adopted by the OSGi specification.  The new OSGi bundle manifest 
-header Bundle-ActivationPolicy can be used to specify a lazy activation policy.
-Eclipse 3.3 fully supports both the Eclipse-LazyStart header and the Bundle-ActivationPolicy 
-headers for specifying the lazy start policy.
+The Eclipse-AutoStart and Eclipse-LazyStart headers have been deprecated in Eclipse 3.4.
+As of the OSGi R4.1 specification the lazy activation policy has been adopted by the OSGi 
+specification.  The new OSGi bundle manifest header Bundle-ActivationPolicy can be used to 
+specify a lazy activation policy.
 </p>
+
+<p>
+The Equinox Framework version 3.4 will continue to support the deprecated  Eclipse-LazyStart and 
+Eclipse-AutoStart headers. Bundle developers that want their bundles to work across other OSGi 
+Framework implementations should add the Bundle-ActivationPolicy header to their manifest. In most cases you can simply add the following header: 
+</p>
+
+<pre>
+Bundle-ActivationPolicy: lazy
+</pre>
+
+<p>
+If the 'exceptions' attribute is used with the Eclipse-LazyStart or Eclipse-AutoStart header then the 'include' or 'exclude' directive can be used 
+with the Bundle-ActivationPolicy header.  Consider the following Eclipse-LazyStart header:
+</p>
+
+<pre>
+Eclipse-LazyStart: true; exceptions=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The equivalent Bundle-ActivationPolicy header would be the following:
+</p>
+
+<pre>
+Bundle-ActivationPolicy: lazy; exclude:=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The following is an example Eclipse-LazyStart header that uses a false value with the exceptions attribute:
+</p>
+
+<pre>
+Eclipse-LazyStart: false; exceptions=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The equivalent Bundle-ActivationPolicy header would be the following:
+</p>
+
+<pre>
+Bundle-ActivationPolicy: lazy; include:=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
 
 <h3>The Eclipse-PlatformFilter Header</h3>
 
