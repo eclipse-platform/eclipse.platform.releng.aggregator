@@ -283,6 +283,16 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   The default value is &quot;false&quot;.  This is different than the 
   <a href="#eclipseapplicationlaunchDefault">eclipse.application.launchDefault</a> option because the main thread will 
   not wait for an application descriptor service to be launched.</dd>
+  <dt><a name="eclipseloglevel" id="eclipseloglevel"></a>eclipse.log.level</dt>
+  <dd>
+    sets the level used when logging messages to the eclipse log.
+    <ul type=disc>
+      <li><b>ERROR</b> - enables logging only ERROR messages.</li>
+      <li><b>WARNING</b> - enables logging of ERROR and WARNING messages.</li>
+      <li><b>INFO</b> - enables logging of ERROR, WARNING and INFO messages.</li>
+      <li><b>ALL</b> - enables logging of all messages (default value)</li>
+    </ul>
+  </dd>
   <dt><a name="eclipselogbackupmax" id="eclipselogbackupmax"></a>eclipse.log.backup.max</dt>
   <dd>the max number of backup log files to allow.  The oldest backup log file will be deleted
      after the max number of backup log files is reached as a result of rotating the log file.
@@ -328,6 +338,13 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
     of disk writes while performing administrative operations (e.g. installing bundles).  
     The delay interval is used to wait for a period of inactivity before persisting the 
     framework state information.</dd>
+  <dt><a name="eclipsesecurity"></a>eclipse.security</dt>
+  <dd>specifies that a security policy and manager should be configured when the framework is launched.  If the launcher is used (org.eclipse.equinox.launcher)
+   and this property is set to any value then the launcher will configure a java.security.Policy that grants all permissions to the launcher
+   and the framework.  When the framework is launched it will use this property to determine the security manager to use.  If set to <b>osgi</b>
+   then the Equinox security manager is used.  This security manager is required to fully support the OSGi Conditional Permission Admin specification.  If
+   the property is set to the empty string then java.lang.SecurityManager will be used; otherwise the property specifies a security manager 
+   class that should be used as the security manager.</dd>
   <dt><a name="eclipsevm" id="eclipsevm"></a>eclipse.vm {-vm}</dt>
   <dd>the path to the Java executable used to run Eclipse. This information is
   used to construct relaunch command lines.</dd>
@@ -386,8 +403,24 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
   is up to date with respect to the contents of the installed bundles.  The default value is &quot;false&quot;.</dd>
   <dt><a name="osgiclassloadersingleThreadLoads" id="osgiclassloadersingleThreadLoads"></a>osgi.classloader.singleThreadLoads</dt>
   <dd>if set to &quot;true&quot; then only one thread is allowed to load a class at a time.  The default value is 
-  &quot;false&quot;.  This option can be used to work around certain VM bugs which can cause deadlock.
-  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=121737">bug 121737</a></dd>
+   &quot;false&quot;.  This option can be used to work around certain VM bugs which can cause deadlock.
+   See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=121737">bug 121737</a>.  Note that recent 
+   discussions in <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=227587">bug 227587</a> have shown
+   that this option introduces another kind of deadlock.</dd>
+  <dt><a name="osgiclassloaderlock" id="osgiclassloaderlock"></a>osgi.classloader.lock</dt>
+  <dd>
+    the classloader locking strategy to use when defining classes.  The valid types are the following:
+    <ul type=disc>
+      <li><b>classname</b> - lock on the classname.</li>
+      <li><b>classloader</b> - lock on the classloader (default value).</li>
+    </ul>
+    There are cases where bundle cycles may cause class loader deadlock to occur (see 
+    <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=229621">bug 229621</a>).  This option 
+    can be used to work around this deadlock by locking on the class name instead of the class loader
+    when defining a class.  This option should be used with caution because some VMs still lock the 
+    class loader natively (e.g. the Sun VM).  When running on these kinds of VMs deadlock can still 
+    occur because of the VM lock. 
+  </dd>
   <dt><a name="osgiclean"></a>osgi.clean</dt>
   <dd>if set to &quot;true&quot;, any cached data used by the OSGi framework and eclipse runtime 
 will be wiped clean.  This will clean the caches used to store bundle 
@@ -496,6 +529,15 @@ will force eclipse to reinitialize these caches.</dd>
       <li><b>ext</b> - the extension classloader.</li>
       <li><b>current</b> - the classloader used to load the equinox launcher.</li>
     </ul>
+  </dd>
+  <dt><a name="osgiframeworkactiveThreadType"></a>osgi.framework.activeThreadType</dt>
+  <dd>
+   if set to <b>normal</b> then an active framework thread is started when the framework is launched
+   that monitors the lifecycle of the framework.  This thread is a non-daemon thread and is used to prevent
+   the VM from shutting down when the framework is active and only daemon threads are active in the VM.
+   When the framework is shutdown then the active framework thread will quit which should allow the VM to
+   shutdown as long as no other non-deamon threads are active in the VM.  By default no active framework
+   thread is started when the framework is launched.
   </dd>
   <dt><a name="osgiframeworkuseSystemProperties"></a>osgi.framework.useSystemProperties</dt>
   <dd>controls whether the framework properties are backed by the global System properties 
@@ -614,10 +656,40 @@ will force eclipse to reinitialize these caches.</dd>
       mode is not strict.  When the resolver is in strict mode the Framework will 
       enforce access restriction rules when loading classes and resources from 
       exported packages which specify the x-internal or x-friends directives.</dd>
+      osgi.resolver.usesMode
+  <dt><a name="osgi.resolver.usesMode"></a>osgi.resolver.usesMode</dt>
+  <dd>
+    the resolver mode used to resolve <b>uses</b> directives on Export-Package statements.  
+     <ul type=disc>
+      <li><b>aggressive</b> - aggressively seeks a solution with no class space inconsistencies (default value).  This mode may be very expensive depending on the number of bundles and number of duplicate exports in the system.</li>
+      <li><b>tryFirst</b> - only tries the first solution selected by the resolver.  This mode is very fast but may result in unresolved bundles because of class space inconsistencies.</li>
+      <li><b>ignore</b> - ignores all uses directives on exports.  This mode is very fast by may result in inconsistent class spaces in resolved bundles.</li>
+    </ul>
+  </dd>
   <dt><a name="osgisharedconfigurationarea"></a>osgi.sharedConfiguration.area</dt>
   <dd>the shared configuration location for this run of the platform.  If the
   <a href="#osgiconfigurationcascaded">osgi.configuration.cascaded</a> property is set
   to &quot;true&quot; then shared configuration area is used as the parent configuration.</dd>
+  <dt><a name="osgisignedcontentsupport"></a>osgi.signedcontent.support</dt>
+  <dd>A comma separated list of options for signed content support.  The valid types are the following:
+    <ul type=disc>
+      <li><b>certificate</b> - enables parsing and verification of certificates.</li>
+      <li><b>trust</b> - enables verification of certificate trust.  This option implies
+      &quot;certificate&quot;.</li>
+      <li><b>runtime</b> - enables verification of signed bundle content at runtime.  
+      This option implies &quot;certificate&quot;.</li>
+      <li><b>authority</b> - enables the default authorization engine.  This option implies &quot;certificate&quot; and &quot;trust&quot;..</li>
+      <li><b>all</b> - same as &quot;certificate,trust,runtime,authority&quot;.</li>
+    </ul>
+  </dd>
+  <dt><a name="osgisignedcontenttrustengine"></a>osgi.signedcontent.trust.engine</dt>
+  <dd>
+  A service property key used to identify an implementation of the <b>org.eclipse.osgi.service.security.TrustEngine</b> service.
+  A TrustEngine service should be registered with a unique value for this property to allow selection of the TrustEngine
+  service implementation.  The <b>osgi.signedcontent.trust.engine</b> property can be used as a configuration 
+  property to select particular TrustEngine service implementations at runtime.  If this property is not set then
+  all available TrustEngine services are used at runtime.
+  </dd>
   <dt><a name="osgisplashlocation"></a>osgi.splashLocation</dt>
   <dd>the absolute URL location of the splash screen (.bmp file) to to show while
     starting Eclipse. This property overrides any value set in <a href="#osgisplashpath">osgi.splashPath</a>.</dd>
@@ -627,18 +699,15 @@ will force eclipse to reinitialize these caches.</dd>
   <dt><a name="osgistartlevel"></a>osgi.startLevel</dt>
   <dd>the start level value the framework will be set to at startup.  The default value is 6.</dd>
   <dt><a name="osgisupportsignatureverify"></a>osgi.support.signature.verify</dt>
-  <dd>A comma separated list of options for signed bundle signature verification.  The valid types are the following:
-    <ul type=disc>
-      <li><b>certificate</b> - enables parsing and verification of certificates.</li>
-      <li><b>trust</b> - enables verification of certificate trust.  This option implies
-      &quot;certificate&quot;.</li>
-      <li><b>runtime</b> - enables verification of signed bundle content at runtime.  
-      This option implies &quot;certificate&quot;.</li>
-      <li><b>all</b> - same as &quot;certificate,trust,runtime&quot;.</li>
-      <li><b>true</b> - same as &quot;all&quot;.
-     that was set when the framework launched (default value).</li>
-    </ul>
+  <dd>This option has been deprecated.  Use <a href="#osgisignedcontentsupport">osgi.signedcontent.support</a> instead.
   </dd>
+  <dt><a name="osgisupportclasscertificate"></a>osgi.support.class.certificate</dt>
+  <dd>
+   if set to <b>true</b> then the certificates available from a signed bundle are used when defining the classes from 
+   the signed bundle.  The default value is <b>true</b>.
+   This option only takes effect when <a href="#osgisignedcontentsupport">osgi.signedcontent.support</a> is set
+   to <b>certificate</b>.
+  <dd>
   <dt><a name="osgisyspath"></a>osgi.syspath</dt>
   <dd>set to the path where the eclipse OSGi Framework (org.eclipse.osgi) implementation 
   is located.  For example, &quot;&lt;eclipse install path&gt;/eclipse/plugins&quot;.
