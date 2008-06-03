@@ -329,86 +329,77 @@ document for changes in the Platform.
       <td colspan="2"><a name="JavaCompiler"></a> <div style="font-size: 20px; font-weight: bold;"> 
           Java Compiler </div></td>
     </tr>
-
+    
   <tr> 
-    <td><p align="right"><b>Improved handling of duplicate 
-      local variables and types</b></p></td>
-    <td><p>JDT now does a better job of handling invalid 
-      code with duplicate local variables and types; in particular it will minimize secondary 
-      errors. This allows the Java tools to perform in offending code, so as to 
-      offer quick fixes.</p> 
-      <ul>
-        <li>Local rename (Ctrl+2,R) can now operate even in faulty nested loops, 
-          allowing you to quickly fix the name of the duplicate variable in all 
-          the places it appears. 
-          <p><img src="images/editor-duplicate-variable-rename.png" alt="Local rename with duplicate locate variables"></p>
-        <br></li>
-        <li>Method invocation or field access through a duplicate variable now 
-          refers to nearest definition of the local variable, thus reducing the 
-          number of secondary errors reported. 
-          <p><img src="images/editor-duplicate-variable.png" alt="Method invocation with duplicate locate variables"></p>
-        </li>
-      </ul></td>
+    <td><p align="right"><b>Java compiler on multi-CPU machines</b></p></td>
+    <td><p>Class folders that are outside the current workspace (external) 
+        can now be added to the build path.</p>
+        <p>Using the <b>Java Build Path</b> page of the project properties, select
+        the <b>Libraries</b> tab and push the <b>Add External Class Folder</b> button:</p>
+        <p><img src="images/external-class-folders-prop.png" alt="How set up an External Class Folder"/></p>
+    </td>
   </tr>
-
-  <tr>
-    <td><p align="right"><b>Improved null check detection</b></p></td>
-    <td><p>The existing <b>Null reference</b> option on the
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
-        <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
-        <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
-      preference page has been split into three options:</p>
-      <ul>
-        <li><b>Null pointer access</b> (in 'Potential programming problems')<br>
-          When this option is enabled, the compiler will issue an error or warning
-            whenever a variable that is statically known to hold a null value
-            is used to access a field or method, as shown in the example below:
-          <p><img src="images/null-reference.png" alt="Null pointer access example"></p><br>
-        </li>
-        <li><b>Potential null pointer access</b> (in 'Potential programming problems')<br>
-          When this option is enabled, the compiler will issue an error or a
-            warning whenever a variable is statically known to potentially hold
-            a null value, as shown in the example below:
-          <p><img src="images/potential-null-ref.png" alt="Potential null pointer access example"></p><br>
-        </li>
-        <li><b>Redundant null check</b> (in 'Unnecessary code')<br>
-          When enabled, the compiler will issue an error or a warning whenever
-            a variable that is statically known to hold a null or a non-null
-            value is tested against null, as shown in the examples below:
-          <p><img src="images/instanceof-always-false.png" alt="Redundant null check example (instanceof always false)"></p>
-          <br>
-          <p><img src="images/redundant-null-check.png" alt="Redundant null check example"></p>
-        </li>
-      </ul>
-	</td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Warning for raw types activated
-        by default</b></p> </td>
-    <td><p>The optional compiler diagnostic for detecting
-      any usage of a raw type is now activated by default.</p>
-      <p>This diagnosis can be configured on the
-        <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
-          <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
-        preference page, using the <b>Generic types &gt; Usage of a raw type</b> preference.</p>
-      <p><img src="images/raw-type-warning-example.png" alt="Raw Type Warning example"></p>
+  
+  <tr> 
+    <td><p align="right"><b>Support for external class folders</b></p></td>
+    <td><p>You will see faster Java compile times when using machines with multiple CPUs.</p> 
+        <p>The Eclipse Compiler for Java is now taking advantage of the multi-threading 
+        capability of multi-CPU machines. The full build of a Java project also takes advantage of this support.</p>
     </td>
   </tr>
 
-  <tr>
-    <td><p align="right"><b>Unused parameter warning enhancement </b></p></td>
-    <td><p>The <b>Unused Parameter</b> warning was improved
-      with a new option that helps avoiding false positives. You can give the
-      compiler a hint that a parameter is not really unused by commenting it
-      with a <b>@param</b> tag.</p>
-      <p> The option is located on the
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
-        <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
-        <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
-      preference page in the <b>Unnecessary code</b> section.</p>
-      <p> <img alt="Screenshot of the Error/Warning preference page" src="images/unused-parameters.png"></p></td>
+  <tr> 
+    <td><p align="right"><b>New and improved compiler diagnostics</b></p></td>
+    <td>
+      <p>Several improvements have been made to the problem detection in the compiler:</p>
+      <ul>
+        <li>The <b>Unnecessary declaration of thrown checked exception</b> 
+          problem has a new option that helps avoiding false positives:
+          You can give the compiler a hint that a declared thrown exception is
+          not unused by commenting it with the <b>@throws</b> tag.
+          <p><img src="images/unused-declared-exception.png" alt="Screenshot of the Error/Warning preference page"/></p>
+          <p>There is also a quick fix (<b>Ctrl+1</b>) that helps you by adding the Javadoc tag.</p>
+        </li>
+        <li>The <b>Unnecessary declaration of thrown exception</b> compiler diagnosis has been extended to 
+            optionally report warnings for unchecked exceptions (e.g. subclasses of <code>java.lang.RuntimeException</code>
+            and <code>java.lang.Error</code>), if no such exception has been explicitly thrown in the code.
+        </li>
+        <li><b>Null pointer accesses</b> are now reported as a warning by default.</li>
+        <li><b>Unnecessary @SuppressWarnings</b> annotations are now detected by the compiler.
+          <p><img src="images/uu-suppress-warning-eg.png" alt="Unused Suppress Warning Example" /></p>  
+          <p>Note that <code>@SuppressWarnings(&quot;all&quot;)</code> is still silencing
+             the warning for unnecessary <code>@SuppressWarnings</code>, as it is
+             the master switch to silence ALL warnings:</p>
+        </li>
+        <li><b>Redundant superinterfaces</b> can now be detected by the compiler.
+          <p><img src="images/redundant-si-example.png" alt="Example of diagnosed redundant super interface"/></p>
+          <p>The unnecessary code can be removed by using quick fix (<b>Ctrl+1</b>).</p>
+        </li>
+      </ul>
+      <p>You can configure this settings on the  
+        <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
+         <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
+         <b>Java &gt; Compiler &gt; Errors/Warnings</b></a> preference page.</p>
+    </td>
+  </tr>
+  
+  <tr> 
+    <td><p align="right"><b>CLDC 1.1 class file compatibility</b></p></td>
+    <td><p>The Java compiler can now create CLDC 1.1 compatible class files.</p>
+      <p>You can set this on the 
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CompliancePreferencePage)")'> 
+         <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
+         <b>Java &gt; Compiler</b></a> preference page:</p>
+      <p><img src="images/cldc-compatibility.png" alt="Screenshot of the Compiler preference page"/></p>
+    </td>
+  </tr>
+  
+  <tr> 
+    <td><p align="right"><b>Flexible ZIP archive extensions</b></p></td>
+    <td><p>It is now possible to add ZIP archives on the build path with file 
+        extensions other than <code>.zip</code> or <code>.jar</code>.</p>
+        <p>For example, it is now possible to add a <code>.rar</code> file on the build path.</p>
+    </td>
   </tr>
 
    <!-- ******************* Java Views and Dialogs ************************************* -->
@@ -645,90 +636,48 @@ document for changes in the Platform.
   </tr>
 
   <tr>
-    <td><p align="right"><b>New code formatter options</b></p> </td>
-    <td><p> New options have been added to the
+    <td><p align="right"><b>Java 5 annotations supported by Java model</b></p></td>
+    <td><p>The Java Model now supports Java 5 annotations
+      as Java elements (<code>IAnnotation</code>). One can now use <code>getAnnotations()</code> on
+      a package, a field, a method or a type to retrieve their corresponding
+      annotations. The fine-grained deltas now reflect annotation additions,
+      removals, and changes.</p>
+    </td>
+  </tr>
+  
+  <tr>
+    <td><p align="right"><b>Annotation formatting improvements</b></p> </td>
+    <td>
+      <p>The Java source code formatter now provides fine-grained options for line breaks after annotations. 
+      It is now possible to specify separately for each type of annotation if it should be followed by a line break:</p>
+      <ul>
+        <li>Annotations on members:
+          <p> <img src="images/annotation-fmt-member.png" alt="A member annotation" title="Member Annotation"/></p>
+        </li>
+        <li>Annotations on parameters:
+          <p> <img src="images/annotation-fmt-param.png" alt="A parameter annotation" title="Parameter Annotation"/></p>
+        </li>
+        <li>Annotations on local variables:
+          <p> <img src="images/annotation-fmt-var.png" alt="A local variable annotation" title="Local variable Annotation"/></p>
+        </li>
+      </ul>
+      <p>This can be configured on the
       <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage)")'> 
         <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Formatter preference page">
-        <b>Java &gt; Code Style &gt; Formatter</b></a>
-      preference page:</p>
+        <b>Java &gt; Code Style &gt; Formatter</b></a> preference page:</p> 
+      <p><img src="images/annotation-fmt.png" alt="Formatter preference dialog showing the new line tab page" title="Formatter Preference Dialog"/> </p>
+    </td>
+  </tr>
+  
+  <tr>
+    <td><p align="right"><b>New API for invoking batch compiler</b></p></td>
+    <td><p>The Java batch compiler now has two API methods to allow standalone applications 
+       (e.g. running on a Foundation 1.0 JRE) to call it without involving the Eclipse platform:</p>
       <ul>
-        <li><b>Comment formatting</b> can now be enabled and disabled
-        for each comment type individually (Javadoc, block, single line, and header comments).
-        Block and line comments on the first column can be <b>excluded from indentation</b>.
-          <p> <img src="images/formatter-comments.png" alt="Screenshot showing the formatter preferences modify dialog"></p>
-        <br></li>
-        
-        <li>The number of blank lines that Organize Imports (<b>Ctrl+Shift+O</b>)
-          inserts between import groups can be configured on the <b>Blank Lines</b>
-          tab. When formatting, this setting will take precedence over the number
-          of blank lines to preserve.
-          <p><img src="images/blank-lines-between-imports.png" alt="Screenshot of the formatter preference page showing 'Blank lines between import groups'"></p>
-        <br></li>
-        
-        <li><b>Binary expressions</b> can now be wrapped before or after the operator.
-          <p><img src="images/formatter-operator.png" alt="Screenshot showing the formatter preferences modify dialog"></p>
-        <br></li>
-        
-        <li>For <b>return statements</b>, you can now add or remove whitespace before
-          the parenthesized expression of the throw statement. This option is
-          available on <b>White Space</b> tab.
-          <p><img src="images/space-before-throws.png" alt="Screenshot of the formatter preference page showing 'Space before expression throws'"></p>
-        </li>
-      </ul></td>
-  </tr>
-
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Access rules for execution environments</b></p></td>
-      <td  valign="top"> <p> Access rules are now assigned to each execution environment 
-          based on its profile. For example, rules prevent access to <code>com.sun.*</code> 
-          packages that are not guaranteed to be present at runtime. The rules 
-          are only applied to projects that are bound to execution environments. 
-          Projects bound to a specific JRE still have access to all of their libraries. 
-        </p>
-        <p><img alt="Access rules for system libraries" src="images/access-rules.png"> </p></td>
-    </tr>
-    
-  <tr>
-    <td><p align="right"><b>Deprecated
-          and non-modifiable classpath variables</b></p></td>
-    <td><p> System-defined classpath variables can now
-        be deprecated and/or declared read-only via the <code>org.eclipse.jdt.core.classpathVariableInitializer</code> extension
-        point. </p>
-      <p> Users should replace deprecated classpath variables by better mechanisms
-        such as Libraries. </p>
-      <p> <img src="images/deprecated-classpath-vars.png" alt="Java build path dialog with deprecated variables"> </p>
-      <p> For some variables (e.g. JUNIT_HOME), the Problems view even offers
-        quick fixes to migrate existing projects. </p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Workspace relative paths for
-        Javadoc location</b></p></td>
-    <td><p>Workspace relative paths are now accepted as
-      Javadoc locations for archives and class folders:</p>
-      <p> <img alt="Screenshot of the Javadoc location configuration dialog" src="images/javadoc-location.png"></p></td>
-  </tr>
-
-
-  <tr>
-    <td><p align="right"><b>Runtime type generation</b></p></td>
-    <td><p>Java 5 annotation processing (APT) was introduced
-      in Eclipse 3.2, but until now, new types could only be generated by doing
-      a build. Java 5 Annotation processors can now generate new types on the fly, as
-      you edit the annotations. This feature is disabled by default, for performance
-      reasons; to enable it, a processor should include "enableTypeGenerationInEditor"
-      in the set of strings returned from
-      <code><a href="http://java.sun.com/j2se/1.5.0/docs/guide/apt/mirror/com/sun/mirror/apt/AnnotationProcessorFactory.html#supportedOptions()" target="_blank">AnnotationProcessorFactory.supportedOptions()</a></code>.
-      </p></td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Java 6 annotation processing</b></p></td>
-    <td><p>Eclipse 3.3 fully supports <a href="http://java.sun.com/javase/6/docs/api/javax/annotation/processing/package-summary.html" target="_blank"> Java
-        6 annotation processing</a> in the <a href="../../org.eclipse.jdt.doc.isv/guide/jdt_api_compile.htm"> Eclipse
-        Java batch compiler</a>. Java 6 annotation processing is also minimally
-        supported in the IDE, with more support to come in the future.
-      </p></td>
+        <li><code>BatchCompiler#compiler(String, PrintWriter, PrintWriter, CompilationProgress)</code></li>
+        <li><code>BatchCompiler#compiler(String[], PrintWriter, PrintWriter, CompilationProgress)</code>.</li>
+      </ul>
+    </td>
   </tr>
   
     <!-- ****************** END OF N&N TABLE ****************** -->
