@@ -4,41 +4,56 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <title>Source Code Locations</title>
-<link href="../../book.css" rel="stylesheet" type="text/css">
-<style type="text/css">
-<!--
-.style1 {
-	font-size: 18px;
-	font-weight: bold;
-}
-.style2 {
-	font-size: 12pt;
-	font-weight: bold;
-}
--->
-</style>
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
 </head>
 
 <body>
-<p class="style1">Source Code Locations</p>
-<p>In Eclipse, source code and extension point schemas are shipped in separate <em>source</em> plug-ins. A <em>source</em> plug-in is a plug-in containing one or more source code locations.</p>
-<p>&nbsp;</p>
-<p class="style2">Declared Source Code Locations </p>
-<p> A declared (pre-defined) source code location is an <em>org.eclipse.pde.core.source</em> extension.</p>
-<p>Eclipse 3.3 comes with seven pre-defined source code locations. The extension point schemas and source archive(s) for a plug-in are located in a unique subdirectory under one of these source code locations. </p>
+<h1>Source Code Locations</h1>
+<p>In Eclipse, source code and extension point schemas are shipped in separate source locations.  The Eclipse SDK source is shipped as a set of <a href="#sourcePlugins">source plug-ins</a>, included in the <em>plugins</em> directory.  Source can also be shipped using <a href="#declaredLocations">declared source locations</a>.
+
+<p>To see a list of known source code locations:</p>
+<ol>
+<li> Open the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.pde.ui.TargetPlatformPreferencePage)")'> 
+    <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Target Platform preference page"> 
+    <strong>Java &gt; Target Platform</strong></a> preference page. </li>
+<li>Go to the <strong>Source Code Location</strong> tab.</li>
+</ol>
+<img src="../../images/preferences/target_source.png" alt="Source Code Locations" hspace="30">
+<p>You can add additional locations to search for source by clicking <strong>Add...</strong> and browsing the file system. The subdirectories of the additional source code locations must follow the <a href="#namingConvention">layout and naming conventions</a> for declared source locations.</p>
+
+<p>For more information on generated source plug-ins and features, please see <a href="../../tasks/pde_source_generation.htm">Source Generation</a>.</p>
+
+<a name="#sourcePlugins"></a>
+<h2>Source Plug-ins</h2>
+<p>Source can be shipped as a plug-in with a special manifest header.  These <em>source plug-ins</em> (also called <em>source bundles</em>) can be treated as normal plug-ins, though they will not be installed or started.  The plug-ins can be contained in a folder or jar file.  When placed in the <em>plugins</em> directory, they will be recognized as source by PDE.</p>
+
+<p>The manifest header that defines a plug-in as being source uses the following format:</p>
+<blockquote>
+Eclipse-SourceBundle: [pluginID];version=[version];roots:=[roots]<br>
+[pluginID] and [version] specify the plug-in that this bundle provides source for<br>
+[roots] comma separated list of source roots in the bundle, i.e. folders where
+source is located. A period (".") can be used to specify the root of the plug-in.
+This attribute can be omitted if the only source root is the root of the plug-in.
+</blockquote>
+
+<a name="#declaredLocations"></a>
+<h2>Declared Source Locations</h2>
+<p>An alternative way to ship source code locations is to use declared (pre-defined) source locations.  This is done by using the <em>org.eclipse.pde.core.source</em> extension.  A plug-in defining this extension will be treated as a source location.  The extension point schemas and source archive(s) for a plug-in are located in a unique subdirectory under one of these source code locations.  The name and structure of the subdirectories must follow a specific convention.</p>
+
+<a name="#namingConvention"></a>
+<h3>Declared Source Location Naming Convention</h3>
+
 <p>Each subdirectory must have the <em>{id}_{version}</em> naming convention, where <em>id</em> is the plug-in ID and <em>version</em> is the plug-in version.</p>
+
 <p>For instance, <em>org.eclipse.pde.source</em> is the plug-in containing the source code for all <em>org.eclipse.pde.*</em> plug-ins. </p>
+
 <p>Therefore, the source code and extension point schemas for the <em>org.eclipse.pde.core</em> plug-in are located at <em>{eclipse_installation}/plugins/org.eclipse.pde.source_3.3.0.{qualifier}/src/org.eclipse.pde.core_3.3.0.{qualifier}/</em></p>
-<p><img src="../../images/preferences/target_source.png" alt="Source Code Locations" hspace="30"></p>
-<p>&nbsp;</p>
-<p class="style2">Additional Source Code Locations</p>
-<p>Additional source code locations can be specified without the use of an <em>org.eclipse.pde.core.source</em> extension by simply pressing <strong>Add...</strong> to browse the file system.</p>
-<p>The subdirectories of the additional source code locations must follow the same layout and naming conventions described above for the declared source code locations. </p>
-<p>&nbsp;</p>
-<p class="style2">Source Archive Naming Convention </p>
+
 <p>The ZIP archive containing the source code for a plug-in must follow the <em>{library_name}src.zip</em> naming convention.</p>
+
 <p>For example, if a plug-in has the <strong>Bundle-ClassPath: xyz.jar</strong> <em>MANIFEST.MF</em> header, then the source code must be packaged in a ZIP archive named <strong>xyzsrc.zip</strong>.</p>
+
 <p>If the plug-in has no <strong>Bundle-ClassPath</strong> <em>MANIFEST.MF</em> header or the header is of the form <strong>Bundle-ClassPath: . </strong>, then the source code must be packaged in a ZIP archive named <strong>src.zip</strong>.  </p>
-<p>&nbsp; </p>
 </body>
 </html>
