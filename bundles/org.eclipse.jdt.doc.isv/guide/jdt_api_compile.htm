@@ -75,10 +75,9 @@ resource filter may apply to a particular project only:</p>
 
 <h4>Finding the batch compiler</h4>
 
-<p>The batch compiler class is located in the internal classes of the
-JDT Core plug-in.
-The name of the class is <i>org.eclipse.jdt.internal.compiler.batch.Main</i>. It
-is packaged into <code>plugins/org.eclipse.jdt.core_3.4.0.&lt;qualifier&gt;.jar</code>. Since 3.2, it is also available as a separate download.
+<p>The batch compiler class is located in the JDT Core plug-in.
+The name of the class is <i>org.eclipse.jdt.compiler.batch.BatchCompiler</i>.
+It is packaged into <code>plugins/org.eclipse.jdt.core_3.4.0.&lt;qualifier&gt;.jar</code>. Since 3.2, it is also available as a separate download.
 The name of the file is <code>ecj.jar</code>. Its corresponding source is also available. To get them, go to the <a href="http://download.eclipse.org/eclipse/downloads/">download page</a> and 
 search for the section <b>JDT Core Batch Compiler</b>. This jar contains the batch compiler and the javac ant adapter.</p>
 <p>Since 3.3, this jar also contains the support for jsr199 (Compiler API) and the support for jsr269 (Annotation processing). <b>In order to use the annotations
@@ -86,28 +85,12 @@ processing support, a 1.6 VM is required.</b></p>
 <p>So it can be used as a standalone application and inside an Ant build outside of Eclipse.</p>
 <h4>Running the batch compiler</h4>
 <ul>
-<li>Using the main method.
-<p>The Main class has a main method. This
-is the classical way to invoke the batch compiler on a command-line.</p>
-<ul>
-<li>
-For example on a command-line:
+<li>From the command line.
 <p><code><font color="#3366FF">java -jar org.eclipse.jdt.core_3.4.0&lt;qualifier&gt;.jar -classpath rt.jar A.java</font></code></p>
 <p>or:</p>
 <p><code><font color="#3366FF">java -jar ecj.jar -classpath rt.jar A.java</font></code></p>
-</li>
-<li>For example in a java source:
-<p><code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.main(new
-String[] {"-classpath", "rt.jar", "A.java"});</font></code></p>
-</li></ul></li>
-<li>
-Using the static <code>compile(String)</code> method.
-<p>The <code>compile(String)</code> method is a convenient method to invoke
-the batch compiler in a java application. Instead of:<br>
-<code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.main(new
-String[] {"-classpath", "rt.jar", "A.java"});</font></code><br>
-you can simply write:<br><code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.Main.compile("-classpath
-rt.jar A.java");</font></code></p></li>
+<li>Using the static <code>compile(String commandLine, PrintWriter outWriter, PrintWriter errWriter, CompilationProgress progress)</code> method of the class BatchCompiler.
+<p><code><font color="#3366FF">org.eclipse.jdt.internal.compiler.batch.BatchCompiler.compile("-classpath rt.jar A.java", new PrintWriter(System.out), new PrintWriter(System.err), null);</font></code></p></li>
 </ul>
 
 <h4>Which options are available?</h4>
