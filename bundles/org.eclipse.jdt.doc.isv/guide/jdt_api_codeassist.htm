@@ -36,7 +36,7 @@ is desired.&nbsp; You must also supply an instance of <b><a href="../reference/a
 
 
 
-<P>The method in <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestor.html#accept(org.eclipse.jdt.core.CompletionProposal)">CompletionRequestor.accept</a>
+<P>The method in <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestor.html#accept(org.eclipse.jdt.core.CompletionProposal)">CompletionRequestor.accept(CompletionProposal)</a>
 </b>accepts all kinds of proposals for code completion.&nbsp;
 The methods of <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html">CompletionProposal</a>
 </b> give information that describes the proposed element (its
@@ -49,6 +49,7 @@ This kind is given by <b><a href="../reference/api/org/eclipse/jdt/core/Completi
 CompletionProposal</a></b>):</P>
 
 <ul>
+  <li>annotation attribute - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#ANNOTATION_ATTRIBUTE_REF">ANNOTATION_ATTRIBUTE_REF</a></b></li>
   <li>anonymous type - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#ANONYMOUS_CLASS_DECLARATION">ANONYMOUS_CLASS_DECLARATION</a></b></li>
   <li>type reference - <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#TYPE_REF">TYPE_REF</a></b></li>
   <li>field reference- <b><a href="../reference/api/org/eclipse/jdt/core/CompletionProposal.html#FIELD_REF">FIELD_REF</a></b></li>
@@ -75,6 +76,32 @@ the expected type of the expression, as it relates to the types in the
 surrounding code, such as variable types, cast types, return types, etc.&nbsp;
 The presence of an expected prefix or suffix in a completion also affects its
 relevance.
+</p>
+
+<h4>Completion context
+</h4>
+
+<p>An instance of <b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestor.html">CompletionRequestor</a></b> can also
+accept a completion context. This context is given by the method
+<b><a href="../reference/api/org/eclipse/jdt/core/CompletionRequestor.html#acceptContext(org.eclipse.jdt.core.CompletionContext)">
+CompletionRequestor.acceptContext(CompletionContext)</a></b> and does not depend on a specific completion proposal. The methods of 
+<b><a href="../reference/api/org/eclipse/jdt/core/CompletionContext.html">CompletionContext</a></b> give information that describe 
+the general context like the offset of completion, the completed token, the completed token kind (name or string literal) and its position.<br>
+</p>
+<p>A <b><a href="../reference/api/org/eclipse/jdt/core/CompletionContext.html">CompletionContext</a></b> can also give some
+informationabout elements (<b><a href="../reference/api/org/eclipse/jdt/core/IJavaElement.html">IJavaElement</a></b>) which are
+related to the completion location. These elements are based on the content of the completed compilation unit's buffer and are not
+the result of the last reconcile operation.<br>
+</p>
+
+<p>Some of these methods are:
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/CompletionContext.html#getEnclosingElement()">getEnclosingElement()</a>
+</b> - This method returns the innermost enclosing element
+which contains the completion location</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/CompletionContext.html#getVisibleElements(java.lang.String)">getVisibleElements(String)</a>
+</b> - This method returns the elements which are visible from the completion location and which can be assigned to the given type</li>
+</ul>
 </p>
 
 <H4>
