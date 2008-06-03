@@ -99,6 +99,33 @@ modifies the buffer, reconciles the changes, commits the changes to disk and fin
     workingCopy.discardWorkingCopy();
 </pre></font>
 <P>
+The compilation unit's buffer can also be modified using the
+<b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#applyTextEdit(org.eclipse.text.edits.TextEdit, org.eclipse.core.runtime.IProgressMonitor)">ICompilationUnit.applyTextEdit</a></b>
+method.</P>
+<font color='#4444CC'><pre>
+    // Get original compilation unit
+    ICompilationUnit originalUnit = ...;
+    
+    // Get working copy owner
+    WorkingCopyOwner owner = ...;
+    
+    // Create working copy
+    ICompilationUnit workingCopy = originalUnit.getWorkingCopy(owner, null);
+    
+    // Get text edits
+    TextEdit edit = ...;
+    
+    // Modify buffer and reconcile
+    workingCopy.applyTextEdit(edit, null);
+    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+    
+    // Commit changes
+    workingCopy.commitWorkingCopy(false, null);
+    
+    // Destroy working copy
+    workingCopy.discardWorkingCopy();
+</pre></font>
+<P>
 Working copies can also be shared by several clients using a working copy owner. A working copy can be later retrieved using the
 <b><a href="../reference/api/org/eclipse/jdt/core/ICompilationUnit.html#findWorkingCopy(org.eclipse.jdt.core.WorkingCopyOwner)">findWorkingCopy</a></b>
 method. A shared working copy is thus keyed on the original compilation unit and on a working copy owner.</P>
