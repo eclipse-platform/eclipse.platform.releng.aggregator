@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"><html><head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 
@@ -34,8 +34,8 @@ Creating a Java search pattern
 </h4>
 <p>
 A search pattern defines how search results are found. You can either create a search pattern from a Java element (see
-<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(org.eclipse.jdt.core.IJavaElement, int)">createPatternPattern(IJavaElement, int)</a></b>) 
-or from a string (see <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(java.lang.String, int, int, int)">createPattern(String, int, int, int)</a></b>.)
+<b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(org.eclipse.jdt.core.IJavaElement, int)">createPatternPattern(IJavaElement element, int limitTo)</a></b>) 
+or from a string (see <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(java.lang.String stringPattern, int searchFor, int limitTo, int matchRule)">createPattern(String, int, int, int)</a></b>.)
 The last method supports wildcards (i.e. '*') and can be used to widen the search results.</p>
 <p>
 For example, creating a search pattern for searching for references to a given method is done as follows:</p>
@@ -68,6 +68,40 @@ The following search patterns are supported:
 <li>Method (and constructor) references</li>
 <li>Combinations of the above patterns using the OR pattern (see
 <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createOrPattern(org.eclipse.jdt.core.search.SearchPattern, org.eclipse.jdt.core.search.SearchPattern)">createOrPattern</a></b>)</li>
+</ul>
+<p>
+Note that these patterns are created using the following possible rules:
+</p>
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_EXACT_MATCH">R_EXACT_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_PREFIX_MATCH">R_PREFIX_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_PATTERN_MATCH">R_PATTERN_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_REGEXP_MATCH">R_REGEXP_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_CAMELCASE_MATCH">R_CAMELCASE_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_CAMELCASE_SAME_PART_COUNT_MATCH">R_CAMELCASE_SAME_PART_COUNT_MATCH</a></b></li>
+</ul>
+which may be also combined with one of the following flags:
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_CASE_SENSITIVE">R_CASE_SENSITIVE</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_ERASURE_MATCH">R_ERASURE_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_EQUIVALENT_MATCH">R_EQUIVALENT_MATCH</a></b></li>
+</ul>
+For example,
+<font color="#4444cc"><pre>
+    // a case insensitive prefix match is requested
+    SearchPattern pattern1 = SearchPattern.createPattern(&quot;Hash&quot;, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PREFIX_MATCH);
+
+    // a camel case match is requested
+    SearchPattern pattern2 = SearchPattern.createPattern(&quot;HM&quot;, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_CAMEL_CASE_MATCH);
+
+    // a camel case with a strict expected number of parts match is requested
+    SearchPattern pattern3 = SearchPattern.createPattern(&quot;HM&quot;, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH);
+</pre></font></li>
+Note that using the patterns created above reduce the number of possible results among others:
+<ul>
+<li>pattern1: <code>Hashtable</code>, <code>HashMap</code>, <code>HashMapEntry</code>, etc.</li>
+<li>pattern2: <code>HashMap</code>, <code>HashMapEntry</code>, etc.</li>
+<li>pattern3: <code>HashMapEntry</code>, etc.</li>
 </ul>
 
 <h4>
