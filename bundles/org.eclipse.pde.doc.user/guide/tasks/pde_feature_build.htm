@@ -22,110 +22,41 @@ being built are already
 locally available on disk.
 </p>
 <h2>Basic Setup</h2>
-<p>The first step in setting up a build is to create the directory in
-which the build will take
-place. This directory will be referred to as the <i>build directory</i>
-and will contain the
-plug-ins and features to build as well as all the generated artifacts.
-Next, copy your plug-ins and
-features respectively into "plugins" and "features" subdirectories.
-The feature folder is expected to contain the feature being built.</p>
-The second step in setting up a build is to copy the template
-build.properties file from
-org.eclipse.pde.build/templates/headless-build to a new directory which
-will be the build
-configuration directory (also referred to as the <i>configuration
-directory</i>). Edit the copied build.properties file and set the
-following properties:
-<br>
+<h3>The Build Configuration Directory</h3>
+<p>The first step in setting up a build is to create the build configuration directory.  This is the directory in which the files that control and customize the headless build are kept.</p>
+<p>The main file for controlling the build is the top level build configuration build.properties file.  When setting up a new build, copy the template file from the org.eclipse.pde.build bundle in your eclipse install that you will be using to run your build.  The template file is located under org.eclipse.pde.build/templates/headless-build/build.properties.</p>
+<p>This directory is refered to by the <tt>builder</tt> properties which is normally set on the ant command line.</p>
+<h3>The buildDirectory</h3>
+<p>The <tt>buildDirectory</tt> property specifies the directory in which PDE/Build will generate scripts and perform the actual build.  Plug-ins and features that are being built should placed in <tt>${buildDirectory}/plugins</tt> and <tt>${buildDirectory}/features</tt> sub-directories.
+   If bundles and features are being fetch from a repository (See <a href="pde_fetch_phase.htm">Fetching From Repositories</a>), then they will be placed here as well.</p>
+<p>This directory may be the same as the build configuration directory, or it may be a different directory.  It may be desirable to use a separate directory, especially if the build configuration is kept in CVS and you don't want to pollute it with generated build artifacts.</p>
+<h3>Initial Properties</h3>
+<p>To set up a basic feature build, you need to edit the build configuration build.properties file and set the following properties:</p>
 <ul>
-  <li><span style="font-weight: bold;"></span><span
- style="font-weight: bold;">baseLocation</span>: the location of an
-eclipse install containing all the pre-built features and plug-ins in
-    <tt>features/</tt> and <tt>plugins/</tt> subdirectories.</li>
-  <li><span style="font-weight: bold;"></span><span
- style="font-weight: bold;">baseos</span>: indicate the os of the
-eclipse specified by baseLocation.</li>
-  <li><span style="font-weight: bold;"></span><span
- style="font-weight: bold;">basews</span>: indicate the ws of the
-eclipse specified by baseLocation. </li>
-  <li><span style="font-weight: bold;"></span><span
- style="font-weight: bold;">basearch</span>: indicate the arch of the
-eclipse specified by baseLocation. </li>
-  <li><span style="font-weight: bold;">buildDirectory</span>:&nbsp;
-the directory the build will take place in.&nbsp; Set this to the full
-path of the build directory created previously.</li>
-  <li><span style="font-weight: bold;">configs</span>: list the
-configurations for which you want your feature to be built. You can
-uncomment the configuration(s) provided (be careful of the line
-continuations). If the feature you are building is platform
-independent, this property does not need to be set or can be set 
-to <tt>*,*,*</tt>.</li>
-  <li><span style="font-weight: bold;">archivePrefix</span>: 
- the name of the directory in which your feature will be unzipped on disk.</li>
+  <li><span style="font-weight: bold;">topLevelElementId</span>: Set to the id of the feature you wish to build.</li>
+  <li><span style="font-weight: bold;">baseLocation</span>: the location of an eclipse install containing pre-built features and plug-ins in <tt>features/</tt> and <tt>plugins/</tt> subdirectories.  These are the binaries against which you will be compiling.  If you have no pre-requisite binaries and are building everything from scratch, this property can be left un-set.</li>
+  <li><span style="font-weight: bold;">buildDirectory</span>:&nbsp;the directory the build will take place in.</li>
+  <li><span style="font-weight: bold;">configs</span>: list the configurations for which you want your feature to be built. You can uncomment the configuration(s) provided (be careful of the line continuations). If the feature you are building is platform independent, this property does not need to be set or can be set to <tt>*,*,*</tt>.</li>
+  <li><span style="font-weight: bold;">archivePrefix</span>: the name of the directory in which your feature will be unzipped on disk.</li>
 </ul>
-<h2>Controlling what will be built: allElements.xml</h2>
-Copy the allElements.xml file from
-org.eclipse.pde.build/templates/headless-build to your configuration
-directory. This is the file that tells PDE which feature
-you are building.&nbsp; This
-file contains two kinds of targets:&nbsp; the <tt>allElementsDelegator</tt>
-which specifies the feature being built, and
-the assemble targets which are called to assemble individual
-configurations.&nbsp; The
-<tt>allElementsDelegator</tt> for a feature named <code>org.foo.Feature</code>
-is:
-<br>
-<div style="text-align: left; margin-left: 40px;">
-<pre> 	&lt;target name="allElementsDelegator"&gt;<br> 		&lt;ant antfile="${genericTargets}" target="${target}"&gt;<br>	 		&lt;property name="type" value="feature" /&gt;<br>	 		&lt;property name="id" value="<span
- style="font-weight: bold;">org.foo.Feature</span>" /&gt;<br> 		&lt;/ant&gt;<br> 	&lt;/target&gt;<br></pre>
-</div>
-The assemble targets allow you to control the name of the final archive
-on a per configuration
-basis.&nbsp; You should have one target for each configuration you are
-building.&nbsp; For example,
-when building
-<code>org.foo.Feature</code>
-for windows (when <tt>configs</tt> is set to win32, win32, x86) you should have the following target:
-<br>
-<pre style="margin-left: 80px;">&lt;!--Target for assembling  os=win32, ws=win32, arch=x86 --&gt;<br>&lt;target name="assemble.<span  style="font-weight: bold;">org.foo.Feature</span>.win32.win32.x86"&gt;<br>	&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}" /&gt;<br>&lt;/target&gt; <br></pre>
-When building a platform independent configuration (when <tt>configs</tt> is not set or is set to <tt>*,*,*</tt>), you should a target like the following:
-<pre style="margin-left: 80px;">&lt;!--The platform independent assemble target--&gt;<br>&lt;target name="assemble.<span  style="font-weight: bold;">org.foo.Feature</span>"&gt;<br> 	&lt;ant antfile="${assembleScriptName}" dir="${buildDirectory}" /&gt;<br>&lt;/target&gt;<br>	<br></pre>
+<p>Previous version of PDE/Build also required an allElements.xml file, this is no longer necessary in 3.4.  The allElements.xml can still be used, but is only required if you wish to customize certain aspects of your build.  See <a href="pde_customization.htm">Customizing a Headless Build</a>.</p>
+
 <h2>Running the build</h2>
-To run the build you will use the org.elipse.ant.core.antRunner
-application. When invoking eclipse
-with this application to perform a build you need to set two arguments
-on the command line:
-<br>
+<p>To run the build you will use the org.elipse.ant.core.antRunner application. When invoking eclipse with this application to perform a build you need to set two arguments on the command line:</p>
 <ul>
-  <li><code>-buildfile=&lt;/path/to/build.xml&gt;</code>:&nbsp; This is
-the path to the build.xml provided by pde build.&nbsp; It is located in
-the org.eclipse.pde.build/scripts directory.&nbsp; This is the build
-file that drives the whole build process.</li>
-  <li><code>-Dbuilder=&lt;/path/to/configuration folder&gt;</code>:&nbsp;
-This is the path to the build configuration folder.</li>
+  <li><code>-buildfile=&lt;/path/to/build.xml&gt;</code>:&nbsp; This is the path to the build.xml provided by pde build.&nbsp; It is located in the org.eclipse.pde.build/scripts directory.&nbsp; This is the build script that drives the whole build process.</li>
+  <li><code>-Dbuilder=&lt;/path/to/configuration folder&gt;</code>:&nbsp;This is the path to the build configuration folder.</li>
 </ul>
-Run the antRunner application using the following command:
+<p>Run the antRunner application using the following command:</p>
 <br>
-<div style="text-align: center;">
-<div style="text-align: left;">
 <div style="margin-left: 40px;"><code>java -jar
 &lt;eclipseInstall&gt;/plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar
 -application org.eclipse.ant.core.antRunner -buildfile
 &lt;&lt;eclipseInstall&gt;/plugins/org.eclipse.pde.build_&lt;version&gt;/scripts/build.xml&gt;
 -Dbuilder=&lt;path to the build configuration folder&gt;</code><br>
 </div>
-</div>
-</div>
-Once the build is complete, you can get the result in the build
-directory in the folder named I.TestBuild (this name can be configured
-by setting the buildLabel property).
+<p>Once the build is complete, you can get the result in the build directory in the folder named I.TestBuild (this name can be configured by setting the buildLabel property).</p>
 <h2>Advanced scenarios</h2>
-<p>If you require more customization of the build, ie
-fetching from a repository, see the <a
- href="pde_build_advanced_topics.htm">Advanced
-PDE Build topics</a> for
-more information.<br>
-</p>
+<p>If you require more customization of the build, ie fetching from a repository, see the <a href="pde_build_advanced_topics.htm">Advanced PDE Build topics</a> for more information.</p>
 </body>
 </html>
