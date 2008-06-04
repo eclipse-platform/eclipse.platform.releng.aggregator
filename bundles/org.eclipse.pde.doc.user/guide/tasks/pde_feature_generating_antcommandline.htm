@@ -253,7 +253,16 @@ that were built;<br>
  style="font-style: italic;">filteredDependencyCheck</span> : <br>
           </td>
           <td style="vertical-align: top;">optional, constraint the set of plug-ins and features
-          to be considered during the build to the one reachable from the features / plugins being built;<br>
+          to be considered during the build to those reachable from the features;<br>
+          </td>
+        </tr>
+        
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">filterP2Base</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, constraint the set of plug-ins and features
+          to be considered from the baseLocation to those considered to be installed by p2;<br>
           </td>
         </tr>
         
@@ -377,7 +386,7 @@ to be platform independent;</td>
  style="font-style: italic;">pluginList</span> : <br>
           </td>
           <td style="vertical-align: top;">optional, a comma separated
-list of plug-in ids to include in the generated feature.<br>
+list of plug-in ids to include in the generated feature.  (Supports attributes, see below)<br>
           </td>
         </tr>
         <tr>
@@ -385,7 +394,7 @@ list of plug-in ids to include in the generated feature.<br>
  style="font-style: italic;">featureList</span> : <br>
           </td>
           <td style="vertical-align: top;">optional, a comma separated
-list of feature ids to include in the generated feature.<br>
+list of feature ids to include in the generated feature. (Supports attributes, see below)<br>
           </td>
         </tr>
         <tr>
@@ -393,12 +402,44 @@ list of feature ids to include in the generated feature.<br>
  style="font-style: italic;">fragmentList</span> :<br>
           </td>
           <td style="vertical-align: top;">optional, a comma separated
-list of fragment ids to include in the generated feature.<br>
+list of fragment ids to include in the generated feature. (Supports attributes, see below)<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">buildPropertiesFile</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, the location of a properties file whose contents should be used as the generated feature's build.properties.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">includeLaunchers</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, whether or not to include the equinox launchers, default value is "true".<br>
           </td>
         </tr>
       </tbody>
     </table>
     <br>
+    <p>The <tt>pluginList</tt>, <tt>featureList</tt>, and <tt>fragmentList</tt> arguments of the eclipse.generateFeature task all support attributes.  These arguments all take the form:</p>
+    <pre style="text-align: center;">List = &lt;element-id&gt;[;&lt;attribute&gt;=&lt;value&gt;]* [,&lt;element-id&gt;[;&lt;attribute&gt;=&lt;value&gt;]*]*</pre>
+    <p>Each attribute=value pair will be inserted into the generated xml corresponding to the given element.  <b>Example:</b></p>
+    <pre>
+    	featureList = org.eclipse.feature;optional=true
+    	pluginList = org.eclipse.plugin.A;unpack=true
+    	fragmentList=org.eclipse.fragment.a;os=win32,org.eclipse.fragment.b;os=linux;ws=gtk;arch=x86
+    	
+    	&lt;feature ...&gt;
+    	     ...
+    	     &lt;includes id="org.eclipse.feature" version="0.0.0" optional="true" /&gt;
+    	     ...
+    	     &lt;plugin id="org.eclipse.plugin.A" version="0.0.0" unpack="true" /&gt;
+    	     &lt;plugin id="org.eclipse.fragment.a" version="0.0.0" os="win32" fragment="true" /&gt;
+    	     &lt;plugin id="org.eclipse.fragment.b" version="0.0.0" os="linux" ws="gtk" arch="x86" fragment="true" /&gt;
+    	     ...
+    	&lt;/feature&gt;
+    </pre>
   </li>
 </ul>
 <h4>Examples</h4>
