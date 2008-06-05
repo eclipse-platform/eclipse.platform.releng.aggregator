@@ -1,0 +1,167 @@
+<h2>Generating Metadata</h2>
+With the Classic Update Manager, all metadata for features and bundles is self-contained in the features and 
+bundles themselves. In p2 the metadata is more powerful and therefore contains more information and is stored 
+separately in what are called InstallableUnits (IUs) and ConfigurationUnits (CUs).
+<p></p>
+
+In order to be backwards-compatible, p2 is able to install things from old-style update sites and extension locations
+by generating metadata for these things on-the-fly, but this of course is not the optimal situation. Ideally plug-in
+developers should create p2 metadata when they produce their bundles, features, and products. 
+<p></p>
+
+This document will describe how to generate p2 metadata for your software.
+
+<h2>The Metadata Generator Application</h2>
+In Eclipse 3.4, p2 ships with a metadata generator application that plug-in developers can run. The generator application is contained in the
+bundle <code>org.eclipse.equinox.p2.metadata.generator</code>. This bundle is part of the Eclipse SDK, 
+and is also available in the p2 Admin UI. The generator can be invoked using the generic Eclipse launcher format as follows:
+
+<p>
+<code>eclipse -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator &lt;generatorArgs&gt;</code>
+</p>
+
+The generator application has three primary modes of operation:
+<ol>
+	<li>Generating metadata for a folder containing bundles and features (<code>-source</code> argument)
+	<li>Generating metadata for a traditional Eclipse update site (<code>-updateSite</code> argument)
+	<li>Generating metadata for an existing Eclipse application that does not contain p2 metadata (<code>-config</code> argument)
+</ol> 
+
+<p>
+Note that you can also generate metadata for your features, bundles, and products through the PDE
+UI. See the XXXXX section in the PDE documentation for details.
+</p>
+
+<h3>1. Bundles and Features</h3>
+If you have a directory with bundles and features and you want to create p2 metadata for them, you can use the p2
+metadata generator. Here is an example of using the generator in this scenerio. In this case the features and bundles
+are located under the <code>D:/myData/</code> directory and the artifact and metadata repositories are co-located
+and produced to <code>D:/repository/</code>.
+
+<pre>
+eclipse
+   -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator
+   -source D:/myData/
+   -metadataRepository file:D:/repository/
+   -metadataRepositoryName "My Update Site"
+   -artifactRepository file:D:/repository/
+   -artifactRepositoryName "My Artifacts"
+   -publishArtifacts
+   -publishArtifactRepository
+   -root org.example.application
+   -rootVersion 1.0.0
+   -compress
+   -noDefaultIUs
+   -vmargs -Xmx256m
+</pre>
+
+<h3>2. Update Manager Site</h3>
+If you have an update manager site (site index file along with features and plug-ins) and you would like to generate
+p2 metadata, you can use the metadata generator application. The following example shows how to generate metadata 
+from an pre-existing update site located in <code>D:\ganymedeM5</code>. The output files from the operation will
+also be placed in the <code>D:\ganymedeM5</code> folder so clients will be able to point to the same location,
+regardless of which UI they are using.
+
+<pre>
+eclipse
+   -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator
+   -updateSite D:/ganymedeM5/
+   -site file:D:/ganymedeM5/site.xml
+   -metadataRepository file:D:/ganymedeM5/
+   -metadataRepositoryName "Ganymede Update Site"
+   -artifactRepository file:D:/ganymedeM5/
+   -artifactRepositoryName "Ganymede Artifacts"
+   -compress
+   -reusePack200Files
+   -noDefaultIUs
+   -vmargs -Xmx256m
+</pre>
+
+<h3>3. Existing Non-p2 Eclipse Application</h3>
+
+<pre>
+eclipse
+   -application org.eclipse.equinox.p2.metadata.generator.EclipseGenerator
+   -config D:/application/
+   -metadataRepository file:D:/repository/
+   -metadataRepositoryName "My Update Site"
+   -artifactRepository file:D:/repository/
+   -artifactRepositoryName "My Artifacts"
+   -publishArtifacts
+   -publishArtifactRepository
+   -root org.example.application
+   -rootVersion 1.0.0
+   -compress
+   -noDefaultIUs
+   -vmargs -Xmx256m
+</pre>
+
+<h2>Input Arguments</h2>
+
+<p>You can invoke the p2 metadata generator in one of these modes:<br>
+<dt><code>-source &lt;path&gt;</code></dt>
+	<dd>the path to a folder containing <code>plugins</code> and <code>features</code> folders</dd>
+<dt><code>-updateSite &lt;path&gt;</code></dt>
+	<dd>the path to a traditional update site</dd>
+<dt><code>-config &lt;path&gt;</code></dt>
+	<dd>the path of an Eclipse application that is not p2-enabled</dd>
+
+<p>Here are other command-line options:<br>
+<dt><code>-exe &lt;path&gt;</code></dt>
+	<dd>the location of the application launcher executable</dd>
+<dt><code>-launcherConfig &lt;path&gt;</code></dt>
+	<dd>the path of the launcher configuration file (e.g. <code>eclipse.ini</code>)</dd>
+<dt><code>-features &lt;path&gt;</code></dt>
+	<dd>the location of the features folder</dd>
+<dt><code>-bundles &lt;path&gt</code></dt>
+	<dd>the location of bundles folder</dd> 
+<dt><code>-base &lt;path&gt;</code></dt>
+	<dd>a base location containing a <code>plugins</code> and <code>features</code> directory</dd> 
+<dt><code>-p2.os &lt;os&gt;</code></dt>
+	<dd>the target operating system for the application</dd> 
+<dt><code>-site &lt;path&gt;</code></dt>
+	<dd>the URL of a <code>site.xml</code> file used to generate categories</dd> 
+    
+<h2>Output Arguments</h2>
+
+<dt><code>-metadataRepository &lt;url&gt;</code></dt>
+	<dd>the URL to a writable metadata repository that will contain the produced metadata</dd> 
+<dt><code>-metadataRepositoryName &lt;name&gt;</code></dt>
+	<dd>a user-friendly name for the metadata repository</dd> 
+<dt><code>-artifactRepository &lt;url&gt;</code></dt>
+	<dd>the URL to a writable artifact repository that will contain the produced artifacts</dd>
+<dt><code>-artifactRepositoryName &lt;name&gt;</code></dt>
+	<dd>a user-friendly name for the artifact repository</dd> 
+<dt><code>-publishArtifacts</code></dt>
+	<dd>flag indicating that the artifacts should be published (copied) to the repository. When this flag is not set, the actual bytes 
+	underlying the artifact will not be copied, but the repository index will be created. When this option is not 
+	specified, it is recommended to set the artifactRepository to be in the same location as the source (<code>-source</code>).</dd>
+<dt><code>-publishArtifactRepository</code></dt>
+	<dd>flag indicating to write out the artifact repository index file</dd> 
+<dt><code>-append</code></dt>
+	<dd>flag indicating that repositories will be appended to as opposed to over-written</dd> 
+<dt><code>-root &lt;name&gt;</code></dt>
+	<dd>When you run the generator application, it will create a <b>root IU</b> which will contain everything that has
+	been generated during this run. This argument is used for setting the name of the root IU.</dd> 
+<dt><code>-rootVersion &lt;version&gt;</code></dt>
+	<dd>The version of the root installable unit</dd> 
+<dt><code>-inplace</code></dt>
+	<dd>causes the metadata and artifact repositories to be written into the source location</dd> 
+<dt><code>-noDefaultIUs</code></dt>
+	<dd>flag to indicate the default configuration units should not be created</dd> 
+<dt><code>-compress</code></dt>
+	<dd>cause the repositories to store their index files in compressed form</dd> 
+<dt><code>-reusePack200Files</code></dt>
+	<dd>Specifying -reusePack200 does not require you to have pack200 files on the server, nor does it cause pack200 
+	files to be created. When this option is specified, the generator looks for pack.gz files and if available it creates an 
+	entry for them in the artifact repository index.</dd>
+	 
+
+<h2>Generator Ant Task</h2>
+The metadata generator is also available as an Ant task. It iscalled <code>p2.generator</code> and it is available in the 
+<code>org.eclipse.equinox.p2.metadata.generator</code> bundle. The arguments passed to the task are the same as
+listed above.
+
+<h2>Updated Documentation</h2>
+Up-to-date information on the p2 metadata generator application can be found on the 
+<a href="http://wiki.eclipse.org/Equinox_p2_Metadata_Generator">Eclipse p2 wiki</a>.
