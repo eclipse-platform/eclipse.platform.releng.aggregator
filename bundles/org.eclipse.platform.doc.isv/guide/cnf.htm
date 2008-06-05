@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+
+<meta name="copyright"
+	content="Copyright (c) Oakland Software and others 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Common Navigator Framework</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H1>Common Navigator Framework</H1>
+
+
+<p>The Common Navigator Framework (CNF) provides a general purpose
+configurable navigator view which can be shared by many applications
+working with the same set of resources or other objects, presenting a
+integrated view to the end user. It is implemented by the <b><a
+	href="../reference/api/org/eclipse/ui/navigator/package-summary.html">
+org.eclipse.ui.navigator</a> </b> plugin.</p>
+<p>The main part of the CNF is the <b><a
+	href="../reference/api/org/eclipse/ui/navigator/CommonNavigator.html">CommonNavigator
+</a> </b> which is a <b><a
+	href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart </a> </b>
+implementation. The Common Navigator instance in the IDE workbench is
+called the <b>Project Explorer</b>. Note that the <b>Package
+Explorer</b> in the IDE is an instance of the <b><a
+	href="../reference/api/org/eclipse/ui/views/ResourceNavigator.html">ResourceNavigator
+</a> </b> class and is unrelated to the Common Navigator.</p>
+
+<p>With the CNF you can define one or more view parts and associate
+each view part with content extensions, filters, wizards, and sets of
+actions. Each view instance is defined by an extension. Each content
+extension, filter, wizard and action provider is defined by another
+extension which allows these to be shared among the view part(s).</p>
+
+<h2>Components of the Common Navigator Framework</h2>
+
+<p>The CNF has the following major parts:
+<ol>
+	<li><b>View Part</b> - <b><a
+		href="../reference/api/org/eclipse/ui/navigator/CommonNavigator.html">CommonNavigator
+	</a> </b>.
+	<li><b>Viewer</b> -<b><a
+		href="../reference/api/org/eclipse/ui/navigator/CommonViewer.html">CommonViewer
+	</a> </b> the implementation of a viewer that is contained in the above view
+	part.
+	<li><b>Content Service</b> - <b><a
+		href="../reference/api/org/eclipse/ui/navigator/INavigatorContentService.html">INavigatorContentService
+	</a> </b> a service that manages content extensions and allows them to be
+	discovered based on objects associated with a viewer. Most users do not
+	interact directly with the Content Service, but it is possible to use
+	it independently from the common navigator view part.
+</ol>
+
+
+<h2>Content Extensions</h2>
+
+<p>The CNF allows you to include not only resources but any type of
+object. One typical use case is that of a resource (consider a Java file
+for example) which has several subordinate objects presented as tree
+nodes representing aspects of the class like imports, methods, etc. The
+CommonViewer (portion of the Common Navigator) will include the
+IResource object representing the Java file, and then as its children an
+object for each import, method, etc. The mechanism for defining this is
+a <b><a href="cnf_config.htm#contentExtension">content extension</a></b>.</p>
+
+<p>Each content extension also provides a means of associating
+objects with appropriate icons, labels and menu items.</p>
+
+<p>Content extensions are invoked based on an enablement expression
+which is defined using core expressions in the extension point.
+Enablement expressions are commonly defined by sensing the class of an
+object.</p>
+
+<p>A priority may be associated with a content extension which
+indicates the category of importance of the extension related to other
+extensions. It's possible that more than one content extension may be
+enabled for a given object and situation. In this case the priority
+mechanism is used to select the one extension to use. Priorities are
+defined with words like "high" or "normal". A high priority would be
+associated with an extension that defines the primary UI for frequently
+manipulating an object. A low priority would be given to relatively
+infrequent utility sorts of UI.</p>
+
+<p>Content extensions may be activated and deactivated for a given
+view part in the UI using the <b>Customize View</b> menu item in the
+header menu associated with the view part. Common filters are also may
+also be activated and deactivated the same way.</p>
+
+<h2>Common Filters</h2>
+
+<p>Filters allow the user to specify which resources or objects to
+exclude. Like content extensions, filters may be specified centrally and
+shared.</p>
+
+<h2>Common Wizards</h2>
+
+<p>References to wizards for new/import/export may be defined. These
+are included in the appropriate popup menu based on the enablement.</p>
+
+<h2>Action Providers</h2>
+
+<p>Action providers provide a means to configure the retargetable
+actions and programmatically configure the popup menu in a CNF viewer.
+These are useful for when you must perform a computation to determine
+which items are added to the menu, or to adjust the retargetable actions
+to ensure that the user keystrokes are handled properly (like for
+Cut/Copy/Paste).</p>
+
+<h2>Drag and Drop Support</h2>
+
+<p>A drop assistant may be associated with a content extension to
+provide handling of additional (non-standard) transfer types or
+validation in the event of a drop.</p>
+
+
+<h2>Built in Resource Support</h2>
+
+<p><b><a href="../guide/resInt.htm">Resources </a> </b> are one of
+the main types of objects managed by the CNF. To support this the <b><a
+	href="../reference/api/org/eclipse/ui/navigator/resources/package-summary.html">
+org.eclipse.ui.navigator.resources</a> </b> plug-in provides all of the
+necessary definitions. The Project Explorer in the IDE is configured
+using these definitions.</p>
+
+<h2>Configuring the Common Navigator</h2>
+
+<p><b><a href="../guide/cnf_config.htm">Configuring the
+Common Navigator </a> </b> gives the overview of how the CNF is configured. For
+further details, see the extension point documentation:
+<ul>
+	<li><b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_viewer.html">org.eclipse.ui.navigator.viewer</a></b>
+	<li><b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent</a></b>
+	<li><b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_linkHelper.html">org.eclipse.ui.navigator.linkHelper</a></b>
+</ul>
+
+<h2>Rich Client Platform Configuration Steps</h2>
+
+<p>The Common Navigator can be used in RCP applications to allow
+full access and manipulation of the resource workspace. This can be
+accomplished very quickly by using the <b><a
+	href="../guide/cnf_rcp.htm">Using the Common Navigator in RCP </a> </b>
+instructions.</p>
+
+
+</BODY>
+</HTML>
