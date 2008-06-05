@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
 <HEAD>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -14,7 +14,7 @@
 <BODY BGCOLOR="#ffffff">
 <h2>Updating a product or extension</h2>
 <p>By following the prescribed procedures for packaging and installing products,
-we can take advantage of the <b>platform update manager,</b> which treats
+we can take advantage of <b>platform update support,</b> which treats
 products and extensions in a uniform way and allows users to discover and
 install updated versions of products and extensions.</p>
 <p>Before looking at the implementation of such a server, it's important to
@@ -32,7 +32,7 @@ revisit some important concepts:</p>
     appropriate install guidelines.</li>
   <li>Developers are free to use native installers and uninstallers to upgrade
     their own products and extensions without regard to sites and the
-    update manager.</li>
+    platform update support.</li>
 </ul>
 <p>That said, what do we do if we want to fully participate in the platform
 implementation of product updating and use its update server?</p>
@@ -49,12 +49,16 @@ Archive Files</a>.</p>
 The list of available features and plug-ins provided by the server is described
 in a site map file, <b>site.xml</b>.&nbsp; The update server URL can be
 specified as a full URL to the site map file, or a URL of a directory path
-containing the site map.&nbsp; The site map file contains a list of all the
+containing the site map.&nbsp; Prefer using the directory path as this will allow
+easy use of more efficie plugin and feature repositories like the p2 representation.
+&nbsp; The site map file contains a list of all the
 available features and the location of the feature archives on the server.&nbsp;
 It also describes the locations of the plug-in archives that are referenced in
 the feature manifest.</p>
 <p>A simple site layout for our example web product and extension could look something like this:</p>
 <pre>&lt;site root&gt;/
+	artifacts.jar <i>(compressed p2 artifact repository - present in p2 optimized site)</i>
+	content.jar <i>(compressed p2 metadata repository - present in p2 optimized site)</i>
 	site.xml
 	features/	<i>(contains feature archive files)</i>
 		com.example.acme.acmefeature_1.0.1.jar
@@ -67,17 +71,11 @@ the feature manifest.</p>
 		com.example.betterwebs.betterwebsupport_1.0.1.jar
 		...</pre>
 <p>The complete definition for the site map is described in <a href="../reference/misc/update_sitemap.html"> Update Server Site Map</a>.</p>
-<h3>Update servers and policies</h3>
+<h3>Update servers</h3>
 <p>An Eclipse update server is provided for updating the platform
 itself.  In addition, the platform update UI allows users can maintain a list of update servers that
 can be searched for new features.  Any site that conforms to the specified update server
-layout may be added to the list.   Users can choose to manually or automatically search for
+layout may be added to the list. Users can choose to manually or automatically search for
 additional features or upgrades to their installed features.  </p>
-<p>Some organizations may wish to have more control over how their user installations are updated.
-This can be accomplished with an update <b>policy</b> file that specifies which features can be updated
-and which servers can be used to update a particular feature.   See <a href="../../org.eclipse.platform.doc.user/tasks/tasks-37.htm">Controlling the Eclipse update policy</a>
-for a complete definition of the policy file and how it is used.
-</p>
-
 </BODY>
 </HTML>
