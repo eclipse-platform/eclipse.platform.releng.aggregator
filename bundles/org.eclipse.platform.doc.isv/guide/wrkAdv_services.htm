@@ -16,8 +16,181 @@ Services
 <BODY BGCOLOR="#ffffff">
 <h2>Services</h2>
 <p>The workbench defines a number of services that can be retrieved from the
-<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>.
+Services provide a way for components to retrieve information about the workbench
+without always having to go to the global singleton: <code>PlatformUI.getWorkbench()</code>.
+For example:
 </p>
+<pre>
+		IHandlerService handlerService = (IHandlerService) getSite()
+				.getService(IHandlerService.class);
+</pre>
+<p>
+Some services provide 2 optional abilities, which are usually specified in the 
+service interface javadoc:
+<ul>
+<li>Services that support listeners can clean up the listeners automatically
+when the component's 
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>.
+(used to get the service) is disposed.</li>
+<li>Services can provide more localized services depending on which component they
+are requested from.</li>
+</ul>
+See <a href="workbench_cmd_handlers.htm" 
+   class="XRef">Associating a handler programmically with a command...</a>
+for an example of the activation localization provided by the 
+<a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html">org.eclipse.ui.handlers.IHandlerService</a>.
+</p>
+<h3>
+Services Provided by the Workbench
+</h3>
+<p>
+The services provided to by the workbench now includes some of the most
+common services that an
+<a href="../reference/api/org/eclipse/ui/IWorkbenchPart.html">org.eclipse.ui.IWorkbenchPart</a>.
+would require.  Support for service related optional abilities are specified in the service javadoc.
+The availability of the service is at and below the level specified.
+<table border="1">
+<tr>
+<th>Service</th>
+<th>Description</th>
+<th>Availability</th>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/keys/IBindingService.html">IBindingService</a>
+</td>
+<td>Provides services related to the binding architecture (e.g., keyboard
+shortcuts) within the workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/commands/ICommandService.html">ICommandService</a>
+</td>
+<td>Provides services related to the command architecture within the workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/commands/ICommandImageService.html">ICommandImageService</a>
+</td>
+<td>Provides a look-up facility for images associated with commands.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/contexts/IContextService.html">IContextService</a>
+</td>
+<td>Provides services related to contexts in the Eclipse workbench, like context
+activation and definitions.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/model/IContributionService.html">IContributionService</a>
+</td>
+<td>Instances of this service are capable of providing standard mechanisms that
+clients may use to order, display, and generally work with contributions to
+the Workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/services/IEvaluationService.html">IEvaluationService</a>
+</td>
+<td>Evaluate a core expression against the workbench application context and
+report updates using a Boolean property.  Also provides the main source for
+the workbench application context.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/swt/IFocusService.html">IFocusService</a>
+</td>
+<td>Tracks focusGained and focusLost events for a Control registered with this
+service, and provides the control and its registered ID as variables to the
+application evaluation context for evaluation by the various services.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/handlers/IHandlerService.html">IHandlerService</a>
+</td>
+<td>Provides services related to activating and deactivating handlers within the
+workbench.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/menus/IMenuService.html">IMenuService</a>
+</td>
+<td>Provides services related to the menu architecture within the workbench.  It
+can be used to populate MenuManagers and ToolBarManagers by components.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/IPageService.html">IPageService</a>
+</td>
+<td>A page service tracks the page and perspective lifecycle events
+ within a workbench window.</td>
+<td>Workbench Window</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/IPartService.html">IPartService</a>
+</td>
+<td>A part service tracks the creation and activation of parts within a
+ workbench window.</td>
+<td>Workbench Window</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/progress/IProgressService.html">IProgressService</a>
+</td>
+<td>The progress service is the primary interface to the workbench progress support.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/progress/IWorkbenchSiteProgressService.html">IWorkbenchSiteProgressService</a>
+</td>
+<td>The part progress service is an IProgressService that adds API for jobs
+that change the state in a IWorkbenchPartSite while they are being run.</td>
+<td>Part Site</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/ISaveablesLifecycleListener.html">ISaveablesLifecycleListener</a>
+</td>
+<td>Parts that implement 
+<a href="../reference/api/org/eclipse/ui/ISaveablesSource.html">org.eclipse.ui.ISaveablesSource</a>
+should notify their
+<code>ISaveablesLifecycleListener</code>, available as a service from their site, about
+<a href="../reference/api/org/eclipse/ui/Saveable.html">org.eclipse.ui.Saveable</a>
+objects that have been added to or removed from the
+part.  Implementations of <code>ISaveablesSource</code> that are
+not parts should retrieve this service from the
+<a href="../reference/api/org/eclipse/ui/IWorkbench.html">org.eclipse.ui.IWorkbench</a> 
+object.</td>
+<td>Globally</td>
+</tr>
+
+<tr>
+<td><a href="../reference/api/org/eclipse/ui/ISelectionService.html">ISelectionService</a>
+</td>
+<td>A selection service tracks the selection within an a workbench window.</td>
+<td>Workbench Window</td>
+</tr>
+
+</table>
+</p>
+
+
+<h3>
+Contributing a Service
+</h3>
 
 
 </BODY>
