@@ -39,15 +39,15 @@ Changing the build path</h3>
 <P>
 You can programmatically change a project's build path using <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setRawClasspath(org.eclipse.jdt.core.IClasspathEntry[], org.eclipse.core.runtime.IProgressMonitor)">
 setRawClasspath</a></b> on the corresponding project's Java element.&nbsp; The
-following code sets the classpath for a project resource:
+following code sets the classpath for a project resource:</p>
 
-	<font color='#4444CC'><pre>
+	<pre><font color='#4444CC'>
 	IProject project = ... // get some project resource
 	IJavaProject javaProject = JavaCore.create(project);
 	IClasspathEntry[] newClasspath = ...;
 	javaProject.setRawClasspath(newClasspath, someProgressMonitor);
-	</pre></font>
-</p>	
+	</font></pre>
+
 <P>(Note:&nbsp; The use of the term &quot;raw&quot; classpath is used to
 emphasize the fact that any variables used to describe entry locations have not
 been resolved.)
@@ -78,8 +78,8 @@ It is possible to use multiple source folders, as long as they don't overlap. A
   files will be placed in the containing project's output location
   (see <b><a href="../reference/api/org/eclipse/jdt/core/IJavaProject.html#setOutputLocation(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)">IJavaProject.setOutputLocation</a></b>).<P>The
   following is an example classpath entry that denotes the source folder 'src' of project
-  'MyProject':
-	<font color='#4444CC'><pre>   IClassPathEntry srcEntry = JavaCore.newSourceEntry(new Path(&quot;/MyProject/src&quot;));</pre></font></p>
+  'MyProject':</p>
+	<pre><font color='#4444CC'>   IClassPathEntry srcEntry = JavaCore.newSourceEntry(new Path(&quot;/MyProject/src&quot;));</font></pre>
 </li>
 <li><b>a binary library</b> - either a class file folder (contained inside or outside the workspace) or a class file archive file (contained inside or outside the workspace).
 Archive libraries can have attached source archives, which are extracted when asking a class file element  for
@@ -87,22 +87,22 @@ Archive libraries can have attached source archives, which are extracted when as
 The factory method for libraries is 
 <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#newLibraryEntry(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IPath, boolean)">newLibraryEntry</a></b>.
 <P>
-The following is an example classpath entry that denotes the class file folder 'lib' of  'MyProject':
-	<font color='#4444CC'><pre>
+The following is an example classpath entry that denotes the class file folder 'lib' of  'MyProject':</p>
+	<pre><font color='#4444CC'>
   IClassPathEntry libEntry = JavaCore.newLibraryEntry(
     new Path(&quot;/MyProject/lib&quot;), 
     null, // no source
     null, // no source
     false); // not exported
-	</pre></font>
-  The following classpath entry has a source attachment:
-	<font color='#4444CC'><pre>
+	</font></pre>
+  <p>The following classpath entry has a source attachment:</p>
+	<pre><font color='#4444CC'>
   IClassPathEntry libEntry = JavaCore.newLibraryEntry(
     new Path(&quot;d:/lib/foo.jar&quot;), // library location
     new Path(&quot;d:/lib/foo_src.zip&quot;), // source archive location
     new Path(&quot;src&quot;), // source archive root path
     true); // exported
-	</pre></font></p><p>The source archive root path describes the location of the
+	</font></pre><p>The source archive root path describes the location of the
   root within the source archive.&nbsp; If set to null, the root of the archive
   will be inferred dynamically.</p>
   <br></li>
@@ -116,10 +116,10 @@ This means that in addition to contributing its source to its dependents, a proj
 The factory method for a project prerequisite is 
 <b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#newProjectEntry(org.eclipse.core.runtime.IPath, boolean)">newProjectEntry</a></b>.
 <P>
-The following classpath entry denotes a prerequisite project 'MyFramework'.
-	<font color='#4444CC'><pre>
+The following classpath entry denotes a prerequisite project 'MyFramework'.</p>
+	<pre><font color='#4444CC'>
   IClassPathEntry prjEntry = JavaCore.newProjectEntry(new Path(&quot;/MyFramework&quot;), true); // exported
-	</pre></font> </p>
+	</font></pre>
 </li>
 <li><b>an indirect reference to a project or library, using some classpath variable</b> -
   The location of projects or libraries can be dynamically resolved relative to a
@@ -136,15 +136,15 @@ when the workspace is started.</p>
 <P>
 The following classpath entry denotes a library whose location is kept in the
 variable 'HOME'.&nbsp; The source attachment is defined using the
-variables&nbsp; 'SRC_HOME' and 'SRC_ROOT' :
-	<font color='#4444CC'><pre>
+variables&nbsp; 'SRC_HOME' and 'SRC_ROOT' :</p>
+	<pre><font color='#4444CC'>
   IClassPathEntry varEntry = JavaCore.newVariableEntry(
     new Path(&quot;HOME/foo.jar&quot;), // library location
     new Path(&quot;SRC_HOME/foo_src.zip&quot;), // source archive location
     new Path(&quot;SRC_ROOT&quot;), // source archive root path
     true); // exported	
   JavaCore.setClasspathVariable(&quot;HOME&quot;, new Path(&quot;d:/myInstall&quot;), null); // no progress monitor
-	 </pre></font> </p>
+	</font></pre>
 </li>
 <li><b>entry denoting a classpath container</b> - an indirect reference to a structured set of project or libraries.
   Classpath containers are used to refer to a set of classpath entries that
@@ -163,12 +163,12 @@ are dynamically resolved.&nbsp; Classpath containers may be used by different
 It is possible to register an automatic <b><a href="../reference/api/org/eclipse/jdt/core/ClasspathContainerInitializer.html">classpath container initializer</a></b>
 which is lazily invoked through the extension point <b><a href="../reference/extension-points/org_eclipse_jdt_core_classpathContainerInitializer.html">org.eclipse.jdt.core.classpathContainerInitializer</a></b>
 when the container needs to be bound.</p>
-  <P>The following classpath entry denotes a system class library container:
-	<font color='#4444CC'><pre>
+  <P>The following classpath entry denotes a system class library container:</p>
+	<pre><font color='#4444CC'>
   IClassPathEntry varEntry = JavaCore.newContainerEntry(
     new Path(&quot;JDKLIB/default&quot;), // container 'JDKLIB' + hint 'default'
     false); // not exported	
-	                             
+
   JavaCore.setClasspathContainer(
     new Path(&quot;JDKLIB/default&quot;), 
     new IJavaProject[]{ myProject }, // value for 'myProject'
@@ -182,10 +182,10 @@ when the container needs to be bound.</p>
         public String getDescription() { return &quot;Basic JDK library container&quot;; }
         public int getKind() { return IClasspathContainer.K_SYSTEM; }
         public IPath getPath() { return new Path(&quot;JDKLIB/basic&quot;); }
-      }			
+      }
     }, 
-    null);	                             
-</pre></font></p>
+    null);
+</font></pre>
 </li>
 </ul>
 
@@ -220,14 +220,14 @@ other way around.
 A nested source folder excluded from build path can be set as an output location.
  The following is an example classpath entry that denotes the source folder 'src' of project
  'MyProject' with an excluded nested source folder used as an output location:
-	<font color='#4444CC'><pre>
+	<pre><font color='#4444CC'>
   IPath sourceFolder = new Path(&quot;/MyProject/src&quot;);
   IPath outputLocation = sourceFolder.append(&quot;bin&quot;);
   IClassPathEntry srcEntry = JavaCore.newSourceEntry(
     sourceFolder, // source folder location
     new Path[] { outputLocation }, // excluded nested folder
     outputLocation); // output location
-    </pre></font>
+    </font></pre>
 </li>
 </ul>
 <h3>
