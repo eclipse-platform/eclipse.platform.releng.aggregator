@@ -31,7 +31,7 @@ service interface javadoc:</p>
 <ul>
 <li>Services that support listeners can clean up the listeners automatically
 when the component's 
-<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>.
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
 (used to get the service) is disposed.</li>
 <li>Services can provide more localized services depending on which component they
 are requested from.</li>
@@ -47,7 +47,7 @@ Services Provided by the Workbench
 <p>
 The services provided to by the workbench now includes some of the most
 common services that an
-<a href="../reference/api/org/eclipse/ui/IWorkbenchPart.html">org.eclipse.ui.IWorkbenchPart</a>.
+<a href="../reference/api/org/eclipse/ui/IWorkbenchPart.html">org.eclipse.ui.IWorkbenchPart</a>
 would require.  Support for service related optional abilities are specified in the service javadoc.
 The availability of the service is at and below the level specified.</p>
 <table border="1">
@@ -189,7 +189,81 @@ object.</td>
 <h3>
 Contributing a Service
 </h3>
-
+<p>
+Plug-in developers providing a framework in eclipse may also want to provide a service.
+This can be done using the
+<a href="../reference/extension-points/org_eclipse_ui_services.html">org.eclipse.ui.services</a>
+extension point.  Define a service factory based on 
+<a href="../reference/api/org/eclipse/ui/services/AbstractServiceFactory.html">org.eclipse.ui.services.AbstractServiceFactory</a>
+and then specify what services the factory can return.
+A factory can create more than one type of service, but multiple factories cannot
+contribute to the same service type.
+</p>
+<pre>
+      &lt;serviceFactory
+            factoryClass="org.eclipse.ui.examples.contributions.model.PersonServiceFactory"&gt;
+         &lt;service
+               serviceClass="org.eclipse.ui.examples.contributions.model.IPersonService"/&gt;
+      &lt;/serviceFactory&gt;
+</pre>
+<p>
+The create method of the 
+<a href="../reference/api/org/eclipse/ui/services/AbstractServiceFactory.html">org.eclipse.ui.services.AbstractServiceFactory</a>
+passes in 3 parameters:</p>
+<ul>
+<li><code>serviceInterface</code> - the interface class that needs to be created</li>
+<li><code>parentLocator</code> - an
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
+that can be used to get the parent service for <code>serviceInterface</code></li>
+<li><code>locator</code> - the 
+<a href="../reference/api/org/eclipse/ui/services/IServiceLocator.html">org.eclipse.ui.services.IServiceLocator</a>
+that requested this service be created.  It can be used to retrieve dependent services.</li>
+</ul>
+<p>
+Workbench services are organized so there is a global service providing the 
+needed functionality, and a chain of children services.  The children services provide
+the listener cleanup and any data needed to localize the service request.
+</p>
+<p>A service
+factory should return the global service when the <code>parentLocator</code> returns
+<code>null</code> when asked for the <code>serviceInterface</code>.  The global service
+may be the implementation, or a proxy to a plugin provided manager or OSGi service.
+</p>
+<pre>
+		Object parentService = parentLocator.getService(IPersonService.class);
+		if (parentService == null) {
+			return new PersonService(locator);
+		}
+		return new PersonServiceSlave(locator, (IPersonService) parentService);
+		
+		// or ...
+		Object parentService = parentLocator.getService(IPersonService.class);
+		if (parentService == null) {
+			return Activator.getDefault().getPersonManager();
+		}
+		return new PersonServiceSlave(locator, (IPersonService) parentService);
+		
+		//
+		// or as a front to an OSGi service.
+		Object parentService = parentLocator.getService(IPersonService.class);
+		if (parentService == null) {
+			PersonServiceProxy proxy = new PersonServiceProxy(locator,
+			        Activator.getDefault().getBundle().getBundleContext(),
+			        0);
+			proxy.findService();
+			return proxy;
+		}
+		PersonServiceProxy proxy = new PersonServiceProxy(locator,
+		     Activator.getDefault().getBundle().getBundleContext(),
+		     ((PersonServiceProxy)parentService).getLevel()+1);
+		proxy.findService();
+		return proxy;
+</pre>
+<p>In the OSGi service snippet above, instead of having each child <code>IPersonService</code> know
+its parent, each <code>IPersonService</code> talks directly to the OSGi service and uses
+the parent to calculate its "level" which allows it to localize any functionality
+it provides.
+</p>
 
 </BODY>
 </HTML>
