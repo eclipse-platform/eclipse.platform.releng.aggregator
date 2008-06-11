@@ -19,6 +19,7 @@
 <ol>
   <li><a href="#quickAssistContext">Quick Fix command moved to Dialogs and Windows context</a></li>
   <li><a href="#getCharset">IFile.getCharset() caches character set values</a></li>
+  <li><a href="#updateSites">Optimizing your update site for use with p2</a></li>
 </ol>
 
 <hr>
@@ -41,6 +42,28 @@ the workspace using <code>IResource.refreshLocal</code>, it may return a stale r
 Clients that call this method should revisit their usage to determine if a cached result 
 is acceptable. While using a cached encoding has better performance, it could lead 
 to data corruption if the wrong encoding is used to write a file.
+</p>
+<!-- ############################################## -->
+
+<h2>2. <a name="updateSites">Optimizing your update site for use with p2</a></h2>
+<p>
+Eclipse 3.4 includes a new provisioning platform called p2.  This is a replacement
+for the Update Manager technology in previous Eclipse platform releases.  While
+p2 can load update sites designed for Update Manager, you can optimize your site
+for p2 by generating p2 metadata for your update site. This metadata contains
+higher fidelity dependency information about the plug-ins and features in your update
+site, allowing for more accurate resolution of dependencies at install-time. See
+<a href="../../guide/p2_metadata_generator.html">Generating p2 metadata</a>
+for more details on how to generate p2 metadata for your update site.
+</p>
+<p>
+p2 isn't capable of installing from update sites that make use of 
+<a href="../../reference/extension-points/org_eclipse_update_core_installHandlers.html">install handlers</a>.
+When install handlers are encountered, p2 defers installation to the classic Update
+Manager. Although end users will still be able to install such features, the end
+user experience is less polished and the more advanced download technology
+of p2 cannot be exploited. It is recommended that install handlers be avoided
+for this reason.
 </p>
 
 <!-- ############################################## -->
