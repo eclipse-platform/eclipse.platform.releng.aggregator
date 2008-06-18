@@ -338,33 +338,16 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 	 * @param file
 	 */
 	private void processFile(IFile file, IProgressMonitor monitor) {
-		SourceFile aSourceFile;
-
 		String extension = file.getFileExtension();
 		if (extension == null) {
 			warn(file, null, "File has no extension.  File UNCHANGED."); //$NON-NLS-1$
 			return;
 		}
 		monitor.subTask(file.getFullPath().toOSString());
-		int fileType = IBMCopyrightComment.UNKNOWN_COMMENT;
-		extension = extension.toLowerCase();
-		if (extension.equals("java")) { //$NON-NLS-1$
-			fileType = IBMCopyrightComment.JAVA_COMMENT;
-			aSourceFile = new JavaFile(file);
-        } else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$
-        	fileType = IBMCopyrightComment.C_COMMENT;
-            aSourceFile = new CFile(file);
-		} else if (extension.equals("properties")) { //$NON-NLS-1$
-			fileType = IBMCopyrightComment.PROPERTIES_COMMENT;
-			aSourceFile = new PropertiesFile(file);
-        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak")) { //$NON-NLS-1$
-        	fileType = IBMCopyrightComment.SHELL_MAKE_COMMENT;
-            aSourceFile = new ShellMakeFile(file);
-        } else if (extension.equals("bat")) { //$NON-NLS-1$
-        	fileType = IBMCopyrightComment.BAT_COMMENT;
-            aSourceFile = new BatFile(file);
-		} else
+		SourceFile aSourceFile = SourceFile.createFor(file);
+		if (aSourceFile == null) {
 			return;
+		}
 
 		if (aSourceFile.hasMultipleCopyrights()) {
 			warn(file, null, "Multiple copyrights found.  File UNCHANGED."); //$NON-NLS-1$//$NON-NLS-2$
@@ -384,7 +367,7 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 			}
 		}
 
-		IBMCopyrightComment ibmCopyright = IBMCopyrightComment.parse(copyrightComment, fileType);
+		IBMCopyrightComment ibmCopyright = IBMCopyrightComment.parse(copyrightComment, aSourceFile.getFileType());
 		if (ibmCopyright == null) {
 			warn(file, copyrightComment, "Could not interpret copyright comment.  File UNCHANGED."); //$NON-NLS-1$
 			return;

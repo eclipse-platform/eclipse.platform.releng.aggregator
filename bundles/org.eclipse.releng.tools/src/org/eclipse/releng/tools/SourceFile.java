@@ -19,22 +19,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.osgi.util.NLS;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
-
+import org.eclipse.osgi.util.NLS;
 
 /**
  * @author droberts
@@ -46,7 +41,27 @@ public abstract class SourceFile {
 	StringWriter contents = new StringWriter();
 	private ITextFileBufferManager textFileBufferManager;
 
-
+	public static SourceFile createFor(IFile file) {
+        String extension = file.getFileExtension();
+        if (extension != null) {
+	        extension = extension.toLowerCase();
+			if (extension.equals("java")) { //$NON-NLS-1$
+				return new JavaFile(file);
+	        } else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$
+	            return new CFile(file);
+			} else if (extension.equals("properties")) { //$NON-NLS-1$
+				return new PropertiesFile(file);
+	        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak")) { //$NON-NLS-1$
+	            return new ShellMakeFile(file);
+	        } else if (extension.equals("bat")) { //$NON-NLS-1$
+	            return new BatFile(file);
+			} else if (extension.equals("js")) { //$NON-NLS-1$
+	            return new JavaScriptFile(file);
+			}
+        }
+		return null;
+	}
+	
 	public SourceFile(IFile file) {
 		super();
 		this.file = file;
@@ -238,4 +253,6 @@ public abstract class SourceFile {
 		}
 		return false;
 	}
+
+	public abstract int getFileType();
 }

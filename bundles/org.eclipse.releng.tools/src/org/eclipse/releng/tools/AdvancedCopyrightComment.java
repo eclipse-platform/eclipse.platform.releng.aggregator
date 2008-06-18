@@ -19,24 +19,15 @@ import java.util.StringTokenizer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
 
-public class AdvancedCopyrightComment {
+public class AdvancedCopyrightComment extends CopyrightComment {
 	private static final String DATE_VAR = "${date}"; //$NON-NLS-1$
 	private static final String NEW_LINE = "\n"; //$NON-NLS-1$
 
-    public static final int UNKNOWN_COMMENT = -1;
-    public static final int JAVA_COMMENT = 1;
-    public static final int PROPERTIES_COMMENT = 2;
-
-    private int commentStyle = 0;
-    private int creationYear = -1;
-    private int revisionYear = -1;
     private String preYearComment = null;
     private String postYearComment = null;
 
     private AdvancedCopyrightComment(int commentStyle, int creationYear, int revisionYear, List contributors, String preYearComment, String postYearComment) {
-        this.commentStyle = commentStyle;
-       	this.creationYear = creationYear == -1 ? getPreferenceStore().getInt(RelEngCopyrightConstants.CREATION_YEAR_KEY) : creationYear;
-        this.revisionYear = revisionYear;
+        super(commentStyle, creationYear == -1 ? getPreferenceStore().getInt(RelEngCopyrightConstants.CREATION_YEAR_KEY) : creationYear, revisionYear);
         this.preYearComment = preYearComment;
         this.postYearComment = postYearComment;
     }
@@ -48,48 +39,6 @@ public class AdvancedCopyrightComment {
     public static AdvancedCopyrightComment defaultComment(int commentStyle) {
         return new AdvancedCopyrightComment(commentStyle, -1, -1, null);
     }
-    
-    public int getRevisionYear() {
-        return revisionYear == -1 ? creationYear : revisionYear;
-    }
-
-    public void setRevisionYear(int year) {
-        if (revisionYear != -1 || creationYear != year)
-            revisionYear = year;
-    }
-
-    private static String getLinePrefix(int commentStyle) {
-        switch(commentStyle) {
-        case JAVA_COMMENT:
-            return " * ";  //$NON-NLS-1$
-        case PROPERTIES_COMMENT:
-            return "# "; //$NON-NLS-1$
-        default:
-            return null;
-        }
-	}
-
-	private void writeCommentStart(PrintWriter writer) {
-	    switch(commentStyle) {
-	    case JAVA_COMMENT:
-			writer.println("/*******************************************************************************"); //$NON-NLS-1$
-			break;
-	    case PROPERTIES_COMMENT:
-		    writer.println("###############################################################################"); //$NON-NLS-1$
-		    break;
-	    }
-	}
-
-	private void writeCommentEnd(PrintWriter writer) {
-	    switch(commentStyle) {
-	    case JAVA_COMMENT:
-			writer.println(" *******************************************************************************/"); //$NON-NLS-1$
-			break;
-	    case PROPERTIES_COMMENT:
-		    writer.println("###############################################################################"); //$NON-NLS-1$
-		    break;
-	    }
-	}
 	
 	/**
 	 * Get the copyright tool preference store
@@ -130,17 +79,17 @@ public class AdvancedCopyrightComment {
 //		if ((preYearComment != null || postYearComment != null) && (!getPreferenceStore().getBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY))) {
 		if ((preYearComment != null || postYearComment != null)) {
 			String copyrightString = preYearComment == null ? "" : preYearComment; //$NON-NLS-1$
-			copyrightString = copyrightString + creationYear;
+			copyrightString = copyrightString + getCreationYear();
 			
-			if (revisionYear != -1 && revisionYear != creationYear)
-		        copyrightString = copyrightString + ", " + revisionYear; //$NON-NLS-1$
+			if (hasRevisionYear() && getRevisionYear() != getCreationYear())
+		        copyrightString = copyrightString + ", " + getRevisionYear(); //$NON-NLS-1$
 			
 			String endString = postYearComment == null ? "" : postYearComment; //$NON-NLS-1$
 			copyrightString = copyrightString + endString;
 			return copyrightString;
 		}
 		
-	    String linePrefix = getLinePrefix(commentStyle);
+	    String linePrefix = getCommentPrefix();
 	    if (linePrefix == null)
 	        return null;
 
@@ -173,15 +122,15 @@ public class AdvancedCopyrightComment {
 			int offset = currentLine.indexOf(DATE_VAR);
 			// if this is the line, containing the ${date}, add in the year
 			if (offset > -1) {
-				writer.print(linePrefix + currentLine.substring(0, offset)+creationYear);
-				if (revisionYear != -1 && revisionYear != creationYear)
-			        writer.print(", " + revisionYear); //$NON-NLS-1$
+				writer.print(linePrefix + currentLine.substring(0, offset) + getCreationYear());
+				if (hasRevisionYear() && getRevisionYear() != getCreationYear())
+			        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
 				writer.println(currentLine.substring(offset+DATE_VAR.length(), currentLine.length()));
 			} else {
 				// just write out the line
 				if (NEW_LINE.equals(currentLine)) {
 					// handle empty lines
-					writer.print(linePrefix + currentLine);
+					writer.println(linePrefix);
 				} else {
 					writer.println(linePrefix + currentLine);
 				}
@@ -230,6 +179,10 @@ public class AdvancedCopyrightComment {
 	   	    	   	    // then you know between that is the year
 	   	    			String yearRange = body.substring(preYearOffset+preYear.length(), postYearOffset);
 	   	    	   	    int comma = yearRange.indexOf(","); //$NON-NLS-1$
+	   	    	   	    if (comma == -1) {
+	   	    	   	    	// If there's no comma, look for a hyphen
+	   	    	   	    	comma = yearRange.indexOf("-"); //$NON-NLS-1$
+	   	    	   	    }
 	
 	   	    	   	    String startStr = comma == -1 ? yearRange : yearRange.substring(0, comma);
 	   	    	   	    String endStr = comma == -1 ? null : yearRange.substring(comma + 1);

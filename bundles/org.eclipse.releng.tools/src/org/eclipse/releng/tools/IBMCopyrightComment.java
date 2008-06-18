@@ -17,28 +17,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-public class IBMCopyrightComment {
-
-    public static final int UNKNOWN_COMMENT = -1;
-    public static final int JAVA_COMMENT = 1;
-    public static final int PROPERTIES_COMMENT = 2;
-    public static final int C_COMMENT = 3;
-    public static final int SHELL_MAKE_COMMENT = 4;
-    public static final int BAT_COMMENT = 5;
+public class IBMCopyrightComment extends CopyrightComment {
 
     private static final int DEFAULT_CREATION_YEAR = 2005;
 
-    private int commentStyle = 0;
-    private int creationYear = -1;
-    private int revisionYear = -1;
     private List contributors;
     private int yearRangeStart, yearRangeEnd;
     private String originalText;
 
     private IBMCopyrightComment(int commentStyle, int creationYear, int revisionYear, List contributors, int yearRangeStart, int yearRangeEnd, String originalText) {
-        this.commentStyle = commentStyle;
-        this.creationYear = creationYear == -1 ? DEFAULT_CREATION_YEAR : creationYear;
-        this.revisionYear = revisionYear;
+        super(commentStyle, creationYear == -1 ? DEFAULT_CREATION_YEAR : creationYear, revisionYear);
         this.contributors = contributors;
         this.yearRangeStart = yearRangeStart;
         this.yearRangeEnd = yearRangeEnd;
@@ -125,36 +113,11 @@ public class IBMCopyrightComment {
         return new IBMCopyrightComment(commentStyle, startYear, endYear, contributors, rangeStart, rangeEnd, body);
     }
 
-    public int getRevisionYear() {
-        return revisionYear == -1 ? creationYear : revisionYear;
-    }
-
-    public void setRevisionYear(int year) {
-        if (revisionYear != -1 || creationYear != year)
-            revisionYear = year;
-    }
-
-    private static String getLinePrefix(int commentStyle) {
-        switch(commentStyle) {
-	        case JAVA_COMMENT:
-	        case C_COMMENT:
-	            return " *";  //$NON-NLS-1$
-	        case PROPERTIES_COMMENT:
-	            return "#"; //$NON-NLS-1$
-	        case SHELL_MAKE_COMMENT:
-	            return "#"; //$NON-NLS-1$
-	        case BAT_COMMENT:
-	            return "rem "; //$NON-NLS-1$
-		    default:
-	            return null;
-        }
-	}
-
 	/**
 	 * Return the body of this copyright comment or null if it cannot be built.
 	 */
 	public String getCopyrightComment() {
-	    String linePrefix = getLinePrefix(commentStyle);
+	    String linePrefix = getCommentPrefix();
 	    if (linePrefix == null)
 	        return null;
 
@@ -179,9 +142,9 @@ public class IBMCopyrightComment {
 		PrintWriter writer = new PrintWriter(out);
 		try {
 			writer.print(originalText.substring(0, yearRangeStart));
-			writer.print(creationYear);
-			if (revisionYear != -1 && revisionYear != creationYear)
-		        writer.print(", " + revisionYear); //$NON-NLS-1$
+			writer.print(getCreationYear());
+			if (hasRevisionYear() && getRevisionYear() != getCreationYear())
+		        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
 			writer.print(originalText.substring(yearRangeEnd));
 			return out.toString();
 		} finally {
@@ -189,28 +152,10 @@ public class IBMCopyrightComment {
 		}
 	}
 
-	private void writeCommentStart(PrintWriter writer) {
-	    switch(commentStyle) {
-	    case JAVA_COMMENT:
-	    case C_COMMENT:
-			writer.println("/*******************************************************************************"); //$NON-NLS-1$
-			break;
-	    case PROPERTIES_COMMENT:
-		    writer.println("###############################################################################"); //$NON-NLS-1$
-		    break;
-	    case SHELL_MAKE_COMMENT:
-			writer.println("#*******************************************************************************"); //$NON-NLS-1$
-			break;
-	    case BAT_COMMENT:
-			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
-			break;
-	    }
-	}
-
 	private void writeLegal(PrintWriter writer, String linePrefix) {
-		writer.print(linePrefix + " Copyright (c) " + creationYear); //$NON-NLS-1$
-		if (revisionYear != -1 && revisionYear != creationYear)
-	        writer.print(", " + revisionYear); //$NON-NLS-1$
+		writer.print(linePrefix + " Copyright (c) " + getCreationYear()); //$NON-NLS-1$
+		if (hasRevisionYear() && getRevisionYear() != getCreationYear())
+	        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
 		writer.println(" IBM Corporation and others."); //$NON-NLS-1$
 
 		writer.println(linePrefix + " All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
@@ -240,23 +185,5 @@ public class IBMCopyrightComment {
 				}
 			}
 		}
-	}
-
-	private void writeCommentEnd(PrintWriter writer) {
-	    switch(commentStyle) {
-	    case JAVA_COMMENT:
-	    case C_COMMENT:
-			writer.println(" *******************************************************************************/"); //$NON-NLS-1$
-			break;
-	    case PROPERTIES_COMMENT:
-		    writer.println("###############################################################################"); //$NON-NLS-1$
-		    break;
-	    case SHELL_MAKE_COMMENT:
-			writer.println("#*******************************************************************************"); //$NON-NLS-1$
-			break;
-	    case BAT_COMMENT:
-			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
-			break;
-	    }
 	}
 }

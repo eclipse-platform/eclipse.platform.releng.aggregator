@@ -26,4 +26,8 @@ public class ShellMakeFile extends SourceFile {
 		return "**";
 	}
 
+	public int getFileType() {
+		return CopyrightComment.SHELL_MAKE_COMMENT;
+	}
+
 }

@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.releng.tools.preferences;
 
+import java.util.Date;
+
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.releng.tools.Messages;
@@ -26,9 +28,10 @@ public class RelEngPreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
         IPreferenceStore store = RelEngPlugin.getDefault().getPreferenceStore();
+        int year = new Date().getYear() + 1900;
         store.setDefault(RelEngCopyrightConstants.COPYRIGHT_TEMPLATE_KEY, LEGAL_LINE);
-        store.setDefault(RelEngCopyrightConstants.CREATION_YEAR_KEY, 2001);
-        store.setDefault(RelEngCopyrightConstants.REVISION_YEAR_KEY, 2007);
+        store.setDefault(RelEngCopyrightConstants.CREATION_YEAR_KEY, year);
+		store.setDefault(RelEngCopyrightConstants.REVISION_YEAR_KEY, year);
         store.setDefault(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY, false);
     	// disable fix up existing copyright till it works better
 //        store.setDefault(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY, false);

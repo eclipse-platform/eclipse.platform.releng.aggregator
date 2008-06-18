@@ -19,11 +19,15 @@ public class BatFile extends SourceFile {
 	}
 
 	public String getCommentStart() {
-		return "rem **";
+		return "@rem **";
 	}
 
 	public String getCommentEnd() {
 		return "**";
+	}
+	
+	public int getFileType() {
+		return CopyrightComment.BAT_COMMENT;
 	}
 
 }

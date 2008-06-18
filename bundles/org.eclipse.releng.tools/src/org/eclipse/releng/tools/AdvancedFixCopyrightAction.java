@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2007 IBM Corporation and others.
+ * Copyright (c) 2004, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -41,23 +41,32 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
-import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.ICVSRemoteFile;
-import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
-import org.eclipse.team.internal.ccvs.core.ILogEntry;
-import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
+import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.team.core.RepositoryProviderType;
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
     public class MyInnerClass implements IResourceVisitor {
-        public IProgressMonitor monitor;
-        public boolean visit(IResource resource) throws CoreException {
+    	private final IProgressMonitor monitor;
+		private final RepositoryProviderCopyrightAdapter adapter;
+        public MyInnerClass(RepositoryProviderCopyrightAdapter adapter, IProgressMonitor monitor) {
+			this.adapter = adapter;
+			this.monitor = monitor;
+		}
+		public boolean visit(IResource resource) throws CoreException {
         	if (!monitor.isCanceled()) {
 	            if (resource.getType() == IResource.FILE) {
-	                processFile((IFile) resource, monitor);
+	                processFile((IFile) resource, adapter, monitor);
 	            }
         	}
         	return true;
@@ -66,6 +75,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
     private String newLine = System.getProperty("line.separator"); //$NON-NLS-1$
     private Map log = new HashMap();
+    private MessageConsole console;
 
     // The current selection
     protected IStructuredSelection selection;
@@ -124,37 +134,68 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
      */
     public void run(IAction action) {
         log = new HashMap();
+        console = new MessageConsole("Fix Copyrights", null);
+		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] {console});
+		try {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IConsoleConstants.ID_CONSOLE_VIEW);
+		} catch (PartInitException e) {
+			// Don't fail if we can't show the console
+			RelEngPlugin.log(e);
+		}
+		final MessageConsoleStream stream = console.newMessageStream();
+		
     	WorkspaceJob wJob = new WorkspaceJob("Fixing copyrights") {	//$NON-NLS-1$
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
                 try {
                 	long start = System.currentTimeMillis();
-                    System.out.println("Start Fixing Copyrights"); //$NON-NLS-1$
+                	stream.println("Start Fixing Copyrights"); //$NON-NLS-1$
                     IResource[] results = getSelectedResources();
-                    System.out.println("Resources selected: " //$NON-NLS-1$
-                            + results.length);
-                    monitor.beginTask("Fixing copyrights...", //$NON-NLS-1$
-                            results.length);
+                    stream.println("Resources selected: " + results.length); //$NON-NLS-1$
+                    monitor.beginTask("Fixing copyrights...", results.length * 100 + 100); //$NON-NLS-1$
 
+                    RepositoryProviderCopyrightAdapter adapter = createCopyrightAdapter(results);
+                    adapter.initialize(new SubProgressMonitor(monitor, 100));
+                    List exceptions = new ArrayList();
                     for (int i = 0; i < results.length; i++) {
                         IResource resource = results[i];
-                        System.out.println(resource.getName());
+                        stream.println("Fixing copyrights for " + resource.getName());
                         try {
-                            MyInnerClass myInnerClass = new MyInnerClass();
-                            myInnerClass.monitor = monitor;
+                            MyInnerClass myInnerClass = new MyInnerClass(adapter, monitor);
                             resource.accept(myInnerClass);
                             
-                            monitor.worked(1);
+                            monitor.worked(100);
                         } catch (CoreException e1) {
-                            e1.printStackTrace();
+                        	exceptions.add(e1);
                         }
                     }
 
                     writeLogs();
-               		displayLogs();
-                    System.out.println("Done Fixing Copyrights"); //$NON-NLS-1$
+               		displayLogs(stream);
+                    stream.println("Done Fixing Copyrights"); //$NON-NLS-1$
                     long end = System.currentTimeMillis();
-                    System.out.println("Total time: "+(end-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
-
+                    stream.println("Total time: "+(end-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
+                    if (!exceptions.isEmpty()) {
+                    	stream.println("Errors occurred during the operation. Consult the error log for details"); //$NON-NLS-1$
+                    	if (exceptions.size() == 1) {
+                    		throw (CoreException)exceptions.get(0);
+                    	} else {
+                    		List status = new ArrayList();
+                    		for (Iterator iterator = exceptions.iterator(); iterator
+									.hasNext();) {
+								CoreException ce = (CoreException) iterator.next();
+								status.add(new Status(
+										ce.getStatus().getSeverity(), 
+										ce.getStatus().getPlugin(),
+										ce.getStatus().getCode(),
+										ce.getStatus().getMessage(),
+										ce));
+							}
+                    		throw new CoreException(new MultiStatus(RelEngPlugin.ID,
+                    				0, (IStatus[]) status.toArray(new IStatus[status.size()]),
+                    				"The following errors occurred while fixing copyrights",
+                    				null));
+                    	}
+                    }
                 } finally {
                     monitor.done();
                 }
@@ -213,33 +254,31 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 //        }
     }
 
-    /**
-     * Lookup and return the year in which the argument file was revised.  Return -1 if
-     * the revision year cannot be found.
-     */
-    private int getCVSModificationYear(IFile file, IProgressMonitor monitor) {
-        try {
-            monitor.beginTask("Fetching logs from CVS", 100); //$NON-NLS-1$
+    protected RepositoryProviderCopyrightAdapter createCopyrightAdapter(
+			IResource[] results) throws CoreException {
+		RepositoryProviderType providerType = null;
+		for (int i = 0; i < results.length; i++) {
+			IResource resource = results[i];
+			RepositoryProvider p = RepositoryProvider.getProvider(resource.getProject());
+			if (p != null) {
+				if (providerType == null) {
+					providerType = RepositoryProviderType.getProviderType(p.getID());
+				} else if (!providerType.getID().equals(p.getID())) {
+					throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "The selected resources do not all belong to the same repository provider", null));
+				}
+			}
+		}
+		IRepositoryProviderCopyrightAdapterFactory factory = (IRepositoryProviderCopyrightAdapterFactory)providerType.getAdapter(IRepositoryProviderCopyrightAdapterFactory.class);
+		if (factory == null) {
+			factory = (IRepositoryProviderCopyrightAdapterFactory)Platform.getAdapterManager().loadAdapter(providerType, IRepositoryProviderCopyrightAdapterFactory.class.getName());
+			if (factory == null) {
+				return new CVSCopyrightAdapter(results);
+			}
+		}
+		return factory.createAdapater(results);
+	}
 
-            try {
-                ICVSRemoteResource cvsFile = CVSWorkspaceRoot.getRemoteResourceFor(file);
-                if (cvsFile != null) {
-	                // get the log entry for the revision loaded in the workspace
-	                ILogEntry entry = ((ICVSRemoteFile)cvsFile)
-	                        .getLogEntry(new SubProgressMonitor(monitor, 100));
-	                return entry.getDate().getYear() + 1900;
-                }
-            } catch (TeamException e) {
-                // do nothing
-            }
-        } finally {
-            monitor.done();
-        }
-
-        return -1;
-    }
-
-    /**
+	/**
      *  
      */
     private void writeLogs() {
@@ -273,65 +312,62 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
         }
     }
 
-    private void displayLogs() {
+    private void displayLogs(MessageConsoleStream stream) {
 
         Set aSet = log.entrySet();
         Iterator errorIterator = aSet.iterator();
         while (errorIterator.hasNext()) {
             Map.Entry anEntry = (Map.Entry) errorIterator.next();
             String errorDescription = (String) anEntry.getKey();
-            System.out.println(errorDescription);
+            stream.println(errorDescription);
             List fileList = (List) anEntry.getValue();
             Iterator listIterator = fileList.iterator();
             while (listIterator.hasNext()) {
                 String fileName = (String) listIterator.next();
-                System.out.println("     " + fileName); //$NON-NLS-1$
+                stream.println("     " + fileName); //$NON-NLS-1$
             }
         }
     }
 
-    /**
-     * @param file
-     */
-    private void processFile(IFile file, IProgressMonitor monitor) {
-        SourceFile aSourceFile;
-
-        String extension = file.getFileExtension();
-        if (extension == null)
-            return;
+    private void processFile(IFile file, RepositoryProviderCopyrightAdapter adapter, IProgressMonitor monitor) {
         monitor.subTask(file.getFullPath().toOSString());
-        int fileType = AdvancedCopyrightComment.UNKNOWN_COMMENT;
-        extension = extension.toLowerCase();
-        if (extension.equals("java")) { //$NON-NLS-1$
-        	fileType = AdvancedCopyrightComment.JAVA_COMMENT;
-            aSourceFile = new JavaFile(file);
-        } else if (extension.equals("properties")) { //$NON-NLS-1$
-        	// if stop processing if ignoring properties files
-        	if (RelEngPlugin.getDefault().getPreferenceStore().getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY)) {
-        		return;
-        	}
-        	fileType = AdvancedCopyrightComment.PROPERTIES_COMMENT;
-            aSourceFile = new PropertiesFile(file);
-        } else
-            return;
-
+        
+		if (file.getFileExtension() == null) {
+			warn(file, null, "File has no extension.  File UNCHANGED."); //$NON-NLS-1$
+			return;
+		}
+		
+        SourceFile aSourceFile = SourceFile.createFor(file);
+        
+        IPreferenceStore prefStore = RelEngPlugin.getDefault().getPreferenceStore();
+        if (aSourceFile == null
+        		|| (aSourceFile.getFileType() == CopyrightComment.PROPERTIES_COMMENT 
+        				&& prefStore.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY))) {
+        	return;
+        }
         if (aSourceFile.hasMultipleCopyrights()) {
             warn(file, null, "Multiple copyrights found.  File UNCHANGED."); //$NON-NLS-1$//$NON-NLS-2$
             return;
         }
-
-        IPreferenceStore prefStore = RelEngPlugin.getDefault().getPreferenceStore();
+        
         BlockComment copyrightComment = aSourceFile.firstCopyrightComment();
-        AdvancedCopyrightComment ibmCopyright = null;
+        CopyrightComment ibmCopyright = null;
         // if replacing all comments, dont even parse, just use default copyright comment
     	if (prefStore.getBoolean(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY)) {
-    		ibmCopyright = AdvancedCopyrightComment.defaultComment(fileType);
+    		ibmCopyright = AdvancedCopyrightComment.defaultComment(aSourceFile.getFileType());
     	} else {
-            ibmCopyright = AdvancedCopyrightComment.parse(copyrightComment, fileType);    		
+            ibmCopyright = AdvancedCopyrightComment.parse(copyrightComment, aSourceFile.getFileType());  
+            if (ibmCopyright == null) {
+            	// Let's see if the file is EPL
+            	ibmCopyright = IBMCopyrightComment.parse(copyrightComment, aSourceFile.getFileType());
+            	if (ibmCopyright != null) {
+            		warn(file, copyrightComment, "File is licensed under IBM EPL. Revision year may be updated.");
+            	}
+            }
     	}
 
         if (ibmCopyright == null) {
-        	warn(file, copyrightComment, "Could not interpret copyright comment"); //$NON-NLS-1$
+        	warn(file, copyrightComment, "Could not interpret copyright comment.  File UNCHANGED."); //$NON-NLS-1$
         	return;
         }
 
@@ -344,10 +380,24 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
             // figure out if the comment should be updated by comparing the date range
             // in the comment to the last modification time provided by CVS
 	        if (lastMod < currentYear) {
-	            lastMod = getCVSModificationYear(file, new NullProgressMonitor());
+	            try {
+					lastMod = adapter.getLastModifiedYear(file, new SubProgressMonitor(monitor, 1));
+				} catch (CoreException e) {
+					// Let's log the exception and continue
+					RelEngPlugin.log(IStatus.ERROR, "The year could not be determined for " + file.getFullPath(), e);
+				}
+				if (lastMod > currentYear) {
+					// Don't allow future years to be used in the copyright
+					lastMod = currentYear;
+				}
 	            // use default revision year
-	            if (lastMod == -1)
+	            if (lastMod == -1) {
 	            	lastMod = prefStore.getInt(RelEngCopyrightConstants.REVISION_YEAR_KEY);
+	            }
+	            if (lastMod < revised) {
+	            	// Don't let the copyright date go backwards
+	            	lastMod = revised;
+	            }
 	        }
         }
 
@@ -374,7 +424,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
             aList = new ArrayList();
             log.put(errorDescription, aList);
         }
-        aList.add(file.getName());
+        aList.add(file.getFullPath().toString());
     }
 
     /**

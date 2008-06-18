@@ -25,5 +25,9 @@ public class CFile extends SourceFile {
 	public String getCommentEnd() {
 		return "*/";
 	}
+	
+	public int getFileType() {
+		return CopyrightComment.C_COMMENT;
+	}
 
 }

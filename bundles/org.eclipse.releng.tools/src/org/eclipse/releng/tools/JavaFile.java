@@ -38,4 +38,8 @@ public class JavaFile extends SourceFile {
 		return "*/";
 	}
 
+	public int getFileType() {
+		return CopyrightComment.JAVA_COMMENT;
+	}
+
 }

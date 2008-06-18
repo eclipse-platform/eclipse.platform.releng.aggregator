@@ -37,5 +37,9 @@ public class PropertiesFile extends SourceFile {
 	public String getCommentEnd() {
 		return "##";
 	}
+	
+	public int getFileType() {
+		return CopyrightComment.PROPERTIES_COMMENT;
+	}
 
 }
