@@ -36,22 +36,16 @@
 	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
 
 		<!--HACK to ensure the jdt doc is built before PDE - call to this script should be moved to build.jars target-->
-<!--
 		<available file="../org.eclipse.jdt.doc.isv/index" property="jdt.index.present"/>
 		<antcall target="buildJdtDoc" />
--->
 
-		<property name="optionsFile" value="pdeOptions.tmp.txt" />
-		<copy file="pdeOptions.txt" tofile="${optionsFile}" overwrite="true" />
-		
-		<condition property="argsListDelimiter" value=":">
+		<condition property="optionsFile" value="pdeOptions">
 			<os family="unix" />
 		</condition>
-		<condition property="argsListDelimiter" value=";">
+		<condition property="optionsFile" value="pdeOptions.txt">
 			<os family="windows" />
 		</condition>
 
-		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
 
 
