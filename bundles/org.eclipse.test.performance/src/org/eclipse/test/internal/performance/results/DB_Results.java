@@ -696,9 +696,7 @@ private void internalQueryScenarioSummaries(ScenarioResults scenarioResults, Str
 		int scenarioID = scenarioResults.getId();
 		// First try to get summaries of elapsed process dimension
 		result = fSQL.queryScenarioSummaries(scenarioID, config, cBuildName, bBuildName, InternalDimensions.ELAPSED_PROCESS.getId());
-		boolean hasResults = false;
 		while (result.next()) {
-			hasResults = true;
 			String variation = result.getString(1);
 			int summaryKind = result.getShort(2);
 			int comment_id = result.getInt(3);
@@ -715,24 +713,22 @@ private void internalQueryScenarioSummaries(ScenarioResults scenarioResults, Str
 				buildResults.setSummary(summaryKind, COMMENTS[comment_id]);
 			}
 		}
-		if (!hasResults) {
-			// Scenario is not a fingerprint, try to get comments
-			result = fSQL.queryScenarioSummaries(scenarioID, config, cBuildName, bBuildName, 0);
-			while (result.next()) {
-				String variation = result.getString(1);
-				int comment_id = result.getInt(3);
-				StringTokenizer tokenizer = new StringTokenizer(variation, "=|"); //$NON-NLS-1$
-				tokenizer.nextToken(); 									// 'build'
-				String buildName = tokenizer.nextToken();	// 'I20070615-1200'
-				BuildResults buildResults = null;
-				if (buildName.equals(currentBuildName)) {
-					buildResults = currentBuild;
-				} else if (buildName.equals(baselineBuildName)) {
-					buildResults = baselineBuild;
-				}
-				if (buildResults != null) {
-					buildResults.setComment(COMMENTS[comment_id]);
-				}
+		// Update scenario comment if any
+		result = fSQL.queryScenarioSummaries(scenarioID, config, cBuildName, bBuildName, 0);
+		while (result.next()) {
+			String variation = result.getString(1);
+			int comment_id = result.getInt(3);
+			StringTokenizer tokenizer = new StringTokenizer(variation, "=|"); //$NON-NLS-1$
+			tokenizer.nextToken(); 									// 'build'
+			String buildName = tokenizer.nextToken();	// 'I20070615-1200'
+			BuildResults buildResults = null;
+			if (buildName.equals(currentBuildName)) {
+				buildResults = currentBuild;
+			} else if (buildName.equals(baselineBuildName)) {
+				buildResults = baselineBuild;
+			}
+			if (buildResults != null) {
+				buildResults.setComment(COMMENTS[comment_id]);
 			}
 		}
 	} catch (SQLException e) {

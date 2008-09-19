@@ -322,7 +322,9 @@ void readData(DataInputStream stream) throws IOException {
  * Set the build summary and its associated comment.
  */
 void setComment(String comment) {
-	this.comment = comment;
+	if (comment != null && this.comment == null) {
+		this.comment = comment;
+	}
 }
 
 /*
