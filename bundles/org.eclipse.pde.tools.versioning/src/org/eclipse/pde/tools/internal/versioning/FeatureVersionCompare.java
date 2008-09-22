@@ -246,10 +246,10 @@ public class FeatureVersionCompare implements VersionCompareConstants {
 		}else{
 			// check if version has been increased properly
 			int change = checkVersionChange(version1, version2);
-			if (change < result){
+			if (change < result) {			
 				Object[] msg = new Object[] {id, version1, featureModelTable1.getLocation(id), getVersionName(result), getVersionName(change)};
 				finalResult.merge(resultStatusHandler(IStatus.WARNING, IVersionCompare.FEATURE_OVERALL_STATUS, NLS.bind(Messages.FeatureVersionCompare_versionChangeIncorrectMsg, msg), null));
-				return new CheckedItem(id + KEY_SEPARATOR + version1.toString(), null, version1, change);
+				return new CheckedItem(id + KEY_SEPARATOR + version1.toString(), null, version1, change);				
 			}
 			return new CheckedItem(id + KEY_SEPARATOR + version1.toString(), null, version1, result);
 		}		
@@ -266,7 +266,7 @@ public class FeatureVersionCompare implements VersionCompareConstants {
 			case IVersionCompare.MINOR_CHANGE: return "Minor"; //$NON-NLS-1$
 			case IVersionCompare.MICRO_CHANGE: return "Micro"; //$NON-NLS-1$
 			case IVersionCompare.QUALIFIER_CHANGE: return "Qualify"; //$NON-NLS-1$
-			case IVersionCompare.NO_CHANGE: return "NoChange"; //$NON-NLS-1$
+			case IVersionCompare.NO_CHANGE: return "NoChange"; //$NON-NLS-1$			
 			default: return EMPTY_STRING;
 		}
 	}
@@ -470,7 +470,10 @@ public class FeatureVersionCompare implements VersionCompareConstants {
 				// if version2 is null, the plugin is a new added one
 				Object[] msg = {PLUGIN_TITLE, pluginID + UNDERSCORE_MARK + version1.toString(), parentID, featureModelTable1.getVersion(parentID), featureModelTable1.getLocation(parentID)};
 				finalResult.merge(resultStatusHandler(IStatus.INFO, IVersionCompare.FEATURE_DETAIL_STATUS, NLS.bind(Messages.FeatureVersionCompare_newAddedFeaturePlingMsg, msg), null));
-				pluginChange = IVersionCompare.NEW_ADDED;
+				//pluginChange = IVersionCompare.NEW_ADDED;				
+				// the return was changed to a MINOR_CHANGE because adding a new plugin is considering a minor change
+				// and the value associated with NEW_ADDED indicates that it is a greater than minor change
+				pluginChange = IVersionCompare.MINOR_CHANGE;
 			} else {
 				if (version1.compareTo(version2) < 0) {
 					// if version1 is lower than version2, it is wrong
@@ -730,15 +733,15 @@ public class FeatureVersionCompare implements VersionCompareConstants {
 		// overall compare
 		if (version1.compareTo(version2) < 0) {
 			return IVersionCompare.ERROR_OCCURRED;
-		}
+		}		
 		// compare major version
 		if (version1.getMajor() > version2.getMajor()) {
 			return IVersionCompare.MAJOR_CHANGE;
-		}
+		}	
 		// compare minor version
 		if (version1.getMinor() > version2.getMinor()) {
 			return IVersionCompare.MINOR_CHANGE;
-		}
+		}		
 		// compare micro version
 		if (version1.getMicro() > version2.getMicro()) {
 			return IVersionCompare.MICRO_CHANGE;
@@ -746,7 +749,7 @@ public class FeatureVersionCompare implements VersionCompareConstants {
 		// compare qualifier version
 		if (version1.getQualifier().compareTo(version2.getQualifier()) > 0) {
 			return IVersionCompare.QUALIFIER_CHANGE;
-		}
+		}		
 		// if we got to this point, it means no change
 		return IVersionCompare.NO_CHANGE;
 	}
