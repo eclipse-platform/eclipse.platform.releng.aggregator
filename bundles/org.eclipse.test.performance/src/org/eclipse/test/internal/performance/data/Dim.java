@@ -24,7 +24,6 @@ public class Dim implements Dimension {
     private final int fId;
 	private final Unit fUnit;
 	private final int fMultiplier;
-	private final boolean fLargerIsBetter= false;	// true indicates that larger values are better
 	
 	public static Dim getDimension(int id) {
         InternalDimensions.COMITTED.getId();	// trigger loading class InternalDimensions
@@ -64,10 +63,6 @@ public class Dim implements Dimension {
 	
 	public int getMultiplier() {
 		return fMultiplier;
-	}
-
-	public boolean largerIsBetter() {
-	    return fLargerIsBetter;
 	}
 
 	public String getName() {
