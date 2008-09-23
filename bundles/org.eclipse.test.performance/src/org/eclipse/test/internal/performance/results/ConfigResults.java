@@ -36,6 +36,16 @@ public ConfigResults(AbstractResults parent, int id) {
 	this.print = parent.print;
 }
 
+/*
+ * Complete results with additional database information.
+ */
+void completeResults() {
+	if (this.baseline == null || this.current == null) initialize();
+	ScenarioResults scenarioResults = (ScenarioResults) this.parent;
+	DB_Results.queryScenarioFailures(scenarioResults, this.name, this.current, this.baseline);
+	DB_Results.queryScenarioSummaries(scenarioResults, this.name, this.current, this.baseline);
+}
+
 /**
  * Returns the baseline build name used to compare results with.
  *
@@ -43,6 +53,7 @@ public ConfigResults(AbstractResults parent, int id) {
  * @see #getBaselineBuildResults()
  */
 public String getBaselineBuildName() {
+	if (this.baseline == null) initialize();
 	return this.baseline.getName();
 }
 
@@ -55,6 +66,7 @@ public String getBaselineBuildName() {
  * @see BuildResults
  */
 public BuildResults getBaselineBuildResults() {
+	if (this.baseline == null) initialize();
 	return this.baseline;
 }
 
@@ -107,6 +119,7 @@ public List getBuildsMatchingPrefixes(List prefixes) {
  * 	the second is the standard error.
  */
 public double[] getCurrentBuildDeviation() {
+	if (this.baseline == null || this.current == null) initialize();
 	int dim_id = SUPPORTED_DIMS[0].getId();
 	double baselineValue = this.baseline.getValue(dim_id);
 	double currentValue = this.current.getValue(dim_id);
@@ -134,6 +147,7 @@ public double[] getCurrentBuildDeviation() {
  * @see #getCurrentBuildResults()
  */
 public String getCurrentBuildName() {
+	if (this.current == null) initialize();
 	return this.current.getName();
 }
 
@@ -148,6 +162,7 @@ public String getCurrentBuildName() {
  * @see BuildResults
  */
 public BuildResults getCurrentBuildResults() {
+	if (this.current == null) initialize();
 	return this.current;
 }
 
@@ -202,6 +217,35 @@ public double[] getStatistics(List prefixes, int dim_id) {
 	return new double[] { count, mean, stddev, variation };
 }
 
+private void initialize() {
+	// Get performance results builds name
+	PerformanceResults perfResults = getPerformance();
+	String baselineBuildName = perfResults.getBaselineName();
+	String currentBuildName = perfResults.getName();
+
+	// Set baseline and current builds
+	int size = size();
+	for (int i=0; i<size; i++) {
+		BuildResults buildResults = (BuildResults) this.children.get(i);
+		if (buildResults.values != null) {
+			buildResults.cleanValues();
+		}
+		if (buildResults.getName().equals(baselineBuildName)) {
+			this.baseline = buildResults;
+			this.baselined = true;
+		} else if (buildResults.getName().equals(currentBuildName)) {
+			this.current = buildResults;
+			this.valid = true;
+		}
+	}
+	if (this.baseline == null) {
+		this.baseline = (BuildResults) this.children.get(0);
+	}
+	if (this.current == null) {
+		this.current = (BuildResults) this.children.get(size()-1);
+	}
+}
+
 /**
  * Returns whether the configuration has results for the performance
  * baseline build or not.
@@ -254,11 +298,11 @@ public List lastNightlyBuildNames(int n) {
 /*
  * Read all configuration builds results data from the given stream.
  */
-void readData(DataInputStream stream) throws IOException {
+void readData(DataInputStream stream, int version) throws IOException {
 	int size = stream.readInt();
 	for (int i=0; i<size; i++) {
 		BuildResults buildResults = new BuildResults(this);
-		buildResults.readData(stream);
+		buildResults.readData(stream, version);
 		addChild(buildResults, true);
 	}
 }
@@ -273,44 +317,6 @@ void setValue(int build_id, int dim_id, int step, long value) {
 		addChild(buildResults, true);
 	}
 	buildResults.setValue(dim_id, step, value);
-}
-
-/*
- * Update configuration results read locally with additional database information.
- */
-void update() {
-
-	// Get performance results builds name
-	PerformanceResults perfResults = getPerformance();
-	String baselineBuildName = perfResults.getBaselineName();
-	String currentBuildName = perfResults.getName();
-
-	// Set baseline and current builds
-	int size = size();
-	for (int i=0; i<size; i++) {
-		BuildResults buildResults = (BuildResults) this.children.get(i);
-		if (buildResults.values != null) {
-			buildResults.cleanValues();
-		}
-		if (buildResults.getName().equals(baselineBuildName)) {
-			this.baseline = buildResults;
-			this.baselined = true;
-		} else if (buildResults.getName().equals(currentBuildName)) {
-			this.current = buildResults;
-			this.valid = true;
-		}
-	}
-	if (this.baseline == null) {
-		this.baseline = (BuildResults) this.children.get(0);
-	}
-	if (this.current == null) {
-		this.current = (BuildResults) this.children.get(size()-1);
-	}
-
-	// Get current and baseline builds failures and summaries
-	ScenarioResults scenarioResults = (ScenarioResults) this.parent;
-	DB_Results.queryScenarioFailures(scenarioResults, this.name, this.current, this.baseline);
-	DB_Results.queryScenarioSummaries(scenarioResults, this.name, this.current, this.baseline);
 }
 
 /*

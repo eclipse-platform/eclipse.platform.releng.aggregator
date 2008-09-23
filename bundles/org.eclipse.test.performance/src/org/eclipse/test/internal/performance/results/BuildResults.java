@@ -280,7 +280,7 @@ boolean match(String pattern) {
 /*
  * Read the build results data from the given stream.
  */
-void readData(DataInputStream stream) throws IOException {
+void readData(DataInputStream stream, int version) throws IOException {
 	long timeBuild = stream.readLong();
 	this.date = new Long(timeBuild).toString();
 	byte kind = stream.readByte();
@@ -316,6 +316,19 @@ void readData(DataInputStream stream) throws IOException {
 		this.stddev[i] = stream.readDouble();
 	}
 	this.id = DB_Results.getBuildId(this.name);
+	switch (version) {
+		case 0:
+			// no other information were stored in version 0
+			break;
+		default:
+			// extra infos (summary, failure and comment) are also stored in local data files
+			this.summaryKind = stream.readInt();
+			String str = stream.readUTF();
+			if (str.length() > 0) this.failure = str;
+			str = stream.readUTF();
+			if (str.length() > 0) this.comment = str;
+			break;
+	}
 }
 
 /*
@@ -469,6 +482,11 @@ void write(DataOutputStream stream) throws IOException {
 		stream.writeLong(this.count[i]);
 		stream.writeDouble(this.stddev[i]);
 	}
+
+	// Write extra infos (summary, failure and comment)
+	stream.writeInt(this.summaryKind);
+	stream.writeUTF(this.failure == null ? "" : this.failure) ; //$NON-NLS-1$
+	stream.writeUTF(this.comment == null ? "" : this.comment) ; //$NON-NLS-1$
 }
 
 }

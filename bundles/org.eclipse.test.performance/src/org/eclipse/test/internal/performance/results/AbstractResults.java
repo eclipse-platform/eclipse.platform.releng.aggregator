@@ -10,6 +10,13 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.results;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,8 +34,14 @@ import org.eclipse.test.internal.performance.data.Dim;
  */
 public abstract class AbstractResults implements Comparable {
 
+	private static final int ONE_MINUTE = 60000;
+
+	private static final long ONE_HOUR = 3600000L;
+
+	public static final int LOCAL_DATA_VERSION = 1;
+
 	/**
-	 * The lis of supported dimensions.
+	 * The list of supported dimensions.
 	 * <p>
 	 * Currently only {@link InternalDimensions#ELAPSED_PROCESS}
 	 * and {@link InternalDimensions#CPU_TIME}.
@@ -102,6 +115,36 @@ public abstract class AbstractResults implements Comparable {
 	private boolean newLine = true;
 	boolean print = false;
 
+/**
+ * Copy a file to another location.
+ *
+ * @param src the source file.
+ * @param dest the destination.
+ * @return <code>true</code> if the file was successfully copied,
+ * 	<code>false</code> otherwise.
+ */
+public static boolean copyFile(File src, File dest) {
+
+	try {
+		InputStream in = new FileInputStream(src);
+		OutputStream out = new FileOutputStream(dest);
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		in.close();
+		out.close();
+	} catch (FileNotFoundException e) {
+		e.printStackTrace();
+		return false;
+	} catch (IOException e) {
+		e.printStackTrace();
+		return false;
+	}
+	return true;
+}
+
 /*
  * Return the build date as yyyyMMddHHmm
  */
@@ -141,6 +184,29 @@ static Dim getDimension(int id) {
 		}
 	}
 	return null;
+}
+
+public static String timeString(long time) {
+	StringBuffer buffer = new StringBuffer();
+	if (time < 1000) { // less than 1s
+		buffer.append(time);
+		buffer.append("ms"); //$NON-NLS-1$
+	} else if (time < ONE_MINUTE) {  // less than 1mn
+		buffer.append((time/100)/10.0);
+		buffer.append("s"); //$NON-NLS-1$
+	} else if (time < ONE_HOUR) {  // less than 1h
+		buffer.append(time/ONE_MINUTE).append("mn "); //$NON-NLS-1$
+		buffer.append(((time%ONE_MINUTE)/100)/10.0);
+		buffer.append("s"); //$NON-NLS-1$
+	} else {  // more than 1h
+		long h = time / ONE_HOUR;
+		buffer.append(h).append("h "); //$NON-NLS-1$
+		long m = (time % ONE_HOUR) / ONE_MINUTE;
+		buffer.append(m).append("mn "); //$NON-NLS-1$
+		buffer.append(((m%ONE_MINUTE)/100)/10.0);
+		buffer.append("s"); //$NON-NLS-1$
+	}
+	return buffer.toString();
 }
 
 AbstractResults(AbstractResults parent, String name) {
@@ -281,14 +347,13 @@ void printGlobalTime(long start) {
 }
 
 void printGlobalTime(long start, String end) {
-	StringBuffer buffer = new StringBuffer("=> time spent in '"); //$NON-NLS-1$
+	long time = System.currentTimeMillis();
+	StringBuffer buffer = new StringBuffer(" => time spent in '"); //$NON-NLS-1$
 	buffer.append(this.name);
 	buffer.append("' was "); //$NON-NLS-1$
-	buffer.append((System.currentTimeMillis()-start)/1000.0);
-	if (end == null) {
-		buffer.append('s');
-	} else {
-		buffer.append("s. "); //$NON-NLS-1$
+	buffer.append(timeString(time-start));
+	if (end != null) {
+		buffer.append(". "); //$NON-NLS-1$
 		buffer.append(end.trim());
 	}
 	println(buffer);
