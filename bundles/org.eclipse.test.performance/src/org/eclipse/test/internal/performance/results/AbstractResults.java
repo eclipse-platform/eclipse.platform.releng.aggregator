@@ -52,6 +52,13 @@ public abstract class AbstractResults implements Comparable {
 	};
 
 	/**
+	 * The default dimension used to display results (typically in fingerprints).
+	 * <p>
+	 * Currently {@link InternalDimensions#ELAPSED_PROCESS}
+	 */
+	public static final Dim DEFAULT_DIM = SUPPORTED_DIMS[0];
+
+	/**
 	 * The list of possible configurations.
 	 * <p>
 	 * Only used if no specific configurations are specified

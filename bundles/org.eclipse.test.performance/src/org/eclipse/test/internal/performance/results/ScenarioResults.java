@@ -92,7 +92,7 @@ public ConfigResults getConfigResults(String config) {
  */
 public String getFileName() {
 	if (this.fileName == null) {
-		this.fileName = this.name.replace('#', '.').replace(':', '_').replace('\\', '_');
+		this.fileName = "Scenario" + this.id; //$NON-NLS-1$
 	}
 	return this.fileName;
 }
