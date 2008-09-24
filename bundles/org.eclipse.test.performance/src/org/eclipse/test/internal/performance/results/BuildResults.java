@@ -27,17 +27,20 @@ public class BuildResults extends AbstractResults {
 
 	// Build information
 	String date;
-	boolean baseline;
-	String failure;
 	String comment;
 	int summaryKind = -1;
 
-	// Dimensions informations
+	// Dimensions information
 	Dim[] dimensions;
 	double[] average, stddev;
 	long[] count;
 	double[][] values;
-	BuildResults(AbstractResults parent) {
+
+	// Comparison information
+	boolean baseline;
+	String failure;
+
+BuildResults(AbstractResults parent) {
 	super(parent, -1);
 }
 
@@ -195,9 +198,7 @@ double getError(int dim_id) {
  * @return The failure message or <code>null</null> if the scenario passed.
  */
 public String getFailure() {
-	if (this.failure == null) {
-		return null;
-	}
+	if (this.comment != null) return this.comment;
 	return this.failure;
 }
 
@@ -210,6 +211,16 @@ public String getFailure() {
  */
 public double getValue(int dim_id) {
 	return this.average[getDimIndex(dim_id)];
+}
+
+/**
+ * Return the value of the performance result stored
+ * for the default dimension of the current build.
+ * 
+ * @return The value of the performance result
+ */
+public double getValue() {
+	return this.average[DEFAULT_DIM_INDEX];
 }
 
 /**

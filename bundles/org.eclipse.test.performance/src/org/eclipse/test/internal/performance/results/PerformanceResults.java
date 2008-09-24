@@ -34,6 +34,10 @@ public class PerformanceResults extends AbstractResults {
 	private String[] configBoxes, sortedConfigBoxes;
 	private String configPattern;
 
+	// Failure threshold
+	public static final int DEFAULT_FAILURE_THRESHOLD = 10;
+	int failure_threshold = DEFAULT_FAILURE_THRESHOLD;
+
 public PerformanceResults(String name, String baseline, boolean print) {
 	super(null, name);
 	this.baselineName = baseline;
@@ -189,12 +193,11 @@ public ScenarioResults getScenarioResults(String scenarioName) {
  * Read all data from performance database for the given configurations
  * and scenario pattern.
  * 
- * @param configs All configs to extract results. If <code>null</code>,
- * 	then all known configurations ({@link #CONFIGS})  are read.
- * @param pattern The pattern of the concerned scenarios
+ * @param dataDir The directory where data will be stored locally
+ * 	if <code>null</code>, then storage will be performed
  */
-public void read(String[][] configs, String pattern) {
-	read(configs, pattern, null);
+public void read(File dataDir) {
+	read(null, null, dataDir, DEFAULT_FAILURE_THRESHOLD);
 }
 
 /**
@@ -206,10 +209,13 @@ public void read(String[][] configs, String pattern) {
  * @param pattern The pattern of the concerned scenarios
  * @param dataDir The directory where data will be stored locally
  * 	if <code>null</code>, then storage will be performed
+ * @param threshold The failure percentage threshold over which a build result
+ * 	value compared to the baseline is considered as failing.
  */
-public void read(String[][] configs, String pattern, File dataDir) {
+public void read(String[][] configs, String pattern, File dataDir, int threshold) {
 
 	this.scenarioPattern = pattern;
+	this.failure_threshold = threshold;
 
 	// Print title
 	StringBuffer buffer = new StringBuffer("Read performance results until build '"); //$NON-NLS-1$

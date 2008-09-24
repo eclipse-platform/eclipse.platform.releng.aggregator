@@ -51,18 +51,19 @@ public abstract class AbstractResults implements Comparable {
 		InternalDimensions.CPU_TIME
 	};
 
+	static final int DEFAULT_DIM_INDEX = 0;
 	/**
 	 * The default dimension used to display results (typically in fingerprints).
 	 * <p>
 	 * Currently {@link InternalDimensions#ELAPSED_PROCESS}
 	 */
-	public static final Dim DEFAULT_DIM = SUPPORTED_DIMS[0];
+	public static final Dim DEFAULT_DIM = SUPPORTED_DIMS[DEFAULT_DIM_INDEX];
 
 	/**
 	 * The list of possible configurations.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#read(String[][], String)}.
+	 * (see {@link PerformanceResults#read(File)}.
 	 */
 	public final static String[] CONFIGS;
 
@@ -70,7 +71,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible test boxes.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#read(String[][], String)}.
+	 * (see {@link PerformanceResults#read(File)}.
 	 */
 	public final static String[] BOXES = {
 		"RHEL 4.0 Sun 1.4.2_10 (3 GHz 2.5 GB)", //$NON-NLS-1$

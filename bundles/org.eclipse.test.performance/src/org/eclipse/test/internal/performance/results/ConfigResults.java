@@ -29,6 +29,7 @@ import org.eclipse.test.internal.performance.InternalDimensions;
 public class ConfigResults extends AbstractResults {
 	BuildResults baseline, current;
 	boolean baselined = false, valid = false;
+	double delta, error;
 
 public ConfigResults(AbstractResults parent, int id) {
 	super(parent, id);
@@ -118,26 +119,11 @@ public List getBuildsMatchingPrefixes(List prefixes) {
  * @return an array of double. First number is the deviation itself and
  * 	the second is the standard error.
  */
-public double[] getCurrentBuildDeviation() {
-	if (this.baseline == null || this.current == null) initialize();
-	int dim_id = SUPPORTED_DIMS[0].getId();
-	double baselineValue = this.baseline.getValue(dim_id);
-	double currentValue = this.current.getValue(dim_id);
-	double deviation = (currentValue - baselineValue) / baselineValue;
-	if (Double.isNaN(deviation)) {
-		return new double[] { Double.NaN, Double.NaN };
+public double[] getCurrentBuildDeltaInfo() {
+	if (this.baseline == null || this.current == null) {
+		initialize();
 	}
-	long baselineCount = this.baseline.getCount(dim_id);
-	long currentCount = this.current.getCount(dim_id);
-	if (baselineCount == 1 || currentCount == 1) {
-		return new double[] { deviation, Double.NaN };
-	}
-	double baselineError = this.baseline.getError(dim_id);
-	double currentError = this.current.getError(dim_id);
-	double stderr = Double.isNaN(baselineError)
-			? currentError / baselineValue
-			: Math.sqrt(baselineError*baselineError + currentError*currentError) / baselineValue;
-	return new double[] { deviation, stderr };
+	return new double[] { this.delta, this.error };
 }
 
 /**
@@ -243,6 +229,43 @@ private void initialize() {
 	}
 	if (this.current == null) {
 		this.current = (BuildResults) this.children.get(size()-1);
+	}
+
+	// Set delta between current vs. baseline and the corresponding error
+	int dim_id = DEFAULT_DIM.getId();
+	double baselineValue = this.baseline.getValue(dim_id);
+	double currentValue = this.current.getValue(dim_id);
+	this.delta = (currentValue - baselineValue) / baselineValue;
+	if (Double.isNaN(this.delta)) {
+		this.error = Double.NaN;
+	} else {
+		long baselineCount = this.baseline.getCount(dim_id);
+		long currentCount = this.current.getCount(dim_id);
+		if (baselineCount == 1 || currentCount == 1) {
+			this.error = Double.NaN;
+		} else {
+			double baselineError = this.baseline.getError(dim_id);
+			double currentError = this.current.getError(dim_id);
+			this.error = Double.isNaN(baselineError)
+					? currentError / baselineValue
+					: Math.sqrt(baselineError*baselineError + currentError*currentError) / baselineValue;
+		}
+	}
+
+	// Set the failure on the current build if necessary
+	int failure_threshold = getPerformance().failure_threshold;
+	if (this.delta >= (failure_threshold/100.0)) {
+		StringBuffer buffer = new StringBuffer("Performance criteria not met when compared to '"); //$NON-NLS-1$
+		buffer.append(this.baseline.getName());
+		buffer.append("': "); //$NON-NLS-1$
+		buffer.append(DEFAULT_DIM.getName());
+		buffer.append("= "); //$NON-NLS-1$
+		buffer.append(timeString((long)this.current.getValue()));
+		buffer.append(" is not within [0%, "); //$NON-NLS-1$
+		buffer.append(100+failure_threshold);
+		buffer.append("'%] of "); //$NON-NLS-1$
+		buffer.append(timeString((long)this.baseline.getValue()));
+		this.current.setFailure(buffer.toString());
 	}
 }
 
