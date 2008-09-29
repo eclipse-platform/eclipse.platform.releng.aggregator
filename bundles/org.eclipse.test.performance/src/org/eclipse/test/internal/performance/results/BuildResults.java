@@ -198,7 +198,6 @@ double getError(int dim_id) {
  * @return The failure message or <code>null</null> if the scenario passed.
  */
 public String getFailure() {
-	if (this.comment != null) return this.comment;
 	return this.failure;
 }
 
