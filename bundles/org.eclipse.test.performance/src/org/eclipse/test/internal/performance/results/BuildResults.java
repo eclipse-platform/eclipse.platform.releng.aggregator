@@ -110,6 +110,15 @@ public String getComment() {
 	return this.comment;
 }
 
+/**
+ * Return the number of stored values for the default dimension
+ * 
+ * @return the number of stored values for the default dimension
+ */
+public long getCount() {
+	return this.count[DEFAULT_DIM_INDEX];
+}
+
 /*
  * Return the number of stored values for the given dimension
  *  (see {@link Dim#getId()})
@@ -155,6 +164,16 @@ public String getDate() {
 }
 
 /**
+ * Returns the standard deviation of the default dimension computed
+ * while running the scenario for the current build.
+ * 
+ * @return The value of the standard deviation
+ */
+public double getDeviation() {
+	return this.stddev[DEFAULT_DIM_INDEX];
+}
+
+/**
  * Returns the standard deviation of the given dimension computed
  * while running the scenario for the current build.
  * 
@@ -179,6 +198,17 @@ int getDimIndex(int dim_id) {
 		}
 	}
 	return -1;
+}
+
+/**
+ * Return the error computed while storing values for the default dimension
+ * 
+ * @return the error of the measures stored for the default dimension
+ */
+public double getError() {
+	long n = getCount();
+	if (n == 1) return Double.NaN;
+	return getDeviation() / Math.sqrt(n);
 }
 
 /*

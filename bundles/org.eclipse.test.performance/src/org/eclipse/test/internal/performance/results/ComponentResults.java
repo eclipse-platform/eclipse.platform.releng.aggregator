@@ -92,9 +92,14 @@ void read(List scenarios, File dataDir) {
 	}
 	int size = scenarios.size();
 	long time = System.currentTimeMillis();
+	boolean first = true;
 	for (int i=0; i<size; i++) {
 		ScenarioResults scenarioResults= (ScenarioResults) scenarios.get(i);
 		if (scenarioResults.parent == null) {
+			if (first) {
+				println(" - read new scenarios:"); //$NON-NLS-1$
+				first = false;
+			}
 			scenarioResults.parent = this;
 			scenarioResults.print = this.print;
 			scenarioResults.read();
@@ -146,6 +151,12 @@ boolean readData(File dir, List scenarios) throws IOException {
 			}
 			// next field is the build name
 			lastBuildName = stream.readUTF();
+		}
+		
+		// Update last build name if local data file has a more recent one
+		String lastBuildDate = getBuildDate(lastBuildName);
+		if (lastBuildDate.compareTo(getPerformance().getBuildDate()) > 0) {
+			getPerformance().name = lastBuildName;
 		}
 
 		// Save old version files if necessary

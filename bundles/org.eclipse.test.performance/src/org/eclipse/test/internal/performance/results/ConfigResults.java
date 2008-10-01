@@ -59,16 +59,45 @@ public String getBaselineBuildName() {
 }
 
 /**
- * Returns the baseline build results.
- * <p>
- * This build is currently the last reference build which has performance
+ * Returns the most recent baseline build results.
  * 
- * @return The baseline build results.
+ * @return The {@link BuildResults baseline build results}.
  * @see BuildResults
  */
 public BuildResults getBaselineBuildResults() {
 	if (this.baseline == null) initialize();
 	return this.baseline;
+}
+
+/**
+ * Return the baseline build results run just before the given build name.
+ * 
+ * @param buildName The build name
+ * @return The {@link BuildResults baseline results} preceeding the given build name
+ * 	or <code>null</code> if none was found.
+ */
+public BuildResults getBaselineBuildResults(String buildName) {
+	int size = this.children.size();
+	String buildDate = getBuildDate(buildName);
+	for (int i=size-1; i>=0; i--) {
+		BuildResults buildResults = (BuildResults) this.children.get(i);
+		if (buildResults.isBaseline() && buildResults.getDate().compareTo(buildDate) < 0) {
+			return buildResults;
+		}
+	}
+	return null;
+	
+}
+
+/**
+ * Return the results for the given build name.
+ * 
+ * @param buildName The build name
+ * @return The {@link BuildResults results} for the given build name
+ * 	or <code>null</code> if none was found.
+ */
+public BuildResults getBuildResults(String buildName) {
+	return (BuildResults) getResults(buildName);
 }
 
 /**
@@ -153,6 +182,34 @@ public BuildResults getCurrentBuildResults() {
 }
 
 /**
+ * Returns the delta between current and baseline builds results.
+ * 
+ * @return the delta
+ */
+public double getDelta() {
+	if (this.baseline == null || this.current == null) {
+		initialize();
+	}
+	return this.delta;
+}
+
+/**
+ * Get all dimension builds default dimension statistics for a given list of build
+ * prefixes.
+ *
+ * @param prefixes List of prefixes to filter builds. If <code>null</code>
+ * 	then all the builds are taken to compute statistics.
+ * @return An array of double built as follows:
+ * 	- 0:	numbers of values
+ * 	- 1:	mean of values
+ * 	- 2:	standard deviation of these values
+ * 	- 3:	coefficient of variation of these values
+ */
+public double[] getStatistics(List prefixes) {
+	return getStatistics(prefixes, DEFAULT_DIM_INDEX);
+}
+
+/**
  * Get all dimension builds statistics for a given list of build prefixes
  * and a given dimension.
  *
@@ -233,8 +290,8 @@ private void initialize() {
 
 	// Set delta between current vs. baseline and the corresponding error
 	int dim_id = DEFAULT_DIM.getId();
-	double baselineValue = this.baseline.getValue(dim_id);
-	double currentValue = this.current.getValue(dim_id);
+	double baselineValue = this.baseline.getValue();
+	double currentValue = this.current.getValue();
 	this.delta = (currentValue - baselineValue) / baselineValue;
 	if (Double.isNaN(this.delta)) {
 		this.error = Double.NaN;

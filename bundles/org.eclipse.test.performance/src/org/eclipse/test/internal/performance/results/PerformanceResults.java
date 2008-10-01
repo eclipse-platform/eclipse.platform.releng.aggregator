@@ -26,13 +26,21 @@ import java.util.*;
  */
 public class PerformanceResults extends AbstractResults {
 
-	final String baselineName; // Name of the baseline build used for comparison
-	final String baselinePrefix;
+	String baselineName; // Name of the baseline build used for comparison
+	String baselinePrefix;
 	private String scenarioPattern;
 	private List components;
 	String[] configNames, sortedConfigNames;
 	private String[] configBoxes, sortedConfigBoxes;
 	private String configPattern;
+
+public static PerformanceResults createPerformanceResults(String scenarioPattern, File dataDir, boolean print) {
+	DB_Results.getBuilds(); // Init build names
+	if (DB_Results.LAST_CURRENT_BUILD == null || DB_Results.LAST_BASELINE_BUILD == null) return null;
+	PerformanceResults performanceResults = new PerformanceResults(DB_Results.LAST_CURRENT_BUILD, DB_Results.LAST_BASELINE_BUILD, print);
+	performanceResults.read(null, scenarioPattern, dataDir, DEFAULT_FAILURE_THRESHOLD);
+	return performanceResults;
+}
 
 	// Failure threshold
 	public static final int DEFAULT_FAILURE_THRESHOLD = 10;
@@ -41,7 +49,9 @@ public class PerformanceResults extends AbstractResults {
 public PerformanceResults(String name, String baseline, boolean print) {
 	super(null, name);
 	this.baselineName = baseline;
-	this.baselinePrefix = baseline.substring(0, baseline.lastIndexOf('_'));
+	if (baseline != null) {
+		this.baselinePrefix = baseline.substring(0, baseline.lastIndexOf('_'));
+	}
 	this.print = print;
 }
 
@@ -65,7 +75,7 @@ String getBaselinePrefix() {
 /*
  * Get the build date (see #getBuildDate(String, String)).
  */
-String getBuildDate() {
+public String getBuildDate() {
 	return getBuildDate(this.name, this.baselinePrefix);
 }
 
@@ -268,7 +278,7 @@ public void read(String[][] configs, String pattern, File dataDir, int threshold
 	println(" -> "+(System.currentTimeMillis()-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	// Create corresponding children
-	List allComponents = DB_Results.getAllComponents();
+	List allComponents = DB_Results.getComponents();
 	int size = allComponents.size();
 	this.components = new ArrayList(size);
 	for (int i=0; i<size; i++) {

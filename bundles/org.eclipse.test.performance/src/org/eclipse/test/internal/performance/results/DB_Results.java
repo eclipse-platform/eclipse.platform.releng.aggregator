@@ -102,6 +102,7 @@ public class DB_Results {
     
 	// Data storage from queries
 	private static String[] CONFIGS, COMPONENTS, BUILDS;
+	static String LAST_CURRENT_BUILD, LAST_BASELINE_BUILD;
 	private static int BUILDS_LENGTH;
 	private static String[] SCENARII;
 	private static String[] COMMENTS;
@@ -171,15 +172,6 @@ public class DB_Results {
     }
 
 /**
- * Get all components read from database.
- *
- * @return A list of component names matching the given pattern
- */
-static List getAllComponents() {
-	return Arrays.asList(COMPONENTS);
-}
-
-/**
  * Return the build id from a given name.
  * 
  * @param name The build name (eg. I20070615-1200)
@@ -202,6 +194,18 @@ static String getBuildName(int id) {
 }
 
 /**
+ * Returns all the builds names read from the database.
+ * 
+ * @return The list of all builds names matching the scenario pattern used while reading data
+ */
+public static List getBuilds() {
+	if (BUILDS == null) {
+		queryAllVariations("%"); //$NON-NLS-1$
+	}
+	return Arrays.asList(BUILDS);
+}
+
+/**
  * Get component name from a scenario.
  * 
  * @param scenarioName The name of the scenario
@@ -218,6 +222,15 @@ static String getComponentNameFromScenario(String scenarioName) {
 }
 
 /**
+ * Get all components read from database.
+ *
+ * @return A list of component names matching the given pattern
+ */
+public static List getComponents() {
+	return Arrays.asList(COMPONENTS);
+}
+
+/**
  * Return the name of the configuration from the given id.
  * 
  * @param id The index of the configuration in the stored list.
@@ -228,12 +241,12 @@ static String getConfig(int id) {
 }
 
 /**
- * Returns all the scenarios names stored in the dynamic list.
+ * Returns all the scenarios names read from the database.
  * 
  * @return The list of all scenarios matching the pattern for a given build.
  * @see #internalQueryBuildScenarios(String, String)
  */
-public static List getScenariosNames() {
+public static List getScenarios() {
 	return Arrays.asList(SCENARII);
 }
 
@@ -767,9 +780,15 @@ private int storeComponent(String component) {
  * The list is sorted alphabetically.
  */
 private int storeBuildName(String build) {
+	boolean isVersion = Character.isDigit(build.charAt(0));
 	if (BUILDS == null) {
 		BUILDS = new String[1];
 		BUILDS[BUILDS_LENGTH++] = build;
+		if (isVersion) {
+			LAST_BASELINE_BUILD = build;
+		} else {
+			LAST_CURRENT_BUILD = build;
+		}
 		return 0;
 	}
 	int idx = Arrays.binarySearch(BUILDS, build);
@@ -780,13 +799,24 @@ private int storeBuildName(String build) {
 		String[] array = new String[length+1];
 		if (index > 0) System.arraycopy(BUILDS, 0, array, 0, index);
 		array[index] = build;
-		if (index < length) System.arraycopy(BUILDS, index, array, index+1, length-index);
+		if (index < length) {
+			System.arraycopy(BUILDS, index, array, index+1, length-index);
+		}
 		BUILDS = array;
 	} else if (index < length) {
 		System.arraycopy(BUILDS, index, BUILDS, index+1, length-index);
 		BUILDS[index] = build;
 	}
 	BUILDS_LENGTH++;
+	if (isVersion) {
+		if (LAST_BASELINE_BUILD == null || build.compareTo(LAST_BASELINE_BUILD) > 0) {
+			LAST_BASELINE_BUILD = build;
+		}
+	} else {
+		if (LAST_CURRENT_BUILD == null || build.substring(1).compareTo(LAST_CURRENT_BUILD.substring(1)) >= 0) {
+			LAST_CURRENT_BUILD = build;
+		}
+	}
 	return index;
 }
 

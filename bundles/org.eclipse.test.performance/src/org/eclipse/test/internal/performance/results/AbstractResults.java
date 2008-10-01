@@ -156,10 +156,16 @@ public static boolean copyFile(File src, File dest) {
 /*
  * Return the build date as yyyyMMddHHmm
  */
-static String getBuildDate(String buildName, String baselinePrefix) {
+public static String getBuildDate(String buildName) {
+	return getBuildDate(buildName, VERSION_REF);
+}
+/*
+ * Return the build date as yyyyMMddHHmm
+ */
+public static String getBuildDate(String buildName, String baselinePrefix) {
 
 	// Baseline name
-	if (buildName.startsWith(baselinePrefix)) {
+	if (baselinePrefix != null && buildName.startsWith(baselinePrefix)) {
 		int length = buildName.length();
 		return buildName.substring(length-12, length);
 	}
@@ -276,6 +282,17 @@ public boolean equals(Object obj) {
 	return super.equals(obj);
 }
 
+/**
+ * Return an array built on the current results children list.
+ * 
+ * @return An array of the children list
+ */
+public AbstractResults[] getChildren() {
+	AbstractResults[] elements = new AbstractResults[size()];
+	this.children.toArray(elements);
+	return elements;
+}
+
 int getId() {
 	return this.id;
 }
@@ -287,6 +304,15 @@ int getId() {
  */
 public String getName() {
 	return this.name;
+}
+
+/**
+ * Returns the parent
+ * 
+ * @return The parent
+ */
+public AbstractResults getParent() {
+	return this.parent;
 }
 
 PerformanceResults getPerformance() {
