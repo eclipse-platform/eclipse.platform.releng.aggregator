@@ -129,7 +129,6 @@ boolean readData(File dir, List scenarios) throws IOException {
 	DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
 	boolean valid = false, dirty = false;
 	int size = 0;
-	List readResults = new ArrayList();
 	try {
 		// Read local file info
 		print(" - read local files info"); //$NON-NLS-1$
@@ -181,35 +180,39 @@ boolean readData(File dir, List scenarios) throws IOException {
 			// ... which starts with the scenario id
 			int scenario_id = stream.readInt();
 			ScenarioResults scenarioResults = getScenarioResults(scenarios, scenario_id);
-			if (scenarioResults != null) {
+			if (scenarioResults == null) {
+				// this can happen if scenario pattern does not cover all those stored in local data file
+				// hence, creates a fake scenario to read the numbers and skip to the next scenario
+				scenarioResults = new ScenarioResults(-1, null, null);
+				scenarioResults.parent = this;
+				scenarioResults.readData(stream, version);
+			} else {
 				scenarioResults.parent = this;
 				scenarioResults.print = this.print;
 				scenarioResults.readData(stream, version);
-				readResults.add(scenarioResults);
-				if (this.print) System.out.print('.');
+				addChild(scenarioResults, true);
 			}
+			if (this.print) System.out.print('.');
 		}
 		println(""); //$NON-NLS-1$
 
 		// Read new values for the local result
 		boolean first = true;
 		long readTime = System.currentTimeMillis();
-		size = readResults.size();
+		size = size();
 		for (int i=0; i<size; i++) {
-			ScenarioResults scenarioResults = (ScenarioResults) readResults.get(i);
+			ScenarioResults scenarioResults = (ScenarioResults) this.children.get(i);
+			if (first) {
+				println(" - read DB contents:"); //$NON-NLS-1$
+				first = false;
+			}
 			long start = System.currentTimeMillis();
 			boolean newData = scenarioResults.readNewData(lastBuildName);
 			long time = System.currentTimeMillis()-start;
 			if (newData || newVersion) {
-				if (first) {
-					println(" - read DB contents:"); //$NON-NLS-1$
-					first = false;
-				}
 				dirty = true;
-				print("	+ scenario '"+scenarioResults.getShortName()+"': "); //$NON-NLS-1$ //$NON-NLS-2$
-				if (newData) {
-					print(timeString(time));
-					print (" (values), "); //$NON-NLS-1$
+				if (!newData) {
+					print("	+ scenario '"+scenarioResults.getShortName()+"': "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				start = System.currentTimeMillis();
 				scenarioResults.completeResults();
@@ -217,7 +220,6 @@ boolean readData(File dir, List scenarios) throws IOException {
 				print(timeString(time));
 				println(" (infos)"); //$NON-NLS-1$
 			}
-			addChild(scenarioResults, true);
 			if (dirty && (System.currentTimeMillis() - readTime) > 300000) { // save every 5mn
 				writeData(dir, true, true);
 				readTime = System.currentTimeMillis();

@@ -250,7 +250,11 @@ boolean readNewData(String lastBuildName) throws IOException {
 	    } catch (ParseException e) {
 		    // should not happen
 	    }
+		long start = System.currentTimeMillis();
+		print("	+ scenario '"+getShortName()+"': "); //$NON-NLS-1$ //$NON-NLS-2$
 		DB_Results.queryScenarioValues(this, configPattern, lastBuildName, lastBuildTime);
+		print(timeString(System.currentTimeMillis()-start));
+		print (" (values), "); //$NON-NLS-1$
 		return true;
 	}
 	return false;
