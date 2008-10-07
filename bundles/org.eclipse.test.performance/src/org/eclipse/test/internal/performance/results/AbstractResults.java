@@ -120,7 +120,7 @@ public abstract class AbstractResults implements Comparable {
 	int id = -1;
 	String name;
 	List children;
-	private boolean newLine = true;
+	private static boolean NEW_LINE = true;
 	boolean print = false;
 
 /**
@@ -370,9 +370,9 @@ void printTab() {
 }
 void print(String text) {
 	if (this.print) {
-		if (this.newLine) printTab();
+		if (NEW_LINE) printTab();
 		System.out.print(text);
-		this.newLine = false;
+		NEW_LINE = false;
 	}
 }
 
@@ -395,9 +395,9 @@ void printGlobalTime(long start, String end) {
 
 void println(String text) {
 	if (this.print) {
-		if (this.newLine) printTab();
+		if (NEW_LINE) printTab();
 		System.out.println(text);
-		this.newLine = true;
+		NEW_LINE = true;
 	}
 }
 
