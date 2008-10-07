@@ -206,7 +206,7 @@ public double getDelta() {
  * 	- 3:	coefficient of variation of these values
  */
 public double[] getStatistics(List prefixes) {
-	return getStatistics(prefixes, DEFAULT_DIM_INDEX);
+	return getStatistics(prefixes, DEFAULT_DIM.getId());
 }
 
 /**
@@ -351,6 +351,7 @@ boolean isBuildConcerned(BuildResults buildResults) {
  * 	for the performance current build, <code>false</code> otherwise.
  */
 public boolean isValid() {
+	if (this.baseline == null || this.current == null) initialize();
 	return this.valid;
 }
 
