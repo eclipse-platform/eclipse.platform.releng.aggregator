@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.core.resources.IProject;
@@ -72,6 +78,7 @@ public class MapContentDocument implements ITypedElement, IStreamContentAccessor
 				try {
 					inputStream.close();
 				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
