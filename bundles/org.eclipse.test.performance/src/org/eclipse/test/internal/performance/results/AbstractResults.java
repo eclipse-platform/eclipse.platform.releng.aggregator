@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -201,23 +202,45 @@ static Dim getDimension(int id) {
 }
 
 public static String timeString(long time) {
+	NumberFormat format = NumberFormat.getInstance();
+	format.setMaximumFractionDigits(1);
 	StringBuffer buffer = new StringBuffer();
-	if (time < 1000) { // less than 1s
+	if (time < 100) { // less than 0.1s
 		buffer.append(time);
-		buffer.append("ms"); //$NON-NLS-1$
+		if (time > 0) buffer.append("ms"); //$NON-NLS-1$
+	} else if (time < 1000) { // less than 1s
+		if ((time%100) != 0) {
+			format.setMaximumFractionDigits(2);
+		}
+		buffer.append(format.format(time/1000.0));
+		buffer.append("s"); //$NON-NLS-1$
 	} else if (time < ONE_MINUTE) {  // less than 1mn
-		buffer.append((time/100)/10.0);
+		if ((time%1000) == 0) {
+			buffer.append(time/1000);
+		} else {
+			buffer.append(format.format(time/1000.0));
+		}
 		buffer.append("s"); //$NON-NLS-1$
 	} else if (time < ONE_HOUR) {  // less than 1h
 		buffer.append(time/ONE_MINUTE).append("mn "); //$NON-NLS-1$
-		buffer.append(((time%ONE_MINUTE)/100)/10.0);
+		long seconds = time%ONE_MINUTE;
+		if ((seconds%1000) == 0) {
+			buffer.append(seconds/1000);
+		} else {
+			buffer.append(format.format(seconds/1000.0));
+		}
 		buffer.append("s"); //$NON-NLS-1$
 	} else {  // more than 1h
 		long h = time / ONE_HOUR;
 		buffer.append(h).append("h "); //$NON-NLS-1$
 		long m = (time % ONE_HOUR) / ONE_MINUTE;
 		buffer.append(m).append("mn "); //$NON-NLS-1$
-		buffer.append(((m%ONE_MINUTE)/100)/10.0);
+		long seconds = m%ONE_MINUTE;
+		if ((seconds%1000) == 0) {
+			buffer.append(seconds/1000);
+		} else {
+			buffer.append(format.format(seconds/1000.0));
+		}
 		buffer.append("s"); //$NON-NLS-1$
 	}
 	return buffer.toString();

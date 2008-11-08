@@ -90,6 +90,16 @@ public BuildResults getBaselineBuildResults(String buildName) {
 }
 
 /**
+ * Returns the most recent baseline build result value.
+ * 
+ * @return The value of the most recent baseline build results.
+ */
+public double getBaselineBuildValue() {
+	if (this.baseline == null) initialize();
+	return this.baseline.getValue();
+}
+
+/**
  * Return the results for the given build name.
  * 
  * @param buildName The build name
@@ -156,6 +166,16 @@ public double[] getCurrentBuildDeltaInfo() {
 }
 
 /**
+ * Returns the error of the current build results
+ * 
+ * @return the error made during the current build measure
+ */
+public double getCurrentBuildError() {
+	if (this.current == null) initialize();
+	return this.current.getError();
+}
+
+/**
  * Returns the current build name.
  *
  * @return The name of the current build
@@ -182,6 +202,16 @@ public BuildResults getCurrentBuildResults() {
 }
 
 /**
+ * Returns the current build result value.
+ * 
+ * @return The value of the current build results.
+ */
+public double getCurrentBuildValue() {
+	if (this.current == null) initialize();
+	return this.current.getValue();
+}
+
+/**
  * Returns the delta between current and baseline builds results.
  * 
  * @return the delta
@@ -191,6 +221,19 @@ public double getDelta() {
 		initialize();
 	}
 	return this.delta;
+}
+
+/**
+ * Returns the standard error of the delta between current and baseline builds results.
+ * 
+ * @return the delta
+ * @see #getDelta()
+ */
+public double getError() {
+	if (this.baseline == null || this.current == null) {
+		initialize();
+	}
+	return this.error;
 }
 
 /**

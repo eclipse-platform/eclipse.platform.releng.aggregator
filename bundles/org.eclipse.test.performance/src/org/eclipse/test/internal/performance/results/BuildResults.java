@@ -104,9 +104,6 @@ public int compareTo(Object obj) {
  * 	or <code>null</code> if no comment was stored for it.
  */
 public String getComment() {
-	if (this.comment == null) {
-		return null;
-	}
 	return this.comment;
 }
 
@@ -364,9 +361,13 @@ void readData(DataInputStream stream, int version) throws IOException {
 			// extra infos (summary, failure and comment) are also stored in local data files
 			this.summaryKind = stream.readInt();
 			String str = stream.readUTF();
-			if (str.length() > 0) this.failure = str;
+			if (str.length() > 0) {
+				this.failure = str;
+			}
 			str = stream.readUTF();
-			if (str.length() > 0) this.comment = str;
+			if (str.length() > 0) {
+				this.comment = str;
+			}
 			break;
 	}
 }
