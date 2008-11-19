@@ -37,6 +37,7 @@ public class RelEngPreferenceInitializer extends AbstractPreferenceInitializer {
 //        store.setDefault(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY, false);
         store.setDefault(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY, false);
         store.setDefault(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, false);
+        store.setDefault(RelEngCopyrightConstants.IGNORE_XML_KEY, false);
 	}
 
 }

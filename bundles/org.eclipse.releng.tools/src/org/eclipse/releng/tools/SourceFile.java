@@ -57,6 +57,8 @@ public abstract class SourceFile {
 	            return new BatFile(file);
 			} else if (extension.equals("js")) { //$NON-NLS-1$
 	            return new JavaScriptFile(file);
+			} else if (extension.equals("xml")) { //$NON-NLS-1$
+	            return new XmlFile(file);
 			}
         }
 		return null;
