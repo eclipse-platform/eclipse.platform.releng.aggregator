@@ -35,8 +35,23 @@ public class PerformanceResults extends AbstractResults {
 	private String configPattern;
 
 public static PerformanceResults createPerformanceResults(String scenarioPattern, File dataDir, boolean print) {
-	DB_Results.getBuilds(); // Init build names
-	if (DB_Results.LAST_CURRENT_BUILD == null || DB_Results.LAST_BASELINE_BUILD == null) return null;
+	List builds = DB_Results.getBuilds(); // Init build names
+	if (DB_Results.LAST_CURRENT_BUILD == null) {
+		System.err.println("Could not find the last current build amongst the following builds list:");	//$NON-NLS-1$
+		int size = builds.size();
+		for (int i=0; i<size; i++) {
+			System.err.println("	- "+builds.get(i)); //$NON-NLS-1$
+		}
+		return null;
+	}
+	if (DB_Results.LAST_BASELINE_BUILD == null) {
+		System.err.println("Could not find the last baseline build amongst the following builds list:");	//$NON-NLS-1$
+		int size = builds.size();
+		for (int i=0; i<size; i++) {
+			System.err.println("	- "+builds.get(i)); //$NON-NLS-1$
+		}
+		return null;
+	}
 	PerformanceResults performanceResults = new PerformanceResults(DB_Results.LAST_CURRENT_BUILD, DB_Results.LAST_BASELINE_BUILD, print);
 	performanceResults.read(null, scenarioPattern, dataDir, DEFAULT_FAILURE_THRESHOLD);
 	return performanceResults;

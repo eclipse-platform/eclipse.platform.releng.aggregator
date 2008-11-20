@@ -123,6 +123,7 @@ public class DB_Results {
 		"org.eclipse.jdt.ui", //$NON-NLS-1$
 		"org.eclipse.jface", //$NON-NLS-1$
 		"org.eclipse.osgi", //$NON-NLS-1$
+		"org.eclipse.pde.api.tools", //$NON-NLS-1$
 		"org.eclipse.pde.ui", //$NON-NLS-1$
 		"org.eclipse.swt", //$NON-NLS-1$
 		"org.eclipse.team", //$NON-NLS-1$
@@ -218,6 +219,7 @@ static String getComponentNameFromScenario(String scenarioName) {
 			return SUPPORTED_COMPONENTS[i];
 		}
 	}
+	System.err.println("Not able to find a supported component for scenario "+scenarioName); //$NON-NLS-1$
 	return null;
 }
 
@@ -780,7 +782,7 @@ private int storeComponent(String component) {
  * The list is sorted alphabetically.
  */
 private int storeBuildName(String build) {
-	boolean isVersion = Character.isDigit(build.charAt(0));
+	boolean isVersion = build.startsWith("R-"); //$NON-NLS-1$
 	if (BUILDS == null) {
 		BUILDS = new String[1];
 		BUILDS[BUILDS_LENGTH++] = build;

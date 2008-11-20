@@ -75,11 +75,9 @@ public abstract class AbstractResults implements Comparable {
 	 * (see {@link PerformanceResults#read(File)}.
 	 */
 	public final static String[] BOXES = {
-		"RHEL 4.0 Sun 1.4.2_10 (3 GHz 2.5 GB)", //$NON-NLS-1$
-		"Win XP Sun 1.4.2_10 (3 GHz 2 GB)", //$NON-NLS-1$
-		"RHEL 3.0 Sun 1.4.2_10 (3 GHz 2 GB)", //$NON-NLS-1$
-		"Win XP Sun 1.4.2_10 (2 GHz 512 MB)", //$NON-NLS-1$
-		"RHEL 3.0 Sun 1.4.2_10 (2 GHz 512 MB)", //$NON-NLS-1$
+		"Win XP Sun 1.5.0_10 (2 x 3.00GHz, 3GB RAM)", //$NON-NLS-1$
+		"SLED 10 Sun 1.50_10 (2 x 3.00GHz, 3GB RAM)", //$NON-NLS-1$
+		"RHEL 5.0 Sun 1.6_04 (2 x 3.00GHz, 3GB RAM)", //$NON-NLS-1$
 	};
 
 	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm"); //$NON-NLS-1$
@@ -87,33 +85,15 @@ public abstract class AbstractResults implements Comparable {
 	// Initialize constant fields depending on DB version
 	public final static String VERSION_REF, VERSION;
 	static {
-		String dbName = PerformanceTestPlugin.getDBName();
-		String version;
-	
 		// Initialize reference version and database directory
-		char mainVersion;
-		char minorVersion;
-		if (dbName.equals("perfDB")) { //$NON-NLS-1$
-			version = "_R3.3"; //$NON-NLS-1$
-			VERSION_REF = "3.2"; //$NON-NLS-1$
-			mainVersion = '3';
-			minorVersion = '3';
-			VERSION = "3.3"; //$NON-NLS-1$
-		} else {
-			mainVersion = dbName.charAt(dbName.length()-2);
-			minorVersion = dbName.charAt(dbName.length()-1);
-			version = ""; //$NON-NLS-1$
-			VERSION_REF = mainVersion+"."+(char)(minorVersion-1); //$NON-NLS-1$
-			VERSION = mainVersion+"."+minorVersion; //$NON-NLS-1$
-		}
+		VERSION_REF = "R-3.4"; //$NON-NLS-1$
+		VERSION = "3.5"; //$NON-NLS-1$
 	
 		// Initialize configuration names
 		CONFIGS = new String[] {
-			"eclipseperflnx3"+version, //$NON-NLS-1$
-			"eclipseperfwin2"+version, //$NON-NLS-1$
-			"eclipseperflnx2"+version, //$NON-NLS-1$
-			"eclipseperfwin1"+version, //$NON-NLS-1$
-			"eclipseperflnx1"+version, //$NON-NLS-1$
+			"epwin2", //$NON-NLS-1$
+			"eplnx1", //$NON-NLS-1$
+			"eplnx2", //$NON-NLS-1$
 		};
 	}
 
