@@ -52,7 +52,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 	// disable fix up existing copyright till it works better
 //	private Button fFixExisting;
 	private Button fIgnoreProperties;
-	private Button fIgnoreXml;
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
@@ -126,13 +125,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		data.horizontalSpan = 2;
 		fIgnoreProperties.setLayoutData(data);
 		
-		// ignore xml files
-		fIgnoreXml = new Button(fComposite, SWT.CHECK);
-		fIgnoreXml.setText(Messages.getString("CopyrightPreferencePage.9")); //$NON-NLS-1$
-		data = new GridData();
-		data.horizontalSpan = 2;
-		fIgnoreXml.setLayoutData(data);
-
 		KeyListener listener1 = new KeyAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.KeyAdapter#keyReleased(org.eclipse.swt.events.KeyEvent)
@@ -248,8 +240,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		fReplaceAllExisting.setSelection(store.getBoolean(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY));
 		// disable fix up existing copyright till it works better
 //		handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), store.getBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY));
-		fIgnoreProperties.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));
-		fIgnoreXml.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
+		fIgnoreProperties.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));		
 	}
 	
 	/**
@@ -321,7 +312,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		// disable fix up existing copyright till it works better
 //		handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY));
 		fIgnoreProperties.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));
-		fIgnoreXml.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
 		
 		super.performDefaults();
 	}
@@ -340,7 +330,6 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		// disable fix up existing copyright till it works better
 //		store.setValue(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY, fFixExisting.getSelection());
 		store.setValue(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, fIgnoreProperties.getSelection());
-		store.setValue(RelEngCopyrightConstants.IGNORE_XML_KEY, fIgnoreXml.getSelection());
 		
 		RelEngPlugin.getDefault().savePluginPreferences();
 		

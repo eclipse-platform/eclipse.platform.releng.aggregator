@@ -154,13 +154,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
                     monitor.beginTask("Fixing copyrights...", results.length * 100 + 100); //$NON-NLS-1$
 
                     RepositoryProviderCopyrightAdapter adapter = createCopyrightAdapter(results);
-                    if(adapter == null) {
-            			if(!RelEngPlugin.getDefault().getPreferenceStore().getBoolean(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY)) {
-            				throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "The selected resources are not shared in a team repository", null));
-            			}
-                    } else {
-                    	adapter.initialize(new SubProgressMonitor(monitor, 100));
-                    }
+                    adapter.initialize(new SubProgressMonitor(monitor, 100));
                     List exceptions = new ArrayList();
                     for (int i = 0; i < results.length; i++) {
                         IResource resource = results[i];
@@ -274,9 +268,6 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 				}
 			}
 		}
-		if(providerType == null) {
-			return null;
-		}
 		IRepositoryProviderCopyrightAdapterFactory factory = (IRepositoryProviderCopyrightAdapterFactory)providerType.getAdapter(IRepositoryProviderCopyrightAdapterFactory.class);
 		if (factory == null) {
 			factory = (IRepositoryProviderCopyrightAdapterFactory)Platform.getAdapterManager().loadAdapter(providerType, IRepositoryProviderCopyrightAdapterFactory.class.getName());
@@ -351,9 +342,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
         IPreferenceStore prefStore = RelEngPlugin.getDefault().getPreferenceStore();
         if (aSourceFile == null
         		|| (aSourceFile.getFileType() == CopyrightComment.PROPERTIES_COMMENT 
-        				&& prefStore.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY))
-        		|| (aSourceFile.getFileType() == CopyrightComment.XML_COMMENT 
-        				&& prefStore.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY))) {
+        				&& prefStore.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY))) {
         	return;
         }
         if (aSourceFile.hasMultipleCopyrights()) {
@@ -385,7 +374,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
         // figure out revision year
         int revised = ibmCopyright.getRevisionYear();
         int lastMod = revised;
-        if (prefStore.getBoolean(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY) || adapter == null)
+        if (prefStore.getBoolean(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY))
         	lastMod = prefStore.getInt(RelEngCopyrightConstants.REVISION_YEAR_KEY);
         else {
             // figure out if the comment should be updated by comparing the date range

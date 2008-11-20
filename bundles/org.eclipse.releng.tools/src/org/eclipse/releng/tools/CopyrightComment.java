@@ -22,7 +22,6 @@ public abstract class CopyrightComment {
     public static final int SHELL_MAKE_COMMENT = 4;
     public static final int BAT_COMMENT = 5;
 	public static final int JAVASCRIPT_COMMENT = 6;
-	public static final int XML_COMMENT = 7;
     
 	private int commentStyle;
     private int creationYear = -1;
@@ -39,15 +38,13 @@ public abstract class CopyrightComment {
 	        case JAVA_COMMENT:
 	        case C_COMMENT:
 		    case JAVASCRIPT_COMMENT:
-	            return " * ";  //$NON-NLS-1$
+	            return " *";  //$NON-NLS-1$
 	        case PROPERTIES_COMMENT:
-	            return "# "; //$NON-NLS-1$
+	            return "#"; //$NON-NLS-1$
 	        case SHELL_MAKE_COMMENT:
-	            return "# "; //$NON-NLS-1$
+	            return "#"; //$NON-NLS-1$
 	        case BAT_COMMENT:
 	            return "rem "; //$NON-NLS-1$
-	        case XML_COMMENT:
-	            return "    "; //$NON-NLS-1$
 		    default:
 	            return null;
         }
@@ -69,9 +66,6 @@ public abstract class CopyrightComment {
 	    case BAT_COMMENT:
 			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
 			break;
-	    case XML_COMMENT:
-			writer.println("<!--"); //$NON-NLS-1$
-			break;
 	    }
 	}
 	
@@ -90,9 +84,6 @@ public abstract class CopyrightComment {
 			break;
 	    case BAT_COMMENT:
 			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
-			break;
-	    case XML_COMMENT:
-			writer.println(" -->"); //$NON-NLS-1$
 			break;
 	    }
 	}

@@ -22,5 +22,4 @@ public class RelEngCopyrightConstants {
 //	public final static String FIX_UP_EXISTING_KEY = "org.eclipse.releng.tools.fixUpExisting"; //$NON-NLS-1$
 	public final static String REPLACE_ALL_EXISTING_KEY = "org.eclipse.releng.tools.replaceAllExisting"; //$NON-NLS-1$
 	public final static String IGNORE_PROPERTIES_KEY = "org.eclipse.releng.tools.ignoreProperties"; //$NON-NLS-1$
-	public final static String IGNORE_XML_KEY = "org.eclipse.releng.tools.ignoreXml"; //$NON-NLS-1$
 }
