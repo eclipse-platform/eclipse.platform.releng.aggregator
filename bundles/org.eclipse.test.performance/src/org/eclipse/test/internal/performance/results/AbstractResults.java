@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
-import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.Dim;
 
 /**
