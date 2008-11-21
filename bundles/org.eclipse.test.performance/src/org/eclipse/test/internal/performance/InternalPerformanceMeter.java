@@ -122,27 +122,36 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 					String nameString= "  " + dimension.getName() + ":"; //$NON-NLS-1$ //$NON-NLS-2$
 					String meanString= dimension.getDisplayValue(mean);
 					int align= firstNonDigit(meanString);
-					meanString= spaces.substring(0, 30 - align - nameString.length()) + meanString;
+					int endIndex = 30 - align - nameString.length();
+					if (endIndex > 0) meanString= spaces.substring(0, endIndex) + meanString;
 
 					align= nameString.length() + meanString.length();
 
 					Percentile percentile= StatisticsUtil.T95;
 					double[] confidenceInterval= s.getConfidenceInterval(dimension, percentile);
 
-					String confidenceString= n <= 2
-					? " (no confidence)" //$NON-NLS-1$
-							: spaces.substring(0, 40 - align) + format.format(new Object[] {new Double(percentile.inside()), dimension.getDisplayValue(confidenceInterval[0]), dimension.getDisplayValue(confidenceInterval[1])});
+					StringBuffer printBuffer;
+					if (n <= 2) {
+						printBuffer = new StringBuffer(" (no confidence)"); //$NON-NLS-1$
+					} else {
+						printBuffer = new StringBuffer();
+						int ns = align;
+						while (ns++ < 40) printBuffer.append(' ');
+						printBuffer.append(format.format(new Object[] {new Double(percentile.inside()), dimension.getDisplayValue(confidenceInterval[0]), dimension.getDisplayValue(confidenceInterval[1])}));
+					}
 
-					align+= confidenceString.length();
-					String sizeWarning;
+					align+= printBuffer.length();
 					try {
-						sizeWarning= spaces.substring(0, 70 - align) + checkSampleSize(s, sample, dimension);
+						while (align++ < 70) printBuffer.append(' ');
+						printBuffer.append(checkSampleSize(s, sample, dimension));
 					} catch (CoreException x) {
 						badDimensions.add(dimension);
 						continue;
 					}
 
-					ps.println(nameString + meanString + confidenceString + sizeWarning);
+					ps.print(nameString);
+					ps.print(meanString);
+					ps.println(printBuffer);
 				}
 				
 				if (!badDimensions.isEmpty()) {
