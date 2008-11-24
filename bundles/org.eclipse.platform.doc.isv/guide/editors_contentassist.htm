@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><HTML>
 <HEAD>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -120,23 +120,10 @@ and color of information popups.</p>
 	return assistant;
 }</pre>
 
-<h3>Create the content assist action and hook it with a key binding</h3>
+<h3>Show the content assist action in the menu</h3>
 <p>
-In order to allow users to invoke content assist an action has to be created and configured. This is
-normally done in the sub-class implementation of <code>AbstractTextEditor.createActions()</code>:
-</p>
-<pre>protected void createActions() {
-	...
-	IAction action= new ContentAssistAction(aResourceBundle, "ContentAssistProposal.", this); //$NON-NLS-1$
-	action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-	setAction(actionId, action); //$NON-NLS-1$
-	markAsStateDependentAction(actionId, true); //$NON-NLS-1$
-	PlatformUI.getWorkbench().getHelpSystem().setHelp(action, helpContextId);
-	...
-}
-</pre>
-
-The editor action bar contributor has to be extended to make the action appear in the main menu:
+If the content assistant is correctly supplied as mentioned above then the key binding (<strong>Ctrl+Space</strong> per default) will work out of the box.
+To make the action appear in the main menu the editor action bar contributor has to be extended:
 <pre>
 ...
 private RetargetTextEditorAction fContentAssist;
@@ -153,7 +140,7 @@ public void contributeToMenu(IMenuManager menu) {
 }
 
 public void setActiveEditor(IEditorPart part) {
-	IAction editorAction= getAction(part, "ContentAssist");
+	IAction editorAction= getAction(part, ITextEditorActionConstants.CONTENT_ASSIST);
 	fContentAssist.setAction(editorAction);
 }
 ...
