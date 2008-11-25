@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.data.Dim;
@@ -72,12 +73,21 @@ public abstract class AbstractResults implements Comparable {
 	 * <p>
 	 * Only used if no specific configurations are specified
 	 * (see {@link PerformanceResults#read(File)}.
+	 * </p>
+	 * Note that this is a copy of the the property "eclipse.perf.config.descriptors"
+	 * defined in org.eclipse.releng.eclipsebuilder/eclipse/helper.xml file
 	 */
-	public final static String[] BOXES = {
-		"Win XP Sun 1.5.0_10 (2 x 3.00GHz, 3GB RAM)", //$NON-NLS-1$
-		"SLED 10 Sun 1.50_10 (2 x 3.00GHz, 3GB RAM)", //$NON-NLS-1$
-		"RHEL 5.0 Sun 1.6_04 (2 x 3.00GHz, 3GB RAM)", //$NON-NLS-1$
-	};
+	public final static String[] BOXES;
+	static {
+		String descriptors = "Win XP Sun 1.5.0_10 (2 x 3.00GHz - 3GB RAM), SLED 10 Sun 1.5.0_10 (2 x 3.00GHz - 3GB RAM), RHEL 5.0 Sun 6.0_04 (2 x 3.00GHz - 3GB RAM)"; //$NON-NLS-1$
+		StringTokenizer tokenizer = new StringTokenizer(descriptors, ","); //$NON-NLS-1$
+		List boxes = new ArrayList();
+		while (tokenizer.hasMoreTokens()) {
+			boxes.add(tokenizer.nextToken().trim());
+		}
+		BOXES = new String[boxes.size()];
+		boxes.toArray(BOXES);
+	}
 
 	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm"); //$NON-NLS-1$
 
