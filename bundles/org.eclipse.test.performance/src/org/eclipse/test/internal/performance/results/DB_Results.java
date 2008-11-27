@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,8 +50,17 @@ public class DB_Results {
     private String fDBType;	// either "derby" or "cloudscape"
 
     // Store debug info
-    final static StringWriter DEBUG_STR_WRITER = DEBUG ? new StringWriter() : null;
-    final static PrintWriter DEBUG_WRITER = DEBUG ? new PrintWriter(DEBUG_STR_WRITER) : null;
+	final static StringWriter DEBUG_STR_WRITER;
+	final static PrintWriter DEBUG_WRITER;
+	static {
+		if (DEBUG) {
+			DEBUG_STR_WRITER= new StringWriter();
+			DEBUG_WRITER= new PrintWriter(DEBUG_STR_WRITER);
+		} else {
+			DEBUG_STR_WRITER= null;
+			DEBUG_WRITER= null;
+		}
+	}
     
     // Store log info
     final static StringWriter LOG_STR_WRITER = new StringWriter();
@@ -82,7 +91,7 @@ public class DB_Results {
     		if (this.depth > 0) {
     			this.times[this.depth] += System.currentTimeMillis() - this.starts[this.depth];
     			this.depth--;
-    			return;	
+    			return;
     		}
     		for (int i=0; i<this.max; i++) {
 	    		print(this.buffers[i].toString());
@@ -280,7 +289,7 @@ static void queryAllVariations(String configPattern) {
  * @param scenarioResults The scenario results where to store data
  * @param configPattern The configuration pattern concerned by the query
  * @param currentBuild The current build to narrow the query
- * @param baselineBuild The baseline build to narrow the query 
+ * @param baselineBuild The baseline build to narrow the query
  */
 static void queryScenarioFailures(ScenarioResults scenarioResults, String configPattern, BuildResults currentBuild, BuildResults baselineBuild) {
 	getDefault().internalQueryScenarioFailures(scenarioResults, configPattern, currentBuild, baselineBuild);
@@ -293,7 +302,7 @@ static void queryScenarioFailures(ScenarioResults scenarioResults, String config
  * @param scenarioResults The scenario results where to store data
  * @param configPattern The configuration pattern concerned by the query
  * @param currentBuild The current build to narrow the query
- * @param baselineBuild The baseline build to narrow the query 
+ * @param baselineBuild The baseline build to narrow the query
  */
 static void queryScenarioSummaries(ScenarioResults scenarioResults, String configPattern, BuildResults currentBuild, BuildResults baselineBuild) {
 	getDefault().internalQueryScenarioSummaries(scenarioResults, configPattern, currentBuild, baselineBuild);
@@ -303,7 +312,7 @@ static void queryScenarioSummaries(ScenarioResults scenarioResults, String confi
  * Query and store all values for given scenario results
  *
  * @param scenarioResults The scenario results where the values has to be put
- * @param configPattern The pattern of the configuration concerned by the query 
+ * @param configPattern The pattern of the configuration concerned by the query
  *
 */
 static void queryScenarioValues(ScenarioResults scenarioResults, String configPattern) {
@@ -314,7 +323,7 @@ static void queryScenarioValues(ScenarioResults scenarioResults, String configPa
  * Query and store all values for given scenario results
  *
  * @param scenarioResults The scenario results where the values has to be put
- * @param configPattern The pattern of the configuration concerned by the query 
+ * @param configPattern The pattern of the configuration concerned by the query
  * @param lastBuildName Name of the last build on which data were stored locally
  * @param lastBuildDate Date of the last build on which data were stored locally
  *
@@ -498,7 +507,7 @@ private void internalQueryAllComments() {
 		while (result.next()) {
 			int commentID = result.getInt(1);
 			// Ignore kind as there's only one
-			// int commentKind = result.getInt(2); 
+			// int commentKind = result.getInt(2);
 			String comment = result.getString(3);
 			if (comments == null) {
 				comments = new String[commentID+10];

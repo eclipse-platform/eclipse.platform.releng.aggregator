@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,8 +74,8 @@ public class DB {
      */
     public static Scenario[] queryScenarios(String configName, String buildPattern, String scenarioPattern) {
         Variations variations= new Variations();
-        variations.put(PerformanceTestPlugin.CONFIG, configName);       
-        variations.put(PerformanceTestPlugin.BUILD, buildPattern);  
+        variations.put(PerformanceTestPlugin.CONFIG, configName);
+        variations.put(PerformanceTestPlugin.BUILD, buildPattern);
         return queryScenarios(variations, scenarioPattern, PerformanceTestPlugin.BUILD, null);
     }
 
@@ -89,8 +89,8 @@ public class DB {
      */
     public static Scenario[] queryScenarios(String configName, String[] buildPatterns, String scenarioPattern, Dim[] dimensions) {
         Variations variations= new Variations();
-        variations.put(PerformanceTestPlugin.CONFIG, configName);       
-        variations.put(PerformanceTestPlugin.BUILD, buildPatterns);  
+        variations.put(PerformanceTestPlugin.CONFIG, configName);
+        variations.put(PerformanceTestPlugin.BUILD, buildPatterns);
         return queryScenarios(variations, scenarioPattern, PerformanceTestPlugin.BUILD, dimensions);
     }
 
@@ -111,8 +111,8 @@ public class DB {
     /**
      * Returns all Scenarios that match the given variation and scenario pattern.
      * Every Scenario returned contains a series of datapoints specified by the seriesKey.
-     *      
-     * For example to get the datapoints for 
+     * 
+     * For example to get the datapoints for
      * For every Scenario only the specified Diemnsions are retrieved from the database.
      * @param variations
      * @param scenarioPattern
@@ -380,7 +380,7 @@ public class DB {
 	 			    for (int j= 0; j < scalars.length; j++) {
 				        Scalar scalar= scalars[j];
 				        int dim_id= scalar.getDimension().getId();
-				        long value= scalar.getMagnitude();					
+				        long value= scalar.getMagnitude();
 						fSQL.insertScalar(datapoint_id, dim_id, value);
 				    }
 				}
@@ -408,11 +408,11 @@ public class DB {
             return null;
         
         long start = System.currentTimeMillis();
-        if (DEBUG) 
+        if (DEBUG)
         	System.out.print("	- query data points from DB for scenario "+scenarioName+"..."); //$NON-NLS-1$ //$NON-NLS-2$
         ResultSet rs= null;
         try {
-            ArrayList dataPoints= new ArrayList(); 
+            ArrayList dataPoints= new ArrayList();
             rs= fSQL.queryDataPoints(variations, scenarioName);
             if (DEBUG) {
 		        long time = System.currentTimeMillis();
@@ -423,11 +423,11 @@ public class DB {
 	            int datapoint_id= rs.getInt(1);
 	            int step= rs.getInt(2);
 
-	            HashMap map= new HashMap();      
+	            HashMap map= new HashMap();
 	            ResultSet rs2= fSQL.queryScalars(datapoint_id);
 		        while (rs2.next()) {
 	                int dim_id= rs2.getInt(1);
-	                long value= rs2.getBigDecimal(2).longValue();		            
+	                long value= rs2.getBigDecimal(2).longValue();
 	                Dim dim= Dim.getDimension(dim_id);
 	                if (dim != null) {
 	                    if (dimSet == null || dimSet.contains(dim))
@@ -438,7 +438,7 @@ public class DB {
 		            dataPoints.add(new DataPoint(step, map));
 		        
 	            rs2.close();
-	        }			       
+	        }
 	        rs.close();
         	
             int n= dataPoints.size();
@@ -506,7 +506,7 @@ public class DB {
         long start = System.currentTimeMillis();
         if (DEBUG) System.out.print("	- query distinct values from DB for scenario pattern '"+scenarioPattern+"'..."); //$NON-NLS-1$ //$NON-NLS-2$
         ResultSet result= null;
-        try {        	
+        try {
             result= fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
             for (int i= 0; result.next(); i++) {
                 Variations v= new Variations();
@@ -587,7 +587,7 @@ public class DB {
         
         boolean isCloned= false;
         
-        String[] seriesPatterns= null;        
+        String[] seriesPatterns= null;
         Object object= v.get(seriesKey);
         if (object instanceof String[])
             seriesPatterns= (String[]) object;
@@ -699,7 +699,7 @@ public class DB {
         java.util.Properties info= new java.util.Properties();
         
         fDBType= DERBY;	// assume we are using Derby
-        try {            
+        try {
             if (dbloc.startsWith("net://")) { //$NON-NLS-1$
                 // remote
                 fIsEmbedded= false;
@@ -764,7 +764,7 @@ public class DB {
             if (DEBUG) System.out.println("connect succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
-            fSQL= new SQL(fConnection);            
+            fSQL= new SQL(fConnection);
             fConnection.commit();
 
         } catch (SQLException ex) {
@@ -776,9 +776,11 @@ public class DB {
     }
     
     private void disconnect() {
-        if (DEBUG && fStoreCalled)
-            System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
-        if (DEBUG) System.out.println("disconnecting from DB"); //$NON-NLS-1$
+		if (DEBUG) {
+			if (fStoreCalled)
+				System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("disconnecting from DB"); //$NON-NLS-1$
+		}
         if (fSQL != null) {
             try {
                 fSQL.dispose();
