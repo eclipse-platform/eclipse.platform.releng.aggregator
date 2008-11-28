@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.test.internal.performance.results;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.*;
 
 
@@ -31,10 +32,10 @@ public class PerformanceResults extends AbstractResults {
 	private String scenarioPattern;
 	private List components;
 	String[] configNames, sortedConfigNames;
-	private String[] configBoxes, sortedConfigBoxes;
+	String[] configBoxes, sortedConfigBoxes;
 	private String configPattern;
 
-public static PerformanceResults createPerformanceResults(String scenarioPattern, File dataDir, boolean print) {
+public static PerformanceResults createPerformanceResults(String scenarioPattern, File dataDir, PrintStream stream) {
 	List builds = DB_Results.getBuilds(); // Init build names
 	if (DB_Results.LAST_CURRENT_BUILD == null) {
 		System.err.println("Could not find the last current build amongst the following builds list:");	//$NON-NLS-1$
@@ -52,7 +53,7 @@ public static PerformanceResults createPerformanceResults(String scenarioPattern
 		}
 		return null;
 	}
-	PerformanceResults performanceResults = new PerformanceResults(DB_Results.LAST_CURRENT_BUILD, DB_Results.LAST_BASELINE_BUILD, print);
+	PerformanceResults performanceResults = new PerformanceResults(DB_Results.LAST_CURRENT_BUILD, DB_Results.LAST_BASELINE_BUILD, stream);
 	performanceResults.read(null, scenarioPattern, dataDir, DEFAULT_FAILURE_THRESHOLD);
 	return performanceResults;
 }
@@ -61,13 +62,13 @@ public static PerformanceResults createPerformanceResults(String scenarioPattern
 	public static final int DEFAULT_FAILURE_THRESHOLD = 10;
 	int failure_threshold = DEFAULT_FAILURE_THRESHOLD;
 
-public PerformanceResults(String name, String baseline, boolean print) {
+public PerformanceResults(String name, String baseline, PrintStream stream) {
 	super(null, name);
 	this.baselineName = baseline;
 	if (baseline != null) {
 		this.baselinePrefix = baseline.substring(0, baseline.lastIndexOf('_'));
 	}
-	this.print = print;
+	this.printStream = stream;
 }
 
 /**

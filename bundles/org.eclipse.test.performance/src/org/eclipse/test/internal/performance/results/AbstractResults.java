@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -111,7 +112,7 @@ public abstract class AbstractResults implements Comparable {
 	String name;
 	List children;
 	private static boolean NEW_LINE = true;
-	boolean print = false;
+	PrintStream printStream = null;
 
 /**
  * Copy a file to another location.
@@ -305,6 +306,13 @@ public AbstractResults[] getChildren() {
 	return elements;
 }
 
+ComponentResults getComponentResults() {
+	if (this.parent != null) {
+		return this.parent.getComponentResults();
+	}
+	return null;
+}
+
 int getId() {
 	return this.id;
 }
@@ -376,14 +384,14 @@ public int hashCode() {
 
 void printTab() {
 	if (this.parent != null) {
-		if (this.print) System.out.print("\t"); //$NON-NLS-1$
+		if (this.printStream != null) this.printStream.print("\t"); //$NON-NLS-1$
 		this.parent.printTab();
 	}
 }
 void print(String text) {
-	if (this.print) {
+	if (this.printStream != null) {
 		if (NEW_LINE) printTab();
-		System.out.print(text);
+		this.printStream.print(text);
 		NEW_LINE = false;
 	}
 }
@@ -406,9 +414,9 @@ void printGlobalTime(long start, String end) {
 }
 
 void println(String text) {
-	if (this.print) {
+	if (this.printStream != null) {
 		if (NEW_LINE) printTab();
-		System.out.println(text);
+		this.printStream.println(text);
 		NEW_LINE = true;
 	}
 }

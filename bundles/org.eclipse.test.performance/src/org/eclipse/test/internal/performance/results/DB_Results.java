@@ -251,6 +251,30 @@ static String getConfig(int id) {
 	return CONFIGS[id];
 }
 
+/** 
+ * Return the ID of the last baseline build.
+ * 
+ * @return the ID of the last baseline build.
+ */
+public static String getLastBaselineBuild() {
+	if (BUILDS == null) {
+		queryAllVariations("%"); //$NON-NLS-1$
+	}
+	return LAST_BASELINE_BUILD;
+}
+
+/** 
+ * Return the ID of the last baseline build.
+ * 
+ * @return the ID of the last baseline build.
+ */
+public static String getLastCurrentBuild() {
+	if (BUILDS == null) {
+		queryAllVariations("%"); //$NON-NLS-1$
+	}
+	return LAST_CURRENT_BUILD;
+}
+
 /**
  * Returns all the scenarios names read from the database.
  * 

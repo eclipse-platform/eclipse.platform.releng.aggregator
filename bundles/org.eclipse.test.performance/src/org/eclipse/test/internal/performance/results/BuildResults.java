@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ public class BuildResults extends AbstractResults {
 	double[] average, stddev;
 	long[] count;
 	double[][] values;
+	boolean hadValues = false;
 
 	// Comparison information
 	boolean baseline;
@@ -82,6 +83,7 @@ void cleanValues() {
 		}
 	}
 	this.values = null;
+	this.hadValues = true;
 }
 
 /**
@@ -116,11 +118,14 @@ public long getCount() {
 	return this.count[DEFAULT_DIM_INDEX];
 }
 
-/*
- * Return the number of stored values for the given dimension
- *  (see {@link Dim#getId()})
+/**
+ * Return the number of stored values for the given dimension.
+ * 
+ * @param dim_id The id of the dimension (see {@link Dim#getId()})
+ * @return the number of stored values for the given dimension
+ * 
  */
-long getCount(int dim_id) {
+public long getCount(int dim_id) {
 	return this.count[getDimIndex(dim_id)];
 }
 
@@ -181,6 +186,34 @@ public double getDeviation(int dim_id) {
 	return this.stddev[getDimIndex(dim_id)];
 }
 
+/**
+ * Returns the dimensions supported for the current build.
+ * 
+ * @return An array of dimensions.
+ */
+public Dim[] getDimensions() {
+	return this.dimensions;
+}
+
+/**
+ * Returns the kind of summary for the scenario of the current build.
+ * 
+ * @return -1 if the scenario has no summary, 1 if it's a global summary, 0 otherwise.
+ */
+public int getSummaryKind() {
+	return this.summaryKind;
+}
+
+/**
+ * Returns whether the current build had several values stored in database.
+ * 
+ * @return <code>true</code> if the measure was committed several times,
+ * <code>false</code> otherwise.
+ */
+public boolean hadValues() {
+	return this.hadValues;
+}
+
 /*
  * Return the index of the dimension corresponding to the given
  * dimension id (see {@link Dim#getId()})
@@ -208,11 +241,13 @@ public double getError() {
 	return getDeviation() / Math.sqrt(n);
 }
 
-/*
- * Return the error computed while storing values for the given dimension
- *  (see {@link Dim#getId()})
+/**
+ * Return the error computed while storing values for the given dimension.
+ * 
+ * @param dim_id The id of the dimension (see {@link Dim#getId()})
+ * @return the error of the measures stored for the given dimension
  */
-double getError(int dim_id) {
+public double getError(int dim_id) {
 	long n = getCount(dim_id);
 	if (n == 1) return Double.NaN;
 	return getDeviation(dim_id) / Math.sqrt(n);

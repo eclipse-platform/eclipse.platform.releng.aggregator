@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,7 @@ public class ConfigResults extends AbstractResults {
 public ConfigResults(AbstractResults parent, int id) {
 	super(parent, id);
 	this.name = parent.getPerformance().sortedConfigNames[id];
-	this.print = parent.print;
+	this.printStream = parent.printStream;
 }
 
 /*
@@ -97,6 +97,15 @@ public BuildResults getBaselineBuildResults(String buildName) {
 public double getBaselineBuildValue() {
 	if (this.baseline == null) initialize();
 	return this.baseline.getValue();
+}
+
+/**
+ * Returns the configuration description (currently the box name).
+ * 
+ * @return The configuration description (currently the box name).
+ */
+public String getDescription() {
+	return getPerformance().sortedConfigBoxes[this.id];
 }
 
 /**

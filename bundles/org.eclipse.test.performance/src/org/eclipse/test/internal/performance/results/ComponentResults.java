@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2008 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,10 +34,10 @@ public class ComponentResults extends AbstractResults {
 
 public ComponentResults(AbstractResults parent, String name) {
 	super(parent, name);
-	this.print = parent.print;
+	this.printStream = parent.printStream;
 }
 
-ComponentResults getComponent() {
+ComponentResults getComponentResults() {
 	return this;
 }
 
@@ -101,7 +101,7 @@ void read(List scenarios, File dataDir) {
 				first = false;
 			}
 			scenarioResults.parent = this;
-			scenarioResults.print = this.print;
+			scenarioResults.printStream = this.printStream;
 			scenarioResults.read();
 			dirty = true;
 			addChild(scenarioResults, true);
@@ -188,11 +188,11 @@ boolean readData(File dir, List scenarios) throws IOException {
 				scenarioResults.readData(stream, version);
 			} else {
 				scenarioResults.parent = this;
-				scenarioResults.print = this.print;
+				scenarioResults.printStream = this.printStream;
 				scenarioResults.readData(stream, version);
 				addChild(scenarioResults, true);
 			}
-			if (this.print) System.out.print('.');
+			if (this.printStream != null) this.printStream.print('.');
 		}
 		println(""); //$NON-NLS-1$
 
