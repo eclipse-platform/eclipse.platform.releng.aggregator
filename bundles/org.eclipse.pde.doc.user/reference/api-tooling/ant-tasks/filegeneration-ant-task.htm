@@ -11,19 +11,22 @@
 <body>
 <h1> API Tools File Generation Ant Task </h1>
 <h2>Purpose</h2>
-<p>This task runs to generate all files required by Api Tooling inside a binary bundle. This task is currently run
-only during the Eclipse builds to create the .api_description file for all projects that have an Api Tooling nature.
+<p>This task runs to generate all files required by Api Tooling inside a binary bundle. This task is run
+during the Eclipse builds or during the bundle export for all projects
+that have an Api Tooling nature.
 </p>
+<p>Right now, only the file called <code>.api_description</code> is created.</p>
 <h2>Usage</h2>
 <h3>Description</h3>
-<p>The name of the ant task is: <code>apitooling.apifilesgenerator</code>. To be used, the jar file <code>apitooling-ant.jar</code> has to be on the ant
+<p>The name of the ant task is: <code>apitooling.apigeneration</code>. To be used, the jar file <code>apitooling-ant.jar</code> has to be on the ant
 classpath.</p>
 <div style="text-align: left;">
 <pre style="margin-left: 40px">
-<b><font color="#0000ff">&lt;apitooling.apifilesgenerator
+<b><font color="#0000ff">&lt;apitooling.apigeneration
 	projectname=<font color="#008000">"..."</font>
-	projectlocation=<font color="#008000">"..."</font>
-	targetfolder=<font color="#008000">"..."</font>
+	project=<font color="#008000">"..."</font>
+	binary=<font color="#008000">"..."</font>
+	target=<font color="#008000">"..."</font>
 /&gt;</font></b>
 </pre>
 </div>
@@ -36,19 +39,31 @@ classpath.</p>
   </tr>
 <tr>
 <td valign="top">projectname</td>
-<td valign="top">...
+<td valign="top">Set the project name
 </td>
 <td align="center" valign="top">Yes</td>
 </tr>
 <tr>
-<td valign="top">projectlocation</td>
-<td valign="top">...
+<td valign="top">project</td>
+<td valign="top">Set the project location.
+<br><br>This is the folder that contains all the sources for the given project.
+<br><br>The location is set using an absolute path.
 </td>
 <td align="center" valign="top">Yes</td>
 </tr>
 <tr>
-<td valign="top">targetfolder</td>
-<td valign="top">...
+<td valign="top">binary</td>
+<td valign="top">Set the binary location.
+<br><br>This is the folder that contains all the .class files for the given project.
+<br><br>It should be specified using an absolute path.
+</td>
+<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+<td valign="top">target</td>
+<td valign="top">Set the target location.
+<br><br>This is the folder in which the generated files are generated.
+<br><br>The location is set using an absolute path.
 </td>
 <td align="center" valign="top">Yes</td>
 </tr>
@@ -57,12 +72,16 @@ classpath.</p>
 <h3>Examples</h3>
 
 <pre>
-	<b><font color="#0000ff">&lt;apitooling.apifilesgenerator
-		projectname=<font color="#008000">"D:\eclipse\3.4.1\eclipse"</font>
-		projectlocation=<font color="#008000">"D:\eclipse-SDK-I20081118-0800-linux-gtk.tar.gz"</font>
-		targetfolder=<font color="#008000">"D:\report\report.xml"</font>
+	<b><font color="#0000ff">&lt;apitooling.apigeneration
+		projectname=<font color="#008000">"org.eclipse.jdt.core_3.5.0.v_927"</font>
+		project=<font color="#008000">"d:\eclipse\org.eclipse.jdt.core"</font>
+		binary=<font color="#008000">"d:\eclipse\org.eclipse.jdt.core\bin"</font>
+		target=<font color="#008000">"d:\plugins\org.eclipse.jdt.core"</font>
 	/&gt;</font></b>
 </pre>
+<p>This will create a file called <code>.api_description</code> inside the folder <code>d:\plugins\org.eclipse.jdt.core</code> based
+on the source contained in <code>d:\eclipse\org.eclipse.jdt.core</code> and the .class files contained in
+<code>d:\eclipse\org.eclipse.jdt.core\bin</code>.</p>
 
 <p><img src="../../../images/ngrelr.png" alt="Related reference" border="0"></p>
 <p><a href="analysis-ant-task.htm">API Tools Analysis Ant Task</a>
