@@ -57,6 +57,8 @@ public abstract class SourceFile {
 	            return new BatFile(file);
 			} else if (extension.equals("js")) { //$NON-NLS-1$
 	            return new JavaScriptFile(file);
+			} else if (extension.equals("xml")) { //$NON-NLS-1$
+	            return new XmlFile(file);
 			}
         }
 		return null;
@@ -172,11 +174,13 @@ public abstract class SourceFile {
 
 		try {
 			IDocument document= fileBuffer.getDocument();
-			document.replace(0, 0, string);
+			doInsert(string, document);
 			fileBuffer.commit(null, false);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		} catch (CoreException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 			try {
@@ -185,6 +189,10 @@ public abstract class SourceFile {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	protected void doInsert(String comment, IDocument document) throws BadLocationException, CoreException, IOException {
+		document.replace(0, 0, comment);
 	}
 
 	/**
