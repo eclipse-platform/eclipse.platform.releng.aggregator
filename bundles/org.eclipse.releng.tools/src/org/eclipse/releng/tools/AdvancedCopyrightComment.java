@@ -15,9 +15,12 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
 
 public class AdvancedCopyrightComment extends CopyrightComment {
 	private static final String DATE_VAR = "${date}"; //$NON-NLS-1$
@@ -176,40 +179,37 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 	   	    	if (preYearOffset != -1) {
 	   	    		int postYearOffset = body.indexOf(postYear, preYearOffset);
 	   	    		if (postYearOffset != -1) {
-	   	    	   	    // then you know between that is the year
-	   	    			String yearRange = body.substring(preYearOffset+preYear.length(), postYearOffset);
-	   	    	   	    int comma = yearRange.indexOf(","); //$NON-NLS-1$
-	   	    	   	    if (comma == -1) {
-	   	    	   	    	// If there's no comma, look for a hyphen
-	   	    	   	    	comma = yearRange.indexOf("-"); //$NON-NLS-1$
-	   	    	   	    }
-	
-	   	    	   	    String startStr = comma == -1 ? yearRange : yearRange.substring(0, comma);
-	   	    	   	    String endStr = comma == -1 ? null : yearRange.substring(comma + 1);
-	
-	   	    	   	    int startYear = -1;
-	   	    	   	    if (startStr != null)
+		   	    		int preYearEnd= preYearOffset + preYear.length();
+		   	    		
+		   	    		// match "2000", "2000,2001", "2000-2001", all with arbitrary whitespace
+		   	    		Pattern yearsPattern= Pattern.compile("\\s*(\\d+)(?:\\s*[,-]\\s*(\\d+))?"); //$NON-NLS-1$
+		   	    		
+						Matcher yearsMatcher= yearsPattern.matcher(body.substring(preYearEnd));
+		   	    		if (yearsMatcher.find()) {
+		   	    	   	    int startYear = -1;
 	   	    		   	    try {
-	   	    		   	        startYear = Integer.parseInt(startStr.trim());
+	   	    		   	        startYear = Integer.parseInt(yearsMatcher.group(1));
 	   	    		   	    } catch(NumberFormatException e) {
 	   	    		   	        // do nothing
 	   	    		   	    }
-	
-	   	    	   	    int endYear = -1;
-	   	    	   	    if (endStr != null) {
-	   	    	   	        try {
-	   	    	   	            endYear = Integer.parseInt(endStr.trim());
-	   	    	   	        } catch(NumberFormatException e) {
-	   	    	   	            // do nothing
-	   	    	   	        }
-	   	    	   	    }
-	   	    	   	    // save the copyright comment's contents before and after the year so that
-	   	    	   	    // the comment will remain untouched rather than overwritten if the template is
-	   	    	   	    // almost the same
-	   	    	   	    String pre = body.substring(0, preYearOffset+preYear.length());
-	   	    	   	    String post = body.substring(postYearOffset);
-	   	    	   	     
-	   	    	   	    copyright = new AdvancedCopyrightComment(commentStyle, startYear, endYear, null, pre, post);
+		
+		   	    	   	    int endYear = -1;
+		   	    	   	    String endYearString= yearsMatcher.group(2);
+							if (endYearString != null) {
+		   	    	   	        try {
+		   	    	   	            endYear = Integer.parseInt(endYearString);
+		   	    	   	        } catch(NumberFormatException e) {
+		   	    	   	            // do nothing
+		   	    	   	        }
+		   	    	   	    }
+		   	    	   	    // save the copyright comment's contents before and after the year(s) so that
+		   	    	   	    // the comment will remain untouched rather than overwritten if the template is
+		   	    	   	    // almost the same
+		   	    	   	    String pre = body.substring(0, preYearEnd);
+		   	    	   	    String post = body.substring(preYearEnd + yearsMatcher.group().length());
+		   	    	   	     
+		   	    	   	    copyright = new AdvancedCopyrightComment(commentStyle, startYear, endYear, null, pre, post);
+		   	    		}
 	   	    		}
 	   	    	}
 	   	    }
