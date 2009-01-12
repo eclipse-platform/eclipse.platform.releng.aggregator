@@ -13,6 +13,7 @@ package org.eclipse.test.internal.performance.results;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.db.DB;
 
@@ -35,9 +35,11 @@ import org.eclipse.test.internal.performance.db.DB;
  */
 public class DB_Results {
     
-    static final boolean DEBUG = false;
+    private static final String[] EMPTY_LIST = new String[0];
+	static final boolean DEBUG = false;
     static final boolean LOG = false;
-    
+	static final String DEFAULT_SCENARIO_PATTERN = "org.eclipse.%.test%"; //$NON-NLS-1$
+
     // the two supported DB types
     private static final String DERBY= "derby"; //$NON-NLS-1$
     private static final String CLOUDSCAPE= "cloudscape"; //$NON-NLS-1$
@@ -46,7 +48,7 @@ public class DB_Results {
     
     private Connection fConnection;
     private SQL_Results fSQL;
-    private boolean fIsEmbedded;
+//    private boolean fIsEmbedded;
     private String fDBType;	// either "derby" or "cloudscape"
 
     // Store debug info
@@ -163,6 +165,8 @@ public class DB_Results {
 	                }
 	            );
             }
+        } else if (fgDefault.fSQL == null) {
+        	fgDefault.connect();
         }
         return fgDefault;
     }
@@ -208,11 +212,14 @@ static String getBuildName(int id) {
  * 
  * @return The list of all builds names matching the scenario pattern used while reading data
  */
-public static List getBuilds() {
+public static String[] getBuilds() {
 	if (BUILDS == null) {
 		queryAllVariations("%"); //$NON-NLS-1$
 	}
-	return Arrays.asList(BUILDS);
+	if (BUILDS_LENGTH == 0) return EMPTY_LIST;
+	String[] builds = new String[BUILDS_LENGTH];
+	System.arraycopy(BUILDS, 0, builds, 0, BUILDS_LENGTH);
+	return builds;
 }
 
 /**
@@ -237,8 +244,12 @@ static String getComponentNameFromScenario(String scenarioName) {
  *
  * @return A list of component names matching the given pattern
  */
-public static List getComponents() {
-	return Arrays.asList(COMPONENTS);
+public static String[] getComponents() {
+	if (COMPONENTS == null) return EMPTY_LIST;
+	int length = COMPONENTS.length;
+	String[] components = new String[length];
+	System.arraycopy(COMPONENTS, 0, components, 0, length);
+	return components;
 }
 
 /**
@@ -252,15 +263,32 @@ static String getConfig(int id) {
 }
 
 /** 
- * Return the ID of the last baseline build.
+ * Return the ID of the last baseline build before the given date.
  * 
- * @return the ID of the last baseline build.
+ * @param date The date the baseline must be run before. If <code>null</code>
+ * 	return the last baseline build stored in the DB.
+ * 
+ * @return the ID of the last baseline build before the given date or
+ * 	<code>null</code> if none was run before it...
  */
-public static String getLastBaselineBuild() {
+public static String getLastBaselineBuild(String date) {
 	if (BUILDS == null) {
 		queryAllVariations("%"); //$NON-NLS-1$
 	}
-	return LAST_BASELINE_BUILD;
+	if (date == null) return LAST_BASELINE_BUILD;
+	String lastBaselineBuild = null;
+	for (int i=0; i<BUILDS_LENGTH; i++) {
+		String build = BUILDS[i];
+		if (build.startsWith(AbstractResults.VERSION_REF)) {
+			String buildDate = build.substring(build.indexOf('_')+1);
+			if (buildDate.compareTo(date) < 0) {
+				if (lastBaselineBuild == null || build.compareTo(lastBaselineBuild) > 0) {
+					lastBaselineBuild = build;
+				}
+			}
+		}
+	}
+	return lastBaselineBuild;
 }
 
 /** 
@@ -286,6 +314,27 @@ public static List getScenarios() {
 }
 
 /**
+ * Get all scenarios read from database matching the default pattern.
+ * Note that all scenarios are returned if the pattern is <code>null</code>.
+ *
+ * @return A list of all scenario names matching the default pattern
+ */
+public static Map queryAllScenarios() {
+	return getDefault().internalQueryBuildScenarios(DEFAULT_SCENARIO_PATTERN, null);
+}
+
+/**
+ * Get all scenarios read from database matching a given pattern.
+ * Note that all scenarios are returned if the pattern is <code>null</code>.
+ *
+ * @param scenarioPattern The pattern of the requested scenarios
+ * @return A list of scenario names matching the given pattern
+ */
+static Map queryAllScenarios(String scenarioPattern) {
+	return getDefault().internalQueryBuildScenarios(scenarioPattern, null);
+}
+
+/**
  * Get all scenarios read from database matching a given pattern.
  * Note that all scenarios are returned if the pattern is <code>null</code>.
  *
@@ -307,29 +356,15 @@ static void queryAllVariations(String configPattern) {
 }
 
 /**
- * Get all the failures from DB for a given scenario, configuration
- * pattern and builds.
- * 
- * @param scenarioResults The scenario results where to store data
- * @param configPattern The configuration pattern concerned by the query
- * @param currentBuild The current build to narrow the query
- * @param baselineBuild The baseline build to narrow the query
- */
-static void queryScenarioFailures(ScenarioResults scenarioResults, String configPattern, BuildResults currentBuild, BuildResults baselineBuild) {
-	getDefault().internalQueryScenarioFailures(scenarioResults, configPattern, currentBuild, baselineBuild);
-}
-
-/**
- * Get all summaries from DB for a given scenario, configuration
- * pattern and builds.
+ * Get all summaries from DB for a given scenario and configuration pattern
  *
  * @param scenarioResults The scenario results where to store data
  * @param configPattern The configuration pattern concerned by the query
- * @param currentBuild The current build to narrow the query
- * @param baselineBuild The baseline build to narrow the query
+ * @param builds All builds to get summaries, if <code>null</code>, then all DB
+ * 	builds will be concerned.
  */
-static void queryScenarioSummaries(ScenarioResults scenarioResults, String configPattern, BuildResults currentBuild, BuildResults baselineBuild) {
-	getDefault().internalQueryScenarioSummaries(scenarioResults, configPattern, currentBuild, baselineBuild);
+static void queryScenarioSummaries(ScenarioResults scenarioResults, String configPattern, String[] builds) {
+	getDefault().internalQueryScenarioSummaries(scenarioResults, configPattern, builds);
 }
 
 /**
@@ -391,7 +426,7 @@ private void connect() {
 	try {
 		if (dbloc.startsWith("net://")) { //$NON-NLS-1$
 			// remote
-			fIsEmbedded = false;
+//			fIsEmbedded = false;
 			// connect over network
 			if (DEBUG)
 				DEBUG_WRITER.println("Trying to connect over network..."); //$NON-NLS-1$
@@ -403,7 +438,7 @@ private void connect() {
 			url = dbloc + '/' + dbname;
 		} else if (dbloc.startsWith("//")) { //$NON-NLS-1$
 			// remote
-			fIsEmbedded = false;
+//			fIsEmbedded = false;
 			// connect over network
 			if (DEBUG)
 				DEBUG_WRITER.println("Trying to connect over network..."); //$NON-NLS-1$
@@ -419,9 +454,9 @@ private void connect() {
 				System.setProperty("derby.storage.fileSyncTransactionLog", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			// embedded
-			fIsEmbedded = true;
 			try {
 				Class.forName("org.apache.derby.jdbc.EmbeddedDriver"); //$NON-NLS-1$
+//				fIsEmbedded = true;
 			} catch (ClassNotFoundException e) {
 				Class.forName("com.ihost.cs.jdbc.CloudscapeDriver"); //$NON-NLS-1$
 				fDBType = CLOUDSCAPE;
@@ -493,6 +528,7 @@ private void disconnect() {
 		fConnection = null;
 	}
 
+	/*
 	if (fIsEmbedded) {
 		try {
 			DriverManager.getConnection("jdbc:" + fDBType + ":;shutdown=true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -502,6 +538,7 @@ private void disconnect() {
 				e.printStackTrace();
 		}
 	}
+	*/
 }
 
 /*
@@ -586,7 +623,11 @@ private void internalQueryAllVariations(String configPattern) {
 				storeBuildName(buildName);
 			}
 		}
-		System.arraycopy(BUILDS, 0, BUILDS = new String[BUILDS_LENGTH], 0, BUILDS_LENGTH);
+		if (BUILDS_LENGTH == 0) {
+			BUILDS = EMPTY_LIST;
+		} else {
+			System.arraycopy(BUILDS, 0, BUILDS = new String[BUILDS_LENGTH], 0, BUILDS_LENGTH);
+		}
 		for (int i=0; i<MAX_CONFIGS; i++) {
 			if (CONFIGS[i] == null) {
 				System.arraycopy(CONFIGS, 0, CONFIGS = new String[i], 0, i);
@@ -613,12 +654,16 @@ private Map internalQueryBuildScenarios(String scenarioPattern, String buildName
 	if (DEBUG) {
 		DEBUG_WRITER.print("	- DB query all scenarios"); //$NON-NLS-1$
 		if (scenarioPattern != null) DEBUG_WRITER.print(" with pattern "+scenarioPattern); //$NON-NLS-1$
-		DEBUG_WRITER.print(" for build: "+buildName); //$NON-NLS-1$
+		if (buildName != null) DEBUG_WRITER.print(" for build: "+buildName); //$NON-NLS-1$
 	}
 	ResultSet result = null;
 	Map allScenarios = new HashMap();
 	try {
-		result = fSQL.queryBuildScenarios(scenarioPattern, buildName);
+		if (buildName == null) {
+			result = fSQL.queryBuildAllScenarios(scenarioPattern);
+		} else {
+			result = fSQL.queryBuildScenarios(scenarioPattern, buildName);
+		}
 		int previousId = -1;
 		List scenarios = null;
 		List scenariosNames = new ArrayList();
@@ -668,12 +713,13 @@ private void internalQueryScenarioValues(ScenarioResults scenarioResults, String
 			tokenizer.nextToken(); 													// 'build'
 			String buildName = tokenizer.nextToken();					// 'I20070615-1200'
 			tokenizer.nextToken();													// 'config'
-			int config_id = getConfigId(tokenizer.nextToken()); 		// 'eclipseperfwin2_R3.3'
+			int config_id = getConfigId(tokenizer.nextToken()); 		// 'eclipseperflnx3'
 			int build_id = getBuildId(buildName);
 			ResultSet rs2 = fSQL.queryDimScalars(dp_id);
 			while (rs2.next()) {
 				int dim_id = rs2.getInt(1);
-				long value = rs2.getBigDecimal(2).longValue();
+				BigDecimal decimalValue = rs2.getBigDecimal(2);
+				long value = decimalValue.longValue();
 				if (build_id >= 0) { // build id may be negative (i.e. not stored in the array) if new run starts while we're getting results
 					scenarioResults.setValue(build_id, dim_id, config_id, step, value);
 				}
@@ -694,89 +740,31 @@ private void internalQueryScenarioValues(ScenarioResults scenarioResults, String
 	}
 }
 
-private void internalQueryScenarioFailures(ScenarioResults scenarioResults, String config, BuildResults currentBuild, BuildResults baselineBuild) {
+private void internalQueryScenarioSummaries(ScenarioResults scenarioResults, String config, String[] builds) {
 	if (fSQL == null) return;
 	long start = System.currentTimeMillis();
-	if (DEBUG) DEBUG_WRITER.print("	- DB query all failures for config pattern: "+config+" for scenario : "+scenarioResults.getShortName()+"..."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	ResultSet result = null;
-	try {
-		String currentBuildName = currentBuild.getName();
-		String baselineBuildName = baselineBuild.getName();
-		result = fSQL.queryScenarioFailures(scenarioResults.getId(), config, currentBuildName, baselineBuildName);
-		while (result.next()) {
-			String variation = result.getString(1);
-			String failure = result.getString(2);
-			StringTokenizer tokenizer = new StringTokenizer(variation, "=|"); //$NON-NLS-1$
-			tokenizer.nextToken(); 									// 'build'
-			String buildName = tokenizer.nextToken();	// 'I20070615-1200'
-			if (buildName.equals(currentBuildName)) {
-				currentBuild.setFailure(failure);
-			} else if (buildName.equals(baselineBuildName)) {
-				baselineBuild.setFailure(failure);
-			}
-		}
-	} catch (SQLException e) {
-		PerformanceTestPlugin.log(e);
-
-	} finally {
-		if (result != null) {
-			try {
-				result.close();
-			} catch (SQLException e1) {
-				// ignored
-			}
-		}
-		if (DEBUG) DEBUG_WRITER.println("	-> done in " + (System.currentTimeMillis() - start) + "ms]"); //$NON-NLS-1$ //$NON-NLS-2$
+	if (DEBUG) {
+		DEBUG_WRITER.print("	- DB query all summaries for scenario '"+scenarioResults.getShortName()+"' of '"+config+"' config"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
-}
-
-private void internalQueryScenarioSummaries(ScenarioResults scenarioResults, String config, BuildResults currentBuild, BuildResults baselineBuild) {
-	if (fSQL == null) return;
-	long start = System.currentTimeMillis();
-	if (DEBUG) DEBUG_WRITER.print("	- DB query all summaries for config: "+config+" for scenario: "+scenarioResults.getShortName()+"..."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	internalQueryAllComments();
 	ResultSet result = null;
 	try {
-		String cBuildName = currentBuild.getName();
-		String currentBuildName = cBuildName;
-		String bBuildName = baselineBuild.getName();
-		String baselineBuildName = bBuildName;
 		int scenarioID = scenarioResults.getId();
 		// First try to get summaries of elapsed process dimension
-		result = fSQL.queryScenarioSummaries(scenarioID, config, cBuildName, bBuildName, InternalDimensions.ELAPSED_PROCESS.getId());
+		result = fSQL.queryScenarioSummaries(scenarioID, config, builds);
 		while (result.next()) {
-			String variation = result.getString(1);
+			String variation = result.getString(1); //  something like "|build=I20070615-1200||config=eclipseperfwin2_R3.3||jvm=sun|"
 			int summaryKind = result.getShort(2);
 			int comment_id = result.getInt(3);
+			int dim_id = result.getInt(4);
 			StringTokenizer tokenizer = new StringTokenizer(variation, "=|"); //$NON-NLS-1$
-			tokenizer.nextToken(); 									// 'build'
-			String buildName = tokenizer.nextToken();	// 'I20070615-1200'
-			BuildResults buildResults = null;
-			if (buildName.equals(currentBuildName)) {
-				buildResults = currentBuild;
-			} else if (buildName.equals(baselineBuildName)) {
-				buildResults = baselineBuild;
-			}
-			if (buildResults != null) {
-				buildResults.setSummary(summaryKind, COMMENTS[comment_id]);
-			}
-		}
-		// Update scenario comment if any
-		result = fSQL.queryScenarioSummaries(scenarioID, config, cBuildName, bBuildName, 0);
-		while (result.next()) {
-			String variation = result.getString(1);
-			int comment_id = result.getInt(3);
-			StringTokenizer tokenizer = new StringTokenizer(variation, "=|"); //$NON-NLS-1$
-			tokenizer.nextToken(); 									// 'build'
-			String buildName = tokenizer.nextToken();	// 'I20070615-1200'
-			BuildResults buildResults = null;
-			if (buildName.equals(currentBuildName)) {
-				buildResults = currentBuild;
-			} else if (buildName.equals(baselineBuildName)) {
-				buildResults = baselineBuild;
-			}
-			if (buildResults != null) {
-				buildResults.setComment(COMMENTS[comment_id]);
+			tokenizer.nextToken(); 													// 'build'
+			String buildName = tokenizer.nextToken();					// 'I20070615-1200'
+			tokenizer.nextToken();													// 'config'
+			int config_id = getConfigId(tokenizer.nextToken()); 		// 'eclipseperflnx3'
+			int build_id = getBuildId(buildName);
+			if (build_id >= 0) {
+				scenarioResults.setInfos(config_id, build_id, dim_id==0?-1:summaryKind, COMMENTS[comment_id]);
 			}
 		}
 	} catch (SQLException e) {
@@ -797,17 +785,17 @@ private void internalQueryScenarioSummaries(ScenarioResults scenarioResults, Str
  * Store a component in the dynamic list. The list is sorted alphabetically.
  */
 private int storeComponent(String component) {
-	if (COMPONENTS == null) {
-		COMPONENTS = new String[SUPPORTED_COMPONENTS.length];
+	if (COMPONENTS== null) {
+		COMPONENTS= new String[1];
+		COMPONENTS[0] = component;
+		return 0;
 	}
-	int idx = Arrays.binarySearch(SUPPORTED_COMPONENTS, component);
-	if (idx < 0) {
-		throw new RuntimeException("Unexpected component name: "+component); //$NON-NLS-1$
-	}
-	if (COMPONENTS[idx] == null) {
-		COMPONENTS[idx] = SUPPORTED_COMPONENTS[idx];
-	}
-	return idx;
+	int idx = Arrays.binarySearch(COMPONENTS, component);
+	if (idx >= 0) return idx;
+	int length = COMPONENTS.length;
+	System.arraycopy(COMPONENTS, 0, COMPONENTS = new String[length+1], 0, length);
+	COMPONENTS[length] = component;
+	return length;
 }
 
 /*
@@ -844,8 +832,14 @@ private int storeBuildName(String build) {
 	}
 	BUILDS_LENGTH++;
 	if (isVersion) {
-		if (LAST_BASELINE_BUILD == null || build.compareTo(LAST_BASELINE_BUILD) > 0) {
+		if (LAST_BASELINE_BUILD == null || LAST_CURRENT_BUILD == null) {
 			LAST_BASELINE_BUILD = build;
+		} else {
+			String buildDate = LAST_CURRENT_BUILD.substring(1, 9)+LAST_CURRENT_BUILD.substring(10, LAST_CURRENT_BUILD.length());
+			String baselineDate = LAST_BASELINE_BUILD.substring(LAST_BASELINE_BUILD.indexOf('_')+1);
+			if (build.compareTo(LAST_BASELINE_BUILD) > 0 && baselineDate.compareTo(buildDate) < 0) {
+				LAST_BASELINE_BUILD = build;
+			}
 		}
 	} else {
 		if (LAST_CURRENT_BUILD == null || build.substring(1).compareTo(LAST_CURRENT_BUILD.substring(1)) >= 0) {

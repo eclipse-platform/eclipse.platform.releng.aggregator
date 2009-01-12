@@ -14,6 +14,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.StringTokenizer;
 
 
@@ -39,11 +41,29 @@ public ScenarioResults(int id, String name, String shortName) {
 /*
  * Complete results with additional database information.
  */
-void completeResults() {
+void completeResults(String lastBuildName) {
+	String[] builds = DB_Results.getBuilds();
+	class BuildDateComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+	        String s1 = (String) o1;
+	        String s2 = (String) o2;
+	        return AbstractResults.getBuildDate(s1).compareTo(AbstractResults.getBuildDate(s2));
+	    }
+	}
+	BuildDateComparator comparator = new BuildDateComparator();
+	Arrays.sort(builds, comparator);
+	int idx = Arrays.binarySearch(builds, lastBuildName, comparator);
+	if (idx < 0) {
+		builds = null;
+	} else {
+		int size = builds.length - ++idx;
+		System.arraycopy(builds, idx, builds = new String[size], 0, size);
+	}
+//	String[] builds = null;
 	int size = size();
 	for (int i=0; i<size; i++) {
 		ConfigResults configResults = (ConfigResults) this.children.get(i);
-		configResults.completeResults();
+		configResults.completeResults(builds);
 	}
 }
 
@@ -212,15 +232,15 @@ void read() {
 	int size = size();
 	for (int i=0; i<size; i++) {
 		ConfigResults configResults = (ConfigResults) this.children.get(i);
-		configResults.completeResults();
+		configResults.completeResults(null);
 	}
-	println("failures and summaries ("+(System.currentTimeMillis()-start)+"ms)."); //$NON-NLS-1$ //$NON-NLS-2$
+	println("summaries ("+(System.currentTimeMillis()-start)+"ms)."); //$NON-NLS-1$ //$NON-NLS-2$
 }
 
 /*
  * Read data from a local file
  */
-void readData(DataInputStream stream, int version) throws IOException {
+void readData(DataInputStream stream) throws IOException {
 
 	// Read data stored locally
 	int size = stream.readInt();
@@ -231,7 +251,7 @@ void readData(DataInputStream stream, int version) throws IOException {
 			configResults = new ConfigResults(this, config_id);
 			addChild(configResults, true);
 		}
-		configResults.readData(stream, version);
+		configResults.readData(stream);
 	}
 }
 
@@ -251,13 +271,24 @@ boolean readNewData(String lastBuildName) throws IOException {
 		    // should not happen
 	    }
 		long start = System.currentTimeMillis();
-		print("	+ scenario '"+getShortName()+"': "); //$NON-NLS-1$ //$NON-NLS-2$
+		print("	+ scenario '"+getShortName()+"': values..."); //$NON-NLS-1$ //$NON-NLS-2$
 		DB_Results.queryScenarioValues(this, configPattern, lastBuildName, lastBuildTime);
 		print(timeString(System.currentTimeMillis()-start));
-		print (" (values), "); //$NON-NLS-1$
 		return true;
 	}
 	return false;
+}
+
+/*
+ * Set value from database information.
+ */
+void setInfos(int config_id, int build_id, int summaryKind, String comment) {
+	ConfigResults configResults = (ConfigResults) getResults(config_id);
+	if (configResults == null) {
+		configResults = new ConfigResults(this, config_id);
+		addChild(configResults, true);
+	}
+	configResults.setInfos(build_id, summaryKind, comment);
 }
 
 /*

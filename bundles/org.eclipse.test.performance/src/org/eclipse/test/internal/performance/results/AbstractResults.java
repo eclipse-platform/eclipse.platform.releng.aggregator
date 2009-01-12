@@ -40,8 +40,6 @@ public abstract class AbstractResults implements Comparable {
 
 	private static final long ONE_HOUR = 3600000L;
 
-	public static final int LOCAL_DATA_VERSION = 1;
-
 	/**
 	 * The list of supported dimensions.
 	 * <p>
@@ -195,9 +193,11 @@ public static String timeString(long time) {
 	NumberFormat format = NumberFormat.getInstance();
 	format.setMaximumFractionDigits(1);
 	StringBuffer buffer = new StringBuffer();
-	if (time < 100) { // less than 0.1s
+	if (time == 0) {
+		// print nothing
+	} if (time < 100) { // less than 0.1s
 		buffer.append(time);
-		if (time > 0) buffer.append("ms"); //$NON-NLS-1$
+		buffer.append("ms"); //$NON-NLS-1$
 	} else if (time < 1000) { // less than 1s
 		if ((time%100) != 0) {
 			format.setMaximumFractionDigits(2);

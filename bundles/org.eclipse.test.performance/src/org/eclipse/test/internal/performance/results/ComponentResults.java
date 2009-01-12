@@ -125,51 +125,20 @@ boolean readData(File dir, List scenarios) throws IOException {
 	if (!dir.exists()) return true;
 	File dataFile = new File(dir, getName()+".dat");	//$NON-NLS-1$
 	if (!dataFile.exists()) return true;
-	DB_Results.queryAllVariations(getPerformance().getConfigurationsPattern());
+	PerformanceResults performanceResults = getPerformance();
+	DB_Results.queryAllVariations(performanceResults.getConfigurationsPattern());
 	DataInputStream stream = new DataInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
 	boolean valid = false, dirty = false;
 	int size = 0;
 	try {
 		// Read local file info
 		print(" - read local files info"); //$NON-NLS-1$
-		String lastBuildName = stream.readUTF();
-		// First field is either the build name or, since 3.5, the version number
-		int version = 0;
-		boolean newVersion = true;
-		File versionDataDir = null;
-		if (lastBuildName.startsWith("version")) { //$NON-NLS-1$
-			int index = lastBuildName.indexOf('=');
-			if (index > 0) {
-				try {
-					version = Integer.parseInt(lastBuildName.substring(index+1));
-					newVersion = version != LOCAL_DATA_VERSION;
-				}
-				catch (Exception ex) {
-					// skip all exception
-				}
-			}
-			// next field is the build name
-			lastBuildName = stream.readUTF();
-		}
+		String lastBuildName = stream.readUTF(); // first string is the build name
 		
 		// Update last build name if local data file has a more recent one
 		String lastBuildDate = getBuildDate(lastBuildName);
-		if (lastBuildDate.compareTo(getPerformance().getBuildDate()) > 0) {
-			getPerformance().name = lastBuildName;
-		}
-
-		// Save old version files if necessary
-		if (newVersion) {
-			StringBuffer versionName = version < 10
-				? new StringBuffer("v0") //$NON-NLS-1$
-				: new StringBuffer("v"); //$NON-NLS-1$
-			versionName.append(version);
-			versionDataDir = new File(dir, versionName.toString());
-			if (!versionDataDir.exists()) versionDataDir.mkdir();
-			if (versionDataDir.exists())  {
-				File oldDataFile = new File(versionDataDir, getName()+".dat"); //$NON-NLS-1$
-				copyFile(dataFile, oldDataFile);
-			}
+		if (performanceResults.canUpdateName() && lastBuildDate.compareTo(performanceResults.getBuildDate()) > 0) {
+			performanceResults.updatedName = lastBuildName;
 		}
 
 		// Next field is the number of scenarios for the component
@@ -185,11 +154,11 @@ boolean readData(File dir, List scenarios) throws IOException {
 				// hence, creates a fake scenario to read the numbers and skip to the next scenario
 				scenarioResults = new ScenarioResults(-1, null, null);
 				scenarioResults.parent = this;
-				scenarioResults.readData(stream, version);
+				scenarioResults.readData(stream);
 			} else {
 				scenarioResults.parent = this;
 				scenarioResults.printStream = this.printStream;
-				scenarioResults.readData(stream, version);
+				scenarioResults.readData(stream);
 				addChild(scenarioResults, true);
 			}
 			if (this.printStream != null) this.printStream.print('.');
@@ -209,16 +178,13 @@ boolean readData(File dir, List scenarios) throws IOException {
 			long start = System.currentTimeMillis();
 			boolean newData = scenarioResults.readNewData(lastBuildName);
 			long time = System.currentTimeMillis()-start;
-			if (newData || newVersion) {
+			if (newData) {
 				dirty = true;
-				if (!newData) {
-					print("	+ scenario '"+scenarioResults.getShortName()+"': "); //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				print(", infos..."); //$NON-NLS-1$
 				start = System.currentTimeMillis();
-				scenarioResults.completeResults();
+				scenarioResults.completeResults(lastBuildName);
 				time = System.currentTimeMillis()-start;
-				print(timeString(time));
-				println(" (infos)"); //$NON-NLS-1$
+				println(timeString(time));
 			}
 			if (dirty && (System.currentTimeMillis() - readTime) > 300000) { // save every 5mn
 				writeData(dir, true, true);
@@ -227,9 +193,6 @@ boolean readData(File dir, List scenarios) throws IOException {
 			}
 		}
 		valid = true;
-		if (newVersion && versionDataDir != null) {
-			println("	=> previous data file has been saved to "+versionDataDir); //$NON-NLS-1$
-		}
 	} finally {
 		stream.close();
 		if (valid) {
@@ -245,7 +208,7 @@ boolean readData(File dir, List scenarios) throws IOException {
 /*
  * Write the component results data to the file '<component name>.dat' in the given directory.
  */
-public void writeData(File dir, boolean temp, boolean dirty) {
+void writeData(File dir, boolean temp, boolean dirty) {
 	if (!dir.exists() && !dir.mkdirs()) {
 		System.err.println("can't create directory "+dir); //$NON-NLS-1$
 	}
@@ -274,7 +237,6 @@ public void writeData(File dir, boolean temp, boolean dirty) {
 	try {
 		DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		int size = this.children.size();
-		stream.writeUTF("version="+LOCAL_DATA_VERSION); //$NON-NLS-1$
 		stream.writeUTF(getPerformance().getName());
 		stream.writeInt(size);
 		for (int i=0; i<size; i++) {

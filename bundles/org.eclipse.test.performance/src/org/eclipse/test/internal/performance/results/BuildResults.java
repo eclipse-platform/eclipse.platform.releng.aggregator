@@ -25,6 +25,7 @@ import org.eclipse.test.internal.performance.data.Dim;
  */
 public class BuildResults extends AbstractResults {
 
+	private static final double IMPOSSIBLE_VALUE = -1E6;
 	// Build information
 	String date;
 	String comment;
@@ -352,7 +353,7 @@ boolean match(String pattern) {
 /*
  * Read the build results data from the given stream.
  */
-void readData(DataInputStream stream, int version) throws IOException {
+void readData(DataInputStream stream) throws IOException {
 	long timeBuild = stream.readLong();
 	this.date = new Long(timeBuild).toString();
 	byte kind = stream.readByte();
@@ -388,22 +389,14 @@ void readData(DataInputStream stream, int version) throws IOException {
 		this.stddev[i] = stream.readDouble();
 	}
 	this.id = DB_Results.getBuildId(this.name);
-	switch (version) {
-		case 0:
-			// no other information were stored in version 0
-			break;
-		default:
-			// extra infos (summary, failure and comment) are also stored in local data files
-			this.summaryKind = stream.readInt();
-			String str = stream.readUTF();
-			if (str.length() > 0) {
-				this.failure = str;
-			}
-			str = stream.readUTF();
-			if (str.length() > 0) {
-				this.comment = str;
-			}
-			break;
+
+	// read summary
+	this.summaryKind = stream.readInt();
+	
+	// read comment
+	String str = stream.readUTF();
+	if (str.length() > 0) {
+		this.comment = str;
 	}
 }
 
@@ -448,7 +441,7 @@ void setValue(int dim_id, int step, long value) {
 			// init average numbers with an impossible value
 			// to clearly identify whether it's already set or not
 			// when several measures are made for the same build
-			this.average[i] = -1;
+			this.average[i] = IMPOSSIBLE_VALUE;
 		}
 	} else {
 		length = this.dimensions.length;
@@ -466,18 +459,18 @@ void setValue(int dim_id, int step, long value) {
 	}
 	switch (step) {
 		case InternalPerformanceMeter.AVERAGE:
-			if (this.average[idx] != -1) {
+			if (this.average[idx] != IMPOSSIBLE_VALUE) {
 				if (values == null) {
 					values = new double[length][];
 					values[idx] = new double[2];
 					values[idx][0] = this.average[idx];
 					values[idx][1] = value;
-					this.average[idx] = -1;
+					this.average[idx] = IMPOSSIBLE_VALUE;
 				} else if (this.values[idx] == null) {
 					values[idx] = new double[2];
 					values[idx][0] = this.average[idx];
 					values[idx][1] = value;
-					this.average[idx] = -1;
+					this.average[idx] = IMPOSSIBLE_VALUE;
 				}
 			} else if (this.values != null && this.values[idx] != null) {
 				int vLength = values[idx].length;
@@ -561,7 +554,6 @@ void write(DataOutputStream stream) throws IOException {
 
 	// Write extra infos (summary, failure and comment)
 	stream.writeInt(this.summaryKind);
-	stream.writeUTF(this.failure == null ? "" : this.failure) ; //$NON-NLS-1$
 	stream.writeUTF(this.comment == null ? "" : this.comment) ; //$NON-NLS-1$
 }
 

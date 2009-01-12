@@ -40,11 +40,10 @@ public ConfigResults(AbstractResults parent, int id) {
 /*
  * Complete results with additional database information.
  */
-void completeResults() {
+void completeResults(String[] builds) {
 	if (this.baseline == null || this.current == null) initialize();
 	ScenarioResults scenarioResults = (ScenarioResults) this.parent;
-	DB_Results.queryScenarioFailures(scenarioResults, this.name, this.current, this.baseline);
-	DB_Results.queryScenarioSummaries(scenarioResults, this.name, this.current, this.baseline);
+	DB_Results.queryScenarioSummaries(scenarioResults, this.name, builds);
 }
 
 /**
@@ -316,14 +315,21 @@ private void initialize() {
 	// Get performance results builds name
 	PerformanceResults perfResults = getPerformance();
 	String baselineBuildName = perfResults.getBaselineName();
+	String baselineDate = getBuildDate(baselineBuildName);
 	String currentBuildName = perfResults.getName();
 
 	// Set baseline and current builds
+	BuildResults lastBaseline = null;
 	int size = size();
 	for (int i=0; i<size; i++) {
 		BuildResults buildResults = (BuildResults) this.children.get(i);
 		if (buildResults.values != null) {
 			buildResults.cleanValues();
+		}
+		if (buildResults.isBaseline()) {
+			if (lastBaseline == null || baselineDate.compareTo(buildResults.getDate()) >= 0) {
+				lastBaseline = buildResults;
+			}
 		}
 		if (buildResults.getName().equals(baselineBuildName)) {
 			this.baseline = buildResults;
@@ -334,7 +340,7 @@ private void initialize() {
 		}
 	}
 	if (this.baseline == null) {
-		this.baseline = (BuildResults) this.children.get(0);
+		this.baseline = (lastBaseline == null) ? (BuildResults) this.children.get(0) : lastBaseline;
 	}
 	if (this.current == null) {
 		this.current = (BuildResults) this.children.get(size()-1);
@@ -431,13 +437,26 @@ public List lastNightlyBuildNames(int n) {
 /*
  * Read all configuration builds results data from the given stream.
  */
-void readData(DataInputStream stream, int version) throws IOException {
+void readData(DataInputStream stream) throws IOException {
 	int size = stream.readInt();
 	for (int i=0; i<size; i++) {
 		BuildResults buildResults = new BuildResults(this);
-		buildResults.readData(stream, version);
+		buildResults.readData(stream);
 		addChild(buildResults, true);
 	}
+}
+
+/*
+ * Set the configuration value from database information
+ */
+void setInfos(int build_id, int summaryKind, String comment) {
+	BuildResults buildResults = (BuildResults) getResults(build_id);
+	if (buildResults == null) {
+		buildResults = new BuildResults(this, build_id);
+		addChild(buildResults, true);
+	}
+	buildResults.summaryKind = summaryKind;
+	buildResults.comment = comment;
 }
 
 /*

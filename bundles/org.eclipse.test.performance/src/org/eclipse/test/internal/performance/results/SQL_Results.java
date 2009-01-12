@@ -24,7 +24,7 @@ import org.eclipse.test.internal.performance.db.SQL;
  */
 public class SQL_Results extends SQL {
 
-	private PreparedStatement queryBuildScenarios, queryScenarioFailures, queryScenarioSummaries, queryAllComments, queryScenariosBuilds, queryScenarioDataPoints, queryScenarioTimestampDataPoints, queryDimScalars, queryAllVariations;
+	private PreparedStatement queryBuildAllScenarios, queryBuildScenarios, queryScenarioSummaries, queryAllComments, queryScenariosBuilds, queryScenarioDataPoints, queryScenarioTimestampDataPoints, queryDimScalars, queryAllVariations;
 
 
 SQL_Results(Connection con) throws SQLException {
@@ -36,8 +36,8 @@ protected void dispose() throws SQLException {
 	super.dispose();
 	if (this.queryBuildScenarios != null)
 		this.queryBuildScenarios.close();
-	if (this.queryScenarioFailures != null)
-		this.queryScenarioFailures.close();
+	if (this.queryBuildAllScenarios != null)
+		this.queryBuildAllScenarios.close();
 	if (this.queryScenarioSummaries != null)
 		this.queryScenarioSummaries.close();
 	if (this.queryAllComments != null)
@@ -81,6 +81,24 @@ ResultSet queryAllVariations(String configPattern) throws SQLException {
 	ResultSet resultSet =  this.queryAllVariations.executeQuery();
 	if (DB_Results.DEBUG) DB_Results.DEBUG_WRITER.print(")=" + (System.currentTimeMillis() - start) + "ms]"); //$NON-NLS-1$ //$NON-NLS-2$
 	return resultSet;
+}
+
+/**
+ * Query all scenarios corresponding to the default scenario pattern
+ *
+ * @param scenarioPattern The pattern for all the concerned scenarios
+ * @return Set of the query result
+ * @throws SQLException
+ */
+ResultSet queryBuildAllScenarios(String scenarioPattern) throws SQLException {
+	if (this.queryBuildAllScenarios == null) {
+		String statement = "select distinct SCENARIO.ID, SCENARIO.NAME , SCENARIO.SHORT_NAME from SCENARIO where " + //$NON-NLS-1$
+			"SCENARIO.NAME LIKE ? " + //$NON-NLS-1$
+			"order by SCENARIO.NAME"; //$NON-NLS-1$
+		this.queryBuildAllScenarios = fConnection.prepareStatement(statement);
+	}
+	this.queryBuildAllScenarios.setString(1, scenarioPattern);
+	return this.queryBuildAllScenarios.executeQuery();
 }
 
 /**
@@ -145,7 +163,7 @@ ResultSet queryScenarioTimestampDataPoints(String config, int scenarioID, String
 		this.queryScenarioTimestampDataPoints = fConnection.prepareStatement(statement);
 	}
 	this.queryScenarioTimestampDataPoints.setInt(1, scenarioID);
-	Timestamp timestamp = new Timestamp(lastBuildTime+(12*3600L*1000));
+	Timestamp timestamp = new Timestamp(lastBuildTime+(5*3600L*1000)); // create a time-stamp 5h after the given build time
 	this.queryScenarioTimestampDataPoints.setTimestamp(2, timestamp);
 	ResultSet resultSet =  this.queryScenarioTimestampDataPoints.executeQuery();
 	if (DB_Results.LOG) DB_Results.LOG_WRITER.ends(")"); //$NON-NLS-1$
@@ -179,55 +197,54 @@ ResultSet queryScenarioDataPoints(String config, int scenarioID) throws SQLExcep
 }
 
 /**
- * Query all failures from database for a given scenario,
- * configuration and builds.
- *
- * @param config The name of the concerned configuration
- * @param scenarioID The id of the scenario
- * @param currentBuildName The name of the current build
- * @param baselineBuildName The name of the baseline build
- * @return A set of the query result
- * @throws SQLException
- */
-ResultSet queryScenarioFailures(int scenarioID, String config, String currentBuildName, String baselineBuildName) throws SQLException {
-	if (this.queryScenarioFailures == null) {
-		this.queryScenarioFailures = fConnection.prepareStatement("select KEYVALPAIRS, MESSAGE from VARIATION, FAILURE where " + //$NON-NLS-1$
-			"(KEYVALPAIRS like ? or KEYVALPAIRS like ?) and " + //$NON-NLS-1$
-			"VARIATION_ID = VARIATION.ID and " + //$NON-NLS-1$
-			"SCENARIO_ID = ? " + //$NON-NLS-1$
-			"ORDER BY VARIATION_ID"); //$NON-NLS-1$
-	}
-	this.queryScenarioFailures.setString(1, "|build=" + currentBuildName+ "||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	this.queryScenarioFailures.setString(2, "|build=" + baselineBuildName+ "||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	this.queryScenarioFailures.setInt(3, scenarioID);
-	return this.queryScenarioFailures.executeQuery();
-}
-
-/**
  * Query all summaries from database for a given scenario,
  * configuration and builds.
  *
  * @param config The name of the concerned configuration
  * @param scenarioID The id of the scenario
- * @param currentBuildName The name of the current build
- * @param baselineBuildName The name of the baseline build
- * @param dim_id The dim id
+ * @param builds The list of builds to get summaries. When <code>null</code>
+ * 	summaries for all DB builds will be read.
+ * 
  * @return Set of the query result
  * @throws SQLException
  */
-ResultSet queryScenarioSummaries(int scenarioID, String config, String currentBuildName, String baselineBuildName, int dim_id) throws SQLException {
+ResultSet queryScenarioSummaries(int scenarioID, String config, String[] builds) throws SQLException {
+	int length = builds==null ? 0 : builds.length;
+	String buildPattern;
+	switch (length) {
+		case 0:
+			buildPattern = "%"; //$NON-NLS-1$
+			break;
+		case 1:
+			buildPattern = builds[0];
+			break;
+		default:
+			int idx = 0;
+			StringBuffer buffer = new StringBuffer();
+			loop: while (builds[0].length() > idx) {
+				char ch = builds[0].charAt(idx);
+				for (int i=1; i<length; i++) {
+					if (builds[i].length() <= idx || builds[i].charAt(idx) != ch) {
+						break loop;
+					}
+				}
+				buffer.append(ch);
+				idx++;
+			}
+			buffer.append("%"); //$NON-NLS-1$
+			buildPattern = buffer.toString();
+			break;
+	}
 	if (this.queryScenarioSummaries == null) {
-		this.queryScenarioSummaries= fConnection.prepareStatement("select KEYVALPAIRS, IS_GLOBAL, COMMENT_ID from VARIATION, SUMMARYENTRY where " + //$NON-NLS-1$
-			"(KEYVALPAIRS like ? or KEYVALPAIRS like ?) and " + //$NON-NLS-1$
+		this.queryScenarioSummaries= fConnection.prepareStatement("select KEYVALPAIRS , IS_GLOBAL, COMMENT_ID, DIM_ID from VARIATION, SUMMARYENTRY where " + //$NON-NLS-1$
+			"KEYVALPAIRS like ? and " + //$NON-NLS-1$
 			"VARIATION_ID = VARIATION.ID and " + //$NON-NLS-1$
 			"SCENARIO_ID = ? and " + //$NON-NLS-1$
-			"DIM_ID = ? " + //$NON-NLS-1$
-			" order by VARIATION_ID"); //$NON-NLS-1$
+			"(DIM_ID = "+InternalDimensions.ELAPSED_PROCESS.getId()+" or DIM_ID = 0)" + //$NON-NLS-1$ //$NON-NLS-2$
+			" order by VARIATION_ID, DIM_ID"); //$NON-NLS-1$
 	}
-	this.queryScenarioSummaries.setString(1, "|build=" + currentBuildName+ "||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	this.queryScenarioSummaries.setString(2, "|build=" + baselineBuildName+ "||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	this.queryScenarioSummaries.setInt(3, scenarioID);
-	this.queryScenarioSummaries.setInt(4, dim_id);
+	this.queryScenarioSummaries.setString(1, "|build="+buildPattern+"||config="+ config + "||jvm=sun|"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	this.queryScenarioSummaries.setInt(2, scenarioID);
 	return this.queryScenarioSummaries.executeQuery();
 }
 
