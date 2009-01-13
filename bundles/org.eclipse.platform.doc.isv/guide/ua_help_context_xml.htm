@@ -13,7 +13,7 @@
 <h2>Describing and packaging context-sensitive help content</h2>
 
 <p>
-Content-sensitive help is described by associating the context id declared in
+Context-sensitive help is described by associating the context id declared in
 the UI code with a description and list of links to related topics or commands
 in the online help. These associations are made inside an XML file located
 within the plug-in that contains the topics in question. You can create any number
@@ -44,10 +44,7 @@ present the context help information in the Help view.
 <p>
 Once the contexts have been described in the XML file (or files), you are ready
 to refer to the context files in your plug-in manifest. Note that the context id
-is not fully qualified above. This is allowed, as long as the context file is
-contributed in the manifest of the plug-in that defined the context id. In other
-words, if the context id is not fully qualified, it is resolved to the id of the
-plug-in that contributed the XML file.
+is not qualified. 
 </p>
 
 <p>A plug-in containing context files contributes them using the <b><a href="../reference/extension-points/org_eclipse_help_contexts.html">org.eclipse.help.contexts</a></b>
@@ -67,16 +64,11 @@ related plug-in.</p>
 <pre>   &lt;extension point=&quot;org.eclipse.help.contexts&quot;&gt;
       &lt;contexts file=&quot;myContextHelp.xml&quot; <b>plugin</b>=&quot;com.example.helpExample&quot;  /&gt;
    &lt;/extension&gt;</pre>
-
-<p>As you can see, you have a lot of flexibility in organizing your contexts
-into one or more files contained in one or more plug-ins.&nbsp; The main
-consideration is that the context ids in the files resolve correctly.&nbsp; If
-you do not fully qualify a context id, then you must contribute the context XML
-files in the plug-in that declared the context ids.&nbsp; If you use fully
-qualified context ids in your context XML file, then you have complete
-flexibility in the location of your XML files and which plug-in contributes the
-contexts.</p>
-
+   
+<p>When a context id is declared in an extension point the Eclipse help system will create a fully qualified
+context id of the form <code>&lt;plug-in name&gt;.&lt;context id&gt;</code> and use this when matching against the context
+ids used in the Java source. &lt;plug-in name&gt; is the value of the "plugin" attribute, or if not specified the
+name of the plug-in in which the org.eclipse.help.contexts extension is declared.
 
 <h4>
 Context-sensitive help from multiple plug-ins</h4>
@@ -91,10 +83,8 @@ plug-in to declare its contexts independently.&nbsp; The end user will see the
 merged context-sensitive help content for all plug-ins that contributed contexts for the
 widget's id.</p>
 
-
-<p>Note that the fully
-qualified context id for the widget must be used, since none of the documentation plug-ins
-declared the context id.&nbsp; When multiple plug-ins contribute 
+<p>Note that the plugin attribute must be used in the extensions if multiple plugins will 
+contribute to the same context.&nbsp; When multiple plug-ins contribute 
 context-sensitive help for
 the same context ID, the content defined in the plug-in that declared the
 context (the UI plug-in) is shown first.&nbsp; Additional descriptions and links
