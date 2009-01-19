@@ -45,5 +45,17 @@ This had the side effect of accidentally exposing internal constants in an API c
 Clients that reference any of these constants will see a compilation error in the source and will need to replace the reference 
 to the constant with a string literal of the same value. See Bug 251472 for more information</p>
 
+<!-- ############################################## -->
+
+<h2>3. <a name="introConstants">IResourceChangeEvent.getResource() may return null for PRE_REFRESH events</a></h2>
+<p><strong>What is affected: </strong>Clients that use IResourceChangeListeners and listen on IResourceChangeEvent#PRE_REFRESH events</p>
+<p><strong>Description:</strong> In release 3.4, clients were notified with PRE_REFRESH events only during a single project
+refresh. Since Eclipse 3.5, PRE_REFRESH events have been fired during every workspace refresh. For a workspace refresh 
+IResourceChangeEvent.getResource() returns null. To determine the scope of the refresh (a project or the workspace), 
+IResourceChangeEvent.getSource() should be used.</p>
+<p><strong>Action required:</strong> 
+Clients that listens on PRE_REFRESH events should use IResourceChangeEvent.getSource() instead of
+IResourceChangeEvent.getResource() to determine the scope of the refresh. See Bug 255325 for more information.</p>
+
 </body>
 </html>
