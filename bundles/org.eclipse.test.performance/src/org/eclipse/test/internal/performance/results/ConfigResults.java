@@ -76,6 +76,7 @@ public BuildResults getBaselineBuildResults() {
  * 	or <code>null</code> if none was found.
  */
 public BuildResults getBaselineBuildResults(String buildName) {
+	if (this.baseline == null) initialize();
 	int size = this.children.size();
 	String buildDate = getBuildDate(buildName);
 	for (int i=size-1; i>=0; i--) {
@@ -84,7 +85,7 @@ public BuildResults getBaselineBuildResults(String buildName) {
 			return buildResults;
 		}
 	}
-	return null;
+	return this.baseline;
 	
 }
 
@@ -343,7 +344,12 @@ private void initialize() {
 		this.baseline = (lastBaseline == null) ? (BuildResults) this.children.get(0) : lastBaseline;
 	}
 	if (this.current == null) {
-		this.current = (BuildResults) this.children.get(size()-1);
+		int idx = size() - 1;
+		BuildResults previous = (BuildResults) this.children.get(idx--);
+		while (idx >= 0 && previous.isBaseline()) {
+			previous = (BuildResults) this.children.get(idx--);
+		}
+		this.current = previous;
 	}
 
 	// Set delta between current vs. baseline and the corresponding error
