@@ -749,7 +749,7 @@ public class BuildTests extends TestCase {
 	// private String buildCommandLine(String source, String destination, String
 	// options, String output) {
 	private String buildCommandLine(String source, String destination,
-			String output) {
+			String output, String option) {
 
 		Bundle bundle = Platform.getBundle("org.eclipse.equinox.launcher");
 		URL u = null;
@@ -776,6 +776,12 @@ public class BuildTests extends TestCase {
 		command += " -new " + source;
 		command += " -old " + destination;
 		command += " -output " + output;
+		if (option != null) {
+			command += " -option " + option;
+		}
+		
+		System.out.println("commmand "+ command);
+		System.out.println("option "+ option);
 
 		return command;
 	}
@@ -885,7 +891,9 @@ public class BuildTests extends TestCase {
 			assertTrue(msg, msg == null);
 			return;
 		}
-
+		
+		String compareOptions = properties.getProperty("compare.options");
+				
 		/*
 		 * String outputFileName =
 		 * Platform.getInstallLocation().getURL().getPath() + ".." +
@@ -901,7 +909,7 @@ public class BuildTests extends TestCase {
 		 */
 
 		String command = buildCommandLine(compareNewPath, compareOldPath,
-				outputFileName);
+				outputFileName, compareOptions);
 
 		// System.out.println("command "+ command);
 
