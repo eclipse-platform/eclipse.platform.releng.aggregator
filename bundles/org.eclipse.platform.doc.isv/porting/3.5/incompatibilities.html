@@ -21,6 +21,7 @@
   <li><a href="#launchConfigurationLocation">ILaunchConfiguration.getLocation() can return null</a></li>
   <li><a href="#introConstants">CustomizableIntroPart no longer implements IIntroConstants</a></li>
   <li><a href="#preRefresh">IResourceChangeEvent.getResource() may return null for PRE_REFRESH events</a></li>
+  <li><a href="#modelSynchronizeParticipant">ModelSynchronizeParticipant#refreshSchedule is no longer accessible</a></li>
 </ol>
 
 <hr>
@@ -57,6 +58,18 @@ IResourceChangeEvent.getSource() should be used.</p>
 <p><strong>Action required:</strong> 
 Clients that listens on PRE_REFRESH events should use IResourceChangeEvent.getSource() instead of
 IResourceChangeEvent.getResource() to determine the scope of the refresh. See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=255325">bug 255325</a> for more information.</p>
+
+<!-- ############################################## -->
+
+<h2>4. <a name="modelSynchronizeParticipant">ModelSynchronizeParticipant#refreshSchedule is no longer accessible</a></h2>
+<p><strong>What is affected: </strong>Clients that reference ModelSynchronizeParticipant#refreshSchedule</p>
+<p><strong>Description:</strong> In release 3.4 and earlier, ModelSynchronizeParticipant#refreshSchedule was exposed 
+and clients could refer to it. #refreshSchedule is declared as an internal type and referring it is illegal. 
+Since Eclipse 3.5, #refreshSchedule is private.
+</p>
+<p><strong>Action required:</strong> 
+Clients that illegally refer to ModelSynchronizeParticipant#refreshSchedule will see a compilation error in the source 
+and will need to remove references to the field.</p>
 
 </body>
 </html>
