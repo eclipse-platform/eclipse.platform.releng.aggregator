@@ -289,7 +289,7 @@ public class BuildTests extends TestCase {
 
 	private String getExec() {
 
-		return new File("chkpw1012.exe").getPath();
+		return new File("chkpw1102.exe").getPath();
 	}
 
 	/**
