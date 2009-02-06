@@ -21,7 +21,7 @@
   <li><a href="#launchConfigurationLocation">ILaunchConfiguration.getLocation() can return null</a></li>
   <li><a href="#introConstants">CustomizableIntroPart no longer implements IIntroConstants</a></li>
   <li><a href="#preRefresh">IResourceChangeEvent.getResource() may return null for PRE_REFRESH events</a></li>
-  <li><a href="#modelSynchronizeParticipant">ModelSynchronizeParticipant#refreshSchedule is no longer accessible</a></li>
+  <li><a href="#teamPluginLeaks">Methods and fields that leaks internal types are no longer accessible</a></li>
   <li><a href="#commonNavigatorLink">CommonNavigator#IS_LINKING_ENABLED_PROPERTY has changed its value</a></li>
 </ol>
 
@@ -62,15 +62,23 @@ IResourceChangeEvent.getResource() to determine the scope of the refresh. See <a
 
 <!-- ############################################## -->
 
-<h2>4. <a name="modelSynchronizeParticipant">ModelSynchronizeParticipant#refreshSchedule is no longer accessible</a></h2>
-<p><strong>What is affected: </strong>Clients that reference ModelSynchronizeParticipant#refreshSchedule</p>
-<p><strong>Description:</strong> In release 3.4 and earlier, ModelSynchronizeParticipant#refreshSchedule was exposed 
-and clients could refer to it. #refreshSchedule is declared as an internal type and referring it is illegal. 
-Since Eclipse 3.5, #refreshSchedule is private.
+<h2>4. <a name="teamPluginLeaks">Methods and fields that leaks internal types are no longer accessible</a></h2>
+<p><strong>What is affected: </strong>Clients that refer to ModelSynchronizeParticipant#refreshSchedule or call one of:
+<ul>
+<li>ThreeWaySynchronizer#flush</li>
+<li>SubscriberParticipant#getRefreshSchedule</li>
+<li>SubscriberParticipant#setRefreshSchedule</li>
+<li>SubscriberParticipant#getSubscriberSyncInfoCollector</li>
+</ul>
+</p>
+<p><strong>Description:</strong> In release 3.4 and earlier, ModelSynchronizeParticipant#refreshSchedule 
+and methods mentioned above were made accessible. #refreshSchedule is declared as an internal type 
+and referring it is illegal. Calling the methods was also illegal since attributes or returned parameters 
+were internal types. Since Eclipse 3.5, the field and methods are no longer accessible.
 </p>
 <p><strong>Action required:</strong> 
-Clients that illegally refer to ModelSynchronizeParticipant#refreshSchedule will see a compilation error in the source 
-and will need to remove references to the field.</p>
+Clients that illegally call the methods or refer ModelSynchronizeParticipant#refreshSchedule 
+will see a compilation error in the source and will need to remove all the calls and references.</p>
 
 <!-- ############################################## -->
 
