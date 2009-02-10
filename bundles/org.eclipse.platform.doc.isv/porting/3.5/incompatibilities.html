@@ -22,7 +22,9 @@
   <li><a href="#introConstants">CustomizableIntroPart no longer implements IIntroConstants</a></li>
   <li><a href="#preRefresh">IResourceChangeEvent.getResource() may return null for PRE_REFRESH events</a></li>
   <li><a href="#teamPluginLeaks">Methods and fields that leaks internal types are no longer accessible</a></li>
+  <li><a href="#commonNavigatorLabel">Common Navigator Label Provider Configuration has Changed</a></li>
   <li><a href="#commonNavigatorLink">CommonNavigator#IS_LINKING_ENABLED_PROPERTY has changed its value</a></li>
+  <li><a href="#commonNavigatorInitialInput">CommonNavigator#getInitialInput() has changed its return type</a></li>
 </ol>
 
 <hr>
@@ -82,7 +84,40 @@ will see a compilation error in the source and will need to remove all the calls
 
 <!-- ############################################## -->
 
-<h2>5. <a name="commonNavigatorLink">CommonNavigator#IS_LINKING_ENABLED_PROPERTY has changed its value</a></h2>
+<h2>5. <a name="commonNavigatorLabel">Common Navigator Label Provider Configuration has Changed</a></h2>
+<p><strong>What is affected: </strong>Clients that use the possibleChildren or triggerPoints expressions 
+in their org.eclipse.ui.navigator.navigatorContent extension points.</p>
+<p><strong>Description:</strong> In release 3.4 and earlier, the label provider used to resolve an object
+was obtained first from a cache and then from (contrary to the documentation), a content extension matching 
+the possibleChildren expression.  The cache was populated with objects added using a content extension 
+found matching the triggerPoints expression when resolving a getChildren() or getElements() call in
+the content provider.  All of the child objects returned were added to the cache and associated with the
+content extension with the parent's matching triggerPoints expression.  (Confusing enough for you?).
+In release 3.5 the label provider is obtained using the content extension associated with the triggerPoints
+expression.  Thus every object that needs a label, must have a corresponding triggerPoints expression
+(as has always been specified by the documentation).  
+</p>
+<p><strong>Action required:</strong>
+Add any missing objects to the triggerPoints expression for the content extensions that provide
+the desired label providers.  When testing your application, check your log, and check that sorting works
+correctly.  It's possible that there may be objects in the viewer that have no corresponding triggerPoints
+expression (which though was illegal according to the documentation, was tolerated by the code).
+This is no longer tolerated, and if the common sorter encounters a missing object, it will record 
+and error in the log with enough information for you to be able to add it to your triggerPoints expression.
+</p>
+<p>
+If you wish to maintain compatibility with both 3.4 and 3.5 systems, don't remove anything from your
+existing expressions, just add them to meet the 3.5 requirements.
+</p>
+<p>
+Any code that refers to CommonNavigator#IS_LINKING_ENABLED_PROPERTY must be recompiled to get the correct value.
+See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=252293">bug 252293</a> and 
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=262675">bug 262675</a> for more information.
+</p>
+
+<!-- ############################################## -->
+
+<h2>6. <a name="commonNavigatorLink">CommonNavigator#IS_LINKING_ENABLED_PROPERTY has changed its value</a></h2>
 <p><strong>What is affected: </strong>Clients that reference CommonNavigator#IS_LINKING_ENABLED_PROPERTY</p>
 <p><strong>Description:</strong> In release 3.4 and earlier, CommonNavigator#IS_LINKING_ENABLED_PROPERTY had
 the value of 1.  This value was the same as the IWorkbenchPartConstants#PROP_TITLE which caused confusion when
@@ -91,6 +126,21 @@ not conflict with other property values.
 </p>
 <p><strong>Action required:</strong> 
 Any code that refers to CommonNavigator#IS_LINKING_ENABLED_PROPERTY must be recompiled to get the correct value.
+</p>
+
+<!-- ############################################## -->
+
+<h2>7. <a name="commonNavigatorInitialInput">CommonNavigator#getInitialInput() has changed its return type</a></h2>
+<p><strong>What is affected: </strong>Clients that illegally subclass CommonNavigator</p>
+<p><strong>Description:</strong> In release 3.4 and earlier, CommonNavigator#getInitialInput() returned a type of
+IAdaptable, in release 3.5 this has been changed to by Object to allow greater flexibility.  Subclassing
+the CommonNavigator is supported only in the 3.5 release, however this note is included because we are aware
+that many clients have subclassed CommonNavigator in prior releases.
+</p>
+<p><strong>Action required:</strong> 
+If you override CommonNavigator#getInitialInput(), you will need to fix and recompile your code to use the
+new return type of Object.
+See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=143430">bug 143430</a> for more information.
 </p>
 
 </body>
