@@ -10,16 +10,37 @@
  *******************************************************************************/
 package org.eclipse.test;
 
-import java.io.*;
-import java.util.*;
-import junit.framework.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Dictionary;
+import java.lang.reflect.Modifier;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestListener;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters
@@ -52,7 +73,7 @@ public class EclipseTestRunner implements TestListener {
      */
     public static final int ERRORS= 2;
     
-    protected static final String SUITE_METHODNAME= "suite";	
+    private static final String SUITE_METHODNAME= "suite";	
 	/**
 	 * The current test result
 	 */
@@ -64,7 +85,7 @@ public class EclipseTestRunner implements TestListener {
 	/**
      * The corresponding testsuite.
      */
-    private Test testClass;
+    private Test fSuite;
     /**
      * Formatters from the command line.
      */
@@ -186,14 +207,17 @@ public class EclipseTestRunner implements TestListener {
         return runner.getRetCode();
 	}
 
+    /**
+     *   
+     */
     public EclipseTestRunner(JUnitTest test, String testPluginName, boolean haltOnError, boolean haltOnFailure) {
         fJunitTest= test;
         fTestPluginName= testPluginName;
         fHaltOnError= haltOnError;
         fHaltOnFailure= haltOnFailure;
-         
+        
         try {
-            testClass= getTest(test.getName());
+            fSuite= getTest(test.getName());
         } catch(Exception e) {
             fRetCode = ERRORS;
             fException = e;
@@ -204,27 +228,56 @@ public class EclipseTestRunner implements TestListener {
 	 * Returns the Test corresponding to the given suite. 
 	 */
 	protected Test getTest(String suiteClassName) throws TestFailedException {
-		Bundle bundle = Platform.getBundle("org.junit");
-		if (bundle == null)
+		if (suiteClassName.length() <= 0) {
+			clearStatus();
 			return null;
-		String bundleVersion = (String) bundle.getHeaders().get(Constants.BUNDLE_VERSION);
-		if (bundleVersion == null)
-			return null;
-		Version version;
+		}
+		Class testClass= null;
 		try {
-			version = Version.parseVersion(bundleVersion);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			testClass= loadSuiteClass(suiteClassName);
+		} catch (ClassNotFoundException e) {
+		    if (e.getCause() != null) {
+		        runFailed(e.getCause());
+		    }
+			String clazz= e.getMessage();
+			if (clazz == null) 
+				clazz= suiteClassName;
+			runFailed("Class not found \""+clazz+"\"");
+			return null;
+		} catch(Exception e) {
+		    runFailed(e);
 			return null;
 		}
-		switch (version.getMajor()) {
-			case 3 :
-				return EclipseJunit3TestHelper.getTest(this, suiteClassName);
-			default : //assume '4'
-				return EclipseJunit4TestHelper.getTest(this, suiteClassName);
+		Method suiteMethod= null;
+		try {
+			suiteMethod= testClass.getMethod(SUITE_METHODNAME, new Class[0]);
+	 	} catch(Exception e) {
+	 		// try to extract a test suite automatically
+			clearStatus();			
+			return new TestSuite(testClass);
 		}
+	 	if (!Modifier.isStatic(suiteMethod.getModifiers())) {
+	 		runFailed("suite() method must be static");
+	 		return null;
+	 	}
+		Test test= null;
+		try {
+			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
+			if (test == null)
+				return test;
+		} 
+		catch (InvocationTargetException e) {
+			runFailed("Failed to invoke suite():" + e.getTargetException().toString());
+			return null;
+		}
+		catch (IllegalAccessException e) {
+			runFailed("Failed to invoke suite():" + e.toString());
+			return null;
+		}
+		clearStatus();
+		return test;
 	}
-	
+
 	protected void runFailed(String message) throws TestFailedException {
 		System.err.println(message);
 		throw new TestFailedException(message);
@@ -234,16 +287,22 @@ public class EclipseTestRunner implements TestListener {
       e.printStackTrace();
       throw new TestFailedException(e);
     }
-    
-    /*
-	 * Returns the Bundle specified by testPluginName
+
+	protected void clearStatus() {
+	}
+
+	/**
+	 * Loads the class either with the system class loader or a
+	 * plugin class loader if a plugin name was specified
 	 */
-    private Bundle getTestBundle() {
+	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		if (fTestPluginName == null)
-			return null;
+			return Class.forName(suiteClassName);
         Bundle bundle = Platform.getBundle(fTestPluginName);
-        if (bundle == null)
-        	return null;
+        if (bundle == null) {
+            throw new ClassNotFoundException(suiteClassName, new Exception("Could not find plugin \""
+                    + fTestPluginName + "\""));
+        }
         
         //is the plugin a fragment?
 		Dictionary headers = bundle.getHeaders();
@@ -262,21 +321,6 @@ public class EclipseTestRunner implements TestListener {
 			bundle = host;
 		} 
 
-        return bundle;
-    }
-
-	/**
-	 * Loads the class either with the system class loader or a
-	 * plugin class loader if a plugin name was specified
-	 */
-	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
-		if (fTestPluginName == null)
-			return Class.forName(suiteClassName);
-        Bundle bundle = getTestBundle();
-        if (bundle == null) {
-            throw new ClassNotFoundException(suiteClassName, new Exception("Could not find plugin \""
-                    + fTestPluginName + "\""));
-        }
         return bundle.loadClass(suiteClassName);
 	}
 	
@@ -307,7 +351,7 @@ public class EclipseTestRunner implements TestListener {
 
             try {
 //            	pm.snapshot(1); // before
-            	testClass.run(fTestResult);
+                fSuite.run(fTestResult);
             } finally {
  //           	pm.snapshot(2); // after  	
                 fSystemError.close();
