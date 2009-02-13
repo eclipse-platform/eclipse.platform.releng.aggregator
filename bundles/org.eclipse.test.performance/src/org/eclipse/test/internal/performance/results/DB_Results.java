@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -328,10 +328,13 @@ public static Map queryAllScenarios() {
  * Note that all scenarios are returned if the pattern is <code>null</code>.
  *
  * @param scenarioPattern The pattern of the requested scenarios
- * @return A list of scenario names matching the given pattern
+ * @return A map of all scenarios matching the given pattern.
+ * 	The map keys are component names and values are the scenarios list for
+ * 	each component.
  */
 static Map queryAllScenarios(String scenarioPattern) {
-	return getDefault().internalQueryBuildScenarios(scenarioPattern, null);
+	String pattern = scenarioPattern==null ? DEFAULT_SCENARIO_PATTERN : scenarioPattern;
+	return getDefault().internalQueryBuildScenarios(pattern, null);
 }
 
 /**
@@ -365,17 +368,6 @@ static void queryAllVariations(String configPattern) {
  */
 static void queryScenarioSummaries(ScenarioResults scenarioResults, String configPattern, String[] builds) {
 	getDefault().internalQueryScenarioSummaries(scenarioResults, configPattern, builds);
-}
-
-/**
- * Query and store all values for given scenario results
- *
- * @param scenarioResults The scenario results where the values has to be put
- * @param configPattern The pattern of the configuration concerned by the query
- *
-*/
-static void queryScenarioValues(ScenarioResults scenarioResults, String configPattern) {
-	getDefault().internalQueryScenarioValues(scenarioResults, configPattern, null, -1);
 }
 
 /**

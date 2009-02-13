@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,9 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -63,7 +66,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible configurations.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#read(File)}.
+	 * (see {@link PerformanceResults#read(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
 	 */
 	public final static String[] CONFIGS;
 
@@ -71,7 +74,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible test boxes.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#read(File)}.
+	 * (see {@link PerformanceResults#read(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
 	 * </p>
 	 * Note that this is a copy of the the property "eclipse.perf.config.descriptors"
 	 * defined in org.eclipse.releng.eclipsebuilder/eclipse/helper.xml file
@@ -214,11 +217,7 @@ public static String timeString(long time) {
 	} else if (time < ONE_HOUR) {  // less than 1h
 		buffer.append(time/ONE_MINUTE).append("mn "); //$NON-NLS-1$
 		long seconds = time%ONE_MINUTE;
-		if ((seconds%1000) == 0) {
-			buffer.append(seconds/1000);
-		} else {
-			buffer.append(format.format(seconds/1000.0));
-		}
+		buffer.append(seconds/1000);
 		buffer.append("s"); //$NON-NLS-1$
 	} else {  // more than 1h
 		long h = time / ONE_HOUR;
@@ -226,14 +225,54 @@ public static String timeString(long time) {
 		long m = (time % ONE_HOUR) / ONE_MINUTE;
 		buffer.append(m).append("mn "); //$NON-NLS-1$
 		long seconds = m%ONE_MINUTE;
-		if ((seconds%1000) == 0) {
-			buffer.append(seconds/1000);
-		} else {
-			buffer.append(format.format(seconds/1000.0));
-		}
+		buffer.append(seconds/1000);
 		buffer.append("s"); //$NON-NLS-1$
 	}
 	return buffer.toString();
+}
+
+public static String timeChrono(long time) {
+	if (time < 1000) { // less than 1s
+		return "00:00:00"; //$NON-NLS-1$
+	}
+	StringBuffer buffer = new StringBuffer();
+	int seconds = (int) (time / 1000);
+	if (seconds < 60) {
+		buffer.append("00:00:"); //$NON-NLS-1$
+		if (seconds < 10) buffer.append('0');
+		buffer.append(seconds);
+	} else {
+		int minutes = seconds / 60;
+		if (minutes < 60) {
+			buffer.append("00:"); //$NON-NLS-1$
+			if (minutes < 10) buffer.append('0');
+			buffer.append(minutes);
+			buffer.append(':');
+			seconds = seconds % 60;
+			if (seconds < 10) buffer.append('0');
+			buffer.append(seconds);
+		} else {
+			int hours = minutes / 60;
+			if (hours < 10) buffer.append('0');
+			buffer.append(hours);
+			buffer.append(':');
+			minutes = minutes % 60;
+			if (minutes < 10) buffer.append('0');
+			buffer.append(minutes);
+			buffer.append(':');
+			seconds = seconds % 60;
+			if (seconds < 10) buffer.append('0');
+			buffer.append(seconds);
+		}
+	}
+	return buffer.toString();
+}
+public static String timeEnd(long time) {
+	GregorianCalendar calendar = new GregorianCalendar();
+	calendar.add(Calendar.SECOND, (int)(time/1000));
+	Date date = calendar.getTime();
+	SimpleDateFormat dateFormat = new SimpleDateFormat("KK:mm:ss"); //$NON-NLS-1$
+	return dateFormat.format(date);
 }
 
 AbstractResults(AbstractResults parent, String name) {
@@ -293,6 +332,10 @@ public boolean equals(Object obj) {
 		return this.name.equals(((AbstractResults)obj).getName());
 	}
 	return super.equals(obj);
+}
+
+String getBaselinePrefix() {
+	return "R-3.4-200806172000"; //$NON-NLS-1$
 }
 
 /**
@@ -402,15 +445,28 @@ void printGlobalTime(long start) {
 
 void printGlobalTime(long start, String end) {
 	long time = System.currentTimeMillis();
-	StringBuffer buffer = new StringBuffer(" => time spent in '"); //$NON-NLS-1$
-	buffer.append(this.name);
-	buffer.append("' was "); //$NON-NLS-1$
+	String resultsName = getName();
+	StringBuffer buffer;
+	if (resultsName == null) {
+		buffer = new StringBuffer(" => time spent was "); //$NON-NLS-1$
+	} else {
+		buffer = new StringBuffer(" => time spent in '"); //$NON-NLS-1$
+		buffer.append(resultsName);
+		buffer.append("' was "); //$NON-NLS-1$
+	}
 	buffer.append(timeString(time-start));
 	if (end != null) {
 		buffer.append(". "); //$NON-NLS-1$
 		buffer.append(end.trim());
 	}
 	println(buffer);
+}
+
+void println() {
+	if (this.printStream != null) {
+		this.printStream.println();
+		NEW_LINE = true;
+	}
 }
 
 void println(String text) {

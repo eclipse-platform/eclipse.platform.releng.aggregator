@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -272,7 +272,9 @@ public String getFailure() {
  * @return The value of the performance result
  */
 public double getValue(int dim_id) {
-	return this.average[getDimIndex(dim_id)];
+	int idx = getDimIndex(dim_id);
+	if (idx < 0) return Double.NaN;
+	return this.average[idx];
 }
 
 /**
@@ -359,7 +361,7 @@ void readData(DataInputStream stream) throws IOException {
 	byte kind = stream.readByte();
 	this.baseline = kind == 0;
 	if (this.baseline) {
-		this.name = getPerformance().baselinePrefix + '_' + this.date;
+		this.name = getBaselinePrefix() + '_' + this.date;
 	} else {
 		String suffix = this.date.substring(0, 8) + '-' + this.date.substring(8);
 		switch (kind) {

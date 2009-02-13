@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 
@@ -91,6 +94,20 @@ public String getBaselineBuildName() {
 		}
 	}
 	return buffer.toString();
+}
+
+Set getAllBuildNames() {
+	Set buildNames = new HashSet();
+	int size = size();
+	for (int i=0; i<size; i++) {
+		ConfigResults configResults = (ConfigResults) this.children.get(i);
+		List builds = configResults.getBuilds(null);
+		int length = builds.size();
+		for (int j=0; j<length; j++) {
+			buildNames.add(((BuildResults)builds.get(j)).getName());
+		}
+	}
+	return buildNames;
 }
 
 /**
@@ -218,23 +235,25 @@ public boolean isValid(String config) {
 /*
  * Read scenario results information from database.
  */
-void read() {
+void read(String buildName, long lastBuildTime) {
 
 	// Get values
-	print("+ scenario '"+getShortName()+"': "); //$NON-NLS-1$ //$NON-NLS-2$
+	print("	+ scenario '"+getShortName()+"': values..."); //$NON-NLS-1$ //$NON-NLS-2$
 	long start = System.currentTimeMillis();
 	String configPattern = getPerformance().getConfigurationsPattern();
-	DB_Results.queryScenarioValues(this, configPattern);
-	print(" values for "+size()+" configs ("+(System.currentTimeMillis()-start)+"ms), "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	DB_Results.queryScenarioValues(this, configPattern, buildName, lastBuildTime);
+	print(timeString(System.currentTimeMillis()-start));
 
 	// Set baseline and current builds
+	print(", infos..."); //$NON-NLS-1$
 	start = System.currentTimeMillis();
 	int size = size();
+	String[] builds = buildName == null ? null : new String[] { buildName };
 	for (int i=0; i<size; i++) {
 		ConfigResults configResults = (ConfigResults) this.children.get(i);
-		configResults.completeResults(null);
+		configResults.completeResults(builds);
 	}
-	println("summaries ("+(System.currentTimeMillis()-start)+"ms)."); //$NON-NLS-1$ //$NON-NLS-2$
+	println(timeString(System.currentTimeMillis()-start));
 }
 
 /*
@@ -259,21 +278,21 @@ void readData(DataInputStream stream) throws IOException {
  * Read new data from the database.
  * This is typically needed when the build results are not in the local file...
  */
-boolean readNewData(String lastBuildName) throws IOException {
+boolean readNewData(String lastBuildName, boolean force) {
+	if (lastBuildName == null) {
+		read(null, -1);
+		return true;
+	}
 	PerformanceResults performanceResults = getPerformance();
-	String configPattern = performanceResults.getConfigurationsPattern();
-	String lastBuildDate = getBuildDate(lastBuildName, performanceResults.getBaselinePrefix());
-	if (performanceResults.getBuildDate().compareTo(lastBuildDate) > 0) {
+	String lastBuildDate = getBuildDate(lastBuildName, getBaselinePrefix());
+	if (force || performanceResults.getBuildDate().compareTo(lastBuildDate) > 0) {
 		long lastBuildTime = 0;
 	    try {
 		    lastBuildTime = DATE_FORMAT.parse(lastBuildDate).getTime();
 	    } catch (ParseException e) {
 		    // should not happen
 	    }
-		long start = System.currentTimeMillis();
-		print("	+ scenario '"+getShortName()+"': values..."); //$NON-NLS-1$ //$NON-NLS-2$
-		DB_Results.queryScenarioValues(this, configPattern, lastBuildName, lastBuildTime);
-		print(timeString(System.currentTimeMillis()-start));
+	    read(lastBuildName, lastBuildTime);
 		return true;
 	}
 	return false;

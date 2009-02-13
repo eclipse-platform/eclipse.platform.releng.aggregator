@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.PrintStream;
 import java.util.*;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 
 /**
@@ -37,7 +38,48 @@ public class PerformanceResults extends AbstractResults {
 	String[] configBoxes, sortedConfigBoxes;
 	private String configPattern;
 	String updatedName = null;
+	boolean nameCanBeUpdated = false;
 
+	/*
+	 * Local class helping to guess remaining time while reading results from DB
+	 */
+	class RemainingTimeGuess {
+		int all, count;
+		long start;
+		double remaining;
+		RemainingTimeGuess(int all, long start) {
+			this.all = all;
+			this.start = start;
+		}
+		String display() {
+			StringBuffer buffer = new StringBuffer(" [elapsed: "); //$NON-NLS-1$
+			long elapsed = getElapsed();
+			buffer.append(timeChrono(elapsed));
+			if (this.count > 0) {
+				buffer.append(" | left: "); //$NON-NLS-1$
+				long remainingTime = getRemainingTime(elapsed);
+				buffer.append(timeChrono(remainingTime));
+				buffer.append(" | end: "); //$NON-NLS-1$
+				buffer.append(timeEnd(remainingTime));
+			}
+			buffer.append(']');
+			return buffer.toString();
+		}
+		private long getRemainingTime(long elapsed) {
+			return (long) ((((double)elapsed) / this.count) * (this.all - this.count));
+	    }
+		private long getElapsed() {
+			return System.currentTimeMillis() - this.start;
+	    }
+	}
+
+
+	// Failure threshold
+	public static final int DEFAULT_FAILURE_THRESHOLD = 10;
+	int failure_threshold = DEFAULT_FAILURE_THRESHOLD;
+	private int allScenariosSize;
+
+/*
 public static PerformanceResults createPerformanceResults(String scenarioPattern, File dataDir, PrintStream stream, IProgressMonitor monitor) {
 	String[] builds = DB_Results.getBuilds(); // Init build names
 	if (DB_Results.LAST_CURRENT_BUILD == null) {
@@ -61,11 +103,7 @@ public static PerformanceResults createPerformanceResults(String scenarioPattern
 	performanceResults.read(null, scenarioPattern, dataDir, DEFAULT_FAILURE_THRESHOLD, monitor);
 	return performanceResults;
 }
-
-	// Failure threshold
-	public static final int DEFAULT_FAILURE_THRESHOLD = 10;
-	int failure_threshold = DEFAULT_FAILURE_THRESHOLD;
-
+*/
 public PerformanceResults(String name, String baseline, PrintStream stream) {
 	super(null, name);
 	this.baselineName = baseline;
@@ -73,10 +111,6 @@ public PerformanceResults(String name, String baseline, PrintStream stream) {
 		this.baselinePrefix = baseline.substring(0, baseline.lastIndexOf('_'));
 	}
 	this.printStream = stream;
-}
-
-boolean canUpdateName() {
-	return this.updatedName != null;
 }
 
 /**
@@ -93,14 +127,39 @@ public String getBaselineName() {
  * Get the baseline prefix (computed from #baselineName).
  */
 String getBaselinePrefix() {
-	return this.baselinePrefix;
+	if (this.baselinePrefix != null) return this.baselinePrefix;
+	return super.getBaselinePrefix();
 }
 
 /*
  * Get the build date (see #getBuildDate(String, String)).
  */
 public String getBuildDate() {
-	return getBuildDate(getName(), this.baselinePrefix);
+	String buildName = getName();
+	if (buildName == null) return ""; //$NON-NLS-1$
+	return getBuildDate(getName(), getBaselinePrefix());
+}
+
+/**
+ * Returns the list of all builds currently read.
+ * 
+ * @return The names list of all currently known builds
+ */
+public List getAllBuildNames() {
+	SortedSet buildNames = new TreeSet(new Comparator() {
+		public int compare(Object o1, Object o2) {
+	        String s1 = (String) o1;
+	        String s2 = (String) o2;
+	        return getBuildDate(s1).compareTo(getBuildDate(s2));
+	    }
+	});
+	int size = size();
+	for (int i=0; i<size; i++) {
+		ComponentResults componentResults = (ComponentResults) this.children.get(i);
+		Set builds = componentResults.getAllBuildNames();
+		buildNames.addAll(builds);
+	}
+	return new ArrayList(buildNames);
 }
 
 /**
@@ -205,7 +264,10 @@ String getConfigurationsPattern() {
 }
 
 public String getName() {
-	if (this.updatedName != null) return this.updatedName;
+	if (this.nameCanBeUpdated && this.updatedName != null) return this.updatedName;
+	if (this.name == null) {
+		this.name = DB_Results.LAST_CURRENT_BUILD;
+	}
 	return this.name;
 }
 
@@ -215,6 +277,29 @@ public String getName() {
  */
 PerformanceResults getPerformance() {
 	return this;
+}
+
+private Map getScenarios(String pattern, IProgressMonitor monitor, long start) throws OperationCanceledException {
+	// Get scenarios from the given pattern
+	print("	+ get all database scenarios..."); //$NON-NLS-1$
+	if (monitor != null) monitor.subTask("Get all database scenarios..."); //$NON-NLS-1$
+	Map allScenarios = DB_Results.queryAllScenarios(pattern);
+	this.allScenariosSize = 0;
+	List componentsSet = new ArrayList(allScenarios.keySet());
+	Collections.sort(componentsSet);
+	int componentsSize = componentsSet.size();
+	componentsSet.toArray(this.components = new String[componentsSize]);
+	for (int i=0; i<componentsSize; i++) {
+		String componentName = this.components[i];
+		List scenarios = (List) allScenarios.get(componentName);
+		this.allScenariosSize += scenarios.size();
+	}
+	println(" -> "+this.allScenariosSize+" found in "+(System.currentTimeMillis()-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	if (monitor != null) {
+		monitor.worked(900);
+		if (monitor.isCanceled()) throw new OperationCanceledException();
+	}
+	return allScenarios;
 }
 
 /**
@@ -228,15 +313,67 @@ public ScenarioResults getScenarioResults(String scenarioName) {
 	return componentResults == null ? null : (ScenarioResults) componentResults.getResults(scenarioName);
 }
 
+boolean canUpdateName() {
+	return this.nameCanBeUpdated;
+}
+
 /**
  * Read all data from performance database for the given configurations
  * and scenario pattern.
  * 
- * @param dataDir The directory where data will be stored locally
- * 	if <code>null</code>, then storage will be performed
+ * @param dataDir The directory where local files are located
+ * @param monitor  The progress monitor
  */
-public void read(File dataDir) {
-	read(null, null, dataDir, DEFAULT_FAILURE_THRESHOLD, null);
+public void readLocal(File dataDir, IProgressMonitor monitor) {
+	if (dataDir == null) {
+		throw new IllegalArgumentException("Must specify a directory to read local files!"); //$NON-NLS-1$
+	}
+
+	// Print title
+	StringBuffer buffer = new StringBuffer("Read local performance results"); //$NON-NLS-1$
+	String taskName = buffer.toString();
+	if (monitor != null) {
+		monitor.setTaskName(taskName);
+		monitor.worked(100);
+		if (monitor.isCanceled()) return;
+	}
+	println(buffer);
+
+	// Update infos
+	long start = System.currentTimeMillis();
+	storeConfigInfo(null);
+	Map allScenarios;
+    try {
+        allScenarios = getScenarios(null, monitor, start);
+    } catch (OperationCanceledException e) {
+        return;
+    }
+	this.nameCanBeUpdated = true;
+
+	// Create corresponding children
+	int componentsLength = this.components.length;
+	for (int i=0; i<componentsLength; i++) {
+		String componentName = this.components[i];
+		List scenarios = (List) allScenarios.get(componentName);
+		if (monitor != null) {
+			int percentage = (int) ((((double)(i+1)) / (componentsLength+1)) * 100);
+			monitor.setTaskName(taskName+" ("+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$
+			StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
+			subTaskBuffer.append(componentName);
+			subTaskBuffer.append("..."); //$NON-NLS-1$
+			monitor.subTask(subTaskBuffer.toString());
+		}
+		if (scenarios == null) continue;
+		ComponentResults componentResults = new ComponentResults(this, componentName);
+		addChild(componentResults, true);
+		componentResults.readLocalFile(dataDir, scenarios);
+		if (monitor != null) {
+			if (monitor.isCanceled()) return;
+		}
+	}
+
+	// Print time
+	printGlobalTime(start);
 }
 
 /**
@@ -255,106 +392,166 @@ public void read(File dataDir) {
  */
 public void read(String[][] configs, String pattern, File dataDir, int threshold, IProgressMonitor monitor) {
 
-	try {
-		this.scenarioPattern = pattern == null ? DB_Results.DEFAULT_SCENARIO_PATTERN : pattern;
-		this.failure_threshold = threshold;
-	
-		// Print title
-		StringBuffer buffer = new StringBuffer("Read performance results until build '"); //$NON-NLS-1$
-		buffer.append(this.name);
-		String taskName = buffer.toString();
-		if (monitor != null) {
-			monitor.setTaskName(taskName);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return;
-		}
-		if (scenarioPattern == null) {
-			buffer.append("':"); //$NON-NLS-1$
-		} else {
-			buffer.append("' using scenario pattern '"); //$NON-NLS-1$
-			buffer.append(scenarioPattern);
-			buffer.append("':"); //$NON-NLS-1$
-		}
-		println(buffer);
-	
-		// Store given configs
-		if (configs == null) {
-			int length=CONFIGS.length;
-			this.configNames = new String[length];
-			this.sortedConfigNames = new String[length];
-			this.configBoxes = new String[length];
-			for (int i=0; i<length; i++) {
-				this.configNames[i] = this.sortedConfigNames[i] = CONFIGS[i];
-				this.configBoxes[i] = BOXES[i];
-			}
-		} else {
-			int length = configs.length;
-			this.configNames = new String[length];
-			this.sortedConfigNames = new String[length];
-			this.configBoxes = new String[length];
-			for (int i=0; i<length; i++) {
-				this.configNames[i] = this.sortedConfigNames[i] = configs[i][0];
-				this.configBoxes[i] = configs[i][1];
-			}
-		}
-		Arrays.sort(this.sortedConfigNames);
-		int length = this.sortedConfigNames.length;
-		this.sortedConfigBoxes = new String[length];
-		for (int i=0; i<length; i++) {
-			for (int j=0; j<length; j++) {
-				if (this.sortedConfigNames[i] == this.configNames[j]) { // == is intentional!
-					this.sortedConfigBoxes[i] = this.configBoxes[j];
-					break;
-				}
-			}
-		}
-	
-		// Get scenarios from the given pattern
-		print("	+ get corresponding scenarios for build: "+this.name); //$NON-NLS-1$
-		if (monitor != null) monitor.subTask("Get all scenarios for build "+this.name+"..."); //$NON-NLS-1$ //$NON-NLS-2$
-		long start = System.currentTimeMillis();
-		Map allScenarios = DB_Results.queryAllScenarios(this.scenarioPattern);
-		println(" -> "+allScenarios.size()+" found in "+(System.currentTimeMillis()-start)+"ms"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (monitor != null) {
-			monitor.worked(99);
-			if (monitor.isCanceled()) return;
-		}
+	// Init
+	this.scenarioPattern = pattern == null ? DB_Results.DEFAULT_SCENARIO_PATTERN : pattern;
+	this.failure_threshold = threshold;
 
-		// Create corresponding children
-		String[] allComponents = DB_Results.getComponents();
-		int cLength= allComponents.length;
-		this.components = new String[cLength];
-		int count = 0;
-		int progress = 100, step = 900 / cLength;
-		for (int i=0; i<cLength; i++) {
-			String componentName = allComponents[i];
-			List scenarios = (List) allScenarios.get(componentName);
-			if (monitor != null) {
-				int percentage = (int) ((progress / 1000.0) * 100);
-				monitor.setTaskName(taskName+" ("+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$
-				monitor.subTask("Component "+componentName+"..."); //$NON-NLS-1$ //$NON-NLS-2$
-			}
-			if (scenarios == null) continue;
-			this.components[count++] = componentName;
-			ComponentResults componentResults = new ComponentResults(this, componentName);
-			addChild(componentResults, true);
-			componentResults.read(scenarios, dataDir);
-			if (monitor != null) {
-				monitor.worked(step);
-				if (monitor.isCanceled()) return;
-				progress += step;
+	// Print title
+	StringBuffer buffer = new StringBuffer("Read performance results until build '"); //$NON-NLS-1$
+	buffer.append(this.name);
+	String taskName = buffer.toString();
+	if (monitor != null) {
+		monitor.setTaskName(taskName);
+		monitor.worked(100);
+		if (monitor.isCanceled()) return;
+	}
+	if (scenarioPattern == null) {
+		buffer.append("':"); //$NON-NLS-1$
+	} else {
+		buffer.append("' using scenario pattern '"); //$NON-NLS-1$
+		buffer.append(scenarioPattern);
+		buffer.append("':"); //$NON-NLS-1$
+	}
+	println(buffer);
+
+	// Update configs
+	long start = System.currentTimeMillis();
+	storeConfigInfo(configs);
+	Map allScenarios;
+    try {
+        allScenarios = getScenarios(null, monitor, start);
+    } catch (OperationCanceledException e) {
+        return;
+    }
+	this.nameCanBeUpdated = false;
+
+	// Create corresponding children
+	int componentsLength = this.components.length;
+	RemainingTimeGuess timeGuess = new RemainingTimeGuess(1+componentsLength+this.allScenariosSize, start);
+	for (int i=0; i<componentsLength; i++) {
+		String componentName = this.components[i];
+		List scenarios = (List) allScenarios.get(componentName);
+		if (monitor != null) {
+			int percentage = (int) ((((double)(i+1)) / (componentsLength+1)) * 100);
+			monitor.setTaskName(taskName+" ("+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$
+			StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
+			subTaskBuffer.append(componentName);
+			subTaskBuffer.append("..."); //$NON-NLS-1$
+			monitor.subTask(subTaskBuffer.toString());
+		}
+		if (scenarios == null) continue;
+		ComponentResults componentResults = new ComponentResults(this, componentName);
+		addChild(componentResults, true);
+		componentResults.read(scenarios, dataDir, monitor, timeGuess);
+		if (monitor != null) {
+			if (monitor.isCanceled()) return;
+		}
+	}
+
+	// Print time
+	printGlobalTime(start);
+}
+
+private void storeConfigInfo(String[][] configs) {
+	if (configs == null) {
+		int length=CONFIGS.length;
+		this.configNames = new String[length];
+		this.sortedConfigNames = new String[length];
+		this.configBoxes = new String[length];
+		for (int i=0; i<length; i++) {
+			this.configNames[i] = this.sortedConfigNames[i] = CONFIGS[i];
+			this.configBoxes[i] = BOXES[i];
+		}
+	} else {
+		int length = configs.length;
+		this.configNames = new String[length];
+		this.sortedConfigNames = new String[length];
+		this.configBoxes = new String[length];
+		for (int i=0; i<length; i++) {
+			this.configNames[i] = this.sortedConfigNames[i] = configs[i][0];
+			this.configBoxes[i] = configs[i][1];
+		}
+	}
+	Arrays.sort(this.sortedConfigNames);
+	int length = this.sortedConfigNames.length;
+	this.sortedConfigBoxes = new String[length];
+	for (int i=0; i<length; i++) {
+		for (int j=0; j<length; j++) {
+			if (this.sortedConfigNames[i] == this.configNames[j]) { // == is intentional!
+				this.sortedConfigBoxes[i] = this.configBoxes[j];
+				break;
 			}
 		}
-		if (count < cLength) {
-			System.arraycopy(this.components, 0, this.components = new String[count], 0, count);
+	}
+}
+
+/**
+ * Read all data from performance database for the given configurations
+ * and scenario pattern.
+ * 
+ * @param buildName The build name to read new data
+ * @param dataDir The directory where data will be stored locally
+ * @param monitor 
+ */
+public void updateBuild(String buildName, File dataDir, IProgressMonitor monitor) {
+
+	// Print title
+	StringBuffer buffer = new StringBuffer("Read new data for "); //$NON-NLS-1$
+	if (buildName == null) {
+		buffer.append("all builds"); //$NON-NLS-1$
+	} else {
+		buffer.append(buildName);
+		buffer.append(" build"); //$NON-NLS-1$
+	}
+	String taskName = buffer.toString();
+	if (monitor != null) {
+		monitor.setTaskName(taskName);
+		monitor.worked(100);
+		if (monitor.isCanceled()) return;
+	}
+	println(buffer);
+
+	// Update info
+	storeConfigInfo(null);
+	long start = System.currentTimeMillis();
+	Map allScenarios;
+    try {
+        allScenarios = getScenarios(null, monitor, start);
+    } catch (OperationCanceledException e) {
+        return;
+    }
+	this.nameCanBeUpdated = true;
+
+	// Create corresponding children
+	int componentsLength = this.components.length;
+	RemainingTimeGuess timeGuess = new RemainingTimeGuess(1+componentsLength+this.allScenariosSize, start);
+	for (int i=0; i<componentsLength; i++) {
+		String componentName = this.components[i];
+		List scenarios = (List) allScenarios.get(componentName);
+		if (monitor != null) {
+			int percentage = (int) ((((double)(i+1)) / (componentsLength+1)) * 100);
+			monitor.setTaskName(taskName+" ("+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$
+			StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
+			subTaskBuffer.append(componentName);
+			subTaskBuffer.append("..."); //$NON-NLS-1$
+			monitor.subTask(subTaskBuffer.toString());
 		}
+		if (scenarios == null) continue;
+		ComponentResults componentResults = (ComponentResults) getResults(componentName);
+		componentResults.readNewData(buildName, scenarios, dataDir, monitor, timeGuess);
+		if (monitor != null) {
+			if (monitor.isCanceled()) return;
+		}
+	}
 	
-		// Print time
-		printGlobalTime(start);
+	// Update name
+	String lastBuildDate = getBuildDate(buildName);
+	if (this.name == null || lastBuildDate.compareTo(getBuildDate()) > 0) {
+		this.name = buildName;
+		this.updatedName = null;
 	}
-	finally {
-		// Shutdown database
-		DB_Results.shutdown();
-	}
+
+	// Print time
+	printGlobalTime(start);
 }
 }

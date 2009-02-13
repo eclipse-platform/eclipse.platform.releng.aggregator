@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -131,7 +131,7 @@ public List getBuilds(String buildPattern) {
 	int size = size();
 	for (int i=0; i<size; i++) {
 		BuildResults buildResults = (BuildResults) this.children.get(i);
-		if (buildResults.match(buildPattern)) {
+		if (buildPattern == null || buildResults.match(buildPattern)) {
 			builds.add(buildResults);
 		}
 	}
@@ -316,7 +316,7 @@ private void initialize() {
 	// Get performance results builds name
 	PerformanceResults perfResults = getPerformance();
 	String baselineBuildName = perfResults.getBaselineName();
-	String baselineDate = getBuildDate(baselineBuildName);
+	String baselineDate = baselineBuildName == null ? null : getBuildDate(baselineBuildName);
 	String currentBuildName = perfResults.getName();
 
 	// Set baseline and current builds
@@ -328,14 +328,14 @@ private void initialize() {
 			buildResults.cleanValues();
 		}
 		if (buildResults.isBaseline()) {
-			if (lastBaseline == null || baselineDate.compareTo(buildResults.getDate()) >= 0) {
+			if (lastBaseline == null || baselineDate == null || baselineDate.compareTo(buildResults.getDate()) >= 0) {
 				lastBaseline = buildResults;
 			}
 		}
-		if (buildResults.getName().equals(baselineBuildName)) {
+		if (baselineBuildName != null && buildResults.getName().equals(baselineBuildName)) {
 			this.baseline = buildResults;
 			this.baselined = true;
-		} else if (buildResults.getName().equals(currentBuildName)) {
+		} else if (currentBuildName == null || buildResults.getName().equals(currentBuildName)) {
 			this.current = buildResults;
 			this.valid = true;
 		}
