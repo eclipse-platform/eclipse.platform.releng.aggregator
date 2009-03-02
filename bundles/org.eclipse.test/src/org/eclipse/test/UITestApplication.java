@@ -33,7 +33,7 @@ import org.eclipse.ui.testing.TestableObject;
  * A Workbench that runs a test suite specified in the
  * command line arguments.
  */ 
-public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApplication {
+public class UITestApplication implements ITestHarness {
 
 	private static final String DEFAULT_APP_3_0 = "org.eclipse.ui.ide.workbench"; //$NON-NLS-1$
 	private static final String DEFAULT_APP_PRE_3_0 = "org.eclipse.ui.workbench"; //$NON-NLS-1$
@@ -43,11 +43,8 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 	private int fTestRunnerResult = -1;
 	private IApplicationContext appContext;
 	
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.boot.IPlatformRunnable
-	 */
-	public Object run(final Object args) throws Exception {
+
+	public Object run(String[] args) throws Exception {
 		// Get the application to test
 		Object application = getApplication((String[])args);
 		Assert.assertNotNull(application);
@@ -199,21 +196,6 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 			}
 		});
 		fTestableObject.testingFinished();
-	}
-
-
-	public Object start(IApplicationContext context) throws Exception {
-		this.appContext = context;
-		String[] args = (String[]) appContext.getArguments().get("application.args");
-		if (args == null)
-			args = new String[0];
-		return run(args);
-	}
-
-
-	public void stop() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }
