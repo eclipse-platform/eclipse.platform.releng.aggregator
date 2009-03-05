@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -224,25 +225,22 @@ public class MapProject implements IResourceChangeListener {
 	private IFolder getMapFolder(){
 		return getProject().getFolder(RelEngPlugin.MAP_FOLDER);
 	}
+
 	private void loadMapFiles() throws CoreException {
-		IFolder folder = project.getFolder(RelEngPlugin.MAP_FOLDER);
-		if(!folder.exists()) {
-			mapFiles = new MapFile[0];
-			return;
-		}
-		IResource[] resource = folder.members();
-		if (resource != null) {
-			List list = new ArrayList();
-			for (int i = 0; i < resource.length; i++) {
-				//In case there are some sub folders
-				if(resource[i].getType() == IResource.FILE){
-					IFile file = (IFile) resource[i];
-					if(isMapFile(file)){
-						list.add(new MapFile(file));
+		final ArrayList maps = new ArrayList();
+		project.accept(new IResourceVisitor() {
+			public boolean visit(IResource resource) throws CoreException {
+				if (resource.getType() == IResource.FILE) {
+					IFile file = (IFile) resource;
+					if (isMapFile(file)) {
+						maps.add(new MapFile(file));
 					}
 				}
+				return true;
 			}
-			mapFiles = (MapFile[])list.toArray(new MapFile[list.size()]);
+		});
+		if (maps.size() > 0) {
+			mapFiles = (MapFile[]) maps.toArray(new MapFile[maps.size()]);
 		} else {
 			mapFiles = new MapFile[0];
 		}
