@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+<meta name="copyright" content="Copyright (c) 2008 Mateusz Matela and others. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <title>
+      ToString() Generator: Code Styles
+    </title>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+  </head>
+  <body>
+    <h1>
+      ToString() Generator: Code Styles
+    </h1>
+<p>
+Code style determines how the generated method works and what classes it uses. There are several code styles available to chose from the combo box in generator's <a href="ref-dialog-tostring.htm">dialog</a>:</p>
+<ul>
+<li><h3>String concatenation</h3>
+This style uses simple sum expressions so it's very efficient (compiler uses StringBuilder/StringBuffer to optimize the code) and relatively easy to read and modify. Here's an example outcome in the simplest case:
+<pre>return "FooClass [aFloat=" + aFloat + ", aString=" + aString + ", anInt=" + anInt 
+  + ", anObject=" + anObject + "]";</pre>
+With "Skip null values" option turned on, the code becomes a little harder to read:
+<pre>return "FooClass [aFloat=" + aFloat + ", "
+  + (aString != null ? "aString=" + aString + ", " : "") 
+  + "anInt=" + anInt + ", " 
+  + (anObject != null ? "anObject=" + anObject : "") + "]";</pre>
+</li>
+<li><h3>StringBuilder/StringBuffer</h3>
+This style uses StringBuilder if the project is compatible with JDK1.5 or later and StringBuffer otherwise. StringBuilder is faster (because of lack of synchronization), but only available since JDK1.5.
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=");
+builder.append(aFloat);
+builder.append(", aString=");
+builder.append(aString);
+builder.append(", anInt=");
+builder.append(anInt);
+builder.append(", anObject=");
+builder.append(anObject);
+builder.append("]");
+return builder.toString();</pre>
+The <b>"Skip null values"</b> option doesn't obfuscate the code as much as previously:
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=");
+builder.append(aFloat);
+builder.append(", ");
+if (aString != null) {
+	builder.append("aString=");
+	builder.append(aString);
+	builder.append(", ");
+}
+builder.append("anInt=");
+builder.append(anInt);
+builder.append(", ");
+if (anObject != null) {
+	builder.append("anObject=");
+	builder.append(anObject);
+}
+builder.append("]");
+return builder.toString();</pre>
+</li>
+<li><h3>StringBuilder/StringBuffer with chained calls</h3>
+Style very similar to the previous one only that append methods are called in chain. This makes the code shorter and probably easier to read.
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=").append(aFloat).append(", aString=").append(aString)
+		.append(", anInt=").append(anInt).append(", anObject=").append(anObject).append("]");
+return builder.toString();</pre>
+With <b>"Skip null values"</b> switched on, the chain must be broken:
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=").append(aFloat).append(", ");
+if (aString != null) {
+	builder.append("aString=").append(aString).append(", ");
+}
+builder.append("anInt=").append(anInt).append(", ");
+if (anObject != null) {
+	builder.append("anObject=").append(anObject);
+}
+builder.append("]");
+return builder.toString();</pre>
+</li>
+<li><h3>String.format()/MessageFormat</h3>
+This style is very pleasant for relatively short list of elements, but with longer ones it becomes hard to see which fields are associated with which variables. Unfortunately, the <b>"Skip null values"</b> option cannot be used with this style.
+<pre>return String.format("FooClass [aFloat=%s, aString=%s, anInt=%s, anObject=%s]",
+  aFloat, aString, anInt, anObject);</pre>
+Because there's no <code>String.format()</code> in JDK 1.4 and ealier, <code>MessageFormat.format()</code> is used instead:
+<pre>return MessageFormat.format("FooClass [aFloat={1}, aString={2}, anInt={3}, anObject={4}]", 
+  new Object[] { Float.valueOf(aFloat), aString, Integer.valueOf(anInt), anObject });</pre>
+</li>
+<li><h3>Apache Commons-Lang ToStringBuilder</h3>
+This style uses <code>org.apache.commons.lang.builder.ToStringBuilder</code>. It ignores the format template because ToStringBuilder already takes care the output string's format. Maybe it's a little less flexible, but the power of this solution is that you can easily change the style of all toStrings within the project without changing any actual object's toString method.<br>
+ToStringBuilder, depending on configuration, also takes care of listing array contents or prints only the size of a field in case of array, <code>Collection</code> or <code>Map</code>. That's why it is not recommended to use "ignore arrays' default toString()" or "Limit number of items in arrays/collections/maps" options with this style.
+<pre>ToStringBuilder builder = new ToStringBuilder(this);
+builder.append("aFloat", aFloat);
+builder.append("aString", aString);
+builder.append("anInt", anInt);
+builder.append("anObject", anObject);
+return builder.toString();</pre>
+Skipping nulls works this way:
+<pre>ToStringBuilder builder = new ToStringBuilder(this);
+builder.append("aFloat", aFloat);
+if (aString != null)
+	builder.append("aString", aString);
+builder.append("anInt", anInt);
+if (anObject != null)
+	builder.append("anObject", anObject);
+return builder.toString();</pre>
+</li>
+<li><h3>Apache Commons-Lang ToStringBuilder witch chained calls</h3>
+Again, this solution is for those who prefer chained calls to append method.
+<pre>ToStringBuilder builder = new ToStringBuilder(this);
+builder.append("aFloat", aFloat).append("aString", aString)
+		.append("anInt", anInt).append("anObject", anObject);
+return builder.toString();</pre>
+"Skip null values" option breaks the chain in similar way to chained StringBuilder style.
+</li>
+<li><h3>Spring Framework's ToStringCreator</h3>
+This style behaves the same as Apache ToStringCreator except it uses <code>org.springframework.core.style.ToStringCreator</code> to create output string. There's a chained-calls version as well.
+
+    <p>
+      <img src="../images/ngrelr.png" alt="Related reference" border="0" >
+    </p>
+    <p>
+	  <a href="ref-dialog-tostring.htm">Generate toString() dialog</a><br>
+	  <a href="ref-tostring-templates.htm">ToString() Generator: Format Templates</a><br>
+	  <a href="ref-tostring-listcontent.htm">ToString() Generator: Content Listing</a>
+    </p>
+    
+  </body>
+</html>
