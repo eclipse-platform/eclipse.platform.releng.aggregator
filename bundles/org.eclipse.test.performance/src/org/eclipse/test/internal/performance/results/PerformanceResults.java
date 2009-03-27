@@ -391,7 +391,7 @@ public String[] readAll(String[][] configs, String pattern, File dataDir, int th
 	read(true, null, configs, true, dataDir, null, subMonitor.newChild(100));
 	
 	// Read database contents after
-	return read(false, null, configs, true, dataDir, null, subMonitor.newChild(900));
+	return read(false, this.name, configs, false, dataDir, null, subMonitor.newChild(900));
 }
 
 /**
