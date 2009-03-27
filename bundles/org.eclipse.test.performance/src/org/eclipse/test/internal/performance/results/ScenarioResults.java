@@ -13,7 +13,6 @@ package org.eclipse.test.internal.performance.results;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -222,6 +221,25 @@ public int hashCode() {
 }
 
 /**
+ * Returns whether the current scenario is valid or not.
+ * 
+ * @return <code>true</code> if all the builds contained in the database are
+ * 	known by the scenario (ie. at least one its configuration knows each of the
+ * 	db builds), <code>false</code> otherwise.
+ */
+public boolean isValid() {
+	String[] buildNames = DB_Results.getBuilds();
+	Set scenarioBuilds = getAllBuildNames();
+	int length = buildNames.length;
+	for (int i=0; i<length; i++) {
+		if (!scenarioBuilds.contains(buildNames[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
  * Returns whether the current build of the given config has valid results or not.
  * 
  * @param config The name of the configuration
@@ -232,9 +250,30 @@ public boolean isValid(String config) {
 	return getResults(config) != null;
 }
 
+/**
+ * Returns whether the current scenario knows a build or not.
+ * 
+ * @param buildName The name of the build
+ * @return <code>true</code> if the at least one of scenario configuration
+ * 	knows the given build, <code>false</code> otherwise.
+ */
+public boolean knowsBuild(String buildName) {
+	String[] buildNames = buildName == null
+		? DB_Results.getBuilds()
+		: new String[] { buildName };
+	Set scenarioBuilds = getAllBuildNames();
+	int length = buildNames.length;
+	for (int i=0; i<length; i++) {
+		if (!scenarioBuilds.contains(buildNames[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
 /*
  * Read scenario results information from database.
- */
+ *
 void read(String buildName, long lastBuildTime) {
 
 	// Get values
@@ -255,6 +294,7 @@ void read(String buildName, long lastBuildTime) {
 	}
 	println(timeString(System.currentTimeMillis()-start));
 }
+*/
 
 /*
  * Read data from a local file
@@ -277,7 +317,7 @@ void readData(DataInputStream stream) throws IOException {
 /*
  * Read new data from the database.
  * This is typically needed when the build results are not in the local file...
- */
+ *
 boolean readNewData(String lastBuildName, boolean force) {
 	if (lastBuildName == null) {
 		read(null, -1);
@@ -297,6 +337,7 @@ boolean readNewData(String lastBuildName, boolean force) {
 	}
 	return false;
 }
+*/
 
 /*
  * Set value from database information.
@@ -320,6 +361,33 @@ void setValue(int build_id, int dim_id, int config_id, int step, long value) {
 		addChild(configResults, true);
 	}
 	configResults.setValue(build_id, dim_id, step, value);
+}
+
+/*
+ * Read scenario results information from database.
+ */
+boolean updateBuild(String buildName, boolean force) {
+
+	if (knowsBuild(buildName) && !force)  return false;
+	
+	// Get values
+	print("	+ scenario '"+getShortName()+"': values..."); //$NON-NLS-1$ //$NON-NLS-2$
+	long start = System.currentTimeMillis();
+	String configPattern = getPerformance().getConfigurationsPattern();
+	DB_Results.queryScenarioValues(this, configPattern, buildName);
+	print(timeString(System.currentTimeMillis()-start));
+
+	// Set baseline and current builds
+	print(", infos..."); //$NON-NLS-1$
+	start = System.currentTimeMillis();
+	int size = size();
+	String[] builds = buildName == null ? null : new String[] { buildName };
+	for (int i=0; i<size; i++) {
+		ConfigResults configResults = (ConfigResults) this.children.get(i);
+		configResults.completeResults(builds);
+	}
+	println(timeString(System.currentTimeMillis()-start));
+	return true;
 }
 
 void write(DataOutputStream stream) throws IOException {

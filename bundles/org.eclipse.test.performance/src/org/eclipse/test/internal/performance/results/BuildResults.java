@@ -361,7 +361,7 @@ void readData(DataInputStream stream) throws IOException {
 	byte kind = stream.readByte();
 	this.baseline = kind == 0;
 	if (this.baseline) {
-		this.name = getBaselinePrefix() + '_' + this.date;
+		this.name = getPerformance().baselinePrefix + '_' + this.date;
 	} else {
 		String suffix = this.date.substring(0, 8) + '-' + this.date.substring(8);
 		switch (kind) {

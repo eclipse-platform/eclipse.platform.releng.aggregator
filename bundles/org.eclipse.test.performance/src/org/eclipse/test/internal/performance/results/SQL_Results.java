@@ -24,8 +24,16 @@ import org.eclipse.test.internal.performance.db.SQL;
  */
 public class SQL_Results extends SQL {
 
-	private PreparedStatement queryBuildAllScenarios, queryBuildScenarios, queryScenarioSummaries, queryAllComments, queryScenariosBuilds, queryScenarioDataPoints, queryScenarioTimestampDataPoints, queryDimScalars, queryAllVariations;
-
+private PreparedStatement queryBuildAllScenarios,
+	queryBuildScenarios,
+	queryScenarioSummaries,
+	queryAllComments,
+	queryScenariosBuilds,
+	queryScenarioDataPoints,
+	queryScenarioTimestampDataPoints,
+	queryScenarioBuildDataPoints,
+	queryDimScalars,
+	queryAllVariations;
 
 SQL_Results(Connection con) throws SQLException {
 	    super(con);
@@ -169,6 +177,22 @@ ResultSet queryScenarioTimestampDataPoints(String config, int scenarioID, String
 	if (DB_Results.LOG) DB_Results.LOG_WRITER.ends(")"); //$NON-NLS-1$
 	return resultSet;
 }
+ResultSet queryScenarioBuildDataPoints(String config, int scenarioID, String buildName) throws SQLException {
+	if (DB_Results.LOG) DB_Results.LOG_WRITER.starts("		+ SQL query (config="+config+", scenario ID="+scenarioID+", build name="+buildName); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	if (this.queryScenarioBuildDataPoints== null) {
+		String statement = "select DATAPOINT.ID, DATAPOINT.STEP, VARIATION.KEYVALPAIRS from SAMPLE, DATAPOINT, VARIATION where " + //$NON-NLS-1$
+			"SAMPLE.VARIATION_ID = VARIATION.ID and VARIATION.KEYVALPAIRS LIKE ? and " + //$NON-NLS-1$
+			"SAMPLE.SCENARIO_ID = ? and " + //$NON-NLS-1$
+			"DATAPOINT.SAMPLE_ID = SAMPLE.ID " + //$NON-NLS-1$
+			"ORDER BY DATAPOINT.ID, DATAPOINT.STEP"; //$NON-NLS-1$
+		this.queryScenarioBuildDataPoints = fConnection.prepareStatement(statement);
+	}
+	this.queryScenarioBuildDataPoints.setString(1, "|build=" + buildName + '%'); //$NON-NLS-1$
+	this.queryScenarioBuildDataPoints.setInt(2, scenarioID);
+	ResultSet resultSet =  this.queryScenarioBuildDataPoints.executeQuery();
+	if (DB_Results.LOG) DB_Results.LOG_WRITER.ends(")"); //$NON-NLS-1$
+	return resultSet;
+}
 
 /**
  * Get all data points for a given scenario and configuration.
@@ -219,17 +243,19 @@ ResultSet queryScenarioSummaries(int scenarioID, String config, String[] builds)
 			buildPattern = builds[0];
 			break;
 		default:
-			int idx = 0;
 			StringBuffer buffer = new StringBuffer();
-			loop: while (builds[0].length() > idx) {
+			loop: for (int idx=0; idx < builds[0].length(); idx++) {
 				char ch = builds[0].charAt(idx);
 				for (int i=1; i<length; i++) {
-					if (builds[i].length() <= idx || builds[i].charAt(idx) != ch) {
+					if (idx == builds[i].length()) {
 						break loop;
+					}
+					if (builds[i].charAt(idx) != ch) {
+						buffer.append('_');
+						continue loop;
 					}
 				}
 				buffer.append(ch);
-				idx++;
 			}
 			buffer.append("%"); //$NON-NLS-1$
 			buildPattern = buffer.toString();

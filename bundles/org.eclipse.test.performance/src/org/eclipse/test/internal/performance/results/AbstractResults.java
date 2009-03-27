@@ -66,7 +66,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible configurations.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#read(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
+	 * (see {@link PerformanceResults#readAll(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
 	 */
 	public final static String[] CONFIGS;
 
@@ -74,7 +74,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible test boxes.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#read(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
+	 * (see {@link PerformanceResults#readAll(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
 	 * </p>
 	 * Note that this is a copy of the the property "eclipse.perf.config.descriptors"
 	 * defined in org.eclipse.releng.eclipsebuilder/eclipse/helper.xml file
@@ -332,10 +332,6 @@ public boolean equals(Object obj) {
 		return this.name.equals(((AbstractResults)obj).getName());
 	}
 	return super.equals(obj);
-}
-
-String getBaselinePrefix() {
-	return "R-3.4-200806172000"; //$NON-NLS-1$
 }
 
 /**

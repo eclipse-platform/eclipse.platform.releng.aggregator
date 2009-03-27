@@ -41,7 +41,7 @@ public ConfigResults(AbstractResults parent, int id) {
  * Complete results with additional database information.
  */
 void completeResults(String[] builds) {
-	if (this.baseline == null || this.current == null) initialize();
+	/*if (this.baseline == null || this.current == null) */initialize();
 	ScenarioResults scenarioResults = (ScenarioResults) this.parent;
 	DB_Results.queryScenarioSummaries(scenarioResults, this.name, builds);
 }
@@ -313,11 +313,13 @@ public double[] getStatistics(List prefixes, int dim_id) {
 }
 
 private void initialize() {
+	reset();
 	// Get performance results builds name
 	PerformanceResults perfResults = getPerformance();
 	String baselineBuildName = perfResults.getBaselineName();
-	String baselineDate = baselineBuildName == null ? null : getBuildDate(baselineBuildName);
-	String currentBuildName = perfResults.getName();
+	String baselineBuildDate = baselineBuildName == null ? null : getBuildDate(baselineBuildName);
+	String currentBuildName = perfResults.name;
+	String currentBuildDate = currentBuildName == null ? null : getBuildDate(currentBuildName);
 
 	// Set baseline and current builds
 	BuildResults lastBaseline = null;
@@ -328,14 +330,14 @@ private void initialize() {
 			buildResults.cleanValues();
 		}
 		if (buildResults.isBaseline()) {
-			if (lastBaseline == null || baselineDate == null || baselineDate.compareTo(buildResults.getDate()) >= 0) {
+			if (lastBaseline == null || baselineBuildDate == null || baselineBuildDate.compareTo(buildResults.getDate()) >= 0) {
 				lastBaseline = buildResults;
 			}
 		}
 		if (baselineBuildName != null && buildResults.getName().equals(baselineBuildName)) {
 			this.baseline = buildResults;
 			this.baselined = true;
-		} else if (currentBuildName == null || buildResults.getName().equals(currentBuildName)) {
+		} else if (currentBuildName == null || currentBuildDate == null || buildResults.getDate().compareTo(currentBuildDate) >= 0) {
 			this.current = buildResults;
 			this.valid = true;
 		}
@@ -452,6 +454,15 @@ void readData(DataInputStream stream) throws IOException {
 	}
 }
 
+private void reset() {
+	this.current = null;
+	this.baseline = null;
+	this.baselined = false;
+	this.valid = false;
+	this.delta = 0;
+	this.error = -1;
+}
+
 /*
  * Set the configuration value from database information
  */
@@ -469,6 +480,7 @@ void setInfos(int build_id, int summaryKind, String comment) {
  * Set the configuration value from database information
  */
 void setValue(int build_id, int dim_id, int step, long value) {
+//	reset();
 	BuildResults buildResults = (BuildResults) getResults(build_id);
 	if (buildResults == null) {
 		buildResults = new BuildResults(this, build_id);

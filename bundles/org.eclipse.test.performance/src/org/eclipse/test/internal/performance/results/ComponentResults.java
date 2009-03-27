@@ -20,12 +20,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 
 /**
  * Class to handle performance results of an eclipse component
@@ -51,6 +52,20 @@ Set getAllBuildNames() {
 		buildNames.addAll(builds);
 	}
 	return buildNames;
+}
+
+String[] getAllSortedBuildNames() {
+	Set allBuildNames = getAllBuildNames();
+	String[] sortedNames = new String[allBuildNames.size()];
+	allBuildNames.toArray(sortedNames);
+	Arrays.sort(sortedNames, new Comparator() {
+		public int compare(Object o1, Object o2) {
+	        String s1 = (String) o1;
+	        String s2 = (String) o2;
+	        return getBuildDate(s1).compareTo(getBuildDate(s2));
+	    }
+	});
+	return sortedNames;
 }
 
 ComponentResults getComponentResults() {
@@ -91,107 +106,27 @@ public List getSummaryScenarios(boolean global, String config) {
 	return scenarios;
 }
 
-private boolean hasLocalData(File dataDir) {
-	boolean hasData = dataDir != null && dataDir.exists() && (new File(dataDir, getName()+".dat")).exists(); //$NON-NLS-1$
-	return hasData;
-}
-
-/*
- * Read performance results information of the given scenarios.
- * First try to read data for existing scenarios and complete possible new ones
- * by specific request to the database.
- */
-void read(List scenarios, File dataDir, IProgressMonitor monitor, PerformanceResults.RemainingTimeGuess timeGuess) {
-	println("Component '"+this.name+"':"); //$NON-NLS-1$ //$NON-NLS-2$
-	long start = System.currentTimeMillis();
-	if (hasLocalData(dataDir)) {
-        readData(dataDir, scenarios, monitor, timeGuess);
+private String lastBuildName(int kind) {
+	String[] builds = getAllSortedBuildNames();
+	int idx = builds.length-1;
+	String lastBuildName = builds[idx--];
+	switch (kind) {
+		case 1: // no ref
+			while (lastBuildName.startsWith(VERSION_REF)) {
+				lastBuildName = builds[idx--];
+			}
+			break;
+		case 2: // only I-build or M-build
+			char ch = lastBuildName.charAt(0);
+			while (ch != 'I' && ch != 'M') {
+				lastBuildName = builds[idx--];
+				ch = lastBuildName.charAt(0);
+			}
+			break;
+		default:
+			break;
 	}
-	try {
-		if (getPerformance().canUpdateName()) {
-			readNewScenarios(null, scenarios, dataDir, monitor, timeGuess);
-		}
-	}
-	catch (OperationCanceledException oce) {
-		return;
-	}
-	printGlobalTime(start);
-}
-
-/*
- * Read the data stored locally in the given directory for all given scenarios.
- * Update the missing information from the database.
- */
-void readData(File dataDir, List scenarios, IProgressMonitor monitor, PerformanceResults.RemainingTimeGuess timeGuess) {
-	DB_Results.queryAllVariations(getPerformance().getConfigurationsPattern());
-	boolean dirty = false;
-
-	// read local file and update last build name if local data file has a more recent one
-	String lastBuildName = readLocalFile(dataDir, scenarios);
-
-	// manage monitor
-	if (monitor != null) {
-		StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
-		subTaskBuffer.append(this.name);
-		subTaskBuffer.append("..."); //$NON-NLS-1$
-		subTaskBuffer.append(timeGuess.display());
-		timeGuess.count++;
-		monitor.subTask(subTaskBuffer.toString());
-		monitor.worked(100);
-		if (monitor.isCanceled()) return;
-	}
-
-	// Read new values for the local result
-	boolean first = true;
-	long readTime = System.currentTimeMillis();
-	int size = size();
-	int step = 900 / size;
-	for (int i=0; i<size; i++) {
-
-		// manage monitor
-		if (monitor != null) {
-			StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
-			subTaskBuffer.append(this.name);
-			subTaskBuffer.append("..."); //$NON-NLS-1$
-			subTaskBuffer.append(timeGuess.display());
-			timeGuess.count++;
-			monitor.subTask(subTaskBuffer.toString());
-		}
-		
-		// read results
-		ScenarioResults scenarioResults = (ScenarioResults) this.children.get(i);
-		if (first) {
-			println(" - read DB contents:"); //$NON-NLS-1$
-			first = false;
-		}
-		long start = System.currentTimeMillis();
-		boolean newData = scenarioResults.readNewData(lastBuildName, false);
-		long time = System.currentTimeMillis()-start;
-		if (newData) {
-			dirty = true;
-			print(", infos..."); //$NON-NLS-1$
-			start = System.currentTimeMillis();
-			scenarioResults.completeResults(lastBuildName);
-			time = System.currentTimeMillis()-start;
-			println(timeString(time));
-		}
-		if (dataDir != null && dirty && (System.currentTimeMillis() - readTime) > 300000) { // save every 5mn
-			writeData(null, dataDir, true, true);
-			readTime = System.currentTimeMillis();
-			dirty = false;
-		}
-
-		// manage monitor
-		if (monitor != null) {
-			monitor.worked(step);
-			if (monitor.isCanceled()) return;
-		}
-	}
-	
-	// Write local files
-	if (dataDir != null) {
-		writeData(null, dataDir, false, dirty);
-	}
+	return lastBuildName;
 }
 
 /*
@@ -220,29 +155,22 @@ String readLocalFile(File dir, List scenarios) {
 			if (scenarioResults == null) {
 				// this can happen if scenario pattern does not cover all those stored in local data file
 				// hence, creates a fake scenario to read the numbers and skip to the next scenario
+				/*
 				scenarioResults = new ScenarioResults(-1, null, null);
 				scenarioResults.parent = this;
 				scenarioResults.readData(stream);
-			} else {
-				scenarioResults.parent = this;
-				scenarioResults.printStream = this.printStream;
-				scenarioResults.readData(stream);
-				addChild(scenarioResults, true);
+				*/
+				// Should no longer occur as we get all scenarios from database now
+				throw new RuntimeException("Unexpected unfound scenario!"); //$NON-NLS-1$
 			}
+			scenarioResults.parent = this;
+			scenarioResults.printStream = this.printStream;
+			scenarioResults.readData(stream);
+			addChild(scenarioResults, true);
 			if (this.printStream != null) this.printStream.print('.');
 		}
 		println();
 		println("	=> "+size+" scenarios data were read from file "+dataFile); //$NON-NLS-1$ //$NON-NLS-2$
-
-		// Update performance name
-		String lastBuildDate = getBuildDate(lastBuildName);
-		PerformanceResults performanceResults = getPerformance();
-		if (performanceResults.name == null ) {
-			performanceResults.name = lastBuildName;
-		}
-		else if (performanceResults.canUpdateName() && lastBuildDate.compareTo(performanceResults.getBuildDate()) > 0) {
-			performanceResults.updatedName = lastBuildName;
-		}
 		
 		// Return last build name stored in the local files
 		return lastBuildName;
@@ -259,57 +187,59 @@ String readLocalFile(File dir, List scenarios) {
 }
 
 /*
- * Read the database values for the given build name.
- * Compare with the given scenarios list to see if new ones has been created
- * since the last read operation.
+ * Read the database values for a build name and a list of scenarios.
+ * The database is read only if the components does not already knows the
+ * given build (i.e. if it has not been already read) or if the force arguments is set.
  */
-void readNewData(String buildName, List scenarios, File dataDir, IProgressMonitor monitor, PerformanceResults.RemainingTimeGuess timeGuess) {
+void updateBuild(String buildName, List scenarios, boolean force, File dataDir, SubMonitor subMonitor, PerformanceResults.RemainingTimeGuess timeGuess) {
+	
+	// Read all variations
 	println("Component '"+this.name+"':"); //$NON-NLS-1$ //$NON-NLS-2$
 	PerformanceResults performanceResults = getPerformance();
 	DB_Results.queryAllVariations(performanceResults.getConfigurationsPattern());
 
 	// manage monitor
-	if (monitor != null) {
-		StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
-		subTaskBuffer.append(this.name);
-		subTaskBuffer.append("..."); //$NON-NLS-1$
-		subTaskBuffer.append(timeGuess.display());
-		timeGuess.count++;
-		monitor.subTask(subTaskBuffer.toString());
-		monitor.worked(100);
-		if (monitor.isCanceled()) return;
-	}
+	int size = scenarios.size();
+	subMonitor.setWorkRemaining(size+1);
+	StringBuffer buffer = new StringBuffer("Component "); //$NON-NLS-1$
+	buffer.append(this.name);
+	buffer.append("..."); //$NON-NLS-1$
+	String title = buffer.toString();
+	subMonitor.subTask(title+timeGuess.display());
+	timeGuess.count++;
+	subMonitor.worked(1);
+	if (subMonitor.isCanceled()) return;
 
 	// Read new values for the local result
 	boolean dirty = false;
-	boolean first = true;
 	long readTime = System.currentTimeMillis();
-	int size = size();
+	String log = " - read scenarios from DB:"; //$NON-NLS-1$
 	if (size > 0) {
-		int step = 900 / size;
 		for (int i=0; i<size; i++) {
 	
 			// manage monitor
-			if (monitor != null) {
-				StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
-				subTaskBuffer.append(this.name);
-				subTaskBuffer.append("..."); //$NON-NLS-1$
-				subTaskBuffer.append(timeGuess.display());
-				timeGuess.count++;
-				monitor.subTask(subTaskBuffer.toString());
+			subMonitor.subTask(title+timeGuess.display());
+			timeGuess.count++;
+			if (log != null) {
+				println(log);
+				log = null;
 			}
 			
 			// read results
-			ScenarioResults scenarioResults = (ScenarioResults) this.children.get(i);
-			if (first) {
-				println(" - read DB contents:"); //$NON-NLS-1$
-				first = false;
-			}
-			if (buildName == null) {
-				scenarioResults.read(null, -1);
+			ScenarioResults nextScenarioResults= (ScenarioResults) scenarios.get(i);
+			ScenarioResults scenarioResults = (ScenarioResults) getResults(nextScenarioResults.id);
+			if (scenarioResults == null) {
+				// Scenario is not known yet, force an update
+				scenarioResults = nextScenarioResults;
+				scenarioResults.parent = this;
+				scenarioResults.printStream = this.printStream;
+				scenarioResults.updateBuild(buildName, true);
 				dirty = true;
-			} else if (scenarioResults.readNewData(buildName, true)) {
-				dirty = true;
+				addChild(scenarioResults, true);
+			} else {
+				if (scenarioResults.updateBuild(buildName, force)) {
+					dirty = true;
+				}
 			}
 			if (dataDir != null && dirty && (System.currentTimeMillis() - readTime) > 300000) { // save every 5mn
 				writeData(buildName, dataDir, true, true);
@@ -318,10 +248,8 @@ void readNewData(String buildName, List scenarios, File dataDir, IProgressMonito
 			}
 	
 			// manage monitor
-			if (monitor != null) {
-				monitor.worked(step);
-				if (monitor.isCanceled()) return;
-			}
+			subMonitor.worked(1);
+			if (subMonitor.isCanceled()) return;
 		}
 	}
 	
@@ -330,92 +258,9 @@ void readNewData(String buildName, List scenarios, File dataDir, IProgressMonito
 		writeData(buildName, dataDir, false, dirty);
 	}
 
-	// Identify unknown scenarios
-	List unknownScenarios = new ArrayList();
-	size = scenarios.size();
-	for (int i=0; i<size; i++) {
-		ScenarioResults scenarioResults= (ScenarioResults) scenarios.get(i);
-		if (getResults(scenarioResults.id) == null) {
-			unknownScenarios.add(scenarioResults);
-		}
-	}
-	
-	// Read new scenarios
-	try {
-		readNewScenarios(buildName, unknownScenarios, dataDir, monitor, timeGuess);
-	}
-	catch (OperationCanceledException oce) {
-		return;
-	}
-
-	// Update performance name
-	if (buildName != null) {
-		String lastBuildDate = getBuildDate(buildName);
-		if (performanceResults.canUpdateName() && lastBuildDate.compareTo(performanceResults.getBuildDate()) > 0) {
-			performanceResults.updatedName = buildName;
-		}
-	}
-
 	// Print global time
 	printGlobalTime(readTime);
 
-}
-
-/*
- * Read new scenarios values from database.
- * New scenarios are those in the list without parent, hence not populated
- * with a previous read operation.
- */
-void readNewScenarios(String buildName, List scenarios, File dataDir, IProgressMonitor monitor, PerformanceResults.RemainingTimeGuess timeGuess) {
-	int size = scenarios.size();
-	if (size == 0) return;
-	long time = System.currentTimeMillis();
-	boolean dirty = false;
-	boolean first = true;
-	boolean hasData = hasLocalData(dataDir);
-	int step = hasData ? 0 : 1000 / size;
-	for (int i=0; i<size; i++) {
-
-		// manage monitor
-		if (!hasData && monitor != null) {
-			StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
-			subTaskBuffer.append(this.name);
-			subTaskBuffer.append("..."); //$NON-NLS-1$
-			subTaskBuffer.append(timeGuess.display());
-			timeGuess.count++;
-			monitor.subTask(subTaskBuffer.toString());
-		}
-
-		// read results
-		ScenarioResults scenarioResults= (ScenarioResults) scenarios.get(i);
-		if (scenarioResults.parent == null) {
-			if (first) {
-				println(" - read new scenarios:"); //$NON-NLS-1$
-				first = false;
-			}
-			scenarioResults.parent = this;
-			scenarioResults.printStream = this.printStream;
-			scenarioResults.readNewData(buildName, true);
-			dirty = true;
-			addChild(scenarioResults, true);
-		}
-		if (dataDir != null && dirty && (System.currentTimeMillis() - time) > 300000) { // save every 5mn
-			writeData(buildName, dataDir, true, true);
-			time = System.currentTimeMillis();
-			dirty = false;
-		}
-
-		// manage monitor
-		if (monitor != null) {
-			if (!hasData) monitor.worked(step);
-			if (monitor.isCanceled()) throw new OperationCanceledException();
-		}
-	}
-	
-	// Write new local files
-	if (dataDir != null) {
-		writeData(buildName, dataDir, false, dirty);
-	}
 }
 
 /*
@@ -450,7 +295,7 @@ void writeData(String buildName, File dir, boolean temp, boolean dirty) {
 	try {
 		DataOutputStream stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
 		int size = this.children.size();
-		stream.writeUTF(buildName != null ? buildName : getPerformance().getName());
+		stream.writeUTF(lastBuildName(0));
 		stream.writeInt(size);
 		for (int i=0; i<size; i++) {
 			ScenarioResults scenarioResults = (ScenarioResults) this.children.get(i);

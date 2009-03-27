@@ -38,7 +38,6 @@ public class DB_Results {
     private static final String[] EMPTY_LIST = new String[0];
 	static final boolean DEBUG = false;
     static final boolean LOG = false;
-	static final String DEFAULT_SCENARIO_PATTERN = "org.eclipse.%.test%"; //$NON-NLS-1$
 
     // the two supported DB types
     private static final String DERBY= "derby"; //$NON-NLS-1$
@@ -314,13 +313,12 @@ public static List getScenarios() {
 }
 
 /**
- * Get all scenarios read from database matching the default pattern.
- * Note that all scenarios are returned if the pattern is <code>null</code>.
+ * Get all scenarios read from database.
  *
  * @return A list of all scenario names matching the default pattern
  */
 public static Map queryAllScenarios() {
-	return getDefault().internalQueryBuildScenarios(DEFAULT_SCENARIO_PATTERN, null);
+	return getDefault().internalQueryBuildScenarios("%", null); //$NON-NLS-1$
 }
 
 /**
@@ -333,7 +331,7 @@ public static Map queryAllScenarios() {
  * 	each component.
  */
 static Map queryAllScenarios(String scenarioPattern) {
-	String pattern = scenarioPattern==null ? DEFAULT_SCENARIO_PATTERN : scenarioPattern;
+	String pattern = scenarioPattern==null ? "%" : scenarioPattern; //$NON-NLS-1$
 	return getDefault().internalQueryBuildScenarios(pattern, null);
 }
 
@@ -375,12 +373,11 @@ static void queryScenarioSummaries(ScenarioResults scenarioResults, String confi
  *
  * @param scenarioResults The scenario results where the values has to be put
  * @param configPattern The pattern of the configuration concerned by the query
- * @param lastBuildName Name of the last build on which data were stored locally
- * @param lastBuildDate Date of the last build on which data were stored locally
+ * @param buildName Name of the last build on which data were stored locally
  *
 */
-static void queryScenarioValues(ScenarioResults scenarioResults, String configPattern, String lastBuildName, long lastBuildDate) {
-	getDefault().internalQueryScenarioValues(scenarioResults, configPattern, lastBuildName, lastBuildDate);
+static void queryScenarioValues(ScenarioResults scenarioResults, String configPattern, String buildName) {
+	getDefault().internalQueryScenarioValues(scenarioResults, configPattern, buildName);
 }
 
 /**
@@ -687,26 +684,28 @@ private Map internalQueryBuildScenarios(String scenarioPattern, String buildName
 	return allScenarios;
 }
 
-private void internalQueryScenarioValues(ScenarioResults scenarioResults, String configPattern, String lastBuildName, long lastBuildDate) {
+private void internalQueryScenarioValues(ScenarioResults scenarioResults, String configPattern, String buildName) {
 	if (fSQL == null) return;
-	if (LOG) LOG_WRITER.starts("	- DB query all data points for config pattern: "+configPattern+" for scenario: " + scenarioResults.getShortName()); //$NON-NLS-1$ //$NON-NLS-2$
+	if (DEBUG) {
+		DEBUG_WRITER.print("	- DB query all data points for config pattern: "+configPattern+" for scenario: " + scenarioResults.getShortName()); //$NON-NLS-1$ //$NON-NLS-2$
+		if (buildName != null) DEBUG_WRITER.print(" for build: "+buildName); //$NON-NLS-1$
+	}
 	internalQueryAllVariations(configPattern); // need to read all variations to have all build names
 	ResultSet result = null;
 	try {
 		int count = 0;
-		result = lastBuildName == null
+		result = buildName == null
 			?	fSQL.queryScenarioDataPoints(configPattern, scenarioResults.getId())
-			:	fSQL.queryScenarioTimestampDataPoints(configPattern, scenarioResults.getId(), lastBuildName, lastBuildDate);
+			:	fSQL.queryScenarioBuildDataPoints(configPattern, scenarioResults.getId(), buildName);
 		while (result.next()) {
 			int dp_id = result.getInt(1);
 			int step = result.getInt(2);
 			String variation = result.getString(3); //  something like "|build=I20070615-1200||config=eclipseperfwin2_R3.3||jvm=sun|"
 			StringTokenizer tokenizer = new StringTokenizer(variation, "=|"); //$NON-NLS-1$
 			tokenizer.nextToken(); 													// 'build'
-			String buildName = tokenizer.nextToken();					// 'I20070615-1200'
+			int build_id = getBuildId(tokenizer.nextToken());		// 'I20070615-1200'
 			tokenizer.nextToken();													// 'config'
 			int config_id = getConfigId(tokenizer.nextToken()); 		// 'eclipseperflnx3'
-			int build_id = getBuildId(buildName);
 			ResultSet rs2 = fSQL.queryDimScalars(dp_id);
 			while (rs2.next()) {
 				int dim_id = rs2.getInt(1);
