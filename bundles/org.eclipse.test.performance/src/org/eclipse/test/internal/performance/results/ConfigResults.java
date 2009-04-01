@@ -400,8 +400,10 @@ private void initialize() {
  * 	for the performance baseline build, <code>false</code> otherwise.
  */
 public boolean isBaselined() {
+	if (this.baseline == null || this.current == null) initialize();
 	return this.baselined;
 }
+
 boolean isBuildConcerned(BuildResults buildResults) {
 	String buildDate = buildResults.getDate();
 	String currentBuildDate = getCurrentBuildResults() == null ? null : getCurrentBuildResults().getDate();

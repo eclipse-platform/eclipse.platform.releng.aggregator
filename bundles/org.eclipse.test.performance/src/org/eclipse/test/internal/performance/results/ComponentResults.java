@@ -133,10 +133,10 @@ private String lastBuildName(int kind) {
  * Read local file contents and populate the results model with the collected
  * information.
  */
-String readLocalFile(File dir, List scenarios) {
+String readLocalFile(File dir, List scenarios) throws FileNotFoundException {
 	if (!dir.exists()) return null;
 	File dataFile = new File(dir, getName()+".dat");	//$NON-NLS-1$
-	if (!dataFile.exists()) return null;
+	if (!dataFile.exists()) throw new FileNotFoundException();
 	DataInputStream stream = null;
 	try {
 		// Read local file info

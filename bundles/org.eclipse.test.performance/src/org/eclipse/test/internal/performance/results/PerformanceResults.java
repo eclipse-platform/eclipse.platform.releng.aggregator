@@ -11,6 +11,7 @@
 package org.eclipse.test.internal.performance.results;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.*;
 
@@ -302,7 +303,8 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 	subMonitor.setWorkRemaining(100);
 	
 	// Reset
-	if (local) reset();
+	boolean reset = local || (buildName == null && force);
+	if (reset) reset();
 
 	// Update info
 	setConfigInfo(configs);
@@ -333,7 +335,7 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 		// Get component results
 		if (scenarios == null) continue;
 		ComponentResults componentResults;
-		if (local || (buildName == null && force)) {
+		if (reset) {
 			componentResults = new ComponentResults(this, componentName);
 			addChild(componentResults, true);
 		} else {
@@ -342,7 +344,12 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 		
 		// Read the component results
 		if (local) {
-			componentResults.readLocalFile(dataDir, scenarios);
+			try {
+				componentResults.readLocalFile(dataDir, scenarios);
+			}
+			catch (FileNotFoundException ex) {
+				return null;
+			}
 			subMonitor.worked(1);
 		} else {
 			if (timeGuess == null) {
@@ -365,7 +372,7 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 /**
  * Read all data from performance database for the given configurations
  * and scenario pattern.
- * 
+ * @param buildName The name of the build
  * @param configs All configurations to extract results. If <code>null</code>,
  * 	then all known configurations ({@link #CONFIGS})  are read.
  * @param pattern The pattern of the concerned scenarios
@@ -375,9 +382,10 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
  * @param threshold The failure percentage threshold over which a build result
  * 	value compared to the baseline is considered as failing.
  * @param monitor The progress monitor
+ * 
  * @return All known builds
  */
-public String[] readAll(String[][] configs, String pattern, File dataDir, int threshold, IProgressMonitor monitor) {
+public String[] readAll(String buildName, String[][] configs, String pattern, File dataDir, int threshold, IProgressMonitor monitor) {
 
 	// Init
 	this.scenarioPattern = pattern == null ? "%" : pattern; //$NON-NLS-1$
@@ -388,10 +396,11 @@ public String[] readAll(String[][] configs, String pattern, File dataDir, int th
 	setDefaults();
 
 	// Read local file first
-	read(true, null, configs, true, dataDir, null, subMonitor.newChild(100));
+	String[] names = read(true, null, configs, true, dataDir, null, subMonitor.newChild(100));
 	
 	// Read database contents after
-	return read(false, this.name, configs, false, dataDir, null, subMonitor.newChild(900));
+	boolean force = names==null;
+	return read(false, force ? null : buildName, configs, force, dataDir, null, subMonitor.newChild(900));
 }
 
 /**
