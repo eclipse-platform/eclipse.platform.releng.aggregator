@@ -42,6 +42,14 @@ public class PerformanceResults extends AbstractResults {
 	String[] configBoxes, sortedConfigBoxes;
 	private String configPattern;
 
+	private final class BuildDateComparator implements Comparator {
+    public int compare(Object o1, Object o2) {
+        String s1 = (String) o1;
+        String s2 = (String) o2;
+        return getBuildDate(s1).compareTo(getBuildDate(s2));
+    }
+    }
+
 	/*
 	 * Local class helping to guess remaining time while reading results from DB
 	 */
@@ -397,10 +405,20 @@ public String[] readAll(String buildName, String[][] configs, String pattern, Fi
 
 	// Read local file first
 	String[] names = read(true, null, configs, true, dataDir, null, subMonitor.newChild(100));
+	if (names==null) {
+		// if one local files is missing then force a full DB read!
+		// TODO moderate this to force the DB read only for the missing file...
+		return read(false, null, configs, true, dataDir, null, subMonitor.newChild(900));
+	}
 	
-	// Read database contents after
-	boolean force = names==null;
-	return read(false, force ? null : buildName, configs, force, dataDir, null, subMonitor.newChild(900));
+	// Look for missing builds
+	String[] builds = DB_Results.getBuilds();
+	Arrays.sort(builds, new BuildDateComparator());
+	int length = builds.length;
+	for (int i=this.allBuildNames.length; i<length; i++) {
+		read(false, builds[i], configs, true, dataDir, null, subMonitor.newChild(900));
+	}
+	return this.allBuildNames;
 }
 
 /**
@@ -463,13 +481,7 @@ private void reset() {
 }
 
 private void setAllBuildNames() {
-	SortedSet builds = new TreeSet(new Comparator() {
-		public int compare(Object o1, Object o2) {
-	        String s1 = (String) o1;
-	        String s2 = (String) o2;
-	        return getBuildDate(s1).compareTo(getBuildDate(s2));
-	    }
-	});
+	SortedSet builds = new TreeSet(new BuildDateComparator());
 	int size = size();
 	for (int i=0; i<size; i++) {
 		ComponentResults componentResults = (ComponentResults) this.children.get(i);
