@@ -66,7 +66,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible configurations.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#readAll(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
+	 * (see {@link PerformanceResults#readAll(String, String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
 	 */
 	public final static String[] CONFIGS;
 
@@ -74,7 +74,7 @@ public abstract class AbstractResults implements Comparable {
 	 * The list of possible test boxes.
 	 * <p>
 	 * Only used if no specific configurations are specified
-	 * (see {@link PerformanceResults#readAll(String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
+	 * (see {@link PerformanceResults#readAll(String, String[][], String, File, int, org.eclipse.core.runtime.IProgressMonitor)}.
 	 * </p>
 	 * Note that this is a copy of the the property "eclipse.perf.config.descriptors"
 	 * defined in org.eclipse.releng.eclipsebuilder/eclipse/helper.xml file
