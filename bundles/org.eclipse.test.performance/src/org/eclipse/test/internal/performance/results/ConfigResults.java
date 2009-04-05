@@ -333,10 +333,10 @@ private void initialize() {
 			if (lastBaseline == null || baselineBuildDate == null || baselineBuildDate.compareTo(buildResults.getDate()) >= 0) {
 				lastBaseline = buildResults;
 			}
-		}
-		if (baselineBuildName != null && buildResults.getName().equals(baselineBuildName)) {
-			this.baseline = buildResults;
-			this.baselined = true;
+			if (baselineBuildName != null && buildResults.getName().equals(baselineBuildName)) {
+				this.baseline = buildResults;
+				this.baselined = true;
+			}
 		} else if (currentBuildName == null || currentBuildDate == null || buildResults.getDate().compareTo(currentBuildDate) >= 0) {
 			this.current = buildResults;
 			this.valid = true;
