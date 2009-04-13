@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2005 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,11 @@ import junit.framework.TestCase;
  * 		
  *   public void testMyOperation() {
  *     for (int i= 0; i < 10; i++) {
+ *       // preparation
  *       startMeasuring();
  *       // my operation
  *       stopMeasuring();
+ *       // clean up
  *     }
  *     commitMeasurements();
  *     assertPerformance();
@@ -138,15 +140,31 @@ public class PerformanceTestCase extends TestCase {
 	 * It starts capturing of performance data.
 	 * Must be followed by a call to {@link PerformanceTestCase#stopMeasuring()} before subsequent calls
 	 * to this method or {@link PerformanceTestCase#commitMeasurements()}.
+	 * 
+	 * @see PerformanceMeter#start()
 	 */
 	protected void startMeasuring() {
 		fPerformanceMeter.start();
 	}
 	
+	/**
+	 * Called from within a test case immediately after the operation to measure.
+	 * Must be preceded by a call to {@link PerformanceTestCase#startMeasuring()}, that follows any
+	 * previous call to this method.
+	 * 
+	 * @see PerformanceMeter#stop()
+	 */
 	protected void stopMeasuring() {
 		fPerformanceMeter.stop();
 	}
 	
+	/**
+	 * Called exactly once after repeated measurements are done and before
+	 * their analysis. Afterwards {@link PerformanceTestCase#startMeasuring()} and
+	 * {@link PerformanceTestCase#stopMeasuring()} must not be called.
+	 * 
+	 * @see PerformanceMeter#commit()
+	 */
 	protected void commitMeasurements() {
 		fPerformanceMeter.commit(); 
 	}
