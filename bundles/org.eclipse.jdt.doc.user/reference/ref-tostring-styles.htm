@@ -86,37 +86,45 @@ Because there's no <code>String.format()</code> in JDK 1.4 and ealier, <code>Mes
 <pre>return MessageFormat.format("FooClass [aFloat={1}, aString={2}, anInt={3}, anObject={4}]", 
   new Object[] { Float.valueOf(aFloat), aString, Integer.valueOf(anInt), anObject });</pre>
 </li>
-<!--
-<li><h3>Apache Commons-Lang ToStringBuilder</h3>
-This style uses <code>org.apache.commons.lang.builder.ToStringBuilder</code>. It ignores the format template because ToStringBuilder already takes care the output string's format. Maybe it's a little less flexible, but the power of this solution is that you can easily change the style of all toStrings within the project without changing any actual object's toString method.<br>
-ToStringBuilder, depending on configuration, also takes care of listing array contents or prints only the size of a field in case of array, <code>Collection</code> or <code>Map</code>. That's why it is not recommended to use "ignore arrays' default toString()" or "Limit number of items in arrays/collections/maps" options with this style.
-<pre>ToStringBuilder builder = new ToStringBuilder(this);
-builder.append("aFloat", aFloat);
-builder.append("aString", aString);
-builder.append("anInt", anInt);
-builder.append("anObject", anObject);
-return builder.toString();</pre>
-Skipping nulls works this way:
-<pre>ToStringBuilder builder = new ToStringBuilder(this);
-builder.append("aFloat", aFloat);
-if (aString != null)
-	builder.append("aString", aString);
-builder.append("anInt", anInt);
-if (anObject != null)
-	builder.append("anObject", anObject);
-return builder.toString();</pre>
-</li>
-<li><h3>Apache Commons-Lang ToStringBuilder witch chained calls</h3>
-Again, this solution is for those who prefer chained calls to append method.
-<pre>ToStringBuilder builder = new ToStringBuilder(this);
-builder.append("aFloat", aFloat).append("aString", aString)
-		.append("anInt", anInt).append("anObject", anObject);
-return builder.toString();</pre>
-"Skip null values" option breaks the chain in similar way to chained StringBuilder style.
-</li>
-<li><h3>Spring Framework's ToStringCreator</h3>
-This style behaves the same as Apache ToStringCreator except it uses <code>org.springframework.core.style.ToStringCreator</code> to create output string. There's a chained-calls version as well.
+<li><h3><a name="custombuilder">Custom toString() builder</a></h3>
+<p>This style uses an external class to build a result string. It can use classes that fulfill the following conditions:
+<ul>
+<li>Provide a public constructor taking a single <code>Object</code> as parameter - it will be passed an object for which the toString() method is called</li>
+<li>Provide methods for appending member information - these are methods with specified name, that take an <code>Object</code> and (optionally) a <code>String</code> (in any order)</li>
+<li>Provide a method for retrieving result - that is a method taking no arguments and returning a <code>String</code></li>
+</ul></p>
 
+<p>Custom builder requires some additional configuration to work properly. All necessary options can be entered in a dialog box showing up after clicking 'Configure...' button. These options include:
+<ul>
+<li><b>Builder class</b> - a fully qualified name of a class to use. It can be typed in manually or selected from a class search dialog box
+(in this case it's automatically checked if selected class meets the requirements).
+It can be a class declared either directly in current project or in one of included libraries - 
+it just has to be accessible on the build path. For example, ToStringBuilder from the Apache Commons Lang library or
+ToStringCreator from the Spring Framework work very well with this mechanism.</li>
+<li><b>Builder label</b> - any valid java identifier. It will be used to reference the builder object.</li>
+<li><b>Append method</b> - the name of methods to use for appending items. If the class provides many methods with this name, methods taking two arguments (one of them must be <code>String</code>) are preferred over those taking a single argument (additionally, the <code>String</code> argument shall preferably be the first one). If there are versions of the method that take specific argument types, they are also used when possible.</li>
+<li><b>Result method</b> - the name of a method to use for retrieving final result.</li>
+<li><b>Chain invocations</b> - determines whether calls to the <b>append</b> methods should form chains. This option takes effect only for methods that have proper return type (that is, the builder class, or a subclass).</li>
+</ul></p>
+
+<p>For example, suppose your builder class looks like this:
+<pre>package org.foo.ToStringBuilder2;
+
+public class ToStringBuilder2 {
+	public ToStringBuilder2(Object o) {...}
+	public ToStringBuilder2 appendItem(String s, Object o) {...}
+	public ToStringBuilder2 appendItem(String s, float f) {...}
+	public String getString() {...}
+}</pre>
+Of course in this case <b>builder class</b> should be set to <code>"org.foo.ToStringBuilder2"</code>, <b>builder label</b> can be for example <code>"builder"</code>, <b>append method</b> is <code>"appendItem"</code> and <b>result method</b> is <code>"getString"</code>. With <b>chain invocations</b> selected, generated method will look like this:
+<pre>ToStringBuilder2 builder = new ToStringBuilder2(this);
+builder.append("aFloat", aFloat).append("aString", aString).append("anInt", new Integer(anInt))
+		.append("anObject", anObject);
+return builder.getString();</pre></p>
+
+<p>Note that a primitive variable <code>anInt</code> was passed to the builder using wrapper type. This is done for projects using JDK 1.4 and earlier (for later JDKs the compiler does it automatically). In case of <code>aFloat</code> there was a specific method in builder class so no wrapping was required.</p>
+</li>
+</ul>
     <p>
       <img src="../images/ngrelr.png" alt="Related reference" border="0" >
     </p>
@@ -125,7 +133,5 @@ This style behaves the same as Apache ToStringCreator except it uses <code>org.s
 	  <a href="ref-tostring-templates.htm">toString() Generator: Format Templates</a><br>
 	  <a href="ref-tostring-listcontent.htm">toString() Generator: Content Listing</a>
     </p>
- -->
-</ul>
   </body>
 </html>
