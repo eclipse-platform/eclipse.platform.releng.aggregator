@@ -414,9 +414,21 @@ public String[] readAll(String buildName, String[][] configs, String pattern, Fi
 	// Look for missing builds
 	String[] builds = DB_Results.getBuilds();
 	Arrays.sort(builds, new BuildDateComparator());
-	int length = builds.length;
-	for (int i=this.allBuildNames.length; i<length; i++) {
-		read(false, builds[i], configs, true, dataDir, null, subMonitor.newChild(900));
+	int lengthDB = builds.length;
+	int lengthLocal = names.length;
+	if (lengthLocal < lengthDB) {
+		int length= lengthDB-lengthLocal;
+		String[] addedBuilds = new String[length];
+		int idx = length-1;
+		int idxDB = --lengthDB;
+		while (!this.allBuildNames[lengthLocal-1].equals(builds[idxDB])) {
+			addedBuilds[idx] = builds[idxDB];
+			idxDB--;
+			idx--;
+		}
+		for (int i=idx+1; i<length; i--) {
+			read(false, addedBuilds[i], configs, true, dataDir, null, subMonitor.newChild(900));
+		}
 	}
 	return this.allBuildNames;
 }
