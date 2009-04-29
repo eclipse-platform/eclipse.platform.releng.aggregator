@@ -228,11 +228,10 @@ public int hashCode() {
  * 	db builds), <code>false</code> otherwise.
  */
 public boolean isValid() {
-	String[] buildNames = DB_Results.getBuilds();
-	Set scenarioBuilds = getAllBuildNames();
-	int length = buildNames.length;
-	for (int i=0; i<length; i++) {
-		if (!scenarioBuilds.contains(buildNames[i])) {
+	int size = this.children.size();
+	for (int i=0; i<size; i++) {
+		ConfigResults configResults = (ConfigResults) this.children.get(i);
+		if (!configResults.isValid()) {
 			return false;
 		}
 	}
