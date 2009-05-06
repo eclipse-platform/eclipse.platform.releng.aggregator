@@ -420,13 +420,13 @@ public String[] readAll(String buildName, String[][] configs, String pattern, Fi
 		int length= lengthDB-lengthLocal;
 		String[] addedBuilds = new String[length];
 		int idx = length-1;
-		int idxDB = --lengthDB;
+		int idxDB = lengthDB-1;
 		while (!this.allBuildNames[lengthLocal-1].equals(builds[idxDB])) {
 			addedBuilds[idx] = builds[idxDB];
 			idxDB--;
 			idx--;
 		}
-		for (int i=idx+1; i<length; i--) {
+		for (int i=idx+1; i<length; i++) {
 			read(false, addedBuilds[i], configs, true, dataDir, null, subMonitor.newChild(900));
 		}
 	}
