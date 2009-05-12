@@ -231,11 +231,11 @@ public boolean isValid() {
 	int size = this.children.size();
 	for (int i=0; i<size; i++) {
 		ConfigResults configResults = (ConfigResults) this.children.get(i);
-		if (!configResults.isValid()) {
-			return false;
+		if (configResults.isValid()) {
+			return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 /**
