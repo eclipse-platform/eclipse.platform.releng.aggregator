@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html lang="en">
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
@@ -13,23 +13,24 @@ img[alt] {background-color:#ffdddd;}
 tr {vertical-align: top;}
 ul {padding-left: 1.2em;}
 </style>
-<title>What's New in 3.4 (JDT)</title>
+<title>What's New in 3.5 (JDT)</title>
 <script language="JavaScript" type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"> </script>
 </head>
 
 <body>
-<h2>What's New in 3.4 (JDT)</h2>
+<h2>What's New in 3.5 (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools
-for the 3.4 release of Eclipse. They are grouped into:</p>
+for the 3.5 release of Eclipse. They are grouped into:</p>
 <ul>
 	<li><a href="#JavaEditor">Java Editor</a></li>
+	<li><a href="#JavaCompareEditor">Java Compare Editor</a></li>
 	<li><a href="#JavaRefactoring">Java Refactoring and Source Actions</a></li>
 	<li><a href="#JavaCompiler">Java Compiler</a></li>
 	<li><a href="#JavaViews">Java Views and Dialogs</a></li>
 	<li><a href="#Debug">Java Debugger</a></li>
 </ul>
 <p>
-See also the <a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New in 3.4</a>
+See also the <a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New in 3.5</a>
 document for changes in the Platform.
 </p>
 <br>
@@ -41,382 +42,318 @@ document for changes in the Platform.
   <col width="30%">
   <col width="70%">
   </colgroup>
+
   <tbody>  
     <!-- ******************* Java Editor ************************************* -->
     <tr> 
       <td colspan="2"><a name="JavaEditor"></a> <div style="font-size: 20px; font-weight: bold;"> 
           Java Editor </div></td>
     </tr>
-    
-  <tr>
-    <td><p align="right"><b>Java Editor Breadcrumb</b></p></td>
-    <td>
-      <p>The Java editor now offers a breadcrumb which shows the path to the element
-      at the cursor position. The breadcrumb can be enabled via the 
-      <b>Toggle Breadcrumb</b> tool bar button or by pressing <b>Alt+Shift+B</b>:</p>
-      <p><img src="images/breadcrumb.png" alt="Picture showing the breadcrumb in the Java editor" title="Java Editor breadcrumb"></p>
-      <p> Each element in the breadcrumb can be selected and actions can be invoked
-        through a context menu or keyboard short cuts.</p>
-      <p> <img src="images/breadcrumb-context-menu.png" alt="Context menu on breadcrumb item" title="Breadcrumb Context Menu"> </p>
-      <p>Furthermore the breadcrumb lets you navigate to other elements via drop-downs.</p>
-      <p><img src="images/breadcrumb-drop-down.png" alt="Breadcrumb drop down" title="Breadcrumb Drop Down"> </p>
+
+  <tr id="constructor-completion"> 
+    <td width="30%" valign="top" align="left">
+		<b>Constructor completion</b>
+	</td>
+    <td width="70%" valign="top">
+      Content Assist can now propose the available constructors of a class when
+         the completion happens in an allocation expression:
+      <p><img src="images/constructor-completion.png" alt="Constructor completion"/></p>
+      <p>If the class is not already imported (as shown in the example above),
+      then the corresponding import will also be added.</p>
     </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Rich Javadoc Hover</b></p></td>
-    <td>
-      <p>The Javadoc hover can now be used to navigate Javadoc.</p>
-      <ul>
-        <li>Follow links in Javadoc</li>
-        <li>Go forward and backward in the navigation history</li>
-        <li>Show the current content in the Javadoc view</li>
-        <li>Open the declaration of the current element</li>
-        <li>Open the current content in an external browser</li>
-        <li>Resize the hover</li>
-        <li>Move the hover (start dragging in the toolbar area)</li>
-      </ul>
-      <p> <img src="images/javadoc-hover.png" alt="The enriched Javadoc hover" title="Enriched Javadoc hover"> </p>
-      <p>The hover also shows the icon corresponding to the current Java element</p>
-      <p>To enrich a hover either press <b>F2</b> or move the mouse into the hover. 
-      You can configure how to enrich the hover on the
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.GeneralTextEditor)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Text Editors preference page">
-          <b>General &gt; Editors &gt; Text Editors</b></a> preference page.</p>
-    </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Rich Java problem hover</b></p></td>
-    <td>
-      <p>The problem hover now offers all available quick fixes for a problem
-      and shows a tool bar on <b>F2</b> or when you move the mouse into it.</p>
-      <p><img src="images/rich-problem-hover.png" alt="Enriched Problem Hover"></p>
-      <p>Quick fixes can be executed by clicking on the links. The actions in
-        the tool bar let you configure the annotation preferences and the problem severity.</p>
-    </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Content assist improvements</b></p></td>
-    <td>
-      <p>Content Assist (<strong>Ctrl+Space</strong>) has been improved in several areas.</p>
-      <ul>
-        <li>Content assist can now use the type of the enclosing <code>instanceof</code> condition to 
-          offer more field and method access proposals:
-          <p><img src="images/instanceof-compl-proposals.png" alt="Instanceof Completion Proposals"></p>
-          <p>The required cast will be inserted when such a proposal is selected.</p>
-        </li>
-        <li>Content assist for static members also work if the type has not been imported yet:
-          <p><img src="images/static-members-completion.png" alt="Static Members Completion"></p>
-          <p>The required import will be added when such a proposal is selected.</p>
-        </li>
-        <li>Content assist can now propose methods with unknown types:
-          <p><img src="images/missing-types-sample2.png" alt="Second example of missing types"></p>
-        </li>
-        <li>Content assist on method invocations shows the guessed arguments:
-          <p><img src="images/argument-guessing.png" alt="Content assist with proposed guessed arguments"></p>
-          <p>This can be configured on the 
-          <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Content Assist preference page">
-          <b>Java &gt; Editor &gt; Content Assist</b></a> preference page.</p>
-        </li>
-      </ul>
-    </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Quick assists<br>
-      </b></p></td>
-    <td><p>New quick assists (<b>Ctrl+1</b>) have been added in this release:</p>
-      <ul>
-        <li><b>Create getter and setters</b>: Available on fields.
-          <br><img style="margin-top: .5em" src="images/gettersetter-quickassist.png" alt="Screenshot of the 'create getter and setter' quick assist">
-          <br><br>
-        </li>
-        <li><b>Extract to method</b>: Available on expressions and statements.
-          <br><img style="margin-top: .5em" src="images/extractmethod-quickassist.png" alt="Screenshot of the 'extract method' quick assist">
-          <br><br>
-        </li>
-        <li><b>Extract to local variable</b> without replacing all occurrences: Available on expressions.
-        </li>
-        <li><b>Use StringBuilder for string concatenation</b>: Available on string concatenations.
-          <br><img style="margin-top: .5em" src="images/convert-to-sb2.png"  alt="Picture showing the 'Convert to StringBuffer' quick assist" title="'Convert to StringBuffer' quick assist">
-          <br><code>StringBuilder</code> is used in Java projects with a 1.5 or higher compliance, <code>StringBuffer</code> is used in
-          projects with a lower compliance.
-        </li>
-        <li><b>Use MessageFormat for string concatenation</b>: Similar to convert to <code>StringBuilder</code>, 
-          <code>MessageFormat</code> is used to replace string concatenations.
-          <br><img style="margin-top: .5em" src="images/convert-to-messageformat.png"  alt="Picture showing the 'Convert to MessageFormat' quick assist">
-        </li>
-      </ul>
-    </td>
-  </tr>
-    
-  <tr>
-    <td><p align="right"><b>SWT Templates</b></p></td>
-    <td>
-      <p>A set of templates have been added to provide code building blocks for SWT widgets.</p>
-      <p>To add, for example, an SWT button, type <i>Button</i> and press <strong>Ctrl+Space</strong>, 
-      select the <i>Button</i> SWT template, and press <strong>Enter</strong>.</p> 
-      <p> <img src="images/swt-templates.png" alt="Create a button with the Button template"> </p>
-      <p>To see all available templates go to the 
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Templates preference page">
-      <b>Java &gt; Editor &gt; Templates</b></a> preference page or open the Templates view through <b>Window &gt; Show View &gt; Other...</b>.
-      </p>
-	 </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>New Template Variables</b></p></td>
-    <td>
-      <p>New template variables have been added and existing variables have been improved.
-         Consult the <a href="../concepts/concept-template-variables.htm">Template Variables</a> help page for a detailed overview.
-      </p>
-	 </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Specify location for templates</b></p></td>
-    <td>
-      <p>It is now possible to specify the location where
-      Java editor templates are applicable.</p>
-      <ul>
-        <li><b>Statement location</b>: The template shows up only when completing a statement.</li>
-        <li><b>Type member location</b>: The template shows up only when completing a type member.</li>
-      </ul>
-      <p>As a result, Content Assist (<strong>Ctrl+Space</strong>) will only show templates applicable at the current location.</p>
-	 </td>
   </tr>
 
-  <tr>
-    <td><p align="right"><b>Format edited lines on save</b></p></td>
-    <td>
-      <p>A new save action allows to format the edited lines on save. 
-      With this option enabled, format on save generates a minimal amount 
-      of changes, even on unformatted code.</p>
-      <p><img src="images/save-action-preference.png" alt="Save action preference page"></p>
-      <p>To enable this feature go to the 
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Save Actions preference page">
-          <b>Java &gt; Editor &gt; Save Actions</b></a> preference page and select <b>Format edited lines</b>.</p>
-	 </td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>'Fix Project Setup' quick fix<br>
-      </b></p></td>
-    <td><p>If a type can not be resolved a new quick fix offers to fix the class path:</p>
-    <p><img src="images/fix-project-setup.png" alt="Missing type with quick fix and fix project setup dialog"></p>
-    <p>For normal Java projects, the quick fix will search in other projects for the type and offer to add the JAR that contains that type to the build path.
-    For PDE projects, information from the plug-in manifest is used to offer a new plugin dependency. Other project types can add their fix proposal
-    through a new extension point.
-    </p> 
+  <tr id="open-implementation">
+    <td width="30%" valign="top" align="left">
+        <b>Open Implementation hyperlink</b>
+    </td>
+    <td width="70%" valign="top">
+        An <b>Open Implementation</b> hyperlink has been added for overridable methods, which directly opens the implementation 
+        in case there's only one, or shows all the concrete implementations for that method in the hierarchy of its declaring type, using 
+        the quick type hierarchy. By default, the hyperlink appears when you hold down the <b>Ctrl</b> key
+        while hovering over an overridable method.
+       <p><img src="images/open-implementation.png" alt="Open Implementation hyperlink for methods" /></p>
+       <p>You can configure the modifier for this hyperlink on the <b>General &gt; Editors &gt; Text Editors &gt; Hyperlinking</b> preference page.</p>
     </td>
   </tr>
   
-  <tr>
-    <td><p align="right"><b>Highlighting numbers in Java code</b></p></td>
-    <td>
-      <p>The Java editor can now show numbers with their own custom color.</p>
-      <p> <img src="images/number-highlighting.png" alt="Picture showing custom color for numbers" title="Java Code with Number Coloring"></p>
-      <p>The color can be configured on the 
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.JavaEditorColoringPreferencePage)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Syntax Color page">
-          <b>Java &gt; Editor &gt; Syntax Coloring</b></a> preference page.</p>      
+  <tr id="select-comment">
+    <td width="30%" valign="top" align="left">
+        <b>Select comment with double click</b>
+    </td>
+    <td width="70%" valign="top">
+		Double clicking on the beginning or end marker of a comment now selects the whole comment.
     </td>
   </tr>
   
-  <tr>
-    <td><p align="right"><b>Javadoc shows constant value</b></p></td>
-    <td>
-      <p>The Javadoc hover and the Javadoc view now show the constant value of static fields.</p>
-      <p><img src="images/const-in-Javadoc-hover.png" alt="Picture showing Javadoc hover with constant value" title="Javadoc hover with constant value"></p> 
+    <tr id="rename-in-workspace">
+    <td width="30%" valign="top" align="left">
+        <b>Quick Fix to start Rename refactoring</b>
+    </td>
+    <td width="70%" valign="top">
+    	The <b>Rename</b> refactoring can now also be started via Quick Fix (<b>Ctrl+1</b>):
+       <p> <img src="images/rename-in-workspace.png" alt="Quick Fix 'Rename in workspace' in Java editor"/></p>
+    </td>
+  </tr>
+
+  <tr id="javadoc-header-links">
+    <td width="30%" valign="top" align="left">
+        <b>Links in Javadoc headers</b>
+    </td>
+    <td width="70%" valign="top">
+        In the headers of Javadoc hovers and the Javadoc view, references to other types and members are now links.
+        You can click on a method return type or parameter type to quickly read the type's Javadoc.
+    	<p><img src="images/javadoc-header-links.png" alt="Javadoc hover with mouse over method return type"/></p>
+    	And when you're done with reading, just click <b>Back</b> in the toolbar to see the original Javadoc again.
+    </td>
+  </tr>
+  
+  <tr id="open-in-properties-file">
+    <td width="30%" valign="top" align="left">
+        <b>Open in Properties File action in NLS Hover</b>
+    </td>
+    <td width="70%" valign="top">
+        The <b>NLS string hover</b> now has an <b>Open in Properties File </b> action in the toolbar which  
+        locates the selected NLS string in the corresponding properties file where it is defined. The action 
+        is activated in the toolbar with focus on the hover. 
+       <p><img src="images/open-in-properties-file.png" alt="Open in Properties File action in NLS hover" /></p>        
+    </td>
+  </tr>
+  
+  <tr id="joinLine-formatter-option"> 
+    <td width="30%" valign="top" align="left">
+		<b>Formatter option to preserve user line breaks</b>
+    </td>
+    <td width="70%" valign="top">
+      The Java code formatter can now optionally preserve user line breaks by not joining lines in code or comments.
+      <p>For example, the wrapped lines of the <code>return</code> statement in following test case:</p>
+      <p><img src="images/formatter-join-lines-before.png" alt="Example of Code to Format"/></p>  
+      <p>will be preserved by the formatter when the <b>Never join lines</b> preference is used and now produces the following result:</p>
+      <p><img src="images/formatter-join-lines-after.png" alt="Coded Formatted with Never Join Lines"/></p>  
+      <p>This preference can be configured on the <b>Java &gt; Code Style &gt; Formatter</b> preference page.
+      		 See the <b>Never join lines</b> option on the <b>Line Wrapping</b> and <b>Comments</b> tab.</p>
+    </td>
+  </tr>
+
+   <!-- ******************* Java Compare Editor ************************************* -->
+
+     <tr> 
+      <td colspan="2"><a name="JavaCompareEditor"></a> <div style="font-size: 20px; font-weight: bold;"> 
+          Java Compare Editor</div></td>
+    </tr>
+   
+  <tr id="workspace_java-compare">
+    <td width="30%" valign="top" align="left">
+		<b>General typing enhancements</b></td>
+    <td width="70%" valign="top">
+		<p>The Java Compare editor now supports new text editing features like move/copy/delete line and formatting.<p>
+    </p>
+    </td>
+  </tr>
+
+    <tr id="java-compare-hyperlinking">
+    <td width="30%" valign="top" align="left">
+        <b>Hyperlinking</b>
+    </td>
+    <td width="70%" valign="top">
+    	<p><img src="images/java-compare-hyperlinking.png" alt="Hyperlinking" /></p>
 	</td>
   </tr>
   
-  <tr>
-    <td><p align="right"><b>Mark read and write occurrences</b></p></td>
-    <td>
-     <p><b>Mark Occurrences (Alt+Shift+O)</b> now marks read and write accesses with different colors.</p>
-      <img src="images/read-write-occs.png" alt="Picture showing read and write accesses in the Java editor" title="Read and write accesses in the Java editor">
-      <p>Mark Occurrences can be enabled in the tool bar. Annotation colors are configured on the 
-        <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.editors.preferencePages.Annotations)")'> 
-          <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Annotations preference page">
-        <b>General &gt; Editors &gt; Text Editors &gt; Annotations</b></a> preference page</p>
+    <tr id="java-compare-content-assist">
+    <td width="30%" valign="top" align="left">
+        <b>Content Assist</b>
+    </td>
+    <td width="70%" valign="top">
+		<p><img src="images/java-compare-assist.png" alt="Content Assist" /></p>
 	</td>
   </tr>
   
-  <tr>
-    <td><p align="right"><b>Occurrences in File improvements</b></p> </td>
-    <td><p>Several improvements have been added to <b>Search &gt; Occurrences in File</b>:</p>
-      <ul>
-        <li>The quick menu (<b>Ctrl+Shift+U</b>) now only shows the searches
-          applicable for the current selection. If only one search kind is possible,
-          the shortcut will directly invoke the search.
-          <p><img src="images/find-occs-quick-menu.png" alt="Picture showing the 'Occurrences in File' quick menu" title="'Occurrences in File' quick menu"></p>
-        </li>
-        <li>The menu now offers all searches available by <b>Mark Occurrences</b>. </li>
-        <li>Matches are now highlighted with different colors for read and write accesses in the search view.</li>
-        <li>The search view offers a <b>Link with Editor</b> mode
-          where the view input is connected to the current editor selection. 
-          <p><img src="images/link-with-editor-in-occs.png" alt="Picture showing 'Link With Editor' toolbar button in the 'Occurrences result view'" title="'Link With Editor' toolbar button in the 'Occurrences result view'"></p>
-        </li>
-      </ul>
-     </td>
+    <tr id="javadoc-on-hover">
+    <td width="30%" valign="top" align="left">
+        <b>Javadoc on hover</b>
+    </td>
+    <td width="70%" valign="top">
+		<p><img src="images/java-compare-hover.png" alt="Javadoc hovers" /></p>
+	</td>
   </tr>
   
+    <tr id="java-compare-quick-outline">
+    <td width="30%" valign="top" align="left">
+        <b>Quick Outline</b>
+    </td>
+    <td width="70%" valign="top">
+		<p><img src="images/java-compare-outline.png" alt="Quick outline" /></p>
+    </td>
+  </tr>
+  
+    <tr id="java-compare-reconcile">
+    <td width="30%" valign="top" align="left">
+        <b>Reconcile Java compare structure while typing</b>
+    </td>
+    <td width="70%" valign="top">
+        The Java compare editor now updates its structure while you are typing inside the editor.
+        </p>
+        <p><img src="images/dynamic-structure-compare.png" alt="Dynamic structure comparison"/></p>
+    </td>
+  </tr>
+  
+    
   <!-- *************** Java Refactoring ************************************ -->
     <tr> 
       <td colspan="2"><a name="JavaRefactoring"></a> <div style="font-size: 20px; font-weight: bold;"> 
           Java Refactoring and Source Actions</div></td>
     </tr>
 
-  <tr>
-    <td><p align="right"><b>Extract Class refactoring</b></p></td>
-    <td>
-      <p><b>Extract Class</b> replaces a set of fields with a new container object. 
-      All references to the fields are updated to access the new container object.
-      This refactoring helps to group fields which logically belong together.</p>
-      <p>The following example demonstrates how to extract the fields <i>x,y,z</i> to a new class <i>Position</i>:</p>
-      <p><img src="images/extract-class-start.png" alt="Extract Class Position"></p>
-      <p>The refactoring results in the creation of a new <code>Position</code> class which
-         is used in the original class:</p>
-      <p><img src="images/extract-class-result.png" alt="Extract Class Position result"></p>
-      <p>To execute the <b>Extract Class</b> refactoring, select a type and invoke <b>Refactor &gt; Extract Class</b>.</p>
+  <tr id="generate-tostring">
+    <td width="30%" valign="top" align="left">
+        <b>Generate toString()</b>
+    </td>
+    <td width="70%" valign="top">
+        The new toString() generator allows you to quickly generate a toString() method for your class.
+        <b>Source</b> &gt; <b>Generate toString()...</b> offers several options to configure the
+        format of the resulting String and the style of the generated code in the toString() method body.
+       <p><img src="images/generate-tostring-dialog.png" alt="Generate toString() dialog" /></p>
     </td>
   </tr>
-  
-  <tr>
-    <td><p align="right"><b>New Clean Ups</b></p></td>
-    <td><p>The following Clean Ups have been added:</p>
-      <ul>
-        <li><b>Correct indentation</b>: Corrects the indentation of your source code.
-        </li>
-        <li><b>Add unimplemented methods</b>: Adds code stubs for all unimplemented methods.
-        </li>
-      </ul>
-      <p><b>Add unimplemented methods</b> is most useful after adding a new method to an interface.
-         <b>Correct indentation</b> is also available as save action. 
-      </p>
-      <p>To clean up your code select a set of Java elements and invoke <b>Source &gt; Clean Up</b>.</p>
-	</td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Refactoring flags references in binaries</b></p></td>
-    <td>
-      <p>Refactorings now flag references to the refactored element inside compiled class files. Such references
-      cannot be updated and would lead to problems at run time.</p>
-      <p><img src="images/refactoring-references-in-binaries.png" alt="Refactoring error dialog showing references in binaries"></p>
-	</td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Undo format</b></p></td>
-    <td>
-      <p>Formatting a set of Java elements, e.g. via Package Explorer, can now be undone using <b>Edit &gt; Undo Format (Ctrl+Z)</b>.</p>
-	</td>
-  </tr>
-  
-  <tr>
-    <td><p align="right"><b>Annotation formatting improvements</b></p> </td>
-    <td>
-      <p>The Java source code formatter now provides fine-grained options for line breaks after annotations. 
-      It is possible to specify for each type of annotation if it should be followed by a line break:</p>
-      <ul>
-        <li>Annotations on members:
-          <p> <img src="images/annotation-fmt-member.png" alt="A member annotation" title="Member Annotation"></p>
-        </li>
-        <li>Annotations on parameters:
-          <p> <img src="images/annotation-fmt-param.png" alt="A parameter annotation" title="Parameter Annotation"></p>
-        </li>
-        <li>Annotations on local variables:
-          <p> <img src="images/annotation-fmt-var.png" alt="A local variable annotation" title="Local variable Annotation"></p>
-        </li>
-      </ul>
-      <p>This can be configured on the
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage)")'> 
-        <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Formatter preference page">
-        <b>Java &gt; Code Style &gt; Formatter</b></a> preference page.</p> 
-      <p><img src="images/annotation-fmt.png" alt="Formatter preference dialog showing the new line tab page" title="Formatter Preference Dialog"> </p>
+
+  <tr id="use-blocks">
+    <td width="30%" valign="top" align="left">
+        <b>Optionally use blocks when generating hashCode() and equals()</b>
     </td>
-  </tr>  
+    <td width="70%" valign="top">
+    	The <b>Generate hashCode() and equals()</b> wizard now allows you to choose
+    	whether blocks are used for <code>if</code> statements:
+		<p><img src="images/hashcode-and-equals-wizard.png" alt="Generate hashCode() and equals() wizard"/></p>
+    </td>
+  </tr>
      
     <!-- ******************* Java Compiler ************************************* -->
     <tr> 
       <td colspan="2"><a name="JavaCompiler"></a> <div style="font-size: 20px; font-weight: bold;"> 
           Java Compiler </div></td>
     </tr>
-    
-  <tr> 
-    <td><p align="right"><b>Java compiler on multi-CPU machines</b></p></td>
-    <td><p>The Eclipse Compiler for Java is now taking advantage of the multi-threading 
-        capability of multi-CPU machines. Our measurements show improvements up to 30%.
-        Results depend on the JRE and platform used.</p>
+
+    <TR id=compiler-diagnostic>
+      <TD vAlign=top align=left width="30%"><B>New compiler diagnostic</B> </TD>
+      <TD vAlign=top width="70%"><P>Comparing identical values is now detected
+          by the compiler and reported as a warning by default:</P>
+        <P><IMG alt="Comparing Identical Values Warning Example" 
+      src="images/comparing-identical-values-example.png" /></P>
+        <P>You can configure this setting in the <B>Potential programming problems</B> section
+          on the <B>Java &gt; Compiler &gt; Errors/Warnings</B> preference page,
+          or by clicking the <B>Configure Problem Severity</B> button in the
+          problem hover toolbar.</P></TD>
+    </TR>
+
+  <tr id="missing-synchronized">
+    <td width="30%" valign="top" align="left">
+        <b>Compiler problem for missing synchronized modifier</b>
     </td>
-  </tr>
-    
-  <tr> 
-    <td><p align="right"><b>Support for external class folders</b></p></td>
-    <td><p>Class folders located outside the workspace (external) 
-        can now be added to the build path.</p>
-        <p>To add an external class folder use the <b>Java Build Path</b> page of the project properties, select
-        the <b>Libraries</b> tab and push the <b>Add External Class Folder</b> button.</p>
-        <p><img src="images/external-class-folders-prop.png" alt="How set up an External Class Folder"></p>
+    <td width="70%" valign="top">
+    	The compiler now issues a warning when a method overrides a synchronized method
+    	but the method itself is not synchronized.
+    	<p><img src="images/missing-synchronized.png" alt="Problem hover with quick fix for missing synchronized modifier"/></p>
+    	You can use the quick fix to add the <code>synchronized</code> modifier, and you can
+    	configure the problem severity on <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings</b>
+    	in the <b>Potential programming problems</b> section.
     </td>
   </tr>
 
-  <tr> 
-    <td><p align="right"><b>New and improved compiler diagnostics</b></p></td>
-    <td>
-      <p>Several improvements have been made to the problem detection in the compiler:</p>
-      <ul>
-        <li><b>Unnecessary declaration of thrown exception</b> can now be ignored
-          if it is documented with an <code>@throws</code> or an <code>@exception</code> tag.
-          <p><img src="images/unused-declared-exception.png" alt="Screenshot of the Error/Warning preference page"></p>
-          <p>A Quick Fix (<b>Ctrl+1</b>) helps adding the Javadoc tag.</p>
-        </li>
-        <li><b>Unnecessary declaration of thrown exception</b> can now report 
-            warnings for unused declarations of 'Exception' and 'Throwable'. 
-            <p>A warning is issued if no such exception has been explicitly thrown in the code.</p>
-        </li>
-        <li><b>Null pointer accesses</b> are now reported as a warning by default.</li>
-        <li><b>Unnecessary @SuppressWarnings</b> annotations are now detected by the compiler.
-          <p><img src="images/uu-suppress-warning-eg.png" alt="Unused Suppress Warning Example" ></p>  
-          <p>Note that <code>@SuppressWarnings(&quot;all&quot;)</code> is still silencing
-             the warning for unnecessary <code>@SuppressWarnings</code>, as it is
-             the master switch to silence all warnings.</p>
-        </li>
-        <li><b>Redundant superinterfaces</b> can now be detected by the compiler.
-          <p><img src="images/redundant-si-example.png" alt="Example of diagnosed redundant super interface"></p>
-          <p>The unnecessary code can be removed by using Quick Fix (<b>Ctrl+1</b>).</p>
-        </li>
-      </ul>
-      <p>You can configure this settings on the  
-        <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
-         <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
-         <b>Java &gt; Compiler &gt; Errors/Warnings</b></a> preference page.</p>
+  <tr id="switch-case-fall-through">
+    <td width="30%" valign="top" align="left">
+        <b>Suppress compiler problem for 'switch' case fall-through</b>
+    </td>
+    <td width="70%" valign="top">
+        The compiler problem for expected fall-throughs in switch case statements can now be suppressed by preceding
+        the following <code>case</code> statement with a comment that starts with $FALL-THROUGH$. This is especially
+		interesting for code that can't use the J2SE-5.0-style <code>@SuppressWarnings("fallthrough")</code> annotation.
+    	<p><img src="images/switch-case-fall-through.png" alt="Problem hover with quick fixes for switch case fall-through"/></p>
+    	This problem is not reported by default. You can enable the <b>'switch' case fall-through</b> warning on
+    	<b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings</b>
+    	in the <b>Potential programming problems</b> section.
     </td>
   </tr>
-  
-  <tr> 
-    <td><p align="right"><b>CLDC 1.1 class file compatibility</b></p></td>
-    <td><p>The Java compiler can now create <a href="http://java.sun.com/products/cldc/">CLDC 1.1</a> compatible class files.</p>
-      <p>You can set this on the 
-      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CompliancePreferencePage)")'> 
-         <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page">
-         <b>Java &gt; Compiler</b></a> preference page:</p>
-      <p><img src="images/cldc-compatibility.png" alt="Screenshot of the Compiler preference page"></p>
+
+  <tr id="class-path-header"> 
+    <td width="30%" valign="top" align="left">
+		<b>Classpath resolution honors the 'Class-Path' header of JAR manifest file</b>
+    </td>
+    <td width="70%" valign="top">
+      The 'Class-Path' header of a JAR manifest is now honored in the Java model. JARs defined by 'Class-Path' are now automatically
+      added to the build path.
+      <p>For example, 'nested.jar' is a referenced library although it was not explicitly specified in the project build path
+      but through the manifest of 'lib.jar':</p>
+      <p><img src="images/class-path-header.png" alt="Class-Path Clause Example"/></p>  
     </td>
   </tr>
-  
-  <tr> 
-    <td><p align="right"><b>Flexible ZIP archive extensions</b></p></td>
-    <td><p>It is now possible to add ZIP archives to the build path with file 
-        extensions other than <code>.zip</code> or <code>.jar</code>.</p>
-        <p>It is now, for example, possible to add a <code>.rar</code> file on the build path.</p>
+
+  <tr id="relative-build-path"> 
+    <td width="30%" valign="top" align="left">
+		<b>Build path supports ".."</b>
+    </td>
+    <td width="70%" valign="top">
+      The path of a library, variable or container entry can now be anywhere relative to the project,
+      e.g. if the library is on a sibling directory, its path can be specified using the ".." as follows:
+      <p><img src="images/build-path-dot-dot-path.png" alt="Parent Relative Path Example"/></p>  
+    </td>
+  </tr>
+
+  <tr id="duplicate-build-path-diagnostic"> 
+    <td width="30%" valign="top" align="left">
+		<b>Build path resolution tolerates duplicate entries</b>
+    </td>
+    <td width="70%" valign="top">
+      Duplicate entries in the build path are now tolerated if the redundant entry is found while resolving the build path
+      and not at the raw level.
+      <p>For example, two user libraries used in the project build path referring to the same JAR file are tolerated:</p>
+      <p><img src="images/build-path-duplicate-entries.png" alt="Classpath Duplicate Entries Example"/></p>
+      However, an error is reported if the same JAR file is directly specified twice:
+      <p><img src="images/build-path-invalid-dups.png" alt="Classpath Invalid Duplicate Entries Example"/></p>
+    </td>
+  </tr>
+
+  <tr id="hash-code-compiler-diagnostic"> 
+    <td width="30%" valign="top" align="left">
+        <b>Compiler problem for missing hashCode() method</b>
+    </td>
+    <td width="70%" valign="top">
+    	The compiler can now detect whether a class overrides the <code>equals()</code> method
+    	without overriding the <code>hashCode()</code> method:
+    	<p><img src="images/compiler-hashcode-diagnosis.png" alt="Problem hover with quick fix for missing hashCode method"/></p>
+    	<p>You can either use the quick fix to override the <code>hashCode()</code> method or the quick fix to regenerate both methods.</p>
+    	<p>This problem is not reported by default. You can enable it on <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings</b>
+    	in the <b>Potential programming problems</b> section.</p>
+    </td>
+  </tr>
+
+  <tr id="deadCode-diagnostic"> 
+    <td width="30%" valign="top" align="left">
+		<b>Compiler problem for dead code</b>
+    </td>
+
+    <td width="70%" valign="top">
+      The compiler can now issue a warning if dead code is detected.
+      <p> For instance, <code>if (false) foo();</code> is not reported as truly unreachable code by the Java Language Specification. 
+             When this diagnostic is enabled, the invocation of foo() is signaled as dead code:</p>
+      <p><img src="images/compiler-deadcode-diagnosis.png" alt="Problem hover with quick fix for dead code"/></p>
+      <p>This problem is reported as a warning by default.  You can configure the problem severity on <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings</b>
+	    	in the <b>Potential programming problems</b> section</p>
+      <p>Note that dead code following an <code>if (constant variable)</code> statement, e.g. <code>if (DEBUG)</code>, is not reported.</p>
+    </td>
+  </tr>
+
+  <tr id="compliance-follows-execution-environment">
+    <td width="30%" valign="top" align="left">
+        <b>Compiler compliance follows execution environment</b>
+    </td>
+    <td width="70%" valign="top">
+        When you change the JRE on the build path of a Java project to an execution 
+        environment, Eclipse now automatically updates the compiler compliance settings 
+        on the <b>Java Compiler</b> properties page to use the settings defined by the execution environment.
+       <p><img src="images/compliance-follows-ee.png" alt="Java Compiler properties page" /></p>
+       <p>Note that as of M6 an execution environment is the first choice when 
+       creating a new Java project or a launch configuration.</p>
     </td>
   </tr>
 
@@ -427,131 +364,138 @@ document for changes in the Platform.
           Java Views and Dialogs</div></td>
     </tr>
 
-  <tr>
-    <td><p align="right"><b>JUnit view shows execution time</b></p> </td>
-    <td>
-      <p>The JUnit view now shows the elapsed time for test cases and test suites.</p>
-      <p><img src="images/junit-time.png" alt="JUnit view with elapsed time"></p>
+  <tr id="open-type">
+    <td width="30%" valign="top" align="left">
+        <b>Emphasized matching characters in Open Type dialog</b>
+    </td>
+    <td width="70%" valign="top">
+        The <b>Open Type</b> dialog now emphasizes the characters that match the pattern:
+       <p><img src="images/open-type.png" alt="Emphasized matching characters in Open Type dialog" /></p>
+    </td>
+  </tr>
+
+  <tr id="sort-working-sets">
+    <td width="30%" valign="top" align="left">
+        <b>Sort working sets in Package Explorer</b>
+    </td>
+    <td width="70%" valign="top">
+        The <b>Configure Working Sets...</b> dialog now has a <b>Sort working sets</b> option to sort working sets alphabetically.
+	    The settings are preserved, so the working sets stay sorted, even as new working sets are added.
+       <p><img src="images/sort-working-sets.png" alt="Sort working sets in Package Explorer" /></p>
+        You can enable working sets in the Package Explorer via the <b>Top Level Elements</b> &gt; <b>Working Sets</b> view menu.
+    </td>
+  </tr>
+
+  <tr id="delete-workingSets">
+    <td width="30%" valign="top" align="left">
+        <b>Delete working sets from the Package Explorer</b>
+    </td>
+    <td width="70%" valign="top">
+    	The <b>Delete</b> functionality is now enabled for working sets when the top level 
+    	elements are Working Sets in the Package Explorer. When deleting working sets, you can now either remove or
+    	just hide them from the Package Explorer: 
+       <p> <img src="images/delete-working-set.png" alt="Delete working sets from a Package Explorer"/></p> 
+    </td>
+  </tr>
+
+  <tr id="paste-patch">
+    <td width="30%" valign="top" align="left">
+        <b>Paste patch into Package Explorer</b>
+    </td>
+    <td width="70%" valign="top">
+    	What's the quickest way to apply a patch from Bugzilla? Just open the attachment,
+    	copy the patch to the clipboard and paste it into the <b>Package Explorer</b>.
     </td>
   </tr>
   
-  <tr>
-    <td><p align="right"><b>Improved Javadoc view</b></p> </td>
-    <td>
-      <p>The Javadoc view has been improved with:</p>
-      <ul>
-        <li>Icon corresponding to the current input.</li>
-        <li>Actions to go back and forth in the history.</li>
-        <li>Action to enable and disable linking with selection.</li>
-        <li>Action to open the current input in an external browser.</li>
-      </ul>
-      <p><img src="images/javadoc-view.png" alt="Javadoc View"></p>
+  <tr id="expand-with-constructors">
+    <td width="30%" valign="top" align="left">
+        <b>Call Hierarchy can expand with constructors</b>
     </td>
-  </tr>
-
-  <tr>
-    <td><p align="right"><b>Rearrange content of files per drag and drop</b></p> </td>
-    <td>
-      <p>Unsorted views like the Outline view and the Members view in the 
-      Java browsing perspective can now be used to rearrange members by drag and drop.</p>
-      <p><img src="images/drag-and-drop-outline.png" alt="Outline view showing a drag and drop interaction."></p>
+    <td width="70%" valign="top">
+        In Callers mode, the Call Hierarchy now has an <b>Expand With Constructors</b> action in the context menu for instance methods.
+        <p>
+        This action replaces the normal children of the method with
+        </p>
+        <ul>
+        <li> the constructors of the method's declaring class</li>
+        <li> a node that contains the direct callers of the method.</li>
+        </ul>
+        This is useful for methods in anonymous classes, for example to follow the callers that create a <code>Runnable</code>,
+        instead of those which actually call its <code>run()</code> method.
+        <p><img src="images/expand-with-constructors.png" alt="Expand With Constructors" /></p>
     </td>
   </tr>
   
-  <tr>
-    <td><p align="right"><b>Call Hierarchy view works with fields and types</b></p> </td>
-    <td><p>The Call Hierarchy view in caller mode now works with more kinds of elements:</p>
-      <ul>
-        <li>The children of a field are all members that access the field (read
-          and write accesses)</li>
-        <li>The children of a type or an instance initializer are all constructors
-          of the type</li>
-      </ul>
-      <p><img src="images/call-hierarchy-members.png" alt="Caller Hierarchy on a field"></p>
-    </td> 
-  </tr>
+    <TR id=javadoc-hover>
+      <TD vAlign=top align=left width="30%"><B>Improved Javadoc view and hover</B> </TD>
+      <TD vAlign=top width="70%">The Javadoc view and hovers now support the <STRONG>{@inheritDoc}</STRONG> tag
+        and add links to overridden methods (like the Javadoc tool):
+        <P><img alt="Improved Javadoc hover" 
+      src="images/javadoc-hover.png" /></P>
+        <P>Moreover, the message for deprecated elements now shows up on top,
+          and relative links are supported (for example, to embed images from
+          the 
+      "doc-files" directory or to link to <STRONG>{@docRoot}</STRONG>). </P></TD>
+    </TR>
 
-  <tr>
-    <td><p align="right"><b>Runnable JAR export wizard</b></p></td>
-    <td><p>The Runnable JAR File Export wizard can create a JAR file based on a launch configuration. 
-      The generated JAR file contains all class files from the project including class files from
-      required JARs and projects.</p>
-      <p>The generated JAR can be executed with the command:</p>
-      <blockquote>
-        <p> <code>java -jar generated_file.jar</code></p>
-      </blockquote>
-      <p>or, on most operating systems, by double-clicking the file.</p>
-      <p> <img src="images/runnable-jar.png" alt="Picture showing the runnable JAR export wizard" title="Runnable JAR export wizard"></p>
-      <p>The export wizard can also create an ANT script which can be used to build the JAR.</p>
-      <p>Invoke <b>File &gt; Export...</b> and then select the <b>Java &gt; Runnable JAR file</b> wizard to
-      create such a JAR file.</p>
+  <tr id="open-jar-export-wizard">
+    <td width="30%" valign="top" align="left">
+        <b>Open *.jardesc files with JAR Export Wizard</b>
+    </td>
+    <td width="70%" valign="top">
+        Opening *.jardesc files now launches the JAR Export Wizard by default.
+    	<p><img src="images/jar-export.png" alt="Open With &gt; JAR Export Wizard"/></p>
+    	<p>The <b>Open JAR Packager...</b> action in the context menu is gone.</p>
     </td>
   </tr>
 
-  <tr> 
-    <td><p align="right"><b>More Java search options</b></p></td>
-    <td>
-      <p>Type reference search can now be limited to
-      specific match locations in the code. For example, you can find references in cast expressions, 
-      or in field and local variable types.</p>
-      <p>The following example shows how to search for all catch clauses in
-        your code (search for references to '*' and limit to catch clauses): </p>
-      <p> <img src="images/finegrain-search.png" alt="Picture showing the match location selection UI" title="Match location dialog"></p>
+  <tr id="open-in-junit-view">
+    <td width="30%" valign="top" align="left">
+        <b>Open test result files in JUnit view</b>
+    </td>
+    <td width="70%" valign="top">
+        JUnit test result files from Eclipse or the Ant JUnit tasks can now be opened in the JUnit view via
+        double click or via <b>Open With &gt; JUnit View</b>.
+    	<p><img src="images/open-in-junit-view.png" alt="Open With &gt; JUnit View"/></p>
+    	<p>If the files are not inside your workspace, you can still open them
+    	from the JUnit view via the <b>Test Run History...</b> drop-down menu.
+    	And the <b>Import...</b> and <b>Export...</b> actions now always start at the most recently used location.</p>
+    	<p><img src="images/junit-view-import.png" alt="Test Run History... &gt; Import"/></p>
+    </td>
+  </tr>
+  
+    <tr id="junit4.5">
+    <td width="30%" valign="top" align="left">
+        <b>JUnit 4.5</b>
+    </td>
+    <td width="70%" valign="top">
+    	The JUnit4 version shipped with Eclipse has been updated to 4.5.
+    	See their <a href="http://sourceforge.net/project/shownotes.php?release_id=618683&amp;group_id=15278">Release Notes</a>
+    	for the changes in version 4.5.
+    </td>
+  </tr>
+  
+  <tr id="jar-in-jar-exporter">
+    <td width="30%" valign="top" align="left">
+        <b>Runnable Jar-in-Jar exporter can package libraries</b>
+    </td>
+    <td width="70%" valign="top">
+    	The Runnable JAR File Export wizard can now also package the required libraries into the exported runnable JAR file
+    	or into a folder next to the JAR:
+       <p> <img src="images/runnable-jar-in-jar-export.png" alt="Runnable JAR File Export wizard"/></p>
+       <p> The advantage of the second and third options is that the required libraries
+         will just be copied and don't need be repackaged. </p>
     </td>
   </tr>
 
-  <tr> 
-    <td><p align="right"><b>Paste creates snippet for members and statements</b></p></td>
-    <td><p><b>Paste</b> (<b>Ctrl+V</b>) in the Package Explorer view now supports members and statements. 
-      Eclipse creates the required enclosing elements for you.</p>
-      <p>For example, pasting:</p>
-      <pre>
-		List&lt;Number&gt; numbers;
-		numbers= Arrays.asList(1, 2, 42);</pre>
-      <p>into <i>_pasted_code_</i> generates a Java class and main method to hold the statements:</p>
-      <img src="images/paste-snippet.png" alt="Pasted snippet into _pasted_code_">
-     </td>
-  </tr>
 
     <!-- ******************* Java Debugger ************************************* -->
     <tr> 
       <td colspan="2"><a name="Debug"></a> <div style="font-size: 20px; font-weight: bold;"> 
           Java Debugger </div></td>
     </tr>
-    <tr> 
-      <td  valign="top"><p align="right"><b>Enhanced debug hover</b></p></td>
-      <td  valign="top"><p>When debugging, hovers for variables have been enhanced to display an object   inspector. The inspector will display logical structures according to the toggle setting in the visible Variables or Expressions view.</p>
-      <p><img src="images/debug-hover.png" alt="Debug hover"></p></td>
-    </tr>
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Execution environment description files</b></p></td>
-      <td  valign="top"> <p>An execution environment description file describes a JVM and the environment it   represents (see <A href="http://wiki.eclipse.org/index.php/Execution_Environment_Descriptions">Execution   Environment Descriptions</A> for detailed information on the file format). The   file defines JVM properties such as boot path, endorsed directories, language   level, executables, source attachments, and so on. </p>      
-      <p>You can now add JREs to your workspace using execution environment   description files from the Installed JREs preference page.   Press Add and select the Execution Environment   Description JRE type.</p>
-      <p><img src="images/add-jre-type.png" alt="Choose the kind of JRE to add"></p>
-      <p>On the following page specify an .ee file. This will create a JRE with   attributes from the description file. This example shows <A href="http://wiki.eclipse.org/J9">J9 configured for Foundation 1.1</A>.</p>
-      <p><img src="images/add-j9-jre.png" alt="Add JRE based on execution environmet description file"></p></td>
-    </tr>
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Search for installed JREs on Mac</b></p></td>
-      <td  valign="top"> <p>You can now search for all installed JREs on Mac. Pressing the <strong>Search</strong> button on the <STRONG>Java &gt; Installed JREs</STRONG> preference page will add   definitions for all VMs installed in the operating system's default location   (<code>/System/Library/Frameworks/JavaVM.framework/Versions</code>). </p>
-      <p><img src="images/mac-jres.png" alt="Search for installed JREs"></p></td>
-    </tr>
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Search results include launch configurations </b></p></td>
-      <td  valign="top"> <p>Launch configurations now appear when searching for references to a main type.   Double-clicking on the search result opens the launch dialog on that   configuration.</p>
-      <p><img src="images/search-lc.png" alt="References to a main type include launch configurations"></p></td>
-    </tr>
-   <tr> 
-    <td><p align="right"><b>Wait for remote debug connection</b></p></td>
-    <td> <p>A socket listening connector has been added to the Remote Java Application   launch type. This allows you to start the Java debugger listening for connection   on a specific socket. The program being debugged can then be started with   command line options to connect back to the debugger. Select "Standard (Socket   Listen)" in the connection type drop down.</p>
-      <p><img src="images/listening.png" alt="Connect tab using a socket listening connector"></p></td>
-  </tr>    
-    <tr> 
-      <td  valign="top"> <p align="right"><b> Default watchpoint suspend settings</b></p></td>
-      <td  valign="top"> <p>You can now control the suspend settings for newly created watchpoints. A   watchpoint can suspend execution when a field is accessed, modified, or both.   The new preference is available on the <STRONG>Java &gt; Debug</STRONG> preference page.</p>
-      <p><img src="images/watchpoint.png" alt="Suspend policy for watchpoints"></p></td>
-    </tr>
- 
+
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
 </table>
