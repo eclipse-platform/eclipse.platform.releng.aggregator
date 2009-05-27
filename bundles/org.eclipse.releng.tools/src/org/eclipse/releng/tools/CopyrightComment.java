@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * Martin Oberhuber (Wind River) - [276255] fix insertion of extra space chars
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -39,15 +40,15 @@ public abstract class CopyrightComment {
 	        case JAVA_COMMENT:
 	        case C_COMMENT:
 		    case JAVASCRIPT_COMMENT:
-	            return " * ";  //$NON-NLS-1$
+	            return " *";  //$NON-NLS-1$
 	        case PROPERTIES_COMMENT:
-	            return "# "; //$NON-NLS-1$
+	            return "#"; //$NON-NLS-1$
 	        case SHELL_MAKE_COMMENT:
-	            return "# "; //$NON-NLS-1$
+	            return "#"; //$NON-NLS-1$
 	        case BAT_COMMENT:
-	            return "rem "; //$NON-NLS-1$
+	            return "rem"; //$NON-NLS-1$
 	        case XML_COMMENT:
-	            return "    "; //$NON-NLS-1$
+	            return "   "; //$NON-NLS-1$
 		    default:
 	            return null;
         }

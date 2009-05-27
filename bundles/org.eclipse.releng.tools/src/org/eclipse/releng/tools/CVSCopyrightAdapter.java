@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
+import java.util.Calendar;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -22,6 +24,8 @@ import org.eclipse.team.internal.ccvs.core.resources.CVSWorkspaceRoot;
 
 public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 	
+	private static String filterString = "copyright"; // lowercase
+
 	public CVSCopyrightAdapter(IResource[] resources) {
 		super(resources);
 	}
@@ -34,7 +38,16 @@ public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
                 // get the log entry for the revision loaded in the workspace
                 ILogEntry entry = ((ICVSRemoteFile)cvsFile)
                         .getLogEntry(new SubProgressMonitor(monitor, 100));
-                return entry.getDate().getYear() + 1900;
+                
+                String logComment = entry.getComment();
+				if (filterString != null && logComment.toLowerCase().indexOf(filterString) != -1) {
+					//the last update was a copyright checkin - ignore
+					return 0;
+				}
+				
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(entry.getDate());
+				return calendar.get(Calendar.YEAR);
             }
         } finally {
             monitor.done();

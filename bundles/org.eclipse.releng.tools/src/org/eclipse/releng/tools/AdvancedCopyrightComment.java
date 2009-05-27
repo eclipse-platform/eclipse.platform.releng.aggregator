@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004 IBM Corporation and others.
+ * Copyright (c) 2004, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * Martin Oberhuber (Wind River) - [276255] fix insertion of extra space chars
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -18,9 +19,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
-
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
 
 public class AdvancedCopyrightComment extends CopyrightComment {
 	private static final String DATE_VAR = "${date}"; //$NON-NLS-1$
@@ -125,7 +125,7 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 			int offset = currentLine.indexOf(DATE_VAR);
 			// if this is the line, containing the ${date}, add in the year
 			if (offset > -1) {
-				writer.print(linePrefix + currentLine.substring(0, offset) + getCreationYear());
+				writer.print(linePrefix + ' ' + currentLine.substring(0, offset) + getCreationYear());
 				if (hasRevisionYear() && getRevisionYear() != getCreationYear())
 			        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
 				writer.println(currentLine.substring(offset+DATE_VAR.length(), currentLine.length()));
@@ -135,7 +135,7 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 					// handle empty lines
 					writer.println(linePrefix);
 				} else {
-					writer.println(linePrefix + currentLine);
+					writer.println(linePrefix + ' ' + currentLine);
 				}
 			}
 		}
@@ -173,43 +173,39 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 	   	    	// NOTE: this won't really work well if the text surrounding the year is
 	   	    	// generic, or if the year is at the beginning or end of the line
 	   	    	String preYear = yearLine.substring(0, yearOffset);
-	   	    	String postYear = yearLine.substring(yearOffset+DATE_VAR.length(), yearLine.length());
 	   	    	
-	   	    	int preYearOffset = body.indexOf(preYear);
+	   	    	int preYearOffset = body.toLowerCase().indexOf(preYear.toLowerCase());
 	   	    	if (preYearOffset != -1) {
-	   	    		int postYearOffset = body.indexOf(postYear, preYearOffset);
-	   	    		if (postYearOffset != -1) {
-		   	    		int preYearEnd= preYearOffset + preYear.length();
-		   	    		
-		   	    		// match "2000", "2000,2001", "2000-2001", all with arbitrary whitespace
-		   	    		Pattern yearsPattern= Pattern.compile("\\s*(\\d+)(?:\\s*[,-]\\s*(\\d+))?"); //$NON-NLS-1$
-		   	    		
-						Matcher yearsMatcher= yearsPattern.matcher(body.substring(preYearEnd));
-		   	    		if (yearsMatcher.find()) {
-		   	    	   	    int startYear = -1;
-	   	    		   	    try {
-	   	    		   	        startYear = Integer.parseInt(yearsMatcher.group(1));
-	   	    		   	    } catch(NumberFormatException e) {
-	   	    		   	        // do nothing
-	   	    		   	    }
-		
-		   	    	   	    int endYear = -1;
-		   	    	   	    String endYearString= yearsMatcher.group(2);
-							if (endYearString != null) {
-		   	    	   	        try {
-		   	    	   	            endYear = Integer.parseInt(endYearString);
-		   	    	   	        } catch(NumberFormatException e) {
-		   	    	   	            // do nothing
-		   	    	   	        }
-		   	    	   	    }
-		   	    	   	    // save the copyright comment's contents before and after the year(s) so that
-		   	    	   	    // the comment will remain untouched rather than overwritten if the template is
-		   	    	   	    // almost the same
-		   	    	   	    String pre = body.substring(0, preYearEnd);
-		   	    	   	    String post = body.substring(preYearEnd + yearsMatcher.group().length());
-		   	    	   	     
-		   	    	   	    copyright = new AdvancedCopyrightComment(commentStyle, startYear, endYear, null, pre, post);
-		   	    		}
+	   	    		int preYearEnd= preYearOffset + preYear.length();
+	   	    		
+	   	    		// match "2000", "2000,2001", "2000-2001", all with arbitrary whitespace
+	   	    		Pattern yearsPattern= Pattern.compile("\\s*(\\d+)(?:\\s*[,-]\\s*(\\d+))?"); //$NON-NLS-1$
+	   	    		
+					Matcher yearsMatcher= yearsPattern.matcher(body.substring(preYearEnd));
+	   	    		if (yearsMatcher.find()) {
+	   	    	   	    int startYear = -1;
+   	    		   	    try {
+   	    		   	        startYear = Integer.parseInt(yearsMatcher.group(1));
+   	    		   	    } catch(NumberFormatException e) {
+   	    		   	        // do nothing
+   	    		   	    }
+	
+	   	    	   	    int endYear = -1;
+	   	    	   	    String endYearString= yearsMatcher.group(2);
+						if (endYearString != null) {
+	   	    	   	        try {
+	   	    	   	            endYear = Integer.parseInt(endYearString);
+	   	    	   	        } catch(NumberFormatException e) {
+	   	    	   	            // do nothing
+	   	    	   	        }
+	   	    	   	    }
+	   	    	   	    // save the copyright comment's contents before and after the year(s) so that
+	   	    	   	    // the comment will remain untouched rather than overwritten if the template is
+	   	    	   	    // almost the same
+	   	    	   	    String pre = body.substring(0, preYearEnd);
+	   	    	   	    String post = body.substring(preYearEnd + yearsMatcher.group().length());
+	   	    	   	     
+	   	    	   	    copyright = new AdvancedCopyrightComment(commentStyle, startYear, endYear, null, pre, post);
 	   	    		}
 	   	    	}
 	   	    }

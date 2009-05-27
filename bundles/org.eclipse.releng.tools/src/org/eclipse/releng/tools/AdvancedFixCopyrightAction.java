@@ -401,6 +401,10 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					// Don't allow future years to be used in the copyright
 					lastMod = currentYear;
 				}
+	            if (lastMod == 0) {
+	            	warn(file, copyrightComment, "Last commit was copyright change.  File UNCHANGED."); //$NON-NLS-1$
+	            	return;
+	            }
 	            // use default revision year
 	            if (lastMod == -1) {
 	            	lastMod = prefStore.getInt(RelEngCopyrightConstants.REVISION_YEAR_KEY);
