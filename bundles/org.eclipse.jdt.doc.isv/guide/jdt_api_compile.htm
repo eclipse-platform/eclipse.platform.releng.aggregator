@@ -181,6 +181,7 @@ Defaults are:
 <li><font color="#3366FF">1.7</font> in <font color="#3366FF">-1.7</font> mode</li>
 </ul>
 </td>
+<p>clcd1.1 can be used to generate the StackMap attribute.
 </tr>
 <tr>
 <td valign=top>-1.3</td>
@@ -228,14 +229,27 @@ and <font color="#3366FF">1.6</font>, <font color="#3366FF"><I>enum</I></font> a
 <th colspan="2">Warning options</th>
 </tr>
 <tr>
-<td valign=top width="250">-warn:<blockquote>allDeprecation<br>allJavadoc<br><font color="#FF0000">assertIdentifier</font><br>boxing<br><font color="#FF0000">charConcat</font><br>conditionAssign<br><font color="#FF0000">constructorName</font>
-<br>dep-ann<br><font color="#FF0000">deprecation</font><br><font color="#FF0000">discouraged</font><br>emptyBlock<br>enumSwitch<br>fallthrough<br>fieldHiding<br>finalBound<br><font color="#FF0000">finally</font>
-<br><font color="#FF0000">forbidden</font><br>hiding<br>incomplete-switch<br>indirectStatic
-<br><font color="#FF0000">intfAnnotation</font><br><font color="#FF0000">intfNonInherited</font><br>javadoc<br>localHiding
-<br><font color="#FF0000">maskedCatchBlocks</font><br>nls<br><font color="#FF0000">noEffectAssign</font><br>null<br>nullDereference<br>over-ann<br>paramAssign<br><font color="#FF0000">pkgDefaultMethod</font><br>raw<br>semicolon<br><font color="#FF0000">serial</font><br>
-specialParamHiding<br>static-access<br><font color="#FF0000">staticReceiver</font><br>super<br><font color="#FF0000">suppress</font><br>synthetic-access<br>syntheticAccess<br>tasks(&lt;task1&gt;|...|&lt;taskN&gt;)<br>
+<td valign=top>-?:warn -help:warn</td>
+<td>Display advanced warning options</td>
+</tr>
+<tr>
+<td valign=top width="250">-warn:<blockquote>allDeadCode<br>allDeprecation<br>allJavadoc<br><font color="#FF0000">assertIdentifier</font><br>boxing<br><font color="#FF0000">charConcat</font><br>
+<font color="#FF0000">compareIdentical</font><br>conditionAssign<br><font color="#FF0000">constructorName</font>
+<br><font color="#FF0000">deadCode</font>
+<br>dep-ann<br><font color="#FF0000">deprecation</font><br><font color="#FF0000">discouraged</font><br>emptyBlock<br>
+<font color="#FF0000">enumIdentifier</font><br>enumSwitch<br>fallthrough<br>fieldHiding
+<br><font color="#FF0000">finalBound</font><br><font color="#FF0000">finally</font>
+<br><font color="#FF0000">forbidden</font><br>
+hashCode<br>hiding<br>indirectStatic
+<br><font color="#FF0000">intfAnnotation</font><br><font color="#FF0000">intfNonInherited</font>
+<br>intfRedundant<br>javadoc<br>localHiding
+<br><font color="#FF0000">maskedCatchBlock</font><br>nls<br><font color="#FF0000">noEffectAssign</font>
+<br><font color="#FF0000">null</font><br>nullDereference<br>over-ann<br>paramAssign<br><font color="#FF0000">pkgDefaultMethod</font>
+<br><font color="#FF0000">raw</font><br>semicolon<br><font color="#FF0000">serial</font><br>
+specialParamHiding<br>static-access<br><font color="#FF0000">staticReceiver</font><br>super<br><font color="#FF0000">suppress</font><br>synthetic-access<br>
+syncOverride<br>syntheticAccess<br>tasks(&lt;task1&gt;|...|&lt;taskN&gt;)<br>
 <font color="#FF0000">typeHiding</font><br><font color="#FF0000">unchecked</font><br>unnecessaryElse<br>unqualified-field-access<br>unqualifiedField<br>unused<br>unusedArgument<br><font color="#FF0000">unusedImport</font><br><font color="#FF0000">unusedLabel</font><br><font color="#FF0000">unusedLocal</font><br><font color="#FF0000">unusedPrivate</font><br>unusedThrown
-<br>uselessTypeCheck<br><font color="#FF0000">varargsCast</font><br><font color="#FF0000">warningToken</font>
+<br><font color="#FF0000">unusedTypeArgs</font><br>uselessTypeCheck<br><font color="#FF0000">varargsCast</font><br><font color="#FF0000">warningToken</font>
 </blockquote>
 </td>
 <td valign=top>Set warning level.<br>e.g. <font color="#3366FF">-warn:unusedLocal,deprecation</font><br>
@@ -247,6 +261,10 @@ specialParamHiding<br>static-access<br><font color="#FF0000">staticReceiver</fon
     -warn:-&lt;warnings separated by ,&gt;   disable specific warnings
 </pre>
 <table>
+<tr>
+<th align=left valign=top>allDeadCode</th>
+<td valign=top>dead code including trivial if(DEBUG) check</td>
+</tr>
 <tr>
 <th align=left valign=top>allDeprecation</th>
 <td valign=top>deprecation even inside deprecated code</td>
@@ -269,6 +287,10 @@ specialParamHiding<br>static-access<br><font color="#FF0000">staticReceiver</fon
 a string</td>
 </tr>
 <tr>
+<th align=left valign=top>compareIdentical</th>
+<td valign=top>comparing identical expressions</td>
+</tr>
+<tr>
 <th align=left valign=top>conditionAssign</th>
 <td valign=top>possible accidental boolean assignment</td>
 </tr>
@@ -277,6 +299,9 @@ a string</td>
 <td valign=top>method with constructor name</td>
 </tr>
 <tr>
+<th align=left valign=top>deadCode</th>
+<td valign=top>dead code excluding trivial if (DEBUG) check</td>
+</tr><tr>
 <th align=left valign=top>dep-ann</th>
 <td valign=top>missing @Deprecated annotation</td>
 </tr>
@@ -293,7 +318,11 @@ a string</td>
 <td valign=top>undocumented empty block</td>
 </tr>
 <tr>
-<th align=left valign=top>enumSwitch,<br>incomplete-switch</th>
+<th align=left valign=top>enumIdentifier</th>
+<td valign=top>occurrence of <i>enum</i> used as identifier</td>
+</tr>
+<tr>
+<th align=left valign=top>enumSwitch</th>
 <td valign=top>incomplete enum switch</td>
 </tr>
 <tr>
@@ -317,6 +346,10 @@ a string</td>
 <td valign=top>use of types matching a forbidden access rule</td>
 </tr>
 <tr>
+<th align=left valign=top>hashCode</th>
+<td valign=top>missing hashCode() method when overriding equals()</td>
+</tr>
+<tr>
 <th align=left valign=top>hiding</th>
 <td valign=top>macro for fieldHiding, localHiding, typeHiding and maskedCatchBlock</td>
 </tr>
@@ -333,6 +366,10 @@ a string</td>
 <td valign=top>interface non-inherited method compatibility</td>
 </tr>
 <tr>
+<th align=left valign=top>intfRedundant</th>
+<td valign=top>find redundant superinterfaces</td>
+</tr>
+<tr>
 <th align=left valign=top>javadoc</th>
 <td valign=top>invalid javadoc</td>
 </tr>
@@ -341,7 +378,7 @@ a string</td>
 <td valign=top>local variable hiding another variable</td>
 </tr>
 <tr>
-<th align=left valign=top>maskedCatchBlocks</th>
+<th align=left valign=top>maskedCatchBlock</th>
 <td valign=top>hidden catch block</td>
 </tr>
 <tr>
@@ -405,7 +442,11 @@ a string</td>
 <td valign=top>enable @SuppressWarnings</td>
 </tr>
 <tr>
-<th align=left valign=top>syntheticAccess,<br>synthetic-access</th>
+<th align=left valign=top>syncOverride</th>
+<td valign=top>missing synchronized in synchronized method override</td>
+</tr>
+<tr>
+<th align=left valign=top>syntheticAccess</th>
 <td valign=top>when performing synthetic access for innerclass</td>
 </tr>
 <tr>
@@ -425,7 +466,7 @@ a string</td>
 <td valign=top>unnecessary else clause</td>
 </tr>
 <tr>
-<th align=left valign=top>unqualified-field-access,<br>unqualifiedField</th>
+<th align=left valign=top>unqualifiedField</th>
 <td valign=top>unqualified reference to field</td>
 </tr>
 <tr>
@@ -455,6 +496,10 @@ a string</td>
 <tr>
 <th align=left valign=top>unusedThrown</th>
 <td valign=top>unused declared thrown exception</td>
+</tr>
+<tr>
+<th align=left valign=top>unusedTypeArgs</th>
+<td valign=top>unused type arguments for method</td>
 </tr>
 <tr>
 <th align=left valign=top>uselessTypeCheck</th>
