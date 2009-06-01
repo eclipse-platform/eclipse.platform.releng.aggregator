@@ -10,7 +10,9 @@
 </head>
 <body>
 <h1>PDE Build Extensions to the p2 Publisher</h1>
-<p>PDE Build contributes several ant tasks that extend the p2 publisher.  These tasks allow PDE Build to publish metadata and artifacts directly into a p2 repository.</p>
+<p>PDE Build contributes several ant tasks that extend the <a href="../../org.eclipse.platform.doc.isv/guide/p2_publisher.html">p2 publisher</a>.  These tasks allow PDE Build to publish metadata and artifacts directly into a p2 repository.</p>
+<p>The generated build scripts use these tasks in the context of a full build where things like compiling class files and replacing versions are done.  However, some of the 
+tasks may be usefull in special cases to publish metadata directly without running a full build. </p>
 
 <table cellspacing="1" cellpadding="2">
 	<tr><td><b><tt>eclipse.publish.featuresAndBundles</tt></b></td></tr>
@@ -19,8 +21,9 @@
 	</p></td></tr>
 	<tr><td><p>This task supports the following attributes:</p>
 		<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
-			<tr><td><tt>metadataRepository</tt></td><td>The metadata repository to publish to.</td></tr>
-			<tr><td><tt>artifactRepository</tt></td><td>The artifact repository to publish to.</td></tr>
+			<tr><td><tt>metadataRepository</tt></td><td>A URL specifying the metadata repository to publish to.</td></tr>
+			<tr><td><tt>artifactRepository</tt></td><td>A URL specifying the artifact repository to publish to.</td></tr>
+			<tr><td><tt>repository</tt></td><td>Sets both metadataRepository and artifactRepository.</td></tr>
 			<tr><td><tt>site</tt></td><td>A URL to a site.xml specifying category information.</td></tr>
 			<tr><td><tt>category</tt></td><td>A URL to a category.xml specifyiny category information.</td></tr>
 			<tr><td><tt>siteQualifier</tt></td><td>A qualifier used to ensure resulting category IUs have unique names.</td></tr>
@@ -29,13 +32,24 @@
 		</table>
 	</td></tr>
 </table>
-
+Example:
+<div  style="border:1px inset">
+<pre>
+ &lt;eclipse.publish.featuresAndBundles repository="file:C:/build/repository" category="file:C:/build/category.xml" &gt;
+     &lt;features dir="C:\eclipse\features\" includes="org.eclipse.cvs_1.1.100.v20090514-7E79FEc9BJ99r9XGQ3CICF"	/&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.cvs_1.0.300.v20090520.jar"	/&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.core_3.3.200.I20090430-0408.jar"	/&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.ssh_3.2.100.I20090508-2000.jar"	/&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.ssh2_3.2.200.I20090508-2000.jar"	/&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.ui_3.3.200.I20090521-1750.jar"	/&gt;
+ &lt;/eclipse.publish.featuresAndBundles&gt;
+</pre>
+</div>
 <br>
 <table cellspacing="1" cellpadding="2">
 	<tr><td><b><tt>eclipse.gatherBundle</tt></b></td></tr>
 	<tr><td><p>Publish a plug-in directly from source.  Once the .class files for a bundle are compiled, this task will gather up all the files that make up the binary result and publish them as a p2 artifact with metadata.  
-	This task is used in the <tt>publish.bin.parts</tt> task in the plug-in's generated build.xml, this task replaces the <tt>gather.bin.parts</tt> task when you are building with the p2 publisher.
-	These p2 targets are conditional on the <tt>generate.p2.metadata</tt> property.</p>
+	This task is used in the <tt>publish.bin.parts</tt> task in the plug-in's generated build.xml, this task replaces the <tt>gather.bin.parts</tt> task when you are building with the p2 publisher.</p>
 	</td></tr>
 	<tr><td><p>This task supports the following attributes:</p>
 	<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
@@ -51,7 +65,16 @@
 	</table>
 	</td></tr>
 </table>
-
+Example:
+<div style="border:1px inset">
+<pre>
+ &lt;eclipse.gatherBundle metadataRepository="file:/build/repo" artifactRepository="file:/build/repo"
+                       buildResultFolder="${basedir}" baseDirectory="${basedir}" unpack="true" &gt;
+     &lt;outputFolder library="lib/pdebuild-ant.jar" dir="${basedir}" includes="bin_ant/**" /&gt;
+     &lt;outputFolder library="pdebuild.jar" dir="${basedir}" includes="bin/**" /&gt;
+ &lt;/eclipse.gatherBundle&gt;
+</pre>
+</div>
 <br>			
 <table cellspacing="1" cellpadding="2">
 	<tr><td><b><tt>eclipse.gatherFeature</tt></b></td></tr>
@@ -70,7 +93,16 @@
 	</table>
 	</td></tr>
 </table>
-	
+Example:
+<div style="border:1px inset">
+<pre> &lt;eclipse.gatherFeature
+     metadataRepository="file:/build/repo"
+     artifactRepository="file:/build/repo"
+     buildResultFolder="${basedir}"
+     baseDirectory="${basedir}"
+ /&gt;
+</pre>
+</div>
 <br>			
 <table cellspacing="1" cellpadding="2">
 	<tr><td><b><tt>eclipse.brand.p2.artifacts</tt></b></td></tr>
