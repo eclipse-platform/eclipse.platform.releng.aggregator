@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+  <title>Customizing p2 metadata</title>
+</head>
+<body>
+<h1>Customizing p2 metadata</h1>
+<p>
+ 
+For the 3.5 release a touchpoint advice file (a p2.inf file) can be use to augment an Installable Units: capabilites, properties, and instructions.
+In addition support is provided for defining additional installable units that are in some way related to the container IU.
+</p> 
+
+The touchpoint advice file is a <b>java properties</b> file and can be placed: 
+<ul>
+<li>In bundles (META-INF/p2.inf): The instructions are added to the installable unit for the bundle.</li> 
+<li>In features (a p2.inf file co-located with the feature.xml): The instructions are added to the installable unit for the feature group.</li> 
+<li>In products (a p2.inf file co-located with the .product file): The instructions are added to the root installable unit for that product.</li>
+</ul>
+
+<p>
+Version substitution is a common practice and two special version parameters are supported: 
+</p> 
+<ul>
+<li><b>$version$</b> - returns the string form of the containing IU's version</li>
+<li><b>$qualifier$</b> - returns just the string form of the qualifier of the containing IU's version</li> 
+</ul>
+
+<hr />
+<h2>Capability Advice</h2>
+<p>Note: Capability advice will "replace" an existing capability of the same type on the IU if the name and namespace match.</p>
+<p>There are three different type of capability advice:</p> 
+<ol>
+<li><b>provides</b> - these are capabilities that an IU will offer to satisfy the needs of other IUs.</li> 
+<li><b>requires</b> - these are the capabilities that an IU requires from other IUs in order to resolve correctly.</li> 
+<li><b>metaRequirements</b> - these are capabilities that the IU puts on the profile that must already be installed before this IU can be installed.</li> 
+</ol>
+
+<pre>
+ provides.{#}.namespace = {namespace}
+ provides.{#}.name = {name}
+ provides.{#}.version = {version} (optional / default: 1.0.0)
+ 
+ requires.{#}.namespace = {namespace}
+ requires.{#}.name = {name}
+ requires.{#}.range = {range} (optional / default: 0.0.0)]
+ requires.{#}.greedy = {true|false} (optional / default: true)
+ requires.{#}.optional = {true|false} (optional / default: false)
+ requires.{#}.multiple = {true|false}  (optional / default: false)
+ 
+ metaRequirements.{#}.namespace = {namespace}
+ metaRequirements.{#}.name = {name}
+ metaRequirements.{#}.range = {range} (optional / default: 0.0.0)
+ metaRequirements.{#}.greedy = {true|false} (optional / default: true)
+ metaRequirements.{#}.optional = {true|false} (optional / default: false)
+ metaRequirements.{#}.multiple = {true|false}  (optional / default: false)
+ </pre>
+ 
+Where {#} is an index for the property, {namespace}, and {name} are the associated named strings, {version} and {range} are version and version range strings respectively. 
+<br />
+For example: 
+<pre>
+ provides.0.namespace = testNamespace1
+ provides.0.name = testName1
+ provides.0.version = 1.2.3.$qualifier$
+ provides.1.namespace = testNamespace2
+ provides.1.name = testName2
+ provides.1.version = $version$
+ 
+ requires.0.namespace = testNamespace1
+ requires.0.name = testName1
+ requires.0.range = [1.2.3.$qualifier$, 2)
+ requires.0.greedy = true
+ requires.0.optional = true
+ requires.0.multiple = true
+ requires.1.namespace = testNamespace2
+ requires.1.name = testName2
+ requires.1.range = [$version$, $version$]
+ requires.1.greedy = false
+ 
+ metaRequirements.0.namespace = testNamespace1
+ metaRequirements.0.name = testName1
+ metaRequirements.0.range = [1.2.3, 2)
+ metaRequirements.0.greedy = true
+ metaRequirements.0.optional = true
+ metaRequirements.0.multiple = true
+ metaRequirements.1.namespace = testNamespace2
+ metaRequirements.1.name = testName2
+ metaRequirements.1.range = $version$
+ metaRequirements.1.greedy = false
+</pre>
+
+<hr />
+<h2>Property Advice</h2>
+<pre> 
+ properties.{#}.name = {propertyName}
+ properties.{#}.value = {propertyValue}
+ </pre>
+<p>Where {#} is an index for the property, {propertyName}, and {propertyValue} hold the name and value strings for the property. 
+<br />For example: 
+</p>
+<pre>
+ properties.0.name = testName1
+ properties.0.value = testValue1
+ properties.1.name = testName2
+ properties.1.value = testValue2
+</pre>
+ 
+<hr />
+<h2>Touchpoint Instruction Advice</h2>
+<pre> 
+ instructions.{phase} = {raw actions}
+ instructions.{phase}.import = {qualified action name} [,{qualified action name}]* (optional)
+</pre>
+Where {phase} is a p2 phases (collect, configure, install, uninstall, unconfigure, etc). 
+
+Note:
+<ul> 
+<li>The {raw actions} will be "appended" to the end of any instructions already being generated.</li> 
+<li>The qualified action names for the IU's touchpoint type are implicitly imported. All other actions need to be imported.</li>
+</ul>
+ 
+For example: 
+<pre>
+ instructions.install = \
+    ln(targetDir:@artifact,linkTarget:foo/lib.1.so,linkName:lib.so);\
+    chmod(targetDir:@artifact,targetFile:lib/lib.so,permissions:755);
+ instructions.install.import= \
+    org.eclipse.equinox.p2.touchpoint.natives.ln,\
+    org.eclipse.equinox.p2.touchpoint.natives.chmod
+</pre>
+
+<hr />
+<h2>Additional Installable Unit Advice</h2> 
+<p>In addition to customizing attributes of the containing IU one can also author addtional installable units that work with the container IU. Typically this mechanism is used to author an IUFragment that customizes the containing IU or one of it's dependencies.</p> 
+
+<pre>
+ iu.{#}.id = {identifier} 
+ iu.{#}.version = {version} (optional)
+ </pre>
+<p>Where {#} is an index for the Installable Unit, so multiple Installable Units can be declared. A fairly full range of IU customizations are supported including:</p> 
+
+<pre>
+ id
+ version
+ singleton
+ copyright
+ licenses
+ filter
+ touchpoint
+ update
+ artifacts
+ properties
+ provides
+ requires
+ metaRequirements
+ hostRequirements
+ instructions
+ </pre>
+<p>To illustrate all the various settings for these customizations here's a more complete example of: (unit.0) a minimal IU and (unit.1) a full featured IU:</p> 
+
+<pre>
+ units.0.id = testid0
+ units.0.version = 1.2.3
+ units.1.id = testid1
+ units.1.version = 1.2.4
+ units.1.singleton = true
+ units.1.copyright = testCopyright
+ units.1.copyright.location = http://localhost/test
+ units.1.filter = test=testFilter
+ units.1.touchpoint.id = testTouchpointId
+ units.1.touchpoint.version = 1.2.5
+ units.1.update.id = testid1
+ units.1.update.range = (1,2)
+ units.1.update.severity = 2
+ units.1.update.description = some description
+ units.1.artifacts.0.id = testArtifact1
+ units.1.artifacts.0.version = 1.2.6
+ units.1.artifacts.0.classifier = testClassifier1
+ units.1.artifacts.1.id = testArtifact2
+ units.1.artifacts.1.version = 1.2.7
+ units.1.artifacts.1.classifier = testClassifier2
+ units.1.licenses.0 = testLicense
+ units.1.licenses.0.location = http://localhost/license
+ units.1.properties.0.name = testName1
+ units.1.properties.0.value = testValue1
+ units.1.properties.1.name = testName2
+ units.1.properties.1.value = testValue2
+ units.1.requires.0.namespace = testNamespace1
+ units.1.requires.0.name = testName1
+ units.1.requires.0.range = [1.2.3.$qualifier$, 2)
+ units.1.requires.0.greedy = true
+ units.1.requires.0.optional = true
+ units.1.requires.0.multiple = true
+ units.1.requires.1.namespace = testNamespace2
+ units.1.requires.1.name = testName2
+ units.1.requires.1.range = $version$
+ units.1.requires.1.greedy = false
+ units.1.requires.1.optional = false
+ units.1.metaRequirements.0.namespace = testNamespace1
+ units.1.metaRequirements.0.name = testName1
+ units.1.metaRequirements.0.range = [1.2.3.$qualifier$, 2)
+ units.1.metaRequirements.0.greedy = true
+ units.1.metaRequirements.0.optional = true
+ units.1.metaRequirements.0.multiple = true
+ units.1.metaRequirements.1.namespace = testNamespace2
+ units.1.metaRequirements.1.name = testName2
+ units.1.metaRequirements.1.range = $version$
+ units.1.metaRequirements.1.greedy = false
+ units.1.metaRequirements.1.optional = false
+ units.1.provides.0.namespace = testNamespace1
+ units.1.provides.0.name = testName1
+ units.1.provides.0.version = 1.2.3.$qualifier$
+ units.1.provides.1.namespace = testNamespace2
+ units.1.provides.1.name = testName2
+ units.1.provides.1.version = $version$
+ units.1.instructions.configure = addProgramArg(programArg:-startup); addProgramArg(programArg:@artifact);
+ units.1.instructions.unconfigure = removeProgramArg(programArg:-startup); removeProgramArg(programArg:@artifact);)
+ units.1.instructions.unconfigure.import = some.removeProgramArg
+ units.1.hostRequirements.0.namespace = testNamespace1
+ units.1.hostRequirements.0.name = testName1
+ units.1.hostRequirements.0.range = [1.2.3.$qualifier$, 2)
+ units.1.hostRequirements.0.greedy = true
+ units.1.hostRequirements.0.optional = true
+ units.1.hostRequirements.0.multiple = true
+</pre>
+</body>
