@@ -38,6 +38,8 @@ Version substitution is a common practice and two special version parameters are
 <li><b>$qualifier$</b> - returns just the string form of the qualifier of the containing IU's version</li> 
 </ul>
 
+<p>One common use for advice files is to allow more fine grained control of the <a href="#categoryGen">generation of categories</a> used by the UI to group installable features</p> 
+
 <hr />
 <h3>Capability Advice</h3>
 <p>Note: Capability advice will "replace" an existing capability of the same type on the IU if the name and namespace match.</p>
@@ -233,4 +235,38 @@ For example:
  units.1.hostRequirements.0.optional = true
  units.1.hostRequirements.0.multiple = true
 </pre>
+
+<hr />
+
+<label id="#categoryGen"/>
+<h2>Category Generation Using p2.inf</h2>
+
+<p>The p2 UI allows for hierarchical organization of Installable Units based on the concept of "categories" where the children
+of categories are what's installable. On occasion we might want to take finer grained control of the contents of a category and
+what it contains. For example we might want to support further categorization of a features contents to allow individual plugins
+to be installed instead of the more typical features.</p>
+
+<p>To support this we can tag a feature as a category as follows:</p>
+<pre>
+  properties.1.name=org.eclipse.equinox.p2.type.category
+  properties.1.value=true
+</pre>
+
+<p>Another possibility is to use the "additional IU advice" to create a specialized category IU like this:</p>
+<pre>
+  units.1.id=my.product.category
+  units.1.version=1.0.0
+  units.1.provides.1.namespace=org.eclipse.equinox.p2.iu
+  units.1.provides.1.name=my.product.category
+  units.1.provides.1.version=1.0.0
+  units.1.properties.1.name=org.eclipse.equinox.p2.type.category
+  units.1.properties.1.value=true
+  units.1.properties.2.name=org.eclipse.equinox.p2.name
+  units.1.properties.2.value=My Category Name
+  requires.1.namespace=org.eclipse.equinox.p2.iu
+  requires.1.name=my.product
+  requires.1.range=[1.0.0,1.0.0]
+  requires.1.greedy=true
+</pre>
+
 </body>
