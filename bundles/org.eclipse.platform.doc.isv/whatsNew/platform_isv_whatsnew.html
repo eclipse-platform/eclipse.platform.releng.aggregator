@@ -191,14 +191,6 @@ section of the Workbench User Guide.
 </td>
 </tr>
 
-  <tr id="permission-admin"> 
-    <td width="30%" valign="top" align="left"><b>Security Manager enhancements</b></td>
-    <td width="70%" valign="top">This release includes an implementation of RFC 120 from the OSGi R4.2 draft specification.
-    RFC 120 specifies enhancements to the Conditional Permission Admin service which is used to manage 
-    the permissions assigned to bundles.  The enhancements include adding the ability to grant or deny permissions based on conditions,
-    and to manage conditions as an ordered list of rules.  For more information see <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.2-early-draft.pdf">the OSGi R4.2 draft spec</a></td>
-  </tr>
-
   <tr id="p2-publisher"> 
     <td width="30%" valign="top" align="left"><b>New publisher bundle</b></td>
     <td width="70%" valign="top"><a href="http://wiki.eclipse.org/p2">p2</a> has introduced a new bundle
@@ -206,93 +198,6 @@ section of the Workbench User Guide.
     into p2 repositories. The publisher provides an extensible API that clients
     can extend to perform customized publishing to repositories, and includes an <i>advice</i> mechanism for injecting
     additional metadata into the generation and packaging process.</td>
-  </tr>
-
-  <tr id="rfc126">
-    <td width="30%" valign="top" align="left" id="service-registry"><b>OSGi service registry enhancements</b></td>
-    <td width="70%" valign="top">
-       This release includes an implementation of RFC 126 from the OSGi R4.2 
-       draft specification.  Certain specialized bundles need to be able to alter 
-       output results of service layer find and event delivery operations to 
-       affect their purpose.  RFC 126 enhances the service registry to allow 
-       service registry hooks to affect the service registry find and event 
-       delivery operations.  
-    <p>RFC 126 is targeted at bundles which need to observe and react to
-       selected service layer operations. In general these will be highly 
-       specialized bundles written by systems programmers.  The  is not 
-       intended to be used by so-called "normal" application bundles.
-       For more information see <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.2-early-draft.pdf">the OSGi R4.2 draft spec</a>.</p></td>
-  </tr>
-
-  <tr id="rfc132">
-    <td width="30%" valign="top" align="left" id="framework-launching"><b>OSGi framework launching</b></td>
-    <td width="70%" valign="top">
-       This release includes an implementation of RFC 132 from the OSGi R4.2 
-       draft specification.  RFC 132 defines a standard way to launch an 
-       OSGi framework implementation.  Framework implementations designate 
-       a public class that implements the <code>org.osgi.framework.launch.SystemBundle</code> 
-       interface.  To create a framework instance a launcher constructs the 
-       framework implementation's SystemBundle.  The SystemBundle can then be
-       used to control the lifecycle of the framework (e.g. start, stop, update
-       etc.)  The <code>org.eclipse.osgi.launch.Equinox</code> class is the public
-       class in Equinox which implements the new 
-       <code>org.osgi.framework.launch.SystemBundle</code> interface.  
-    <p>This RFC also specifies standard configuration properties which all 
-       framework implementations must recognize.  This allows for a generic
-       framework launcher to be implemented that can launch any framework 
-       implementation. 
-       For more information see <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.2-early-draft.pdf">the OSGi R4.2 draft spec</a>.</p></td>
-  </tr>
-
-  <tr id="rfc132">
-    <td width="30%" valign="top" align="left"><b>Composite bundles</b></td>
-    <td width="70%" valign="top">
-        This release includes an implementation of RFC 138 from the OSGi R4.2
-        core specification draft.  In a large system built upon a large number of modules, 
-        sometimes it is necessary to provide a mechanism for isolating the various 
-        modules from each other at runtime. RFC 138 introduces the concept of 
-        composite bundles to provide isolation for a group of bundles.
-        <p>  
-        Conceptually a composite bundle is composed of 
-        a set of bundles which are contained in another (nested) framework instance.
-        New API is introduced in the <code>org.osgi.service.framework</code> package to 
-        manage composite bundles.  The <code>CompositeBundleFactory</code> service interface is 
-        used to install composite bundles.  The <code>CompositeBundle</code> interface is used to 
-        manage the bundles which compose a composite bundle.
-        For more information see <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.2-early-draft.pdf">the OSGi R4.2 draft spec</a>.
-        </p>
-        <p>
-        <b>Note:</b> The API introduced in the <code>org.osgi.service.framework</code> package 
-        is a proposed OSGi API.  This API is considered provisional in Eclipse and 
-        may change drastically or be dropped altogether in a future release of 
-        Equinox.  We encourage use of the API and any feedback on the 
-        specification, but consumers must be aware that breaking changes may occur
-        in a future release. 
-        </p>  
-    </td>
-  </tr>
-
-  <tr id="OSGiR42">
-    <td width="30%" valign="top" align="left"><b>New core framework API</b></td>
-    <td width="70%" valign="top">
-        The OSGi R4.2 Core Specification is adding a number of small API additions
-        to the core Framework.  The following is a list of API additions included in this release.
-        <br>
-        <dl>
-          <dt><b>org.osgi.framework.Bundle#getVersion()</b></dt> 
-            <dd>Returns the Version of a bundle.</dd>
-          <dt><b>org.osgi.framework.Bundle#getSignerCertificates()</b></dt>
-            <dd>Returns the signers of a bundle.</dd>
-          <dt><b>org.osgi.framework.BundleReference</b></dt>
-            <dd>Interface which must be implemented by bundle classloaders.  This gives clients the ability to determine what bundle a ClassLoader is for.</dd>
-          <dt><b>org.osgi.framework.BundleException#getType()</b></dt>
-            <dd>Returns the error type for a BundleException.  For example, a resolver error.</dd>
-          <dt><b>org.osgi.framework.FrameworkUtil#matchDistinguishedNameChain(String, List)</b></dt>
-            <dd>Utility to match a certificate chain against a pattern.  This is used for permission and condition checks against signed bundles.</dd>
-          <dt><b>org.osgi.framework.FrameworkUtil#getBundleReference(Class)</b></dt>
-            <dd>Utility to get a BundleReference object for a given class.  A static method equivalent to the PackageAdmin#getBundle(Class) method.</dd>
-        </dl>
-    </td>
   </tr>
 
   <tr id="equinox-concurrency"> 
@@ -331,11 +236,67 @@ section of the Workbench User Guide.
     </td>
   </tr>
 
-  <tr id="rfc126">
-    <td width="30%" valign="top" align="left" id="service-registry"><b>OSGi Declarative Services Changes</b></td>
+  <tr id="permission-admin"> 
+    <td width="30%" valign="top" align="left"><b>Security Manager enhancements</b></td>
+    <td width="70%" valign="top">This release includes an implementation of the updated Conditional Permission Admin
+    Specification included in the OSGi Service Platform Core Specification Release 4, Version 4.2.
+    This version of the specification includes enhancements to the Conditional Permission Admin service which is used to manage 
+    the permissions assigned to bundles.  The enhancements include adding the ability to grant or deny permissions based on conditions,
+    and to manage conditions as an ordered list of rules.  For more information see the <a href="http://www.osgi.org/Release4/Download">OSGi Release 4 Version 4.2 specification</a>.</td>
+  </tr>
+
+  <tr id="service-hooks">
+    <td width="30%" valign="top" align="left"><b>OSGi service registry enhancements</b></td>
     <td width="70%" valign="top">
-       This release includes an implementation of RFC 134 Declarative Services Updates from the OSGi R4.2 
-       draft specification.
+       This release includes an implementation of the new Service Hooks Specification
+       included in the OSGi Service Platform Core Specification Release 4, Version 4.2.  
+       Certain specialized bundles need to be able to alter 
+       output results of service layer's find and event delivery operations to 
+       affect their purpose.  The Service Hooks Specification enhances the service registry to allow 
+       service registry hooks to affect the service registry's find and event 
+       delivery operations.  
+    <p>The Service Hooks Specification is targeted at bundles which need to observe and react to
+       selected service layer operations. In general these will be highly 
+       specialized bundles written by systems programmers.  The is not 
+       intended to be used by so-called "normal" application bundles.
+       For more information see the <a href="http://www.osgi.org/Release4/Download">OSGi Release 4 Version 4.2 specification</a>.</p></td>
+  </tr>
+
+  <tr id="framework-launching">
+    <td width="30%" valign="top" align="left"><b>OSGi framework launching</b></td>
+    <td width="70%" valign="top">
+       The OSGi Service Platform Core Specification Release 4, Version 4.2 defines a standard 
+       way to launch an OSGi framework implementation.
+       This release of Equinox includes an implementation the OSGi standard launching APIs.
+       A framework implementation must provide a factory class. A factory class is 
+       an indirection to create a framework implementation object. The implementation factory 
+       class must implement the FrameworkFactory interface.  A launcher can use the following ways 
+       to get this class name:
+       <ul>
+        <li>The Java-SE Service Provider Configuration model.</li>
+        <li>Get it from some configuration and use Class.forName.</li>
+        <li>Hardcode the factory name.</li>
+       </ul>
+       To create a framework instance a launcher uses the FrameworkFactory to constructs the 
+       implementation's Framework object.  The Framework can then be
+       used to control the lifecycle of the framework (e.g. start, stop, update
+       etc.)  The <code>org.eclipse.osgi.launch.EquinoxFactory</code> class is the public
+       class in Equinox which implements the new 
+       <code>org.osgi.framework.launch.FrameworkFactory</code> interface.  
+    <p>This Release 4, Version 4.2 specification also defines standard configuration properties which all 
+       framework implementations must recognize.  This allows for a generic
+       framework launcher to be implemented that can launch any framework 
+       implementation. 
+       For more information see the <a href="http://www.osgi.org/Release4/Download">OSGi Release 4 Version 4.2 specification</a>.</p></td>
+  </tr>
+
+  <tr id="declarative-services">
+    <td width="30%" valign="top" align="left"><b>OSGi Declarative Services Changes</b></td>
+    <td width="70%" valign="top">
+      This release includes an implementation of the updated Declarative Services
+      Specification included in the OSGi Service Platform Core Specification Release 4, Version 4.2.
+      The following list highlights the changes to Declarative Services for Version 4.2 of the 
+      OSGi Specification:
       <ul>
         <li>The definition of the <code>Service-Component</code> header now uses the definition of a 
 	  header from the module layer. It also allows wild-cards to be used in the 
@@ -371,8 +332,73 @@ section of the Workbench User Guide.
 	  wherever component properties can be set, including configurations.</li>
       </ul>
     <p>
-       For more information see <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.2-early-draft.pdf">the OSGi R4.2 draft spec</a>.
+       For more information see the <a href="http://www.osgi.org/Release4/Download">OSGi Release 4 Version 4.2 specification</a>.
     </p></td>
+  </tr>
+
+  <tr id="OSGiR42">
+    <td width="30%" valign="top" align="left"><b>New core framework API</b></td>
+    <td width="70%" valign="top">
+        The OSGi Service Platform Core Specification Release 4, Version 4.2 is adding a number of small API additions
+        to the core Framework.  The following is a list of API additions included in this release.
+        <br>
+        <dl>
+          <dt><b>org.osgi.framework.Bundle#getVersion()</b></dt> 
+            <dd>Returns the Version of a bundle.</dd>
+          <dt><b>org.osgi.framework.Bundle#getSignerCertificates()</b></dt>
+            <dd>Returns the signers of a bundle.</dd>
+          <dt><b>org.osgi.framework.BundleException#getType()</b></dt>
+            <dd>Returns the error type for a BundleException.  For example, a resolver error.</dd>
+          <dt><b>org.osgi.framework.BundleReference</b></dt>
+            <dd>Interface which must be implemented by bundle classloaders.  This gives clients the ability to determine what bundle a ClassLoader is for.</dd>
+          <dt><b>org.osgi.framework.Constants</b></dt>
+            <dd>A number of new constants have been added to define standard launching configuration properties.</dd>
+          <dt><b>org.osgi.framework.FrameworkEvent</b></dt>
+            <dd>A number of new FrameworkEvent types have been added give launchers standard notification when a framework is stopped or restarted.</dd>
+          <dt><b>org.osgi.framework.FrameworkUtil#getBundle(Class)</b></dt>
+            <dd>Utility to get a Bundle object for a given class.  A static method equivalent to the PackageAdmin#getBundle(Class) method.</dd>
+          <dt><b>org.osgi.framework.FrameworkUtil#matchDistinguishedNameChain(String, List)</b></dt>
+            <dd>Utility to match a certificate chain against a pattern.  This is used for permission and condition checks against signed bundles.</dd>
+          <dt><b>org.osgi.framework.ServiceEvent</b></dt>
+            <dd>A new ServiceEvent type has been added to indicate the properties of a registered service have been modified and the new
+            properties no longer match a listener's filter.</dd>
+          <dt><b>org.osgi.framework.ServiceException</b></dt>
+            <dd>A new ServiceException type has been added to indicate that a service problem occurred.</dd>
+          <dt><b>org.osgi.util.tracker.BundleTracker</b></dt>
+            <dd>The BundleTracker class simplifies tracking bundles much like the ServiceTracker simplifies tracking services.</dd>     
+        </dl>
+    </td>
+  </tr>
+
+  <tr id="rfc132">
+    <td width="30%" valign="top" align="left"><b>Composite bundles</b></td>
+    <td width="70%" valign="top">
+        This release includes an implementation of the Composite Bundles specification.  
+        The Composite Bundles specification is a proposed specification for the OSGi 
+        Release 4, Version 4.2 specification.  In a large system built upon a large number of modules, 
+        sometimes it is necessary to provide a mechanism for isolating the various 
+        modules from each other at runtime. Composite Bundles introduces a concept  
+        to provide isolation for a group of bundles.
+        <p>  
+        Conceptually a composite bundle is composed of 
+        a set of bundles which are contained in another (nested) framework instance.
+        New API is introduced in the <code>org.osgi.service.framework</code> package to 
+        manage composite bundles.  The <code>CompositeBundleFactory</code> service interface is 
+        used to install composite bundles.  The <code>CompositeBundle</code> interface is used to 
+        manage the bundles which compose a composite bundle.
+        </p>
+        <p>
+        For more information see the <a href="http://www.osgi.org/Release4/Download">OSGi Release 4 Version 4.2 specification</a>.
+        </p>
+        <p>
+        <b>Note:</b> The API introduced in the <code>org.osgi.service.framework</code> package 
+        is a proposed OSGi API.  This API is considered provisional in Equinox and 
+        may change drastically or be dropped altogether in a future release of 
+        Equinox.  We encourage use of the API and any feedback on the 
+        specification, but consumers must be aware that breaking changes may occur
+        in a future release. 
+        </p>  
+    </td>
   </tr>
 
 <!-- *********************** SWT *********************** -->
