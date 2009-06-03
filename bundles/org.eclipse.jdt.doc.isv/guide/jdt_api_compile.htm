@@ -745,13 +745,13 @@ org.eclipse.jdt.core jar file (this jar file needs to be extracted first).</li>
 		    &lt;classpath&gt;
 		      &lt;pathelement location=&quot;${basedir}/../org.eclipse.jdt.core/bin&quot;/&gt;
 		    &lt;/classpath&gt;
-		&lt;/javac&gt;		
+		&lt;/javac&gt;
 	&lt;/target&gt;
 &lt;/project&gt;
 </font>
 </pre><p>The syntax used for the javac Ant task can be found in the <a href="http://ant.apache.org/manual/CoreTasks/javac.html">
  Ant javac task documentation</a>. The current adapter supports the Javac Ant task 1.4.1 up to 1.6.5 versions.</p>
-<p>If you are using a version above 1.5.0, you can use the nested compiler argument element to specify compiler
+<p>If you are using a version above 1.5.0, you can use the nested compiler argument element (<code>&lt;compilerarg&gt;</code>) to specify compiler
 specific options.
 </p>
 <pre><font color="#4444cc">
@@ -760,13 +760,22 @@ specific options.
     &lt;classpath&gt;
       &lt;pathelement location=&quot;${basedir}/../org.eclipse.jdt.core/bin&quot;/&gt;
     &lt;/classpath&gt;
-    &lt;compilerarg compiler=&quot;org.eclipse.jdt.core.JDTCompilerAdapter&quot; line=&quot;-1.5 -warn:+boxing&quot;/&gt;
-&lt;/javac&gt;		
+    &lt;compilerarg</font> <font color="red">compiler=&quot;org.eclipse.jdt.core.JDTCompilerAdapter&quot;</font> <font color="#4444cc">line=&quot;-1.5 -warn:+boxing&quot;/&gt;
+&lt;/javac&gt;
 ...
 </font>
-</pre><p>To prevent from getting compiler dependant buildfiles, we advise you to use the compiler argument set to <code>org.eclipse.jdt.core.JDTCompilerAdapter</code>.
+</pre>
+<b>Note:</b>
+<ol>
+<li>To prevent compiler dependant buildfiles, we <u>strongly</u> advise you to use a <code>&lt;compilerarg&gt;</code> whose "compiler" attribute value is <code>org.eclipse.jdt.core.JDTCompilerAdapter</code>.
 If this is not set, the buildfile can only be used with the Eclipse compiler. If set, the nested compiler argument is ignored if the name is different from the 
-compiler name specified by the <code>build.compiler</code> property.</p>
+compiler name specified by the <code>build.compiler</code> property.</li>
+<li><code>&lt;compilerarg&gt;</code> should not be used to set values like target value, source value, debug options, or any options that could be set using the
+defined attributes of the <code>javac</code> ant task. Its usage must be reserved to pass
+compiler specific options like warning options. When a command-line argument is specified more than once, the Eclipse batch compiler can report errors like:
+<pre>duplicate target compliance setting specification: 1.5</pre>
+</li>
+</ol>
 <h3> Problem determination</h3>
 <p> JDT Core defines a specialized marker (marker type "<b>org.eclipse.jdt.core.problem</b>
   ") to denote compilation problems. To programmatically discover problems
