@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Reusing Metadata</title>
+</head>
+<body>
+<h1>Reusing p2 Metadata</h1>
+<p>Metadata for a given feature or bundle can be different depending on how it was generated.  Particularily when <a href="../../org.eclipse.platform.doc.isv/guide/p2_customizing_metadata.html">customizing metadata</a>, or when features contribute <a href="pde_p2_featuremetadata.htm">root files</a>. </p>
+<p>Because of this, it is always a good idea to reuse metadata when possible instead of regenerating it based on binary features and bundles that you may not own.</p>
+
+<h3>The repo2runnable task</h3>
+<p>There is an Ant task <a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_repo2runnable"><tt>&lt;p2.repo2runnable&gt;</tt></a> which will transform feature and bundle artifacts into their installed form.  Generally speaking, this is the shape we need the plug-ins to be in if we want
+to be able to compile against them.  This task allows us to easily reconsume repositories from other projects in our own build.  PDE/Build has built-in integration with this task through the following properties:</p>
+<table border="5" cellspacing="0" cellpadding="2">
+	<tr><td><tt>repoBaseLocation</tt></td><td>A folder containing repositories to transform.  This folder can contain zipped repositories as well as sub-folders which are repositories.</td></tr>
+	<tr><td><tt>transformedRepoLocation</tt></td><td>The folder where the tranformed artifacts will be placed.  This folder will then become a p2 repository itself.</td></tr>
+</table>
+<br>
+New in 3.5 are <a href="pde_customization.htm#custom_targets">custom targets</a> <tt>preProcessRepos</tt> and <tt>postProcessRepos</tt> which occur before and after PDE/Build's call to <tt>&lt;p2.repo2runnable&gt;</tt>.  This allows for automatically mirroring or download zipped repositories:
+<pre>
+<b>build.properties:</b>
+	repoBaseLocation=${buildDirectory}/inputRepositories
+	transformedRepoLocation=${buildDirectory}/transformedRepo
+	
+<b>customTargets.xml:</b>
+&lt;target name="preProcessRepos"&gt;
+   &lt;p2.mirror source="http://download.eclipse.org/releases/galileo" destination="file:${repoBaseLocation}/mirrored"&gt;
+      &lt;iu id="org.eclipse.equinox.p2.user.ui.feature.group" /&gt;
+      &lt;iu id="org.eclipse.cdt.feature.group"/&gt;
+   &lt;/p2.mirror&gt;
+   &lt;property name="RCP.Repo-3.5RC3" value="http://download.eclipse.org/eclipse/downloads/drops/S-3.5RC3-200905282000/org.eclipse.rcp-p2repo-3.5RC3.zip" /&gt;
+   &lt;property name="Equinox.Repo-3.5RC3" value="http://download.eclipse.org/equinox/drops/S-3.5RC3-200905282000/equinox-SDK-3.5RC3.zip" /&gt;
+   &lt;get src="${RCP.Repo-3.5RC3" dest="${repoBaseLocation}/org.eclipse.rcp-p2repo-3.5RC3.zip" /&gt;
+   &lt;get src="${Equinox.Repo-3.5RC3" dest=""${repoBaseLocation}/eclipse-equinox-3.5RC3.zip" /&gt;
+&lt;/target&gt;
+</pre>
+<i>(At the time of of this writing, the location of the 3.5 final zips was not yet known, the URLs here serve as an example only and may not exist at any later date.)</i>
+<p>PDE/Build will first call the <tt>preProcessRepos</tt> custom target, then it will call the repo2runnable ant task to transform those downloaded repositories into a form that can be reused by the build.</p>
+<p>The <tt>transformedRepoLocation</tt> property which defines the location for the output of this transformation also serves as a <b>context repository</b>.</p>
+
+<h3>Context repositories</h3>
+<p>The property <tt><b>p2.context.repos</b></tt> is a comma separated list of repositories that serve as <i>context</i> to the build.</p>
+<p>When generating metadata, build will first consult the context repositories to see if there is already existing metadata for the feature or plug-in.  
+If metadata already exists, then it will be copied into the build local repository (<tt>${p2.build.repo}</tt>) instead of new metadata being generated.
+</p>
+<p>As well, if features, bundles, or products have <a href="../../org.eclipse.platform.doc.isv/guide/p2_customizing_metadata.html">customized</a> their metadata to depend on something that wasn't included in the build, then PDE/Build will
+perform a <a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_mirror">mirror</a> out of the context repositories.  This mirror operation will include any IUs that were added to feature or plug-in metadata.</p>
+</body>
+</html>
