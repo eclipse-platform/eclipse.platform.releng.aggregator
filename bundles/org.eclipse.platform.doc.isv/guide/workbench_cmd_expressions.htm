@@ -47,7 +47,15 @@ They do not <b>and</b> their elements together.
 
 <h3>Declarative Expression Examples</h3>
 
-<h4>Basic IStructuredSelection</h4>
+<ol>
+<li><a href="#ex1">Basic IStructuredSelection</a></li>
+<li><a href="#ex2">IResources and the Package or Project Explorer</a></li>
+<li><a href="#ex3">Active Contexts</a></li>
+<li><a href="#ex4">Active Views and Editor</a></li>
+<li><a href="#ex5">ActionSets and Contexts</a></li>
+</ol>
+
+<a name="ex1"></a><h4>Basic IStructuredSelection</h4>
 
 <p>
 Most of the tree or table like viewers return an
@@ -127,7 +135,7 @@ The same expression using the default variable:
 
 
 
-<h4>IResources and the Package or Project Explorer</h4>
+<a name="ex2"></a><h4>IResources and the Package or Project Explorer</h4>
 
 <p>
 The Package Explorer is a mixture of
@@ -156,8 +164,26 @@ the "*.java" files, you would need to:
 &lt;/enabledWhen&gt;
 </pre>
 
+<p>
+When working with the current selection and property testers it does not always make sense to use 
+<code>adapt</code>.  In these situations it is a good practice to check that the object under test
+is a valid type for that property tester:
+</p>
 
-<h4>Active Contexts</h4>
+<pre>
+&lt;enabledWhen&gt;
+    &lt;with variable="selection"&gt;
+        &lt;iterate ifEmpty="false"&gt;
+            &lt;instanceof type="org.eclipse.core.resources.IResource"/&gt;
+            &lt;test property="org.eclipse.core.resources.name"
+                     value="*.java"/&gt;
+        &lt;/iterate&gt;
+    &lt;/with&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+
+<a name="ex3"></a><h4>Active Contexts</h4>
 
 <p>
 If your handler should be enabled when your view or editor activates a context, you can use the
@@ -177,7 +203,7 @@ extension point and activated programmatically using the
 &lt;/enabledWhen&gt;
 </pre>
 
-<h4>Active Views and Editor</h4>
+<a name="ex4"></a><h4>Active Views and Editor</h4>
 
 <p>
 For handlers that are to be contributed to a specific view or editor, you can use <code>activeEditorId</code>
@@ -204,6 +230,36 @@ The following clause is for a handler that's active while in the Project Explore
     &lt;/with&gt;
 &lt;/activeWhen&gt;
 </pre>
+
+<a name="ex5"></a><h4>ActionSets and Contexts</h4>
+
+<p>As of 3.3 all <a href="../reference/extension-points/org_eclipse_ui_actionSets.html">org.eclipse.ui.actionSets</a>
+generate a context with a parent of <code>org.eclipse.ui.contexts.actionSet</code>.  Contexts with
+this parent are filtered from the <a class="command-link" 
+href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Keys)")'> 
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"> <b>General &gt; Keys</b></a> preference page.
+</p>
+
+<p>
+Showing an
+actionSet activates the matching context.  This allows contributed commands to "join" actionSets, like
+the debug launch actionSet. 
+</p>
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;with variable="activeContexts"&gt;
+        &lt;iterate ifEmpty="false" operator="or"&gt;
+            &lt;equals value="org.eclipse.debug.ui.launchActionSet"/&gt;
+        &lt;/iterate&gt;
+    &lt;/with&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+<p>
+Note: commands that are enabled or visible with actionSets are not currently displayed in the
+<b>Customize Perspective Dialog</b>.
+</p>
 
 <h3>Variables Provided in the Workbench</h3>
 
