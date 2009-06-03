@@ -6,30 +6,30 @@
   <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
   <meta http-equiv="Content-Style-Type" content="text/css">
   <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
-  <title>Composite Repositories</title>
+  <title>Composite repositories</title>
 </head>
 <body>
 
-<h1>Composite Repositories</h1>
+<h1>Composite repositories</h1>
 <p>
 As repositories continually grow in size they become harder to manage. The goal of composite repositories is to make this task easier 
-by allowing site maintainers to have a parent repository which refers to multiple children. Users are then able to reference the parent repository
-and the children's content will transparently be available to them. 
+by allowing site maintainers to have a parent repository which refers to multiple child repositories. Users are then able to reference the parent repository
+and the content of all the child repositories will be transparently available to them. 
 </p>
 
-<h2>How It Works</h2>
+<h2>How it works</h2>
 <p>
 With the built-in repository types defined by p2, when a user connects to a server, p2 checks to see if there are any files that are recognized. 
 In particular for metadata repositories it searches for a <code>content.xml</code> file or a <code>content.jar</code> and in the case of 
 artifact repositories it looks for an <code>artifacts.xml</code> or <code>artifacts.jar</code> file.
 </p>
-
 <p>
 So in order to create a composite repository, all one needs to do is create a new &quot;index&quot; file for the metadata and/or artifact
-repository and p2 will recognize that a composite repository has been defined and it will load it and its children. 
+repository and p2 will recognize that a composite repository has been defined and it will load it and its children. Composite repositories use
+a different index file name to help p2 recognize them as composite repositories.
 </p>
 
-<h2>Sample Composite Metadata Repository</h2>
+<h2>Sample composite metadata repository</h2>
 
 <p>
 File: <code>compositeContent.xml</code>
@@ -50,7 +50,7 @@ File: <code>compositeContent.xml</code>
 </pre>
 </p>
 
-<h2>Sample Composite Artifact Repository</h2>
+<h2>Sample composite artifact repository</h2>
 
 <p>
 File: <code>compositeArtifacts.xml</code>
@@ -72,22 +72,22 @@ File: <code>compositeArtifacts.xml</code>
 </pre>
 </p>
 
-<h2>Composite Repositories as part of the build</h2>
+<h2>Composite repositories as part of the build</h2>
 
 <p>
 In order to automate composite repository actions in release engineering builds, Ant tasks have been provided which can be called to create and 
-modify repositories. The tasks are defined in the <code>org.eclipse.equinox.p2.repository.tools</code> bundle.
+modify composite repositories. The tasks are defined in the <code>org.eclipse.equinox.p2.repository.tools</code> bundle.
 </p>
 
 <h3>p2.composite.repository</h3>
 <h4>Attributes</h4>
 <ul>
-<li><code>failOnExists</code> - Whether we should fail if the repository already exists. (Default is <i>false</i>)</li>
+<li><code>failOnExists</code> - Whether it should fail if the repository already exists. (Default is <i>false</i>)</li>
 <li><code>validate</code> - A comparator-id. Child repositories claiming to contain the same artifact are compared using the given 
 comparator. These are extensions to the <code>org.eclipse.equinox.p2.artifact.repository.artifactComparators</code> extension 
 point. Comparators provided by p2 are:
 <ul>
-      <li><code>org.eclipse.equinox.p2.repository.tools.jar.comparator</code>: Compare jars. Class files are dissassembled and compared for equivalence, 
+      <li><code>org.eclipse.equinox.p2.repository.tools.jar.comparator</code>: Compare jars. Class files are disassembled and compared for equivalence, 
       properties and manifest files are compared as such, all other files are compared byte-for-byte.</li>
       <li><code>org.eclipse.equinox.artifact.md5.comparator</code>: Compare the MD5 sums as recorded in the artifact repositories.</li>
 </ul>
