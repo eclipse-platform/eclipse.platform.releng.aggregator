@@ -39,20 +39,169 @@ Core expressions are used declaratively in the plugin.xml files, and programmati
 services provided in the workbench.
 </p>
 
+<p>
+Note: Elements from workbench extension points that use core expressions, like <code>enabledWhen</code>,
+take one child core expression element.  
+They do not <b>and</b> their elements together.
+<p>
+
 <h3>Declarative Expression Examples</h3>
 
 <h4>Basic IStructuredSelection</h4>
 
 <p>
+Most of the tree or table like viewers return an
+<a href="../reference/api/org/eclipse/jface/viewers/IStructuredSelection.html">IStructuredSelection</a>.
+For example, the Project Explorer and Package Explorer. 
+</p>
+
+<p>
 When using the default variable you must treat it as an <code>java.util.Collection</code>.  
-That means using &lt;count&gt; or &lt;iterate&gt;
+That means using &lt;count&gt; or &lt;iterate&gt;.  The expression below returns true if all of
+the selected items are <code>Person</code>.
+</p>
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;iterate ifEmpty="false"&gt;
+        &lt;instanceof value="org.eclipse.ui.examples.contributions.model.Person"/&gt;
+    &lt;/iterate&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+<p>
+This is equivalent to:
+</p>
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;with variable="selection"&gt;
+        &lt;iterate ifEmpty="false"&gt;
+            &lt;instanceof value="org.eclipse.ui.examples.contributions.model.Person"/&gt;
+        &lt;/iterate&gt;
+    &lt;/with&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+<p>
+The behaviour of <code>iterate</code> is:
+<ul>
+<li><code>iterate</code> <b>and</b>s the results of evaluating its child expressions for each
+element in the collection, unless you set the <code>operator</code> attribute.</li>
+<li><code>iterate</code> has the same semantics for its children as &lt;and&gt;</li>
+<li><code>iterate</code> with an operator of <b>and</b> returns true if the collection is empty,
+unless you set the <code>ifEmpty</code> attribute.</li>
+</ul>
+</p>
+
+<p>
+If you want to be enabled if only one Person is selected, you can include a <code>count</code>
+element.
+</p>
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;with variable="selection"&gt;
+        &lt;count value="1"/&gt;
+        &lt;iterate ifEmpty="false"&gt;
+            &lt;instanceof value="org.eclipse.ui.examples.contributions.model.Person"/&gt;
+        &lt;/iterate&gt;
+    &lt;/with&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+<p>
+The same expression using the default variable:
+</p>
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;and&gt;
+        &lt;count value="1"/&gt;
+        &lt;iterate ifEmpty="false"&gt;
+            &lt;instanceof value="org.eclipse.ui.examples.contributions.model.Person"/&gt;
+        &lt;/iterate&gt;
+    &lt;/and&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+
+
+<h4>IResources and the Package or Project Explorer</h4>
+
+<p>
+The Package Explorer is a mixture of
+<a href="../reference/api/org/eclipse/core/resources/IResource.html">org.eclipse.core.resources.IResource</a>,
+<code>org.eclipse.jdt.core.IJavaElement</code> and other classes. If you are trying to find all of 
+the "*.java" files, you would need to:
+</p>
+<ol>
+<li>Iterate through the default variable.</li>
+<li>Adapt the selection elements to your class, in this case 
+<a href="../reference/api/org/eclipse/core/resources/IResource.html">org.eclipse.core.resources.IResource</a>.</li>
+<li>Use one of the org.eclipse.core.resources property testers to test the 
+<a href="../reference/api/org/eclipse/core/resources/IResource.html">org.eclipse.core.resources.IResource</a> property.</li>
+</ol> 
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;with variable="selection"&gt;
+        &lt;iterate ifEmpty="false"&gt;
+            &lt;adapt type="org.eclipse.core.resources.IResource"&gt;
+                &lt;test property="org.eclipse.core.resources.name"
+                         value="*.java"/&gt;
+            &lt;/adapt&gt;
+        &lt;/iterate&gt;
+    &lt;/with&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+
+<h4>Active Contexts</h4>
+
+<p>
+If your handler should be enabled when your view or editor activates a context, you can use the
+<code>activeContexts</code> variable.  Contexts are defined in the 
+<a href="../reference/extension-points/org_eclipse_ui_contexts.html">org.eclipse.ui.contexts</a>
+extension point and activated programmatically using the 
+<a href="../reference/api/org/eclipse/ui/contexts/IContextService.html">org.eclipse.ui.contexts.IContextService</a>.
+</p>
+
+<pre>
+&lt;enabledWhen&gt;
+    &lt;with variable="activeContexts"&gt;
+        &lt;iterate ifEmpty="false" operator="or"&gt;
+            &lt;equals value="org.example.view.context"/&gt;
+        &lt;/iterate&gt;
+    &lt;/with&gt;
+&lt;/enabledWhen&gt;
+</pre>
+
+<h4>Active Views and Editor</h4>
+
+<p>
+For handlers that are to be contributed to a specific view or editor, you can use <code>activeEditorId</code>
+and <code>activePartId</code> in the <code>activeWhen</code> clause.  This is an example for a handler
+that should be active in text editors:
 </p>
 
 <pre>
 &lt;activeWhen&gt;
-    &lt;iterate ifEmpty="false"&gt;
-       &lt;instanceof value="org.eclipse.ui.examples.contributions.model.Person"/&gt;
-    &lt;/iterate&gt;
+    &lt;with variable="activeEditorId"&gt;
+        &lt;equals value="org.eclipse.ui.DefaultTextEditor"/&gt;
+    &lt;/with&gt;
+&lt;/activeWhen&gt;
+</pre>
+
+<p>
+The following clause is for a handler that's active while in the Project Explorer:
+</p>
+
+<pre>
+&lt;activeWhen&gt;
+    &lt;with variable="activePartId"&gt;
+        &lt;equals value="org.eclipse.ui.navigator.ProjectExplorer"/&gt;
+    &lt;/with&gt;
 &lt;/activeWhen&gt;
 </pre>
 
@@ -70,7 +219,9 @@ or have the contents of an
 </p>
 
 <p>
-The workbench publishes variables in <a href="../reference/api/org/eclipse/ui/ISources.html">ISources</a>.
+The workbench publishes variables in <a href="../reference/api/org/eclipse/ui/ISources.html">ISources</a>
+that can be used in the &lt;with/&gt; element and can be retrieved from the
+<a href="../reference/api/org/eclipse/core/expressions/IEvaluationContext.html">IEvaluationContext</a>.
 Some of the variables may not be set, depending on the current application context when they are evaluated.
 The following table explains some of the more commonly used ones: 
 </p>
@@ -184,6 +335,19 @@ and the active action sets show up in the list of active contexts.
 </tr>
 
 <tr>
+<td>activeEditorInput</td>
+<td><code><a href="../reference/api/org/eclipse/ui/IEditorInput.html">org.eclipse.ui.IEditorInput</a></code></td>
+<td>
+<p>The input of the currently active editor.  This is useful for property testers.
+
+</p>
+</td>
+<td>3.5</td>
+</tr>
+
+
+
+<tr>
 <td>activePart</td>
 <td><code><a href="../reference/api/org/eclipse/ui/IWorkbenchPart.html">org.eclipse.ui.IWorkbenchPart</a></code></td>
 <td>
@@ -285,6 +449,19 @@ the editor input, usually if includeEditorInput was set to <code>true</code> dur
 <td>
 <p>The ID of a control that has focus and has been registered with the 
 <a href="../reference/api/org/eclipse/ui/swt/IFocusService.html">IFocusService</a>.
+</p>
+</td>
+<td>3.3</td>
+
+</tr>
+
+<tr>
+<td>org.eclipse.core.runtime.Platform</td>
+<td><code><a href="../reference/api/org/eclipse/core/runtime/Platform.html">org.eclipse.core.runtime.Platform</a></code></td>
+<td>
+<p>
+The runtime Platform class is available, for use with property testers like <code>org.eclipse.core.runtime.isBundleInstalled</code>
+and <code>org.eclipse.core.runtime.product</code>.
 </p>
 </td>
 <td>3.3</td>
