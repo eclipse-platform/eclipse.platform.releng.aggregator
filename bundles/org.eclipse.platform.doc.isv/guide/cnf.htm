@@ -3,7 +3,7 @@
 <HEAD>
 
 <meta name="copyright"
-	content="Copyright (c) Oakland Software and others 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+	content="Copyright (c) Oakland Software and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -17,50 +17,143 @@
 <BODY BGCOLOR="#ffffff">
 <H1>Common Navigator Framework</H1>
 
-
-<p>The Common Navigator Framework (CNF) provides a general purpose
-configurable navigator view which can be shared by many applications
-working with the same set of resources or other objects, presenting a
-integrated view to the end user. It is implemented by the <b><a
+<p>A JFace Viewer provides the user with a view of objects using a single
+content provider, label provider, sorter and filter. The Common
+Navigator Framework (CNF) extends this idea by allowing a single view to
+dynamically use multiple and unrelated sets of content providers, label
+providers, sorters and filters. These can be activated in the view
+depending on declarative expressions or using API calls. The CNF
+implemented by the <b><a
 	href="../reference/api/org/eclipse/ui/navigator/package-summary.html">
 org.eclipse.ui.navigator</a></b> plugin.</p>
-<p>The main part of the CNF is the <b><a
-	href="../reference/api/org/eclipse/ui/navigator/CommonNavigator.html">CommonNavigator
-</a></b> which is a <b><a
-	href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart </a></b> 
-implementation. The Common Navigator instance in the IDE workbench is
-called the <b>Project Explorer</b>. Note that the <b>Package
-Explorer</b> in the IDE is part of the <b><a
-	href="../reference/api/org/eclipse/ui/views/navigator/package-summary.html">org.eclipse.ui.views.navigator
-</a></b> package and is unrelated to the Common Navigator.</p>
 
-<p>With the CNF you can define one or more view parts and associate
-each view part with content extensions, filters, wizards, and sets of
-actions. Each view instance is defined by an extension. Each content
-extension, filter, wizard and action provider is defined by another
-extension which allows these to be shared among the view part(s).</p>
+<p>The CNF uses the idea of <i>Navigator Content Extensions</i>
+(NCE) which can refer to a content provider, label provider, sorter, or
+drag adaptor (note that filters are configured separately). An NCE has
+associated expressions that tell it when it is active. NCEs are also
+presented to the user in the view context menu so that user can turn
+them on or off in order to show the view in different ways. Examples of
+NCEs are a resource content extension that controls how resources are
+presented and Java content extension that shows Java projects. In the
+IDE's Project Explorer, you can turn off the Java content extension
+getting a pure resource view of the workspace.</p>
 
-<h2>Components of the Common Navigator Framework</h2>
+<p>By using the NCEs it's possible to include different <i>model
+objects</i> directly in the view. These model objects might be related in a
+cascading fashion. For example a resource object (an <code>IFile</code>)
+might refer to a Java class object. This Java class object can be
+presented directly in the view by defining an NCE. The Java class object
+can have children (representing methods, fields, etc) all of which
+appear in the view. You can then add another NCE to display model
+objects related to the Java (or resource object) that display content
+related to a Java Server Page object. This can all be done without the
+"lower level" NCEs (resources, Java) being aware of the existence of the
+"outer" NCEs (JSP). Further, it's possible for outer NCEs to override by
+suppressing processing associated with lower level NCEs according to
+their requirements. And even further, it's possible (using the
+pipelining mechanism) for even level in this cascaded set of NCEs to
+arrange the presentation of the objects according to their
+specifications, moving, adding, or suppressing objects as necessary.</p>
+
+<p>The CNF has depends only on <code>org.eclipse.ui</code> and is
+therefore suitable for use both within the IDE and in an RCP
+application.</p>
+
+<p>The CNF is highly configurable and many of its components can be
+used separately (though this is not the typical case). For example, it's
+possible use the service that manages content extensions with a viewer
+other than the standard <code>CommonViewer</code>.</p>
+
+<p>The CNF documentation has the following sections:
+<p>
+<ul>
+	<li><a href="cnf_config.htm">Configuration Overview</a> - A high
+	level discussion of the configuration.</li>
+	<li><a href="cnf_operation.htm">Operational Topics</a> - A detailed discussion of various topics in the
+	operation of the CNF</li>
+	<li><a href="cnf_steps.htm">Step-by-step Instructions</a>
+	- Provides configuration instructions for various scenarios.</li>
+	
+	<!--
+	<li><a href="cnf_examples.htm">Examples</a> - Describes the
+	example projects for the CNF.</li>
+	-->
+
+	<li><a href="cnf_troubleshooting.htm">Troubleshooting</a> - Some suggestions for troubleshooting.</li>
+</ul>
+</p>
+</p>
+
+<h2>Major Components of the Common Navigator Framework</h2>
 
 <p>The CNF has the following major parts:</p>
 <ol>
 	<li><b>View Part</b> - <b><a
 		href="../reference/api/org/eclipse/ui/navigator/CommonNavigator.html">CommonNavigator
 	</a></b>.</li>
+
 	<li><b>Viewer</b> -<b><a
 		href="../reference/api/org/eclipse/ui/navigator/CommonViewer.html">CommonViewer
 	</a></b> the implementation of a viewer that is contained in the above view
-	part.</li>
-	<li><b>Content Service</b> - <b><a
-		href="../reference/api/org/eclipse/ui/navigator/INavigatorContentService.html">INavigatorContentService
-	</a></b> a service that manages content extensions and allows them to be
-	discovered based on objects associated with a viewer. Most users do not
-	interact directly with the Content Service, but it is possible to use
-	it independently from the common navigator view part.</li>
+	part. You can also use the CNF with your own viewer that can be
+	displayed anywhere.</li>
+
+	<li><b>Navigator Content Extensions</b> - <b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent</a></b>
+	This extension point is where you configure the collections of content
+	you want to make visible.</li>
+
+	<li><b>Navigator Viewer</b> - <b><a
+		href="../reference/extension-points/org_eclipse_ui_navigator_viewer.html">org.eclipse.ui.navigator.navigatorContent</a></b>
+	This extension point is used to declare the relationship between the
+	NCEs and a particular viewer. Regular expressions may be used here to
+	allow a viewer to dynamically detect NCEs that it does not know about
+	beforehand. visible.</li>
+
+	<li><b>Resource Support</b> - <b><a href="../guide/resInt.htm">Resources
+	</a></b> are one of the main types of objects managed by the CNF. To support
+	this the <b><a
+		href="../reference/api/org/eclipse/ui/navigator/resources/package-summary.html">
+	org.eclipse.ui.navigator.resources</a></b> plug-in provides all of the
+	necessary definitions. The Project Explorer is configured using these
+	definitions.</li>
+
 </ol>
 
+<h2>Navigators - Where the CNF Fits</h2>
 
-<h2>Content Extensions</h2>
+<p>There are currently 3 major navigators in the Eclipse IDE.</p>
+<ol>
+	<li><b>Project Explorer</b> - This is an instance of the
+	CommonNavigator that is provided by the <b><a
+		href="../reference/api/org/eclipse/ui/navigator/resources/package-summary.html">
+	org.eclipse.ui.navigator.resources</a></b> plugin. It provides a view of the
+	workspace and has a large number of NCEs contributed for resources,
+	Java, C, Web Tools, Data Tools, PHP, etc.</li>
+	<li><b>Package Explorer</b> - Provided by the Java Development
+	Tools (JDT) UI project, this provides a view of Java classes for the
+	workspace. Generally speaking, the presentation of the Package Explorer
+	and Project Explorer for Java objects is substantially similar. The JDT
+	is not used for projects beyond Java.</li>
+	<li><b>Navigator</b> - This view is an implementation of the now
+	deprecated (as of 3.5) <b><a
+		href="../reference/api/org/eclipse/ui/views/navigator/package-summary.html">org.eclipse.ui.views.navigator
+	</a>ResourceNavigator </b> class provided in the <code>org.eclipse.ui.ide</code>
+	plugin. It shows only the workspace resources and does not support
+	extensibility to show other content. In a future release, the Navigator
+	view will be provided by an implementation of the CommonNavigator.
+	<p>
+	We also provide <a href="cnf_steps_rn_migration.htm">instructions</a> for migration from the ResourceNavigator to the CNF.
+	</p>
+	</li>
+</ol>
+
+<p>The only navigator intended for general purpose client use if the
+CNF, which can be used either by adding NCEs visable in the Project
+Explorer (if developing an IDE plugin), or using a separate instance of
+the CommonNavigator as a view.</p>
+
+<h2>Navigator Content Extensions (NCE)</h2>
 
 <p>The CNF allows you to include not only resources but any type of
 object. One typical use case is that of a resource (consider a Java file
@@ -69,7 +162,8 @@ nodes representing aspects of the class like imports, methods, etc. The
 CommonViewer (portion of the Common Navigator) will include the
 IResource object representing the Java file, and then as its children an
 object for each import, method, etc. The mechanism for defining this is
-a <b><a href="cnf_config.htm#contentExtension">content extension</a></b>.</p>
+a <b><a href="cnf_config.htm#contentExtension">navigator content
+extension</a></b>.</p>
 
 <p>Each content extension also provides a means of associating
 objects with appropriate icons, labels and menu items.</p>
@@ -79,15 +173,15 @@ which is defined using core expressions in the extension point.
 Enablement expressions are commonly defined by sensing the class of an
 object.</p>
 
-<p>A priority may be associated with a content extension which
-indicates the category of importance of the extension related to other
-extensions. It's possible that more than one content extension may be
-enabled for a given object and situation. In this case the priority
-mechanism is used to select the one extension to use. Priorities are
-defined with words like "high" or "normal". A high priority would be
-associated with an extension that defines the primary UI for frequently
-manipulating an object. A low priority would be given to relatively
-infrequent utility sorts of UI.</p>
+<p></p>
+
+<p>A priority may be associated with a content extension which helps
+to determine the order of invocation of the NCEs. It's possible that
+more than one content extension may be enabled for a given object and
+situation. Priorities are defined with words like "high" or "normal". A
+high priority would be associated with an extension that defines the
+primary UI for frequently manipulating an object. A low priority would
+be given to relatively infrequent utility sorts of UI.</p>
 
 <p>Content extensions may be activated and deactivated for a given
 view part in the UI using the <b>Customize View</b> menu item in the
@@ -98,7 +192,8 @@ also be activated and deactivated the same way.</p>
 
 <p>Filters allow the user to specify which resources or objects to
 exclude. Like content extensions, filters may be specified centrally and
-shared.</p>
+shared.  
+</p>
 
 <h2>Common Wizards</h2>
 
@@ -106,6 +201,11 @@ shared.</p>
 are included in the appropriate popup menu based on the enablement.</p>
 
 <h2>Action Providers</h2>
+
+<p>Though the CNF provides a mechanism to work with actions, it is
+recommended that you instead use the <b><a
+	href="../guide/workbench_cmd.htm">Workbench Commands </a></b> instead of actions.
+</p>
 
 <p>Action providers provide a means to configure the retargetable
 actions and programmatically configure the popup menu in a CNF viewer.
@@ -122,42 +222,11 @@ validation in the event of a drop.</p>
 
 <h2>Link with Editor Support</h2>
 
-<p>The link helper extension point provides a flexible mechanism of determining the 
-appropriate selection in the navigator when an editor is activated.  Conversely, it also 
-provides the appropriate editor to be activated when the selection changes.
-</p>
+<p>The link helper extension point provides a flexible mechanism of
+determining the appropriate selection in the navigator when an editor is
+activated. Conversely, it also provides the appropriate editor to be
+activated when the selection changes.</p>
 
-
-<h2>Built in Resource Support</h2>
-
-<p><b><a href="../guide/resInt.htm">Resources </a></b> are one of
-the main types of objects managed by the CNF. To support this the <b><a
-	href="../reference/api/org/eclipse/ui/navigator/resources/package-summary.html">
-org.eclipse.ui.navigator.resources</a></b> plug-in provides all of the
-necessary definitions. The Project Explorer in the IDE is configured
-using these definitions.</p>
-
-<h2>Configuring the Common Navigator</h2>
-
-<p><b><a href="../guide/cnf_config.htm">Configuring the
-Common Navigator </a></b> gives the overview of how the CNF is configured. For
-further details, see the extension point documentation:</p>
-<ul>
-	<li><b><a
-		href="../reference/extension-points/org_eclipse_ui_navigator_viewer.html">org.eclipse.ui.navigator.viewer</a></b></li>
-	<li><b><a
-		href="../reference/extension-points/org_eclipse_ui_navigator_navigatorContent.html">org.eclipse.ui.navigator.navigatorContent</a></b></li>
-	<li><b><a
-		href="../reference/extension-points/org_eclipse_ui_navigator_linkHelper.html">org.eclipse.ui.navigator.linkHelper</a></b></li>
-</ul>
-
-<h2>Rich Client Platform Configuration Steps</h2>
-
-<p>The Common Navigator can be used in RCP applications to allow
-full access and manipulation of the resource workspace. This can be
-accomplished very quickly by using the <b><a
-	href="../guide/cnf_rcp.htm">Using the Common Navigator in RCP </a></b>
- instructions.</p>
 
 
 </BODY>
