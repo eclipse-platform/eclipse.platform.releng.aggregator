@@ -421,6 +421,18 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
     class loader natively (e.g. the Sun VM).  When running on these kinds of VMs deadlock can still 
     occur because of the VM lock. 
   </dd>
+  <dt><a name="osgiclassloadercopynatives" id="osgiclassloadercopynatives"></a>osgi.classloader.copy.natives</dt>
+  <dd>
+    If set to &quot;true&quot; then native code which is loaded from a bundle will be copied to a unique
+    location on disk each time a class loader asks to load the library from the bundle.  This may be needed in 
+    scenarios where the framework is restarted without shutting down the VM.  The default value is &quot;false&quot;.
+  </dd>
+  <dt><a name="osgiclassloadertype" id="osgiclassloadertype"></a>osgi.classloader.type</dt>
+  <dd>
+    If set to &quot;parallel&quot; then a check is done on JavaSE 7 for the ClassLoader#registerAsParallelCapable
+    method and if found then it is called to allow for parallel class loads.  On Java SE 7 this is the preferred 
+    way to avoid class loader deadlock because of cyclic class loaders.
+  </dd>
   <dt><a name="osgiclean"></a>osgi.clean</dt>
   <dd>if set to &quot;true&quot;, any cached data used by the OSGi framework and eclipse runtime 
 will be wiped clean.  This will clean the caches used to store bundle 
@@ -651,11 +663,13 @@ will force eclipse to reinitialize these caches.</dd>
   <dd>The minimum java version that is required to launch Eclipse.  The default value is
       &quot;1.4.1&quot;.</dd>
   <dt><a name="osgiresolvermode"></a>osgi.resolverMode</dt>
-  <dd>the mode used to resolve bundles installed in the Framework.  A value of 
-      &quot;strict&quot; puts the resolver in strict mode.  The default resolver
-      mode is not strict.  When the resolver is in strict mode the Framework will 
-      enforce access restriction rules when loading classes and resources from 
-      exported packages which specify the x-internal or x-friends directives.</dd>
+  <dd>the mode used to resolve bundles installed in the Framework.  The default resolver
+      mode is not strict.  The following options are available.
+    <ul type=disc>
+      <li><b>strict</b> - the resolver is in strict mode and will enforce access restriction rules when loading classes and resources from exported packages which specify the x-internal or x-friends directives.</li>
+      <li><b>development</b> - used for development time resolution.  This mode disables certain resolver rules that are not needed at development time.  For example, singleton selection is disabled to allow the development of multiple versions of a singleton bundle</li>
+    </ul>     
+  </dd>
   <dt><a name="osgi.resolver.usesMode"></a>osgi.resolver.usesMode</dt>
   <dd>
     the resolver mode used to resolve <b>uses</b> directives on Export-Package statements.  
@@ -697,6 +711,11 @@ will force eclipse to reinitialize these caches.</dd>
   This property is overriden by any value set in <a href="#osgisplashlocation">osgi.splashLocation</a>.</dd>
   <dt><a name="osgistartlevel"></a>osgi.startLevel</dt>
   <dd>the start level value the framework will be set to at startup.  The default value is 6.</dd>
+  <dt><a name="osgisupportmultipleHosts"></a>osgi.support.multipleHosts</dt>
+  <dd>
+    if set to <b>true</b> then the framework will attempt to attach a fragment to all available host 
+    bundles which satisfy the fragment bundle's Fragment-Host constraint.  The default value is <b>false</b>.
+  </dd>
   <dt><a name="osgisupportsignatureverify"></a>osgi.support.signature.verify</dt>
   <dd>This option has been deprecated.  Use <a href="#osgisignedcontentsupport">osgi.signedcontent.support</a> instead.
   </dd>
