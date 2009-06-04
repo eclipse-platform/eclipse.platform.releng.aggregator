@@ -14,7 +14,7 @@
 <body>
 
 <h1>The Eclipse runtime options</h1>
-<p>Version 3.5 - Last revised April 21, 2008</p>
+<p>Version 3.5 - Last revised June 4, 2009</p>
 <p>The Eclipse platform is highly configurable. Configuration input takes the
   form of command line arguments and System property settings. In many cases
   the command line arguments are simply short cuts for setting the related System
@@ -60,11 +60,9 @@ line arguments. </p>
   <dt>-dev [entries] (OSGi)</dt>
   <dd>equivalent to setting <a href="#osgidev">osgi.dev</a> to [entries] or
     the empty string to simply enable dev mode (i.e., if entries are not specified)</dd>
-  <dt>-eclipse.keyring &lt;file path&gt;    (Equinox) <span
- style="font-style: italic;">NEW</span></dt>
+  <dt>-eclipse.keyring &lt;file path&gt;    (Equinox)</dt>
   <dd>Set to override location of the default secure storage</dd>
-  <dt>-eclipse.password &lt;file path&gt;    (Equinox) <span
- style="font-style: italic;">NEW</span></dt>
+  <dt>-eclipse.password &lt;file path&gt;    (Equinox)</dt>
   <dd>If specified, the secure storage treats contents of the file as a default password. 
     When not set, password providers are used to obtain a password.</dd>
   <dt>-feature &lt;feature id&gt;    (Runtime)</dt>
@@ -84,38 +82,34 @@ line arguments. </p>
   <dt>-keyring &lt;location&gt; (Runtime)</dt>
   <dd>the location of the authorization database on disk. This argument has to
     be used together with the -password argument. </dd>
-  <dt>--launcher.library &lt;location&gt; (Executable) <span
- style="font-style: italic;">NEW</span></dt>
+  <dt>--launcher.library &lt;location&gt; (Executable)</dt>
   <dd>the location of the eclipse executable's companion shared
 library.&nbsp; If not specified the executable looks in the plugins
 directory for the appropriate org.eclipse.equinox.launcher.[platform]
 fragment with the highest version and uses the shared library named
 eclipse_* inside.</dd>
-  <dt>--launcher.ini &lt;location&gt; (Executable) <span
- style="font-style: italic;">NEW</span></dt>
+  <dt>--launcher.ini &lt;location&gt; (Executable)</dt>
   <dd>the location of the product .ini file to use.&nbsp; If not
 specified the executable will look for a file beside the launcher with
 the same name and the extension .ini.&nbsp; (ie eclipse.exe looks for
 eclipse.ini, product.exe looks for product.ini)</dd>
-  <dt>--launcher.suppressErrors (Executable) <span
- style="font-style: italic;">NEW</span></dt>
+  <dt>--launcher.suppressErrors (Executable)</dt>
   <dd>If specified the executable will not display any error or message
 dialogs.&nbsp; This is useful if the executable is being used in an
 unattended situation.</dd>
   <dt>--launcher.secondThread (Executable)&nbsp; <span
- style="font-style: italic;">NEW MACOSX ONLY</span></dt>
+ style="font-style: italic;">MACOSX ONLY</span></dt>
   <dd>If specified the executable will create the Java VM on a
 secondary thread.&nbsp; This should used if a swing application is
 being run. <span style="font-weight: bold;">SWT will NOT work</span>
 if this option is specified.</dd>
-  <dt>--launcher.XXMaxPermSize &lt;value&gt; (Executable) <span
- style="font-style: italic;">NEW</span></dt>
+  <dt>--launcher.XXMaxPermSize &lt;value&gt; (Executable)</dt>
   <dd>If specified, and the executable detects that the VM being used
 is a Sun VM, then the launcher will automatically add the
 -XX:MaxPermSize=&lt;value&gt; vm argument.&nbsp; The executable is not
 capable of detecting Sun VMs on all platforms.<br>
   </dd>
-  <dt>-name &lt;string&gt; <em>NEW</em></dt>
+  <dt>-name &lt;string&gt;</dt>
   <dd>The name to be displayed in task bar item when the application starts up. When not set, the name is the name of the executable.</dd>
   <dt>-nl &lt;locale&gt; (OSGi)</dt>
   <dd>equivalent to setting <a href="#osginl">osgi.nl</a> to &lt;locale&gt;</dd>
@@ -140,15 +134,14 @@ capable of detecting Sun VMs on all platforms.<br>
   <dt> -product &lt;id&gt; (OSGi) </dt>
   <dd>equivalent to setting  <a href="#eclipseproduct">eclipse.product</a> to
   &lt;id&gt;</dd>
-  <dt>-showSplash &lt;bitmap&gt; (Executable, Main) <span
- style="font-style: italic;">NEW</span><br>
+  <dt>-showSplash &lt;bitmap&gt; (Executable, Main)
   </dt>
   <dd>specifies the bitmap to use in the splash screen. If specified,
 the launcher may be able to show the splash screen before starting the
 Java VM.&nbsp; If not specified, Main will find the bitmap using the
 osgi.splashLocation and osgi.splashPath properties.<br>
   </dd>
-  <dt>-startup &lt;location&gt; (Executable) <em>NEW</em></dt>
+  <dt>-startup &lt;location&gt; (Executable)</dt>
   <dd>The location of jar used to startup eclipse. The jar referred to
 should have the Main-Class attribute set to
 org.eclipse.equinox.launcher.Main. If this parameter is not set, the
@@ -345,6 +338,12 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
    then the Equinox security manager is used.  This security manager is required to fully support the OSGi Conditional Permission Admin specification.  If
    the property is set to the empty string then java.lang.SecurityManager will be used; otherwise the property specifies a security manager 
    class that should be used as the security manager.</dd>
+  <dt><a name="eclipsetracesizemax"></a>eclipse.trace.size.max <span style="font-style: italic;">NEW</span></dt>
+  <dd>the max size in Kb that the trace file is allowed to grow. The trace file is rotated when the file size exceeds the max size. 
+  The default value is "1000". A negative value will cause the default value to be used. A zero value indicates no max trace size.</dd>
+  <dt><a name="eclipsetracebackupmax"></a>eclipse.trace.backup.max <span style="font-style: italic;">NEW</span></dt>
+  <dd>the max number of backup trace files to allow. The oldest backup trace file will be deleted after the max number of backup trace 
+  files is reached as a result of rotating the trace file. The default value is "10". A negative or zero value will cause the default value to be used.</dd>
   <dt><a name="eclipsevm" id="eclipsevm"></a>eclipse.vm {-vm}</dt>
   <dd>the path to the Java executable used to run Eclipse. This information is
   used to construct relaunch command lines.</dd>
@@ -421,13 +420,13 @@ in <a href="#eclipsevm">eclipse.vm</a>.</dd>
     class loader natively (e.g. the Sun VM).  When running on these kinds of VMs deadlock can still 
     occur because of the VM lock. 
   </dd>
-  <dt><a name="osgiclassloadercopynatives" id="osgiclassloadercopynatives"></a>osgi.classloader.copy.natives</dt>
+  <dt><a name="osgiclassloadercopynatives" id="osgiclassloadercopynatives"></a>osgi.classloader.copy.natives <span style="font-style: italic;">NEW</span></dt>
   <dd>
     If set to &quot;true&quot; then native code which is loaded from a bundle will be copied to a unique
     location on disk each time a class loader asks to load the library from the bundle.  This may be needed in 
     scenarios where the framework is restarted without shutting down the VM.  The default value is &quot;false&quot;.
   </dd>
-  <dt><a name="osgiclassloadertype" id="osgiclassloadertype"></a>osgi.classloader.type</dt>
+  <dt><a name="osgiclassloadertype" id="osgiclassloadertype"></a>osgi.classloader.type <span style="font-style: italic;">NEW</span></dt>
   <dd>
     If set to &quot;parallel&quot; then a check is done on JavaSE 7 for the ClassLoader#registerAsParallelCapable
     method and if found then it is called to allow for parallel class loads.  On Java SE 7 this is the preferred 
@@ -711,7 +710,7 @@ will force eclipse to reinitialize these caches.</dd>
   This property is overriden by any value set in <a href="#osgisplashlocation">osgi.splashLocation</a>.</dd>
   <dt><a name="osgistartlevel"></a>osgi.startLevel</dt>
   <dd>the start level value the framework will be set to at startup.  The default value is 6.</dd>
-  <dt><a name="osgisupportmultipleHosts"></a>osgi.support.multipleHosts</dt>
+  <dt><a name="osgisupportmultipleHosts"></a>osgi.support.multipleHosts <span style="font-style: italic;">NEW</span></dt>
   <dd>
     if set to <b>true</b> then the framework will attempt to attach a fragment to all available host 
     bundles which satisfy the fragment bundle's Fragment-Host constraint.  The default value is <b>false</b>.
