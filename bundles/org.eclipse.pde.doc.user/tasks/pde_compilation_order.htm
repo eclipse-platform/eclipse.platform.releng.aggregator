@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Compilation Order and Parallelization</title>
+</head>
+<body>
+<h1>Compilation Order and Parallelization</h1>
+<p>By default, PDE/Build compiles plug-ins by delegating through the feature structure.  Features are visited depth first, the plug-ins within each feature are compiled in dependency-order (as determined by the OSGi resolver).</p>
+<p>This means that all dependencies of a given bundle must contained in the same feature, or in a feature that appears earlier in the depth-first traversal of the feature inclusion hierarchy.  This can make it difficult to organize your
+features.</p>
+
+<h3>Flattening Dependencies</h3>
+<p>New in 3.5 is a builder property <b><tt>flattenDependencies</tt></b>.  Setting this property to true will cause PDE/Build to instead sort all plug-ins regardless accross feature boundaries.  PDE/Build will then generate a new build script
+<i>compile.&lt;feature&gt;.xml</i> which lists all plug-ins in order sorted by their dependencies.  This allows you to partition your bundles into different features according to their functionality without worrying about their inter-dependencies.</p>
+
+<h3>Parallel Compilation</h3>
+<p>If <tt>flattenDependencies</tt> is specified, then PDE/Build is then able to compile bundles in parallel.  It does this by partitioning the sorted list of bundles into groups where each group contains bundles that depend only on bundles in earlier groups.</p>
+<p>Each group is then wrapped in an Ant <tt>&lt;parallel&gt;</tt> task.  The following properties control the parallelization behaviour:</p>
+		<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
+			<tr><td><tt>parallelCompilation</tt></td><td>Set to <b><tt>true</tt></b> to enable parallel compilation. (Requires <tt>flattenDependencies=true</tt>)</td></tr>
+			<tr><td><tt>parallelThreadCount</tt></td><td>The maximum number of threads to use.  Default is 3.  Corresponds to <i>threadCount</i> on the ant parallel task.</td></tr>
+			<tr><td><tt>parallelThreadsPerProcessor</tt></td><td>The maximum number of threads to use per available processor.  Corresponds to <i>threadsPerProcessor</i> on the ant parallel task.</td></tr>
+		</table>
+		
+<p>The resulting compile script that gets generated then looks something like this:</p>
+<pre>
+  &lt;project name="Compile master" default="main"&gt;
+     &lt;target name="main"&gt;
+        &lt;parallel threadsPerProcessor='3'&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.osgi" target="build.jars"/&gt;
+        &lt;/parallel&gt;
+        &lt;parallel threadsPerProcessor='3'&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.equinox.common" target="build.jars"/&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.equinox.p2.jarprocessor" target="build.jars"/&gt;
+        &lt;/parallel&gt;
+        &lt;parallel threadsPerProcessor='3'&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.update.configurator" target="build.jars"/&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.equinox.simpleconfigurator" target="build.jars"/&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.equinox.frameworkadmin" target="build.jars"/&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.core.jobs" target="build.jars"/&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.core.databinding.observable" target="build.jars"/&gt;
+             &lt;ant antfile="build.xml" dir="plugins/org.eclipse.swt" target="build.jars"/&gt;
+             ...
+
+</pre>
+</body>
+</html>
