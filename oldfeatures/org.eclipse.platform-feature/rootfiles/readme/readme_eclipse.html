@@ -8,7 +8,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Release 3.5.0<br>
-  Last revised June 15, 2009</p>
+  Last revised June 19, 2009</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -1251,6 +1251,23 @@ some limitations. Java 6 processors are only executed during a build, not while 
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=188558">188558</a>). Some methods
 in the processing API are unimplemented when compiling within the IDE, and will throw
 UnsupportedOperationException.
+
+<h4>New 'indirectly referenced from required .class files' compile error</h4>
+In the 3.5 release, the compiler fixed a problem at the 1.5 compliance level
+and above, that may cause your existing projects to report an 'indirectly
+referenced from required .class files' error.
+<p>When a type implements more than 1 API method such as :
+<ol>
+	<li><code>public int getService(String name);</code></li>
+	<li><code>public int getService(String name, Missing missing);</code></li>
+	<li><code>public int getService(String name, String platform, Missing missing);</code></li>
+</ol>
+and you call the method <code>getService("Test")</code>, the compiler needs to find the best matching method.
+If the type <code>Missing</code> is not available on your Java build path because its bundle is
+not required then an 'indirectly referenced from required .class files' error
+could be reported by the compiler.</p>
+<p>To fix this add the necessary bundle to your required
+bundles or wait for a 3.5 maintenance build where this problem will be fixed. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=278745">278745</a>)</p>
 
 <h3>3.4 <a name="I-PDE">Plug-in Development Environment (PDE)</a></h3>
 <h4>Feature manifest editor does not preserve all comments</h4>
