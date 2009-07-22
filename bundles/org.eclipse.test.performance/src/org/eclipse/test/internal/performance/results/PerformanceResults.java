@@ -334,7 +334,7 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 		
 		// Manage monitor
 		int percentage = (int) ((((double)(i+1)) / (componentsLength+1)) * 100);
-		subMonitor.setTaskName(taskName+" ("+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$
+		subMonitor.setTaskName(taskName+" ("+buildName+": "+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
 		subTaskBuffer.append(componentName);
 		subTaskBuffer.append("..."); //$NON-NLS-1$
@@ -409,6 +409,9 @@ public String[] readAll(String buildName, String[][] configs, String pattern, Fi
 		// if one local files is missing then force a full DB read!
 		// TODO moderate this to force the DB read only for the missing file...
 		return read(false, null, configs, true, dataDir, null, subMonitor.newChild(900));
+	}
+	if (buildName != null) {
+		this.name = buildName;
 	}
 	
 	// Look for missing builds
@@ -543,6 +546,16 @@ private void setConfigInfo(String[][] configs) {
 			}
 		}
 	}
+}
+
+
+/**
+ * Set the name of the baseline used for extracted results
+ * 
+ * @param buildName The name of the baseline build
+ */
+public void setBaselineName(String buildName) {
+	this.baselineName = buildName;
 }
 
 private void setDefaults() {

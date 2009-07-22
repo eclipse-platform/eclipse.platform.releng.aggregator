@@ -337,7 +337,7 @@ private void initialize() {
 				this.baseline = buildResults;
 				this.baselined = true;
 			}
-		} else if (currentBuildName == null || currentBuildDate == null || buildResults.getDate().compareTo(currentBuildDate) >= 0) {
+		} else if (currentBuildName == null || currentBuildDate == null || (this.current == null && buildResults.getDate().compareTo(currentBuildDate) >= 0)) {
 			this.current = buildResults;
 			this.valid = true;
 		}
