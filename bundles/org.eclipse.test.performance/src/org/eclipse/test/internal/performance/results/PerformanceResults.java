@@ -334,7 +334,13 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 		
 		// Manage monitor
 		int percentage = (int) ((((double)(i+1)) / (componentsLength+1)) * 100);
-		subMonitor.setTaskName(taskName+" ("+buildName+": "+percentage+"%)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		StringBuffer tnBuffer= new StringBuffer(taskName);
+		tnBuffer.append(" ("); //$NON-NLS-1$
+		if (buildName != null) {
+			tnBuffer.append(buildName).append(": "); //$NON-NLS-1$
+		}
+		tnBuffer.append(percentage).append("%)"); //$NON-NLS-1$
+		subMonitor.setTaskName(tnBuffer.toString());
 		StringBuffer subTaskBuffer = new StringBuffer("Component "); //$NON-NLS-1$
 		subTaskBuffer.append(componentName);
 		subTaskBuffer.append("..."); //$NON-NLS-1$
