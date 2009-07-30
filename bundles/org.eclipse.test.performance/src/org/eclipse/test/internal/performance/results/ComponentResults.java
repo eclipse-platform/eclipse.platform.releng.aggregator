@@ -112,7 +112,7 @@ private String lastBuildName(int kind) {
 	String lastBuildName = builds[idx--];
 	switch (kind) {
 		case 1: // no ref
-			while (lastBuildName.startsWith(VERSION_REF)) {
+			while (lastBuildName.startsWith(DEFAULT_BASELINE_PREFIX)) {
 				lastBuildName = builds[idx--];
 			}
 			break;

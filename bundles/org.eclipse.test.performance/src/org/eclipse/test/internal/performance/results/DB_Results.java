@@ -274,11 +274,16 @@ public static String getLastBaselineBuild(String date) {
 	if (BUILDS == null) {
 		queryAllVariations("%"); //$NON-NLS-1$
 	}
-	if (date == null) return LAST_BASELINE_BUILD;
+	if (date == null) {
+		if (LAST_BASELINE_BUILD == null) {
+			return BUILDS[0];
+		}
+		return LAST_BASELINE_BUILD;
+	}
 	String lastBaselineBuild = null;
 	for (int i=0; i<BUILDS_LENGTH; i++) {
 		String build = BUILDS[i];
-		if (build.startsWith(AbstractResults.VERSION_REF)) {
+		if (build.startsWith(AbstractResults.DEFAULT_BASELINE_PREFIX)) {
 			String buildDate = build.substring(build.indexOf('_')+1);
 			if (buildDate.compareTo(date) < 0) {
 				if (lastBaselineBuild == null || build.compareTo(lastBaselineBuild) > 0) {
@@ -286,6 +291,9 @@ public static String getLastBaselineBuild(String date) {
 				}
 			}
 		}
+	}
+	if (lastBaselineBuild == null) {
+		return BUILDS[0];
 	}
 	return lastBaselineBuild;
 }

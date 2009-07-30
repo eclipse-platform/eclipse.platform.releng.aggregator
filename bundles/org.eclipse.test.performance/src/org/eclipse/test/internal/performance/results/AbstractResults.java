@@ -94,11 +94,12 @@ public abstract class AbstractResults implements Comparable {
 	protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMddHHmm"); //$NON-NLS-1$
 
 	// Initialize constant fields depending on DB version
+	public final static String DEFAULT_BASELINE_PREFIX = "R-3."; //$NON-NLS-1$
 	public final static String VERSION_REF, VERSION;
 	static {
 		// Initialize reference version and database directory
-		VERSION_REF = "R-3.4"; //$NON-NLS-1$
-		VERSION = "3.5"; //$NON-NLS-1$
+		VERSION_REF = "R-3.5"; //$NON-NLS-1$
+		VERSION = "3.6"; //$NON-NLS-1$
 	
 		// Initialize configuration names
 		CONFIGS = new String[] {
@@ -149,7 +150,7 @@ public static boolean copyFile(File src, File dest) {
  * Return the build date as yyyyMMddHHmm
  */
 public static String getBuildDate(String buildName) {
-	return getBuildDate(buildName, VERSION_REF);
+	return getBuildDate(buildName, DEFAULT_BASELINE_PREFIX);
 }
 /*
  * Return the build date as yyyyMMddHHmm

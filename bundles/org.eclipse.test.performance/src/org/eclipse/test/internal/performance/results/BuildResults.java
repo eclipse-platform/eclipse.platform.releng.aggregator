@@ -49,7 +49,7 @@ BuildResults(AbstractResults parent) {
 BuildResults(AbstractResults parent, int id) {
 	super(parent, id);
 	this.name = DB_Results.getBuildName(id);
-	this.baseline = this.name.startsWith(VERSION_REF);
+	this.baseline = this.name.startsWith(DEFAULT_BASELINE_PREFIX);
 }
 
 /*

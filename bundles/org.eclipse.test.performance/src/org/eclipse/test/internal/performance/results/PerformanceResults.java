@@ -334,7 +334,7 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 		
 		// Manage monitor
 		int percentage = (int) ((((double)(i+1)) / (componentsLength+1)) * 100);
-		StringBuffer tnBuffer= new StringBuffer(taskName);
+		StringBuffer tnBuffer= taskName==null ? new StringBuffer() : new StringBuffer(taskName);
 		tnBuffer.append(" ("); //$NON-NLS-1$
 		if (buildName != null) {
 			tnBuffer.append(buildName).append(": "); //$NON-NLS-1$
@@ -354,6 +354,10 @@ private String[] read(boolean local, String buildName, String[][] configs, boole
 			addChild(componentResults, true);
 		} else {
 			componentResults = (ComponentResults) getResults(componentName);
+			if (componentResults == null) {
+				componentResults = new ComponentResults(this, componentName);
+				addChild(componentResults, true);
+			}
 		}
 		
 		// Read the component results
@@ -515,7 +519,7 @@ private void setAllBuildNames() {
 		builds.toArray(this.allBuildNames);
 		int idx = this.allBuildNames.length-1;
 		this.name = this.allBuildNames[idx--];
-		while (this.name.startsWith(VERSION_REF)) {
+		while (this.name.startsWith(DEFAULT_BASELINE_PREFIX)) {
 			this.name = this.allBuildNames[idx--];
 		}
 	}
@@ -595,7 +599,12 @@ private void setDefaults() {
 	// Init baseline prefix if not set
 	if (this.baselinePrefix == null) {
 		// Assume that baseline name format is *always* x.y_yyyyMMddhhmm_yyyyMMddhhmm
-		this.baselinePrefix = this.baselineName.substring(0, this.baselineName.lastIndexOf('_'));
+		int index = this.baselineName.lastIndexOf('_');
+		if (index > 0) {
+			this.baselinePrefix = this.baselineName.substring(0, index);
+		} else {
+			this.baselinePrefix = DEFAULT_BASELINE_PREFIX;
+		}
 	}
 	
 	// Set scenario pattern default
@@ -632,8 +641,7 @@ public String[] updateBuilds(String[] builds, boolean force, File dataDir, IProg
 			reset();
 			break;
 		case 1:
-			buffer.append(builds[0]);
-			buffer.append(" build"); //$NON-NLS-1$
+			buffer.append("one build"); //$NON-NLS-1$
 			break;
 		default:
 			buffer.append("several builds"); //$NON-NLS-1$
@@ -674,8 +682,7 @@ public String[] updateBuild(String buildName, boolean force, File dataDir, IProg
 		buffer.append("all builds"); //$NON-NLS-1$
 		reset();
 	} else {
-		buffer.append(buildName);
-		buffer.append(" build"); //$NON-NLS-1$
+		buffer.append("one build"); //$NON-NLS-1$
 	}
 	String taskName = buffer.toString();
 	println(buffer);
@@ -688,7 +695,7 @@ public String[] updateBuild(String buildName, boolean force, File dataDir, IProg
 	read(false, buildName, null, force, dataDir, taskName, subMonitor);
 
 	// Refresh name
-	if (buildName != null && !buildName.startsWith(VERSION_REF)) {
+	if (buildName != null && !buildName.startsWith(DEFAULT_BASELINE_PREFIX)) {
 		this.name = buildName;
 	}
 	
