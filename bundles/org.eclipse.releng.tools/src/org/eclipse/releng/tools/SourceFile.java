@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * Martin Oberhuber (Wind River) - [235572] detect existing comments in bat files
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -51,7 +52,7 @@ public abstract class SourceFile {
 	            return new CFile(file);
 			} else if (extension.equals("properties")) { //$NON-NLS-1$
 				return new PropertiesFile(file);
-	        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak")) { //$NON-NLS-1$
+	        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak") || extension.equals("pl") || extension.equals("tcl")) { //$NON-NLS-1$
 	            return new ShellMakeFile(file);
 	        } else if (extension.equals("bat")) { //$NON-NLS-1$
 	            return new BatFile(file);
@@ -70,6 +71,27 @@ public abstract class SourceFile {
 		initialize();
 	}
 
+	/**
+	 * Test if the given line marks the start of a potential Copyright comment.
+	 * Can be overridden in subclasses to perform advanced detection.
+	 * @param aLine a line of text to check
+	 * @return <code>true</code> if the line can mark a copyright comment start.
+	 * @since 3.5
+	 */
+	public boolean isCommentStart(String aLine) {
+		return aLine.trim().startsWith(getCommentStart());
+	}
+	/**
+	 * Test if the given line marks the end of a potential Copyright comment.
+	 * Can be overridden in subclasses to perform advanced detection.
+	 * @param aLine a line of text to check
+	 * @param commentStartString the line which started the block comment
+	 * @return <code>true</code> if the line can mark a copyright comment end.
+	 * @since 3.5
+	 */
+	public boolean isCommentEnd(String aLine, String commentStartString) {
+		return aLine.trim().endsWith(getCommentEnd());
+	}
 	public abstract String getCommentStart();
 	public abstract String getCommentEnd();
 	
@@ -102,28 +124,33 @@ public abstract class SourceFile {
 			int commentStart = 0;
 			int commentEnd = 0;
 			boolean inComment = false;
+			String commentStartString = ""; //$NON-NLS-1$
 			
 			while (aLine != null) {
 				contentsWriter.write(aLine);
 				contentsWriter.newLine();
-				if (!inComment && aLine.trim().startsWith(getCommentStart())) {
+				if (!inComment && isCommentStart(aLine)) {
 					// start saving comment
 					inComment = true;
 					commentStart = lineNumber;
+					commentStartString = aLine;
 				}
 				
 				if (inComment) {
 					comment = comment + aLine + newLine;
 								
-					if (aLine.trim().endsWith(getCommentEnd()) && commentStart != lineNumber) {
+					if (isCommentEnd(aLine, commentStartString) && commentStart != lineNumber) {
 						// stop saving comment
 						inComment = false;
 						commentEnd = lineNumber;
-						BlockComment aComment = new BlockComment(commentStart, commentEnd, comment.toString(), getCommentStart(), getCommentEnd());
+						String commentEndString = aLine.trim();
+						commentEndString = commentEndString.substring(commentEndString.length()-2);
+						BlockComment aComment = new BlockComment(commentStart, commentEnd, comment.toString(), commentStartString, commentEndString);
 						comments.add(aComment);
 						comment = ""; //$NON-NLS-1$
 						commentStart = 0;
 						commentEnd = 0;
+						commentStartString = ""; //$NON-NLS-1$
 					}
 				}
 				

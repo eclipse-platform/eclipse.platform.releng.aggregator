@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,8 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ * Martin Oberhuber (Wind River) - [235572] detect existing comments in bat files
  *******************************************************************************/
 package org.eclipse.releng.tools;
+
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 
@@ -18,12 +21,25 @@ public class ShellMakeFile extends SourceFile {
 		super(file);
 	}
 
+	//Optional Whitespace, #, optional whitespace, then at least 2 non-word chars repeated till EOL 
+	private static Pattern p = Pattern.compile("\\s*#\\s*\\W{2,}\\s*");
+	
+	public boolean isCommentStart(String aLine) {
+		return p.matcher(aLine).matches();
+	}
+
+	public boolean isCommentEnd(String aLine, String commentStartString) {
+		String s = commentStartString.trim();
+		s = s.substring(s.length()-2);
+		return aLine.trim().endsWith(s);
+	}
+
 	public String getCommentStart() {
-		return "#*";
+		return "#*"; //unused, Pattern matcher above will be used instead
 	}
 
 	public String getCommentEnd() {
-		return "**";
+		return "**"; //unused, Pattern matcher above will be used instead
 	}
 
 	public int getFileType() {
