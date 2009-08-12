@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  * Martin Oberhuber (Wind River) - [276255] fix insertion of extra space chars
+ * Martin Oberhuber (Wind River) - [234872] avoid rem's that echo to the console
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -46,7 +47,7 @@ public abstract class CopyrightComment {
 	        case SHELL_MAKE_COMMENT:
 	            return "#"; //$NON-NLS-1$
 	        case BAT_COMMENT:
-	            return "rem"; //$NON-NLS-1$
+	            return "@rem"; //$NON-NLS-1$
 	        case XML_COMMENT:
 	            return "   "; //$NON-NLS-1$
 		    default:
@@ -68,7 +69,7 @@ public abstract class CopyrightComment {
 			writer.println("#*******************************************************************************"); //$NON-NLS-1$
 			break;
 	    case BAT_COMMENT:
-			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
+			writer.println("@rem ***************************************************************************"); //$NON-NLS-1$
 			break;
 	    case XML_COMMENT:
 			writer.println("<!--"); //$NON-NLS-1$
@@ -90,7 +91,7 @@ public abstract class CopyrightComment {
 			writer.println("#*******************************************************************************"); //$NON-NLS-1$
 			break;
 	    case BAT_COMMENT:
-			writer.println("rem *******************************************************************************"); //$NON-NLS-1$
+			writer.println("@rem ***************************************************************************"); //$NON-NLS-1$
 			break;
 	    case XML_COMMENT:
 			writer.println(" -->"); //$NON-NLS-1$
