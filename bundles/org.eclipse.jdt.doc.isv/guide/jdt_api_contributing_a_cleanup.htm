@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Contributing a simple clean up and a simple save action using the org.eclipse.jdt.ui.cleanUps extension point</title>
+<link rel="stylesheet" type="text/css" href="../book.css">
+</head>
+<body>
+<h2> Contributing a clean up and a save action using the <b>clean up</b> extension point</h2>
+<p>The <a href="../reference/api/org/eclipse/jdt/ui/cleanup/package-summary.html"><b>org.eclipse.jdt.ui.cleanUps</b></a> extension point enables you to contribute your own Java code clean ups and Java editor save actions.
+The clean ups help in resolving the problems for a compilation unit. A save action is a special clean up which also resolves problems by doing the selected actions on save automatically.
+</p>
+<h3> Using the extension point</h3>
+<p>To create a new extension for the <a href="../reference/api/org/eclipse/jdt/ui/cleanup/package-summary.html"><strong>org.eclipse.jdt.ui.cleanUps</strong></a> extension point
+you need to first provide the required extensions in the plugin.xml. There are 3 extensions that need to be declared as shown below with the example of a clean up
+which updates the copyrights for a file on save: </p>
+<p>
+<pre class="CleanUp"><span class="code SchemaTag">
+   &lt;extension
+         point=</span><span class="code SchemaCstring">&quot;org.eclipse.jdt.ui.cleanUps&quot;</span><span class="code SchemaTag">&gt;
+      &lt;cleanUp
+            id=</span><span class="code SchemaCstring">&quot;org.eclipse.jdt.copyrightsaveaction.copyright_clean_up&quot;</span><span class="code SchemaTag">
+            class=</span><span class="code SchemaCstring">&quot;org.eclipse.jdt.ui.internal.copyrightupdater.CopyrightUpdaterCleanUp&quot;</span><span class="code SchemaTag">&gt;
+      &lt;/cleanUp&gt;
+      
+      &lt;cleanUpOptionsInitializer
+            class=</span><span class="code SchemaCstring">&quot;org.eclipse.jdt.ui.internal.copyrightupdater.CopyrightOnSaveOptionsInitializer&quot;</span><span class="code SchemaTag">
+            cleanUpKind=</span><span class="code SchemaCstring">&quot;saveAction&quot;</span><span class="code SchemaTag">&gt;
+      &lt;/cleanUpOptionsInitializer&gt;
+      
+      &lt;cleanUpConfigurationUI
+            class=</span><span class="code SchemaCstring">&quot;org.eclipse.jdt.ui.internal.copyrightupdater.CopyrightTabPage&quot;</span><span class="code SchemaTag">
+            name=</span><span class="code SchemaCstring">&quot;%cleanUpConfigurationUI.name&quot;</span><span class="code SchemaTag">
+            cleanUpKind=</span><span class="code SchemaCstring">&quot;saveAction&quot;</span><span class="code SchemaTag">&gt;
+      &lt;/cleanUpConfigurationUI&gt;
+   &lt;/extension&gt;
+</span></pre>
+
+For a description of the attributes list please refer to the extension point document.
+</p>
+<h3>Contributing  a clean up</h3>
+<p>To contribute a clean up, you need to first create the class that implements the <a href="../reference/api/org/eclipse/jdt/ui/cleanup/ICleanUp.html"><b>ICleanUp</b></a> Interface. 
+Lets create the <code>CopyrightUpdaterCleanUp</code> class for our example clean up and implement the inherited methods :</p>
+<pre><font color="#4444cc">	public class CopyrightUpdaterCleanUp implements ICleanUp {
+	
+		private CleanUpOptions fOptions;
+		private RefactoringStatus fStatus;
+
+		public CopyrightUpdaterCleanUp() {
+		
+		}</font></pre>
+
+<p>The CleanUpRequirements contain various requirements for the clean up such as an AST or a fresh AST containing changes from other clean ups, compiler options and changed 
+regions, which are used by the <code>CleanUpContext</code> to create the fix. It can be obtained using the method getRequirements() 
+<pre><font color="#4444cc">		public CleanUpRequirements getRequirements() {
+			boolean changedRegionsRequired= false;
+			Map compilerOptions= null;
+			boolean isUpdateCopyrights= fOptions.isEnabled("cleanup.update_copyrights");//$NON-NLS-1$
+			return new CleanUpRequirements(isUpdateCopyrights, isUpdateCopyrights, changedRegionsRequired, compilerOptions);	    
+		}</font></pre>
+
+A human readable description can be set for each step of the clean up using getStepDescriptions()
+<pre><font color="#4444cc">		public String[] getStepDescriptions() {
+			if (fOptions.isEnabled("cleanup.update_copyrights"))//$NON-NLS-1$
+				return new String[] {"Update Copyrights"};//$NON-NLS-1$
+
+			return null;
+		}</font></pre>
+
+The CleanUpOptions for the given options keys need to be set using the setOptions(...)
+<pre><font color="#4444cc">		public void setOptions(CleanUpOptions options) {
+			Assert.isLegal(options != null);
+			Assert.isTrue(fOptions == null);
+			fOptions= options;		
+		}</font></pre>
+
+The clean up pre-conditions and post-conditions should be checked for an OK status using checkPreConditions(...) and checkPostConditions(...)
+<pre><font color="#4444cc">		public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+			if (fOptions.isEnabled("cleanup.update_copyrights")) { //$NON-NLS-1$
+				fStatus= new RefactoringStatus();
+			}
+			return new RefactoringStatus();
+		}</font></pre>
+
+<pre><font color="#4444cc">		public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
+			try {
+				if (fStatus == null || fStatus.isOK()) {
+					return new RefactoringStatus();
+				} else {
+					return fStatus;
+				}
+			} finally {
+				fStatus= null;
+			}
+		}</font></pre>
+
+Finally a <a href="../reference/api/org/eclipse/jdt/ui/cleanup/ICleanUpFix.html"><b>ICleanUpFix</b></a> is to be created which fixes all the problems for the given context using createFix(...)
+<pre><font color="#4444cc">		public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
+			CompilationUnit compilationUnit= context.getAST();
+			if (compilationUnit == null)
+				return null;
+
+			return CopyrightsFix.createCleanUp(compilationUnit, fOptions.isEnabled("cleanup.update_copyrights"));//$NON-NLS-1$
+		}</font></pre> 
+</p>
+
+<h3>Contributing a clean up options provider</h3>
+<p>To create the UI for the clean up , an options provider tab page has to be created by implementing the <a href="../reference/api/org/eclipse/jdt/ui/cleanup/ICleanUpConfigurationUI.html"><b>ICleanUpConfigurationUI</b></a> interface.
+The page can be created by implementing the createContents(...) method in the <code>CopyrightTabPage</code> class. The preferences page along with the desired groups and options can be 
+created using the method doCreatePreferences().
+Optionally a code snippet of the new clean up with the given options can be shown in the clean up preview tab using the method getPreview(). If the CleanUpOptions get modified in the UI,
+ they need to be set again using the method setOptions(...).
+
+<h3> Contributing a clean up options initializer</h3>
+<p>A clean up options initializer, which returns the default options for each clean up kind can be created by implementing the <a href="../reference/api/org/eclipse/jdt/ui/cleanup/ICleanUpOptionsInitializer.html"><b>ICleanUpOptionsInitializer</b></a>.
+The options initializer can either be for a normal code clean up or for a save action.
+<pre><font color="#4444cc">	public class CopyrightOnSaveOptionsInitializer implements ICleanUpOptionsInitializer {
+
+		public CopyrightOnSaveOptionsInitializer() {		
+		}</font></pre>
+
+The default options for this initializer can be set using setDefaultOptions(...)
+<pre><font color="#4444cc">		public void setDefaultOptions(CleanUpOptions options) {
+			options.setOption("cleanup.update_copyrights", CleanUpOptions.TRUE);
+		}
+	}</font></pre>
+<p> The UI code to configure the options can be found here: <a href="CopyrightTabPage.html"><b>CleanUpTabPage.java</b></a>.
+</body>
+</html>
