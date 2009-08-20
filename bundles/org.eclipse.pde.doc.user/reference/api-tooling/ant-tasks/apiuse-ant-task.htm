@@ -20,16 +20,12 @@
 classpath.</p>
 <pre>
 	<b><font color="#0000ff">&lt;apitooling.apiuse
-		baseline=<font color="#008000">"..."</font>
-		scope=<font color="#008000">"..."</font>
-		proceedonerror=<font color="#008000">"..."</font>
+		location=<font color="#008000">"..."</font>
+		scopepattern=<font color="#008000">"..."</font>
+		referencepattern=<font color="#008000">"..."</font>
 		report=<font color="#008000">"..."</font>
-		includenonapiprojects=<font color="#008000">"..."</font>
-		includesystemlibraries=<font color="#008000">"..."</font>
 		considerinternal=<font color="#008000">"..."</font>
 		considerapi=<font color="#008000">"..."</font>
-		eefile=<font color="#008000">"..."</font>
-		excludelist=<font color="#008000">"..."</font>
 		debug=<font color="#008000">"..."</font>
 	/&gt;</font></b>
 </pre>
@@ -41,9 +37,9 @@ classpath.</p>
     <td align="center" valign="top"><b>Required</b></td>
   </tr>
 <tr>
-	<td valign="top">baseline</td>
+	<td valign="top">location</td>
 	<td valign="top">
-		This attribute specifies the location of the current product or baseline that you want to search for API usage to.
+		This attribute specifies the location of the current product you want to search for API usage.
 		<br><br>
 		It can be a .zip, .jar, .tgz, .tar.gz file, or a directory that corresponds to a collection of bundles.
 		<br><br>
@@ -51,14 +47,25 @@ classpath.</p>
 	<td align="center" valign="top">Yes</td>
 </tr>
 <tr>
-	<td valign="top">scope</td>
+	<td valign="top">scopepattern</td>
 	<td valign="top">
-		This attribute specifies the location of the current product or baseline that you want to search against for API usage.
-		<br><br>
-		It can be a .zip, .jar, .tgz, .tar.gz file, or a directory that corresponds to a collection of bundles. If no scope is provided
-		the baseline will act as itself and the search scope.
-		<br><br>
-		The location is specified using an absolute path.</td>
+		This attribute specifies the regular expression pattern used to build the scope of elements to search for 
+	 	references from in the product location.
+	 	<br><br>
+	 	The pattern must be a well-formatted regular expression as
+	 	defined <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">here</a>.
+	</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">referencepattern</td>
+	<td valign="top">
+		Set the regular expression pattern used to build the scope of elements to search for 
+	 	references to in the product location.
+	 	<br><br>
+	 	The pattern must be a well-formatted regular expression as
+	 	defined <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html">here</a>.
+	 	</td>
 	<td align="center" valign="top">No</td>
 </tr>
 <tr>
@@ -93,24 +100,6 @@ classpath.</p>
 	<td align="center" valign="top">Yes</td>
 </tr>
 <tr>
-	<td valign="top">proceedonerror</td>
-	<td valign="top">If the use search should try to continue if an error is encountered.
-		<br><br>Default is <code>false</code>.</td>
-	<td align="center" valign="top">No</td>
-</tr>
-<tr>
-	<td valign="top">includenonapiprojects</td>
-	<td valign="top">If non-API enabled projects should be allowed in the search scope.
-		<br><br>Default is <code>false</code>.</td>
-	<td align="center" valign="top">No</td>
-</tr>
-<tr>
-	<td valign="top">includesystemlibraries</td>
-	<td valign="top">If system libraries should be allowed in the search scope.
-		<br><br>Default is <code>false</code>.</td>
-	<td align="center" valign="top">No</td>
-</tr>
-<tr>
 	<td valign="top">considerinternal</td>
 	<td valign="top">If internal references should be considered during the search.
 		<br><br>Default is <code>false</code>.</td>
@@ -120,37 +109,6 @@ classpath.</p>
 	<td valign="top">considerapi</td>
 	<td valign="top">If API references should be considered during the search.
 		<br><br>Default is <code>false</code>.</td>
-	<td align="center" valign="top">No</td>
-</tr>
-<tr>
-	<td valign="top">eefile</td>
-	<td valign="top">Set the execution environment file to use. 
-		<br><br>By default, an execution environment file corresponding to a JavaSE-1.6 execution environment is used.
-		<br><br>The format of the file is described in this <a href="http://wiki.eclipse.org/index.php/Execution_Environment_Descriptions" target="blank">wiki page</a>.
-		<br><br>The file is specified using an absolute path.</td>
-	<td align="center" valign="top">No</td>
-</tr>
-<tr>
-	<td valign="top">excludelist</td>
-	<td valign="top">Set the exclude list location. 
-		<br><br>The exclude list is used to know what bundles should excluded from the search scope during a search.
-		The lines that start with '#' are ignored from the excluded elements.
-		<br><br>
-		Regular expressions can be used in the listing but must be prefixed with 'R:'. For example
-		<code>R:org.eclipse.*</code>
-		<br>The location is specified using an absolute path.
-		<br>The format of the exclude list file looks like this:
-<pre>
- # DOC BUNDLES
- R:org.eclipse.*.doc.*
-
- # NON-ECLIPSE BUNDLES
- com.ibm.icu
- com.jcraft.jsch
- javax.servlet
- javax.servlet.jsp
- ...
-</pre></td>
 	<td align="center" valign="top">No</td>
 </tr>
 <tr>
@@ -165,26 +123,22 @@ classpath.</p>
 <h3>Examples</h3>
 <pre>
 	<b><font color="#0000ff">&lt;apitooling.apiuse
-		baseline=<font color="#008000">"/eclipse/eclipse.tar.gz"</font>
-		scope=<font color="#008000">"/eclipse/jdt_only.tar.gz"</font>
-		proceedonerror=<font color="#008000">"true"</font>
-		includenonapiprojects=<font color="#008000">"false"</font>
-		includesystemlibraries=<font color="#008000">"false"</font>
+		location=<font color="#008000">"/eclipse/eclipse.tar.gz"</font>
+		scopepattern=<font color="#008000">".*"</font>
+		referencepattern=<font color="#008000">"org\.eclipse.*"</font>
 		report=<font color="#008000">"/eclipse/apiuse-both/XML"</font>
 		considerinternal=<font color="#008000">"true"</font>
 		considerapi=<font color="#008000">"true"</font>
-		eefile=<font color="#008000">""</font>
-		excludelist=<font color="#008000">"/eclipse/excludelist.txt"</font>
 		debug=<font color="#008000">"true"</font>
 	/&gt;</font></b>
 </pre>
 <p>This will run the task creating <code>*.xml</code> files inside the folder <code>/eclipse/apiuse-both/XML</code>.
-It will use the exclude list located in <code>/eclipse/excludelist.txt</code> to reduce the scope of the search.</p>
+The task will search all bundles in the product location - defined by the regular expression <code>.*</code> - searching 
+for all references to any bundles whose identifier begins with org.eclipse (defined by the <code>org\.eclipse.*</code> regular expression).
 <p>If debug is enabled, some debug tracing will show up in the ant console.</p>
 
 <p><img src="../../../images/ngrelr.png" alt="Related reference" border="0"></p>
 <p><a href="apifreeze-ant-task.htm">API Tools API Freeze Ant Task</a>
-<br><a href="pluggableapiuse-ant-task.htm">API Tools Pluggable API Use Ant Task</a>
 <br><a href="filegeneration-ant-task.htm">API Tools File Generation Ant Task</a>
 <br><a href="analysis-reportconversion-ant-task.htm">API Tools Analysis Report Conversion Ant Task</a>
 <br><a href="apifreeze-reportconversion-ant-task.htm">API Tools API Freeze Report Conversion Ant Task</a>
