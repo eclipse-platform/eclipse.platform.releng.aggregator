@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,13 +10,20 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -25,10 +32,13 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceComparator;
 
 
 /**
@@ -96,6 +106,13 @@ public class ProjectSelectionPage extends WizardPage {
 		viewer.getTree().setFont(font);
 		viewer.setLabelProvider(new MapFileLabelProvider());
 		viewer.setContentProvider(getContentProvider());
+		viewer.setComparator(new ResourceComparator(ResourceComparator.NAME) {
+			public int compare(Viewer viewer, Object o1, Object o2) {
+				if (o1 instanceof MapFile && o2 instanceof MapFile) {
+					return super.compare(viewer, ((MapFile) o1).getFile(), ((MapFile) o2).getFile()); 
+				}
+				return super.compare(viewer, o1, o2);
+			}});
 		viewer.setInput(mapProject);
 		viewer.expandAll();
 		viewer.addCheckStateListener(new ICheckStateListener(){
