@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ===================================================================== -->
+<!-- Custom targets called from a project's generated build.xml            -->
+<!-- Set customBuildCallbacks=<path/to/this/file> in your build.properties.-->
+<!-- ===================================================================== -->
+<project name="Build specific targets and properties" default="noDefault">
+
+	<import file="${eclipse.pdebuild.templates}/plugins/customBuildCallbacks.xml" />
+	
+	<target name="noDefault">
+		<echo message="This file must be called with explicit targets" />
+	</target>
+	
+	<!-- ===================================================================== -->
+	<!-- Steps to do before the target gather.bin.parts                        -->
+	<!-- Available parameters :                                                -->
+	<!--  destination.temp.folder - the directory plugins will be collected to -->
+	<!--  feature.directory - the directory containing the resulting feature   -->
+	<!-- ===================================================================== -->
+	<target name="pre.gather.bin.parts">
+		<antcall target="build.index"/>	
+	</target>
+	
+	<target name="build.index" description="Builds search index for the plug-in: org.eclipse.platform.doc.user." if="eclipse.running">
+		<ant antfile="buildDoc.xml" />
+	</target>
+
+</project>
