@@ -90,7 +90,11 @@ public class PerformanceTestPlugin extends Plugin {
 	/**
 	 * Default machines names.
 	 */
-	private static final String DEFAULT_CONFIG_DESCRIPTORS = "epwin2,Win XP Sun 1.5.0_10 (2 x 3.00GHz - 3GB RAM); eplnx1,SLED 10 Sun 1.5.0_10 (2 x 3.00GHz - 3GB RAM); eplnx2,RHEL 5.0 Sun 6.0_04 (2 x 3.00GHz - 3GB RAM)"; //$NON-NLS-1$
+	private static final String DEFAULT_CONFIG_DESCRIPTORS =
+		"eplnx1,SLED 10 Sun 1.5.0_10 (2 x 3.00GHz - 3GB RAM); " + //$NON-NLS-1$
+		"eplnx2,RHEL 5.0 Sun 6.0_04 (2 x 3.00GHz - 3GB RAM); " + //$NON-NLS-1$
+		"epwin2,Win XP Sun 1.5.0_10 (2 x 3.00GHz - 3GB RAM); " + //$NON-NLS-1$
+		"epwin3,Win XP Sun 6.0_04 (2 x 3.00GHz - 3GB RAM);"; //$NON-NLS-1$
 
 	/**
 	 * Default dimension use for performance results.
