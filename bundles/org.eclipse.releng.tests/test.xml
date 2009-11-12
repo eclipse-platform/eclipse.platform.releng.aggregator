@@ -20,6 +20,8 @@
 		</condition>
 		<property name="location" value="${basedir}/releng" />
 		<property name="locationcompare" value="${basedir}/relengcompare" />
+		<property name="versionOutputDir" value="${locationcompare}/../../../results/versiontool" />
+		<property name="versionOutputFile" value="${versionOutputDir}/results.xml" />
 	</target>
 
 	<!-- This target holds code to cleanup the testing environment after the tests -->
@@ -56,15 +58,12 @@
 		<exec dir="${locationcompare}" executable="tar" failonerror="false" os="Linux">
 			<arg line="-xzf ${locationcompare}/eclipse-SDK-3.5-linux-gtk.tar.gz" />
 		</exec>
-
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@new@" value="${location}/eclipse/features" />
-		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@old@" value="${locationcompare}/eclipse/features" />
-		<property name="versionOutputDir" value="${locationcompare}/../../../results/versiontool" />
+		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@old@" value="${locationcompare}/eclipse/features" />	
 		<mkdir dir="${versionOutputDir}" />
 		<exec dir="${versionOutputDir}" executable="/bin/touch" failonerror="false" os="Linux">
-			<arg line="results.xml" />
+			<arg line="results.xml" />		
 		</exec>
-		<property name="versionOutputFile" value="${versionOutputDir}/results.xml" />
 		<echo message="locationcompare ${locationcompare} versionOutputDir ${versionOutputDir} versionOutputFile ${versionOutputFile}" />
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@output@" value="${versionOutputFile}" />
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@compareoptions@" value="${basedir}/plugins/${org.eclipse.releng.tests}/compareoptions.properties" />
@@ -74,10 +73,11 @@
 	<!-- This target runs the test suite. Any actions that need to happen after all -->
 	<!-- the tests have been run should go here. -->
 	<target name="run" depends="init,BuildTests">
+		<xslt style="${plugin-path}/versioncompare.xsl" basedir="${versionOutputDir}" destdir="${versionOutputDir}" />
 		<ant target="collect" antfile="${library-file}" dir="${eclipse-home}">
 			<property name="includes" value="org*.xml" />
 			<property name="output-file" value="org.eclipse.releng.tests.xml" />
-		</ant>
+		</ant>		
 	</target>
 
 	<target name="BuildTests" depends="init,cleanup,setup">
