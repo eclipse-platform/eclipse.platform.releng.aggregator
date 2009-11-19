@@ -20,6 +20,8 @@
 		</condition>
 		<property name="location" value="${basedir}/releng" />
 		<property name="locationcompare" value="${basedir}/relengcompare" />
+		<property name="versionOutputDir" value="${locationcompare}/../../../results/versiontool" />
+		<property name="versionOutputFile" value="${versionOutputDir}/results.xml" />
 	</target>
 
 	<!-- This target holds code to cleanup the testing environment after the tests -->
@@ -37,17 +39,19 @@
 		<exec dir="${location}" executable="tar">
 			<arg line="-xzf ${archiveDir}/${runtimeArchive}" />
 		</exec>
-		<condition property="notMac">
-			<not>
-				<os family="mac" />
-			</not>
+		<condition property="skipCompare">			
+				<or>
+					<os family="mac" />
+					<os family="windows" />
+					<equals arg1="${buildType}" arg2="N" />
+				</or>			
 		</condition>
 		<antcall target="setupcompare" />
 	</target>
 
-	<target name="setupcompare" if="notMac">
+	<target name="setupcompare" unless="skipCompare">
 		<!-- only run compare test on Linux machine since it is the fastest machine.
-	                Also, the compare tool only parses feature.xmls so it only needs to be run on one machine  -->
+	                                Also, the compare tool only parses feature.xmls so it only needs to be run on one machine  -->
 		<delete dir="${locationcompare}" />
 		<mkdir dir="${locationcompare}" />
 		<exec executable="/usr/bin/wget" dir="${locationcompare}" output="${locationcompare}/error.txt" failonerror="false">
@@ -56,15 +60,12 @@
 		<exec dir="${locationcompare}" executable="tar" failonerror="false" os="Linux">
 			<arg line="-xzf ${locationcompare}/eclipse-SDK-3.5-linux-gtk.tar.gz" />
 		</exec>
-
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@new@" value="${location}/eclipse/features" />
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@old@" value="${locationcompare}/eclipse/features" />
-		<property name="versionOutputDir" value="${locationcompare}/../../../results/versiontool" />
 		<mkdir dir="${versionOutputDir}" />
 		<exec dir="${versionOutputDir}" executable="/bin/touch" failonerror="false" os="Linux">
 			<arg line="results.xml" />
 		</exec>
-		<property name="versionOutputFile" value="${versionOutputDir}/results.xml" />
 		<echo message="locationcompare ${locationcompare} versionOutputDir ${versionOutputDir} versionOutputFile ${versionOutputFile}" />
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@output@" value="${versionOutputFile}" />
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@compareoptions@" value="${basedir}/plugins/${org.eclipse.releng.tests}/compareoptions.properties" />
@@ -78,7 +79,15 @@
 			<property name="includes" value="org*.xml" />
 			<property name="output-file" value="org.eclipse.releng.tests.xml" />
 		</ant>
+		<antcall target="transformcompare" />
 	</target>
+
+	<target name="transformcompare" unless="skipCompare">
+		<property name="plugin-path" value="${eclipse-home}/plugins/${org.eclipse.releng.tests}" />
+		<echo message="skipCompare ${skipCompare}" />
+		<xslt style="${plugin-path}/versioncompare.xsl" basedir="${versionOutputDir}" destdir="${versionOutputDir}" />
+	</target>
+
 
 	<target name="BuildTests" depends="init,cleanup,setup">
 		<ant target="core-test" antfile="${library-file}" dir="${eclipse-home}">
@@ -90,4 +99,4 @@
 		</ant>
 	</target>
 
-</project>
+</project>	
