@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,23 +19,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.internal.resources.WorkspaceRoot;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.team.core.synchronize.SyncInfoSet;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -47,23 +33,44 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.team.core.synchronize.SyncInfoSet;
-import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardPage;
+
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.internal.texteditor.SWTUtil;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
+
 public class BuildNotesPage extends WizardPage {
 
-	private static final String FOLDER_BIN = "bin";
+	private static final String FOLDER_BIN = "bin"; //$NON-NLS-1$
 
-	private static final String EXT_HTML = "html";
+	private static final String EXT_HTML = "html"; //$NON-NLS-1$
 
-	private static final String BUILD_NOTES_HTML = "/build_notes.html";
+	private static final String BUILD_NOTES_HTML = "/build_notes.html"; //$NON-NLS-1$
 
-	private String FILE_PATH_KEY = "BuildNotesPage.filePath";
+	private String FILE_PATH_KEY = "BuildNotesPage.filePath"; //$NON-NLS-1$
 
-	private String UPDATE_FILE_KEY = "BuildNotesPage.updateNotesButton";
+	private String UPDATE_FILE_KEY = "BuildNotesPage.updateNotesButton"; //$NON-NLS-1$
 
 	private Button updateNotesButton;
 
@@ -129,8 +136,7 @@ public class BuildNotesPage extends WizardPage {
 				Path path = new Path(filePath.getText());
 				validPath = false;
 				if (!path.isEmpty()) {
-					IFile file = ((WorkspaceRoot) ResourcesPlugin
-							.getWorkspace().getRoot()).getFile(path);
+					IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 					if (path.isValidPath(filePath.getText())
 							&& file.getParent().exists()) {
 						if (path.getFileExtension().equals(EXT_HTML)) {
@@ -171,6 +177,7 @@ public class BuildNotesPage extends WizardPage {
 				}
 			}
 		});
+		SWTUtil.setButtonDimensionHint(browse);
 
 		data = new GridData(GridData.FILL_BOTH);
 		data.horizontalSpan = 3;
@@ -223,10 +230,9 @@ public class BuildNotesPage extends WizardPage {
 	 * write to existing file
 	 */
 	public void updateNotesFile() {
-		if (!filePath.isDisposed()) {
+		if (bugSummaryMap != null && !filePath.isDisposed()) {
 			Path path = new Path(filePath.getText());
-			WorkspaceRoot root = (WorkspaceRoot) ResourcesPlugin.getWorkspace()
-					.getRoot();
+			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 			final IFile file = root.getFile(path);
 			if (file.exists()) {
 				writeUpdate(file);

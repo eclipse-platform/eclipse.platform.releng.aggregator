@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,30 +13,50 @@ package org.eclipse.releng.tools;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
-import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jface.dialogs.*;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.*;
+
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.client.Command;
-import org.eclipse.team.internal.ccvs.ui.*;
+import org.eclipse.team.internal.ccvs.ui.CVSLightweightDecorator;
+import org.eclipse.team.internal.ccvs.ui.CVSUIMessages;
+import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
 import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
 import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
+
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 
 
 public class ReleaseWizard extends Wizard {
@@ -54,6 +74,7 @@ public class ReleaseWizard extends Wizard {
 	private MapFileComparePage mapComparePage;
 	private CommitCommentPage commentPage;
 	private BuildNotesPage buildNotesPage;
+	private ValidatePage validatePage;
 
 	private Dialog parentDialog;
 	private IDialogSettings section;
@@ -138,41 +159,52 @@ public class ReleaseWizard extends Wizard {
 		
 		if (!defaultBeingUsed) addMapSelectionPage();
 		
-		projectSelectionPage = new ProjectSelectionPage(Messages.getString("ReleaseWizard.5"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.6"),  //$NON-NLS-1$
+		ImageDescriptor wizardPageImageDescriptor= TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE);
+		
+		projectSelectionPage = new ProjectSelectionPage("ProjectSelectionPage", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.6"), //$NON-NLS-1$
 				section, 
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+				wizardPageImageDescriptor);
 		projectSelectionPage.setDescription(Messages.getString("ReleaseWizard.7")); //$NON-NLS-1$
 		addPage(projectSelectionPage);
 		
-		tagPage = new TagPage(Messages.getString("ReleaseWizard.8"),  //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.9"),  //$NON-NLS-1$
+		tagPage = new TagPage("TagPage", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.9"), //$NON-NLS-1$
 				section, 
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+				wizardPageImageDescriptor);
 		tagPage.setDescription(Messages.getString("ReleaseWizard.10")); //$NON-NLS-1$
 		addPage(tagPage);
 		
-		projectComparePage = new ProjectComparePage(Messages.getString("ReleaseWizard.11"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.12"),  //$NON-NLS-1$
-				section, TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+		projectComparePage = new ProjectComparePage("ProjectComparePage", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.12"), //$NON-NLS-1$
+				section,
+				wizardPageImageDescriptor);
 		projectComparePage.setDescription(Messages.getString("ReleaseWizard.13")); //$NON-NLS-1$
 		addPage(projectComparePage);
 		
-		buildNotesPage = new BuildNotesPage(Messages.getString("ReleaseWizard.2"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.1"), section, TeamUIPlugin //$NON-NLS-1$
-				.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+		buildNotesPage = new BuildNotesPage("Build Notes Page", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.1"), //$NON-NLS-1$
+				section,
+				wizardPageImageDescriptor);
 		buildNotesPage.setDescription(Messages.getString("ReleaseWizard.0")); //$NON-NLS-1$
 		addPage(buildNotesPage);
 		
-		mapComparePage = new MapFileComparePage(Messages.getString("ReleaseWizard.14"), //$NON-NLS-1$
+		mapComparePage = new MapFileComparePage("MapComparePage", //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.15"),  //$NON-NLS-1$
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+				wizardPageImageDescriptor);
 		mapComparePage.setDescription(Messages.getString("ReleaseWizard.16")); //$NON-NLS-1$
 		addPage(mapComparePage);
 		
-		commentPage = new CommitCommentPage(parentDialog, Messages.getString("ReleaseWizard.17"), //$NON-NLS-1$
-				Messages.getString("ReleaseWizard.18"), TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE), Messages.getString("ReleaseWizard.19")); //$NON-NLS-1$ //$NON-NLS-2$
+		commentPage = new CommitCommentPage(parentDialog, "Commit", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.18"), //$NON-NLS-1$
+				wizardPageImageDescriptor,
+				Messages.getString("ReleaseWizard.19")); //$NON-NLS-1$
 		addPage(commentPage);
+		
+		validatePage = new ValidatePage(parentDialog, "ValidatePage", //$NON-NLS-1$
+				Messages.getString("ReleaseWizard.validatePageTitle"), //$NON-NLS-1$
+				wizardPageImageDescriptor);
+		addPage(validatePage);
 		
 		if (defaultBeingUsed) broadcastMapProjectChange(mapProject);
 	}
@@ -262,6 +294,12 @@ public class ReleaseWizard extends Wizard {
 						try {						
 							if(tagPage.isValidateButtonSelected()){
 								try {
+									getShell().getDisplay().asyncExec(new Runnable() {
+										public void run() {
+											if (parentDialog instanceof WizardDialog)
+												((WizardDialog)parentDialog).showPage(validatePage);
+										}
+									});
 									validateRelease(new SubProgressMonitor(monitor, 10));
 								} catch (TeamException e) {
 									throw new InvocationTargetException(e);
@@ -460,8 +498,11 @@ public class ReleaseWizard extends Wizard {
 		if (!tagPage.isPageComplete()) {
 			return false;
 		}
-		// Force map comparison if option set by user
 		IWizardPage currentPage = getContainer().getCurrentPage();
+		if (currentPage == validatePage)
+			return false;
+		
+		// Force map comparison if option set by user
 		if(currentPage == tagPage){
 			if(tagPage.compareButtonSelected()){
 				return false;

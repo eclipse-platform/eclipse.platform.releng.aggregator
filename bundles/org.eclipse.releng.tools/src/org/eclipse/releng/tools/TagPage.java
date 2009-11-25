@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2009 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -32,7 +30,13 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
+
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.WizardPage;
+
 
 /**
  *This class extends <code>WizardPage<code>. It allows user to enter a tag name and make some additional 
@@ -122,12 +126,10 @@ public class TagPage extends WizardPage{
 		
 		Group group = new Group(composite, SWT.LEFT);
 		group.setLayout(new GridLayout());
-		group.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
+		GridData layoutData= new GridData(GridData.FILL, GridData.CENTER, true, false);
+		group.setLayoutData(layoutData);
 		group.setFont(font);
-		
-		Label mapLabel = new Label(group, SWT.HORIZONTAL);	 
-		mapLabel.setText(Messages.getString("TagPage.9")); //$NON-NLS-1$
-		mapLabel.setFont(font);
+		group.setText(Messages.getString("TagPage.9")); //$NON-NLS-1$
 		
 		compareButton = new Button(group,SWT.RADIO);
 		compareButton.setText(Messages.getString("TagPage.10")); //$NON-NLS-1$
