@@ -14,21 +14,27 @@
   Eclipse changed in incompatible ways between 3.5 and 3.6 in ways that affect 
   plug-ins. The following entries describe the areas that changed and provide 
   instructions for migrating 3.5 plug-ins to 3.6. Note that you only need to look 
-  here if you are experiencing problems running your 3.5 plug-in on 3.6.
+  here if you are experiencing problems compiling or running your 3.5 plug-in on 3.6.
 </p>
 
 <ol>
-	<li>None</li>
-</ol>
+ <li><a href="#dialogSettings">DialogSettings.save(Writer writer) can throw an
+ IOException</a></li>
+ </ol>
 
 <hr>
 
 <!-- ############################################## -->
-<!-- <h2><a name="item1">Item 1</a></h2>
-<p>
-Use an entry from a previous release as template
-</p>
--->
+<h2>1. <a name="dialogSettings">DialogSettings.save(Writer writer) can throw an IOException</a></h2>
+<p><strong>What is affected:</strong> Clients that call DialogSettings.save(Writer writer) in code that is compiled against release 3.5</p>
+<p><strong>Description:</strong> In release 3.4 and earlier, DialogSettings.save(Writer writer) was specified
+to throw an <code>IOException</code>.  In release 3.5, the method signature was changed to not throw the
+exception.  In release 3.6, the method is specified to throw the exception (restoring it to the release 3.4 
+and earlier specification).  Clients that do not catch the IOException when calling DialogSettings.save(Writer writer)
+should update the code to catch the exception.  Note that this source incompatibility only applies to clients who
+directly use <code>DialogSettings</code>, the default implementation class.  The interface type, <code>IDialogSettings</code>,
+has remained consistent in throwing the IOException in the method signature, so clients using the interface type are not
+affected.</p>
 
 <!-- ############################################## -->
 
