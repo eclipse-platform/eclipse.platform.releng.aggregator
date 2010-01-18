@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Dictionary;
 import java.lang.reflect.Modifier;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -36,7 +37,9 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
+
 import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.osgi.util.ManifestElement;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
@@ -254,7 +257,26 @@ public class EclipseTestRunner implements TestListener {
 	 	} catch(Exception e) {
 	 		// try to extract a test suite automatically
 			clearStatus();			
-			return new TestSuite(testClass);
+			
+            Class jUnit4TestAdapterClass= null;
+            try {
+                jUnit4TestAdapterClass= loadSuiteClass("junit.framework.JUnit4TestAdapter");
+            } catch (ClassNotFoundException e1) {
+                // JUnit4 is not available
+            } catch (UnsupportedClassVersionError e1) {
+            	// running with a VM < 1.5
+            }
+            if (jUnit4TestAdapterClass != null) {
+				try {
+					Constructor jUnit4TestAdapterCtor= jUnit4TestAdapterClass.getConstructor(new Class[] { Class.class });
+					return (Test) jUnit4TestAdapterCtor.newInstance(new Object[] { testClass });
+				} catch (Exception e1) {
+					runFailed(new InvocationTargetException(e1, "Failed to create a JUnit4TestAdapter for \"" + suiteClassName + "\":"));
+					return null;
+				}
+            } else { // the JUnit 3 way
+            	return new TestSuite(testClass);
+            }
 		}
 	 	if (!Modifier.isStatic(suiteMethod.getModifiers())) {
 	 		runFailed("suite() method must be static");
