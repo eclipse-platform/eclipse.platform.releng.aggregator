@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2005, 2008. This page is made available under license. Full for details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2005, 2010. This page is made available under license. Full for details see the LEGAL in the documentation book that contains this page." >
 
 <meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
 <link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
@@ -268,8 +268,25 @@ Eclipse-BuddyPolicy: dependent
 <h3>The Eclipse-RegisterBuddy Header</h3>
 
 <p>
-The Eclipse-RegisterBuddy header is used to specify a list of bundles for which this bundle is 
-a registered buddy.  The Eclipse-RegisterBuddy header must use the following syntax:
+The Eclipse-RegisterBuddy header is used to declare a comma-separated list of symbolic names of 
+bundles that this bundle should be a registered buddy to. The bundles with the specified 
+symbolic names must use the <b>registered</b> buddy policy (specified by the Eclipse-BuddyPolicy)
+header) in order for this bundle to be a registered buddy.
+</p>
+<p>
+Note that the following conditions must be met before a bundle <b>X</b> can become a registered 
+buddy of another bundle <b>Y</b>: 
+</p>
+<ul>
+ <li>The bundle <b>Y</b> must specify the <b>registered</b> buddy policy (i.e. Eclipse-BuddyPolicy: 
+     registered) </li>
+ <li>The bundle <b>X</b> must specify the symbolic name of <b>Y</b> in the Eclipse-RegisterBuddy 
+     header (i.e Eclipse-RegisterBuddy: Y) </li>
+ <li>The bundle <b>X</b> must be dependent on a package exported by bundle <b>Y</b>. This can 
+     happen through either a Require-Bundle or Import-Package constraint. </li>
+</ul>
+<p>
+The syntax of the Eclipse-RegisterBuddy header is the following:
 </p>
 
 <pre>
