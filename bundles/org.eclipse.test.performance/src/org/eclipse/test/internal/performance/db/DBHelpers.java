@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.test.internal.performance.db;
 
-import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,23 +33,10 @@ public class DBHelpers {
                         
         DBHelpers db= new DBHelpers();
         
-		String outFile= null;
-		//outFile= "out.txt";	//$NON-NLS-1$
-		PrintStream ps= null;
-		if (outFile != null) {
-		    try {
-                ps= new PrintStream(new BufferedOutputStream(new FileOutputStream(outFile)));
-            } catch (FileNotFoundException e) {
-                System.err.println("can't create output file"); //$NON-NLS-1$
-            }
-		}
-		if (ps == null)
-		    ps= System.out;
-
 		long start= System.currentTimeMillis();
 		
 		
-		db.dumpSizes(ps);
+		db.dumpSizes(System.out);
 		//db.renameVariation("|build=3.0.0_200410130800||config=relengbuildwin2|", "|build=3.0.0_200406251208_200410130800||config=relengbuildwin2|");
 		//db.dumpTable(ps, "VARIATION", 1000); //$NON-NLS-1$
 		//db.countSamplesWithNullVariations();
@@ -68,9 +52,6 @@ public class DBHelpers {
         
 		
         System.out.println("time: " + ((System.currentTimeMillis()-start)/1000.0)); //$NON-NLS-1$
-        
-        if (ps != System.out)
-            ps.close();
     }
 
     public DBHelpers() {
@@ -173,7 +154,7 @@ public class DBHelpers {
         PreparedStatement deleteSamples= fConnection.prepareStatement("delete from SAMPLE where SAMPLE.ID = ?"); //$NON-NLS-1$
         PreparedStatement deleteScenario= fConnection.prepareStatement("delete from SCENARIO where SCENARIO.ID = ?"); //$NON-NLS-1$
         
-        ResultSet samples= null, datapoints= null, configs= null;
+		ResultSet samples= null, datapoints= null;
         iterSamples.setInt(1, variation_id);
         samples= iterSamples.executeQuery();
         while (samples.next()) {
@@ -197,7 +178,7 @@ public class DBHelpers {
                     }
 	            }
 	        }
-            System.out.println(" dps: " + dps); //$NON-NLS-1$        
+            System.out.println(" dps: " + dps); //$NON-NLS-1$
 	        if (delete) {
 	            deleteDatapoints.setInt(1, sample_id);
 	            try {
@@ -241,7 +222,6 @@ public class DBHelpers {
             deleteVariation.close();
         }
 
-        if (configs != null) configs.close();
         if (samples != null) samples.close();
         if (datapoints != null) datapoints.close();
         
@@ -284,13 +264,13 @@ public class DBHelpers {
     
     void dumpSizes(PrintStream ps) throws SQLException {
         if (fConnection == null)
-            return;    
+            return;
         Statement stmt= fConnection.createStatement();
         try {
 	        ResultSet rs= stmt.executeQuery("SELECT sys.systables.tablename FROM sys.systables WHERE sys.systables.tablename NOT LIKE 'SYS%' "); //$NON-NLS-1$
 	        while (rs.next())
 	            dumpSize(ps, rs.getString(1));
-	        rs.close();   
+	        rs.close();
         } finally {
             stmt.close();
         }
@@ -301,7 +281,7 @@ public class DBHelpers {
         ResultSet rs= stmt.executeQuery("select Count(*) from " + table); //$NON-NLS-1$
         if (rs.next())
             ps.println(table + ": " + rs.getInt(1)); //$NON-NLS-1$
-        rs.close();   
+        rs.close();
         stmt.close();
     }
     
