@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,13 +35,15 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
+import org.xml.sax.SAXException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 
 public class BuildTests extends TestCase {
 
@@ -199,9 +201,6 @@ public class BuildTests extends TestCase {
 		// String to use when running in Eclipse
 		// String installDir = BootLoader.getInstallURL().getPath() + "..";
 		File aFile = new File(installDir);
-		if (aFile == null) {
-			System.out.println("File is null");
-		}
 
 		File[] files = aFile.listFiles();
 		for (int i = 0; i < files.length; i++) {
