@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2007 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,15 +35,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
-import org.xml.sax.SAXException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
+import org.xml.sax.SAXException;
 
 public class BuildTests extends TestCase {
 
@@ -52,6 +50,7 @@ public class BuildTests extends TestCase {
 	private static final int PROPERTIES = 1;
 	private static final int XML = 2;
 	URL[] javadocLogs = null;
+	URL comparatorLogs = null;
 
 	private static FileTool.IZipFilter getTrueFilter() {
 		return new FileTool.IZipFilter() {
@@ -403,14 +402,16 @@ public class BuildTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 
-		// Autoamted Test
+		// Automated Test
 		logFileName = Platform.getInstallLocation().getURL().getPath() + ".."
 				+ File.separator + ".." + File.separator + "results"
 				+ File.separator + "chkpii"; // A tad bogus but this is where
-		// the build wants to copy the
+    	// the build wants to copy the
 		// results from!
 
 		String javadocUrls = System.getProperty("RELENGTEST.JAVADOC.URLS");
+		String comparatorUrl = System.getProperty("RELENGTEST.COMPARATOR.URL");		
+	
 		if (javadocUrls != null) {
 			String[] urls = javadocUrls.split(",");
 			javadocLogs = new URL[urls.length];
@@ -418,7 +419,9 @@ public class BuildTests extends TestCase {
 				javadocLogs[i] = new URL(urls[i]);
 			}
 		}
-
+		if (comparatorUrl != null) {
+				comparatorLogs = new URL(comparatorUrl);
+		}
 		// Runtime Workbench - TODI Put me back to Automated status
 		// logFileName = "d:\\results";
 		// sourceDirectoryName = "d:\\sourceFetch";
@@ -719,8 +722,82 @@ public class BuildTests extends TestCase {
 				}
 			}
 		}
+	} 
+ 
+	
+	public void testComparatorLogs() {
+		
+		String os = System.getProperty("os.name");
+		
+		// Only run compare tool on Linux to save time during tests 
+			if (!os.equalsIgnoreCase("Linux")) {
+				return;
+			}
+			
+			// load the configuration and ensure the mandatory parameters were
+			// specified
+			Properties properties = loadCompareConfiguration();			
+			String compareOldPath = properties.getProperty("compare.old");
+			if (compareOldPath.indexOf("N2") > 0) { 
+				// if nightly build, skip test
+				return;
+			}
+		// skip this test if there are no logs to check
+		if (comparatorLogs == null)
+			assertTrue("", true);
+		else {
+			ComparatorLog comparatorLog = new ComparatorLog(comparatorLogs);
+			String message = "comparator warnings in: \n";
+			boolean problemLogsExist = comparatorLog.logs.size() > 0;			
+			message = message
+					.concat("See the comparator logs linked from the test results page for details");
+			assertTrue(message, !problemLogsExist);
+		}
 	}
 
+	private class ComparatorLog {
+		private ArrayList logs = new ArrayList();
+
+		private ComparatorLog(URL comparatorLogs) {
+			findProblems(comparatorLogs);
+		}
+
+		private void findProblems(URL ComparatorLogs) {
+		
+			String COMPARATOR_ERROR = "canonical:";		
+
+			BufferedReader in = null;
+		
+				try {
+					in = new BufferedReader(new InputStreamReader(
+							comparatorLogs.openStream()));
+					String tmp;
+					while ((tmp = in.readLine()) != null) {
+						tmp = tmp.toLowerCase();
+						if (tmp.indexOf(COMPARATOR_ERROR) != -1) {										
+							String fileName = new File(comparatorLogs.getFile())
+									.getName();
+							if (!logs.contains(fileName))
+								logs.add(fileName);
+						}
+					}
+					in.close();
+
+				} catch (FileNotFoundException e) {
+					logs.add("Unable to find "
+							+ new File(comparatorLogs.getFile()).getName()
+							+ " to read.");
+					e.printStackTrace();
+				} catch (IOException e) {
+					logs.add("Unable to read "
+							+ new File(comparatorLogs.getFile()).getName());
+					e.printStackTrace();
+				}
+			}		
+	}
+
+	
+	
 	/*
 	 * Load the configuration file which should be included in this bundle
 	 */
@@ -862,8 +939,9 @@ public class BuildTests extends TestCase {
 		 * Determine if the build is a nightly Nightly builds have qualifiers
 		 * identical the buildId - for instance N200612080010 which means that
 		 * they are lower than v20060921-1945 from an promoted integration build
-		 * and thus cannot be compared
+		 * and thus cannot be compared 
 		 */
+		 
 
 		// disable temporarily
 		if (compareOldPath.indexOf("N2") > 0) { 
@@ -893,7 +971,7 @@ public class BuildTests extends TestCase {
 		
 		String compareOptions = properties.getProperty("compare.options");
 				
-		/*
+	/*	
 		 * String outputFileName =
 		 * Platform.getInstallLocation().getURL().getPath() + ".." +
 		 * File.separator + ".." + File.separator + "results" + File.separator +
@@ -904,8 +982,9 @@ public class BuildTests extends TestCase {
 		 * File(outputFileName); boolean created = outputfile.createNewFile();
 		 * if (created) { } else { msg = "Output dir could not be created.";
 		 * assertTrue(msg, msg == null); } } catch (IOException e) {
-		 * e.printStackTrace(); }
-		 */
+		 * e.printStackTrace(); } 
+*/
+		 
 
 		String command = buildCommandLine(compareNewPath, compareOldPath,
 				outputFileName, compareOptions);
