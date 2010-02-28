@@ -201,6 +201,7 @@ public class BuildTests extends TestCase {
 		// String to use when running in Eclipse
 		// String installDir = BootLoader.getInstallURL().getPath() + "..";
 		File aFile = new File(installDir);
+		
 
 		File[] files = aFile.listFiles();
 		for (int i = 0; i < files.length; i++) {
