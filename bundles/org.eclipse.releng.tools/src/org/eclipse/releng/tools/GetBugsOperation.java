@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.team.core.synchronize.SyncInfo;
@@ -42,6 +44,7 @@ import org.eclipse.team.internal.ccvs.core.syncinfo.ResourceSyncInfo;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.operations.RemoteLogOperation;
 import org.eclipse.team.internal.ccvs.ui.operations.RemoteLogOperation.LogEntryCache;
+import org.eclipse.ui.statushandlers.StatusManager;
 
 public class GetBugsOperation {
 	private static final CVSTag TAG_1_1 = new CVSTag("1.1", CVSTag.VERSION);
@@ -272,7 +275,10 @@ public class GetBugsOperation {
 					}					
 				}
 			} catch (IOException e) {
-				CVSUIPlugin.openError(wizard.getShell(), null, null, e);
+				StatusManager.getManager().handle(
+						new Status(IStatus.ERROR, RelEngPlugin.ID, Messages
+								.getString("GetBugsOperation.Error"), e),
+						StatusManager.SHOW | StatusManager.LOG);
 			}
 			monitor.worked(1);
 		}
