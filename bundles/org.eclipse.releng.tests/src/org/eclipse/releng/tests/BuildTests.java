@@ -765,7 +765,7 @@ public class BuildTests extends TestCase {
 
 		private void findProblems(URL ComparatorLogs) {
 		
-			String COMPARATOR_ERROR = "canonical:";		
+			String COMPARATOR_ERROR = "Difference found";		
 
 			BufferedReader in = null;
 		
