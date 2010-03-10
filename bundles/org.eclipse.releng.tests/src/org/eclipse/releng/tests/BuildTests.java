@@ -420,9 +420,9 @@ public class BuildTests extends TestCase {
 				javadocLogs[i] = new URL(urls[i]);
 			}
 		}
-		if (comparatorUrl != null) {
+	/*	if (comparatorUrl != null) {
 				comparatorLogs = new URL(comparatorUrl);
-		}
+		} */
 		// Runtime Workbench - TODI Put me back to Automated status
 		// logFileName = "d:\\results";
 		// sourceDirectoryName = "d:\\sourceFetch";
@@ -726,7 +726,7 @@ public class BuildTests extends TestCase {
 	} 
  
 	
-	public void testComparatorLogs() {
+ /*	public void testComparatorLogs() {
 		
 		String os = System.getProperty("os.name");
 		
@@ -795,7 +795,7 @@ public class BuildTests extends TestCase {
 					e.printStackTrace();
 				}
 			}		
-	}
+	} */
 
 	
 	
