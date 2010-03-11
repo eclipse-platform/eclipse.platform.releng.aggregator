@@ -411,7 +411,7 @@ public class BuildTests extends TestCase {
 		// results from!
 
 		String javadocUrls = System.getProperty("RELENGTEST.JAVADOC.URLS");
-		String comparatorUrl = System.getProperty("RELENGTEST.COMPARATOR.URL");		
+	//	String comparatorUrl = System.getProperty("RELENGTEST.COMPARATOR.URL");		
 	
 		if (javadocUrls != null) {
 			String[] urls = javadocUrls.split(",");
