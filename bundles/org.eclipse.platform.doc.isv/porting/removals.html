@@ -33,6 +33,7 @@ There are no API removals planned for the Eclipse project Helios (3.6) release.
  <li><a href="#workspaceLock">WorkspaceLock</a></li>
  <li><a href="#updateManager">Update Manager</a></li>
  <li><a href="#incrementalProjectBuilder_getRule">IncrementalProjectBuilder#getRule()</a></li>
+ <li><a href="#luceneSearchParticipants">luceneSearchParticipants</a></li>
 </ol>
 
 <hr>
@@ -48,10 +49,12 @@ and was never intended to be used by other clients. In the 3.0 release this API
 was deprecated in favor of a more general API provided by the <code>org.eclipse.core.jobs</code>
 bundle. Invoking this API has had no effect since the 3.0 release. The specific API
 to be removed includes:
+</p>
 <ul>
 <li>The <code>org.eclipse.core.resources.WorkspaceLock</code> class.</li>
 <li>The method <code>org.eclipse.core.resources.IWorkspace#setWorkspaceLock</code></li>
 </ul>
+<p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311240">bug 311240</a>.
 </p>
 
@@ -65,12 +68,14 @@ comprise this component will be removed from the Eclipse platform and RCP featur
 after the June 2012 release. Equinox p2 will continue to provide full compatibility
 for features and update sites created for Update Manager. The bundles to be removed
 are:
+</p>
 <ul>
 <li>org.eclipse.update.configurator</li>
 <li>org.eclipse.update.core</li>
 <li>org.eclipse.update.scheduler</li>
 <li>org.eclipse.update.ui</li>
 </ul>
+<p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311590">bug 311240</a>.
 </p>
 <!-- ############################################## -->
@@ -81,10 +86,35 @@ The <code>IncrementalProjectBuilder#getRule()</code> method returned a schedulin
 that was required for building the project by the builder. This method was intended to be used by the builder framework only.
 In the 3.6 release this method was deprecated in favor of a more general method <code>IncrementalProjectBuilder#getRule(int, Map)</code>. 
 The specific API to be removed includes:
+</p>
 <ul>
 <li>The method <code>org.eclipse.core.resources.IncrementalProjectBuilder#getRule()</code></li>
 </ul>
+<p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=310072">bug 310072</a>.
+</p>
+<!-- ############################################## -->
+
+<h3>4. <a name="luceneSearchParticipants">luceneSearchParticipants</a></h3>
+<p>
+The extension point <code>org.eclipse.help.base.luceneSearchParticipants</code> used API classes which exposed classes from 
+Apache Lucene in their method parameters. This means that clients would be impacted with at least binary incompatibility
+if the Eclipse 
+Help system switched from Lucene 1.x to 2.x or 3.x and has caused the help system to stay on an old version of Lucene.
+In the 3.6 release this extension point and the classes it requires were deprecated. The replacement extension point
+ <code>org.eclipse.help.base.searchParticipant</code> should be used instead. 
+The specific API to be removed includes:
+</p>
+<ul>
+
+<li>The extension point org.eclipse.help.base.luceneSearchParticipants</li>
+<li>The class org.eclipse.help.search.LuceneSearchParticipant</li>
+<li>The class org.eclipse.help.search.ISearchIndex</li>
+<li>The class org.eclipse.help.search.XMLSearchParticipant</li>
+
+</ul>
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311931">bug 311931</a>.
 </p>
 <!-- ############################################## -->
 
