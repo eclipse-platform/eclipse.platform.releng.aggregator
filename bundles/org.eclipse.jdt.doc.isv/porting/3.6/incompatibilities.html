@@ -20,6 +20,7 @@
 <ol>
   <li><a href="#JUnit4">SDK ships 2 org.junit plug-ins (versions 3.8.2 and 4.8.1)</a></li>
   <li><a href="#AbstractTemplatesPage">Source incompatibility for subclasses of <code>AbstractTemplatesPage</code></a></li>
+  <li><a href="#SuppressWarningRawTypes"><code>@SuppressWarnings("unchecked")</code> does not ignore raw types warnings anymore</a></li>
 </ol>
 
 <hr>
@@ -44,6 +45,34 @@ include 4.x in their required version bounds.</p>
 <p><strong>Description:</strong> In order to provide new API we had to make two methods public. While this <em>does not break binary compatibility</em> it breaks source compatibility.</p>
 <p><strong>Action required:</strong> Change the visibility of <code>getSelectedTemplates()</code> and <code>getTemplateStore()</code> to <code>public</code>.</p>
 
+<!-- ############################################## -->
+
+<h2>3. <a name="SuppressWarningRawTypes"><code>@SuppressWarnings("unchecked")</code> does not ignore raw types warnings anymore</a></h2>
+<p><strong>What is affected:</strong> Usage of <code>@SuppressWarnings("unchecked")</code>.</p>
+<p><strong>Description:</strong> Up to Eclipse 3.5, <code>@SuppressWarnings("unchecked")</code> was used to suppress the unchecked and raw types warnings.
+This was not consistent with other compilers (e.g. javac). A new warning token <code>"rawtypes"</code> has been added to cover the case of raw type warnings
+exclusively. So in order to get rid of all warnings, in Eclipse 3.6, it might be required to add <code>"rawtypes"</code> in the warning token list.</p>
+<p>If it is not possible to update the code, a system property (<code>-DsuppressRawWhenUnchecked=true</code>) can be added to the <code>-vmargs</code> list on startup.
+This preserves the old behavior.</p>
+<p><strong>Action required:</strong> When new warnings that were previously ignored are now reported, add <code>"rawtypes"</code> to the list of warning tokens.
+</p>Before:
+<pre>
+@SuppressWarnings("unchecked")
+    void bar(List list) {
+        List&lt;String&gt; ls2 = list;
+    }
+@SuppressWarnings("unchecked")
+private List l;
+</pre>
+After:
+<pre>
+@SuppressWarnings(<b>{</b>"unchecked", "rawtypes"<b>}</b>)
+    void bar(List list) {
+        List&lt;String&gt; ls2 = list;
+    }
+@SuppressWarnings("rawtypes")
+private List l;
+</pre>
 <!-- ############################################## -->
 
 </body>
