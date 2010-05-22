@@ -10,15 +10,15 @@ td {border-top: solid thin black;}
 img[alt] {background-color:#ffdddd;}
 tr {vertical-align: top;}
 </style>
-<title>Eclipse Platform What's New in 3.5</title>
+<title>Eclipse Platform What's New in 3.6</title>
 </head>
 
 <body>
 
-<h2>What's New in 3.5</h2>
+<h2>What's New in 3.6</h2>
 
 <p>Here are descriptions of some of the more interesting or significant changes 
-made to the Eclipse Platform for the 3.5 release of Eclipse. They are grouped into:</p>
+made to the Eclipse Platform for the 3.6 release of Eclipse. They are grouped into:</p>
 
 <ul>
 <li><a href="#Platform">Platform Changes</a></li>
@@ -47,190 +47,229 @@ document in the plug-in developer's guide.
           Changes</div></td>
     </tr>
 
-  <tr id="cocoa">
-    <td width="30%" valign="top" align="left"><b>Eclipse on Cocoa</b></td>
-    <td width="70%" valign="top">32 and 64-bit OSX Cocoa have joined the line-up of supported configurations for which SWT and Eclipse are routinely
-	built. Cocoa is now a first class Eclipse configuration, including advanced libraries such as OpenGL for SWT. Cocoa replaces Carbon
-	as the primary toolkit for Eclipse and SWT on Mac.
-	<p>
-	  <img src="images/cocoa.png" alt="Eclipse on Cocoa">
-	</p>
-    </td>
-  </tr>
-
-  <tr id="solaris-x86"> 
-    <td width="30%" valign="top" align="left"><b>Solaris x86</b></td>
-    <td width="70%" valign="top">Solaris x86 has joined the line-up of supported configurations for which SWT and Eclipse are routinely built.
-		<p><img src="images/solarisx86.png" alt="Solaris x86"></p>
+  <tr id="platform-open-file">
+    <td width="30%" valign="top" align="left"><b>Opening a file from the command line</b></td>
+    <td width="70%" valign="top">Based on work in SWT and the native launcher, the 
+    Eclipse IDE now supports opening a file from the command line, or opening a file that 
+    has been associated with the Eclipse executable. If an instance of Eclipse is already running, 
+    that instance will open the file. Otherwise, a new instance will be started. This feature is 
+    not fully finished and not enabled by default on all platforms, but we encourage those interested in 
+    this feature to give it a try and provide feedback. Information about how to enable 
+    the feature, as well as further details, can be found on the <a href="http://wiki.eclipse.org/Eclipse/OpenFileFeature">OpenFileFeature</a> wiki page.
 	</td>
-  </tr>
+	</tr>
 
-  <tr id="s390"> 
-    <td width="30%" valign="top" align="left"><b>Eclipse on s390 and s390x</b></td>
-    <td width="70%" valign="top">It's time to dust off that old mainframe in your basement, because Eclipse has
-    arrived on the s390 and s390x architectures. This new port is still early access, so give
-    it a spin and report any problems you encounter in bugzilla.
-	</td>
-  </tr>
-
-  <tr id="buttonorder">
-    <td width="30%" valign="top" align="left"><b>Alternate button order</b></td>
-    <td width="70%" valign="top">
-		On GTK, it is now possible to change the default button order for Eclipse.  
-		To have the <b>OK</b> button on the left, edit the ~/.gtkrc-2.0 file and include the line 
-		"gtk-alternative-button-order=1".
-		<p><img src="images/alternate.png" alt="Alternate button order"></p>
-	</td>
-  </tr>
-
-  <tr id="customize-perspective">
-    <td width="30%" valign="top" align="left"><b>Customize menus and toolbars</b></td>
-    <td width="70%" valign="top">The customize perspective dialog has been improved and
-      extended with new functionality. It can now be used to hide or show individual menu 
-      or toolbar items.
-      <p><img src="images/customize-perspective.png" alt="Customize Perspective dialog"></p>
-   </td>
-  </tr>
-
-  <tr id="multi-instance-properties">
-    <td width="30%" valign="top" align="left"><b>Multi-instance Properties view</b></td>
-    <td width="70%" valign="top">You can now pin the Properties view to a given selection.
-    This allows you to see the properties of a particular selection while 
-    having the freedom to select alternate items.
-    <p>You can now create new instances of the Properties view from an existing 
-    one. The existing one will be pinned to the contents it is currently 
-    displaying and the new view will be set to follow the workbench's 
-    selection.</p>
-    <p><img src="images/multi-instance-properties.png" alt="The Multi-instance Properties View"></p>
-    </td>
-  </tr>
-
-  <tr id="workspace-compare-editor-enhancements">
-    <td width="30%" valign="top" align="left"><b>Compare Editor enhancements</b></td>
-    <td width="70%" valign="top"> 
-    New features have been added to the Compare Editor:
+  <tr id="resource-filters">
+    <td width="30%" valign="top" align="left"><b>Resource filters</b></td>
+    <td width="70%" valign="top">Projects and folders can now be configured to omit some of their
+    children in the file system from the workspace. The filtered files and directories will not
+    appear in views such as the <b>Project Explorer</b>, and won't be processed by 
+    workspace facilities such as builders. Filters can be configured on the <b>Resource Filters</b> 
+    page in the <b>Properties</b> dialog. When a filter is added, the following attributes have to be set.
     <ul>
-    	<li>The <b>Go to Line</b> action (<b>Ctrl + L</b>) has been added to allow rapid navigation to a specific line</li>
-    	<li>The current text selection will be used to populate the filter field of the <b>Open Type</b> and <b>Open Resource</b> dialogs</li>
-    	<li>The current line is now highlighted in each viewer</li>
-    	<li>Background and foreground color preferences are now honored</li>
-    	<li> The <b>Set Encoding...</b> action has been added to the context menu. 
-    	This allows you to change the encoding of each side of the comparison</li>
-   	</ul>
-    <p><img src="images/gotoLine.png" alt="Go to Line" ></p>
-    <p><img src="images/textSelection.png" alt="TextSelection" ></p>
+    	<li><b>Type</b> - determines the filtering method (simple wildcards, regular expression, etc)</li>
+    	<li><b>Target</b> - determines the type of resources that should be affected (files, folders, or both)</li>
+    	<li><b>Mode</b> - determines whether only matching resources should be visible (<b>Include</b>) or whether all matching resources should be hidden (<b>Exclude</b>)</li>
+	</ul>
+    By default resource filters affect only direct children of the configured container. The <b>Inheritable</b> option 
+    indicates that the filter should be used for the entire resource subtree.
+    <p><img src="images/resourceFilters.png" alt="Resource Filters" /></p></td>
+  </tr> 
+
+  <tr id="dynamic_path_variables">
+    <td width="30%" valign="top" align="left"><b>Dynamic path variables</b></td>
+    <td width="70%" valign="top">Linked resources can define their locations 
+    relative to user-defined <i>path variables</i>.
+    Now, a set of predefined path variables are available:
+    <ul>
+  		<li><b>PROJECT_LOC</b> - pointing out the project location</li>
+  		<li><b>WORKSPACE_LOC</b> - pointing out the workspace location</li>
+	</ul>
+	<p>When these variables are used, they are dynamically resolved based on the context 
+	of a linked resource. Those predefined variables may be also used to build user-defined variables.
+	</p>
+    <p><img src="images/dynamicPathVariables.png" alt="Dynamic Path Variables" /></p>
+    <p><img src="images/linkedResourcesPropPage.png" alt="Linked Resources Property Page" /></p>
 	</td>
   </tr>
 
-    <TR id="compare-word">
-      <TD vAlign=top align=left width="30%"><B>Compare Word documents</B></TD>
-      <TD vAlign=top width="70%">Comparing Word document changes in Eclipse now
-        uses the Word compare support to show you the changes as revisions.
-        <P><IMG alt="Compare Word documents" 
-      src="images/wordinplace.png" ></p></TD>
-    </TR>
-
-  <tr id="workspace-compare-switch-viewer">
-    <td width="30%" valign="top" align="left"><b>Switching compare viewers</b></td>
-    <td width="70%" valign="top">The <b>Compare Editor</b> allows you to switch to 
-      optional merge viewers available for the compared content. For instance, while comparing 
-      two Java files, you can use the simple <b>Text Compare</b> viewer instead of the default <b>Java 
-      Source Compare</b>.
-      <p>You can also switch between content-specific merge viewers; 
-      for example when an alternative Java compare viewer is available, you can use it instead of the default one.</p>
-      <p><img src="images/contentMergeViewerSwitching.png" alt="Viewer switching" ></p>
-	</td>
-  </tr>
-
-  <tr id="open-resource-open-with">
+  <tr> 
     <td width="30%" valign="top" align="left">
-        <b>Open Resource dialog allows choice of editor</b>
+      <b>Support for PowerPC 64</b>
     </td>
     <td width="70%" valign="top">
-        The Open Resource dialog now allows you to open files with the the editor of your choice.
-        You can either choose the editor from the <b>Open With</b> context menu or
-        use the drop-down menu besides the <b>Open</b> button.
-        <p><img src="images/open-resource-dialog.png" alt="Open Resource dialog"></p>
-    </td>
+     PowerPC 64-bit has joined the line-up of supported configurations for which SWT and Eclipse are routinely built.
+    </td> 
   </tr>
 
-  <tr id="switch-editors">
-    <td width="30%" valign="top" align="left">
-        <b>Switch editors and multi-page editors</b>
-    </td>
-    <td width="70%" valign="top">
-        Switching between open editors and multiple editor pages has been streamlined.
-        <b>Ctrl</b>+<b>PageDown</b> and <b>Ctrl</b>+<b>PageUp</b> now always activate the next or
-        previous editor tab, even in multi-page editors. To switch between pages of a multi-page
-        editor, use <b>Alt</b>+<b>PageDown</b> and <b>Alt</b>+<b>PageUp</b>.
-        <p><img src="images/switch-editors.png" alt="Multi-page editor (PDE manifest editor)"></p>
-    </td>
+  <tr id="virtual_folders">
+    <td width="30%" valign="top" align="left"><b>Virtual folders</b></td>
+    <td width="70%" valign="top"><b>Virtual folders</b> are a new type of resource that exist only in the workspace and
+    are not backed by a directory in your file system. These folders can be used to create more flexible project structures
+    by bringing together links to files spread throughout your file system.
+    <p>
+    Since virtual folders do not exist in the local file system, they can only
+    contain other virtual folders and linked resources.
+    </p>
+    <p><img src="images/virtual-folder.png" alt="Virtual Folders" /></p></td>
+  </tr> 
+
+  <tr id="filesystem_import">
+    <td width="30%" valign="top" align="left"><b>File system import wizard</b></td>
+    <td width="70%" valign="top">The file system import wizard now supports creating
+    	virtual folders and linked files and folders.
+      <p><img src="images/file-system-import.png" alt="File System Import Wizard" /></p>
+      <p>Linked files and folders can also be created relative to a path variable.</p></td>
   </tr>
 
-  <tr id="workspace_team-proxy-settings-ui">
-    <td width="30%" valign="top" align="left"><b>Improved Network Connections page</b></td>
+  <tr id="webkitgtk">
+    <td width="30%" valign="top" align="left"><b>Browser can use WebKitGTK+</b></td>
     <td width="70%" valign="top">
-	The <b>Network Connection</b> page has been changed to better show the current
-	proxy configuration. Now if you go to <b>Preferences &gt; General &gt; Network Connections</b>,
-	you are able to see and change Eclipse proxy settings as well as see 
-	settings provided by the operating system. If you want to use your browser
-	or Gnome settings, or you have your proxy configured using environmental variables on Linux, 
-	you can see them all in this new UI.
-    <p><img src="images/proxy-settings-ui.png" alt="New Proxy Settings UI" ></p>
+      <p>Linux users can now use WebKitGTK+ instead of Mozilla as the Browser control's native renderer.  See
+      <a href="http://www.eclipse.org/swt/faq.php#browserwebkitgtk">Can the Browser use the WebKit renderer on GTK?</a>.
+      </p>
+      <p><img src="images/webkitgtk.png" alt="WebKitGTK+ Image"/></p>
 	</td>
   </tr>
 
-  <tr id="workspaces_preference_page">
-    <td width="30%" valign="top" align="left"><b>Workspaces preference page</b></td>
-    <td width="70%" valign="top">A new preference page supports managing the startup prompt to select a
-    workspace: <b>General &gt; Startup and Shutdown &gt; Workspaces</b>. You can
-    enable or disable the prompt altogether (this setting used to be on 
-    <b>General &gt; Startup and Shutdown</b>) and specify the maximum number of
-    recent workspaces to be remembered. The page also lists the recently used
-    workspaces and allows you to remove unwanted workspaces from that list.
-    <p><img src="images/workspaces-preference-page.png" alt="The Workspaces preference page"></p></td>
+  <tr id="open-resource-paths">
+    <td width="30%" valign="top" align="left">
+        <b>New features in Open Resource dialog</b>
+    </td>
+    <td width="70%" valign="top">
+        The <b>Open Resource</b> dialog supports three new features:
+        <ul>
+        <li><b>Path patterns:</b> If the pattern contains a /, the part before the last / is used to match a path in the workspace: 
+          <p><img src="images/open-resource-path.png" alt="Open Resource dialog with pattern '*/jface/w*/pa.html'"/></p> 
+        </li>
+        
+        <li><b>Relative paths:</b> For example, "./T" matches all files starting with T in the folder of the active editor or selection:
+          <p><img src="images/open-resource-path-relative.png" alt="Open Resource dialog with pattern './T'"/></p> 
+        </li>
+        
+        <li><b>Closer items on top:</b> If the pattern matches many files with the same name, the files that are closer
+          to the currently edited or selected resource are shown on top of the matching items list.
+          <p><img src="images/open-resource-boosting.png" alt="Open Resource dialog with pattern 'mak', matching many makefiles"/></p> 
+        </li>
+        </ul>
+    </td>
   </tr>
 
-  <tr id="platform-ui.cnf.gointo">
-    <td width="30%" valign="top" align="left"><b>Project Explorer improvements</b></td>
-    <td width="70%" valign="top">As a step in the campaign to bring
-    the <b>Project Explorer</b> up to parity with the <b>Package Explorer</b>, the
-    <b>Go Into</b> and <b>Go To</b> functionality has been added.  You can now
-    go into any folder/project/etc. and have that be the only contents of the <b>Project Explorer</b>.
-    <p><img src="images/cnf-gointo.png" alt="Showing the Project Explorer after Go Into selected" title="Go Into" border="1"></p>
+  <tr id="quick-access-keybindings">
+    <td width="30%" valign="top" align="left"><b>Quick Access now shows keybindings for commands</b></td>
+    <td width="70%" valign="top">Quick Access (Ctrl+3) now shows keybindings for commands so you can
+        save yourself from all that typing and just use the keyboard shortcut the next time you need
+        to run a command.
+      <p><img src="images/quickaccess-bindings.png"
+      alt="Quick Access dialog displaying two commands and their associated keybindings at the end of the command's description."/></p></td>
+  </tr>
+
+  <tr id="wizard-keywords">
+    <td width="30%" valign="top" align="left"><b>Search keywords in wizards</b></td>
+    <td width="70%" valign="top">The <b>File &gt; New</b>, <b>File &gt; Import...</b>,
+    and <b>File &gt; Export...</b> wizards now support searching by keyword. You can type
+    a search term that doesn't appear in the wizard name, and the term will match against
+    search keywords registered for that wizard. For example if you search for "zip" or
+    "directory" in the import wizard, you will be shown the wizards for importing from
+    archives or the file system, respectively.
+    <p><img src="images/import-zip.png" alt="Keyword search in wizards"/></p>
+	</td>
+  </tr>
+
+  <tr id="workspace_local-history-limit-size">
+    <td width="30%" valign="top" align="left"><b>Local History pruning can be disabled</b></td>
+    <td width="70%" valign="top">The local history size constraints can now be disabled. 
+    Users that never want to discard history no longer need to wait on shutdown for 
+    history cleanup to occur. To disable history cleaning, go to <b>Preferences &gt; General &gt; 
+    Workspace &gt; Local History</b> and disable <b>Limit history size</b>.
+	Note that when this option is chosen, disk usage for the workspace local history 
+	will continue to grow indefinitely.
+	<p><img src="images/localHistoryLimitSize.png" alt="Limit history size"/></p></td>
+  </tr> 
+
+   <tr id="platui-1">
+    <td width="30%" valign="top" align="left"><b>Cancelling long-running operations in wizards</b></td>
+    <td width="70%" valign="top">There is now a stop button adjacent to the progress bar when a wizard is running
+       a long operation.  You can press the stop button (or the <b>Enter</b> or <b>Space</b> key) to cancel the operation
+       being shown in the progress bar.  This behavior occurs for all subclasses of <tt>WizardDialog</tt>.  Dialogs
+       that do not subclass <tt>WizardDialog</tt> must change their code to get the new behavior.  Please open a bug
+       if you see wizards that should have the stop button and do not.
+       <p> <img src="images/wizardstop.png" alt="Wizard with a progress bar and stop button" title="Wizard with Stop Button"/></p>
     </td>
+  </tr>
+  <tr>
+  <tr>
+    <td colspan="2"><hr />
+    </td>
+  </tr>
+   <tr id="platui-2">
+    <td width="30%" valign="top" align="left"><b>Progress shown in platform task bar</b></td>
+    <td width="70%" valign="top">Job progress can now be shown in the platform task bar on platforms that support
+       this feature.  In this milestone, progress is shown for install, update, and uninstall jobs.  In
+       future milestones, progress will be shown for startup and other long-running jobs, such as team repository 
+       synchronize or workspace builds.  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302529">Bug 302529</a>
+       for more detail about the new API associated with this feature.
+       <p> <img src="images/taskbarprogress.png" alt="Progress View and Win 7 Task Bar indicating the same progress" title="Progress in Win7 Task Bar"/></p>
+    </td>
+  </tr>
+
+  <tr id="hideFVB">
+    <td width="30%" valign="top" align="left"><b>Hide empty fast view bars</b></td>
+    <td width="70%" valign="top">
+	In order to clean up the UI and gain some space in the trim area we've added a new preference to allow you to
+	hide the Fast View Bar when it's empty. Note that this option does not inhibit the functionality, if there are
+	fast views in the perspective (or you make a view a fast view) the bar will be shown regardless of the preference
+	setting.
+	<p>	<img src="images/hide-fvb.png" alt="Hide the fast view bar" /></p></td>
+  </tr>
+
+  <tr id="print-dialog-remembers-options">
+    <td width="30%" valign="top" align="left">
+        <b>Print dialog remembers user selected options </b>
+    </td>
+    <td width="70%" valign="top">
+    	The <b>Print</b> dialog now remembers the following user selected options for all textual editors until the workbench is shutdown:
+    	<ul>
+    		<li>Selected printer</li>
+    		<li>Print to file</li>
+    		<li>Printer preferences: These are printer specific options like paper size, page order orientation etc.</li>
+    	</ul>
+    </td>
+  </tr>
+
+  <tr id="unix-file-permissions">
+    <td width="30%" valign="top" align="left"><b>UNIX file permissions</b></td>
+    <td width="70%" valign="top">The full set of UNIX file permissions are now supported.
+	The attributes can be managed from the <b>Resource Properties</b> page.
+        <p><img src="images/file-attributes-ui.png" alt="File attributes UI" /></p>
+    </td>
+  </tr>
+
+  <tr id="edit-link-location">
+    <td width="30%" valign="top" align="left"><b>Edit linked resource location</b></td>
+    <td width="70%" valign="top"><p>Linked resource locations can now be changed by the user
+    	by selecting the <b>Edit...</b> button in the <b>Resource Properties</b> page.</p>
+    	<img src="images/edit-button-in-property.png" border="0" alt="Edit Button" />
+    </td>
+  </tr>
+
+  <tr id="file-drag-dialog">
+    <td width="30%" valign="top" align="left"><b>File and folder operation dialog</b></td>
+    <td width="70%" valign="top">When dragging files and folders from the operating system 
+    	shell (such as Windows Explorer) onto <b>Project Explorer</b> (not yet available 
+    	to <b>Package Explorer</b>), a dialog appears to let the user choose how should 
+    	the files be imported.
+    	<p>The dialog allows the user to simply copy files and folders (the traditional operation)
+    	but also easily create linked resources and virtual folders hierarchies in a project folder 
+    	by simply drag and dropping files and folders.</p>
+    	<p></p>
+    	<img src="images/import-type-dialog.png" border="0" alt="Import File Operation Dialog" />
+      <p>The dialog also creates project path variable relative linked resources automatically,
+      	so that projects remains portable while using linked resources.</p>
+      </td>
   </tr>
 
       <!-- ******************** User Assistance ********************** -->
-
-  <tr id="customIcons">
-    <td width="30%" valign="top" align="left"><b>Custom icons in help system</b></td>
-    <td width="70%" valign="top">Custom icons can be specified for books and topics in the help system using
-	the &lt;tocIcon&gt; element in the <tt>org.eclipse.help.toc</tt> extension point. 
-      <p><img src="images/customicon.png" alt="table of contents"></p></td>
-  </tr>
-
-  <tr id="welcomeFont">
-    <td width="30%" valign="top" align="left"><b>Buttons to change font size in Welcome</b></td>
-    <td width="70%" valign="top">To improve accessibility two new buttons (a large and a small 'A') have been 
-    added above the welcome area which can be used to increase or decrease the font size on the welcome pages. 
-    <p><img src="images/welcomescale.png" alt="welcome page"></p></td>
-  </tr>
-
-  <tr id="abouthtml">
-    <td width="30%" valign="top" align="left"><b>About page in help system</b></td>
-    <td width="70%" valign="top">It is now possible to open a web page, about.html from 
-    the help system that shows plug-in version information. This makes it possible to determine 
-    the versions of plug-ins running in a Help information center.</td>
-  </tr>
-
-  <tr id="helpQuickSearch">
-    <td width="30%" valign="top" align="left"><b>Help quick search</b></td>
-    <td width="70%" valign="top">A search of the help system can be initiated with a  
-      scope limited to the selected book or topic.
-      <p> <img src="images/quicksearch.png" alt="help quick search"></p>
-    </td>
-  </tr>
 
       <!-- ******************** Install/Update ********************** -->
 
@@ -238,95 +277,29 @@ document in the plug-in developer's guide.
       <td colspan="2"><a name="Install"></a> <div style="font-size: 20px; font-weight: bold;">Install/Update Changes</div></td>
     </tr>
 
-  <tr id="p2ui-software-updates">
-    <td width="30%" valign="top" align="left"><b>Software updates menu items</b></td>
-    <td width="70%" valign="top">New menu items have been added to the <b>Help</b> menu, allowing you to
-       invoke the most common software management tasks immediately.  Instead of launching a single updates dialog and navigating pages with
-       action buttons, you can now perform common tasks immediately from the <b>Help</b> menu.
-       <p> <img src="images/p2menu.png" alt="Software updates menu items in the Help menu" title="Software Updates Menu Items"></p>
-       <p>For example, you can now check for software updates in one step using <b>Help &gt; Check for Updates</b>.
-       This menu command will check for updates (in the foreground or background depending on your 
-       <b>General &gt; Always run in background</b> preference), and launch the software updates wizard if updates are available.</p>
+  <tr id="p2-license"> 
+    <td width="30%" valign="top" align="left"><b>Grouping by license in install wizard</b></td>
+    <td width="70%" valign="top">Software to install is now grouped by license
+    in the <b>Review Licenses</b> page of the install wizard. This means you no longer need to select each item being
+    installed to ensure all applicable licenses have been reviewed.</p>
+     <p><img src="images/p2-license.png" alt="Install wizard license review page"></p>
     </td>
   </tr>
 
-  <tr id="p2ui-installing-new-software">
-    <td width="30%" valign="top" align="left"><b>Installing new software</b></td>
-    <td width="70%" valign="top">The <b>Available Software</b> page has been merged into the install wizard and
-       can be accessed using <b>Help &gt; Install New Software...</b>.   The same navigation features previously 
-       appearing in the <b>Available Software</b> page, such as filtering and viewing by site, category, or name, 
-       are now on the first page of the wizard.
-       <p> <img src="images/p2installwizard.png" alt="Available Software Page in the Install Wizard" title="Available Software Wizard Page"></p>
-       <p>Some of the most common workflow and usability complaints have also been addressed:</p>
-       <ul><li>The wizard will now open immediately without waiting to connect to any update sites.
-       This makes the view itself much more responsive once the wizard is opened.</li>
-       <li>A description field has been added to the page to show more information about the selected item.</li>
-       <li>You can now change many selections at once without computing the install results on each change.  Once 
-       you've selected the items to install, the <b>Next</b> button will take you to the review page.  If there
-       is an error or you otherwise want to change your selections, you can now go back and change the selections in the first
-       page, and the resulting changes won't be computed until you move forward again.</li>
-       </ul>
-    </td>
+  <tr id="ntlm-support"> 
+    <td width="30%" valign="top" align="left"><b>NTLMv2 proxy support</b></td>
+    <td width="70%" valign="top">Support has been added to the platform for communicating
+    with NT Lan Manager proxies (NTLMv2). You can now install and update software
+    in the Eclipse user interface when running behind proxies that use this protocol.</td>
   </tr>
 
-  <tr id="p2ui-install-from-new-site">
-    <td width="30%" valign="top" align="left"><b>Installing software from a new site</b></td>
-    <td width="70%" valign="top">The install wizard has been reorganized to make it simpler to
-       add a new site and install software from it.  You can add a new site by typing, pasting, or
-       dragging a URL link into the <b>Work with</b> combo box.  You can also use the <b>Add...</b> button
-       to add a site. Auto-completion on names and locations is supported when typing in the <b>Work with</b> field,
-       including completion of repositories that are currently disabled.
-       <p>Only the content for a newly added site will be shown, making it simpler to find
-       what you want to install.  You can also use the combo to change the filtering of the available software by any
-       site.  The wizard has also been streamlined by placing the links to other views closer to the
-       relevant information in the wizard.</p>
-       <p> <img src="images/p2install.png" alt="Available Software view in Install Wizard" title="Install Wizard"></p>
-       <p>A new checkbox at the bottom of the page lets you control whether all sites will be used when
-       searching for the new software's requirements, or whether only the site selected will be
-       consulted.  Previously, all sites were always used when gathering the requirements.</p>
-    </td>
-  </tr>
-
-  <tr id="p2ui-install-wizard">
-    <td width="30%" valign="top" align="left"><b>More detail in install wizards</b></td>
-    <td width="70%" valign="top">The wizards for installing, updating, and uninstalling software now provide
-       more detailed information about the software required to complete an operation.  For example, when you 
-       install a feature, you will see a list of the other features required that will also be installed.
-       <p> <img src="images/p2install-details-wizard.png" alt="Install wizard with detail" title="Install Wizard"></p>
-       <p>The update wizard has also been reorganized so that you can change your update selections
-       in a separate selection page.  When available updates are shown, the wizard will open directly
-       on the details page.</p>
-       <p> <img src="images/p2updatewizard1.png" alt="Update wizard detail" title="Update Wizard Detail Page"></p>
-       <p>From this page, use the wizard <b>&lt; Back</b> button to see all of the possible update proposals and
-       change the selections.</p>
-       <p> <img src="images/p2updatewizard2.png" alt="Update wizard with multiple proposals" title="Update Wizard Selection Page"></p>
-    </td>
-  </tr>
-
-  <tr id="p2ui-info-in-about">
-    <td width="30%" valign="top" align="left"><b>Installation information now appears in About</b></td>
-    <td width="70%" valign="top">The <b>Installed Software</b> and <b>Installation History</b> pages
-       have been moved into the new <b>Installation Details</b> dialog.  To access these pages, choose <b>Help&gt;About</b>
-       and press the <b>Installation Details</b> button. In addition, you can now expand the top level items in the 
-       <b>Installed Software</b> page to see what software each item requires. From the
-       <b>Installation History</b> page you can browse previous install configurations, and
-       <b>Revert</b> to previous configurations.
-       <p> <img src="images/p2revert.png" alt="Installation History page in Installation Information dialog" title="Installation History"></p>
-    </td>
-  </tr>
-
-  <tr id="p2ui-software-sites-preferences">
-    <td width="30%" valign="top" align="left"><b>Software sites preference page</b></td>
-    <td width="70%" valign="top">
-       The available sites for installing and updating software are now managed from 
-       a preference page (<b>Preferences &gt; Install/Update &gt; Available Software Sites</b>). 
-       To find a particular site quickly, you can sort by name, location, or enablement.  You can also use the filter field to filter the list of sites.
-	   
-	   <p>This preference page also allows you to define your own name for available
-	   software sites. Names can be defined when adding a new site, or edited from the available
-	   sites preference page. If you don't provide a name, the name defined by the site itself will be used.
-	   </p>
-       <p> <img src="images/p2repoprefs2.png" alt="Available Software Sites preference page" title="Available Software Sites"></p>
+  <tr id="p2ui-1">
+    <td width="30%" valign="top" align="left"><b>Comparing configurations in the Installation History</b></td>
+    <td width="70%" valign="top">The <b>Installation History</b> page now allows you to compare two different
+       installation history configurations.  Now you can more easily see what was installed, uninstalled, or updated
+       in the various installation configurations.  You can also delete unwanted installation configurations
+       in order to reduce clutter and free up disk space.
+       <p> <img src="images/installhistory.png" alt="Compare button in the Installation History Page" title="Installation History Page"/></p>
     </td>
   </tr>
 
@@ -337,25 +310,60 @@ document in the plug-in developer's guide.
       <em>These changes apply to all textual editors in the SDK.</em></p></td>
     </tr>
 
-  <tr id="block-selection-mode">
+  <tr id="save-unmappable-chars">
     <td width="30%" valign="top" align="left">
-        <b>Block selection mode in textual editors</b>
+        <b>Better handling of unmappable characters on save</b>
     </td>
     <td width="70%" valign="top">
-    	Textual editors now support block (aka column or rectangular) selection mode:
-       <p> <img src="images/block-selection-mode.png" alt="Block selection in text editor"></p>
-       <p>To enable it either use <b>Alt+Shift+A</b> or activate the 'Editor Presentation' action set to get
-       		a tool bar button for toggling the block selection mode.</p>  
+        There is now better support for characters that cannot be saved with the current encoding:
+       <p><img src="images/save-dialog.png" alt="Save dialog in case of unmappable characters"/></p> 
     </td>
   </tr>
 
-  <tr id="collapse-projection">
+  <tr id="resize-popups-gtk">
     <td width="30%" valign="top" align="left">
-        <b>Double-click on folding line collapses the folding region</b>
+        <b>Resize content assist and hover pop-ups under Linux</b>
     </td>
     <td width="70%" valign="top">
-        Double-click on the vertical folding line now collapses the folding region:
-       <p><img src="images/collapse-projection.png" alt="Double-click collapses the folding region" ></p>
+        Content assist and most hover pop-ups are now resizable in textual editors under Linux/GTK.
+       <p><img src="images/resize-popups-gtk.png" alt="Content assist popup with resize trim"/></p>
+    </td>
+  </tr>
+
+  <tr id="multifix-problem-hover">
+    <td width="30%" valign="top" align="left">
+      <b>Fix multiple problems via problem hover</b>
+    </td>
+    <td width="70%" valign="top">
+      The problem hover now shows quick fix links that fix multiple instances of a problem in a file:
+      <p><img src="images/multifix-problem-hover.png" alt="Support for multi-fix quick fixes in problem hover"/></p>       
+      The new links behave the same as pressing <b>Ctrl+Enter</b> in the Quick Fix proposal list (<b>Ctrl+1</b>). 
+    </td>
+  </tr>
+
+  <tr id="getter-setter-content-assist">
+    <td width="30%" valign="top" align="left"><b>Improved content assist for getter and setter proposals</b></td>
+    <td width="70%" valign="top">Content assist now proposes all possible getter and setter proposals
+    in case of field name clashes and no longer proposes setter proposals for final fields.
+	</td>
+  </tr>
+
+  <tr id="all-folded-annotations-visible">
+    <td width="30%" valign="top" align="left">
+        <b>All folded annotations are now visible in the rulers</b>
+    </td>
+    <td width="70%" valign="top">
+        So far, only errors and warnings were shown in the vertical and overview ruler when code is folded. As of now,
+        all annotations from the folded region are visible:
+        <p><img src="images/visible-folded-annotations.png" alt="Vertical and overview ruler annotations for folded code"/></p> 
+    </td>
+  </tr>
+
+  <tr id="ruler-annotation-tooltip">
+    <td width="30%" valign="top" align="left"><b>Show ruler annotation tooltip command</b></td>
+    <td width="70%" valign="top">The annotation tooltip that appears when you hover over an icon in the vertical ruler on the left of a textual editor can now also be shown by pressing a key sequence. 
+        However, out of the box no key sequence is defined for that. Go to the <strong>General &gt; Keys</strong> preference page to assign a key sequence to the <b>Show Ruler Annotation Tooltip</b> command.      
+        <p><img src="images/show-ruler-annotation-tooltip.png" alt="Text editor with ruler annotation tooltip"/></p>         
     </td>
   </tr>
 
@@ -365,28 +373,99 @@ document in the plug-in developer's guide.
           Changes</div></td>
     </tr>
 
-    <TR id=tagHistory>
-      <TD vAlign=top align=left width="30%"><B>History in Tag Resources dialog</B></TD>
-      <TD vAlign=top width="70%">When tagging a project you can now choose a
-        previously used tag.
-        <P><IMG alt="The Tag Resources dialog with the history list" 
-      src="images/tag-history.png" ></p></TD>
-    </TR>
+  <tr id="apply-patch-workingset">
+    <td width="30%" valign="top" align="left"><b>Apply patch enabled for working sets</b></td>
+    <td width="70%" valign="top">
+    	<p>Now, the <b>Apply Patch</b> action is enabled for working sets if they are used as top-level elements in the explorer.</p>
+		<p><img src="images/apply-patch-ws.png" alt="Apply Patch for working set"/></p>
+    </td>
+  </tr>
 
-    <TR id=applyPatch>
-      <TD vAlign=top align=left width="30%"><B>Apply patch in the Synchronize
-          view</B></TD>
-      <TD vAlign=top width="70%">You can now apply a patch directly in the Synchronize
-        view.
-        <P><IMG alt="Apply patch in the Synchronize view" 
-      src="images/apply-patch-syncview.png" ></p></TD>
-    </TR>
+  <tr id="config-branches">
+    <td width="30%" valign="top" align="left"><b>Usability enhancement to Configure Branches and Versions</b></td>
+    <td width="70%" valign="top">
+      	<p>Now the <b>Configure Branches and Versions</b> action in the repository view is enabled for multiple selections. 
+      	This means that you are able to choose any file in the selection as a tag source for all selected folders.</p>
+		<p><img src="images/configure-branches.png" alt="Configure Branches and Versions for multiple selection"/></p>
+  </tr>
 
-  <tr id="workspace_sync-schedule">
-    <td width="30%" valign="top" align="left"><b>More options for synchronization scheduling</b></td>
-    <td width="70%" valign="top">New options are available in the Configure Synchronize Schedule dialog.
-    Synchronization can be started at a specified time, run once or repeated at selected intervals.
-    <p><img src="images/sync-schedule.png" alt="Synchronize schedule dialog" ></p></td>
+  <tr id="workspace_sync-view-link-with-editor">
+    <td width="30%" valign="top" align="left"><b>"Link with Editor" in Synchronize View</b></td>
+    <td width="70%" valign="top">The <b>Synchronize</b> view can now be linked 
+    with the active editor. Moreover, the view is now one of the 'Show In' targets when in the Synchronize perspective.
+    <p><img src="images/syncViewLinkWithEditor.png" alt="Link with Editor" /></p></td>
+  </tr>
+  <tr>
+    <td colspan="2"><hr />
+    </td>
+  </tr>
+  <tr id="workspace_commit-wizard-logical-models">
+    <td width="30%" valign="top" align="left"><b>Logical Models in Commit Wizard</b></td>
+    <td width="70%" valign="top">The <b>Commit</b> wizard now shows logical 
+    models just like the <b>Synchronize</b> view does.
+    <p><img src="images/commitWizardLogicalModels.png" alt="Commit Wizard" /></p></td>
+  </tr>
+
+  <tr id="workspace_sorted-diffs-in-patch">
+    <td width="30%" valign="top" align="left"><b>Sorted diffs in patches</b></td>
+    <td width="70%" valign="top">The <b>Create Patch</b> action now creates patches 
+    that contain changes sorted by project and file path. This makes comparing patches much easier.</td>
+  </tr>
+
+  <tr id="patch-sync-view-improvements">
+    <td width="30%" valign="top" align="left"><b>Apply patch in synchronize view improvements</b></td>
+    <td width="70%" valign="top"><p>A set of patch options has been added to the drop-down menu in the <b>Synchronize</b> View.
+		New actions include <b>Reverse</b>, <b>Fuzz Factor...</b> and <b>Generate .rej File</b>.</p>
+    	<img src="images/patch-options-in-sync-view.png" alt="Patch options in Synchronize view" />
+    	<p>Moreover a new page has been added to the <b>Synchronize with Patch</b> wizard.
+		The page displays inaccessible projects referred from within the patch. Projects selected
+		on this page will be opened prior to synchronization.</p>
+        <img src="images/inaccessible-projects-page.png" alt="Inaccessible Projects page" />
+    </td>
+  </tr>
+
+  <tr id="apply-patch-in-sync-view-preference">
+    <td width="30%" valign="top" align="left"><b>Apply patch in Synchronize view preference</b></td>
+    <td width="70%" valign="top">Thanks to the new preference <b>Apply patch in Synchronize view</b>,
+	you can leverage the new way of working with patches each time you apply one. When set, applying
+	a patch via the <b>Team</b> context menu or by pasting in <b>Package Explorer</b> uses the <b>Synchronize</b> view.
+	<p><img alt="Apply patch in Synchronize view preference" title="Apply patch in Synchronize view preference"
+		src="images/apply-patch-in-sync-view-preference.png"/>
+	</p> 
+    </td>
+  </tr>
+
+  <tr id="ignore-leading-segments-option">
+    <td width="30%" valign="top" align="left"><b>Ignore Leading Path Segments option</b></td>
+    <td width="70%" valign="top">
+	A new option helps apply patches with non-matching paths in the <b>Synchronize</b> view. This is the last option
+	needed to bring patching in the <b>Synchronize</b> view up to par with the <b>Apply Patch</b> dialog.
+	<p><img alt="Ignore Leading Path Segments option" title="Ignore Leading Path Segments option"
+		src="images/ignore-leading-segments-option.png"/>
+	</p>
+    </td>
+  </tr>
+
+  <tr id="matching-might-not-be-optimal">
+    <td width="30%" valign="top" align="left"><b>Warning about possible inaccuracy in comparison result</b></td>
+    <td width="70%" valign="top">
+	The compare framework caps the result accuracy for large files. This used to happen silently, which
+	confused users. Now when the faster algorithm is used a warning label appears.
+	<p><img alt="Mathing might not be optimal label" title="Mathing might not be optimal label"
+		src="images/matching-might-not-be-optimal.png"/>
+	</p>
+    </td>
+  </tr>
+
+  <tr id="open-in-compare-editor.png">
+    <td width="30%" valign="top" align="left"><b>Enhanced Open in Compare editor menu</b></td>
+    <td width="70%" valign="top">    
+    The context menu of the <b>Compare</b> editor contains <b>Open</b> and <b>Open With</b> actions, 
+    which open the file in full-fledged editors. Now, these actions set the selection and the caret position 
+    in the newly opened editor based on the selection in <b>Compare Editor</b>.
+    <p><img src="images/open-in-compare-editor.png" alt="Open in Compare Editor" />
+    </p>
+      </td>
   </tr>
 
     <!-- ******************** Debug ********************* -->
@@ -395,28 +474,41 @@ document in the plug-in developer's guide.
           Changes</div></td>
     </tr>
 
-  <tr id="debug-view-breadcrumb">
-    <td align="left" valign="top" width="30%"><b>Debug view breadcrumb</b></td>
-    <td valign="top" width="70%">Debug view now offers a breadcrumb
-      which shows the current active debug context. The breadcrumb is
-      activated automatically when the Debug view is resized to show only one
-      line of text.
-      <p><img alt="Debug view Breadcrumb" title="Debug view Breadcrumb"
-      src="images/debug-breadcrumb-1.png"><br><br></p>
-      <p>Each element in the breadcrumb can be selected and actions can
-      be invoked through a context menu or keyboard short cuts.
-      </p>
-      <p><img alt="Debug Breadcrumb Popup Menu"
-      title="Debug Breadcrumb Popup Menu" src="images/debug-breadcrumb-2.png"><br><br>
-      </p>
-      <p>Finally, a drop-down menu allows navigating to a new
-      element and changing the active debug context.
-      </p>
-      <p><img alt="Debug view Breadcrumb Drop-Down"
-      title="Debug view Breadcrumb Drop-Down"
-      src="images/debug-breadcrumb-3.png"></p>
-    </td>
-  </tr>
+	<tr id="expressionsviewcolumnsupport">
+	<td align="left" valign="top" width="30%"><b>Columns in the expressions view
+	</b></td>
+	<td valign="top" width="70%">The <b>Expressions</b> view now supports displaying data
+	in columns format just like in the <b>Variables</b> view. To switch to a column 
+	presentation select <b>Layout &gt; Show Columns</b> from the view's menu.
+	<p><img alt="Expressions View with Columns" title="Expressions View with Columns"
+	src="images/expressions-columns.png"/><br/><br/></p>
+	<p>Users can also quickly edit existing expressions by clicking on the 
+	expression in the <b>Name</b> column to activate an in-line editor.  To add a 
+	new expression, click on the <b>Add new expression</b> place-holder element.
+	</p>
+	</td>
+	</tr>
+
+	<tr>
+	<td colspan="2">
+	<hr/> </td>
+	</tr>
+	<tr id="breakpointdetails">
+	<td align="left" valign="top" width="30%"><b>Breakpoint detail panes
+	</b></td>
+	<td valign="top" width="70%">The breakpoints view now provides detail panes
+	to display and edit breakpoint properties. To display detail panes, 
+	select <b>Layout &gt; Vertical</b> from the view's menu.
+	<p><img alt="Breakpoint Detail Panes" title="Breakpoint Detail Panes"
+	src="images/breakpoint-details.png"/><br/><br/></p>
+	<p>For example, the default detail pane for a Java line breakpoint allows its
+	condition to be edited in place with content assist. Use the <b>File &gt; Save (Ctrl-S)</b>
+	action to save a condition that has been edited. Check box properties are saved immediately.
+	Another detail pane provides editors for suspend policy and hit count. You can switch detail
+	panes by selecting <b>Show Details As &gt; Breakpoint Settings</b> in the context menu.
+	</p>
+	</td>
+	</tr>
 
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
