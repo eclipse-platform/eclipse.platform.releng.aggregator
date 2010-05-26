@@ -24,6 +24,8 @@
  <li><a href="#FileSystemFetchTree">The method FileSystem.fetchFileTree now throws CoreException</a></li>
  <li><a href="#exemplarySetup">The bundle org.eclipse.equinox.p2.exemplarysetup has been removed</a></li>
  <li><a href="#objectContribution">Object Contributions will not execute from a keybinding</a></li>
+ <li><a href="#spinner">Spinner now allows setting equal minimum and maximum values</a></li>
+ <li><a href="#safari">Browser on OS X now returns "webkit" as its type</a></li>
 </ol>
 
 <hr>
@@ -98,6 +100,29 @@ An example of writing a core expression that's similar to an objectContribution 
 Example</a>.
 <p>
 
+</p>
+
+<!-- ############################################## -->
+
+<h2>6. <a name="spinner">Spinner now allows setting equal minimum and maximum values</a></h2>
+<p><strong>What is affected:</strong> Clients dependent on the setting of a Spinner control's valid range to a single value to fail.</p>
+<p><strong>Description:</strong> Prior to Eclipse 3.6 it was not possible to set a Spinner's range of valid
+integer values to a single value.  This was done in order to be consistent with other range-based controls
+in SWT.  However the case of specifying a single integer value as the valid range for a Spinner is valid,
+so this can now be done.  Clients that were dependent on this case failing now need to check for this
+condition before setting a Spinner's maximum to a value that would match its minimum value (or vice versa),
+and not set the value in such cases.
+</p>
+
+<!-- ############################################## -->
+
+<h2>7. <a name="safari">Browser on OS X now returns "webkit" as its type</a></h2>
+<p><strong>What is affected:</strong> Clients using the result of <code>Browser.getBrowserType()</code> on OS X.</p>
+<p><strong>Description:</strong> In Eclipse 3.5.x the Browser returned "safari" as its type on OS X.  However this
+return value was not accurate since it is the WebKit framework that is embedded by the Browser control on OS X, not
+the Safari application, so it has been changed accordingly.  Clients that were using this return value to detect the
+use of a WebKit-based native browser on OS X should now detect a return value of "webkit" from <code>Browser.getBrowserType()</code>
+<em>and</em> check <code>SWT.getPlatform()</code> for a return value of either "carbon" or "cocoa".
 </p>
 
 <!-- ############################################## -->
