@@ -384,9 +384,11 @@ public class BuildNotesPage extends WizardPage {
 			GetBugsOperation getBugsOperation = new GetBugsOperation(
 					(ReleaseWizard) getWizard(), syncInfoSet);
 			getBugsOperation.run(this);
-			String tempText = outputReport();
-			if (tempText != null) {
-				reportText.setText(tempText);
+			if (bugSummaryMap != null) {
+				String tempText = outputReport();
+				if (tempText != null) {
+					reportText.setText(tempText);
+				}
 			}
 		}
 	}
