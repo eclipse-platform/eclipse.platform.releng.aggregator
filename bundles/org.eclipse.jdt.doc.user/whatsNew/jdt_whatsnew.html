@@ -3,7 +3,7 @@
 <head>
 <meta name="copyright" content="Copyright (c) IBM Corporation and others 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 <style type="text/css">
 td {border-top: solid thin black;}
@@ -23,10 +23,10 @@ for the 3.6 release of Eclipse. They are grouped into:</p>
 <ul>
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<li><a href="#JavaFormatter">Java Formatter</a></li>
-	<li><a href="#JavaCompareEditor">Java Compare Editor</a></li>
 	<li><a href="#JavaRefactoring">Java Refactoring and Source Actions</a></li>
 	<li><a href="#JavaCompiler">Java Compiler</a></li>
 	<li><a href="#JavaViews">Java Views and Dialogs</a></li>
+	<li><a href="#JUnit">JUnit</a></li>
 </ul>
 <p>
 See also the <a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New in 3.6</a>
@@ -49,14 +49,14 @@ document for changes in the Platform.
           Java Editor </div></td>
     </tr>
 
-  <tr id="new-preference-transfer">
+  <tr id="multifix-problem-hover">
     <td width="30%" valign="top" align="left">
-        <b>New 'Java Code Style Preferences' category when importing or exporting preferences</b>
+      <b>Fix multiple problems via problem hover</b>
     </td>
     <td width="70%" valign="top">
-        There is a new category available when importing or exporting preferences that
-        allows you to control whether Java code style preferences are imported or exported.
-       <p><img src="images/preference-transfer.png" alt="Java code style preference transfers"/></p> 
+      The problem hover now shows quick fix links that fix multiple instances of a problem in a file:
+      <p><img src="images/multifix-problem-hover.png" alt="Support for multi-fix quick fixes in problem hover"/></p>       
+      The new links behave the same as pressing <b>Ctrl+Enter</b> in the Quick Fix proposal list (<b>Ctrl+1</b>). 
     </td>
   </tr>
 
@@ -79,6 +79,38 @@ document for changes in the Platform.
         <p><img src="images/value-in-javadoc.png" alt="Javadoc hover"/></p>
     </td>
   </tr>
+  
+   <tr id="open-implementation-command">
+    <td width="30%" valign="top" align="left">
+        <b>Command to open an implementation</b>
+    </td>
+    <td width="70%" valign="top">
+    	The <b>Open Implementation</b> command is available from the <b>Navigate</b> menu. A key binding can be
+    	assigned on the <b>General &gt; Keys</b> preference page.
+        <p><img src="images/open-implementation-command.png" alt="Open Implementation action in Navigate menu" /></p>
+    	<p>
+    	This action is enabled on text selections in the Java editor for overridable methods and directly opens the implementation in case there's only one, 
+    	or shows all the concrete implementations for that method in the hierarchy of its declaring type, using the Quick Type Hierarchy.</p> 
+    </td>
+  </tr> 
+
+  <tr id="getter-setter-content-assist">
+    <td width="30%" valign="top" align="left"><b>Improved content assist for getter and setter proposals</b></td>
+    <td width="70%" valign="top">Content assist now proposes all possible getter and setter proposals
+    in case of field name clashes and no longer proposes setter proposals for final fields.
+	</td>
+  </tr>
+
+  <tr id="new-preference-transfer-code">
+    <td width="30%" valign="top" align="left">
+        <b>New 'Java Code Style Preferences' category when importing or exporting preferences</b>
+    </td>
+    <td width="70%" valign="top">
+        There is a new category available when importing or exporting preferences that
+        allows you to control whether Java code style preferences are imported or exported:
+       <p><img src="images/preference-transfer-code.png" alt="Java code style preference transfers"/></p> 
+    </td>
+  </tr>
 
   <!-- ******************* Java Formatter ************************************* -->
   <tr> 
@@ -86,13 +118,45 @@ document for changes in the Platform.
       Java Formatter </div></td>
   </tr>
 
-  <tr id="formatter-preferences"> 
+  <tr id="formatter-disabling-enabling-tags-preference"> 
     <td width="30%" valign="top" align="left">
+      <b>Control the formatting in code sections</b>
     </td>
-
     <td width="70%" valign="top">
-      Formatter&nbsp;profiles can be configured on the <b>Java &gt; Code
-      Style &gt; Formatter</b> preference page.
+      This preference allows you to define one tag to disable and one tag
+      to enable the formatter (see the <b>Off/On Tags</b> tab in your formatter
+      profile):
+      <p><img src="images/formatter-disabling-enabling-tags-preference.png"
+          alt="Java formatter preference page. Set the disabling and enabling tags on the 'Off/On Tags' tab of the formatter profile."/></p>
+      <p>Here is an example of formatted code which is using code sections
+      with the tags defined as shown above:</p>
+      <p><img src="images/formatter-disabling-enabling-tags-formatted.png"
+          alt="Java formatter example. The simple snippet with the formatted annotation and its element-value pairs aligned."/></p>
+    </td>
+  </tr>
+
+  <tr id="formatter-prefer-wrapping-outer-expressions-preference"> 
+    <td width="30%" valign="top" align="left">
+      <b>New strategy to wrap nested method calls</b>
+    </td>
+    <td width="70%" valign="top">
+      The Java formatter now tries to wrap the outermost method calls
+      first to have a better output when wrapping nested method calls.
+      <p>
+      Here is an example of a formatted code where the formatter has
+      wrapped the line earlier, e.g. between the arguments of the outermost
+      message call. Doing this, each nested method call is kept on a single
+      line:</p>
+      <p><img src="images/formatter-prefer-wrapping-outer-expressions-formatted.png"
+          alt="Java formatter example. The simple snippet with the formatted nested method calls."/></p>
+      <p>
+      A new preference allows you to disable this new strategy, e.g. if you want to format your code as before:</p>
+      <p><img src="images/formatter-prefer-wrapping-outer-expressions-preference.png"
+          alt="Java formatter preference page. Activate the new strategy when wrapping nested method calls."/></p>
+          
+      <p><b>Note:</b> Currently the new strategy only applies to nested method
+      calls, but that might be extended to other nested expressions in future
+      versions.</p>
     </td>
   </tr>
 
@@ -128,9 +192,9 @@ document for changes in the Platform.
     </td>
   </tr>
 
-  <tr id="formatter-align-method-declaration-preference"> 
+  <tr id="formatter-wrap-method-declaration-preference"> 
     <td width="30%" valign="top" align="left">
-      <b>Align method declaration</b>
+      <b>Wrap method declaration</b>
     </td>
     <td width="70%" valign="top">
       <img src="images/formatter-align-method-declaration-preference.png"
@@ -144,54 +208,9 @@ document for changes in the Platform.
     </td>
   </tr>
 
-  <tr id="formatter-disabling-enabling-tags-preference"> 
-    <td width="30%" valign="top" align="left">
-      <b>Control the formatting in code sections</b>
-    </td>
-    <td width="70%" valign="top">
-      This preference allows you to define one tag to disable and one tag
-      to enable the formatter (see the <b>Off/On Tags</b> tab in your formatter
-      profile):
-      <p><img src="images/formatter-disabling-enabling-tags-preference.png"
-          alt="Java formatter preference page. Set the disabling and enabling tags on the 'Off/On Tags' tab of the formatter profile."/></p>
-      <p>Here is an example of a formatted code which is using code sections
-      with the tags defined as shown above:</p>
-      <p><img src="images/formatter-disabling-enabling-tags-formatted.png"
-          alt="Java formatter example. The simple snippet with the formatted annotation and its element-value pairs aligned."/></p>
-    </td>
-  </tr>
-
-  <tr id="formatter-prefer-wrapping-outer-expressions-preference"> 
-    <td width="30%" valign="top" align="left">
-      <b>New strategy to wrap nested method calls</b>
-    </td>
-    <td width="70%" valign="top">
-      This preferences allows you to disable the new strategy when wrapping
-      nested method calls:
-      <p><img src="images/formatter-prefer-wrapping-outer-expressions-preference.png"
-          alt="Java formatter preference page. Activate the new strategy when wrapping nested method calls."/></p>
-      <p>Now, the Java formatter tries to wrap the outermost method calls
-      first to have a better output when wrapping nested method calls.</p>
-      <p>Here is an example of a formatted code where the formatter has
-      wrapped the line earlier, e.g. between the arguments of the outermost
-      message call. Doing this, each nested method calls are kept on a single
-      line:</p>
-      <p><img src="images/formatter-prefer-wrapping-outer-expressions-formatted.png"
-          alt="Java formatter example. The simple snippet with the formatted nested method calls."/></p>
-      <p>Note that this preference is checked by default (i.e. the new behavior
-      is automatically activated). If the backward compatibility regarding
-      previous versions' formatter behavior (i.e. before 3.6 version) is necessary,
-      then this preference has to be unchecked in order to get the previous
-      formatter behavior back.</p>
-      <p>Note also that the new strategy currently only applies to nested method
-      calls, but that might be extended to other nested expressions in future
-      versions</p>
-    </td>
-  </tr>
-
   <tr id="formatter-condense-multi-lines-comments-preference"> 
     <td width="30%" valign="top" align="left">
-      <b>Put comments start and end on separated lines</b>
+      <b>Put start and end of comments on separate lines</b>
     </td>
 
     <td width="70%" valign="top">
@@ -200,7 +219,7 @@ document for changes in the Platform.
       lines or not:
       <p><img src="images/formatter-condense-multi-lines-comments-preference.png"
           alt="Java formatter preference page. Check the preferences on the 'Comments' tab of the formatter profile."/></p>
-      <p>For example, with these preferences not activated as shown above,
+      <p>For example with the above preferences disabled,
       a block comment can be formatted to take less lines in the code:</p>
       <p><img src="images/formatter-condense-multi-lines-comments-formatted.png"
           alt="Java formatter example. The simple snippet with the block and javadoc comments formatted with less lines than with the default profile."/></p>
@@ -214,7 +233,7 @@ document for changes in the Platform.
 
     <td width="70%" valign="top">
       This preference lets you decide whether line comments which start
-      at the first column of the file will be formatted or not :
+      at the first column of the file will be formatted or not:
       <p><img src="images/formatter-skip-first-column-comments-preference.png"
           alt="Java formatter preference page. Check the preference on the 'Comments' tab of the formatter profile."/></p>
       <p>For example, with this preference not activated as shown above,
@@ -224,13 +243,6 @@ document for changes in the Platform.
     </td>
   </tr>
 
-  <!-- ******************* Java Compare Editor ************************************* -->
-
-  <tr> 
-    <td colspan="2"><a name="JavaCompareEditor"></a> <div style="font-size: 20px; font-weight: bold;"> 
-          Java Compare Editor</div></td>
-  </tr>
-   
   <!-- *************** Java Refactoring ************************************ -->
     <tr> 
       <td colspan="2"><a name="JavaRefactoring"></a> <div style="font-size: 20px; font-weight: bold;"> 
@@ -313,6 +325,16 @@ document for changes in the Platform.
         at the end of the <b>Potential programming problems</b> section.
     </td>
   </tr>
+  
+  <tr id="compiler-preference-transfer-compiler">
+    <td width="30%" valign="top" align="left">
+        <b>Import and export compiler preferences</b>
+    </td>
+    <td width="70%" valign="top">
+        The new 'Java Compiler Preferences' category allows to just import or export the compiler preferences:
+       <p><img src="images/preference-transfer-compiler.png" alt="New Java Compiler Preference transfer"/></p> 
+    </td>
+  </tr>
 
    <!-- ******************* Java Views and Dialogs ************************************* -->
      
@@ -321,15 +343,42 @@ document for changes in the Platform.
           Java Views and Dialogs</div></td>
     </tr>
 
-  <tr id="background-computation-of-type-hierarchy">
+   <tr id="new-build-path-error-decorator">
     <td width="30%" valign="top" align="left">
-      <b>Type Hierarchy computed in background</b>
+        <b>New build path error decorator</b>
     </td>
     <td width="70%" valign="top">
-      The <b>Type Hierarchy</b> is now computed in an operation that can be sent to the background
-      (or always runs in the background, depending on your settings).
-      <p><img src="images/background-computation-of-type-hierarchy.png" alt="Background computation of Type Hierarchy"/></p> 
-      <p>Your workbench is no longer blocked while a big hierarchy is computed.</p>       
+        Build path problems are sometimes easy to miss among other problems in a project.
+        The <b>Package Explorer</b> and <b>Project Explorer</b> views now show a new 
+        decorator on Java projects and working sets that contain build path errors:
+       <p><img src="images/build-path-error-decorator.png" alt="Build path error decorator"/></p> 
+       
+        <p>The concrete errors can be seen in the <b>Problems</b> view, and if you open the view menu and select
+        <b>Group By &gt; Java Problem Type</b>, they all show up in the Build Path category:</p>
+       <p><img src="images/build-path-problems.png" alt="Build path error decorator"/></p> 
+    </td>
+  </tr>
+
+   <tr id="package-name-abbreviations">
+    <td width="30%" valign="top" align="left">
+        <b>Package name abbreviations</b>
+    </td>
+    <td width="70%" valign="top">
+        Package names in Java views can now be abbreviated with custom rules. For example, with
+        the following rules:
+        <pre>org.eclipse.ui={UI}
+org.eclipse.ui.texteditor={T}
+org.eclipse.ui.internal.texteditor=[iT]</pre>
+        <p>
+        <img src="images/package-abbreviations-off.png" alt="Package Explorer with abbreviations disabled"/>
+        </p>
+        <p>Becomes:</p>
+        <p>
+        <img src="images/package-abbreviations-on.png" alt="Package Explorer with abbreviations enabled"/>
+        </p>
+        
+       
+        <p>The abbreviation rules can be configured on the <b>Preferences &gt; Java &gt; Appearance</b> preference page.</p>
     </td>
   </tr>
 
@@ -342,88 +391,7 @@ document for changes in the Platform.
        <p><img src="images/remove-from-view-action.png" alt="Remove from View action in Call Hierarchy"/></p>        
     </td>
   </tr>
-
-   <tr id="open-implementation-command">
-    <td width="30%" valign="top" align="left">
-        <b>New Open Implementation command</b>
-    </td>
-    <td width="70%" valign="top">
-    	The <b>Open Implementation</b> action is now available from the <b>Navigate</b> menu. A key binding can be
-    	assigned on the <b>General &gt; Keys</b> preference page.
-        <p><img src="images/open-implementation-command.png" alt="Open Implementation action in Navigate menu" /></p>
-    	<p>
-    	This action is enabled on text selections in the Java editor for overridable methods and directly opens the implementation in case there's only one, 
-    	or shows all the concrete implementations for that method in the hierarchy of its declaring type, using the Quick Type Hierarchy.</p> 
-    </td>
-  </tr> 
-
-  <tr id="export-all-formatter">
-    <td width="30%" valign="top" align="left">
-        <b>Export All... from Formatter preference page</b>
-    </td>
-    <td width="70%" valign="top">
-        The <b>Formatter</b> preference page and the <b>Clean Up</b> preference page now have an <b>Export All... </b> button that allows exporting all user-defined profiles 
-		into an XML file. The exported profiles can be imported from the XML file at once using the <b>Import...</b> button. 
-       <p><img src="images/export-all-profiles.png" alt="Export All... from Formatter preference page"/></p>        
-    </td>
-  </tr>
-
- <tr id="junit-split">
-    <td width="30%" valign="top" align="left"><b>org.eclipse.jdt.junit split</b></td>
-    <td width="70%" valign="top">
-      The non-UI parts of the <code>org.eclipse.jdt.junit</code> plug-in have been split off into the new plug-in
-      called <code>org.eclipse.jdt.junit.core</code>. This change does not affect existing clients of the
-      <code>org.eclipse.jdt.junit</code> plug-in, but allows new clients to use only the launcher without
-      requiring all the UI dependencies.
-    </td>
-  </tr>
-
-  <tr id="junit-skipped-node">
-    <td width="30%" valign="top" align="left"><b>JUnit imports test results with </b><code>&lt;skipped&gt;</code><b> nodes</b>
-    </td>
-    <td width="70%" valign="top">
-        The JUnit view can now import test run files that contain <code>&lt;skipped&gt;</code> nodes.
-        Eclipse and the Ant JUnit task do not generate such nodes, but e.g. test result files from Apache Maven
-        do generate them for ignored JUnit4 tests.
-    </td>
-  </tr>
-
-  <tr id="org.junit-plugins">
-    <td width="30%" valign="top" align="left">
-      <b>2 versions of org.junit plug-in</b>
-    </td>
-    <td width="70%" valign="top">
-      The SDK now ships 2 org.junit plug-ins (versions 3.8.2 and 4.7.0). Clients that want to run JUnit Plug-in Tests with a Java 5 or later VM
-      and that require org.junit with a version bound that does not include 4.x need to update their version bound to include 4.x.
-      If they don't update their bounds, both versions of org.junit are resolved at run time, which leads to errors when test classes are loaded.
-      <p>For complete details on the steps required to transition to using JUnit4 or to continue using JUnit3, please see:<br/>
-      <a href="http://wiki.eclipse.org/Eclipse/Testing/JUnit4_Changes">http://wiki.eclipse.org/Eclipse/Testing/JUnit4_Changes</a>.</p>
-    </td>
-  </tr>
-
-  <tr id="edit-test-method">
-    <td width="30%" valign="top" align="left">
-      <b>Edit test method in JUnit launch configuration</b>
-    </td>
-    <td width="70%" valign="top">
-      In JUnit launch configurations, you can now edit the test method:
-      <p><img src="images/edit-test-method.png" alt="JUnit launch configuration on 'Test' tab"/></p>       
-      When the test method is empty, all tests in the class will be run. 
-    </td>
-  </tr>
-
-  <tr id="new-preference-transfer">
-    <td width="30%" valign="top" align="left">
-        <b>New categories when importing or exporting preferences</b>
-    </td>
-    <td width="70%" valign="top">
-        There are two new categories available when importing or exporting preferences. The
-        wizard now supports importing or exporting Java compiler settings and JDT appearance
-        preferences.
-       <p><img src="images/preference-transfer.png" alt="New preference transfers"/></p> 
-    </td>
-  </tr>
-
+  
   <tr id="refresh-element-action">
     <td width="30%" valign="top" align="left">
         <b>Improved refresh in the Call Hierarchy</b>
@@ -437,27 +405,27 @@ document for changes in the Platform.
     	</p>
     </td>
   </tr>
-
-  <tr id="junit-open-url">
-    <td width="30%" valign="top" align="left"><b>JUnit view opens test result URL</b></td>
+  
+  <tr id="background-computation-of-type-hierarchy">
+    <td width="30%" valign="top" align="left">
+      <b>Type Hierarchy computed in background</b>
+    </td>
     <td width="70%" valign="top">
-      The <b>JUnit</b> view can now directly load test result files from an URL. You can either just drag and drop an URL to the view or open the
-      <b>Test Run History...</b> tool bar button's drop-down and choose <b>Import from URL...</b> to enter an URL from which
-      the test results should be loaded.
-      <p>
-        <img src="images/junit-import-url.png" alt="'Import from URL...' menu item"/></p>
-      <p>
-      Supported test run formats are XML files exported from the JUnit view or
-      generated by the Ant JUnit task.</p>
+      The <b>Type Hierarchy</b> is now computed in an operation that can be sent to the background
+      (or always runs in the background, depending on your settings):
+      <p><img src="images/background-computation-of-type-hierarchy.png" alt="Background computation of Type Hierarchy"/></p> 
+      <p>Your workbench is no longer blocked while a big hierarchy is computed.</p>       
     </td>
   </tr>
 
-  <tr id="junit4.7">
+  <tr id="export-all-formatter">
     <td width="30%" valign="top" align="left">
-        <b>JUnit 4.7</b>
+        <b>Export all profiles</b>
     </td>
     <td width="70%" valign="top">
-    	The JUnit4 version shipped with Eclipse has been updated to 4.7.
+        The <b>Formatter</b> preference page and the <b>Clean Up</b> preference page now have an <b>Export All... </b> button that allows exporting all user-defined profiles 
+		into an XML file. The exported profiles can be imported from the XML file at once using the <b>Import...</b> button. 
+       <p><img src="images/export-all-profiles.png" alt="Export All... from Formatter preference page"/></p>        
     </td>
   </tr>
 
@@ -468,15 +436,6 @@ document for changes in the Platform.
 	</td>
   </tr>
   
-  <tr id="find-externalized-strings-constants">
-    <td width="30%" valign="top" align="left"><b>'Find Broken Externalized Strings' handles constants</b></td>
-    <td width="70%" valign="top"><b>Source &gt; Find Broken Externalized Strings</b> can now handle constants used as message keys
-      (in addition to directly embedded string literals).
-      In the example below, MAIN_INDIRECT is no longer listed as an undefined key.
-     <p><img src="images/find-externalized-strings-constants.png" alt="'Find Broken Externalized Strings' handles constants example"/></p> 
-    </td>
-  </tr>
-
 	<tr id="instancecounts">
 	<td align="left" valign="top" width="30%"><b>Instance counts
 	</b></td>
@@ -519,48 +478,102 @@ document for changes in the Platform.
 
   <tr id="find-externalized-strings">
     <td width="30%" valign="top" align="left"><b>Find broken externalized strings improvements</b></td>
-    <td width="70%" valign="top"><b>Source &gt; Find Broken Externalized Strings</b> now reports less false positives, since it ignores
-    all methods that don't take a single parameter of type String. For example, method calls like
-    <code>Messages.getResourceBundle()</code> are no longer listed as undefined keys.      
+    <td width="70%" valign="top"><b>Source &gt; Find Broken Externalized Strings</b> now reports less false positives:
+    <p>&bull; It ignores
+    all methods that don't take a single parameter of type <code>String</code>. For example, method calls like
+    <code>Messages.getResourceBundle()</code> are no longer listed as undefined keys.</p>
+  
+    <p>&bull; Constants used for message keys are now correctly recognized.
+      In the example below, <code>MAIN_INDIRECT</code> is no longer listed as an undefined key:</p>
+     <p><img src="images/find-externalized-strings-constants.png" alt="'Find Broken Externalized Strings' handles constants example"/></p>
     </td>
   </tr>
-
-   <tr id="new-build-path-error-decorator">
+  
+    <tr id="new-preference-transfer-appearance">
     <td width="30%" valign="top" align="left">
-        <b>New build path error decorator</b>
+        <b>New Java appearance category when importing or exporting preferences</b>
     </td>
     <td width="70%" valign="top">
-        Build path problems are sometimes easy to miss among other problems in a project.
-        The <b>Package Explorer</b> and <b>Project Explorer</b> views now show a new 
-        decorator on Java projects and working sets that contain build path errors:
-       <p><img src="images/build-path-error-decorator.png" alt="Build path error decorator"/></p> 
-       
-        <p>The concrete errors can be seen in the <b>Problems</b> view, and if you open the view menu and select
-        <b>Group By &gt; Java Problem Type</b>, they all show up in the Build Path category:</p>
-       <p><img src="images/build-path-problems.png" alt="Build path error decorator"/></p> 
+        There is a new category available when importing or exporting preferences that
+        allows you to control whether <b>Java &gt; Appearance</b> preferences are imported or exported:
+       <p><img src="images/preference-transfer-appearance.png" alt="Java appearance preference transfers"/></p> 
     </td>
   </tr>
 
-   <tr id="package-name-abbreviations">
+   <!-- ******************* JUnit ************************************* -->
+     
+     <tr> 
+      <td colspan="2"><a name="JUnit"></a> <div style="font-size: 20px; font-weight: bold;"> 
+          JUnit</div></td>
+    </tr>
+
+
+  <tr id="junit4.7">
     <td width="30%" valign="top" align="left">
-        <b>Package name abbreviations</b>
+        <b>JUnit 4.7</b>
     </td>
     <td width="70%" valign="top">
-        Package names in Java views can now be abbreviated with custom rules:
-        <p>
-        <img src="images/package-abbreviations-off.png" alt="Package Explorer with abbreviations disabled"/>&nbsp;&nbsp;
-        <img src="images/package-abbreviations-on.png" alt="Package Explorer with abbreviations enabled"/>
-        </p>
-        
-        <p>Rules for this example:</p>
-        <pre>org.eclipse.ui={UI}
-org.eclipse.ui.texteditor={T}
-org.eclipse.ui.internal.texteditor=[iT]</pre>
-       
-        <p>The abbreviation rules can be configured in <b>Preferences &gt; Java &gt; Appearance &gt; Abbreviate package names</b>.</p>
+    	The JUnit4 version shipped with Eclipse has been updated to 4.7.
+    </td>
+  </tr>
+  
+  <tr id="org.junit-plugins">
+    <td width="30%" valign="top" align="left">
+      <b>2 versions of org.junit plug-in</b>
+    </td>
+    <td width="70%" valign="top">
+      The SDK now ships 2 org.junit plug-ins (versions 3.8.2 and 4.7.0). Clients that want to run JUnit Plug-in Tests with a Java 5 or later VM
+      and that require org.junit with a version bound that does not include 4.x need to update their version bound to include 4.x.
+      If they don't update their bounds, both versions of org.junit are resolved at run time, which leads to errors when test classes are loaded.
+      <p>For complete details on the steps required to transition to using JUnit4 or to continue using JUnit3, please see:<br/>
+      <a href="http://wiki.eclipse.org/Eclipse/Testing/JUnit4_Changes">http://wiki.eclipse.org/Eclipse/Testing/JUnit4_Changes</a>.</p>
     </td>
   </tr>
 
+  <tr id="junit-open-url">
+    <td width="30%" valign="top" align="left"><b>JUnit view opens test result URL</b></td>
+    <td width="70%" valign="top">
+      The <b>JUnit</b> view can now directly load test result files from an URL. You can either just drag and drop an URL to the view or open the
+      <b>Test Run History...</b> tool bar button's drop-down and choose <b>Import from URL...</b> to enter an URL from which
+      the test results should be loaded.
+      <p>
+        <img src="images/junit-import-url.png" alt="'Import from URL...' menu item"/></p>
+      <p>
+      Supported test run formats are XML files exported from the JUnit view or
+      generated by the Ant JUnit task.</p>
+    </td>
+  </tr>
+  
+  <tr id="junit-skipped-node">
+    <td width="30%" valign="top" align="left"><b>JUnit imports test results with </b><code>&lt;skipped&gt;</code><b> nodes</b>
+    </td>
+    <td width="70%" valign="top">
+        The JUnit view can now import test run files that contain <code>&lt;skipped&gt;</code> nodes.
+        Eclipse and the Ant JUnit task do not generate such nodes, but e.g. test result files from Apache Maven
+        do generate them for ignored JUnit4 tests.
+    </td>
+  </tr>
+  
+    <tr id="edit-test-method">
+    <td width="30%" valign="top" align="left">
+      <b>Edit test method in JUnit launch configuration</b>
+    </td>
+    <td width="70%" valign="top">
+      In JUnit launch configurations, you can now edit the test method:
+      <p><img src="images/edit-test-method.png" alt="JUnit launch configuration on 'Test' tab"/></p>       
+      When the test method is empty, all tests in the class will be run. 
+    </td>
+  </tr>
+
+ <tr id="junit-split">
+    <td width="30%" valign="top" align="left"><b>org.eclipse.jdt.junit split</b></td>
+    <td width="70%" valign="top">
+      The non-UI parts of the <code>org.eclipse.jdt.junit</code> plug-in have been split off into the new plug-in
+      called <code>org.eclipse.jdt.junit.core</code>. This change does not affect existing clients of the
+      <code>org.eclipse.jdt.junit</code> plug-in, but allows new clients to use only the launcher without
+      requiring all the UI dependencies.
+    </td>
+  </tr>
 
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
