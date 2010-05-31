@@ -265,6 +265,10 @@ public class FixCopyrightAction implements IObjectActionDelegate {
 						return 0;
 
 					}
+					else if (swt && logComment.indexOf("restore HEAD after accidental deletion by error in automated build script") != -1) {
+						// the last modification was the recovery when SWT was accidentally deleted from HEAD in July 2009, so ignore
+						return 0;
+					}
 					else if (filterString != null && logComment.indexOf(filterString) != -1) {
 						//the last update was a copyright checkin - ignore
 						return 0;
