@@ -69,7 +69,7 @@
 <h2>Ant Tasks</h2>
 <br>
 <table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><a name="p2_mirror"><tt>p2.mirror</tt></a></b></td></tr>
+	<tr><td><b><a name="p2_mirror"><h3>p2.mirror</h3></a></b></td></tr>
 	<tr><td><p>This task mirrors artifacts and metadata from the given source repositories to the destination.  
 	  This task will traverse the source repository and recursively include all IUs that match the requirements of IUs being mirrored (this is called <em>slicing</em> the repository).</p>
 	  </td>
@@ -93,6 +93,33 @@
 			<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
 				<tr><td><tt>&lt;baseline&gt;</tt></td><td>A nested element specifying the baseline repository.  
 				  See <a href="#destination_repositories"><i>destination repositories</i></a> above.</td></tr>
+				<tr><td><tt>&lt;exclude&gt;</tt></td><td>A nested element specifying artifacts to exclude from the comparison.
+				Contains nested &lt;artifact&gt; elements which support the following attributes:
+				<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
+					<tr><td><tt>id</tt></td><td>The artifact id.</td></tr>
+					<tr><td><tt>classifier</tt></td><td>The artifact classifier</td></tr>
+					<tr><td><tt>version</tt></td><td>The version to exclude.</td></tr>
+					<tr><td><tt>range;</tt></td><td>A range of versions to exclude</td></tr>
+					<tr><td><tt>&lt;property&gt;</tt></td><td>Nested &lt;property&gt; elements specifying properties that the artifact descriptor must have.</td></tr>
+				</table>
+				<br>
+Example: Exclude all pack.gz artifacts:
+<pre>
+	   &lt;exclude&gt;
+	      &lt;artifact&gt;
+	         &lt;property name="format" value="packed" /&gt;
+	      &lt;/artifact&gt;
+	   &lt;/exclude&gt;
+</pre>
+Exclude the specified documentation bundles:
+<pre>
+	   &lt;exclude&gt;
+	      &lt;artifact id="org.eclispe.jdt.doc.isv" classifier="osgi.bundle" /&gt;
+	      &lt;artifact id="org.eclispe.jdt.doc.usr" classifier="osgi.bundle" /&gt;
+	      &lt;artifact id="org.eclispe.pde.doc.isv" classifier="osgi.bundle" /&gt;
+	   &lt;/exclude&gt;
+</pre>
+				</td></tr>
 				<tr><td><tt>comparator</tt></td><td>Id of a comparator to use if the baseline artifacts should be compared 
 				  against the source artifacts.  These are extensions to the <i>org.eclipse.equinox.p2.artifact.repository.artifactComparators</i> extension point.  
 				  Comparators provided by p2 are:
@@ -170,7 +197,7 @@ Examples:
 </pre>
 
 <table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><a name="p2_repo2runnable"><tt>p2.repo2runnable</tt></a></b></td></tr>
+	<tr><td><b><a name="p2_repo2runnable"><h3>p2.repo2runnable</h3></a></b></td></tr>
 	<tr><td><p>Transform IUs into their installed form and add them to the destination repository.  This allows compiling against folder 
 	  shaped bundles that contain nested jars.  This task is the main mechanism by which headless PDE/Builds can reuse metadata.</p>
 	</td></tr>
@@ -186,7 +213,7 @@ Examples:
 </table>
 <br>
 <table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><tt>p2.process.artifacts</tt></b></td></tr>
+	<tr><td><b><h3>p2.process.artifacts</h3></b></td></tr>
 	<tr><td><p>Process a local, file-based artifact repository.  This task will (optionally) sign and pack artifacts, 
 	  as well as update the MD5 sums in the repository to match the actual artifacts on disk (since signing/conditioning will change the MD5 sums).
 	This task will use the jarProcessor, which in turn uses ant's SignJar task which requires the <i>jarsigner</i> command line tool.</p></td></tr>
@@ -216,7 +243,7 @@ Examples:
 </table>		
 <br>
 <table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><tt>p2.remove.iu</tt></b></td></tr>
+	<tr><td><b><h3>p2.remove.iu</h3></b></td></tr>
 	<tr><td><p>Remove Installable Units from the given metadata and artifact repositories.  The provided repositories must be modifiable.</p></td></tr>
 	<tr><td><p>This task supports the following attributes and elements:</p>
 		<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
@@ -229,7 +256,7 @@ Examples:
 </table>		
 <br>
 <table cellspacing="1" cellpadding="2" width="95%" align="center">
-	<tr><td><b><tt>p2.composite.repository</tt></b></td></tr>
+	<tr><td><b><h3>p2.composite.repository</h3></b></td></tr>
 	<tr><td><p>Create a composite repository</p></td></tr>
 	<tr><td><p>This task supports the following attributes and elements:</p>
 		<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
