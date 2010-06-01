@@ -50,20 +50,61 @@ Finally should you need to write more complex queries, p2 comes with a query lan
 </p>
 <p>
 Repository / Repository manager
-In p2, a repository is a container of installable units (also called metadata repository) or artifacts (also called artifact repository) that can be remote or local, and it can be edited and queried.
-The repositories known from p2 are stored in a repository manager. The repository manager has the ability to create, add or remove and enable or disable repositories.
+In p2, a <a href="../reference/api/org/eclipse/equinox/p2/repository/IRepository.html">repository</a> is a container of installable units (also called <a href="../reference/api/org/eclipse/equinox/p2/repository/metadata/IMetadataRepository.htm>metadata repository</a>) or artifacts (also called <a href="../reference/api/org/eclipse/equinox/p2/repository/artifact/IArtifactRepository.htm>artifact repository</a>) that can be remote or local, and it can be edited and queried.
+The repositories known from p2 are stored in a <a href="../reference/api/org/eclipse/equinox/p2/repository/IRepositoryManager.htm>repository manager</a>. The repository manager has the ability to create, add or remove and enable or disable repositories.
 </p>
 <p>
 ProvisioningAgent
-A provisioning agent represents an aggregation of all the p2 services working together. It is the starting point of everything. The simplest way to think about it is that it is an "executable" representation of what is the p2 area (e.g. the p2 folder at the root of an eclipse installation). The agent contains generic methods to obtain any of the p2 "services". For example the following code will get an instance of the repository manager:
-	SNIPPET
+A <a href="../reference/api/org/eclipse/equinox/p2/core/IProvisioningAgent.htm">provisioning agent</a> represents an aggregation of all the p2 services working together. It is the starting point of everything. The simplest way to think about it is that it is an "executable" representation of what is the p2 area (e.g. the p2 folder at the root of an eclipse installation). The agent contains generic methods to obtain any of the p2 "services". For example the following code will get an instance of the repository manager:
+<code>
+		ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
+		IProvisioningAgentProvider agentProvider = null;
+		if (sr == null)
+			return;
+		agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);
+		IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse63/p2"));
+</code>
 
 The concept of agent allows for multiple instances of p2 to be running in isolation in the same VM.
+Note that the client creating the agent is responsible for destroying it.
 </p>
 <p>
 Profile / Profile Registry
-The profile is the entity that describe in terms of installable units what a given installation is made of, as such it is queryable.
-The profile registry knows about all the profiles from a given p2 area.
+The <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfile.htm">profile</a> is the entity that describe in terms of installable units what a given installation is made of, as such it is queryable.
+The <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfileRegistry.htm">profile registry</a> knows about all the profiles from a given p2 area.
+</p>
+
+<p>
+Putting it all together.
+The following code is the complete code snippet to trigger the installation of an IU.
+<code>
+		ProvisioningSession session = null;
+
+		//get the agent
+		ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
+		IProvisioningAgentProvider agentProvider = null;
+		if (sr == null)
+			return;
+		agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);
+		IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse63/p2"));
+
+		//get the repo managers
+		IMetadataRepositoryManager manager = (IMetadataRepositoryManager) agent.getService(IMetadataRepositoryManager.SERVICE_NAME);
+		IArtifactRepositoryManager artifactManager = (IArtifactRepositoryManager) agent.getService(IArtifactRepositoryManager.SERVICE_NAME);
+
+		//Loading reppos
+		IMetadataRepository metadataRepo = manager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());
+		IArtifactRepository artifactRepo = artifactManager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());
+
+		//Querying
+		Collection toInstall = metadataRepo.query(QueryUtil.createIUQuery("org.eclipse.equinox.p2.demo.feature.group"), new NullProgressMonitor()).toUnmodifiableSet();
+
+		InstallOperation installOperation = new InstallOperation(session, toInstall);
+		if (installOperation.resolveModal(new NullProgressMonitor()).isOK())
+			installOperation.getProvisioningJob(new NullProgressMonitor()).schedule();
+	        agent.close()
+
+</code>
 </p>
 </body>
 </html>
