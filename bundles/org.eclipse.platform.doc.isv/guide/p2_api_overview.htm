@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) Sonatype Inc and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+  <title>Overview of the p2 API</title>
+</head>
+<body>
+API overview
+
+The API for p2 can be generally split into three big categories. The UI API, the Operations API and the Core API. This section provides a description of each of these categories and introduces some of the key concepts.
+
+The UI API. The UI API offers SWT-based UI elements such as wizard (install, update, uninstall), dialogs (to manipulate repositories or see the content of an installation) and the like that can be used for assembling a provisioning UI. 
+Most of these elements can be customized registering a new Policy
+You can see examples of this in the XXXX section
+
+The Operation API. The operations API provides the easiest way to install, update and uninstall software in a headless way.  
+For example the following code will cause the installation of the installable unit being passed in.
+
+	SNIPPET
+
+The Core API. The core API contains all the building block on which the Operation and the UI APIs are being built. I'm currently presenting the 
+
+Installable unit
+Installable unit is the source of metadata. It is the 
+An installable unit is usually obtained either by querying a source of metadata (e.g. É) or created programmatically.
+
+A typical source of metadata is a metadata repository.
+
+(side note: It is to e noted that the serialized format of an IU is not specified. For any manipulation of installable unit, we highly recommend to use the Installable unit API.
+
+Query/Queryable
+Every source of metadata is usually queryable (IQueryable). To discover an IU, one usually executes a query (IQuery) against a metadata source.
+Queries can be created in multiple ways.  QueryUtil is a good starting point as it contains some of the most common queries such as query for an IU with a given id, id and version, etc..
+Because of the extensible nature of p2, additional queries that are OSGi specific can actually be found in the package org.eclipse.equinox.p2.eclipse.touchpoint..
+Finally should you need to write more complex queries p2 comes with a query language that allows to get off the beaten paths (link to the wiki)
+
+Repository / Repository manager
+In p2, a repository is a container of installable units (also called metadata repository) or artifacts (also called artifact repository) that can be remote or local, and it can be edited and queried.
+The repositories known from p2 are stored in a repository manager. The repository manager has the ability to create, add or remove and enable or disable repositories.
+
+ProvisioningAgent
+A provisioning agent represents an aggregation of all the p2 services working together. It is the starting point of everything. The simplest way to think about it is that it is an "executable" representation of what is the p2 area (e.g. the p2 folder at the root of an eclipse installation). The agent contains generic methods to obtain any of the p2 "services". For example the following code will get an instance of the repository manager:
+	SNIPPET
+
+The concept of agent allows for multiple instances of p2 to be running in isolation in the same VM.
+
+
+Profile / Profile Registry
+The profile is the entity that describe in terms of installable units what a given installation is made of, as such it is queryable.
+The profile registry knows about all the profiles from a given p2 area.
+</body>
+</html>
