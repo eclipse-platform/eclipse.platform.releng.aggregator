@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta name="copyright"
- content="Copyright (c) Sonatype Inc and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+ content="Copyright (c) Sonatype Inc and others 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
   <meta http-equiv="Content-Type"
  content="text/html; charset=ISO-8859-1">
   <meta http-equiv="Content-Style-Type" content="text/css">
@@ -16,24 +16,24 @@ The API for p2 can be generally split into three big categories. The UI API, the
 </p>
 <p>
 The UI API. The UI API offers SWT-based UI elements such as wizard (<a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/ProvisioningUI.html">install, update, uninstall</a>), dialogs (to <a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/RepositoryManipulationPage.html">manipulate repositories</a> or see the <a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/InstalledSoftwarePage.html">content of an installation</a>) and the like that can be used for assembling a provisioning UI. 
-Most of these elements can be customized registering a new <a href="../reference/api/org/eclipse/equinox/p2/ui/Policy.html">Policy class</a>.
+Most of these elements can be customized by registering a new <a href="../reference/api/org/eclipse/equinox/p2/ui/Policy.html">Policy class</a>.
 You can see examples of this in the <a href="org.eclipse.platform.doc.isv/guide/p2_ui.htm">customizing p2 UI section</a>. 
 </p>
 <p>
 The Operation API. The operations API provides the easiest way to install, update and uninstall software in a headless way.  
 For example the following code will cause the installation of the installable unit being passed in.
-
-<code>
-		InstallOperation installOperation = new InstallOperation(session, toInstall);
-		if (installOperation.resolveModal(new NullProgressMonitor()).isOK())
-			installOperation.getProvisioningJob(new NullProgressMonitor()).schedule();
-</code>			
 </p>
-The Core API. The core API contains all the building block on which the Operation and UI APIs are being built.
-
+<code>
+&nbsp;&nbsp;&nbsp;InstallOperation installOperation = new InstallOperation(session, toInstall);<br>
+&nbsp;&nbsp;&nbsp;	if (installOperation.resolveModal(new NullProgressMonitor()).isOK())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;installOperation.getProvisioningJob(new NullProgressMonitor()).schedule();<br>
+</code>			
 <p>
-Installable unit is the source of metadata and what is being passed to p2 to triggeer an installation, removal, or udpate.
-An installable unit is usually obtained either by querying a source of metadata (e.g. É) or created programmatically.
+The Core API. The core API contains all the building block on which the Operation and UI APIs are being built.
+</p>
+<p>
+Installable unit is the source of metadata and what is being passed to p2 to trigger an installation, removal, or update.
+An installable unit is usually obtained either by querying a source of metadata (e.g. a repository) or created programmatically.
 
 A typical source of metadata is a metadata repository.
 
@@ -56,15 +56,16 @@ The repositories known from p2 are stored in a <a href="../reference/api/org/ecl
 <p>
 ProvisioningAgent
 A <a href="../reference/api/org/eclipse/equinox/p2/core/IProvisioningAgent.htm">provisioning agent</a> represents an aggregation of all the p2 services working together. It is the starting point of everything. The simplest way to think about it is that it is an "executable" representation of what is the p2 area (e.g. the p2 folder at the root of an eclipse installation). The agent contains generic methods to obtain any of the p2 "services". For example the following code will get an instance of the repository manager:
+</p>
 <code>
-		ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
-		IProvisioningAgentProvider agentProvider = null;
-		if (sr == null)
-			return;
-		agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);
-		IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse63/p2"));
+&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgentProvider agentProvider = null;<br>
+&nbsp;&nbsp;&nbsp;if (sr == null)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse36/p2"));<br>
 </code>
-
+<p>
 The concept of agent allows for multiple instances of p2 to be running in isolation in the same VM.
 Note that the client creating the agent is responsible for destroying it.
 </p>
@@ -78,32 +79,32 @@ The <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfileRegistry.htm
 Putting it all together.
 The following code is the complete code snippet to trigger the installation of an IU.
 <code>
-		ProvisioningSession session = null;
-
-		//get the agent
-		ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);
-		IProvisioningAgentProvider agentProvider = null;
-		if (sr == null)
-			return;
-		agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);
-		IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse63/p2"));
-
-		//get the repo managers
-		IMetadataRepositoryManager manager = (IMetadataRepositoryManager) agent.getService(IMetadataRepositoryManager.SERVICE_NAME);
-		IArtifactRepositoryManager artifactManager = (IArtifactRepositoryManager) agent.getService(IArtifactRepositoryManager.SERVICE_NAME);
-
-		//Loading reppos
-		IMetadataRepository metadataRepo = manager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());
-		IArtifactRepository artifactRepo = artifactManager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());
-
-		//Querying
-		Collection toInstall = metadataRepo.query(QueryUtil.createIUQuery("org.eclipse.equinox.p2.demo.feature.group"), new NullProgressMonitor()).toUnmodifiableSet();
-
-		InstallOperation installOperation = new InstallOperation(session, toInstall);
-		if (installOperation.resolveModal(new NullProgressMonitor()).isOK())
-			installOperation.getProvisioningJob(new NullProgressMonitor()).schedule();
-	        agent.close()
-
+&nbsp;&nbsp;&nbsp;ProvisioningSession session = null;<br>
+<br>
+&nbsp;&nbsp;&nbsp;//get the agent<br>
+&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgentProvider agentProvider = null;<br>
+&nbsp;&nbsp;&nbsp;if (sr == null)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);<br>
+&nbsp;&nbsp;&nbsp;IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse63/p2"));<br>
+<br>
+&nbsp;&nbsp;&nbsp;//get the repository managers<br>
+&nbsp;&nbsp;&nbsp;IMetadataRepositoryManager manager = (IMetadataRepositoryManager) agent.getService(IMetadataRepositoryManager.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;IArtifactRepositoryManager artifactManager = (IArtifactRepositoryManager) agent.getService(IArtifactRepositoryManager.SERVICE_NAME);<br>
+<br>
+&nbsp;&nbsp;&nbsp;//Loading repositories<br>
+&nbsp;&nbsp;&nbsp;IMetadataRepository metadataRepo = manager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());<br>
+&nbsp;&nbsp;&nbsp;IArtifactRepository artifactRepo = artifactManager.loadRepository(new URI("file:/Users/Pascal/tmp/demo/"), new NullProgressMonitor());<br>
+<br>
+&nbsp;&nbsp;&nbsp;//Querying<br>
+&nbsp;&nbsp;&nbsp;Collection toInstall = metadataRepo.query(QueryUtil.createIUQuery("org.eclipse.equinox.p2.demo.feature.group"), new NullProgressMonitor()).toUnmodifiableSet();<br>
+<br>
+&nbsp;&nbsp;&nbsp;InstallOperation installOperation = new InstallOperation(session, toInstall);<br>
+&nbsp;&nbsp;&nbsp;if (installOperation.resolveModal(new NullProgressMonitor()).isOK())<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;installOperation.getProvisioningJob(new NullProgressMonitor()).schedule();<br>
+&nbsp;&nbsp;&nbsp;agent.close()<br>
+<br>
 </code>
 </p>
 </body>
