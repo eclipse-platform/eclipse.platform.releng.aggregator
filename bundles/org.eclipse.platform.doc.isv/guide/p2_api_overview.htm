@@ -10,17 +10,20 @@
   <title>Overview of the p2 API</title>
 </head>
 <body>
-API overview
+<h1>Overview of the p2 API</h1>
 <p>
-The API for p2 can be generally split into three big categories. The UI API, the Operations API and the Core API. This section provides a description of each of these categories and introduces some of the key concepts.
+The API for p2 can be generally split into three big categories. The UI API, the Operations API and the Core API. 
+This section provides a description of each of these categories and introduces some of the key concepts.
 </p>
 <p>
-The UI API. The UI API offers SWT-based UI elements such as wizard (<a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/ProvisioningUI.html">install, update, uninstall</a>), dialogs (to <a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/RepositoryManipulationPage.html">manipulate repositories</a> or see the <a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/InstalledSoftwarePage.html">content of an installation</a>) and the like that can be used for assembling a provisioning UI. 
+<h3>The UI API</h3>
+The UI API offers SWT-based UI elements such as wizard (<a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/ProvisioningUI.html">install, update, uninstall</a>), dialogs (to <a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/RepositoryManipulationPage.html">manipulate repositories</a> or see the <a href="org.eclipse.platform.doc.isv/reference/api/org/eclipse/equinox/p2/ui/InstalledSoftwarePage.html">content of an installation</a>) and the like that can be used for assembling a provisioning UI. 
 Most of these elements can be customized by registering a new <a href="../reference/api/org/eclipse/equinox/p2/ui/Policy.html">Policy class</a>.
 You can see examples of this in the <a href="org.eclipse.platform.doc.isv/guide/p2_ui.htm">customizing p2 UI section</a>. 
 </p>
 <p>
-The Operation API. The operations API provides the easiest way to install, update and uninstall software in a headless way.  
+<h3>The Operation API</h3>
+The operations API provides the easiest way to install, update and uninstall software in a headless way.  
 For example the following code will cause the installation of the installable unit being passed in.
 </p>
 <code>
@@ -29,7 +32,8 @@ For example the following code will cause the installation of the installable un
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;installOperation.getProvisioningJob(new NullProgressMonitor()).schedule();<br>
 </code>			
 <p>
-The Core API. The core API contains all the building block on which the Operation and UI APIs are being built.
+<h3>The Core API</h3>
+The core API contains all the building block on which the Operation and UI APIs are being built.
 </p>
 <p>
 Installable unit is the source of metadata and what is being passed to p2 to trigger an installation, removal, or update.
@@ -39,22 +43,21 @@ A typical source of metadata is a metadata repository.
 
 Side note: It is to be noted that the serialized format of an IU is not specified. For any manipulation of installable unit, we highly recommend to use the Installable unit API.
 </p>
+<h4>Query/Queryable</h4>
 <p>
-Query/Queryable
 Every source of metadata is usually queryable (see <a href="../reference/api/org/eclipse/equinox/p2/query/IQueryable.html">org.eclipse.equinox.p2.query.IQueryable</a>). 
 To discover an IU, one usually executes a query (see <a href="../reference/api/org/eclipse/equinox/p2/query/IQuery.html">IQuery</a>) against a metadata source.
 Queries can be created in multiple ways. <a href="../reference/api/org/eclipse/equinox/p2/query/QueryUtil.html">QueryUtil</a> is a good starting point as it contains some of the most common queries such as query for an IU with a given id, id and version, etc..
 Because of the extensible nature of p2, additional queries that are OSGi specific can actually be found in the package <a href="../reference/api/org/eclipse/equinox/p2/touchpoint/eclipse/query/package-summary.html">org.eclipse.equinox.p2.eclipse.touchpoint</a>.
 Finally should you need to write more complex queries, p2 comes with a query language called <a href="http://wiki.eclipse.org/Query_Language_for_p2">p2 QL</a>
-
 </p>
 <p>
-Repository / Repository manager
+<h4>Repository / Repository manager</h4>
 In p2, a <a href="../reference/api/org/eclipse/equinox/p2/repository/IRepository.html">repository</a> is a container of installable units (also called <a href="../reference/api/org/eclipse/equinox/p2/repository/metadata/IMetadataRepository.htm">metadata repository</a>) or artifacts (also called <a href="../reference/api/org/eclipse/equinox/p2/repository/artifact/IArtifactRepository.htm">artifact repository</a>) that can be remote or local, and it can be edited and queried.
 The repositories known from p2 are stored in a <a href="../reference/api/org/eclipse/equinox/p2/repository/IRepositoryManager.htm">repository manager</a>. The repository manager has the ability to create, add or remove and enable or disable repositories.
 </p>
+<h4>ProvisioningAgent</h4>
 <p>
-ProvisioningAgent
 A <a href="../reference/api/org/eclipse/equinox/p2/core/IProvisioningAgent.htm">provisioning agent</a> represents an aggregation of all the p2 services working together. It is the starting point of everything. The simplest way to think about it is that it is an "executable" representation of what is the p2 area (e.g. the p2 folder at the root of an eclipse installation). The agent contains generic methods to obtain any of the p2 "services". For example the following code will get an instance of the repository manager:
 </p>
 <code>
@@ -69,14 +72,14 @@ A <a href="../reference/api/org/eclipse/equinox/p2/core/IProvisioningAgent.htm">
 The concept of agent allows for multiple instances of p2 to be running in isolation in the same VM.
 Note that the client creating the agent is responsible for destroying it.
 </p>
+<h4>Profile / Profile Registry</h4>
 <p>
-Profile / Profile Registry
 The <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfile.htm">profile</a> is the entity that describe in terms of installable units what a given installation is made of, as such it is queryable.
 The <a href="../reference/api/org/eclipse/equinox/p2/engine/IProfileRegistry.htm">profile registry</a> knows about all the profiles from a given p2 area.
 </p>
 
+<h4>Putting it all together</h4>
 <p>
-Putting it all together.
 The following code is the complete code snippet to trigger the installation of an IU.
 <code>
 &nbsp;&nbsp;&nbsp;ProvisioningSession session = null;<br>
