@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,19 +17,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.eclipse.compare.IStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.team.internal.ccvs.core.CVSException;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IProject;
+
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
 
 
 public class MapContentDocument implements ITypedElement, IStreamContentAccessor{
 	private MapFile mapFile;
-	private String oldContents = "";
-	private String newContents = "";
+	private String oldContents = ""; //$NON-NLS-1$
+	private String newContents = ""; //$NON-NLS-1$
 
 	public MapContentDocument(MapFile aMapFile) {
 		mapFile = aMapFile;	

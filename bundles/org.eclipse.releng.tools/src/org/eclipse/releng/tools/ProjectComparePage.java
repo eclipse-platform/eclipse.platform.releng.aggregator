@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,25 +12,6 @@ package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.core.synchronize.SyncInfoSet;
 import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
@@ -42,7 +23,33 @@ import org.eclipse.team.internal.ui.synchronize.ChangeSetModelManager;
 import org.eclipse.team.ui.synchronize.ISynchronizePageConfiguration;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
 import org.eclipse.team.ui.synchronize.ParticipantPageSaveablePart;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.wizard.WizardPage;
+
 import org.eclipse.ui.part.PageBook;
+
+import org.eclipse.compare.CompareConfiguration;
+
 
 /**
  *This class extends <code>WizardPage<code>. It utilizes a <code>PageBook<code> to show user
@@ -52,7 +59,7 @@ import org.eclipse.ui.part.PageBook;
 public class ProjectComparePage extends WizardPage{
 
 	private IDialogSettings settings;
-	private String NOTES_BUTTON_KEY = "ProjectComparePage.buildNotesButton";
+	private String NOTES_BUTTON_KEY = "ProjectComparePage.buildNotesButton"; //$NON-NLS-1$
 	private SyncInfoSet syncInfoSet;
 	private Button buildNotesButton;
 	private boolean buildNotesButtonChecked;
