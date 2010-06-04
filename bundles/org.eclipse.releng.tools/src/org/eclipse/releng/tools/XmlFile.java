@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 Gunnar Wagenknecht and others.
+ * Copyright (c) 2008, 20010 Gunnar Wagenknecht and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,10 @@ package org.eclipse.releng.tools;
 import java.io.IOException;
 
 import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+
 
 /**
  * XML File
@@ -26,11 +28,11 @@ public class XmlFile extends SourceFile {
 	}
 
 	public String getCommentStart() {
-		return "<!--";
+		return "<!--"; //$NON-NLS-1$
 	}
 
 	public String getCommentEnd() {
-		return "-->";
+		return "-->"; //$NON-NLS-1$
 	}
 	
 	public int getFileType() {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 
+
 public class ShellMakeFile extends SourceFile {
 
 	public ShellMakeFile(IFile file) {
@@ -22,7 +23,7 @@ public class ShellMakeFile extends SourceFile {
 	}
 
 	//Optional Whitespace, #, optional whitespace, then at least 2 non-word chars repeated till EOL 
-	private static Pattern p = Pattern.compile("\\s*#\\s*\\W{2,}\\s*");
+	private static Pattern p = Pattern.compile("\\s*#\\s*\\W{2,}\\s*"); //$NON-NLS-1$
 	
 	public boolean isCommentStart(String aLine) {
 		return p.matcher(aLine).matches();
@@ -35,11 +36,11 @@ public class ShellMakeFile extends SourceFile {
 	}
 
 	public String getCommentStart() {
-		return "#*"; //unused, Pattern matcher above will be used instead
+		return "#*"; //unused, Pattern matcher above will be used instead //$NON-NLS-1$
 	}
 
 	public String getCommentEnd() {
-		return "**"; //unused, Pattern matcher above will be used instead
+		return "**"; //unused, Pattern matcher above will be used instead //$NON-NLS-1$
 	}
 
 	public int getFileType() {

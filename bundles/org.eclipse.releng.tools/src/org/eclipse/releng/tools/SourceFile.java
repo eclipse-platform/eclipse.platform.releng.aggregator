@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,17 +20,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.osgi.util.NLS;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.osgi.util.NLS;
+
 
 /**
  * @author droberts
@@ -48,11 +53,11 @@ public abstract class SourceFile {
 	        extension = extension.toLowerCase();
 			if (extension.equals("java")) { //$NON-NLS-1$
 				return new JavaFile(file);
-	        } else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$
+	        } else if (extension.equals("c") || extension.equals("h") || extension.equals("rc") || extension.equals("cc") || extension.equals("cpp")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	            return new CFile(file);
 			} else if (extension.equals("properties")) { //$NON-NLS-1$
 				return new PropertiesFile(file);
-	        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak") || extension.equals("pl") || extension.equals("tcl")) { //$NON-NLS-1$
+	        } else if (extension.equals("sh") || extension.equals("csh") || extension.equals("mak") || extension.equals("pl") || extension.equals("tcl")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	            return new ShellMakeFile(file);
 	        } else if (extension.equals("bat")) { //$NON-NLS-1$
 	            return new BatFile(file);

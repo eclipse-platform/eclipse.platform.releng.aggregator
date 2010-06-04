@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009 IBM Corporation and others.
+ * Copyright (c) 2009, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.releng.tools;
 
 import org.eclipse.core.resources.IFile;
 
+
 public class JavaScriptFile extends SourceFile {
 
 	public JavaScriptFile(IFile file) {
@@ -22,14 +23,14 @@ public class JavaScriptFile extends SourceFile {
 	 * @see Test.popup.actions.SourceFile#getCommentStart()
 	 */
 	public String getCommentStart() {
-		return "/*";
+		return "/*"; //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
 	 * @see Test.popup.actions.SourceFile#getCommentEnd()
 	 */
 	public String getCommentEnd() {
-		return "*/";
+		return "*/"; //$NON-NLS-1$
 	}
 	public int getFileType() {
 		return CopyrightComment.JAVASCRIPT_COMMENT;

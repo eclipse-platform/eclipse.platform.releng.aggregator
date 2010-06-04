@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+
 
 public class IBMCopyrightComment extends CopyrightComment {
 
@@ -50,7 +51,7 @@ public class IBMCopyrightComment extends CopyrightComment {
    	    String body = comment.getContents();
 
         final String copyrightLabel = "Copyright (c) "; //$NON-NLS-1$
-   	    int start = body.indexOf(copyrightLabel); //$NON-NLS-1$
+   	    int start = body.indexOf(copyrightLabel);
    	    if (start == -1) return null;
    	    int contrib = body.indexOf("Contributors:", start); //$NON-NLS-1$
    	    int rangeEnd = body.indexOf(" IBM Corp", start); //$NON-NLS-1$ // catch both IBM Corporation and IBM Corp.
@@ -98,9 +99,9 @@ public class IBMCopyrightComment extends CopyrightComment {
    	        if (contributor.indexOf("***********************************") == -1 //$NON-NLS-1$
    	         && contributor.indexOf("###################################") == -1) { //$NON-NLS-1$
    	            int c = contributor.indexOf(linePrefix);
-   	            if (c == -1 && linePrefix.equals(" *")) {
+   	            if (c == -1 && linePrefix.equals(" *")) { //$NON-NLS-1$
    	            	// special case: old prefix was "*" and new prefix is " *"
-   	            	c = contributor.indexOf("*");
+   	            	c = contributor.indexOf("*"); //$NON-NLS-1$
    	            }
    	            if (c == 0) {
 					// prefix has to be at the beginning of the line
@@ -176,12 +177,12 @@ public class IBMCopyrightComment extends CopyrightComment {
 				String contributor = (String) i.next();
 				if (contributor.length() > 0) {
 					if (Character.isWhitespace(contributor.charAt(0))) {
-					    writer.println(linePrefix + contributor);  //$NON-NLS-1$
+					    writer.println(linePrefix + contributor);
 					} else {
 					    writer.println(linePrefix + " " + contributor);  //$NON-NLS-1$
 					}
 				} else {
-				    writer.println(linePrefix);  //$NON-NLS-1$
+				    writer.println(linePrefix);
 				}
 			}
 		}

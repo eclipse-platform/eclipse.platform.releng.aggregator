@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,12 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 
 /**
  * Don't implement the Map interface because we don't want people calling #entrySet
@@ -135,21 +140,21 @@ public class OrderedMap {
 	 */
 	public String toString() {
 		StringBuffer result = new StringBuffer();
-		result.append("{");
+		result.append("{"); //$NON-NLS-1$
 		for (Iterator iter = keys().iterator(); iter.hasNext(); ) {
 			Object key = iter.next();
 			Object value = get(key);
 			result.append(key);
 			result.append('=');
 			result.append(value);
-			result.append(",\n");
+			result.append(",\n"); //$NON-NLS-1$
 		}
 		// delete last 2 chars... comma and new-line
 		if (result.length() > 2) {
 			result = result.deleteCharAt(result.length() - 1);
 			result = result.deleteCharAt(result.length() - 1);
 		}
-		result.append("}");
+		result.append("}"); //$NON-NLS-1$
 		return result.toString();
 	}
 
