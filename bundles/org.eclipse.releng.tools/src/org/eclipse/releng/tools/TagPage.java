@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -275,7 +275,7 @@ public class TagPage extends WizardPage{
 	
 	//The default tag format is "vYYYYMMDD"
 	private String getTagTemplate(){
-		String tag = getTagPrefix(); //$NON-NLS-1$
+		String tag = getTagPrefix();
 		Calendar today = Calendar.getInstance( );
 		tag += today.get(Calendar.YEAR);
 		int month = today.get(Calendar.MONTH) + 1;
