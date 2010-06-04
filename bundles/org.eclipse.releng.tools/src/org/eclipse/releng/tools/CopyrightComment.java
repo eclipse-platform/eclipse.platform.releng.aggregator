@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,8 @@
 package org.eclipse.releng.tools;
 
 import java.io.PrintWriter;
-import java.util.Date;
+import java.util.Calendar;
+
 
 public abstract class CopyrightComment {
 
@@ -32,7 +33,7 @@ public abstract class CopyrightComment {
     
     protected CopyrightComment(int commentStyle, int creationYear, int revisionYear) {
         this.commentStyle = commentStyle;
-        this.creationYear = creationYear == -1 ? (new Date().getYear() + 1900) : creationYear;
+        this.creationYear = creationYear == -1 ? (Calendar.getInstance().get(Calendar.YEAR)) : creationYear;
         this.revisionYear = revisionYear;
     }
 
