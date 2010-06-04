@@ -10,12 +10,14 @@
  *******************************************************************************/
 package org.eclipse.releng.tools.preferences;
 
-import java.util.Date;
+import java.util.Calendar;
 
-import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.releng.tools.Messages;
 import org.eclipse.releng.tools.RelEngPlugin;
+
+import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * Initializes default preferences for release engineering tool
@@ -28,7 +30,7 @@ public class RelEngPreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
         IPreferenceStore store = RelEngPlugin.getDefault().getPreferenceStore();
-        int year = new Date().getYear() + 1900;
+        int year = Calendar.getInstance().get(Calendar.YEAR);
         store.setDefault(RelEngCopyrightConstants.COPYRIGHT_TEMPLATE_KEY, LEGAL_LINE);
         store.setDefault(RelEngCopyrightConstants.CREATION_YEAR_KEY, year);
 		store.setDefault(RelEngCopyrightConstants.REVISION_YEAR_KEY, year);
