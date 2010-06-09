@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2007 IBM Corporation and others.
+ * Copyright (c) 2003, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,29 +10,48 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.jface.wizard.WizardPage;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.eclipse.team.core.RepositoryProvider;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.team.core.RepositoryProvider;
-import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.List;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IProject;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.WizardPage;
+
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
+
 
 public class MapProjectSelectionPage extends WizardPage {
 	
 	private MapProject selectedMapProject;
 	private IDialogSettings settings;
-	private TreeViewer projectTree;
+	private ListViewer mapProjectListViewer;
 	protected Button useDefaultProjectButton;
 	protected boolean useDefaultMapProject;
 	private final String SELECTED_PROJECT_KEY = "Selected Project"; //$NON-NLS-1$
@@ -53,9 +72,8 @@ public class MapProjectSelectionPage extends WizardPage {
 		topContainer.setLayout(new GridLayout());
 		topContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		projectTree = createTree(topContainer); 
-		projectTree.setInput(RelEngPlugin.getWorkspace().getRoot());
-		
+		mapProjectListViewer = createListViewer(topContainer); 
+		mapProjectListViewer.setInput(getMapFileProjects());
 		useDefaultProjectButton = new Button(topContainer, SWT.CHECK);
 		useDefaultProjectButton.setText(Messages.getString("MapProjectSelectionPage.0")); //$NON-NLS-1$
 		useDefaultProjectButton.addSelectionListener(new SelectionAdapter() {
@@ -70,13 +88,22 @@ public class MapProjectSelectionPage extends WizardPage {
         setControl(topContainer);
 	}
 
-	protected TreeViewer createTree(Composite parent) {
-		Tree tree = new Tree(parent, SWT.SINGLE | SWT.BORDER);
+	protected ListViewer createListViewer(Composite parent) {
+		List tree = new List(parent, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= tree.getItemHeight() * 15;
 		tree.setLayoutData(gd);
-		TreeViewer result = new TreeViewer(tree);
-		result.setContentProvider(new WorkbenchContentProvider());
+		ListViewer result = new ListViewer(tree);
+		result.setContentProvider(new IStructuredContentProvider() {
+			public Object[] getElements(Object inputElement) {
+				Set projects=(Set)inputElement;
+				return ((IProject[]) projects.toArray(new IProject[projects.size()]));
+			}
+			public void dispose() {	
+			}
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
+		});
 		result.setLabelProvider(new WorkbenchLabelProvider());
 		result.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {				
@@ -87,24 +114,63 @@ public class MapProjectSelectionPage extends WizardPage {
 		return result;
 	}	
 
+	private static Set getMapFileProjects() {
+		Set projects = new HashSet();
+		MapFile[] mapFiles;
+		try {
+			mapFiles = MapFile.findAllMapFiles(RelEngPlugin.getWorkspace().getRoot());
+		} catch (CoreException ex) {
+			return Collections.EMPTY_SET;
+		}
+		for (int i = 0; i < mapFiles.length; i++)
+			projects.add(mapFiles[i].getFile().getProject());
+		for (Iterator iterator= projects.iterator(); iterator.hasNext();) {
+			MapProject mapProject= null;
+			try {
+				mapProject= new MapProject((IProject)iterator.next());
+				if (mapProject.getValidMapFiles().length == 0)
+					iterator.remove();
+			} catch (CoreException e) {
+				iterator.remove();
+			} finally {
+				if (mapProject != null)
+					mapProject.dispose();
+			}
+			
+		}
+		return projects;
+	}
+
 	private void updateMapProject(){
-		selectedMapProject = null;	
-		
-		IStructuredSelection selection = (IStructuredSelection)projectTree.getSelection();
+		if (selectedMapProject != null) {
+			selectedMapProject.dispose();	
+			selectedMapProject = null;
+		}
+
+		IStructuredSelection selection = (IStructuredSelection)mapProjectListViewer.getSelection();
 		if( !selection.isEmpty()){
 			Object obj = selection.getFirstElement();
 			if(obj instanceof IProject){
 				try {
 					selectedMapProject = new MapProject((IProject)obj);
-					if(selectedMapProject.getValidMapFiles().length == 0){
-						selectedMapProject = null;
-					}
 				} catch (CoreException e) {
 					selectedMapProject = null;
 				}
 			}
 		}
 		setPageComplete(isValid(selectedMapProject));
+	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 * @since 3.6
+	 */
+	public void dispose() {
+		if (selectedMapProject != null) {
+			selectedMapProject.dispose();	
+			selectedMapProject = null;
+		}
+		super.dispose();
 	}
 
 	private void initializedViewer(){
@@ -120,13 +186,13 @@ public class MapProjectSelectionPage extends WizardPage {
 		String name = settings.get(SELECTED_PROJECT_KEY);
 		if (name != null) {
 			ISelection selection = new StructuredSelection(RelEngPlugin.getWorkspace().getRoot().getProject(name));
-			projectTree.setSelection(selection);
+			mapProjectListViewer.setSelection(selection);
 		}
-		projectTree.getTree().setFocus();
+		mapProjectListViewer.getList().setFocus();
 	}
 	
 	public void saveSettings(){
-		IStructuredSelection selection = (IStructuredSelection)projectTree.getSelection();
+		IStructuredSelection selection = (IStructuredSelection)mapProjectListViewer.getSelection();
 		if(!selection.isEmpty()){
 			Object obj = selection.getFirstElement();
 			if(obj instanceof IProject){
