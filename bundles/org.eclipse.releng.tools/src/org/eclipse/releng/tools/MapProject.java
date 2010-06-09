@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,12 +9,22 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.releng.tools;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.team.core.TeamException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.client.Command;
+import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
+import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -23,17 +33,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.CVSTag;
-import org.eclipse.team.internal.ccvs.core.client.Command;
-import org.eclipse.team.internal.ccvs.ui.operations.CommitOperation;
-import org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation;
+
 
 public class MapProject implements IResourceChangeListener {
 	
@@ -57,7 +60,6 @@ public class MapProject implements IResourceChangeListener {
 				RelEngPlugin.log(e);
 			}
 		}
-		
 		return mapProject;
 	}
 	
@@ -70,8 +72,8 @@ public class MapProject implements IResourceChangeListener {
 
 	public MapProject(IProject p) throws CoreException {
 		this.project = p;
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 		loadMapFiles();
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_CHANGE);
 	}
 
 	public IProject getProject() {
@@ -176,6 +178,7 @@ public class MapProject implements IResourceChangeListener {
 	 */
 	public void dispose(){
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
+		mapFiles= null;
 	}
 	
 	/**
@@ -197,7 +200,7 @@ public class MapProject implements IResourceChangeListener {
 				try{
 					IFile aFile = (IFile)(delta.getResource());
 					MapFile mFile = null;
-					if(isMapFile(aFile)){
+					if(MapFile.isMapFile(aFile)){
 						// Handle content change
 						if(delta.getKind() == IResourceDelta.CHANGED){	
 							mFile = getMapFileFor(aFile);
@@ -227,23 +230,7 @@ public class MapProject implements IResourceChangeListener {
 	}
 
 	private void loadMapFiles() throws CoreException {
-		final ArrayList maps = new ArrayList();
-		project.accept(new IResourceVisitor() {
-			public boolean visit(IResource resource) throws CoreException {
-				if (resource.getType() == IResource.FILE) {
-					IFile file = (IFile) resource;
-					if (isMapFile(file)) {
-						maps.add(new MapFile(file));
-					}
-				}
-				return true;
-			}
-		});
-		if (maps.size() > 0) {
-			mapFiles = (MapFile[]) maps.toArray(new MapFile[maps.size()]);
-		} else {
-			mapFiles = new MapFile[0];
-		}
+		mapFiles = MapFile.findAllMapFiles(project);
 	}
 	
 	private MapFile getMapFileFor(IFile file) throws CoreException{
@@ -257,10 +244,5 @@ public class MapProject implements IResourceChangeListener {
 		Set set = new HashSet(Arrays.asList(mapFiles));
 		set.add(aFile);
 		mapFiles = (MapFile[])set.toArray(new MapFile[set.size()]); 
-	}
-	private boolean isMapFile(IFile aFile){
-		String extension = aFile.getFileExtension();
-		//In case file has no extension name or is not validate map file
-		return ( extension != null && extension.equals(MapFile.MAP_FILE_EXTENSION)); 
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,19 +11,26 @@
 package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
 import org.eclipse.team.core.TeamException;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.ICVSResource;
 import org.eclipse.team.internal.ccvs.core.syncinfo.ResourceSyncInfo;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.operations.ReplaceOperation;
 import org.eclipse.team.internal.core.InfiniteSubProgressMonitor;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
+
 
 /**
  * This action replaces one or more projects in the local workspace
@@ -77,26 +84,16 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	public boolean isEnabled() {
 		if (!(super.isEnabled()))
 			return false;
-		
-		IResource[] resources = super.getSelectedResources();
+
+		IResource[] resources = getSelectedResources();
 		for (int i = 0; i < resources.length; i++) {
 			IResource resource = resources[i];
 			if (resource.getType() != IResource.PROJECT) {
 				return false;
 			}
 		}
-		
-		//if any of the projects in the current workspace contain valid map files, return true
-		IProject[] workspaceProjects = RelEngPlugin.getWorkspace().getRoot().getProjects();
-        for (int i=0; i<workspaceProjects.length; i++) {
-        	try {
-    			if (new MapProject(workspaceProjects[i]).getValidMapFiles().length != 0)
-    				return true;
-    		} catch (CoreException e) {
-        		//this is ok, we will move on to the next project
-    		}
-        }
-        return false;
+
+		return CompareLocalToMap.hasProjectFromMapFile();
 	}
 
 	/* (non-Javadoc)

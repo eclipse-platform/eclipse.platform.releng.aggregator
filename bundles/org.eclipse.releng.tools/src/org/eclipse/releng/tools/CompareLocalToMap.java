@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,17 +11,28 @@
 package org.eclipse.releng.tools;
 
 import java.lang.reflect.InvocationTargetException;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.internal.ccvs.core.CVSCompareSubscriber;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction;
 import org.eclipse.team.internal.ccvs.ui.subscriber.CompareParticipant;
 import org.eclipse.team.ui.TeamUI;
 import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.preference.IPreferenceStore;
+
 
 /**
  * This class compares the locally selected projects againsts the versions
@@ -30,6 +41,7 @@ import org.eclipse.team.ui.synchronize.ISynchronizeParticipant;
  */
 public class CompareLocalToMap extends WorkspaceAction {
 	
+
 	/**
 	 * Returns true if the super would enable the option *and*
 	 * only projects are selected.  There is no concept of "releasing"
@@ -41,17 +53,46 @@ public class CompareLocalToMap extends WorkspaceAction {
 		if (!super.isEnabled())
 			return false;
 		
-		//if any of the projects in the current workspace contain valid map files, return true
-		IProject[] workspaceProjects = RelEngPlugin.getWorkspace().getRoot().getProjects();
-        for (int i=0; i<workspaceProjects.length; i++) {
-        	try {
-    			if (new MapProject(workspaceProjects[i]).getValidMapFiles().length != 0)
-    				return true;
-    		} catch (CoreException e) {
-        		//do nothing
-    		}
-        }
-        return false;
+		return hasProjectFromMapFile();
+	}
+
+	static boolean hasProjectFromMapFile() {
+		final String FOUND= new String();
+		try {
+			final MapFile[] mapFiles= MapFile.findAllMapFiles(ResourcesPlugin.getWorkspace().getRoot());
+
+			IResourceProxyVisitor visitor= new IResourceProxyVisitor() {
+				public boolean visit(IResourceProxy resourceProxy) throws CoreException {
+					if (resourceProxy.getType() == IResource.ROOT)
+						return true;
+
+					if (resourceProxy.getType() != IResource.PROJECT || !resourceProxy.isAccessible())
+						return false;
+
+					IProject project= (IProject)resourceProxy.requestResource();
+					if (!RelEngPlugin.isShared(project))
+						return false;
+
+					if (contains(mapFiles, project))
+						throw new OperationCanceledException(FOUND);
+
+					return false;
+				}
+			};
+			ResourcesPlugin.getWorkspace().getRoot().accept(visitor, IResource.NONE);
+			return false;
+		} catch (OperationCanceledException ex) {
+			return ex.getMessage() == FOUND;
+		} catch (CoreException e) {
+			return false;
+		}
+	}
+
+	private static boolean contains(MapFile[] mapFiles, IProject project) {
+		for (int i= 0; i < mapFiles.length; i++)
+			if (mapFiles[i].contains(project))
+				return true;
+		return false;
 	}
 
 	/**

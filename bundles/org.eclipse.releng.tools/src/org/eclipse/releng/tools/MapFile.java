@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,18 +14,27 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+
 public class MapFile {
 	
-	public static final String MAP_FILE_EXTENSION = "map";
+	private static final String MAP_FILE_EXTENSION = "map"; //$NON-NLS-1$
+	private static final String MAP_FILE_NAME_ENDING = '.' + MAP_FILE_EXTENSION;
 	
 	protected IFile file;
 	protected MapEntry[] entries;
@@ -112,6 +121,33 @@ public class MapFile {
 
 	public String getName() {
 		return file.getName();
+	}
+
+	public static MapFile[] findAllMapFiles(IResource resource) throws CoreException {
+		final ArrayList mapFiles = new ArrayList();
+		IResourceProxyVisitor visitor= new IResourceProxyVisitor() {
+			public boolean visit(IResourceProxy resourceProxy) throws CoreException {
+				if (!resourceProxy.isAccessible())
+					return false;
+
+				int type= resourceProxy.getType();
+				if (type == IResource.PROJECT)
+					return RelEngPlugin.isShared((IProject)resourceProxy.requestResource());
+
+				if (type == IResource.FILE && resourceProxy.getName().endsWith(MAP_FILE_NAME_ENDING))
+					mapFiles.add(new MapFile((IFile)resourceProxy.requestResource()));
+
+				return true;
+			}
+		};
+		
+		resource.accept(visitor,IResource.NONE);
+		
+		return (MapFile[]) mapFiles.toArray(new MapFile[mapFiles.size()]);
+	}
+
+	public static boolean isMapFile(IFile aFile){
+		return MapFile.MAP_FILE_EXTENSION.equals(aFile.getFileExtension());
 	}
 
 }

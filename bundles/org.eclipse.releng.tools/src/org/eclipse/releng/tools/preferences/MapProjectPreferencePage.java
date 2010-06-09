@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,24 +10,38 @@
  *******************************************************************************/
 package org.eclipse.releng.tools.preferences;
 
-import java.util.ArrayList;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.releng.tools.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.releng.tools.MapFile;
+import org.eclipse.releng.tools.MapProject;
+import org.eclipse.releng.tools.Messages;
+import org.eclipse.releng.tools.RelEngPlugin;
+import org.eclipse.team.internal.ui.SWTUtils;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.team.core.RepositoryProvider;
-import org.eclipse.team.internal.ui.SWTUtils;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.List;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+
 
 public class MapProjectPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -101,7 +115,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 	 * @param aComposite The Composite to which the List being populated will be attached.
 	 */
 	private void createMapProjectList(Composite aComposite) {
-		projectList = new List(aComposite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		projectList = new List(aComposite, SWT.BORDER | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL);
 		GridData data = new GridData();
 		//Set heightHint with a small value so the list size will be defined by 
 		//the space available in the dialog instead of resizing the dialog to
@@ -113,21 +127,16 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		data.grabExcessVerticalSpace = true;
 		projectList.setLayoutData(data);
 
-		IProject[] workspaceProjects = RelEngPlugin.getWorkspace().getRoot().getProjects();
-		ArrayList temporaryProjectList = new ArrayList();
-		for (int i = 0; i < workspaceProjects.length; i++) {
-			MapProject aMapProject;
-			try {
-				aMapProject = new MapProject(workspaceProjects[i]);
-				if (aMapProject.getValidMapFiles().length != 0) {
-					temporaryProjectList.add(workspaceProjects[i]);
-				}
-			} catch (CoreException e) {
-				//do nothing
-			}
+		Set projects = new HashSet();
+		MapFile[] mapFiles;
+		try {
+			mapFiles = MapFile.findAllMapFiles(RelEngPlugin.getWorkspace().getRoot());
+		} catch (CoreException ex) {
+			mapFiles = new MapFile[0];
 		}
-		workspaceMapProjects = new IProject[temporaryProjectList.size()];
-		workspaceMapProjects = ((IProject[]) temporaryProjectList.toArray(new IProject[temporaryProjectList.size()]));
+		for (int i = 0; i < mapFiles.length; i++)
+			projects.add(mapFiles[i].getFile().getProject());
+		workspaceMapProjects = ((IProject[]) projects.toArray(new IProject[projects.size()]));
 
 		String[] projectNames = new String[workspaceMapProjects.length];
 		for (int i = 0; i < workspaceMapProjects.length; i++) {
@@ -149,16 +158,20 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 			return;
 		}
 		IProject selectedProject = workspaceMapProjects[selectedIndex];
+		boolean isValid = false;
 		MapProject mapProject = null;
 		try {
 			mapProject = new MapProject(selectedProject);
-			if (mapProject.getValidMapFiles().length == 0) {
-				mapProject = null;
-			}
+			isValid = true;
+			if (mapProject.getValidMapFiles().length == 0)
+				setMessage(Messages.getString("MapProjectPreferencePage.3"), WARNING); //$NON-NLS-1$
 		} catch (CoreException e) {
-			mapProject = null;
+			isValid = false;
+		} finally {
+			if (mapProject != null)
+				mapProject.dispose();
 		}
-		setValid(isValid(mapProject));
+		setValid(isValid);
 	}
 
 	/*
@@ -213,16 +226,21 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 
 	private void highlightDefaultMapProject() {
 		String path = preferenceStore.getString(MapProjectPreferencePage.SELECTED_MAP_PROJECT_PATH);
-		MapProject selectedMapProject = null;
+		boolean isMapProjectSelected = false;
 		if (path.length() > 0) {
+			MapProject selectedMapProject= null;
 			try {
 				selectedMapProject = new MapProject(ResourcesPlugin.getWorkspace().getRoot().getProject(path));
+				isMapProjectSelected = true;
 			} catch (CoreException e) {
-				//do nothing
+				isMapProjectSelected = false;
+			} finally {
+				if (selectedMapProject != null)
+					selectedMapProject.dispose();
 			}
 		}
 
-		if (selectedMapProject == null) {
+		if (!isMapProjectSelected) {
 			alwaysPromptButton.setEnabled(true);
 			preferenceStore.setValue(USE_DEFAULT_MAP_PROJECT, false);
 		} else {
@@ -237,19 +255,4 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		}
 	}
 
-	private boolean isValid(final MapProject mapProject) {
-		//Check if map project is accessible
-		if (mapProject == null || (!mapProject.getProject().isAccessible())) {
-			setErrorMessage(Messages.getString("MapProjectPreferencePage.3")); //$NON-NLS-1$
-			return false;
-		}
-
-		//Check if the map project is shared
-		if (RepositoryProvider.getProvider(mapProject.getProject()) == null) {
-			setErrorMessage(Messages.getString("MapProjectPreferencePage.4") + mapProject.getProject().getName() + Messages.getString("MapProjectPreferencePage.5")); //$NON-NLS-1$ //$NON-NLS-2$
-			return false;
-		}
-		setErrorMessage(null);
-		return true;
-	}
 }

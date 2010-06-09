@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,18 +8,24 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.releng.tools;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.team.core.RepositoryProvider;
+
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
 
 /**
  * A Plugin for performing certain important RelEng tasks.
@@ -31,6 +37,8 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	public static final String ID = "org.eclipse.releng.tools"; //$NON-NLS-1$
 	public static final String MAP_PROJECT_NAME = Messages.getString("RelEngPlugin.1"); //$NON-NLS-1$
 	public static final String MAP_FOLDER = Messages.getString("RelEngPlugin.2"); //$NON-NLS-1$
+	private static final String BINARY_REPOSITORY_PROVIDER_CLASS_NAME= "org.eclipse.pde.internal.core.BinaryRepositoryProvider"; //$NON-NLS-1$
+
 	
 	//The shared instance.
 	private static RelEngPlugin plugin;
@@ -121,7 +129,24 @@ public class RelEngPlugin extends AbstractUIPlugin {
 		}
 		return plugin;
 	}
-	
+
+	/**
+	 * Tells whether the given project is shared.
+	 * 
+	 * @param project the project
+	 * @return <code>true</code> if the project is shared
+	 * @since 3.6
+	 */
+	static boolean isShared(IProject project) {
+		Assert.isLegal(project != null);
+		if (!RepositoryProvider.isShared(project))
+			return false;
+
+		// Check for PDE's binary projects that also connect a provider to the project
+		RepositoryProvider provider= RepositoryProvider.getProvider(project);
+		return provider != null && !BINARY_REPOSITORY_PROVIDER_CLASS_NAME.equals(provider.getClass().getName());
+	}
+
 	/**
 	 * The following code is a sample of how to assign a
 	 * RelEng nature to a project.  This only ever needed
