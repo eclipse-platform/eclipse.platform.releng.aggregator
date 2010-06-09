@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007 IBM Corporation and others.
+ * Copyright (c) 2007, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,17 @@
 package org.eclipse.releng.tools;
 
 import java.util.ArrayList;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * This is a helper class used for obtaining CVSTags and checking for projects that have no corresponding
@@ -60,13 +64,19 @@ public class CVSTagHelper {
 	 * @throws CVSException
 	 */
 	private CVSTag getTag(IResource resource) {
-		MapProject selectedMapProject = getSelectedMapProject();
-		if (selectedMapProject == null)
-			return CVSTag.DEFAULT;
-		MapEntry entry = selectedMapProject.getMapEntry(resource.getProject());
-		if (entry == null)
-			return CVSTag.DEFAULT;
-		return entry.getTag();
+		MapProject selectedMapProject= null;
+		try {
+			selectedMapProject= getSelectedMapProject();
+			if (selectedMapProject == null)
+				return CVSTag.DEFAULT;
+			MapEntry entry = selectedMapProject.getMapEntry(resource.getProject());
+			if (entry == null)
+				return CVSTag.DEFAULT;
+			return entry.getTag();
+		} finally {
+			if (selectedMapProject != null)
+				selectedMapProject.dispose();
+		}
 	}
 
 	//returns the MapProject that was selected by the user in the MapProjectSelectionWizard
