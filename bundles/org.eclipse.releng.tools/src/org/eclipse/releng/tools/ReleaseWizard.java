@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -208,7 +208,19 @@ public class ReleaseWizard extends Wizard {
 		
 		if (defaultBeingUsed) broadcastMapProjectChange(mapProject);
 	}
-	
+
+	/*
+	 * @see org.eclipse.jface.wizard.Wizard#dispose()
+	 * @since 3.6
+	 */
+	public void dispose() {
+		if (mapProject != null) {
+			mapProject.dispose();
+			mapProject= null;
+		}
+		super.dispose();
+	}
+
 	private void addMapSelectionPage() {
 		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage", //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.4"), //$NON-NLS-1$
@@ -360,7 +372,11 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
 	 */
 	public IWizardPage getNextPage(IWizardPage page) {
-		if (page == mapSelectionPage){
+		if (page == mapSelectionPage) {
+			if (selectedProjects == null && preSelectedProjects != null) {
+				projectSelectionPage.setSelection(preSelectedProjects);
+				selectedProjects= preSelectedProjects;
+			}
 			return projectSelectionPage;
 		}
 		if (page == projectSelectionPage) {
@@ -511,9 +527,6 @@ public class ReleaseWizard extends Wizard {
 		return true;
 	}
 
-	public MapProject getMapProject(){
-		return mapProject;
-	}	
 	public void broadcastMapProjectChange(MapProject m){
 		mapProject = m;
 		projectSelectionPage.updateMapProject(m);
