@@ -135,7 +135,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	 * 
 	 * @param project the project
 	 * @return <code>true</code> if the project is shared
-	 * @since 3.6
+	 * @since 3.7
 	 */
 	static boolean isShared(IProject project) {
 		Assert.isLegal(project != null);

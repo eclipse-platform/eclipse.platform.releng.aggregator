@@ -163,7 +163,7 @@ public class MapProjectSelectionPage extends WizardPage {
 
 	/*
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 * @since 3.6
+	 * @since 3.7
 	 */
 	public void dispose() {
 		if (selectedMapProject != null) {

@@ -152,7 +152,7 @@ public class ProjectSelectionPage extends WizardPage {
 			}
 			/*
 			 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#getParent(java.lang.Object)
-			 * @since 3.6
+			 * @since 3.7
 			 */
 			public Object getParent(Object element) {
 				if (mapProject == null)
