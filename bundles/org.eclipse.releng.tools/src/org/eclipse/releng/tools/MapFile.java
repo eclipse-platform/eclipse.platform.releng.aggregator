@@ -33,7 +33,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 public class MapFile {
 	
-	private static final String MAP_FILE_EXTENSION = "map"; //$NON-NLS-1$
+	/**
+	 * @deprecated As of 3.7, replaced by {@link #isMapFile(IFile)}
+	 */
+	public static final String MAP_FILE_EXTENSION = "map"; //$NON-NLS-1$
 	private static final String MAP_FILE_NAME_ENDING = '.' + MAP_FILE_EXTENSION;
 	
 	protected IFile file;
@@ -123,6 +126,14 @@ public class MapFile {
 		return file.getName();
 	}
 
+	/**
+	 * Finds all map files in the workspace.
+	 * 
+	 * @param resource the resource for which to find the map files
+	 * @return an array of all map file for the given resource
+	 * @throws CoreException if something goes wrong
+	 * @since 3.7
+	 */
 	public static MapFile[] findAllMapFiles(IResource resource) throws CoreException {
 		final ArrayList mapFiles = new ArrayList();
 		IResourceProxyVisitor visitor= new IResourceProxyVisitor() {
