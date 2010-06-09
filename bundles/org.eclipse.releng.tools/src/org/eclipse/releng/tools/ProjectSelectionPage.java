@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,17 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,6 +24,20 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.WizardPage;
+
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -140,14 +143,33 @@ public class ProjectSelectionPage extends WizardPage {
 		return new WorkbenchContentProvider() {
 			public Object[] getChildren(Object parentElement) {
 				if (parentElement instanceof MapProject) {
-					return mapProject.getValidMapFiles();								
+					return mapProject.getValidMapFiles();
 				}
 				if (parentElement instanceof MapFile) {
 					return ((MapFile)parentElement).getAccessibleProjects();
 				}
 				return null;
 			}
-			
+			/*
+			 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#getParent(java.lang.Object)
+			 * @since 3.6
+			 */
+			public Object getParent(Object element) {
+				if (mapProject == null)
+					return null;
+
+				if (element instanceof MapFile) {
+					return mapProject;
+				}
+				if (element instanceof IProject) {
+					MapFile[] mapFiles= mapProject.getValidMapFiles();
+					for (int i= 0; i < mapFiles.length; i++) {
+						if (mapFiles[i].contains((IProject)element))
+							return mapFiles[i];
+					}
+				}
+				return super.getParent(element);
+			}
 			public boolean hasChildren(Object element) {
 				if (element instanceof MapFile) {
 					return ((MapFile)element).getAccessibleProjects().length > 0;
@@ -273,9 +295,13 @@ public class ProjectSelectionPage extends WizardPage {
 		}
 	}
 	public void updateMapProject(MapProject m){
+		if (m != null && mapProject != null && m.getProject().equals(mapProject.getProject()))
+			return;
+
 		mapProject = m;
 		if(viewer != null){
 			viewer.setInput(mapProject);
+			viewer.expandAll();
 		}
 	}
 }
