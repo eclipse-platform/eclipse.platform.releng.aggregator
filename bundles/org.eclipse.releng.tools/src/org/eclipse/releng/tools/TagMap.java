@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,15 +10,27 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.team.internal.ccvs.core.*;
+import org.eclipse.team.internal.ccvs.core.CVSException;
+import org.eclipse.team.internal.ccvs.core.CVSProviderPlugin;
+import org.eclipse.team.internal.ccvs.core.CVSTag;
+import org.eclipse.team.internal.ccvs.core.ICVSRemoteResource;
+import org.eclipse.team.internal.ccvs.core.ICVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.core.connection.CVSRepositoryLocation;
 import org.eclipse.team.internal.ccvs.ui.CVSUIPlugin;
 import org.eclipse.team.internal.ccvs.ui.actions.TagInRepositoryAction;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+
 
 /**
  * Tags the versions in a map file with another tag
@@ -122,8 +134,10 @@ public class TagMap extends TagInRepositoryAction {
 		if (resources.length == 0) return false;
 		for (int i = 0; i < resources.length; i++) {
 			IResource resource = resources[i];
-			if (resource.getType() != IResource.FILE) return false;
-			if (!resource.getFileExtension().equals("map")) return false;
+			if (resource.getType() != IResource.FILE)
+				return false;
+			if (!MapFile.isMapFile((IFile)resource))
+				return false;
 		}
 		return true;
 	}
