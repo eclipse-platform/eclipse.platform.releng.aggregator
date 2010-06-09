@@ -211,7 +211,7 @@ public class ReleaseWizard extends Wizard {
 
 	/*
 	 * @see org.eclipse.jface.wizard.Wizard#dispose()
-	 * @since 3.6
+	 * @since 3.7
 	 */
 	public void dispose() {
 		if (mapProject != null) {
@@ -527,6 +527,9 @@ public class ReleaseWizard extends Wizard {
 		return true;
 	}
 
+	public MapProject getMapProject(){
+		return mapProject;
+	}	
 	public void broadcastMapProjectChange(MapProject m){
 		mapProject = m;
 		projectSelectionPage.updateMapProject(m);
