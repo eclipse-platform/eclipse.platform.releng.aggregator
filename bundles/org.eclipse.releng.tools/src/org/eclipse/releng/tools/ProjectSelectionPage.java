@@ -295,13 +295,15 @@ public class ProjectSelectionPage extends WizardPage {
 		}
 	}
 	public void updateMapProject(MapProject m){
-		if (m != null && mapProject != null && m.getProject().equals(mapProject.getProject()))
-			return;
-
 		mapProject = m;
 		if(viewer != null){
+			Object[] checkedElements= null;
+			if (m != null && mapProject != null && m.getProject().equals(mapProject.getProject()))
+				checkedElements= viewer.getCheckedElements();
 			viewer.setInput(mapProject);
 			viewer.expandAll();
+			if (checkedElements != null)
+				viewer.setCheckedElements(checkedElements);
 		}
 	}
 }
