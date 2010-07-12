@@ -36,6 +36,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
@@ -235,6 +236,15 @@ public class ProjectSelectionPage extends WizardPage {
 		}
 		settings.put(SELECTED_ITEMS_KEY, (String[])names.toArray(new String[names.size()]));
 		settings.put(COMPARE_BUTTON_KEY, compareButtonChecked);
+	}
+
+	/*
+	 * @see org.eclipse.jface.wizard.WizardPage#setPreviousPage(org.eclipse.jface.wizard.IWizardPage)
+	 * @since 3.7
+	 */
+	public void setPreviousPage(IWizardPage page) {
+		super.setPreviousPage(page);
+		updatePageComplete();
 	}
 	
 	private void initialize(){
