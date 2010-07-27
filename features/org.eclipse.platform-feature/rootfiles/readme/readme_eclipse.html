@@ -308,9 +308,10 @@ OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</stro
 <blockquote>
   <a href="#I-General">
   3.1 General problems</a><br/>
-  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-Startup">3.1.1 Startup</a><br/>
-  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-GCJ">3.1.2 GCJ</a><br/>
-  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-64bitJava">3.1.3 64-bit Java HotSpot(TM) VM</a><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-EarlyAdopter">3.1.1 Early Adopter Release Issues</a><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-Startup">3.1.2 Startup</a><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-GCJ">3.1.3 GCJ</a><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-General-64bitJava">3.1.4 64-bit Java HotSpot(TM) VM</a><br/>
   <a href="#I-Platform">3.2 Platform</a><br/>
   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#I-Platform-Core">3.2.1 Core</a><br/>
 
@@ -333,7 +334,55 @@ OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</stro
 <p>Note: Bug numbers refer to the Eclipse project bug database at <a href="http://dev.eclipse.org/bugs/">http://bugs.eclipse.org/bugs/</a></p>
 
 <h3>3.1 <a name="I-General">General problems</a></h3>
-<h3>3.1.1 <a name="I-General-Startup">General - Startup</a></h3>
+<h3>3.1.1 <a name="I-General-EarlyAdopter">General - Early Adopter Issues</a></h3>
+<p>
+The Eclipse SDK 4.0 release is an Early Adopter Release. It is made available at this
+early stage to allow plug-in and application writers an opportunity to begin migrating
+their applications to use it prior to a wider scale commercial release. Due to a large
+amount of new technology in this release, there are some general problems listed
+here that early adopters and users should be aware of.
+</p>
+
+<h4><b>Model corruption preventing Eclipse to start</b></h4>
+<p>In the 4.0 Early Adopter Release, there are circumstances where the model representing
+the user interface state can become corrupt. This can prevent startup from completing,
+or cause the user interface to start in a non-functioning state. In this situation, restarting
+with the -clearPersistedState command line argument will cause the user interface
+state to be discarded. The user interface will then start normally but will revert to the
+default perspective and layout.</p>
+
+<h4><b>Widget disposed errors in the log during shutdown</b></h4>
+<p>
+There are circumstances where "widget is disposed" errors are printed to the log during shutdown. These
+are caused by bugs in user interface cleanup and generally don't affect subsequent sessions.
+See bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=320854">320854</a>
+and <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=319847">319847</a> for details.
+</p>
+
+<h4><b>Memory leaks</b></h4>
+<p>
+There are some known memory leaks in this release. Running the SDK for long
+periods will generally cause memory usage to continue increasing. Periodic restarts
+may be required to recover memory when the SDK is used extensively.
+</p>
+
+<h4>Changing theme does not update all widgets dynamically</h4>
+<p>
+When changing to a different them on the <b>General &gt; Appearance</b>
+preference page, some changes to the appearance only take effect after a restart.
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=321050">321050</a> for details.
+</p>
+
+<h4><b>Failure to start on some configurations using Windows 7 and Sun JRE 6</b></h4>
+<p>
+At least one user has reported failure to start the Eclipse SDK 4.0 when running
+on Windows 7 with a Sun JRE version 6. Others on similar configurations have
+not experienced the problem and it seems to be caused by particular
+network configurations. See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=320932">320932</a>
+for details and workarounds.
+</p>
+
+<h3>3.1.2 <a name="I-General-Startup">General - Startup</a></h3>
 <h4>Installation/Configuration issues that can cause Eclipse to fail start</h4>
 <p>Here are some common problems that can cause Eclipse not to start:</p>
 <ul>
@@ -369,14 +418,6 @@ problem set their configuration area explicitly using the <tt>-configuration</tt
 line argument. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=67719">67719</a>)</li>
 </ul>
 
-<h4><b>Model corruption preventing Eclipse to start</b></h4>
-<p>In the 4.0 Early Adopter Release, there are circumstances where the model representing
-the user interface state can become corrupt. This can prevent startup from completing,
-or cause the user interface to start in a non-functioning state. In this situation, restarting
-with the -clearPersistedState command line argument will cause the user interface
-state to be discarded. The user interface will then start normally but will revert to the
-default perspective and layout.</p>
-
 <h4><b>Invalid characters in install directory prevents Eclipse from starting</b></h4>
 <p>Eclipse will fail to launch if installed in a directory whose path
 contains certain invalid characters, including :%#&lt;&gt;&quot;!. The
@@ -392,7 +433,7 @@ is ended.  See the section <a href="#RunningEclipse">Running Eclipse</a> for det
 on addressing this VM problem.
 </p>
 
-<h3>3.1.2 <a name="I-General-GCJ">General - GCJ</a></h3>
+<h3>3.1.3 <a name="I-General-GCJ">General - GCJ</a></h3>
 <p>GCJ is an effort by the GCC team to provide an open source Java compiler and
 runtime environment to interpret Java bytecode. Unfortunately, the GCJ runtime
 environment is not an environment that is often tested on by Eclipse developers.</p>
@@ -483,7 +524,7 @@ the IRC <a href="irc://irc.freenode.net/#eclipse">channel</a>,
 and/or <a href="https://bugs.eclipse.org/bugs/">bugzilla</a>.
 </p>
 
-<h3>3.1.3 <a name="I-General-64bitJava">General - 64-bit Java HotSpot(TM) VM</a></h3>
+<h3>3.1.4 <a name="I-General-64bitJava">General - 64-bit Java HotSpot(TM) VM</a></h3>
 <p>
 There is a known issue with the Java HotSpot(TM) 1.6.0 VM compiler which causes eclipse to 
 crash (see Sun bug <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6614100">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6614100</a>,
