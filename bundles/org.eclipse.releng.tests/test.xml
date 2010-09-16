@@ -48,50 +48,43 @@
 
 	<target name="setupcompare" if="notMac">
 		<!-- only run compare test on Linux machine since it is the fastest machine.
-	                Also, the compare tool only parses feature.xmls so it only needs to be run on one machine  -->
+	                        Also, the compare tool only parses feature.xmls so it only needs to be run on one machine  -->
 		<delete dir="${locationcompare}" />
 		<mkdir dir="${locationcompare}" />
 		<property name="locationcomparetemp" value="${locationcompare}/temp" />
 		<delete dir="${locationcomparetemp}" />
 		<mkdir dir="${locationcomparetemp}" />
-		<!--	<exec executable="/usr/bin/wget" dir="${locationcompare}" output="${locationcompare}/error.txt" failonerror="false">
-			<arg line="-q -O  ${locationcompare}/eclipse-SDK-3.6-linux-gtk.tar.gz http://${localmirror}/downloads/drops/R-3.6-201006080911/eclipse-SDK-3.6-linux-gtk.tar.gz" />
-		</exec>
-		<exec dir="${locationcompare}" executable="tar" failonerror="false" os="Linux">
-			<arg line="-xzf ${locationcompare}/eclipse-SDK-3.6-linux-gtk.tar.gz" />
-		</exec> -->
-
 		<delete dir="${locationcompare}" />
 		<mkdir dir="${locationcompare}" />
 		<property name="locationcomparetemp" value="${locationcompare}/temp" />
 		<delete dir="${locationcomparetemp}" />
-		<mkdir dir="${locationcomparetemp}" />
+		<mkdir dir="${locationcomparetemp}" />		
+		<property file="${basedir}/../../equinoxp2tests.properties" />
 		<p2.mirror source="${org.eclipse.equinox.p2.tests.last.release.build.repo}">
 			<destination kind="metadata" location="file://${locationcomparetemp}" name="Current build Repo" />
-			<destination kind="artifact" location="file://${locationcomparetemp}" name="Current build Repo" />		
+			<destination kind="artifact" location="file://${locationcomparetemp}" name="Current build Repo" />
 		</p2.mirror>
 		<p2.repo2runnable destination="${locationcompare}">
-			<source dir="${locationcompare}" includes="${temp}" />
+			<source dir="${locationcompare}" includes="temp" />
 		</p2.repo2runnable>
 		<delete dir="${locationcomparetemp}" />
-
+		
 		<delete dir="${locationcomparecurrent}" />
 		<mkdir dir="${locationcomparecurrent}" />
-		<property name="locationcomparecurrenttemp" value="${locationcompare}/temp" />
+		<property name="locationcomparecurrenttemp" value="${locationcomparecurrent}/temp" />
 		<delete dir="${locationcomparecurrenttemp}" />
 		<mkdir dir="${locationcomparecurrenttemp}" />
-	    <property file="${basedir}/../../equinoxp2tests.properties" />
 		<p2.mirror source="${org.eclipse.equinox.p2.tests.current.build.repo}">
 			<destination kind="metadata" location="file://${locationcomparecurrenttemp}" name="Current build Repo" />
-			<destination kind="artifact" location="file://${locationcomparecurrenttemp}" name="Current build Repo" />					
+			<destination kind="artifact" location="file://${locationcomparecurrenttemp}" name="Current build Repo" />
 		</p2.mirror>
 		<p2.repo2runnable destination="${locationcomparecurrent}">
-			<source dir="${locationcomparecurrent}" includes="${temp}" />
+			<source dir="${locationcomparecurrent}" includes="temp" />
 		</p2.repo2runnable>
 		<delete dir="${locationcomparecurrenttemp}" />
 
-		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@new@" value="${locationcomparecurrent}/eclipse/features" />
-		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@old@" value="${locationcompare}/eclipse/features" />
+		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@new@" value="${locationcomparecurrent}/features" />
+		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@old@" value="${locationcompare}/features" />
 		<property name="versionOutputDir" value="${locationcompare}/../../../results/versiontool" />
 		<mkdir dir="${versionOutputDir}" />
 		<exec dir="${versionOutputDir}" executable="/bin/touch" failonerror="false" os="Linux">
@@ -102,6 +95,7 @@
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@output@" value="${versionOutputFile}" />
 		<replace file="${basedir}/plugins/${org.eclipse.releng.tests}/compare.properties" token="@compareoptions@" value="${basedir}/plugins/${org.eclipse.releng.tests}/compareoptions.properties" />
 	</target>
+
 
 
 	<!-- This target runs the test suite. Any actions that need to happen after all -->
