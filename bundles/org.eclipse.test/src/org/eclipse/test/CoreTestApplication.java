@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Platform;
 
 /**
  * A an application that launches tests once it is started.
+ * @deprecated As using deprecated materials
  */
 public class CoreTestApplication implements IPlatformRunnable {
 	/** true if workspace tests should log their deltas */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,13 +14,14 @@ import java.io.IOException;
 
 import junit.framework.Assert;
 
-import org.eclipse.core.runtime.IPlatformRunnable;
+import org.eclipse.equinox.app.IApplication;
+import org.eclipse.equinox.app.IApplicationContext;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IPlatformRunnable;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.equinox.app.IApplication;
-import org.eclipse.equinox.app.IApplicationContext;
 
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbench;
@@ -30,8 +31,9 @@ import org.eclipse.ui.testing.ITestHarness;
 import org.eclipse.ui.testing.TestableObject;
 
 /**
- * A Workbench that runs a test suite specified in the
- * command line arguments.
+ * A Workbench that runs a test suite specified in the command line arguments.
+ * 
+ * @deprecated As using deprecated materials
  */ 
 public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApplication {
 
@@ -40,7 +42,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 	
 	private boolean fInDeprecatedMode = false;
 	private TestableObject fTestableObject;
-	private int fTestRunnerResult = -1;
+	int fTestRunnerResult = -1;
 	private IApplicationContext appContext;
 	
 	
@@ -102,9 +104,9 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 			if (runs.length > 0) {
 				Object runnable = runs[0].createExecutableExtension("class"); //$NON-NLS-1$
 				if (runnable instanceof IPlatformRunnable)
-					return (IPlatformRunnable) runnable;
+					return runnable;
 				if (runnable instanceof IApplication)
-					return (IApplication) runnable;
+					return runnable;
 			}
 		}
 		return null;

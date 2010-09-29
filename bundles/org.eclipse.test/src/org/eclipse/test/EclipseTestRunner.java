@@ -33,17 +33,18 @@ import junit.framework.TestListener;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 
-import org.eclipse.core.runtime.Platform;
-
 import org.eclipse.osgi.util.ManifestElement;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
+
+import org.eclipse.core.runtime.Platform;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters
@@ -92,11 +93,11 @@ public class EclipseTestRunner implements TestListener {
     /**
      * Formatters from the command line.
      */
-	private static Vector fgFromCmdLine= new Vector();
+	private static Vector<JUnitResultFormatter> fgFromCmdLine= new Vector<JUnitResultFormatter>();
 	/**
      * Holds the registered formatters.
      */
-    private Vector formatters= new Vector();
+    private Vector<JUnitResultFormatter> formatters= new Vector<JUnitResultFormatter>();
     /**
      * Do we stop on errors.
      */
@@ -197,8 +198,8 @@ public class EclipseTestRunner implements TestListener {
         JUnitTest t= new JUnitTest(className);
 
         // Add/overlay system properties on the properties from the Ant project
-        Hashtable p= System.getProperties();
-        for (Enumeration _enum = p.keys(); _enum.hasMoreElements(); ) {
+        Hashtable<Object, Object> p= System.getProperties();
+        for (Enumeration<Object> _enum = p.keys(); _enum.hasMoreElements(); ) {
             Object key = _enum.nextElement();
             props.put(key, p.get(key));
         }
@@ -235,7 +236,7 @@ public class EclipseTestRunner implements TestListener {
 			clearStatus();
 			return null;
 		}
-		Class testClass= null;
+		Class<?> testClass= null;
 		try {
 			testClass= loadSuiteClass(suiteClassName);
 		} catch (ClassNotFoundException e) {
@@ -258,7 +259,7 @@ public class EclipseTestRunner implements TestListener {
 	 		// try to extract a test suite automatically
 			clearStatus();			
 			
-            Class jUnit4TestAdapterClass= null;
+            Class<?> jUnit4TestAdapterClass= null;
             try {
                 jUnit4TestAdapterClass= loadSuiteClass("junit.framework.JUnit4TestAdapter");
             } catch (ClassNotFoundException e1) {
@@ -268,7 +269,7 @@ public class EclipseTestRunner implements TestListener {
             }
             if (jUnit4TestAdapterClass != null) {
 				try {
-					Constructor jUnit4TestAdapterCtor= jUnit4TestAdapterClass.getConstructor(new Class[] { Class.class });
+					Constructor<?> jUnit4TestAdapterCtor= jUnit4TestAdapterClass.getConstructor(new Class[] { Class.class });
 					return (Test) jUnit4TestAdapterCtor.newInstance(new Object[] { testClass });
 				} catch (Exception e1) {
 					runFailed(new InvocationTargetException(e1, "Failed to create a JUnit4TestAdapter for \"" + suiteClassName + "\":"));
@@ -284,7 +285,7 @@ public class EclipseTestRunner implements TestListener {
 	 	}
 		Test test= null;
 		try {
-			test= (Test)suiteMethod.invoke(null, new Class[0]); // static method
+			test= (Test)suiteMethod.invoke(null, (Object[])new Class[0]); // static method
 			if (test == null)
 				return test;
 		} 
@@ -317,7 +318,7 @@ public class EclipseTestRunner implements TestListener {
 	 * Loads the class either with the system class loader or a
 	 * plugin class loader if a plugin name was specified
 	 */
-	protected Class loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
+	protected Class<?> loadSuiteClass(String suiteClassName) throws ClassNotFoundException {
 		if (fTestPluginName == null)
 			return Class.forName(suiteClassName);
         Bundle bundle = Platform.getBundle(fTestPluginName);
@@ -327,8 +328,8 @@ public class EclipseTestRunner implements TestListener {
         }
         
         //is the plugin a fragment?
-		Dictionary headers = bundle.getHeaders();
-		String hostHeader = (String) headers.get(Constants.FRAGMENT_HOST);
+		Dictionary<String, String> headers = bundle.getHeaders();
+		String hostHeader = headers.get(Constants.FRAGMENT_HOST);
 		if (hostHeader != null) {
 			// we are a fragment for sure
 			// we need to find which is our host
@@ -352,7 +353,7 @@ public class EclipseTestRunner implements TestListener {
         fTestResult= new TestResult();
         fTestResult.addListener(this);
         for (int i= 0; i < formatters.size(); i++) {
-            fTestResult.addListener((TestListener)formatters.elementAt(i));
+            fTestResult.addListener(formatters.elementAt(i));
         }
 
         long start= System.currentTimeMillis();
@@ -360,7 +361,7 @@ public class EclipseTestRunner implements TestListener {
         
         if (fException != null) { // had an exception in the constructor
             for (int i= 0; i < formatters.size(); i++) {
-                ((TestListener)formatters.elementAt(i)).addError(null, fException);
+                formatters.elementAt(i).addError(null, fException);
             }
             fJunitTest.setCounts(1, 0, 1);
             fJunitTest.setRunTime(0);
@@ -435,13 +436,13 @@ public class EclipseTestRunner implements TestListener {
     
 	private void fireStartTestSuite() {
 		for (int i= 0; i < formatters.size(); i++) {
-            ((JUnitResultFormatter)formatters.elementAt(i)).startTestSuite(fJunitTest);
+            formatters.elementAt(i).startTestSuite(fJunitTest);
         }
     }
 
     private void fireEndTestSuite() {
         for (int i= 0; i < formatters.size(); i++) {
-            ((JUnitResultFormatter)formatters.elementAt(i)).endTestSuite(fJunitTest);
+            formatters.elementAt(i).endTestSuite(fJunitTest);
         }
     }
 
@@ -468,7 +469,7 @@ public class EclipseTestRunner implements TestListener {
 
     private static void transferFormatters(EclipseTestRunner runner) {
         for (int i= 0; i < fgFromCmdLine.size(); i++) {
-            runner.addFormatter((JUnitResultFormatter)fgFromCmdLine.elementAt(i));
+            runner.addFormatter(fgFromCmdLine.elementAt(i));
         }
     }
 
@@ -481,7 +482,7 @@ public class EclipseTestRunner implements TestListener {
         if (classname == null) {
             throw new BuildException("you must specify type or classname");
         }
-        Class f = null;
+        Class<?> f = null;
         try {
             f= EclipseTestRunner.class.getClassLoader().loadClass(classname);
         } catch (ClassNotFoundException e) {
@@ -517,7 +518,7 @@ public class EclipseTestRunner implements TestListener {
     private void sendOutAndErr(String out, String err) {
         for (int i=0; i<formatters.size(); i++) {
             JUnitResultFormatter formatter = 
-                ((JUnitResultFormatter)formatters.elementAt(i));
+                formatters.elementAt(i);
             
             formatter.setSystemOutput(out);
             formatter.setSystemError(err);
