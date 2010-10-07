@@ -115,13 +115,17 @@ The <b> class</b> identified in the extension point must extend the platform cla
 Build processing begins with the <b> build()</b> method, which includes information about the kind of build that 
 has been requested.  The build is one of the following values:</p>
 <ul>
-<li><b>FULL_BUILD</b> indicates that all resources in the project should be built.</li>
+<li><b>FULL_BUILD</b> indicates that all resources in the project should be built. No delta is available.</li>
 <li><b>INCREMENTAL_BUILD</b> indicates that the build is incremental.</li>
 <li><b>AUTO_BUILD</b> indicates that an incremental build is being triggered automatically because a
 resource has changed and the autobuild feature is on.</li>
 </ul>
-<p>If an incremental build has been requested, a resource delta is provided to describe the changes in the 
-resources since the last build. The following snippet further refines the
+<p>If an incremental build or workspace auto-build have been requested, a resource delta is provided to describe the changes in the 
+resources since the last build.</p>
+<p><strong>NOTE:</strong> If no delta is available, the build kind will
+always be FULL_BUILD. See <a href="#advanced_build_kinds">Advanced Build Kinds</a> for more on build kinds.</p>
+
+<p>The following snippet further refines the
 <b> build() </b> method.
 </P>
 <pre>   protected IProject[] build(int kind, Map args, IProgressMonitor monitor
@@ -248,7 +252,61 @@ The following snippet adds a new builder as the first builder in the existing li
 Configuring a project's builder is done just once, usually as the project is being created.
 A common way to associate a builder with a project is by configuring a <a href="resAdv_natures.htm">project nature</a>.
 </P>
+<H3><a name="advanced_build_kinds">Advanced Build Kinds</H3>
 
+<h4>Triggers vs. Kinds</h4>
+<p>When a build is invoked on an IProject or IWorkspace, we call the passed in build kind, the build <i>trigger</i>.
+This trigger is usually passed through to the IncrementalProjectBuilder as the build <i>kind</i> argument when IncrementalProjectBuilder#build
+is invoked.  
+<p>The major exception to this is where no delta exists. In this case the the build <i>trigger</i> is always promoted to <b>FULL_BUILD</b>.
+
+<p>
+The mapping between triggers and kinds looks like: 
+<table border="1">
+<tr>
+<th>Trigger</th>
+<th>Kind</th>
+</tr>
+<td>FULL_BUILD</td>
+<td>FULL_BUILD</td>
+<tr>
+<td>INCREMENTAL_BUILD</td>
+<td>INCREMENTAL_BUILD or FULL_BUILD</td>
+</tr>
+<tr>
+<td>AUTO_BUILD</td>
+<td>AUTO_BUILD or FULL_BUILD</td>
+</tr>
+<tr>
+<td>CLEAN_BUILD</td>
+<td>IncrementalProjectBuilder#clean(...)</td>
+</tr>
+<table>
+
+<h4>Ignoring Build Kinds</h4>
+
+<p>
+The platform provides API for configuring which build <i>kind</i>s a builder responds to.  If the builder is marked
+as 'isConfigurable' in its <a href="../reference/extension-points/org_eclipse_core_resources_builders.html">extension point</a> it can be configured at runtime to respond to, or ignore, certain build <i>triggers</i>.
+
+<p>For example a long running builder which doesn't want to be called during workspace AUTO_BUILD, can use:
+<pre>
+  <a href="../reference/api/org/eclipse/core/resources/ICommand.html">ICommand</a>#setBuilding(AUTO_BUILD, false);
+</pre>
+
+It is important to note that: 
+<ul>
+<li>
+if INCREMENTAL_BUILD (or AUTO_BUILD) is promoted to FULL_BUILD, a builder that responds to INCREMENTAL_BUILD (or AUTO_BUILD) will be called,
+</li><li>
+if INCREMENTAL_BUILD is promoted to FULL_BUILD, a builder that responds to FULL_BUILD will be called,
+</li><li>
+if AUTO_BUILD is promoted to FULL_BUILD, <strong>only</strong> builders that respond to AUTO_BUILD will be called. 
+This is to allow long running builders to ignore AUTO_BUILD requests completely.
+</li>
+</ul>
+
+<p>See <a href="../reference/api/org/eclipse/core/resources/ICommand.html">ICommand</a> for more.
 
 </BODY>
 </HTML>
