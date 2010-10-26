@@ -30,6 +30,8 @@ classpath.</p>
 		apipatterns=<font color="#008000">"..."</font>
 		internalpatterns=<font color="#008000">"..."</font>
 		archivepatterns=<font color="#008000">"..."</font>
+		excludelist=<font color="#008000">"..."</font>
+		includelist=<font color="#008000">"..."</font>	
 		debug=<font color="#008000">"..."</font>
 	/&gt;</font></b>
 </pre>
@@ -142,6 +144,52 @@ classpath.</p>
 	<td align="center" valign="top">No</td>
 </tr>
 <tr>
+	<td valign="top">excludelist</td>
+	<td valign="top">
+		Set the exclude list location. 
+<br/><br/>The exclude list location specifies a text file listing bundles to be excluded from the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. The include list seeds the set of bundles to be analyzed (when omitted,
+all bundles are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a regular expression to match against bundle names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example exclude list:
+<pre>
+# EXCLUDED BUNDLES
+R:org\.eclipse\..*\.doc\..*
+...
+</pre>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">includelist</td>
+	<td valign="top">
+		Set the include list location. 
+<br/><br/>The include list location specifies a text file listing bundles to be included in the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. The include list seeds the set of bundles to be analyzed (when omitted,
+all bundles are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a regular expression to match against bundle names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example include list:
+<pre>
+# INCLUDED BUNDLES
+R:org\.eclipse\..*
+...
+</pre>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
 	<td valign="top">debug</td>
 	<td valign="top">Set the debug value.
 		<br><br>The possible values are: <code>true</code>, <code>false</code>
@@ -161,12 +209,14 @@ classpath.</p>
 		considerapi=<font color="#008000">"true"</font>
 		considerillegaluse=<font color="#008000">"true"</font>
 		archivepatterns=<font color="#008000">"org.eclipse.test.bundle:/libs/contributed.jar"</font>
+		excludelist=<font color="#008000">"D:\exclude_list_external.txt"</font>
 		debug=<font color="#008000">"true"</font>
 	/&gt;</font></b>
 </pre>
 <p>This will run the task creating <code>*.xml</code> files inside the folder <code>/eclipse/apiuse-both/XML</code>.
 The task will search all bundles in the product location - defined by the regular expression <code>.*</code> - searching 
-for all references to any bundles whose identifier begins with org.eclipse (defined by the <code>org\.eclipse.*</code> regular expression).</p>
+for all references to any bundles whose identifier begins with org.eclipse (defined by the <code>org\.eclipse.*</code> regular expression).
+It will use the exclude list file located in <code>D:\exclude_list_external.txt</code> to reduce the number of problems to report.</p>
 <p>While scanning, any class files found in the /libs/contributed.jar archive inside org.eclipse.test.bundle will be ignored.</p>
 <p>If debug is enabled, some debug tracing will show up in the Ant console.</p>
 

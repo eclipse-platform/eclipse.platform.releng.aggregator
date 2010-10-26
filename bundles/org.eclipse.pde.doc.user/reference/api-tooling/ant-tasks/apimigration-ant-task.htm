@@ -24,6 +24,8 @@ classpath.</p>
 		usescan=<font color="#008000">"..."</font>
 		scopepattern=<font color="#008000">"..."</font>
 		referencepattern=<font color="#008000">"..."</font>
+		excludelist=<font color="#008000">"..."</font>
+		includelist=<font color="#008000">"..."</font>		
 		report=<font color="#008000">"..."</font>
 		debug=<font color="#008000">"..."</font>
 	/&gt;</font></b>
@@ -77,6 +79,52 @@ classpath.</p>
 	<td align="center" valign="top">No</td>
 </tr>
 <tr>
+	<td valign="top">excludelist</td>
+	<td valign="top">
+		Set the exclude list location. 
+<br/><br/>The exclude list location specifies a text file listing bundles to be excluded from the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. The include list seeds the set of bundles to be analyzed (when omitted,
+all bundles are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a regular expression to match against bundle names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example exclude list:
+<pre>
+# EXCLUDED BUNDLES
+R:org\.eclipse\..*\.doc\..*
+...
+</pre>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">includelist</td>
+	<td valign="top">
+		Set the include list location. 
+<br/><br/>The include list location specifies a text file listing bundles to be included in the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. The include list seeds the set of bundles to be analyzed (when omitted,
+all bundles are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a regular expression to match against bundle names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example include list:
+<pre>
+# INCLUDED BUNDLES
+R:org\.eclipse\..*
+...
+</pre>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
 	<td valign="top">report</td>
 	<td valign="top">Set the output location where the reports will be generated.
 		<br><br>
@@ -123,13 +171,15 @@ classpath.</p>
 		usescan=<font color="#008000">"/eclipse/scans/sdk3.4"</font>
 		scopepattern=<font color="#008000">".*"</font>
 		referencepattern=<font color="#008000">"org\.eclipse.*"</font>
+		excludelist=<font color="#008000">"D:\exclude_list_external.txt"</font>
 		report=<font color="#008000">"/eclipse/apimigration/xml"</font>
 		debug=<font color="#008000">"true"</font>
 	/&gt;</font></b>
 </pre>
 <p>This will run the task creating <code>*.xml</code> files inside the folder <code>/eclipse/apimigration/xml</code>.
 The task will re-resolve all references in the <code>usescan</code> location - defined by the regular expression <code>.*</code> - against 
-the candidate product whose identifier begins with org.eclipse (defined by the <code>org\.eclipse.*</code> regular expression).</p>
+the candidate product whose identifier begins with org.eclipse (defined by the <code>org\.eclipse.*</code> regular expression).
+It will use the exclude list file located in <code>D:\exclude_list_external.txt</code> to reduce the number of problems to report.</p>
 <p>If debug is enabled, some debug tracing will show up in the Ant console.</p>
 
 <p><img src="../../../images/ngrelr.png" alt="Related reference" border="0"></p>
