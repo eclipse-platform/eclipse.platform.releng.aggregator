@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -474,7 +474,7 @@ public class DB {
         try {
             result= fSQL.queryScenarios(variations, scenarioPattern);
             ArrayList scenarios= new ArrayList();
-            for (int i= 0; result.next(); i++)
+			while (result.next())
 		        scenarios.add(result.getString(1));
             return (String[])scenarios.toArray(new String[scenarios.size()]);
 
@@ -508,7 +508,7 @@ public class DB {
         ResultSet result= null;
         try {
             result= fSQL.queryVariations(variations.toExactMatchString(), scenarioPattern);
-            for (int i= 0; result.next(); i++) {
+			while (result.next()) {
                 Variations v= new Variations();
                 v.parseDB(result.getString(1));
                 String build= v.getProperty(seriesKey);
