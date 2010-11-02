@@ -11,30 +11,13 @@
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.osgi.util.NLS;
-
-import org.eclipse.core.runtime.CoreException;
-
+import java.io.*;
+import java.util.*;
+import org.eclipse.core.filebuffers.*;
 import org.eclipse.core.resources.IFile;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.text.*;
+import org.eclipse.osgi.util.NLS;
 
 
 /**
@@ -63,8 +46,8 @@ public abstract class SourceFile {
 	            return new BatFile(file);
 			} else if (extension.equals("js")) { //$NON-NLS-1$
 	            return new JavaScriptFile(file);
-			} else if (extension.equals("xml")) { //$NON-NLS-1$
-	            return new XmlFile(file);
+//			} else if (extension.equals("xml")) { //$NON-NLS-1$
+//	            return new XmlFile(file);
 			}
         }
 		return null;
