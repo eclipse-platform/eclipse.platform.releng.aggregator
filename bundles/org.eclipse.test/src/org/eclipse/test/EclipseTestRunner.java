@@ -146,7 +146,10 @@ public class EclipseTestRunner implements TestListener {
 	}
 	public static int run(String[] args) throws IOException {
 		String className= null;
-		String testPluginName= null;
+		String classesNames = null;
+		String testPluginName = null;
+		String testPluginsNames = null;
+		String formatterString =null;
 		
         boolean haltError = false;
         boolean haltFail = false;
@@ -167,21 +170,24 @@ public class EclipseTestRunner implements TestListener {
 				if (i < args.length-1)
 					className= args[i+1]; 
 				i++;	
+			} else if (args[i].toLowerCase().equals("-classesnames")) {
+				if (i < args.length-1)
+					classesNames= args[i+1];
+				i++;
 			} else if (args[i].toLowerCase().equals("-testpluginname")) {
 				if (i < args.length-1)
 					testPluginName= args[i+1]; 
 				i++;	
+			} else if (args[i].toLowerCase().equals("-testpluginsnames")) {
+				if (i < args.length-1)
+					testPluginsNames= args[i+1];
+				i++;
 			} else if (args[i].startsWith("haltOnError=")) {
                 haltError= Project.toBoolean(args[i].substring(12));
             } else if (args[i].startsWith("haltOnFailure=")) {
                 haltFail = Project.toBoolean(args[i].substring(14));
             } else if (args[i].startsWith("formatter=")) {
-                try {
-                    createAndStoreFormatter(args[i].substring(10));
-                } catch (BuildException be) {
-                    System.err.println(be.getMessage());
-                    return ERRORS;
-                }
+            	formatterString = args[i].substring(10);
             } else if (args[i].startsWith("propsfile=")) {
                 FileInputStream in = new FileInputStream(args[i].substring(10));
                 props.load(in);
@@ -191,18 +197,50 @@ public class EclipseTestRunner implements TestListener {
             	return ERRORS;
 			}
         }
-			
+		// Add/overlay system properties on the properties from the Ant project
+		Hashtable<Object, Object> p= System.getProperties();
+		for (Enumeration<Object> _enum = p.keys(); _enum.hasMoreElements(); ) {
+			Object key = _enum.nextElement();
+			props.put(key, p.get(key));
+		}
+		if (testPluginsNames != null && classesNames != null) {
+			// we have several plugins to look tests for, let's parse their
+			// names
+			String[] testPlugins = testPluginsNames.split(",");
+			String[] suiteClasses = classesNames.split(",");
+			try {
+				createAndStoreFormatter(formatterString,suiteClasses);
+			} catch (BuildException be) {
+				System.err.println(be.getMessage());
+				return ERRORS;
+			}
+			int returnCode=0;
+			int j=0;
+			for (String oneClassName : suiteClasses) {
+				JUnitTest t = new JUnitTest(oneClassName);
+				t.setProperties(props);
+				EclipseTestRunner runner = new EclipseTestRunner(t, testPlugins[j],
+						haltError, haltFail);
+				transferFormatters(runner,j);
+				runner.run();
+				j++;
+				if(runner.getRetCode()!=0){
+					returnCode=runner.getRetCode();
+				}
+			}
+			return returnCode;
+		}
+		try {
+			createAndStoreFormatter(formatterString);
+		} catch (BuildException be) {
+			System.err.println(be.getMessage());
+			return ERRORS;
+		}	
 		if (className == null)
 			throw new IllegalArgumentException("Test class name not specified");
 		
         JUnitTest t= new JUnitTest(className);
 
-        // Add/overlay system properties on the properties from the Ant project
-        Hashtable<Object, Object> p= System.getProperties();
-        for (Enumeration<Object> _enum = p.keys(); _enum.hasMoreElements(); ) {
-            Object key = _enum.nextElement();
-            props.put(key, p.get(key));
-        }
         t.setProperties(props);
 	
 	    EclipseTestRunner runner= new EclipseTestRunner(t, testPluginName, haltError, haltFail);
@@ -466,7 +504,41 @@ public class EclipseTestRunner implements TestListener {
         }
         fgFromCmdLine.addElement(createFormatter(formatterClassName, formatterFile));
     }
+    
+    /**
+	 * Line format is: formatter=<pathname>
+	 */
+	private static void createAndStoreFormatter(String line, String...suiteClassesNames )
+			throws BuildException {
+		String formatterClassName = null;
+		File formatterFile = null;
 
+		int pos = line.indexOf(',');
+		if (pos == -1) {
+			formatterClassName = line;
+		} else {
+			formatterClassName = line.substring(0, pos);
+		}
+		File outputDirectory = new File(line.substring(pos + 1));
+		outputDirectory.mkdir();
+		for (String suiteClassName : suiteClassesNames) {
+			
+			String pathname = "TEST-"+suiteClassName+".xml";
+			if(outputDirectory!=null && outputDirectory.exists()){
+				pathname = outputDirectory.getAbsolutePath()  +"/"+pathname;
+			}
+			formatterFile = new File(pathname);
+			fgFromCmdLine.addElement(createFormatter(formatterClassName,
+					formatterFile));
+			
+		}
+		
+	}
+
+    private static void transferFormatters(EclipseTestRunner runner, int j) {
+		runner.addFormatter(fgFromCmdLine.elementAt(j));
+    }
+    
     private static void transferFormatters(EclipseTestRunner runner) {
         for (int i= 0; i < fgFromCmdLine.size(); i++) {
             runner.addFormatter(fgFromCmdLine.elementAt(i));
