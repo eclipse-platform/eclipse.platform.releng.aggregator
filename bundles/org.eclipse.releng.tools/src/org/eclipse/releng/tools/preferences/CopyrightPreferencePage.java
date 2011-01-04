@@ -10,16 +10,11 @@
  *******************************************************************************/
 package org.eclipse.releng.tools.preferences;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.releng.tools.Messages;
 import org.eclipse.releng.tools.RelEngPlugin;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -31,6 +26,20 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -342,7 +351,11 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		store.setValue(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, fIgnoreProperties.getSelection());
 		store.setValue(RelEngCopyrightConstants.IGNORE_XML_KEY, fIgnoreXml.getSelection());
 		
-		RelEngPlugin.getDefault().savePluginPreferences();
+		try {
+			InstanceScope.INSTANCE.getNode(RelEngPlugin.ID).flush();
+		} catch (BackingStoreException e) {
+			RelEngPlugin.log(IStatus.ERROR, "could not save preferences", e); //$NON-NLS-1$
+		}
 		
 		return super.performOk();
 	}
