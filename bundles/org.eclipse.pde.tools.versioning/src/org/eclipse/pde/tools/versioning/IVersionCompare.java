@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,73 +33,73 @@ public interface IVersionCompare {
 
 	/**
 	 * This String type constant is a property name in compare option file; 
-	 * It's value indicates exclusive feature ids.
+	 * Its value indicates exclusive feature ids.
 	 */
 	public static final String EXCLUDE_FEATURES_OPTION = "exclude.features"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates inclusive feature ids.
+	 * Its value indicates inclusive feature ids.
 	 */
 	public static final String INCLUDE_FEATURES_OPTION = "include.features"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates exclusive plugin ids.
+	 * Its value indicates exclusive plugin ids.
 	 */
 	public static final String EXCLUDE_PLUGINS_OPTION = "exclude.plugins"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates inclusive plugin ids.
+	 * Its value indicates inclusive plugin ids.
 	 */
 	public static final String INCLUDE_PLUGINS_OPTION = "include.plugins"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates exclusive operation systems.
+	 * Its value indicates exclusive operation systems.
 	 */
 	public static final String EXCLUDE_OS_OPTION = "exclude.os"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates inclusive operation systems.
+	 * Its value indicates inclusive operation systems.
 	 */
 	public static final String INCLUDE_OS_OPTION = "include.os"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates exclusive windows systems.
+	 * Its value indicates exclusive windows systems.
 	 */
 	public static final String EXCLUDE_WS_OPTION = "exclude.ws"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates inclusive windows systems.
+	 * Its value indicates inclusive windows systems.
 	 */
 	public static final String INCLUDE_WS_OPTION = "include.ws"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates exclusive system architecture specifications.
+	 * Its value indicates exclusive system architecture specifications.
 	 */
 	public static final String EXCLUDE_ARCH_OPTION = "exclude.arc"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates inclusive system architecture specifications.
+	 * Its value indicates inclusive system architecture specifications.
 	 */
 	public static final String INCLUDE_ARCH_OPTION = "include.arc"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file; 
-	 * It's value indicates exclusive locale language specifications.
+	 * Its value indicates exclusive locale language specifications.
 	 */
 	public static final String EXCLUDE_NL_OPTION = "exclude.nl"; //$NON-NLS-1$
 
 	/**
 	 * This String type constant is a property name in compare option file;
-	 * It's value indicates inclusive locale language specifications
+	 * Its value indicates inclusive locale language specifications
 	 */
 	public static final String INCLUDE_NL_OPTION = "include.nl"; //$NON-NLS-1$
 
