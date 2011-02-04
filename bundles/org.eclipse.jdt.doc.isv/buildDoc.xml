@@ -74,41 +74,8 @@
 			<include name="*htm*" />
 		</replace>
 		
-		<antcall target="generateJdtAptJavadoc" />
-		
 	</target>
 	
-	<target name="generateJdtAptJavadoc">
-		<property name="javadoc15" value="${javadoc}" />
-		
-		<property name="jdtaptoptionsFile" value="jdtaptOptions.tmp.txt" />
-		<copy file="jdtaptOptions.txt" tofile="${jdtaptoptionsFile}" overwrite="true" />
-		
-		<condition property="argsListDelimiter" value=":">
-			<os family="unix" />
-		</condition>
-		<condition property="argsListDelimiter" value=";">
-			<os family="windows" />
-		</condition>
-
-		<replaceregexp file="${basedir}/${jdtaptoptionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
-		<replace file="${basedir}/${jdtaptoptionsFile}" token="@rt@" value="${bootclasspath}" />
-
-		<!--scrub isv plugin directories of any preexisting api doc content-->
-		<delete dir="reference/apt" />
-		<mkdir dir="reference/apt" />
-
-		<exec dir="." executable="${javadoc15}" output="jdtapt.doc.bin.log">
-			<arg line="@${basedir}/${jdtaptoptionsFile} -J-Xmx500M" />
-		</exec>
-		
-		<!--workaround for bug 101048-->
-		<replace dir="reference/apt" token="=&quot;/../misc/api-usage-rules.html" value="=&quot;./../misc/api-usage-rules.html">
-			<include name="*htm*" />
-		</replace>
-		
-	</target>
-
 	<target name="buildPlatformDoc" unless="platform.index.present">
 		<ant antfile="buildDoc.xml" dir="../org.eclipse.platform.doc.isv" />
 	</target>
