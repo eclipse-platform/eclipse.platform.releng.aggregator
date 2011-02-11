@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,11 +31,11 @@ import java.util.zip.ZipOutputStream;
  * A tool for performing operations on files.
  */
 public class FileTool {
+
 	/**
-	 * A zip filter which is used to filter out unwanted entries
-	 * while extracting a zip file.
+	 * A zip filter which is used to filter out unwanted entries while extracting a zip file.
 	 * 
-	 * @see FileTool#unzip(IZipFilter, ZipFile, File, Log)
+	 * @see FileTool#unzip
 	 */
 	public interface IZipFilter {
 		/**
@@ -407,10 +407,11 @@ public class FileTool {
 						if(innerZipFile != null){
 							try {
 								innerZipFile.close();
+								System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
 							} catch(IOException e2){
 							}
-						}
-						System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
+						} else
+							System.out.println("Could not unzip: " + fileName + ". InnerZip = <null>");
 						e.printStackTrace();
 					}
 				
@@ -461,10 +462,11 @@ public class FileTool {
 						if(innerZipFile != null){
 							try {
 								innerZipFile.close();
+								System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
 							} catch(IOException e2){
 							}
-						}
-						System.out.println("Could not unzip: " + fileName + ". InnerZip = " + innerZipFile.getName() + ". Lenght: " + innerZipFile.getName().length());
+						} else
+							System.out.println("Could not unzip: " + fileName + ". InnerZip = <null>");
 						e.printStackTrace();
 					}
 				
