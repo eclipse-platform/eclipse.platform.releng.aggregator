@@ -35,10 +35,14 @@
 		<property name="formatter" value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter" />
 
 		<!--default heap sizes when running performance tests-->
-		<condition property="vmargs" value=" -Xms256M -Xmx512M">
+		<condition property="vmargs" value=" -Xms256M -Xmx512M -XX:MaxPermSize=500m">
 			<equals arg1="${test.target}" arg2="performance" />
 		</condition>
-		<property name="extraVMargs" value="" />
+		<tstamp prefix="NOW" />
+		<property name="coverage-output" value="${eclipse-home}/coverage" />
+		<property file="${basedir}/finalPluginsVersions.properties" />
+		<echo message="basedir = ${basedir}"/>
+		<property name="extraVMargs" value="-javaagent:${basedir}/plugins/org.eclipse.test_${org.eclipse.test}/lib/jacocoagent.jar=destfile=${coverage-output}/jacoco${classname}${NOW.DSTAMP}_${NOW.TSTAMP}.exec"/>
 		<property name="plugin-path" value="" />
 		<property name="timeout" value="7200000" />
 		<property name="test-output" value="${eclipse-home}/${classname}.xml" />
@@ -64,7 +68,7 @@
 		<condition property="vmargs" value=" -Xms40m -Xmx384m -XX:MaxPermSize=256m">
 			<os family="windows" />
 		</condition>
-		<property name="vmargs" value=" -Xms40m -Xmx384m" />
+		<property name="vmargs" value=" -Xms40m -Xmx384m -XX:MaxPermSize=256m" />
 
 		<!--set default jvm to use for testing-->
 		<property name="jvm" value="${java.home}/bin/java" />
@@ -93,7 +97,7 @@
 	</target>
 
 	<target name="eclipse-test" description="Runs the specified classname as a plug-in test.">
-		<property name="vmargs" value="-Xms256m -Xmx512m" />
+		<property name="vmargs" value="-Xms256m -Xmx512m -XX:MaxPermSize=256m" />
 
 		<!--use -consolelog if launching a headless test-->
 		<condition property="consolelog" value="-consolelog">
