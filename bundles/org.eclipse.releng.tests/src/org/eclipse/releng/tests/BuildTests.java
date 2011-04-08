@@ -355,7 +355,7 @@ public class BuildTests extends TestCase {
 
 	public static final String[] REQUIRED_FEATURE_FILES = { "epl-v10.html",
 			"feature.properties", "feature.xml", "license.html" };
-	public static final String REQUIRED_FEATURE_SUFFIX = ".jpg";
+	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
 	public static final String[] REQUIRED_PLUGIN_FILES = { "about.html",
 			"plugin.properties", "plugin.xml" };
