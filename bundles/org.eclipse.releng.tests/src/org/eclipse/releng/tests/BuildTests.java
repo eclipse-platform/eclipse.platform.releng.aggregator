@@ -750,7 +750,7 @@ public class BuildTests extends TestCase {
 
 		private void findProblems(URL comparatorLogs) {
 		
-			String COMPARATOR_ERROR = "Difference found";		
+			String COMPARATOR_ERROR = "difference found";		
 
 			BufferedReader in = null;
 		
