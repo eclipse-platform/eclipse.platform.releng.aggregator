@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,10 +22,16 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 import junit.framework.AssertionFailedError;
@@ -34,18 +40,18 @@ import junit.framework.TestListener;
 import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
-
-import org.eclipse.osgi.util.ManifestElement;
-
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters
@@ -196,6 +202,10 @@ public class EclipseTestRunner implements TestListener {
             } else if (args[i].equals("-testlistener")) {
             	System.err.println("The -testlistener option is no longer supported\nuse the formatter= option instead");
             	return ERRORS;
+            } else if (args[i].equals("-timeout")) {
+				if (i < args.length-1)
+					startStackDumpTimoutTimer(args[i+1]); 
+				i++;	
 			}
         }
 		// Add/overlay system properties on the properties from the Ant project
@@ -248,6 +258,75 @@ public class EclipseTestRunner implements TestListener {
         transferFormatters(runner);
         runner.run();
         return runner.getRetCode();
+	}
+
+	/**
+	 * Starts a timer that dumps all stack traces shortly before the given timeout expires. 
+	 * 
+	 * @param timeoutArg the -timeout argument from the command line 
+	 */
+	private static void startStackDumpTimoutTimer(final String timeoutArg) {
+		try {
+			/* The delay (in ms) is the sum of
+			 * - the expected time it took for launching the current VM and reaching this method
+			 * - the time it will take to dump all threads
+			 */
+			int delay= 30000;
+			
+			int timeout= Integer.parseInt(timeoutArg) - delay;
+			if (timeout > 0) {
+				new Timer("EclipseTestRunnerTimer", true).schedule(new TimerTask() {
+					@Override
+					public void run() {
+						dump();
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							// continue
+						}
+						dump();
+					}
+
+					private void dump() {
+						System.err.println("EclipseTestRunner almost reached timeout '" + timeoutArg + "'.");
+						String time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").format(new Date());
+						System.err.println("Thread dump at " + time + ":");
+						Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
+						for (Entry<Thread, StackTraceElement[]> entry : stackTraces.entrySet()) {
+							String name= entry.getKey().getName();
+							StackTraceElement[] stack= entry.getValue();
+							Exception exception= new Exception(name);
+							exception.setStackTrace(stack);
+							exception.printStackTrace();
+						}
+						
+						final Display display= Display.getDefault();
+						display.syncExec(new Runnable() {
+							public void run() {
+								Control focusControl= display.getFocusControl();
+								if (focusControl != null) {
+									System.err.println("FocusControl: ");
+									do {
+										System.err.println(focusControl);
+										focusControl= focusControl.getParent();
+									} while (focusControl != null);
+								}
+								Shell[] shells= display.getShells();
+								if (shells.length > 0) {
+									System.err.println("Shells: ");
+									for (int i= 0; i < shells.length; i++) {
+										Shell shell= shells[i];
+										System.err.println((shell.isVisible() ? "visible: " : "invisible: ") + shell);
+									}
+								}
+							}
+						});
+					}
+				}, timeout);
+			}
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
 	}
 
     /**
