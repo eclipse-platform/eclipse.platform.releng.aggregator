@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,11 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
+import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.team.core.RepositoryProviderType;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,16 +35,22 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
-import org.eclipse.team.core.RepositoryProvider;
-import org.eclipse.team.core.RepositoryProviderType;
+
 import org.eclipse.ui.IActionDelegate;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
@@ -100,19 +105,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
             resources = new ArrayList();
             Iterator elements = selection.iterator();
             while (elements.hasNext()) {
-                Object next = elements.next();
-                if (next instanceof IResource) {
-                    resources.add(next);
-                    continue;
-                }
-                if (next instanceof IAdaptable) {
-                    IAdaptable a = (IAdaptable) next;
-                    Object adapter = a.getAdapter(IResource.class);
-                    if (adapter instanceof IResource) {
-                        resources.add(adapter);
-                        continue;
-                    }
-                }
+                addResource(elements.next(), resources);
             }
         }
         if (resources != null && !resources.isEmpty()) {
@@ -121,6 +114,20 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
             return result;
         }
         return new IResource[0];
+    }
+
+    private void addResource(Object element, ArrayList resources) {
+        if (element instanceof IResource) {
+        	resources.add(element);
+        } else if (element instanceof IWorkingSet) {
+        	IWorkingSet ws = (IWorkingSet) element;
+        	IAdaptable[] elements= ws.getElements();
+        	for (int i= 0; i < elements.length; i++)
+        		addResource(elements[i], resources);
+        } else if (element instanceof IAdaptable) {
+        	IAdaptable a = (IAdaptable) element;
+        	addResource((IResource)a.getAdapter(IResource.class), resources);
+        }
     }
 
     /**
@@ -156,7 +163,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
                     RepositoryProviderCopyrightAdapter adapter = createCopyrightAdapter(results);
                     if(adapter == null) {
             			if(!RelEngPlugin.getDefault().getPreferenceStore().getBoolean(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY)) {
-            				throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "The selected resources are not shared in a team repository", null));
+            				throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, "None of the selected resources is shared in a team repository", null));
             			}
                     } else {
                     	adapter.initialize(new SubProgressMonitor(monitor, 100));
