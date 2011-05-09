@@ -40,6 +40,9 @@ changes since the builder last built the project.  This delta is similar to the 
 the next time an incremental build is performed on that project.  Cleaning a project removes build information
 such as problem markers and class files.
 </p>
+<p>Projects support multiple <a href="resAdv_buildconfigs.htm">build configurations</a> which allow Incremental 
+Project Builders to build a project in more than one way while providing a resource delta for each build configuration.
+</p>
 <p>Builders are best understood by example. The JDT Java compiler is driven by a Java incremental project builder 
 which recompiles the files in a project that are affected by changes. When a full build is triggered, (or an incremental
 build after a clean), all of the <b> .java</b> files in the project are compiled. Any compile problems encountered 
@@ -209,6 +212,35 @@ allows the user to force a rebuild from scratch on only certain projects.  Build
 this method to clean up any problem markers and <a href="resAdv_derived.htm">derived resources</a> in the project.
 </P>
 
+<h4>Build Locking</h4>
+
+<p>
+By default, builders run with the <a href="resAdv_batching.htm">Workspace Root scheduling rule</a>.  This prevents other threads from modifying the Eclipse
+workspace while the build is in progress.  Long running builders, or builders which do not care about concurrent changes
+in parts of the resource tree, may wish to allow modification while the build is in progress.
+A builder may relax the scheduling rule its run with by overriding the #getRule method:
+</p>
+
+<pre>
+  public ISchedulingRule <a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#getRule(int, java.util.Map)">getRule</a>(int kind, Map&lt;String,String&gt; args) {
+    // Allow any resource to be modified concurrently with this buidler's invocation.
+    return null;
+  }
+</pre>
+
+<h4>Discovering what's being built</h4>
+
+It's sometimes useful for a builder to discover why its being built.  Builders have access to a build context by calling
+<pre>
+<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html">IBuildContext</a> buildContext = <a href="../reference/api/org/eclipse/core/resources/IncrementalProjectBuilder.html#getContext()">getContext</a>();
+</pre>
+When building a project and its references, projects may be implicitly built if they are reachable 
+in the reference graph of the top-level project the user requested built.
+With this API a builder can discover which <a href="resAdv_buildconfigs.htm">build configurations</a> have been built before it 
+(<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html#getAllReferencedBuildConfigs()">IBuildContext#getAllReferencedBuildConfigs()</a>), will be built after 
+it (<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html#getAllReferencingBuildConfigs()">IBuildContext#getAllReferencingBuildConfigs()</a>), as well as 
+which build configurations the user asked to be built (<a href="../reference/api/org/eclipse/core/resources/IBuildContext.html#getRequestedConfigs()">IBuildContext#getRequestedConfigs()</a>).  
+
 <H3>
 Associating an incremental project builder with a project</H3>
 <P >
@@ -260,7 +292,6 @@ This trigger is usually passed through to the IncrementalProjectBuilder as the b
 is invoked.</p> 
 <p>The major exception to this is where no delta exists. In this case the build <i>trigger</i> is always promoted to <b>FULL_BUILD</b>.</p>
 
-<p>
 The mapping between triggers and kinds looks like: 
 <table border="1">
 <tr>
@@ -283,7 +314,7 @@ The mapping between triggers and kinds looks like:
 <td>CLEAN_BUILD</td>
 <td>IncrementalProjectBuilder#clean(...)</td>
 </tr>
-</table></p>
+</table>
 
 <h4>Ignoring Build Kinds</h4>
 
@@ -292,7 +323,7 @@ The platform provides API for configuring which build <i>kind</i>s a builder res
 as 'isConfigurable' in its <a href="../reference/extension-points/org_eclipse_core_resources_builders.html">extension point</a> it can be configured at runtime to respond to, or ignore, certain build <i>triggers</i>.
 </p>
 
-<p>For example a long running builder which doesn't want to be called during workspace AUTO_BUILD, can use:
+For example a long running builder which doesn't want to be called during workspace AUTO_BUILD, can use:
 <pre>
   <a href="../reference/api/org/eclipse/core/resources/ICommand.html">ICommand</a>#setBuilding(AUTO_BUILD, false);
 </pre>
@@ -307,7 +338,7 @@ if INCREMENTAL_BUILD is promoted to FULL_BUILD, a builder that responds to FULL_
 if AUTO_BUILD is promoted to FULL_BUILD, <strong>only</strong> builders that respond to AUTO_BUILD will be called. 
 This is to allow long running builders to ignore AUTO_BUILD requests completely.
 </li>
-</ul></p>
+</ul>
 
 <p>See <a href="../reference/api/org/eclipse/core/resources/ICommand.html">ICommand</a> for more information.</p>
 
