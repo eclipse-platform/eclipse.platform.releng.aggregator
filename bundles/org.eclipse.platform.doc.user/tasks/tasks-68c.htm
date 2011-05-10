@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Working with patches</title>
+</HEAD>
+
+<BODY BGCOLOR="#ffffff">
+<H1>Working with patches</H1>
+
+<p>Patches allow developers to share work without storing it in a repository. 
+  This is helpful when a developer wants to contribute to a project that is shared 
+  through a repository but does not have write access to the repository. In this 
+  situation, the developer can create a patch and either e-mail it to a developer 
+  who does have write access or attach it to a bug in the bug reporting system 
+  used by the project, depending on the process defined by the project. A developer 
+  that does have write access can then apply the patch to the project and commit 
+  the changes.</p>
+<H2>To create a patch from a CVS project:</H2>
+<ol>
+  <li>Select the resource that contains the modifications to be included in the 
+    patch. You can select resources that reside in multiple projects and at any level
+    as the Create Patch wizard, when run in its default mode, knows how to create a multi-project
+    patch. The patch should also be applied to the same file revisions that it 
+    is generated on so steps should be taken to ensure that the patch is applied 
+    to the same resource line-up (the easiest way to do this is to create the 
+    patch on top of a version).</li>
+  <li>From the popup menu, select <b>Team &gt; Create Patch...</b>. The Create 
+    Patch wizard will open.</li>
+  <li>Choose where the patch should be saved: 
+    <ol type="a">
+      <li><i>Save to Clipboard</i> - this will place the patch on the clipboard 
+        so it can be pasted into a text editor such as an e-mail program.</li>
+      <li><i>Save to File System</i> - this will place the patch in the specified 
+        file in the local file system</li>
+      <li><i>Save in Workspace</i> - this will place the patch in the specified 
+        file inside one of the existing workbench projects.</li>
+    </ol>For small patches it may be reasonable to transfer the patch using the clipboard 
+    but in most cases the local file system in the best option to use. </li>
+    <li>You can preview and fine tune your patch selection by expanding the Resources tree presented
+    in the Changes pane. Only those elements which are checked will be included in the patch. Click <b>Next</b> to configure how the patch is generated.</li>
+  <li>Choose how to configure the patch:
+    <ol type="a">
+      <li><i>Diff output format</i> - Allows the choice of several common diff 
+        output formats. <i>Unified</i> is the format used by many patch application 
+        tools including Eclipse. The format used in Context and Unified diffs allows to apply a patch, even though the line number mentioned 
+        for the hunk (patch terminology) is incorrect. In this case, when applying the patch, the algorithm scans both forwards and backwards
+        for a set of lines matching the context given for the hunk.</li>
+      <li><i>Patch Root</i> - Allows you to specify at what level your patch is rooted at. The choices
+      are <i>Workspace</i>, <i>Project</i> and <i>Selection</i>.<br>
+      <br><i>Workspace</i> allows you to include resources from multiple projects in your patch and is the <em>default</em> option. Workspace 
+      patches can be applied to any resource in the workspace - they contain enough information to allow the Apply Patch wizard
+      to figure out which resources need to be patched.<br>
+      <br><i>Project</i> patches are rooted at the project level - which means they can only contain resources from one project and must
+      be applied to the same project.<br>
+      <br><i>Selection</i> patches are rooted at whatever the selected resource is and must be applied to the same resource.
+   	</li>
+    </ol>
+  </li>
+  <li>Click <b>Finish</b>. </li>
+  <li>Transfer the patch as appropriate for the project being patched.</li>
+</ol>
+<H2>To apply a patch:</H2>
+<ol>
+  <li>Select the resource that the patch was generated on. This resource should 
+    contain the same file revisions as the line-up on which the patch was generated.</li>
+  <li>From the pop-up menu, select <b>Team &gt; Apply Patch...</b>. The Apply 
+    Patch wizard will open.<br><br>
+    This can also be achieved by copying the patch contents to the clipboard 
+    and pasting it directly into the Package Explorer view by choosing <b>Edit &gt; Paste</b>. 
+    In this case, you can skip the next step.</li>
+  <li>Indicate where the patch is to be found:
+    <ol type="a">
+      <li><i>File</i> - the patch is in a file on the local file system. Either 
+        type in the full path to the file or use the <b>Browse...</b> button to 
+        find the file.</li>
+      <li><i>Clipboard</i> - the patch is on the clipboard. <b>Warning:</b> It 
+        is safer to use a file based patch. Line endings may not be handled properly 
+        if the clipboard is used and the patch was generated on a different platform 
+        (i.e. Linux vs. Windows).</li>
+       <li><i>URL</i> - the patch is located under the given URL. <b>Warning:</b>
+       Make sure the URL you entered is valid and contains a proper patch. 
+       Otherwise you won't be able to apply it. Also, please keep in mind that 
+       applying a patch directly from a URL may take some time.
+       </li> 
+       <li><i>Workspace</i> - the patch has been saved somewhere in the workspace.</li>
+    </ol> Click <b>Next</b> to see the effect of applying the patch.</li>
+  <li>
+  <b>Optional Step</b>: <i>this step applies, only if you have a patch rooted at the project or selection level - workspace
+  rooted patches will automatically proceed to the Patch Preview Page.</i> In the Patch Target Specification page, you should
+  select the resource that is to act as the root of the patch.
+  </li>
+  <li>The patch preview page shows whether the patch could be successfully applied
+  to files in your workspace. The top pane shows the list of changes contained in your patch.
+  There are two types of entries in the top pane: file changes and unmatched patch segments 
+  (known as 'hunk' in patch terminology).
+  <ol type="a">
+  <li>If one of more of the patch segments can be automatically applied to the file, the file will be shown
+  with an incoming change indicator. You can inspect the change by double-clicking on the file.</li>
+  <li>If one or more hunks cannot be automatically applied, the hunk entries will appear as children of the
+  file in the top pane and a red exclamation mark indicates that there is a problem with a patch or hunk. 
+  You can inspect the hunk by double-clicking on it. You can then manually apply the hunk
+  from the right pane to the file on the left. Saving from the left pane will update the parent file entry in the top pane but
+  will not modify the file on disk. The file on disk is only modified when Finish is pressed.
+  In order to apply the full patch
+    successfully you will have to eliminate the problems (red exclamation marks) either by manually
+    applying the patch segments, by excluding the patch segment from the operation by 
+    selecting <strong>Remove</strong> from the 
+  context menu or by tweaking the options on this wizard page (see 'Options' below).
+  </li>
+  </ol>
+  </li>
+  <li>If all is well, click <b>Finish</b> to apply the patch. The workspace will 
+    now contain outgoing changes for each file modified by the patch.</li>
+</ol>
+
+<p>Patches can be applied by synchronizing them with a local content</p>   
+
+<H3>To synchronize with a patch:</H3>
+<ol>
+	<li>
+  		From the Team Synchronizing perspective select the <strong>Synchronize...</strong> 
+		action from the Synchronize <img src="../images/synch_participants.png" alt="" border="0" > 
+		button drop down.
+	</li>
+	<li>
+		Select <strong>Synchronize with Patch</strong> from the list of possible synchronization types 
+		and click <strong>Next</strong>.
+	</li>
+	<li>Indicate where the patch is to be found:
+    <ol type="a">
+      <li><i>File</i> - the patch is in a file on the local file system. Either 
+        type in the full path to the file or use the <b>Browse...</b> button to 
+        find the file.</li>
+      <li><i>Clipboard</i> - the patch is on the clipboard. <b>Warning:</b> It 
+        is safer to use a file based patch. Line endings may not be handled properly 
+        if the clipboard is used and the patch was generated on a different platform 
+        (i.e. Linux vs. Windows).</li>
+       <li><i>URL</i> - the patch is located under the given URL. <b>Warning:</b>
+       Make sure the URL you entered is valid and contains a proper patch. 
+       Otherwise you won't be able to apply the patch. Also, please keep in mind that 
+       applying a patch directly from a URL may take some time.
+       </li>
+       <li><i>Workspace</i> - the patch has been saved somewhere in the workspace.</li>
+    </ol> Click <b>Next</b> to see the effect of applying the patch.
+    </li>
+	<li>
+		<b>Optional Step</b>: <i>this step applies, only if you have a patch rooted at the project or selection level - workspace
+		rooted patches will automatically proceed to the Patch Preview Page.</i> In the Patch Target Specification page, you should
+		select the resource that is to act as the root of the patch.
+	</li>
+	<li>
+		<b>Optional Step</b>: <i>this step applies, only if your patch refers to projects that are inaccessible - if all projects from the patch are present in the workspace
+		and are open, this page will be skipped.</i> In the Inaccessible Projects page you can open any closed projects. Moreover, details about non-existing projects will be displayed.
+		Projects that are closed or do not exist in the workspace cannot be patched.
+	</li>
+	<li>
+		On the final page, click <b>Finish</b> to preview patch changes in the Synchronize view.
+	</li>
+</ol>
+
+<H3>Options for applying a patch</H3>
+
+  	For getting successful matches of your patch file you have the following options:
+   	<ol>
+   	
+   		<li>
+   			Go back to the first page of the Apply Patch wizard and
+   			select the correct resource to which the patch should be applied.
+   		</li>
+   	
+   	  	<li>
+   	  		If a common prefix of the path names stored in the patch file doesn't match
+   	  		the path names in you current workspace, you can <i>Ignore leading path name segments</i>.
+  		</li>
+
+   	  	<li>
+   	  		Use the <i>Ignore whitespace</i> button to make the matching process
+   	  		independent from whitespace differences between the patch file and files
+   	  		in your workspace. 
+  		</li>
+
+   	  	<li>
+   	  		Adjust the <i>Fuzz factor</i> (patch terminology). This factor indicates the amount of hunk context lines to ignore. 
+			If the Fuzz factor value is zero all lines need to match.
+			If the fuzz factor is greater than zero, for example 2, the first two context lines before the hunk and the last two context lines after the hunk are ignored. 
+			Click <b>Guess</b> to calculate the fuzz factor that allows the most hunks to be matched.
+  		</li>
+
+   	  	<li>
+   	  		Use the <i>Reverse patch</i> option for patch files that already have been applied to your
+   	  		workspace. This option is also useful to undo or redo a patch.
+  		</li>
+
+  		<li>
+  			For Workspace patches, you can select another project in your workspace
+  			to apply the patch changes to. To do this, select a project in the top pane and select <b>Move</b> from the context menu. This will launch a dialog with a list of all available projects in your
+  			workspace. Select a project and click <b>OK</b>; the patch changes will be applied to your selected project.
+  		</li>
+
+  		<li>
+			Use the <i>Show Excluded</i> option to show the hunks which you have already selected to not include in the patch.
+		</li>
+
+		<li>
+			When synchronizing with a patch, the options above are available in the Synchronize View's pull down menu.
+			You can also switch between available models to get extra information about the changes being applied.
+  		</li>
+
+   	</ol>
+
+
+<p><img border="0" src="../images/ngrelc.png" alt="Related concepts" ><br>
+<a href="../concepts/concepts-26.htm">Team programming with CVS</a><br>
+</p>
+
+<p><img border="0" src="../images/ngrelt.png" alt="Related tasks" ><br>
+<a href="tasks-68.htm">Comparing resources</a><br>
+<a href="tasks-115.htm">Synchronizing with the repository</a>
+</p>
+
+
+<p><img border="0" src="../images/ngrelr.png" alt="Related reference" ><br>
+<a href="../reference/ref-19.htm">Team</a>
+<a href="../reference/ref-47.htm">CVS</a>
+</p>
+
+
+
+</BODY>
+</HTML>

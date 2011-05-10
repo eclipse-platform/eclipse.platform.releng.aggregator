@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+
+<title>Installing software using the p2 director application</title>
+</head>
+<body>
+
+<h1>Installing software using the p2 director application</h1>
+In addition to the "Software Updates" dialog, you can also perform
+provisioning operations from a command line or script. 
+This is achieved using a tool called the director application. The director application 
+is a command line tool for installing additional software or uninstalling
+software from an Eclipse-based product. This application is capable of provisioning a
+complete installation from scratch or simply extending your application.
+Depending on your needs, this application can be executed both inside and
+outside of the target product being provisioned.
+
+<h2>Terminology</h2>
+<ul>
+	<li><b>Director application:</b> the application performing p2
+	operations such as install or uninstall. This application is provided
+	by the org.eclipse.equinox.p2.director.app bundle.</li>
+	<li><b>Provisioning operation:</b> an operation installing,
+	uninstalling features.</li>
+	<li><b>Target product:</b> the installation targeted by the
+	provisioning operation.</li>
+	<li><b>Builder:</b> an eclipse based application containing the
+	director application bundle and its dependents.</li>
+</ul>
+<br>
+
+<h2>Running inside the target application</h2>
+<p>In this mode, the provisioning operation happens from within the
+targeted product that you are provisioning. It is equivalent to starting
+up the targeted product and using the p2 UI to perform the equivalent
+operation.</p>
+<p>This means that the target application has to be in a runnable
+state and has to contain the director application bundle. Also, since the
+target product will have run, cache files will have been created in the
+configuration folder (e.g. configuration/org.eclipse.osgi).</p>
+<p>The following example shows the command line used to install CDT
+into the SDK.</p>
+<pre>
+<code>
+  &lt;targetProductFolder&gt;/eclipsec.exe 
+   -application org.eclipse.equinox.p2.director 
+   -repository http://download.eclipse.org/releases/helios/
+   -installIU org.eclipse.cdt.feature.group/&lt;version&gt;
+</code>
+</pre>
+
+<h2>Provisioning without running the target application</h2>
+<p>In this case the provisioning operation happens "outside" of
+the targeted product. The "targeted product" is *not* started. This
+allows one to both modify an existing installation and create a complete
+installation from scratch given proper metadata.</p>
+
+<p>This also has the advantage that since the targeted product does
+not need to be started, the provisioning operation can be performed on
+any platform for any other platform (e.g. on my linux machine, one can
+add plug-ins to a windows-based target application).</p>
+
+<h3>Installing / uninstalling IUs into a target product</h3>
+<p>To install or uninstall something into an existing target product
+a few extra arguments than for the "inside" mode need to be set. These
+mostly consist in providing the provisioning operation the ID of the
+profile it needs to operate on, and where it is located on disk.</p>
+
+<p>For example, if from a directory called "d:\builder" containing
+the builder, you want to install CDT into an existing SDK located into
+"d:\eclipse", you would use the following command line.</p>
+<pre>
+<code>
+   d:\builder\eclipsec.exe
+   -application org.eclipse.equinox.p2.director
+   -repository http://download.eclipse.org/releases/helios/
+   -installIU org.eclipse.cdt.feature.group
+   -tag AddCDT
+   -destination d:/eclipse/
+   -profile SDKProfile</code>
+</pre>
+<p>Note that there is no need to describe the os/ws/arch of the
+platform being targeted because all this information is already 
+available in the profile of the application in which we are
+provisioning.</p>
+
+<h3>Installing a complete product</h3>
+<p>The creation of a complete product using the director application
+only needs a few extra arguments compared to the previous example. Most of these
+consist of values used to initialize the profile in which the
+application will be provisioned.</p>
+
+<p>The following example demonstrates how to create a linux/gtk
+installation of the Eclipse SDK provisioned into a folder called "d:\eclipse" using
+a director application located in "d:\builder".</p>
+
+<pre>
+<code>
+   d:\builder\eclipsec.exe
+   -application org.eclipse.equinox.p2.director
+   -repository http://download.eclipse.org/eclipse/updates/3.6
+   -installIU org.eclipse.sdk.ide
+   -tag InitialState
+   -destination d:/eclipse/
+   -profile SDKProfile
+   -profileProperties org.eclipse.update.install.features=true
+   -bundlepool d:/eclipse/
+   -p2.os linux
+   -p2.ws gtk
+   -p2.arch x86
+   -roaming
+ </code>
+</pre>
+<p>The -p2.* arguments describe the os/ws/arch that the provisioned
+product is targeting.</p>
+
+<h2>Arguments Description</h2>
+<ul>
+<li><b>-application
+org.eclipse.equinox.p2.director</b>: the application ID.</li>
+<li><b>-metadataRepository</b>: a comma separated list of
+metadata repository URLs where the software to be installed can be
+found.</li>
+<li><b>-artifactRepository</b>: a comma separated list of
+artifact repository URLs where the software artifacts can be found.</li>
+<li><b>-repository</b>: a comma separated list of repository URL where 
+  each entry denotes colocated meta-data and artifact repositories.</li>
+<li><b>-installIU</b>: a comma separated list of IUs to install. Each entry in the list is in the form &lt;id&gt; [ '/' &lt;version&gt; ].
+If you are looking to install a feature, the identifier of
+the feature has to be suffixed with ".feature.group".</li>
+<li><b>-uninstallIU</b>: a comma separated list of IUs to uninstall. Each entry in the list is in the form &lt;id&gt; [ '/' &lt;version&gt; ].</li>
+<li><b>-revert</b>: Revert the installation to a previous state. The previous state can either be a tag (see -tag / -listtags) or a previous profile state [ the number representing the previous state of the profile  as found in p2/org.eclipse.equinox.p2.engine/&lt;profileId&gt;/ ].</li>
+<li><b>-purgeHistory</b>: Remove the history of the profile registry.</li>
+<li><b>-destination</b>: the path of a folder in which the targeted
+product is located.</li>
+<li><b>-list</b>: lists all IU's found in the given repositories in a property like format. The optional arguments can be an comma separated list of entries where each entry is in the form &lt;id&gt; [ '/' &lt;version&gt; ], or a p2 QL query prefixed with Q:, or Q:group as shortcut for groups.</li>
+<li><b>-listTags</b>: list all the tags found for the given profile.</li>
+<li><b>-listInstalledRoots</b>: list all the roots IUs found in the given profile. Each entry is the list in the form id / version</li>
+<li><b>-profile</b>: the profile id containing the
+description of the targeted product. This ID is is defined by the 
+<tt>eclipse.p2.profile</tt> property contained in the config.ini of the targeted
+product. For the Eclipse SDK the ID is "SDKProfile"</li>
+<li><b>-profileProperties</b>: a comma separated list of &lt;key&gt;=&lt;value&gt;
+pair. The property org.eclipse.update.install.features=true will cause
+the update manager features to be installed.</li>
+<li><b>-bundlepool</b>: the location of where the plug-ins and features will be stored. This value is
+only taken into account when a new profile is created. For an
+application where all the bundles are located into the plugins/ folder
+of the destination, set it to &lt;destination&gt;.</li>
+<li><b>-p2.os</b>: the OS to use when the profile is created.
+This will be used to filter which OS specific installable units need to
+be installed.</li>
+<li><b>-p2.ws</b>: the windowing system to use when the
+profile is created. This will be used to filter which WS specific
+installable units need to be installed.</li>
+<li><b>-p2.arch</b>: the architecture to use when the profile
+is created. This will be used to filter which architecture specific
+installable units need to be installed.</li>
+<li><b>-roaming</b>: indicates that the product resulting
+from the installation can be moved. This property only makes sense when
+the destination and bundle pool are in the same location. This value is only taken
+into account when the profile is created.</li>
+<li><b>-shared</b>: use a shared location for the install. The path defaults to ${user.home}/.p2.</li>
+<li><b>-tag</b>: a label. This allows to tag the profile state resulting from the operation being executed. </li>
+<li><b>-verifyOnly</b>: only verify that the actions can be performed. Don't actually install or remove anything.</li>
+</ul>
+While doing these operations, you can disable the automatic mirror selection mechanism by setting the VM argument eclipse.p2.mirrors to false.
+</body>
+</html>

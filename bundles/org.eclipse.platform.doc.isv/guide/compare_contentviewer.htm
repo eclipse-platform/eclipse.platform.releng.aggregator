@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Implementing a Content Viewer</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Implementing a content viewer</H2>
+
+
+<p>
+The compare plug-in allows you to supply specialized viewers for viewing and
+merging content differences between unstructured elements.</p>
+
+
+<h3>
+Simple content viewers</h3>
+
+
+<p>
+A <b>content viewer</b> is used in places where only a single input is available and therefore
+no compare is necessary.&nbsp; A typical example for this is the &quot;<b>Restore from Local
+History</b>&quot; function.&nbsp; The <a href="../reference/extension-points/org_eclipse_compare_contentViewers.html"><b>org.eclipse.compare.contentViewers</b></a>
+extension point allows you to define a specialized content viewer that does not
+compare its inputs. </p>
+<pre>&lt;extension
+	point="org.eclipse.compare.contentViewers"&gt;
+	&lt;viewer
+		extensions="java,java2"
+		class="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"
+		id="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"&gt;
+	&lt;/viewer&gt;
+	&lt;contentTypeBinding
+		contentTypeId="org.eclipse.jdt.core.javaSource"
+		contentViewerId="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator"&gt;
+	&lt;/contentTypeBinding&gt;
+&lt;/extension&gt;
+</pre>
+<p>Specialized viewers contributed by your plug-in are designated in the
+<b>viewer</b> element.  You must specify the <b>id </b>of the viewer and the <b>class</b> that
+creates it.  You may also specify any file <b>extensions</b> for which the content viewer should be used.&nbsp;&nbsp;</p>
+<p>You may also use the <b>contentTypeBinding</b> element to associate a <a href="runtime_content.htm">content type</a> 
+with a content viewer.  
+</p>
+<h3>Content merge viewers</h3>
+<p>	A <b> content merge viewer </b> performs a two-way or three-way compare of its inputs
+and presents the result side-by-side or in any other suitable way.&nbsp; The viewer lets the user 
+merge between the inputs.  Content merge viewers are common for text or images.</p>
+<p>If the standard merge viewers are not appropriate for your plug-in's
+function, you may choose to implement your own content merge viewer.&nbsp; Your
+content merge viewer should be registered with the platform using the
+<a href="../reference/extension-points/org_eclipse_compare_contentMergeViewers.html"><b>org.eclipse.compare.contentMergeViewers</b></a>
+extension point.&nbsp; The following markup shows
+the definition of specialized content merge viewers for viewing Java files and
+properties files in the Java IDE:
+</p>
+<pre>&lt;extension
+      point="org.eclipse.compare.contentMergeViewers"&gt;
+      &lt;viewer
+            extensions="java,java2"
+            class="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"
+            id="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"&gt;
+      &lt;/viewer&gt;
+      &lt;contentTypeBinding
+            contentTypeId="org.eclipse.jdt.core.javaSource"
+            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.JavaContentViewerCreator"&gt;
+	  &lt;/contentTypeBinding&gt;
+&lt;/extension&gt;
+&lt;extension
+      point="org.eclipse.compare.contentMergeViewers"&gt;
+      &lt;viewer
+            extensions="properties,properties2"
+            class="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator"
+            id="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator"&gt;
+      &lt;/viewer&gt;
+      &lt;contentTypeBinding
+            contentTypeId="org.eclipse.jdt.core.javaProperties"
+            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.PropertiesFileMergeViewerCreator"&gt;
+	  &lt;/contentTypeBinding&gt;
+&lt;/extension&gt;
+</pre>
+<p>
+Similar to content viewers, specialized merge viewers contributed by your plug-in are designated in the
+<b>viewer</b> element.  You must specify the <b>id </b>of the viewer and the <b>class</b> that
+creates it.  You may also specify any file <b>extensions</b> for which the content merge viewer should be used.
+</p>
+<p>Also similar to content viewers, you can use <b>contentTypeBinding</b> to associate a <a href="runtime_content.htm">content type</a> 
+with a merge viewer.  The JDT plug-in binds content merge viewers to two different content types:  Java source and Java properties files.
+</p>
+
+
+<p> <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>
+is an abstract compare and merge viewer
+with two side-by-side content areas and an optional content area for a
+common ancestor (for three-way compare).&nbsp; Because the implementation makes
+no assumptions about the content type, the subclass is responsible for dealing
+with the specific content type.&nbsp;&nbsp;</p>
+
+
+<p> <b>ImageMergeViewer</b> in <b> org.eclipse.compare.internal</b> shows how to
+implement a simple merge viewer for images using a <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>.&nbsp;
+A <a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a> 
+accesses its model by means of a content
+provider which must implement the
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/IMergeViewerContentProvider.html"><b>IMergeViewerContentProvider</b></a> interface.</p>
+
+
+<h4><a name="Text">Text merging</a></h4>
+
+
+<p> If your viewer uses text, additional classes that&nbsp; compare
+and merge text content can be used.</p>
+<p>
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
+is the concrete subclass of
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/ContentMergeViewer.html"><b>ContentMergeViewer</b></a>
+ used for comparing and merging text content.&nbsp; A text merge viewer uses the
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/RangeDifferencer.html"><b>RangeDifferencer</b></a>
+to perform a textual, line-by-line comparison of two (or three) input documents.</p>
+<p>
+For text lines that differ, the
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
+uses an
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/ITokenComparator.html"><b>ITokenComparator</b></a>
+to find the longest sequences of matching and non-matching tokens.
+The 
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>'s
+default token compare works on characters separated by white space. If a
+different strategy is needed (for example, Java tokens in a Java-aware
+merge viewer), clients can create their own token comparators by implementing
+the
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/ITokenComparator.html"><b>ITokenComparator</b></a>
+interface.</p>
+<p>
+ <a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a>
+ works on whole documents and on sub ranges of documents. For partial documents,
+the viewer's input must adapt to an
+<a href="../reference/api/org/eclipse/compare/contentmergeviewer/IDocumentRange.html"><b>IDocumentRange</b></a>
+instead of an
+<a href="../reference/api/org/eclipse/jface/text/IDocument.html"><b>IDocument</b></a>.</p>
+
+<p>The <a href="../reference/api/org/eclipse/compare/contentmergeviewer/TextMergeViewer.html"><b>TextMergeViewer</b></a> also
+supports the use of a shared document (i.e. document's that are shared by multiple open editors) when the input adapts to an 
+<a href="../reference/api/org/eclipse/compare/ISharedDocumentAdapter.html"><b>ISharedDocumentAdapter</b></a>. Subclasses of
+TextMergeViewer that provide syntax highlighting must implement both the <code>getDocumentPartitioner()</code> and
+<code>getDocumentPartitioning()</code> methods to support shared documents.	</p>
+
+<h4>Range differencing</h4>
+<p> 
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/RangeDifferencer.html"><b>RangeDifferencer</b></a>
+ finds the longest sequences of matching and
+non-matching comparable entities in text content.
+ Clients must supply
+an input to the differencer that implements the
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b></a>
+interface.
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b></a>
+breaks the input data into a sequence
+of entities and provides a method for comparing
+one entity with the entity in another
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b></a>.
+</p><p>
+For example, to compare two text documents and find the longest common
+sequences of matching and non-matching lines,
+the implementation of
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/IRangeComparator.html"><b>IRangeComparator</b> </a>
+must break the document into lines and provide a method for testing
+whether two lines are considered equal.
+See <b>org.eclipse.compare.internal.DocLineComparator</b> for an example of how this can be done.</p>
+<p>The differencer returns the differences among these sequences as an
+array of
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/RangeDifference.html"><b>RangeDifference</b></a>
+objects.
+Every single
+<a href="../reference/api/org/eclipse/compare/rangedifferencer/RangeDifference.html"><b>RangeDifference</b></a>
+describes the kind of difference
+(no change, change, addition, deletion) and the corresponding ranges
+of the underlying comparable entities in the two or three inputs.
+</p>
+</BODY>
+</HTML>

@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Concurrency infrastructure</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Concurrency infrastructure</H2>
+<p>
+One of the major challenges of a complex system is to remain responsive while tasks are being performed.  This
+challenge is even greater in an extensible system, when components that weren't designed to run together are
+sharing the same resources.  The
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/package-summary.html"> org.eclipse.core.runtime.jobs</a></b> 
+package addresses this challenge by providing infrastructure for scheduling, executing, and managing 
+concurrently running operations.   This infrastructure is based on the use of <i>jobs</i> to represent
+a unit of work that can run asynchronously.</p>
+<h3>Jobs</h3>
+The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> class represents
+a unit of asynchronous work running concurrently with other jobs.  To perform a task, a plug-in creates 
+a job and then <i>schedules</i> it.  Once a job is scheduled, it is added to a job queue managed by the 
+platform.  The platform uses a background scheduling thread to manage all of the pending jobs.  As a running
+job completes, it is removed from the queue and the platform decides which job to run next.  When a job 
+becomes active, the platform invokes its <b>run()</b> method.  Jobs are best demonstrated with a simple example:
+<pre>
+   class TrivialJob extends Job {
+      public TrivialJob() {
+         super("Trivial Job");
+      }
+      public IStatus run(IProgressMonitor monitor) {
+         System.out.println("This is a job");
+         return Status.OK_STATUS;
+      }
+   }
+</pre>
+The job is created and scheduled in the following snippet:
+<pre>
+   TrivialJob job = new TrivialJob();
+   System.out.println("About to schedule a job");
+   job.schedule();
+   System.out.println("Finished scheduling a job");
+</pre>
+The output of this program is timing dependent.  That is, there is no way
+to be sure when the job's <b>run</b> method will execute in relation
+to the thread that created the job and scheduled it.  The output will
+either be:
+<pre>
+   About to schedule a job
+   This is a job
+   Finished scheduling a job
+</pre>
+or:
+<pre>
+   About to schedule a job
+   Finished scheduling a job
+   This is a job
+</pre>
+
+<p>
+If you want to be certain that a job has completed before continuing, you can use
+the <b>join()</b> method.  This method will block the caller until the job has completed, or 
+until the calling thread is interrupted.  Let's rewrite our snippet from above in a more 
+deterministic manner:
+</p>
+<pre>   TrivialJob job = new TrivialJob();
+   System.out.println("About to schedule a job");
+   job.schedule();
+   job.join();
+   if (job.getResult().isOk())
+      System.out.println("Job completed with success");
+   else
+      System.out.println("Job did not complete successfully");
+</pre>
+Assuming the <b>join()</b> call is not interrupted, this method is guaranteed to
+return the following result:
+<pre>
+   About to schedule a job
+   This is a job
+   Job completed with success
+</pre>
+<p>
+Of course, it is generally not useful to join a job immediately after scheduling it,
+since you obtain no concurrency by doing so. In this case you might as well do the work
+from the job's run method directly in the calling thread.  We'll look at some examples later on where 
+the use of join makes more sense.
+</p>
+<p>
+The last snippet also makes use of the job <b>result</b>.  The result
+is the <b><a href="../reference/api/org/eclipse/core/runtime/IStatus.html">IStatus</a></b>
+object that is returned from the job's <b>run()</b> method.  You can use this result
+to pass any necessary objects back from the job's run method.  The result can also be used to
+indicate failure (by returning an <b><a href="../reference/api/org/eclipse/core/runtime/IStatus.html">IStatus</a></b>
+with severity <b>IStatus.ERROR</b>), or cancellation (<b>IStatus.CANCEL</b>).
+</p>
+<h3>Common job operations</h3>
+<p>
+We've seen how to schedule a job and wait for it complete, but there are many other
+interesting things you can to do jobs.  If you
+schedule a job but then decide it is no longer needed, the job can be stopped using
+the <b>cancel()</b> method.  If the job has not yet started running when canceled,
+the job is immediately discarded and will not run.  If, on the other hand, the job 
+has already started running, it is up to the job whether it wants to respond to the cancellation.
+When you are trying to cancel a job, waiting for it using the <b>join()</b> method comes in handy.
+Here is a common idiom for canceling a job, and waiting until the job is finished before
+proceeding:</p>
+<pre>   if (!job.cancel())
+      job.join();
+</pre>
+<p>If the cancellation does not take effect immediately, then <b>cancel()</b> will return 
+false and the caller will use <b>join()</b> to wait for the job to successfully cancel.
+</p>
+<p>
+Slightly less drastic than cancellation is the <b>sleep()</b> method.  Again,
+if the job has not yet started running, this method will cause the
+job to be put on hold indefinitely.  The job will still be remembered by the platform,
+and a <b>wakeUp()</b> call will cause the job to be added to the wait
+queue where it will eventually be executed. 
+</p>
+<h3>Job states</h3>
+<p>
+A job goes through several states during its lifetime.  Not only can it be manipulated through API
+such as <b>cancel()</b> and <b>sleep()</b>, but its state also changes as the platform runs and completes the
+job.  Jobs can move through the following states:</p>
+<ul>
+<li><b>WAITING</b> indicates that the job been scheduled to run, but is not running yet.</li>
+<li><b>RUNNING</b> indicates that the job is running.</li>
+<li><b>SLEEPING</b> indicates that the job is sleeping due to a sleep request or because it was scheduled
+to run after a certain delay.</li>
+<li><b>NONE</b> indicates that the job is not waiting, running, or sleeping.  A job is in this state when
+it has been created but is not yet scheduled.  It is also in this state after it is finished running or when
+it has been canceled.</li>
+</ul>
+<p>A job can only be put to sleep if it is currently <b>WAITING</b>.  Waking up a sleeping job will put it back in the
+<b>WAITING</b> state.  Canceling a job will return it to the <b>NONE</b> state.
+</p>
+<p>
+If your plug-in needs to know the state of a particular job, it can register a <i>job change listener</i> that is
+notified as the job moves through its life-cycle.  This is useful for showing progress or otherwise reporting on
+a job.  
+</p>
+<h3>Job change listeners</h3>
+<p>
+The <b><a href="../reference/api/org/eclipse/core/runtime/jobs/Job.html">Job</a></b> method
+<b>addJobChangeListener</b> can be used to register a listener on a particular job.  
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobChangeListener.html">IJobChangeListener</a></b>
+defines protocol for responding to the state changes in a job:
+</p>
+<ul>
+<li><b>aboutToRun</b> is sent when the job is about to be run.</li>
+<li><b>awake</b> is sent when a previously sleeping job is now waiting to be run.</li>
+<li><b>done</b> is sent when a job finishes execution.</li>
+<li><b>running</b> is sent when a job starts running.</li>
+<li><b>scheduled</b> is sent when a job is scheduled and waiting in the queue of jobs.</li>
+<li><b>sleeping</b> is sent when a waiting job is put to sleep.</li>
+</ul>
+<p>In all of these cases, the listener is provided with an
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobChangeEvent.html">IJobChangeEvent</a></b>
+that specifies the job undergoing the state change and status on its completion (if it is done).
+</p>
+<blockquote><i>
+Note:  Jobs also define the <b>getState()</b> method for obtaining the (relatively) current
+state of a job.  However, this result is not always reliable since jobs run in a different thread and may
+change state again by the time the call returns.  Job change listeners are the recommended mechanism
+for discovering state changes in a job.
+</i></blockquote>
+<h3>The job manager</h3>
+<p>
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+defines protocol for working with all of the jobs in the system.  Plug-ins that show progress or otherwise
+work with the job infrastructure can use <b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+to perform tasks such as suspending all jobs in the system, finding out which job is running, or receiving progress
+feedback about a particular job.  The platform's job manager can be obtained using 
+<b><a href="../reference/api/org/eclipse/core/runtime/Platform.html">Platform</a></b> API:</p>
+<pre>   IJobManager jobMan = Platform.getJobManager();
+</pre>
+<p>Plug-ins interested in the state of all jobs in the system can register a job change listener on the job manager rather
+than registering listeners on many individual jobs.  
+</p>
+<h3>Job families</h3>
+<p>
+It is sometimes easier for a plug-in to work with a group of related jobs as a single unit.
+This can be accomplished using <i>job families</i>.  A job declares that it belongs to a certain family by 
+overriding the <b>belongsTo</b> method:</p>
+<pre>
+   public static final String MY_FAMILY = "myJobFamily";
+   ...
+   class FamilyJob extends Job {
+      ...
+      public boolean belongsTo(Object family) {
+         return family == MY_FAMILY;
+      }
+   }
+</pre>
+<b><a href="../reference/api/org/eclipse/core/runtime/jobs/IJobManager.html">IJobManager</a></b>
+protocol can be used to cancel, join, sleep, or find all jobs in a family:
+<pre>
+   IJobManager jobMan = Platform.getJobManager();
+   jobMan.cancel(MY_FAMILY);
+   jobMan.join(MY_FAMILY, null);
+</pre>
+<p>Since job families are represented using arbitrary objects, you can store interesting
+state in the job family itself, and jobs can dynamically build family objects as needed.
+It is important to use family objects that are 
+fairly unique, to avoid accidental interaction with the families created by
+other plug-ins. 
+</p>
+<p>
+Families are also a convenient way of locating groups of jobs.  The method <b>IJobManager.find(Object family)</b> can
+be used to locate instances of all running, waiting, and sleeping jobs at any
+given time.
+</p>
+
+<h3>Completing jobs before shutdown</h3>
+<p>
+Since jobs run concurrently, it is possible for your jobs to be still running when the platform
+begins to shutdown. This is a dangerous situation, since after your plug-in stops it
+may not behave correctly or be able to load classes. For this reason, it is important
+for you to ensure all your jobs are canceled and completed in your plug-in's <code>stop</code>
+method. As in the previous example, you can use a job family to ensure all jobs
+scheduled by your plug-in are canceled and joined before your plug-in stops running.
+</p>
+
+</BODY>
+</HTML>

@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Adopting 3.4 mechanisms and APIs</title>
+</head>
+
+<body>
+
+<h1>Adopting 3.4 mechanisms and APIs</h1>
+<p>
+  This section describes changes that are required if you are trying to change 
+  your 3.3 plug-in to adopt the 3.4 mechanisms and APIs.
+</p>
+
+<ol>
+  <li><a href="#quickAssistContext">Quick Fix command moved to Dialogs and Windows context</a></li>
+  <li><a href="#getCharset">IFile.getCharset() caches character set values</a></li>
+  <li><a href="#updateSites">Optimizing your update site for use with p2</a></li>
+</ol>
+
+<hr>
+
+<!-- ############################################## -->
+<h2>1. <a name="quickAssistContext">Quick Fix command moved to Dialogs and Windows context</a></h2>
+<p>
+In order to enable Quick Fix in dialogs we moved the <code>org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals</code>
+command to the <b>Dialogs and Windows</b> context. Clients who registered that command for the <b>Dialogs</b> or
+<b>Dialogs and Windows</b> context can now remove their contribution from their <code>plugin.xml</code>.
+</p>
+
+<!-- ############################################## -->
+
+<h2>2. <a name="getCharset">IFile.getCharset() caches character set values</a></h2>
+<p>
+The method <code>IFile.getCharset</code> returns a cached value for the file's encoding. 
+If the file's encoding has been changed externally, and has not since been synchronized with 
+the workspace using <code>IResource.refreshLocal</code>, it may return a stale result.  
+Clients that call this method should revisit their usage to determine if a cached result 
+is acceptable. While using a cached encoding has better performance, it could lead 
+to data corruption if the wrong encoding is used to write a file.
+</p>
+<!-- ############################################## -->
+
+<h2>3. <a name="updateSites">Optimizing your update site for use with p2</a></h2>
+<p>
+Eclipse 3.4 includes a new provisioning platform called p2.  This is a replacement
+for the Update Manager technology in previous Eclipse platform releases.  While
+p2 can load update sites designed for Update Manager, you can optimize your site
+for p2 by generating p2 metadata for your update site. This metadata contains
+higher fidelity dependency information about the plug-ins and features in your update
+site, allowing for more accurate resolution of dependencies at install-time. See
+<a href="../../guide/p2_publisher.html">Generating p2 metadata</a>
+for more details on how to generate p2 metadata for your update site.
+</p>
+<p>
+p2 isn't capable of installing from update sites that make use of 
+<a href="../../reference/extension-points/org_eclipse_update_core_installHandlers.html">install handlers</a>.
+When install handlers are encountered, p2 defers installation to the classic Update
+Manager. Although end users will still be able to install such features, the end
+user experience is less polished and the more advanced download technology
+of p2 cannot be exploited. It is recommended that install handlers be avoided
+for this reason.
+</p>
+
+<!-- ############################################## -->
+
+</body>
+</html>

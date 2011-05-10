@@ -1,0 +1,312 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+  <meta content="text/css" http-equiv="Content-Style-Type">
+  <link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
+  <title>Implementing a repository provider</title>
+  <link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h2>Repository providers</h2>
+<p>
+A repository provider (<b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>)
+is the central class in the implementation of your
+repository.&nbsp;This class is responsible for configuring a project
+for repository management and providing the necessary hooks for resource
+modification.&nbsp;Providers are mapped to a project using <a
+ href="resInt_properties.htm">project
+persistent properties</a>.&nbsp; The mechanism for mapping providers to
+a project is not central to the team API, but you'll need to be aware of
+it when filtering out resources in your UI.&nbsp; For the most part, you'll be
+using team API to work with projects and associate them with your provider.
+</p>
+<p>
+To implement a provider, you must define a repository using <a
+ href="../reference/extension-points/org_eclipse_team_core_repository.html"><b>org.eclipse.team.core.repository</b></a>
+and supply a class derived from&nbsp;<b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.&nbsp;
+We'll use the CVS client as an example to see how this
+works.</p>
+<h3><a name="repository_pt"></a>Extension point</h3>
+<p>
+The <a
+ href="../reference/extension-points/org_eclipse_team_core_repository.html">
+<b> org.eclipse.team.core.repository</b></a> extension point is used to
+add a repository definition.&nbsp; Here is the markup for the CVS client.</p>
+<pre>
+&lt;extension
+	point="org.eclipse.team.core.repository"&gt;	
+	&lt;repository
+		class="org.eclipse.team.internal.ccvs.core.CVSTeamProvider"
+		id="org.eclipse.team.cvs.core.cvsprovider"&gt;	
+	&lt;/repository&gt;
+&lt;/extension&gt;
+</pre>
+<p>This registers your team provider with the team support plug-in and
+assigns
+an id that should be used when your provider is associated with a
+project.&nbsp; The specified <b>class</b> for the repository must extend <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.
+</p>
+<h3><a name="repo_impl"></a>Implementing a RepositoryProvider</h3>
+<p>
+The class identified in the extension must be a subclass of <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.
+Its primary responsibilities are to configure and deconfigure a project
+for
+repository support, and supply any necessary resource modification
+hooks.&nbsp;
+The CVS client serves as a good example.&nbsp; Its repository provider
+is <b>CVSTeamProvider</b>.</p>
+
+<pre>public class CVSTeamProvider extends RepositoryProvider {<br>...<br>	</pre>
+<p> <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a>
+</b>&nbsp;defines two abstract methods, <b>configureProject</b> and 
+<b>deconfigure</b>.&nbsp;All providers must implement these methods.</p>
+<p>A project is configured
+when it is first associated with a particular repository
+provider.&nbsp;This
+typically happens when the user selects a project and uses the team
+wizards to
+associate a project with your repository.&nbsp;Regardless of how the
+operation
+is triggered, this is
+the appropriate time to compute or cache any data about the project
+that you'll
+need to provide your repository function.&nbsp;(Assume that mapping
+the project
+to your provider has already happened.&nbsp;You'll be taking care of
+this in
+your configuration wizard.)</p>
+<p>The
+CVS provider simply broadcasts the fact that a project has been
+configured:</p>
+<pre>
+public void configureProject() throws CoreException {
+	CVSProviderPlugin.broadcastProjectConfigured(getProject());
+}
+</pre>
+<p>We won't follow the implementation of the plug-in broadcast
+mechanism.&nbsp;Suffice to say that any parties that need to compute
+or initialize project specific data can do so at this time.</p>
+<p>A project is deconfigured when the user no longer wants to associate a team 
+provider with a project.&nbsp;It is up to your plug-in to implement the user
+action that causes this to happen (and unmapping the project from your team
+provider will happen there).&nbsp;The <b>deconfigure</b> method&nbsp;is the
+appropriate time to delete any project related caches or remove any
+references to the project in the UI.&nbsp;The CVS provider flushes project
+related caches kept in its views and broadcasts the fact that the project is
+deconfigured.</p>
+<pre>
+public void deconfigure() throws CoreException {
+	...	
+	try {
+		EclipseSynchronizer.getInstance().flush(getProject(), true, true /*flush deep*/, null);
+	} catch(CVSException e) {
+		throw new CoreException(e.getStatus());
+	} finally {
+		CVSProviderPlugin.broadcastProjectDeconfigured(getProject());
+	}
+}
+</pre>
+<h3> <a name="ui_conf"></a>Configuring a project </h3>
+<p>Typically, the first step in building a team UI is implementing a
+wizard page that allows users to configure a project for your plug-in's team
+support.&nbsp;This is where your team provider's id will be added to
+the project's properties.&nbsp;You participate in project configuration by
+contributing to the <a
+ href="../reference/extension-points/org_eclipse_team_ui_configurationWizards.html"><b>org.eclipse.team.ui.configurationWizards</b></a>
+extension point.&nbsp;This wizard is shown when the user chooses 
+<b>Team&nbsp;&gt;&nbsp;Share Project...</b>.
+</p>
+<p>We'll look at this in the context of the CVS client implementation.&nbsp;
+Here is the CVS UI markup for its configuration wizard:
+</p>
+<pre>
+&lt;extension
+	point="org.eclipse.team.ui.configurationWizards"&gt;
+	&lt;wizard
+		name="%SharingWizard.name"
+		icon="icons/full/wizards/newconnect_wiz.png"	
+		class="org.eclipse.team.internal.ccvs.ui.wizards.SharingWizard"
+		id="org.eclipse.team.ccvs.ui.SharingWizard"&gt;
+	&lt;/wizard&gt;
+&lt;/extension&gt;
+</pre>
+<p>As usual, plug-ins supply a <b>class</b> that implements the
+extension and a
+unique <b>id</b> to identify their extension.&nbsp; The <b>name</b>
+and <b>icon</b>
+are shown in the first page of the project configuration wizard if
+there are
+multiple providers to choose from.
+</p>
+<p>Once the user has selected a provider, the next page shows the
+specific
+configuration information for your provider.&nbsp;(If your provider is
+the only
+team provider plug-in installed, then the wizard skips directly to your
+page.)&nbsp;Your wizard must implement <a href="../reference/api/org/eclipse/team/ui/IConfigurationWizard.html"><b>IConfigurationWizard</b></a>,
+which initializes the wizard for a specified workbench and
+project.&nbsp;The rest of the implementation depends on the design of your wizard.
+You must gather up any information needed to associate the project with your
+team support.
+</p>
+<p> When the wizard is completed, you must map your team provider to
+the project
+using <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html#map(org.eclipse.core.resources.IProject, java.lang.String)">RepositoryProvider.map(IProject,
+String)</a></b>.&nbsp;Mapping handles the assignment of the correct
+project persistent property to your project.
+</p>
+<p> The CVS client does this work in its provider's <b>setSharing</b>
+method, which is called when its wizard is finished:
+</p>
+<pre>
+public void setSharing(IProject project, FolderSyncInfo info, IProgressMonitor monitor) throws TeamException {
+
+	// Ensure provided info matches that of the project
+	...
+	// Ensure that the provided location is managed
+	...
+	// Register the project with Team
+	<b>	RepositoryProvider.map(project, CVSProviderPlugin.getTypeId());</b>
+}
+</pre>
+<h3>Finding a provider</h3>
+<p>Static methods in <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b> 
+  make it easy for clients to map projects to providers and to find the providers 
+  associated with a given project. </p>
+<ul>
+  <li><b>map(IProject, String)</b> - instantiates a provider of the
+specified provider id and maps the specified project to it.&nbsp;This
+call sets the proper project persistent property on the project.</li>
+  <li><b>unmap(IProject, String)</b> - removes the association of the
+specified provider id from the specified project.&nbsp;Leaves the
+project unassociated with any team provider.</li>
+  <li><b>getProvider(IProject)</b> - answers the provider for a given
+project.&nbsp;Can be used to find any team provider for a
+project.</li>
+  <li><b>getProvider(IProject, String) </b>- answers the provider for
+a given project with the specified provider id.&nbsp;Can be used to
+check whether a particular team provider type is associated with a
+given project.&nbsp;It is commonly used by providers to quickly check
+whether a given project is under their care.&nbsp;This call is safer
+for clients since it does not return a provider that does not match the
+client's id.</li>
+</ul>
+<h3>Repository Providers and Capabilities</h3>
+<p>
+If a product chooses to add a Repository plug-in to a capability, it
+should bind the capability to the repository id. Here are the two steps
+to take to enable a RepositoryProvider as a capability:
+</p>
+<ol>
+<li>Bind the capability to the repository provider id. This allows the
+Team plug-in to activate/disable based on repository provider ids.<br>
+<pre>
+&lt;activityPatternBinding
+	activityId="org.eclipse.team.cvs"
+	pattern="org\.eclipse\.team\.cvs\.core/.*cvsnature"&gt;
+&lt;/activityPatternBinding&gt;
+</pre>
+</li>
+<li>Next bind the capability to all UI packages for the provider:<br>
+<pre>
+&lt;activityPatternBinding
+	activityId="org.eclipse.team.cvs"
+	pattern="org\.eclipse\.team\.cvs\.ui/.*"&gt;
+&lt;/activityPatternBinding&gt;
+</pre>
+</li>
+</ol>
+<p>
+There are two capability triggers points defined by the Team plug-ins.
+The first is the <span style="font-weight: bold;">Team &gt; Share
+Project...</span> wizard which allows filtering of repository providers
+based on the enabled/disabled state of workbench capabilities, and the
+other is the Team plug-in auto-enablement trigger.</p>
+<h3>Resource modification hooks<a name="hooks"></a></h3>
+<p>Most of the interesting functionality associated with a repository
+provider occurs as the user works with resources in the project that is
+configured for the provider.&nbsp; In order to be aware of changes the
+user makes to a resource, the provider can implement <a
+ href="resAdv_hooks.htm">resource modification hooks</a>.&nbsp;The
+resources plug-in provides these hooks as extension points.&nbsp;The
+documentation for <a
+ href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>,
+<a
+ href="../reference/api/org/eclipse/core/resources/team/FileModificationValidator.html"><b>FileModificationValidator</b></a>
+and <a
+ href="../reference/api/org/eclipse/core/resources/team/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a>
+describe the details for implementing these hooks.</p>
+<p>The team plug-in optimizes and simplifies the association of the
+hook with
+appropriate resources by registering generic hooks with the resources
+plug-in.&nbsp; These generic hooks simply look up the repository
+provider for a
+given resource and obtain its hook.&nbsp; This has the advantage of
+calling only
+one provider hook rather than having each provider implementation
+register a
+hook that must first check whether the resource is managed by the
+provider.</p>
+<p>What this means to your plug-in is that you provide any necessary
+hooks by overriding methods in <b><a
+ href="../reference/api/org/eclipse/team/core/RepositoryProvider.html">RepositoryProvider</a></b>.&nbsp;
+The default implementation of these methods answers null,
+indicating that no hook is necessary (except for the resource rule
+factory, as described below): </p>
+<ul>
+  <li><b>getMoveDeleteHook</b> - answers an <a
+ href="../reference/api/org/eclipse/core/resources/team/IMoveDeleteHook.html"><b>IMoveDeleteHook</b></a>
+appropriate for the provider.&nbsp; This hook allows providers to
+control how moves and deletes occur and includes the ability to prevent
+them from happening.&nbsp; Implementors can provide alternate
+implementations for moving or deleting files, folders, and
+projects.&nbsp; The CVS client uses this hook to monitor folder
+deletions and ensure that any files contained in deleted folders are
+remembered so that they can later be deleted from the repository if
+desired.</li>
+  <li><b>getFileModificationValidator2</b> - answers an <a
+ href="../reference/api/org/eclipse/core/resources/team/FileModificationValidator.html"><b>FileModificationValidator</b></a>
+appropriate for the provider.&nbsp; This hook allows providers to
+pre-check any modifications or saves to files.&nbsp; This hook is
+typically needed when a repository provider wants to implement <b>pessimistic
+versioning</b>.&nbsp; In pessimistic versioning, a file must be checked
+out before modifying it, and only one client can check out a file at
+any given time.&nbsp; Pessimistic versioning could be implemented by
+checking out a file (if not already checked out) whenever a file is
+edited, and checking the file back in when it is saved. CVS uses
+this hook when using the watch/edit mode, but by default CVS
+uses an optimistic versioning scheme that does not require this hook.</li>
+  <li><strong>getRuleFactory</strong> - answers a resource rule factory
+appropriate for the provider. Providers should always override this
+method as the default factory locks the workspace for all operations
+for backwards compatibility reasons. Provides should subclass <a
+ href="../reference/api/org/eclipse/core/resources/team/ResourceRuleFactory.html"><strong>ResourceRuleFactory</strong></a>
+and override those rules required to ensure that the proper rules are
+obtained for operations that invoke the move/delete hook and file
+modification validator. The rule methods of particular interest to
+repository providers are:
+    <ul>
+      <li><em>deleteRule</em> - move/delete hook</li>
+      <li><em>moveRule</em> -move/delete hook</li>
+      <li><em>validateEditRule</em> - file modification validator
+validateEdit</li>
+      <li><em>modifyRule</em> - file modification validator validateSave</li>
+    </ul>
+  </li>
+</ul>
+
+</body>
+</html>

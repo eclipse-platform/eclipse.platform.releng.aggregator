@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Creating a project builder Ant buildfile</title>
+
+</head>
+<body>
+<h1>Creating a project builder Ant buildfile</h1>
+<p>To see how project builders work, we will create a simple project 
+  with a single source file and an Ant buildfile that jars up the single class file. 
+  Though this example uses Java, it should be noted that project builders are 
+  available for all projects, Java or otherwise.</p>
+<ol>
+  <li>Create a Java project named <code>HW</code>.</li>
+  <li>Create a Java source file named <code>HelloWorld</code> with a main method.</li>
+  <li>Put a single <code>System.out.println()</code> statement in the main method, and make 
+    it print a greeting of your choice.</li>
+  <li>Save changes.</li>
+  <li>Create a file named <code>projectBuilder.xml</code>, open the <b><a href="../reference/ref-anteditor.htm">Ant editor</a></b> on it, enter 
+    the following content, and save changes.
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project name="HW.makejar" default="makejar" basedir="."&gt;
+  &lt;target name ="makejar" description="Create a jar for the HW project"&gt;
+    &lt;jar jarfile="HelloWorld.jar" includes="*.class" basedir="bin"/&gt;
+  &lt;/target&gt;
+&lt;/project&gt;
+</pre>
+  </li>
+  <li>In one of the navigation views, select the HW project and choose <b>Properties</b> 
+    from its context menu.</li>
+  <li>In the project properties dialog, select <b>Builders</b>, then click <b>New...</b>. 
+  </li>
+  <li>In the <strong>Choose configuration type</strong> dialog, select <strong>Ant 
+    build</strong>, and click <b>OK</b>. </li>
+  <li>The <strong>External Tools</strong> dialog appears. Set the name to <code>Makejar</code>. 
+    In the <b>Main tab</b>, click the <strong>Buildfile</strong> <b>Browse Workspace...</b> 
+    and set the <b>Location</b> to be the <code>projectBuilder.xml</code> buildfile created 
+    above. Then click the <strong>Base Directory</strong> <b>Browse Workspace...</b> 
+    and set the Base Directory to be the HW project.
+    <p><img src="../images/ant_builder_main_tab.png" alt="Main tab of External tools dialog" border="0" ></p>
+  </li>
+  <li>In the <b>Refresh</b> tab, we want to be sure that when our <code>HelloWorld.jar</code> 
+    is created, we see it in Eclipse. By default, no refreshing is done when a 
+    project builder finishes running, so check <b>Refresh resource upon completion</b>, 
+    then select <b>The project containing the selected resource</b> in the list 
+    of scoped variables. Because refreshing can be expensive, you should, in general,
+    refresh the smallest entity that contains all resources that will be affected 
+    by your buildfile.
+    <p><img src="../images/ant_builder_refresh_tab.png" alt="Refresh tab of External tools dialog" border="0"></p>
+  </li>
+  <li>In the <b>Targets</b> tab, you can specify when this project builder 
+    is executed and which targets. By default, the <code>default</code> target is set to run <strong>After a &quot;Clean&quot; 
+    </strong> and <strong>Manual Build</strong>. You can specify other targets and other triggers. Running your project builder 
+    during auto builds is possible, though not recommended because of performance 
+    concerns. More information about the build kinds can be found <a href="qs-93a_project_builder_targets.htm">here</a>.
+    <p><img src="../images/ant_builder_targets_tab.png" alt="Targets tab of External tools dialog" border="0" ></p>
+  </li>
+  <li>Apply the changes and click <b>OK</b>.</li>
+  <li>Back in the project properties dialog, you will now see a project builder 
+    named <code>Makejar</code> that is set to run after the default <b><a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-java-builder.htm">Java builder</a></b>. Click <b>OK</b> 
+    to save the project builder and close the dialog. <br>
+    <strong>Note:</strong>You can change the order so that your Ant buildfile runs before 
+    the <b><a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-java-builder.htm">Java builder</a></b>, though that wouldn't make sense in this example. 
+    <p><img src="../images/builder_property_page.png" alt="Project properties dialog" border="0" ></p>
+  </li>
+</ol>
+<p>The <b><a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-java-builder.htm">Java builder</a></b> runs the internal Eclipse Java compiler which in 
+  turn is responsible for indexing your source so that searching, refactoring and 
+  many other features are available. Thus it is not possible to replace the internal 
+  Eclipse Java compiler by using a project builder. You can disable the <b><a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-java-builder.htm">Java builder</a></b> and you can control 
+  when the Java Builder runs with respect to the project builders that you define.</p>
+<p>
+	<img border="0" src="../images/ngrelt.png" alt="Related tasks" ><br>
+	<a href="qs-82_create.htm">Creating Ant buildfiles</a><br>
+	<a href="qs-93a_project_builder_targets.htm">Project Builder Ant Targets</a><br>
+	<a href="qs-83_edit.htm">Editing Ant buildfiles</a><br>
+	<a href="qs-85_ant_configs.htm">Saving &amp; Reusing Ant options</a><br>
+	<a href="qs-84_run_ant.htm">Running Ant buildfiles</a><br>
+	<a href="qs-92_project_builders.htm">Ant buildfiles as project builders</a><br>
+	<a href="qs-94_run_pj.htm">Executing project builders</a><br>
+	<a href="qs-95_external_tools.htm">External tools</a><br>
+	<a href="qs-96_non_ant_pjs.htm">Non-Ant project builders</a><br>
+	<a href="qs-97_standalone_ets.htm">Stand-alone external tools</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Defining a rich client application
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Defining a rich client application</H2>
+<p>
+The definition of a rich client application plug-in starts out similarly to the other plug-ins we've been
+studying.  The only difference in the <tt>MANIFEST.MF</tt> file is that the list of 
+required plug-ins is much smaller than we've been used to!
+</p>
+
+<pre>
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.eclipse.ui.examples.rcp.browser; singleton:=true
+Bundle-Version: 3.3.0.qualifier
+Bundle-ClassPath: browser.jar
+Bundle-Activator: org.eclipse.ui.examples.rcp.browser.BrowserPlugin
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui
+Eclipse-LazyStart: true
+</pre>
+
+<p>
+Up to now, we've contributed functionality to the platform workbench by declaring extensions that
+add elements to the workbench.  In all of the <tt>plugin.xml</tt> content that we've reviewed so far,
+we've only looked at individual contributions to a workbench that is assumed to be there.  On the rich
+client platform, there is no application already defined.  Your rich client plug-in is the one
+responsible for specifying the class that should be executed when the platform is started.  This 
+is done in the <a href="../reference/extension-points/org_eclipse_core_runtime_applications.html"><b>org.eclipse.core.runtime.applications</b></a>
+extension.</p>
+<pre>   &lt;extension
+         point="org.eclipse.core.runtime.applications"
+         id="app"
+         name="%appName"&gt;
+      &lt;application&gt;
+         &lt;run
+            class="org.eclipse.ui.examples.rcp.browser.BrowserApp"&gt;
+         &lt;/run&gt;
+      &lt;/application&gt;
+   &lt;/extension&gt;
+</pre> 
+<p>In this extension, we specify the class that should be run when the platform is first started.
+This class must implement <b><a href="../reference/api/org/eclipse/equinox/app/IApplication.html">IApplication</a></b>,
+which simply means that it must implement a <b>start</b> and <b>stop</b> method.  The start method is responsible for creating the SWT display and
+starting up a workbench.  The class <b><a href="../reference/api/org/eclipse/ui/PlatformUI.html">PlatformUI</a></b>
+implements convenience methods for performing these tasks.</p>
+<pre>
+	public Object start(IApplicationContext context) throws Exception {
+		Display display = PlatformUI.createDisplay();
+		try {
+			int code = PlatformUI.createAndRunWorkbench(display,
+					new BrowserAdvisor());
+			// exit the application with an appropriate return code
+			return code == PlatformUI.RETURN_RESTART
+					? EXIT_RESTART
+					: EXIT_OK;
+		} finally {
+			if (display != null)
+				display.dispose();
+		}
+	}
+</pre>
+<p>The call to <b>createAndRunWorkbench</b> will not return until the workbench is closed.  The SWT event loop and other
+low-level logistics are handled inside this method.  At this stage, it's not so important
+that you understand the underlying mechanics in running an SWT application.</p>
+<p>
+The stop method is used to force the application to shutdown.  In the browser example the workbench is closed to 
+force the application to shutdown.</p>
+<pre>
+	public void stop() {
+		final IWorkbench workbench = PlatformUI.getWorkbench();
+		if (workbench == null)
+			return;
+		final Display display = workbench.getDisplay();
+		display.syncExec(new Runnable() {
+			public void run() {
+				if (!display.isDisposed())
+					workbench.close();
+			}
+		});
+	}
+</pre>
+<p>The call to <b>syncExec</b> will not return until the workbench is closed.  This will force the application to exit 
+and the call to <b>createAndRunWorkbench</b> to return.
+</p>
+<p>
+This code can be copied to your rich client
+application with minimal changes.  In fact, the hook for you to add your own functionality is the <b>WorkbenchAdvisor</b>
+that is passed as an argument when the workbench is created.  Let's take a closer look.</p>
+</BODY>
+</HTML>

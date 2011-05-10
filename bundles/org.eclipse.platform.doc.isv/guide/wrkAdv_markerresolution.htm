@@ -1,0 +1,58 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Contributing marker resolution
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h4>Contributing marker resolution</h4>
+<p>Plug-ins can also define marker resolutions, so that their problem markers can
+participate in the workbench <b>Quick Fix</b> feature. Users can select
+a problem marker and choose a <b>Quick Fix</b> from a popup containing the list of supplied
+fixes contributed for the marker.</p>
+
+
+<p><img src="images/markerquickfixmenu.png" alt="Marker quick fix menu" border="0"></p>
+
+
+<p>Marker resolutions are contributed using the <b><a href="../reference/extension-points/org_eclipse_ui_ide_markerResolution.html">org.eclipse.ui.ide.markerResolution</a></b>
+extension point. This extension point allows plug-ins to associate a <b>class</b>
+that implements <b><a href="../reference/api/org/eclipse/ui/IMarkerResolutionGenerator.html">IMarkerResolutionGenerator</a></b>
+with a particular type of marker.&nbsp; The marker can be qualified
+by marker type only, or it can be further qualified by the value of one or more of its
+attributes.  The JDT contributes a marker resolution for Java problems:</p>
+
+<pre>
+&lt;extension
+	point="org.eclipse.ui.ide.markerResolution"&gt;
+	&lt;markerResolutionGenerator
+		markerType="org.eclipse.jdt.core.problem"
+		class="org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator"&gt;
+	&lt;/markerResolutionGenerator&gt;
+&lt;/extension&gt;
+</pre>
+
+<p>The marker resolution generator is responsible for returning an array of
+marker resolutions (<a href="../reference/api/org/eclipse/ui/IMarkerResolution.html"><b>IMarkerResolution</b></a>)
+that will be shown in the <b>Quick Fix</b> popup. The resolution will
+be <b>run()</b> if the user selects one of the fixes.</p>
+<p><img src="images/markerresolution.png" alt="Marker resolutions" border="0"></p>
+<p>
+The Problems view supports resolving multiple problems at once.  The user can
+add other matching problems to the list of problems to fix, and then apply all
+fixes in one go.  To support multiple resolutions, your implementation of <a href="../reference/api/org/eclipse/ui/IMarkerResolution.html">IMarkerResolution</a> 
+must be a subclass of <a href="../reference/api/org/eclipse/ui/views/markers/WorkbenchMarkerResolution.html">WorkbenchMarkerResolution</a>.
+</p>
+<p><img src="images/quickfix.png" alt="Picture of 'Quick Fix' dialog"></p>
+
+</BODY>
+</HTML>

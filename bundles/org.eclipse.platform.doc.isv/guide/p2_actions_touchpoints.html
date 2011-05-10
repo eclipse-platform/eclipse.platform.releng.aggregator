@@ -1,0 +1,639 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2010, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<title>Provisioning Actions and Touchpoints</title>
+</head>
+<body>
+<h1>Provisioning Actions and Touchpoints</h1>
+<h2>Introduction</h2>
+<p>A p2 Installable Unit (IU) is installed using the facilities
+provided by a <i>touchpoint</i>. The IU metadata consists of a reference
+to the touchpoint (Touchpoint Type) which also defines the version of
+the touchpoint (i.e an expectancy that it supports a certain set of
+operations), and describes instructions to execute in various p2 engine
+phases. The instructions are named after the phases - the phases
+"install", "uninstall", "configure", "unconfigure" are of interest when
+authoring, but there are also some internal phases such as "collect" and
+"checktrust" executed by the engine. Each instruction (e.g. "install")
+describes a sequence of actions to execute on the referenced touchpoint.
+Examples of actions are: create and remove directories, change
+permissions, install and remove bundles. Currently, two touchpoints
+(native, and eclipse) have been implemented. The native touchpoint has
+approximately 5 different actions, and the eclipse touchpoint has
+approximately 20. Most of these actions take parameters.</p>
+<p>The instructions are grouped and described in a Touchpoint Data
+Element. The touchpoint data element uses a Map where the key is the
+name of a p2 engine phase (such as "install"), and the value is a string
+representation of a sequence of actions. Using multiple touchpoint data
+elements is useful as it allows separation between sets of actions for
+install/uninstall/configure/unconfigure which makes it easier to
+maintain the meta data.</p>
+<h2>Actions</h2>
+<h3>Fully Qualified Action Names and Importing Actions</h3>
+<p>Each action has a fully qualified name; for example
+"org.eclipse.equinox.p2.touchpoint.eclipse.installBundle" is the FQN for
+the Eclipse touchpoints "installBundle" action. One can use the short
+name of an action if the action is imported or if the IUs "touchpoint
+type" matches the action.</p>
+Most bundle IUs use the Eclipse touchpoint type so you may be able to
+use:
+<table>
+	<tr>
+		<td><pre> installBundle(bundle:${artifact}) 
+</pre></td>
+	</tr>
+</table>
+However, if you get an error such as the following, use the fully
+qualified name.
+<table>
+	<tr>
+		<td><pre>java.lang.IllegalArgumentException: No action found for: installBundle.
+</pre></td>
+	</tr>
+</table>
+A valid call of this action using FQN might be something like:
+<table>
+	<tr>
+		<td><pre> org.eclipse.equinox.p2.touchpoint.eclipse.installBundle(bundle:${artifact}) 
+</pre></td>
+	</tr>
+</table>
+<h3>Native Touchpoint Actions</h3>
+<p><b>Action Fully Qualified Name:</b></p>
+<pre>org.eclipse.equinox.p2.touchpoint.natives.<i>action_name</i> 
+</pre>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>action</b></td>
+		<td><b>parameters</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">collect</td>
+		<td>-</td>
+		<td>collects all associated artifacts for an IU and places them
+		in a local touchpoint addressable cache. This action may be called
+		explicitly during the collect phase but is typically called as the
+		"default" action called for IUs with the Native Touchpoint Type as
+		part of the main Collect and Sizing phases.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold">cleanupzip
+		</td>
+		<td><code>source, target</code></td>
+		<td>removes unzipped files and directories that where unzipped
+		from <i>source</i> into <i>target</i> - i.e. an "undo operation" of an
+		<i>unzip</i> instruction.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">unzip</td>
+		<td>source, target</td>
+		<td>unzips the <i>source</i> into the <i>target</i> directory.
+		The <i>source</i> can be the special value <code>@artifact</code>,
+		which denotes the download cache location for the first artifact
+		key in the installable unit.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">mkdir</td>
+		<td>path</td>
+		<td>Creates the directory specified by the parameter <i>path</i>.
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">rmdir</td>
+		<td>path</td>
+		<td>Removes the directory specified by the parameter <i>path</i>.
+		Action has no effect if the referenced directory contains files. Use
+		the <i>remove</i> action for a forced recursive remove.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">link</td>
+		<td>targetDir, linkTarget,
+		linkName, force</td>
+		<td>Performs the system action <code>ln -s</code> with the
+		parameters <i>linkTarget</i> being the source-file, <i>targetDir</i>
+		is the directory where the symbolic link will be created, and <i>linkName</i>
+		is the name of the resulting link in the <i>targetDir</i>. The <i>force</i>
+		parameter is a boolean in string form (i.e. "true"/"false") and
+		indicates if an existing link with the same name should be removed
+		before the new link is created.
+		<p><em>This action is not available on platforms that do not have this command(i.e. Windows)</em></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">chmod</td>
+		<td>targetDir, targetFile,
+		permissions, options</td>
+		<td>Changes permission on a file using the system <code>chmod</code> command.
+		The <i>targetDir</i> parameter is either a path, or the special <code>@artifact</code>
+		which is a reference to the directory where the first artifact
+		included in the installable unit is located. The parameter <i>targetFile</i>
+		is the name of a file, and <i>permissions</i> is written like for the
+		<i>chmod</i> system command. The options parameter allows passing
+		additional options like "-R" for recursive operation. If multiple
+		parameters are needed separate them with a space (like on the command
+		line).
+		<p><em>This is not available on platforms that do not have this command (i.e. Windows)</em></p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">remove</td>
+		<td>path</td>
+		<td>Removes a file, or a directory (and all files under this
+		directory) as referenced by the parameter <i>path</i>.
+		<p><br>
+		(Since 3.5)</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">copy</td>
+		<td>source, target, overwrite</td>
+		<td>Copies a file or a directory (and all of its content) denoted
+		by <i>source</i> path to the <i>target</i> path.
+		<p>The boolean flag <i>overwrite</i> should be set to <i>true</i>
+		if the copy action should overwrite existing files. If overwrite is <i>false</i>
+		the operation will fail with an IO error in the files already exists.
+		<br>
+		(Since 3.5)</p>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">cleanupcopy
+		</td>
+		<td>source, target</td>
+		<td>Cleans up what was installed earlier with a <i>copy</i> from
+		<i>source</i> to <i>target</i>. I.e. this is an "undo" of a <i>copy</i>
+		operation.
+		<p><br>
+		(Since 3.5)</p>
+		</td>
+	</tr>
+</table>
+<h3>Eclipse Touchpoint Actions</h3>
+<p><b>Action Fully Qualified Name:</b></p>
+<pre>org.eclipse.equinox.p2.touchpoint.eclipse.<i>action_name</i> 
+</pre>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>instruction</b></td>
+		<td><b>parameters</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">collect</td>
+		<td>-</td>
+		<td>collects all associated artifacts for an IU and places them
+		in a local touchpoint addressable cache. This action may be called
+		explicitly during the collect phase but is typically called as the
+		"default" action called for IUs with the Eclipse Touchpoint Type as
+		part of the main Collect and Sizing phases.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">installBundle
+		</td>
+		<td>bundle</td>
+		<td>Installs a bundle artifact specified by the parameter <i>bundle</i>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">uninstallBundle
+		</td>
+		<td>bundle</td>
+		<td>Uninstalls a bundle artifact with a bundle-id specified by
+		the paramter <i>bundle</i></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">addSourceBundle
+		</td>
+		<td>bundle</td>
+		<td>Installs a source bundle artifact with the bundle-id
+		specified by the parameter <i>bundle</i></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">removeSourceBundle
+		</td>
+		<td>bundle</td>
+		<td>Removes/uninstalls the source bundle artifact with the
+		bundle-id specified by the parameter <i>bundle</i></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">installFeature
+		</td>
+		<td>feature, featureId, version</td>
+		<td>Installs the feature referenced by the parameter <i>feature</i>
+		(matched against artifacts in the iu). The feature is installed with
+		the id specified by the parameter <i>featureId</i>, or if this
+		parameter has the value <code>default</code>, with the id specified in
+		the artifact referenced by <i>feature</i>. The features is installed
+		with the version specified in <i>version</i>, or with the version
+		specified in the artifact referenced by the <i>feature</i> parameter
+		if the <i>version</i> parameter has the value <code>default</code></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">uninstallFeature
+		</td>
+		<td>feature, featureId, version</td>
+		<td>Uninstalls a feature. Parameters have the same meaning as for
+		the command <code>installFeature</code></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">setLauncherName
+		</td>
+		<td>name</td>
+		<td>Sets the name of the launcher to <code>name</code>. The
+		launcher name is used to configure launcher name specific ini files.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">addProgramArg
+		</td>
+		<td>programArg</td>
+		<td>Adds the string specified in the parameter <i>programArg</i>
+		as an argument to the program. If the parameter is the special value
+		<code>@artifact</code>, the location of the artifact referenced by the
+		first artifact key in the IU is used as the parameter value.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">removeProgramArg
+		</td>
+		<td>programArg</td>
+		<td>Removes the program argument specified in the string <i>programArg</i>
+		- if the parameter is the special value <code>@artifact</code>, the
+		location of the artifact referenced by the first artifact key in the
+		IU is used as the parameter value.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">setStartLevel
+		</td>
+		<td>startLevel</td>
+		<td>Sets the start level to the integer value specified in the
+		parameter <i>startValue</i></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">markStarted
+		</td>
+		<td>started</td>
+		<td>Marks the bundle referenced by the first artifact key in the
+		installable unit as started or not started, as controlled by the boolean parameter <i>started</i>.
+		A parameter value of "true" will mark the bundle as started and "false" will mark the bundle as not started).</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">setFrameworkDependentProperty
+		</td>
+		<td>propName, propValue</td>
+		<td>Sets the framework dependent property named <i>propName</i>
+		to the value specified in <i>propValue</i>. Framework dependent
+		properties are properties specific to the Equinox implementation of
+		the OSGi framework.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">setFrameworkIndependentProperty
+		</td>
+		<td>propName, propValue</td>
+		<td>Sets the framework independent property named <i>propName</i>
+		to the value specified in <i>propValue</i>. Framework independent
+		properties do not specifically target Eclipse and are generally
+		applicable to other OSGi frameworks.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">addProgramProperty
+		</td>
+		<td>propName, propValue</td>
+		<td>Adds the given value specified in <i>propValue</i> to the program
+		property named <i>propName</i>. The program property value is treated
+		as a comma-separated list and the given value is added to that list. Program
+		properties are used by the executable program to among other things locate
+		the jars needed to start Eclipse.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">removeProgramProperty
+		</td>
+		<td>propName, propValue</td>
+		<td>Remove the given value specified in <i>propValue</i> from the program
+		property named <i>propName</i>. The program property value is treated as 
+		a comma-separated list and the given value is removed from that list. If there
+		are no more elements in the list, then the property itself is removed. Program
+		properties are used by the executable program to among other things locate 
+		the jars needed to start Eclipse.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">setProgramProperty
+		</td>
+		<td>propName, propValue</td>
+		<td>Sets the program property named <i>propName</i> to the value
+		specified in <i>propValue</i>. Program properties are used by the
+		executable program to among other things locate the jars needed to
+		start Eclipse.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">addJvmArg
+		</td>
+		<td>jvmArg</td>
+		<td>Adds the string specified in the parameter <i>jvmArg</i> to
+		the arguments passed to the JVM.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">removeJvmArg
+		</td>
+		<td>jvmArg</td>
+		<td>Removes the string specified in the parameter <i>jvmArg</i>
+		from the arguments passed to the JVM.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">setJvm</td>
+		<td>jvm</td>
+		<td>Sets the JVM to be the path specified in the parameter <i>jvm</i>.
+		If a value of <i>null</i> is specified then the current JVM path value
+		is removed.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">checkTrust
+		</td>
+		<td>-</td>
+		<td>collects the set of bundle files on which the signature trust
+		check should be performed. The checkTrust action is not meant to be
+		user callable and is done as part of the CheckTrust phase.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">addRepository
+		</td>
+		<td>location, type, enabled</td>
+		<td>Adds the repository at <i>location</i> of type <i>type</i> to
+		the list of known repositories. The repository will then be available
+		when installing or updating the profile in the future. The <i>enabled</i>
+		parameter takes a boolean value ("true" or "false") indicating whether
+		the add repository should be enabled. The value of the <i>location</i>
+		parameter must be a well-formed URI. The <i>type</i> parameter value
+		must be the value of one of the IRepository.TYPE_* constants,
+		Specifically, type "0" indicates a metadata repository, and type "1"
+		indicates an artifact repository.
+		<p><i>Example:</i></p>
+		<pre>instructions.configure=org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/birt/update-site/2.5/,type:0,name:BIRT 2.5,enabled:true); \
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/birt/update-site/2.5/,type:1,name:BIRT 2.5,enabled:true);
+</pre></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">removeRepository
+		</td>
+		<td>location, type</td>
+		<td>Removes the repository at <i>location</i> of type <i>type</i>
+		from the list of known
+		<p>repositories. The value of the <i>location</i> parameter must
+		be a well-formed URI. The <i>type</i> parameter value must be the
+		value of one of the IRepository.TYPE_* constants, Specifically, type
+		"0" indicates a metadata repository, and type "1" indicates an
+		artifact repository.</p>
+		</td>
+	</tr>
+</table>
+<h2>Action Format</h2>
+<p>The Touchpoint Data Element has a Map that describes the actions
+to execute in the various p2 engine phases (e.g. "install", "uninstall",
+"configure", "unconfigure", "collect" and "checktrust"). The key of the
+Map entry is the name of a phase (i.e. when the actions should be
+executed), and the value is a <i>statement-sequence</i>:</p>
+<pre>  statement-sequence&nbsp;:
+      | statement ';'
+      | statement-sequence statement
+     &nbsp;;
+</pre>
+<p>Where a statement is of the format:</p>
+<pre>  statement&nbsp;:
+      | actionName '(' parameters ')'
+     &nbsp;;
+</pre>
+<pre>  parameters&nbsp;:
+      | // empty
+      | parameter
+      | parameters ',' parameter
+     &nbsp;;
+</pre>
+<pre>   parameter&nbsp;: 
+      | paramName ':' paramValue
+     &nbsp;;
+ 
+ actionName, paramName, paramValue&nbsp;:
+      | String 
+     &nbsp;;
+</pre>
+<p>In the p2 engine, the Phase will lookup the "actionName" using
+it's own phase specific actions (e.g. "collect") and also those made
+available by the associated touchpoint (e.g. "mkdir" in the native
+touchpoint, and "installBundle" in the Eclipse touchpoint) .</p>
+<p>As an example - an "install" instruction for a bundle might
+consist of the following statement:</p>
+<pre>  installBundle(bundle:${artifact});
+</pre>
+<ul>
+	<li><i>installBundle</i> is the action name</li>
+	<li><i>bundle</i> is the parameter name</li>
+	<li><i>${artifact}</i> is the parameter value. The value
+	${artifact} signifies the use of a pre-defined variable named
+	"artifact".</li>
+</ul>
+<h2>Built-in Action Variables</h2>
+<p>What follows is a catalog of the variables made available by the
+phases and touchpoints. Many of these are mostly useful to the
+implementor of new actions and touchpoint types.</p>
+<h3>Variables Available in all phases</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">#nnnn</td>
+		<td>the unicode value of a character.
+		<p><i>Note: This is especially important for the six
+		characters that require escaping.</i></p>
+		<ol>
+			<li>$ = ${#36}</li>
+			<li>, = ${#44}</li>
+			<li>&nbsp;: = ${#58}</li>
+			<li>&nbsp;; = ${#59}</li>
+			<li>{ = ${#123}</li>
+			<li>} = ${#125}</li>
+		</ol>
+		</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">profile</td>
+		<td>the profile being modified.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">phaseId</td>
+		<td>the name of the phase e.g. collect, install, etc.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">operand</td>
+		<td>the actions operand (e.g. IU pair)</td>
+	</tr>
+</table>
+<h3>Variables Available in all installable unit phases</h3>
+<p><i>e.g. collect, unconfigure, uninstall, install, configure,
+...</i></p>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">installFolder
+		</td>
+		<td>the root folder for this profile.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">touchpoint
+		</td>
+		<td>the touchpoint associated with the IUs in the operand if
+		applicable</td>
+	</tr>
+</table>
+<h3>Collect Phase Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">artifactRequests
+		</td>
+		<td>A list that a touchpoints "collect" action will use to add
+		mirroring requests to.</td>
+	</tr>
+</table>
+<h3>Unconfigure Phase Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">iu</td>
+		<td>The IU being unconfigured. This is set from the first IU of
+		the operand pair.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">artifact</td>
+		<td>The artifact id of the first artifact listed in the IU.</td>
+	</tr>
+</table>
+<h3>Uninstall Phase Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">iu</td>
+		<td>The IU being uninstalled. This is set from the first IU of
+		the operand pair.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">artifact</td>
+		<td>The artifact id of the first artifact listed in the IU.</td>
+	</tr>
+</table>
+<h3>Install Phase Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">iu</td>
+		<td>The IU being installed. This is set from the second IU of the
+		operand pair.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">artifact</td>
+		<td>The artifact id of the first artifact listed in the IU.</td>
+	</tr>
+</table>
+<h3>Configure Phase Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">iu</td>
+		<td>The IU being configured. This is set from the second IU of
+		the operand pair.</td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">artifact</td>
+		<td>The artifact id of the first artifact listed in the IU.</td>
+	</tr>
+</table>
+<h3>Eclipse Touchpoint Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">manipulator
+		</td>
+		<td>an instance of the Manipulator class used to alter the
+		configuration of an Eclipse install.</td>
+	</tr>
+</table>
+<h3>Native Touchpoint Variables</h3>
+<table border="1" cellpadding="5" style="border: 1px solid #CCC; border-collapse: collapse;">
+
+	<tr valign="top" style="background-color: #eeeeee; color: #444444;">
+		<td><b>variable</b></td>
+		<td><b>description</b></td>
+	</tr>
+	<tr valign="top">
+		<td style="font-weight: bold;">backup</td>
+		<td>the BackupStore used to save transaction state during native
+		file operations.</td>
+	</tr>
+</table>
+<h2>Additional Notes on Backup for File Operation Actions</h2>
+<p>The Native Touchpoint stores a temporary backup of files that are
+deleted or overwritten during the installation process. If an
+installation succeeds the backup is simply removed. If however the
+installation fails, the files in backup are restored to their original
+location. If the restore works as expected, the backup copy is also
+removed. Two "disaster" cases remain:</p>
+<ul>
+	<li>It was not possible to restore files (probably because of
+	faulty hardware, running out of disk, or manual tampering with files
+	during the installation).</li>
+	<li>The system crashed during the install</li>
+</ul>
+<p>The backup is placed in a directory under the directory
+referenced by the system property "java.io.tmpdir". The backup directory
+has a name with the prefix ".p2bu" which is followed by a unique key per
+running backup instance. Under the ".p2bu..." directory files are stored
+in a hierarchy that reflects their original location.</p>
+<p>In both of the disaster cases, the backup store under
+java.io.tempdir will contain copies of all files that were not
+automatically restored. If a restore is wanted, this can be performed
+manually by copying the content back to their original position (which
+is evident from the structure under ".p2bu"). This can be made with
+tools like zip (simply zip everything relative to .p2bu, and then unzip
+it from the real file system root).</p>
+<p>In case something goes wrong during restore of a backup, the
+event is logged with details of what needs to be manually restored. This
+is best effort support so in the case of a system crash file loss is possible.</p>
+</body>
+</html>

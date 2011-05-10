@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>Plug-in manifest</title>
+</head>
+
+<body>
+
+<h1>Eclipse platform plug-in manifest</h1>
+
+<p><span style='font-size:10.0pt'>Version 3.2 - Last revised May 9, 2006</span></p>
+
+<p>The manifest markup definitions below make use of various naming tokens and
+identifiers. To eliminate ambiguity, here are some production rules for these [are
+referenced in text below]. In general, all identifiers are case-sensitive. </p>
+
+<pre>SimpleToken := sequence of characters from ('a-z','A-Z','0-9','_')
+ComposedToken := SimpleToken | (SimpleToken '.' ComposedToken)
+QualifiedId := ComposedToken '.' SimpleToken
+ExtensionId := SimpleToken | QualifiedId
+ExtensionPointId := SimpleToken | QualifiedId
+ExtensionPointReference := SimpleToken | QualifiedId</pre>
+
+<p>The remainder of this section describes the plugin.xml file structure as a series
+of DTD fragments. File <a href="plugin_dtd.html">plugin.dtd</a> presents the DTD
+definition in its entirety. </p>
+
+<pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt;
+&lt;?eclipse version=&quot;3.2&quot;?&gt;
+&lt;!ELEMENT plugin (extension-point*, extension*)&gt;
+</pre>
+
+<p>The &lt;plugin&gt; element defines the body of the manifest. It optionally contains
+declarations of any new extension points being introduced by the
+plug-in, as well as configuration of functional extensions (configured into
+extension points defined by other plug-ins, or introduced by this plug-in).</p>
+
+<p>The XML DTD construction rule <tt><i>element*</i></tt> means zero
+or more occurrences of the element; <tt><i>element?</i></tt> means zero or
+one occurrence of the element; and <tt><i>element+</i></tt> (used below) means one or more
+occurrences of the element. Based on the &lt;plugin&gt; definition above, this
+means, for example, that a plug-in containing no
+extension point declarations or extension configurations is valid (for example,
+common libraries that other plug-ins depend on). Similarly, a plug-in
+containing only extension configurations and no extension points of
+its own is also valid (for example, configuring classes delivered in other
+plug-ins into extension points declared in other plug-ins). </p>
+
+<p>The Eclipse architecture is based on the notion of configurable extension
+points. The platform itself predefines a set of extension points that cover the
+task of extending the platform and desktop (for example, adding menu actions,
+contributing embedded editor). In addition to the predefined extension points,
+each supplied plug-in can declare additional extension points. By declaring an
+extension point the plug-in is essentially advertising the ability to configure
+the plug-in function with externally supplied extensions. For example, the Page
+Builder plug-in may declare an extension point for adding new Design Time
+Controls (DTCs) into its builder palette. This means that the Page Builder has
+defined an architecture for what it means to be a DTC and has implemented the
+code that looks for DTC extensions that have been configured into the extension
+points. </p>
+
+<pre>&lt;!ELEMENT extension-point EMPTY&gt;  
+&lt;!ATTLIST extension-point 
+  name               CDATA #REQUIRED 
+  id                 CDATA #REQUIRED    
+  schema             CDATA #IMPLIED 
+&gt;</pre>
+
+<p>The &lt;extension-point&gt; element has the following attributes:</p>
+
+<ul>
+ <li><b>name</b> - user-displayable (translatable) name for the extension point</li>
+ <li><b>id</b> - Either a simple id token, or a fully qualified id. Simple id should be
+ used unless there is an actual need to specify a fully qualified id.
+ <ul>
+  <li>Simple id token should be unique within this plug-in. The simple id token cannot contain dot (.) or 
+  whitespace</li>
+  <li>Qualified id should uniquely identify this extension point among all Eclipse extension points</li>
+  <li>[production rule: ExtensionPointId]</li>
+ </ul>
+ </li>
+ <li><b>schema</b> - schema
+     specification for this extension point. The exact details are being
+     defined as part of the Plug-In Development Environment (PDE). The schema
+     is currently not used at runtime. The reference is a file name relative to
+     the plug-in installation location.</li>
+</ul>
+
+<p>Actual extensions are configured into extension points (predefined, or newly declared
+in this plug-in) in the &lt;extension&gt; section. The configuration
+information is specified as well-formed XML contained between the &lt;extension&gt;
+and &lt;/extension&gt; tags. The platform does not specify the actual form of
+the configuration markup (other than requiring it to be well-formed XML). The
+markup is defined by the supplier of the plug-in that declared the extension
+point. The platform does not actually interpret the configuration markup. It
+simply passes the configuration information to the plug-in as part of the
+extension point processing (at the time the extension point logic queries all
+of its configured extensions). </p>
+
+<pre>&lt;!ELEMENT extension ANY&gt; 
+&lt;!ATTLIST extension 
+  point              CDATA #REQUIRED 
+  id                 CDATA #IMPLIED 
+  name               CDATA #IMPLIED 
+&gt;</pre>
+
+<p>The &lt;extension&gt; element has the following attributes: </p>
+<ul>
+ <li><b>point</b> - reference to
+     an extension point being configured. The extension point can be one
+     defined in this plug-in or another plug-in
+ <ul>
+  <li>[production rule: ExtensionPointReference]</li>
+ </ul>
+ </li>
+ <li><b>id</b> - optional identifier for this extension point configuration instance. This is used
+     by extension points that need to uniquely identify (rather than just enumerate) the specific 
+     configured extensions. Can be specified as either a simple id token, or a fully qualified id
+ <ul>
+  <li>Simple id token should be unique within the definition of the declaring plug-in. The simple id 
+  token cannot contain dot (.) or whitespace.</li>
+  <li>Qualified id should uniquely identify this extension among all Eclipse extensions</li>
+  <li>[production rule: ExtensionId]</li>
+ </ul>
+ </li>
+ <li><b>name</b> - user-displayable (translatable) name for the extension</li>
+</ul>
+
+<p><b>Important:</b>
+The content of the &lt;extension&gt; element is declared using the <tt>ANY</tt> rule. 
+This means that any well-formed XML can be specified within the extension
+configuration section (between &lt;extension&gt; and &lt;/extension&gt; tags). </p>
+
+<h2>Fragments</h2>
+<p>Fragments are used to increase the scope of a plug-in.
+An example would be to incorporate data such as messages or labels in another language.</p>
+<pre>&lt;?xml encoding=&quot;US-ASCII&quot;?&gt; 
+&lt;?eclipse version=&quot;3.2&quot;?&gt;
+&lt;!ELEMENT fragment (extension-point*, extension*)&gt;</pre>
+
+<p>The &lt;extension-point&gt;, and &lt;extension&gt; components of a fragment will be logically added to the hosting plug-in.
+</p>
+
+<h2>Note on the ExtensionId and ExtensionPointId</h2>
+<p> Special processing was added to support backward compatibility for ExtensionId and ExtensionPointId
+that used to contain dots ('.') prior to the version 3.2. Depending on the version specified in 
+the &lt;?eclipse version?&gt; tag:</p>
+<ul>
+<li>If the version is below 3.2, then qualified name = PluginID '.' (ExtensionID | ExtensionPointID)</li>
+</ul>
+<p> This rule applies only to the ExtensionId and ExtensionPointId that contain dot ('.') character(s).</p>
+
+<hr>
+<p><span style='font-size:10.0pt'>Older versions of the plug-in manifest can be found here:</span></p>
+<ul>
+  <li><span style='font-size:10.0pt'>Version <a href="plugin_manifest_30.html">3.0</a></span></li>
+</ul>
+
+</body>
+
+</html>

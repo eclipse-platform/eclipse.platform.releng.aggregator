@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML lang="en">
+<HEAD>
+<meta name="copyright"
+	content="Copyright (c) Simon Zambrovski and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Creation of Common Navigator View</TITLE>
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<h1>Creation of Common Navigator View</h1>
+<p>
+In order to use the CNF-based view in the application several steps are required which are discussed below. The created view can be 
+configured by binding specific content and actions to it, which is discussed in the <a href="cnf_steps_content.htm">Content and Action Binding</a>. 
+</p>
+
+<p>The example plugin <code>org.eclipse.ui.examples.navigators.resources</code> shows this.</p>
+
+<ol>
+<li>
+Add the following as dependent plug-ins:
+<ul>
+<li><code>org.eclipse.ui</code></li>
+<li><code>org.eclipse.ui.navigator</code></li>
+</ul>
+</li>
+<li>Add a View extension (<code>org.eclipse.ui.views</code>) and provide <code>org.eclipse.ui.navigator.CommonNavigator</code> 
+as the value of <code>class</code> attribute. Please note, that the <code>id</code> of the view will be required in later steps 
+for the content and action bindings.
+<pre>
+   &lt;extension
+         point="org.eclipse.ui.views"&gt;
+      &lt;view
+            name="View"
+            class="org.eclipse.ui.navigator.CommonNavigator"
+            id="example.view"&gt;
+      &lt;/view&gt;
+   &lt;/extension&gt;
+</pre>
+</li>
+</ol>
+<p>
+Please note, that if you are 
+<a href="rcp_perspective.htm">defining your own perspective</a> in which the Common 
+Navigator is used, the <code>showTitle</code> parameter must be set to <code>true</code> 
+in order the viewer renders correctly (see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=235171">bug 235171</a>).
+</p>
+<pre>
+	public void createInitialLayout(IPageLayout layout) {
+		String editorArea = layout.getEditorArea();
+		layout.setEditorAreaVisible(false);
+		layout.setFixed(true);
+		
+		layout.addStandaloneView("example.view",  true /* show title */, IPageLayout.LEFT, 1.0f, editorArea);
+	}
+</pre>
+</BODY>
+</HTML>

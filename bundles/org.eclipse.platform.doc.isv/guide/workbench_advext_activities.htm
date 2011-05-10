@@ -1,0 +1,385 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html lang="en">
+<head>
+  <meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page. Portions contributed by Jan-Hendrik Diederich (bug 228956).">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript">
+</script>
+
+  <title>Activities</title>
+
+  <link rel="stylesheet" type="text/css" href="../book.css">
+</head>
+
+<body bgcolor="#ffffff">
+  <h3>Activities</h3>An <b>activity</b> is a logical grouping of functionality that
+  is centered around a certain kind of task. For example, developing Java
+  software is an activity commonly performed by users of the platform, and the
+  JDT defines many UI contributions (views, editors, perspectives, preferences,
+  etc.) that are only useful when performing this activity. Activities can be
+  used to implement <em>progressive disclosure</em> of UI elements; when used for
+  this purpose, they are called <em>capabilities</em> in the UI. The second use
+  for activities, added for Eclipse 3.4, is to filter available UI elements based
+  on other criteria such as the current user's access permissions as defined by
+  the application.
+  <p>
+  In the following text, we will be using the following terms to distinguish
+  between the two uses of activities:</p>
+
+  <ul>
+    <li>Activities that are used to <strong>declutter</strong> the user desktop from unnecessary UI
+    elements will be called <em><strong>conventional activities</strong></em>.</li> 
+
+    <li>Activities that filter out UI elements which are not supposed to be shown to the
+    user (e.g. based on their access rights) will be called
+    <strong><em>expression-based activities</em></strong>.</li>
+  </ul>
+
+
+  <h4>Conventional activities</h4>Conventional activities are exposed to the
+  user under the name <em>capabilities</em>, although not in a way that is
+  apparent to a new user. When an activity is enabled in the platform, the UI
+  contributions associated with that activity are shown. When a activity is
+  disabled in the platform, its UI contributions are not shown. Users
+  can enable and disable these conventional activities as needed using
+  the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.sdk.capabilities)")'>
+  <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" width="28" height="32" alt="Command link"> <b>General &gt; Capabilities</b></a> preference page.
+  <p>Certain user
+  operations serve as <b>trigger points</b> for enabling an activity. For
+  example, creating a new Java project could trigger the enabling of the Java
+  development activity. In this way, users are exposed to new functionality as they
+  need it, and gradually learn about the activities that are available to them
+  and how they affect the UI. When a user first starts the platform, it is
+  desirable for as many activities as possible to be disabled, so that the
+  application is as simple as possible. Choices made in the welcome page can
+  help determine what activities should be enabled.
+  </p>
+  <p>There are certain places in the UI where the user can ask to see all
+  contributions - even the ones filtered by conventional activities, for example
+  in the <b>New...</b> wizard. UI elements that are filtered by conventional
+  activities can also still be used programmatically using the Eclipse API.
+  </p>
+
+  <h4>Expression-based activities</h4>
+  
+  Expression-based activities differ from conventional activities in that:
+
+  <ul>
+    <li>they are <b>solely</b> controlled by 
+        expressions (see&nbsp;"org.eclipse.core.expressions.definitions").
+        All other declarations related to such an
+  		activity, such as "categories", "default enabled activities", and
+  		"requirement bindings" will be ignored.</li>
+    <li>they move an UI contribution completely out of reach for users and
+    programmers. The UI contributions cannot be accessed programmatically using
+    API calls, and they do not show up when the user asks to see all contributions
+    to, for example, the <b>New...</b> wizard.</li>
+  </ul>
+
+  <h3>Conventional Activities vs. perspectives</h3>We have seen
+  (in <A href="workbench_perspectives.htm">Perspectives</a>) how perspectives are used to
+  organize different view layouts and action sets into tasks. Why do we need
+  activities? While perspectives and activities define similar kinds of tasks,
+  the main difference is how the UI contributions for a plug-in are associated
+  with them. UI contributions are associated with perspectives in the extension
+  definition of the contribution. That is, a plug-in is in charge of
+  determining what perspectives its views and action sets belong to. Plug-ins
+  are also free to define their own perspectives. Even when a perspective is
+  not active, the user can access the views and actions associated with the
+  perspective through commands such as <b>Show View</b>.
+  <p>
+  Activities are a
+  higher level of organization. Individual UI contributions are not aware of
+  activities and do not refer to the activities in their extension definitions.
+  Rather, the activities are expected to be configured at a higher level such
+  as platform integration/configuration or product install. Individual plug-ins
+  typically do not define new activities, unless the plug-in is a systems-level
+  plug-in defined by a systems integrator. In a typical scenario, a systems
+  integrator determines how functions are grouped into activities and which ones
+  are enabled by default. Activities are associated with UI contributions using
+  <b>activity pattern bindings</b>, patterns that are matched against the id of
+  the UI contributions made by plug-ins. An example will help demonstrate these
+  concepts.
+  </p>
+
+  <h3>Defining activities</h3>Activities are defined using the <b><A href="../reference/extension-points/org_eclipse_ui_activities.html">org.eclipse.ui.activities</a></b>
+
+  extension point.<br>
+  Let's look at first at a simplified version of how the Eclipse SDK
+  plug-in defines two&nbsp;conventional activities - one for
+  developing Java software and one for developing plug-ins:
+  <pre>&lt;extension
+  point="org.eclipse.ui.activities"&gt;
+  &lt;activity
+    name="Java Activity"
+    description="Developing Java Software"
+    id="org.eclipse.javaDevelopment"&gt;
+  &lt;/activity&gt;
+  
+  &lt;activity
+    name="Plug-in Activity"
+    description="Developing Eclipse Plug-ins"
+    id="org.eclipse.plugInDevelopment"&gt;
+
+  &lt;/activity&gt;
+  ...
+</pre>Activities are assigned a name and description. This name and description
+can be shown to the user whenever the they are enabling and disabling conventional
+activities, or otherwise shown information about an activity. The id of
+the activity is used when defining pattern bindings or other relationships
+between activities. For example, for conventional activities, it is
+possible&nbsp;to declare that one activity requires another activity.
+  <pre>&lt;activityRequirementBinding
+  activityId="org.eclipse.plugInDevelopment"
+  requiredActivityId="org.eclipse.javaDevelopment"&gt;
+
+&lt;/activityRequirementBinding&gt;
+</pre><br>
+  The requirement binding states that the plug-in development activity can only
+  be enabled when the Java development activity is enabled. Related
+  conventional activities can also be bound into <b>categories</b>,
+  that are shown to the user when the user is working with activities.
+  <pre>&lt;category
+  name="Development"
+  description="Software Development"
+  id="org.eclipse.categories.developmentCategory"&gt;
+&lt;/category&gt;
+
+&lt;categoryActivityBinding
+  activityId="org.eclipse.javaDevelopment"
+  categoryId="org.eclipse.categories.developmentCategory"&gt;
+
+&lt;/categoryActivityBinding&gt;
+      
+&lt;categoryActivityBinding
+  activityId="org.eclipse.plugInDevelopment"
+  categoryId="org.eclipse.categories.developmentCategory"&gt;
+&lt;/categoryActivityBinding&gt;
+</pre><br>
+  The category groups the related development conventional activities
+  together. This category is shown to the user when the user manually
+  configures conventional activities. Note that
+  expression-based activities can be also added to categories, but
+  they are ignored when the user changes states of these categories.
+
+  <h4>Binding activities to UI contributions</h4>Activities can be associated
+  with UI contributions by referring to them by id, or by pattern matching. The
+  pattern matching used in activity pattern bindings follows the rules
+  described in the <b>java.util.regex</b> package for regular expressions. The
+  patterns used by the workbench are composed of two parts. The first part uses
+  the identifier of the plug-in that is contributing the UI extension. The
+  second part is the id used by plug-in itself when defining the contribution
+  (which may or may not also include the plug-in id as part of the identifier).
+  The following format is used:
+  <pre>
+
+plug-in-identifier + "/" + local-identifier
+</pre>For example, the following activity pattern binding states that a UI
+contribution from any JDT plug-in id (<tt>org.eclipse.jdt.*</tt>) is associated
+with the Java development activity regardless of its local identifier
+(<tt>.*</tt>).
+  <pre>&lt;activityPatternBinding
+  activityId="org.eclipse.javaDevelopment"
+  pattern="org\.eclipse\.jdt\..*/.*"&gt;
+&lt;/activityPatternBinding&gt;
+</pre>The next binding is more specific. It states that the contribution named
+<tt>javanature</tt> defined in the JDT core (<tt>org.eclipse.jdt.core</tt>) is
+associated with the Java development activity.
+  <pre>&lt;activityPatternBinding
+  activityId="org.eclipse.javaDevelopment"
+  pattern="org\.eclipse\.jdt\.core/javanature"&gt;
+
+&lt;/activityPatternBinding&gt;
+</pre>
+
+It is also possible to refer to a single UI contribution using its id without having to
+use regular expression syntax if the attribute
+<tt>isEqualityPattern</tt> is set to <tt>true</tt>.<br>
+  The following XML shows the previous example with the
+  <tt>isEqualityPattern</tt> set to <tt>true</tt>.<br>
+
+  <tt><br>
+  &lt;activityPatternBinding<br>&nbsp; activityId="org.eclipse.javaDevelopment"<br>&nbsp; pattern="org.eclipse.jdt.core/javanature"<br>&nbsp; isEqualityPattern="true"&gt;<br>
+  &lt;/activityPatternBinding&gt;<br>
+  <br></tt>As you can see, activity pattern bindings can be used to associate
+  large groups of contributions with a particular activity, or to associate
+  very specific contributions with an activity. The following contributions are
+  affected by activities:
+
+  <ul>
+
+    <li>Views and editors</li> 
+
+    <li>Perspectives</li> 
+
+    <li>Preference and property pages</li> 
+
+    <li>Menus and toolbars</li> 
+
+    <li>New wizard</li>
+
+    <li>Common Navigator Action Providers</li>
+  </ul>
+  
+  The convention used by the workbench (plug-in id + local id) allows easy
+  binding to plug-ins that do not necessarily follow the naming practice of
+  prefixing their UI contribution identifiers with their plug-in's
+  identifier. Plug-ins that directly interact with the activity API are free to
+  use their own format for identifying contributions and for pattern-matching
+  against those names.
+
+  <h4>Binding activities to help contributions</h4>Activities are associated
+  with help contributions using the same pattern matching scheme used for UI
+  contributions. The second part of the identifier (the local identifier)
+  indicates the name of the table of contents (TOC) file. For example, the
+  following activity pattern binding associates all TOC files contributed by
+  JDT plug-ins (org.eclipse.jdt.*) with the Java development activity:
+  <pre>&lt;activityPatternBinding
+  activityId="org.eclipse.javaDevelopment"
+  pattern="org\.eclipse\.jdt\..*/.*"&gt;
+&lt;/activityPatternBinding&gt;
+</pre>When the Java development activity is disabled, help books contributed by
+JDT plug-ins, or any sub-books (TOCs linked to, or linked by JDT books), even
+if contributed by a different plug-in, will not show in the help UI. The topics
+defined in these books will also not show in the search results. In the case
+where JDT TOCs were not displayed as primary TOCs, but were instead linked from
+another TOC to appear as sub-trees in a book, disabling the JDT activity has
+the effect of hiding the sub-trees. The containing book will appear to define
+less topics in the UI. Using more specific binding, it is possible to associate
+activities with selected TOCs from plug-ins that contribute multiple TOCs to
+the help system. For example, the following activity pattern binding associates
+the "Examples" TOC with the Java development examples activity.
+  <pre>&lt;activityPatternBinding
+  activityId="org.eclipse.javaDevelopmentExamples"
+  pattern="org\.eclipse\.jdt\.doc\.isv\.topics_Samples.xml"&gt;
+
+&lt;/activityPatternBinding&gt;
+</pre>With such pattern binding, disabling the Java development examples
+activity will hide the "Examples" section from the "JDT Plug-in
+Developer Guide" book.
+
+  <h4>Using the activities API</h4>
+  
+  The workbench activity support includes an API for working
+  with all defined activities (to some extent also expression-based
+  activities) and changing the enabled state (only for conventional
+  activities). Most plug-ins need not be concerned with this API, but it is
+  useful when implementing functions that allow the user to work with
+  activities, or for implementing the trigger points that enable a particular
+  conventional activity. It is assumed that any plug-in that is
+  manipulating activities through API is quite aware of the ways that
+  activities are configured for a particular product. For example, the
+  workbench itself uses the API to trigger the enablement of conventional
+  activities such as Java development. We'll look at how the workbench
+  uses the generic activity API to implement triggers. The hub of all activity
+  in the workbench is <A href="../reference/api/org/eclipse/ui/activities/IWorkbenchActivitySupport.html"><b>
+
+  IWorkbenchActivitySupport</b></a>. The activity support works in tandem with
+  an <A href="../reference/api/org/eclipse/ui/activities/IActivityManager.html"><b>IActivityManager</b></a>.
+  Plug-ins can obtain the activity support instance from the workbench, and the
+  activity manager from there.
+  <pre>
+IWorkbenchActivitySupport workbenchActivitySupport = PlatformUI.getWorkbench().getActivitySupport();
+IActivityManager activityManager = workbenchActivitySupport.getActivityManager();
+</pre>The following snippet enables the Java development activity (if it is not
+already enabled). It shows a simplified version of a trigger.
+  <pre>
+...
+//the user did something Java related.  Enable the Java activity.
+Set enabledActivityIds = new HashSet(activityManager.getEnabledActivityIds());
+if (enabledIds.add("org.eclipse.javaDevelopment"))
+  workbenchActivitySupport.setEnabledActivityIds(enabledActivityIds);
+</pre>
+<p><A href="../reference/api/org/eclipse/ui/activities/IActivityManager.html"><b>IActivityManager</b></a>
+  also defines protocol for getting all defined activity and category ids, and
+  for getting the associated <A href="../reference/api/org/eclipse/ui/activities/IActivity.html"><b>IActivity</b></a>
+  or <A href="../reference/api/org/eclipse/ui/activities/IActivity.html"><b>ICategory</b></a>
+  for a particular id. These objects can be used to traverse the definition for
+  an activity or category in API, such as getting the pattern bindings or
+  requirement bindings. Listeners can be registered on the activity manager or
+  on the activities and categories themselves to detect changes in the
+  definition of a particular activity or in the activity manager itself. See
+  the package <b><A href="../reference/api/org/eclipse/ui/activities/package-summary.html">org.eclipse.ui.activities</a></b>
+  for more information.</p>
+
+  <p>
+  Note that the API methods will silently ignore attempts to enable expression-based
+  activities, or similar requests that do not apply to expression-based activities.
+  </p>
+
+  <h4>Using expression-based activities</h4>
+  
+  To filter a UI element using an expression-based activity, create an activity like the
+  following:<br>
+     
+  <tt>&lt;activity <br>&nbsp;id="forbiddenViewActivityId" name="Forbidden View Activity"&gt;<br>&nbsp;&nbsp;&lt;enabledWhen&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;with variable="rightsVariable"&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  &lt;iterate ifEmpty="false" operator="or"&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; 
+  &lt;equals value="grantShowForbidden" /&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&lt;/iterate&gt;<br>&nbsp;&nbsp;&nbsp;                     
+  &lt;/with&gt;<br>               
+  &nbsp;&nbsp;&lt;/enabledWhen&gt;<br>
+  &lt;/activity&gt;
+  </tt><br><br>
+
+  Then, bind this activity to a UI element, for example a view:<br>
+  <tt>&lt;activityPatternBinding <br>&nbsp;activityId="forbiddenViewActivityId" <br><br>&nbsp;<font color="green">&lt;!-- Switches the interpretation of the pattern 
+     as regular expression off --&gt;</font> <br>&nbsp;isEqualityPattern="true" <br>&nbsp;pattern="DemoRCP/demorcp.views.ForbiddenView"&gt; <br>
+  &lt;/activityPatternBinding&gt;
+  </tt>
+
+   <p>The following code snippets show how to control the variable "rightsVariable"
+   that appears in the activity's "enabledWhen" expression. New variables can be added
+   through the <b>org.eclipse.ui.services</b> extension point as subclasses of
+   <b>AbstractSourceProvider</b>.        
+     </p>
+
+   <p align="left">
+   <tt>
+    <code>
+<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">java.util.HashMap;<br>...</font><br>
+<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">org.eclipse.ui.AbstractSourceProvider;</font><br>
+
+<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">org.eclipse.ui.PlatformUI;</font><br>
+<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">org.eclipse.ui.handlers.IHandlerService;</font><br>
+<font color="#7f0055"><b>import&nbsp;</b></font><font color="#000000">org.eclipse.ui.services.IEvaluationService;</font><br>
+<br>
+<font color="#7f0055"><b>public&nbsp;class&nbsp;</b></font><font color="#000000">RightsSourceProvider&nbsp;</font><font color="#7f0055"><b>extends&nbsp;</b></font><font color="#000000">AbstractSourceProvider&nbsp;</font><font color="#000000">{</font><br>
+
+<br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;final&nbsp;static&nbsp;</b></font><font color="#000000">String&nbsp;RIGHT_FORBIDDEN&nbsp;=&nbsp;<font color="#2a00ff">"grantShowForbidden"</font><font color="#000000">;</font></font><br>
+<br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;final&nbsp;static&nbsp;</b></font><font color="#000000">String&nbsp;RIGHTS_VARIABLE&nbsp;=&nbsp;</font><font color="#2a00ff">"rightsVariable"</font><font color="#000000">;</font><br>
+
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>private&nbsp;final&nbsp;static&nbsp;</b></font><font color="#000000">String</font><font color="#000000">[]&nbsp;</font><font color="#000000">PROVIDED_SOURCE_NAMES&nbsp;=&nbsp;</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">String</font><font color="#000000">[]&nbsp;{&nbsp;</font><font color="#000000">RIGHTS_VARIABLE&nbsp;</font><font color="#000000">}</font><font color="#000000">;</font><br>
+<br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>private&nbsp;final&nbsp;static&nbsp;</b></font><font color="#000000">Map&lt;String,&nbsp;List&lt;String&gt;&gt;&nbsp;stateMap&nbsp;=&nbsp;</font><font color="#7f0055"><b>new&nbsp;</b></font><font color="#000000">HashMap&lt;String,&nbsp;List&lt;String&gt;&gt;</font><font color="#000000">()</font><font color="#000000">;</font><br>
+
+<br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;</b></font><font color="#000000">Map&nbsp;getCurrentState</font><font color="#000000">()&nbsp;{<BR>&nbsp;&nbsp;&nbsp;&nbsp;<FONT 
+color="#008000">/*&nbsp;"YourRightsHandler" is here just an example for&nbsp;a 
+static class<BR>&nbsp;&nbsp;&nbsp;&nbsp; * which returns the list of 
+rights&nbsp;as&nbsp;a list of strings. */</FONT></font><br>
+
+<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">stateMap.put</font><font color="#000000">(</font><font color="#000000">RIGHTS_VARIABLE,&nbsp;<EM>YourRightsHandler</EM>.getUserRights</font><font color="#000000">())</font><font color="#000000">;</font><br>
+<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>return&nbsp;</b></font><font color="#000000">stateMap;</font><br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#000000">}</font><br><br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;</b></font><font color="#000000">String</font><font color="#000000">[]&nbsp;</font><font color="#000000">getProvidedSourceNames</font><font color="#000000">()&nbsp;{</font><br>
+
+<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#7f0055"><b>return&nbsp;</b></font><font color="#000000">PROVIDED_SOURCE_NAMES;</font><br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#000000">}</font><br><BR>&nbsp;&nbsp;<FONT 
+color="#008000">/*&nbsp;This triggers an update of the rights variable state, and 
+will update also all&nbsp;<BR>&nbsp;&nbsp; * listeners to the evaluation 
+service. So that every menu point, which is also <BR>&nbsp;&nbsp; * expression 
+controlled, gets updated too. */</FONT><br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#7f0055"><b>public&nbsp;</b></font><font color="#7f0055"><b>void&nbsp;</b></font><font color="#000000">updateRights</font><font color="#000000">()&nbsp;{</font><br>
+
+<font color="#ffffff">&nbsp;&nbsp;&nbsp;&nbsp;</font><font color="#000000">fireSourceChanged</font><font color="#000000">(</font><font color="#990000">0</font><font color="#000000">,&nbsp;getCurrentState</font><font color="#000000">())</font><font color="#000000">;</font><br>
+<font color="#ffffff">&nbsp;&nbsp;</font><font color="#000000">}</font><br><BR>&nbsp; // ...<br>
+<font color="#000000">}</font></code>    
+   </tt></p>
+   
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+<title>Adding criteria to help content</title> 	
+</head>
+<body>
+
+<h2>Adding criteria to help content</h2>
+
+<p>This page will explain how to activate criteria. To enable criteria you need define which criteria are associated 
+with each topic and also set preferences which tell the help system to show criteria. The association between criteria and topics can be
+either in a toc file or using a criteria provider class. </p>
+
+<h3>What are criteria?</h3>
+
+<p>Some topics of the plug-in might only be of interest to certain users, for example a topic may be specific to the linux platform.
+The document writer can define a criterion "platform" with values such as "linux", "windows" etc applied to different topics. The user can
+then filter the documentation to show only documents applicable to a specific platform.
+</p>
+
+<h3>How to define criteria in a table of contents file</h3>
+
+<p>When defining a table of contents file criteria information can be appended according to these steps:</p>
+<ul>
+<li>Add criteria tag as children to the topic.</li>
+<li>Use id to define 'name' and 'value' attribute of the criteria element</li>
+</ul>
+<p>For example:</p>
+<pre>
+ &lt;toc href="tochref"&gt;
+      &lt;criteria  name="platform"  value="AIX"/&gt;
+      &lt;criteria  name="platform"  value="Windows"/&gt;
+      &lt;topic label="label1" href="href1"&gt;
+          &lt;criteria  name="platform" value="Windows"/&gt;
+      &lt;/topic&gt;
+      &lt;topic label="label2" href="href2"&gt;
+          &lt;criteria name="platform" value="AIX"/&gt;
+      &lt;/topic&gt;
+ &lt;/toc&gt;
+</pre>
+<p>Some rules to follow when adding criteria:</p>
+<ul>
+<li>The criteria name is case insensitive but the criteria value is case sensitive.</li>
+<li>It is important to ensure that parent topics contain all of the criteria of any of their children,
+ the parent and child will not show in the  
+table of contents if filtered using criteria which only the child satisfies.</li>
+<li>Any criterion with an empty value is invalid and will be ignored.</li>
+<li>Multiple comma separated values can be specified in a single &lt;criteria&gt; element, for example 
+&lt;criteria name="Platform" value="AIX,Linux"/&gt;. The name attribute takes a single value.</li>
+</ul>
+
+<h3>How to define criteria using a criteria provider</h3>
+<p>As an alternative to defining criteria in a table of contents file the extension point
+<a href="../reference/extension-points/org_eclipse_help_criteriaProvider.html">org.eclipse.criteriaProvider</a>
+can be used to define a class which will associate criteria with topics.
+Criteria defined using this extension point will be merged with those defined in the table of contents 
+and if multiple criteria providers are defined each will contribute to the criteria of an ITopic or IToc.
+</p>
+
+
+<h3>Criteria localization</h3>
+<p>The names and values of criteria can be localized.
+Follow these steps to add localization information for criteria:</p>
+<ul>
+<li>In plugin.xml, use the extension point 
+<a href="../reference/extension-points/org_eclipse_help_criteriaDefinition.html">org.eclipse.help.criteriaDefinition</a> 
+to provide the criteria definition file. (if no translation file is provided, then the id of criteria name and value will be displayed). 
+For example:
+<pre>
+ &lt;extension point="org.eclipse.help.criteriaDefinition"&gt;
+      &lt;criteriaDefinition file="criteria.xml"/&gt;
+ &lt;/extension&gt;
+</pre>
+</li>
+
+<li>In the definition file, define the translation of criteria information. 
+Node 'criterion' represents the criterion name.
+Node 'criterion-value' represents the criterion value.
+All 'id' attributes represent the id of criterion name or value.
+All 'name' attributes represent the display name of criteria name or value in one specific locale. 
+For example:
+<pre>
+ &lt;criteriaDefinition&gt;
+      &lt;criterion id="platform" name="Platform"&gt;
+          &lt;criterion-value id="AIX" name="AIX Server"/&gt;
+          &lt;criterion-value id="Windows" name="Windows Server"/&gt;
+      &lt;/criterion&gt;
+ &lt;/criteriaDefinition&gt;
+</pre>
+</li>
+
+</ul>
+<h3>How to set the preferences to enable criteria</h3>
+<p>Define the necessary preferences in your plugin customization file.</p>
+<ul>
+<li>enableCriteria. This preference must be true to enable filtering by criteria.
+<pre>example: org.eclipse.help/enableCriteria = true</pre></li>
+
+<li>supportedCriteria. A comma separated list of the criteria which will be supported in the help system. 
+<pre>example: org.eclipse.help/supportedCriteria = platform,version</pre>
+which means that 'platform' and 'version' are the supported criteria in help system.
+</li>
+</ul>
+<p> 	
+See Also:
+<br>
+<a href="../reference/extension-points/org_eclipse_help_criteriaDefinition.html">The criteria definition extension point.</a>
+<br>	
+<a href="../reference/extension-points/org_eclipse_help_criteriaProvider.html">The criteria provider extension point.</a>	
+</p>
+</body>	
+</html>

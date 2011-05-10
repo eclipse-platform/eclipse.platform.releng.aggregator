@@ -1,0 +1,98 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Multi-page form editors
+</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H1>
+Multi-page form editors</H1>
+<p align="left">UI Forms provide a basic support for multi-page editors you can 
+build on.</p>
+<p align="left">You should start building a UI Forms multi-page editor by 
+extending <code>FormEditor</code>:</p>
+<blockquote>
+	<pre>public class SimpleFormEditor extends FormEditor {
+
+	public SimpleFormEditor() {
+	}
+
+	protected FormToolkit createToolkit(Display display) {
+		// Create a toolkit that shares colors between editors.
+		return new FormToolkit(ExamplesPlugin.getDefault().getFormColors(
+				display));
+	}
+
+	protected void addPages() {
+		try {
+		addPage(new FreeFormPage(this));
+		addPage(new SecondPage(this));
+		addPage(new ThirdPage(this));
+		addPage(new MasterDetailsPage(this));
+		addPage(new PageWithSubPages(this));
+		}
+		catch (PartInitException e) {
+			//
+		}
+	}
+
+	public void doSave(IProgressMonitor monitor) {
+	}
+
+	public void doSaveAs() {
+	}
+
+	public boolean isSaveAsAllowed() {
+		return false;
+	}</pre>
+</blockquote>
+<p>A very simple way to get started is to create pages and add them as above. 
+Each page need to implement <code>FormPage</code> and override <code>
+createFormContent(IManagedForm managedForm)</code> method. Obviously there is a 
+managed form already created in the page, and you should create contents in the 
+enclosed form, and also register any form part that needs to be part of the 
+managed life cycle.</p>
+<p>In addition to form pages, you can add one or more text editors as a raw 
+source alternative to the GUI pages. For this, you should call '<code>addPage(IEditorPart, 
+IEditorInput input)</code>' method in the superclass.</p>
+<h2 align="left">Recommended practices for Eclipse Forms multi-page editors</h2>
+<p align="left">There are many ways you can go about writing a form-based 
+multi-page editor. It mostly depends on the type of content you are editing and 
+proficiency of your users. There are two ways you can approach it:</p>
+<ol>
+	<li>
+	<p align="left">If the typical users are using the editor infrequently, raw 
+	source is hard to edit by hand or complex, your users are not very technical 
+	etc., you should make COMPLETE pages that are fully capable of editing every 
+	aspect of the content without the need to turn to the raw source. In this 
+	approach, source page is there only for occasional validation, rather than 
+	for regular work. In that respect, you can get away with a basic text 
+	editor. PDE extension point schema editor falls into this group.</p></li>
+	<li>
+	<p align="left">If your users are more technical, have no problem editing 
+	the file by hand but would appreciate some help from time to time, consider 
+	providing a mixed experience - make a good source editor with all the 
+	add-ons like incremental outline, context assist, syntax highlighting etc. 
+	In turn, add complex value-add functionality in the form pages that are hard 
+	to achieve from source. We have learned from experience that it is very hard 
+	to convince seasoned users to switch from source editing if the value-add is 
+	marginal or debatable. However, functionality that was only available in GUI 
+	pages and was very high-quality was used readily.</p></li>
+</ol>
+<p align="left">Creating a high quality multi-page editor with mixed GUI and 
+source pages has its challenges. Accepting that users will switch pages 
+frequently requires a good model of the underlying content. The model should be 
+directly tied to the underlying document(s) so that it is in sync both when 
+users type in the text directly and when they change it structurally through the 
+GUI pages (don't forget the indirect changes caused by other workbench actions 
+while the editor is still up).</p>
+</BODY>
+</HTML>

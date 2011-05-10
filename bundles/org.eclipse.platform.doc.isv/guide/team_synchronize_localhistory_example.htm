@@ -1,0 +1,332 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta content="text/html; charset=ISO-8859-1"
+ http-equiv="Content-Type">
+<meta content="text/css" http-equiv="Content-Style-Type">
+<link type="text/css" charset="ISO-8859-1" href="../book.css"
+ rel="STYLESHEET">
+<title>Synchronization Support - Local History Example</title>
+<link href="../book.css" type="text/css" rel="stylesheet">
+</head>
+<body style="background-color: rgb(255, 255, 255);">
+<h2>Local History Example</h2>
+<p>The best way to understand the Synchronize APIs is to create a simple example 
+  that actually works. In this example we will be creating a page in the Synchronize 
+  View that will display the latest local history state for all files in the workspace. 
+  The local history synchronization will update automatically when changes are 
+  made to the workspace, and a compare editor can open to browse, merge, then 
+  changes. We will also add a custom decorator to show the last timestamp of the 
+  local history element and an action to revert the workspace files to their latest 
+  saved local history state. This is an excellent example because we already have 
+  a store of resource variants available and we don't have to manage it.</p>
+<p>For the remainder of this example we will make use of a running example. Much, 
+  but not all, of the source code will be included on this page. The full source 
+  code can be found in the local history package of the <a
+ href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.team.examples.filesystem/">org.eclipse.team.examples.filesystem</a> 
+  plug-in. You can check the project out from the CVS repository and use it as 
+  a reference while you are reading this tutorial. <em>Disclaimer</em>: The source 
+  code in the example plug-ins may change over time. To get a copy that matches 
+  what is used in this example, you can check out the project using the 3.3.2 version 
+  tag (most likely R3_3_2) or a date tag of June 10, 2007.<br>
+  <br>
+  <img src="images/team_synchronize_example_localhistory_overview.png" alt="local history overview"><br>
+  <br>
+  This screen shot shows the local history synchronization in the Synchronize 
+  View. With it you can browse the changes between the local resource and the 
+  latest state in history. It has a custom decorator for displaying the timestamp 
+  associated with the local history entry and a custom action to revert your file 
+  to the contents in the local history. Notice also that the standard Synchronize 
+  View presentation is used which provide problem annotations, compressed folder 
+  layout, and navigation buttons.</p>
+<h3>Defining the variants for local history</h3>
+<p>The first step is to define a variant to represent the elements from local 
+  history. This will allow the synchronize APIs to access the contents from the 
+  local history so it can be compared with the current contents and displayed 
+  to the user.</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+public class LocalHistoryVariant implements IResourceVariant {
+  private final IFileState state;
+  public LocalHistoryVariant(IFileState state) {
+    this.state = state;
+  }
+  public String getName() {
+    return state.getName();
+  }
+  public boolean isContainer() {
+    return false;
+  }
+  public IStorage getStorage(IProgressMonitor monitor) throws TeamException {
+    return state;
+  }
+  public String getContentIdentifier() {
+    return DateFormat.getDateTimeInstance().format(new Date(state.getModificationTime()));
+  }
+  public byte[] asBytes() {
+    return null;
+  }
+  public IFileState getFileState() {
+    return state;
+  }
+}
+</span></pre>
+ 
+<p>Since the IFileState interface already provides access to the contents of the 
+  file from local history (i.e. implements the IStorage interface), this was easy. 
+  Generally, when creating a variant you have to provide a way of accessing the 
+  content, a content identifier that will be displayed to the user to identify 
+  this variant, and a name. The asBytes() method is only required if persisting 
+  the variant between sessions. <br>
+  <br>
+  Next, let's create a variant comparator that allows the SyncInfo calculation 
+  to compare local resources with their variants. Again, this is easy because 
+  the existence of a local history state implies that the content of the local 
+  history state differs from the current contents of the file. This is because 
+  the specification for local history says that it won't create a local history 
+  state if the file hasn't changed. </p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+public class LocalHistoryVariantComparator implements IResourceVariantComparator {
+  public boolean compare(IResource local, IResourceVariant remote) {
+    return false;
+  }
+  public boolean compare(IResourceVariant base, IResourceVariant remote) {
+    return false;
+  }
+  public boolean isThreeWay() {
+    return false;
+  }
+}
+</span></pre>
+ 
+<p>Because we know that the existence of the local history state implies that 
+  it is different from the local, we can simply return <strong>false</strong> 
+  when comparing the file to its local history state. Also, synchronization with 
+  the local history is only two-way because we don't have access to a base resource 
+  so the method for comparing two resource variants is not used.</p>
+<p> Note that the synchronize calculation won't call the compare method of the 
+  comparator if the variant doesn't exist (i.e. is null). It is only called if 
+  both elements exist. In our example, this would occur both for files that don't 
+  have a local history and for all folders (which never have a local history). 
+  To deal with this, we need to define our own subclass of SyncInfo in order to 
+  modify the calculated synchronization state for these cases.</p>
+  
+<pre><span style="color: rgb(68, 68, 204);">
+public class LocalHistorySyncInfo extends SyncInfo {
+  public LocalHistorySyncInfo(IResource local, IResourceVariant remote, IResourceVariantComparator comparator) {
+    super(local, null, remote, comparator);
+  }
+  protected int calculateKind() throws TeamException {
+    if (getRemote() == null)
+      return IN_SYNC;
+    else
+      return super.calculateKind();
+  }
+}
+</span></pre>
+
+<p>We have overridden the constructor to always provide a base that is <em>null</em> 
+  (since we are only using two-way comparison) and we have modified the synchronization 
+  kind calculation to return <em>IN_SYNC</em> if there is no remote (since we 
+  only care about the cases where there is a local file and a file state in the 
+  local history.</p>
+<h3>Creating the Subscriber</h3>
+<p>Now we will create a Subscriber that will provide access to the resource variants 
+  in the local history. Since local history can be saved for any file in the workspace, 
+  the local history Subscriber will supervise every resource and the set of roots 
+  will be all projects in the workspace. Also, there is no need to provide the 
+  ability to refresh the subscriber since the local history changes only when 
+  the contents of a local file changes. Therefore, we can update our state whenever 
+  a resource delta occurs. That leaves only two interesting method on our local 
+  history subscriber: obtaining a SyncInfo and traversing the workspace. </p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+public SyncInfo getSyncInfo(IResource resource) throws TeamException {
+  try {
+    IResourceVariant variant = null;
+    if(resource.getType() == IResource.FILE) {
+      IFile file = (IFile)resource;
+      IFileState[] states = file.getHistory(null);
+      if(states.length &gt; 0) {
+        // last state only
+        variant = new LocalHistoryVariant(states[0]);
+      } 
+    }
+    SyncInfo info = new LocalHistorySyncInfo(resource, variant, comparator);
+    info.init();
+    return info;
+  } catch (CoreException e) {
+    throw TeamException.asTeamException(e);
+  }
+}
+</span></pre>
+
+<p>The Subscriber will return a new SyncInfo instance that will contain the latest 
+  state of the file in local history. The SyncInfo is created with a local history 
+  variant for the remote element. For projects, folders and files with no local 
+  history, no remote resource variant is provided, which will result in the resource 
+  being considered in-sync due to the <em>calculateKind</em> method in our LocalHistorySyncInfo. 
+</p>
+<p>The remaining code in the local history subscriber is the implementation of 
+  the <em>members</em> method:</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+public IResource[] members(IResource resource) throws TeamException {
+    try {
+      if(resource.getType() == IResource.FILE)
+        return new IResource[0];
+      IContainer container = (IContainer)resource;
+      List existingChildren = new ArrayList(Arrays.asList(container.members()));
+      existingChildren.addAll(Arrays.asList(container.findDeletedMembersWithHistory(IResource.DEPTH_INFINITE, null)));
+      return (IResource[]) existingChildren.toArray(new IResource[existingChildren.size()]);
+    } catch (CoreException e) {
+      throw TeamException.asTeamException(e);
+    }
+}
+</span></pre>
+
+<p>The interesting detail of this method is that it will return non-existing children 
+  if a deleted resource has local history. This will allow our Subscriber to return 
+  SyncInfo for elements that only exist in local history and are no longer in 
+  the workspace.</p>
+<h3>Adding a Local History Synchronize Participant</h3>
+<p>So far we have created the classes which provide access to SyncInfo for elements 
+  in local history. Next, we will create the UI elements that will allow us to 
+  have a page in the Synchronize View to display the last history state for every 
+  element in local history. Since we have a Subscriber, adding this to the Synchronize 
+  View is easy. Let's start by adding an synchronize participant extension point:</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+&lt;extension
+  point="org.eclipse.team.ui.synchronizeParticipants"&gt;
+  &lt;participant
+      persistent="false"
+      icon="icons/full/wizards/synced.gif"
+      class="org.eclipse.team.examples.localhistory.LocalHistoryParticipant"
+      name="Latest From Local History"
+      id="org.eclipse.team.synchronize.example"/&gt;
+&lt;/extension&gt;
+</span></pre>
+ 
+<p>Next we have to implement the LocalHistoryParticipant. It will subclass SubscriberParticipant 
+  which will provide all the default behavior for collecting SyncInfo from the 
+  subscriber and updating sync states when workspace changes occur. In addition, 
+  we will add an action to revert the workspace resources to the latest in local 
+  history.</p>
+<p>First, we will look at how a custom action is added to the participant.</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+public static final String CONTEXT_MENU_CONTRIBUTION_GROUP = "context_group_1"; //$NON-NLS-1$
+  
+private class LocalHistoryActionContribution extends SynchronizePageActionGroup {
+  public void initialize(ISynchronizePageConfiguration configuration) {
+    super.initialize(configuration);
+    appendToGroup(
+      ISynchronizePageConfiguration.P_CONTEXT_MENU, CONTEXT_MENU_CONTRIBUTION_GROUP, 
+      new SynchronizeModelAction("Revert to latest in local history", configuration) { //$NON-NLS-1$
+        protected SynchronizeModelOperation getSubscriberOperation(ISynchronizePageConfiguration configuration, IDiffElement[] elements) {
+          return new RevertAllOperation(configuration, elements);
+        }
+      });
+  }
+}
+</span></pre>
+
+<p>Here we are adding a specific SynchronizeMoidelAction and operation. The behavior 
+  we get for free here is the ability to run in the background and show busy status 
+  for the nodes that are being worked on. The action reverts all resources in 
+  the workspace to their latest state in local history. The action is added by 
+  adding an action contribution to the participants configuration. The configuration 
+  is used to describe the properties used to build the participant page that will 
+  display the actual synchronize UI. </p>
+<p>The participant will initialize the configuration as follows in order to add 
+  the local history action group to the context menu:</p>
+  
+<pre><span style="color: rgb(68, 68, 204);">
+protected void initializeConfiguration(ISynchronizePageConfiguration configuration) {
+  super.initializeConfiguration(configuration);
+  configuration.addMenuGroup(
+    ISynchronizePageConfiguration.P_CONTEXT_MENU, 
+    CONTEXT_MENU_CONTRIBUTION_GROUP);
+  configuration.addActionContribution(new LocalHistoryActionContribution());
+  configuration.addLabelDecorator(new LocalHistoryDecorator());	
+}
+</span></pre>
+ 
+<p>Now lets look at how we can provide a custom decoration. The last line of the 
+  above method registers the following decorator with the page's configuration.</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+private class LocalHistoryDecorator extends LabelProvider implements ILabelDecorator {
+  public String decorateText(String text, Object element) {
+    if(element instanceof ISynchronizeModelElement) {
+      ISynchronizeModelElement node = (ISynchronizeModelElement)element;
+      if(node instanceof IAdaptable) {
+        SyncInfo info = (SyncInfo)((IAdaptable)node).getAdapter(SyncInfo.class);
+        if(info != null) {
+          LocalHistoryVariant state = (LocalHistoryVariant)info.getRemote();
+          return text+ " ("+ state.getContentIdentifier() + ")";
+        }
+      }
+    }
+    return text;
+  }
+		
+  public Image decorateImage(Image image, Object element) {
+    return null;
+  }
+}
+</span></pre>
+
+<p>The decorator extracts the resource from the model element that appears in 
+  the synchronize view and appends the content identifier of the local history 
+  resource variant to the text label that appears in the view.</p>
+<p>The last and final piece is to provide a wizard that will create the local 
+  history participant. The Team Synchronizing perspective defines a global synchronize 
+  action that allows users to quickly create a synchronization. In addition, the 
+  ability to create synchronizations in available from the Synchronize view toolbar. 
+  To start, create a synchronizeWizards extension point:</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+&lt;extension
+  point="org.eclipse.team.ui.synchronizeWizards"&gt;
+  &lt;wizard
+    class="org.eclipse.team.examples.localhistory.LocalHistorySynchronizeWizard"
+    icon="icons/full/wizards/synced.gif"
+    description="Synchronize resources with their previous contents in the local history"
+    name="Synchronize with Latest From Local History"
+    id="ExampleSynchronizeSupport.wizard1"/&gt;
+&lt;/extension&gt;
+</span></pre>
+ 
+<p>This will add our wizard to the list and in the wizards performFinish() method we 
+  will simply create our participant and add it to the synchronize manager.</p>
+
+<pre><span style="color: rgb(68, 68, 204);">
+LocalHistoryParticipant participant = new LocalHistoryParticipant();
+ISynchronizeManager manager = TeamUI.getSynchronizeManager();
+manager.addSynchronizeParticipants(new ISynchronizeParticipant[] {participant});
+ISynchronizeView view = manager.showSynchronizeViewInActivePage();
+view.display(participant);
+</span></pre>
+
+<h3>Conclusion</h3>
+<p>This is a simple example of using the synchronize APIs and we have glossed 
+  over some of the details in order to make the example easier to understand. 
+  Writing responsive and accurate synchronization support is non-trivial, the 
+  hardest part being the management of synchronization information and the notification 
+  of synchronization state changes. The user interface, if the one associated 
+  with SubscriberParticipants is adequate, is the easy part once the Subscriber 
+  implementation is complete. For more examples please refer to the org.eclipse.team.example.filesystem 
+  plug-in and browse the subclasses in the workspace of Subscriber and ISynchronizeParticipant.<br>
+  <br>
+  The next section describes some class and interfaces that can help you write 
+  a Subscriber from scratch including how to cache synchronization states between 
+  workbench sessions.</p>
+
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Secure Storage Architecture</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<H2>Secure Storage Architecture</H2>
+
+
+<p>From a logical perspective secure storage represents a hybrid of OSGi's Preferences 
+and a keyring.</p>
+
+<p>The front end is modeled in a fashion very similar to the 
+<a href="http://www.osgi.org/javadoc/r4v42/org/osgi/service/prefs/Preferences.html" title="Preferences specification in org.osgi.service.prefs"><b>OSGi Preferences Service specification</b></a>. 
+Secure storage is represented as a tree of nodes. Nodes provide context. For instance, a bundle 
+<i>&quot;com.abc&quot;</i> could use the node <i>&quot;abc&quot;</i> under the node <i>&quot;com&quot;</i> under 
+the root node. As in Preference's, the path to such node can be described as <i>&quot;/com/abc&quot;</i>.</p>
+
+<p align="center"><img alt="Logical organization of data in secure storage" src="images/equinox_secure_storage_data.png">
+</p>
+<p align="center"><b>Picture 1. How the data is organized.</b></p>
+
+<p>The data is stored under the node as a key-value pair. The data can be stored in an encrypted form or as 
+a clear text. The ability to store clear-text data is provided so that logically related information (such as 
+non-encrypted user name and encrypted password) can be stored using the same mechanism.</p>
+
+<p>The code to store a password associated with &quot;com.abc&quot; could look like this:</p>
+<pre>
+	...
+	ISecurePreferences root = SecurePreferencesFactory.getDefault();
+	ISecurePreferences node = root.node(&quot;/com/abc&quot;);
+	node.put(&quot;password&quot;, &quot;12345&quot;, true /*encrypt*/);
+	...
+</pre>
+<p>and then to retrieve the data:</p>
+<pre>
+	...
+	String password = node.get(&quot;password&quot;, null /*default*/);
+	...
+</pre>
+
+<p>If secure storage was modified, it will be saved when the application is closed. Alternatively, a save can be triggered 
+programmatically by calling 
+<a href="../reference/api/org/eclipse/equinox/security/storage/ISecurePreferences.html#flush()">
+<b>ISecurePreferences#flush()</b></a>.</p>
+
+<p>On the back end, secure storage can be thought of as a keyring. Each entry is associated with a password 
+provider; only this password provider can be used in the future to decrypt the entry.</p> 
+
+<p align="center"><img alt="Secure storage entries and password providers" src="images/equinox_secure_storage_prov.png">
+</p>
+<p align="center"><b>Picture 2. Relationship between entries and password providers.</b></p>
+
+<p>Secure storage has provisions to obtain the master password from various sources described by 
+password providers. Even more importantly for developers, the set of password providers is open and 
+easily customizable.</p>
+
+</BODY>
+</HTML>

@@ -1,0 +1,78 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML lang="en">
+<HEAD>
+
+<meta name="copyright"
+	content="Copyright (c) Oakland Software and others 2009, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Operational Topics</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h1>Operational Topics</h1>
+<p>This section covers the operation of the CNF in detail.</p>
+
+<h2>Content Provider selection</h2>
+<p>Selecting the content provider is done by finding one or more
+NCEs associated with an object. The CNF is registered as a content
+provider a viewer and thus gets called at the content provider APIs in
+response to actions by the user on the viewer. In general, if the user
+is navigating by expanding in the viewer, the <code>getElements()</code>
+or <code>getChildren()</code> methods are called. However if the user
+has selected some object (like in an editor) and wishes to show it in
+the viewer, the <code>getParent()</code> method is used because the
+viewer needs to be able to figure out the part of the tree between the
+object and the content currently visible in the viewer.</p>
+
+<p>When selecting an NCE in reaction to the <code>getElements()</code>
+or <code>getChildren()</code> call on the viewer, the <b>triggerPoints</b>
+(or <b>enablement</b> if specified) expression is evaluated against the
+object. The content provider associated with that NCE is invoked. If
+there are multiple content providers enabled by their <b>triggerPoints</b>
+(or <b>enablement</b>) expressions, they are all invoked in order
+according to priority and their results are concatenated.</p>
+
+<p>When selecting an NCE in reaction to the <code>getParent()</code>
+call on the viewer, the <b>possibleChildren</b> (or <b>enablement</b> if
+specified) expression is evaluated against the object. The content
+provider associated with that NCE is invoked. If there are multiple
+content providers enabled by their <b>possibleChildren</b> (or <b>enablement</b>)
+expressions, the content providers are invoked in priority order. The
+first non-null parent returned by the content provider is used.</p>
+
+<p>The <b>overrides</b> element allows an NCE to be overridden by
+another. In this case the content provider associated with the
+suppressed NCE will not be invoked to contribute.</p>
+
+<p>During the initialization of the viewer, the it gets the initial
+input by invocation of the <a
+	href="../reference/api/org/eclipse/ui/navigator/CommonNavigator.html#getInitialInput"><code>CommonNavigator.getInitialInput()</code></a>.
+The default implementation of this method is to return the input of the
+current page. Thus, the initial input becomes the first object that is
+evaluated for the selection of NCEs.</p>
+
+<!--
+
+<h2>Label Provider selection</h2>
+
+<p>TBS - talk about the association of the object with the NCE that
+is associated with the object's content provider.</p>
+
+<p>More ???TBS</p>
+
+<h2>Pipelining</h2>
+
+<p>Pipelining works with the override mechanism to allow reshaping
+the tree of objects. To use pipelining service, your content provider
+must implement the <b>IPipedlinedTreeContentProvider</b> interface.</p>
+<p>??? More TBS</p>
+
+-->
+
+</BODY>
+</HTML>

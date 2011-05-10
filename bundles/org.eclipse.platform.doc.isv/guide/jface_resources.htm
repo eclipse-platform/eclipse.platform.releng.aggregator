@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+User interface resources
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+User interface resources</H2>
+<P >
+The <b><a href="../reference/api/org/eclipse/jface/resource/package-summary.html"> org.eclipse.jface.resource</a></b> package defines classes that help plug-ins manage UI resources such as fonts and icons.</P>
+<P >
+Many of the workbench extension points allow plug-ins to supply icons that can be used to show their contributions in the workbench. Since GUI operating systems support a limited number of images or fonts in memory at once, a plug-in's UI resources must be carefully managed and sometimes shared between widgets.</P>
+<P >
+We've already seen several references to icons in the readme tool plug-in. Some of its icons are specified in the
+<b> plugin.xml</b> markup.</P>
+<pre>&lt;extension
+   point=&quot;org.eclipse.ui.views&quot;&gt;
+	&lt;category
+	   id=&quot;org.eclipse.ui.examples.readmetool&quot;
+	   name=&quot;%Views.category&quot;&gt;
+	&lt;/category&gt;
+	&lt;view
+	   id=&quot;org.eclipse.ui.examples.readmetool.views.SectionsView&quot;
+	   name=&quot;%Views.ReadmeSections&quot;
+	   <b>icon</b>=&quot;icons/view16/sections.png&quot;
+	   category=&quot;org.eclipse.ui.examples.readmetool&quot;
+	   class=&quot;org.eclipse.ui.examples.readmetool.ReadmeSectionsView&quot;&gt;
+	&lt;/view&gt;
+&lt;/extension&gt;</pre>
+<P >
+We've also seen code that describes images on the fly. The following is from the readme tool's
+<b>ReadmeEditorActionBarContributor</b>.</P>
+<pre>public ReadmeEditorActionBarContributor() {
+      	...
+	action1 = new EditorAction(MessageUtil.getString(&quot;Editor_Action1&quot;));
+	action1.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action1&quot;));
+<b>	action1.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE_DISABLE);
+	action1.setImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE_ENABLE);
+</b>	...
+</pre>
+<P >JFace provides the basic support classes that allow plug-ins to manage their icons and fonts without worrying about when the corresponding platform graphics objects
+are created and destroyed. These support classes are used directly by plug-ins as shown above, or indirectly when the workbench uses these classes to obtain images that are described in extension point markup.</P>
+
+<H3>
+Image descriptors and the registry</H3>
+<P >
+The SWT <b><a href="../reference/api/org/eclipse/swt/graphics/Image.html">Image</a></b> class represents an image from the operating system's perspective. Because most GUI operating systems have a limit on the number of images that can be open at once, plug-ins should be very careful when creating them,
+and ensure that they also dispose of them properly when finished using them. By using the JFace
+<b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptor</a></b> and
+<b><a href="../reference/api/org/eclipse/jface/resource/ImageRegistry.html"> ImageRegistry</a></b> classes instead of the SWT image, plug-ins can generally avoid creating, managing, and disposing these images directly.</P>
+
+<H4>
+Image descriptor</H4>
+<P >
+The <b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptor</a></b> class can be used as a lightweight description of an image. It specifies everything that is needed to create an image, such as the
+URL or filename where the image can be obtained.
+<b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptors</a></b> do not allocate an actual platform image unless specifically requested using the
+<b> createImage()</b> method. </P>
+<P >
+Image descriptors are the best strategy when your code is structured such that it defines all the icons in one place and allocates them as they are needed. Image descriptors can be created at any time without concern for OS resources, making it convenient to create them all in initialization code. </P>
+
+
+<H4>
+Image registry</H4>
+<P >
+The <a href="../reference/api/org/eclipse/jface/resource/ImageRegistry.html"><b> ImageRegistry</b></a> class is used to keep a list of named images. Clients can add image descriptors or SWT images directly to the list. When an image is requested by name from the registry, the registry will return the image if it has been created, or create one from the descriptor. This allows clients of the registry to share images.</P>
+<P >
+Images that are added to or retrieved from the registry must not be disposed by any client. The registry is responsible for disposing of the image since the images are shared by multiple clients. The registry will dispose of the images when the platform GUI system shuts down.</P>
+
+
+
+<H3>
+<a name="jface_resources_patterns">
+Plug-in patterns for using images</a></H3>
+
+<H4>
+Specifying the image in the plugin.xml</H4>
+<P >
+Where possible, specify the icon for your plug-in's UI objects in the <b> plugin.xml</b> file. Many of the workbench extension points include configuration parameters for an icon file. By defining your icons in your extension contribution in the plugin.xml, you leave the image management strategy up the platform. Since the icons are typically kept in your plug-in's directory, this allows you to specify the icons and manage the files all in one place.</P>
+<P >
+The other patterns should only be considered when you can't specify the icon as part of your extension contribution.</P>
+
+
+<H4>
+Explicit creation</H4>
+<P >
+Explicitly creating an image is the best strategy when the image is infrequently used and not shared. The image can be created directly in SWT and disposed after it is used.</P>
+<P >
+Images can also be created explicitly using an <b><a href="../reference/api/org/eclipse/jface/resource/ImageDescriptor.html"> ImageDescriptor</a></b> and invoking the
+<b> createImage()</b> method. As in the first case, the dispose() method for the image must be invoked after the image is
+no longer needed.&nbsp; For example, if a dialog creates an image when it is
+opened, it should dispose the image when it is closed.</P>
+
+
+<H4>
+Image registry</H4>
+<P >
+When an image is used frequently in a plug-in and shared across many different objects in the UI, it is useful to register the image descriptor with an
+<a href="../reference/api/org/eclipse/jface/resource/ImageRegistry.html"><b>ImageRegistry</b></a>. The images in the registry will be shared with any object that queries an image by the same name. You must not dispose any images in the registry since they are shared by other objects.</P>
+<P >
+Adding an image to the image registry is the best strategy when the image is used frequently, perhaps through the lifetime of the plug-in, and is shared by many objects. The disadvantage of using the registry is that images in the registry are not disposed until the
+GUI system shuts down. Since there is a limit on the number of platform (SWT) images that can be open at one time, plug-ins should be careful not to register too many icons in a registry.</P>
+<P >
+The class <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> includes protocol for creating a plug-in wide image registry.</P>
+
+
+<H4>
+Label providers</H4>
+<P >
+When an icon is used frequently to display items in a particular viewer, it can be shared among similar items in the viewer using a label provider. Since a label provider is responsible for returning an image for any
+object in a viewer, it can control the creation of the image and any sharing of images across objects in the viewer. </P>
+<P >
+The label provider can use any of the previously discussed techniques to produce an image. If you browse the various implementations of
+<b> getImage()</b> in the <b><a href="../reference/api/org/eclipse/jface/viewers/LabelProvider.html"> LabelProvider</a></b> subclasses, you will see a variety of approaches including caching a single icon for objects and maintaining a table of images by type.&nbsp;
+Images created by a label provider must be disposed in the provider's <b>dispose()
+</b>method, which is called when the viewer is disposed.</P>
+<P >
+Using a label provider is a good compromise between explicit creation and the image registry. It promotes sharing of icons like the image registry, yet still maintains control over the creation and disposal of the actual image.</P>
+
+
+<H4>
+Plug-in wide image class</H4>
+<P >
+When fine-tuning a plug-in, it is common to experiment with all of these different image creation patterns. It
+can be useful to isolate the decision making regarding image creation in a separate class and instruct all clients to use the class to obtain all images. This way, the creation sequence can be tuned to reflect the actual performance characteristics of the plug-in.&nbsp;</P>
+
+<H3> ResourceManager</H3>
+<P > The <a href="../reference/api/org/eclipse/jface/resource/ResourceManager.html"><b> 
+  ResourceManager</b></a> class is used to keep a mapping of ImageDescriptors 
+  to Images so that an Image can be reused by referring to it via its descriptor.When 
+  an image is requested by descriptor from the registry, the registry will return 
+  the image if it has been created, or create one from the descriptor. This allows 
+  clients of the registry to share images. </P>
+<P >The top level ResourceManager is a <a href="../reference/api/org/eclipse/jface/resource/DeviceResourceManager.html"><strong>DeviceResourceManager</strong></a> 
+  which is created on a Display. The ResourceManager defined by <strong><a href="../reference/api/org/eclipse/jface/resource/JFaceResources.html">JFaceResources</a></strong>.<strong>getResources() 
+  </strong>is a DeviceResourceManager and can be used as the top level ResourceManager. 
+  If you need a ResourceManager with a shorter lifecycle than the DeviceResourceManager 
+  you can create a <strong><a href="../reference/api/org/eclipse/jface/resource/LocalResourceManager.html">LocalResourceManager</a></strong> 
+  as a child and dispose of it when you are done with it.</P>
+<P >A DeviceResourceManager will be disposed when the Display used to create it 
+  is disposed so no special management code is required.</P>
+<P > Images that are added to or retrieved from the manager must not be disposed 
+  by any client. The manager is responsible for disposing of the image since the 
+  images are shared by multiple clients. The registry will dispose of the images 
+  when the ResourceManager that holds onto them is disposed.</P>
+<H3> Font registry</H3>
+<P >
+Fonts are another limited resource in platform operating systems. The creation and disposal issues are the same for fonts as
+for images, requiring similar speed/space tradeoffs. In general, fonts are allocated in SWT by requesting a font with a platform dependent font name.</P>
+<P >
+The <b><a href="../reference/api/org/eclipse/jface/resource/FontRegistry.html"> FontRegistry</a></b> class keeps a table of fonts by their name. It manages the allocation and disposal of the font.</P>
+<P >
+In general, plug-ins should avoid allocating any fonts or describing fonts with platform specific names. Although the font registry is used internally in JFace, it is typically not used by plug-ins. The
+<b><a href="../reference/api/org/eclipse/jface/resource/JFaceResources.html"> JFaceResources</a></b> class should be used to access common fonts.</P>
+<P >It is very common to allow users to specify their preferences for the
+application's fonts in a preference page.&nbsp; In these cases, the
+<b><a href="../reference/api/org/eclipse/jface/preference/FontFieldEditor.html"> FontFieldEditor</a></b> should be used to obtain the font name from the user, and a
+<b><a href="../reference/api/org/eclipse/jface/resource/FontRegistry.html"> FontRegistry</a></b> may be used to keep the font.&nbsp;
+The
+<b><a href="../reference/api/org/eclipse/jface/preference/FontFieldEditor.html"> FontFieldEditor</a></b>
+is only used in preference pages.</P>
+
+
+<H3>
+JFaceResources</H3>
+<P >
+The class <a href="../reference/api/org/eclipse/jface/resource/JFaceResources.html"><b> JFaceResources</b></a> controls access to common platform fonts and images. It maintains an internal font and image registry so that clients can share named fonts and images.</P>
+<P >
+There are many techniques used in the workbench and other plug-ins to share images where required. The
+<a href="../reference/api/org/eclipse/jface/resource/JFaceResources.html"><b> JFaceResources</b></a> image registry is not widely used across the workbench and plug-in code.</P>
+<P >
+Use of fonts is much simpler. The workbench and most plug-ins use the <a href="../reference/api/org/eclipse/jface/resource/JFaceResources.html"><b> JFaceResources</b></a> class to request fonts by logical name. Methods such as
+<b> getDialogFont() </b> and <b> getDefaultFont()</b> are provided so that plug-ins can use the expected fonts in their UI.</P>
+
+</BODY>
+</HTML>

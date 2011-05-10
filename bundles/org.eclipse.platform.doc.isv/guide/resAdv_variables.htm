@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>
+Dynamic Path Variables
+</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+<H2>
+Dynamic path variables</H2>
+<P >
+Each linked resource in the workspace can be specified relative to a path variable.
+</P>
+<P >
+Each IResource has a dedicated path variable manager, accessible from <b>IResource.getPathVariableManager()</b>.  
+The path variable manager allows reading, creating and changing path variables, along with resolving URIs that may be relative 
+to a path variable, as opposed to be defined as an absolute path. 
+</P>
+<P >
+Currently, each project has a separate list of path variables, so all resources under a given project have path variable managers
+that contain the same list of path variables, although that could change in the future.  Still variables <i>values</i> can be different
+between two path variable managers of two different resources.  For example, the variable "PARENT_LOC" contains the location of 
+the workspace parent of the current resource for which the path variable manager was created. 
+</P>
+<P >
+The default path variable list can be extended through the  <a href="../reference/extension-points/org_eclipse_core_resources_variableResolvers.html"><b>org.eclipse.core.resources.variablesResolvers</b></a> extension point.
+</p>
+<P >
+Because of limitations and backward compatibilities in the legacy <b>IPathVariableManager</b>, the path variable values cannot contain
+parent path lexical element ("..").  Instead, the methods <b>IPathVariableManager.convertToUserEditableFormat</b> and <b>IPathVariableManager.convertFromUserEditableFormat</b>
+can be used to convert a path that contains the ".." element into an internal format that can be stored in the URI of a variable. The UI
+automatically converts user provided strings into the internal format and vice versa.
+</p>
+</BODY>
+</HTML>

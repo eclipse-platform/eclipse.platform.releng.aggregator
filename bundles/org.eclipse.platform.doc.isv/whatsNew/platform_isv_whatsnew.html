@@ -1,0 +1,529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2010, 2011. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
+<meta http-equiv="Content-Language" content="en-us"/>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<link rel="STYLESHEET" href="../book.css"  type="text/css"/>
+<style type="text/css">
+td {border-top: solid thin black;}
+img[alt] {background-color:#ffdddd;}
+tr {vertical-align: top;}
+</style>
+<title>Eclipse Platform What's New in 3.6</title>
+</head>
+
+<body>
+
+<h1>What's New in 3.6</h1>
+
+<p>Here are descriptions of some of the changes of interest to plug-in developers
+made to the Eclipse <a href="#Platform">Platform</a>, <a href="#Equinox">Equinox</a> and
+<a href="#SWT">SWT</a> for the 3.6 release of Eclipse.</p>
+
+<p>
+There are also many new features oriented towards end-users of the platform
+that can be viewed in the 
+<a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">What's new</a>
+section of the Workbench User Guide.
+</p>
+
+<!-- ****************** START OF N&N TABLE ****************** -->
+<table cellpadding="10" cellspacing="0" width="600">
+  <colgroup>
+  <col width="20%"/>
+  <col width="80%"/>
+  </colgroup>
+  <tbody>
+
+<!-- ******************** Platform ********************** -->
+<tr>
+
+<td colspan="2"><a name="Platform"></a>
+<div style="font-size: 20px; font-weight: bold;">Platform Changes</div>
+</td>
+</tr>
+
+  <tr id="test-framework-junit4"> 
+    <td width="30%" valign="top" align="left">
+      <b>Platform test framework support for JUnit 4</b>
+    </td>
+    <td width="70%" valign="top">
+      The platform's automated testing framework now supports running tests with JUnit 4.
+      The test framework previously only allowed running with JUnit version 3.
+    </td>
+  </tr>
+
+  <tr id="headless-ext-tools">
+    <td width="30%" valign="top" align="left"><b>Headless external tool builders</b></td>
+    <td width="70%" valign="top">
+    	Launching support for Ant and external tools is provided by the new headless plug-ins
+    	<code>org.eclipse.ant.launching</code> and <code>org.eclipse.core.externaltools</code>.
+    	This allows applications without a user interface to leverage the launch support programmatically
+    	and it allows projects configured with external tool builders to be built in headless
+    	environments.
+    </td>
+   </tr>
+
+  <tr id="equinox.event.admin">
+    <td width="30%" valign="top" align="left"><b>Event admin added</b></td>
+    <td width="70%" valign="top">The OSGi event admin specification provides 
+        a general purpose event bus for posting and sending events to event 
+        handlers.  The Equinox event admin implementation has been 
+        added to the platform feature.</td>
+  </tr>
+
+  <tr id="webappextension">
+    <td width="30%" valign="top" align="left"><b>Help UI extensibility</b></td>
+    <td width="70%" valign="top">New extension points allow additional buttons and 
+    frames to be added to the help web application. In the image below the title search frame, 
+    the rightmost button and the frame below the content page are all contributed.
+      <p><img src="images/webappextn.png" alt="Help webapp showing extensions" /></p>
+    </td>
+  </tr>
+
+  <tr id="helpfooter">
+    <td width="30%" valign="top" align="left"><b>Customizable help footer</b></td>
+    <td width="70%" valign="top"><p>The customization <tt>org.eclipse.help.base/footer</tt> allows
+    a footer to be added to the Eclipse help system. This can be used for infocenters or 
+    in Eclipse-based products.</p>
+      <p><img src="images/footer.png" alt="Eclipse Help showing footer" />.</p>
+    </td>
+  </tr>
+
+  <tr id="help-scoping-criteria">
+    <td width="30%" valign="top" align="left"><b>Scoping by criteria in help system</b></td>
+    <td width="70%" valign="top">The help web application now allows the table of contents, the 
+		index and the search results to be filtered by book/topic or by criteria. Criteria are defined in 
+		the table of contents or using the extension point <tt>org.eclipse.help.criteriaDefinition</tt>. The list of 
+		displayed criteria is defined at the product level. Products which do not define criteria (including 
+		the Eclipse SDK) will not show any UI for criteria.
+      <p><img src="images/newscope.png" alt="Scope dialog showing criteria." /></p>
+    </td>
+  </tr>
+
+  <tr id="helpsort">
+    <td width="30%" valign="top" align="left"><b>Sorting help topics</b></td>
+    <td width="70%" valign="top">A new attribute "sort" has been added to the &lt;toc&gt; and
+    &lt;topic&gt; elements in a table of contents which causes subtopics to be sorted alphabetically when 
+    the value is set to "true".</td>
+  </tr>
+
+  <tr id="rsswidget">
+    <td width="30%" valign="top" align="left"><b>Reusable intro news reader</b></td>
+    <td width="70%" valign="top">The <tt>EclipseRSSViewer</tt> class allows multiple RSS news readers to
+be easily added to an intro page.
+      <p><img src="images/rss.png" alt="RSS reader on Intro page" /></p>
+    </td>
+  </tr>
+
+
+  <tr id="see">
+    <td width="30%" valign="top" align="left"><b>See entries in keyword index</b></td>
+    <td width="70%" valign="top">See entries can now be added to the help system keyword index.
+      <p><img src="images/see.png" alt="Help webapp showing extensions" /></p>
+    </td>
+  </tr>
+
+  <tr id="helpsearchprovider">
+    <td width="30%" valign="top" align="left"><b>Extension point  for help search</b></td>
+    <td width="70%" valign="top">A new extension point <tt>org.eclipse.help.base.searchParticipant</tt>
+    has been added. This allows clients to add documents not in the html or xhtml format to the search
+    index used by the help system. This should be used in place of the deprecated extension point 
+    <tt>org.eclipse.help.base.luceneSearchParticipants</tt> which is not binary compatible across Lucene versions.	  
+	</td>
+  </tr>
+
+<!-- ******************** Equinox ********************** -->
+<tr>
+<td colspan="2"><a name="Equinox"></a>
+<div style="font-size: 20px; font-weight: bold;">Equinox Changes</div>
+</td>
+</tr>
+
+  <tr id="multi-locale-registry"> 
+    <td width="30%" valign="top" align="left"><b>Multi-locale support in extension registry</b></td>
+    <td width="70%" valign="top">The Equinox extension registry now supports running
+    in a multi-locale mode. When running in this mode, translated extension attributes can be
+    obtained for any locale, whereas they were previously only available for the system's
+    current locale. Multi-locale mode is enabled via the <tt>-registryMultiLanguage</tt>
+    command line argument, or by setting the Java system property <tt>eclipse.registry.MultiLanguage=true</tt>.
+    <p>
+    The registry also uses a new <tt>LocaleProvider</tt> service for
+    obtaining the locale for a given execution context. This allows a system to provide
+    an alternative mechanism for computing the current locale, rather than using the
+    singleton locale defined by the Java runtime environment.
+    </p>
+    </td>
+  </tr>
+
+  <tr id="equinox.weaving">
+    <td width="30%" valign="top" align="left"><b>New Equinox weaving feature</b></td>
+    <td width="70%" valign="top">The byte code weaving work in the Equinox incubator has passed the 
+        graduation review and the major parts of the work are now part of the Equinox distribution.
+      <p>Equinox Weaving provides a general infrastructure for load-time byte code 
+        weaving for the Equinox OSGi runtime. Currently Equinox Weaving includes 
+        a weaver for AspectJ to load-time weave aspects into bundles (AspectJ Development Tools and 
+        the Scala IDE for Eclipse already use this to realize deeper integration 
+        with the Eclipse Java development tools, for example).</p>
+      <p>These four bundles are contained in the distribution:</p>
+      <ul>
+        <li><tt>org.eclipse.equinox.weaving.hook:</tt> The framework extension project 
+          containing the hooks to insert byte code weaving and caching at 
+          load-time.</li>
+        <li><tt>org.eclipse.equinox.weaving.aspectj:</tt> Contains the bridge to use 
+          AspectJ as load-time weaving implementation.</li>
+        <li><tt>org.eclipse.equinox.weaving.caching:</tt> Provides caching for woven 
+          byte code for standard Java virtual machines.</li>
+        <li><tt>org.eclipse.equinox.weaving.caching.j9:</tt> Contains an alternative 
+          cache implementation that uses IBM J9 VM shared classes for caching woven 
+          classes.</li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr id="equinox.console">
+    <td width="30%" valign="top" align="left"><b>Multi-session Equinox console</b></td>
+    <td width="70%" valign="top">The Equinox console has been enhanced to 
+        allow multiple console sessions to be connected.  Previous versions of the 
+        Equinox console would only allow a single session to be connected at a time.   
+        The console only allowed for connections from two built connection types,
+        through standard in/out or though a telnet port.
+      <p>A new service interface has been introduced: 
+        <tt>org.eclipse.osgi.framework.console.ConsoleSession</tt>.  
+        Implementers of a console session register themselves as an OSGi service.
+        The console implementation will then automatically use the console session
+        for input and output of a console connection.</p>
+    </td>
+  </tr>
+
+  <tr id="equinox.p2.revert">
+    <td width="30%" valign="top" align="left"><b>Revert support in p2 director</b></td>
+    <td width="70%" valign="top">The p2 director application now supports reverting
+    to an earlier profile state from the command line. Use the new <tt>-revert</tt>
+    argument to specify a previous profile state to revert to.
+    </td>
+  </tr>
+
+<!-- *********************** SWT *********************** -->
+<tr>
+<td colspan="2"><a name="SWT"></a>
+<div style="font-size: 20px; font-weight: bold;">SWT Changes</div>
+</td>
+</tr>
+
+  <tr>
+    <td width="30%" valign="top" align="left"><b>Browser can use WebKitGTK+</b></td>
+    <td width="70%" valign="top">Linux users can now use WebKitGTK+ instead of Mozilla as the Browser control's native renderer.
+      See <a href="http://www.eclipse.org/swt/faq.php#browserwebkitgtk">Can the Browser use the WebKit renderer on GTK?</a>.
+      <p><img src="images/webkitgtk.png" alt="WebKitGTK+ Image"/></p>
+	</td>
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>Icon support for GTK Text widgets</b></td>
+    <td width="70%" valign="top">The text widget can now display the search and cancel icons inside the widget. This runs on Linux platforms with a GTK version of 2.16 or greater.
+     <p><img src="images/text_search.png" alt="Icon support"/></p>
+    </td>
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>Mozilla browser support on Solaris SPARC</b></td>
+    <td width="70%" valign="top">Mozilla browser support has been added for the Solaris SPARC platform (Solaris 10, GTK+).</td>
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>Browser closing API</b></td>
+    <td width="70%" valign="top">The new API method <tt>Browser.close()</tt> is used to 
+    close a browser, but allows the close to be cancelled by an <i>onbeforeunload</i> handler.  
+	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet326.java">Snippet 326</a>.
+     <p><img src="images/browserclose.png" alt="Browser close"/></p>
+    </td>
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>Key events for F16-F20 </b></td>
+    <td width="70%" valign="top">New key event constants have been added for the keyboard function keys F16 to F20.</td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>DND insertion feedback for tables</b></td>
+    <td width="70%" valign="top">The default drop target effect for Table now supports <tt>DND.FEEDBACK_INSERT_BEFORE</tt>
+      and <tt>DND.FEEDBACK_INSERT_AFTER</tt>.
+     <p><img src="images/tablednd.png" alt="desc"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>Horizontal mouse wheel</b></td>
+    <td width="70%" valign="top">New event constants have been added for horizontal
+    mouse wheels. See <tt>SWT.MouseHorizontalWheel</tt> and <tt>SWT.MouseVerticalWheel</tt>.</td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left"><b>Variable tab stops in StyledText</b></td>
+    <td width="70%" valign="top">New API in StyledText allows the application to specify a non-uniform sequence of tab stops.
+	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet325.java">Snippet 325</a>.
+     <p><img src="images/sttabs.png" alt="desc"/></p>
+    </td> 
+   </tr>
+
+  <tr id="styledtext-variable-tab-stops">
+    <td width="30%" valign="top" align="left">
+      <b>StyledText: per line variable tab stops</b>
+    </td>
+    <td width="70%" valign="top">
+      Tab stop support in <tt>StyledText</tt> has been improved to allow each line to have its own sequence of tab stops.
+	  <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet328.java">Snippet 328</a> 
+	  has been modified from Snippet325 to show this.
+     <p><img src="images/variable-tab-stops.png" alt="Multi-line variable tab stops in a StyledText"/></p>
+    </td> 
+  </tr>
+
+  <tr id="swt-clabel-margins">
+    <td width="30%" valign="top" align="left"><b>CLabel set/get margins</b></td>
+    <td width="70%" valign="top">New API has been added to <tt>CLabel</tt> to set and get the left, top, right and bottom margin spacing.
+    </td> 
+  </tr>
+
+  <tr id="swt-key-location">
+    <td width="30%" valign="top" align="left">
+      <b>Key location</b>
+    </td>
+    <td width="70%" valign="top">
+		A new field has been added to <code>KeyEvent</code> to allow the application 
+		to identify which keyboard key originated the event, for example, right or left shift key.
+		See <code>KeyEvent.keyLocation</code> for details.
+    </td> 
+  </tr>
+
+  <tr id="swt-scrollbar-api">
+    <td width="30%" valign="top" align="left">
+      <b>New API in Scrollbar</b>
+    </td>
+    <td width="70%" valign="top">
+      New methods have been added to <tt>Scrollbar</tt> to return the bounds for the thumb and its track.
+      See <code>ScrollBar.getThumbBounds()</code> and <code>ScrollBar.getThumbTrackBounds()</code>.
+    </td> 
+  </tr>
+
+  <tr id="state-mask-selection-event">
+    <td width="30%" valign="top" align="left">
+      <b>State mask for selection events</b>
+    </td>
+    <td width="70%" valign="top">
+	<tt>SelectionEvent.stateMask</tt> is now set on selection and default selection events for all native controls.
+    </td> 
+  </tr>
+
+  <tr id="styledtext-orientation-event">
+    <td width="30%" valign="top" align="left">
+      <b>Orientation event</b>
+    </td>
+    <td width="70%" valign="top">
+	A new event has been added to <tt>Text</tt>, <tt>Combo</tt>, and <tt>StyledText</tt>. It is sent when the writing direction is changed via keyboard shortcut.
+        See <code>SWT.OrientationChanged</code>
+    </td> 
+  </tr>
+
+  <tr id="browser-post-data">
+    <td width="30%" valign="top" align="left"><b>Browser.setUrl() can specify post data and headers</b></td>
+    <td width="70%" valign="top">The new API <code>Browser.setUrl(String url, String postData, String[] headers)</code> allows clients
+      to include post data and add/override header values when initiating HTTP requests.  See
+      <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet330.java">Snippet 330</a> for an example.
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>Wrap indent in StyledText</b>
+    </td>
+    <td width="70%" valign="top">
+      <tt>StyledText</tt> and <tt>TextLayout</tt> now offer API to allow the application 
+      to control the amount of indent space for wrapped lines.
+      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet331.java">Snippet 331</a>.
+      <p><img src="images/wrap-indent.png" alt="Wrap Indent"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>Improved bidi segments support</b>
+    </td>
+    <td width="70%" valign="top">
+      The bidi segments support in <tt>StyledText</tt> and <tt>TextLayout</tt> was changed 
+      to allow the application to specify which Unicode Control Characters to use in the segments boundaries.
+      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet332.java">Snippet 332</a>.
+      <p><img src="images/segments-chars.png" alt="Improved Bidi Segments support"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>Right-to-Left text support on Cocoa</b>
+    </td>
+    <td width="70%" valign="top">
+      On Cocoa, setting the <code>SWT.RIGHT_TO_LEFT</code> flag changes the default text reading direction to right to left. 
+      <p><img src="images/cocoartl.PNG" alt="Right-to-Left text support on Cocoa"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>Skin engine support</b>
+    </td>
+    <td width="70%" valign="top">
+      New API added to allow CSS engines to skin widgets at the appropriate time 
+      (See <code>SWT.Skin</code> and <code>Widget.reskin(int)</code>). For more info see 
+      <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet333.java">Snippet 333</a>. 
+
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>New layout API</b>
+    </td>
+    <td width="70%" valign="top">
+	New API added to <code>Composite</code> to support automatic deferred layout.
+        See <code>Composite.layout(Control[], int)</code>.
+    </td> 
+  </tr>
+  
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>Browser.setText() can restrict content permissions</b>
+    </td>
+    <td width="70%" valign="top">
+        New Browser API <code>setText(String html, boolean trusted)</code> allows clients to 
+        restrict the permissions that are given to Browser content that is set from a String.  
+        Restricting permissions is suggested when the source of the content is not trusted.
+    </td> 
+  </tr>
+
+  <tr id="swt-accessibility"> 
+    <td width="30%" valign="top" align="left">
+      <b>Accessibility upgrade</b>
+    </td>
+    <td width="70%" valign="top">
+    SWT Accessibility has new API for making applications more accessible to Assistive 
+    Technology products such as screen readers.
+    The new API can be found in the <code>org.eclipse.swt.accessibility</code> package.
+    For examples, see the <code>org.eclipse.swt.examples.accessibility</code> package, and the 
+    <a href="http://www.eclipse.org/swt/snippets/#accessibility">Accessibility snippets</a>.
+	</td> 
+  </tr>
+
+  <tr id="swt.opendoc.event"> 
+    <td width="30%" valign="top" align="left">
+      <b>SWT.OpenDoc Event</b>
+    </td>
+    <td width="70%" valign="top">
+    A new event type has been added to SWT to notify applications that a document 
+    should be opened. Listeners for <tt>OpenDoc</tt> events can be added to a <tt>Display</tt>.
+    <p>Support has also been added to the Equinox launcher, and the Eclipse workbench. 
+    Users are now able to associate file types with Eclipse and have Eclipse launched when 
+    they open a file of an associated type.</p>
+    </td> 
+  </tr>
+
+ <tr id="swt-program-working-directory"> 
+    <td width="30%" valign="top" align="left">
+      <b>Program working directory</b>
+    </td>
+    <td width="70%" valign="top">
+    New API has been added to <tt>Program</tt> to allow the working directory to be 
+    specified when launching an executable. See <code>Program.launch(String fileName, String workingDir)</code> for more details.
+    </td> 
+  </tr>
+ 
+ <tr id="swt-xul-runner"> 
+    <td width="30%" valign="top" align="left">
+      <b>XULRunner 1.9.2 support</b>
+    </td>
+    <td width="70%" valign="top">
+    The <tt>Browser</tt> widget now has full support for the recent release of XULRunner 1.9.2.
+    </td> 
+  </tr>
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>TaskItem overlay image</b>
+    </td>
+    <td width="70%" valign="top">
+      The new API <code>TaskItem#setOverlayImage(Image)</code> allows clients to set an image to be displayed on top of the application button in the taskbar.
+      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet336.java">Snippet 336</a> for an example.
+      <p><img src="images/overlayimage.png" alt="Overlay Image"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>TaskItem overlay text</b>
+    </td>
+    <td width="70%" valign="top">
+      The new API <code>TaskItem#setOverlayText(String)</code> allows clients to set a short text to be displayed on top of the application button in the taskbar.
+      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet336.java">Snippet 336</a> for an example. 
+      <p><img src="images/overlaytext.png" alt="Overlay Text"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>TaskItem progress</b>
+    </td>
+    <td width="70%" valign="top">
+      The new APIs <code>TaskItem#setProgress(int)</code> and <code>TaskItem#setProgressState(int)</code> allows clients to show progress indication in the application button in the taskbar.
+      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet336.java">Snippet 336</a> for an example.
+      <p><img src="images/progress.png" alt="Progress"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>TaskItem menu</b>
+    </td>
+    <td width="70%" valign="top">
+      The new API <code>TaskItem#setMenu(Menu)</code> allows clients to specify a menu for the application button in the taskbar.
+      Running on Windows 7:<br/> 
+     <p><img src="images/menu-win32.png" alt="Menu on Windows"/></p>
+      Running on Mac OS X:<br/> 
+     <p><img src="images/menu-mac.png" alt="Menu on Mac"/></p>
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>CTabFolder renderer</b>
+    </td>
+    <td width="70%" valign="top">
+      <tt>CTabFolder</tt> has been improved and now allows clients to change its look by implementing their own renderers.
+	<p><img src="images/newctab.png" alt="New CTabFolder"/></p>
+    </td> 
+  </tr>
+
+  <tr> 	
+    <td width="30%" valign="top" align="left">
+      <b>Custom traversals</b>
+    </td>
+    <td width="70%" valign="top">
+      New API <code>Control.traverse(int, event)</code> enables clients to request that a customized traversal be performed.  For an example of this see
+        <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet338.java">Snippet 338</a>.
+    </td> 
+  </tr>
+
+  <tr> 
+    <td width="30%" valign="top" align="left">
+      <b>Draw background at an offset</b>
+    </td>
+    <td width="70%" valign="top">
+      New API was added in <code>Composite.drawBackground</code> that allows for drawing of a parent background at an offset specified by the child. This
+	is useful for aligning patterns between the parent and child when dealing with non-rectangular shapes. 
+    </td> 
+  </tr>
+
+<!-- ****************** END OF N&N TABLE ****************** -->
+  </tbody>
+</table>
+
+</body>
+</html>

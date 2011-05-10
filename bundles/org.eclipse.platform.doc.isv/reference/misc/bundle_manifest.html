@@ -1,0 +1,477 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2005, 2011. This page is made available under license. Full for details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link REL="STYLESHEET" HREF="../../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<title>OSGi Bundle Manifest</title>
+</head>
+
+<body>
+
+<div class="Section1">
+
+<h1>OSGi Bundle Manifest Headers</h1>
+
+<p><i>Version 3.3 - Last revised April 27, 2011</i></p>
+
+<p>
+A bundle can carry descriptive information about itself in the manifest file 
+named META-INF/MANIFEST.MF.  The OSGi R4.3 Framework specification defines a set of 
+manifest headers such as Export-Package and Bundle-Classpath, which bundle developers 
+use to supply descriptive information about a bundle.  The Equinox OSGi Framework 
+implements the complete OSGi R4.3 Framework specification and all of the Core Framework 
+services. The OSGi R4.3 Core Framework services include the following:</p>
+<ul>
+  <li>Package Admin Service Specification (deprecated) - consider using the new org.osgi.framework.wiring package</li>
+  <li>URL Handlers Service Specification</li>
+  <li>Start Level Service Specification(deprecated) - consider using the new org.osgi.framework.startlevel package</li>
+  <li>Conditional Permission Admin Specification</li>
+  <li>Permission Admin Service Specification</li>
+</ul>
+  <p> There are a number of optional services defined in the OSGi R4.3 compendium specification. 
+    The optional services are not included with the Equinox OSGi Framework implementation. 
+    For information on OSGi R4.3 manifest headers and services refer to the <a href="http://www.osgi.org/Download/Release4V43">OSGi 
+    specifications</a>. </p>
+
+<h2>Eclipse Bundle Manifest Headers</h2>
+
+<p>
+The Eclipse OSGi Framework supports a number of additional bundle manifest headers 
+and directives.  A bundle developer may use these additional headers and directives 
+to take advantage of some additional features of the Eclipse OSGi Framework which 
+are not specified as part of a standard OSGi R4 Framework.
+</p>
+<h3>Additional Export-Package Directives</h3>
+
+<p>
+The Eclipse OSGi Framework supports additional directives on the Export-Package 
+header.  These directives are used to specify the access restriction rules of an 
+exported package.  See <a href="runtime-options.html#osgiresolvermode">osgi.resolverMode</a> 
+to configure the Eclipse OSGi Framework to enforce the access restriction rules at 
+runtime.
+</p>
+
+<h4>The x-internal Directive</h4>
+
+<p>
+The x-internal directive can be used in an Export-Package header to specify whether 
+the package is an internal package.  The Plug-in Development Environment will discourage 
+other bundles from using an internal package.  If the x-internal directive is not 
+specified then a default value of 'false' is used.  The x-internal directive must 
+use the following syntax:
+</p>
+
+<pre>
+x-internal ::= ( 'true' | 'false' )
+</pre>
+
+<p>
+The following is an example of the x-internal directive:
+</p>
+
+<pre>
+Export-Package: org.eclipse.foo.internal; x-internal:=true
+</pre>
+
+<h4>The x-friends Directive</h4>
+
+<p>
+The x-friends directive can be used in an Export-Package header to specify a list 
+of bundles which are allowed access to the package.  The Plug-in Development 
+Environment will discourage other bundles from using the package.  The x-friends 
+directive must use the following syntax:
+</p>
+
+<pre>
+x-friends ::= '&quot;' ( target-bundle ) ( ',' target-bundle ) * '&quot;'
+target-bundle ::= a bundle symbolic name
+</pre>
+
+<p>
+The following is an example of the x-friends directive:
+</p>
+
+<pre>
+Export-Package: org.eclipse.foo.formyfriends; x-friends:=&quot;org.eclipse.foo.friend1, org.eclipse.foo.friend2&quot;
+</pre>
+
+<p>
+The example specifies that only the bundles org.eclipse.foo.friend1 and 
+org.eclipse.foo.friend2 should be encouraged to use the org.eclipse.foo.formyfriends 
+package.  The x-internal package takes priority over the x-friends directive.  If 
+the x-internal directive specifies 'true' then The Plug-in Development 
+Environment will discourage all bundles from using the package even if they are
+specified as a friend.
+</p>
+
+<h3>The Eclipse-LazyStart Header</h3>
+
+<p>
+The Eclipse-LazyStart header is used to specify if a bundle should be started 
+before the first class or resource is accessed from that bundle. 
+This feature allows Eclipse to activate bundles lazily the first time they are
+needed.  Using this model Eclipse can startup with as few active bundles as 
+possible.  The Eclipse-LazyStart header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-LazyStart ::= ( 'true' | 'false' ) ( ';' 'exceptions' '=' '&quot;' exceptions-list '&quot;' ) ?
+exceptions-list ::= a comma ',' separated list of packages
+</pre>
+
+<p>
+When Eclipse-LazyStart is true, the 'exceptions' attribute specifies a list of
+packages that <b>will not</b> cause the bundle to be activated when classes are
+loaded from them. 
+When Eclipse-LazyStart is false, the 'exceptions' attribute specifies a list of
+packages that <b>will</b> cause the bundle to be activated when classes are
+loaded from them.
+The exception rules apply to all classes in the listed packages.  When a bundle 
+is activated the bundle's BundleActivator.start(BundleContext) method will be
+called.
+</p>
+<p>  
+If the Eclipse-LazyStart header is not defined in the bundle manifest then a default 
+value of 'false' is used.  The following is an example of the Eclipse-LazyStart header:
+</p>
+
+<pre>
+Eclipse-LazyStart: true; exceptions=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The example specifies that this bundle must be activated for any classes 
+that are loaded from this bundle, except the classes in the packages
+'org.eclipse.foo1' and 'org.eclipse.foo2'.
+</p>
+
+<p>
+The Eclipse-AutoStart and Eclipse-LazyStart headers have been deprecated in Eclipse 3.4.
+As of the OSGi R4.1 specification the lazy activation policy has been adopted by the OSGi 
+specification.  The new OSGi bundle manifest header Bundle-ActivationPolicy can be used to 
+specify a lazy activation policy.
+</p>
+
+<p>
+The Equinox Framework version 3.4 or later will continue to support the deprecated  Eclipse-LazyStart and 
+Eclipse-AutoStart headers. Bundle developers that want their bundles to work across other OSGi 
+Framework implementations should add the Bundle-ActivationPolicy header to their manifest. In most cases you can simply add the following header: 
+</p>
+
+<pre>
+Bundle-ActivationPolicy: lazy
+</pre>
+
+<p>
+If the 'exceptions' attribute is used with the Eclipse-LazyStart or Eclipse-AutoStart header then the 'include' or 'exclude' directive can be used 
+with the Bundle-ActivationPolicy header.  Consider the following Eclipse-LazyStart header:
+</p>
+
+<pre>
+Eclipse-LazyStart: true; exceptions=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The equivalent Bundle-ActivationPolicy header would be the following:
+</p>
+
+<pre>
+Bundle-ActivationPolicy: lazy; exclude:=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The following is an example Eclipse-LazyStart header that uses a false value with the exceptions attribute:
+</p>
+
+<pre>
+Eclipse-LazyStart: false; exceptions=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<p>
+The equivalent Bundle-ActivationPolicy header would be the following:
+</p>
+
+<pre>
+Bundle-ActivationPolicy: lazy; include:=&quot;org.eclipse.foo1, org.eclipse.foo2&quot;
+</pre>
+
+<h3>The Eclipse-PlatformFilter Header</h3>
+
+<p>
+The Eclipse-PlatformFilter is used to specify a platform filter for a bundle.  A platform
+filter must evaluate to true in a running platform in order for a bundle to be allowed
+to resolve.  The Eclipse-PlatformFilter header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-PlatformFilter ::= a valid LDAP filter string
+</pre>
+
+<p>
+The Framework supports filtering on the following system properties:
+</p>
+
+<ul type="disc">
+ <li><b>osgi.nl</b> - the platform language setting.</li>
+ <li><b>osgi.os</b> - the platform operating system.</li>
+ <li><b>osgi.arch</b> - the platform architecture.</li>
+ <li><b>osgi.ws</b> - the platform windowing system.</li>
+</ul>
+
+<p>
+The following is an example of the Eclipse-PlatformFilter header:
+</p>
+
+<pre>
+Eclipse-PlatformFilter: (&amp; (osgi.ws=win32) (osgi.os=win32) (osgi.arch=x86))
+</pre>
+
+<p>
+This example specifies that this bundle can only be resolved if the platform 
+properties are osgi.ws=win32 and osgi.os=win32 and osgi.arch=x86.  In other words 
+a platform running on an x86 architecture, using a win32 operating system and 
+the win32 windowing system.
+</p>
+
+<h3>The Eclipse-BuddyPolicy Header</h3>
+
+<p>
+The Eclipse-BuddyPolicy header is used to specify the buddy classloading policies for a bundle.
+The Eclipse-BuddyPolicy header must use the following syntax:
+</p>
+
+<pre>
+Eclipse-BuddyPolicy ::= ( policy-name ) ( ',' policy-name ) *
+policy-name ::= ( 'dependent' | 'global' | 'registered' | 
+                  'app' | 'ext' | 'boot' | 'parent' )
+</pre>
+
+<p>
+The following is an example of the Eclipse-BuddyPolicy header:
+</p>
+
+<pre>
+Eclipse-BuddyPolicy: dependent
+</pre>
+
+<h3>The Eclipse-RegisterBuddy Header</h3>
+
+<p>
+The Eclipse-RegisterBuddy header is used to declare a comma-separated list of symbolic names of 
+bundles that this bundle should be a registered buddy to. The bundles with the specified 
+symbolic names must use the <b>registered</b> buddy policy (specified by the Eclipse-BuddyPolicy)
+header) in order for this bundle to be a registered buddy.
+</p>
+<p>
+Note that the following conditions must be met before a bundle <b>X</b> can become a registered 
+buddy of another bundle <b>Y</b>: 
+</p>
+<ul>
+ <li>The bundle <b>Y</b> must specify the <b>registered</b> buddy policy (i.e. Eclipse-BuddyPolicy: 
+     registered) </li>
+ <li>The bundle <b>X</b> must specify the symbolic name of <b>Y</b> in the Eclipse-RegisterBuddy 
+     header (i.e Eclipse-RegisterBuddy: Y) </li>
+ <li>The bundle <b>X</b> must be dependent on a package exported by bundle <b>Y</b>. This can 
+     happen through either a Require-Bundle or Import-Package constraint. </li>
+</ul>
+<p>
+The syntax of the Eclipse-RegisterBuddy header is the following:
+</p>
+
+<pre>
+Eclipse-RegisterBuddy ::= ( target-bundle ) ( ',' target-bundle ) *
+target-bundle ::= a bundle symbolic name
+</pre>
+
+<p>
+The following is an example of the Eclipse-RegisterBuddy header:
+</p>
+
+<pre>
+Eclipse-RegisterBuddy: org.eclipse.foo.bundle1, org.eclipse.foo.bundle2
+</pre>
+
+<h3>The Eclipse-ExtensibleAPI Header</h3>
+
+<p>
+The Eclipse-ExtensibleAPI is used to specify whether a host bundle allows fragment bundles 
+to add additional API to the host.  This header should be used if a host bundle wants to allow 
+fragments to add additional packages to the API of the host.  If this header is not 
+specified then a default value of 'false' is used.  Note that this header is only used by tooling
+(PDE) to construct proper class paths for building. <b>The runtime does not use this header 
+at all.</b>  At runtime a fragment is always allowed to add additional packages, classes and 
+resources to the API of the host.  The Eclipse-ExtensibleAPI header must use the following 
+syntax:
+</p>
+
+<pre>
+Eclipse-ExtensibleAPI ::= ( 'true' | 'false' )
+</pre>
+
+<p>
+The following is an example of the Eclipse-ExtensibleAPI header:
+</p>
+
+<pre>
+Eclipse-ExtensibleAPI: true
+</pre>
+
+<h3>The Eclipse-BundleShape Header</h3>
+
+<p>
+The Eclipse-BundleShape header is used to specify the deployment shape a bundle should use when 
+the bundle is provisioned to an Eclipse installation. 
+<b>The runtime does not use this header at all.</b>  This header is only used by the build and 
+provisioning systems to determine how to deploy a bundle.  The Eclipse-BundleShape header must 
+use the following syntax:
+</p>
+
+<pre>
+Eclipse-BundleShape ::= ( 'jar' | 'dir' )
+</pre>
+
+<p>
+The &quot;jar&quot; value indicates that the bundle should be deployed as a jar.  The &quot;dir&quot;
+value indicates that the bundle should be unpacked into a directory when deployed to an Eclipse installation.
+</p>
+
+<p>
+If a product uses PDE to build a feature based product then, if specified, the value of the unpack attribute in the feature.xml file 
+takes precedence over the Eclipse-BundleShape header.
+</p>
+
+<p>
+The following is an example of the Eclipse-BundleShape header:
+</p>
+
+<pre>
+Eclipse-BundleShape: jar
+</pre>
+
+<h3>The Eclipse-GenericCapability Header</h3>
+
+<p>
+<b>Note:</b> the Eclipse-GenericCapability header has been deprecated.  The OSGi R4.3 Core Framework 
+specification includes a new header <b>Provide-Capability</b> which can be used to specify 
+generic capabilities provided by a bundle.  Equinox will continue to support both the 
+Eclipse-GenericCapability header and the new OSGi Provide-Capability header.
+</p>
+<p>
+The Eclipse-GenericCapability header is used to specify a generic capability 
+of a bundle.  Generic capabilities can be used to describe features of your 
+bundle which can be required by other bundles in the system (using the 
+Eclipse-GenericRequire header).  Generic capabilities are given a name 
+and a capability type.  Capability types are defined by the bundle which is 
+offering the capability.  Capabilities can also have a set of typed matching
+attributes which are used to match against when resolving Eclipse-GenericRequire 
+headers.  Matching attributes may be one of the following types; 
+[string | version | uri | long | double | set].  The set type can be used 
+to define a set of strings as a comma separated list of strings.
+
+The Eclipse-GenericCapability header must use the following syntax:
+</p>
+
+<pre>
+  Eclipse-GenericCapability ::= capability ( ',' capability ) *
+  capability                ::= typed-name ( ';' typed-name ) * 
+                                ( ';' typed-param ) *
+  typed-name                ::= name ( ':' capability-type )
+  typed-param               ::= typed-key '=' quouted-string
+  typed-key                 ::= name ( ':' 
+                                [string | version | uri | long | double | set] )</pre>
+
+<p>
+The following is an example of the Eclipse-GenericCapability header that could be used
+to specify a bundle with an OSGi service org.acme.stuff.SomeService implementation:
+</p>
+
+<pre>
+  Eclipse-GenericCapability: 
+   org.acme.stuff.SomeService:osgi.service; 
+   version:version=&quot;1.0.1&quot;</pre>
+
+<h3>The Eclipse-GenericRequire Header</h3>
+
+<p>
+<b>Note:</b> the Eclipse-GenericRequire header has been deprecated.  The OSGi R4.3 Core Framework 
+specification includes a new header <b>Require-Capability</b> which can be used to specify 
+a requirement on a generic capabilities provided by another bundle.  Equinox will continue to 
+support both the Eclipse-GenericRequire header and the new OSGi Require-Capability header.
+</p>
+
+<p>
+The Eclipse-GenericRequire header is used to specify a requirement on a generic 
+capability which is offered by another bundle (using the Eclipse-GenericCapability
+header).  Generic requirements are given a name and a capability type.  Capability 
+types are defined by the bundle which is offering the capability.  Generic 
+requirements can specify an LDAP filter string which is used as a selection filter
+to resolve against matching generic capabilities.
+
+The Eclipse-GenericRequire header must use the following syntax:
+</p>
+
+<pre>
+  Eclipse-GenericRequire   ::= generic-require ( ',' generic-require ) *
+  generic-require          ::= typed-name ( ';' typed-name ) *
+                               ( ';' selection-filter '=' quoated-ldapFilter )
+                               ( ';' optional '=' [true|false] )
+                               ( ';' multiple '=' [true|false] )
+  typed-name                ::= name ( ':' capability-type )</pre>
+
+<p>
+The following is an example of the Eclipse-GenericRequire header that could be used
+to specify a bundle that depends on an OSGi service org.acme.stuff.SomeService 
+implementation:
+</p>
+
+<pre>
+  Eclipse-GenericRequire: 
+   org.acme.stuff.SomeService:osgi.service; 
+   selection-filter=&quot;(version&gt;=1.0.1)&quot;</pre>
+
+<h3>Generic Aliases</h3>
+<p>
+The <a href="runtime-options.html#osgigenericAliases">osgi.genericAliases</a> option 
+can be used to map existing OSGi manifest headers onto Eclipse-GenericCapability and
+Eclipse-GenericRequire manifest headers.  For example, consider the following manifest 
+headers
+</p>
+<pre>
+  Export-Service: org.acme.stuff.SomeService
+  Import-Service: org.acme.stuff.SomeService</pre>
+
+<p>
+These headers can be mapped to Eclipse-GenericCapability and Eclipse-GenericRequire 
+headers using the following property:
+</p>
+<pre>  osgi.genericAliases=Export-Service:Import-Service:osgi.service</pre>
+<p>
+Under the covers this would translate into the following generic headers:
+</p>
+<pre>
+  Eclipse-GenericRequire: org.acme.stuff.SomeService:osgi.service
+  Eclipse-GenericCapability: org.acme.stuff.SomeService:osgi.service
+</pre>
+
+<h3>The Plugin-Class Header</h3>
+
+<p>
+The Plugin-Class header is only used to support plugins developed for the Eclipse 2.1 
+platform.  This header is used to specify a class name that will be used to activate 
+a plug-in using the old Eclipse 2.1 activation model.  New bundles developed for
+Eclipse 3.0 or greater should not use this header.
+The following is an example of the Plugin-Class header:
+</p>
+
+<pre>
+Plugin-Class: org.eclipse.foo.FooPlugin
+</pre>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright"
+	content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1"
+	TYPE="text/css">
+<TITLE>Support for displaying markers</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</head>
+
+<body>
+<h2>Support for displaying markers</h2>
+<p>The <a
+	href="../reference/extension-points/org_eclipse_ui_ide_markerSupport.html">org.eclipse.ui.ide.markerSupport</a>
+extension point provides facilities for controlling how markers are
+displayed and organized in the UI. This extension point handles filters
+and grouping in views such as the Problems view as well as definition of custom marker views.</p>
+<p><strong>Marker Content Generators</strong></p>
+
+<p>Custom marker views can be created by specifying the view using a
+<tt>markerContentsGenerator</tt>. A <tt>markerContentsGenerator</tt>
+specifies the types used, the configurations available and the grouping
+to be shown in the view. The problems view, tasks view and bookmarks
+view are defined using <tt>markerContentsGenerator</tt> as of version
+3.4. A reusable superclass <tt>org.eclipse.ui.views.markers.AbstractMarkersView</tt>
+has been supplied for use by custom <tt>markerContentsGenerators</tt>.</p>
+<p><strong>Commands</strong></p>
+The menus defined in the markersViews now all use the
+<tt>org.eclipse.ui.menus</tt>
+extension point so they can be extended by clients at any desired point.
+The pop-up menus in the supplied markers views are available to all
+subclasses of
+<tt>org.eclipse.ui.views.markers.AbstractMarkersView</tt>
+but pull-down entries must be added for the new views explicitly. It is
+recommended that all new handlers for commands to be added to the
+markersView subclass
+<tt>org.eclipse.ui.views.markers.MarkerViewHandler</tt>
+so as to get access to the
+<tt>org.eclipse.core.resources.IMarkers</tt>
+currently selected.
+
+<p><strong>Configurations</strong></p>
+<p>The Problems view supports multiple configurations at once. When
+multiple configurations are enabled there are two possible modes of
+matching: <i>match any</i> (any marker that matches one or more selected
+filters will be displayed) or <i>match all</i> (any marker that matches all
+selected filters will be displayed). New configurations can be added
+using the <tt>markerFieldConfiguration</tt> element or manually by the
+user. Below is the configuration section of the Problems view showing
+user configurations and configurations added via the extension point).</p>
+<p><img src="images/prbfil.png" alt="Picture of Problems view's 'Configure Contents' dialog"></p>
+<p><strong>Groups</strong></p>
+<p>Markers can be grouped in two ways. The first way is to group
+marker types into groups using the <code>markerTypeCategory</code>
+element. This is shown when the user selects <b>Group By &gt; Type</b>.
+Below is an example that shows grouping by 'Java Problem Type':</p>
+<p><img src="images/prob.png" alt="Picture of Problems view showing grouping by type"></p>
+<p>When marker types are grouped together they will be shown in
+those groups in the configurations dialog.</p>
+<p><img src="images/problems_view_markerTypeCat.png" alt="Picture of Problems view's 'Configure Contents' dialog"></p>
+<p>You can also create your own grouping using the <code>markerGrouping</code>
+element, which will show up as an extra entry in the <b>Group By</b>
+menu of the markers view it is defined in. Top level markerGroupings are
+shown in the Problems View (this is for compatibility with previous
+Eclipse versions). The IDE provides a grouping based on severity (the
+default). The Java development tools provide a Java Type grouping.</p>
+<p><code>markerGroupings</code> are resolved by checking attributes
+on the <a
+	href="../reference/api/org/eclipse/core/resources/IMarker.html">IMarker</a>.
+<code>markerAttributeMappings</code> are used to specify these mappings.
+Below is the Group By menu with the extra <code>markerGroupings</code>
+that have been added. The Problems view is currently grouped by
+severity.</p>
+<p><img src="images/problemsview_groups.png" alt="Picture of the Problems view's 'Group By' view menu"></p>
+</body>
+</html>
