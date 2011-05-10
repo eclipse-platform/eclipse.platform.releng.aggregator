@@ -44,6 +44,10 @@ public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 					//the last update was a copyright checkin - ignore
 					return 0;
 				}
+				if (logComment.indexOf("restore HEAD after accidental deletion") != -1) {
+					//the last update was the SWT accidental deletion of HEAD in 2009 - ignore
+					return 0;
+				}
 				
 				Calendar calendar = Calendar.getInstance();
 				calendar.setTime(entry.getDate());
