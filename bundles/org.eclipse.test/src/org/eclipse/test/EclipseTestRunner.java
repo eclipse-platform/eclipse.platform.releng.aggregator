@@ -280,7 +280,7 @@ public class EclipseTestRunner implements TestListener {
 					public void run() {
 						dump();
 						try {
-							Thread.sleep(2000);
+							Thread.sleep(5000);
 						} catch (InterruptedException e) {
 							// continue
 						}
@@ -289,6 +289,10 @@ public class EclipseTestRunner implements TestListener {
 
 					private void dump() {
 						System.err.println("EclipseTestRunner almost reached timeout '" + timeoutArg + "'.");
+						System.err.println("totalMemory: " + Runtime.getRuntime().totalMemory());
+						System.err.println("freeMemory (before GC): " + Runtime.getRuntime().freeMemory());
+						System.gc();
+						System.err.println("freeMemory (after GC):  " + Runtime.getRuntime().freeMemory());
 						String time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").format(new Date());
 						System.err.println("Thread dump at " + time + ":");
 						Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
@@ -306,9 +310,11 @@ public class EclipseTestRunner implements TestListener {
 								Control focusControl= display.getFocusControl();
 								if (focusControl != null) {
 									System.err.println("FocusControl: ");
+									StringBuilder indent= new StringBuilder("  ");
 									do {
-										System.err.println(focusControl);
+										System.err.println(indent.toString() + focusControl);
 										focusControl= focusControl.getParent();
+										indent.append("  ");
 									} while (focusControl != null);
 								}
 								Shell[] shells= display.getShells();
@@ -316,7 +322,7 @@ public class EclipseTestRunner implements TestListener {
 									System.err.println("Shells: ");
 									for (int i= 0; i < shells.length; i++) {
 										Shell shell= shells[i];
-										System.err.println((shell.isVisible() ? "visible: " : "invisible: ") + shell);
+										System.err.println((shell.isVisible() ? "  visible: " : "  invisible: ") + shell);
 									}
 								}
 							}
