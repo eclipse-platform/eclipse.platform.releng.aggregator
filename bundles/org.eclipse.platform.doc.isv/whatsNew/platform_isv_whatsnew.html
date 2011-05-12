@@ -4,22 +4,22 @@
 <meta name="copyright" content="Copyright (c) Eclipse contributors and others 2010, 2011. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-<link rel="STYLESHEET" href="../book.css"  type="text/css"/>
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 <style type="text/css">
-td {border-top: solid thin black;}
-img[alt] {background-color:#ffdddd;}
-tr {vertical-align: top;}
+table.news td {border-top: solid thin black;}
+table.news tr {vertical-align: top;}
+table.news tr td.section {font-size: 20px; font-weight: bold;}
+table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
+table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
-<title>Eclipse Platform What's New in 3.6</title>
+<title>Eclipse Platform What's New in 3.7</title>
 </head>
 
 <body>
-
-<h1>What's New in 3.6</h1>
-
+<h2>What's New in 3.7</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
 made to the Eclipse <a href="#Platform">Platform</a>, <a href="#Equinox">Equinox</a> and
-<a href="#SWT">SWT</a> for the 3.6 release of Eclipse.</p>
+<a href="#SWT">SWT</a> for the 3.7 release of Eclipse.</p>
 
 <p>
 There are also many new features oriented towards end-users of the platform
@@ -29,496 +29,533 @@ section of the Workbench User Guide.
 </p>
 
 <!-- ****************** START OF N&N TABLE ****************** -->
-<table cellpadding="10" cellspacing="0" width="600">
-  <colgroup>
-  <col width="20%"/>
-  <col width="80%"/>
-  </colgroup>
-  <tbody>
-
+<table class="news" border="0" cellpadding="10" cellspacing="0" width="600">
+<tbody>
 <!-- ******************** Platform ********************** -->
-<tr>
 
-<td colspan="2"><a name="Platform"></a>
-<div style="font-size: 20px; font-weight: bold;">Platform Changes</div>
-</td>
-</tr>
-
-  <tr id="test-framework-junit4"> 
-    <td width="30%" valign="top" align="left">
-      <b>Platform test framework support for JUnit 4</b>
+	<tr>
+    <td id="Platform" class="section" colspan="2">
+      <h2>Platform Changes</h2>
     </td>
-    <td width="70%" valign="top">
-      The platform's automated testing framework now supports running tests with JUnit 4.
-      The test framework previously only allowed running with JUnit version 3.
-    </td>
-  </tr>
+  	</tr>
 
-  <tr id="headless-ext-tools">
-    <td width="30%" valign="top" align="left"><b>Headless external tool builders</b></td>
-    <td width="70%" valign="top">
-    	Launching support for Ant and external tools is provided by the new headless plug-ins
-    	<code>org.eclipse.ant.launching</code> and <code>org.eclipse.core.externaltools</code>.
-    	This allows applications without a user interface to leverage the launch support programmatically
-    	and it allows projects configured with external tool builders to be built in headless
-    	environments.
-    </td>
-   </tr>
-
-  <tr id="equinox.event.admin">
-    <td width="30%" valign="top" align="left"><b>Event admin added</b></td>
-    <td width="70%" valign="top">The OSGi event admin specification provides 
-        a general purpose event bus for posting and sending events to event 
-        handlers.  The Equinox event admin implementation has been 
-        added to the platform feature.</td>
-  </tr>
-
-  <tr id="webappextension">
-    <td width="30%" valign="top" align="left"><b>Help UI extensibility</b></td>
-    <td width="70%" valign="top">New extension points allow additional buttons and 
-    frames to be added to the help web application. In the image below the title search frame, 
-    the rightmost button and the frame below the content page are all contributed.
-      <p><img src="images/webappextn.png" alt="Help webapp showing extensions" /></p>
+  <tr id="builderFrameworkEnhancements">
+    <td class="title">Builder framework enhancements</td>
+    <td class="content">
+        The platform now supports multiple <i>build configurations</i> per project. Build configurations
+        allow a project to be built in different ways. The build commands can discover
+        which configuration is currently being built. Builder resource deltas are stored per 
+        configuration.
+        <p>
+        New API is introduced to define references between the configurations and
+        to build chosen configurations and their references.
+        See <tt>org.eclipse.core.resources.IBuildConfiguration</tt> for further details.
+        </p>
+        <p>
+        Builders also now have access to a <i>build context</i> that can be used to discover the 
+        source of the build request, as well as the build configurations being built during the current
+        build invocation.
+        See <tt>org.eclipse.core.resources.IncrementalProjectBuilder#getContext</tt> for further details.
+        </p>
     </td>
   </tr>
 
-  <tr id="helpfooter">
-    <td width="30%" valign="top" align="left"><b>Customizable help footer</b></td>
-    <td width="70%" valign="top"><p>The customization <tt>org.eclipse.help.base/footer</tt> allows
-    a footer to be added to the Eclipse help system. This can be used for infocenters or 
-    in Eclipse-based products.</p>
-      <p><img src="images/footer.png" alt="Eclipse Help showing footer" />.</p>
+  <tr id="help-display">
+    <td class="title">Extension point for changing help main page</td>
+    <td class="content">
+      A new extension point, <tt>org.eclipse.help.base.display</tt>, allows for an alternate
+      web page instead of help/index.jsp to be opened when <b>Help &gt; Contents</b> is invoked from the workbench menu.
     </td>
   </tr>
 
-  <tr id="help-scoping-criteria">
-    <td width="30%" valign="top" align="left"><b>Scoping by criteria in help system</b></td>
-    <td width="70%" valign="top">The help web application now allows the table of contents, the 
-		index and the search results to be filtered by book/topic or by criteria. Criteria are defined in 
-		the table of contents or using the extension point <tt>org.eclipse.help.criteriaDefinition</tt>. The list of 
-		displayed criteria is defined at the product level. Products which do not define criteria (including 
-		the Eclipse SDK) will not show any UI for criteria.
-      <p><img src="images/newscope.png" alt="Scope dialog showing criteria." /></p>
+  <tr id="Plat-stackdumps-on-timeout">
+    <td class="title">Eclipse Test Framework writes stackdumps on timeout</td>
+    <td class="content">
+
+      The Eclipse Test Framework (org.eclipse.test) now writes stackdumps to <code>System.err</code> shortly before
+      a test gets killed by the <code>&lt;java fork="true" timeout="${timeout}" ...&gt;</code> Ant task.
+      
+      <p>Where before, you just saw:</p>
+      
+      <pre>     [java] Timeout: killed the sub-process
+     [java] Java Result: -1</pre>
+     
+     You now get a stackdump of all threads, followed by the current focus control (with all its parents), and the open shells, e.g.:
+     
+      <pre>     [java] EclipseTestRunner almost reached timeout '7200000'.
+     [java] Thread dump at 2011-04-21 06:41:49 -0400:
+     [java] java.lang.Exception: Worker-JM
+     [java] 	at java.lang.Object.wait
+     [java] 	at org.eclipse.core.internal.jobs.InternalWorker.run
+     [java] ...
+     [java] java.lang.Exception: main
+     [java] 	at org.eclipse.swt.internal.win32.OS.WaitMessage
+     [java] 	at org.eclipse.swt.widgets.Display.sleep
+     [java] 	at pack.TestClass.testMethod
+     [java] ...
+     [java] FocusControl: 
+     [java] Tree {}
+     [java] Shell {}
+     [java] Shells: 
+     [java] visible: Shell {Java - Eclipse SDK}
+     [java] visible: Shell {}</pre>
+
+     <p>The whole dump is repeated two seconds later. Since the code that prints the SWT information uses
+     <code>display.syncExec(..)</code>, this may or may not influence a hung main thread.</p>
     </td>
   </tr>
 
-  <tr id="helpsort">
-    <td width="30%" valign="top" align="left"><b>Sorting help topics</b></td>
-    <td width="70%" valign="top">A new attribute "sort" has been added to the &lt;toc&gt; and
-    &lt;topic&gt; elements in a table of contents which causes subtopics to be sorted alphabetically when 
-    the value is set to "true".</td>
-  </tr>
+  <tr id="Plat-launchshortcuts">
+	<td class="title">Variables in launch shortcuts</td>
+	<td class="content">
+	Previously when you contributed a launch shortcut, the only variable you had available 
+	for examination was the current selection in the workspace. Now you have all of the 
+	variables from the Platform evaluation context available as well.
+	<p>
+	For example you can now ask if your bundle has been loaded yet to prevent your launch 
+	shortcut from appearing when it should not.</p>
+	<pre>
+      &lt;enablement&gt;
+        &lt;with variable="selection"&gt;
+          &lt;count value="1"/&gt;
+             &lt;iterate&gt;
+                &lt;and&gt;
+                    &lt;test property="org.eclipse.my.bundle.tester" value="true"/&gt;
+                    &lt;with variable="org.eclipse.core.runtime.Platform"&gt;
+                       &lt;test
+                             args="org.eclipse.my.bundle"
+                             property="org.eclipse.core.runtime.bundleState"
+                             value="ACTIVE"&gt;
 
-  <tr id="rsswidget">
-    <td width="30%" valign="top" align="left"><b>Reusable intro news reader</b></td>
-    <td width="70%" valign="top">The <tt>EclipseRSSViewer</tt> class allows multiple RSS news readers to
-be easily added to an intro page.
-      <p><img src="images/rss.png" alt="RSS reader on Intro page" /></p>
-    </td>
-  </tr>
-
-
-  <tr id="see">
-    <td width="30%" valign="top" align="left"><b>See entries in keyword index</b></td>
-    <td width="70%" valign="top">See entries can now be added to the help system keyword index.
-      <p><img src="images/see.png" alt="Help webapp showing extensions" /></p>
-    </td>
-  </tr>
-
-  <tr id="helpsearchprovider">
-    <td width="30%" valign="top" align="left"><b>Extension point  for help search</b></td>
-    <td width="70%" valign="top">A new extension point <tt>org.eclipse.help.base.searchParticipant</tt>
-    has been added. This allows clients to add documents not in the html or xhtml format to the search
-    index used by the help system. This should be used in place of the deprecated extension point 
-    <tt>org.eclipse.help.base.luceneSearchParticipants</tt> which is not binary compatible across Lucene versions.	  
+                       &lt;/test&gt;
+                    &lt;/with&gt;
+                &lt;/and&gt;
+             &lt;/iterate&gt;
+        &lt;/with&gt;
+      &lt;/enablement&gt;
+	</pre>
 	</td>
   </tr>
 
 <!-- ******************** Equinox ********************** -->
-<tr>
-<td colspan="2"><a name="Equinox"></a>
-<div style="font-size: 20px; font-weight: bold;">Equinox Changes</div>
-</td>
-</tr>
+	<tr>
+    <td id="Equinox" class="section" colspan="2">
+      <h2>Equinox Changes</h2>
+    </td>
+  	</tr>
 
-  <tr id="multi-locale-registry"> 
-    <td width="30%" valign="top" align="left"><b>Multi-locale support in extension registry</b></td>
-    <td width="70%" valign="top">The Equinox extension registry now supports running
-    in a multi-locale mode. When running in this mode, translated extension attributes can be
-    obtained for any locale, whereas they were previously only available for the system's
-    current locale. Multi-locale mode is enabled via the <tt>-registryMultiLanguage</tt>
-    command line argument, or by setting the Java system property <tt>eclipse.registry.MultiLanguage=true</tt>.
-    <p>
-    The registry also uses a new <tt>LocaleProvider</tt> service for
-    obtaining the locale for a given execution context. This allows a system to provide
-    an alternative mechanism for computing the current locale, rather than using the
-    singleton locale defined by the Java runtime environment.
-    </p>
+  <tr id="framework-update">
+    <td class="title">OSGi R4.3 Core Framework API update</td>
+    <td class="content">
+      The upcoming OSGi R4.3 Core Specification includes many updates to core
+      framework API.  This includes introducing generics in the framework and other core
+      API.  
+
+      <p>The framework package is updated in several ways. First, generic 
+      types are added to existing API where appropriate. Second, new API 
+      is added to exploit generic type safety. In particular there is new API in the service registry 
+      to facilitate working with type parameters. Finally, in order to 
+      tidy up the overall framework API, an adapt method was added to the <tt>Bundle</tt> 
+      interface to allow it to be adapted to types in the new <tt>org.osgi.framework.wiring</tt>
+      and <tt>org.osgi.framework.startlevel</tt> packages. These new packages replace the 
+      <tt>org.osgi.service.packageadmin</tt> and <tt>org.osgi.service.startlevel</tt> packages, 
+      respectively, both of which are now deprecated.</p>
+
+      <p>The tracker API is also updated to use generic types. A new constructor is added 
+      to <tt>ServiceTracker</tt> which take a class argument for type safety.  New <tt>getTracked</tt>
+      methods are added to both <tt>BundleTracker</tt> and <tt>ServiceTracker</tt> to return a map for 
+      keys to values. </p>
+
+      <p>OSGi has a requirement to support J2ME foundation 1.1, even with 
+      the introduction of generic API.  For J2ME platforms, the OSGi API 
+      is compiled in a way that allows it to continue running on J2SE 1.4
+      based VMs (a compiler option known as jsr14).  The Equinox core framework
+      uses this option when it is built and we still support J2SE 1.4 and
+      J2ME Foundation 1.1 runtime environments.</p>
+
+      <p>For more information see the upcoming OSGi Service Platform Release 4 Core 
+      and Compendium Version 4.3 
+      <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.3-early-draft3.pdf">Early Draft 3</a>
+      available December 20th, 2010.</p>
+    </td>
+  </tr>
+  
+  <tr id="framework-hooks">
+    <td class="title">Framework Hooks</td>
+    <td class="content">
+      The upcoming OSGi R4.3 Core Framework Specification includes new framework
+      hooks that provide a means for a bundle to hook into the resolver, bundle
+      events and accessing bundles via the bundle context.  These hooks build 
+      upon the concepts already available in the service hooks introduced in the 
+      OSGi R4.2 Core Specification (package org.osgi.framework.hooks.service).
+
+      <p>The framework hook specification provides a number of new mechanisms that closely 
+      interact with the built-in resolver and lifecycle layer of the framework.  These 
+      interactions are not intended for use by application bundles.  Modifying the behavior
+      of the module and lifecycle layer requires developers to closely follow the semantics 
+      of the OSGi module and lifecycle model and this is often hard, requiring a significant
+      amount of code.  The resolver hook API is included in the 
+      <tt>org.osgi.framework.hooks.resolver</tt> package.  The bundle event and find hooks are
+      included in the <tt>org.osgi.framework.hooks.bundle</tt> package.</p>
+
+      <p>OSGi middleware developers may notice that the composite bundle specification and
+      concept will not be included in the upcoming OSGi R4.3 Core Specification.  The OSGi
+      Core Expert Group decided against building the concept of composite bundles directly 
+      into the framework.  Instead these new core framework hooks have been introduced
+      to allow a layer on top to provide isolation in a similar fashion as the composite
+      bundle concept from earlier OSGi draft specification proposals.</p>
+
+      <p>For more information see the upcoming OSGi Service Platform Release 4 Core 
+      and Compendium Version 4.3 
+      <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.3-early-draft3.pdf">Early Draft 3</a>
+      available December 20th 2010.</p>
     </td>
   </tr>
 
-  <tr id="equinox.weaving">
-    <td width="30%" valign="top" align="left"><b>New Equinox weaving feature</b></td>
-    <td width="70%" valign="top">The byte code weaving work in the Equinox incubator has passed the 
-        graduation review and the major parts of the work are now part of the Equinox distribution.
-      <p>Equinox Weaving provides a general infrastructure for load-time byte code 
-        weaving for the Equinox OSGi runtime. Currently Equinox Weaving includes 
-        a weaver for AspectJ to load-time weave aspects into bundles (AspectJ Development Tools and 
-        the Scala IDE for Eclipse already use this to realize deeper integration 
-        with the Eclipse Java development tools, for example).</p>
-      <p>These four bundles are contained in the distribution:</p>
-      <ul>
-        <li><tt>org.eclipse.equinox.weaving.hook:</tt> The framework extension project 
-          containing the hooks to insert byte code weaving and caching at 
-          load-time.</li>
-        <li><tt>org.eclipse.equinox.weaving.aspectj:</tt> Contains the bridge to use 
-          AspectJ as load-time weaving implementation.</li>
-        <li><tt>org.eclipse.equinox.weaving.caching:</tt> Provides caching for woven 
-          byte code for standard Java virtual machines.</li>
-        <li><tt>org.eclipse.equinox.weaving.caching.j9:</tt> Contains an alternative 
-          cache implementation that uses IBM J9 VM shared classes for caching woven 
-          classes.</li>
-      </ul>
+  <tr id="weaving-hooks">
+    <td class="title">Weaving Hooks</td>
+    <td class="content">
+      The upcoming OSGi R4.3 Core Framework Specification includes new hooks for 
+      manipulating class bytecode at runtime (or bytecode weaving). Bytecode weaving has 
+      become more popular, in particular due to its inclusion in the core Java API, and so 
+      there are a number of bytecode weaving technologies that would benefit from weaving 
+      support in the OSGi runtime.  Bytecode weaving requires tight integration with the 
+      class loader for the class to be woven, and also can alter the class dependency graph.
+
+      <p>To support bytecode weaving a new weaving hook is defined in the package 
+      <tt>org.osgi.framework.hooks.weaving</tt>.  The weaving hook allows a hook
+      implementation to manipulate the bytecode of a class before it is defined
+      by an OSGi class loader.  In cases where the class dependency graph has 
+      changed, a weaving hook is able to add additional package constraints to 
+      the bundle that is being woven.</p>
+
+      <p>For more information see the upcoming OSGi Service Platform Release 4 Core 
+      and Compendium Version 4.3 
+      <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.3-early-draft3.pdf">Early Draft 3</a>
+      available December 20th 2010.</p>
     </td>
   </tr>
 
-  <tr id="equinox.console">
-    <td width="30%" valign="top" align="left"><b>Multi-session Equinox console</b></td>
-    <td width="70%" valign="top">The Equinox console has been enhanced to 
-        allow multiple console sessions to be connected.  Previous versions of the 
-        Equinox console would only allow a single session to be connected at a time.   
-        The console only allowed for connections from two built connection types,
-        through standard in/out or though a telnet port.
-      <p>A new service interface has been introduced: 
-        <tt>org.eclipse.osgi.framework.console.ConsoleSession</tt>.  
-        Implementers of a console session register themselves as an OSGi service.
-        The console implementation will then automatically use the console session
-        for input and output of a console connection.</p>
+  <tr id="generic-capabilities">
+    <td class="title">Generic Capabilities</td>
+    <td class="content">
+      The upcoming OSGi R4.3 Core Framework Specification includes a new 
+      generic dependency model for bundles that will be understood and enforced by
+      the framework resolver.   Since existing resolve-time dependencies (Import-Package,
+      Require-Bundle etc.) are related to code visibility management, the resolution of
+      such dependencies has traditionally indicated
+      that the bundles in question are ready to share and/or use their code.  With the
+      introduction of a generic dependency model, a bundle can provide and require 
+      capabilities that are not related to code.
+
+      <p>New OSGi bundle manifest headers are introduced to declare arbitrary provided
+      capabilities (<tt>Provide-Capability</tt>) and requirements on them (<tt>Require-Capability</tt>).
+      These headers impact the resolution of the bundles involved and the dependencies among 
+      them, but have no other impact.  It is predicated solely on the
+      existence of declared capabilities to satisfy declared requirements and nothing more.</p>
+
+      <p>Those familiar with Equinox may notice a similarity between the generic dependency
+      model in OSGi R4.3 and the Equinox specific manifest headers <tt>Eclipse-GenericCapability</tt>
+      and <tt>Eclipse-GenericRequire</tt>.  The OSGi R4.3 generic dependency model provides
+      an equivalent and standard way for defining generic capabilities and requirements.
+      Developers are encouraged to migrate off the Equinox specific headers to the new OSGi
+      headers for generic capabilities and requirements.</p>
+
+      <p>For more information see the upcoming OSGi Service Platform Release 4 Core 
+      and Compendium Version 4.3 
+      <a href="http://www.osgi.org/Download/File?url=/download/osgi-4.3-early-draft3.pdf">Early Draft 3</a>
+      available December 20th 2010.</p>
+    </td>
+  </tr>
+  <tr id="memory-improvements">
+    <td class="title">Reduced memory use when loading p2 repositories</td>
+    <td class="content">
+      Several changes were made to reduce memory usage during and after loading p2 repositories.
+      Although actual savings depends on the composition of the repositories being loaded we are seeing
+      an average reduction of 23% in the peak memory usage and heap expansion during the load and an 
+      average reduction of 19% in memory used to store the repository after the load.  
+      Using a sample Eclipse build repository with 10 integration builds, this translates to a 
+      reduction in peak memory usage from 92 MB to 71 MB, and a reduction in retained 
+      memory after the load of 48 MB to 39 MB.
+      <p>
+      To maintain repository compatibility between different versions of Eclipse, most of
+      these savings will only be realized when reading repositories generated with a 3.7 M4 or later
+      Eclipse. 
+      </p>
+      <p>
+      You can look forward to additional improvements which did not make it into this Milestone, but 
+      will be included in the next Milestone.
+      </p>
     </td>
   </tr>
 
-  <tr id="equinox.p2.revert">
-    <td width="30%" valign="top" align="left"><b>Revert support in p2 director</b></td>
-    <td width="70%" valign="top">The p2 director application now supports reverting
-    to an earlier profile state from the command line. Use the new <tt>-revert</tt>
-    argument to specify a previous profile state to revert to.
+  <tr id="unified-logging">
+    <td class="title">Unified logging</td>
+    <td class="content">
+      Eclipse and Equinox currently have several logging APIs which do not 
+      always work together nicely.  This includes <tt>ILog</tt>, <tt>FrameworkLog</tt>, and 
+      the OSGi <tt>LogService</tt>, among others.  For the 3.7 release Equinox has pulled the 
+      Extended OSGi log service into the core framework to 
+      aggregate and unify the various logging APIs within the Eclipse
+      Platform.  Before this unification it was not possible for an 
+      <tt>ILogListener</tt> to listen to entries logged directly to the
+      <tt>FrameworkLog</tt> or to the OSGi <tt>LogService</tt>.  Similarly, it was not possible
+      for an OSGi <tt>LogListener</tt> to listen to entries logged directly to
+      the <tt>FrameworkLog</tt> or an <tt>ILog</tt>.  Now through the use of the 
+      <tt>ExtendedLogService</tt>, included in the core framework, listeners
+      can listen to logs coming from any source as long as they are 
+      aggregated through the extended log service.
+      <p>
+      The package <tt>org.osgi.service.log</tt> contains the OSGi LogService
+      API and <tt>org.eclipse.equinox.log</tt> contains the Equinox 
+      extended OSGi log service API.  Both packages are exported by the
+      core framework (<tt>org.eclipse.osgi</tt>).  All eclipse logging
+      APIs are now aggregated through the <tt>org.eclipse.equinox.log.Logger</tt>
+      with the name <tt>org.eclipse.equinox.logger</tt>.  All <tt>ILogListener</tt>
+      instances will be notified of entries logged through this logger.  OSGi <tt>LogListener</tt>
+      instances will also be notified of entries logged through this logger as well as entries logged
+      through any other logger.  The <tt>ExtendedLogReaderService</tt> in Equinox also allows
+      OSGi <tt>LogListener</tt> instances to listen to specific loggers through the use of a filter.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="p2-touchpoint-instructions">
+    <td class="title">More metadata customizations in p2</td>
+    <td class="content">
+	Applications can now set the <tt>-vm</tt> command-line argument within p2 metadata by using the <tt>setJvm</tt>
+	touchpoint instruction.
+<pre>
+&lt;touchpointData ...&gt;
+   &lt;instructions ...&gt;
+      &lt;instruction key='configure'&gt;
+         <b>setJvm</b>(jvm:/usr/bin/java);
+      &lt;/instruction&gt;
+      ...
+&lt;/touchpointData&gt;
+</pre> 
+	
+	<p>
+	You can also incrementally add program property arguments. This is useful particularly for
+	the case where you have a property in the <tt>config.ini</tt> file whose value is a comma-separated
+	list. Calling <tt>addProgramProperty</tt> will add the value to the end of the list and calling
+	<tt>removeProgramProperty</tt> will remove it from the list. If it is the only item in the list and it is removed,
+	then the property itself is removed.
+	</p>
+<pre>
+&lt;touchpointData ...&gt;
+   &lt;instructions ...&gt;
+      &lt;instruction key='configure'&gt;
+         <b>addProgramProperty</b>(propName:myKey,propValue:myValue);
+      &lt;/instruction&gt;
+      &lt;instruction key='unconfigure'&gt;
+         <b>removeProgramProperty</b>(propName:myKey,propValue:myValue);
+      &lt;/instruction&gt;
+      ...
+&lt;/touchpointData&gt;
+</pre> 
+    </td>
+  </tr>
+  
+  <tr id="p2-history-labels">
+    <td class="title">Add labels to install history states</td>
+    <td class="content">
+	When using the p2 director application to install from the command-line, you can now tag the operation with a label
+	that you can later refer to. This label will appear next to the associated entry in the <b>Installation History</b> table
+	and you can later refer to it when using the director application to revert to a particular installation state. 
+	
+	<p>You call the director application with the <tt>-tag &lt;tagName&gt;</tt> argument to set the tag.</p>
+<pre>
+d:\builder\eclipse.exe
+   -application org.eclipse.equinox.p2.director
+   -repository http://download.eclipse.org/releases/helios/
+   -installIU org.eclipse.cdt.feature.group
+   <b>-tag AddCDT</b>
+   -destination d:/eclipse/
+   -profile SDKProfile
+</pre>
+	<p>
+	To get a list of tags for a particular profile, invoke the application with the <tt>-listTags</tt> argument.
+	</p>
+<pre>
+d:\builder\eclipse.exe
+   -application org.eclipse.equinox.p2.director
+   <b>-listTags</b>
+   -profile SDKProfile
+</pre>
+	<p>
+	The list of tags is also available from the <b>About Eclipse -&gt; Installation Details -&gt; Installation History</b> view.
+	</p>
+	<p>
+	<img src="images/install-history-tag.png" alt="Install History View" />
+	</p>
+    </td>
+  </tr>
+ 
+  <tr id="p2-director-download">
+    <td class="title">Use the p2 director to download only</td>
+    <td class="content">
+	You can now use the p2 director application to download artifacts without installing them. This
+	is done by invoking the application with the <tt>-downloadOnly</tt> flag.
+<pre>
+d:\builder\eclipse.exe
+   -application org.eclipse.equinox.p2.director
+   -repository http://download.eclipse.org/releases/helios/
+   -installIU org.eclipse.cdt.feature.group
+   <b>-downloadOnly</b>
+   -destination d:/eclipse/
+   -profile SDKProfile
+</pre>
     </td>
   </tr>
 
 <!-- *********************** SWT *********************** -->
-<tr>
-<td colspan="2"><a name="SWT"></a>
-<div style="font-size: 20px; font-weight: bold;">SWT Changes</div>
-</td>
-</tr>
-
-  <tr>
-    <td width="30%" valign="top" align="left"><b>Browser can use WebKitGTK+</b></td>
-    <td width="70%" valign="top">Linux users can now use WebKitGTK+ instead of Mozilla as the Browser control's native renderer.
-      See <a href="http://www.eclipse.org/swt/faq.php#browserwebkitgtk">Can the Browser use the WebKit renderer on GTK?</a>.
-      <p><img src="images/webkitgtk.png" alt="WebKitGTK+ Image"/></p>
-	</td>
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>Icon support for GTK Text widgets</b></td>
-    <td width="70%" valign="top">The text widget can now display the search and cancel icons inside the widget. This runs on Linux platforms with a GTK version of 2.16 or greater.
-     <p><img src="images/text_search.png" alt="Icon support"/></p>
+	<tr>
+    <td id="SWT" class="section" colspan="2">
+      <h2>SWT Changes</h2>
     </td>
-  </tr>
+  	</tr>
 
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>Mozilla browser support on Solaris SPARC</b></td>
-    <td width="70%" valign="top">Mozilla browser support has been added for the Solaris SPARC platform (Solaris 10, GTK+).</td>
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>Browser closing API</b></td>
-    <td width="70%" valign="top">The new API method <tt>Browser.close()</tt> is used to 
-    close a browser, but allows the close to be cancelled by an <i>onbeforeunload</i> handler.  
-	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet326.java">Snippet 326</a>.
-     <p><img src="images/browserclose.png" alt="Browser close"/></p>
-    </td>
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>Key events for F16-F20 </b></td>
-    <td width="70%" valign="top">New key event constants have been added for the keyboard function keys F16 to F20.</td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>DND insertion feedback for tables</b></td>
-    <td width="70%" valign="top">The default drop target effect for Table now supports <tt>DND.FEEDBACK_INSERT_BEFORE</tt>
-      and <tt>DND.FEEDBACK_INSERT_AFTER</tt>.
-     <p><img src="images/tablednd.png" alt="desc"/></p>
-    </td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>Horizontal mouse wheel</b></td>
-    <td width="70%" valign="top">New event constants have been added for horizontal
-    mouse wheels. See <tt>SWT.MouseHorizontalWheel</tt> and <tt>SWT.MouseVerticalWheel</tt>.</td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left"><b>Variable tab stops in StyledText</b></td>
-    <td width="70%" valign="top">New API in StyledText allows the application to specify a non-uniform sequence of tab stops.
-	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet325.java">Snippet 325</a>.
-     <p><img src="images/sttabs.png" alt="desc"/></p>
-    </td> 
-   </tr>
-
-  <tr id="styledtext-variable-tab-stops">
-    <td width="30%" valign="top" align="left">
-      <b>StyledText: per line variable tab stops</b>
-    </td>
+  <tr id="cocoatool">
+    <td width="30%" valign="top" align="left"><b>Tool shell support on Cocoa</b></td>
     <td width="70%" valign="top">
-      Tab stop support in <tt>StyledText</tt> has been improved to allow each line to have its own sequence of tab stops.
-	  <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet328.java">Snippet 328</a> 
-	  has been modified from Snippet325 to show this.
-     <p><img src="images/variable-tab-stops.png" alt="Multi-line variable tab stops in a StyledText"/></p>
-    </td> 
+      The Cocoa port now supports the <tt>SWT.TOOL</tt> style bit. See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet344.java">Snippet 344</a>.
+      <p><img src="images/cocoatool.png" alt="Cocoa Tool"/></p></td>
+  </tr>
+  <tr id="webkitgtk">
+    <td width="30%" valign="top" align="left"><b>Browser on Linux defaults to WebKitGTK+</b></td>
+    <td width="70%" valign="top">
+      Browsers created with style <tt>SWT.NONE</tt> on Linux now use WebKitGTK+ as the default native renderer if it is found on the user's machine.  If WebKitGTK+ is not found then a Mozilla-based native renderer is used instead.
+      <p><img src="images/webkitgtk.png" alt="WebKitGTK+ Image"/></p></td>
   </tr>
 
-  <tr id="swt-clabel-margins">
-    <td width="30%" valign="top" align="left"><b>CLabel set/get margins</b></td>
-    <td width="70%" valign="top">New API has been added to <tt>CLabel</tt> to set and get the left, top, right and bottom margin spacing.
-    </td> 
+  <tr id="wrappablebuttons">
+    <td width="30%" valign="top" align="left"><b>Wrappable buttons</b></td>
+    <td width="70%" valign="top">
+      The button control now supports the <b>SWT.WRAP</b> style bit on all platforms. This 
+      allows for the creation of buttons that will automatically wrap any text when resized. 
+      For more info, please see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet345.java">Snippet 345</a>.
+      <p><img src="images/wrap.png" alt="Wrap"/></p></td>
   </tr>
 
-  <tr id="swt-key-location">
-    <td width="30%" valign="top" align="left">
-      <b>Key location</b>
-    </td>
+  <tr id="appmenu">
+    <td width="30%" valign="top" align="left"><b>Cocoa getAppMenuBar</b></td>
     <td width="70%" valign="top">
-		A new field has been added to <code>KeyEvent</code> to allow the application 
-		to identify which keyboard key originated the event, for example, right or left shift key.
-		See <code>KeyEvent.keyLocation</code> for details.
-    </td> 
+	<tt>Display.getAppMenuBar()</tt> is a new API that returns a menu that is 
+	displayed when no shell is visible or when the active shell doesn't have a 
+	menu bar of its own.  This API is currently only available in the Mac OS X Cocoa port. 
+	It will return null on all other platforms.  
+	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet347.java">Snippet 347</a> 
+	for an example of how you can use this API in a cross-platform application.
+    <p><img src="images/AppMenuBar.png" alt="appMenuBar"/></p></td>
   </tr>
 
-  <tr id="swt-scrollbar-api">
-    <td width="30%" valign="top" align="left">
-      <b>New API in Scrollbar</b>
-    </td>
+<tr id="toolbar">
+    <td width="30%" valign="top" align="left"><b>Cocoa getToolbar</b></td>
     <td width="70%" valign="top">
-      New methods have been added to <tt>Scrollbar</tt> to return the bounds for the thumb and its track.
-      See <code>ScrollBar.getThumbBounds()</code> and <code>ScrollBar.getThumbTrackBounds()</code>.
-    </td> 
+      <tt>Shell.getToolBar()</tt> returns a tool bar that appears in the title area of the shell.
+      Tool items added to that tool bar will have the look and feel of the platform. 
+      You can also add special separator items that provide a fixed-width spacer or 
+      a flexible-width spacer that pushes the tool items on either side of it out to 
+      the next fixed item, or the edge of the shell. Please note that this API is a 
+      work in progress, and is currently Cocoa-only. Please follow <a href="http://bugs.eclipse.org/222859">bug 222859</a> 
+      or watch future <i>New and Noteworthy</i> announcements for further details.
+      <p><img src="images/NativeToolBar.png" alt="nativeToolbar"/></p></td>
   </tr>
 
-  <tr id="state-mask-selection-event">
-    <td width="30%" valign="top" align="left">
-      <b>State mask for selection events</b>
-    </td>
+<tr id="textChar">
+    <td width="30%" valign="top" align="left"><b>Text setTextChars</b></td>
     <td width="70%" valign="top">
-	<tt>SelectionEvent.stateMask</tt> is now set on selection and default selection events for all native controls.
-    </td> 
+    There is new API in Text that allows applications to get and set text as a char array 
+    in a secure manner. For more details, please see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet346.java">Snippet 346</a>.
+ 	</td>
   </tr>
 
-  <tr id="styledtext-orientation-event">
-    <td width="30%" valign="top" align="left">
-      <b>Orientation event</b>
-    </td>
+  <tr id="accessibleeditabletext">
+    <td width="30%" valign="top" align="left"><b>Accessible editable text support</b></td>
     <td width="70%" valign="top">
-	A new event has been added to <tt>Text</tt>, <tt>Combo</tt>, and <tt>StyledText</tt>. It is sent when the writing direction is changed via keyboard shortcut.
-        See <code>SWT.OrientationChanged</code>
-    </td> 
+      SWT Accessibility now has API to support the platform's EditableText interface 
+      used by accessibility tools such as speech recognition systems.
+      For details, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324005">bug 324005</a>.
+    </td>
   </tr>
 
-  <tr id="browser-post-data">
-    <td width="30%" valign="top" align="left"><b>Browser.setUrl() can specify post data and headers</b></td>
-    <td width="70%" valign="top">The new API <code>Browser.setUrl(String url, String postData, String[] headers)</code> allows clients
-      to include post data and add/override header values when initiating HTTP requests.  See
-      <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet330.java">Snippet 330</a> for an example.
-    </td> 
+  <tr id="duplex">
+    <td class="title">Duplex printing</td>
+    <td class="content">
+      New API has been added to <tt>PrinterData</tt> to enable duplex (double-sided) printing without using the <tt>PrintDialog</tt>.
+      This can also be used to seed the <tt>PrintDialog</tt>'s duplex setting before presenting it to the user.
+      <p><img src="images/duplex-printing-pl.png" alt="PrintDialog showing double-sided portrait printing that can be bound on the long edge"/></p>
+      <p><img src="images/duplex-printing-ps.png" alt="PrintDialog showing double-sided portrait printing that can be bound on the short edge"/></p>
+      <p><img src="images/duplex-printing-ll.png" alt="PrintDialog showing double-sided landscape printing that can be bound on the long edge"/></p>
+      <p><img src="images/duplex-printing-ls.png" alt="PrintDialog showing double-sided landscape printing that can be bound on the short edge"/></p>
+     </td>
   </tr>
 
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>Wrap indent in StyledText</b>
+ <tr id="CocoaDateTime">
+    <td class="title">Improved Cocoa DateTime support</td>
+    <td class="content">
+      On Cocoa, the <tt>DateTime</tt> control now supports the <tt>SWT.DROP_DOWN</tt> option bit.
+      <p><img src="images/cocoadatetime.png" alt="cocoadatetime"/></p>
     </td>
-    <td width="70%" valign="top">
-      <tt>StyledText</tt> and <tt>TextLayout</tt> now offer API to allow the application 
-      to control the amount of indent space for wrapped lines.
-      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet331.java">Snippet 331</a>.
-      <p><img src="images/wrap-indent.png" alt="Wrap Indent"/></p>
-    </td> 
   </tr>
 
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>Improved bidi segments support</b>
+  <tr id="touch-support">
+    <td class="title">Touch and gesture support</td>
+    <td class="content">If your hardware supports it, you can now listen for touches or 
+    gestures on SWT controls. Four standard gestures are supported: two-finger panning, 
+    rotation, magnification, and swipe (three fingers on Mac OS X, flicks on Windows). 
+    You can also listen for 'raw' touches on a MacBook touchpad, Magic Trackpad or 
+    Magic Mouse, or a touch-sensitive display that is supported by Windows Touch.
+	For examples of how to use the touch and gesture support see 
+	<a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet352.java">Snippet 352</a> 
+	and <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet353.java">Snippet 353</a>.
+	<p><img src="images/gesture.png" alt="Gesture" title="A gesture from our fearless leader"/></p>
     </td>
-    <td width="70%" valign="top">
-      The bidi segments support in <tt>StyledText</tt> and <tt>TextLayout</tt> was changed 
-      to allow the application to specify which Unicode Control Characters to use in the segments boundaries.
-      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet332.java">Snippet 332</a>.
-      <p><img src="images/segments-chars.png" alt="Improved Bidi Segments support"/></p>
-    </td> 
   </tr>
 
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>Right-to-Left text support on Cocoa</b>
+  <tr id="WebKit_Everywhere">
+    <td class="title">WebKit everywhere</td>
+    <td class="content">The SWT browser now supports using WebKit as its native renderer 
+    on Windows.  Consequently, browsers created with new style <code>SWT.WEBKIT</code> 
+    will use WebKit on Windows, Linux and OS X, provided that the user's machine satisfies the 
+    <a href="http://www.eclipse.org/swt/faq.php#howusewebkit">runtime requirements</a>.  
+    For an example of using WebKit see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet351.java">Snippet 351</a>.
+	<p><img src="images/webkitWindows.png" alt="Webkit"/></p>
     </td>
-    <td width="70%" valign="top">
-      On Cocoa, setting the <code>SWT.RIGHT_TO_LEFT</code> flag changes the default text reading direction to right to left. 
-      <p><img src="images/cocoartl.PNG" alt="Right-to-Left text support on Cocoa"/></p>
-    </td> 
   </tr>
 
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>Skin engine support</b>
+   <tr id="Change_Orientation">
+    <td class="title">Change orientation</td>
+    <td class="content">
+      New methods have been added to <tt>Control</tt> and <tt>Menu</tt> to 
+      allow the application to change the orientation of these interface elements. Prior to 
+      the introduction of these methods, the application was required to recreate the 
+      element to achieve the same result. 
+      Note: these methods are only relevant on platforms where BIDI mirroring is supported.
+	  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=29779">Bug 29779</a> for more information.
     </td>
-    <td width="70%" valign="top">
-      New API added to allow CSS engines to skin widgets at the appropriate time 
-      (See <code>SWT.Skin</code> and <code>Widget.reskin(int)</code>). For more info see 
-      <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet333.java">Snippet 333</a>. 
-
-    </td> 
   </tr>
 
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>New layout API</b>
+  <tr id="swt-cocoa-system-menu">
+    <td class="title">Cocoa Display getSystemMenu</td>
+    <td class="content">
+	<tt>Display.getSystemMenu()</tt> is a new API that returns the system-provided menu for the application.
+    You can access menu items in the system menu by comparing a <tt>MenuItem</tt>'s id with various <tt>SWT.ID_</tt>* constants.
+    Right now, this API is only available in the Mac OS X Cocoa port. It will return null on all other platforms.
+    See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet354.java">this snippet</a>
+    for an example of how you can use this API in a cross-platform application.
+    <p><img src="images/system-menu.png" alt="Cocoa System Menu"/></p>
     </td>
-    <td width="70%" valign="top">
-	New API added to <code>Composite</code> to support automatic deferred layout.
-        See <code>Composite.layout(Control[], int)</code>.
-    </td> 
-  </tr>
-  
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>Browser.setText() can restrict content permissions</b>
-    </td>
-    <td width="70%" valign="top">
-        New Browser API <code>setText(String html, boolean trusted)</code> allows clients to 
-        restrict the permissions that are given to Browser content that is set from a String.  
-        Restricting permissions is suggested when the source of the content is not trusted.
-    </td> 
   </tr>
 
-  <tr id="swt-accessibility"> 
-    <td width="30%" valign="top" align="left">
-      <b>Accessibility upgrade</b>
+  <tr id="swt-gtk-datetime">
+    <td class="title">Improved GTK DateTime support</td>
+    <td class="content">
+	On GTK, the <tt>DateTime</tt> control now supports <tt>SWT.DROP_DOWN</tt> style to drop down a calendar from a date editor.
+    All platforms now support this style, and the <tt>HINT</tt> keyword has been removed from the <tt>SWT.DROP_DOWN</tt> style bit.
+    <p><img src="images/gtk-datetime.png" alt="GTK DateTime DROP_DOWN calendar"/></p>
     </td>
-    <td width="70%" valign="top">
-    SWT Accessibility has new API for making applications more accessible to Assistive 
-    Technology products such as screen readers.
-    The new API can be found in the <code>org.eclipse.swt.accessibility</code> package.
-    For examples, see the <code>org.eclipse.swt.examples.accessibility</code> package, and the 
-    <a href="http://www.eclipse.org/swt/snippets/#accessibility">Accessibility snippets</a>.
-	</td> 
-  </tr>
-
-  <tr id="swt.opendoc.event"> 
-    <td width="30%" valign="top" align="left">
-      <b>SWT.OpenDoc Event</b>
-    </td>
-    <td width="70%" valign="top">
-    A new event type has been added to SWT to notify applications that a document 
-    should be opened. Listeners for <tt>OpenDoc</tt> events can be added to a <tt>Display</tt>.
-    <p>Support has also been added to the Equinox launcher, and the Eclipse workbench. 
-    Users are now able to associate file types with Eclipse and have Eclipse launched when 
-    they open a file of an associated type.</p>
-    </td> 
-  </tr>
-
- <tr id="swt-program-working-directory"> 
-    <td width="30%" valign="top" align="left">
-      <b>Program working directory</b>
-    </td>
-    <td width="70%" valign="top">
-    New API has been added to <tt>Program</tt> to allow the working directory to be 
-    specified when launching an executable. See <code>Program.launch(String fileName, String workingDir)</code> for more details.
-    </td> 
-  </tr>
- 
- <tr id="swt-xul-runner"> 
-    <td width="30%" valign="top" align="left">
-      <b>XULRunner 1.9.2 support</b>
-    </td>
-    <td width="70%" valign="top">
-    The <tt>Browser</tt> widget now has full support for the recent release of XULRunner 1.9.2.
-    </td> 
-  </tr>
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>TaskItem overlay image</b>
-    </td>
-    <td width="70%" valign="top">
-      The new API <code>TaskItem#setOverlayImage(Image)</code> allows clients to set an image to be displayed on top of the application button in the taskbar.
-      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet336.java">Snippet 336</a> for an example.
-      <p><img src="images/overlayimage.png" alt="Overlay Image"/></p>
-    </td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>TaskItem overlay text</b>
-    </td>
-    <td width="70%" valign="top">
-      The new API <code>TaskItem#setOverlayText(String)</code> allows clients to set a short text to be displayed on top of the application button in the taskbar.
-      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet336.java">Snippet 336</a> for an example. 
-      <p><img src="images/overlaytext.png" alt="Overlay Text"/></p>
-    </td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>TaskItem progress</b>
-    </td>
-    <td width="70%" valign="top">
-      The new APIs <code>TaskItem#setProgress(int)</code> and <code>TaskItem#setProgressState(int)</code> allows clients to show progress indication in the application button in the taskbar.
-      See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet336.java">Snippet 336</a> for an example.
-      <p><img src="images/progress.png" alt="Progress"/></p>
-    </td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>TaskItem menu</b>
-    </td>
-    <td width="70%" valign="top">
-      The new API <code>TaskItem#setMenu(Menu)</code> allows clients to specify a menu for the application button in the taskbar.
-      Running on Windows 7:<br/> 
-     <p><img src="images/menu-win32.png" alt="Menu on Windows"/></p>
-      Running on Mac OS X:<br/> 
-     <p><img src="images/menu-mac.png" alt="Menu on Mac"/></p>
-    </td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>CTabFolder renderer</b>
-    </td>
-    <td width="70%" valign="top">
-      <tt>CTabFolder</tt> has been improved and now allows clients to change its look by implementing their own renderers.
-	<p><img src="images/newctab.png" alt="New CTabFolder"/></p>
-    </td> 
-  </tr>
-
-  <tr> 	
-    <td width="30%" valign="top" align="left">
-      <b>Custom traversals</b>
-    </td>
-    <td width="70%" valign="top">
-      New API <code>Control.traverse(int, event)</code> enables clients to request that a customized traversal be performed.  For an example of this see
-        <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet338.java">Snippet 338</a>.
-    </td> 
-  </tr>
-
-  <tr> 
-    <td width="30%" valign="top" align="left">
-      <b>Draw background at an offset</b>
-    </td>
-    <td width="70%" valign="top">
-      New API was added in <code>Composite.drawBackground</code> that allows for drawing of a parent background at an offset specified by the child. This
-	is useful for aligning patterns between the parent and child when dealing with non-rectangular shapes. 
-    </td> 
   </tr>
 
 <!-- ****************** END OF N&N TABLE ****************** -->
