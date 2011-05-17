@@ -5,556 +5,299 @@
 	content="Copyright (c) IBM Corporation and others 2010, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-<title>PDE - What's New in 3.6</title>
-<link rel="stylesheet" href="../book.css" type="text/css"/>
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 <style type="text/css">
-td {
-	border-top: solid thin black;
-}
-
-img[alt] {
-	background-color: #ffdddd;
-}
-
-tr {
-	vertical-align: top;
-}
+table.news td {border-top: solid thin black;}
+table.news tr {vertical-align: top;}
+table.news tr td.section {font-size: 20px; font-weight: bold;}
+table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
+table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
+<title>PDE - What's New in 3.7</title>
 </head>
 <body>
-<h2>What's New in 3.6 (PDE)</h2>
+<h2>What's New in 3.7 (PDE)</h2>
 <p>Here are descriptions of some of the more interesting or
 significant changes made to the Plug-in Development Environment (PDE)
-for the 3.6 release of Eclipse, grouped into:</p>
+for the 3.7 release of Eclipse, grouped into:</p>
 <ul>
 	<li><a href="#ViewsAndEditors">Views and Editors</a></li>
 	<li><a href="#Launching">Launching</a></li>
-	<li><a href="#TargetPlatform">Target Platform </a></li>
 	<li><a href="#Export">Import and Export</a></li>
+	<li><a href="#TargetPlatform">Target Platform </a></li>
 	<li><a href="#APITooling">API Tools</a></li>
-	<li><a href="#Build">Build</a></li>
 </ul>
 <!-- ****************** START OF N&N TABLE ****************** -->
-<table cellpadding="10" cellspacing="0" width="600">
+<table class="news" border="0" cellpadding="10" cellspacing="0" width="600">
+
+<!-- ******************* Views/Editors ******************** -->
 	<tr>
-		<td colspan="2">
-		<h2><a name="ViewsAndEditors">Views and Editors </a></h2>
-		</td>
-	</tr>
-	
-	<tr id="osgiconsole">
-		<td align="left" valign="top" width="30%"><b>OSGi console </b></td>
-		<td valign="top" width="70%">An OSGi console is now available to
-		interact with the running framework. Use the <b>Open Console</b> drop
-		down action in the <b>Console View</b> to open a <b>Host OSGi Console</b>.
-		<p><img alt="Open an OSGi console to interact with the running framework" title="Open Host OSGi Console"
-			src="images/console-menu.png" /><br />
-		<br />
-		</p>
-		<p>You can then enter OSGi commands into the console to interact
-		directly with the framework running the IDE.</p>
-		</td>
+    <td id="ViewsAndEditors" class="section" colspan="2">
+      <h2>Views and editors</h2>
+    </td>
+  	</tr>
+
+	<tr id="productproperties">
+	<td align="left" valign="top" width="30%"><b>Properties in product editor</b></td>
+	<td valign="top" width="70%">The product editor now has support to view, add and edit
+	configuration properties.  The properties will be added to config.ini files generated
+	using the product configuration.
+	<p><img alt="Product Properties" title="Properties in Product Editor" src="images/product-properties.png"/><br/><br/></p>
+	</td>
 	</tr>
 
-	<tr id="pde-xml-errors">
-		<td width="30%" valign="top" align="left"><b>XML error
-		reporting in context help and table of contents editors</b></td>
-		<td width="70%" valign="top">The context help editor and table of
-		contents editor now report XML errors.
-		<p><img src="images/xml-errors.png" alt="TOC Editor" /></p>
-		</td>
+  <tr id="shared-license">
+    <td class="title">Share licenses between features</td>
+    <td class="content">
+      Many Eclipse features use the same license.  For example, all features in the Eclipse SDK use the 
+      Eclipse Foundation Software User Agreement. Using the new shared license facility allows multiple 
+      features to reference license text and files from a single location.  This makes updating licenses across 
+      multiple features easier and less error prone.
+      
+      <p>To make use of the shared license facility, simply open your feature.xml file in the feature editor.  
+      Select the <b>Information</b> Tab and then the <b>License Agreement</b> section.  Selecting the 
+      <b>Shared license</b> radio button will allow you to specify the feature and version that contains your 
+      license text and optional license files.</p>
+      
+      <img src="images/shared-license.png" alt="Feature Editor With Shared License" />
+      
+      <p>When your feature is built it's license text will be taken from the feature.xml of the referenced
+      feature.  As well, all files contained in the referenced feature's Binary Build list (bin.includes)
+      will be included in your feature.  If your feature already had license files, you can remove them.</p> 
+    </td>
+  </tr>
+  
+  	<tr id="buildmodel">
+	<td align="left" valign="top" width="30%"><b>PDE build model API</b></td>
+	<td valign="top" width="70%">Calling getBuildModel() on IPluginModelBase objects will now return
+	a handle to PDE's build model for that plug-in.  The IBuildModel API can be used
+	to view and edit the contents of a build.properties file.
+	</td>
 	</tr>
 
-	<tr id="toc.spell.check">
-		<td width="30%" valign="top" align="left"><b>Spell checking 
-		in context help and table of contents editors</b></td>
-		<td width="70%" valign="top">
-		<p>Spell checking is now available in the <strong>Table
-		of Contents</strong> (TOC) and <strong> Context Help</strong> editors.</p>
-		<p><img src="images/spell-check.png"
-			alt="Incorrectly spelled works are underlined in red" /></p>
-		</td>
-	</tr>
-
-	<tr id="buildseverities">
-		<td align="left" valign="top" width="30%"><b>Configurable
-		problem severities for build.properties </b></td>
-		<td valign="top" width="70%">Severities for problems in
-		build.properties can now be configured individually via the <b>Preferences
-		&gt; Plug-in Development &gt; Compilers</b> preference page. Problem
-		severities can also be configured at the project level via a project's
-		<b>Properties &gt; Plug-in Development &gt; Plug-in Manifest
-		Compiler</b> property page.
-		<p><img alt="Severity Settings" title="Severity Settings"
-			src="images/build-severities.png" /><br />
-		<br />
-		</p>
-		</td>
-	</tr>
-	
-	<tr id="searchrepos">
-		<td align="left" valign="top" width="30%"><b>Search
-		repositories quick fix</b></td>
-		<td valign="top" width="70%">A new quick fix allows you to
-		conveniently search a set of repositories for a missing imported
-		package and have a bundle supplying the package added to your target
-		platform.
-		<p><img alt="Search Repositories quick fix"
-			title="Search Repositories Quick Fix" src="images/hover-quick-fix.png" /><br />
-		<br />
-		</p>
-		</td>
-	</tr>
-	
-	<tr id="pdecreateapi">
-		<td align="left" valign="top" width="30%"><b>API for plug-in
-		project creation</b></td>
-		<td valign="top" width="70%">An API is now available to create
-		and modify plug-in (bundle) projects. The API provides a description
-		of a project's bundle related attributes and allows them to be
-		modified declaratively. For example, a bundle's activator, required
-		bundles, package exports and imports can be queried and defined. As
-		well, the root of bundle (i.e. the folder containing <code>META-INF/MANIFEST.MF</code>)
-		can be placed anywhere inside a project (rather than just the root
-		project folder). The new API is available in the <code>org.eclipse.pde.core.project</code>
-		package of the <code>org.eclipse.pde.core</code> bundle.</td>
-	</tr>
-
-	<tr>
-		<td colspan="2">
-		<h2><a name="Launching">Launching</a></h2>
-		</td>
-	</tr>
-
-	<tr id="featurelaunch">
-		<td align="left" valign="top" width="30%"><b>Feature based
-		launch </b></td>
-		<td valign="top" width="70%">You can now manage the set of
-		plug-ins launched in Eclipse Applications, JUnit
-		Plug-in Tests, and OSGi Framework launch configurations
-		by selecting a set of features.
-		<p><img alt="Feature Based Launching"
-			title="Feature Based Launching" src="images/feature-launch.png" />
-		</p>
-		<p>
-		Features from both the workspace and the target can be 
-		included.  Individual plug-ins can be added to the launch
-		to include plug-ins that are not part of a feature.  PDE
-		will launch all the selected plug-ins as well as all required
-		plug-ins.
-		</p>
-		<p><img alt="Add individual plug-ins to a feature based launch"
-			title="Add Individual Plug-ins" src="images/add-plugins.png" />
-		</p>
-		<p>Features in the workspace are used over external features,
-		however, this can be configured by un-checking '<b>Use features
-		from workspace if available</b>'. Bundles in the workspace are used over
-		external bundles in the target platform. However, this can be
-		configured by modifying the configuration's default bundle resolution
-		policy, or can be configured per feature using the cell editors in the
-		'<b>Plug-in Location</b>' column.</p>
-		</td>
-	</tr>
-
-	<tr id="headless-pde">
-		<td width="30%" valign="top" align="left"><b>Headless
-		launching support</b></td>
-		<td width="70%" valign="top">Launching support for Eclipse
-		Applications, JUnit Plug-in Tests, and OSGi Frameworks is provided by
-		a new headless plug-in (<code>org.eclipse.pde.launching</code>). This
-		allows applications without a user interface to leverage the launch
-		support programmatically.</td>
-	</tr>
-
-	<tr>
-		<td width="30%" valign="top" align="left"><a name="consolelog"
-			id="consolelog"></a><b>Console log</b></td>
-		<td width="70%" valign="top">By <a
-			href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=284704">popular
-		demand</a>, <code>-consoleLog</code> is added to new launch configuration
-		program arguments by default.
-		<p><img src="images/consolelog.png"
-			alt="Default program arguments" /></p>
-		</td>
-	</tr>
-
-	<tr id="generate-profile">
-		<td width="30%" valign="top" align="left"><b>Support software
-		installation while running and debugging</b></td>
-		<td width="70%" valign="top">Launched Eclipse Applications can
-		now support software installation operations. When the new option is
-		checked (on the <b>Configuration</b> tab of Eclipse Applications), a
-		p2 profile is generated when running or debugging. The profile
-		initially contains all bundles in the target and can be modified by
-		software installation operations. The profile is regenerated on each
-		subsequent run or debug session, but is maintained across restart
-		operations.
-		<p><img src="images/soft-install.png"
-			alt="Configuration tab of Eclipse Application" /></p>
-		</td>
-	</tr>
-
-	<tr>
-		<td colspan="2">
-		<h2><a name="Export">Import and Export </a></h2>
-		</td>
-	</tr>
-
-	<tr id="importcvs">
-		<td align="left" valign="top" width="30%"><b>Import from CVS
-		</b></td>
-		<td valign="top" width="70%">The <b>Plug-in Import</b> wizard
-		allows you to import projects from CVS corresponding to bundles in the
-		target platform. This feature is available for bundles that define the
-		<b>Eclipse-SourceReferences</b> header. On the first page of the
-		import wizard select the <b>Import As &gt; Projects from a repository</b>
-		option.
-		<p><img alt="Import from a repository"
-			title="Import From Repository" src="images/from-repo.png" />
-		</p>
-		<p>The second page allows you to choose from all bundles with
-		source repository information. Select the bundles you want to import
-		and press <b>Next</b>.</p>
-		<p><img alt="Select bundles to import"
-			title="Select Bundles to Import" src="images/avail.png" />
-		</p>
-		<p>The last page of the wizard allows you to import the specific
-		versions of the bundles used in the target platform or from HEAD.
-		Pressing <b>Finish</b> will import the projects into your workspace.</p>
-		<p><img alt="Select Version" title="Select Version"
-			src="images/head-version.png" />
-		</p>
-		<p>You can also import projects from the <b>Plug-ins</b> view. Use the <b>Import As &gt; Project from a Repository...</b> action
-		to import plug-ins from CVS. 
-		</p>
-		<p><img alt="Import plug-in projects from CVS" title="Import plug-in projects from CVS"
-			src="../guide/images/tasks/import-from-plugins-view.png" />
-		</p>
-		</td>
-	</tr>
-
-	<tr id="exporttarget">
-		<td align="left" valign="top" width="30%"><b>Export target
-		content </b></td>
-		<td valign="top" width="70%">It's now possible to export the
-		contents of your current target platform into a destination directory
-		via the export active target definition wizard. In the list of export
-		wizards (<b>File -&gt; Export...</b>), you'll find the wizard available
-		under <b>Plug-in Development -&gt; Target definition</b>.
-		<p><img alt="Export Active Target Wizard"
-			title="Export Active Target Wizard" src="images/export-target.png" /><br />
-		<br />
-		</p>
-		<p>Note: This will copy all features and plug-ins that are part of
-		your currently set target platform to the destination directory.</p>
-		</td>
-	</tr>
+<!-- ******************** Launching ********************** -->
 	
 	<tr>
-		<td colspan="2">
-		<h2><a name="TargetPlatform">Target Platform</a></h2>
-		</td>
+    <td id="Launching" class="section" colspan="2">
+      <h2>Launching</h2>
+    </td>
+  	</tr>
+
+	<tr id="pde-default-workspace-locations">
+    <td class="title">Default workspace locations</td>
+    <td class="content">
+      If you want to run multiple JUnit Plug-in Tests or Eclipse Application launch configurations in parallel,
+      you need to make sure the launch configurations use separate workspaces.
+      <p><img src="images/edit-default-workspace.png" alt="Configure defaults link"/></p>
+      
+      <p>On the <b>Plug-in Development</b> preference page, you can choose the default 
+      workspace location for new launch configurations. If you select "Append launch configuration 
+      name to this location", you will get separate workspaces for different launch configurations.</p>
+      
+      <p><img src="images/default-workspace-preference.png" alt="Plug-in Development preference page"/></p>
+    </td>
 	</tr>
 
-	<tr id="featuretarget">
-		<td align="left" valign="top" width="30%"><b>Feature based
-		target </b></td>
-		<td valign="top" width="70%">You can now manage the set of
-		bundles in a target platform by selecting a set of features.
-		Additionally, you can select from bundles that are not contained in
-		any feature. On a target definition's <b>Content</b> tab select the <b>Manage
-		using Features</b> radio button. This provides coarse grained management
-		of bundles in a target. When a feature is selected, all bundles in
-		that feature are added to the target.
-		<p><img alt="Target Based Features" title="Target Based Features"
-			src="images/target-features.png" /><br />
-		<br />
-		</p>
-		</td>
-	</tr>
-
-	<tr id="pdetargetdialog">
-		<td align="left" valign="top" width="30%"><b>Add to target
-		platform dialog</b></td>
-		<td valign="top" width="70%">The <b>Add Artifact to Target
-		Platform</b> dialog (Ctrl+Shift+Alt+A) allows you to quickly search a set
-		of repositories for dependencies (bundle, feature or package) to add
-		to your current target platform.
-		<p><img alt="Add Artifact to Target Platform Dialog"
-			title="Add Artifact to Target Platform Dialog"
-			src="images/add-to-target.png" /><br />
-		<br />
-		</p>
-		</td>
+	<tr id="pde-applicationsandui">
+	<td class="title">Applications do not require UI to launch</td>
+	<td class="content">When launching an <b>Eclipse Application</b> or <b>JUnit Plug-in Test</b> 
+	you can now select an application to run.  Previously, the application framework required UI 
+	plug-ins to run, forcing launch configurations to add additional dependencies.  In 3.7, applications 
+	that run headless (without UI) will not require UI plug-ins to be available.
+	<p><img src="images/application.png" alt="Select application on launch"/></p>
+	</td>
 	</tr>
 	
-	<tr id="synch-java-search">
-		<td width="30%" valign="top" align="left"><b>Synchronize Java
-		search with target platform</b></td>
-		<td width="70%" valign="top">You can automatically synchronize
-		Java search operations with the target platform via the <b>Preferences
-		&gt; Plug-in Development</b> preference page.
-		<p><img src="images/target-search.png"
-			alt="Preferences &gt; Plug-in Development" /></p>
-		<p>Java search operations are scoped to workspace projects and
-		their dependencies. Developers don't typically have the entire target
-		platform in their workspace and thus Java search operations don't
-		locate references from many upstream plug-ins. You can manually add
-		plug-ins to the Java search path using the <b>Add All Plug-ins to
-		Java Search</b> action in the Plug-ins view. However, the new preference
-		automatically keeps the search path in synch with the target platform.</p>
-		<p>Under the covers a project named <i>External Plug-in
-		Libraries</i> is created with all external plug-ins in the target platform
-		on its build path.</p>
-		</td>
-	</tr>
+	 <tr id="PDE-sourceattach">
+    <td class="title">Editable source attachments</td>
+    <td class="content">By default, the source attachment for Plug-in Dependencies is a 
+    source bundle in the target platform. You can now change the source attachment during development.
+	<p>
+	While developing or debugging, if a class file is opened that has no attached source 
+	available, you can now set a custom source location.  Class file editors provide a 
+	button to do this, but the source attachment can be modified at any time by right 
+	clicking on it and selecting <b>Properties</b>.  Changes are not persisted between workspace restarts.
+	</p>
+    </td>
+  </tr>
+
+<!-- ******************* Import/Export ******************** -->
 
 	<tr>
-		<td colspan="2">
-		<h2><a name="APITooling">API Tools</a></h2>
+		<td id="Export" class="section" colspan="2">
+		<h2>Import and Export</h2>
 		</td>
 	</tr>
 
-	<tr id="pde-api-deprecation">
-		<td width="30%" valign="top" align="left"><b>Compare with
-		baseline now reports deprecations</b></td>
-		<td width="70%" valign="top">When performing <b>Compare With
-		&gt; API Baseline...</b>, deprecation changes are now reported. This
-		allows you to quickly identify what has been deprecated between two
-		releases of a project.
-		<p><img src="images/api-deprecation.png" alt="TOC Editor" /></p>
-		</td>
+	<tr id="pde-teamimportapi">
+	<td class="title">Import from repository uses Eclipse CVS support</td>
+	<td class="content">When using the <b>Import Plug-ins and Fragments Wizard</b> there is an 
+	option to import projects from a repository.  This option searches for a custom header in the 
+	plug-in manifest to find a repository to check out source from.  This feature now uses API from 
+	Eclipse CVS to perform the import.  The import now uses several CVS features including finding alternative 
+	repository locations and password storage.
+	<p><img src="images/teamcvs.png" alt="Import plugin from CVS"/></p>
+	</td>
 	</tr>
 
-	<tr id="api.use.scans">
-		<td width="30%" valign="top" align="left"><b>API use reports
-		</b></td>
-		<td width="70%" valign="top">
-		<p>You can generate reports describing what API and internals are
-		being used by other bundles. API use reports have been integrated as
-		an external tool (<strong>Run &gt; External Tools &gt;
-		External Tool Configurations...</strong>). For example, the following report
-		settings are used to generate a report revealing which internal
-		components of the debug platform are being consumed by JDT.</p>
-		<p><img src="images/api-scan.png" alt="API use report settings" />
-		</p>
-		<p>A report is run against a set of bundles which can be specified
-		as an API baseline, a target definition or a directory of bundles. You
-		can search for API and/or internal references and you can limit the
-		report to specific bundles by using regular expressions. You must
-		specify an output location (directory) for the report and whether to
-		generate HTML.</p>
-		<p>Package exports in bundle manifests are used to determine
-		package visibility. Any package exports with an <em>x-internal</em> or
-		<em>x-friends</em> modifier will be considered internal. All other
-		packages are considered API. The <strong>Patterns</strong> tab can be
-		used to augment package visibility information by specifying regular
-		expressions to identify packages, and whether those packages should be
-		considered API or internal. For example, since TPTP specifies all
-		packages as API, the following patterns could be used to identify its
-		internal packages.</p>
-		<p><img src="images/patterns.png"
-			alt="Specify package visibility using the patterns tab" /></p>
-		</td>
-	</tr>
-
-	<tr id="apireports">
-		<td align="left" valign="top" width="30%"><b>Customize API
-		use scan reports </b></td>
-		<td valign="top" width="70%">A new wizard helps you customize API
-		use reports. From the <b>Patterns</b> tab of an <b>API Use Report</b>
-		launch configuration (available via External Tools), press the <b>Add</b>
-		button to open the wizard and create custom pattern filters.
-		<p><img alt="API Pattern Wizard" title="API Pattern Wizard"
-			src="images/api-filters.png" />
-		</p>
-		<p>An <b>Archive Pattern</b> allows specific jars within bundles
-		to be omitted from the scan. A <b>Package Pattern</b> allows you to
-		specify which packages should be considered API or non-API (override
-		visibility definitions in bundle manifests). A <b>Report
-		Conversion Pattern</b> allows specific references to be filtered from the
-		final report. You can filter references from or to locations based on
-		regular expressions.</p>
-		</td>
-	</tr>
-
-	<tr id="build-properties">
-		<td width="30%" valign="top" align="left"><b>Enhanced
-		build.properties validation</b></td>
-		<td width="70%" valign="top">Redundant entries in source builds
-		are now flagged with a warning by default.
-		<p><img src="images/src-builds.png" alt="Source folder validation" /></p>
-		</td>
-	</tr>
+<!-- ***************** Target Platform ******************* -->
 
 	<tr>
-		<td width="30%" valign="top" align="left"><a
-			name="usescanpatterntab" id="usescanpatterntab"></a><b>API use
-		report filters</b></td>
-		<td width="70%" valign="top">You can now add filter patterns to
-		API use reports to constrain what references are reported. This
-		feature is available in UI and in API Tools Ant tasks. When you
-		press <b>Add</b> on the <b>Patterns</b> tab a wizard allows you to
-		craft a variety of patterns. An archive pattern is used to skip
-		specific jars. A package pattern is used to define a package as API or
-		internal (to override a bundle manifest). A report conversion pattern
-		is used to skip specific references during report creation (by
-		specifying a regular expression of reference origins to skip).
-		<p><img src="images/pattern-wizard.png"
-			alt="Create new patterns using the convenient wizard" /></p>
-		<p>For example, to use an archive pattern to filter references
-		from specific archives within bundles, select <b>Archive Pattern</b>
-		and press <b>Next</b>. The wizard allows you to easily craft an
-		archive pattern.</p>
-		<p><img src="images/archive-wizard.png"
-			alt="Create a new archive pattern using the convenient wizard" /></p>
-		<p>When you press <b>Finish</b> the pattern appears in the <b>Patterns</b>
-		table.</p>
-		<p><img src="images/archive.png" alt="Archive pattern" /></p>
+		<td id="TargetPlatform" class="section" colspan="2">
+		<h2>Target Platform</h2>
 		</td>
 	</tr>
+
+	<tr id="targetresolution">
+	<td align="left" valign="top" width="30%"><b>p2 Target definition performance</b></td>
+	<td valign="top" width="70%">Target definitions that use a p2 repository as a location
+	will see improved performance in 3.7.  Previously, each time a p2 target definition was
+	opened, the remote repository was accessed to determine if all required plug-ins were 
+	available.  Now, this information is stored locally in a p2 profile.
+	<p>
+	If the target definition is modified or a required plug-in cannot be found, the target
+	will do a full resolve operation, accessing the remote repository and downloading any
+	missing plug-ins.</p>
+	<p><img alt="Target Resolution" title="p2 Target Definition"	src="images/target-resolution.png"/><br/><br/></p>
+	</td>
+	</tr>
+
+	<tr id="offlinetargets">
+	<td align="left" valign="top" width="30%"><b>Offline p2 target definitions</b></td>
+	<td valign="top" width="70%">As an added benefit to performance improvements of
+	p2 based target definitions, the target editor is much more functional with an
+	intermittent network connection.  Once a target definition has connected to the
+	remote repository and downloaded all required plug-ins, a network connection
+	is no longer required to open the editor, set the definition as the target platform,
+	and in some cases even modify the target.
+	</td>
+	</tr>
+
+  <tr id="TargetUpdate">
+      <td class="title">Update target definitions</td>
+      <td class="content">
+	Target definitions that contain p2 repository locations can be updated to use the most recent version available.  To update
+	a target, press <b>Update</b> on the locations tab of the target definition editor.  If a specific location or software item
+	is selected, only that item will be updated, otherwise all locations will be updated.  If a newer version cannot be found in
+	the repository, your target will not be changed.
+	<p/>
+	<img src="images/target_update.png" alt="Update button for target definitions" />
+      </td>
+  </tr>
+  
+  <tr id="TargetLocal">
+      <td class="title">Targets use local repositories</td>
+      <td class="content">
+	When a target definition that contains a p2 repository location resolves, plug-ins must be downloaded to a local cache.  However,
+	many of the required plug-ins may already be available locally.  Target definitions will now try to copy local plug-ins from the
+	running Eclipse instance or known workspaces instead of downloading them remotely.
+      </td>
+  </tr>
+
+  <tr id="TargetMultiple">
+      <td class="title">Software sites collaborate</td>
+      <td class="content">
+	Previously, Software Site locations in target definitions considered only one repository when looking for dependencies.  Now,
+	the repositories from all Software Site locations in the current target definition are used when resolving dependencies.
+      </td>
+  </tr>
+
+  <tr id="TargetSource">
+      <td class="title">Source for target definitions</td>
+      <td class="content">
+	When you create a target definition containing a Software Site location, there is now an option to automatically find and download
+	source for the software items you have selected from the set of repositories known to the target definition.
+	<p/>
+	<img src="images/target_source.png" alt="Include source option for target definitions" />
+      </td>
+  </tr>
+
+  <tr id="TargetExport">
+      <td class="title">Target definition export improvements</td>
+      <td class="content">
+	Target Definition exporting has been enhanced to create proper p2 metadata and artifact repositories in the destination (for 
+	Software Site content), to honor content (de)selection and to allow non-active target definitions to be exported. 
+      </td>
+  </tr>
+
+<!-- ******************** API Tools ********************** -->
 
 	<tr>
-		<td width="30%" valign="top" align="left"><a name="meta-data"
-			id="meta-data"></a><b>API use report details</b></td>
-		<td width="70%" valign="top">You can now provide comments to
-		accompany an API use report, which will show up in the reports as
-		additional information along with the scan parameters for reference.
-		This feature is available in the UI and in API Tools Ant tasks.
-		<p><img src="images/description.png" alt="Scan description" /></p>
-		<p>The resulting report could look like the following.</p>
-		<p><img src="images/scandetails.png"
-			alt="Sample use scan details report header." /></p>
+		<td id="APITooling" class="section" colspan="2">
+		<h2>API Tools</h2>
 		</td>
 	</tr>
 
-	<tr>
-		<td colspan="2">
-		<h2><a name="Build">Build </a></h2>
-		</td>
+	<tr id="includelists">
+	<td align="left" valign="top" width="30%"><b>Include lists in Ant tasks
+	</b></td>
+	<td valign="top" width="70%">
+	API Tooling Ant tasks that support exclude lists now also support include lists. The include list seeds the 
+	set of bundles and members to be analyzed (when omitted, all bundles and members are included), and the exclude list
+	is then applied.  Include lists have the same structure as the exclude lists, allowing specific bundles/members, regular
+	expressions and comments to be added.
+	</td>
 	</tr>
 
-	<tr id="error-options">
-		<td width="30%" valign="top" align="left"><b>Enhanced
-		compiler error options for PDE build</b></td>
-		<td width="70%" valign="top">PDE/Build can now take advantage of
-		new support from the JDT compiler to specify that certain warnings
-		should instead be reported as errors.
-		<p>Set the property <tt>javacErrors.&lt;library&gt;</tt> in your
-		build.properties. Similar to the <tt>javacWarnings.&lt;library&gt;</tt>
-		property, specify the <a
-			href="../../org.eclipse.jdt.doc.isv/guide/jdt_api_compile.htm">warnings</a>
-		that should be reported as errors:</p>
-		<pre>
-    	javacErrors.. = forbidden,discouraged,
-    	javacErrors.library.jar = deprecation,nullDereference
-    	</pre></td>
+	<tr id="consumerreport">
+	<td align="left" valign="top" width="30%"><b>Consumer use report
+	</b></td>
+	<td valign="top" width="70%">The API Consumer Use Report Conversion task is a new Ant task that generates an HTML report
+	from the XML result of a use scan.  The information is organized in a different format than the standard report converter
+	produces.  The references are organized by consumer bundle, the bundle which contains the code that references the API/type.
+	The standard report organizes references by the bundle that produced the API/type.
+	</td>
 	</tr>
 
-	<tr>
-		<td width="30%" valign="top" align="left"><a
-			name="buildproperties" id="buildproperties"></a><b>Synchronize
-		project settings with PDE build</b></td>
-		<td width="70%" valign="top">To ensure PDE will export and build
-		your project with the same settings as in the workspace there are new
-		checks to synchronize project specific compiler and build path
-		settings with <code>build.properties</code>. The following validations
-		are performed and quick fixes are provided for any problems.
-		<ul>
-			<li>Compiler compliance, source and target levels match <code>jre.compliance.profile</code>,
-			<code>javacSource</code>, and <code>javacTarget</code> properties
-			(only required when compiler settings do not match default settings
-			for a bundle's required execution environment).</li>
-			<li>Folders in <code>source.&lt;library&gt;</code> exist, are
-			source folders on the Java build path, and are not duplicated.</li>
-			<li>Folders in <code>output.&lt;library&gt;</code> exist, are
-			output folders or class file folders on the Java build path, and are
-			not duplicated.</li>
-			<li>Each <code>output.&lt;library&gt;</code> entry contains all
-			output locations of its corresponding source folders on the Java
-			build path.</li>
-			<li>Source folders targeted to different libraries do not share
-			the same output location.</li>
-			<li>Source folders are not included in <code>src.includes</code>
-			entries (they are included by default).</li>
-			<li>Additionally, a check can be performed to ensure an <code>output.&lt;library&gt;</code>
-			exists for each <code>source.&lt;library&gt;</code> entry. By
-			default, this problem is ignored but can be turned on via <b>Preferences
-			&gt; Plug-in Development &gt; Compilers</b> (or project specific <b>Properties
-			&gt; Plug-in Development &gt; Plug-in Manifest Compiler</b>). This option
-			is useful when using the PDE option to export existing class files
-			from the workspace.</li>
-		</ul>
-		<p><img src="images/buildproperties.png"
-			alt="Build.properties validation" /></p>
-		</td>
+  <tr id="UseScans">
+      <td class="title">API use scan builder</td>
+      <td class="content">
+        The API Analysis builder now supports scanning of API use scan reports. Any API use scans added to the <b>API Use Scans</b>
+	preference page will be compared to the current workspace.  If any type, method or field references found in the scan have been
+	removed, the builder will report an <b>API Use Scan Problem</b>.
+	<p>Reports can be added to the page as directories or archives. Only the checked reports are considered by the builder.</p>
+	<img src="images/api-use-scan-preference-page.png" alt="API Use Scans preference page" />
+        <p>The <b>API Errors/Warnings</b> preference page has a new <b>API Use Scans</b> tab. You can set the severity levels of the
+	reported problems. By default all the problem type severities are set to <b>Ignore</b>. The builder will not check any use
+	scans if all severities are set to <b>Ignore</b>.</p>
+        <img src="images/api-errors-warning-api-use-scan.png" alt="API Use Scans severities" />
+      </td>
+  </tr>
+
+  <tr id="ConsumerBasedLaunch">
+      <td class="title">Consumer reports in launch configuration</td>
+      <td class="content">
+	The API use scan launch configuration, available under external tools launches, now can create a consumer based report.  The
+	consumer based report organizes the use scan references by the plug-in that references the field, method or type (the normal
+	report organizes by the bundle the created the field, method or type).  The ant task that creates the consumer report is still
+	available for releng builds.
+	<p />
+	<img src="images/consumer_configuration.png" alt="Consumer Report option in the use scan launch configuration" />
+      </td>
+  </tr>
+
+	<tr id="pde-usescantask">
+	<td class="title">Ant task to report missing use scan references</td>
+	<td class="content">A new Ant task is available from API Tools that will compare a profile 
+	against a list of use scans and report any missing references.  A HTML converter task is also 
+	available to provide a formatted report.  The task will report the same missing references in the 
+	IDE when the <b>API Use Scan</b> preference page is used.  Documentation for the task is available 
+	in the <b>Reference</b> section of the <b>Plug-in Development Environment Guide</b>.
+	</td>
 	</tr>
 
-	<tr id="pdebuildsynch">
-		<td align="left" valign="top" width="30%"><b>Synchronize
-		project settings with PDE build</b></td>
-		<td valign="top" width="70%">It's easier to synchronize your
-		project specific compiler settings and file encoding settings with PDE
-		build. Two new options appear in the <b>Build</b> section of the <b>Preferences
-		&gt; Plug-in Development &gt; Compilers </b> preference page. By default the new
-		options are set to <b>Ignore</b>.
-		<p><img alt="Build validation settings"
-			title="Build Validation Settings" src="images/synch-settings.png" />
-		</p>
-		<p>When set to <b>Warning</b> or <b>Error</b> problem markers will
-		appear when your project settings are not reflected in <code>build.properties</code>.
-		Quick fixes are available to help you synchronize the settings.</p>
-		<p><img alt="Warnings" title="Build Validation Warnings"
-			src="images/synch-warnings.png" />
-		</p>
-		<p>A new <code>javacProjectSettings</code> property is supported
-		in <code>build.properties</code>. The value can be a project relative
-		path to a preference settings file of compiler options supported by
-		the JDT compiler, or it can simply by <code>true</code> to indicate
-		the default preference file should be used (<code>.settings/org.eclipse.jdt.core.prefs</code>).
-		</p>
-		</td>
-	</tr>
-	
-	<tr id="bundleCompilerArgs">
-		<td align="left" valign="top" width="30%"><b>Plug-in specific
-		compiler arguments</b></td>
-		<td valign="top" width="70%">A bundle can now specify custom
-		compiler arguments to be used in export or releng builds by setting <b><tt>compilerArgs</tt></b>
-		in its build.properties file..
-		<p>These arguments will be specified in addition to whatever
-		general compiler arguments are specified by the releng setup.</p>
-		</td>
-	</tr>
-	
-	<tr id="customCompilerAdapter">
-		<td align="left" valign="top" width="30%"><b>Custom compiler
-		adapters</b></td>
-		<td valign="top" width="70%">A bundle can now specify a custom
-		ant compiler adapter to be used during export or releng builds. This
-		allows for compiling non-java sources such as AspectJ or Groovy
-		provided a suitable adapter is available.
-		<p>Set <b><tt>compilerAdapter</tt></b> in the bundle's
-		build.properties file. As well, set <b><tt>sourceFileExtensions</tt></b>
-		to a list of file extensions which should be treated as source and
-		automatically copied to generated source bundles.</p>
-		</td>
-	</tr>
+  <tr id="PDE-scancounts">
+    <td class="title">Summaries for API Tools Ant tasks</td>
+    <td class="content">
+    For the API analysis tools that use Ant tasks, you now get a simple index file with 
+    summary counts of the kinds of problems found by the tasks. 
+    <p>
+    These summaries are located in the root of the output directory for each scan in 
+    a file named <code>counts.xml</code>
+    </p>
+    </td>
+  </tr>
 
-	<tr id="pdeerrors">
-		<td align="left" valign="top" width="30%"><b>Improved error
-		reporting from PDE build</b></td>
-		<td valign="top" width="70%">A new <code>prereqErrors.log</code>
-		file is generated by PDE build. The file helps locate bundles lowest
-		on the stack with compilation errors. An entry is added for each
-		bundle with build errors describing any prerequisite bundles that
-		contained compile errors. Entries are added in the order bundles are
-		compiled. For example:
-		<p><code> org.eclipse.debug.ui_3.6.0.201004141459: the
-		following prerequisites contain compile errors<br />
-		&nbsp;&nbsp;&nbsp;&nbsp;org.eclipse.debug.core_3.6.0.201004141459 </code></p>
-		</td>
-	</tr>
 </table>
 </body>
 </html>
