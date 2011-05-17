@@ -58,6 +58,46 @@ block</td>
       <td style="vertical-align: top;" width="15%">On a boolean expression</td>
     </tr>
     <tr>
+      <td style="vertical-align: top;" width="15%">Invert local variable</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>boolean a = false;<br>
+		if (a) {}</code></td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>boolean notA = true;<br>
+		if (!notA) {}</code></td>
+      <td style="vertical-align: top;" width="15%">On a boolean variable</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" width="15%">Invert equals</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>a.equals(b)</code>
+      </td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>b.equals(a)</code></td>
+      <td style="vertical-align: top;" width="15%">On a invocation of 'equals'</td>
+    </tr>
+    <tr>
+        <tr>
+      <td style="vertical-align: top;" width="15%">Inverse conditional expression</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>x ? b : c</code></td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>!x ? c : b</code></td>
+      <td style="vertical-align: top;" width="15%">On a conditional expression</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top" width="15%">Pull negation up</td>
+      <td style="vertical-align: top; text-align: right" width="34%"><code>b &amp;&amp; c</code></td>
+      <td style="vertical-align: top">&gt;</td>
+      <td style="vertical-align: top" width="34%"><code>!(!b || !c)</code></td>
+      <td style="vertical-align: top" width="15%">On a boolean expression</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top" width="15%">Push negation down</td>
+      <td style="vertical-align: top; text-align: right" width="34%">!(<code>b
+&amp;&amp; c)</code></td>
+      <td style="vertical-align: top">&gt;</td>
+      <td style="vertical-align: top" width="34%">!<code>b || !c</code></td>
+      <td style="vertical-align: top" width="15%">On a negated boolean expression</td>
+    </tr>
+    <tr>
       <td style="vertical-align: top;" width="15%">Remove extra parentheses</td>
       <td style="vertical-align: top; text-align: right;" width="34%"><code>if ((a == b)
 &amp;&amp; (c != d)&nbsp; {}</code></td>
@@ -67,11 +107,18 @@ d)&nbsp; {}</code></td>
       <td style="vertical-align: top;" width="15%">On selected expressions</td>
     </tr>
     <tr>
-      <td style="vertical-align: top;" width="15%">Add paranoidal parentheses</td>
+      <td style="vertical-align: top;" width="15%">Put expression in parentheses</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>return a > 10 ? 1 : 2;</code> </td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>return (a > 10) ? 1 : 2;</code></td>
+      <td style="vertical-align: top;" width="15%">On selected expression</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" width="15%">Put expressions in parentheses</td>
       <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a == b
 &amp;&amp; c != d)&nbsp; {}</code> </td>
       <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code>if ((a == b) &amp;&amp; (c != d)</code></td>
+      <td style="vertical-align: top;" width="34%"><code>if ((a == b) &amp;&amp; (c != d))&nbsp; {} </code></td>
       <td style="vertical-align: top;" width="15%">On selected expressions</td>
     </tr>
     <tr>
@@ -100,37 +147,27 @@ expression</td>
       <td style="vertical-align: top;" width="15%">On an and'ed expression in a 'if'</td>
     </tr>
     <tr>
+      <td style="vertical-align: top;" width="15%">Join selected 'if' statements with ||</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code> if (a) x();&nbsp; if (b) x();</code></td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>if (a || b) x();</code></td>
+      <td style="vertical-align: top;" width="15%">On selected 'if' statements</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" width="15%">Join 'if' sequence in if-else-if</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code> if (a) x();&nbsp; if (b) y();</code></td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code> if (a) x();&nbsp; else if (b) y();</code></td>
+      <td style="vertical-align: top;" width="15%">On selected 'if' statements</td>
+    </tr>
+    <tr>
       <td style="vertical-align: top;" width="15%">Split if statement with or'd
 expression</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a || b)
-x();</code></td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a || b) x();</code></td>
       <td style="vertical-align: top;">&gt;</td>
       <td style="vertical-align: top;" width="34%"><code> if (a) x();&nbsp; if (b) x();</code></td>
       <td style="vertical-align: top;" width="15%">On an or'd expression in a 'if'</td>
     </tr>
-    <tr>
-      <td style="vertical-align: top;" width="15%">Inverse conditional expression</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>x ? b : c</code></td>
-      <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code>!x ? c : b</code></td>
-      <td style="vertical-align: top;" width="15%">On a conditional expression</td>
-    </tr>
-		<tr>
-			<td style="vertical-align: top" width="15%">Pull negation up</td>
-			<td style="vertical-align: top; text-align: right" width="34%"><code>b &amp;&amp; c</code></td>
-			<td style="vertical-align: top">&gt;</td>
-			<td style="vertical-align: top" width="34%"><code>!(!b || !c)</code></td>
-			<td style="vertical-align: top" width="15%">On a boolean expression</td>
-		</tr>
-		<tr>
-			<td style="vertical-align: top" width="15%">Push negation down</td>
-			<td style="vertical-align: top; text-align: right" width="34%">!(<code>b
-			&amp;&amp; c)</code></td>
-			<td style="vertical-align: top">&gt;</td>
-			<td style="vertical-align: top" width="34%">!<code>b || !c</code></td>
-			<td style="vertical-align: top" width="15%">On a negated boolean expression</td>
-		</tr>
-		<tr>
       <td style="vertical-align: top;" width="15%">If-else assignment to
 conditional expression</td>
       <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a) x= 1;
@@ -174,7 +211,7 @@ a ? 1 : 2;</code></td>
 			<td style="vertical-align: top" width="34%"><code>if (kind == 1) {<br>&nbsp;&nbsp;return  
 			-1;<br>} else if (kind == 2) {<br>&nbsp;&nbsp;return -2;<br>}</code>
 			</td>
-			<td style="vertical-align: top" width="15%">On a statement</td>
+			<td style="vertical-align: top" width="15%">On a switch statement</td>
 		</tr>
 	<tr>
       <td style="vertical-align: top;" width="15%">Add missing case statements on enums</td>
@@ -199,7 +236,42 @@ instanceof Vector) {<br>
       <td style="vertical-align: top;" width="34%"><code> if (obj instanceof Vector) {<br>
 &nbsp;Vector vec= (Vector)obj;</code><br>
 }</td>
-      <td style="vertical-align: top;" width="15%">on a instanceof expression in an 'if' or 'while' statement</td>
+      <td style="vertical-align: top;" width="15%">On an instanceof expression in an 'if' or 'while' statement</td>
+    </tr>
+        <tr>
+      <td style="vertical-align: top;" width="15%">Add finally block</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>try {<br>
+} catch (Expression e) {<br>
+}
+      </code></td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>try {<br>
+} catch (Expression e) {<br>
+} finally {}</code></td>
+      <td style="vertical-align: top;" width="15%">On a try/catch statement</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" width="15%">Add else block</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a) b();</code>
+      </td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>if (a) b(); else { }</code></td>
+      <td style="vertical-align: top;" width="15%">On a if statement</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" width="15%">Replace statement with block</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a) b();</code>
+      </td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code> if (a) { b(); }</code></td>
+      <td style="vertical-align: top;" width="15%">On a if statement </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;" width="15%">Unwrap blocks</td>
+      <td style="vertical-align: top; text-align: right;" width="34%"><code>{ a() }</code></td>
+      <td style="vertical-align: top;">&gt;</td>
+      <td style="vertical-align: top;" width="34%"><code>a()</code></td>
+      <td style="vertical-align: top;" width="15%">On blocks, if/while/for statements</td>
     </tr>
     <tr>
       <td style="vertical-align: top;" width="15%">Pick out string</td>
@@ -268,42 +340,6 @@ public A(int color) {<br>
       <td style="vertical-align: top;" width="15%">On a parameter</td>
     </tr>
     <tr>
-      <td style="vertical-align: top;" width="15%">Add finally block</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>try {<br>
-} catch (Expression e) {<br>
-}
-      </code></td>
-      <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code>try {<br>
-} catch (Expression e) {<br>
-} finally {}</code></td>
-      <td style="vertical-align: top;" width="15%">On a try/catch statement</td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;" width="15%">Add else block</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a) b();</code>
-      </td>
-      <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code>if (a) b(); else { }</code></td>
-      <td style="vertical-align: top;" width="15%">On a if statement</td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;" width="15%">Replace statement with block</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>if (a) b();</code>
-      </td>
-      <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code> if (a) { b(); }</code></td>
-      <td style="vertical-align: top;" width="15%">On a if statement </td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;" width="15%">Invert equals</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>a.equals(b)</code>
-      </td>
-      <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code>b.equals(a)</code></td>
-      <td style="vertical-align: top;" width="15%">On a invocation of 'equals'</td>
-    </tr>
-    <tr>
       <td style="vertical-align: top;" width="15%">Array initializer to Array
 creation</td>
       <td style="vertical-align: top; text-align: right;" width="34%"><code>int[]
@@ -330,13 +366,6 @@ i= c.iterator();i.hasNext();) {<br>
       <td style="vertical-align: top;"><br></td>
       <td style="vertical-align: top;" width="34%"><br></td>
       <td style="vertical-align: top;" width="15%">On a method declaration</td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;" width="15%">Unwrap blocks</td>
-      <td style="vertical-align: top; text-align: right;" width="34%"><code>{ a() }</code></td>
-      <td style="vertical-align: top;">&gt;</td>
-      <td style="vertical-align: top;" width="34%"><code>a()</code></td>
-      <td style="vertical-align: top;" width="15%">On blocks, if/while/for statements</td>
     </tr>
     <tr>
       <td style="vertical-align: top;" width="15%">Rename in file</td>
