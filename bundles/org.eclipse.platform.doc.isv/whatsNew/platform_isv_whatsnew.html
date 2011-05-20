@@ -47,7 +47,7 @@ section of the Workbench User Guide.
         which configuration is currently being built. Builder resource deltas are stored per 
         configuration.
         <p>
-        New API is introduced to define references between the configurations and
+        New API has been introduced to define references between the configurations and
         to build chosen configurations and their references.
         See <tt>org.eclipse.core.resources.IBuildConfiguration</tt> for further details.
         </p>
@@ -66,6 +66,38 @@ section of the Workbench User Guide.
       A new extension point, <tt>org.eclipse.help.base.display</tt>, allows for an alternate
       web page instead of help/index.jsp to be opened when <b>Help &gt; Contents</b> is invoked from the workbench menu.
     </td>
+  </tr>
+
+  <tr id="Plat-launchshortcuts">
+	<td class="title">Variables in launch shortcuts</td>
+	<td class="content">
+	Previously when you contributed a launch shortcut, the only variable you had available 
+	for examination was the current selection in the workspace. Now you have all of the 
+	variables from the Platform evaluation context available as well.
+	<p>
+	For example you can now ask if your bundle has been loaded yet to prevent your launch 
+	shortcut from appearing when it should not.</p>
+	<pre>
+      &lt;enablement&gt;
+        &lt;with variable="selection"&gt;
+          &lt;count value="1"/&gt;
+             &lt;iterate&gt;
+                &lt;and&gt;
+                    &lt;test property="org.eclipse.my.bundle.tester" value="true"/&gt;
+                    &lt;with variable="org.eclipse.core.runtime.Platform"&gt;
+                       &lt;test
+                             args="org.eclipse.my.bundle"
+                             property="org.eclipse.core.runtime.bundleState"
+                             value="ACTIVE"&gt;
+
+                       &lt;/test&gt;
+                    &lt;/with&gt;
+                &lt;/and&gt;
+             &lt;/iterate&gt;
+        &lt;/with&gt;
+      &lt;/enablement&gt;
+	</pre>
+	</td>
   </tr>
 
   <tr id="Plat-stackdumps-on-timeout">
@@ -103,38 +135,6 @@ section of the Workbench User Guide.
      <p>The whole dump is repeated two seconds later. Since the code that prints the SWT information uses
      <code>display.syncExec(..)</code>, this may or may not influence a hung main thread.</p>
     </td>
-  </tr>
-
-  <tr id="Plat-launchshortcuts">
-	<td class="title">Variables in launch shortcuts</td>
-	<td class="content">
-	Previously when you contributed a launch shortcut, the only variable you had available 
-	for examination was the current selection in the workspace. Now you have all of the 
-	variables from the Platform evaluation context available as well.
-	<p>
-	For example you can now ask if your bundle has been loaded yet to prevent your launch 
-	shortcut from appearing when it should not.</p>
-	<pre>
-      &lt;enablement&gt;
-        &lt;with variable="selection"&gt;
-          &lt;count value="1"/&gt;
-             &lt;iterate&gt;
-                &lt;and&gt;
-                    &lt;test property="org.eclipse.my.bundle.tester" value="true"/&gt;
-                    &lt;with variable="org.eclipse.core.runtime.Platform"&gt;
-                       &lt;test
-                             args="org.eclipse.my.bundle"
-                             property="org.eclipse.core.runtime.bundleState"
-                             value="ACTIVE"&gt;
-
-                       &lt;/test&gt;
-                    &lt;/with&gt;
-                &lt;/and&gt;
-             &lt;/iterate&gt;
-        &lt;/with&gt;
-      &lt;/enablement&gt;
-	</pre>
-	</td>
   </tr>
 
 <!-- ******************** Equinox ********************** -->
@@ -267,27 +267,6 @@ section of the Workbench User Guide.
       available December 20th 2010.</p>
     </td>
   </tr>
-  <tr id="memory-improvements">
-    <td class="title">Reduced memory use when loading p2 repositories</td>
-    <td class="content">
-      Several changes were made to reduce memory usage during and after loading p2 repositories.
-      Although actual savings depends on the composition of the repositories being loaded we are seeing
-      an average reduction of 23% in the peak memory usage and heap expansion during the load and an 
-      average reduction of 19% in memory used to store the repository after the load.  
-      Using a sample Eclipse build repository with 10 integration builds, this translates to a 
-      reduction in peak memory usage from 92 MB to 71 MB, and a reduction in retained 
-      memory after the load of 48 MB to 39 MB.
-      <p>
-      To maintain repository compatibility between different versions of Eclipse, most of
-      these savings will only be realized when reading repositories generated with a 3.7 M4 or later
-      Eclipse. 
-      </p>
-      <p>
-      You can look forward to additional improvements which did not make it into this Milestone, but 
-      will be included in the next Milestone.
-      </p>
-    </td>
-  </tr>
 
   <tr id="unified-logging">
     <td class="title">Unified logging</td>
@@ -316,6 +295,28 @@ section of the Workbench User Guide.
       instances will also be notified of entries logged through this logger as well as entries logged
       through any other logger.  The <tt>ExtendedLogReaderService</tt> in Equinox also allows
       OSGi <tt>LogListener</tt> instances to listen to specific loggers through the use of a filter.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="memory-improvements">
+    <td class="title">Reduced memory use when loading p2 repositories</td>
+    <td class="content">
+      Several changes were made to reduce memory usage during and after loading p2 repositories.
+      Although actual savings depends on the composition of the repositories being loaded we are seeing
+      an average reduction of 23% in the peak memory usage and heap expansion during the load and an 
+      average reduction of 19% in memory used to store the repository after the load.  
+      Using a sample Eclipse build repository with 10 integration builds, this translates to a 
+      reduction in peak memory usage from 92 MB to 71 MB, and a reduction in retained 
+      memory after the load of 48 MB to 39 MB.
+      <p>
+      To maintain repository compatibility between different versions of Eclipse, most of
+      these savings will only be realized when reading repositories generated with a 3.7 M4 or later
+      Eclipse. 
+      </p>
+      <p>
+      You can look forward to additional improvements which did not make it into this Milestone, but 
+      will be included in the next Milestone.
       </p>
     </td>
   </tr>
@@ -416,6 +417,64 @@ d:\builder\eclipse.exe
     </td>
   	</tr>
 
+  <tr id="touch-support">
+    <td class="title">Touch and gesture support</td>
+    <td class="content">If your hardware supports it, you can now listen for touches or 
+    gestures on SWT controls. Four standard gestures are supported: two-finger panning, 
+    rotation, magnification, and swipe (three fingers on Mac OS X, flicks on Windows). 
+    You can also listen for 'raw' touches on a MacBook touchpad, Magic Trackpad or 
+    Magic Mouse, or a touch-sensitive display that is supported by Windows Touch.
+	For examples of how to use the touch and gesture support see 
+	<a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet352.java">Snippet 352</a> 
+	and <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet353.java">Snippet 353</a>.
+	<p><img src="images/gesture.png" alt="Gesture" title="A gesture from our fearless leader"/></p>
+    </td>
+  </tr>
+
+  <tr id="WebKit_Everywhere">
+    <td class="title">WebKit everywhere</td>
+    <td class="content">The SWT browser now supports using WebKit as its native renderer 
+    on Windows.  Consequently, browsers created with new style <code>SWT.WEBKIT</code> 
+    will use WebKit on Windows, Linux and OS X, provided that the user's machine satisfies the 
+    <a href="http://www.eclipse.org/swt/faq.php#howusewebkit">runtime requirements</a>.  
+    For an example of using WebKit see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet351.java">Snippet 351</a>.
+	<p><img src="images/webkitWindows.png" alt="Webkit"/></p>
+    </td>
+  </tr>
+
+   <tr id="Change_Orientation">
+    <td class="title">Change orientation</td>
+    <td class="content">
+      New methods have been added to <tt>Control</tt> and <tt>Menu</tt> to 
+      allow the application to change the orientation of these interface elements. Prior to 
+      the introduction of these methods, the application was required to recreate the 
+      element to achieve the same result. 
+      Note: these methods are only relevant on platforms where BIDI mirroring is supported.
+	  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=29779">Bug 29779</a> for more information.
+    </td>
+  </tr>
+
+  <tr id="accessibleeditabletext">
+    <td width="30%" valign="top" align="left"><b>Accessible editable text support</b></td>
+    <td width="70%" valign="top">
+      SWT Accessibility now has API to support the platform's EditableText interface 
+      used by accessibility tools such as speech recognition systems.
+      For details, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324005">bug 324005</a>.
+    </td>
+  </tr>
+
+  <tr id="duplex">
+    <td class="title">Duplex printing</td>
+    <td class="content">
+      New API has been added to <tt>PrinterData</tt> to enable duplex (double-sided) printing without using the <tt>PrintDialog</tt>.
+      This can also be used to seed the <tt>PrintDialog</tt>'s duplex setting before presenting it to the user.
+      <p><img src="images/duplex-printing-pl.png" alt="PrintDialog showing double-sided portrait printing that can be bound on the long edge"/></p>
+      <p><img src="images/duplex-printing-ps.png" alt="PrintDialog showing double-sided portrait printing that can be bound on the short edge"/></p>
+      <p><img src="images/duplex-printing-ll.png" alt="PrintDialog showing double-sided landscape printing that can be bound on the long edge"/></p>
+      <p><img src="images/duplex-printing-ls.png" alt="PrintDialog showing double-sided landscape printing that can be bound on the short edge"/></p>
+     </td>
+  </tr>
+
   <tr id="cocoatool">
     <td width="30%" valign="top" align="left"><b>Tool shell support on Cocoa</b></td>
     <td width="70%" valign="top">
@@ -471,69 +530,11 @@ d:\builder\eclipse.exe
  	</td>
   </tr>
 
-  <tr id="accessibleeditabletext">
-    <td width="30%" valign="top" align="left"><b>Accessible editable text support</b></td>
-    <td width="70%" valign="top">
-      SWT Accessibility now has API to support the platform's EditableText interface 
-      used by accessibility tools such as speech recognition systems.
-      For details, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324005">bug 324005</a>.
-    </td>
-  </tr>
-
-  <tr id="duplex">
-    <td class="title">Duplex printing</td>
-    <td class="content">
-      New API has been added to <tt>PrinterData</tt> to enable duplex (double-sided) printing without using the <tt>PrintDialog</tt>.
-      This can also be used to seed the <tt>PrintDialog</tt>'s duplex setting before presenting it to the user.
-      <p><img src="images/duplex-printing-pl.png" alt="PrintDialog showing double-sided portrait printing that can be bound on the long edge"/></p>
-      <p><img src="images/duplex-printing-ps.png" alt="PrintDialog showing double-sided portrait printing that can be bound on the short edge"/></p>
-      <p><img src="images/duplex-printing-ll.png" alt="PrintDialog showing double-sided landscape printing that can be bound on the long edge"/></p>
-      <p><img src="images/duplex-printing-ls.png" alt="PrintDialog showing double-sided landscape printing that can be bound on the short edge"/></p>
-     </td>
-  </tr>
-
  <tr id="CocoaDateTime">
     <td class="title">Improved Cocoa DateTime support</td>
     <td class="content">
       On Cocoa, the <tt>DateTime</tt> control now supports the <tt>SWT.DROP_DOWN</tt> option bit.
       <p><img src="images/cocoadatetime.png" alt="cocoadatetime"/></p>
-    </td>
-  </tr>
-
-  <tr id="touch-support">
-    <td class="title">Touch and gesture support</td>
-    <td class="content">If your hardware supports it, you can now listen for touches or 
-    gestures on SWT controls. Four standard gestures are supported: two-finger panning, 
-    rotation, magnification, and swipe (three fingers on Mac OS X, flicks on Windows). 
-    You can also listen for 'raw' touches on a MacBook touchpad, Magic Trackpad or 
-    Magic Mouse, or a touch-sensitive display that is supported by Windows Touch.
-	For examples of how to use the touch and gesture support see 
-	<a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet352.java">Snippet 352</a> 
-	and <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet353.java">Snippet 353</a>.
-	<p><img src="images/gesture.png" alt="Gesture" title="A gesture from our fearless leader"/></p>
-    </td>
-  </tr>
-
-  <tr id="WebKit_Everywhere">
-    <td class="title">WebKit everywhere</td>
-    <td class="content">The SWT browser now supports using WebKit as its native renderer 
-    on Windows.  Consequently, browsers created with new style <code>SWT.WEBKIT</code> 
-    will use WebKit on Windows, Linux and OS X, provided that the user's machine satisfies the 
-    <a href="http://www.eclipse.org/swt/faq.php#howusewebkit">runtime requirements</a>.  
-    For an example of using WebKit see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet351.java">Snippet 351</a>.
-	<p><img src="images/webkitWindows.png" alt="Webkit"/></p>
-    </td>
-  </tr>
-
-   <tr id="Change_Orientation">
-    <td class="title">Change orientation</td>
-    <td class="content">
-      New methods have been added to <tt>Control</tt> and <tt>Menu</tt> to 
-      allow the application to change the orientation of these interface elements. Prior to 
-      the introduction of these methods, the application was required to recreate the 
-      element to achieve the same result. 
-      Note: these methods are only relevant on platforms where BIDI mirroring is supported.
-	  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=29779">Bug 29779</a> for more information.
     </td>
   </tr>
 
