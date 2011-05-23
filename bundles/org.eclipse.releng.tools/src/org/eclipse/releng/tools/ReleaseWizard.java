@@ -286,7 +286,7 @@ public class ReleaseWizard extends Wizard {
 		if(!isProjectSelected())return false;
 		
 		if (projectSelectionPage.isCompareButtonChecked() && !buildNotesOperation()) {
-				return true; // Build notes file update cancelled. Close dialog.
+			return true; // Build notes file update cancelled. Close dialog.
 		}
 		
 		try {
