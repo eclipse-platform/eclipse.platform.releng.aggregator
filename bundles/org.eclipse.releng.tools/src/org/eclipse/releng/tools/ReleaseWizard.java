@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -285,9 +285,8 @@ public class ReleaseWizard extends Wizard {
 	public boolean performFinish() {
 		if(!isProjectSelected())return false;
 		
-		// Build notes file update cancelled. Close dialog.
-		if (!buildNotesOperation()) {
-			return true;
+		if (projectSelectionPage.isCompareButtonChecked() && !buildNotesOperation()) {
+				return true; // Build notes file update cancelled. Close dialog.
 		}
 		
 		try {
