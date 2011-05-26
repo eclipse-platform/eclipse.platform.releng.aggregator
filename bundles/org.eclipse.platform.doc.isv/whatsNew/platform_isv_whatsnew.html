@@ -32,7 +32,6 @@ section of the Workbench User Guide.
 <table class="news" border="0" cellpadding="10" cellspacing="0" width="600">
 <tbody>
 <!-- ******************** Platform ********************** -->
-
 	<tr>
     <td id="Platform" class="section" colspan="2">
       <h2>Platform Changes</h2>
@@ -60,11 +59,29 @@ section of the Workbench User Guide.
     </td>
   </tr>
 
+  <tr id="search-processor">
+    <td class="title">Help search refinement</td>
+    <td class="content">
+      The new extension point <code>org.eclipse.help.base.searchProcessor</code> allows for modification
+      of the search term, suggestion of alternate terms and modification of the list of search results. 
+       <p><img src = "images/searchprocessorNN.png" alt="Help view showing alternate terms"/>
+      </p>
+    </td>
+  </tr>
+
   <tr id="help-display">
     <td class="title">Extension point for changing help main page</td>
     <td class="content">
-      A new extension point, <tt>org.eclipse.help.base.display</tt>, allows for an alternate
+      A new extension point, <code>org.eclipse.help.base.display</code>, allows for an alternate
       web page instead of help/index.jsp to be opened when <b>Help &gt; Contents</b> is invoked from the workbench menu.
+    </td>
+  </tr>
+
+  <tr id="remote_style">
+    <td class="title">Remote help styling</td>
+    <td class="content">The new preference <code>org.eclipse.help.base/remote_css</code> 
+    allows the definition of a style sheet which is included in all help pages that
+    originated from a remote infocenter.
     </td>
   </tr>
 
@@ -100,6 +117,15 @@ section of the Workbench User Guide.
 	</td>
   </tr>
 
+  <tr id="projectSetCapabilityAPI">
+    <td class="title">ProjectSetCapability API extension</td>
+    <td class="content">
+		The ProjectSetCapability API now supports SCM URLs (see http://maven.apache.org/scm/scm-url-format.html). 
+		An URL in that format is now accepted by ProjectSetCapability#asReference(URI, String) method. Currently, 
+		only CVS provides an extended implementation of the method. 
+    </td>
+  </tr>
+
   <tr id="Plat-stackdumps-on-timeout">
     <td class="title">Eclipse Test Framework writes stackdumps on timeout</td>
     <td class="content">
@@ -112,9 +138,12 @@ section of the Workbench User Guide.
       <pre>     [java] Timeout: killed the sub-process
      [java] Java Result: -1</pre>
      
-     You now get a stackdump of all threads, followed by the current focus control (with all its parents), and the open shells, e.g.:
+     You now get the process memory stats, followed by a stackdump of all threads, followed by the current focus control (with all its parents), and the open shells, e.g.:
      
       <pre>     [java] EclipseTestRunner almost reached timeout '7200000'.
+     [java] totalMemory: 260177920
+     [java] freeMemory (before GC): 195046224
+     [java] freeMemory (after GC):  244342384
      [java] Thread dump at 2011-04-21 06:41:49 -0400:
      [java] java.lang.Exception: Worker-JM
      [java] 	at java.lang.Object.wait
@@ -132,7 +161,7 @@ section of the Workbench User Guide.
      [java] visible: Shell {Java - Eclipse SDK}
      [java] visible: Shell {}</pre>
 
-     <p>The whole dump is repeated two seconds later. Since the code that prints the SWT information uses
+     <p>The whole dump is repeated 5 seconds later. Since the code that prints the SWT information uses
      <code>display.syncExec(..)</code>, this may or may not influence a hung main thread.</p>
     </td>
   </tr>
@@ -438,15 +467,21 @@ d:\builder\eclipse.exe
     </td>
   </tr>
 
+  <tr id="webkitgtk">
+    <td width="30%" valign="top" align="left"><b>Browser on Linux defaults to WebKitGTK+</b></td>
+    <td width="70%" valign="top">
+      Browsers created with style <tt>SWT.NONE</tt> on Linux now use WebKitGTK+ as the default native renderer if it is found on the user's machine.  If WebKitGTK+ is not found then a Mozilla-based native renderer is used instead.
+    </td>
+  </tr>
+
    <tr id="Change_Orientation">
     <td class="title">Change orientation</td>
     <td class="content">
-      New methods have been added to <tt>Control</tt> and <tt>Menu</tt> to 
-      allow the application to change the orientation of these interface elements. Prior to 
-      the introduction of these methods, the application was required to recreate the 
-      element to achieve the same result. 
-      Note: these methods are only relevant on platforms where BIDI mirroring is supported.
-	  See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=29779">Bug 29779</a> for more information.
+      New API <tt>setOrientation()</tt> has been added to <tt>Control</tt> and <tt>Menu</tt> to 
+      allow the application to change the orientation on instances of these widgets. Prior to 
+      the introduction of <tt>setOrientation()</tt> the application had to recreate the widgets 
+      in order to do this. 
+      Note that these methods are only relevant on platforms where BIDI mirroring is supported.
     </td>
   </tr>
 
@@ -454,8 +489,9 @@ d:\builder\eclipse.exe
     <td width="30%" valign="top" align="left"><b>Accessible editable text support</b></td>
     <td width="70%" valign="top">
       SWT Accessibility now has API to support the platform's EditableText interface 
-      used by accessibility tools such as speech recognition systems.
-      For details, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324005">bug 324005</a>.
+      used by accessibility tools such as speech recognition systems. Clients can add support
+      for this to their custom controls by providing an implementation of new interface
+      <a href="../reference/api/org/eclipse/swt/accessibility/AccessibleEditableTextListener.html">AccessibleEditableTextListener</a>.
     </td>
   </tr>
 
@@ -474,14 +510,8 @@ d:\builder\eclipse.exe
   <tr id="cocoatool">
     <td width="30%" valign="top" align="left"><b>Tool shell support on Cocoa</b></td>
     <td width="70%" valign="top">
-      The Cocoa port now supports the <tt>SWT.TOOL</tt> style bit. See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet344.java">Snippet 344</a>.
+      The Cocoa port now supports the <tt>SWT.TOOL</tt> style bit. For an example of this see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet344.java">Snippet 344</a>.
       <p><img src="images/cocoatool.png" alt="Cocoa Tool"/></p></td>
-  </tr>
-  <tr id="webkitgtk">
-    <td width="30%" valign="top" align="left"><b>Browser on Linux defaults to WebKitGTK+</b></td>
-    <td width="70%" valign="top">
-      Browsers created with style <tt>SWT.NONE</tt> on Linux now use WebKitGTK+ as the default native renderer if it is found on the user's machine.  If WebKitGTK+ is not found then a Mozilla-based native renderer is used instead.
-      <p><img src="images/webkitgtk.png" alt="WebKitGTK+ Image"/></p></td>
   </tr>
 
   <tr id="wrappablebuttons">
@@ -489,32 +519,43 @@ d:\builder\eclipse.exe
     <td width="70%" valign="top">
       The button control now supports the <b>SWT.WRAP</b> style bit on all platforms. This 
       allows for the creation of buttons that will automatically wrap any text when resized. 
-      For more info, please see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet345.java">Snippet 345</a>.
+      For an example of this see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet345.java">Snippet 345</a>.
       <p><img src="images/wrap.png" alt="Wrap"/></p></td>
   </tr>
 
   <tr id="appmenu">
-    <td width="30%" valign="top" align="left"><b>Cocoa getAppMenuBar</b></td>
+    <td width="30%" valign="top" align="left"><b>Cocoa getMenuBar</b></td>
     <td width="70%" valign="top">
-	<tt>Display.getAppMenuBar()</tt> is a new API that returns a menu that is 
+	<tt>Display.getMenuBar()</tt> is a new API that returns a menu that is 
 	displayed when no shell is visible or when the active shell doesn't have a 
-	menu bar of its own.  This API is currently only available in the Mac OS X Cocoa port. 
-	It will return null on all other platforms.  
+	menu bar of its own.  This API is currently only available in the Mac OS X Cocoa port; 
+	it returns <code>null</code> on all other platforms.  
 	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet347.java">Snippet 347</a> 
-	for an example of how you can use this API in a cross-platform application.
-    <p><img src="images/AppMenuBar.png" alt="appMenuBar"/></p></td>
+	for an example of using this API in a cross-platform application.
+    <p><img src="images/AppMenuBar.png" alt="menuBar"/></p></td>
+  </tr>
+
+  <tr id="swt-cocoa-system-menu">
+    <td class="title">Cocoa getSystemMenu</td>
+    <td class="content">
+	<tt>Display.getSystemMenu()</tt> is a new API that returns the system-provided menu for the application.
+    You can access menu items in the system menu by comparing a <tt>MenuItem</tt>'s id with various <tt>SWT.ID_</tt>* constants.
+    This API is currently only available in the Mac OS X Cocoa port; it returns <code>null</code> on all other platforms.  
+	See <a href="http://dev.eclipse.org/viewcvs/index.cgi/~checkout~/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet354.java">Snippet 354</a> 
+	for an example of using this API in a cross-platform application.
+    <p><img src="images/system-menu.png" alt="Cocoa System Menu"/></p>
+    </td>
   </tr>
 
 <tr id="toolbar">
-    <td width="30%" valign="top" align="left"><b>Cocoa getToolbar</b></td>
+    <td width="30%" valign="top" align="left"><b>Cocoa getToolBar</b></td>
     <td width="70%" valign="top">
       <tt>Shell.getToolBar()</tt> returns a tool bar that appears in the title area of the shell.
       Tool items added to that tool bar will have the look and feel of the platform. 
       You can also add special separator items that provide a fixed-width spacer or 
       a flexible-width spacer that pushes the tool items on either side of it out to 
-      the next fixed item, or the edge of the shell. Please note that this API is a 
-      work in progress, and is currently Cocoa-only. Please follow <a href="http://bugs.eclipse.org/222859">bug 222859</a> 
-      or watch future <i>New and Noteworthy</i> announcements for further details.
+      the next fixed item, or the edge of the shell. This API is currently only available in the
+      Mac OS X Cocoa port; it returns <code>null</code> on all other platforms.
       <p><img src="images/NativeToolBar.png" alt="nativeToolbar"/></p></td>
   </tr>
 
@@ -522,27 +563,15 @@ d:\builder\eclipse.exe
     <td width="30%" valign="top" align="left"><b>Text setTextChars</b></td>
     <td width="70%" valign="top">
     There is new API in Text that allows applications to get and set text as a char array 
-    in a secure manner. For more details, please see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet346.java">Snippet 346</a>.
+    in a secure manner. For an example of this see <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet346.java">Snippet 346</a>.
  	</td>
   </tr>
 
  <tr id="CocoaDateTime">
     <td class="title">Improved Cocoa DateTime support</td>
     <td class="content">
-      On Cocoa, the <tt>DateTime</tt> control now supports the <tt>SWT.DROP_DOWN</tt> option bit.
+      On Cocoa the <tt>DateTime</tt> control now supports the <tt>SWT.DROP_DOWN</tt> style bit.
       <p><img src="images/cocoadatetime.png" alt="cocoadatetime"/></p>
-    </td>
-  </tr>
-
-  <tr id="swt-cocoa-system-menu">
-    <td class="title">Cocoa Display getSystemMenu</td>
-    <td class="content">
-	<tt>Display.getSystemMenu()</tt> is a new API that returns the system-provided menu for the application.
-    You can access menu items in the system menu by comparing a <tt>MenuItem</tt>'s id with various <tt>SWT.ID_</tt>* constants.
-    Right now, this API is only available in the Mac OS X Cocoa port. It will return null on all other platforms.
-    See <a href="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet354.java">this snippet</a>
-    for an example of how you can use this API in a cross-platform application.
-    <p><img src="images/system-menu.png" alt="Cocoa System Menu"/></p>
     </td>
   </tr>
 
