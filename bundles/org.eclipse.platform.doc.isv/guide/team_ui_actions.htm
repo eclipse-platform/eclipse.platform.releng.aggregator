@@ -87,7 +87,37 @@ happening in the markup:</p>
 </ul>
 <p>The implementation of an action is largely dependent on your specific
 provider.</p>
-<p>&nbsp;</p>
+<p>Commands can be contributed in a similar way:</p>
+<pre>
+   &lt;extension point="org.eclipse.core.expressions.definitions"&gt;
+      &lt;definition id="org.eclipse.ui.example.ccvs.ui.IFileContributions"&gt;
+         &lt;iterate ifEmpty="false"&gt;
+            &lt;adapt type="org.eclipse.core.resources.IFile"&gt;
+               &lt;test <b>property="org.eclipse.core.resources.projectPersistentProperty"</b>
+                     <b>value="org.eclipse.team.core.repository=org.eclipse.team.cvs.core.cvsnature"</b>/&gt;
+            &lt;/adapt&gt;
+         &lt;/iterate&gt;
+      &lt;/definition&gt;
+   &lt;/extension&gt;
+   &lt;extension point="org.eclipse.ui.menus"&gt;
+      &lt;menuContribution locationURI="popup:<b>team.main?after=group3</b>"&gt;
+         &lt;command commandId="org.eclipse.team.ccvs.ui.ignore"
+               id="org.eclipse.ui.example.ccvs.ui.ignore"
+               style="push"&gt;
+            &lt;visibleWhen checkEnabled="false"&gt;
+               &lt;or&gt;
+                  &lt;with variable="activeMenuSelection"&gt;
+                     &lt;reference definitionId="org.eclipse.ui.example.ccvs.ui.IFileContributions"/&gt;
+                  &lt;/with&gt;
+                  &lt;with variable="activeMenuEditorInput"&gt;
+                     &lt;reference definitionId="org.eclipse.ui.example.ccvs.ui.IFileContributions"/&gt;
+                  &lt;/with&gt;
+               &lt;/or&gt;
+            &lt;/visibleWhen&gt;
+         &lt;/command&gt;
+      &lt;/menuContribution&gt;
+   &lt;/extension&gt;
+</pre>
 <p>
    &nbsp;
 </p>

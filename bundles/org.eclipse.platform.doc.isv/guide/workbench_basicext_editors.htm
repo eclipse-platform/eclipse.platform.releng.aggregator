@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
 <HEAD>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -28,7 +28,8 @@ in the same perspective will activate the same editor. (You can open another
 editor on the same file from a different workbench window or perspective).&nbsp;
 Unlike views, however, the same editor type, such as a text editor, may be open
 many times
-within one workbench page for different inputs.</P>
+within one workbench page for different inputs.  The editor input can also be a path
+to an in memory model, as in the InfoEditor example.</P>
 <P >
 The workbench extension point <b><a href="../reference/extension-points/org_eclipse_ui_editors.html">org.eclipse.ui.editors</a></b>
 is used by plug-ins to add editors to the workbench. Plug-ins that contribute an editor must register the editor
@@ -36,8 +37,9 @@ extension in their <b>plugin.xml </b> file, along with configuration information
 for the editor. Some
 of the editor information, such as the implementation <b> class</b> and the
 <b> name</b> and the <b>icon</b>  to be used in the workbench menus and
-labels, is similar to the view information. In addition, editor extensions specify the file extensions or file name patterns of the file types that the editor understands. Editors can also define a
-<b> contributorClass</b>, which is a class that adds actions to workbench menus and tool bars when the editor is active.</P>
+labels, is similar to the view information. In addition, editor extensions specify the file extensions or file name patterns of the file types that the editor understands. 
+Editors also use <a href="workbench_cmd_commands.htm" class="XRef">org.eclipse.ui.commands</a> and <a href="workbench_cmd_menus.htm" class="XRef">org.eclipse.ui.menus</a>
+to contribute to the workbench menus and toolbars when that editor is active.</P>
 <P >
 The interface for editors is defined in <b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>, but plug-ins
 can choose to extend the
@@ -50,110 +52,56 @@ or to call pre-existing java code. In this discussion, we are focusing on those 
 are implemented using
 <b><a href="../reference/api/org/eclipse/ui/IEditorPart.html">IEditorPart</a></b>.</i></blockquote> 
 <P >
-The readme tool provides a custom editor primarily for the purpose of contributing its own content outliner page to the
+The editor can contribute its own content outliner page to the
 workbench outline view.&nbsp;&nbsp;</P>
 <P >
  The configuration for the editor extension is defined as follows.</P>
 <pre>
 &lt;extension
     point = &quot;org.eclipse.ui.editors&quot;&gt;
-	&lt;editor
-  	   id = &quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
-  	   name=&quot;%Editors.ReadmeEditor&quot;
-      	   icon=&quot;icons/obj16/editor.png&quot;
-      	   class=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditor&quot;
-	   extensions=&quot;readme&quot;
-           contributorClass=&quot;org.eclipse.ui.examples.readmetool.ReadmeEditorActionBarContributor&quot;&gt;
-	&lt;/editor&gt;
+      &lt;editor
+            class="org.eclipse.ui.examples.contributions.editor.InfoEditor"
+            icon="icons/editor.gif"
+            id="org.eclipse.ui.examples.contributions.editor"
+            name="%contributions.editor.name"&gt;
+      &lt;/editor&gt;
 &lt;/extension&gt;</pre>
 <P >
 We see the familiar configuration markup for <b>id</b>,
 <b>name</b>,
-<b>icon</b>, and <b>class</b>.&nbsp;&nbsp; The <b>extensions</b> attribute
-describes the file types that the editor understands.&nbsp; (You could also
+<b>icon</b> (which must be specified when specifying <b>class</b>),
+and <b>class</b>.&nbsp;&nbsp; You could use the <b>extensions</b> attribute
+describes the file types that the editor understands, like <b>extensions=&quot;person&quot;</b>,
+although this example doesn't need it.
+(You could also
 specify <b>filenames</b> if you need to be more specific.)&nbsp; The <b>class</b>
-implements the editor, and the <b>contributorClass</b> is responsible for
-providing editor-related actions.  The contributor is not normally used to
-contribute commands or handlers to the workbench menu or toolbar, that's done
-via <a href="workbench_cmd_menus.htm" class="XRef">org.eclipse.ui.menus</a>.
-Let's look at the contributor that's used for actions in more
-detail.</P>
+implements the editor.</P>
 
-<H4>
-Editor action contributors</H4>
 <P >
-The contributor class adds editor-related actions to the workbench menu and toolbar. It must implement the
-<b><a href="../reference/api/org/eclipse/ui/IEditorActionBarContributor.html"> IEditorActionBarContributor</a></b> interface. The contributor is
-separate from the editor itself since any given workbench page can have multiple editors of the same type.
-A single contributor is shared by all the editors of a specific type, rather than
-having each instance of an editor create actions and images.&nbsp;</P>
-<P >
-In <b>ReadmeEditorActionBarContributor</b>, we contribute three actions,
-&quot;Editor Action1,&quot; &quot;Editor Action2,&quot; and &quot;Editor Action3.&quot;&nbsp;&nbsp;
-These are set up in the constructor.</P>
+Editor menus and editor toolbars are placed in the main menu and main toolbar.  See 
+<a href="workbench_cmd_menus.htm" class="XRef">org.eclipse.ui.menus</a> for how to use the
+<b>locationURI</b> to place the commands correctly.</P>
+<img src="images/contributions_global.png" alt="Showing a global menu additions" border="0" >
+<P>
+These menu and tool bar items can be shown only when the editor is active using core expressions.
+To define a re-usable core expression for your editor, use
+<b><a href="../reference/extension-points/org_eclipse_core_expressions_definitions.html">org.eclipse.core.expressions.definitions</a></b></P>
 <pre>
-   public ReadmeEditorActionBarContributor() {
-      	...
-	action1 = new EditorAction(MessageUtil.getString(&quot;Editor_Action1&quot;)); 
-	action1.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action1&quot;)); 
-	action1.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE_DISABLE);
-	action1.setImageDescriptor(ReadmeImages.EDITOR_ACTION1_IMAGE_ENABLE);
-	...	
-	action2 = new RetargetAction(IReadmeConstants.RETARGET2, MessageUtil.getString(&quot;Editor_Action2&quot;)); 
-	action2.setToolTipText(MessageUtil.getString(&quot;Readme_Editor_Action2&quot;)); 
-	action2.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE_DISABLE);
-	action2.setImageDescriptor(ReadmeImages.EDITOR_ACTION2_IMAGE_ENABLE);
-	...
-	action3 = new LabelRetargetAction(IReadmeConstants.LABELRETARGET3, MessageUtil.getString(&quot;Editor_Action3&quot;));
-	action3.setDisabledImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE_DISABLE);
-	action3.setImageDescriptor(ReadmeImages.EDITOR_ACTION3_IMAGE_ENABLE);
-	...   
-   }
-</pre>
-<P >
-The names and icons for the actions are set up in the code rather than in the <b>plugin.xml</b>.&nbsp;
-(We'll ignore the differences in the action classes for now until we look at <a href="wrkAdv_retarget_contribute.htm">retargetable
-actions</a>.)&nbsp;&nbsp;</P>
-<P >Note how similar the action information is to the
-<b> viewActions</b> information we saw in the markup
-for the view action.&nbsp; The actions are set up in code since we have to
-manage the sharing of the actions among different instances of the same editor.&nbsp;
-When the actions are created in the constructor, they are independent of any
-particular instance of the editor.</P>
-<P >
- When an editor becomes active and it has actions that need to be installed in the workbench menus and tool bar, the <b>setActiveEditor
-</b>message is sent to the contributor.&nbsp; The contributor connects the editor actions to a specific editor.&nbsp;&nbsp;</P>
-<pre>
-   public void setActiveEditor(IEditorPart editor) {
-      ...
-      action1.setActiveEditor(editor);
-      ...
-   }
-</pre>
-<P >
-As you can see, the actions show up in the workbench menu and tool bar when a readme editor is active. </P>
-
-<img src="images/editormenu.png" alt="Readme entry in workbench menu bar with three editor actions" border="0" >
-
-
-
-<p><img src="images/editortoolbar.png" alt="Workbench toolbar with three readme actions" border="0" ></p>
-<P >
-These menu and tool bar items are only shown when the editor is active. The location for the menu and tool bar items can be specified as described in
-<a HREF="workbench_menupaths.htm" CLASS="XRef">Menu and toolbar paths</a>.</P>
-
-
+&lt;extension
+    point = &quot;org.eclipse.core.expressions.definitions&quot;&gt;
+      &lt;definition id="org.eclipse.ui.examples.contributions.view.activeEditor"&gt;    
+         &lt;with variable="activeEditorId"&gt;
+            &lt;equals value="org.eclipse.ui.examples.contributions.editor"/&gt;
+         &lt;/with&gt;
+      &lt;/definition&gt;
+&lt;/extension&gt;</pre>
 
 <H4>
 Editors and content outliners
 </h4>
 <P >
-The readme editor itself, <b>ReadmeEditor</b>, is not very complicated. It extends the
-<b><a href="../reference/api/org/eclipse/ui/editors/text/TextEditor.html"> TextEditor</a></b> class so that it can contribute a customized content outliner page
-to the outline view when a readme file is being edited. It does not change any behavior inside the text editor.</P>
-<p><img src="images/readmeoutliner.png" alt="" border="0"></p>
-<P >
-Editors often have corresponding content outliners that provide a structured
+Although the Info Editor does not, editors often have corresponding content outliners 
+that provide a structured
 view of the editor's contents and assist the user in navigating through the
 contents of the editor.&nbsp; See <a href="editors_workbench_outliner.htm">Content
 outliners</a> for more detail. </P>
@@ -162,9 +110,6 @@ outliners</a> for more detail. </P>
 <P >
 We'll look at the implementation of text editors in <a href="editors_jface.htm">Text
 editors and platform text</a>. </P>
-
-
-
 
 
 </BODY>

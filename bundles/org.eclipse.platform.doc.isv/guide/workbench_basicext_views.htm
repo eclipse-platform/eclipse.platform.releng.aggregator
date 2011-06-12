@@ -27,7 +27,7 @@ that is currently being edited.</P>
 <P >
 The extension point <b><a href="../reference/extension-points/org_eclipse_ui_views.html">org.eclipse.ui.views</a></b>
 allows plug-ins to add views to the workbench. Plug-ins that contribute a view must register the view in their
-<b> plugin.xml </b> file and provide&nbsp; configuration information about the view, such as its implementation class, the category (or group) of views to which it belongs, and the name and icon that should be used to describe the view in menus and labels.</P>
+<b> plugin.xml </b> file and provide configuration information about the view, such as its implementation class, the category (or group) of views to which it belongs, and the name and icon that should be used to describe the view in menus and labels.</P>
 <P >
 The interface for views is defined in <b><a href="../reference/api/org/eclipse/ui/IViewPart.html">IViewPart</a></b>, but plug-ins
 can choose to extend the
@@ -39,27 +39,25 @@ changes in the workbench. First,
 let's take a look at the declaration of the extension in the <b>plugin.xml</b>.</P>
 <pre>&lt;extension 
    point=&quot;org.eclipse.ui.views&quot;&gt;
-	&lt;category 
-	   id=&quot;org.eclipse.ui.examples.readmetool&quot;
-	   name=&quot;%Views.category&quot;&gt;
-	&lt;/category&gt;
-	&lt;view
- 	   id=&quot;org.eclipse.ui.examples.readmetool.views.SectionsView&quot;
-	   name=&quot;%Views.ReadmeSections&quot;
-	   icon=&quot;icons/view16/sections.png&quot;
-	   category=&quot;org.eclipse.ui.examples.readmetool&quot;
-	   class=&quot;org.eclipse.ui.examples.readmetool.ReadmeSectionsView&quot;&gt;
-	&lt;/view&gt;
+      &lt;category
+            id="org.eclipse.ui.examples.contributions.viewCategory"
+            name="%contributions.viewCategory.name"&gt;
+      &lt;/category&gt;
+      &lt;view
+            category="org.eclipse.ui.examples.contributions.viewCategory"
+            class="org.eclipse.ui.examples.contributions.view.InfoView"
+            id="org.eclipse.ui.examples.contributions.view"
+            name="%contributions.view.name"&gt;
+      &lt;/view&gt;
 &lt;/extension&gt;
 </pre>
 <P >
-This should look pretty familiar. We see that a new view, <b>ReadmeSectionsView</b>, is contributed to the workbench. The
+This should look pretty familiar. We see that a new view, <b>InfoView</b>, is contributed to the workbench. The
 <b>view id</b>, <b>name</b>,
 and
-<b> category</b> are specified as we've seen before. An <b> icon</b> is also provided
-for the view, using a path relative to the plug-in's installation directory. </P>
+<b> category</b> are specified as we've seen before.</P>
 <P >
-Let's look at the <b>ReadmeSectionsView</b>. You can show any view in the
+Let's look at the <b>InfoView</b>. You can show any view in the
 workbench by choosing
 
 <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.views.showView")'>
@@ -68,14 +66,10 @@ workbench by choosing
 
 and selecting the view from the <b>Show View</b> list.</P>
 <P >
-When we show the <b>ReadmeSectionsView</b>, a view with a list in it pops up.
-The list is empty unless we click on a file with an extension of <b>.readme</b>, in which case
-the list is populated with sections from the readme file.</P>
+When we show the <b>InfoView</b>, a view with a list in it pops up.
+The list is pre-populated with some data.</P>
 
-<img src="images/readmeview.png" alt="" border="0">
-<P >
-How does the plug-in recognize the readme file and how did it know about selection changes? If we can track down
-the answers to these questions, we are well on our way to understanding how to build integrated workbench plug-ins.</P>
+<img src="images/contributions_window.png" alt="Picture of the workbench, showing the contributions">
 <P >
 We'll start with the familiar <b>createPartControl</b>
 method.&nbsp; As we saw in the Hello World example, this is where the widgets
@@ -84,73 +78,36 @@ started.</P>
 <pre>
    public void createPartControl(Composite parent) {
       viewer = new ListViewer(parent);
-      ...
-      // add myself as a global selection listener
-      getSite().getPage().addSelectionListener(this);
-
-      // prime the selection
-      selectionChanged(null, getSite().getPage().getSelection());
-   }
-</pre>
-<P >
-The view creates and stores a ListViewer and registers itself as a selection listener
-on its page. It obtains the page from an
-<b><a href="../reference/api/org/eclipse/ui/IViewSite.html">IViewSite</a></b>, which contains information about the view's context, such as its workbench window,
-its containing page, its local services, and its plug-in. When we are notified of a selection change, what happens?&nbsp;
-The following code is executed:</P>
-<pre>
-   public void selectionChanged(IWorkbenchPart part, ISelection sel) {
-      //if the selection is a readme file, get its sections.
-      AdaptableList input = ReadmeModelFactory.getInstance().getSections(sel);
-      viewer.setInput(input);
-   }
-</pre>
-<P >
-It looks like the <b> ReadmeModelFactory</b> class is responsible for turning the selection into readme
-sections and these sections are input for
-the viewer that we created in the <b>createPartControl</b>
-method.</P>
-<P >
-But how did the viewer populate its list widgets?&nbsp; For now, let's assume that once the viewer was told its input element, it knew how to populate
-its list widget with the information - it is a ListViewer, after all.&nbsp; If you must know right now what this viewer is all about, go to <a HREF="jface_viewers.htm" CLASS="XRef">Viewers</a>.&nbsp;</P>
-<P >
-We still do not know how readme files are detected or where the file's section
-information comes from.&nbsp; A quick look at the
-<b> ReadmeModelFactory</b> sheds some light.</P>
-<pre>
-   public AdaptableList getSections(ISelection sel) {
-      // If sel is not a structured selection just return.
-      if (!(sel instanceof IStructuredSelection))
-         return null;
-      IStructuredSelection structured = (IStructuredSelection)sel;
-
-      //if the selection is a readme file, get its sections.
-      Object object = structured.getFirstElement();
-      if (object instanceof IFile) {
-         IFile file = (IFile) object;
-         String extension = file.getFileExtension();
-         if (extension != null &amp;&amp; extension.equals(IReadmeConstants.EXTENSION)) {
-            return getSections(file);
+      viewer.setContentProvider(new ContentProvider());
+      viewer.setLabelProvider(new LabelProvider());
+      viewer.addDoubleClickListener(new IDoubleClickListener() {
+         public void doubleClick(DoubleClickEvent event) {
+            editSelection();
          }
-      }
-
-      //the selected object is not a readme file
-      return null;
+      });
+      // A service will be providing our input
+      IPersonService service = (IPersonService) getSite().getService(
+         IPersonService.class);
+      viewerInput = new ArrayList(service.getPeople());
+      viewer.setInput(viewerInput);
+      ...
+      // register myself as a selection provider for this view
+      getSite().setSelectionProvider(viewer);
    }
 </pre>
-<P >We check the selection to see if it is a structured (multiple)
-selection.&nbsp; (The concept of a structured selection comes from JFace <a href="jface_viewers.htm">viewers</a>.)&nbsp;
-For the first object in the selection, we check to see whether it is a file (<b><a href="../reference/api/org/eclipse/core/resources/IFile.html">IFile</a></b>)
-resource.&nbsp; If it is, we check its extension to see if it matches the &quot;<b>.readme</b>&quot;
-extension.&nbsp; Once we know we have a readme file, we can use other methods to
-parse the sections.&nbsp;&nbsp; You can browse the rest of <b>ReadmeModelFactory</b>,&nbsp;
-<b>MarkElement</b>, and <b> DefaultSectionsParser</b> for the
-details about the file parsing. </P>
+<P >
+The view creates and stores a ListViewer and sets the content and label provides.
+It also registers itself as the selection
+provider for this view.
+(The concept of selection provider, label provider, and content provider come
+ from JFace <a href="jface_viewers.htm">viewers</a>.)
+It obtains the service from its
+<b><a href="../reference/api/org/eclipse/ui/IViewSite.html">IViewSite</a></b>, which contains information about the view's context, such as its workbench window,
+its containing page, its local services, and its plug-in.</P>
+<p>
+</p>
 <P >
 We've covered a lot of common workbench concepts by studying this extension. Now we'll move on to some other workbench extensions and examine how your plug-in can further contribute to the workbench UI. </P>
-
-
-
 
 
 </BODY>
