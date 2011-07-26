@@ -100,11 +100,11 @@ This is generally done in one place in the client code, with the rest of the cod
 the agent through some variable or helper code.  The following snippet shows how to acquire the provisioning agent.
 </p>
 <code>
-&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.getContext().getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
 &nbsp;&nbsp;&nbsp;IProvisioningAgentProvider agentProvider = null;<br>
 &nbsp;&nbsp;&nbsp;if (sr == null)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
-&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);<br>
+&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.getContext().getService(sr);<br>
 &nbsp;&nbsp;&nbsp;IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse36/p2"));<br>
 </code>
 <p>Accessing all p2 services through an agent allows for multiple instances of p2
@@ -187,11 +187,11 @@ IUs from a repository.  The operation manages the rest of the detail.
 <br>
 <code>
 &nbsp;&nbsp;&nbsp;//get the agent<br>
-&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.sContext.getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
+&nbsp;&nbsp;&nbsp;ServiceReference sr = Activator.getContext().getServiceReference(IProvisioningAgentProvider.SERVICE_NAME);<br>
 &nbsp;&nbsp;&nbsp;IProvisioningAgentProvider agentProvider = null;<br>
 &nbsp;&nbsp;&nbsp;if (sr == null)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return;<br>
-&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.sContext.getService(sr);<br>
+&nbsp;&nbsp;&nbsp;agentProvider = (IProvisioningAgentProvider) Activator.getContext().getService(sr);<br>
 &nbsp;&nbsp;&nbsp;IProvisioningAgent agent = agentProvider.createAgent(new URI("file:/Applications/eclipse36/p2"));<br>
 <br>
 &nbsp;&nbsp;&nbsp;//get the repository managers and define our repositories<br>
@@ -209,7 +209,7 @@ IUs from a repository.  The operation manages the rest of the detail.
 &nbsp;&nbsp;&nbsp;if (installOperation.resolveModal(new NullProgressMonitor()).isOK()) {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Job job = installOperation.getProvisioningJob(new NullProgressMonitor());<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.addJobChangeListener(new JobChangeAdapter() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public void done(IJobChangeEvent event) {agent.close()}});<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public void done(IJobChangeEvent event) {agent.stop()}});<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;job.schedule();<br>
 &nbsp;&nbsp;&nbsp;}<br>
 </code>
