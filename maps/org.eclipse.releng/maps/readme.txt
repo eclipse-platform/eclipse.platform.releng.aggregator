@@ -1,1 +1,1 @@
-Map files for Eclipse 4.x stream are currently in the bundle org.eclipse.e4.sdk.
+Map files for Eclipse 4.x stream are currently in /cvsroot/e4/releng/org.eclipse.e4.sdk.
