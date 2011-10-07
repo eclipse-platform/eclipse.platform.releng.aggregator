@@ -14,8 +14,33 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.preferences.MapProjectPreferencePage;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.team.core.TeamException;
 import org.eclipse.team.internal.ccvs.core.CVSTag;
 import org.eclipse.team.internal.ccvs.core.client.Command;
@@ -28,35 +53,6 @@ import org.eclipse.team.internal.ui.ITeamUIImages;
 import org.eclipse.team.internal.ui.TeamUIPlugin;
 import org.eclipse.team.internal.ui.dialogs.IPromptCondition;
 import org.eclipse.team.internal.ui.dialogs.PromptingDialog;
-
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
 
 
 public class ReleaseWizard extends Wizard {
@@ -156,16 +152,18 @@ public class ReleaseWizard extends Wizard {
 				//this is ok, we will use the mapSelectionPage instead
 			}			
 		}
-		
-		if (!defaultBeingUsed) addMapSelectionPage();
-		
-		ImageDescriptor wizardPageImageDescriptor= TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE);
+
+		ImageDescriptor wizardPageImageDescriptor = TeamUIPlugin
+				.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE);
+
+		if (!defaultBeingUsed)
+			addMapSelectionPage(wizardPageImageDescriptor);
 		
 		projectSelectionPage = new ProjectSelectionPage("ProjectSelectionPage", //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.6"), //$NON-NLS-1$
-				section, 
-				wizardPageImageDescriptor);
-		projectSelectionPage.setDescription(Messages.getString("ReleaseWizard.7")); //$NON-NLS-1$
+				section, wizardPageImageDescriptor);
+		projectSelectionPage.setDescription(Messages
+				.getString("ReleaseWizard.7")); //$NON-NLS-1$
 		addPage(projectSelectionPage);
 		
 		tagPage = new TagPage("TagPage", //$NON-NLS-1$
@@ -221,11 +219,11 @@ public class ReleaseWizard extends Wizard {
 		super.dispose();
 	}
 
-	private void addMapSelectionPage() {
-		mapSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage", //$NON-NLS-1$
+	private void addMapSelectionPage(ImageDescriptor wizardPageImageDescriptor) {
+		mapSelectionPage = new MapProjectSelectionPage(
+				"MapProjectSelectionPage", //$NON-NLS-1$
 				Messages.getString("ReleaseWizard.4"), //$NON-NLS-1$
-				section,
-				TeamUIPlugin.getImageDescriptor(ITeamUIImages.IMG_WIZBAN_SHARE));
+				section, wizardPageImageDescriptor);
 		mapSelectionPage.setDescription(Messages.getString("ReleaseWizard.3")); //$NON-NLS-1$
 		addPage(mapSelectionPage);
 	}
