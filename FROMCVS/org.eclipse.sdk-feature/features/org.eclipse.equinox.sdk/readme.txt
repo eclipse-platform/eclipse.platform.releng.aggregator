@@ -1,1 +1,0 @@
-This bundle has been moved to /cvsroot/rt/org.eclipse.equinox/compontents/features/org.eclipse.equinox.sdk
