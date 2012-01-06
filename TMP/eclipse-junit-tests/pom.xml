@@ -12,6 +12,10 @@
   <artifactId>eclipse-junit-tests</artifactId>
   <packaging>eclipse-repository</packaging>
 
+  <!--
+    igorf: I *guess* junit-tests is built by PDE/Build from org.eclipse.releng.eclipsebuilder/eclipse/buildConfigs/sdk.tests 
+   -->
+
   <build>
     <resources>
       <resource>
@@ -21,6 +25,24 @@
     </resources>
 
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.5</version>
+        <executions>
+          <execution>
+            <id>filter-resources</id>
+            <goals>
+              <goal>resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <outputDirectory>${project.build.directory}/resources</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
@@ -65,6 +87,33 @@
             <goals>
               <goal>archive-repository</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.cbi</groupId>
+        <artifactId>maven-cbi-plugin</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <id>plugin-versions</id>
+            <goals>
+              <goal>plugin-versions</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <destination>${project.build.directory}/resources/finalPluginsVersions.properties</destination>
+            </configuration>
+          </execution>
+          <execution>
+            <id>test-properties</id>
+            <goals>
+              <goal>test-properties</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <destination>${project.build.directory}/resources/test.properties</destination>
+            </configuration>
           </execution>
         </executions>
       </plugin>
