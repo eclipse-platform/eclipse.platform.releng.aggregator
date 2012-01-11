@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<meta http-equiv="Content-Style-Type" content="text/css"/>
+<link rel="stylesheet" href="../../../apache_style.css" type="text/css"/>
+<title>API Tools API Freeze Ant Task</title>
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
+</head>
+<body>
+<h1> API Freeze Ant Task </h1>
+<h2>Purpose</h2>
+<p>This task identifies APIs that have been added, modified, or removed relative to an API baseline.
+This task is intended to validate no API changes occur after an API freeze. </p>
+<h2>Usage</h2>
+<h3>Description</h3>
+<p>The name of the Ant task is: <code>apitooling.apifreeze</code>. To be used, the jar file <code>apitooling-ant.jar</code> has to be on the Ant
+classpath.</p>
+<div style="text-align: left;">
+<pre style="margin-left: 40px">
+<b><font color="#0000ff">&lt;apitooling.apifreeze
+	baseline=<font color="#008000">"..."</font>
+	profile=<font color="#008000">"..."</font>
+	report=<font color="#008000">"..."</font>
+	excludelist=<font color="#008000">"..."</font>
+	includelist=<font color="#008000">"..."</font>
+	debug=<font color="#008000">"..."</font>
+	eefile=<font color="#008000">"..."</font>
+/&gt;</font></b>
+</pre>
+</div>
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+<tr>
+<td valign="top">baseline</td>
+<td valign="top">This attribute specifies the location of the reference baseline.
+<br/><br/>It can be a .zip, .jar, .tgz, .tar.gz file, or a directory that corresponds to the Eclipse installation folder. This is the 
+directory is which you can find the Eclipse executable.
+<br/><br/>The location is specified using an absolute path.
+</td>
+<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+<td valign="top">profile</td>
+<td valign="top">This attribute specifies the location of the current product or profile that you want to compare against the reference baseline.
+<br/><br/>
+It can be a .zip, .jar, .tgz, .tar.gz file, or a directory that corresponds to the Eclipse installation folder. This is the 
+directory is which you can find the Eclipse executable.
+<br/><br/>The location is specified using an absolute path.
+</td>
+<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+<td valign="top">report</td>
+<td valign="top">Set the name of the report file to be generated.
+<br/><br/>It should be specified using an absolute path.
+<br/>This must be a file location, not a directory.
+</td>
+<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+<td valign="top">excludelist</td>
+<td valign="top">Set the exclude list location.
+<br/><br/>The exclude list location specifies a text file listing bundles to be excluded from the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. In addition, this task supports listing members in the include
+and exclude lists. The include list seeds the set of bundles and members to be analyzed (when omitted,
+all bundles and members are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a specific member name</li>
+<li>a regular expression to match against bundle or member names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example exclude list:
+<pre>
+# ECLIPSE MEMBERS
+org.eclipse.jface.databinding_1.2.0:org.eclipse.jface.databinding.viewers.ObservableListContentProvider#getElements(Ljava/lang/Object;)[Ljava/lang/Object;
+# ECLIPSE BUNDLES
+org.eclipse.ui.workbench_3.4.0:org.eclipse.ui.ISharedImages#IMG_DEC_FIELD_ERROR
+org.eclipse.ui.workbench_3.4.0:org.eclipse.ui.ISharedImages#IMG_DEC_FIELD_WARNING
+org.eclipse.ui.workbench_3.4.0:org.eclipse.ui.ISharedImages#IMG_ELCL_COLLAPSEALL
+# NON-ECLIPSE BUNDLES
+com.ibm.icu
+R:javax\..*
+...
+</pre>
+</td>
+<td align="center" valign="top">No</td>
+</tr>
+<tr>
+<td valign="top">includelist</td>
+<td valign="top">Set the include list location.
+<br/><br/>The include list location specifies a text file listing bundles to be included in the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. In addition, this task supports listing members in the include
+and exclude lists. The include list seeds the set of bundles and members to be analyzed (when omitted,
+all bundles and members are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a specific member name</li>
+<li>a regular expression to match against bundle or member names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example include list:
+<pre>
+# ECLIPSE MEMBERS
+org.eclipse.jface.databinding_1.2.0:org.eclipse.jface.databinding.viewers.ObservableListContentProvider#getElements(Ljava/lang/Object;)[Ljava/lang/Object;
+# ECLIPSE BUNDLES
+org.eclipse.ui.workbench_3.4.0:org.eclipse.ui.ISharedImages#IMG_DEC_FIELD_ERROR
+org.eclipse.ui.workbench_3.4.0:org.eclipse.ui.ISharedImages#IMG_DEC_FIELD_WARNING
+org.eclipse.ui.workbench_3.4.0:org.eclipse.ui.ISharedImages#IMG_ELCL_COLLAPSEALL
+# NON-ECLIPSE BUNDLES
+com.ibm.icu
+R:javax\..*
+...
+</pre>
+</td>
+<td align="center" valign="top">No</td>
+</tr>
+<tr>
+<td valign="top">debug</td>
+<td valign="top">Set the debug value.
+<br/><br/>The possible values are: <code>true</code>, <code>false</code>
+<br/>Default is <code>false</code>.
+</td>
+<td align="center" valign="top">No</td>
+</tr>
+<tr>
+<td valign="top">eefile</td>
+<td valign="top">Set the execution environment file to use. 
+<br/><br/>By default, an execution environment file corresponding to a JavaSE-1.6 execution environment is used.
+<br/><br/>The format of the file is described in this <a href="http://wiki.eclipse.org/index.php/Execution_Environment_Descriptions" target="blank">wiki page</a>.
+<br/><br/>The file is specified using an absolute path.
+</td>
+<td align="center" valign="top">No</td>
+</tr>
+</table>
+
+<h3>Examples</h3>
+
+<pre>
+	<b><font color="#0000ff">&lt;apitooling.apifreeze
+		baseline=<font color="#008000">"D:\eclipse\3.4.1\eclipse"</font>
+		profile=<font color="#008000">"D:\eclipse-SDK-I20081118-0800-linux-gtk.tar.gz"</font>
+		report=<font color="#008000">"D:\report\report.xml"</font>
+		excludelist=<font color="#008000">"D:\exclude_list.txt"</font>
+		debug=<font color="#008000">"true"</font>
+	/&gt;</font></b>
+</pre>
+<p>This will run the task creating <code>report.xml</code> inside the folder <code>D:\report</code>.
+It will use the exclude list <code>D:\exclude_list_external.txt</code> to reduce the number of problems to report.</p>
+<p>Since debug is enabled, some debug tracing will show up in the Ant console.</p>
+
+<p><img src="../../../images/ngrelr.png" alt="Related reference" border="0"/></p>
+<p><a href="analysis-ant-task.htm">Analysis Ant Task</a>
+<br/><a href="filegeneration-ant-task.htm">File Generation Ant Task</a>
+<br/><a href="apiuse-ant-task.htm">API Use Ant Task</a>
+<br/><a href="analysis-reportconversion-ant-task.htm">Analysis Report Conversion Ant Task</a>
+<br/><a href="apifreeze-reportconversion-ant-task.htm">API Freeze Report Conversion Ant Task</a>
+<br/><a href="deprecation-ant-task.htm">API Deprecation Ant Task</a>
+<br/><a href="deprecation-reportconversion-ant-task.htm">API Deprecation Report Conversion Ant Task</a>
+<br/><a href="apiuse-reportconversion-ant-task.htm">API Use Report Conversion Ant Task</a></p>
+</body>
+</html>

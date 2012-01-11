@@ -1,0 +1,467 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Command line Ant script generation</title>
+</head>
+<body>
+<h1>Generating Ant scripts from the command line</h1>
+<p>Ant scripts are typically generated using the Plug-in Development
+Environment (PDE), but it is also possible to generate
+them by hand or from other scripts.&nbsp;<br>
+Indeed PDE exposes Ant tasks to generate the various build scripts.
+Build script generation facilities
+reside in the following tasks.&nbsp; Arguments are also listed for each
+task.
+</p>
+<ul>
+  <li><b><a name="eclipseFetch">eclipse.fetch</a></b>: generates an Ant script that fetches
+content from a CVS repository. The eclipse fetch is driven by a file
+whose format is described below (see <a href="#directoryFileFormat">Directory
+file format</a>).
+    <table style="text-align: left; margin-left: 40px; width: 90%;"
+ border="1" cellpadding="1" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; text-align: left;"><span
+ style="font-style: italic;">elements</span>:<br>
+          </td>
+          <td style="vertical-align: top;">the entry that will be
+fetched. The format
+expected is of the form type@id[,version] as specified in the directory file
+format;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">buildDirectory</span>:<br>
+          </td>
+          <td style="vertical-align: top;">the directory into which
+fetch scripts will be generated and into which features and plug-in projects will be
+checked out;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">directory</span>:<br>
+          </td>
+          <td style="vertical-align: top;">the path to a directory file;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">children</span>:<br>
+          </td>
+          <td style="vertical-align: top;">optional, specifies whether
+the script generation for contained plug-ins and fragments should be invoked.
+Default is set to true;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">cvspassfile</span>:<br>
+          </td>
+          <td style="vertical-align: top;">optional, the name of a CVS
+password file;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">fetchTag</span>:<br>
+          </td>
+          <td style="vertical-align: top;">optional, overrides the tag
+provided in
+directory file by the given value;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">configInfo</span>:<br>
+          </td>
+          <td style="vertical-align: top;">optional, an ampersand
+separated list of
+configuration indicating the targeted configuration. The default is set
+to be platform independent;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">recursiveGeneration</span>:&nbsp;&nbsp; <br>
+          </td>
+          <td style="vertical-align: top;">optional, specify whether or
+not fetch scripts should be generated for nested features. The default is
+set to true.</td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+  </li>
+</ul>
+<ul>
+  <li><b>eclipse.buildScript</b>: generates a build.xml file for the
+given elements as well as additional scripts used by the pde build infrastructure.
+    <table style="width: 90%; text-align: left; margin-left: 40px;"
+ border="1" cellpadding="1" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">elements</span> : <br>
+          </td>
+          <td style="vertical-align: top;">the entry to be built.
+Entry is expected to be of the form type@id[,version] as specified in the
+directory file format;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">buildDirectory :</span><br>
+          </td>
+          <td style="vertical-align: top;">the directory where the
+features and plug-ins to build are located. Plug-ins and features must
+respectively be located in <tt>plugins</tt> and <tt>features</tt> folders;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">children</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, specifies whether
+the script generation for contained plug-ins and fragments should be invoked.
+Default is set to true;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">recursiveGeneration</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, specified whether
+the
+script generation for contained features should be invoked. Default is
+set to true;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">devEntries</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, a comma separated
+list of
+directories to be given to the compile classpath;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">buildingOSGi</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, indicates if the
+target is 3.x.
+or 2.1.&nbsp; Default is true;<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">baseLocation</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, indicates a folder
+which
+containing a target eclipse install with <tt>features/</tt> and <tt>plugins/</tt>
+subdirectories;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">configInfo</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, an ampersand
+separated list of
+configuration indicates the targeted configuration. The default is set
+to be platform independent;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">pluginPath</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, a platform file
+separator separated list of locations from which to find additional
+plug-ins;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">archivesFormat</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, an ampersand
+separated list of
+configs and the expected output format for each of those. The format is
+separated by a dash (-) from the configuration. The values supported
+are: folder, tar, zip, antZip, respectively meaning don't archive, use
+tar to create the archive, use the version of info zip available on the
+platform, use ant zip . The default value is antZip;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">product</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, '/' separated path
+to the location of
+an RCP product being built. The first segment of the path must refer to
+the plug-in id of a plug-in containing the .product file;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">signJars</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, indicates if the
+scripts generated
+must sign jars for features and plug-ins. The default value is false.
+The parameters to the sign task are controlled by the following ant
+properties: sign.alias, sign.keystore and sign.storepass respectively
+being passed to the alias, keystore and storepass parameters from the
+ant <a href="http://ant.apache.org/manual/Tasks/signjar.html">signJar
+task</a>. The default value is false;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">generateJnlp</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, indicates if a
+jnlp file should
+be generated for all the features being built;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">outputUpdateJars</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, generates plug-ins
+and
+features in the update site format when set. The default value is
+false. Note that the site.xml is not generated nor updated;</td>
+        </tr>
+
+        <tr>
+          <td style="vertical-align: top;"><span style="font-style: italic;">groupConfiguration</span>
+: <br>
+          </td>
+          <td style="vertical-align: top;">optional, whether or not to
+group all configurations being built into a single archive;<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">generateVersionsLists</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, whether or not to
+generate properties files listing the versions of features and plug-ins
+that were built;<br>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">filteredDependencyCheck</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, constrain the set of plug-ins and features
+          to be considered during the build to those reachable from the features;<br>
+          </td>
+        </tr>
+        
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">filterP2Base</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, constrain the set of plug-ins and features
+          to be considered from the baseLocation to those considered to be installed by p2;<br>
+          </td>
+        </tr>
+        
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">generateFeatureVersionSuffix:&nbsp;</span>
+          </td>
+          <td style="vertical-align: top;">optional, whether or not to
+generate the feature version suffix. See also <a
+ href="pde_version_qualifiers.htm">Version Qualifiers</a>;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">generatedVersionLength</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, the length of the generated feature version suffix. By default it is set to 28. See also <a
+ href="pde_version_qualifiers.htm">Version Qualifiers</a>;<br>
+          </td>
+        </tr>
+        
+       <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">significantVersionDigits</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, the number of significant digits used when generating feature version suffixes.
+          See also <a href="pde_version_qualifiers.htm">Version Qualifiers</a>;<br>
+          </td>
+        </tr>
+        
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">forceContextQualifier</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, uses the given
+value to replace the .qualifier being by plug-ins and features. See also <a
+ href="pde_version_qualifiers.htm">Version Qualifiers</a>;<br>
+          </td>
+        </tr>
+                
+      </tbody>
+    </table>
+  </li>
+</ul>
+<ul>
+  <li><a name="eclipseGenerateFeature"><span style="font-weight: bold;">eclipse.generateFeature</span></a>:
+generates a feature that will contain the provided elements.&nbsp; This
+task is used to <a href="pde_product_build.htm">build an RCP
+application from a product configuration file</a>.<br>
+    <table style="width: 90%; text-align: left; margin-left: 40px;"
+ border="1" cellpadding="1" cellspacing="0">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">featureId</span> : <br>
+          </td>
+          <td style="vertical-align: top;">The id to give to the
+generated Feature.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">buildDirectory</span>:&nbsp;&nbsp;&nbsp; <br>
+          </td>
+          <td style="vertical-align: top;">the directory where the
+features and plug-ins (in <tt>/features</tt> and <tt>/plugins</tt> subdirectories) to
+include are located.&nbsp; The generated feature will be placed in the
+/features subdirectory.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">baseLocation</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, indicates a folder
+which contains installed features and plug-ins<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">productFile</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, a product file on
+which to base the generated feature.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">verify</span> : <br>
+          </td>
+          <td style="vertical-align: top;">Whether or not to use the
+resolver to verify that the provided plug-ins and features are
+available.&nbsp; This also determines whether or not the the feature
+will be able to correctly handle platform specific fragments and
+plug-ins that will be JARed.&nbsp; If all the elements to be included
+in the feature are available locally, then verify should be set to
+True.&nbsp; If the elements need to be fetched from a repository, set
+verify to False, use the resulting feature to fetch the required
+plug-ins and features, then regenerate the container feature using
+verify = True.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">pluginPath</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, a platform file
+separator separated list of locations from which to find additional
+plug-ins</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">configInfo</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, an ampersand
+separated list of
+configuration indicates the targeted configuration. The default is set
+to be platform independent;</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">pluginList</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, a comma separated
+list of plug-in ids to include in the generated feature.  (Supports attributes, see below)<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">featureList</span> : <br>
+          </td>
+          <td style="vertical-align: top;">optional, a comma separated
+list of feature ids to include in the generated feature. (Supports attributes, see below)<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">fragmentList</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, a comma separated
+list of fragment ids to include in the generated feature. (Supports attributes, see below)<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">buildPropertiesFile</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, the location of a properties file whose contents should be used as the generated feature's build.properties.<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: top;"><span
+ style="font-style: italic;">includeLaunchers</span> :<br>
+          </td>
+          <td style="vertical-align: top;">optional, whether or not to include the equinox launchers, default value is "true".<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <p>The <tt>pluginList</tt>, <tt>featureList</tt>, and <tt>fragmentList</tt> arguments of the eclipse.generateFeature task all support attributes.  These arguments all take the form:</p>
+    <pre style="text-align: center;">List = &lt;element-id&gt;[;&lt;attribute&gt;=&lt;value&gt;]* [,&lt;element-id&gt;[;&lt;attribute&gt;=&lt;value&gt;]*]*</pre>
+    <p>Each attribute=value pair will be inserted into the generated xml corresponding to the given element.  <b>Example:</b></p>
+    <pre>
+    	featureList = org.eclipse.feature;optional=true
+    	pluginList = org.eclipse.plugin.A;unpack=true
+    	fragmentList=org.eclipse.fragment.a;os=win32,org.eclipse.fragment.b;os=linux;ws=gtk;arch=x86
+    	
+    	&lt;feature ...&gt;
+    	     ...
+    	     &lt;includes id="org.eclipse.feature" version="0.0.0" optional="true" /&gt;
+    	     ...
+    	     &lt;plugin id="org.eclipse.plugin.A" version="0.0.0" unpack="true" /&gt;
+    	     &lt;plugin id="org.eclipse.fragment.a" version="0.0.0" os="win32" fragment="true" /&gt;
+    	     &lt;plugin id="org.eclipse.fragment.b" version="0.0.0" os="linux" ws="gtk" arch="x86" fragment="true" /&gt;
+    	     ...
+    	&lt;/feature&gt;
+    </pre>
+  </li>
+</ul>
+<h4>Examples</h4>
+<pre>&lt;eclipse.fetch elements="bundle@org.eclipse.osgi"<br>		buildDirectory="c:\toBuild"<br>		directory="directory.txt"<br>		configInfo="win32,win32,x86 &amp; linux, motif, x86"<br>		/&gt;<br>		<br>&lt;eclipse.buildScript elements="bundle@org.eclipse.osgi" <br>		buildDirectory="c:\toBuild"<br>		archivesFormat="macosx, carbon, ppc - tar"/&gt;<br></pre>
+<h3><a name="directoryFileFormat">Directory file format</a></h3>
+Directory files are used to indicate where the plug-ins and features
+can be obtained, as well as their versions. It is a Java property file whose keys are always of the form 
+<tt>type@id[,version]</tt> but where the value is open ended. When using
+map files to fetch your elements, the directory file is a concatenation
+of all the map files, for more details on map files see <a
+ href="pde_fetch_phase.htm">Fetching From
+Repositories</a>.
+
+<h3>Using the targets</h3>
+<p>The tasks previously described only work if Eclipse is running. In
+the particular scenario of executing Ant scripts using Eclipse
+tasks,the scripts must be run using the Eclipse Ant Runner application.
+The command line for this particular
+case is the following:
+</p>
+<pre>  java -jar plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar -application org.eclipse.ant.core.antRunner -buildfile build.xml<br> </pre>
+<p>Note that the parameters appearing after the application are the
+parameters that are passed to Ant.
+</p>
+</body>
+</html>

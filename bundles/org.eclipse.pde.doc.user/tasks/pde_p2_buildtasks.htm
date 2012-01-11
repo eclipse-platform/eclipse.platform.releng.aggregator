@@ -1,0 +1,507 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2009, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content=
+    "text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+    type="text/css" />
+    <title>
+      PDE Build Extensions to the p2 Publisher
+    </title>
+    <style type="text/css">
+/*<![CDATA[*/
+    div.c2 {border:1px inset}
+    h3.c1 {font-weight: bold}
+    /*]]>*/
+    </style>
+
+  </head>
+  <body>
+    <h1>
+      PDE Build Extensions to the p2 Publisher
+    </h1>
+    <p>
+      PDE Build contributes several ant tasks that extend the
+      <a href=
+      "../../org.eclipse.platform.doc.isv/guide/p2_publisher.html">p2
+      publisher</a>. These tasks allow PDE Build to publish
+      metadata and artifacts directly into a p2 repository.
+    </p>
+    <p>
+
+      The generated build scripts use these tasks in the context of
+      a full build where things like compiling class files and
+      replacing versions are done. However, some of the tasks may
+      be usefull in special cases to publish metadata directly
+      without running a full build.
+    </p>
+    <table cellspacing="1" cellpadding="2">
+      <tr>
+        <td>
+          <h3 class="c1">
+            eclipse.publish.featuresAndBundles
+          </h3>
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          <p>
+            This task is very similar to the
+            <tt>p2.publish.featuresAndBundles</tt> task contributed
+            by the p2 publisher. This task will publish metadata
+            for pre-existing binary features and plug-ins which are
+            not being built from source. The task will also publish
+            categories based on a provided site.xml or category.xml
+            file.
+          </p>
+        </td>
+      </tr>
+      <tr>
+
+        <td>
+          <p>
+            This task supports the following attributes:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width=
+          "95%" align="center">
+            <tr>
+              <td>
+                <tt>metadataRepository</tt>
+              </td>
+
+              <td>
+                A URI specifying the metadata repository to publish
+                to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>artifactRepository</tt>
+              </td>
+              <td>
+
+                A URI specifying the artifact repository to publish
+                to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>repository</tt>
+              </td>
+              <td>
+                Sets both metadataRepository and
+                artifactRepository.
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>site</tt>
+              </td>
+              <td>
+                A URL to a site.xml specifying category
+                information.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>category</tt>
+              </td>
+              <td>
+                A URL to a category.xml specifyiny category
+                information.
+              </td>
+            </tr>
+            <tr>
+
+              <td>
+                <tt>siteQualifier</tt>
+              </td>
+              <td>
+                A qualifier used to ensure resulting category IUs
+                have unique names.
+              </td>
+            </tr>
+            <tr>
+              <td>
+
+                <tt>&lt;features&gt;</tt>
+              </td>
+              <td>
+                A nested fileset element specifying the locations
+                of binary features to publish.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>&lt;bundles&gt;</tt>
+
+              </td>
+              <td>
+                A nested fileset element specifying the locations
+                of binary plug-ins to publish.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>Example:
+    <div class="c2">
+
+      <pre>
+ &lt;eclipse.publish.featuresAndBundles repository="file:C:/build/repository" category="file:C:/build/category.xml" &gt;
+     &lt;features dir="C:\eclipse\features\" includes="org.eclipse.cvs_1.1.100.v20090514-7E79FEc9BJ99r9XGQ3CICF" /&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.cvs_1.0.300.v20090520.jar" /&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.core_3.3.200.I20090430-0408.jar" /&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.ssh_3.2.100.I20090508-2000.jar" /&gt;
+
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.ssh2_3.2.200.I20090508-2000.jar" /&gt;
+     &lt;bundles dir="C:\eclipse\plugins" includes="org.eclipse.team.cvs.ui_3.3.200.I20090521-1750.jar" /&gt;
+ &lt;/eclipse.publish.featuresAndBundles&gt;
+</pre>
+    </div><br />
+    <table cellspacing="1" cellpadding="2">
+      <tr>
+        <td>
+
+          <h3 class="c1">
+            eclipse.gatherBundle
+          </h3>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Publish a plug-in directly from source. Once the .class
+            files for a bundle are compiled, this task will gather
+            up all the files that make up the binary result and
+            publish them as a p2 artifact with metadata. This task
+            is used in the <tt>publish.bin.parts</tt> task in the
+            plug-in's generated build.xml, this task replaces the
+            <tt>gather.bin.parts</tt> task when you are building
+            with the p2 publisher.
+          </p>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width=
+          "95%" align="center">
+            <tr>
+
+              <td>
+                <tt>metadataRepository</tt>
+              </td>
+              <td>
+                A URI to the metadata repository to publish to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+
+                <tt>artifactRepository</tt>
+              </td>
+              <td>
+                A URI to the artifact repository to publish to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>buildResultFolder</tt>
+
+              </td>
+              <td>
+                Folder containing built .class files, the Manifest
+                and potentially .api_description files.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>targetFolder</tt>
+              </td>
+
+              <td>
+                Content when running with customBuildCallbacks.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>baseDirectory</tt>
+              </td>
+              <td>
+
+                Project location to gather content from when not
+                using customBuildCallbacks
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>unpack</tt>
+              </td>
+              <td>
+                Whether or not the plug-in should be unpacked into
+                folder form when installed.
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>gatheredSource</tt>
+              </td>
+              <td>
+                For source bundles, the location of the gather
+                source.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>&lt;outputFolder&gt;</tt>
+              </td>
+              <td>
+                Nested elements specifying alternate locations to
+                get .class files from, used when reusing .class
+                files from the workspace. This is an ant FileSet
+                with an additional "<tt>library</tt>" attribute
+                specifying which library the class files belong to
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>Example:
+    <div class="c2">
+      <pre>
+ &lt;eclipse.gatherBundle metadataRepository="file:/build/repo" artifactRepository="file:/build/repo"
+                       buildResultFolder="${basedir}" baseDirectory="${basedir}" unpack="true" &gt;
+     &lt;outputFolder library="lib/pdebuild-ant.jar" dir="${basedir}" includes="bin_ant/**" /&gt;
+
+     &lt;outputFolder library="pdebuild.jar" dir="${basedir}" includes="bin/**" /&gt;
+ &lt;/eclipse.gatherBundle&gt;
+</pre>
+    </div><br />
+    <table cellspacing="1" cellpadding="2">
+      <tr>
+        <td>
+          <h3 class="c1">
+
+            eclipse.gatherFeature
+          </h3>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Publish a feature directly from source. This task will
+            gather up all the files that make up the feature jar
+            and publish them as a p2 artifact with metadata. This
+            task will also publish artifacts containing any
+            <a href="pde_rootfiles.htm">root files</a> that are
+            contributed by this feature. If the feature does not
+            specify a <tt>bin.includes</tt> property, then the
+            feature jar will not be generated, but there will still
+            be root file artifacts and feature group metadata.
+          </p>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            This task supports the following attributes:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width=
+          "95%" align="center">
+            <tr>
+
+              <td>
+                <tt>metadataRepository</tt>
+              </td>
+              <td>
+                A URI to the metadata repository to publish to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+
+                <tt>artifactRepository</tt>
+              </td>
+              <td>
+                A URI to the artifact repository to publish to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>buildResultFolder</tt>
+
+              </td>
+              <td>
+                Folder containing a modified feature.xml with
+                versions replaced.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>targetFolder</tt>
+              </td>
+
+              <td>
+                Content when running with customBuildCallbacks.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>baseDirectory</tt>
+              </td>
+              <td>
+
+                The feature project location
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>Example:
+    <div class="c2">
+      <pre>
+ &lt;eclipse.gatherFeature
+     metadataRepository="file:/build/repo"
+     artifactRepository="file:/build/repo"
+     buildResultFolder="${basedir}"
+     baseDirectory="${basedir}"
+ /&gt;
+
+</pre>
+    </div><br />
+    <table cellspacing="1" cellpadding="2">
+      <tr>
+        <td>
+          <h3 class="c1">
+            <a name="brand_p2_artifacts" id=
+            "brand_p2_artifacts">eclipse.brand.p2.artifacts</a>
+          </h3>
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Brand launcher artifacts for a product and republish
+            them with a new name for inclusion in the given
+            product.
+          </p>
+        </td>
+      </tr>
+      <tr>
+
+        <td>
+          <p>
+            This task supports the following attributes:
+          </p>
+          <table border="5" cellspacing="0" cellpadding="1" width=
+          "95%" align="center">
+            <tr>
+              <td>
+                <tt>metadataRepository</tt>
+              </td>
+
+              <td>
+                A URI to the metadata repository to publish to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>artifactRepository</tt>
+              </td>
+              <td>
+
+                A URI to the artifact repository to publish to.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>config</tt>
+              </td>
+              <td>
+                The configuration for which the launchers will be
+                used. (eg "gtk.linux.x86")
+              </td>
+
+            </tr>
+            <tr>
+              <td>
+                <tt>iconsList</tt>
+              </td>
+              <td>
+                Locations to find the icons to brand the executable
+                with.
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <tt>tempDirectory</tt>
+              </td>
+              <td>
+                The location of a temporary directory that can be
+                be used.
+              </td>
+            </tr>
+            <tr>
+
+              <td>
+                <tt>productId</tt>
+              </td>
+              <td>
+                The id of the product we are publishing for.
+              </td>
+            </tr>
+            <tr>
+              <td>
+
+                <tt>productVersion</tt>
+              </td>
+              <td>
+                The version of the product we are publishing for.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>launcherName</tt>
+
+              </td>
+              <td>
+                The name to give the new launcher.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <tt>launcherProvider</tt>
+              </td>
+
+              <td>
+                The name of the IU which is providing the original
+                launcher artifacts. By default this is
+                "org.eclipse.equinox.executable", the task will be
+                looking for artifacts named
+                <tt>&lt;launcherProvider&gt;_root.&lt;config&gt;</tt>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+    </table>
+  </body>
+</html>

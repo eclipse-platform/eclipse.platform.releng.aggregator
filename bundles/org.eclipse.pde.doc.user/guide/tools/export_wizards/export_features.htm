@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Feature Export</title>
+<script language="JavaScript" type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"></script>
+<link href="../../book.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<h1>Feature Export</h1>
+<p>PDE provides a <strong>Feature Export</strong> wizard to export features and constituent plug-ins and fragments into a form that is suitable for deployment. The wizard shields you from Ant scripts and does not pollute your workspace with resources generated during the build operation. The wizard is available under <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.file.export(exportWizardId=org.eclipse.pde.ui.featureExportWizard)")'>
+<img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Open the feature export wizard">
+<strong>File &gt; Export... &gt; Plug-in Development &gt; Deployable features</strong>
+</a>. </p>
+
+<h2>Feature Selection </h2>
+<p>The wizard displays all the non-binary features found in the workspace. </p>
+<p><img src="../../images/export_wizards/feature_available.png" alt="Feature Selection" ></p>
+<p>Select the features that you want to export. If you find yourself exporting the same set of features over and over, you can press <strong>Working Set...</strong> to define a <em> working set</em>. </p>
+<p>Features are built recursively; therefore, in the case where one feature includes another feature, only the top-level feature needs to be selected in order to export them both.
+</p>
+
+<h2>Destination</h2>
+<p>You can choose to export the features and their constituent plug-ins to a directory or to a ZIP archive. You can also choose to export the features in a runnable format and have them installed into your currently running Eclipse host.</p>
+<p><img src="../../images/export_wizards/destination.png" alt="Destination" ></p>
+<p>If you choose to export to a <strong>Directory</strong> (the default), the features will be placed in a <em>features/</em> subdirectory and the plug-ins will be placed in a <em>plugins/</em> subdirectory of the chosen directory.</p>
+<p>If you choose to export to an <strong>Archive file</strong>, all of the features and plug-ins will be packaged into a single ZIP archive. Also, the root directory structure inside the ZIP  starts with <em>features/</em> and <em>plugins/</em>. </p>
+<p>If you choose to export and <strong>Install</strong> the features will be exported in a runnable format and a p2 repository will be generated.  After the export completes, an installation operation will run to install the features.  You will be prompted to restart Eclipse when the installation completes.  To uninstall your features you must use the <strong>Installation Details</strong> button on the About Dialog (available by going to Help &gt; About Eclipse SDK). For more details see <a href="../../../tasks/ui_export_install_into_host.htm">Exporting and Installing into the Host</a></p>  
+
+<h2>Options</h2>
+<p><img src="../../images/export_wizards/options_features.png" alt="Options" ></p>
+
+<p>The <strong>Export source</strong> option results in the exporting of source code as well as binaries.  There are two ways to package source with your exported feature.  The <em>Generated Source Bundles</em> option will add the ant commands to the export to create separate source bundles for each of the exported plug-ins.  For more information on source bundles see the PDE Build entry on <a href="../../../tasks/pde_individual_source.htm">Individual Source Bundles</a>.  The second option is to <em>Include source in exported plug-ins</em>.  This option will package the source files in a <em>src/</em> folder at the root of the JAR (if exporting in a JAR format). If the plug-in is packaged as a flat directory, the source code will be placed in a source ZIP inside the plug-in directory as a sibling to the library JAR.</p>
+
+<p>The <strong>Package as individual JAR archives</strong> option packages features and their constituent plug-ins as JARs. If the option is not selected, then the features are exported as flat directories, while their constituent plug-ins are packaged as specified in the <em>feature.xml</em> markup. Plug-in entries that are marked with <em><strong>unpack=&quot;false&quot;</strong></em> in the <em>feature.xml</em> are exported as JARs; otherwise, they are exported as directories.</p>
+<p> There are two additional options available when packaging as individual JARs.  The <strong>Generate metadata repository</strong> option allows you to also generate p2 metadata along with your exported feature. This allows the directory or archive you are exporting to, to be used as a repository that p2 can install and update from.  This option must be turned on when exporting and installing into your running host.  The <strong>Categorize repository</strong> allows the generated metadata repository to be organized by category..  A valid category xml file that includes data for the features being exported must be specified for categories to be created succesfully.</p> 
+
+<p>The <strong>Qualifier replacement</strong> option enables you to substitute a value for the qualifier element in a plug-in's version or feature's version.  The version must be in the following format: &lt;<em>major</em>&gt;.&lt;<em>minor</em>&gt;.&lt;<em>micro</em>&gt;.qualifier.  For example: 3.3.0.qualifier. Normally, the qualifier represents a build date or identifier.</p>
+
+<p>The <strong>Save as Ant script</strong> option lets you save the settings of the export operation so that it can be re-executed at a later time without having to go through the wizard again. Like the export operation, the Ant task runs as an asynchronous job; therefore, it may not be suitable to incorporate it as a part of a larger Ant script. </p>
+
+<p> <strong>Allow binary cycles in target platform</strong> is an option that controls how the export operation deals with cycles in the dependency graph for a plug-in.  PDE Build cannot compile if a cycle is detected.  However, if a cycle only contains binary plug-ins from the target platform, turning on this option will allow PDE Build to continue.</p>
+
+<p> If the <strong>Use class files compiled in the workspace</strong> option is turned on, rather than compiling files as part of the export operation, the binary files in the workspace that were compiled by Eclipse are used.  This should improve performance as it skips the compilation phase, but your workspace must have successfully compiled</p>
+
+<h2>JAR Signing </h2>
+<p>The <strong>JAR Signing</strong> tab is only visible when the <strong>Package as individual JAR archives</strong> option is selected on the <strong>Options</strong> tab. </p>
+<p><img src="../../images/export_wizards/jar_signing.png" alt="JAR Signing" ></p>
+<p>To sign the JARs, <em><strong>you must be running Eclipse with a full JDK, rather than just a JRE. </strong></em></p>
+<p>The <strong>Keystore location</strong>,  <strong>Keypass</strong>, <strong>Alias</strong> and <strong>Password</strong> fields are all required for the signing operation.</p>
+
+<h2>Java Web Start</h2>
+<p>The <strong>Java Web Start</strong> tab is only available when the <strong>Directory</strong> option is selected on the <strong>Destination</strong> tab and the <strong>Package as individual JAR archives</strong> option is selected on the <strong>Options</strong> tab. </p>
+<p><img src="../../images/export_wizards/webstart_features.png" alt="Java Web Start" > .</p>
+<p>The <strong>Site URL</strong> and <strong>JRE version</strong> fields are both required.</p>
+
+<p><img src="../../../images/ngrelr.png" alt="Related reference" border="0"></p>
+<p>
+<a href="export_wizards.htm">Export Wizards</a><br>
+<a href="export_plugins.htm">Plug-in Export Wizard</a>
+</p>
+<p><img src="../../../images/ngrelt.png" alt="Related tasks" border="0"></p>
+<p>
+<a href="../../../tasks/ui_export_install_into_host.htm">Export and Install into the Running Host</a>
+</p>
+</body>
+</html>

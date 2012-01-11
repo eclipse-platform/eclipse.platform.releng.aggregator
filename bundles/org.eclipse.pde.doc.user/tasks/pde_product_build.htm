@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Building an RCP application from a product configuration file</title>
+</head>
+<body>
+<h1>Building an RCP application from a product configuration file</h1>
+<p>PDE Build comes with infrastructure to build a complete RCP
+application from a product configuration file. Most of the setup
+necessary for such a build can be done through a few modifications to
+the template build.properties provided in PDE build. The
+following section focuses on setting up a simple product build assuming
+that all plug-ins and features (both to build and pre-built) referenced
+by the product file are
+already locally available on disk.<br>
+</p>
+<h2>Basic setup</h2>
+<p>
+The first step in setting up a build is to create the directory in
+which the build will take place.
+This directory will be referred to as the <i>build directory</i> and
+will contain the plug-ins and features
+to build as well as all the generated artifacts. Next, copy your
+plug-ins and
+features respectively into "plugins" and "features" subdirectories.
+Your
+product configuration file is expected to be in one of these
+plugins/features.
+</p>
+The second step in setting up a build is to copy the template
+build.properties file from
+org.eclipse.pde.build/templates/headless-build to a new directory which
+will be the build configuration directory (also referred to as the <i>configuration
+directory</i>).
+Edit the copied build.properties file and set the following properties:<br>
+<ul>
+  <li><span style="font-weight: bold;">product</span>: the location of
+your product configuration file in the form "<code>/&lt;plug-in or
+feature id&gt;/path/to/.product</code>"</li>
+  <li><span style="font-weight: bold;">baseLocation</span>:&nbsp; the
+location of an eclipse install containing all the pre-built features
+and plug-ins
+that your product requires in features/ and plugins/
+subdirectories.&nbsp; The RCP delta pack (it is available
+from the eclipse download page) is mandatory as it includes the
+org.eclipse.platform.launchers feature which
+contains the launchers and root files necessary for a product.</li>
+  <li><span style="font-weight: bold;">buildDirectory</span>:&nbsp; the
+directory the build will take place in.&nbsp; Set this to the full path
+of the build directory created
+previously.</li>
+  <li><span style="font-weight: bold;">configs</span>: list the
+configurations for which you want your product to be built. You can
+uncomment the configuration(s) provided (be careful of the line
+continuations).</li>
+  <li><span style="font-weight: bold;">archivePrefix</span>: the name
+of the directory of your product once installed on disk.</li>
+</ul>
+<h3>Overview of the directory structure</h3>
+<pre>&lt;buildDirectory&gt;/<br>	plugins/<br>		pluginToBuildA<br>		pluginToBuildB<br>			myProduct.product<br>		...<br>	features/<br>		featureToBuild<br>		...<br><br>&lt;buildConfiguration&gt;/<br>	build.properties<br><br>&lt;baseLocation&gt;<br>	plugins/<br>		org.eclipse.core.runtime<br>		org.eclipse.ui<br>		...<br>	features/<br>		org.eclipse.rcp<br>		org.eclipse.platform.launchers<br>		...<br>		<br></pre>
+<h2>Running the build</h2>
+To run the build you will use the org.eclipse.ant.core.antRunner
+application. When invoking eclipse with this application to
+perform a build you need to set two arguments on the command line:<br>
+<ul>
+  <li><code>-buildfile &lt;/path/to/productBuild.xml&gt;</code>:&nbsp;
+This is
+the path to
+the productBuild.xml provided by pde build.&nbsp; It is located in the
+org.eclipse.pde.build/scripts/productBuild directory.&nbsp; This is the
+build file
+that drives the whole product build process.</li>
+  <li><code>-Dbuilder=&lt;/path/to/configuration folder&gt;</code>:&nbsp;
+This is
+the path to the build configuration folder.</li>
+</ul>
+Run the antRunner application using the following command:<br>
+<div style="text-align: center;">
+<div style="text-align: left;">
+<div style="margin-left: 40px;"><code>java -jar
+&lt;eclipseInstall&gt;/plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar -application
+org.eclipse.ant.core.antRunner -buildfile
+&lt;&lt;eclipseInstall&gt;/plugins/org.eclipse.pde.build_&lt;version&gt;/scripts/productBuild/productBuild.xml&gt;
+-Dbuilder=&lt;path to the build configuration folder&gt;</code><br>
+</div>
+</div>
+</div>
+<h2>Advanced scenarios</h2>
+<p>Behind the scenes this setup will generate a feature containing the
+plug-ins or features specified in your product configuration file.&nbsp;
+This generated feature is then used to drive a normal feature based
+headless build. If you require more customization of the build,
+i.e. fetching from a repository, see the Advanced
+PDE Build topics for
+more information.
+</p>
+</body>
+</html>

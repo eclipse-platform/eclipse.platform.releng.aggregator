@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+  <head>
+<meta name="copyright" content="Copyright (c) 2008, 2009 Mateusz Matela, IBM Corporation and others. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <title>
+      toString() Generator: Content Listing
+    </title>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+  </head>
+  <body>
+    <h1>
+      toString() Generator: Content Listing
+    </h1>
+<p>This topic discusses how toString() generator lists contents of arrays and how it limits number of items listed in <code>Collection</code>s and <code>Map</code>s. Used method depends not only on the member type, but also on selected JDK compatibility of the project.</p>
+<h2>Listing contents of Arrays</h2>
+<ul>
+<li><h3>Without limiting number of elements</h3>
+For JDK1.5 and later, generated method uses <code>Arrays.toString()</code>. As this method is not available in JDK1.4, <code>Arrays.asList()</code> is used instead in this case, but only for non-primitive arrays. Primitive arrays are handled with a helper method, showed below.</li>
+<li><h3>Limiting number of elements</h3>
+If the array enclose a non-primitive type, the same solution is used for all versions of JDK: <code>Arrays.asList()</code> with <code>List.subList()</code>. For example, for a member named anArray, generated code looks like this: <code>Arrays.asList(anArray).subList(0, Math.min(anArray.length, maxLen))</code><br>
+In case of primitive arrays, <code>Arrays.asList()</code> cannot be used so in JDK1.5 or lower a helper method is used instead. In JDK1.6 there's another solution: <code>Arrays.toString(Arrays.copyOf(anArray, Math.min(anArray.length, maxLen))</code>. Although copying an array is not an optimal solution, the copied part is usually rather small and efficiency is not affected. A good thing is that a helper method can be avoided.</li>
+<li><h3>Helper method</h3>
+A helper method returns a string listing items of a given array, in the form of <code>[1, 2, 3]</code>. The method iterates over the array and uses <code>instanceof</code> to determine its enclosing type. To make the code shorter, it checks only for types that can actually be passed to it.
+<pre>private String arrayToString(Object array, int len, int maxLen) {
+	StringBuffer stringBuffer = new StringBuffer();
+	len = Math.min(len, maxLen);
+	stringBuffer.append("[");
+	for (int i = 0; i &lt; len; i++) {
+		if (i &gt; 0)
+			stringBuffer.append(", ");
+		if (array instanceof float[])
+			stringBuffer.append(((float[]) array)[i]);
+		if (array instanceof int[])
+			stringBuffer.append(((int[]) array)[i]);
+		if (array instanceof Object[])
+			stringBuffer.append(((Object[]) array)[i]);
+	}
+	stringBuffer.append("]");
+	return stringBuffer.toString();
+}</pre>
+<b>NOTES:</b><ul><li>This method is overwritten every time the generator runs.</li>
+<li>If the number of items is not limited, the method doesn't take the <code>maxLen</code> argument and doesn't use <code>Math.min()</code></li>
+<li>StringBuffer or StringBuilder is used depending on selected JDK compatibility</li>
+</ul>
+</li></ul>
+
+<h2>Listing limited contents of <code>List</code>s</h2>
+<p>The same solution is used for all JDK versions: <code>aList.subList(0, Math.min(aList.size(), maxLen))</code></p>
+
+<h2>Listing limited contents of <code>Collection</code>s (helper method)</h2>
+<p>A <code>Collection</code> cannot be turned into a <code>List</code> without copying its contents (assuming it isn't a <code>List</code> already), so a helper method is used to iterate over first <code>maxLen</code> elements and build a string out of them:</p>
+<pre>private String toString(Collection collection, int maxLen) {
+	StringBuffer stringBuffer = new StringBuffer();
+	stringBuffer.append("[");
+	int i = 0;
+	for (Iterator iterator = collection.iterator(); iterator.hasNext() &amp;&amp; i &lt; maxLen; i++) {
+		if (i &gt; 0)
+			stringBuffer.append(", ");
+		stringBuffer.append(iterator.next());
+	}
+	stringBuffer.append("]");
+	return stringBuffer.toString();
+}</pre>
+<b>NOTES:</b><ul><li>This method is not overwritten every time the generator runs, so it can be easily customized by hand.</li>
+<li>StringBuilder or StringBuffer is used depending on selected JDK compatibility</li>
+</ul>
+
+<h2>Listing limited contents of <code>Map</code>s</h2>
+<p>In case  of <code>Map</code>s, the same helper method is used as for <code>Collection</code>s only that <code>map.entrySet()</code> is passed to it.</p>
+
+<h2>Summary</h2>
+<p>This table sums up what methods are used in different conditions:</p>
+<table border="10">
+<tr>
+<td></td>
+<th><code>java.util.List</code></th>
+<th><code>java.util.Collection</code></th>
+<th><code>java.util.Map</code></th>
+<th>Array of primitive type</th>
+<th>Array of non-primitive type</th>
+</tr>
+<tr>
+<th>jdk 1.4</th>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>helper method <code>arrayToString(array, len)</code></td>
+<td><code>Arrays.asList(array)</code></td>
+</tr>
+<tr>
+<th>jdk 1.4/1.5, limit elements</th>
+<td><code>member.subList()</code></td>
+<td>helper method <code>toSting(collection, maxLen)</code></td>
+<td>helper method <code>toString(collection, maxLen)</code> with <code>map.entrySet()</code></td>
+<td>helper method <code>arrayToString(array, len, maxLen)</code></td>
+<td><code>Arrays.asList(array).subList()</code></td>
+</tr>
+<tr>
+<th>jdk 1.5</th>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td><code>Arrays.toString()</code></td>
+<td><code>Arrays.asList(array)</code></td>
+</tr>
+<tr>
+<th>jdk 1.6</th>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td><code>Arrays.toString()</code></td>
+<td><code>Arrays.toString()</code></td>
+</tr>
+<tr>
+<th>jdk 1.6, limit elements</th>
+<td><code>member.subList()</code></td>
+<td>helper method <code>toString(Collection)</code></td>
+<td>helper method <code>toString(Collection)</code> with <code>map.entrySet()</code></td>
+<td><code>Arrays.toString(Arrays.copyOf(member, ...))</code></td>
+<td><code>Arrays.asList(array).subList()</code></td>
+</tr>
+</table>
+
+
+<h2>Additional notes</h2><ul>
+<li>If a helper method must be generated for at least one member, it is also used for other members when possible. For example, a <code>List</code> is usually handled with <code>subList()</code> method, but if there's another member of <code>Collection</code> (not <code>List</code>) type and toString(collection) is generated, <code>List</code>s are also passed to it. This way the code is shorter and more consistent.</li>
+<li>Where necessary, the code responsible for listing contents is surrounded with null-checking code, for example: <code>array != null ? Arrays.asList(array) : null</code></li>
+<li>If maximum number of listed items is set to 0, the generator uses simple string literal (<code>"[]"</code>) instead of methods described above.</li>  
+</ul>
+    <p>
+      <img src="../images/ngrelr.png" alt="Related reference" border="0" >
+    </p>
+    <p>
+	  <a href="ref-dialog-tostring.htm">Generate toString() dialog</a><br>
+	  <a href="ref-tostring-templates.htm">toString() Generator: Format Templates</a><br>
+	  <a href="ref-tostring-styles.htm">toString() Generator: Code Styles</a>
+    </p>
+    
+  </body>
+</html>

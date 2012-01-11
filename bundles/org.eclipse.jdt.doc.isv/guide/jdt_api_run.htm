@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="copyright" content=
+"Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
+<title>Running a Java program</title>
+<link rel="stylesheet" type="text/css" href="../book.css" />
+</head>
+<body>
+<h2>Running a Java program</h2>
+<p>The JDT Debug component includes facilities for launching a Java program using the VM install
+that is currently configured by the user for a Java project.&nbsp;&nbsp;</p>
+
+<h3>Launching a compiled Java program</h3>
+<p>Java programs that have been compiled in a Java project can be run by getting the appropriate
+<a href="../reference/api/org/eclipse/jdt/launching/IVMRunner.html"><b>IVMRunner</b></a> for the
+Java project and running the class by name. The following code snippet shows how the class
+<b>MyClass</b> inside <b>myJavaProject</b> can be launched.</p>
+<pre class="color1">
+   IVMInstall vmInstall = JavaRuntime.getVMInstall(myJavaProject);
+   if (vmInstall == null)
+      vmInstall = JavaRuntime.getDefaultVMInstall();
+   if (vmInstall != null) {
+      IVMRunner vmRunner = vmInstall.getVMRunner(ILaunchManager.RUN_MODE);
+      if (vmRunner != null) {
+         String[] classPath = null;
+         try {
+            classPath = JavaRuntime.computeDefaultRuntimeClassPath(myJavaProject);
+         } catch (CoreException e) { }
+         if (classPath != null) {
+            VMRunnerConfiguration vmConfig = 
+               new VMRunnerConfiguration("MyClass", classPath);
+            ILaunch launch = new Launch(null, ILaunchManager.RUN_MODE, null);
+            vmRunner.run(vmConfig, launch, null);
+         }
+      }
+   }
+</pre>
+<p>Another way to launch a Java program is to create a <b>Java application</b> launch
+configuration, and launch it. The following snippet shows how the class <b>MyClass</b> inside
+<b>myJavaProject</b> can be launched using a simple launch configuration. By default, the resulting
+running application uses the JRE and classpath associated with <b>myJavaProject</b>.</p>
+<pre class="color1">
+   ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+   ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
+   ILaunchConfigurationWorkingCopy wc = type.newInstance(null, "SampleConfig");
+   wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "myJavaProject");
+   wc.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "myClass");
+   ILaunchConfiguration config = wc.doSave(); 
+   config.launch(ILaunchManager.RUN_MODE, null);
+</pre>
+</body>
+</html>

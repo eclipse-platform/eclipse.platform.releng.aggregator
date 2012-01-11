@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2009, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<meta http-equiv="Content-Style-Type" content="text/css"/>
+<link rel="stylesheet" href="../../../apache_style.css" type="text/css"/>
+<title>API Use Ant Task</title>
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
+</head>
+<body>
+<h1> API Use Ant Task </h1>
+<h2>Purpose</h2>
+<p>This task runs a complete search of a given baseline to create a report of API usage.</p>
+<p>The analysis does not include bundles that are not API Tools enabled.</p>
+
+<h2>Usage</h2>
+<h3>Description</h3>
+<p>The name of the Ant task is: <code>apitooling.apiuse</code>. To be used, the jar file <code>apitooling-ant.jar</code> has to be on the Ant
+classpath.</p>
+<pre class="c3">
+<b><font color="#0000ff">&lt;apitooling.apiuse
+	location=<font color="#008000">"..."</font>
+	scopepattern=<font color="#008000">"..."</font>
+	referencepattern=<font color="#008000">"..."</font>
+	report=<font color="#008000">"..."</font>
+	considerinternal=<font color="#008000">"..."</font>
+	considerapi=<font color="#008000">"..."</font>
+	considerillegaluse=<font color="#008000">"..."</font>
+	apipatterns=<font color="#008000">"..."</font>
+	internalpatterns=<font color="#008000">"..."</font>
+	archivepatterns=<font color="#008000">"..."</font>
+	excludelist=<font color="#008000">"..."</font>
+	includelist=<font color="#008000">"..."</font>	
+	debug=<font color="#008000">"..."</font>
+/&gt;</font></b>
+</pre>
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+<tr>
+  <td valign="top"><b>Attribute</b></td>
+  <td valign="top"><b>Description</b></td>
+  <td align="center" valign="top"><b>Required</b></td>
+</tr>
+<tr>
+	<td valign="top">location</td>
+	<td valign="top">
+		This attribute specifies the location of the current product you want to search for API usage.
+		<br/><br/>
+		It can be a .zip, .jar, .tgz, .tar.gz file, or a directory containing a product or a collection of bundles.
+		<br/><br/>
+		The location is specified using an absolute path.</td>
+	<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+	<td valign="top">scopepattern</td>
+	<td valign="top">
+		This attribute specifies a regular expression pattern used to select what bundles in the location will be searched.
+		
+		<br/><br/>
+		For example, the following would only scan for API usage in Eclipse bundles:
+		<pre>org.eclipse.*</pre>
+		
+	 	The pattern must be a well-formatted regular expression as
+	 	defined <a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">here</a>.
+	</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">referencepattern</td>
+	<td valign="top">
+		This attribute specifies a regular expression pattern used to filter the search results.  Only API usage that references
+		a bundle matching the filter will be reported.
+		<br/><br/>
+		For example, the following would only report usage that references code in JDT:
+		<pre>org.eclipse.jdt.*</pre> 
+		
+	 	The pattern must be a well-formatted regular expression as
+	 	defined <a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">here</a>.
+	 	</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">report</td>
+	<td valign="top">Set the output location where the reports will be generated.
+		<br/><br/>
+		Once the task is completed, reports are available in this directory using a hierarchical structure. A sub-folder is created
+		for each component that has another bundle that references it. Each sub-folder contains a file called "[bundlename].xml". Within
+		this folder is another sub-folder (named "[referencing bundle name].xml") for each bundle that references the bundle of the containing folder. 
+		Inside the referencing bundle folder is one of three sub-folders (API, PRIVATE or OTHER) which contain type, method or field references of that kind.
+		<br/><br/>
+		Three other special files are written into the report directory, which are "counts.xml", "not_searched.xml" and "no_apidescription.xml" and they contain
+		information about the number of references found, bundles from the baseline that were not search for usage information and those that did not have an 
+		.api_description files in them, respectively.
+		<br/><br/>
+		The location is specified using an absolute path.
+		<br/><br/>
+		For example:
+<pre>
+  root
+   |
+   +-- "not_searched.xml"
+   +-- "no_apidescription.xml"
+   +-- "counts.xml"
+   +-- bundle name with usage
+   		|
+   		+--referencing bundle name
+   			|
+   			+-- [API or PRIVATE or OTHER]
+   				|
+   				+--[type_ or method_ or field_]references.xml
+</pre>
+		</td>
+	<td align="center" valign="top">Yes</td>
+</tr>
+<tr>
+	<td valign="top">considerinternal</td>
+	<td valign="top">If internal references should be considered during the search.
+		<br/><br/>Default is <code>false</code>.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">considerapi</td>
+	<td valign="top">If API references should be considered during the search.
+		<br/><br/>Default is <code>false</code>.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">considerillegaluse</td>
+	<td valign="top">If illegal API use references should be considered during the search.
+		<br/><br/>Default is <code>false</code>.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">apipatterns</td>
+	<td valign="top">A comma separated list of package name patterns (regular expressions) to consider as API packages.
+		<br/><br/>By default API descriptions are used in the scanned bundles, but this can be used to
+		override or add API packages.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">internalpatterns</td>
+	<td valign="top">A comma separated list of package name patterns (regular expressions) to consider as private packages.
+		<br/><br/>By default API descriptions are used in the scanned bundles, but this can be used to
+		override or add private packages.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">archivepatterns</td>
+	<td valign="top">A comma separated list of archive identifiers to ignore during the scan.
+		<br/><br/>An archive identifier is of the form: <code>[bundle id]:[path to archive]</code>.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">excludelist</td>
+	<td valign="top">
+		Set the exclude list location. 
+<br/><br/>The exclude list location specifies a text file listing bundles to be excluded from the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. The include list seeds the set of bundles to be analyzed (when omitted,
+all bundles are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a regular expression to match against bundle names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example exclude list:
+<pre>
+# EXCLUDED BUNDLES
+R:org\.eclipse\..*\.doc\..*
+...
+</pre></td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">includelist</td>
+	<td valign="top">
+		Set the include list location. 
+<br/><br/>The include list location specifies a text file listing bundles to be included in the analysis.
+By default all bundles in the profile are analyzed. The include and exclude list attributes can be used to 
+selectively include and exclude bundles. The include list seeds the set of bundles to be analyzed (when omitted,
+all bundles are included), and the exclude list is then applied.
+Each line of the file specifies one of:
+<ul>
+<li>a specific bundle name</li>
+<li>a regular expression to match against bundle names (lines being with "R:")</li>
+<li>a comment (lines being with '#')</li>
+</ul>
+<br/>The location is specified using an absolute path.
+<br/>Following is an example include list:
+<pre>
+# INCLUDED BUNDLES
+R:org\.eclipse\..*
+...
+</pre>
+</td>
+	<td align="center" valign="top">No</td>
+</tr>
+<tr>
+<td valign="top">filters</td>
+<td valign="top">Set the root directory of API filters to use during the use scan.
+<br/><br/>
+The argument is the root directory of the .api_filters files that should be used to filter references.
+<br/><br/>
+The .api_filters files specify specific problems to ignore during api analysis.  During the use scan, the problem filters
+will be converted to a list of references that will be filtered from the use scan results.
+<br/>
+<br/>The root is specified using an absolute path. 
+<br/>The root needs to contain the following structure:
+<pre>
+ root
+  |
+  +-- component name (i.e. org.eclipse.jface)
+         |
+         +--- .api_filters
+</pre>
+</td>
+<td align="center" valign="top">No</td>
+</tr>
+<tr>
+	<td valign="top">debug</td>
+	<td valign="top">Set the debug value.
+		<br/><br/>The possible values are: <code>true</code>, <code>false</code>
+		<br/>Default is <code>false</code>.</td>
+	<td align="center" valign="top">No</td>
+</tr>
+</table>
+
+<h3>Examples</h3>
+<pre>
+	<b><font color="#0000ff">&lt;apitooling.apiuse
+		location=<font color="#008000">"/eclipse/eclipse.tar.gz"</font>
+		scopepattern=<font color="#008000">".*"</font>
+		referencepattern=<font color="#008000">"org\.eclipse.*"</font>
+		report=<font color="#008000">"/eclipse/apiuse-both/XML"</font>
+		considerinternal=<font color="#008000">"true"</font>
+		considerapi=<font color="#008000">"true"</font>
+		considerillegaluse=<font color="#008000">"true"</font>
+		archivepatterns=<font color="#008000">"org.eclipse.test.bundle:/libs/contributed.jar"</font>
+		excludelist=<font color="#008000">"D:\exclude_list_external.txt"</font>
+		debug=<font color="#008000">"true"</font>
+	/&gt;</font></b>
+</pre>
+<p>This will run the task creating <code>*.xml</code> files inside the folder <code>/eclipse/apiuse-both/XML</code>.
+The task will search all bundles in the product location - defined by the regular expression <code>.*</code> - searching 
+for all references to any bundles whose identifier begins with org.eclipse (defined by the <code>org\.eclipse.*</code> regular expression).
+It will use the exclude list file located in <code>D:\exclude_list_external.txt</code> to reduce the number of problems to report.</p>
+<p>While scanning, any class files found in the /libs/contributed.jar archive inside org.eclipse.test.bundle will be ignored.</p>
+<p>If debug is enabled, some debug tracing will show up in the Ant console.</p>
+
+<p><img src="../../../images/ngrelr.png" alt="Related reference" border="0"/></p>
+<p><a href="apifreeze-ant-task.htm">API Freeze Ant Task</a>
+<br/><a href="filegeneration-ant-task.htm">File Generation Ant Task</a>
+<br/><a href="analysis-reportconversion-ant-task.htm">Analysis Report Conversion Ant Task</a>
+<br/><a href="apifreeze-reportconversion-ant-task.htm">API Freeze Report Conversion Ant Task</a>
+<br/><a href="deprecation-ant-task.htm">API Deprecation Ant Task</a>
+<br/><a href="deprecation-reportconversion-ant-task.htm">API Deprecation Report Conversion Ant Task</a>
+<br/><a href="apiuse-reportconversion-ant-task.htm">API Use Report Conversion Ant Task</a>
+</p>
+</body>
+</html>

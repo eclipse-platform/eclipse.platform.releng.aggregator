@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="copyright" content=
+"Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
+<title>Using the ant javac adapter</title>
+<link rel="stylesheet" type="text/css" href="../book.css" />
+    <style type="text/css">
+/*<![CDATA[*/
+    span.c6 {color: red}
+    span.c2 {color: #4444CC}
+    /*]]>*/
+    </style>
+</head>
+<body>
+<a name="t_javac_adapter"></a>
+<h2>Using the ant javac adapter</h2>
+<p>The Eclipse compiler can be used inside an Ant buildfile using the javac adapter. In order to use the Eclipse compiler, you simply need to define the <b>build.compiler</b> property in your
+buildfile.</p>
+
+<p>In order to get the batch compiler working in an ant buildfile, the ant runtime classpath needs to contain the Eclipse batch compiler. When you run your ant buildfile:</p>
+<ol>
+<li>outside of Eclipse: the easiest way to set up the ant runtime classpath is to add the <code>ecj.jar</code> file using the <code>-lib</code> argument or dumping it inside the <code>ANT_HOME</code>
+location.</li>
+<li>inside Eclipse using the same JRE than Eclipse: the Eclipse batch compiler is implicitly added to the ant runtime classpath.</li>
+<li>inside Eclipse using the different JRE: the Eclipse batch compiler must be explicitly added to the ant runtime classpath. This can be done using the <code>ecj.jar</code> file or using the
+org.eclipse.jdt.core jar file and the <code>jdtCompilerAdapter.jar</code> file located inside the org.eclipse.jdt.core jar file (this jar file needs to be extracted first).</li>
+
+</ol>
+<p>Here is a small example:</p>
+<pre>
+<span class="c2">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project name="compile" default="main" basedir="../."&gt;
+
+ <b>&lt;property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/&gt;</b>
+
+ &lt;property name="root" value="${basedir}/src"/&gt;
+
+ &lt;property name="destdir" value="d:/temp/bin" /&gt;
+
+ &lt;target name="main"&gt;
+  &lt;javac srcdir="${root}" destdir="${destdir}" debug="on" nowarn="on" extdirs="d:/extdirs" source="1.4"&gt;
+      &lt;classpath&gt;
+        &lt;pathelement location="${basedir}/../org.eclipse.jdt.core/bin"/&gt;
+
+      &lt;/classpath&gt;
+  &lt;/javac&gt;
+ &lt;/target&gt;
+&lt;/project&gt;
+</span>
+</pre>
+<p>The syntax used for the javac Ant task can be found in the <a href="http://ant.apache.org/manual/Tasks/javac.html">Ant javac task documentation</a>. The current adapter supports the Javac Ant task
+1.4.1 up to 1.6.5 versions.</p>
+
+<p>If you are using a version above 1.5.0, you can use the nested compiler argument element (<code>&lt;compilerarg&gt;</code>) to specify compiler specific options.</p>
+<pre>
+<span class="c2">
+...
+&lt;javac srcdir="${root}" destdir="${destdir}" debug="on" nowarn="on" extdirs="d:/extdirs" source="1.4"&gt;
+    &lt;classpath&gt;
+      &lt;pathelement location="${basedir}/../org.eclipse.jdt.core/bin"/&gt;
+    &lt;/classpath&gt;
+
+    &lt;compilerarg</span> <span class="c6">compiler="org.eclipse.jdt.core.JDTCompilerAdapter"</span> <span class="c2">line="-1.5 -warn:+boxing"/&gt;
+&lt;/javac&gt;
+...
+</span>
+</pre>
+<b>Note:</b>
+<ol>
+<li>To prevent compiler dependant buildfiles, we <em>strongly</em> advise you to use a <code>&lt;compilerarg&gt;</code> whose "compiler" attribute value is
+
+<code>org.eclipse.jdt.core.JDTCompilerAdapter</code>. If this is not set, the buildfile can only be used with the Eclipse compiler. If set, the nested compiler argument is ignored if the name is
+different from the compiler name specified by the <code>build.compiler</code> property.</li>
+<li><code>&lt;compilerarg&gt;</code> should not be used to set values like target value, source value, debug options, or any options that could be set using the defined attributes of the
+<code>javac</code> ant task. Its usage must be reserved to pass compiler specific options like warning options. When a command-line argument is specified more than once, the Eclipse batch compiler
+can report errors like:
+<pre>
+duplicate target compliance setting specification: 1.5
+</pre></li>
+</ol>
+</body>
+</html>

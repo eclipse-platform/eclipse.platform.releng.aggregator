@@ -1,0 +1,354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2009, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content=
+    "text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="stylesheet" href="../../../apache_style.css" type=
+    "text/css" />
+    <title>
+      API Use Migration Ant Task
+    </title>
+    <script language="JavaScript" src=
+    "PLUGINS_ROOT/org.eclipse.help/livehelp.js" type=
+    "text/javascript">
+
+</script>
+  </head>
+  <body>
+    <h1>
+      API Use Migration Ant Task
+    </h1>
+    <h2>
+      Purpose
+    </h2>
+
+    <p>
+      This task takes a given API use scan and tries to re-resolve
+      it within a given candidate product release and reports any
+      unresolved references.
+    </p>
+    <h2>
+      Usage
+    </h2>
+    <h3>
+      Description
+    </h3>
+    <p>
+
+      The name of the Ant task is:
+      <code>apitooling.apimigration</code>. To be used, the jar
+      file <code>apitooling-ant.jar</code> has to be on the Ant
+      classpath.
+    </p>
+    <pre class="c3">
+ <b><span class="c2">&lt;apitooling.apimigration
+	candidate=<span class="c1">"..."</span>
+	usescan=<span class="c1">"..."</span>
+	scopepattern=<span class="c1">"..."</span>
+	referencepattern=<span class="c1">"..."</span>
+	excludelist=<span class="c1">"..."</span>
+	includelist=<span class="c1">"..."</span>
+	report=<span class="c1">"..."</span>
+	debug=<span class="c1">"..."</span>
+ /&gt;</span></b>
+</pre>
+    <h3>
+      Parameters
+    </h3>
+    <table border="1" cellpadding="2" cellspacing="0">
+      <tr>
+
+        <td valign="top">
+          <b>Attribute</b>
+        </td>
+        <td valign="top">
+          <b>Description</b>
+        </td>
+        <td align="center" valign="top">
+          <b>Required</b>
+
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          candidate
+        </td>
+        <td valign="top">
+          This attribute specifies the product you want to use as
+          the migration candidate.
+          <p>
+            It can be a .zip, .jar, .tgz, .tar.gz file, or a
+            directory that corresponds to the Eclipse installation
+            folder. This is the directory is which you can find the
+            Eclipse executable.
+          </p>
+
+        </td>
+        <td align="center" valign="top">
+          Yes
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          usescan
+        </td>
+        <td valign="top">
+
+          This attribute specifies the product use scan you want to
+          compare to the migration candidate.<br />
+          <br />
+          The usescan is specified using an absolute path to the
+          root of the use scan.
+        </td>
+        <td align="center" valign="top">
+          Yes
+        </td>
+      </tr>
+      <tr>
+
+        <td valign="top">
+          scopepattern
+        </td>
+        <td valign="top">
+          This attribute specifies the regular expression pattern
+          used to build the scope of elements to search for
+          references from in the product location.<br />
+          <br />
+          The pattern must be a well-formatted regular expression
+          as defined <a href=
+          "http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">
+          here</a>.
+        </td>
+
+        <td align="center" valign="top">
+          No
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          referencepattern
+        </td>
+        <td valign="top">
+          Set the regular expression pattern used to build the
+          scope of elements to search for references to in the
+          product location.<br />
+
+          <br />
+          The pattern must be a well-formatted regular expression
+          as defined <a href=
+          "http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">
+          here</a>.
+        </td>
+        <td align="center" valign="top">
+          No
+        </td>
+      </tr>
+      <tr>
+
+        <td valign="top">
+          excludelist
+        </td>
+        <td valign="top">
+          Set the exclude list location.<br />
+          <br />
+          The exclude list location specifies a text file listing
+          bundles to be excluded from the analysis. By default all
+          bundles in the profile are analyzed. The include and
+          exclude list attributes can be used to selectively
+          include and exclude bundles. The include list seeds the
+          set of bundles to be analyzed (when omitted, all bundles
+          are included), and the exclude list is then applied. Each
+          line of the file specifies one of:
+          <ul>
+            <li>a specific bundle name
+            </li>
+
+            <li>a regular expression to match against bundle names
+            (lines being with "R:")
+            </li>
+            <li>a comment (lines being with '#')
+            </li>
+          </ul><br />
+          The location is specified using an absolute path.<br />
+          Following is an example exclude list:
+          <pre>
+# EXCLUDED BUNDLES
+R:org\.eclipse\..*\.doc\..*
+...
+</pre>
+        </td>
+
+        <td align="center" valign="top">
+          No
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          includelist
+        </td>
+        <td valign="top">
+          Set the include list location.<br />
+
+          <br />
+          The include list location specifies a text file listing
+          bundles to be included in the analysis. By default all
+          bundles in the profile are analyzed. The include and
+          exclude list attributes can be used to selectively
+          include and exclude bundles. The include list seeds the
+          set of bundles to be analyzed (when omitted, all bundles
+          are included), and the exclude list is then applied. Each
+          line of the file specifies one of:
+          <ul>
+            <li>a specific bundle name
+            </li>
+            <li>a regular expression to match against bundle names
+            (lines being with "R:")
+            </li>
+            <li>a comment (lines being with '#')
+            </li>
+          </ul><br />
+          The location is specified using an absolute path.<br />
+
+          Following is an example include list:
+          <pre>
+# INCLUDED BUNDLES
+R:org\.eclipse\..*
+...
+</pre>
+        </td>
+        <td align="center" valign="top">
+          No
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+
+          report
+        </td>
+        <td valign="top">
+          Set the output location where the reports will be
+          generated.<br />
+          <br />
+          Once the task is completed, reports are available in this
+          directory using a hierarchical structure. A sub-folder is
+          created for each component that has another bundle that
+          references it. Each sub-folder contains a file called
+          "[bundlename].xml". Within this folder is another
+          sub-folder (named "[referencing bundle name].xml") for
+          each bundle that references the bundle of the containing
+          folder. Inside the referencing bundle folder is one of
+          three sub-folders (API, PRIVATE or OTHER) which contain
+          type, method or field references of that kind.<br />
+          <br />
+          Two other special files are written into the report
+          directory, which are "not_searched.xml" and
+          "no_apidescription.xml" and they contain information
+          about bundles from the baseline that were not search for
+          usage information and those that did not have an
+          .api_description files in them, respectively.<br />
+
+          <br />
+          The location is specified using an absolute path.<br />
+          <br />
+          For example:
+          <pre>
+  root
+   |
+   +-- "not_searched.xml"
+   +-- "no_apidescription.xml"
+   +-- bundle name with usage
+     |
+     +--referencing bundle name
+      |
+      +-- [API or PRIVATE or OTHER]
+       |
+       +--[type_ or method_ or field_]references.xml
+</pre>
+        </td>
+        <td align="center" valign="top">
+
+          Yes
+        </td>
+      </tr>
+      <tr>
+        <td valign="top">
+          debug
+        </td>
+        <td valign="top">
+          Set the debug value.<br />
+
+          <br />
+          The possible values are: <code>true</code>,
+          <code>false</code><br />
+          Default is <code>false</code>.
+        </td>
+        <td align="center" valign="top">
+          No
+        </td>
+
+      </tr>
+    </table>
+    <h3>
+      Examples
+    </h3>
+    <pre>
+ <b><span class="c2">&lt;apitooling.apimigration
+  candidate=<span class="c1">"/eclipse/sdk3.5"</span>
+  usescan=<span class="c1">"/eclipse/scans/sdk3.4"</span>
+
+  scopepattern=<span class="c1">".*"</span>
+  referencepattern=<span class="c1">"org\.eclipse.*"</span>
+  excludelist=<span class=
+"c1">"D:\exclude_list_external.txt"</span>
+  report=<span class="c1">"/eclipse/apimigration/xml"</span>
+  debug=<span class="c1">"true"</span>
+
+ /&gt;</span></b>
+</pre>
+    <p>
+      This will run the task creating <code>*.xml</code> files
+      inside the folder <code>/eclipse/apimigration/xml</code>. The
+      task will re-resolve all references in the
+      <code>usescan</code> location - defined by the regular
+      expression <code>.*</code> - against the candidate product
+      whose identifier begins with org.eclipse (defined by the
+      <code>org\.eclipse.*</code> regular expression). It will use
+      the exclude list file located in
+      <code>D:\exclude_list_external.txt</code> to reduce the
+      number of problems to report.
+    </p>
+
+    <p>
+      If debug is enabled, some debug tracing will show up in the
+      Ant console.
+    </p>
+    <p>
+      <img src="../../../images/ngrelr.png" alt="Related reference"
+      border="0" />
+    </p>
+    <p>
+      <a href="apifreeze-ant-task.htm">API Freeze Ant
+      Task</a><br />
+      <a href="filegeneration-ant-task.htm">File Generation Ant
+      Task</a><br />
+
+      <a href="analysis-reportconversion-ant-task.htm">Analysis
+      Report Conversion Ant Task</a><br />
+      <a href="apifreeze-reportconversion-ant-task.htm">API Freeze
+      Report Conversion Ant Task</a><br />
+      <a href="deprecation-ant-task.htm">API Deprecation Ant
+      Task</a><br />
+      <a href="deprecation-reportconversion-ant-task.htm">API
+      Deprecation Report Conversion Ant Task</a><br />
+      <a href="apiuse-reportconversion-ant-task.htm">API Use Report
+      Conversion Ant Task</a><br />
+      <a href="apimigration-reportconversion-ant-task.htm">API Use
+      Migration Report Conversion Ant Task</a>
+
+    </p>
+  </body>
+</html>

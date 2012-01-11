@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type=
+    "text/javascript"></script>
+<title>Adopting 3.3 mechanisms and APIs</title>
+</head>
+
+<body>
+
+<h1>Adopting 3.3 mechanisms and APIs</h1>
+<p>This section describes changes that are required if you are trying to change 
+  your 3.2 plug-in to adopt the 3.3 mechanisms and APIs.</p>
+  
+<ol>
+	<li><a href="#deprecatedWorkingCopyMethods">How can I remove deprecation warning I get on <code>*WorkingCopy(...IProblemRequestor...)</code> methods and keep same behavior?</a></li>
+</ol>
+<h2><a name="deprecatedWorkingCopyMethods">1. How can I remove deprecation warning I get on <code>*WorkingCopy(...IProblemRequestor...)</code> methods and keep same behavior?</a></h2>
+<p>
+While implementing bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=175243">175243</a>, following methods
+have been deprecated:</p>
+<ol>
+<li><code>ICompilationUnit#becomeWorkingCopy(IProblemRequestor, IProgressMonitor)</code></li>
+<li><code>ICompilationUnit#getWorkingCopy(WorkingCopyOwner, IProblemRequestor, IProgressMonitor)</code></li>
+<li><code>IClassFile#becomeWorkingCopy(IProblemRequestor, WorkingCopyOwner, IProgressMonitor)</code></li>
+<li><code>WorkingCopyOwner#newWorkingCopy(String, IClasspathEntry[], IProblemRequestor, IProgressMonitor)</code></li>
+</ol>
+<p>This answer gives some advice to use new API corresponding methods without changing
+the behavior of the existing code.
+</p>
+How to re-write the code depends on the fact that given problem requestor was null or not
+(i.e. if the client code was interested in reporting problems of the working copy):
+<ol>
+	<li><strong>Problem requestor was null</strong>
+	<p>
+	There's no specific migration issue when the given requestor was null.
+	</p><p>
+	So, following snippet warned for calls to deprecated methods...:</p>
+	<pre>
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
+	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/bin/pack/Y.class"));
+	IClassFile classFile = JavaCore.createClassFileFrom(file);
+	WorkingCopyOwner owner = new WorkingCopyOwner() {};
+	IClasspathEntry[] entries = classFile.getJavaProject().getResolvedClasspath(true);
+	<b>
+	ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null, null);
+	ICompilationUnit newWorkingCopy = compilationUnit.becomeWorkingCopy(null, null);
+	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, null, null);
+	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(null, owner, null);</b>
+	</pre><p>
+	... can now be easily rewritten as follow due to the fact that default owner's problem requestor is null:</p>
+	<pre>
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
+	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/bin/pack/Y.class"));
+	IClassFile classFile = JavaCore.createClassFileFrom(file);
+	WorkingCopyOwner owner = new WorkingCopyOwner() {};
+	IClasspathEntry[] entries = classFile.getJavaProject().getResolvedClasspath(true);
+	<b>
+	// just remove the IProblemRequestor parameter
+	ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null); 
+	ICompilationUnit newWorkingCopy = compilationUnit.becomeWorkingCopy(null);
+	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, null);
+	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(null, owner, null);</b>
+	</pre>
+	</li>
+	<li><strong>Problem requestor was not null</strong>
+	<p>
+	In this case, client must ensure that the working copy owner requestor is the same than
+	the one given as parameter to the deprecated method. The simplest way to this is to make
+	the working copy owner returning this requestor.
+	</p><p>
+	So, following snippet warned for calls to deprecated methods...:</p>
+	<pre>
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
+	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/bin/pack/Y.class"));
+	IClassFile classFile = JavaCore.createClassFileFrom(file);
+	WorkingCopyOwner owner = new WorkingCopyOwner() {};
+	IClasspathEntry[] entries = classFile.getJavaProject().getResolvedClasspath(true);
+	<b>
+	IProblemRequestor requestor = new IProblemRequestor {
+		public void acceptProblem(IProblem problem) {}
+		public void beginReporting() {}
+		public void endReporting() {}
+		public boolean isActive() {
+			return true;
+		}
+	};
+	ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
+	ICompilationUnit newWorkingCopy = compilationUnit.becomeWorkingCopy(requestor, null);
+	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, requestor, null);
+	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(requestor, owner, null);</b>
+	</pre><p>
+	... needs to be rewritten as follow to keep the same behavior:</p>
+	<pre>
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/pack/X.java"));
+	ICompilationUnit compilationUnit = (ICompilationUnit)JavaCore.create(file);
+	IFile file = getWorkspaceRoot().getFile(new Path("FAQ/bin/pack/Y.class"));
+	IClassFile classFile = JavaCore.createClassFileFrom(file);
+	IClasspathEntry[] entries = classFile.getJavaProject().getResolvedClasspath(true);
+	<b>
+	// Make the requestor final...
+	final IProblemRequestor requestor = new IProblemRequestor {
+		public void acceptProblem(IProblem problem) {}
+		public void beginReporting() {}
+		public void endReporting() {}
+		public boolean isActive() {
+			return true;
+		}
+	};
+	// ...and let the created working copy owner returning it
+	WorkingCopyOwner owner = new WorkingCopyOwner() {
+		public IProblemRequestor getProblemRequestor(ICompilationUnit unit) {
+			return requestor;
+		}
+	};
+	// Calls can now be done to the new API methods using this working copy owner
+	ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(owner, null); 
+	ICompilationUnit newWorkingCopy = compilationUnit.becomeWorkingCopy(null);
+	ICompilationUnit newWorkingCopy2 = owner.newWorkingCopy(new Path("FAQ/test/Z.java"), entries, null);
+	ICompilationUnit classWorkingCopy = classFile.becomeWorkingCopy(owner, null);
+	</b>
+	</pre>
+	</li>
+</ol>
+</body>
+
+</html>

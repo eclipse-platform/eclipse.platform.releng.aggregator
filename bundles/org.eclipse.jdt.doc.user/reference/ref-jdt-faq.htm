@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type=
+    "text/css" />
+    <title>
+      Frequently Asked Questions on JDT
+    </title>
+    <script language="JavaScript" src=
+    "PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript">
+
+</script>
+  </head>
+  <body>
+    <h1>
+      Frequently Asked Questions on JDT
+    </h1>
+    <h3>
+      Can I use a Java compiler other than the built-in one (javac for example)
+      with the workbench?
+    </h3>
+    <p>
+
+      No. The JDT provides a number of sophisticated features including fully
+      automatic incremental compilation, code snippet evaluation, code assist,
+      type hierarchies, and hot code replace. These features require special
+      support found in the workbench Java compiler (an integral part of the
+      JDT's incremental project builder), but not available in standard Java
+      compilers.
+    </p>
+    <h3>
+      Where do Java packages come from?
+    </h3>
+    <p>
+      A project contains only files and folders. The notion of a Java package
+      is introduced by a Java project's class path (at the UI, the Package
+      Explorer presents the packages as defined by the classpath).
+      <strong>Tip:</strong> If the package structure is not what you expect,
+      check out your class path. The Java search infrastructure only finds
+      declarations for and references from Java elements on the class path.
+    </p>
+    <h3>
+
+      When do I use an internal versus an external JAR library file?
+    </h3>
+    <p>
+      An internal resource resides in some project in the workbench and is
+      therefore managed by the workbench; like other resources, these resources
+      can be version managed by the workbench. An external resource is not part
+      of the workbench and can be used only by reference. For example, a JRE is
+      often external and very large, and there is no need to associate it with
+      a VCM system.
+    </p>
+    <h3>
+      When should I use source folders within a Java project?
+    </h3>
+    <p>
+      Each Java project locates its Java source files via one or more source
+      type entries on the project's class path. Use source folders to organize
+      the packages of a large project into useful grouping, or to keep source
+      code separate from other files in the same project. Also, use source
+      folders if you have files (documentation for example) which need not be
+      on the build path.
+    </p>
+
+    <h3>
+      What are source attachments, How do I define one?
+    </h3>
+    <p>
+      Libraries are stored as JAR files containing binary class files (and
+      perhaps other resources). These binary class files provide signature
+      information for packages, classes, methods, and fields. This information
+      is sufficient to compile or run against, but contains far less
+      information that the original source code. In order to make it easier to
+      browse and debug binary libraries, there is a mechanism for associating a
+      corresponding source JAR (or ZIP) file with a binary JAR file.
+    </p>
+    <h3>
+      Why are all my resources duplicated in the output folder (bin, for
+      example)?
+    </h3>
+    <p>
+
+      If your Java project is using source folders, then in the course of
+      compiling the source files in the project, the Java compiler copies
+      non-Java resources to the output folder as well so that they will be
+      available on the class path of the running program. To avoid certain
+      resources to be copied to the output location you can set a resource
+      filter in the Java compiler preferences: <strong>Window &gt; Preferences
+      &gt; Java &gt; Compiler &gt; Building</strong>
+    </p>
+    <h3>
+      How do I prevent having my documentation files from being copied to the
+      project's output folder?
+    </h3>
+
+    <p>
+      Use source folders and put any resources that you do not want to be
+      copied to the output folder into a separate folder that is not included
+      on the class path. You can also set a resource filter in the Java
+      compiler preferences: <strong>Window &gt; Preferences &gt; Java &gt;
+      Compiler &gt; Building</strong> to for example *.doc.
+    </p>
+
+    <h3>
+      How do I create a default package?
+    </h3>
+    <p>
+      You don't have to. Files in the root folder of a source folder or project
+      are considered to be in the default package. In effect, every source
+      folder has the capability of having a fragment of the default package.
+    </p>
+    <h3>
+      What is refactoring?
+    </h3>
+    <p>
+
+      Refactoring means behavior-preserving program transformations. The JDT
+      supports a number of transformations described in Martin Fowler's book
+      <em>Refactoring: Improving the Design of Existing Code</em>,
+      Addison-Wisely 1999.
+    </p>
+    <h3>
+      When do I use Open Declaration (F3)?
+    </h3>
+    <p>
+      To find out the Java element that corresponds to the selected source
+      range with the help of the compiler.
+    </p>
+    <h3>
+
+      Is the Java program information (type hierarchy, declarations,
+      references, for example) produced by the Java builder? Is it still
+      updated when auto-build is off?
+    </h3>
+    <p>
+      The Java program information is independent from the Java builder. It is
+      automatically updated when performing resource changes or Java
+      operations. In particular, all the functionality offered by the Java
+      tooling (for example, type hierarchies, code assisting, search) will
+      continue to perform accurately when auto-build is off; for example, when
+      doing heavy refactoring which require to turn off the builders, you can
+      still use code assist, which will reflect the latest changes (not yet
+      build). Other than the launching (that is, running and debugging) of
+      programs, the only functionality which requires the Java builder is the
+      evaluation of code snippets.
+    </p>
+    <h3>
+      After reopening a workbench, the first build that happens after editing a
+      Java source file seems to take a long time. Why is that?
+    </h3>
+    <p>
+      The Java incremental project builder saves its internal state to a file
+      when the workbench is closed. On the first build after the project is
+      reopened, the Java incremental project builder will restore its internal
+      state. When this file is large, the user experiences an unusually long
+      build delay.
+    </p>
+
+    <h3>
+      I can't see a type hierarchy for my class. What can I do?
+    </h3>
+    <p>
+      Check that you have your build class path set up properly. Setting up the
+      proper build class path is an important task when doing Java development.
+      Without the correct build path, you will not be able to compile your
+      code. In addition, you will not be able to search or look at the type
+      hierarchies for Java elements.
+    </p>
+    <h3>
+      How do I turn off "auto compile" and do it manually when I want?
+    </h3>
+    <p>
+
+      Clear the <strong>Build automatically</strong> checkbox on the <a class=
+      "command-link" href=
+      'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Workspace)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt=
+      "Opens the Workspace preference page" /> <strong>General &gt;
+      Workspace</strong></a> preference page. When you want to build, press
+      <kbd>Ctrl+B</kbd>, or select <strong>Project &gt; Build All</strong> from
+      the menu bar.
+    </p>
+
+    <p>
+      <b>Hint</b>: when you turn "auto compile" off and build manually, you may
+      also want to select the <strong>Save automatically before build</strong>
+      checkbox on the <a class="command-link" href=
+      'javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.preferencePages.Workspace)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt=
+      "Opens the Workspace preference page" /> <strong>General &gt;
+      Workspace</strong></a> preference page.
+    </p>
+
+    <h3>
+      When I select a method or a field in the Outline view, only the source
+      for that element is shown in the editor. What do I do to see the source
+      of the whole file?
+    </h3>
+    <p>
+      There is a toolbar button <b>Show Source of Selected Element Only</b> -
+      all you have to do is un-press it.
+    </p>
+    <h3>
+      Can I nest source folders?
+    </h3>
+
+    <p>
+      Yes, you can use exclusion filters to create nested source folders.
+    </p>
+    <h3>
+      Can I have separate output folders for each source folder?
+    </h3>
+    <p>
+      Yes, select the <b>Allow output folders for source folders</b> checkbox
+      in the <b>Java Build Path &gt; Source</b> property page of your Java
+      project.
+    </p>
+
+    <h3>
+      Can I have an output or source folder that is located outside of the
+      workspace?
+    </h3>
+    <p>
+      Yes, you can create a linked folder that points to the desired location
+      and use that folder as the source or output folder in your Java project.
+    </p>
+    <p>
+      <img border="0" src="../images/ngrelc.png" alt="Related concepts" />
+    </p>
+    <p>
+
+      <a href="../concepts/concept-jdt.htm">Java development tools (JDT)</a>
+    </p>
+    <p>
+      <img border="0" src="../images/ngrelr.png" alt="Related reference" />
+    </p>
+    <p>
+      <a href="../reference/ref-properties-build-path.htm">Java build path
+      page</a><br />
+      <a href="../reference/ref-jdt-glossary.htm">JDT glossary</a>
+
+    </p>
+  </body>
+</html>

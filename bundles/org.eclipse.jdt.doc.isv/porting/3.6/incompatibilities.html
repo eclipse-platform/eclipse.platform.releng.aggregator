@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Incompatibilities between Eclipse 3.5 and 3.6</title>
+</head>
+<body>
+<h1>Incompatibilities between Eclipse 3.5 and 3.6</h1>
+
+<p>
+  Eclipse changed in incompatible ways between 3.5 and 3.6 in ways that affect 
+  plug-ins. The following entries describe the areas that changed and provide 
+  instructions for migrating 3.5 plug-ins to 3.6. Note that you only need to look 
+  here if you are experiencing problems compiling or running your 3.5 plug-in on 3.6.
+</p>
+
+<ol>
+  <li><a href="#JUnit4">SDK ships 2 org.junit plug-ins (versions 3.8.2 and 4.8.1)</a></li>
+  <li><a href="#AbstractTemplatesPage">Source incompatibility for subclasses of <code>AbstractTemplatesPage</code></a></li>
+  <li><a href="#SuppressWarningRawTypes"><code>@SuppressWarnings("unchecked")</code> does not ignore raw types warnings anymore</a></li>
+  <li><a href="#ReferencedLibraries">Classpath containers have the choice to resolve the referenced libraries themselves</a></li>  
+</ol>
+
+<hr>
+
+<!-- ############################################## -->
+<h2>1. <a name="JUnit4">SDK ships 2 org.junit plug-ins (versions 3.8.2 and 4.8.1)</a></h2>
+<p><strong>What is affected:</strong> Clients that require the org.junit and don't include 4.x in their version bounds</p>
+<p><strong>Description:</strong>
+The SDK now ships 2 org.junit plug-ins (versions 3.8.2 and 4.8.1). Clients that want to run JUnit Plug-in Tests with a Java 5 or later VM
+and that require org.junit with a version bound that does not include 4.x need to update their version bound to include 4.x
+(e.g. change their <code>Require-Bundle:</code> header to <code>org.junit;bundle-version="3.8.2"</code>).
+If they don't update their bounds, both versions of org.junit are resolved at run time, which leads to errors when test classes are loaded.</p>
+<p>For complete details on the steps required to transition to using JUnit4 or to continue using JUnit3, please see:<br>
+<a href="http://wiki.eclipse.org/Eclipse/Testing/JUnit4_Changes">http://wiki.eclipse.org/Eclipse/Testing/JUnit4_Changes</a>.</p>
+<p><strong>Action required:</strong> Clients that require org.junit should make sure they
+include 4.x in their required version bounds.</p>
+
+<!-- ############################################## -->
+
+<h2>2. <a name="AbstractTemplatesPage">Source incompatibility for subclasses of <code>AbstractTemplatesPage</code></a></h2>
+<p><strong>What is affected:</strong> Subclasses of <code>org.eclipse.ui.texteditor.templates.AbstractTemplatesPage</code>.</p>
+<p><strong>Description:</strong> In order to provide new API we had to make two methods public. While this <em>does not break binary compatibility</em> it breaks source compatibility.</p>
+<p><strong>Action required:</strong> Change the visibility of <code>getSelectedTemplates()</code> and <code>getTemplateStore()</code> to <code>public</code>.</p>
+
+<!-- ############################################## -->
+
+<h2>3. <a name="SuppressWarningRawTypes"><code>@SuppressWarnings("unchecked")</code> does not ignore raw types warnings anymore</a></h2>
+<p><strong>What is affected:</strong> Usage of <code>@SuppressWarnings("unchecked")</code>.</p>
+<p><strong>Description:</strong> Up to Eclipse 3.5, <code>@SuppressWarnings("unchecked")</code> was used to suppress the unchecked and raw types warnings.
+This was not consistent with other compilers (e.g. javac). A new warning token <code>"rawtypes"</code> has been added to cover the case of raw type warnings
+exclusively. So in order to get rid of all warnings, in Eclipse 3.6, it might be required to add <code>"rawtypes"</code> in the warning token list.</p>
+<p>If it is not possible to update the code, a system property (<code>-DsuppressRawWhenUnchecked=true</code>) can be added to the <code>-vmargs</code> list on startup.
+This preserves the old behavior. The projects need to be manually cleaned and rebuilt after toggling the property.</p>
+<p><strong>Action required:</strong> When new warnings that were previously ignored are now reported, add <code>"rawtypes"</code> to the list of warning tokens.
+</p>Before:
+<pre>
+@SuppressWarnings("unchecked")
+    void bar(List list) {
+        List&lt;String&gt; ls2 = list;
+    }
+@SuppressWarnings("unchecked")
+private List l;
+</pre>
+After:
+<pre>
+@SuppressWarnings(<b>{</b>"unchecked", "rawtypes"<b>}</b>)
+    void bar(List list) {
+        List&lt;String&gt; ls2 = list;
+    }
+@SuppressWarnings("rawtypes")
+private List l;
+</pre>
+<!-- ############################################## -->
+<h2>4. <a name="ReferencedLibraries">Classpath containers have the choice to resolve the referenced libraries themselves</a></h2>
+<p><strong>What is affected:</strong> Classpath containers that depended on JDT to resolve referenced libraries via JAR's MANIFEST.MF.</p>
+<p><strong>Description:</strong> 
+In 3.5, classpath containers did not have full control over what JARs ended up on the classpath, since references in the Class-Path section 
+of a JAR's MANIFEST.MF were automatically added. In 3.6, referenced JARs are not automatically added any more. However, a classpath container 
+implementor can use <code>JavaCore#getReferencedClasspathEntries()</code> to resolve the referenced JARs and return them in the implementation of 
+<code>IClasspathContainer#getClasspathEntries()</code>.</p>
+<p>Please refer to the documentation of these APIs:</p>
+<ul>
+<li><code>IClasspathContainer</code></li>
+<li><code>JavaCore#getReferencedClasspathEntries()</code></li>
+</ul>
+<p><strong>Action required:</strong> 
+If the classpath container implementation cannot be changed to accommodate this, the 3.5 behavior can be retained by adding a system property (<code>-DresolveReferencedLibrariesForContainers=true</code>) to the <code>-vmargs</code>
+list on start-up.</p> 
+
+<!-- ############################################## -->
+
+</body>
+</html>

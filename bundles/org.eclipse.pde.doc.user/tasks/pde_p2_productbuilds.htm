@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
+  <title>Product Builds with p2</title>
+</head>
+<body>
+<h1>Product Builds with p2</h1>
+<p>Defining the new property:</p>
+<div align="center"><tt><b>p2.gathering = true</b></tt></div>
+<p>will cause a <a href="pde_p2_builds.htm#gathering_overview">few changes</a> for product builds.  In particular, the build will produce properly installed fully p2 enabled products.</p>
+<p>The following is a list of related properties (old and new):</p>
+<table border="5" cellspacing="0" cellpadding="2">
+	<tr><td><tt><b>p2.gathering</b></tt></td><td>Set to <tt><b>true</b></tt> to turn on p2 publisher based builds.</td></tr>
+	<tr><td><tt>p2.build.repo</tt></td><td>A URI to the local build time p2 repository, default is <tt>file:${buildDirectory}/buildRepo</tt>.  Results will be mirrored from here to the final archive location.</td></tr>
+	<tr><td><tt>generate.p2.metadata</tt></td><td>This is property for the old <a href="pde_p2_integration.htm">metadata generator integration</a>.  It has no effect when <tt>p2.gathering=true</tt>.</td></tr>
+	<tr><td><tt>p2.metadata.repo<br>p2.artifact.repo</tt></td>
+		<td>These properties are be URIs.  By default for product builds, the final archives are the installed products and metadata and artifacts are left in the <tt>${p2.build.repo}</tt>.  If <tt>p2.metadata.repo</tt> and <tt>p2.artifact.repo</tt> are defined, then 
+		the artifacts and metadata for the product will be mirrored from the build repository.</td>
+	</tr>
+	<tr><td><tt>p2.metadata.repo.name<br>p2.artifact.repo.name</tt></td><td>Optional, these properties will be used to name the final repository when <tt>p2.metadata.repo</tt> and <tt>p2.artifact.repo</tt> are used.</td></tr>
+	<tr><td><tt>p2.compress</tt></td><td>Set to <tt>true</tt> to compress the final repository xml into a jar.</td></tr>
+	<tr><td><tt>p2.flavor</tt></td><td>The flavor of the product, used as a qualifier on the configuration metadata for the product.  See <a href="#product_flavors">below</a>.</td></tr>
+	<tr><td><tt>p2.product.qualifier</tt></td><td>The qualifier to use when replacing "1.0.0.<i>qualifier</i>" in a product's version.  If not set, the qualifier will be based on <tt>forceContextQualifier</tt> or the timestamp.</td></tr>
+	<tr><td><tt>p2.publish.artifacts</tt></td><td>No effect when <tt>p2.gathering=true</tt> (Old property)</td></tr>
+	<tr><td><tt>p2.root.name<br>p2.root.version</tt></td><td>No effect when <tt>p2.gathering=true</tt> (Old property)</td></tr>
+	<tr><td><tt>p2.context.repos</tt></td><td>Define context repositories.  See <a href="pde_p2_reusingmetadata.htm">reusing metadata</a>.</td></tr>
+	<tr><td><tt>repoBaseLocation</tt></td><td>A folder containing repositories to transform using <tt><a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_repo2runnable">&lt;p2.repo2runnable&gt;</a></tt>.  See also <a href="pde_p2_reusingmetadata.htm">reusing metadata</a>.</td></tr>
+	<tr><td><tt>transformedRepoLocation</tt></td><td>The folder containing the output of <tt><a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_repo2runnable">&lt;p2.repo2runnable&gt;</a></tt>.  See also <a href="pde_p2_reusingmetadata.htm">reusing metadata</a>.</td></tr>	
+	<tr><td><tt>p2.category.site</tt></td><td>A URL to a site.xml file used to define categories.</td></tr>
+	<tr><td><tt>p2.category.definition</tt></td><td>A URL to a category.xml file used to define categories.</td></tr>
+	<tr><td><tt>p2.category.prefix</tt></td><td>Define a prefix to ensure unique ids for category IUs generated from site/category files that don't use unique names.</td></tr>
+	<tr><td><tt>skipMirroring</tt></td><td>Skip the final mirroring from <tt>${p2.build.repo}</tt> to <tt>${p2.metadata.repo}</tt>.</td></tr>
+	<tr><td><tt>skipDirector</tt></td><td>Skip the call to the director.  No installed products will be produced.  If <tt>p2.metadata.repo</tt> and <tt>p2.artifact.repo</tt> are defined, those repositories will contain the product metadata and artifacts, otherwise <tt>${p2.build.repo}</tt> will contain the results.</td></tr>
+	<tr><td><tt>p2.director.log</tt></td><td>Location of a log file to log the results of the director call.</td></tr>
+	<tr><td><tt>p2.director.profile</tt></td><td>The name to use for the p2 profile created by the director.  Generally it is a good idea to name this something related to your product. Default is "profile".</td></tr>
+	<tr><td><tt>p2.director.extraArgs</tt></td><td>Extra arguments to pass to the directory.  Default is "<tt>-profileProperties org.eclipse.update.install.features=true</tt>".</td></tr>
+	<tr><td>Mirroring Properties</td><td>When building products or features, PDE/Build mirrors dependencies from <a href="pde_p2_reusingmetadata.htm">context repositories</a> to be included in the build.  
+		These properties control what dependencies are included in this operation.  See the <a href="../../org.eclipse.platform.doc.isv/guide/p2_repositorytasks.htm#p2_mirror">p2.mirror ant task</a> for details.
+	<table border="5" cellspacing="0" cellpadding="1" width="95%" align="center">
+		<tr><td><tt>p2.mirror.raw</tt></td><td>Default value: false.  Set to true to reuse artifact descriptors from the source repositories.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.filter</tt></td><td>Default is no filter. Set additional filter properties IUs must satisfy in order to be included. </td></tr>
+		<tr><td><tt>p2.mirror.slicing.followOnlyFilteredRequirements</tt></td><td>Default is false.  Set to true to invert the filters and only include IUs that don't match.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.followStrict</tt></td><td>Default is false.  Set to true to only include dependencies whose versions are exactly specified.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.includeFeatures</tt></td><td>Default is true.  Whether or not to include features.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.includeNonGreedy</tt></td><td>Default is false.  Whether or not to include non-greedy dependencies.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.includeOptional</tt></td><td>Default is true, whether or not to include optional dependencies.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.latestVersionOnly</tt></td><td>Default is false, whether or not to only include the latest version of a dependency when the requirement is a range and multiple versions are available.</td></tr>
+		<tr><td><tt>p2.mirror.slicing.platformFilter</tt></td><td>Default is no filter, An "os,ws,arch" triplet to set as the platform against which IU LDAP filters will be matched. IUs not matching the filter will not be mirrored.</td></tr>
+	</table>
+	</td>
+	</tr>
+</table>
+
+
+<h3><a name="product_flavors">Product Flavor</a></h3>
+<p>As part of a product build, PDE/Build automatically generates default configuration metadata to set start levels and config.ini property.  This metadata is commonly referred to as Configuration Units (CUs).  In particular, start levels are set
+using CU fragments on the IU for the bundle being started.  The flavor is used as a qualifier when generating the CU's name based on the IU.</p>
+<p>For example, with "<tt>p2.flavor = tooling</tt>", <tt>'<b>tooling</b><i>win32.win32.x86</i>org.eclipse.core.runtime'</tt> will be the name of the CU that configures the org.eclipse.core.runtime bundle on windows.
+It may be a good idea to use a flavor based on your product id to avoid conflicts with other metadata, particularly if your product has particular needs with respect to start levels.
+</p>
+<p>See also the <a href="pde_p2_configuringproducts.htm">configuring products</a> page.</p>
+<h3>The director call</h3>
+PDE/Build includes a <tt>runDirector</tt> target that is called to perform installs during a product build.  Currently, this is a fork of the <a href="../../org.eclipse.platform.doc.isv/guide/p2_director.html">director application</a> in a new process.
+In more advanced releng scenarios, it is possible to reuse this task to perform additional installs.  The task requires that the location of the equinox launcher for the builder is defined.  An example call would look something like this:
+<pre>
+	&lt;property name="equinoxLauncherJar" value="/builder/eclipse/plugins/org.eclipse.equinox.launcher_1.0.200.v20090520.jar"/&gt;
+	&lt;ant antfile="${eclipse.pdebuild.scripts}/genericTargets.xml" target="runDirector" inheritAll="true"&gt;
+		&lt;property name="ws" value="gtk"/&gt;
+		&lt;property name="os" value="linux"/&gt;
+		&lt;property name="arch" value="x86"/&gt;
+		&lt;property name="p2.director.installPath" value="${installFolder}"/&gt;
+		&lt;property name="p2.repo" value="${p2.build.repo}"/&gt;
+		&lt;property name="p2.director.iu" value="my.rcp.product"/&gt;
+		&lt;property name="p2.director.version" value="1.0.0"/&gt;
+	&lt;/ant&gt;
+</pre> 
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Using version qualifiers</title>
+</head>
+<body>
+<h1>Using Version Qualifiers</h1>
+<p>Eclipse bundles and features have version numbers of the form <span
+ style="font-style: italic;">major</span>.<span
+ style="font-style: italic;">minor</span>.<span
+ style="font-style: italic;">micro</span>.<span
+ style="font-style: italic;">qualifier</span>.&nbsp; The qualifier
+segment of the version is often used to indicated a specific
+build.&nbsp; If you set your feature or plug-in version qualifier to
+"<tt style="font-weight: bold;">qualifier</tt>" (i.e. a version of <tt>1.0.0.qualifier</tt>),
+then PDE build
+will
+automatically replace the word "qualifier" with a generated qualifier.<br>
+</p>
+<h2>Controlling the Generated Qualifier</h2>
+<p>A feature or plug-in can control its qualifier by setting the property "<tt><b>qualifier</b></tt>" in its build.properties file.  There are are a couple of different cases for the value of this property:</p>
+<table style="border: solid;" border="1" cellspacing="0" cellpadding="1" width="95%" align="center">
+	<tr><td><tt>qualifier = none</tt></td><td>Sets the qualifier to be empty.  (i.e. "1.2.3.qualifier" becomes "1.2.3")</td></tr>
+	<tr><td><tt>qualifier = context</tt></td><td>Sets the qualifier to be the <i>context</i> qualifier.  See below for the value of the context qualifier.</td></tr>
+	<tr><td><i>not set</i></td><td>If the "<tt>qualifier</tt>" property is not set, this is equivalent to setting <tt>qualifier = context</tt>.</td></tr>
+	<tr><td><tt>qualifier = v12345</tt></td><td>Any other value sets the qualifier to be that value.</td></tr>
+</table>
+<h3>The Context Qualifier</h3>
+The value of the generated context qualifier is determined by the first of the
+following items that apply:<br>
+<ol>
+  <li>If the property <tt style="font-weight: bold;">forceContextQualifier</tt> is set in your builder's
+configuration build.properties file,&nbsp; then the value of this
+property is used as the qualifier.&nbsp; This property can also be set
+on the command line with -D when invoking ant.<br>
+<ul>
+<li>When exporting from the UI, <tt>forceContextQualifier</tt> is set according to the "Qualifier replacement" value on the options tab of the "Deployable plug-ins and fragments" export wizard.</li>
+</ul>
+  </li>
+  <li>If you are using map files to fetch your bundles from a
+repository,
+then the tag that was used to fetch the bundle will be used as the
+qualifier.</li>
+  <li>If neither forceContextQualifier nor map files are used, then the
+qualifier will be a time stamp in the form YYYYMMDDHHMM (i.e.
+200605121600)<br>
+  </li>
+</ol>
+<h2>Feature Version Suffixes</h2>
+You can turn on the generation of qualifier suffixes for features by
+setting the property <tt style="font-weight: bold;">generateFeatureVersionSuffix=true
+</tt>in the build configuration build.properties file.<br>
+<br>
+The idea of a version is that it should increment each time something
+changes, the version qualifier increments and captures changes from
+build to build.&nbsp; Features rarely change, however, they do contain
+plug-ins which may change often.&nbsp; When version suffixes are turned
+on, a feature version will have the form <span
+ style="font-style: italic;">major.minor.micro.qualifier-suffix</span>.&nbsp;&nbsp;
+The suffix is in effect the sum of the version qualifiers of all the
+features and plug-ins included by the feature.&nbsp; This means that
+when one of the included plug-ins increments its version, then the
+version of the feature will automatically increment as well.&nbsp; This
+is particularly useful when the feature is deployed via an update site.<br>
+<br>
+<h2><a name="final_versions"></a>Final Versions</h2>
+<p>
+Occasionally there may be custom build steps that may require the
+actual final version used in the build.&nbsp; When the property <b><tt>generateVersionsLists</tt></b> is set, PDE Build will generate
+properties files containing the versions of the features and plug-ins
+that were built.&nbsp; These properties files can be loaded using the ant property task.</p>
+<p>
+The files are named:
+finalPluginsVersions.properties,
+finalPluginsVersions.&lt;config&gt;.properties,
+finalFeaturesVersions.properties, and&nbsp;
+finalFeaturesVersions.&lt;config&gt;.properties.&nbsp;
+finalPluginsVersions.properties and finalFeaturesVersions.properties
+contain the versions for all of the plug-ins and features that were
+built.&nbsp; The &lt;config&gt; properties files contain the versions
+of plug-ins and features for specific build configurations.</p>
+<p>
+The properties in these files have the form:<br>
+</p><pre>&nbsp;&nbsp;&nbsp; &lt;bundleSymbolicName&gt; = &lt;version&gt;<br>&nbsp;&nbsp;&nbsp; &lt;bundleSymbolicName&gt;_&lt;first 3 segments of version&gt; = &lt;version&gt;</pre>
+If more than one versions of a plug-in or feature exists, then
+<tt>&lt;bundleSymbolicName&gt;=&lt;version&gt;</tt> refers to the plug-in or
+feature with the highest version.
+Example:<br>
+<pre>&nbsp;&nbsp;&nbsp; org.eclipse.pde.build = 3.3.0.v20070524<br>&nbsp;&nbsp;&nbsp; org.eclipse.pde.build_3.3.0=3.3.0.v20070524<br>&nbsp;&nbsp;&nbsp; org.eclipse.pde.build_3.2.1=3.2.1.r321_v20060823</pre>
+</body></html>

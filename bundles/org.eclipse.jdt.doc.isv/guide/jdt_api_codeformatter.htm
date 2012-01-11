@@ -1,0 +1,489 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content=
+    "text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1"
+    type="text/css" />
+    <title>
+      Using the code formatter
+    </title>
+    <link rel="stylesheet" type="text/css" href="../book.css" />
+
+  </head>
+  <body>
+    <h2>
+      Using the code formatter
+    </h2>
+    <p>
+      The JDT API allows other plug-ins to use the default
+      <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">
+      code formatter</a></b> to format source code. The two methods
+      to consider are:
+    </p>
+
+    <ul>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/ToolFactory.html#createCodeFormatter(java.util.Map)">
+        ToolFactory.createCodeFormatter(Map)</a></b>
+      </li>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/ToolFactory.html#createCodeFormatter(java.util.Map,%20int)">
+        ToolFactory.createCodeFormatter(Map, int)</a></b>
+
+      </li>
+    </ul>
+    <p>
+      Note: The <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">
+      CodeFormatter</a></b> class is not intended to be subclassed
+      by clients.
+    </p>
+    <h3>
+      Getting a code formatter instance
+    </h3>
+
+    <p>
+      The factory methods on <b><a href=
+      "../reference/api/org/eclipse/jdt/core/ToolFactory.html">ToolFactory</a></b>
+      can be invoked to create a new instance of the default code
+      formatter. Before invoking one of those, you need to define a
+      map that contains the code formatter options. In order to
+      create such a map, you can use the methods defined in the
+      class <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">
+      DefaultCodeFormatterConstants</a></b> like <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html#getEclipseDefaultSettings()">
+      DefaultCodeFormatterConstants.getEclipseDefaultSettings()</a></b>
+
+    </p>
+    <p>
+      NOTE: These predefined maps contain only the code formatter
+      specific options. In order to invoke the code formatter, you
+      also need to specify what kind of source the code formatter
+      will format. In order to do so, specify the three options:
+    </p>
+    <ul>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_CODEGEN_TARGET_PLATFORM">
+        JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM</a></b>
+      </li>
+
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_SOURCE">
+        JavaCore.COMPILER_SOURCE</a></b>
+      </li>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_COMPLIANCE">
+        JavaCore.COMPILER_COMPLIANCE</a></b>
+      </li>
+
+    </ul>
+    <p>
+      The possible values of these options are given by the
+      constants:
+    </p>
+    <ul>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_1">
+        JavaCore.VERSION_1_1</a></b>
+      </li>
+
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_2">
+        JavaCore.VERSION_1_2</a></b>
+      </li>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_3">
+        JavaCore.VERSION_1_3</a></b>
+      </li>
+
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_4">
+        JavaCore.VERSION_1_4</a></b>
+      </li>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_5">
+        JavaCore.VERSION_1_5</a></b>
+      </li>
+
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_6">
+        JavaCore.VERSION_1_6</a></b>
+      </li>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/JavaCore.html#VERSION_1_7">
+        JavaCore.VERSION_1_7</a></b>
+      </li>
+
+    </ul>
+    <p>
+      If you want to modify the default maps, it is recommended
+      that you use the methods defined on <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">
+      DefaultCodeFormatterConstants</a></b> to create the values of
+      the corresponding options. This is especially true for the
+      options relative to code wrapping.
+    </p>
+    <h3>
+      Invoking the code formatter
+    </h3>
+
+    <p>
+      Use the newly created code formatter to format code snippets.
+      The default code formatter allows you to format different
+      kind of code snippets.<br />
+      These kinds are specified in the documentation of the
+      <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int,%20java.lang.String,%20int,%20int,%20int,%20java.lang.String)">
+      format</a></b> method. The returned value of this method is a
+      text edit. This text edit then needs to be applied to an
+      <b><a href=
+      "../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/jface/text/IDocument.html">
+      IDocument</a></b> instance in order to get the formatted
+      result.
+    </p>
+
+    <h4>
+      Example
+    </h4>
+    <pre class="color1">
+	// take default Eclipse formatting options
+	Map options = DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+
+	// initialize the compiler settings to be able to format 1.5 code
+	options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+
+	// change the option to wrap each enum constant on a new line
+	options.put(
+		DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ENUM_CONSTANTS,
+		DefaultCodeFormatterConstants.createAlignmentValue(
+		true,
+		DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE,
+		DefaultCodeFormatterConstants.INDENT_ON_COLUMN));
+
+	// instantiate the default code formatter with the given options
+	final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(options);
+
+	// retrieve the source to format
+	String source = null;
+	try {
+		source = ...; // retrieve the source 
+	} catch (IOException e) {
+		System.err.println("Could not retrieve the source"); //$NON-NLS-1$
+		e.printStackTrace();
+		return;
+	}
+	final TextEdit edit = codeFormatter.format(
+		CodeFormatter.K_COMPILATION_UNIT, // format a compilation unit
+		source, // source to format
+		0, // starting position
+		source.length(), // length
+		0, // initial indentation
+		System.getProperty("line.separator") // line separator
+	);
+
+	IDocument document = new Document(source);
+	try {
+		edit.apply(document);
+	} catch (MalformedTreeException e) {
+		e.printStackTrace();
+	} catch (BadLocationException e) {
+		e.printStackTrace();
+	}
+
+	// display the formatted string on the System out
+	System.out.println(document.get());
+</pre>
+    <p>
+      On this example,
+    </p>
+    <pre class="color1">
+public enum X { A,B,C,D,E,F}
+</pre>
+    <p>
+      the result would be:
+    </p>
+    <pre class="color1">
+public enum X {
+	A,
+	B,
+	C,
+	D,
+	E,
+	F
+}
+</pre>
+    <h3>
+      Formatting a set of regions
+    </h3>
+    <p>
+
+      The default <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">
+      code formatter</a></b> allows to format a set of regions of a
+      given source file.<br />
+      This can be achieved by calling the <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int,%20java.lang.String,%20org.eclipse.jface.text.IRegion[],%20int,%20java.lang.String)">
+      format(int, String, IRegion[], int, String)</a></b> method of
+      the code formatter, with a given <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_UNKNOWN">
+      source kind</a></b> and an array of <b><a href=
+      "../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/jface/text/IRegion.html">
+
+      regions</a></b>.
+    </p>
+    <ul>
+      <li>Each of the region to format must be within source range
+      and should not overlap with another region.
+      </li>
+      <li>The array of regions to format must contain at least one
+      region. Regions should be sorted by their offsets, smaller
+      offset first.
+      </li>
+    </ul>
+    <h3>
+      Comment Formatter API
+    </h3>
+
+    <p>
+      The default <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">
+      code formatter</a></b> API offers the possibility to format
+      comments during the processing of the code snippet.<br />
+      This can be achieved by combining the appropriate flag
+      <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#F_INCLUDE_COMMENTS">
+      F_INCLUDE_COMMENTS</a></b> with <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_COMPILATION_UNIT">
+
+      K_COMPILATION_UNIT</a></b> and <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_UNKNOWN">
+      K_UNKNOWN</a></b> flags.<br />
+      <br />
+      This flag is effective only if the corresponding formatting
+      option was enabled when calling <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int,%20java.lang.String,%20int,%20int,%20int,%20java.lang.String)">
+      format(int, String, int, int, int, String)</a></b> or
+      <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int,%20java.lang.String,%20org.eclipse.jface.text.IRegion[],%20int,%20java.lang.String)">
+
+      format(int, String, IRegion[], int, String)</a></b> methods:
+    </p>
+    <ul>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html#FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT">
+        FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT</a></b> which
+        controls the formatting of javadoc comments
+      </li>
+      <li>
+
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html#FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT">
+        FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT</a></b> which
+        controls the formatting of multiple lines comments
+      </li>
+      <li>
+        <b><a href=
+        "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html#FORMATTER_COMMENT_FORMAT_LINE_COMMENT">
+        FORMATTER_COMMENT_FORMAT_LINE_COMMENT</a></b> which
+        controls the formatting of single line comments
+      </li>
+    </ul>
+
+    <h3>
+      Comment formatter options
+    </h3>
+    <p>
+      Various formatting options are available in order to format
+      comments:
+    </p>
+    <ul>
+      <li>General options to enable or disable the formatting of
+      specific comments (javadoc, multi or single line comments),
+      set maximum line width for comments.
+      </li>
+      <li>javadoc comments options to enable the formatting of code
+      snippets or HTML sections inside javadoc comments, indent tag
+      descriptions, etc.
+      </li>
+
+      <li>block comments option to keep or remove blanks lines
+      within such comment
+      </li>
+    </ul>
+    <p>
+      For detailed information about these settings, refer to the
+      <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/DefaultCodeFormatterConstants.html">
+      DefaultCodeFormatterConstants</a></b>
+    </p>
+    <h3>
+
+      Formatting comments with the stand-alone formatter
+    </h3>
+    <p>
+      The default <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html">
+      code formatter</a></b> can be used to format comments
+      (javadoc, multi or single line). In this case, the source
+      passed to the <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#format(int,%20java.lang.String,%20int,%20int,%20int,%20java.lang.String)">
+      format method</a></b> should only contain a specific kind of
+      comments, and corresponding kind <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_JAVA_DOC">
+
+      K_JAVA_DOC</a></b>, <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_MULTI_LINE_COMMENT">
+      K_MULTI_LINE_COMMENT</a></b> or <b><a href=
+      "../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_SINGLE_LINE_COMMENT">
+      K_SINGLE_LINE_COMMENT</a></b> should be used.
+    </p>
+    <ul>
+      <li>
+
+        <h4>
+          Formatting javadoc comments
+        </h4>
+        <p>
+          The following unformatted javadoc:
+        </p>
+        <pre class="color1">
+  /**
+ * This is just a simple example to show how javadoc comments can     be formatted .
+ * @param str The input string
+   * @return      The resulting   string
+   */
+</pre>
+        <p>
+
+          should be formatted as follows:
+        </p>
+        <pre class="color1">
+/**
+ * This is just a simple example to show how javadoc comments can be formatted .
+ * 
+ * @param str
+ *            The input string
+ * @return The resulting string
+ */
+</pre>
+        <p>
+          using command:
+        </p>
+<pre class="color1">
+	(...)
+	final TextEdit edit = codeFormatter.format(
+		<b><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_JAVA_DOC">CodeFormatter.K_JAVA_DOC</a></b>, // specify the kind: javadoc
+		source, // source to format (as per the above example)
+		0, // starting position
+		source.length(), // length
+		0, // initial indentation
+		System.getProperty("line.separator") // line separator
+	);
+	(...)
+
+</pre>
+      </li>
+      <li>
+        <h4>
+          Formatting multi-line comments
+        </h4>
+        <p>
+          The following unformatted multi-line comment:
+        </p>
+        <pre class="color1">
+
+/*
+  * This is just an example of multi- line comment intended to demonstrate the default code formatter ability to format multi-line comments .
+  * 
+  *   These possibilities include: Formatting of javadoc     comments, 
+  *     formatting of multi-line comments
+ */
+</pre>
+        <p>
+          should be formatted as follows:
+        </p>
+        <pre class="color1">
+/*
+ * This is just an example of multi- line comment intended to demonstrate
+ * the default code formatter ability to format multi-line comments .
+ * 
+ * These possibilities include: Formatting of javadoc comments, formatting
+ * of multi-line comments
+ */
+</pre>
+        <p>
+          using command:
+        </p>
+        <pre class="color1">
+	(...)
+	final TextEdit edit = codeFormatter.format(
+		<b><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_MULTI_LINE_COMMENT">CodeFormatter.K_MULTI_LINE_COMMENT</a></b>, // specify the kind: multi-line comments
+		source, // source to format (as per the above example)
+		0, // starting position
+		source.length(), // length
+		0, // initial indentation
+		System.getProperty("line.separator") // line separator
+	);
+	(...)
+</pre>
+      </li>
+      <li>
+        <h4>
+          Formatting single line comments
+        </h4>
+        <p>
+          The following unformatted single line comments:
+        </p>
+
+        <pre class="color1">
+// This is a long comment that should be split in multiple line comments in case the line comment formatting is enabled
+</pre>
+        <p>
+          should be formatted as follows:
+        </p>
+        <pre class="color1">
+// This is a long comment that should be split in multiple line comments in
+// case the line comment formatting is enabled
+</pre>
+        <p>
+          using command:
+        </p>
+
+        <pre class="color1">
+	(...)
+	final TextEdit edit = codeFormatter.format(
+		<b><a href="../reference/api/org/eclipse/jdt/core/formatter/CodeFormatter.html#K_SINGLE_LINE_COMMENT">CodeFormatter.K_SINGLE_LINE_COMMENT</a></b>,  // specify the kind: single-line comments
+		source, // source to format (as per the above example)
+		0, // starting position
+		source.length(), // length
+		0, // initial indentation
+		System.getProperty("line.separator") // line separator
+	);
+	(...)
+</pre>
+      </li>
+    </ul>
+  </body>
+</html>

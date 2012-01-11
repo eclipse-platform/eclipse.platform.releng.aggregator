@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+  <head>
+<meta name="copyright" content="Copyright (c) 2008, 2009 Mateusz Matela, IBM Corporation and others. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <title>
+      toString() Generator: Code Styles
+    </title>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+  </head>
+  <body>
+    <h1>
+      toString() Generator: Code Styles
+    </h1>
+<p>
+Code style determines how the generated method works and what classes it uses. There are several code styles available to chose from the combo box in generator's <a href="ref-dialog-tostring.htm">dialog</a>:</p>
+<ul>
+<li><h3>String concatenation</h3>
+This style uses simple sum expressions so it's very efficient (compiler uses StringBuilder/StringBuffer to optimize the code) and relatively easy to read and modify. Here's an example outcome in the simplest case:
+<pre>return "FooClass [aFloat=" + aFloat + ", aString=" + aString + ", anInt=" + anInt 
+  + ", anObject=" + anObject + "]";</pre>
+With "Skip null values" option turned on, the code becomes a little harder to read:
+<pre>return "FooClass [aFloat=" + aFloat + ", "
+  + (aString != null ? "aString=" + aString + ", " : "") 
+  + "anInt=" + anInt + ", " 
+  + (anObject != null ? "anObject=" + anObject : "") + "]";</pre>
+</li>
+<li><h3>StringBuilder/StringBuffer</h3>
+This style uses StringBuilder if the project is compatible with JDK1.5 or later and StringBuffer otherwise. StringBuilder is faster (because of lack of synchronization), but only available since JDK1.5.
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=");
+builder.append(aFloat);
+builder.append(", aString=");
+builder.append(aString);
+builder.append(", anInt=");
+builder.append(anInt);
+builder.append(", anObject=");
+builder.append(anObject);
+builder.append("]");
+return builder.toString();</pre>
+The <b>"Skip null values"</b> option doesn't obfuscate the code as much as previously:
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=");
+builder.append(aFloat);
+builder.append(", ");
+if (aString != null) {
+	builder.append("aString=");
+	builder.append(aString);
+	builder.append(", ");
+}
+builder.append("anInt=");
+builder.append(anInt);
+builder.append(", ");
+if (anObject != null) {
+	builder.append("anObject=");
+	builder.append(anObject);
+}
+builder.append("]");
+return builder.toString();</pre>
+</li>
+<li><h3>StringBuilder/StringBuffer with chained calls</h3>
+Style very similar to the previous one only that append methods are called in chain. This makes the code shorter and probably easier to read.
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=").append(aFloat).append(", aString=").append(aString)
+		.append(", anInt=").append(anInt).append(", anObject=").append(anObject).append("]");
+return builder.toString();</pre>
+With <b>"Skip null values"</b> switched on, the chain must be broken:
+<pre>StringBuilder builder = new StringBuilder();
+builder.append("FooClass [aFloat=").append(aFloat).append(", ");
+if (aString != null) {
+	builder.append("aString=").append(aString).append(", ");
+}
+builder.append("anInt=").append(anInt).append(", ");
+if (anObject != null) {
+	builder.append("anObject=").append(anObject);
+}
+builder.append("]");
+return builder.toString();</pre>
+</li>
+<li><h3>String.format()/MessageFormat</h3>
+This style is very pleasant for relatively short list of elements, but with longer ones it becomes hard to see which fields are associated with which variables. Unfortunately, the <b>"Skip null values"</b> option cannot be used with this style.
+<pre>return String.format("FooClass [aFloat=%s, aString=%s, anInt=%s, anObject=%s]",
+  aFloat, aString, anInt, anObject);</pre>
+Because there's no <code>String.format()</code> in JDK 1.4 and earlier, <code>MessageFormat.format()</code> is used instead:
+<pre>return MessageFormat.format("FooClass [aFloat={0}, aString={1}, anInt={2}, anObject={3}]", 
+  new Object[] { new Float(aFloat), aString, new Integer(anInt), anObject });</pre>
+</li>
+<li><h3><a name="custombuilder">Custom toString() builder</a></h3>
+<p>This style uses an external class to build a result string. It can use classes that fulfill the following conditions:</p>
+<ul>
+<li>Provide a public constructor taking a single <code>Object</code> as parameter - it will be passed an object for which the toString() method is called</li>
+<li>Provide methods for appending member information - these are methods with specified name, that take an <code>Object</code> and (optionally) a <code>String</code> (in any order)</li>
+<li>Provide a method for retrieving result - that is a method taking no arguments and returning a <code>String</code></li>
+</ul>
+
+<p>Custom builder requires some additional configuration to work properly. All necessary options can be entered in a dialog box showing up after clicking 'Configure...' button. These options include:</p>
+<ul>
+<li><b>Builder class</b> - a fully qualified name of a class to use. It can be typed in manually or selected from a class search dialog box
+(in this case it's automatically checked if selected class meets the requirements).
+It can be a class declared either directly in current project or in one of included libraries - 
+it just has to be accessible on the build path. For example, ToStringBuilder from the Apache Commons Lang library or
+ToStringCreator from the Spring Framework work very well with this mechanism.</li>
+<li><b>Builder label</b> - any valid java identifier. It will be used to reference the builder object.</li>
+<li><b>Append method</b> - the name of methods to use for appending items. If the class provides many methods with this name, methods taking two arguments (one of them must be <code>String</code>) are preferred over those taking a single argument (additionally, the <code>String</code> argument shall preferably be the first one). If there are versions of the method that take specific argument types, they are also used when possible.</li>
+<li><b>Result method</b> - the name of a method to use for retrieving final result.</li>
+<li><b>Chain invocations</b> - determines whether calls to the <b>append</b> methods should form chains. This option takes effect only for methods that have proper return type (that is, the builder class, or a subclass).</li>
+</ul>
+
+<p>For example, suppose your builder class looks like this:</p>
+<pre>package org.foo.ToStringBuilder2;
+
+public class ToStringBuilder2 {
+	public ToStringBuilder2(Object o) {...}
+	public ToStringBuilder2 appendItem(String s, Object o) {...}
+	public ToStringBuilder2 appendItem(String s, float f) {...}
+	public String getString() {...}
+}</pre>
+<p>
+Of course in this case <b>builder class</b> should be set to <code>"org.foo.ToStringBuilder2"</code>, <b>builder label</b> can be for example <code>"builder"</code>, <b>append method</b> is <code>"appendItem"</code> and <b>result method</b> is <code>"getString"</code>. With <b>chain invocations</b> selected, generated method will look like this:
+</p>
+<pre>ToStringBuilder2 builder = new ToStringBuilder2(this);
+builder.append("aFloat", aFloat).append("aString", aString).append("anInt", new Integer(anInt))
+		.append("anObject", anObject);
+return builder.getString();</pre>
+
+<p>Note that a primitive variable <code>anInt</code> was passed to the builder using wrapper type. This is done for projects using JDK 1.4 and earlier (for later JDKs the compiler does it automatically). In case of <code>aFloat</code> there was a specific method in builder class so no wrapping was required.</p>
+</li>
+</ul>
+    <p>
+      <img src="../images/ngrelr.png" alt="Related reference" border="0" >
+    </p>
+    <p>
+	  <a href="ref-dialog-tostring.htm">Generate toString() dialog</a><br>
+	  <a href="ref-tostring-templates.htm">toString() Generator: Format Templates</a><br>
+	  <a href="ref-tostring-listcontent.htm">toString() Generator: Content Listing</a>
+    </p>
+  </body>
+</html>

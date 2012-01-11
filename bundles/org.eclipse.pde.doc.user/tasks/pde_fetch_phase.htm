@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2010. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Fetching from Repositories</title>
+</head>
+<body>
+<h1>Fetching from Repositories</h1>
+<p>
+The infrastructure offered by PDE Build provides steps to fetch the
+source code and pre-built plug-ins from a repository as part of the build process (see the <a href="pde_feature_generating_antcommandline.htm#eclipseFetch">eclipse.fetch</a> task 
+and the <a href="../reference/pde_builder_config.htm#fetchControl">properties to control fetching</a>).
+Two possibilities are available: let PDE build automatically fetch the
+source, or fetch the source code manually.</p>
+
+<h3>First step to automation, the map file</h3>
+<p>
+Given the identifier of a feature or a plug-in that needs to be built, the build
+infrastructure is able to fetch from a repository all the included features and
+plug-ins.</p>
+<p>
+In order to know where to get things from, PDE uses map files. A map
+file is a java property file which maps feature and plug-in ids to a
+location and a tag in a repository. The format of map files is open and but  
+the <b>key</b> part is fixed by PDE Build:</p>
+<div style="text-align: center;">
+<pre>&lt;elementType&gt;@&lt;elementID&gt;[,&lt;elementVersion&gt;] = &lt;repo specific content&gt;</pre>
+</div>
+<p>where <tt>elementType</tt> is one of <tt>bundle</tt>, <tt>feature</tt>,
+<tt>plugin</tt> or <tt>fragment</tt>, and <tt>elementId</tt> and <tt>elementVersion</tt> give the specifics of the element.</p>
+
+<h4>Map file entry for CVS</h4>
+The format of a map file entry to fetch content from CVS is the following:
+<div style="text-align: center;">
+	<pre>&lt;key&gt; = CVS, [,args]</pre>
+</div>
+where <tt>args</tt> is a comma-separated list of key/value pairs described below:
+<ul>
+	<li><tt>tag</tt>, the CVS tag to check out;</li>
+	<li><tt>cvsRoot</tt>, a CVS connection string;</li>
+	<li><tt>path</tt>, an optional CVS module and path where to get the folder containing the element. By default the element name is used as module name;</li>
+	<li><tt>prebuilt</tt>, an optional boolean indicating if the element downloaded is prebuilt. By default this is false;</li>
+	<li><tt>cvsPassFile</tt>, an option path to a cvs pass file;</li>
+	<li><tt>password</tt>, an optional password to use to connect to CVS;</li>
+</ul>
+	
+Example:
+<div style="text-align: center;">
+<pre>plugin@com.ibm.icu,3.6.1=CVS,tag=v200704191630,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/tools,path=org.eclipse.orbit/com.ibm.icu/bin,prebuilt=true</pre>
+</div>
+<br>
+<table style="border: solid 1px">
+<tr><td><b>Old style Map Entries</b></td></tr>
+<tr><td>
+In Eclipse 3.2 and earlier, the map file format for CVS was:
+<div style="text-align: center;">
+<pre>&lt;elementType&gt;@&lt;elementID&gt; = CVS, &lt;TAG&gt;, &lt;CVSROOT&gt;[,&lt;PASSWORD&gt;[,&lt;PATH&gt;[,&lt;CVSPASSFILE&gt;]]]</pre>
+</div>
+If any of the optional arguments aren't specified, then the commas are still required to delimit any following arguments.  This format should be considered deprecated and the key/value format is prefered.
+</td>
+</tr>
+</table>
+<h4>Map file entry for Ant GET</h4>
+<p>
+The format of a map file entry to fetch content from any URL supported by <a href="http://ant.apache.org/manual/Tasks/get.html">Ant GET</a> is the following:</p>
+<div style="text-align: center;">
+<pre>&lt;key&gt; = GET, &lt;url&gt; [,args]</pre>
+</div>
+where <tt>url</tt> is the url to retrieve the data from and <tt>args</tt> is an optional comma-separated list of key/value pairs described below:  
+<ul>
+	<li><tt>unpack</tt>, set to true the indicate that the downloaded element should be unzipped;</li> 
+	<li><tt>verbose</tt>, set to true to show verbose progress information when downloading. The default value is false;</li>
+	<li><tt>ignoreerrors</tt>, set to true to log errors during the transport. The default value is false;</li>
+	<li><tt>usetimestamp</tt>, conditionally download a file based on the timestamp of the local copy (for http URLs only) when set to true. The default value is false;</li>
+	<li><tt>username</tt>, the username for "BASIC" http authentication;</li>
+	<li><tt>password</tt>, the password to perform the download.</li>
+</ul>
+
+Example:
+<div style="text-align: center;">
+   <pre>plugin@com.ibm.icu,3.4.5=GET,http://download.eclipse.org/tools/orbit/downloads/drops/S200705301823/bundles/com.ibm.icu_3.4.5.jar, unpack=true</pre>
+</div>
+
+<h4><a name="p2_fetch">Map file entry for a p2 fetch</a></h4>
+<p>A new extension has been added to PDE/Build that enables users to fetch artifacts from p2 repositories. You can now add an 
+entry to your map file for build input and PDE/Build will retrieve the artifact and include it in the build. The map file entry needs to include the 
+id and version of the installable unit (IU), and the URI of the repository where the IU can be found. The metadata and artifact repositories are 
+assumed to be co-located. 
+</p>
+<p>
+The format of a map file entry to fetch content via p2 is as follows:
+</p>
+<div style="text-align: center;">
+<pre>&lt;elementType&gt;@&lt;elementID&gt; = p2IU, id=&lt;id&gt;, version=&lt;version&gt;, repository=&lt;repository&gt;</pre>
+</div>
+<ul>
+<li><tt>id</tt>, the identifier of the Installable Unit;</li>
+<li><tt>version</tt>, the version of the Installable (optional).  If not specified, the highest version available will be fetched.</li>
+<li><tt>repository</tt>, the location (URI) of the repository where the IU will be found.</li>
+</ul>
+
+<b>Fetching features with p2</b>
+<p>In the Helios release, features can be fetched with p2 by specifying the Installable Unit representing the feature jar.  See the <a href="pde_p2_featuremetadata.htm">feature metadata</a> page 
+for details on the structure of p2 metadata for features.</p> 
+
+Examples:
+<div style="text-align: center;">
+<pre>
+plugin@my.bundle.id,1.0.0=p2IU,id=my.bundle.id,version=1.0.0,repository=http://example.eclipse.org/repo
+feature@my.feature.id = p2IU,id=my.feature.id<b>.feature.jar</b>, version=1.0.0,repository=http://example.eclipse.org/repo
+</pre> 
+</div>
+
+
+
+
+<h4>Map file entry for other repositories</h4>
+<p>PDE Build provides an extension point
+where fetch script generators for different repositories can be plugged in. When your eclipse
+install contains a bundle that provides a script generator extension
+for a different type of repository, you can use that repository by
+specifying it in your map file entries and adhering to the format specified by the extension provider.</p>
+
+<h3>Setting up for CVS source fetching</h3>
+To set up fetching your source from CVS, you should do the following:<br>
+<ul>
+  <li>Make sure you have a cvs.exe on your system search path.&nbsp;
+(Download CVS from <a href="http://www.nongnu.org/cvs/">here</a>).<br>
+  </li>
+  <li>Create a folder called maps in the build directory.</li>
+  <li>Create a file with extension .map in the maps folder.</li>
+  <li>Fill in this map file with all the elements that need to be
+fetched from a repository.</li>
+  <li>Edit the build.properties file from the configuration folder and
+comment out the line <tt>skipFetch=true</tt>.&nbsp; If that property
+is set, then PDE build will skip the entire fetch phase.&nbsp; If you
+want the tag specified in the map files to be ignored you can set the
+property <tt>fetchTag</tt> to a specific value. This is useful when
+doing a nightly build from HEAD instead of from the tagged versions. </li>
+</ul>
+<h4>Getting the map files from CVS</h4>
+Map files are usually stored in a repository. PDE Build offers default
+infrastructure to get those map files from a CVS repository.
+To enable this function change the following properties in your
+configuration's build.properties from your configuration directory:
+<ul>
+  <li><span style="font-weight: bold;">skipMaps</span>:&nbsp; Comment
+out this property.&nbsp; If this property is set, then PDE build will
+not fetch the map files.<br>
+  </li>
+  <li><span style="font-weight: bold;">mapsRepo</span> =
+:pserver:anonymous@example.com/path/to/repo.&nbsp; The CVS repository
+from which to get the map files.<br>
+  </li>
+  <li><span style="font-weight: bold;">mapsRoot</span> =
+/path/to/maps.&nbsp; The path in the CVS repository to the directory
+containing the map files.<br>
+  </li>
+  <li><span style="font-weight: bold;">mapsCheckoutTag</span> =
+HEAD.&nbsp; The CVS tag to use to checkout the map files.</li>
+</ul>
+Fetching the map files from CVS occurs during the Pre-Build phase of
+the build.&nbsp; Scripts to
+fetch all the features and plug-ins included in the feature you are
+building will be generated and
+run during the fetch phase of the build.&nbsp;
+
+<h3>Automatic fetching from other repositories</h3>
+<p>If&nbsp; you are automatically fetching your map files from the
+repository, you will need to copy the customTarget.xml file from
+org.eclipse.pde.build/templates/headless-build into your configuration
+directory.&nbsp; The target&nbsp; getMapFiles is used to fetch the map
+files, this should be modified to fetch from your repository.</p>
+<h3>Getting source code manually</h3>
+You can write custom fetch targets to retrieve your plug-ins and
+features which can be invoked from
+the preSetup or postSetup targets in the customTargets.xml file.&nbsp;
+Features and plug-ins should
+be fetched to
+<tt>${buildDirectory}/features</tt>
+and
+<tt>${buildDirectory}/plugins</tt>
+respectively.&nbsp;
+<br>
+<br>
+</body>
+</html>

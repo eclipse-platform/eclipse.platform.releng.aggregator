@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Customizing feature and plug-in builds</title>
+</head>
+<body>
+<h1>Feature and Plug-in custom build steps</h1>
+<p>New in 3.2 is the ability for a feature or plug-in to contribute
+custom ant targets to its own build.&nbsp; These custom steps can be
+used for things like instrumenting byte-code after compilation,
+indexing help files for documentation, or copying extra files into the
+bundle.&nbsp;</p>
+<p>To use custom targets, a feature or plug-in must define the property
+<tt>customBuildCallbacks</tt> in its build.properties file; the value
+of this
+property is the location of an xml file, relative to the root of the
+feature/plug-in, containing the custom targets.  If the xml file is located elsewhere, use the property
+customBuildCallbacks.buildpath to set the directory to use. </p>
+<p>Templates named
+<span style="font-style: italic;">customBuildCallbacks.xml</span>
+containing the supported custom targets are
+provided in org.eclipse.pde.build/templates/plugins and&nbsp;
+org.eclipse.pde.build/templates/features.&nbsp; These
+templates can be copied into your feature/plug-in and modified as
+needed. </p>
+ <p>
+ The custom targets will be invoked using the subant task; by default, <span style="font-style: italic;">failonerror</span> is set to false.  To change this
+set the property <tt>customBuildCallbacks.failonerror</tt> to true.  Similarly, the <span style="font-style: italic;">inheritall</span> parameter defaults to false.  Set the 
+property <tt>customBuildCallbacks.inheritall</tt> to change this. 
+</p>
+<h2>Plug-ins</h2>
+<p>The generated build.xml that builds a plug-in contains several
+targets that perform specific tasks.&nbsp; PDE Build allows the plug-in
+to provide custom pre and post targets that will be called before and
+after specific tasks.&nbsp; In addition to any ant properties that may
+already be defined, each custom target may also be passed a couple of
+specific properties.&nbsp; The following targets support custom
+callbacks:<br>
+</p>
+<ul>
+  <li><span style="font-weight: bold;">build.jars</span>:&nbsp; The
+build.jars target will invoke in turn each of the compilation targets
+that will be built for this bundle.&nbsp; It supports <span
+ style="font-weight: bold;">pre.build.jars</span> and <span
+ style="font-weight: bold;">post.build.jars</span> targets which are
+called before and after all the compilation targets are called.&nbsp;
+Both the pre and post targets are provided with the property <tt>build.result.folder</tt>
+which is the folder to which the
+results of the
+build will be copied.</li>
+  <li><span style="font-weight: bold;">Compilation Targets</span>:&nbsp;
+The build.xml defines a compilation target for each jar being built (eg
+@dot for the bundle itself, or library.jar).&nbsp; Each compilation
+target supports 3 custom callbacks:
+  <ul>
+    <li><span style="font-weight: bold;">pre.&lt;compilation target&gt;</span>:&nbsp;
+Called before source files are compiled.&nbsp; It is provided with the
+following properties:
+    <ul>
+      <li><tt>target.folder</tt>:&nbsp; The folder where the compiled
+class
+files will be placed</li>
+      <li><tt>source.folder&lt;N&gt;</tt>:&nbsp; The source folder(s)
+containing
+the source to be compiled.&nbsp; (e.g. <tt>source.folder1</tt>, <tt>source.folder2</tt>,
+etc).</li>
+      <li><tt>&lt;compilation target&gt;.classpath</tt>:&nbsp; A
+reference to
+the ant path structure containing the classpath that will be used in
+the compilation.&nbsp; (e.g. <tt>@dot.classpath</tt>, <tt>library.jar.classpath</tt>).  The reference to the classpath should be used with a <tt>refid</tt>. 
+<br><b>Example:</b>
+<pre>
+&lt;classpath refid="library.jar.classpath"/&gt;
+&lt;property name="mypath" refid="library.jar.classpath" /&gt;
+</pre>
+</li>
+    </ul>
+    </li>
+    <li><span style="font-weight: bold;">post.compile.&lt;compilation
+target&gt;</span>:&nbsp; Called after the source is compiled, but
+before the class files are jared or copied into the build result
+folder.&nbsp;
+It is provided with the same properties as the pre.&lt;compilation
+target&gt; target.</li>
+    <li><span style="font-weight: bold;">post.&lt;compilation target&gt;</span>:&nbsp;
+Called at the end of the compilation target after the results are
+copied to the build result folder.&nbsp; It is provided with the
+following properties:
+    <ul>
+      <li>jar.Location:&nbsp; The jar or folder containing the
+compilation results.</li>
+      <li>&lt;compilation target&gt;.classpath:&nbsp; A reference to
+the ant path structure containing the classpath that was used in the
+compilation.</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+  <li><span style="font-weight: bold;">build.sources</span>:&nbsp; This
+target builds the source zips for each of the compilation
+targets.&nbsp; It supports <span style="font-weight: bold;">pre.build.sources</span>
+and <span style="font-weight: bold;">post.build.sources</span>
+targets.&nbsp; Both of these targets are provided with the property
+build.result.folder which is the folder to which the source zip files
+will be copied.</li>
+  <li><span style="font-weight: bold;">gather.bin.parts</span>:&nbsp;
+This target copies the build results (i.e. the jars and any other files
+being included in the bundle) to the final destination directory.&nbsp;
+It is also the target where the version qualifiers are replaced in the
+manifest file (see&nbsp;<a href="pde_version_qualifiers.htm">Version
+Qualifiers</a>). It supports <span style="font-weight: bold;">pre.gather.bin.parts</span>
+and <span style="font-weight: bold;">post.gather.bin.parts</span>
+targets.&nbsp; Two properties are provided to the pre and post targets:
+  <ul>
+    <li><tt>build.result.folder</tt>:&nbsp; the folder containing the
+results of
+the build</li>
+    <li><tt>target.folder</tt>:&nbsp; the destination folder to which
+the build
+results and bundle contents are being copied.</li>
+  </ul>
+  </li>
+  <li><span style="font-weight: bold;">gather.sources</span>: This
+target gathers the source zips for the bundle.&nbsp; It supports <span
+ style="font-weight: bold;">pre.gather.sources </span>and <span
+ style="font-weight: bold;">post.gather.sources</span> targets.&nbsp;
+Both the pre
+and post targets are provided with the target.folder property which is
+the folder that the sources are being copied to.<br>
+  </li>
+  <li><span style="font-weight: bold;">gather.logs</span>:&nbsp; This
+target collects the log files from the build.&nbsp; It supports <span
+ style="font-weight: bold;">pre.gather.logs</span> and <span
+ style="font-weight: bold;">post.gather.logs</span>.&nbsp; Both the pre
+and post
+targets are provided with the destination.temp.folder which is the
+temporary folder that the logs files are being copied to.<br>
+  </li>
+  <li><span style="font-weight: bold;">clean</span>:&nbsp; This target
+performs a clean, it supports <span style="font-weight: bold;">pre.clean</span>
+and <span style="font-weight: bold;">post.clean</span> targets.&nbsp;
+The pre and post targets have the following properties:
+  <ul>
+    <li><tt>plugin.destination</tt>:&nbsp; The folder that the final
+bundle was
+copied to.<br>
+    </li>
+    <li><tt>build.result.folder</tt>:&nbsp; The folder that the results
+of the
+build were copied to</li>
+    <li><tt>temp.folder</tt>:&nbsp; The temporary folder where the results
+were staged before being copied to the final destination.<br>
+    </li>
+  </ul>
+  </li>
+</ul>
+<h2>Features</h2>
+<p>
+The generated build.xml for features only supports custom build
+callbacks for the gather.bin.parts target.&nbsp; This target will
+invoke the gather.bin.parts target of all the included features and
+plug-ins.&nbsp; It supports pre.gather.bin.parts and
+post.gather.bin.parts.&nbsp; Both of these targets are provided with
+the following properties:
+</p>
+<ul>
+  <li><tt>destination.temp.folder</tt>:&nbsp; The directory to which
+the plug-ins will be copied.</li>
+  <li><tt>feature.directory</tt>:&nbsp; The directory to which the
+files for
+this feature will be copied.<br>
+  </li>
+</ul>
+</body>
+</html>

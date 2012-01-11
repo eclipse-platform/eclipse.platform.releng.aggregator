@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright" content="Copyright (c) IBM Corporation and others 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../../book.css" type="text/css">
+  <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
+  <title>Javadoc @since Tag Management</title>
+</head>
+<body>
+<h1> Javadoc @since Tag Management</h1>
+<p>API Tools provides support for management of <code>@since</code> Javadoc tags on new elements that have been added to API (types, methods, fields, etc). 
+New API elements could be a new type added to an API package, a new type added to an API type, a new method added to an API type or a new field added to an API type.
+Method addition is a special case, where a method addition could be adding a method to a type, overriding a parent class method, implementing a parent interface method 
+or changing an existing methods' signature.
+</p>
+<p>
+Note: <code>@since</code> tag information is not propagated via implementation or sub-classing. Each element that is added to API is expected to have 
+its' own <code>@since</code> tag and version information.
+</p>
+<p>
+The tooling provides the following validation for <code>@since</code> tags:
+</p>
+<ul>
+	<li><a href="#missing">Missing <code>@since</code> tags</a></li>
+	<li><a href="#malformed">Malformed <code>@since</code> tags</a></li>
+	<li><a href="#invalid">Invalid <code>@since</code> tag versions</a></li>
+</ul>
+<p>The preferences for <code>@since</code> tag management can be changed on the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.pde.api.tools.ui.apitools.errorwarnings.prefpage)")'> <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Console preference page"> <b>Plug-in Development &gt; API Errors/Warnings</b></a> preference page.</p>
+<a id="missing"></a>
+<h2>Missing @since tags</h2>
+<p>
+Every new API element detected will be checked by the tooling to ensure it has an <code>@since</code> tag. 
+If the new element does not have an <code>@since</code> tag, it will be flagged as needing one, and a version for the tag will be proposed.
+The proposed version for the new tag will be the current version of the bundle - except in the case of a breaking API change where the bundle
+version also needs to be updated. If the bundle version also needs to be updated, the proposed version for the missing <code>@since</code> tag will be that of the proposed
+bundle version.  
+</p>
+<p>
+Consider the following example: we have a bundle A with version 1.0.0 and we have a class C that was added in version 1.1.0 of A which contains method m1().
+</p>
+<ul>
+<li>If we add a new method to C, say m2(), the tooling will report a missing <code>@since</code> tag problem on m2() and suggest
+that a new tag of <code>@since 1.1</code> be placed on m2().</li>
+<li>If we add a new method to C, say m2() again and we change m1() - introduce a breaking API change - the tooling will report a 
+missing <code>@since</code> tag problem on m2() and suggest that a new tag of <code>@since 2.0</code> be place on m2(). Where <code>2.0.0</code>
+is the new proposed bundle version.</li>
+</ul>
+<a id="malformed"></a>
+<h2>Malformed @since tags</h2>
+<p>
+New elements can have their <code>@since</code> tags checked for consistency to ensure they are properly formulated. API tools 
+checks that all <code>@since</code> tags follow the general format of: <br><br>
+<code>[@since] [pre-amble] [2 part version] [post-amble]</code>
+</p>
+<p>
+Consider the following <code>@since</code> tag examples:
+</p>
+<ul>
+<li><code>@since A 1 added m2()</code>: would be flagged as malformed because the version is missing the second segment</li>
+<li><code>@since</code>: would flagged as malformed since there is no version information</li>
+<li><code>@since A</code>: would be flagged since there is no version information</li>
+<li><code>@since 1.0.0</code>: would be flagged since the version has too many segments</li>
+<li><code>@since A 1.0 added m2()</code>: would not be flagged</li>
+</ul>
+<a id="invalid"></a>
+<h2>Invalid @since tag versions</h2>
+<p>
+New elements can also have their <code>@since</code> tags checked for validity. An <code>@since</code> tag is considered to be valid
+if the version information in the tag matches the version of the bundle.
+</p>
+<p>
+Consider the following example where we have added a new method m2() to an API class in bundle A whose version is 1.0.0:
+</p>
+<ul>
+<li><code>@since A 1.0 added method m2()</code>: is considered valid</li>
+<li><code>@since A 2.0 added method m2()</code>: is invalid since the version of bundle A is 1.0.0</li>
+<li><code>@since A 0.1 added method m2()</code>: is invalid since the version of bundle A is 1.0.0</li>
+</ul>
+<p> 
+	<img border="0" src="../../images/ngrelt.png" alt="Related tasks"><br>
+	<a href="../../tasks/api_tooling_baseline.htm">Setting up a baseline</a>
+</p>
+<p>
+	<img src="../../images/ngrelr.png" alt="Related reference" border="0"><br>
+	<a href="preferences/ref-baselines.htm">API Baselines Preferences</a><br>
+	<a href="preferences/ref-errorswarnings.htm">API Errors and Warnings Preferences</a>
+</p>
+</body>
+</html>

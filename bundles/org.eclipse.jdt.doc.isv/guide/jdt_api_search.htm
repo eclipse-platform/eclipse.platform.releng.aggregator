@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="copyright" content=
+"Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
+<title>Using the Java search engine</title>
+<link rel="stylesheet" type="text/css" href="../book.css" />
+</head>
+<body>
+<h2>Using the Java search engine</h2>
+<p>Your plug-in can use the JDT API to search Java projects in the workspace for Java elements, such as method references, field declarations, implementors of an interface, etc.</p>
+
+<p>The entry point for Java search is the <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchEngine.html">SearchEngine</a></b> class. You can search for particular patterns inside a Java
+element and scope the search to specific elements.&nbsp; Search patterns can be created using <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(org.eclipse.jdt.core.IJavaElement,%20int)">createPattern</a></b>.&nbsp; A pattern is scoped using <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createJavaSearchScope(org.eclipse.jdt.core.IJavaElement[])">createJavaSearchScope</a></b>.&nbsp; Once a pattern and scope are defined,
+the <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#search(org.eclipse.jdt.core.search.SearchPattern,%20org.eclipse.jdt.core.search.SearchParticipant[],%20org.eclipse.jdt.core.search.IJavaSearchScope,%20org.eclipse.jdt.core.search.SearchRequestor,%20org.eclipse.core.runtime.IProgressMonitor)">
+search</a></b> method is used to collect the results.</p>
+
+<p>Search results are reported to a <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html">SearchRequestor</a></b> which you must extend in order to access the results.</p>
+<h3>Preparing for search</h3>
+<p>A search operation will use both a pattern for describing the nature of the search, and a scope for restraining the range of investigation.</p>
+<h4>Creating a Java search pattern</h4>
+<p>A search pattern defines how search results are found. You can either create a search pattern from a Java element (see <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(org.eclipse.jdt.core.IJavaElement,%20int)">createPatternPattern(IJavaElement element, int limitTo)</a></b>) or from a
+string (see <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createPattern(java.lang.String,%20int,%20int,%20int)">createPattern(String, int, int, int)</a></b>.) The last
+method supports wildcards (i.e. '*') and can be used to widen the search results.</p>
+
+<p>For example, creating a search pattern for searching for references to a given method is done as follows:</p>
+<pre class="color1">
+
+    // Get the method
+    IMethod method = ...;
+    
+    // Create search pattern
+    SearchPattern pattern = SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES);
+</pre>
+<p>Or creating a search pattern for searching for declarations of all types starting with "Obj":</p>
+<pre class="color1">
+
+    // Create search pattern
+    SearchPattern pattern = SearchPattern.createPattern("Obj*", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
+</pre>
+<p>The following search patterns are supported:</p>
+<ul>
+
+<li>Package declarations</li>
+<li>Type declarations</li>
+<li>Field declarations</li>
+<li>Method (and constructor) declarations</li>
+<li>Package references</li>
+<li>Type references</li>
+<li>Interface implementors</li>
+<li>Field references</li>
+<li>Field write accesses</li>
+
+<li>Field read accesses</li>
+<li>Method (and constructor) references</li>
+<li>Combinations of the above patterns using the OR pattern (see <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#createOrPattern(org.eclipse.jdt.core.search.SearchPattern,%20org.eclipse.jdt.core.search.SearchPattern)">createOrPattern</a></b>)</li>
+</ul>
+<p>Note that these patterns are created using the following possible rules:</p>
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_EXACT_MATCH">R_EXACT_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_PREFIX_MATCH">R_PREFIX_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_PATTERN_MATCH">R_PATTERN_MATCH</a></b></li>
+
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_REGEXP_MATCH">R_REGEXP_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_CAMELCASE_MATCH">R_CAMELCASE_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_CAMELCASE_SAME_PART_COUNT_MATCH">R_CAMELCASE_SAME_PART_COUNT_MATCH</a></b></li>
+</ul>
+which may be also combined with one of the following flags:
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_CASE_SENSITIVE">R_CASE_SENSITIVE</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_ERASURE_MATCH">R_ERASURE_MATCH</a></b></li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/SearchPattern.html#R_EQUIVALENT_MATCH">R_EQUIVALENT_MATCH</a></b></li>
+</ul>
+<p>For example,</p>
+
+<pre class="color1">
+
+    // a case insensitive prefix match is requested
+    SearchPattern pattern1 = SearchPattern.createPattern("Hash", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PREFIX_MATCH);
+
+    // a camel case match is requested
+    SearchPattern pattern2 = SearchPattern.createPattern("HM", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_CAMEL_CASE_MATCH);
+
+    // a camel case with a strict expected number of parts match is requested
+    SearchPattern pattern3 = SearchPattern.createPattern("HM", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_CAMELCASE_SAME_PART_COUNT_MATCH);
+</pre>
+<p>Note that using the patterns created above reduce the number of possible results among others:</p>
+<ul>
+<li>pattern1: <code>Hashtable</code>, <code>HashMap</code>, <code>HashMapEntry</code>, etc.</li>
+<li>pattern2: <code>HashMap</code>, <code>HashMapEntry</code>, etc.</li>
+
+<li>pattern3: <code>HashMapEntry</code>, etc.</li>
+</ul>
+<h4>Using <i>fine grain</i> flags in a Java search pattern</h4>
+<p>Some references patterns can be refined by adding one or several <i>fine grain</i> flags to the <code>limitTo</code> parameter.</p>
+
+<p>For example, only the type references used in a cast expression will match the pattern created as follows:</p>
+<pre class="color1">
+
+    // Get the type
+    IType type = ...;
+    
+    // Create search pattern
+    SearchPattern pattern = SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES | IJavaSearchConstants.CAST_TYPE_REFERENCE);
+</pre>
+<p>Note that the fine grain flags can be combined together but only for the same kind of search (e.g. only a combination of flags for <strong>type</strong> references will be meaningful if the
+<code>searchFor</code> parameter is set to <a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#TYPE">TYPE</a>).</p>
+
+<p>Flags for type references:</p>
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#FIELD_DECLARATION_TYPE_REFERENCE">FIELD_DECLARATION_TYPE_REFERENCE</a></b>: type references used as the type of
+a field declaration.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE">LOCAL_VARIABLE_DECLARATION_TYPE_REFERENCE</a></b>: type references
+used as the type of a local variable declaration.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#PARAMETER_DECLARATION_TYPE_REFERENCE">PARAMETER_DECLARATION_TYPE_REFERENCE</a></b>: type references used as the
+type of a method parameter.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#SUPERTYPE_TYPE_REFERENCE">SUPERTYPE_TYPE_REFERENCE</a></b>: type references used as a super type or as a super
+interface.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#THROWS_CLAUSE_TYPE_REFERENCE">THROWS_CLAUSE_TYPE_REFERENCE</a></b>: type references used in a throws
+clause.</li>
+
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#CAST_TYPE_REFERENCE">CAST_TYPE_REFERENCE</a></b>: type references used in a cast expression.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#CATCH_TYPE_REFERENCE">CATCH_TYPE_REFERENCE</a></b>: type references used in a catch header.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#CLASS_INSTANCE_CREATION_TYPE_REFERENCE">CLASS_INSTANCE_CREATION_TYPE_REFERENCE</a></b>: type references used in
+class instance creation.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#RETURN_TYPE_REFERENCE">RETURN_TYPE_REFERENCE</a></b>: type references used as a method return type.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#IMPORT_DECLARATION_TYPE_REFERENCE">IMPORT_DECLARATION_TYPE_REFERENCE</a></b>: type references used in an import
+declaration.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#ANNOTATION_TYPE_REFERENCE">ANNOTATION_TYPE_REFERENCE</a></b>: type references used as an annotation.</li>
+
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#TYPE_ARGUMENT_TYPE_REFERENCE">TYPE_ARGUMENT_TYPE_REFERENCE</a></b>: type references used as a type argument in a
+parameterized type or a parameterized method.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#TYPE_VARIABLE_BOUND_TYPE_REFERENCE">TYPE_VARIABLE_BOUND_TYPE_REFERENCE</a></b>: type references used as a type
+variable bound.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#WILDCARD_BOUND_TYPE_REFERENCE">WILDCARD_BOUND_TYPE_REFERENCE</a></b>: type references used as a wildcard
+bound.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#INSTANCEOF_TYPE_REFERENCE">INSTANCEOF_TYPE_REFERENCE</a></b>: type references used in an <code>instance
+of</code> condition.</li>
+</ul>
+<p>Flags for field or method references:</p>
+
+<ul>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#SUPER_REFERENCE">SUPER_REFERENCE</a></b>: super field accesses or super method invocations (e.g. using the
+<code>super</code> qualifier).</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#QUALIFIED_REFERENCE">QUALIFIED_REFERENCE</a></b>: qualified field accesses or qualified method invocations.</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#THIS_REFERENCE">THIS_REFERENCE</a></b>: primary field accesses or primary method invocations (e.g. using the
+<code>this</code> qualifier).</li>
+<li><b><a href="../reference/api/org/eclipse/jdt/core/search/IJavaSearchConstants.html#IMPLICIT_THIS_REFERENCE">IMPLICIT_THIS_REFERENCE</a></b>: field accesses or method invocations without any
+qualification.</li>
+
+</ul>
+<h4>Creating a Java search scope</h4>
+<p>If you are interested in search results in a given project or even in a given package, or if you know that search results can only be found in the hierarchy of a given type, you can create the
+appropriate search scope using <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createJavaSearchScope(org.eclipse.jdt.core.IJavaElement[])">createJavaSearchScope(IJavaElement[])</a></b> or <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createHierarchyScope(org.eclipse.jdt.core.IType)">createHierarchyScope(IType)</a></b>.</p>
+<p>For example, creating a search scope on a given package is done as follows:</p>
+<pre class="color1">
+
+    // Get the package
+    IPackageFragment pkg = ...;
+
+    // Create search scope
+    IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {pkg});
+</pre>
+
+<p>Or creating a search scope on the hierarchy of a given type is:</p>
+<pre class="color1">
+
+    // Get the type
+    IType type = ...;
+
+    // Create search scope
+    IJavaSearchScope scope = SearchEngine.createHierarchyScope(type);
+</pre>
+<p>Finally, you can create a search scope comprising the entire workspace using <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchEngine.html#createWorkspaceScope()">createWorkspaceScope</a></b>:</p>
+<pre class="color1">
+
+    // Create search scope
+    IJavaSearchScope scope = SearchEngine.createWorkspaceScope();
+</pre>
+<h3>Searching</h3>
+
+<p>Once you have created a search pattern and a search scope, and you have extended <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html">SearchRequestor</a></b>, you can
+start a search query as follows:</p>
+<pre class="color1">
+
+    // Get the search pattern
+    SearchPattern pattern = ...;
+
+    // Get the search scope
+    IJavaSearchScope scope = ...;
+
+    // Get the search requestor
+    SearchRequestor requestor = ...;
+
+    // Search
+    SearchEngine searchEngine = new SearchEngine();
+    searchEngine.search(pattern, new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()}, scope, requestor, null);
+</pre>
+<p>A notification that the search starts is sent to your search requestor using the <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#beginReporting()">beginReporting</a></b> method. &nbsp;Then, each search result is reported using the <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)">acceptSearchMatch</a></b> method. Finally <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#endReporting()">endReporting</a></b> indicates that the search has ended.</p>
+
+<h3>Collecting search results</h3>
+<p>Search results are reported using the <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchRequestor.html#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)">acceptSearchMatch(SearchMatch)</a></b> method. Paragraphs below
+highlight some features of <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchMatch.html">SearchMatch</a></b>.</p>
+<h4>Resources and Java elements</h4>
+<p>A search result can correspond to a Java element (e.g. a type declaration) or it can be contained in a Java element (e.g. a reference to a type inside a method). The search engine always tries to
+find the innermost Java element that corresponds to or that contains the search result. For example, searching for references to a method could find such a reference in an initializer. The
+initializer that contains this method reference is the element of the search match.</p>
+<p>The search engine also tries to find the resource that contains the Java element. If the Java element is contained in a compilation unit or a class file, the resource is the corresponding <a href=
+"../../org.eclipse.platform.doc.isv/reference/api/org/eclipse/core/resources/IFile.html"><b>IFile</b></a>. If the Java element is contained in a .jar file, the returned resource is that .jar file if
+it is in the workspace, <b>null</b> otherwise.</p>
+
+<h4>Source positions</h4>
+<p>Source positions <b><a href="../reference/api/org/eclipse/jdt/core/search/SearchMatch.html#getOffset()">getOffset</a></b> and <b><a href=
+"../reference/api/org/eclipse/jdt/core/search/SearchMatch.html#getLength()">getLength</a></b> are given relative to the compilation unit that contains the search result. If the search result is
+contained in a .jar file, the source positions are relative to the attached source. They are (-1, -1) if there is no source attached to the .jar file.</p>
+<h4>Accurate versus inaccurate search results</h4>
+<p>In most cases search results are accurate, meaning that the search engine was able to determine that the given match is what was asked for. However in some cases the search engine is unable to do
+so, in such cases the match is inaccurate. Some possible reasons why a match could be inaccurate are:</p>
+<ul>
+<li>The classpath on the project that contains the result is not properly set. For example, it refers to a project that is not accessible, a jar on the classpath requires another jar that is not on
+the classpath, etc.</li>
+
+<li>The user code would not compile. For example, it refers to a class that is not yet defined.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2010, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Language" content="en-us" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type=
+    "text/css" />
+    <style type="text/css">
+/*<![CDATA[*/
+    table.news td {border-top: solid thin black;}
+    table.news tr {vertical-align: top;}
+    table.news tr td.section {font-size: 20px; font-weight: bold;}
+    table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
+    table.news tr td.content {vertical-align: top; width: 70%;}
+    /*]]>*/
+    </style>
+    <title>
+      PDE - What's New in 3.7
+    </title>
+
+  </head>
+  <body>
+    <h2>
+      What's New in 3.7 (PDE)
+    </h2>
+    <p>
+      Here are descriptions of some of the more interesting or significant
+      changes made to the Plug-in Development Environment (PDE) for the 3.7
+      release of Eclipse, grouped into:
+    </p>
+    <ul>
+      <li>
+
+        <a href="#ViewsAndEditors">Views and Editors</a>
+      </li>
+      <li>
+        <a href="#Launching">Launching</a>
+      </li>
+      <li>
+        <a href="#Import">Import</a>
+
+      </li>
+      <li>
+        <a href="#TargetPlatform">Target Platform</a>
+      </li>
+      <li>
+        <a href="#APITools">API Tools</a>
+      </li>
+    </ul><!-- ****************** START OF N&N TABLE ****************** -->
+
+    <table class="news" border="0" cellpadding="10" cellspacing="0" width=
+    "600">
+      <!-- ******************* Views/Editors ******************** -->
+      <tr>
+        <td id="ViewsAndEditors" class="section" colspan="2">
+          <h2>
+            Views and editors
+          </h2>
+        </td>
+      </tr>
+
+      <tr id="productproperties">
+        <td align="left" valign="top" width="30%">
+          <b>Properties in product editor</b>
+        </td>
+        <td valign="top" width="70%">
+          The product editor now has support to view, add and edit
+          configuration properties. The properties will be added to config.ini
+          files generated using the product configuration.
+          <p>
+            <img alt="Product Properties" title="Properties in Product Editor"
+            src="images/product-properties.png" /><br />
+            <br />
+
+          </p>
+        </td>
+      </tr>
+      <tr id="shared-license">
+        <td class="title">
+          Share licenses between features
+        </td>
+        <td class="content">
+          Many Eclipse features use the same license. For example, all features
+          in the Eclipse SDK use the Eclipse Foundation Software User
+          Agreement. Using the new shared license facility allows multiple
+          features to reference license text and files from a single location.
+          This makes updating licenses across multiple features easier and less
+          error prone.
+          <p>
+
+            To make use of the shared license facility, simply open your
+            feature.xml file in the feature editor. Select the
+            <b>Information</b> Tab and then the <b>License Agreement</b>
+            section. Selecting the <b>Shared license</b> radio button will
+            allow you to specify the feature and version that contains your
+            license text and optional license files.
+          </p><img src="images/shared-license.png" alt=
+          "Feature Editor With Shared License" />
+          <p>
+            When your feature is built it's license text will be taken from the
+            feature.xml of the referenced feature. As well, all files contained
+            in the referenced feature's Binary Build list (bin.includes) will
+            be included in your feature. If your feature already had license
+            files, you can remove them.
+          </p>
+
+        </td>
+      </tr>
+      <tr id="buildmodel">
+        <td align="left" valign="top" width="30%">
+          <b>PDE build model API</b>
+        </td>
+        <td valign="top" width="70%">
+          Calling getBuildModel() on IPluginModelBase objects will now return a
+          handle to PDE's build model for that plug-in. The IBuildModel API can
+          be used to view and edit the contents of a build.properties file.
+        </td>
+
+      </tr><!-- ******************** Launching ********************** -->
+      <tr>
+        <td id="Launching" class="section" colspan="2">
+          <h2>
+            Launching
+          </h2>
+        </td>
+      </tr>
+      <tr id="pde-default-workspace-locations">
+
+        <td class="title">
+          Default workspace locations
+        </td>
+        <td class="content">
+          If you want to run multiple JUnit Plug-in Tests or Eclipse
+          Application launch configurations in parallel, you need to make sure
+          the launch configurations use separate workspaces.
+          <p>
+            <img src="images/edit-default-workspace.png" alt=
+            "Configure defaults link" />
+          </p>
+          <p>
+            On the <b>Plug-in Development</b> preference page, you can choose
+            the default workspace location for new launch configurations. If
+            you select "Append launch configuration name to this location", you
+            will get separate workspaces for different launch configurations.
+          </p>
+
+          <p>
+            <img src="images/default-workspace-preference.png" alt=
+            "Plug-in Development preference page" />
+          </p>
+        </td>
+      </tr>
+      <tr id="pde-applicationsandui">
+        <td class="title">
+          Applications do not require UI to launch
+        </td>
+
+        <td class="content">
+          When launching an <b>Eclipse Application</b> or <b>JUnit Plug-in
+          Test</b> you can now select an application to run. Previously, the
+          application framework required UI plug-ins to run, forcing launch
+          configurations to add additional dependencies. In 3.7, applications
+          that run headless (without UI) will not require UI plug-ins to be
+          available.
+          <p>
+            <img src="images/application.png" alt=
+            "Select application on launch" />
+          </p>
+        </td>
+
+      </tr>
+      <tr id="PDE-sourceattach">
+        <td class="title">
+          Editable source attachments
+        </td>
+        <td class="content">
+          By default, the source attachment for Plug-in Dependencies is a
+          source bundle in the target platform. You can now change the source
+          attachment during development.
+          <p>
+            While developing or debugging, if a class file is opened that has
+            no attached source available, you can now set a custom source
+            location. Class file editors provide a button to do this, but the
+            source attachment can be modified at any time by right clicking on
+            it and selecting <b>Properties</b>. Changes are not persisted
+            between workspace restarts.
+          </p>
+
+        </td>
+      </tr><!-- ******************* Import/Export ******************** -->
+      <tr>
+        <td id="Import" class="section" colspan="2">
+          <h2>
+            Import
+          </h2>
+        </td>
+      </tr>
+
+      <tr id="pde-teamimportapi">
+        <td class="title">
+          Import from repository uses Eclipse CVS support
+        </td>
+        <td class="content">
+          When using the <b>Import Plug-ins and Fragments Wizard</b> there is
+          an option to import projects from a repository. This option searches
+          for a custom header in the plug-in manifest to find a repository to
+          check out source from. This feature now uses API from Eclipse CVS to
+          perform the import. The import now uses several CVS features
+          including finding alternative repository locations and password
+          storage.
+          <p>
+            <img src="images/teamcvs.png" alt="Import plugin from CVS" />
+
+          </p>
+        </td>
+      </tr><!-- ***************** Target Platform ******************* -->
+      <tr>
+        <td id="TargetPlatform" class="section" colspan="2">
+          <h2>
+            Target Platform
+          </h2>
+        </td>
+
+      </tr>
+      <tr id="targetresolution">
+        <td align="left" valign="top" width="30%">
+          <b>p2 Target definition performance</b>
+        </td>
+        <td valign="top" width="70%">
+          Target definitions that use a p2 repository as a location will see
+          improved performance in 3.7. Previously, each time a p2 target
+          definition was opened, the remote repository was accessed to
+          determine if all required plug-ins were available. Now, this
+          information is stored locally in a p2 profile.
+          <p>
+            If the target definition is modified or a required plug-in cannot
+            be found, the target will do a full resolve operation, accessing
+            the remote repository and downloading any missing plug-ins.
+          </p>
+
+          <p>
+            <img alt="Target Resolution" title="p2 Target Definition" src=
+            "images/target-resolution.png" /><br />
+            <br />
+          </p>
+        </td>
+      </tr>
+      <tr id="offlinetargets">
+        <td align="left" valign="top" width="30%">
+          <b>Offline p2 target definitions</b>
+
+        </td>
+        <td valign="top" width="70%">
+          As an added benefit to performance improvements of p2 based target
+          definitions, the target editor is much more functional with an
+          intermittent network connection. Once a target definition has
+          connected to the remote repository and downloaded all required
+          plug-ins, a network connection is no longer required to open the
+          editor, set the definition as the target platform, and in some cases
+          even modify the target.
+        </td>
+      </tr>
+      <tr id="TargetUpdate">
+        <td class="title">
+          Update target definitions
+        </td>
+        <td class="content">
+
+          Target definitions that contain p2 repository locations can be
+          updated to use the most recent version available. To update a target,
+          press <b>Update</b> on the locations tab of the target definition
+          editor. If a specific location or software item is selected, only
+          that item will be updated, otherwise all locations will be updated.
+          If a newer version cannot be found in the repository, your target
+          will not be changed. <img src="images/target_update.png" alt=
+          "Update button for target definitions" />
+        </td>
+      </tr>
+      <tr id="TargetLocal">
+        <td class="title">
+          Targets use local repositories
+        </td>
+
+        <td class="content">
+          When a target definition that contains a p2 repository location
+          resolves, plug-ins must be downloaded to a local cache. However, many
+          of the required plug-ins may already be available locally. Target
+          definitions will now try to copy local plug-ins from the running
+          Eclipse instance or known workspaces instead of downloading them
+          remotely.
+        </td>
+      </tr>
+      <tr id="TargetMultiple">
+        <td class="title">
+          Software sites collaborate
+        </td>
+        <td class="content">
+          Previously, Software Site locations in target definitions considered
+          only one repository when looking for dependencies. Now, the
+          repositories from all Software Site locations in the current target
+          definition are used when resolving dependencies.
+        </td>
+
+      </tr>
+      <tr id="TargetSource">
+        <td class="title">
+          Source for target definitions
+        </td>
+        <td class="content">
+          When you create a target definition containing a Software Site
+          location, there is now an option to automatically find and download
+          source for the software items you have selected from the set of
+          repositories known to the target definition. <img src=
+          "images/target_source.png" alt=
+          "Include source option for target definitions" />
+        </td>
+      </tr>
+
+      <tr id="TargetExport">
+        <td class="title">
+          Target definition export improvements
+        </td>
+        <td class="content">
+          Target Definition exporting has been enhanced to create proper p2
+          metadata and artifact repositories in the destination (for Software
+          Site content), to honor content (de)selection and to allow non-active
+          target definitions to be exported.
+        </td>
+      </tr><!-- ******************** API Tools ********************** -->
+      <tr>
+        <td id="APITools" class="section" colspan="2">
+
+          <h2>
+            API Tools
+          </h2>
+        </td>
+      </tr>
+      <tr id="includelists">
+        <td align="left" valign="top" width="30%">
+          <b>Include lists in Ant tasks</b>
+        </td>
+
+        <td valign="top" width="70%">
+          API Tooling Ant tasks that support exclude lists now also support
+          include lists. The include list seeds the set of bundles and members
+          to be analyzed (when omitted, all bundles and members are included),
+          and the exclude list is then applied. Include lists have the same
+          structure as the exclude lists, allowing specific bundles/members,
+          regular expressions and comments to be added.
+        </td>
+      </tr>
+      <tr id="consumerreport">
+        <td align="left" valign="top" width="30%">
+          <b>Consumer use report</b>
+        </td>
+        <td valign="top" width="70%">
+
+          The API Consumer Use Report Conversion task is a new Ant task that
+          generates an HTML report from the XML result of a use scan. The
+          information is organized in a different format than the standard
+          report converter produces. The references are organized by consumer
+          bundle, the bundle which contains the code that references the
+          API/type. The standard report organizes references by the bundle that
+          produced the API/type.
+        </td>
+      </tr>
+      <tr id="UseScans">
+        <td class="title">
+          API use scan builder
+        </td>
+        <td class="content">
+          The API Analysis builder now supports scanning of API use scan
+          reports. Any API use scans added to the <b>API Use Scans</b>
+
+          preference page will be compared to the current workspace. If any
+          type, method or field references found in the scan have been removed,
+          the builder will report an <b>API Use Scan Problem</b>.
+          <p>
+            Reports can be added to the page as directories or archives. Only
+            the checked reports are considered by the builder.
+          </p><img src="images/api-use-scan-preference-page.png" alt=
+          "API Use Scans preference page" />
+          <p>
+            The <b>API Errors/Warnings</b> preference page has a new <b>API Use
+            Scans</b> tab. You can set the severity levels of the reported
+            problems. By default all the problem type severities are set to
+            <b>Ignore</b>. The builder will not check any use scans if all
+            severities are set to <b>Ignore</b>.
+          </p><img src="images/api-errors-warning-api-use-scan.png" alt=
+          "API Use Scans severities" />
+
+        </td>
+      </tr>
+      <tr id="ConsumerBasedLaunch">
+        <td class="title">
+          Consumer reports in launch configuration
+        </td>
+        <td class="content">
+          The API use scan launch configuration, available under external tools
+          launches, now can create a consumer based report. The consumer based
+          report organizes the use scan references by the plug-in that
+          references the field, method or type (the normal report organizes by
+          the bundle the created the field, method or type). The ant task that
+          creates the consumer report is still available for releng builds.
+          <img src="images/consumer_configuration.png" alt=
+          "Consumer Report option in the use scan launch configuration" />
+        </td>
+
+      </tr>
+      <tr id="pde-usescantask">
+        <td class="title">
+          Ant task to report missing use scan references
+        </td>
+        <td class="content">
+          A new Ant task is available from API Tools that will compare a
+          profile against a list of use scans and report any missing
+          references. A HTML converter task is also available to provide a
+          formatted report. The task will report the same missing references in
+          the IDE when the <b>API Use Scan</b> preference page is used.
+          Documentation for the task is available in the <b>Reference</b>
+
+          section of the <b>Plug-in Development Environment Guide</b>.
+        </td>
+      </tr>
+      <tr id="PDE-scancounts">
+        <td class="title">
+          Summaries for API Tools Ant tasks
+        </td>
+        <td class="content">
+          For the API analysis tools that use Ant tasks, you now get a simple
+          index file with summary counts of the kinds of problems found by the
+          tasks.
+          <p>
+
+            These summaries are located in the root of the output directory for
+            each scan in a file named <code>counts.xml</code>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

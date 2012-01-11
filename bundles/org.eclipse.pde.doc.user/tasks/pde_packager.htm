@@ -1,0 +1,449 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta name="copyright" content=
+    "Copyright (c) IBM Corporation and others 2006, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+    <meta http-equiv="Content-Type" content=
+    "text/html; charset=utf-8" />
+    <meta http-equiv="Content-Style-Type" content="text/css" />
+    <link rel="STYLESHEET" href="../guide/book.css" type=
+    "text/css" />
+    <title>
+      Repackaging Eclipse Components
+    </title>
+    <style type="text/css">
+/*<![CDATA[*/
+    table.c4 {width: 90%; text-align: left; margin-left: 40px;}
+    td.c3 {vertical-align: top;}
+    div.c2 {text-align: center;}
+    span.c1 {font-weight: bold;}
+    /*]]>*/
+    </style>
+
+  </head>
+  <body>
+    <h1>
+      Packaging Eclipse Components<br />
+    </h1>
+    <p>
+      Eclipse components are delivered as archive files. Each
+      archive contains a collection of features and plug-ins.
+      Typically the archives contain all the functions that a
+      particular component has to offer. It is often the case that
+      consumers either need more than one component and/or only
+      need parts of some components. Without assistance, consumers
+      would have to manually fetch the archives containing the
+      superset of the functionality they need and then manually
+      extract the required features and plug-ins. This can be a
+      laborious and error prone process.
+    </p>
+    <p>
+
+      Fortunately, PDE contains a batch oriented mechanism, the
+      <em>packager</em>, which can help. In short, the packager
+      takes as input a list of archives containing features and a
+      list of interesting features. It then fetches the zips,
+      extracts the features (and their plug-ins) and repackages
+      them into an output zip.
+    </p>
+    <h2>
+      Quick Start<br />
+    </h2>
+    <p>
+      Below is a set of basic steps to get started with the
+      packager.&nbsp; It is suggested that you build *nix packages
+      on a *nix machine to ensure that file permissions are
+      preserved.<br />
+
+    </p>
+    <ol>
+      <li>Create a packaging configuration directory and copy the
+      template files (packager.properties, packaging.properties,
+      and customTargets.xml) from
+      org.eclipse.pde.build/templates/packager here.
+      </li>
+      <li>Edit the copied packager.properties files and set the
+      following properties:
+        <ul>
+          <li>
+            <span class="c1">baseDirectory</span> : the directory
+            in which the actual packaging work will take place.
+            &nbsp;&nbsp;&nbsp;<br />
+
+          </li>
+          <li>
+            <span class="c1">featureList</span> : a comma separated
+            list of feature ids that you wish to include in your
+            archive.<br />
+          </li>
+          <li>
+            <span class="c1">componentFilter</span> :&nbsp; A comma
+            separated list of components in which your features can
+            be found.&nbsp; Specifying this will avoid unnecessary
+            downloads.&nbsp; Use * if you don't know the
+            components.&nbsp; (See the componentName in the
+            <a href="pde_packager.htm#Packager_Map_File_Format">Packager
+            Map File Format</a> below).<br />
+
+          </li>
+          <li>
+            <span class="c1">contentFilter</span> : A comma
+            separated list of content types you are interested
+            in.&nbsp; Common content types are <tt>runtime</tt> or
+            <tt>sdk</tt>.&nbsp; This is used to optimize the
+            downloading of the archives.&nbsp;&nbsp; Leave this
+            blank to not filter on content type.&nbsp; (See the
+            contentDescription in the <a href=
+            "#Packager_Map_File_Format">Packager Map File
+            Format</a> below).
+          </li>
+
+          <li>
+            <span class="c1">config</span> :&nbsp; The
+            configurations to package. This is an "&amp;" separated
+            list of comma separated triples of operating system,
+            windowing system and architecture (eg
+            <tt>win32,win32,x86 &amp; linux,gtk,ppc</tt>)
+          </li>
+        </ul>
+      </li>
+
+      <li>Get packager map files.&nbsp; The following properties
+      control downloading the map files:<br />
+        <ul>
+          <li>
+            <span class="c1">localMaps</span> : Set this property
+            if you have map files locally, put the map files in
+            <tt>${downloadDirectory}</tt> (by default this is
+            <tt>${baseDirectory}/toPackage</tt>).&nbsp; Comment out
+            this property to automatically download the map file.
+          </li>
+
+          <li>
+            <span class="c1">packagerMapURL</span> : The URL from
+            which to download the map file.
+          </li>
+        </ul>The packager script will concatenate all *.map files
+        found in <tt>${downloadDirectory}</tt>. To download more
+        than one map file, or to fetch them from CVS edit the
+        customTargets.xml file and change the getMapFiles target.
+      </li>
+      <li>Run the packager using the following command:
+        <pre>
+java -jar &lt;eclipse install&gt;/plugins/org.eclipse.equinox.launcher_&lt;version&gt;.jar -application org.eclipse.ant.core.antRunner <br />    -buildfile &lt;&lt;eclipse install&gt;/plugins/org.eclipse.pde.build_&lt;version&gt;/scripts/package.xml&gt; <br />    -DpackagingInfo=&lt;path to your packaging configuration directory&gt;<br />
+
+</pre>
+      </li>
+    </ol>
+    <h2>
+      <a name="Packager_Map_File_Format" id=
+      "Packager_Map_File_Format"></a>Packager Map File Format
+    </h2>The packager map files are used to describe the various
+    archives, their content and where they can be downloaded
+    from.&nbsp; They are similar to the map files used in the build
+    process to fetch bundles from repositories.&nbsp; The format of
+    a packager map file entry is as follows:<br />
+    <div class="c2">
+
+      <tt>archiveName = <span class="c1">url</span> | [<span class=
+      "c1">configList</span>] | [<span class="c1">directory</span>]
+      | <span class="c1">contentDescription</span> | <span class=
+      "c1">componentName</span></tt><br />
+    </div>
+    <ul>
+
+      <li>
+        <span class="c1">archiveName</span> : This is the name of
+        the archive<br />
+      </li>
+      <li>
+        <span class="c1">url</span> : This is the url where the
+        archive can be found.&nbsp; The concatenation of url and
+        archiveName should point to the archive to download.
+      </li>
+
+      <li>
+        <span class="c1">configList</span> : This is an "&amp;"
+        separated list of configs that this archive contains.&nbsp;
+        (eg: <tt>win32,win32,x86 &amp; linux,gtk,x86</tt>).&nbsp;
+        If no value is given the archive is considered to be
+        platform independent.
+      </li>
+
+      <li>
+        <span class="c1">directory</span> : The directory where the
+        content of the archive should be extracted relative to a
+        standard eclipse installation.&nbsp; When no value is
+        specified it means that the archive contains an eclipse
+        installation directory at its root.<br />
+      </li>
+      <li>
+        <span class="c1">contentDescription</span> : The content
+        flags indicating the type of content in this archive.&nbsp;
+
+        Normally this is something like <tt>runtime</tt>,
+        <tt>sdk</tt>, <tt>source</tt>, <tt>doc</tt>, etc.
+      </li>
+      <li>
+        <span class="c1">componentName</span> : The canonical name
+        of the component this archive is for.&nbsp; For example
+        eclipse, jdt, cdt, gef, emf, etc.<br />
+
+      </li>
+    </ul><br />
+    Note that configList and directory are optional, it is
+    important that the appropriate number "|" separators are still
+    used.<br />
+    Examples:<br />
+    <pre>
+eclipse-SDK-3.1-win32.zip=http://download.eclipse.org/downloads/drops/R-3.1-200506271435/ | win32,win32,x86 | | sdk | eclipse<br />eclipse-PDE-3.1.zip=http://download.eclipse.org/downloads/drops/R-3.1-200506271435/ | | | runtime | pde<br />
+</pre>
+    <h2>
+
+      Packager Configuration Properties
+    </h2>The following properties can be set in the packager
+    configuration packager.properties file:<br />
+    <table class="c4" border="1" cellpadding="2" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="c3">
+            baseDirectory<br />
+          </td>
+
+          <td class="c3">
+            The directory in which all the packaging will take
+            place<br />
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            workingDirectory<br />
+          </td>
+
+          <td class="c3">
+            The directory in which the scripts will be
+            generated.&nbsp; The value in the template is
+            <tt>${baseDirectory}/workingPlace</tt><br />
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            downloadDirectory<br />
+
+          </td>
+          <td class="c3">
+            The folder to which the archives will be
+            downloaded.&nbsp; The value in the template is
+            <tt>${baseDirectory}/toPackage</tt><br />
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+
+            tempDirectory<br />
+          </td>
+          <td class="c3">
+            The folder that the archives will be extracted
+            to.&nbsp; The value in the template is
+            <tt>${baseDirectory}/temp</tt><br />
+          </td>
+        </tr>
+
+        <tr>
+          <td class="c3">
+            featurePaths<br />
+          </td>
+          <td class="c3">
+            The name of the root of the archives downloaded.&nbsp;
+            The value in the template is <tt>eclipse</tt>.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            featureList<br />
+          </td>
+          <td class="c3">
+            A comma separated list of feature ids that you wish to
+            repackage.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            componentFilter<br />
+          </td>
+          <td class="c3">
+            A comma separated list of the components from which the
+            features in featureList can be found.&nbsp; This
+            filters the available archives and allows the packager
+            to optimize the set of files downloaded.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            contentFilter<br />
+          </td>
+          <td class="c3">
+            A comma separated list of content types to fetch.&nbsp;
+
+            This filters the set of available archives and allows
+            the packager to optimize the set of files
+            downloaded.<br />
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            config<br />
+          </td>
+          <td class="c3">
+
+            An "&amp;" separated list of configs (comma separated
+            triples of operating system, windowing system,
+            architecture) to repackage.&nbsp; (eg: <tt>win32,
+            win32, x86 &amp; linux, gtk, x86</tt>)
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            archivesFormat<br />
+
+          </td>
+          <td class="c3">
+            The formats of the archives.&nbsp; An "&amp;" separated
+            list of config - format.&nbsp; (eg: <tt>win32, win32,
+            x86 - antZip &amp; linux, gtk, ppc - tar</tt>).&nbsp;
+            If no archive format is specified for a given config,
+            the default format is antZip.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            zipargs<br />
+          </td>
+          <td class="c3">
+            Extra arguments to be passed to zip<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            unzipargs<br />
+          </td>
+          <td class="c3">
+            Extra arguments to be passed to unzip<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            archivePrefix<br />
+          </td>
+          <td class="c3">
+            The prefix of the resulting archive(s)<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            collectingFolder<br />
+          </td>
+          <td class="c3">
+            The name of the root folder of the resulting
+            archive.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            buildId<br />
+          </td>
+          <td class="c3">
+            Controls the build id in the default name of the
+            archive.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            buildType<br />
+          </td>
+          <td class="c3">
+            Type of the build, used in naming the build
+            output.&nbsp; Typically one of I, N, M, S, ...<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            buildLabel<br />
+          </td>
+          <td class="c3">
+            Label for the build.&nbsp; The template value is
+            <tt>${buildType}.${buildId}</tt><br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            archiveNamePrefix<br />
+          </td>
+          <td class="c3">
+            Control the name of the resulting archive.&nbsp; The
+            default value of this is <tt>${buildId}</tt><br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            packagingProperties<br />
+          </td>
+          <td class="c3">
+            A relative path to the file containing the properties
+            packaging root files..&nbsp; By default this points to
+            packaging.properties.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            deltaPack<br />
+          </td>
+          <td class="c3">
+            Whether or not to generate a delta pack.&nbsp; This
+            will exclude platform independent pieces and will group
+            all configs into one archive.<br />
+
+          </td>
+        </tr>
+        <tr>
+          <td class="c3">
+            unzipOrder<br />
+          </td>
+          <td class="c3">
+            a comma separated list of archive name prefixes setting
+            the order in which archives should be extracted.<br />
+
+          </td>
+        </tr>
+      </tbody>
+    </table><br />
+    <h2>
+      Packaging Root Files
+    </h2>In the packager configuration packager.properties file,
+    the property packagingProperties points to a property file
+    which specifies the root files that need to be packaged.&nbsp;
+    By default this is the file packaging.properties.<br />
+
+    <br />
+    This property file should contain the properties specifying the
+    required root files.&nbsp; See the <a href=
+    "../reference/pde_feature_generating_build.htm#Feature_specific_properties">
+    Feature specific properties</a> page for details on the root
+    properties.<br />
+    <br />
+  </body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Generating Source Features and Plug-ins</title>
+</head>
+<body>
+<h1>Generating Source Features and Plug-ins</h1>
+<p>Starting in 3.4, Eclipse has shipped with individual source bundles which allow for more flexible delivery of source.  See the &quot;<a href="pde_individual_source.htm">Individual Source Bundles</a>&quot; page for details.  Traditional folder-shaped source plug-ins can still be built as outlined below.
+</p>
+<p>
+Consider the following SDK feature:</p><br>
+<div style="text-align: left; margin-left: 40px;">
+<pre>features/<br>    org.foo.sdk/<br>	feature.xml: &lt;includes id="org.foo.rcp" /&gt;<br>		     &lt;includes id="org.foo.rcp.source" /&gt;<br>	build.properties: generate.feature@org.foo.rcp.source = org.foo.rcp<br>    org.foo.rcp/<br>	feature.xml: &lt;plugin id="org.foo.BundleA" /&gt;<br>		     &lt;plugin id="org.foo.BundleB" /&gt;<br>		     &lt;plugin id="org.foo.BundleB.win32" fragment="true" os="win32" /&gt;<br></pre>
+</div>
+
+<p>
+The idea of the SDK is that it includes a feature as well as
+the source for that feature.&nbsp; Notice
+the <tt>generate.feature</tt> property in the feature's
+build.properties
+file.&nbsp; This property tells PDE Build to generate a feature named
+"<tt>org.foo.rcp.source</tt>" based on the contents of the feature
+"<tt>org.foo.rcp</tt>".&nbsp; PDE build will generate an
+org.foo.rcp.source feature, a plug-in that
+will contain the source code, and fragments containing the source of
+any platform specific bundles that were included in the feature:</p><br>
+<div style="text-align: left; margin-left: 40px;">
+<pre>features/<br>    org.foo.rcp.source/<br>	feature.xml:  &lt;plugin id="org.foo.rcp.source"/&gt;<br>		      &lt;plugin id="org.foo.rcp.source.win32" fragment="true" os="win32" /&gt;<br>plugins/<br>    org.foo.rcp.source/src/<br>		org.foo.BundleA/src.zip<br>		org.foo.BundleB/src.zip<br>    org.foo.rcp.source.win32/src/<br>		org.foo.BundleB.win32/src.zip<br> <br></pre>
+</div>
+<h2>Customizing the Generated Source Feature</h2>
+<p>
+The generate.feature property has the following form:</p>
+<pre style="text-align: left;">generate.feature@&lt;source feature id&gt; = &lt;feature id&gt; [, feature@&lt;feature id&gt;[;attribute=value]*]* [, plugin@&lt;plugin id&gt;[;attribute=value]*]*</pre>
+<ul>
+  <li><span style="font-weight: bold;">&lt;source feature id&gt;:</span>&nbsp;
+This is the id of the source feature and plug-in to be generated.&nbsp;
+Normally it is something like &lt;feature id&gt;.source</li>
+  <li><span style="font-weight: bold;">&lt;feature id&gt;</span>:&nbsp;
+The feature on which to base the source feature, the source for all
+contained plug-ins will be collected into the &lt;source feature id&gt;
+plug-in.</li>
+  <li><span style="font-weight: bold;">feature@&lt;feature id&gt;</span>:&nbsp;
+This will include the named feature in the generated source feature.</li>
+  <li><span style="font-weight: bold;">plugin@&lt;plug-in id&gt;</span>:&nbsp;
+This will include the named plug-in in the generated source feature.
+If the plug-in is JARed specify <span style="font-weight: bold;">unpack="false"</span>. If multiple versions
+of the plug-in are available, specify the requested version using <span style="font-weight: bold;">version=&lt;pluginVersion&gt;</span> followed by <tt>qualifier</tt>.</li>
+<li>
+<b><i>attribute</i>=<i>value</i></b> : Both feature@ and plugin@ entries can be qualified with additional attributes that should be added in the generated source feature.<br>
+Possible attributes (with example values) for <tt>feaure@</tt> entries are:
+<ul>
+<li>version = 1.0.0 : specify the version of the feature to include</li>
+<li>optional = true : set the included feature as optional</li>
+<li>ws=gtk : set the window system for the included feature</li>
+<li>os=linux : set the operating system for the included feature</li>
+<li>arch=x86 : set the architecture for the included feature</li>
+</ul>
+Possible attributes for <tt>plugin@</tt> entries are:
+<ul>
+<li>version = 1.0.0 : specify the version of the plug-in to include</li>
+<li>unpack = true : set the included plug-in to be unpacked (ie the plug-in should be installed as a folder).</li>
+<li>ws=gtk : set the window system for the included plug-in</li>
+<li>os=linux : set the operating system for the included plug-in</li>
+<li>arch=x86 : set the architecture for the included plug-in</li>
+</ul>
+</li>
+</ul>
+<p>
+Use plugin@ to add additional plug-ins that weren't part of the
+original feature to the generated source feature.&nbsp; This is useful
+for documentation plug-ins.&nbsp; The feature@ together with a source
+template can be used to nest source features (see below).
+</p>
+
+<h3>Source Templates</h3>
+<p>
+The feature from which the source feature is being generated can
+provide template files to be included in the generated source feature:</p><br>
+<div style="text-align: left; margin-left: 40px;">
+<pre>features/<br>    org.foo.rcp/<br> 	sourceTemplateFeature/&lt;files to be included in generated source feature&gt;<br>	sourceTemplatePlugin/&lt;files to be included in generated source plugin&gt;<br>	sourceTemplateFragment/&lt;files to be included in generated platform specific fragments&gt;</pre>
+</div>
+<p>Any files located in these sourceTemplate folder will be included in
+the appropriate generated feature/plug-in/fragment.&nbsp; Specifically,
+files from these directories will replace files generated by PDE
+build.&nbsp; This can be used to provide a custom feature.xml if there
+are requirements for your source feature that PDE build does not
+support.
+</p>
+<h4>Nesting Generated Source Features</h4>
+<p>You can nest source features by providing a
+sourceTemplateFeature/build.properties file for your generated source
+feature that contains a generate.feature property for the nested source
+feature.&nbsp; You will also need to ensure that your top source
+feature.xml includes the nested source feature, do this either by using
+feature@ or by providing a template feature.xml:<br>
+</p>
+<div style="text-align: left; margin-left: 40px;">
+<pre>features/<br>    org.foo.sdk/<br>	sourceTemplateFeature/<br>		build.properties:  generate.feature@org.foo.nested.source = org.foo.nested<br><br>	feature.xml: &lt;includes id="org.foo.rcp" /&gt;<br>		     &lt;includes id="org.foo.rcp.source" /&gt;<br><br>	build.properties: generate.feature@org.foo.rcp.source = org.foo.rcp, feature@org.foo.nested.source<br><br>    org.foo.rcp/...<br>    org.foo.nested/...<br></pre>
+</div>
+In the above example, org.foo.sdk contains a generated source
+feature named org.foo.rcp.source.&nbsp; This generated source feature
+will get the template sourceTemplateFeature/build.properties
+file.&nbsp; It will also include org.foo.nested.source in its
+feature.xml.&nbsp; So when PDE build is processing the generated
+org.foo.rcp.source, it sees the inclusion of the org.foo.nested.source
+feature and the generate.feature property and then generates the
+org.foo.nested.source.
+
+<h2>Generating a Source Plug-in</h2>
+<p>It is also possible to generate a single source plug-in based on a
+feature instead of generating an entire source feature.&nbsp; The
+property to do this is:</p>
+<p style="text-align: left;"><tt>generate.plugin@&lt;source plug-in
+id&gt;=&lt;feature-in id&gt;</tt></p>
+<p>Be aware that these old-style source plug-ins (one plug-in containing
+the source for all plug-ins of the feature) must be installed in folder 
+form. Therefore you have to set the <tt>unpack="true"</tt> attribute
+in the file <tt>feature.xml</tt>.</p>
+Example:
+<div style="text-align: left; margin-left: 40px;">
+<pre>features/<br>    org.foo.sdk/<br>	feature.xml: &lt;plugin id="org.foo.rcp" /&gt;<br> 		     &lt;plugin id="org.foo.sdk.source" <b>unpack="true"</b> /&gt;<br> <br>	build.properties: generate.plugin@org.foo.sdk.source = org.foo.sdk<br></pre>
+</div>
+<br>
+<br>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta http-equiv="Content-Language" content="en-us"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
+<style type="text/css">
+table.news td {border-top: solid thin black;}
+table.news tr {vertical-align: top;}
+table.news tr td.section {font-size: 20px; font-weight: bold;}
+table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
+table.news tr td.content {vertical-align: top; width: 70%;}
+</style>
+<title>What's New in 3.7 (JDT)</title>
+<script language="JavaScript" type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"> </script>
+</head>
+
+<body>
+<h2>What's New in 3.7 (JDT)</h2>
+<p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools
+for the 3.7 release of Eclipse. They are grouped into:</p>
+<ul>
+	<li><a href="Java7news/whats-new-java-7.html">Java 7</a></li>
+	<li><a href="#JavaEditor">Java Editor</a></li>
+	<li><a href="#JavaFormatter">Java Formatter</a></li>
+	<li><a href="#JavaCompiler">Java Compiler</a></li>
+	<li><a href="#JavaViews">Java Views and Dialogs</a></li>
+	<li><a href="#PropertiesEditor">Properties File Editor</a></li>
+	<li><a href="#JUnit">JUnit</a></li>
+</ul>
+<p>
+See also the <a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New</a>
+document for changes in the Platform.
+</p>
+<br/>
+<!-- *************************************************** -->
+
+<table class="news" border="0" cellpadding="10" cellspacing="0" width="600" summary="New and noteworthy items">
+
+  <tbody>
+  <!-- ******************* Java Editor ************************************* -->
+  <tr>
+    <td id="JavaEditor" class="section" colspan="2">
+    <h2>Java Editor </h2>
+    </td>
+  </tr>
+
+  <tr id="open-from-clipboard">
+    <td class="title">Open Java element from clipboard</td>
+    <td class="content">
+        The new <b>Navigate &gt; Open from Clipboard</b> command tries to open the
+        matching Java element in the editor if the clipboard contains a single line. Otherwise it
+        opens the contents in the Java Stack Trace Console.
+        <br/><br/>Examples:
+            <ul>
+             <li>java.lang.String</li>
+             <li>String</li>
+             <li>String#getBytes</li>
+             <li>String.getBytes</li>
+             <li>java.lang.String.getBytes(String)</li>
+             <li>String.java:123</li>
+             <li>at java.lang.String.matches(String.java:1550)</li>
+             <li>java.lang.String.valueOf(char) line: 1456</li>
+             <li>currentTimeMillis()</li>
+           </ul>
+     <p>Note: If the action is not enabled in a certain perspective, then you can enable the <b>Java Debug</b>
+      action group in
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.customizePerspective")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Customize Perspective dialog"/>
+      <b>Window &gt; Customize Perspective</b></a>
+      <b>&gt; Command Groups Availability</b>.</p>
+    </td>
+  </tr>
+
+  <tr id="hyperlinks">
+    <td class="title">Hyperlinks</td>
+    <td class="content">
+        Three new hyperlinks have been added to the Java editor:
+        <ul>
+            <li><b>Open Super Implementation</b>: The action from the <b>Navigate</b> menu is now also available as a hyperlink.
+            It is enabled for overridden methods and opens the super implementation of the selected method.
+            <p><img src="images/open-super-implementation.png" alt="Open Super Implementation popup on a method"/></p>
+            </li>
+        </ul>
+        <ul>
+            <li><b>Open Declared Type</b>: This link is enabled for local variables and fields. When invoked, it
+            opens the declared type of the variable in an editor:
+            <p><img src="images/open-declared-type.png" alt="Open Declared Type popup on a variable"/></p>
+            </li>
+        </ul>
+        <ul>
+            <li><b>Open Return Type</b>: This link is enabled for methods. When invoked, it opens the return type of the method
+            in an editor:
+            <p><img src="images/open-return-type.png" alt="Open Return Type popup on a method"/></p>
+            </li>
+        </ul>
+
+      <p>By default, the hyperlink appears when you hold down the <b>Ctrl</b> key while hovering over an appropriate element,
+       or when you use the <b>Navigate &gt; Open Hyperlink</b> command.
+       You can configure the modifier for the hyperlinks on the
+       The hyperlink style navigation can be configured on the
+       <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.ui.editors.preferencePages.HyperlinkDetectorsPreferencePage)")'>
+       <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the hyperlinking preference page"/>
+       <b>General &gt; Editors &gt; Text Editors &gt; Hyperlinking</b></a>
+       preference page.</p>
+    </td>
+  </tr>
+
+  <tr id="quick-assist-introduce-new-local-with-cast-type">
+    <td class="title">"Introduce new local with cast type" quick assist</td>
+    <td class="content">
+      The <b>Introduce new local with cast type</b> quick assist (<b>Ctrl+1</b>) is now not only available on the <code>instanceof</code>
+      keyword, but also in the body of the conditional statement (before the first body statement).
+      <p><img src="images/introduce-new-local-with-cast-type.png" alt="Introduce new local with cast type"/></p>
+    </td>
+  </tr>
+
+  <tr id="quick-assist-join-variable-declaration">
+    <td class="title">"Join variable declaration" quick assist for variables initialized to null</td>
+    <td class="content">
+      The <b>Join variable declaration</b> quick assist is now also available for variables initialized to <code>null</code>.
+      <p><img src="images/join-variable-declaration.png" alt="Join variable declaration"/></p>
+    </td>
+  </tr>
+
+  <tr id="quick-assist-exchange-operands">
+    <td class="title">"Exchange Operands" quick assist for comparison operators</td>
+    <td class="content">
+      The <b>Exchange left and right operands for infix expression</b> quick assist is now
+      also available for the <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>,
+      and <code>&gt;=</code> operators.
+      <p><img src="images/exchange-operands.png" alt="Exchange Operands"/></p>
+    </td>
+  </tr>
+
+  <tr id="jdt-put-expression-in-parentheses">
+    <td class="title">New 'Put expression in parentheses' quick assist</td>
+    <td class="content">
+      The Java editor now offers a new quick assist <b>Put expression in parentheses</b>.
+      <p><img src="images/put-expression-in-parentheses.png" alt="Put expression in parentheses"/></p>
+      Also the <b>Add paranoiac parentheses</b> quick assist has been renamed to <b>Put expressions in parentheses</b>.
+      <p><img src="images/put-expressions-in-parentheses.png" alt="Put expressions in parentheses"/></p>
+    </td>
+  </tr>
+
+  <tr id="quick-assist-add-missing-case-statements">
+    <td class="title">'Add missing case statements' quick assist</td>
+    <td class="content">
+      The <b>Add missing case statements</b> quick assist is now available in the body of the switch statement:
+      <p><img src="images/add-missing-case-statements.png" alt="Add missing case statements"/></p>
+    </td>
+  </tr>
+
+  <tr id="abstract-class-highlighting">
+    <td class="title">Semantic coloring for abstract classes</td>
+    <td class="content">
+      Abstract classes can now be highlighted separately in the source code:
+      <p><img src="images/abstract-class-hl.png" alt="Semantic coloring for abstract classes"/></p>
+      <p>The rendering can be configured on the <b>Java &gt; Editor &gt; Syntax Coloring</b> preference page.</p>
+    </td>
+  </tr>
+
+  <tr id="quick-outline-inherited-from-nested">
+    <td class="title">Quick Outline shows inherited members for nested type</td>
+    <td class="content">
+      The <b>Quick Outline</b> shows inherited members of top-level types when <b>Ctrl+O</b> is pressed twice.
+      Now, it also shows inherited members of the type that contains the current editor selection:
+      <p><img src="images/quick-outline-inherited-for-nested.png" alt="Quick Outline showing inherited members for a nested type"/></p>
+      <p>The focus types that can show inherited members are marked with a triangle ( <img src="images/focus-ovr.png" alt="Focus adornment"/> ).</p>
+    </td>
+  </tr>
+
+  <tr id="ctrl-drag-add-to-call-hierarchy">
+    <td class="title">Ctrl+drag to add to Call Hierarchy</td>
+    <td class="content">
+      <b>Ctrl+drag</b> now adds the selected methods to the existing elements in the <b>Call Hierarchy</b> view. Plain drag and drop continues
+      to replace the view input with the selected methods.
+     </td>
+  </tr>
+
+  <tr id="jdt-inheritDoc-clickable">
+    <td class="title">Navigate to {@inheritDoc} target</td>
+    <td class="content">
+      To quickly navigate to the target of an {@inheritDoc} tag in a Javadoc comment,
+      you can now <b>Ctrl+click</b> the tag or use <b>Navigate &gt; Open Declaration</b>
+      to jump to the method that defines the inherited doc.
+      <p><img src="images/code-select-inheritDoc.png" alt="@inheritDoc tag on X2.foo() that overrides X1.foo()"/></p>
+      <p>In this example, the target of the <code>@inheritDoc</code> inline tag on X2.foo() is X1.foo().</p>
+    </td>
+  </tr>
+
+  <tr id="jdt-break-continue-hyperlink">
+    <td class="title">Navigate to 'break' and 'continue' target</td>
+    <td class="content">
+      To quickly navigate to the target of a <code>break</code> or <code>continue</code> statement,
+      you can now <b>Ctrl+click</b> or use <b>Open Declaration</b> (<b>F3</b>) on <code>break</code> or <code>continue</code> keywords or their labels.
+      <p>Navigation on...</p>
+      <ul>
+	      <li><code>break</code>: jumps to the end of the target statement</li>
+	      <li><code>continue</code>: jumps to the beginning of the target statement</li>
+	      <li>a label: jumps to the label declaration</li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr id="format-element-action">
+    <td class="title">Format Java elements via Outline view</td>
+    <td class="content">
+        You can now format one or more selected elements in the Java Outline view by
+        invoking <b>Source &gt; Format Element</b> from the main menu.
+    </td>
+  </tr>
+
+  <tr id="enter-key-indent-preference">
+    <td class="title">Disable smart indentation on 'Enter'</td>
+    <td class="content">
+        A new preference has been added to the <b>Java &gt; Editor &gt; Typing</b>  preference page that allows to disable smart indentation after the <b>Enter</b> key has been pressed:
+       <p><img src="images/enter-key-indent-preference.png" alt="Enter Key Indent Preference"/></p>
+    </td>
+  </tr>
+
+  <!-- ******************* Java Formatter ************************************* -->
+  <tr>
+    <td id="JavaFormatter" class="section" colspan="2">
+    <h2>Java Formatter</h2>
+    </td>
+  </tr>
+
+  <tr id="new-code-formatter-options">
+    <td class="title">New line after annotations</td>
+    <td class="content">
+      The <b>Insert new line after annotations on members</b> option on the '<b>New Lines</b>' tab of the formatter preferences has been split up to support packages, types, fields and methods:
+      <p>
+      <img src="images/formatter-newline-annotation-preference.png"
+      	alt="Java formatter preference page. Check the preference on the 'New Lines' tab of the formatter profile."
+      	title="The 'New Lines' tab of the formatter profile allows you to specify whether a new line should be inserted after the annotation or not"/>
+      </p>
+      <p>For example, with this preference activated as shown above, the formatted code looks like this:</p>
+      <p>
+      <img src="images/formatter-newline-annotation-formatted.png"
+      	alt="Java formatter example. The simple snippet with the annotations formatted."/>
+      </p>
+      <p>
+      Formatter&nbsp;profiles can be configured on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens formatter preference page"/>
+      <b>Java &gt; Code Style &gt; Formatter</b></a> preference page.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="code-formatter-preserve-space-line-comment">
+    <td class="title">Preserve whitespace before line comment</td>
+    <td class="content">
+      A code formatter option has been added to preserve white space between code and line comments:
+      <p><img src="images/code-formatter-preserve-space-line-comment-example.png" alt="Code snippet with tabs in front of a line comment"/></p>
+
+      <p>This preference can be enabled on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens formatter preference page"/>
+      <b>Java &gt; Code Style &gt; Formatter</b></a> preference page
+      on the <b>Comments</b> tab:</p>
+      <p><img src="images/code-formatter-preserve-space-line-comment.png" alt="Formatter preference page"/></p>
+    </td>
+  </tr>
+
+  <!-- ******************* Java Compiler ************************************* -->
+  <tr>
+    <td id="JavaCompiler" class="section" colspan="2">
+    <h2>Java Compiler</h2>
+    </td>
+  </tr>
+
+  <tr id="honor-assert-in-null-analysis">
+    <td class="title">New option to include 'assert' in null analysis</td>
+    <td class="content">
+      JDT now gives the flexibility to enable or disable null-related errors/warnings on variables that got
+      marked as potentially or definitely null inside an assert statement. If you have runtime asserts enabled,
+      you can also enable the new warning to see the null-related problems being reported because of null-related checks inside
+      the assert statement. If the option is disabled, null checks in asserts are not considered.
+
+      <p><img src="images/assert-null-analysis.png" alt="Example of asserts included in null analysis"/></p>
+      <p>The new option <b>Include 'assert' in null analysis</b> is disabled by default and can be
+      enabled on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page"/>
+      <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
+      preference page.</p>
+    </td>
+  </tr>
+
+  <tr id="report-missing-param-tags">
+    <td class="title">Missing Javadoc tags for method type parameters no longer reported by default</td>
+    <td class="content">
+      JDT now provides an option to enable or disable the missing Javadoc tag error or warning for a method type parameter without a
+	  corresponding <code>@param</code> tag.
+
+	  <p><img src="images/javadoc-untagged-type-params.png" alt="Example of Javadoc without @param tags for method type parameters"/></p>
+	  <p>The new <b>Ignore method type parameters</b> option is enabled by default and can be disabled on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page"/>
+      <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
+	  preference page.</p>
+    </td>
+  </tr>
+
+  <tr id="improved-unused-variable-detection">
+    <td class="title">Improved detection of unused local variables, parameters and fields</td>
+    <td class="content">
+      JDT now reports local variables, parameters, and fields of a primitive type as unused in the following scenarios:
+
+      <ul>
+        <li>compound assignment</li>
+        <li>prefix/postfix increment/decrement expression</li>
+      </ul>
+
+      <p><img src="images/local-variable-unused.png" alt="Example of unused local variable"/></p>
+      <p>In case the above expressions involve an unboxing operation, the variable is not reported as unused.</p>
+      <p>We also changed the wording from "X has never been read" to "The value of X is not used."</p></td>
+  </tr>
+
+  <tr id="new-preference-transfer">
+    <td class="title">Filter preferences on Java &gt; Compiler &gt; Errors/Warnings page</td>
+    <td class="content">
+        You can now filter preferences on the
+        <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
+        <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page"/>
+        <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
+        page by preference
+        label text or by preference value. A word in the filter string preceded by '~' is used to filter on
+		preference values. Examples:
+	 	<ul>
+	 		<li>param</li>
+	 		<li>~off</li>
+	 		<li>~ignore</li>
+	 		<li>param ~enabled</li>
+	 		<li>~ignore param</li>
+	 	</ul>
+       <p><img src="images/preference-filter.png" alt="Filter preferences"/></p>
+    </td>
+  </tr>
+
+  <tr id="unavoidable-generic-type-problems">
+    <td class="title">Unavoidable generic type problems</td>
+    <td class="content">
+      A new compiler option has been added that suppresses unavoidable generic type problems.
+      <p><img src="images/unavoidable-generic-type-problems.png" alt="compiler option on the Errors/Warnings page"/></p>
+
+      <p>Those problems only show up because a type refers to an old API that uses raw types.</p>
+      <p><img src="images/unavoidable-generic-type-problems-example.png" alt="example code"/></p>
+
+      <p>When the old API is eventually generified, then these problems either go away,
+      or you will see a compile error because the type arguments you used are not correct.</p>
+
+      <p>This option is disabled by default but can be enabled on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> 
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page"/>
+      <b>Java &gt; Compiler &gt; Errors/Warnings</b></a>
+      preference page.</p>
+    </td>
+  </tr>
+
+  <tr id="method-can-be-static">
+    <td class="title">Compiler detects methods that can be static</td>
+    <td class="content">
+      Two new compiler options have been added that mark methods which can be made static because they only refer to static members.
+      <p><img src="images/method-can-be-static.png" alt="'Method can be static' compiler options on the Errors/Warnings page"/></p>
+      <p>
+      The first option marks private and final methods than can always be made static.<br/>
+      The second option also marks other methods. Note that methods can be overridden in a subclass, so if you
+      make a "potentially static" method static, this may break existing clients.
+      </p>
+
+      <p>These options are disabled by default.</p>
+    </td>
+  </tr>
+
+  <tr id="jre_disk_changes">
+    <td class="title">On-disk JRE change detection</td>
+    <td class="content">
+      In the past, if a system update or another event changed a JRE used in Eclipse,
+      those changes would not be reflected in Eclipse: In some cases, this caused the JRE to stop
+      functioning. Now, these changes are accounted for, and any JRE that changed on-disk (external to Eclipse) will be updated accordingly when Eclipse restarts.
+    </td>
+  </tr>
+
+  <tr id="jdt-suppresswarnings-javadoc">
+    <td class="title">New &quot;javadoc&quot; token for <code>@SuppressWarnings</code> annotation</td>
+    <td class="content">
+        The <code>@SuppressWarnings</code> annotation can now also be used to suppress compiler warnings/errors related
+    	to Javadoc issues:
+        <p><img src="images/suppresswarnings-javadoc.png" alt="Suppress javadoc warnings using @SuppressWarnings(&quot;javadoc&quot;) annotation"/></p>
+    </td>
+  </tr>
+
+  <!-- ******************* Java Views and Dialogs ************************************* -->
+  <tr>
+    <td id="JavaViews" class="section" colspan="2">
+    <h2>Java Views and Dialogs</h2>
+    </td>
+  </tr>
+
+  <tr id="open-type-hierarchy-on-multiple-java-elements">
+    <td class="title">Open Type Hierarchy on multiple type containers</td>
+    <td class="content">
+        The <b>Open Type Hierarchy</b> action now also works on multiple type containers:
+        You can select multiple packages, source folders, or projects, and then open a hierarchy that contains all types
+        in the selected containers.
+    </td>
+  </tr>
+
+  <tr id="pin-call-hierarchy-view">
+    <td class="title">Pin the Call Hierarchy view	</td>
+    <td class="content">
+        The <b>Call Hierarchy</b> view now allows to pin the current view,
+        which allows you to open multiple Call Hierarchy views at the same time:
+      <p><img src="images/pin-call-hierarchy-view.png" alt="Pin the Call Hierarchy View action"/></p>
+    </td>
+  </tr>
+
+  <tr id="search-in-options">
+    <td class="title">Configure 'Search In...' in Call Hierarchy</td>
+    <td class="content">
+        A new <b>Search In...</b> action has been added to the <b>Call Hierarchy</b> view menu. The action shows the <b>Search In</b> dialog
+        with the same options that are already available in the <b>Search</b> dialog.
+       <p><img src="images/search-in-options.png" alt="Search In options"/></p>
+    </td>
+  </tr>
+
+  <!-- *********************** Debug ******************************** -->
+
+  <tr id="conditional_bp_history">
+    <td class="title">History for breakpoint conditions</td>
+    <td class="content">
+      There is now a history for recently used breakpoint conditions:
+      <p><img src="images/condition-history.png" alt="Breakpoint condition history"/></p>
+    </td>
+  </tr>
+
+  <tr id="prompt_conditional_bp">
+    <td class="title">Prompt before deleting conditional breakpoints</td>
+    <td class="content">
+      In the Java editor, if you delete a breakpoint that has a condition set on it, you will now be prompted before the breakpoint gets deleted:
+      <p><img src="images/prompt-on-deletion.png" alt="Prompt when deleting a breakpoint"/></p>
+      <p>You can specify that you would not like to be notified again when trying to remove a conditional breakpoint. This can later be changed again
+      via <b>Prompt for confirmation when deleting a conditional breakpoint from editor</b> on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.debug.ui.JavaDebugPreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Debug preference page"/>
+      <b>Java &gt; Debug</b></a>
+      preference page.</p>
+    </td>
+  </tr>
+
+  <tr id="filter_getters_and_setters">
+    <td class="title">Step filtering for bean-style getters and setters</td>
+    <td class="content">
+      When single stepping, you can now automatically step over simple getters and setters during <b>Step Into</b>:
+      <p><img src="images/filter-getters-and-setters.png" alt="Options for step filtering on simple getters and setters"/></p>
+      <p>Consider single stepping into statements like:</p><pre>computeEffect(meters.getCurrent(), meters.getVoltage());</pre>
+      <p>Normally, this means first stepping into <tt>getCurrent</tt>, then into <tt>getVoltage</tt>, and finally into <tt>computeEffect</tt>.
+      You can now skip the first two steps (provided they are simple bean-style getters), and jump directly into the
+      <tt>computeEffect</tt> method, by selecting the <b>Filter simple getters</b> check box on the
+      <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.debug.ui.JavaStepFilterPreferencePage)")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Step Filtering preference page"/>
+      <b>Java &gt; Debug &gt; Step Filtering</b></a>
+      preference page.</p>
+      <p>Similarly, selecting <b>Filter simple setters</b> avoids stopping inside simple bean-style setters when using <b>Step Into</b>.</p>
+    </td>
+  </tr>
+
+  <!-- ******************* Properties File Editor ************************************* -->
+  <tr>
+    <td id="PropertiesEditor" class="section" colspan="2">
+    <h2>Properties File Editor</h2>
+    </td>
+  </tr>
+
+  <tr id="quick-assist-escape-backslashes">
+    <td class="title">New "Escape backslashes" and "Unescape backslashes" quick assists in properties file editor</td>
+    <td class="content">
+      The properties file editor now offers two new quick assists (<b>Ctrl+1</b>) to escape or unescape backslashes.
+      <p><img src="images/escape-backslashes.png" alt="Escape backslashes"/>
+      <img src="images/unescape-backslashes.png" alt="Uescape backslashes"/></p>
+
+      The <b>Escape backslashes</b> quick assist is also offered automatically on paste if the pasted text
+      contains backslashes that should be escaped.
+    </td>
+  </tr>
+
+  <tr id="properties-file-editor-hover">
+    <td class="title">Auto-escaped characters and editor hovers</td>
+    <td class="content">
+        The properties file editor now auto-escapes typed and pasted non-ISO-8859-1 characters and shows a hover containing the real text
+        if the underlying text contains special characters like \uHHHH, \t, or \n.
+      <p><img src="images/properties-file-editor-hover.png" alt="Properties file editor hover"/></p>
+    </td>
+  </tr>
+
+  <!-- ******************* JUnit ************************************* -->
+  <tr>
+    <td id="JUnit" class="section" colspan="2">
+    <h2>JUnit</h2>
+    </td>
+  </tr>
+
+  <tr id="junit-4-suite-wizard">
+    <td class="title">New JUnit Test Suite wizard supports JUnit&nbsp;4</td>
+    <td class="content">
+        The <b>New &gt; JUnit Test Suite</b> wizard can now also create JUnit 4 test suites:
+        <p><img src="images/junit-4-suite-wizard.png" alt="New JUnit Test Suite wizard"/></p>
+        Result:
+        <pre>@RunWith(Suite.class)
+@SuiteClasses({ ListTest.class, SimpleTest.class })
+public class AllTests {
+}</pre>
+    </td>
+  </tr>
+
+  <tr id="junit-show-new-launches">
+    <td class="title">Show latest JUnit test in all windows</td>
+    <td class="content">
+        By default, a new JUnit test run only shows up in the window where the test was started.
+        If you prefer to see the latest test in all open JUnit views, select
+        <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.junit.preferences)")'>
+        <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Debug preference page"/>
+        <b>Preferences &gt; Java &gt; JUnit</b></a><b> &gt; Show newly launched test in all JUnit views:</b>
+        <p><img src="images/junit-show-new-launches.png" alt="JUnit preference page"/></p>
+    </td>
+  </tr>
+
+  <tr id="junit-paste-url">
+    <td class="title">Paste URL into JUnit view</td>
+    <td class="content">
+      Apart from drag-and-drop or <b>Test Run History &gt; Import from URL...</b>, you can now also
+      paste a URL into the JUnit view to load test results from the web.
+      <p>Supported test run formats are XML files exported from the JUnit view or
+      generated by the Ant JUnit task.</p>
+    </td>
+  </tr>
+
+    <!-- ****************** END OF N&N TABLE ****************** -->
+  </tbody>
+</table>
+</body>
+</html>
