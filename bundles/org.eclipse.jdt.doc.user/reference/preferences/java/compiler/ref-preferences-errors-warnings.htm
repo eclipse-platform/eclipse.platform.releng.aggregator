@@ -811,6 +811,17 @@ use raw types in the first place.</p>
 	</tr>
 	<tr>
 		<td valign="top">
+		<p>Include 'assert' in null analysis</p>
+		</td>
+		<td valign="top">
+		<p>When enabled, the compiler will honor 'assert' statement when doing the null analysis.</p>
+		</td>
+		<td valign="top">
+		<p>Off</p>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
 		<p>Include fields in null analysis</p>
 		</td>
 		<td valign="top">
@@ -824,66 +835,15 @@ use raw types in the first place.</p>
 	</tr>
 	<tr>
 		<td valign="top">
-		<p>Include 'assert' in null analysis</p>
-		</td>
-		<td valign="top">
-		<p>When enabled, the compiler will honor 'assert' statement when doing the null analysis.</p>
-		</td>
-		<td valign="top">
-		<p>Off</p>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top">
 		<p>Enable annotation-based null analysis</p>
 		</td>
 		<td valign="top">
-		<p>When enabled, the compiler will interpret the annotation types defined using <b>'Nullable' annotation</b> and <b>'NonNull' annotation</b> options below 
-		as specifying whether or not a given type includes the value null.</p>
-		<p>The effect of these analyses is further controlled by the options <b>Violation of null specification</b>, <b>Potential violation of null specification</b>
-		 and <b>Insufficient information for null analysis</b> options below.</p>
+		<p>When enabled, the compiler will interpret annotations @Nullable, @NonNull, and @NonNullByDefault
+		as specifying whether or not a given type includes the value 'null'.</p>
+		<p>The effect of these analyses is further controlled by the following sub-options.</p>
 		</td>
 		<td valign="top">
 		<p>Off</p>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top" style="padding-left: 2em;">
-		<p>'Nullable' annotation</p>
-		</td>
-		<td valign="top">
-		<p>This option defines a fully qualified name of a Java annotation type, which when applied to a type in a method signature or variable declaration, 
-		will be interpreted as a specification that null is a legal value in that position. Currently supported positions are: method parameters, method 
-		return type and local variables.</p>
-		</td>
-		<td valign="top">
-		<p>org.eclipse.jdt.annotation.Nullable</p>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top" style="padding-left: 2em;">
-		<p>'NonNull' annotation</p>
-		</td>
-		<td valign="top">
-		<p>This option defines a fully qualified name of a Java annotation type, which when applied to a type in a method signature or variable declaration, 
-		will be interpreted as a specification that null is <b>not</b> a legal value in that position. Currently supported positions are: method parameters, method 
-		return type and local variables.</p>
-		</td>
-		<td valign="top">
-		<p>org.eclipse.jdt.annotation.NonNull</p>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top" style="padding-left: 2em;">
-		<p>'NonNullByDefault' annotation</p>
-		</td>
-		<td valign="top">
-		<p>This option defines a fully qualified name of a Java annotation type. When applied to an element without an argument, 
-		all unannotated types in method signatures within the annotated element will be treated as if they were specified with the non-null annotation.</p>
-		<p> On the contrary, when the annotation is applied with the constant false as its argument, all corresponding defaults at outer scopes will be canceled for the annotated element.</p>
-		</td>
-		<td valign="top">
-		<p>org.eclipse.jdt.annotation.NonNullByDefault</p>
 		</td>
 	</tr>
 	<tr>
@@ -892,7 +852,7 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>When enabled, this option globally (at a workspace level or project level depending on
-		where the option is configured) achieves the same effect as specifying <b>'NonNull' annotation</b> does for individual elements.</p>
+		where the option is configured) achieves the same effect as specifying @NonNull for individual elements.</p>
 		</td>
 		<td valign="top">
 		<p>Off</p>
@@ -956,10 +916,39 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>When enabled, the compiler will issue an error or a warning when a non-null annotation is applied although the same effect is already achieved by a default applicable at the current location. 
-		Such a default may be set by enabling the option <b>Use non-null as workspace-wide (or project-wide) default</b> or by using the annotation specified by the option <b>'NonNullByDefault' annotation</b>.</p>
+		Such a default may be set by enabling the option <b>Use non-null as workspace-wide (or project-wide) default</b> or by using the @NonNullByDefault annotation.</p>
 		</td>
 		<td valign="top">
 		<p>Warning</p>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" style="padding-left: 2em;">
+		<p>Use default annotations for null specifications</p>
+		</td>
+		<td valign="top">
+		<p>When enabled, the compiler will use the default set of annotations for null specifications. These annotations are included in the Eclipse SDK in the
+		<b>org.eclipse.jdt.annotation</b> bundle.</p>
+		<p>You can specify different annotation names to use in your projects, but be aware that the Eclipse compiler only supports the semantics
+		specified in the default annotations:</p>
+		<ul>
+			<li><b>org.eclipse.jdt.annotation.Nullable</b>: A fully qualified name of a Java annotation type, which when applied to a type in a method signature or variable declaration, 
+				will be interpreted as a specification that null is a legal value in that position.<br>
+				Currently supported positions are: method parameters, method return type and local variables.
+			</li>
+			<li><b>org.eclipse.jdt.annotation.NonNull</b>: A fully qualified name of a Java annotation type, which when applied to a type in a method signature or variable declaration, 
+				will be interpreted as a specification that null is <b>not</b> a legal value in that position.<br>
+				Currently supported positions are: method parameters, method return type and local variables.
+			</li>
+			<li>
+				<b>org.eclipse.jdt.annotation.NonNullByDefault</b>: A fully qualified name of a Java annotation type. When applied to an element without an annotation argument, 
+				all unannotated types in method signatures within the annotated element will be treated as if they were specified with the non-null annotation.<br>
+				On the contrary, when the annotation is applied with the constant 'false' as its argument, all corresponding defaults at outer scopes will be canceled for the annotated element.
+			</li>
+		</ul>
+		</td>
+		<td valign="top">
+		<p>On</p>
 		</td>
 	</tr>
 </table>
