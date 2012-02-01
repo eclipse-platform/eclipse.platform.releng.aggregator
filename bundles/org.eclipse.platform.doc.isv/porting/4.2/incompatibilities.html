@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Incompatibilities between Eclipse 3.7 and 4.2</title>
+</head>
+
+<body>
+
+<h1>Incompatibilities between Eclipse 3.7 and 4.2</h1>
+
+<p>
+  Eclipse changed in incompatible ways between 3.7 and 4.2 in ways that affect 
+  plug-ins. The following entries describe the areas that changed and provide 
+  instructions for migrating 3.7 plug-ins to 4.2. Note that you only need to look 
+  here if you are experiencing problems running your 3.7 plug-in on 4.2.
+</p>
+
+<ol>
+	<li><a href="#runtime-auth">Platform keyring implementation removed</a></li>
+</ol>
+
+<hr>
+<!-- ############################################## -->
+<h2>1. <a name="runtime-auth">Platform keyring implementation removed</a></h2>
+<p><strong>What is affected:</strong> Clients that call the following methods for
+storing and retrieving passwords in the platform keyring file:
+<ul>
+<li>Platform#addAuthorizationInfo</li>
+<li>Platform#getAuthorizationInfo</li>
+<li>Platform#flushAuthorizationInfo</li>
+<li>Platform#addProtectionSpace</li>
+<li>Platform#getProtectionSpace</li>
+</ul>
+</p>
+<p><strong>Description: These APIs were deprecated and superseded by new
+API in the <tt>org.eclipse.equinox.security.storage</tt> package in Eclipse 3.4.
+These APIs made use of a custom encryption algorithm that caused problems
+for organizations distributing and exporting Eclipse-based products. The system was
+also inherently flawed due to relying on a password supplied on the command line
+that users never set. In Eclipse 4.2 this problematic implementation has been removed.
+The API remains in place and will log an exception when used.
+</strong> 
+</p>
+<p><strong>Action required:</strong> Clients that call these methods should instead
+use the corresponding Equinox security APIs for storing authentication information instead.
+Refer to the deprecation comment on each method for precise migration instructions.
+</p>
+
+<!-- ############################################## -->
+<!-- <h2><a name="item1">Item 1</a></h2>
+<p>
+</p>
+-->
+
+<!-- ############################################## -->
+
+</body>
+</html>
