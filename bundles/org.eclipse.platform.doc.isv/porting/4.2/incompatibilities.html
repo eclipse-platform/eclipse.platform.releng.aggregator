@@ -21,6 +21,9 @@
 
 <ol>
 	<li><a href="#runtime-auth">Platform keyring implementation removed</a></li>
+	<li><a href="#2x-compatibility-removed">Compatibility code for Eclipse 1.0-2.1 removed</a></li>
+	<li><a href="#help-appserver">Bundle org.eclipse.help.appserver removed</a></h2>
+	<li><a href="#update-manager">Update Manager bundles removed</a></h2>
 </ol>
 
 <hr>
@@ -36,25 +39,69 @@ storing and retrieving passwords in the platform keyring file:
 <li>Platform#getProtectionSpace</li>
 </ul>
 </p>
-<p><strong>Description: These APIs were deprecated and superseded by new
+<p><strong>Description:</strong> These APIs were deprecated and superseded by new
 API in the <tt>org.eclipse.equinox.security.storage</tt> package in Eclipse 3.4.
 These APIs made use of a custom encryption algorithm that caused problems
 for organizations distributing and exporting Eclipse-based products. The system was
 also inherently flawed due to relying on a password supplied on the command line
 that users never set. In Eclipse 4.2 this problematic implementation has been removed.
 The API remains in place and will log an exception when used.
-</strong> 
 </p>
 <p><strong>Action required:</strong> Clients that call these methods should instead
 use the corresponding Equinox security APIs for storing authentication information instead.
 Refer to the deprecation comment on each method for precise migration instructions.
 </p>
-
 <!-- ############################################## -->
-<!-- <h2><a name="item1">Item 1</a></h2>
-<p>
+<h2>2. <a name="2x-compatibility-removed">Compatibility code for Eclipse 1.0-2.1 removed</a></h2>
+<p><strong>What is affected:</strong>Bundles built for Eclipse 1.0 to 2.1 that have
+not been compiled in Eclipse 3.0 or later. Also, any bundle or feature that requires
+or includes a removed bundle.
+<p><strong>Description:</strong> The following bundles provided implementation
+of compatibility mechanisms to support bundles compiled against Eclipse prior to version 3.0.
+These bundles have not contained any API since the 3.0 release, and no API is
+changed or removed as a consequence of these bundles being removed.
+<ul>
+<li>org.eclipse.core.boot</li>
+<li>org.eclipse.ui.presentations.r21</li>
+<li>org.eclipse.ui.workbench.compatibility</li>
+</ul>
 </p>
--->
+<p><strong>Action required:</strong> Clients with a bundle or feature including
+or requiring any of these bundles should remove the requirement.
+</p>
+<!-- ############################################## -->
+<h2>3. <a name="help-appserver">Bundle org.eclipse.help.appserver removed</a></h2>
+<p><strong>What is affected:</strong>Any bundle or feature that requires or includes 
+the bundle <tt>org.eclipse.help.appserver</tt>.
+<p><strong>Description:</strong> This bundle provided implementation of a Tomcat-based
+web server application for the Eclipse help system. This was replaced in Eclipse 3.3 with
+a Jetty-based application server. This bundle defines no API and has been unused
+in the Eclipse platform for many releases.
+</p>
+<p><strong>Action required:</strong> Clients with a bundle or feature including
+or requiring the bundle <tt>org.eclipse.help.appserver</tt> should remove the requirement.
+</p>
+<!-- ############################################## -->
+<h2>4. <a name="update-manager">Update Manager bundles removed</a></h2>
+<p><strong>What is affected:</strong> Clients that rely on the provisional API
+or implementation found in the following bundles:
+<ul>
+<li>org.eclipse.update.core</li>
+<li>org.eclipse.update.core.win32</li>
+<li>org.eclipse.update.scheduler</li>
+<li>org.eclipse.update.ui</li>
+</ul>
+</p>
+<p><strong>Description:</strong> These provisional APIs were deprecated and 
+superseded by new API provided by Equinox p2 in Eclipse 3.4. These bundles have
+been removed from the Eclipse SDK in 4.2, but remain available and fully compatible
+with 4.2 should any application or product require them.
+</p>
+<p><strong>Action required:</strong> Clients that rely on the provisional
+API or implementation in these bundles should migrate to the functionality and API
+provided by Equinox p2. Alternatively, products can install these bundles from the
+Eclipse 3.8 repository and they will continue to function in Eclipse 4.2-based applications.
+</p>
 
 <!-- ############################################## -->
 
