@@ -1,0 +1,471 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Supported Text Types</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2>Supported Text Types</h2>
+<p>Out-of-the-box we include support for the following text types:</p>
+<ul>
+  <li><a href="#property">Property File</a></li>
+  <li><a href="#compound">Compound Name</a></li>
+  <li><a href="#comma">Comma-delimited List</a></li>
+  <li><a href="#userid">System, Userid Specification</a></li>
+  <li><a href="#path">Full Path - Relative Path - File Name</a></li>
+  <li><a href="#IRI">URL, URI, IRI</a></li>
+  <li><a href="#math">Mathematical Formula</a></li>
+  <li><a href="#regexp">Regular Expression</a></li>
+  <li><a href="#Java">Java Code</a></li>
+  <li><a href="#XPath">XPath</a></li>
+  <li><a href="#message">Message with Placeholders</a></li>
+</ul>
+<p>Developers can add custom text type by contributing to the <code>org.eclipse.equinox.bidi.bidiTypes</code> 
+extension point.</p>
+<p>Unless specified otherwise, we assume that the relative progression of the tokens and separators for display
+should always be from left to right, while the text of each token will go LTR or
+RTL depending on its content and according to the Unicode Bidirectional Algorithm.</p>
+<p>&nbsp;</p>
+
+<h3><a name="property"></a>Property File</h3>
+<h4>Pattern</h4>
+<p><span style="color:blue">[variable name]</span> <span style="color:red"><b>=</b></span>
+<span style="color:blue">[value]</span> </p>
+<p>Note: variable names must not include equal signs.</p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+  <li>There is only one separator, the equal sign (=).</li>
+  <li>It is enough to locate the first occurrence of the separator. Everything
+  before can be considered as the first token, everything after can be
+  considered the second (and last) token.</li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   PRIORITY=5
+   Display (without LRM):         5=YTIROIRP
+   Logical order (with LRM):      PRIORITY@=5
+   Display (without LRM):         YTIROIRP=5
+</pre>
+
+<h3><a name="compound"></a>Compound Name</h3>
+<h4>Pattern</h4>
+<p><span style="color:blue">[first part]</span> <span style="color:red"><b>_</b></span>
+<span style="color:blue">[second part]</span> <span style="color:red"><b>_</b></span>
+<span style="color:blue">[third part]</span> </p>
+<p>Note: name parts must not include underscores.</p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptation:</p>
+<ul>
+  <li>There is only one separator, the underscore (_). </li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   MYPACKAGE_MYPROGRAM
+   Display (without LRM):         MARGORPYM_EGAKCAPYM
+   Logical order (with LRM):      MYPACKAGE@_MYPROGRAM
+   Display (without LRM):         EGAKCAPYM_MARGORPYM
+</pre>
+
+<h3><a name="comma"></a>Comma-delimited List</h3>
+<h4>Pattern</h4>
+<p><span style="color:blue">[first list item]</span> <span style="color:red"><b>
+,</b></span> <span style="color:blue">[second list item]</span>
+<span style="color:red"><b>,</b></span> <span style="color:blue">. . .</span>
+<span style="color:red"><b>,</b></span> <span style="color:blue">[last list
+item]</span> </p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+  <li>There is only one separator, the comma(,). </li>
+  <li>This design can easily be adapted to accomodate a different separator,
+  like a semicolon (;) or a tab character, etc... </li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   ABC,DE,FGH
+   Display (without LRM):         HGF,ED,CBA
+   Logical order (with LRM):      ABC@,DE@,FGH
+   Display (without LRM):         CBA,ED,HGF
+</pre>
+
+<h3><a name="userid"></a>System, Userid Specification</h3>
+<h4>Pattern</h4>
+<p><span style="color:blue">[system ID]</span> <span style="color:red"><b>(</b></span>
+<span style="color:blue">[user ID]</span> <span style="color:red"><b>)</b></span>
+</p>
+<p>Note: the system ID must not include parentheses.</p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+  <li>It is enough to consider one separator, the left parenthesis ( ( ). </li>
+  <li>It is enough to locate the first occurrence of the separator. Everything
+  before can be considered as the first token, everything after can be
+  considered the second (and last) token. </li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   MY_HOST(MY_USERID)
+   Display (without LRM):         DIRESU_YM)TSOH_YM)
+   Logical order (with LRM):      MY_HOST@(MY_USERID)
+   Display (without LRM):         TSOH_YM(DIRESU_YM)
+</pre>
+
+<h3><a name="path"></a>Full Path - Relative Path - File Name</h3>
+<h4>Patterns</h4>
+<p><u>Windows full path:</u> <span style="color:blue">[drive letter]</span><span style="color:red"><b>:\</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>\</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>\</b></span>
+<span style="color:blue">[sub-path]</span></p>
+<p><u>Windows relative path:</u> <span style="color:blue">[sub-path]</span>
+<span style="color:red"><b>\</b></span> <span style="color:blue">. . .</span>
+<span style="color:red"><b>\</b></span> <span style="color:blue">[sub-path]</span></p>
+<p><u>Windows full file path:</u> <span style="color:blue">[drive letter]</span><span style="color:red"><b>:\</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>\</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>\</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>\</b></span>
+<span style="color:blue">[file name]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[extension]</span></p>
+<p><u>Windows relative file path:</u> <span style="color:blue">[sub-path]</span>
+<span style="color:red"><b>\</b></span> <span style="color:blue">. . .</span>
+<span style="color:red"><b>\</b></span> <span style="color:blue">[sub-path]</span>
+<span style="color:red"><b>\</b></span> <span style="color:blue">[file name]</span>
+<span style="color:red"><b>.</b></span> <span style="color:blue">[extension]</span></p>
+<p><u>Linux full path:</u> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span></p>
+<p><u>Linux relative path:</u> <span style="color:blue">[sub-path]</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">. . .</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">[sub-path]</span></p>
+<p><u>Linux full file path:</u> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[file name]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[extension]</span></p>
+<p><u>Linux relative file path:</u> <span style="color:blue">[sub-path]</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">. . .</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">[sub-path]</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">[file name]</span>
+<span style="color:red"><b>.</b></span> <span style="color:blue">[extension]</span></p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptation:</p>
+<ul>
+  <li>The separators are colon (:), backslash (\) and full stop (.) for
+  Windows, slash (/) and full stop (.) for Linux. </li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   c:\DIR1\DIR2\MYFILE.ext
+   Display (without LRM):         c:\ELIFYM\2RID\1RID.ext
+   Logical order (with LRM):      c:\DIR1@\DIR2@\MYFILE.ext
+   Display (without LRM):         c:\1RID\2RID\ELIFYM.ext
+</pre>
+
+<h3><a name="IRI"></a>URL, URI, IRI</h3>
+<h4>Patterns</h4>
+<p><span style="color:red"><b>http://</b></span> <span style="color:blue">
+[domain label]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[domain label]</span></p>
+<p><span style="color:red"><b>http://</b></span> <span style="color:blue">
+[domain label]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[domain label]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[file name]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[extension]</span></p>
+<p><span style="color:red"><b>http://</b></span> <span style="color:blue">
+[domain label]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[domain label]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[file name]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[extension]</span> <span style="color:red"><b>#</b></span>
+<span style="color:blue">[local reference]</span> </p>
+<p><span style="color:red"><b>http://</b></span> <span style="color:blue">
+[domain label]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[domain label]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">. . .</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[sub-path]</span> <span style="color:red"><b>/</b></span>
+<span style="color:blue">[file name]</span> <span style="color:red"><b>.</b></span>
+<span style="color:blue">[extension]</span> <span style="color:red"><b>?</b></span>
+<span style="color:blue">[key1]</span> <span style="color:red"><b>=</b></span>
+<span style="color:blue">[value1]</span> <span style="color:red"><b>&amp;</b></span>
+<span style="color:blue">[key2]</span> <span style="color:red"><b>=</b></span>
+<span style="color:blue">[value2]</span></p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+  <li>The detailed syntax of URLs, URIs, IRIs is described in
+  <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a> and
+  <a href="http://www.ietf.org/rfc/rfc3987.txt">RFC 3987</a>. A rigorous
+  analysis to identify tokens and separators is not simple. </li>
+  <li>For most practical cases, it is sufficient to consider the following
+  separators: colon (:), question mark (?), number sign (#), slash (/),
+  commercial at (@), full stop (.), left bracket ([), right bracket (]). </li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   www.DOC.MYDOMAIN.com\HEB\LESSON1.html
+   Display (without LRM):         www.NIAMODYM.COD.com\1NOSSEL\BEH.html
+   Logical order (with LRM):      www.DOC@.MYDOMAIN.com\HEB@\LESSON1.html
+   Display (without LRM):         www.COD.NIAMODYM.com\BEH\1NOSSEL.html
+</pre>
+
+<h3><a name="math"></a>Mathematical Formula</h3>
+<h4>Requirement</h4>
+<p>Preserve the relative order of the formula components according to the
+base text direction of the formula.</p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+    <li>The separators are the usual arithmetic operators. </li>
+  <li>Tokens will be ordered according to the base text direction of the
+  formula.</li>
+  <li>If the first strong directional character in the formula is a Hebrew or
+  LTR letter, the base text direction of the formula is LTR.</li>
+  <li>If the first strong directional character in the formula is an
+  Arabic letter, the base direction of the formula must be RTL.</li>
+  <li>If there is no strong directional character in the formula but there are
+  Arabic-Indic digits, the base direction of the formula must be
+  RTL, otherwise it must be LTR.</li>
+</ul>
+<b>Example (Hebrew):</b>
+<pre>   Logical order (without LRM):   PROFIT = REVENUE - COST
+   Display (without LRM):         TSOC - EUNEVER = TIFORP
+   Logical order (with LRM):      PROFIT @= REVENUE @- COST
+   Display (without LRM):         TIFORP = EUNEVER - TSOC
+</pre>
+<b>Example (Arabic, ampersand represents RLM):</b>
+<pre>   Logical order (without LRM):   DIVIDEND = SHARE x 0.10
+   Display (without LRM):         x 0.10 ERAHS = DNEDIVID
+   Logical order (with LRM):      DIVIDEND = SHARE x&amp; 0.10
+   Display (without LRM):         0.10 x ERAHS = DNEDIVID
+</pre>
+
+<h3><a name="regexp"></a>Regular Expression</h3>
+<h4>Requirement</h4>
+<p>Preserve the relative order of the regular expression components identical to
+the order in which they appear when exclusively Latin characters are used.</p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+    <li>Regular expressions consist of operators, pattern characters, and
+    &quot; in most implementations of extended syntax &quot; named identifiers.</li>
+  <li>Since the syntax of regular expression is not standardized, the
+  list of operators should be adapted to the specific implementation at hand.
+  </li>
+  <li>Common operators include: question mark (?), circumflex (^), dollar ($), plus
+  (+), minus (-), asterisk (*), vertical bar (|), tilde (~), left and right
+  parentheses ( ( ) ), left and right square brackets ([ ]), left and right
+  curly brackets ( { } ), commercial at (@), number sign (#), ampersand (&amp;),
+  backslash (\).</li>
+  <li>The separators will be the characters used as operators for regular
+  expressions.</li>
+  <li>Characters which are not operators are pattern characters.
+  If an operator is immediately preceded by a backslash, both the
+  backslash and the operator must be handled as pattern characters.</li>
+  <li>Each pattern character is a separate token, so pattern characters
+  will always be ordered according to the base text direction of the
+  expression.</li>
+  <li>Identifiers appear in certain syntactic constructs, and are treated as
+  tokens. For example, the strings &quot;digit&quot; and &quot;number&quot; in the expression
+  &quot;total: (?&lt;number&gt;[:digit:]+)\s&quot; are identifiers, whereas &quot;total&quot; is just
+  a sequence of 5 pattern characters.</li>
+  <li>The following constructs must be recognized as delimiting tokens
+  (note: this list should be adapted to the specific syntax of regular
+  expressions in a given environment):<br>
+    &nbsp;&nbsp;&nbsp;(?&lt;name&gt;<br>
+    &nbsp;&nbsp;&nbsp;(?'name'<br>
+    &nbsp;&nbsp;&nbsp;(?(&lt;name&gt;)<br>
+    &nbsp;&nbsp;&nbsp;(?('name')<br>
+    &nbsp;&nbsp;&nbsp;(?(name)<br>
+    &nbsp;&nbsp;&nbsp;(?&amp;name)<br>
+    &nbsp;&nbsp;&nbsp;(?P&lt;name&gt;<br>
+    &nbsp;&nbsp;&nbsp;\k&lt;name&gt;<br>
+    &nbsp;&nbsp;&nbsp;\k'name'<br>
+    &nbsp;&nbsp;&nbsp;\k{name}<br>
+    &nbsp;&nbsp;&nbsp;(?P=name)<br>
+    &nbsp;&nbsp;&nbsp;\g{name}<br>
+    &nbsp;&nbsp;&nbsp;\g&lt;name&gt;<br>
+    &nbsp;&nbsp;&nbsp;\g'name'<br>
+    &nbsp;&nbsp;&nbsp;(?(R&amp;name)<br>
+    &nbsp;&nbsp;&nbsp;[:class:]<br>
+    </li>
+    <li>Comments of the form (?# . . . ) must be handled as individual tokens.</li>
+    <li>Quoted sequences of the form \Q . . . \E must be handled as individual tokens.</li>
+    <li>Numbers used as quantifiers (numbers of occurrences) or as group references
+    must be handled as individual tokens.</li>
+  <li>If the first strong directional character in a regular expression is an
+  Arabic letter, the base direction of the expression must be RTL.</li>
+  <li>If the first strong directional character in a regular expression is a
+  Hebrew letter or a LTR letter, the base direction of the expression must be
+  LTR.</li>
+  <li>If the regular expression contains no strong directional character, its
+  base direction must be LTR for Hebrew users. For Arabic users, its base
+  direction should follow the user interface direction (RTL if mirrored, LTR otherwise).</li>
+</ul>
+<b>Example (Hebrew):</b>
+<pre>   Logical order (without LRM):   ABC(?'DEF'GHI
+   Display (without LRM):         IHG'FED'?(CBA
+   Logical order (with LRM):      A@B@C@(?'DEF'@G@H@I
+   Display (without LRM):         ABC(?'FED'GHI
+</pre>
+<b>Example (Arabic):</b>
+<pre>   Logical order (without LRM):   ABC(?'DEF'GHI
+   Display (without LRM):         IHG'FED'?(CBA
+   Logical order (with LRM):      ABC(?'DEF'GHI
+   Display (without LRM):         IHG'FED'?(CBA
+</pre>
+
+<h3><a name="Java"></a>Java Code</h3>
+<h4>Requirement</h4>
+<p>We can classify elements of a Java program as: </p>
+<ul>
+  <li>white space </li>
+  <li>operators </li>
+  <li>String literals: they start with a double quote and end with a double
+  quote which is not escaped (not preceded by a backslash). </li>
+  <li>comments: they start with /* and end with */ or start with // and end at
+  the end of the line. </li>
+  <li>tokens: anything delimited by the previous items. </li>
+</ul>
+<p>The requirement is to make the relative order of elements left-to-right,
+while each element by itself will be presented according to the Unicode Bidirectional Algorithm. </p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+  <li>Each String literal or comment is considered as one token. </li>
+  <li>The separators are all the characters used as operators and separators
+  in the Java language: plus (+), minus (-), asterisk (*), slash (/), percent
+  (%), less-than (&lt;), greater-than (&gt;), ampersand (&amp;), vertical bar (|),
+  circumflex (^), tilde (~), left and right parentheses ( ( ) ), left and
+  right square brackets ([ ]), left and right curly brackets ( { } ), comma
+  (,), full stop (.), semicolon (;), exclamation mark (!), question mark (?),
+  colon (:), spaces which are not part of a String literal or a comment. </li>
+  <li>If a String literal or a comment includes LRE or RLE characters but do
+  not include the proper number of matching PDF characters, missing PDF
+  characters must be added at the end of the literal or comment.</li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   A = /*B+C*/ D;
+   Display (without LRM):         D /*C+B*/ = A;
+   Logical order (with LRM):      A@ = /*B+C@*/ D;
+   Display (without LRM):         A = /*C+B*/ D;
+</pre>
+
+<h3><a name="XPath"></a>XPath</h3>
+<h4>Patterns</h4>
+<p><span style="color:red"><b>/</b></span> <span style="color:blue">book</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">chapter</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">paragraph</span></p>
+<p><span style="color:red"><b>/</b></span> <span style="color:blue">year</span>
+<span style="color:red"><b>/</b></span> <span style="color:blue">month</span>
+<span style="color:red"><b>[@</b></span><span style="color:blue">name</span>
+<span style="color:red"><b>=</b></span> <span style="color:red"><b>"</b></span><span style="color:blue">April</span><span style="color:red"><b>"]</b></span>
+</p>
+<h4>Detailed Design</h4>
+<p>The general algorithm applies, with the
+following adaptations:</p>
+<ul>
+  <li><b><u>Strings</u></b>
+  <ul>
+    <li>Strings are started by a <i>quotation mark</i> which can be a
+    double-quote (") or an apostrophe ('), and are closed by the same
+    character. </li>
+    <li>Double-quotes may appear within a string limited by apostrophes and
+    vice versa, and must be handled as characters internal to the string.
+    </li>
+    <li>A string started on one line is not necessarily closed on the same
+    line.</li>
+  </ul>
+  </li>
+  <li><b><u>Whitespace</u></b> (e.g. blanks and tab characters) appearing
+  outside of strings constitutes a delimiter for tokens.
+  </li>
+  <li>Each occurrence of a string must be handled as one token.
+  </li>
+  <li>After isolating strings, the following characters are separators: white
+  space, slash (/), square brackets ( [ and ] ), less-than (&lt;), greater-than
+  (&gt;), equal sign (=), exclamation mark (!), colon (:), at sign (@), period
+  (.), vertical bar (|), parentheses ( ( and ) ), plus (+), minus (-),
+  asterisk (*).
+  </li>
+  <li>Some operators are words like "and", "or", "div", "mod". For our
+  purpose, they can be handled as tokens.
+  </li>
+  <li>Some operators are represented by a pair of symbols like "not equal"
+  (!=), "descendant-or-self" (//), "parent" (..). For our purpose, they can be
+  handled as 2 successive operators represented by one symbol each. </li>
+</ul>
+<b>Example:</b>
+<pre>   Logical order (without LRM):   DEF!GHI 'A!B'=JK
+   Display (without LRM):         KJ='B!A' IHG!FED
+   Logical order (with LRM):      DEF@!GHI@ 'A!B'@=JK
+   Display (without LRM):         FED!IHG 'B!A'=KJ
+</pre>
+
+<h3><a name="message"></a>Message with Placeholders</h3>
+<p>Products often use template messages where placeholders are replaced by
+custom data at run time.</p>
+<h4>Requirement</h4>
+<p>The display considerations must ensure correct presentation of both the
+template text and the custom data replacing the placeholders, taking in account
+that these data might have an internal structure, which should be preserved.</p>
+<h4>Detailed Design</h4>
+<ol>
+  <li>The message template will be considered as having a LTR base direction
+  if it is not translated, a RTL base direction if it is translated to Arabic
+  or Hebrew.</li>
+  <li>Let us call "insertion unit" a piece of custom data which is to replace
+  a placeholder. Insertion units with an internal structure also have a
+  defined base direction, generally LTR. For insertion units without internal
+  structure, their base direction will be defined as RTL if they contain at
+  least one Arabic or Hebrew letter, LTR otherwise.</li>
+  <li>&nbsp;Each insertion unit with an internal structure must be processed
+  according to its specific structure.</li>
+  <li>If the base direction of an insertion unit is the same as that of the
+  template, there is nothing more to do for it.</li>
+  <li>If the base direction of the template is LTR and the
+  base direction of an insertion unit is RTL, the insertion unit should have
+  RLE+RLM added at its beginning and RLM+PDF added at its end.</li>
+  <li>If the base direction of the template is RTL and the
+  base direction of an insertion unit is LTR, the insertion unit should have
+  LRE+LRM added at its beginning and LRM+PDF added at its end.</li>
+  <li>If the component in which the formatted message is
+  displayed has an orientation different from the template direction, the formatted
+  message must have LRE+LRM added to its beginning and LRM+PDF added to its
+  end if its base direction is LTR, RLE+RLM added to its beginning and
+  RLM+PDF added to its end if its base direction is RTL.</li>
+</ol>
+<b>Example</b> ("&gt;" represents LRE, "^" represents PDF, "@" represents LRM)<b>:</b>
+<pre>   Logical order (template without LRM):   err012: FILE "%1" NOT FOUND!
+   Logical order (%1 without LRM):         c:\DIR1\MYFILE.ext
+   Display (without LRM):                  !DNUOF TON "ext.ELIFYM\1RID\:c" ELIF :err012
+   Logical order (with LRM):               err012: FILE "&gt;@c:\DIR1@\MYFILE.ext@^" NOT FOUND!
+   Display (without LRM):                  !DNUOF TON "c:\1RID\ELIFYM.ext" ELIF :err012
+</pre>
+<p>&nbsp;</p>
+
+
+</BODY>
+</HTML>
