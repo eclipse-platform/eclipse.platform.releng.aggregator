@@ -1,0 +1,219 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
+<HEAD>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="../book.css" CHARSET="ISO-8859-1" TYPE="text/css">
+<TITLE>Structured Text Design</TITLE>
+
+<link rel="stylesheet" type="text/css" HREF="../book.css">
+</HEAD>
+<BODY BGCOLOR="#ffffff">
+
+<h2><a name="overview"></a>Design Overview</h2>
+
+<h3>Terms and Abbreviations</h3>
+<table border="1" callpadding = "3" cellspacing = "3" width="70%">
+  <tbody><tr>
+    <td>Bidi</td> <td>Bidirectional</td>
+  </tr>
+  <tr>
+    <td>LTR</td> <td>Left to Right</td>
+  </tr>
+  <tr>
+    <td>RTL</td> <td>Right to Left</td>
+  </tr>
+  <tr>
+    <td>LRM</td> <td>Left-to-Right Mark</td>
+  </tr>
+  <tr>
+    <td>RLM</td> <td>Right-to-Left Mark</td>
+  </tr>
+  <tr>
+    <td>LRE</td> <td>Left-to-Right Embedding</td>
+  </tr>
+  <tr>
+    <td>RLE</td> <td>Right-to-Left Embedding</td>
+  </tr>
+   <tr>
+    <td>PDF</td> <td>Pop Directional Formatting</td>
+  </tr>
+</tbody></table>
+
+<h3>General Definitions, Terminology and Conventions</h3>
+<p>Every instance of bidi text has a base text direction. Bidi text in Arabic or
+Hebrew has a RTL base direction, even if it includes numbers or Latin phrases
+which are written from left to right. Bidi text in English or Greek has a LTR
+base direction, even if it includes Arabic or Hebrew phrases which are written
+from right to left.</p>
+<p>Structured expressions also have a base text direction, which is often
+determined by the type of structured expression, but may also be affected by the
+content of the expression (whether it contains Arabic or Hebrew words).</p>
+<p>This document addresses two groups of problematic cases:</p>
+<ol>
+  <li><b>Expressions with simple internal structure</b>: this category
+  regroups cases in which strings are concatenated together in simple ways
+  using known separators. For example: variable names, &quot;name = value&quot;
+  specifications, file path, etc...<br>
+  &nbsp;</li>
+  <li><b>Expressions with complex internal structure</b>: this category
+  regroups structured text like regular expressions, XPath expressions and
+  Java code. This category differs from the previous one since the expressions
+  belonging to it have a unique syntax which cannot be described by
+  concatenation of string segments using separators.</li>
+</ol>
+<p>We will see that the same algorithms can handle both groups, with some
+adaptations in the details.</p>
+<p>In the <b>examples</b> appearing in this document, upper case Latin letters
+represent Arabic or Hebrew text, lower case Latin letters represent English
+text.</p>
+<p>&quot;<b>@</b>&quot; represents an LRM, &quot;<b>&amp;</b>&quot; represents an RLM.</p>
+<p>Notations like <b>LRE+LRM</b> represent character LRE
+immediately followed by character LRM.</p>
+
+<h3>Bidirectional Control Characters</h3>
+<p>When there are problems of wrong display of bidi text, it is often possible
+to cure them by adding some bidi control characters at appropriate locations in
+the text. There are 7 bidi control characters: LRM, RLM, LRE, RLE, LRO, RLO and
+PDF. Since this design has no use for LRO and RLO (Left-to-Right and
+Right-to-Left Override, respectively), the following paragraphs will describe
+the effect of the 5 other characters.</p>
+<ul>
+  <li><b>LRM</b> (Left-to-Right Mark): LRM is an invisible character which
+  behaves like a letter in a Left to Right script such as Latin or Greek. It can
+  be used when a segment of LTR text starts or ends with characters which are
+  not intrinsically LTR and is displayed in a component with a RTL orientation.
+  <br>
+  Example: assume in memory the string &quot;\\myserver\myshare(mydirectory)&quot;. We
+  want it displayed identically, but within a component with RTL
+  orientation it would be displayed as &quot;(myserver\myshare(mydirectory\\&quot;. Adding
+  one LRM character at the beginning of the string will cause the leading
+  backslashes to be displayed on the left side, and adding one LRM character
+  at the end of the string will cause the trailing parenthesis to be displayed
+  on the right side.<br>
+  &nbsp;</li>
+  <li><b>RLM</b> (Right-to-Left Mark): RLM is an invisible character which
+  behaves like a letter in a Right to Left script like Hebrew. It can be used
+  when a segment of RTL text starts or ends with characters which are not
+  intrinsically RTL and is displayed in a component with a LTR
+  orientation.<br>
+  Example: assume in memory the string &quot;HELLO&nbsp;WORLD&nbsp;!&quot;. We want it displayed
+  as &quot;!&nbsp;DLROW&nbsp;OLLEH&quot;, but within a component with a LTR orientation it
+  would be displayed as &quot;DLROW&nbsp;OLLEH&nbsp;!&quot; (exclamation mark on the right side).
+  Adding one RLM character at the end of the string will cause the trailing
+  exclamation mark to be displayed on the left side.<br>
+  &nbsp;</li>
+  <li><b>LRE</b> (Left-to-Right Embedding): LRE can be used to give a base
+  LTR direction to a piece of text. It is most useful for mixed text which
+  contains both LTR and RTL segments.<br>
+  Example: assume in memory the string &quot;i&nbsp;love&nbsp;RACHEL&nbsp;and&nbsp;LEA&quot; which should be
+  displayed as &quot;i&nbsp;love&nbsp;LEHCAR&nbsp;and&nbsp;AEL&quot;. However, within a component with RTL
+  orientation, it would be displayed as &quot;AEL&nbsp;and&nbsp;LEHCAR&nbsp;i&nbsp;love&quot;. Adding one
+  LRE character at the beginning of the string and one PDF (see below)
+  character at the end of the string will cause proper display.<br>
+  &nbsp;</li>
+  <li><b>RLE</b> (Right-to-Left Embedding): RLE can be used to give a base
+  RTL direction to a piece of text. &nbsp;It is most useful for mixed text which
+  contains both LTR and RTL segments.<br>
+  Example: assume in memory the string &quot;I&nbsp;LOVE&nbsp;london&nbsp;AND&nbsp;paris&quot; which should
+  be displayed as &quot;paris&nbsp;DNA&nbsp;london&nbsp;EVOL&nbsp;I&quot;. However, within a component with
+  LTR orientation, it would be displayed as &quot;EVOL&nbsp;I&nbsp;london&nbsp;DNA&nbsp;paris&quot;.
+  Adding one RLE character at the beginning of the string and adding one PDF
+  (see below) character at the end of the string will cause proper display.<br>
+  &nbsp;</li>
+  <li><b>PDF</b> (Pop Directional Formatting): PDF may be used to limit the
+  effect of a preceding LRE or RLE. It may be omitted if not followed by any
+  text.</li>
+</ul>
+<p>Note that pieces of text bracketed between LRE/PDF or RLE/PDF can be
+contained within larger pieces of text themselves bracketed between LRE/PDF or
+RLE/PDF. This is why the &quot;E&quot; of LRE and RLE means &quot;embedding&quot;. This could happen
+if we have for instance a Hebrew sentence containing an English phrase itself
+containing an Arabic segment. In practice, such complex cases should be avoided
+if possible. The present design does not use more than one level of LRE/PDF or
+RLE/PDF, except possibly in regular expressions.</p>
+
+<h3>Bidi Classification</h3>
+<p>Characters can be classified according to their bidi type as described in the
+Unicode Standard (see
+<a href="http://www.unicode.org/reports/tr9/#Bidirectional_Character_Types">
+Bidirectional_Character_Types</a> for a full description of the bidi types). For
+our purpose, we will distinguish the following types of characters:</p>
+<ul>
+  <li><b>&quot;Strong&quot; characters</b>: those with a bidi type of L, R or AL
+  (letters in LTR or RTL scripts);</li>
+  <li><b>Numbers</b>: European Numbers (type EN) or Arabic Numbers (type AN);</li>
+  <li><b>Neutrals</b>: all the rest.</li>
+</ul>
+
+<h3>Text Analysis</h3>
+<p>In all the structured expressions that we are addressing, we can see characters
+with a special syntactical role that we will call &quot;separators&quot;, and pieces of
+text between separators that we will call &quot;tokens&quot;. The separators vary
+according to the type of structured expression. Often they are punctuation signs
+like colon (:), backslash (\) and full stop (.), or mathematical signs like Plus
+(+) or Equal (=).</p>
+<p><b>Our objective is that the relative progression of the
+tokens and separators for display should always follow the base text direction
+of the text, while each token will go LTR or RTL depending on its content and
+according to the UBA.</b></p>
+<p>For this to happen, the following must be done:</p>
+<ol>
+  <li>Parse the expression to locate the separators and the tokens.<br></li>
+  <li>While parsing, note the bidi classification of characters parsed.<br></li>
+  <li>Depending on the bidi types of the characters before a token and in that
+  token, a LRM or a RLM may have to be added. The algorithm for this is detailed below.<br></li>
+  <li>If the expression has a LTR base direction and the component where
+  it is displayed has a RTL orientation, add LRE+LRM at the beginning of
+  the expression and LRM+PDF at its end.<br></li>
+  <li>If the expression has a RTL base direction and the component where
+  it is displayed has a LTR orientation, add RLE+RLM at the beginning of
+  the expression and RLM+PDF at its end.<br></li>
+</ol>
+<p>The original structured expression, before addition of directional formatting
+characters, is called <em><strong>lean</strong></em> text.</p>
+<p>The processed expression, after addition of directional formatting
+characters, is called <em><strong>full</strong></em> text.</p>
+
+<h3>LRM Addition (structured text with LTR base text direction)</h3>
+<p>A LRM will be added before a token if the following conditions are satisfied:</p>
+<ul>
+  <li>The last strong character before the token has a bidi type equal to R or
+  AL and the first non-neutral character in the token itself has a bidi type
+  equal to R, AL, EN or AN.</li>
+</ul>
+<p>Examples (strings in logical order where &quot;@&quot; represents where an LRM should
+  be added):</p>
+<pre>   HEBREW @= ARABIC
+   HEBREW @= 123
+</pre>
+<p>OR</p>
+<ul>
+  <li>The last non-neutral character before the token has a bidi type equal to
+  AN and the first non-neutral character in the token has a bidi type equal to
+  R, AL or AN.</li>
+</ul>
+<p>Examples (strings in logical order where &quot;@&quot; represents where an LRM should
+  be added):</p>
+<pre>   ARABIC NUMBER 123 @&lt; MAX
+   ARABIC NUMBER 123 @&lt; 456
+</pre>
+
+<h3>RLM Addition (structured text with RTL base text direction)</h3>
+<p>A RLM will be added before a token if the following conditions are satisfied:</p>
+<ul>
+  <li>The last strong character before the token has a bidi type equal 
+to L and the first non-neutral character in the token itself has a bidi 
+type
+  equal to L or EN.</li>
+</ul>
+<p>Example (string in logical order where &quot;&amp;&quot; represents where an RLM should
+  be added):
+</p><pre>   my_pet &amp;= dog
+</pre>
+
+</BODY>
+</HTML>
