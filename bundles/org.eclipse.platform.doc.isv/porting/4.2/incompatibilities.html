@@ -21,9 +21,10 @@
 
 <ol>
 	<li><a href="#runtime-auth">Platform keyring implementation removed</a></li>
-	<li><a href="#2x-compatibility-removed">Compatibility code for Eclipse 1.0-2.1 removed</a></li>
-	<li><a href="#help-appserver">Bundle org.eclipse.help.appserver removed</a></h2>
-	<li><a href="#update-manager">Update Manager bundles removed</a></h2>
+	<li><a href="#2x-compatibility-removed">Compatibility bundles for Eclipse 1.0-2.1 removed</a></li>
+	<li><a href="#help-appserver">Bundle org.eclipse.help.appserver removed</a></li>
+	<li><a href="#update-manager">Update Manager bundles removed</a></li>
+	<li><a href="#presentationAPI">Presentation API no longer functional</a></li>
 </ol>
 
 <hr>
@@ -52,7 +53,7 @@ use the corresponding Equinox security APIs for storing authentication informati
 Refer to the deprecation comment on each method for precise migration instructions.
 </p>
 <!-- ############################################## -->
-<h2>2. <a name="2x-compatibility-removed">Compatibility code for Eclipse 1.0-2.1 removed</a></h2>
+<h2>2. <a name="2x-compatibility-removed">Compatibility bundles for Eclipse 1.0-2.1 removed</a></h2>
 <p><strong>What is affected:</strong>Bundles built for Eclipse 1.0 to 2.1 that have
 not been compiled in Eclipse 3.0 or later. Also, any bundle or feature that requires
 or includes a removed bundle.
@@ -101,6 +102,28 @@ with 4.2 should any application or product require them.
 API or implementation in these bundles should migrate to the functionality and API
 provided by Equinox p2. Alternatively, products can install these bundles from the
 Eclipse 3.8 repository and they will continue to function in Eclipse 4.2-based applications.
+</p>
+
+<!-- ############################################## -->
+<h2>5. <a name="presentationAPI">Presentation API no longer functional</a></h2>
+<p><strong>What is affected:</strong> Clients that the used the API in package
+<tt>org.eclipse.ui.presentations</tt>, or the <tt>org.eclipse.ui.presentationFactories</tt>
+extension point.
+</p>
+<p><strong>Description:</strong> The workbench <i>presentation API</i> allowed
+plug-ins to override certain aspects of the workbench appearance, such as the shape
+of view and editor tabs. This mechanism is fundamentally incompatible with the pluggable
+rendering and declarative styling systems in Eclipse 4.2, which offer applications complete
+control over all aspects of the workbench layout and style. 
+</p>
+<p><strong>Action required:</strong> Using the presentation API
+and extension point to customize the workbench appearance will no longer have any
+effect. Clients are encouraged to try out the provisional new API in Eclipse 4.2 for
+performing equivalent workbench customization. Complete rendering control can
+be achieved by supplying an <tt>org.eclipse.e4.ui.workbench.IPresentationEngine</tt>.
+Customization of fonts, spacing, and color can be achieved by supplying custom
+CSS style sheets via the <tt>org.eclipse.e4.ui.css.swt.theme</tt> extension point.
+For more details see the <a href="http://wiki.eclipse.org/Eclipse4/RCP/CSS">Eclipse 4 CSS Styling</a> wiki page.
 </p>
 
 <!-- ############################################## -->
