@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,16 +7,29 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- * Martin Oberhuber (Wind River) - [235572] detect existing comments in bat files
+ *     Martin Oberhuber (Wind River) - [235572] detect existing comments in bat files
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
-import java.io.*;
-import java.util.*;
-import org.eclipse.core.filebuffers.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.text.*;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.osgi.util.NLS;
 
 
@@ -213,7 +226,7 @@ public abstract class SourceFile {
 	/**
 	 * @return BlockComment
 	 */
-	public BlockComment firstCopyrightComment() {
+	public BlockComment getFirstCopyrightComment() {
 		Iterator anIterator = comments.iterator();
 		while (anIterator.hasNext()) {
 			BlockComment aComment = (BlockComment) anIterator.next();

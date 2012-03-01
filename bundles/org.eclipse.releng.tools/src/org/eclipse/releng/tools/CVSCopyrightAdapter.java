@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 
 	public int getLastModifiedYear(IFile file, IProgressMonitor monitor) throws CoreException {
         try {
-            monitor.beginTask("Fetching logs from CVS", 100); //$NON-NLS-1$
+            monitor.beginTask("Fetching logs from CVS", 100);
             ICVSRemoteResource cvsFile = CVSWorkspaceRoot.getRemoteResourceFor(file);
             if (cvsFile != null && cvsFile.isManaged()) {
                 // get the log entry for the revision loaded in the workspace
