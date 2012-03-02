@@ -237,7 +237,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		if (factory == null) {
 			factory = (IRepositoryProviderCopyrightAdapterFactory)Platform.getAdapterManager().loadAdapter(providerType, IRepositoryProviderCopyrightAdapterFactory.class.getName());
 			if (factory == null) {
-				return new CVSCopyrightAdapter(results);
+				throw new CoreException(new Status(IStatus.ERROR, RelEngPlugin.ID, 0, NLS.bind(Messages.getString("AdvancedFixCopyrightAction.12"), providerType.getID()), null)); //$NON-NLS-1$
 			}
 		}
 		return factory.createAdapater(results);
@@ -298,7 +298,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		monitor.subTask(file.getFullPath().toOSString());
 
 		if (file.getFileExtension() == null) {
-			warn(file, null, Messages.getString("AdvancedFixCopyrightAction.12")); //$NON-NLS-1$
+			warn(file, null, Messages.getString("AdvancedFixCopyrightAction.13")); //$NON-NLS-1$
 			return;
 		}
 
@@ -314,7 +314,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			return;
 		}
 		if (aSourceFile.hasMultipleCopyrights()) {
-			warn(file, null, Messages.getString("AdvancedFixCopyrightAction.13")); //$NON-NLS-1$
+			warn(file, null, Messages.getString("AdvancedFixCopyrightAction.14")); //$NON-NLS-1$
 			return;
 		}
 
@@ -329,13 +329,13 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 				// Let's see if the file is EPL
 				ibmCopyright = IBMCopyrightComment.parse(copyrightComment, aSourceFile.getFileType());
 				if (ibmCopyright != null) {
-					warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.14")); //$NON-NLS-1$
+					warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.15")); //$NON-NLS-1$
 				}
 			}
 		}
 
 		if (ibmCopyright == null) {
-			warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.15")); //$NON-NLS-1$
+			warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.16")); //$NON-NLS-1$
 			return;
 		}
 
@@ -355,14 +355,14 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					RelEngPlugin
 					.log(IStatus.ERROR,
 							NLS.bind(
-									Messages.getString("AdvancedFixCopyrightAction.16"), file.getFullPath()), e); //$NON-NLS-1$
+									Messages.getString("AdvancedFixCopyrightAction.17"), file.getFullPath()), e); //$NON-NLS-1$
 				}
 				if (lastMod > currentYear) {
 					// Don't allow future years to be used in the copyright
 					lastMod = currentYear;
 				}
 				if (lastMod == 0) {
-					warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.17")); //$NON-NLS-1$
+					warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.18")); //$NON-NLS-1$
 					return;
 				}
 				// use default revision year
@@ -387,7 +387,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			aSourceFile.insert(ibmCopyright.getCopyrightComment());
 		else {
 			if (!copyrightComment.atTop())
-				warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.18")); //$NON-NLS-1$
+				warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.19")); //$NON-NLS-1$
 			aSourceFile.replace(copyrightComment, ibmCopyright.getCopyrightComment());
 		}
 	}
