@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,24 +13,24 @@ package org.eclipse.releng.tools;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.team.core.RepositoryProvider;
-
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 
 /**
  * A Plugin for performing certain important RelEng tasks.
- * Currentley this Plugin provides support for:
- *    RelEng Map File Validator Builder and associated project nature
+ * <p>
+ * Currently this Plugin provides support for:
+ *    <li>RelEng Map File Validator
+ *    <li>Builder and associated project nature
+ *    <li>Fix Copyright action
  */
 public class RelEngPlugin extends AbstractUIPlugin {
 	
