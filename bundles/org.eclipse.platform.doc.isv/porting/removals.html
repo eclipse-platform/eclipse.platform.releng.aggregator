@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html lang="en">
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css">
@@ -25,10 +25,11 @@
 
 <h2>API removals in this release</h2>
 <p>
-There are no API removals planned for the Eclipse project Helios (3.6) release.
+There are no API removals planned for the Eclipse project Juno (4.2) release.
 </p>
-
-<h2>API removals after June 2012</h2>
+<h2>API removals in future releases</h2>
+<p>
+API removals after June 2012:
 <ol>
  <li><a href="#workspaceLock">WorkspaceLock</a></li>
  <li><a href="#updateManager">Update Manager</a></li>
@@ -36,6 +37,15 @@ There are no API removals planned for the Eclipse project Helios (3.6) release.
  <li><a href="#luceneSearchParticipants">luceneSearchParticipants</a></li>
  <li><a href="#compositeBundles">Composite Bundles</a></li>
 </ol>
+</p>
+<p>
+API removals after June 2014:
+<ol>
+ <li><a href="#presentation">Workbench presentation API</a></li>
+ <li><a href="#runtime">Eclipse 2.0 runtime model and boot API</a></li>
+ <li><a href="#auth">Platform authorization API</a></li>
+</ol>
+</p>
 
 <hr>
 
@@ -151,6 +161,65 @@ The specific API to be removed includes:
 <p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=345790">bug 345790</a>.
 </p>
+
+<!-- ############################################## -->
+
+<h2>API removals after June 2014</h2>
+
+<h3>1. <a name="presentation">Workbench presentation API</a></h3>
+<p>
+The workbench <i>presentation API</i> allowed plug-ins to override certain aspects of 
+the workbench appearance, such as the shape of view and editor tabs. This mechanism 
+is fundamentally incompatible with the pluggable rendering and declarative styling systems 
+in Eclipse 4.2, which offer applications complete control over all aspects of the workbench 
+layout and style. The following API will be removed:
+<ul>
+<li>API package <tt>org.eclipse.ui.presentations</tt></li>
+<li>Extension point <tt>org.eclipse.ui.presentationFactories</tt></li>
+</ul>
+</p>
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248">bug 370248</a>.
+</p>
+
+<h3>2. <a name="runtime">Eclipse 2.0 runtime model and boot API</a></h3>
+<p>
+When the Eclipse runtime transitioned to use OSGi as its implementation, some existing
+APIs for interacting with the old runtime were deprecated and moved to a compatibility fragment
+(<tt>org.eclipse.core.runtime.compatibility</tt>). All API that was still valid was moved
+elsewhere. These APIs have been non-functional since Eclipse 3.0 and will therefore
+be removed in the future. The following packages will be removed:
+<ul>
+ <li><tt>org.eclipse.core.boot</tt></li>
+ <li><tt>org.eclipse.core.runtime.model</tt></li>
+ </ul>
+</p>
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248">bug 370248</a>.
+</p>
+
+<h3>3. <a name="auth">Platform authorization API</a></h3>
+<p>
+Since Eclipse 1.0, the Eclipse Platform class provided API for storing and retrieving
+passwords in a keyring file. This API used an inherently insecure method for encrypting 
+credentials, and used a custom encryption algorithm that made it difficult for some 
+consumers to distribute and export Eclipse-based products. For these and other reasons,
+this API was deprecated and replaced in Eclipse 3.4 with a new Equinox secure storage API.
+In Eclipse 4.2 the implementation of the old authorization methods was removed, but the API left in place. 
+This old API will be removed completely in a future release. The following API methods will
+be removed from <tt>org.eclipse.core.runtime.Platform</tt>:
+<ul>
+ <li><tt>addAuthorizationInfo(URL serverUrl, String realm, String authScheme, Map info)</tt></li>
+ <li><tt>getAuthorizationInfo(URL serverUrl, String realm, String authScheme)</tt></li>
+ <li><tt>flushAuthorizationInfo(URL serverUrl, String realm, String authScheme)</tt></li>
+ <li><tt>addProtectionSpace(URL resourceUrl, String realm)</tt></li>
+ <li><tt>getProtectionSpace(URL resourceUrl)</tt></li>
+ </ul>
+</p>
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248">bug 370248</a>.
+</p>
+
 <!-- ############################################## -->
 </body>
 </html>
