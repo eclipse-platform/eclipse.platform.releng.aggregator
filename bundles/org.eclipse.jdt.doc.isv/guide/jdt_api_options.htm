@@ -134,9 +134,9 @@ parentheses and the default value is shown in bold italics.</p>
   <a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_NULL_SPECIFICATION_VIOLATION</a>,
   <a href=
-"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION</a> and
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT">COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT</a> and
   <a href=
-"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO">COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO</a>.</p></td>
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_UNCHECKED_CONVERSION">COMPILER_PB_NULL_UNCHECKED_CONVERSION</a>.</p></td>
 <td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></b></td>
 </tr>
 <tr valign="top">
@@ -317,8 +317,8 @@ bigger).</td>
     will never occur at runtime in these positions.</p>
  <p>The compiler may furthermore check adherence to the null specification as
     further controlled by <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_NULL_SPECIFICATION_VIOLATION</a>,
-    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION</a> and
-    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO">COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO</a>.</p>
+    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT">COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT</a> and
+    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_UNCHECKED_CONVERSION">COMPILER_PB_NULL_UNCHECKED_CONVERSION</a>.</p>
  <p>This option only has an effect if the option <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_ANNOTATION_NULL_ANALYSIS">COMPILER_ANNOTATION_NULL_ANALYSIS</a> is enabled.</p>
 </td>
 <td>The qualified name of a Java annotation type<br/>
@@ -342,8 +342,8 @@ bigger).</td>
     <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_POTENTIAL_NULL_REFERENCE">COMPILER_PB_POTENTIAL_NULL_REFERENCE</a>.</p>
  <p>The compiler may furthermore check adherence to the null specification as
     further controlled by <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_NULL_SPECIFICATION_VIOLATION</a>,
-    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION</a> and
-    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO">COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO</a>.</p>
+    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT">COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT</a> and
+    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_UNCHECKED_CONVERSION">COMPILER_PB_NULL_UNCHECKED_CONVERSION</a>.</p>
  <p>This option only has an effect if the option <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_ANNOTATION_NULL_ANALYSIS">COMPILER_ANNOTATION_NULL_ANALYSIS</a> is enabled.</p>
 </td>
 <td>The qualified name of a Java annotation type<br/>
@@ -1266,8 +1266,8 @@ by <a href="#INCLUDE_ASSERTS_IN_NULL_ANALYSIS">COMPILER_PB_INCLUDE_ASSERTS_IN_NU
 </tr>
 
 <tr>
-<td colspan="2"><b>Reporting Insufficient Information for Analysing Adherence to Null Specifications</b> (<b><a href=
-"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO">COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO</a></b>)</td>
+<td colspan="2"><b>Reporting unchecked conversion from a type with unknown nullness to a null annotated type</b> (<b><a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_UNCHECKED_CONVERSION">COMPILER_PB_NULL_UNCHECKED_CONVERSION</a></b>)</td>
 </tr>
 <tr valign="top">
 <td rowspan="3">When enabled, the compiler will issue an error or a warning whenever one of the
@@ -1284,7 +1284,7 @@ by <a href="#INCLUDE_ASSERTS_IN_NULL_ANALYSIS">COMPILER_PB_INCLUDE_ASSERTS_IN_NU
      statically proving that it will never evaluate to a null value at runtime
      is assigned to a local variable that is declared with a nonnull annotation.</li>
  </ol>
- Insufficient nullness information is usually a consequence of using other unannotated
+ Unchecked null conversion is usually a consequence of using other unannotated
  variables or methods.
 <p>The compiler options <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_NONNULL_ANNOTATION_NAME">COMPILER_NONNULL_ANNOTATION_NAME</a> and
    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_NULLABLE_ANNOTATION_NAME">COMPILER_NULLABLE_ANNOTATION_NAME</a> control which annotations the compiler
@@ -1309,13 +1309,10 @@ by <a href="#INCLUDE_ASSERTS_IN_NULL_ANALYSIS">COMPILER_PB_INCLUDE_ASSERTS_IN_NU
 <td rowspan="2">When enabled, the compiler will issue an error or a warning whenever one of the
 following situations is detected:
 <ol>
-<li>A method declared with a nonnull annotation returns an expression	that is
-      statically known to evaluate to a null value.</li>
-<li>An expression that is statically known to evaluate to a null value is	passed
-    as an argument in a method call where the corresponding parameter of the called
+<li>A method declared with a nonnull annotation returns a <em>nullable</em> expression.</li>
+<li>A <em>nullable</em> expression is passed as an argument in a method call where the corresponding parameter of the called
     method is declared with a nonnull annotation.</li>
-<li>An expression that is statically known to evaluate to a null value is	assigned
-    to a local variable that is declared with a nonnull annotation.</li>
+<li>A <em>nullable</em> expression is assigned to a local variable that is declared with a nonnull annotation.</li>
 <li>A method that overrides an inherited method declared with a nonnull annotation
     tries to relax that contract by specifying a nullable annotation
     (prohibition of contravariant return).</li>
@@ -1324,6 +1321,8 @@ following situations is detected:
     specifying a nonnull annotation for its corresponding parameter
     (prohibition of covariant parameters).</li>
 </ol>
+<p>In the above an expression is considered as <em>nullable</em> if either it is statically known 
+   to evaluate to the value <code>null</code>, or if it is declared with a nullable annotation.</p>
 <p>The compiler options <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_NONNULL_ANNOTATION_NAME">COMPILER_NONNULL_ANNOTATION_NAME</a> and
    <a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_NULLABLE_ANNOTATION_NAME">COMPILER_NULLABLE_ANNOTATION_NAME</a> control which annotations the compiler
    shall interpret as nonnull or nullable annotations, respectively.</p>
@@ -1378,8 +1377,8 @@ by <a href="#INCLUDE_ASSERTS_IN_NULL_ANALYSIS">COMPILER_PB_INCLUDE_ASSERTS_IN_NU
 </tr>
 
 <tr>
-<td colspan="2"><b>Reporting Violations of Null Specifications with Potential Null Value.</b> (<b><a href=
-"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION">COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION</a></b>)</td>
+<td colspan="2"><b>Reporting conflicts between declared null annotation and inferred null value</b> (<b><a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT">COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT</a></b>)</td>
 </tr>
 <tr valign="top">
 <td rowspan="3">When enabled, the compiler will issue an error or a warning whenever one of the
