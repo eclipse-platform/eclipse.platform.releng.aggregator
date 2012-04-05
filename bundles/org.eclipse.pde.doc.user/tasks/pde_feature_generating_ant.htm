@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+<title>Generating ANT scripts</title>
+</head>
+
+<body>
+
+<h1>Generating Ant scripts</h1>
+
+<p> <b> Ant</b> is a simple open-source scripting engine that is capable of running
+scripts written in XML format. Ant is ideal for executing tasks usually found in
+automated builds.&nbsp;</p>
+
+<p>The variables set in the plug-in, fragment or feature <b>build.properties
+</b> will be used to generate scripts for
+Ant.&nbsp; PDE generates Ant scripts for creating
+individual plug-in and fragment build files and one overall script for building
+the feature JAR. This &quot;main&quot; script is also responsible for running individual
+script files in the right order (defined by the plug-in dependency chain). Each
+build file has the same name (<b>build.xml</b>) and is created as a sibling of the manifest
+files in the corresponding projects.</p>
+
+<p>Since Ant scripts use the replacement variables in <b>build.properties</b>, you can typically use them &quot;as is&quot;, without
+modifying the generated scripts. If you do modify them, you must not recreate the
+scripts every time you want to rebuild the component. </p>
+
+<p>To create scripts, you can simply select <b>Create Ant Build File</b> while a 
+suitable manifest file (plugin.xml, fragment.xml or feature.xml) is selected in 
+the Navigator or Package Explorer views. The command will generate
+the build script. After selecting <b>Run Ant...</b> from the pop-up menu while 
+the newly generated script file is selected, the following wizard will open:</p>
+
+<p>
+<img src="../guide/images/tasks/feature-jar.png" alt="Ant execution wizard showing available targets" border="0"></p>
+
+<p>The standard Ant wizard allows customization in two ways: by
+providing the execution arguments and by selecting one or more build targets.</p>
+
+<h4>Properties</h4>
+<p>Ant arguments are typically used to provide property values that
+override default values and control the build process. Arguments are set using
+&quot;-Dproperty=value&quot;. The following properties are recognized:</p>
+
+<ul>
+  <li>
+    <p><b>bootclasspath</b> - if set, it replaces the default boot
+    classpath. Used when compiling cross-platform plug-ins (e.g. building a UI
+    plug-in for Windows using Linux)</p></li>
+  <li><b>build.result.folder</b> - where
+    the temporary files for the update JAR creation should be placed.
+    These files are usually the plug-in library JARs.</li>
+  <li><b>plugin.destination</b> - where
+    plug-in and fragment update JARs should be put. These JARs represent
+    entire plug-ins and fragments in a format suitable for publishing on an
+    Install/Update server and referencing by a feature. The typical layout of an
+    Update site is to have all the plug-in and fragment JARs in one place and
+    all the features in another. This argument is useful for placing plug-ins and
+    fragment directly into the desired directory (or the staging place on the
+    local machine before pushing the features onto the remote server).</li>
+  <li><b>feature.destination</b> - where
+    feature update JARs should be put.</li>
+</ul>
+<p>To adapt the behavior of the compiler, the following properties are recognized:</p>
+<ul>
+	<li><b>javacFailOnError</b> - stop the build when an error occurs when set to true. Default is false.</li>
+	<li><b>javacDebugInfo</b> - compile source with debug information when set to true. Default is true.</li>
+	<li><b>javacVerbose</b> - produce verbose output when set to true. Default is true.</li>
+	<li><b>javacSource</b> - value of the -source command-line switch.</li>
+	<li><b>javacTarget</b> - generate class files for specific VM version.</li>
+	<li><b>compilerArg</b> - additional command line arguments for the compiler.</li>
+</ul>
+
+<h4>Targets</h4>
+
+<p>When executing feature build scripts, the
+following targets are used to call individual targets of plug-ins or fragments.
+In order to specify what target to execute, the property <b>target</b> should be
+set (e.g. -Dtarget=refresh). One of the <b>all.*</b> targets serves as an iterator, whereas
+the actual target to execute is specified via the property <b>target</b>.</p>
+<ul>
+  <li><b>all.plugins</b> - for all listed plug-ins</li>
+  <li><b>all.fragments</b> - for all listed fragments</li>
+  <li><b>all.children</b> - for all listed plug-ins and fragments</li>
+  <li><b>build.jars</b> - build JARs for all feature children;</li>
+  <li><b>build.sources</b> - build source for all feature children;</li>
+  <li><b>build.update.jar</b> - generate a feature JAR in the format used by the install/update mechanism.
+	The above mentioned property <b>feature.destination</b> can be used to define
+	where to put the JAR;</li>
+  <li><b>zip.distribution</b> - creates a zip
+file with the feature and its plug-ins and fragments in an SDK-like structure
+but does not include source code;</li>
+  <li><b>zip.sources</b> - creates a zip file with the feature and its plug-ins and fragments in an SDK-like structure which only includes the source;</li>
+  <li><b>clean</b> - delete everything produced by running any of the target;</li>
+  <li><b>refresh</b> - performs a &quot;Refresh&quot; action in the current project, thus making the
+newly generated resources visible in the Navigator or Package Explorer.</li>
+  <li><b>zip.plugin</b> - creates a zip file with the binary and source contents of a plug-in with the following structure:
+  <blockquote>
+  id_version/<br>
+  &nbsp;&nbsp;&nbsp; contents
+</blockquote>where 'id' is the plug-in unique identifier
+and 'version' is the plug-in version. This zip file can be directly unzipped
+into the Eclipse installation directory as a form of a quick manual deployment.</li>
+</ul>
+
+
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2007. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Incompatibilities between Eclipse 3.3 and 3.4</title>
+</head>
+<body>
+<h1>Incompatibilities between Eclipse 3.3 and 3.4</h1>
+
+<p>
+  Eclipse changed in incompatible ways between 3.3 and 3.4 in ways that affect 
+  plug-ins. The following entries describe the areas that changed and provide 
+  instructions for migrating 3.3 plug-ins to 3.4. Note that you only need to look 
+  here if you are experiencing problems running your 3.3 plug-in on 3.4.
+</p>
+
+<ol>
+  <li><a href="#ExternalFolders">Library entries on the build path can now target external folders</a></li>
+  <li><a href="#ZipArchives">Assumption that a ZIP archive extension was always .zip or .jar has been removed</a></li>
+  <li><a href="#BinaryQualifiedName">Asking the qualified name of a binary type with a dot ('.') separator will now honor this separator</a></li>
+</ol>
+
+<hr>
+
+<!-- ############################################## -->
+<h2>1. <a name="ExternalFolders">Library entries on the build path can now target external folders</a></h2>
+<p><strong>What is affected:</strong> Clients that call <code>IJavaProject.getResolvedClasspath(boolean)</code>,
+  <code>IJavaProject.getRawClasspath()</code>, or <code>IPackageFragmentRoot.getPath()</code>.</p>
+<p><strong>Description:</strong> In Eclipse 3.3, the class folders on a classpath could only be inside the workspace.
+  In Eclipse 3.4, these class folders can also be outside the workspace.
+  <i>Note that this change has no impact on binary compatibility</i>.</p>
+<p><strong>Action required:</strong> Clients retrieving the <code>IPath</code> from a class folder on the
+  classpath should no longer assume that this path is internal to the workspace.
+</p>
+
+<!-- ############################################## -->
+
+<!-- ############################################## -->
+<h2>2. <a name="ZipArchives">Assumption that a ZIP archive extension was always ".zip" or ".jar" has been removed</a></h2>
+<p><strong>What is affected:</strong> Clients that call <code>IJavaProject.getResolvedClasspath(boolean)</code>,
+  <code>IJavaProject.getRawClasspath()</code>, <code>IPackageFragmentRoot.getPath()</code>, or
+  <code>JavaConventions.validateClasspath(IJavaProject, IClasspathEntry[], IPath)</code>.</p>
+<p><strong>Description:</strong> In Eclipse 3.3, the ZIP archives on a classpath could only have a ".zip" or a ".jar" extension.
+  In Eclipse 3.4, these ZIP archives can have any extension. Thus the classpath validation will no longer report an error
+  if a ZIP archive with an extension other than ".zip" or ".jar" is put on the classpath.
+  <i>Note that this change has no impact on binary compatibility</i>.</p>
+<p><strong>Action required:</strong> Clients should no longer assume that the only valid extensions for ZIP archives on
+  the classpath are ".zip" or ".jar".
+</p>
+
+<!-- ############################################## -->
+
+<!-- ############################################## -->
+<h2>3. <a name="BinaryQualifiedName">Asking the qualified name of a binary type with a dot ('.') separator will now honor this separator</a></h2>
+<p><strong>What is affected:</strong> Clients that call <code>IType.getTypeQualifiedName(char)</code>, or
+  <code>IType.getFullyQualifiedName(char)</code> on a binary member type with a dot ('.') separator.</p>
+<p><strong>Description:</strong> In Eclipse 3.3, calling <code>IType.getTypeQualifiedName(char)</code>, or
+  <code>IType.getFullyQualifiedName(char)</code> on a binary member type with a dot ('.') separator would return
+  a qualified name where the member type name was separated from the enclosing type name with a dollar ('$').
+  In Eclipse 3.4, calling <code>IType.getTypeQualifiedName(char)</code>, or
+  <code>IType.getFullyQualifiedName(char)</code> on a binary member type with a dot ('.') separator now correctly
+  honor this separator.
+  <i>Note that this change has no impact on binary compatibility</i>.</p>
+<p><strong>Action required:</strong> Clients should no longer assume that the member type separator in the qualified name
+  of a binary type is always dollar ('$').
+</p>
+
+<!-- ############################################## -->
+
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2008, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" charset="ISO-8859-1" type="text/css">
+  <title>Individual Source Bundles</title>
+</head>
+<body>
+<h1>Individual Source Bundles</h1>
+The traditional format of source bundles in Eclipse was a folder containing src.zip's for all the plug-ins included in a given feature.  Starting in 3.4, Eclipse now ships with individual source bundles.  For each bundle there is a corresponding source bundle which is a jar containing the source for that bundle.  This allows for more flexible delivery of source, and it also alleviates some path length issues that may be experienced on some platforms.
+
+<h2>Eclipse-SourceBundle</h2>
+<p>A source bundle is identified by the presence of the <b><tt>Eclipse-SourceBundle</tt></b> header in its manifest.  The format of this header is:</p>
+<pre style="text-align: center;">Eclipse-SourceBundle: &lt;bundle-id&gt;;version=&lt;version&gt;;roots:="root1, root2"</pre>
+<p>The bundle-id and version indicate the bundle that the included source code corresponds to.  The roots directive indicates the folders within the source bundle that actually contain source code.  If no roots directive is specified, then a value of &quot;.&quot; is assumed.</p>
+<p>Class file libraries are mapped to source locations in a predictable manner. The root of the plug-in maps to the root of the source bundle. This is the main case for most jarred plug-ins. If the plug-in contains additional libraries "foo/lib.jar", the source is expected to be in corresponding "foo/libsrc/" folders in the source bundles.</p>
+<ul>
+<li><b>Example 1</b> : The org.eclipse.pde.core bundle has class files in the root of the jar, plus a nested jar "ant_tasks/pde-ant.jar".  Therefore, the source bundle should have java files in the root and java files in a "ant_tasks/pde-antsrc" folder.
+The roots directive lists both the root of the source bundle "." and the "ant_tasks/pde-antsrc" folder.
+<pre>
+org.eclipse.pde.core.jar		org.eclipse.pde.core.source.jar
+  - org/**/*.class			  - org/**/*.java
+  - ant_tasks/pde-ant.jar		  - ant_tasks/pde-antsrc/org/**/*.java
+<br>
+Eclipse-SourceBundle: org.eclipse.pde.core;version="3.4.0.N20071128-0010";roots:="ant_tasks/pde-antsrc,."
+</pre>
+</li>
+<li><b>Example 2</b> : The org.eclipse.pde.build bundle is a folder on disk.  It contains a pdebuild.jar and a lib/pdebuild-ant.jar.  The source bundle will be a jar that contains a "pdebuildsrc" folder and a "lib/pdebuild-antsrc" folder. 
+<pre>
+org.eclipse.pde.build/			org.eclipse.pde.build.source.jar
+  - pdebuild.jar			  - pdebuildsrc/org/**/*.java
+  - lib/pdebuild-ant.jar		  - lib/pdebuild-antsrc/org/**/*.java
+<br>
+Eclipse-SourceBundle: org.eclipse.pde.build;version="3.4.0.N20071128-0010";roots:="pdebuildsrc,lib/pdebuild-antsrc"
+</pre>
+</li>
+</ul>
+<h2>Generating Individual Source Bundles</h2>
+<p>PDE/Build can automatically generate individual source bundles, but only in a headless build.  Individual soure bundle geneation can be turned on by specifying:</p>
+<pre style="text-align: center;">individualSourceBundles=true</pre>
+<p>This must be specified in the build configuration's top level build.properties file and it controls all source generation for that build.  See <a href="pde_source_generation.htm">Generating Source Features and Plug-ins</a> for details on generating traditional source plug-ins and features, the remainder of this page assumes familiarity with traditional source generation.</p>
+  
+<h3> generate.feature</h3>
+In a feature's build.properties file, the generate.feature property tells pde.build to generate a source feature.
+<pre style="text-align: center;">generate.feature@&lt;source feature id&gt; = &lt;feature id&gt; [, feature@&lt;feature id&gt;]* [, plugin@&lt;plugin id&gt;]* [, exclude@&lt;plugin id&gt;]*</pre>
+<p>When generating individual source bundles, this property remains as before and supports the same attributes (eg version, unpack, optional, etc), the difference will be noticed in the resulting source feature. Before, the source feature would have included 1 source plug-in + a source fragment for each platform being built. In the new format, the source feature will include a source bundle for each plug-in/fragment listed in the original feature.</p>
+<p>Plug-ins that were included in the source feature via the plugin@ syntax will not get corresponding source bundles. This is useful for adding doc plug-ins to the source feature.</p>
+<p>The <tt>exclude@</tt> entry is new for individual source generation.  Some plug-ins that were included in the originating feature (ie doc plug-ins or fragments that contain only native code) may not have source and should be excluded from the generated source feature. The <tt>exclude@</tt> entry supports a <tt>version</tt> attribute.</p> 
+Example:
+<pre style="text-align: center;">generate.feature@org.eclipse.jdt.source=org.eclipse.jdt, plugin@org.eclipse.jdt.doc.isv;unpack="false",exclude@org.eclipse.jdt.doc.user</pre>
+
+<h3>generate.plugin</h3>
+<p>In the old format, the generate.plugin property generates a source plug-in based on the contents of a given feature. When generating individual source bundles, this changes to be based on a given plug-in:</p>
+<pre style="text-align: center;">generate.plugin@&lt;source plug-in id&gt;=&lt;plug-in id&gt;</pre>
+<p>The generate.plugin property was used by features to include source without having a source feature (even though behind the scenes an entire source feature was generated). When generating individual source bundle, features will need to include a *.source bundle for each plug-in along with a corresponding generate.plugin property for each one.</p>
+<p><b>Example</b>: The sdk.examples feature used to look like this:</p>
+<pre>
+   	&lt;feature id="org.eclipse.sdk.examples"  ... &gt; 
+		....
+		&lt;plugin id="org.eclipse.sdk.examples.source"  version="0.0.0"/&gt;
+		&lt;plugin id="org.eclipse.sdk.examples.source.win32.win32.x86" version="0.0.0"/&gt;
+	&lt;/feature&gt;
+<br>	generate.plugin@org.eclipse.sdk.examples.source=org.eclipse.sdk.examples
+</pre>
+<p>This changes to:</p>
+<pre>
+	&lt;feature id="org.eclipse.sdk.examples" ...&gt;
+		...
+		&lt;plugin id="org.eclipse.compare.examples.source"  version="0.0.0"/&gt;
+		&lt;plugin id="org.eclipse.debug.examples.core.source" version="0.0.0"/&gt;
+		&lt;plugin id="org.eclipse.swt.examples.source" version="0.0.0"/&gt;
+	&lt;/feature&gt;
+<br>
+	generate.plugin@org.eclipse.compare.examples.source=org.eclipse.compare.examples
+	generate.plugin@org.eclipse.debug.examples.core.source=org.eclipse.debug.examples.core
+	generate.plugin@org.eclipse.swt.examples.source=org.eclipse.swt.examples
+</pre>
+
+<h3>generateSourceBundle</h3>
+<p>Specific plug-ins may not require source bundles because they don't actually contain source. This may occur with platform specific fragments that only contain a native library. In this case, the bundles may be excluded by the feature as outlined above in generate.feature.</p>
+<p>Or, bundles can explicitly specify in their own build.properties file that no source bundle should be generated for them:</p> 
+<pre style="text-align: center;">generateSourceBundle=false</pre>
+
+<h3>Custom Content</h3>
+<p>Custom content can always be added to generated source bundles using the <tt>post.gather.source</tt> custom callback in the originating bundle.  (See <a href="pde_custom_callbacks.htm">Feature and Plug-in custom build steps</a>).</p>
+<p>When doing this, set the property "src.additionalRoots" in the plugin's build.properties file so that the generate source bundle has the correct roots directive on the Eclipse-SourceBundle header.</p>
+<p>Example:</p>
+<pre>
+org.junit4 :
+   build.properties
+      src.includes = about.html,junitsrc.zip
+      src.additionalRoots=junitsrc
+      customBuildCallbacks=customBuildCallbacks.xml
+
+   customBuildCallbacks.xml
+    	&lt;target name="post.gather.sources" &gt;
+		&lt;mkdir dir="${target.folder}/junitsrc"/&gt;
+		&lt;unzip src="${target.folder}/junitsrc.zip" dest="${target.folder}/junitsrc" overwrite="false"/&gt;
+		&lt;delete file="${destination.temp.folder}/junitsrc.zip" /&gt;		
+	&lt;/target&gt;
+</pre>
+
+<h3>Branding the Source Feature</h3>
+<p>Previously, the generated source plug-in served as a branding plug-in for the generated source feature. Branding files (about.properties, eclipse32.gif, etc) were provided using the sourceTemplatePlugin directory in the original feature.</p>
+<p>When generating individual source bundles, the branding plug-in for the source feature will be the source bundle corresponding to the original branding plug-in. This means that branding files for the source feature's branding plug-in can be contributed using the <tt>src.includes</tt> property in the original branding plug-in.</p>
+<p>The <tt>sourceTemplatePlugin</tt> folder of the feature for which we are generating source also contributes files to the branding plug-in.</p>
+
+<h3>sourceTemplatePlugin vs sourceTemplateBundle</h3>
+<p>Previously, the contents of the <tt>sourceTemplatePlugin</tt> directory of the original feature was copied into the source plug-in. When generating individual source bundles, this remains true only for the branding source bundle (see above).</p>
+<p>For all the other source bundles, the contents of a <tt>sourceTemplateBundle</tt> directory will be copied over.</p>  
+
+</body>
+</html>

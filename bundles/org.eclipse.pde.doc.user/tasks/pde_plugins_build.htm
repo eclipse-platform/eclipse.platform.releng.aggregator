@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+  <meta name="copyright"
+ content="Copyright (c) IBM Corporation and others 2006, 2009. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+  <meta http-equiv="Content-Type"
+ content="text/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <link rel="STYLESHEET" href="../guide/book.css" type="text/css">
+  <title>Building plug-ins / bundles</title>
+</head>
+<body>
+<h1>Building plug-ins / bundles</h1>
+<p>
+In order to build plug-ins, bundles or fragments, PDE build requires that you create a feature listing all the elements to be built. 
+In this case the feature is only used to drive the build and will not be present in the final archive nor will it force you to use update sites.
+</p>
+<p>
+A feature used to drive a plug-in build is a standard feature. What makes it different is that its build.properties file does not contain the property <tt>bin.includes</tt>.  It is possible to automatically generate a feature containing the plug-ins you wish to build.  This lets you build your plug-ins without requiring you to maintain a feature.
+See the <a href="pde_feature_generating_antcommandline.htm#eclipseGenerateFeature">eclipse.generateFeature</a> task and the <a href="pde_customization.htm">Customizing a Headless Build</a> page.<br>
+Example:
+</p>
+<pre>
+build.properties:  topLevelElementId = acme.build.feature
+customTargets.xml : 
+	&lt;target name="preSetup"&gt;
+		&lt;eclipse.generateFeature
+			featureId="acme.build.feature"
+			buildDirectory="${buildDirectory}"
+			baseLocation="${baseLocation}"
+			productFile="${product}"
+			verify="false"
+			pluginPath="${pluginPath}"
+			configInfo="${configs}"
+			pluginList="acme.plugin.A,acme.plugin.B"
+			featureList="${featureList}"
+			includeLaunchers="false"
+		/&gt;
+	&lt;/target&gt;
+</pre>
+<p>
+Once you have created the feature to drive the build, follow the instructions on <a href="pde_feature_build.htm">building features</a>.
+</p>
+</body>
+</html>

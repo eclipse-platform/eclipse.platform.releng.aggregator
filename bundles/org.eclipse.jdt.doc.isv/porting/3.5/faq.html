@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2008. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Eclipse 3.5 Plug-in Migration FAQ</title>
+</head>
+
+<body>
+
+<h1>Eclipse 3.5 Plug-in Migration FAQ</h1>
+
+<ol>
+	<li><a href="#wildcarddeprecation">How can I remove the deprecation warning I get on 
+	<code>createWilcardTypeBindingKey(String, char)</code> method ?</a></li>
+	<li><a href="#deprecatedSuggestVariableNames">How can I remove the deprecation warning I get on
+	<code>NamingConventions.suggest*Names(...)</code> methods and keep same behavior?</a></li>
+	<li><a href="#deprecatedRemovePrefixAndSuffix">How can I remove the deprecation warning I get on
+	<code>NamingConventions.removePrefixAndSuffixFor*Name(...)</code> methods and keep same behavior?</a></li>
+</ol>
+<h2><a name="wildcarddeprecation">How can I remove the deprecation warning I get on 
+<code>createWilcardTypeBindingKey(String, char)</code> method ?</a></h2>
+<p>
+While implementing the fix for bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=234609">234609</a>,
+the method <code>org.eclipse.jdt.core.BindingKey.createWilcardTypeBindingKey(String, char)</code>
+has been deprecated. 
+
+In order to create a wildcard binding the following pieces of information are needed:</p>
+<ol>
+<li> a generic type (a wildcard is always the wildcard of a generic type)</li>
+<li>a kind</li>
+<li>a bound type (optional)</li>
+<li>a rank (the relative position of the wildcard in the type argument list, e.g. in 
+<code>HashMap&lt;? extends Integer,? super String&gt;</code>, the wildcard type 
+<code>? extends Integer</code> has a rank of 0 while the following wildcard has a rank of 1)</li>
+</ol>
+<p>
+All this information should be encoded in the binding key.</p>
+
+<p>
+However, <code>BindingKey.createWilcardTypeBindingKey(String, char)</code> allows to pass in only partial information.
+Thus this API is not enough to create a proper binding key from which a wildcard type could be recreated. 
+Hence this method has been deprecated and it is recommended that uses of this method be replaced with the
+new API <code>org.eclipse.jdt.core.BindingKey.createWildcardTypeBindingKey(String genericTypeKey, char boundKind, String boundTypeKey, int rank)</code> introduced as of version 3.5.
+</p>
+
+<!-- ############################################## -->
+<h2><a name="deprecatedSuggestVariableNames">How can I remove deprecation warning I get on <code>NamingConventions.suggest*Names(...)</code> methods and keep same behavior?</a></h2>
+<p>
+While implementing bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=38111">38111</a>, following methods
+have been deprecated:</p>
+<ol>
+<li><code>NamingConventions#suggestArgumentNames(IJavaProject, char[], char[], int, char[][])</code></li>
+<li><code>NamingConventions#suggestArgumentNames(IJavaProject, String, String, int, String[])</code></li>
+<li><code>NamingConventions#suggestFieldNames(IJavaProject, char[], char[], int, int, char[][])</code></li>
+<li><code>NamingConventions#suggestFieldNames(IJavaProject, String, String, int, int, String[])</code></li>
+<li><code>NamingConventions#suggestLocalVariableNames(IJavaProject, char[], char[], int, char[][])</code></li>
+<li><code>NamingConventions#suggestLocalVariableNames(IJavaProject, String, String, int, String[])</code></li>
+</ol>
+
+<p>This answer gives some advice to use new API corresponding methods without changing the behavior of the existing code.<br>
+A call to one of these methods can be replaced by a call to <code>NamingConventions#suggestVariableNames(int, int, String, IJavaProject, int, String[], boolean)</code></p>
+
+<ul>
+<li>A call to <code>suggestArgumentNames(...)</code> can be replaced by a call to <code>suggestVariableNames(...)</code>  with <code>NamingConventions#VK_PARAMETER</code> as variable kind</li>
+<li>A call to <code>suggestFieldNames(...)</code> can be replaced by a call to <code>suggestVariableNames(...)</code>  with <code>NamingConventions#VK_INSTANCE_FIELD</code> or <code>NamingConventions#VK_STATIC_FIELD</code> as variable kind</li>
+<li>A call to <code>suggestLocalVariableNames(...)</code> can be replaced by a call to <code>suggestVariableNames(...)</code>  with <code>NamingConventions#VK_LOCAL</code> as variable kind</li>
+</ul>
+
+<p>The following code</p>
+<pre>
+	IJavaProject javaProject = ... ;
+	String[] argumentNames = NamingConventions.suggestArgumentNames(javaProject, "java.util", "ArrayList", 0, null);
+</pre>
+<p>can be replaced by:</p>
+<pre>
+	IJavaProject javaProject = ... ;
+	String[] argumentNames = NamingConventions.suggestVariableNames(NamingConventions.VK_PARAMETER, NamingConventions.BK_TYPE_NAME, "ArrayList", javaProject, 0, null, true);
+</pre>
+
+<!-- ############################################## -->
+<h2><a name="deprecatedRemovePrefixAndSuffix">How can I remove deprecation warning I get on <code>NamingConventions.removePrefixAndSuffixFor*Name(...)</code> methods and keep same behavior?</a></h2>
+<p>
+While implementing bug <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=38111">38111</a>, following methods
+have been deprecated:</p>
+<ol>
+<li><code>NamingConventions#removePrefixAndSuffixForArgumentName(IJavaProject, char[])</code></li>
+<li><code>NamingConventions#removePrefixAndSuffixForArgumentName(IJavaProject, String)</code></li>
+<li><code>NamingConventions#removePrefixAndSuffixForFieldName(IJavaProject, char[], int)</code></li>
+<li><code>NamingConventions#removePrefixAndSuffixForFieldName(IJavaProject, String, int)</code></li>
+<li><code>NamingConventions#removePrefixAndSuffixForLocalVariableName(IJavaProject, char[])</code></li>
+<li><code>NamingConventions#removePrefixAndSuffixForLocalVariableName(IJavaProject, String)</code></li>
+</ol>
+
+<p>This answer gives some advice to use new API corresponding methods without changing the behavior of the existing code.<br>
+A call to one of these methods can be replaced by a call to <code>NamingConventions#getBaseName(int, String, IJavaProject)</code></p>
+
+<ul>
+<li>A call to <code>removePrefixAndSuffixForArgumentName(...)</code> can be replaced by a call to <code>getBaseName(...)</code>  with <code>NamingConventions#VK_PARAMETER</code> as variable kind</li>
+<li>A call to <code>removePrefixAndSuffixForFieldName(...)</code> can be replaced by a call to <code>getBaseName(...)</code>  with <code>NamingConventions#VK_INSTANCE_FIELD</code> or <code>NamingConventions#VK_STATIC_FIELD</code> as variable kind</li>
+<li>A call to <code>removePrefixAndSuffixForLocalVariableName(...)</code> can be replaced by a call to <code>getBaseName(...)</code>  with <code>NamingConventions#VK_LOCAL</code> as variable kind</li>
+</ul>
+
+<p>The following code</p>
+<pre>
+	IJavaProject javaProject = ... ;
+	String name = NamingConventions.removePrefixAndSuffixForArgumentName(javaProject, "preNamesuf");
+</pre>
+<p>can be replaced by</p>
+<pre>
+	IJavaProject javaProject = ... ;
+	String name = NamingConventions.getBaseName(NamingConventions.VK_PARAMETER, "preNamesuf", javaProject);
+</pre>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta name="copyright" content=
+"Copyright (c) IBM Corporation and others 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
+<title>Contributing a quick fix and a quick assist for Java code</title>
+
+</head>
+<body>
+<h2>Contributing a quick fix and a quick assist for Java code</h2>
+<p>The <a href="../reference/extension-points/org_eclipse_jdt_ui_quickFixProcessors.html"><b>org.eclipse.jdt.ui.quickFixProcessors</b></a> and
+<a href="../reference/extension-points/org_eclipse_jdt_ui_quickAssistProcessors.html"><b>org.eclipse.jdt.ui.quickAssistProcessors</b></a>
+extension points enables you to contribute your own Java code <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.user/concepts/concept-quickfix-assist.htm">quick fixes and quick assists</a>.</p>
+
+<h3>Using the extension points</h3>
+<p>To create a new extension for the extension points you need to first provide the required extensions in the plugin.xml. 
+For example, JDT defines the following processors</p>
+<pre>
+   &lt;extension
+         point="org.eclipse.jdt.ui.quickFixProcessors"&gt;
+      &lt;quickFixProcessor
+            name="%defaultQuickFixProcessor"
+            class="org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor"
+            id="org.eclipse.jdt.ui.text.correction.QuickFixProcessor"&gt;
+      &lt;/quickFixProcessor&gt;
+   &lt;/extension&gt;
+   
+   &lt;extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors"&gt;
+      &lt;quickAssistProcessor
+            name="%defaultQuickAssistProcessor"
+            class="org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor"
+            id="org.eclipse.jdt.ui.text.correction.QuickAssistProcessor"&gt;
+      &lt;/quickAssistProcessor&gt;
+   &lt;/extension&gt;
+</pre>
+
+<p>For a description of the individual attributes, please refer to the extension point
+documentation.</p>
+
+<h3>Contributing a quick fix and a quick assist</h3>
+<p>To contribute a quick fix, you need to create the class that implements the <a href=
+"../reference/api/org/eclipse/jdt/ui/text/java/IQuickFixProcessor.html"><b>IQuickFixProcessor</b></a> interface. This is the same class 
+that you specified in the extension declaration. Each Java problem has a unique id which is defined in <a href=
+"../reference/api/org/eclipse/jdt/core/compiler/IProblem.html"><b>IProblem</b></a> interface.
+For a particular Java problem you may offer one or more correction proposals.</p>
+
+<p>To contribute a quick assist, you need to create the class that implements the <a href=
+"../reference/api/org/eclipse/jdt/ui/text/java/IQuickAssistProcessor.html"><b>IQuickAssistProcessor</b></a> interface. Again, this is the same class 
+that you specified in the extension declaration.
+</p>
+
+<h3>Supplying the right IJavaCompletionProposal</h3>
+<p> JDT provides the following default implementations for correction proposals that can be used to contribute quick fixes and quick assists.</p>
+	<ul>
+		<li><a href="../reference/api/org/eclipse/jdt/ui/text/java/correction/ChangeCorrectionProposal.html"><b>ChangeCorrectionProposal</b></a></li>
+		<li><a href="../reference/api/org/eclipse/jdt/ui/text/java/correction/CUCorrectionProposal.html"><b>CUCorrectionProposal</b></a></li>
+		<li><a href="../reference/api/org/eclipse/jdt/ui/text/java/correction/ASTRewriteCorrectionProposal.html"><b>ASTRewriteCorrectionProposal</b></a></li>
+	</ul>
+<p>Typically you will use an <a href="../reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html"><b>ASTRewrite</b></a>, 
+in that case you should create an ASTRewriteCorrectionProposal. However, if as a result of a quick assist you want to start an action e.g. open a wizard, 
+you should create a ChangeCorrectionProposal and override its apply(IDocument) method.
+</p>
+
+</body>
+</html>

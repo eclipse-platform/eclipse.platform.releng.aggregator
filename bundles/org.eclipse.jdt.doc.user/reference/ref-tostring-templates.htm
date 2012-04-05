@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+  <head>
+<meta name="copyright" content="Copyright (c) 2008, 2009 Mateusz Matela, IBM Corporation and others. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <title>
+      toString() Generator: Format Templates
+    </title>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+  </head>
+  <body>
+    <h1>
+      toString() Generator: Format Templates
+    </h1>
+<p>Format templates are used by a simple mechanism that allows you to change format of generated method's output string: beginning, ending, separator, and so on. They look similar to JDT code templates but they don't affect the generated code directly (<a href="ref-tostring-styles.htm">Code Styles</a> are used for that). Here's a list of available template variables:</p>
+<table border="1">
+<tr><td><b>${object.className}</b></td><td>inserts the class name as a simple String</td></tr>
+<tr><td><b>${object.getClassName}</b></td><td>inserts a call to <code>this.getClass.getName()</code></td></tr>
+<tr><td><b>${object.superToString}</b></td><td>inserts a call to <code>super.toString()</code></td></tr>
+<tr><td><b>${object.hashCode}</b></td><td>inserts a call to <code>this.hashCode()</code></td></tr>
+<tr><td><b>${object.identityHashCode}</b></td><td>inserts a call to <code>System.identityHashCode(this)</code></td></tr>
+<tr><td><b>${member.name}</b></td><td>inserts the first member's name</td></tr>
+<tr><td><b>${member.name()}</b></td><td>inserts the first member's name followed by parenthesis in case of methods</td></tr>
+<tr><td><b>${member.value}</b></td><td>inserts the first member's value</td></tr>
+<tr><td><b>${otherMembers}</b></td><td>inserts the remaining members. For each member, the template fragment between the first and the last <b>${member.*}</b> variable is evaluated and appended to the result. The characters between the last <b>${member.*}</b> and <b>${otherMembers}</b> define the separator that is inserted between members (<b>${otherMembers}</b> must stand after the last <b>${member.*}</b> variable).</td></tr></table>
+<p>For the template to work properly, the <b>${otherMembers}</b> variable must be used exactly once in a template and cannot be followed by any <b>${member.*}</b> variable. <b>${object.*}</b> variables can be placed anywhere in the template, although if one is placed in a member related fragment (that is between the first <b>${member.*}</b> variable and <b>${otherMembers}</b>), it will be repeated for every member, which is probably not a sensible solution.</p>
+<p>The description above might seem complicated, but the template format itself is very easy to use. It should all become clear after seeing some working examples.</p>
+<h2>Template examples</h2>
+<ol><li><p>The default template is a good example:</p>
+<pre>${class.name} [${member.name()}=${member.value}, ${otherMembers}]</pre>
+<p>The output string for this template looks like this:</p>
+<pre>FooClass[aFloat=1.0, aString=hello, anInt=10, anObject=null, aCharMethod()=a]</pre>
+</li>
+<li><p>Multiple line output is also available:</p>
+<pre>${object.getClassName} {
+	${member.name}: ${member.value}
+	${otherMembers}
+}</pre> 
+<p>Example result:</p>
+<pre>FooClass {
+	aFloat: 1.0
+	aString: hello
+	anInt: 10
+	anObject: null
+	aCharMethod: a
+}</pre>
+</li>
+<li><p>If you enclose a member in braces, don't forget to do the same with <b>${otherMembers}</b> variable:</p>
+<pre>{${member.name}=${member.value}},
+{${otherMembers}}</pre>
+<p>Here's the effect:</p>
+<pre>{aFloat=1.0},
+{aString=hello},
+{anInt=10},
+{anObject=null},
+{aCharMethod=a}</pre>
+</li>
+<li><p><b>${object.*}</b> variables can be used at the beginning and at the end of the template:</p>
+<pre>${object.getClassName} (hashcode:${object.hashCode})
+	members: ${member.name} = ${member.value}; ${otherMembers}
+[super: ${object.superToString}]</pre>
+<p>This template would result in an output similar to this:</p>
+<pre>FooClass (hashCode:232198409832)
+	members: aFloat = 1.0; aString = hello; anInt = 10; anObject = null; aCharMethod = a
+[super: SuperFooClass[aField=null]]</pre>
+</li>
+</ol>
+    <p>
+      <img src="../images/ngrelr.png" alt="Related reference" border="0" >
+    </p>
+    <p>
+	  <a href="ref-dialog-tostring.htm">Generate toString() dialog</a><br>
+	  <a href="ref-tostring-styles.htm">toString() Generator: Code Styles</a><br>
+	  <a href="ref-tostring-listcontent.htm">toString() Generator: Content Listing</a>
+    </p>
+    
+  </body>
+</html>

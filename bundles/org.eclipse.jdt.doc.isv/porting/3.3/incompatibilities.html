@@ -1,0 +1,41 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+
+<head>
+
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Incompatibilities between Eclipse JDT 3.2 and 3.3</title>
+</head>
+
+<body>
+
+<h1>Incompatibilities between Eclipse JDT 3.2 and 3.3</h1>
+
+<p> Eclipse changed in incompatible ways between 3.2 and 3.3 in ways that affect 
+  plug-ins. The following entries describe the areas that changed and provide 
+  instructions for migrating 3.2 plug-ins to 3.3. Note that you only need to look 
+  here if you are experiencing problems running your 3.2 plug-in on 3.3.</p>
+<ol>
+  <li><a href="#IClassFile">API contract changes to IClassFile</a></li>
+</ol>
+<hr>
+
+<!-- ############################################## -->
+<h2>1. <a name="IClassFile"></a>API contract changes to IClassFile</h2>
+<p><strong>What is affected:</strong> Clients that call <code>IClassFile.getType()</code>.</p>
+<p><strong>Description:</strong> In Eclipse 3.2, the method <code>org.eclipse.jdt.core.IClassFile.getType()</code> 
+  threw a <code>org.eclipse.jdt.core.JavaModelException</code>. This is no longer the case in Eclipse 3.3!
+  <i>Note that this change has no impact on binary compatibility</i>.</p>
+<p><strong>Action required:</strong> Clients calling <code>IClassFile.getType()</code> 
+  will have to fix possible <strong>'Unreachable catch block for JavaModelException'</strong> compile errors
+  (only if this call is the only one throwing a <code>JavaModelException</code> in the try block).
+  They also should verify for methods calling this API and throwing a <code>JavaModelException</code>
+  that they still need to throw this exception.</p>
+<!-- ############################################## -->
+
+</body>
+</html>

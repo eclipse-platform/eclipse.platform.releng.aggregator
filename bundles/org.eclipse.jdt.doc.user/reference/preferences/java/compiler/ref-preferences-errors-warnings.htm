@@ -1,14 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="en">
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2011. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page.">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>Java Compiler Errors/Warnings Preferences</title>
+<title>Java Compile Errors/Warnings Preferences</title>
 <link rel="stylesheet" href="../../../../book.css" charset="ISO-8859-1" type="text/css">
 <script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js" type="text/javascript"> </script>
 </head>
 <body>
-<h1>Java Compiler Errors/Warnings Preferences</h1>
+<h1>Java Compile Errors/Warnings Preferences</h1>
 <p>Indicate your preferences for the Errors/Warnings settings on the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.window.preferences(preferencePageId=org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage)")'> <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png" alt="Opens the Errors/Warnings preference page"> <b> Java &gt; Compiler &gt; Errors/Warnings </b></a> preference page.</p>
 <h3>Code style</h3>
 <table border="1" cellspacing="0" cellpadding="5" width="100%" summary="Code style section">
@@ -256,13 +256,15 @@
 	</tr>
 	<tr>
 		<td valign="top">
-		<p>Enum type constant not covered on 'switch'</p>
+		<p>Incomplete 'switch' cases on enum</p>
 		</td>
 		<td valign="top">
-		<p>When enabled, the compiler will issue an error or a warning whenever it encounters a switch statement which does not contain case statements for every enum constant of the referenced enum.</p>
+		<p>When enabled, the compiler will issue an error or a warning whenever it encounters a switch statement which does not contain case statements
+		for every enum constant of the referenced enum nor a default case. A missing default case is reported even when all enum constants are covered
+		by corresponding case labels; this warning is recommended by the Java Language Specification for the sake of binary compatibility.</p>
 		</td>
 		<td valign="top">
-		<p>Ignore</p>
+		<p>Warning</p>
 		</td>
 	</tr>
 	<tr>
@@ -339,8 +341,8 @@
 		<p>Resource leak</p>
 		</td>
 		<td valign="top">
-		<p>When enabled, the compiler will issue an error or a warning if a local variable holds a value of type 'java.lang.AutoCloseable' (compliance>=1.7) 
-	 		or a value of type 'java.io.Closeable' (compliance<=1.6) and if
+		<p>When enabled, the compiler will issue an error or a warning if a local variable holds a value of type 'java.lang.AutoCloseable' (compliance &gt;= 1.7) 
+	 		or a value of type 'java.io.Closeable' (compliance &lt;= 1.6) and if
 	 		flow analysis shows that the method 'close()' is not invoked locally on that value.</p>
 		</td>
 		<td valign="top">
@@ -352,8 +354,8 @@
 		<p>Potential resource leak</p>
 		</td>
 		<td valign="top">
-		<p>When enabled, the compiler will issue an error or a warning if a local variable holds a value of type 'java.lang.AutoCloseable' (compliance>=1.7) 
-	 		or a value of type 'java.io.Closeable' (compliance<=1.6) and if 
+		<p>When enabled, the compiler will issue an error or a warning if a local variable holds a value of type 'java.lang.AutoCloseable' (compliance &gt;= 1.7) 
+	 		or a value of type 'java.io.Closeable' (compliance &lt;= 1.6) and if 
 	 		flow analysis shows that the method 'close()' is not invoked locally on that value for all execution paths.</p>
 		</td>
 		<td valign="top">
@@ -798,7 +800,7 @@ use raw types in the first place.</p>
 		<p>Suppress optional errors with '@SuppressWarnings'</p>
 		</td>
 		<td valign="top">
-		<p>When enabled, the '@SuppressWarnings' annotation will also suppress the optional compiler errors.</p>
+		<p>When enabled, the '@SuppressWarnings' annotation will also suppress the optional compile errors.</p>
 		</td>
 		<td valign="top">
 		<p>Off</p>
@@ -815,7 +817,6 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>When enabled, the compiler will issue an error or a warning when it encounters that a local variable which is certainly null is dereferenced. Note that the analysis can not find all null pointer accesses, see <strong>Potential null pointer access</strong>.</p>
-		<p>This diagnostic can also be enabled for fields using the option <b>Include fields in null analysis</b>.</p>
 		</td>
 		<td valign="top">
 		<p>Warning</p>
@@ -827,7 +828,6 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>When enabled, the compiler will issue an error or a warning when it encounters that a local variable which may be null is dereferenced. Note that the analysis is fairly conservative, it only considers cases where there is something suspicious.</p>
-		<p>This diagnostic can also be enabled for fields using the option <b>Include fields in null analysis</b>.</p>
 		<p>The quality of the analysis can be improved by using null-annotations, which can be enabled using the option 
 		<b>Enable annotation-based null analysis</b>
 		</td>
@@ -841,7 +841,6 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>When enabled, the compiler will issue an error or a warning whenever a local variable which can not be null is tested for null.</p>
-		<p>This diagnostic can also be enabled for fields using the option <b>Include fields in null analysis</b> below.</p>
 		</td>
 		<td valign="top">
 		<p>Ignore</p>
@@ -853,19 +852,6 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>When enabled, the compiler will honor 'assert' statement when doing the null analysis.</p>
-		</td>
-		<td valign="top">
-		<p>Off</p>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top">
-		<p>Include fields in null analysis</p>
-		</td>
-		<td valign="top">
-		<p>When enabled, the compiler will raise null analysis based errors or warnings on fields.</p>
-		<p>These diagnostics can be configured using the options <b>Null pointer access</b>, 
-		<b>Potential null pointer access</b> and <b>Redundant null check</b>.
 		</td>
 		<td valign="top">
 		<p>Off</p>
@@ -886,29 +872,20 @@ use raw types in the first place.</p>
 	</tr>
 	<tr>
 		<td valign="top" style="padding-left: 2em;">
-		<p>Use non-null as workspace-wide (or project-wide) default</p>
-		</td>
-		<td valign="top">
-		<p>When enabled, this option globally (at a workspace level or project level depending on
-		where the option is configured) achieves the same effect as specifying @NonNull for individual elements.</p>
-		</td>
-		<td valign="top">
-		<p>Off</p>
-		</td>
-	</tr>
-	<tr>
-		<td valign="top" style="padding-left: 2em;">
 		<p>Violation of null specification</p>
 		</td>
 		<td valign="top">
 		<p>Depending on this option, the compiler will issue either an error or a warning whenever one of the following situations is detected:</p> 
 		<ol>
-		<li>A method declared with a nonnull annotation returns an expression that is statically known to evaluate to a null value.</li> 
-		<li>An expression that is statically known to evaluate to a null value is passed as an argument in a method call where the corresponding parameter of the called method is declared with a nonnull annotation.</li> 
-		<li>An expression that is statically known to evaluate to a null value is assigned to a local variable that is declared with a nonnull annotation.</li> 
+		<li>A method declared with a nonnull annotation returns a <em>nullable</em> expression.</li> 
+		<li>A <em>nullable</em> expression is passed as an argument in a method call where the corresponding parameter of the called method is declared with a nonnull annotation.</li> 
+		<li>A <em>nullable</em> expression is assigned to a local variable that is declared with a nonnull annotation.</li> 
 		<li>A method that overrides an inherited method declared with a nonnull annotation tries to relax that contract by specifying a nullable annotation (prohibition of contravariant return).</li> 
 		<li>A method that overrides an inherited method which has a nullable declaration for at least one of its parameters, tries to tighten that null contract by specifying a nonnull annotation for its corresponding parameter (prohibition of covariant parameters).</li>
-		</ol> 
+		</ol>
+		<p>In the above an expression is considered as <em>nullable</em> if
+	 	either it is statically known to evaluate to the value <code>null</code>, or if it is
+	 	declared with a nullable annotation.</p>
 		</td>
 		<td valign="top">
 		<p>Error</p>
@@ -916,7 +893,7 @@ use raw types in the first place.</p>
 	</tr>
 	<tr>
 		<td valign="top" style="padding-left: 2em;">
-		<p>Potential violation of null specification</p>
+		<p>Conflict between null annotations and null inference</p>
 		</td>
 		<td valign="top">
 		<p>Depending on this option, the compiler will issue either an error or a warning whenever one of the following situations is detected:</p>
@@ -932,7 +909,7 @@ use raw types in the first place.</p>
 	</tr>
 	<tr>
 		<td valign="top" style="padding-left: 2em;">
-		<p>Insufficient information for null analysis</p>
+		<p>Unchecked conversion from non-annotated type to @NonNull type</p>
 		</td>
 		<td valign="top">
 		<p>Depending on this option, the compiler will issue either an error or a warning whenever one of the following situations is detected:</p>
@@ -943,6 +920,7 @@ use raw types in the first place.</p>
 		<li>An expression for which insufficient nullness information is available for statically proving that it will never evaluate to a null value at runtime is assigned to a local variable that is declared 
 		with a nonnull annotation. </li> 
 		</ol> 
+		<p>Unchecked conversion is usually a consequence of using other unannotated variables or methods.</p>
 		</td>
 		<td valign="top">
 		<p>Warning</p>
@@ -958,6 +936,22 @@ use raw types in the first place.</p>
 		</td>
 		<td valign="top">
 		<p>Warning</p>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top" style="padding-left: 2em;">
+		<p>Missing '@NonNullByDefault' annotation on package</p>
+		</td>
+		<td valign="top">
+		<p>When enabled, the compiler will issue an error or a warning in the following cases:</p>
+		<ol>
+		<li>When a package does not contain a default nullness annotation, as a result of missing package-info.java 
+	 	or missing default nullness annotation in package-info.java.</li>
+	 	<li>When a type inside a default package does not contain a default nullness annotation.</li>
+		</ol>
+		</td>
+		<td valign="top">
+		<p>Ignore</p>
 		</td>
 	</tr>
 	<tr>
