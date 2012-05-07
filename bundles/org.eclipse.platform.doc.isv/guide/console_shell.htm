@@ -184,8 +184,12 @@
   Instead of using JAAS authentication, the console can use key-based user authentication with ssh. It is possible to provide a file containing a list 
   of keys that are allowed to connect to the SSH console. The file will be read every time a connection is made so that it can be modified dynamically 
   at runtime. The file is specified with the property <code>ssh.server.authorized_keys</code>. If you use key-based authentication you do not need 
-  to specify the JAAS-related properties <code>java.security.auth.login.config</code>, <code>java.security.auth.login.config</code> and 
+  to specify the JAAS-related properties <code>java.security.auth.login.config</code> and 
   <code>osgi.console.ssh.useDefaultSecureStorage</code>.
+  
+  <p>The console supports also custom public keys authentication. If no specific authorized_keys file is configured (via system property) the OSGi service 
+  registry will be searched for available authenticators. To enable this feature you have to set the property
+  <code>ssh.custom.publickeys.auth</code> to <code>true</code>.  
                      
   <h2>Configuring of telnet and ssh host and port through Configuration Admin service</h2>
             
@@ -239,6 +243,8 @@
   If no argument is specified the names of all new commands are displayed. <br>
   If a command name is specified, the help message for this command is displayed. If the command is legacy and the <code>CommandProvider</code>, which provides this command, 
   does not provide separate help for each command (this is a new feature, introduced in Equinox 3.7), then the help messages for all commands in this <code>CommandProvider</code> are displayed. <br>            
+  The help command supports <code>-scope</code> argument, which should be used as follows: <code>help -scope &lt;command_scope&gt;</code>. Thus the help command will display help only for the
+  commands with the specified scope. <br>
   There is also a <code>man</code> command. It accepts the same arguments as the help command and has the same semantics. <br>
             
   <h2>Writing Gogo Commands</h2>
@@ -280,6 +286,20 @@
   the bundle of the new console. It has the single method <code>getCandidates</code>, which get as a parameter the whole command line and the current cursor position in it, and returns
   a map with all completion candidates, and the position in the command line, on which the completion begins. The keys in the map are the candidates, and the values - the start position
   for the completion.
+  
+  <h2>Command Line Editing</h2>
+  
+  Both with telnet and ssh command line editing is available in addition to tab completion. The following functions are supported:
+  <ul>
+    <li>backspace - deletes the character to the left of the cursor</li>
+    <li>delete - deletes the character on the cursor position</li>
+    <li>home/end - moves the cursor to the beginning/end of the command line</li>
+    <li>left/right arrow - moves the cursor one character left/right</li>
+    <li>up/down arrow - moves backward/forward one entry in the command history</li>
+    <li>pageup/pagedown - moves to the first/last entry of the command history</li>
+  </ul>
+  
+  These functions are supported also when the the console is run standalone with Equinox. In PDE these features are not supported.
             
   <h2>Closing Telnet or Ssh Session</h2>
             
