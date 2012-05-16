@@ -251,19 +251,19 @@ document for changes in the Platform.
 		<p>When annotation-based null analysis is enabled, JDT issues new diagnostics based on the nullness
 			of a variable or a method return type as specified by a null annotation.</p>
 		
-		<p><img src="images/null-annotation-problems1.png" alt="	public void foo(@NonNull Object o1) {&#x0A;		System.out.println(o1.toString()); // OK: o1 cannot be null&#x0A;	}&#x0A;	&#x0A;	@NonNull Object bar(@Nullable String s1) {&#x0A;		foo(null); // cannot pass null argument&#x0A;		@NonNull String s= null; // cannot assign null value &#x0A;		@NonNull String t= s1; // cannot assign potentially null value &#x0A;		return null; // cannot return null value&#x0A;	}"/></p>
+		<p><img src="images/null-annotation-problems1.png" alt="	public void foo(@NonNull Object o1) {&para;		System.out.println(o1.toString()); // OK: o1 cannot be null&para;	}&para;	&para;	@NonNull Object bar(@Nullable String s1) {&para;		foo(null); // cannot pass null argument&para;		@NonNull String s= null; // cannot assign null value &para;		@NonNull String t= s1; // cannot assign potentially null value &para;		return null; // cannot return null value&para;	}"/></p>
 		<p> Similar diagnostics are also elicited when the value assigned/returned may potentially be null or has unknown nullness.</p>
 		
 		<p> Overriding methods are also checked for correctness:</p>
-		<p><img src="images/null-annotation-problems2.png" alt="class Base {&#x0A;	@NonNull Object method(@Nullable Object o) {&#x0A;		return new Object();&#x0A;	}&#x0A;}&#x0A;&#x0A;class Sub extends Base {&#x0A;	@Override            // method parameter must allow null&#x0A;	@Nullable Object method(@NonNull Object o) {&#x0A;		return new Object();&#x0A;	}&#x0A;}"/></p>
+		<p><img src="images/null-annotation-problems2.png" alt="class Base {&para;	@NonNull Object method(@Nullable Object o) {&para;		return new Object();&para;	}&para;}&para;&para;class Sub extends Base {&para;	@Override            // method parameter must allow null&para;	@Nullable Object method(@NonNull Object o) {&para;		return new Object();&para;	}&para;}"/></p>
 
 		<p> You can also use the <code>@NonNullByDefault</code> annotation to set a global default on an element (package, type, method) for all enclosed elements.</p>
-		<p><img src="images/null-annotation-problems-redundant1.png" alt="@NonNullByDefault&#x0A;class MyClass {&#x0A;	// redundant @NonNull annotations:&#x0A;	public @NonNull Object foo(@NonNull Object o) {&#x0A;		return o;&#x0A;	}&#x0A;	&#x0A;	@NonNullByDefault(false) // cancels the default&#x0A;	Object bar(@NonNull Object o) {&#x0A;		return o;&#x0A;	}&#x0A;}"/></p>
+		<p><img src="images/null-annotation-problems-redundant1.png" alt="@NonNullByDefault&para;class MyClass {&para;	// redundant @NonNull annotations:&para;	public @NonNull Object foo(@NonNull Object o) {&para;		return o;&para;	}&para;	&para;	@NonNullByDefault(false) // cancels the default&para;	Object bar(@NonNull Object o) {&para;		return o;&para;	}&para;}"/></p>
 
 		<p> As a result of annotating method signatures, the existing intra-procedural null analysis has even more information
 		because of user-specified annotations and thus provides better results. In the example below, the compiler would not have
 		been able to evaluate the null status of parameter 'obj' without the null annotation.</p>
-		<p><img src="images/null-annotation-problems-redundant2.png" alt="public void foo(@NonNull Object obj) {&#x0A;		if (obj == null) { }&#x0A;	}"/></p>
+		<p><img src="images/null-annotation-problems-redundant2.png" alt="public void foo(@NonNull Object obj) {&para;		if (obj == null) { }&para;	}"/></p>
 		
 		<p><b>Note:</b> This is the first version of this feature. We are working on making this
 		easier to consume in Java project setups, and we will also add quick fixes.
@@ -358,16 +358,16 @@ document for changes in the Platform.
         <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Null analysis</b> has been improved:
 		<ul>
 		<li><b>Violation of null specification</b><br/>
-			<img src="images/new-null-analysis-message1.png" alt="This option produces the&#x0A;			'Null type mismatch: required '@NonNull String' but the provided value is specified as @Nullable' warning"/>
+			<img src="images/new-null-analysis-message1.png" alt="This option produces the&para;			'Null type mismatch: required '@NonNull String' but the provided value is specified as @Nullable' warning"/>
 			<p>Here, 'in' is not a legal return value because of the @Nullable annotation in its <b>declaration</b>.</p>
 		</li>
 		<li><b>Conflict between null annotations and null inference</b><br/>
-			<img src="images/new-null-analysis-message2.png" alt="This option produces the&#x0A;			'Null type mismatch: required @NonNull String but the provided value is inferred as @Nullable' warning"/>
+			<img src="images/new-null-analysis-message2.png" alt="This option produces the&para;			'Null type mismatch: required @NonNull String but the provided value is inferred as @Nullable' warning"/>
 			<p>Here, 'local' is not a legal return value, because flow analysis for the un-annotated variable 'local' <b>infers</b> that 
 			it can be null on some path.</p>
 		</li>
 		<li><b>Unchecked conversion from non-annotated type to @NonNull type</b><br/>
-			<img src="images/new-null-analysis-message3.png" alt="This option produces the&#x0A;			'Null type safety: The expression of type String needs unchecked conversion to conform to @NonNull String' warning"/>
+			<img src="images/new-null-analysis-message3.png" alt="This option produces the&para;			'Null type safety: The expression of type String needs unchecked conversion to conform to @NonNull String' warning"/>
 			<p>Here, the return value from 'getLegacyValue()' may or may not be compatible to '@NonNull String'. 
 			Similar to converting a legacy raw type to a generic type, also here essential type information is missing 
 			since 'getLegacyValue()' has no @NonNull or @Nullable annotation.</p>
