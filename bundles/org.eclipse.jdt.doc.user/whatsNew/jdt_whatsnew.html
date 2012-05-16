@@ -13,7 +13,7 @@ table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
 table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
 <title>What's New in Juno (JDT)</title>
-<script language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"> </script>
+<script type="text/javascript" language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"> </script>
 </head>
 
 <body>
@@ -122,6 +122,22 @@ document for changes in the Platform.
 	</td>
   </tr>
 
+  <tr id="bracket-matching2">
+	<td class="title">Bracket matching improvements in Java editor</td>
+	<td class="content">
+		So far, a matching bracket was found when the caret was placed immediately after a bracket. Now,
+		a matching bracket is found both when the caret is placed either immediately before or immediately after a bracket.
+<!-- TODO: matching-bracket.png is used twice. Make sure the final document makes sense. -->
+		<p><img src="images/matching-bracket.png" alt="Matching bracket examples"/></p>
+		
+		<p>You can hover over a closing curly brace and see the source near the matching opening brace in a hover. 
+		This is helpful when you want to see the code near the start of a long code block. The hover also tells the number of lines in the code block.</p> 
+		<p><img src="images/bracket-hover-1.png" alt="Bracket hover example 1"/></p>
+		<p>The hover is also useful to temporarily 'highlight' a short code block.</p>
+		<p><img src="images/bracket-hover-2.png" alt="Bracket hover example 2"/></p>
+	</td>
+  </tr>
+  
   <tr id="default-implementations-for-correction-proposals">
 	<td class="title">Default implementations for correction proposals</td>
 	<td class="content">
@@ -141,21 +157,6 @@ document for changes in the Platform.
       Content assist (<b>Ctrl+Space</b>) is now available inside package-info.java, which is used to declare package-level annotations and Javadocs.
       <p><img src = "images/content-assist-pkg-info.png" alt = "Content assist popup to add package-level annotations on package declaration"/></p>
     </td>
-  </tr>
-
-  <tr id="bracket-matching">
-	<td class="title">Bracket matching improvements in Java editor</td>
-	<td class="content">
-		So far, a matching bracket was found when the caret was placed immediately after a bracket. Now,
-		a matching bracket is found both when the caret is placed either immediately before or immediately after a bracket.
-		<p><img src="images/matching-bracket.png" alt="Matching bracket examples"/></p>
-		
-		<p>You can hover over a closing curly brace and see the source near the matching opening brace in a hover. 
-		This is helpful when you want to see the code near the start of a long code block. The hover also tells the number of lines in the code block.</p> 
-		<p><img src="images/bracket-hover-1.png" alt="Bracket hover example 1"/></p>
-		<p>The hover is also useful to temporarily 'highlight' a short code block.</p>
-		<p><img src="images/bracket-hover-2.png" alt="Bracket hover example 2"/></p>
-	</td>
   </tr>
 
   <!-- ******************* Java Formatter ************************************* -->
@@ -250,52 +251,19 @@ document for changes in the Platform.
 		<p>When annotation-based null analysis is enabled, JDT issues new diagnostics based on the nullness
 			of a variable or a method return type as specified by a null annotation.</p>
 		
-		<p><img src="images/null-annotation-problems1.png" alt="	public void foo(@NonNull Object o1) {
-		System.out.println(o1.toString()); // OK: o1 cannot be null
-	}
-	
-	@NonNull Object bar(@Nullable String s1) {
-		foo(null); // cannot pass null argument
-		@NonNull String s= null; // cannot assign null value 
-		@NonNull String t= s1; // cannot assign potentially null value 
-		return null; // cannot return null value
-	}"/></p>
+		<p><img src="images/null-annotation-problems1.png" alt="	public void foo(@NonNull Object o1) {&#x0A;		System.out.println(o1.toString()); // OK: o1 cannot be null&#x0A;	}&#x0A;	&#x0A;	@NonNull Object bar(@Nullable String s1) {&#x0A;		foo(null); // cannot pass null argument&#x0A;		@NonNull String s= null; // cannot assign null value &#x0A;		@NonNull String t= s1; // cannot assign potentially null value &#x0A;		return null; // cannot return null value&#x0A;	}"/></p>
 		<p> Similar diagnostics are also elicited when the value assigned/returned may potentially be null or has unknown nullness.</p>
 		
 		<p> Overriding methods are also checked for correctness:</p>
-		<p><img src="images/null-annotation-problems2.png" alt="class Base {
-	@NonNull Object method(@Nullable Object o) {
-		return new Object();
-	}
-}
-
-class Sub extends Base {
-	@Override            // method parameter must allow null
-	@Nullable Object method(@NonNull Object o) {
-		return new Object();
-	}
-}"/></p>
+		<p><img src="images/null-annotation-problems2.png" alt="class Base {&#x0A;	@NonNull Object method(@Nullable Object o) {&#x0A;		return new Object();&#x0A;	}&#x0A;}&#x0A;&#x0A;class Sub extends Base {&#x0A;	@Override            // method parameter must allow null&#x0A;	@Nullable Object method(@NonNull Object o) {&#x0A;		return new Object();&#x0A;	}&#x0A;}"/></p>
 
 		<p> You can also use the <code>@NonNullByDefault</code> annotation to set a global default on an element (package, type, method) for all enclosed elements.</p>
-		<p><img src="images/null-annotation-problems-redundant1.png" alt="@NonNullByDefault
-class MyClass {
-	// redundant @NonNull annotations:
-	public @NonNull Object foo(@NonNull Object o) {
-		return o;
-	}
-	
-	@NonNullByDefault(false) // cancels the default
-	Object bar(@NonNull Object o) {
-		return o;
-	}
-}"/></p>
+		<p><img src="images/null-annotation-problems-redundant1.png" alt="@NonNullByDefault&#x0A;class MyClass {&#x0A;	// redundant @NonNull annotations:&#x0A;	public @NonNull Object foo(@NonNull Object o) {&#x0A;		return o;&#x0A;	}&#x0A;	&#x0A;	@NonNullByDefault(false) // cancels the default&#x0A;	Object bar(@NonNull Object o) {&#x0A;		return o;&#x0A;	}&#x0A;}"/></p>
 
 		<p> As a result of annotating method signatures, the existing intra-procedural null analysis has even more information
 		because of user-specified annotations and thus provides better results. In the example below, the compiler would not have
 		been able to evaluate the null status of parameter 'obj' without the null annotation.</p>
-		<p><img src="images/null-annotation-problems-redundant2.png" alt="public void foo(@NonNull Object obj) {
-		if (obj == null) { }
-	}"/></p>
+		<p><img src="images/null-annotation-problems-redundant2.png" alt="public void foo(@NonNull Object obj) {&#x0A;		if (obj == null) { }&#x0A;	}"/></p>
 		
 		<p><b>Note:</b> This is the first version of this feature. We are working on making this
 		easier to consume in Java project setups, and we will also add quick fixes.
@@ -390,19 +358,16 @@ class MyClass {
         <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Null analysis</b> has been improved:
 		<ul>
 		<li><b>Violation of null specification</b><br/>
-			<img src="images/new-null-analysis-message1.png" alt="This option produces the
-			'Null type mismatch: required '@NonNull String' but the provided value is specified as @Nullable' warning"/>
+			<img src="images/new-null-analysis-message1.png" alt="This option produces the&#x0A;			'Null type mismatch: required '@NonNull String' but the provided value is specified as @Nullable' warning"/>
 			<p>Here, 'in' is not a legal return value because of the @Nullable annotation in its <b>declaration</b>.</p>
 		</li>
 		<li><b>Conflict between null annotations and null inference</b><br/>
-			<img src="images/new-null-analysis-message2.png" alt="This option produces the
-			'Null type mismatch: required @NonNull String but the provided value is inferred as @Nullable' warning"/>
+			<img src="images/new-null-analysis-message2.png" alt="This option produces the&#x0A;			'Null type mismatch: required @NonNull String but the provided value is inferred as @Nullable' warning"/>
 			<p>Here, 'local' is not a legal return value, because flow analysis for the un-annotated variable 'local' <b>infers</b> that 
 			it can be null on some path.</p>
 		</li>
 		<li><b>Unchecked conversion from non-annotated type to @NonNull type</b><br/>
-			<img src="images/new-null-analysis-message3.png" alt="This option produces the
-			'Null type safety: The expression of type String needs unchecked conversion to conform to @NonNull String' warning"/>
+			<img src="images/new-null-analysis-message3.png" alt="This option produces the&#x0A;			'Null type safety: The expression of type String needs unchecked conversion to conform to @NonNull String' warning"/>
 			<p>Here, the return value from 'getLegacyValue()' may or may not be compatible to '@NonNull String'. 
 			Similar to converting a legacy raw type to a generic type, also here essential type information is missing 
 			since 'getLegacyValue()' has no @NonNull or @Nullable annotation.</p>
