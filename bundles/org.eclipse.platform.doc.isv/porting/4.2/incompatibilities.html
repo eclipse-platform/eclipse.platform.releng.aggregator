@@ -26,6 +26,7 @@
 	<li><a href="#update-manager">Update Manager bundles removed</a></li>
 	<li><a href="#presentationAPI">Presentation API no longer functional</a></li>
 	<li><a href="#window-advisor">Workbench window advisor can no longer customize window creation</a></li>
+	<li><a href="#jetty">Servlet 3.0 and Jetty 8</a></li>
 </ol>
 
 <hr>
@@ -57,7 +58,7 @@ Refer to the deprecation comment on each method for precise migration instructio
 <h2>2. <a name="2x-compatibility-removed">Compatibility bundles for Eclipse 1.0-2.1 removed</a></h2>
 <p><strong>What is affected:</strong>Bundles built for Eclipse 1.0 to 2.1 that have
 not been compiled in Eclipse 3.0 or later. Also, any bundle or feature that requires
-or includes a removed bundle.
+or includes a removed bundle.</p>
 <p><strong>Description:</strong> The following bundles provided implementation
 of compatibility mechanisms to support bundles compiled against Eclipse prior to version 3.0.
 These bundles have not contained any API since the 3.0 release, and no API is
@@ -75,6 +76,7 @@ or requiring any of these bundles should remove the requirement.
 <h2>3. <a name="help-appserver">Bundle org.eclipse.help.appserver removed</a></h2>
 <p><strong>What is affected:</strong>Any bundle or feature that requires or includes 
 the bundle <tt>org.eclipse.help.appserver</tt>.
+</p>
 <p><strong>Description:</strong> This bundle provided implementation of a Tomcat-based
 web server application for the Eclipse help system. This was replaced in Eclipse 3.3 with
 a Jetty-based application server. This bundle defines no API and has been unused
@@ -145,6 +147,44 @@ of the workbench window layout by invoking the <tt>set*</tt> methods on
 of the workbench window elements can be achieved by defining a custom workbench
 model for the application.
 For more details, see the <a href="http://wiki.eclipse.org/Eclipse4/RCP#Contributing_to_the_Model">Eclipse 4 workbench model</a> wiki page.
+</p>
+
+<!-- ############################################## -->
+<h2>7. <a name="jetty">Servlet 3.0 and Jetty 8</a></h2>
+<p><strong>What is affected:</strong> Clients that relied on the Servlet and Jetty implementations provided
+by the platform.
+</p>
+<p><strong>Description:</strong>
+For the Juno release, Equinox will no longer support the use of older
+Jetty implementations and we are no longer shipping Jetty 6.  The
+Equinox HTTP service implementation will no longer work with the
+Servlet 2.5 and JSP 2.1 APIs.  Also note that the 
+Jasper and expresson language implementation bundles
+have changed in order to support the Servlet 3.0 and JSP 2.2 
+specifications.  The following bundles have been removed:
+<ul>
+  <li>org.apache.jasper</li>
+  <li>org.apache.commons.el</li>
+  <li>org.mortbay.jetty.server</li>
+  <li>org.mortbay.jetty.util</li>
+</ul>
+These have been replaced with the following to support Servlet 3.0 and JSP 2.2:
+<ul>
+  <li>org.eclipse.jetty.continuation</li>
+  <li>org.eclipse.jetty.http</li>
+  <li>org.eclipse.jetty.io</li>
+  <li>org.eclipse.jetty.security</li>
+  <li>org.eclipse.jetty.server</li>
+  <li>org.eclipse.jetty.servlet</li>
+  <li>org.eclipse.jetty.util</li>
+  <li>javax.el</li>
+  <li>org.apache.jasper.glassfish</li>
+  <li>com.sun.el</li>
+</ul>
+</p>
+<p><strong>Action required:</strong> Clients relying on old Servlet and JSP specifications,
+or directly requiring old Jetty 6 packages and bundles, must migrate to the new Servlet 3.0 specification,
+and Jetty 8.
 </p>
 
 </body>
