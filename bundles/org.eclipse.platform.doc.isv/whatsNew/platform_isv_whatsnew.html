@@ -12,16 +12,14 @@ table.news tr td.section {font-size: 20px; font-weight: bold;}
 table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
 table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
-<title>Eclipse Platform What's New in Juno (SWT and Plug-in Developers)</title>
+<title>Eclipse Platform What's New in 3.8 (SWT and Plug-in Developers)</title>
 </head>
 
 <body>
-<h2>What's New in Juno</h2>
+<h2>What's New in 3.8</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
 made to the Eclipse <a href="#Platform">Platform</a>, <a href="#Equinox">Equinox</a> and
-<a href="#SWT">SWT</a> for the Juno (3.8 and 4.2) release of Eclipse. All platform
-features that are new since the Indigo (3.7) release are included here, including
-some functionality that was available in previous technology preview releases of Eclipse Platform 4.
+<a href="#SWT">SWT</a> for the 3.8 release of Eclipse. 
 </p>
 
 <p>
@@ -39,169 +37,6 @@ section of the Workbench User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
-  <tr id="modeled-ui">
- <td class="title">Modeled user interface</td>
-    <td class="content">
-	 The Eclipse platform user interface is now
-	 represented internally as an EMF model. Applications can reconfigure or extend this 
-	 model to arrive at very different presentations of their application with no additional 
-	 coding required. Normalizing the workbench structure as a well defined model has 
-	 the added benefit of making the code for the workbench itself much simpler and less 
-	 error prone. Most importantly, this allows for very different workbench UI layouts, 
-	 such as parts living outside of perspectives, views and editors in dialogs, and other 
-	 designs not previously allowed by the older generation workbench with its rigid 
-	 hand-crafted model. Having a model also allows for more advanced tool support 
-	 for application designers, such as visual design tools. </td>
-	</tr>
-
-  <tr id="model-structure">
-    <td class="title">Clean model structure</td>
-    <td class="content">
-	The workbench model is separated into a number of different levels of building blocks. These are
-	sets of related model functionality that can be used to augment the basic capabilities of the RCP model
-	in order to enhance the UI. This allows RCP developers to choose the specific enhancements that they
-	really need rather than having to make an either/or choice between a model that is simplistic versus one
-	that can support the complete existing IDE UI. The categories are:
-	<ul>
-	<li>Menus and Toolbars: This is a fairly generic definition, suitable for directly implemented operations.</li>
-	<li>RCP: This is a Sash/Stack/Part containment model very much like the legacy one.</li>
-	<li>Commands: This is the e4 version of the Commands/Handlers/Bindings infrastructure. Use this model if you
-	need more sophisticated operations like key bindings, retargetable commands (Undo, copy...).</li>
-	<li>Trim: Using these elements allows clients to add trim containers on any side of their window and
-	populate them with ui elements.</li>
-	<li>Editing: This is a specific element used to gain access to the legacy editor behavior.</li>
-	<li>Shared Elements: These elements allow reuse of various model elements in different parts of the model.
-	It will be used in the compatibility layer for supporting the sharing of views and editor areas between
-	different perspectives.</li>
-	</ul>
-    </td>
-   </tr>
-
-	<tr id="presentation-engine">
-	 <td class="title">Pluggable presentation engine</td>
-    <td class="content">
-	 The workbench model is now translated into
-	 concrete widgets via a generic <i>presentation engine</i> API. The platform
-	 includes a default presentation engine that renders the model using traditional SWT
-	 widgets, but applications can employ alternate presentation engines to render their
-	 application model using a different widget toolkit.</td>
-	</tr>
-
-	<tr id="css-styling">
-	 <td class="title">Widget styling with CSS</td>
-    <td class="content">
-	 The workbench now defines a pluggable
-	 <i>styling engine</i> that allows the appearance of widgets to be customized
-	 declaratively using Cascading Style Sheets (CSS). Widget details such as fonts,
-	 colors, borders, and icons can now be customized via application-defined CSS files.
-	 This mechanism supports changing styles on the fly while the application is running.
-	 <p>
-	 The Eclipse SDK 4 includes styling data to implement the new IDE look and feel,
-	 but rich client applications can employ different CSS styling to achieve a significantly
-	 different widget appearance.
-	 </p>
-    <p><img src="images/cssexample.png" alt="Example of custom styling in contacts demo" /></p>
-	 </td>
-	</tr>
-	
-  <tr id="flexible-tab-rendering">
-    <td class="title">Flexible tab rendering</td>
-    <td class="content">
-    In the platform 3.6 release, SWT introduced API to allow a different renderer
-    for <tt>CTabFolder</tt> to be plugged in. The workbench now uses this pluggable
-    rendering to implement the new Eclipse 4 workbench look and feel.
-    <p><img src="images/ctabrender.png" alt="Highlight of custom tab rendering" /></p></td>
-  </tr>
-
-	<tr id="contexts"> 
-    <td class="title">Hierarchical contexts</td>
-    <td class="content">
-    The bundle <tt>org.eclipse.e4.core.contexts</tt>
-    introduces the notion of hierarchical contexts via the <tt>IEclipseContext</tt> API.
-    Contexts provide a mechanism for isolating application code from the framework,
-    providing an abstraction through which application code can obtain objects and
-    services from the framework. Contexts also provide a way for application code 
-    to make data and services available to other application code in a loosely coupled manner.
-    Contexts currently support:
-    <ul>
-    <li>Context hierarchies. Contexts can be nested within a parent context to override
-    services provided by their parent. This enables application code written in one context
-    to be easily transferred to work in different contexts.</li>
-    <li>OSGi service lookup. Contexts can be used to obtain references to OSGi services.
-    The context takes care of tracking dynamic service changes and cleaning up unused
-    services when contexts are discarded.</li>
-    <li>Dependency injection. Values from a context can be injected into an application object. This
-    results in injectable fields and methods in the application object being provided with
-    values defined in the context. Injection completely removes direct dependency from
-    application code onto the framework.</li>
-    <li>Storage of functions. Contexts can store functions that are evaluated lazily
-    to obtain context values. A client retrieving values from a context may be obtaining
-    raw values stored in the context, or the result of some function that was evaluated
-    at the time of the context lookup.</li>
-    <li>Traditional change notification, and registration of data-binding style update code with a context.
-    Each time the registered update code is run, the context tracks which context values
-    were referenced. Subsequent changes to any of those values will result in the update
-    code re-running. Updates and events are batched and queued to avoid superfluous
-    notifications.</li>
-    </ul></td>
-	</tr>
-
-	<tr id="part-services-using-contexts"> 
-     <td class="title">UI service lookup via contexts</td>
-    <td class="content">
-     The workbench provides a hierarchy of service
-     contexts that reflects the widget hierarchy of the workbench itself. Thus when a 
-     part obtains a service or data value from its context, it will correctly reflect the
-     widget containment structure of that part. This allows parts to be reused in
-     novel new widget layouts without requiring changes in the part's code.</td>
-	</tr>
-
-  <tr id="jsr-330-injection"> 
-    <td class="title">javax.inject annotation support</td>
-    <td class="content">
-    Context injection supports
-    the annotations defined in the upcoming <code>javax.inject</code> package.
-	Annotations such as <code>@Inject</code> and <code>@Named</code> can be used
-	to describe context elements to inject. The internal 
-	injection processing has been updated to make use of these annotations, and
-	passes the open source annotation-based injection test suite found at 
-	<a href="http://code.google.com/p/atinject/">http://code.google.com/p/atinject/</a>.
-	<p>
-	As a result of this work the dependency injection implementation is available
-	as an independent service. While the exact APIs are still under construction and will change, 
-	we expect to make the <code>javax.inject</code>-based dependency injection available as one of 
-	the core Eclipse 4 application platform services.  
-    </p>
-    </td>
-  </tr>
-
-  <tr id="event-bus">
-    <td class="title">Common event bus</td>
-    <td class="content">
-	The Eclipse workbench now has an event bus style architecture based on the 
-	publish/subscribe pattern. This means a 'one stop shopping' approach for
-	workbench clients; <i>any</i> user interface event we expect a client to be interested in 
-	(UI model changes, part life-cycle events, etc) will be available through a
-	common mechanism simply by registering an event handler against the
-	appropriate topic.
-	<p><img src="images/event-bus.png" alt="Event bus"/></p>
-    </td>
-  </tr>
-
-  <tr id="git-migration">
-    <td class="title">Git migration</td>
-    <td class="content">
-    During this release cycle, the Eclipse and Equinox projects migrated their source control systems to <a href="http://git-scm.com/">Git</a>.
-    The new Git repositories are now available for developers to clone or fork:
-    <ul>
-    <li><a href="http://git.eclipse.org/c/platform">Platform</a></li>
-    <li><a href="http://git.eclipse.org/c/jdt">Java development tools</a></li>
-    <li><a href="http://git.eclipse.org/c/pde">Plugin Development Environment</a></li>
-    <li><a href="http://git.eclipse.org/c/equinox">Equinox</a></li>
-    </ul>
-    </td>
-  </tr>
-
   <tr id="flexible-viewer-refactor">
     <td class="title">Flexible viewer refactored</td>
     <td class="content">
@@ -216,57 +51,6 @@ section of the Workbench User Guide.
         <li>A new viewer filter extension has been added to <code>TreeModelViewerFilter</code>, mitigating scrollbar presentation issues</li>
       </ul> 
       The complete list of changes can be found <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=161435#c47">here</a>.
-    </td>
-  </tr>
-
-  <tr id="workbench-events-refactoring">
-    <td class="title">Refactored Eclipse 4 Event API</td>
-    <td class="content">
-      Workbench UI events have been refactored to make them easier to understand and use.  
-      For a detailed write up on the Eclipse 4 event model and the changes in this release 
-      please take a look at <a href="http://wiki.eclipse.org/Eclipse4/RCP/Event_Model">http://wiki.eclipse.org/Eclipse4/RCP/Event_Model</a> and 
-      <a href="http://wiki.eclipse.org/Eclipse4/UI/Event/Migration">http://wiki.eclipse.org/Eclipse4/UI/Event/Migration</a>.
-    </td>
-  </tr>
-
-  <tr id="trim-styling">
-    <td class="title">Trim styling</td>
-    <td class="content">
-      In the new window trim implementation, the drag handle and the frame surrounding the trim are 
-      defined through CSS. Here's an example of what this looks like:
-<pre>
-.MToolControl.TrimStack {
-	frame-image:  url(./winXPTSFrame.PNG);
-	handle-image:  url(./winXPHandle.PNG);
-	frame-cuts: 5px 1px 5px 16px;
-}
-</pre>
-	  <p><tt>frame-image</tt> and <tt>handle-image</tt> define the images to be used to draw the frame. 
-	  The <tt>frame-cuts</tt> attribute is a set of 4 integer values that are used to divide the <tt>frame-image</tt>
-	  into specific areas by defining two widths and two heights (the third is just the image size minus the 
-	  sum of the other two. This allows us to determine what part of the image to use for the top/right corner.</p>
-	  <p>Here is a more interesting example that illustrates the power this gives to applications to customize their appearance:</p>
-      <p><img src="images/trim-styling.png" alt="Trim styling"/></p> 
-    </td>
-  </tr>
-
-  <tr id="css-theme-event">
-    <td class="title">CSS-based Theme changed event</td>
-    <td class="content">
-      An OSGi EventAdmin-based event is now raised on theme change.
-      Subscribe to the <tt>IThemeEngine.Events.THEME_CHANGED</tt> topic to be notified when the workbench theme is changed.
-    </td>
-  </tr>
-
-  <tr id="css-extension-points">
-    <td class="title">Changes to CSS extension points</td>
-    <td class="content">
-      For those providing extensions for the new CSS support,
-      the extension points for providing property handlers and
-      element providers have been renamed to
-      <tt>org.eclipse.e4.ui.css.core.propertyHandler</tt> and
-      <tt>org.eclipse.e4.ui.css.core.elementProvider</tt>
-      (respectively).
     </td>
   </tr>
 
@@ -306,18 +90,32 @@ section of the Workbench User Guide.
   </tr>
 
   <tr id="var-view-find-override">
-    <td class="title">Find action can be customised in Variables View specialisations</td>
+    <td class="title">Find action can be customised in Variables view specialisations</td>
     <td class="content">
-    Consumer now have the ability to completely override the behaviour of the <b>Find...</b> action in the <b>Variables View</b> and any of
-    its sub-classes, e.g. <b>Expressions View</b>, <b>Modules View</b>, etc.
+    Consumer now have the ability to completely override the behaviour of the <b>Find...</b> action in the <b>Variables</b> view and any of
+    its sub-classes, e.g. <b>Expressions</b> view, <b>Modules</b> view, etc.
     <p>
     To replace the default <b>Find...</b> actions clients must provide an adapter for the 
     interface <code>org.eclipse.debug.internal.ui.viewers.model.provisional.IViewActionProvider</code>.
     </p>
     <p>
     For more information see the Javadoc for <code>org.eclipse.debug.internal.ui.viewers.model.provisional.IViewActionProvider</code>
-    with an example available in the <code>org.eclipse.debug.examples.ui</code> bundle found in the Platform Debug Git repo.
+    with an example available in the <code>org.eclipse.debug.examples.ui</code> bundle found in the Platform Debug Git repository.
     </p>
+    </td>
+  </tr>
+
+  <tr id="git-migration">
+    <td class="title">Git migration</td>
+    <td class="content">
+    During this release cycle, the Eclipse and Equinox projects migrated their source control systems to <a href="http://git-scm.com/">Git</a>.
+    The new Git repositories are now available for developers to clone or fork:
+    <ul>
+    <li><a href="http://git.eclipse.org/c/platform">Platform</a></li>
+    <li><a href="http://git.eclipse.org/c/jdt">Java development tools</a></li>
+    <li><a href="http://git.eclipse.org/c/pde">Plugin Development Environment</a></li>
+    <li><a href="http://git.eclipse.org/c/equinox">Equinox</a></li>
+    </ul>
     </td>
   </tr>
 
@@ -488,6 +286,7 @@ section of the Workbench User Guide.
     default type of native renderer that is used by the Browser?</a> .</p>
    </td>
   </tr>
+
   <tr id="SWT-fontdialog">
     <td class="title">FontDialog Effects</td>
     <td class="content">
@@ -496,6 +295,7 @@ section of the Workbench User Guide.
     <p><img src="images/font-dialog-effects.png" alt="FontDialog on Windows without the Effects grouping"/></p>
     </td>
   </tr>
+
   <tr id="SWT-combo-api">
     <td class="title">New Combo API</td>
     <td class="content">
@@ -537,6 +337,7 @@ section of the Workbench User Guide.
       the context menu based on current focus or selection.
     </td>
   </tr>
+
   <tr id="CustomColors">
     <td class="title">Set/get custom colors in ColorDialog</td>
     <td class="content">
