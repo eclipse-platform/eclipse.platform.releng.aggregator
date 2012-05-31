@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 AGETO Service GmbH and others.
+ * Copyright (c) 2010, 2012 AGETO Service GmbH and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the
@@ -65,10 +65,16 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 							if (filterString != null
 									&& commit.getFullMessage().toLowerCase()
 											.indexOf(filterString) != -1) {
-								// the last update was a copyright checkin -
-								// ignore
+								// the last update was a copyright check in - ignore
 								return 0;
 							}
+
+							boolean isSWT= file.getProject().getName().startsWith("org.eclipse.swt"); //$NON-NLS-1$
+							if (isSWT && commit.getFullMessage().indexOf("restore HEAD after accidental deletion") != -1) { //$NON-NLS-1$
+								// the last update was the SWT accidental deletion of HEAD in 2009 - ignore
+								return 0;
+							}
+
 							final Calendar calendar = Calendar.getInstance();
 							calendar.setTimeInMillis(0);
 							calendar.add(Calendar.SECOND,
