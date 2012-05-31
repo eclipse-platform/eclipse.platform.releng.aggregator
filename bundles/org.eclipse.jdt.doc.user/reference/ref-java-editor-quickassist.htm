@@ -558,14 +558,15 @@
             On an instanceof expression in an 'if' or 'while' statement
           </td>
         </tr>
+        
         <tr>
           <td class="c3" width="15%">
-            Add finally block
+            Use separate catch blocks
           </td>
           <td class="c4" width="34%">
             <code>try {<br />
 
-            } catch (Expression e) {<br />
+            } catch (FileNotFoundException | InterruptedIOException e) {<br />
             }</code>
           </td>
           <td class="c3">
@@ -574,15 +575,90 @@
           <td class="c3" width="34%">
             <code>try {<br />
 
-            } catch (Expression e) {<br />
+            } catch (FileNotFoundException e) {<br />
+            } catch (InterruptedIOException e) {<br />
+            }</code>
+          </td>
+          <td class="c3" width="15%">
+            On a multi-catch block (1.7 or higher)
+          </td>
+        </tr>
+
+        <tr>
+          <td class="c3" width="15%">
+            Move exceptions to separate catch blocks
+          </td>
+          <td class="c4" width="34%">
+            <code>try {<br />
+
+            } catch (FileNotFoundException | InterruptedIOException | IllegalArgumentException e) {<br />
+            }</code>
+          </td>
+          <td class="c3">
+            &gt;
+          </td>
+          <td class="c3" width="34%">
+            <code>try {<br />
+
+            } catch (FileNotFoundException e) {<br />
+            } catch (InterruptedIOException | IllegalArgumentException e) {<br />
+            }</code>
+          </td>
+          <td class="c3" width="15%">
+            On exceptions in a multi-catch clause (1.7 or higher)
+          </td>
+        </tr>
+        
+        <tr>
+          <td class="c3" width="15%">
+            Combine catch blocks
+          </td>
+          <td class="c4" width="34%">
+            <code>try {<br />
+
+            } catch (FileNotFoundException e) {<br />
+            } catch (InterruptedIOException e) {<br />
+            }</code>
+          </td>
+          <td class="c3">
+            &gt;
+          </td>
+          <td class="c3" width="34%">
+            <code>try {<br />
+
+            } catch (FileNotFoundException | InterruptedIOException e) {<br />
+            }</code>
+          </td>
+          <td class="c3" width="15%">
+            On a catch block (1.7 or higher)
+          </td>
+        </tr>
+                
+        <tr>
+          <td class="c3" width="15%">
+            Add finally block
+          </td>
+          <td class="c4" width="34%">
+            <code>try {<br />
+
+            } catch (Exception e) {<br />
+            }</code>
+          </td>
+          <td class="c3">
+            &gt;
+          </td>
+          <td class="c3" width="34%">
+            <code>try {<br />
+
+            } catch (Exception e) {<br />
             } finally {}</code>
           </td>
           <td class="c3" width="15%">
             On a try/catch statement
           </td>
         </tr>
+        
         <tr>
-
           <td class="c3" width="15%">
             Add else block
           </td>
@@ -816,9 +892,10 @@
             On an array initializer
           </td>
         </tr>
+        
         <tr>
           <td class="c3" width="15%">
-            Convert to 'enhanced for loop' (J2SE 1.5)
+            Convert to 'enhanced for loop' (J2SE 5.0)
           </td>
 
           <td class="c4" width="34%">
@@ -837,8 +914,51 @@
             On a for loop
           </td>
         </tr>
+        
         <tr>
+          <td class="c3" width="15%">
+            Convert to indexed 'for' loop (J2SE 5.0)
+          </td>
 
+          <td class="c4" width="34%">
+            <code>for (x : c) {<br />
+            }</code>
+          </td>
+          <td class="c3">
+            &gt;
+          </td>
+          <td class="c3" width="34%">
+            <code>for (int i = 0; i &lt; c.size(); i++) {<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;x = c[i];<br />
+            }<br /></code>
+          </td>
+          <td class="c3" width="15%">
+            On an enhanced for loop
+          </td>
+        </tr>
+        
+        <tr>
+          <td class="c3" width="15%">
+            Convert to Iterator-based 'for' loop (J2SE 5.0)
+          </td>
+
+          <td class="c4" width="34%">
+            <code>for (x : c) {<br />
+            }</code>
+          </td>
+          <td class="c3">
+            &gt;
+          </td>
+          <td class="c3" width="34%">
+            <code>for (Iterator i= c.iterator();i.hasNext();) {<br />
+            }<br /></code>
+          </td>
+          <td class="c3" width="15%">
+            On an enhanced for loop
+          </td>
+        </tr>
+        
+        <tr>
           <td class="c3" width="15%">
             Create method in super class
           </td>
@@ -1029,8 +1149,42 @@
             On fields
           </td>
         </tr>
+        
+        <tr>
+          <td class="c3" width="15%">
+            Insert inferred type arguments
+          </td>
+          <td class="c4" width="34%">
+            <code>List&lt;String&gt; list = new ArrayList&lt;&gt;();</code>
+
+          </td>
+          <td class="c3">
+            &gt;
+          </td>
+          <td class="c3" width="34%">
+            <code>List&lt;String&gt; list = new ArrayList&lt;String&gt;();</code>
+          </td>
+          <td class="c3" width="15%">
+
+            On generic instance creation expressions (1.7 or higher)
+          </td>
+        </tr>
+        
       </tbody>
     </table>
+    
+    <br />
+    <p>The following quick assists are available in the <b>Properties File Editor</b>:</p>
+    <ul>
+       <li><b>Rename in workspace</b> - renames the key in the properties file and updates all references</li>
+       <li><b>Create field in '...'</b> - creates the corresponding field in the resource bundle accessor class</li>
+       <li><b>Remove property</b> - deletes the property from the properties file and the field from the resource bundle accessor class</li>
+       <li><b>Remove properties</b> - deletes the selected properties from the properties file and the fields from the resource bundle accessor class</li>
+       <li><b>Escape backslashes</b> - escape all backslashes in the selected text</li>
+       <li><b>Escape backslashes in original string</b> - escape all backslashes in the pasted text</li>
+       <li><b>Unescape backslashes</b> - unescape all backslashes in the selected text</li>
+    </ul>
+      
     <p>
       <img src="../images/ngrelc.png" alt="Related concepts" border="0" />
     </p>
