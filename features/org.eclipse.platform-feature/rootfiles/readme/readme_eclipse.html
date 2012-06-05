@@ -8,7 +8,7 @@
 
 <h1>Eclipse Project Release Notes</h1>
 <p>Release 4.2.0<br/>
-  Last revised May 7th, 2012</p>
+  Last revised June 5th, 2012</p>
 <p align="left"><strong>This software is OSI Certified Open Source Software.<br/>
 OSI Certified is a certification mark of the Open Source Initiative.&nbsp;</strong></p>
 <blockquote>
@@ -610,7 +610,6 @@ void myCallback(void) {
 }
 </pre>
 
-
 <h3>3.2.2 <a name="I-Platform-Ant">Platform - Ant</a></h3>
 <h4> Custom Ant tasks and Ant types must be separate from plug-in library JARs</h4>
 <p>Including the class files for custom Ant tasks or Ant types in the regular
@@ -631,11 +630,11 @@ make it unsafe to run more than one Ant build concurrently in the same JVM. (bug
 
 <h4>Ant Editor code completion based on Ant 1.6.x</h4>
 <p>Code completion provided by the Ant editor does not respect the user-specified version of org.eclipse.ant.core plug-in or ANT_HOME. 
-Code completion proposals are mostly based on Ant 1.6.x with some updates to Ant 1.6.5 (bug
+Code completion proposals are mostly based on Ant 1.6.x with some updates to Ant 1.8.3 (bug
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=193046">bug 193046</a>)</p>
 
 <h4> Setting build loggers not supported when debugging Ant builds</h4>
-<p>When debugging Ant builds within Eclipse, setting -logger as a program argument will be ignored.</p>
+<p>When debugging Ant builds within Eclipse, setting <code>-logger</code> as a program argument will be ignored.</p>
 
 <h4>Renaming an External Tool builder set to run during auto-build will cause errors</h4>
 <p>If you rename an existing external tool builder that is configured to run during auto-builds, you will get the following error:
@@ -657,18 +656,12 @@ See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=187993">187993</a
 
 <h4>Ant 1.8.x reports missing libraries as build failures</h4>
 <p>
-In Ant 1.8.x, if you try to use a task that requires additional libraries and you do not have the libraries on the Ant classpath, the build will now properly report is failed. 
+In Ant 1.8.x, if you try to use a task that requires additional libraries and you do not have the libraries on the Ant classpath, the build will now properly report as failed. 
 In previous versions of Ant, the build would still report that it had suceeded even though it actually failed to run any of the tasks from additional bundles. See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=344518">bug 344518</a>.
 </p>
 <p>
 For more information on tasks that require additional bundles please refer to the <a href="http://www.apache.org/dist/ant/RELEASE-NOTES-apache-ant-1.8.2.html">Ant 1.8.2 release notes</a>
 and the <a href="http://ant.apache.org/manual/install.html#optionalTasks">Optional Tasks</a> section in the At manual. 
-</p>
-
-<h4>Ant 1.8.x extension-point feature is not supported in the Ant editor</h4>
-<p>
-The extension-point feature added in Ant 1.8.x is not supported in the Ant editor, meaning there is no content assist or help support for it.
-See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324625">bug 324625</a> for more details. 
 </p>
 
 <h3>3.2.3 <a name="I-Platform-User-Assistance">Platform - User Assistance</a></h3>
@@ -815,32 +808,9 @@ the paste operation hangs Eclipse for several minutes. This situation can be
 encountered when copying from an Eclipse target workbench, suspending the target
 workbench at a breakpoint and pasting into the hosting Eclipse workbench. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=44915">44915</a>)</p>
 
-<h4>Available colors on 8-bit Linux (Linux only)</h4>
-<p>Typically, in Gnome Linux installs running with 8-bit visuals (i.e. 256
-color mode), before the Eclipse application is started there are no free colors.
-This may mean that Eclipse is unable to allocate the default widget background
-color, causing it to display a white background. The functionality, however, is
-otherwise unaffected.</p>
-
 <h4>IME conversion problem (Solaris GTK only)</h4>
 <p>When typing Japanese text, the conversion to Kanji must be done one ideogram at
 a time. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=226636">226636</a>)</p>
-
-<h4>Key bindings can stop working on Debian (GTK+ only)</h4>
-<p>On some versions of Debian, Eclipse key bindings may stop working.  In this context
-the only way to make the key bindings work again is to restart Eclipse.
-</p><p>
-The problem is that a focus issue exists in GTK+ 2.6.7 and earlier, for which SWT has
-a workaround.  This workaround is incompatible with the GTK+ 2.6.7 fix, so a GTK+ version
-check is done at runtime to determine whether the workaround should be used or not.
-However, Debian backported the GTK+ focus fix into their libgtk+2.0 (2.6.4-2) package,
-so the SWT workaround and GTK+ fix are both incorrectly applied in this context.
-</p><p>
-To work around this problem, either get the Debian unstable version of GTK+, compile your
-own GTK+, or hack SWT's Shell.gtk_realize(int) and change the version that it checks.
-See SWT bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=107013">107013</a>
-and GTK+ bug <a href="http://bugzilla.gnome.org/show_bug.cgi?id=109246">109246</a>
-for more information.</p>
 
 <h4>Typing in an editor crashes with IBM 1.5 VM (Linux GTK PPC only)</h4>
 <p>When running on the IBM Java 5.0 VM, Eclipse crashes while the user is typing in an editor.
@@ -855,15 +825,6 @@ The command line for launching Eclipse with this vm should be: <br/>
 To launch eclipse you must disable file locking using the osgi.locking property.
 For example, you could launch eclipse as follows: <br/>
 <code>eclipse -vmargs -Dosgi.locking=none</code>
-</p>
-
-<h4>SWT for Carbon cannot be used with Mac OS X JRE version 1.6 (Mac OS X 10.5 only)</h4>
-<p>On Leopard (Mac OS X 10.5), JDK version 1.6 assumes that pointers have a size of 64 bits, but SWT's Carbon
-port only uses 32-bit pointers, so SWT and Eclipse cannot be used on Leopard with JDK version
-1.6.  The workaround is to use the Cocoa version of SWT or an earlier supported version
-of the Mac OS X JDK.
-</p>
-<p>Snow Leopard (Mac OS X 10.6) has both a 32-bit and 64-bit version of JDK 1.6, so this restriction does not apply on that version of the operating system.
 </p>
 
 <h4>Strings may be truncated or incorrectly wrapped on RHEL5 (Linux GTK only)</h4>
@@ -892,19 +853,22 @@ which will instruct SWT to not attempt to use IA2 interfaces.  An easy way to se
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=313182">313182</a>)</p>
 
 <h4>Drawing problems when using non-advanced graphics on recent GTK versions</h4>
-<p>On modern Linux distributions with a GTK version greater than 2.18, clipping problems and pixel corruption
-can occur if the SWT client uses non-advanced GC calls. These problems seem to be caused by low-level bugs
-in the interactions between GDK and X.</p>
-<p>
-The workaround for this problem is to specify Java property <code>org.eclipse.swt.internal.gtk.useCairo</code> with value <code>true</code>,
-which instructs SWT to always use Cairo for all GC calls (advanced graphics).  An easy way to set this property is to specify VM argument
-<code>-Dorg.eclipse.swt.internal.gtk.useCairo=true</code> when launching Eclipse or your SWT application.
-(bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=345650">345650</a> and <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=333965">333965</a>)</p>
-<p>There is also a potential clipping problem when using Cairo with GTK versions > 2.18 (see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=349354">349354</a>). 
-The temporary workaround is to set an environment variable GDK_NATIVE_WINDOWS=1 in a shell and then launch Eclipse or your SWT application from that same shell.</p>
+<p>On modern Linux distributions with a GTK version greater than 2.18, clipping problems and pixel corruption 
+can occur if the SWT client uses non-advanced GC calls. These problems seem to be caused by low-level bugs 
+in the interactions between GDK and X.
+</p>
 
 <h4>Menus do not appear in Unity desktop menu bar</h4>
-<p>On recent Ubuntu Linux distributions that feature the Unity desktop, the menus from the workbench will not appear in the top desktop menu bar. They will continue to appear in the shell.</p>
+<p>On recent Ubuntu Linux distributions that feature the Unity desktop, the menus from the workbench 
+will not appear in the top desktop menu bar. They will continue to appear in the shell.</p>
+
+<h4>Slider controls do not draw on Ubuntu</h4>
+<p>Sliders do not work on Linux distros with overlay scrollbars enabled  (such as
+Ubuntu 12.04). A workaround for this is to disable the overlay scrollbars
+(export LIBOVERLAY_SCROLLBAR=0 ) before launching Eclipse.</p>
+
+<h4>BIDI Segments in Text controls</h4>
+<p>BIDI Segments in text controls only work on Windows and GTK.</p>
 
 <h3>3.2.7 <a name="I-Platform-Team-CVS">Platform - Team - CVS</a></h3>
 <p>The following are known problems with the CVS repository provider only, and
@@ -931,6 +895,7 @@ page. </p>
 <p>If a connection initially fails due to a network problem, the connection may
 continue to fail even when the network problem is fixed. In order to establish
 the connection you must exit and restart Eclipse. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=9295">9295</a>)</p>
+
 <h4>&quot;Received broken pipe signal&quot; error from server</h4>
 <p>Eclipse sometimes performs multiple commands within a single connection to
 the server. This may cause problems with CVS servers that are running server
