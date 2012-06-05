@@ -100,6 +100,24 @@ Note, that even the actual qualified names of these annotations are
 <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_annotation_names">configurable</a>,
 but by default the ones given above are used (from the package <code>org.eclipse.jdt.annotation</code>).
 </p>
+
+<h2 id="buildpath_setup">Setup of the build path</h2>
+<p>
+A JAR with the default null annotations is shipped with Eclipse in eclipse/plugins/org.eclipse.jdt.annotation_*.jar.
+This JAR needs to be on the build path at compile time but it is not necessary at run time (so you don't have to ship this to users of your compiled code).
+</p>
+<p>
+There are two quick fixes on unresolved references to <code>@NonNull</code>, <code>@Nullable</code>, or <code>@NonNullByDefault</code> that add the JAR to the build path:
+</p>
+<ul>
+<li>for plain Java projects:
+<p><img src="images/task-null-annotations-qf-simple.png" alt="Copy library with default null annotations to build path"></p>
+</li>
+<li>for OSGi bundles / plug-ins:
+<p><img src="images/task-null-annotations-qf-bundle.png" alt="Add library with default null annotations to build path"></p>
+</li>
+</ul> 
+
 <h2 id="interpretation_of_null_annotations">Interpretation of null annotations</h2>
 <p>
 It should be clear now that null annotations add more information to your
@@ -409,7 +427,8 @@ Then, if you are convinced that the value assigned to this local will never be n
         if (isInitialized()) {
             MyType couldBeNull = getObjectOrNull();
             @NonNull MyType theValue = assertNonNull(couldBeNull, 
-                    "value should not be null because application is fully initialized at this point.");
+                    "value should not be null because application " +
+                    "is fully initialized at this point.");
             return theValue;
         }
         return new MyTypeImpl();
