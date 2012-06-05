@@ -169,66 +169,40 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="incomplete-switch-over-enum">
-    <td class="title">Incomplete switch over enum</td>
+  <tr id="enhanced-switch-diagnostics">
+    <td class="title">Enhanced diagnostics for detection of incomplete switch statements</td>
     <td class="content">
-        JDT now raises a new warning whenever a switch on an enum value lacks a default case, and the option 
-		<b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Incomplete 'switch' cases over enum</b> is enabled.
-		<p><img src="images/switch-case-enum.png" alt="Warning on switch over enum with missing default case"/></p>
+      	The JDT's analysis regarding incomplete switch statements is now stronger and can be configured more in detail. See <a href="../tasks/task-ensuring_switch_completeness.htm">here</a> for background. 
+	  	<p>The compiler now separately checks two criteria for a switch statement to be complete:</p>
+	  	<ul>
+	  	<li>A switch statement on an enum should define one case statement for each of the enum's constants</li>
+	  	<li>Each switch statement independent of type should define a default case.</li>
+	  	</ul>
+	  	<p>By default the compiler warns for an enum switch where both criteria are violated:</p>
+      	<p><img src="images/switch-case-enum.png" alt="Warning on switch over enum with missing default case"/></p>
+	  	<p>This warning is controlled by the option <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Incomplete 'switch' cases on enum</b>.
+	  	  This option can be strengthened by selecting the new sub-option <b>Signal even if 'default' case exists</b>,
+	  	  in which case JDT will flag switch statements over an enum type which may have an enum value covered only through a default statement, but not directly through
+	  	  a case statement. When new enum constants are added, this option will help in detecting the switch statements that do not cover the new value.</p>
+	  	<p><img src="images/switch-missing-case-enum.png" alt="Warning on switch with missing case statement for enum value even though default is present"/></p>
+      	<p><img src = "images/switch-new-warnings.png" alt = "Compiler Errors/warnings preference page with new switch diagnostic options highlighted"/></p>
+	  	<p> A second addition in the same section of the compiler preferences, <b>Switch is missing 'default' case</b>, controls whether the JDT will flag switch statements 
+	  	  with a missing default case, because such a switch statement will be skipped entirely at runtime if an unexpected value occurs.</p>
+		<p><img src="images/switch-missing-default.png" alt="Warning on switch with missing default case"/></p>
 		<p> Note that in cases like the above, the warning also helps to understand another
 		error against the last statement:<br/>
 		"The local variable printString may not have been initialized"
 		is reported because clients could possibly call the method <code>print(Color)</code> with an 
 		enum value that is not known at the time of compiling this method.</p>
-	</td>
-  </tr>
-
-  <tr id="enhanced-switch-diagnostics">
-    <td class="title">Enhanced diagnostics for detection of incomplete switch statements</td>
-    <td class="content">
-      JDT now provides additional configurable diagnostics to flag an incomplete switch statement.
-      <p><img src = "images/switch-new-warnings.png" alt = "Compiler Errors/warnings preference page with new switch diagnostic options highlighted"/></p>
-	  <p> When you enable the option <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Switch is missing default case</b>, JDT will flag switch statements with a missing default
-	      case, because such a switch statement can e.g. result in variables left uninitialized.</p>
-	  <p><img src="images/switch-missing-default.png" alt="Warning on switch with missing default case"/></p>
-	  <p> When you enable the sub-option <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Signal even if default case exists</b> for the <b>Incomplete switch cases on enum</b> option, 
-	  JDT will flag switch statements over an enum type which may have an enum value covered only through a default statement, but not directly through a case
-	  statement. When new enum constants are added, this option will help in detecting the switch statements that do not cover the new value.</p>
-	  <p><img src="images/switch-missing-case-enum.png" alt="Warning on switch with missing case statement for enum value even though default is present"/></p>
     </td>
-  </tr>
-
-  <tr id="resource-leak-warnings-changes">
-    <td class="title">Smarter resource leak detection</td>
-    <td class="content">
-        JDT now performs smarter analysis so that resource leak related errors/warnings 
-		(configured by the options <b>Resource leak</b> and <b>Potential resource leak</b>
-		in <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Potential programming problems</b>) are no longer 
-		reported on practically unimportant cases. Some examples where the absence of a close() call does not
-		trigger any error/warning are given below:
-		<ul>
-		<li> Resource-less implementors of Closeable, such as StringReader.
-		<p><img src="images/os-less-unclosed-resource.png" alt="no resource leak reported if resource-less implentor of Closeable is not closed"/></p>
-		</li>
-		<li> Wrapping implementors of Closeable, such as BufferedReader, that simply wrap a resource-less Closeable, directly or indirectly.
-		<p><img src="images/wrapped-os-less-unclosed-resource.png" alt="no resource leak reported when a resource which wraps a resource-less implentor of Closeable is not closed"/></p>
-		</li>
-		<li> Wrapped resources where any resource in the chain is (potentially) closed.
-		<p><img src="images/wrapped-resource.png" alt="potential resource leak reported when any resource in the chain of wrapper resources is closed along some execution path."/></p>
-		</li>
-		</ul>
-	</td>
   </tr>
 
   <tr id="JDT-resource-leaks">
     <td class="title">New options to detect resource leaks</td>
     <td class="content">The compiler can now detect leakage of resources i.e. local variables of type
       <code>java.lang.AutoCloseable</code> (compliance &gt;= 1.7) and <code>java.io.Closeable</code> (compliance &lt;= 1.6).
-      <p>
-       <img src="images/resource-leak-warnings.png"
-          alt="Configurable options on compiler errors/warnings preference page"
-          title="Configurable options on compiler errors/warnings preference page"/>
-      </p>
+      See <a href="../tasks/task-avoiding_resource_leaks.htm">here</a> for background information.
+	  <p><img src="images/resource-leak-default-warning.png" alt="Errors/Warnings page with 'Resource leaks' highlighted"/></p>
       <p> When the <b>Resource leak</b> option on the <b>Java &gt; Compiler &gt; Errors/Warnings</b> preference page is enabled,
       the compiler will issue an error or a warning if the <code>close()</code> method is not invoked locally on a resource.</p>
       <p>
@@ -245,22 +219,28 @@ document for changes in the Platform.</p>
           alt="Potential resource leak example"
           title="Compiler warning on a resource not closed on all execution paths"/>
       </p>
+      <p> This analysis is less aggressive if a resource is <em>shared between methods</em>, possibly via a field, 
+        where any party accessing the resource could possibly issue the desired call to close().
+        In some cases (e.g.: passed as an argument to another method) the warning will be softened
+        to only report a <em>potential</em> leak, in other cases (stored in a field) the analysis
+        will be entirely silent.
+	  </p>
+	  <p> Additionally the analysis recognizes certain cases as being <em>practically unimportant</em>. 
+	  	Some examples where the absence of a close() call does not trigger any error/warning are given below:
+	  </p>
+		<ul>
+		<li> Resource-less implementors of Closeable, such as StringReader.
+		<p><img src="images/os-less-unclosed-resource.png" alt="no resource leak reported if resource-less implentor of Closeable is not closed"/></p>
+		</li>
+		<li> Wrapping implementors of Closeable, such as BufferedReader, that simply wrap a resource-less Closeable, directly or indirectly.
+		<p><img src="images/wrapped-os-less-unclosed-resource.png" alt="no resource leak reported when a resource which wraps a resource-less implentor of Closeable is not closed"/></p>
+		</li>
+		<li> Wrapped resources where any resource in the chain is (potentially) closed.
+		<p><img src="images/wrapped-resource.png" alt="potential resource leak reported when any resource in the chain of wrapper resources is closed along some execution path."/></p>
+		</li>
+		</ul>
       </td>
     </tr>
-
-  <tr id="resource-leak-default-warning">
-    <td class="title">Resource leak detection improved and enabled by default</td>
-    <td class="content">
-        Resource leak detection as introduced in JDT Juno M3 is now less aggressive if a resource
-		is shared between methods, possibly via a field, where any party accessing the resource
-		could possibly issue the desired call to close(). This, along with some fine tuning of the
-		analysis, results in a greatly reduced number of false positives. Thus, the detection of a
-		definite resource leak is now much more reliable and reporting is set to <b>warning</b> by default.
-		This can be configured in the <b>Java &gt; Compiler &gt; Errors/Warnings</b> preference page.
-		
-		<p><img src="images/resource-leak-default-warning.png" alt="Errors/Warnings page with 'Resource leaks' highlighted"/></p>
-	</td>
-  </tr>
 
   <tr id="JDT-try-with-resource">
     <td class="title">New options to suggest use of <code>try</code>-with-resources statement</td>
@@ -324,33 +304,11 @@ document for changes in the Platform.</p>
 
 		<p> As a result of annotating method signatures, the existing intra-procedural null analysis has even more information
 		because of user-specified annotations and thus provides better results. In the example below, the compiler would not have
-		been able to evaluate the null status of parameter 'obj' without the null annotation.</p>
+		been able to evaluate the null status of parameter 'obj' without the null annotation 
+		(option <b>Redundant null check</b> must be enabled to see the warning).</p>
 		<p><img src="images/null-annotation-problems-redundant2.png" alt="public void foo(@NonNull Object obj) {&para;		if (obj == null) { }&para;	}"/></p>
 		
-		<p><b>Note:</b> This is the first version of this feature. We are working on making this
-		easier to consume in Java project setups, and we will also add quick fixes.
-		The implemented features are complete and tested, but e.g. support for annotating fields or
-		APIs from third-party libraries is currently missing.
-		</p>
-    </td>
-  </tr>
-
-  <tr id="batch-compiler-null-annotations">
-    <td class="title">Batch compiler options for using null annotations</td>
-    <td class="content">
-        You can now configure the batch compiler to use annotations for null analysis by passing the token <b>nullAnnot(nullable|nonnull|nonnullbydefault)</b> to the <code>-warn</code> option, 
-		where nullable, nonnull and nonnullbydefault are the fully qualified names of the annotation types to be used for null analysis. You can use <b>nullAnnot</b> alone
-		to use JDT's default annotations.
-		<p>In addition, you can use the <b>-nonNullByDefault</b> token to globally use nonnull as the default when
-		annotation-based null analysis is enabled. This implies that all types in method signatures without a null annotation are considered as specified non-null.</p>
-	</td>
-  </tr>
-  
-  <tr id="improved-null-analysis-problems">
-    <td class="title">Improved messages for null analysis problems</td>
-    <td class="content">
-        The wording of several error messages and compiler options in
-        <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Null analysis</b> has been improved:
+		<p>The new diagnostics are classified in three categories:</p>
 		<ul>
 		<li><b>Violation of null specification</b><br/>
 			<img src="images/new-null-analysis-message1.png" alt="This option produces the&para;			'Null type mismatch: required '@NonNull String' but the provided value is specified as @Nullable' warning"/>
@@ -368,13 +326,33 @@ document for changes in the Platform.</p>
 			since 'getLegacyValue()' has no @NonNull or @Nullable annotation.</p>
 		</li>
 		</ul>
+		<p><b>Note:</b> This is the first version of this feature. We are working on making this
+		easier to consume in Java project setups.
+		The implemented features are complete and tested, but e.g. support for annotating fields or
+		APIs from third-party libraries is currently missing.
+		An initial set of quick fixes is included which will be further improved in the future.
+		</p>
+		<p>Also see <a href="../tasks/task-using_null_annotations.htm">here</a> for background information.</p>
+    </td>
+  </tr>
+
+  <tr id="batch-compiler-null-annotations">
+    <td class="title">Batch compiler options for using null annotations</td>
+    <td class="content">
+        You can now configure the batch compiler to use annotations for null analysis by passing the token <b>nullAnnot(nullable|nonnull|nonnullbydefault)</b> to the <code>-warn</code> option, 
+		where nullable, nonnull and nonnullbydefault are the fully qualified names of the annotation types to be used for null analysis. You can use <b>nullAnnot</b> alone
+		to use JDT's default annotations.
+		<p>In addition, you can use the <b>-nonNullByDefault</b> token to globally use nonnull as the default when
+		annotation-based null analysis is enabled. This implies that all types in method signatures without a null annotation are considered as specified non-null.</p>
 	</td>
   </tr>
   
   <tr id="missing-non-null-by-default-annotation">
     <td class="title">Detection of missing default nullness annotation</td>
     <td class="content">
-        You can now configure JDT to detect a missing default nullness annotation when using the annotation-based null analysis.
+    	In order to make non-null the default for un-annotated types in method signatures you may
+    	use the '@NonNullByDefault' annotation on all packages.
+        To ensure full coverage of all packages you can configure JDT to detect a missing default nullness annotation.
         When <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Null analysis &gt; Missing '@NonNullByDefault' annotation on package</b>
         is enabled, JDT will issue an error/warning in the following cases:
 		<ul>
@@ -385,9 +363,6 @@ document for changes in the Platform.</p>
 		<p><img src="images/missing-nonnullbydefault-type.png" alt="Missing @NonNullByDefault annotation on type warning"/></p>
 		</li>
 		</ul>
-		<p> Note that the option <b>Use non-null as workspace wide (or project-wide) default</b> has been withdrawn. 
-		Instead, you can enable the <b>Missing '@NonNullByDefault' annotation on package</b> option and make sure you specify the default nullness 
-		annotation on all types/packages.</p>
 	</td>
   </tr>
   
