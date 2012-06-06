@@ -1218,19 +1218,20 @@ and <code>buildDirectory</code> must refer to a fully qualified path.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=139554">139554</a>)
 </p>
 
-<h4>Target Platform only sees installed plug-ins</h4>
-<p>With the new p2 provisioning system in 3.4, PDE introduced a preference to control how target platforms are built. 
-By default, this preference is on if your target equals your host, otherwise it's off. When this preference is enabled, PDE attempts to
-read a target platform's configuration and build the target platform based in the target's list of installed plug-ins. If a configuration
-can't be found (a bundles.info or platform.xml file), PDE will simply manually scan the target directory and populate the target platform's
-list of plug-ins.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=226037">226037</a> and bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=225148">225148</a>)
+<h4>Importing in Eclipse application fails if plug-in exists in host workspace</h4>
+<p>When running an Eclipse application (self-hosting) importing plug-ins will not
+work correctly if the plug-in being imported exists in the host Eclipse's
+workspace. This is because PDE modifies the target platform of the application
+to point at the running plug-ins from the host (target weaving). This also
+affects the PDE test suite.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=294005">294005</a>)
 </p>
 
-<h4>Delta pack is not seen by PDE when installed</h4>
-<p>If you're using the delta pack, the target platform preference for building a target based on the target's installed plug-ins must be checked off.
-This is because a target's runtime configuration only contains plug-ins specific to the platform it's running on.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=230146">230146</a>)
+<h4>Reusing a workspace after changing architectures silently breaks PDE models</h4>
+<p>If a workspace is reused on a machine with a different architecture, the PDE
+models used to build plug-ins may silently fail. To work around this problem,
+delete the metadata in <workspace>/.metadata/.plugins/org.eclipse.pde.core.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=350172">350172</a>)
 </p>
 
 <h2>4. <a name="RunningEclipse">Running Eclipse</a></h2>
