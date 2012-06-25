@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.releng.tools.preferences.RelEngCopyrightConstants;
 
 public class AdvancedCopyrightComment extends CopyrightComment {
+
 	private static final String DATE_VAR = "${date}"; //$NON-NLS-1$
 	private static final String NEW_LINE = "\n"; //$NON-NLS-1$
 
@@ -128,14 +129,14 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 				writer.print(linePrefix + ' ' + currentLine.substring(0, offset) + getCreationYear());
 				if (hasRevisionYear() && getRevisionYear() != getCreationYear())
 			        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
-				writer.println(currentLine.substring(offset+DATE_VAR.length(), currentLine.length()));
+				println(writer, currentLine.substring(offset+DATE_VAR.length(), currentLine.length()));
 			} else {
 				// just write out the line
 				if (NEW_LINE.equals(currentLine)) {
 					// handle empty lines
-					writer.println(linePrefix);
+					println(writer, linePrefix);
 				} else {
-					writer.println(linePrefix + ' ' + currentLine);
+					println(writer, linePrefix + ' ' + currentLine);
 				}
 			}
 		}
@@ -232,4 +233,5 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 //        return new IBMCopyrightComment(commentStyle, startYear, endYear, contributors);
     	return copyright;
     }
+
 }

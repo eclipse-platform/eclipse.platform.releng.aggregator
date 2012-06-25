@@ -20,17 +20,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.osgi.util.NLS;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.osgi.util.NLS;
 
 
 /**
@@ -42,6 +46,7 @@ public abstract class SourceFile {
 	List comments = new ArrayList();
 	StringWriter contents = new StringWriter();
 	private ITextFileBufferManager textFileBufferManager;
+	private String lineDelimiter;
 
 	public static SourceFile createFor(IFile file) {
         String extension = file.getFileExtension();
@@ -116,7 +121,7 @@ public abstract class SourceFile {
 				}
 			}
 			
-			String newLine= TextUtilities.getDefaultLineDelimiter(document);
+			lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 			BufferedReader aReader = new BufferedReader(new StringReader(document.get()));
 			String aLine = aReader.readLine();
 			String comment = ""; //$NON-NLS-1$
@@ -138,7 +143,7 @@ public abstract class SourceFile {
 				}
 				
 				if (inComment) {
-					comment = comment + aLine + newLine;
+					comment = comment + aLine + lineDelimiter;
 								
 					if (isCommentEnd(aLine, commentStartString) && commentStart != lineNumber) {
 						// stop saving comment
@@ -291,4 +296,14 @@ public abstract class SourceFile {
 	}
 
 	public abstract int getFileType();
+	
+	/**
+	 * Returns the line delimiter.
+	 * 
+	 * @return the line delimiter
+	 * @since 3.7
+	 */
+	public String getLineDelimiter() {
+		return lineDelimiter;
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,32 +157,32 @@ public class IBMCopyrightComment extends CopyrightComment {
 		writer.print(linePrefix + " Copyright (c) " + getCreationYear()); //$NON-NLS-1$
 		if (hasRevisionYear() && getRevisionYear() != getCreationYear())
 	        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
-		writer.println(" IBM Corporation and others."); //$NON-NLS-1$
+		println(writer, " IBM Corporation and others."); //$NON-NLS-1$
 
-		writer.println(linePrefix + " All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
-		writer.println(linePrefix + " are made available under the terms of the Eclipse Public License v1.0"); //$NON-NLS-1$
-		writer.println(linePrefix + " which accompanies this distribution, and is available at"); //$NON-NLS-1$
-		writer.println(linePrefix + " http://www.eclipse.org/legal/epl-v10.html"); //$NON-NLS-1$
+		println(writer, linePrefix + " All rights reserved. This program and the accompanying materials"); //$NON-NLS-1$
+		println(writer, linePrefix + " are made available under the terms of the Eclipse Public License v1.0"); //$NON-NLS-1$
+		println(writer, linePrefix + " which accompanies this distribution, and is available at"); //$NON-NLS-1$
+		println(writer, linePrefix + " http://www.eclipse.org/legal/epl-v10.html"); //$NON-NLS-1$
 	}
 
 	private void writeContributions(PrintWriter writer, String linePrefix) {
-		writer.println(linePrefix);
-		writer.println(linePrefix + " Contributors:"); //$NON-NLS-1$
+		println(writer, linePrefix);
+		println(writer, linePrefix + " Contributors:"); //$NON-NLS-1$
 
 		if (contributors == null || contributors.size() <= 0)
-		    writer.println(linePrefix + "     IBM Corporation - initial API and implementation"); //$NON-NLS-1$
+		    println(writer, linePrefix + "     IBM Corporation - initial API and implementation"); //$NON-NLS-1$
 		else {
 			Iterator i = contributors.iterator();
 			while (i.hasNext()) {
 				String contributor = (String) i.next();
 				if (contributor.length() > 0) {
 					if (Character.isWhitespace(contributor.charAt(0))) {
-					    writer.println(linePrefix + contributor);
+					    println(writer, linePrefix + contributor);
 					} else {
-					    writer.println(linePrefix + " " + contributor);  //$NON-NLS-1$
+					    println(writer, linePrefix + " " + contributor);  //$NON-NLS-1$
 					}
 				} else {
-				    writer.println(linePrefix);
+				    println(writer, linePrefix);
 				}
 			}
 		}

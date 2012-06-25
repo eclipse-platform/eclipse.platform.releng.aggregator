@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ public abstract class CopyrightComment {
 	private int commentStyle;
     private int creationYear = -1;
     private int revisionYear = -1;
+	private String lineDelimiter;
     
     protected CopyrightComment(int commentStyle, int creationYear, int revisionYear) {
         this.commentStyle = commentStyle;
@@ -61,19 +62,19 @@ public abstract class CopyrightComment {
 	    case JAVA_COMMENT:
 	    case C_COMMENT:
 	    case JAVASCRIPT_COMMENT:
-			writer.println("/*******************************************************************************"); //$NON-NLS-1$
+			println(writer, "/*******************************************************************************"); //$NON-NLS-1$
 			break;
 	    case PROPERTIES_COMMENT:
-		    writer.println("###############################################################################"); //$NON-NLS-1$
+		    println(writer, "###############################################################################"); //$NON-NLS-1$
 		    break;
 	    case SHELL_MAKE_COMMENT:
-			writer.println("#*******************************************************************************"); //$NON-NLS-1$
+			println(writer, "#*******************************************************************************"); //$NON-NLS-1$
 			break;
 	    case BAT_COMMENT:
-			writer.println("@rem ***************************************************************************"); //$NON-NLS-1$
+			println(writer, "@rem ***************************************************************************"); //$NON-NLS-1$
 			break;
 	    case XML_COMMENT:
-			writer.println("<!--"); //$NON-NLS-1$
+			println(writer, "<!--"); //$NON-NLS-1$
 			break;
 	    }
 	}
@@ -83,19 +84,19 @@ public abstract class CopyrightComment {
 	    case JAVA_COMMENT:
 	    case C_COMMENT:
 	    case JAVASCRIPT_COMMENT:
-			writer.println(" *******************************************************************************/"); //$NON-NLS-1$
+			println(writer, " *******************************************************************************/"); //$NON-NLS-1$
 			break;
 	    case PROPERTIES_COMMENT:
-		    writer.println("###############################################################################"); //$NON-NLS-1$
+		    println(writer, "###############################################################################"); //$NON-NLS-1$
 		    break;
 	    case SHELL_MAKE_COMMENT:
-			writer.println("#*******************************************************************************"); //$NON-NLS-1$
+			println(writer, "#*******************************************************************************"); //$NON-NLS-1$
 			break;
 	    case BAT_COMMENT:
-			writer.println("@rem ***************************************************************************"); //$NON-NLS-1$
+			println(writer, "@rem ***************************************************************************"); //$NON-NLS-1$
 			break;
 	    case XML_COMMENT:
-			writer.println(" -->"); //$NON-NLS-1$
+			println(writer, " -->"); //$NON-NLS-1$
 			break;
 	    }
 	}
@@ -114,6 +115,14 @@ public abstract class CopyrightComment {
             revisionYear = year;
     }
 
+	/**
+	 * @param lineDelimiter
+	 * @since 3.7
+	 */
+	public void setLineDelimiter(String lineDelimiter) {
+		this.lineDelimiter= lineDelimiter;
+	}
+
 	public int getCreationYear() {
 		return creationYear;
 	}
@@ -123,4 +132,12 @@ public abstract class CopyrightComment {
 	}
 
 	public abstract String getCopyrightComment();
+	
+	/**
+	 * @since 3.7
+	 */
+	protected void println(PrintWriter writer, String line) {
+		writer.print(line);
+		writer.print(lineDelimiter);
+	}
 }

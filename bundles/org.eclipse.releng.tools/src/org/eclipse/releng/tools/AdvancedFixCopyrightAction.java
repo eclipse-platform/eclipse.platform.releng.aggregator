@@ -339,6 +339,8 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			return;
 		}
 
+		ibmCopyright.setLineDelimiter(aSourceFile.getLineDelimiter());
+
 		// figure out revision year
 		int revised = ibmCopyright.getRevisionYear();
 		int lastMod = revised;
