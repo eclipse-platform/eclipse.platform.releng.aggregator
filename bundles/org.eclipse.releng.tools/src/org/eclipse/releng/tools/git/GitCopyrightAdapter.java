@@ -70,8 +70,9 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 							}
 
 							boolean isSWT= file.getProject().getName().startsWith("org.eclipse.swt"); //$NON-NLS-1$
-							if (isSWT && commit.getFullMessage().indexOf("restore HEAD after accidental deletion") != -1) { //$NON-NLS-1$
-								// the last update was the SWT accidental deletion of HEAD in 2009 - ignore
+							String logComment= commit.getFullMessage();
+							if (isSWT && (logComment.indexOf("restore HEAD after accidental deletion") != -1 || logComment.indexOf("fix permission of files") != -1)) { //$NON-NLS-1$ //$NON-NLS-2$
+								// ignore commits with above comments
 								return 0;
 							}
 
