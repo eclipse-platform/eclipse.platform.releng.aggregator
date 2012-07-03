@@ -125,6 +125,24 @@
 			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
 		</exec>
 		
+		<fileset dir="${basedir}/.." id="fileSet">
+			<include name="*"/>
+			<include name="*/*"/>
+		</fileset>
+		<dirset dir="${basedir}/.." id="dirSet">
+			<include name="*"/>
+			<include name="*/*"/>
+		</dirset>
+		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
+		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
+		<echo file="doc.bin.log" append="true">
+Workspace Contents:
+Files:
+${fileList}
+Directories:
+${dirList}
+</echo>
+		
 		<!--workaround for bug 101048-->
 		<replace dir="reference/api" token="=&quot;/../misc/api-usage-rules.html" value="=&quot;./../misc/api-usage-rules.html">
 			<include name="*htm*" />
