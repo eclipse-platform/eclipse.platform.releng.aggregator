@@ -104,6 +104,7 @@
 	<target name="generateJavadoc" depends="getJavadocPath">
 		<property name="javadoc16" value="${javadoc}" />
 
+		<!-- replace "\n;" with platform-dependent list entry delimiter -->
 		<property name="optionsFile" value="platformOptions.tmp.txt" />
 		<copy file="platformOptions.txt" tofile="${optionsFile}" overwrite="true" />
 		
@@ -116,6 +117,28 @@
 		
 		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
+		
+		<!-- expand _* to actual version -->
+			<!-- prepare ${replaceFile} with all files and folders from workspace -->
+		<fileset dir="${basedir}/.." id="fileSet">
+			<include name="*"/>
+		</fileset>
+		<dirset dir="${basedir}/.." id="dirSet">
+			<include name="*"/>
+		</dirset>
+		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
+		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
+		<property name="replaceFile" value="platformOptions.replace.txt" />
+		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;${dirList}</echo>
+
+			<!-- strip away leading path -->
+		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^.*/([^/]*)$$" replace="\1" />
+			<!-- remove lines without "_" -->
+		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^[^_\r\n]*$$" replace="" />
+			<!-- create "aa_*[.jar]=aa_[version][.jar]" property for lines with a "_" -->
+		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^([^_]*)_.*?(.jar)?$$" replace="\1_*\2=\0" />
+		
+		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
 
 		<!--scrub isv plugin directories of any preexisting api doc content-->
 		<delete dir="reference/api"/>
