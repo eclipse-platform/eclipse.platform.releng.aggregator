@@ -91,13 +91,6 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
-          <!--
-            org.eclipse.equinox.security requires J2SE-1.4 to resolve a number of javax.crypto.* and javax.security.*
-            packages. This makes J2SE-1.4 effectively the minimal execution environment required by eclipse platform 
-            build since many platform bundles directly or indirectly depend on org.eclipse.equinox.security.
-           -->
-          <executionEnvironment>?J2SE-1.4</executionEnvironment>
-
           <environments>
             <environment>
               <os>linux</os>
@@ -367,6 +360,29 @@
             </configuration>
           </plugin>
         </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>bree-libs</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.tycho</groupId>
+              <artifactId>tycho-compiler-plugin</artifactId>
+              <version>${tycho.version}</version>
+              <configuration>
+                <!--
+                  this tells Tycho to use JRE libraries that match bundle runtime execution environment
+                  http://wiki.eclipse.org/Tycho/Release_Notes/0.14
+                  TODO provide CBI-specific wiki that explains how to setup BREE libraries and toolchain.xml 
+                -->
+                <useJDK>BREE</useJDK>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
       </build>
     </profile>
   </profiles>
