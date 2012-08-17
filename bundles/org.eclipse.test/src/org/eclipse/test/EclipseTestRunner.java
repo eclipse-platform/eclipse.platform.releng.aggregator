@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -46,6 +47,11 @@ import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -157,6 +163,7 @@ public class EclipseTestRunner implements TestListener {
 		String testPluginName = null;
 		String testPluginsNames = null;
 		String formatterString =null;
+		String timeoutString = null;
 		
         boolean haltError = false;
         boolean haltFail = false;
@@ -204,7 +211,7 @@ public class EclipseTestRunner implements TestListener {
             	return ERRORS;
             } else if (args[i].equals("-timeout")) {
 				if (i < args.length-1)
-					startStackDumpTimoutTimer(args[i+1]); 
+					timeoutString = args[i+1];
 				i++;	
 			}
         }
@@ -219,12 +226,14 @@ public class EclipseTestRunner implements TestListener {
 			// names
 			String[] testPlugins = testPluginsNames.split(",");
 			String[] suiteClasses = classesNames.split(",");
+			File outputDirectory;
 			try {
-				createAndStoreFormatter(formatterString,suiteClasses);
+				outputDirectory = createAndStoreFormatter(formatterString,suiteClasses);
 			} catch (BuildException be) {
 				System.err.println(be.getMessage());
 				return ERRORS;
 			}
+			startStackDumpTimoutTimer(timeoutString, outputDirectory);
 			int returnCode=0;
 			int j=0;
 			for (String oneClassName : suiteClasses) {
@@ -264,37 +273,38 @@ public class EclipseTestRunner implements TestListener {
 	 * Starts a timer that dumps all stack traces shortly before the given timeout expires. 
 	 * 
 	 * @param timeoutArg the -timeout argument from the command line 
+	 * @param outputDirectory where the test results end up
 	 */
-	private static void startStackDumpTimoutTimer(final String timeoutArg) {
+	private static void startStackDumpTimoutTimer(final String timeoutArg, final File outputDirectory) {
 		try {
 			/* The delay (in ms) is the sum of
 			 * - the expected time it took for launching the current VM and reaching this method
-			 * - the time it will take to dump all threads
+			 * - the time it will take to run the garbage collection and dump all the infos (twice)
 			 */
-			int delay= 30000;
+			int delay= 60 * 1000;
 			
 			int timeout= Integer.parseInt(timeoutArg) - delay;
 			if (timeout > 0) {
 				new Timer("EclipseTestRunnerTimer", true).schedule(new TimerTask() {
 					@Override
 					public void run() {
-						dump();
+						dump(1);
 						try {
 							Thread.sleep(5000);
 						} catch (InterruptedException e) {
 							// continue
 						}
-						dump();
+						dump(2);
 					}
 
-					private void dump() {
+					private void dump(final int num) {
 						System.err.println("EclipseTestRunner almost reached timeout '" + timeoutArg + "'.");
-						System.err.println("totalMemory: " + Runtime.getRuntime().totalMemory());
+						System.err.println("totalMemory:            " + Runtime.getRuntime().totalMemory());
 						System.err.println("freeMemory (before GC): " + Runtime.getRuntime().freeMemory());
 						System.gc();
 						System.err.println("freeMemory (after GC):  " + Runtime.getRuntime().freeMemory());
-						String time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").format(new Date());
-						System.err.println("Thread dump at " + time + ":");
+						String time= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(new Date());
+						System.err.println("Thread dump " + num + " at " + time + ":");
 						Map<Thread, StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
 						for (Entry<Thread, StackTraceElement[]> entry : stackTraces.entrySet()) {
 							String name= entry.getKey().getName();
@@ -324,6 +334,21 @@ public class EclipseTestRunner implements TestListener {
 										Shell shell= shells[i];
 										System.err.println((shell.isVisible() ? "  visible: " : "  invisible: ") + shell);
 									}
+								}
+								
+								if (outputDirectory.exists()) {
+									// Take a screenshot:
+									GC gc = new GC(display);
+									final Image image = new Image(display, display.getBounds());
+									gc.copyArea(image, 0, 0);
+									gc.dispose();
+	
+									ImageLoader loader = new ImageLoader();
+									loader.data = new ImageData[] { image.getImageData() };
+									String filename = outputDirectory.getAbsolutePath() + "screen" + num + ".png";
+									loader.save(filename, SWT.IMAGE_PNG);
+									System.err.println("Screenshot saved to: " + filename);
+									image.dispose();
 								}
 							}
 						});
@@ -593,8 +618,9 @@ public class EclipseTestRunner implements TestListener {
     
     /**
 	 * Line format is: formatter=<pathname>
+     * @return the output directory
 	 */
-	private static void createAndStoreFormatter(String line, String...suiteClassesNames )
+	private static File createAndStoreFormatter(String line, String...suiteClassesNames )
 			throws BuildException {
 		String formatterClassName = null;
 		File formatterFile = null;
@@ -610,15 +636,14 @@ public class EclipseTestRunner implements TestListener {
 		for (String suiteClassName : suiteClassesNames) {
 			
 			String pathname = "TEST-"+suiteClassName+".xml";
-			if(outputDirectory!=null && outputDirectory.exists()){
+			if (outputDirectory.exists()){
 				pathname = outputDirectory.getAbsolutePath()  +"/"+pathname;
 			}
 			formatterFile = new File(pathname);
 			fgFromCmdLine.addElement(createFormatter(formatterClassName,
 					formatterFile));
-			
 		}
-		
+		return outputDirectory;
 	}
 
     private static void transferFormatters(EclipseTestRunner runner, int j) {
