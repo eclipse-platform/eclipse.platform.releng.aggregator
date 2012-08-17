@@ -280,8 +280,9 @@ public class EclipseTestRunner implements TestListener {
 			/* The delay (in ms) is the sum of
 			 * - the expected time it took for launching the current VM and reaching this method
 			 * - the time it will take to run the garbage collection and dump all the infos (twice)
+			 * - was 60 * 1000 (one minute), trying 180 * 1000 (3 minutes)
 			 */
-			int delay= 60 * 1000;
+			int delay= 180 * 1000;
 			
 			int timeout= Integer.parseInt(timeoutArg) - delay;
 			if (timeout > 0) {
@@ -354,6 +355,8 @@ public class EclipseTestRunner implements TestListener {
 						});
 					}
 				}, timeout);
+			} else {
+                System.err.println("EclipseTestRunner argument error: timeout, '" + timeoutArg + "', was too short to accomidate time delay required, '" + delay + "'.");
 			}
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
