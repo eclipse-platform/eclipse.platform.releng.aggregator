@@ -30,6 +30,10 @@
 
  It creates a non-framed report that can be useful to send via
  e-mail or such.
+ 
+ NOTE: This file was copied from ant-junit.jar 1.8.3 
+ /org/apache/tools/ant/taskdefs/optional/junit/xsl/junit-frames.xsl
+ and should be compared to similar files when ant version changes. 
 
 -->
 <xsl:template match="testsuites">
