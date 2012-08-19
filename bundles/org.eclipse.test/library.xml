@@ -152,6 +152,18 @@
 			<fileset dir="${eclipse-home}" includes="${data-dir}/.metadata/*.log" />
 			<fileset dir="${eclipse-home}" includes="configuration/*.log" />
 		</concat>
+	    
+	    <!-- save any crash logs generated (before they are deleted by subsequent test runs -->
+	    <!-- 
+	         TODO: not all VM's call their crash logs "hs_err_pid*.log". 
+	         We can expand the list as we learn of others 
+	    -->
+	    <copy todir="${junit-report-output}/crashlogs/">
+	      <fileset dir="${eclipse-home}" >
+	        <include name="**/hs_err_pid*.log"/>
+	      </fileset>
+	      <globmapper from="*" to="${classname}.*"/>
+	    </copy>
 	</target>
 
 	<target name="collect">
