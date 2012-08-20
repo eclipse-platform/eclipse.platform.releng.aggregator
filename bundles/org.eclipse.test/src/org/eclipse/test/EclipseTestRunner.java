@@ -285,6 +285,8 @@ public class EclipseTestRunner implements TestListener {
 			int delay= 180 * 1000;
 			
 			int timeout= Integer.parseInt(timeoutArg) - delay;
+			String time0= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(new Date());
+			System.err.println("starting EclipseTestRunnerTimer with timeout=" + timeout + " at " + time0);
 			if (timeout > 0) {
 				new Timer("EclipseTestRunnerTimer", true).schedule(new TimerTask() {
 					@Override
