@@ -221,19 +221,20 @@ public class EclipseTestRunner implements TestListener {
 			Object key = _enum.nextElement();
 			props.put(key, p.get(key));
 		}
+		
+		startStackDumpTimoutTimer(timeoutString, new File("results/"));
+		
 		if (testPluginsNames != null && classesNames != null) {
 			// we have several plugins to look tests for, let's parse their
 			// names
 			String[] testPlugins = testPluginsNames.split(",");
 			String[] suiteClasses = classesNames.split(",");
-			File outputDirectory;
 			try {
-				outputDirectory = createAndStoreFormatter(formatterString,suiteClasses);
+				createAndStoreFormatter(formatterString,suiteClasses);
 			} catch (BuildException be) {
 				System.err.println(be.getMessage());
 				return ERRORS;
 			}
-			startStackDumpTimoutTimer(timeoutString, outputDirectory);
 			int returnCode=0;
 			int j=0;
 			for (String oneClassName : suiteClasses) {
@@ -270,7 +271,7 @@ public class EclipseTestRunner implements TestListener {
 	}
 
 	/**
-	 * Starts a timer that dumps all stack traces shortly before the given timeout expires. 
+	 * Starts a timer that dumps interesting debugging information shortly before the given timeout expires. 
 	 * 
 	 * @param timeoutArg the -timeout argument from the command line 
 	 * @param outputDirectory where the test results end up
@@ -280,9 +281,8 @@ public class EclipseTestRunner implements TestListener {
 			/* The delay (in ms) is the sum of
 			 * - the expected time it took for launching the current VM and reaching this method
 			 * - the time it will take to run the garbage collection and dump all the infos (twice)
-			 * - was 60 * 1000 (one minute), trying 180 * 1000 (3 minutes)
 			 */
-			int delay= 180 * 1000;
+			int delay= 120 * 1000;
 			
 			int timeout= Integer.parseInt(timeoutArg) - delay;
 			String time0= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.US).format(new Date());
@@ -301,6 +301,7 @@ public class EclipseTestRunner implements TestListener {
 					}
 
 					private void dump(final int num) {
+						// Dump all stacks:
 						System.err.println("EclipseTestRunner almost reached timeout '" + timeoutArg + "'.");
 						System.err.println("totalMemory:            " + Runtime.getRuntime().totalMemory());
 						System.err.println("freeMemory (before GC): " + Runtime.getRuntime().freeMemory());
@@ -320,6 +321,7 @@ public class EclipseTestRunner implements TestListener {
 						final Display display= Display.getDefault();
 						display.syncExec(new Runnable() {
 							public void run() {
+								// Dump focus control, parents, and shells:
 								Control focusControl= display.getFocusControl();
 								if (focusControl != null) {
 									System.err.println("FocusControl: ");
@@ -339,26 +341,26 @@ public class EclipseTestRunner implements TestListener {
 									}
 								}
 								
-								if (outputDirectory.exists()) {
-									// Take a screenshot:
-									GC gc = new GC(display);
-									final Image image = new Image(display, display.getBounds());
-									gc.copyArea(image, 0, 0);
-									gc.dispose();
-	
-									ImageLoader loader = new ImageLoader();
-									loader.data = new ImageData[] { image.getImageData() };
-									String filename = outputDirectory.getAbsolutePath() + "screen" + num + ".png";
-									loader.save(filename, SWT.IMAGE_PNG);
-									System.err.println("Screenshot saved to: " + filename);
-									image.dispose();
-								}
+								// Take a screenshot:
+								if (!outputDirectory.exists())
+									outputDirectory.mkdirs();
+								GC gc = new GC(display);
+								final Image image = new Image(display, display.getBounds());
+								gc.copyArea(image, 0, 0);
+								gc.dispose();
+
+								ImageLoader loader = new ImageLoader();
+								loader.data = new ImageData[] { image.getImageData() };
+								String filename = outputDirectory.getAbsolutePath() + "screen" + num + ".png";
+								loader.save(filename, SWT.IMAGE_PNG);
+								System.err.println("Screenshot saved to: " + filename);
+								image.dispose();
 							}
 						});
 					}
 				}, timeout);
 			} else {
-                System.err.println("EclipseTestRunner argument error: timeout, '" + timeoutArg + "', was too short to accomidate time delay required, '" + delay + "'.");
+                System.err.println("EclipseTestRunner argument error: '-timeout " + timeoutArg + "' was too short to accommodate time delay required (" + delay + ").");
 			}
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
@@ -623,9 +625,8 @@ public class EclipseTestRunner implements TestListener {
     
     /**
 	 * Line format is: formatter=<pathname>
-     * @return the output directory
 	 */
-	private static File createAndStoreFormatter(String line, String...suiteClassesNames )
+	private static void createAndStoreFormatter(String line, String...suiteClassesNames )
 			throws BuildException {
 		String formatterClassName = null;
 		File formatterFile = null;
@@ -648,7 +649,7 @@ public class EclipseTestRunner implements TestListener {
 			fgFromCmdLine.addElement(createFormatter(formatterClassName,
 					formatterFile));
 		}
-		return outputDirectory;
+		
 	}
 
     private static void transferFormatters(EclipseTestRunner runner, int j) {
