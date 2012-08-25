@@ -852,11 +852,13 @@ public class EclipseTestRunner implements TestListener {
 		}
 	}
 	
-   private static Display getDisplay() {
-	      Display display = Display.getCurrent();
-	      if (display == null)
-	    	  System.err.println("Display.getCurrent() returned null so this is either a core test with no UI, or this test is running in a non-UI thread, so we will use Display.getDefault() to be safe.");
-	         display = Display.getDefault();
-	      return display;		
-	   }
+	private static Display getDisplay() {
+		Display display = Display.getCurrent();
+		if (display == null) {
+			System.err
+					.println("Display.getCurrent() returned null so this is either a core test with no UI, or this test is running in a non-UI thread, so we will use Display.getDefault() to be safe.");
+			display = Display.getDefault();
+		}
+		return display;
+	}
 }
