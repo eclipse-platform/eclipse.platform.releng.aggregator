@@ -393,15 +393,7 @@ public class EclipseTestRunner implements TestListener {
 									exception.printStackTrace();
 								}
 
-								/* May not be a Display for "core" tests 
-								 * that do not open a workbench, so we use 
-								 * getCurrent(). May need to use getDefault() 
-								 * anyway, depending on threads? In which case
-								 * some screen captures (for core-only tests) will 
-								 * simply be blank.
-								 */
-								final Display display = Display.getCurrent();
-								if (display != null) {
+								final Display display = getDisplay();
 								display.syncExec(new Runnable() {
 									public void run() {
 										// Dump focus control, parents, and
@@ -460,9 +452,7 @@ public class EclipseTestRunner implements TestListener {
 										image.dispose();
 									}
 								});
-								} else {
-									System.err.println("Could not capture screen for timed out test in " + classname + " because Display.getCurrent() returned no Display.");
-								}
+								
 								// Elapsed time in milliseconds
 								long elapsedTimeMillis = System
 										.currentTimeMillis() - start;
@@ -861,4 +851,12 @@ public class EclipseTestRunner implements TestListener {
 			fSystemError.println(line);
 		}
 	}
+	
+   private static Display getDisplay() {
+	      Display display = Display.getCurrent();
+	      if (display == null)
+	    	  System.err.println("Display.getCurrent() returned null so this is either a core test with no UI, or this test is running in a non-UI thread, so we will use Display.getDefault() to be safe.");
+	         display = Display.getDefault();
+	      return display;		
+	   }
 }
