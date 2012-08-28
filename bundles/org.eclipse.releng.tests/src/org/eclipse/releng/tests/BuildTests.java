@@ -647,8 +647,10 @@ public class BuildTests extends TestCase {
 	public void testJavadocLogs() throws Exception {
 		String javadocUrls= System.getProperty("RELENGTEST.JAVADOC.URLS");
 		// Skip this test if there are no logs to check
-		if (javadocUrls == null)
+		if (javadocUrls == null) {
+			System.err.println("WARNING: no javadoc logs to test, since RELENGTEST.JAVADOC.URLS property was not set");
 			return;
+		}
 
 		String[] urls= javadocUrls.split(",");
 		URL[] javadocLogs= new URL[urls.length];
