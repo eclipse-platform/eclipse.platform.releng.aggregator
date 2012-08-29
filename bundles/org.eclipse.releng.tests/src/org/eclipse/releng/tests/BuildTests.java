@@ -650,6 +650,8 @@ public class BuildTests extends TestCase {
 		if (javadocUrls == null) {
 			System.err.println("WARNING: no javadoc logs to test, since RELENGTEST.JAVADOC.URLS property was not set");
 			return;
+		} else {
+			System.err.println("RELENGTEST.JAVADOC.URLS: javadocUrls");
 		}
 
 		String[] urls= javadocUrls.split(",");
