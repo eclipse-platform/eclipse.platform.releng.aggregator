@@ -32,7 +32,7 @@
  e-mail or such.
  
  NOTE: This file was copied from ant-junit.jar 1.8.3 
- /org/apache/tools/ant/taskdefs/optional/junit/xsl/junit-frames.xsl
+ /org/apache/tools/ant/taskdefs/optional/junit/xsl/junit-noframes.xsl
  and should be compared to similar files when ant version changes. 
 
 -->
