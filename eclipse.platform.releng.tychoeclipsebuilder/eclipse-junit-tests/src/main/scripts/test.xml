@@ -1,4 +1,4 @@
-<project name="Automated Eclipse Testing" default="all" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
+<project name="Automated Eclipse Testing" default="all" basedir="." >
 
 	<!--properties file containing the plugin directory name including version number,
 		 and list of required test plug-ins expressed as command-line argument to unzip executable.
@@ -28,17 +28,6 @@
 			Overrides default in org.eclipse.test/library.xml-->
 	<property name="junit-report-output" value="${results}/${platform}" />
 	<property name="coverage-output" value="${results}/coverage" />
-	<condition property="codecoverage" value="true">
-		<and>
-			<and>
-				<equals arg1="${buildType}" arg2="I" />
-				<os family="unix" />
-			</and>
-			<not>
-				<equals arg1="${test.target}" arg2="performance" />
-			</not>
-		</and>
-	</condition>
 
 	<!--Directory name of org.eclipse.test plug-in installed in ${eclipse-home}-->
 	<target name="setup" unless="noclean" depends="init">
@@ -99,9 +88,11 @@
 				<os family="unix" />
 				<not>
 					<or>
+						<or>
+							<os arch="x86_64" />
+							<os arch="amd64" />
+						</or>
 						<os family="mac" />
-						<os arch="x86_64" />
-						<os arch="amd64" />
 					</or>
 				</not>
 			</and>
@@ -278,7 +269,7 @@
 				<equals arg1="${ws}" arg2="gtk" />
 				<equals arg1="${arch}" arg2="x86_64" />
 			</and>
-		</condition>		
+		</condition>
 		<condition property="runtimeArchive" value="eclipse-SDK-${buildId}-macosx-cocoa-ppc.tar.gz">
 			<and>
 				<equals arg1="${os}" arg2="macosx" />
@@ -342,29 +333,47 @@
 		<!--enable tests requiring 1.5 or 1.6 vms to run if running vm level detected matches required execution environment-->
 		<condition property="J2SE-5.0" value="${java.home}/bin/java">
 			<or>
-				<equals arg1="${ant.java.version}" arg2="1.5" />
-				<equals arg1="${ant.java.version}" arg2="1.6" />
+				<or>
+					<equals arg1="${ant.java.version}" arg2="1.5" />
+					<equals arg1="${ant.java.version}" arg2="1.6" />
+				</or>
+				<equals arg1="${ant.java.version}" arg2="1.7" />
 			</or>
 		</condition>
 		<condition property="J2SE-6.0" value="${java.home}/bin/java">
-			<equals arg1="${ant.java.version}" arg2="1.6" />
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.6" />
+				<equals arg1="${ant.java.version}" arg2="1.7" />
+			</or>
 		</condition>
-
+		<condition property="J2SE-7.0" value="${java.home}/bin/java">
+			<equals arg1="${ant.java.version}" arg2="1.7" />
+		</condition>
 	</target>
 	<target name="setJVMfromUserSpecified" if="jvm">
 		<exec executable="${jvm}" outputproperty="javaversion">
 			<arg line="-version" />
 		</exec>
 		<echo message="java version of ${jvm} is ${javaversion}" />
+		<condition property="J2SE-7.0" value="${jvm}">
+			<contains string="${javaversion}" substring="java version &quot;1.7" />
+		</condition>
 		<condition property="J2SE-6.0" value="${jvm}">
-			<contains string="${javaversion}" substring="java version &quot;1.6" />
+			<or>
+				<contains string="${javaversion}" substring="java version &quot;1.6" />
+				<contains string="${javaversion}" substring="java version &quot;1.7" />
+			</or>
 		</condition>
 		<condition property="J2SE-5.0" value="${jvm}">
 			<or>
-				<contains string="${javaversion}" substring="java version &quot;1.6" />
+				<or>
+					<contains string="${javaversion}" substring="java version &quot;1.7" />
+					<contains string="${javaversion}" substring="java version &quot;1.6" />
+				</or>
 				<contains string="${javaversion}" substring="java version &quot;1.5" />
 			</or>
 		</condition>
+		<echo message="J2SE-7.0:  ${J2SE-7.0}" />
 		<echo message="J2SE-6.0:  ${J2SE-6.0}" />
 		<echo message="J2SE-5.0:  ${J2SE-5.0}" />
 	</target>
@@ -583,7 +592,10 @@
 		<!--only run test if J2SE-5.0 property  set-->
 		<condition property="skip.test">
 			<not>
-				<isset property="J2SE-6.0" />
+				<or>
+					<isset property="J2SE-6.0" />
+					<isset property="J2SE-7.0" />
+				</or>
 			</not>
 		</condition>
 		<runTests testPlugin="org.eclipse.jdt.apt.pluggable.tests" />
@@ -603,7 +615,10 @@
 		<!--only run test if J2SE-6.0 property  set-->
 		<condition property="skip.test">
 			<not>
-				<isset property="J2SE-6.0" />
+				<or>
+					<isset property="J2SE-6.0" />
+					<isset property="J2SE-7.0" />
+				</or>
 			</not>
 		</condition>
 		<runTests testPlugin="org.eclipse.jdt.compiler.tool.tests" />
@@ -614,7 +629,10 @@
 		<!--only run test if J2SE-6.0 property  set-->
 		<condition property="skip.test">
 			<not>
-				<isset property="J2SE-6.0" />
+				<or>
+					<isset property="J2SE-6.0" />
+					<isset property="J2SE-7.0" />
+				</or>
 			</not>
 		</condition>
 		<runTests testPlugin="org.eclipse.jdt.compiler.apt.tests" />
@@ -747,7 +765,7 @@
 			</not>
 		</condition>
 		<runTests testPlugin="org.eclipse.equinox.p2.tests.discovery" />
-	</target>	
+	</target>
 
 	<target name="search">
 		<runTests testPlugin="org.eclipse.search.tests" />
@@ -756,197 +774,16 @@
 	<target name="pdeds">
 		<runTests testPlugin="org.eclipse.pde.ds.tests" />
 	</target>
-	
+
 	<target name="bidi">
-			<runTests testPlugin="org.eclipse.equinox.bidi.tests" />
-		</target>
-
-	<macrodef name="jacocoreport">
-		<attribute name="pluginName" />
-		<attribute name="reportTitle" />
-		<sequential>
-			<property name="reportunzipsource" value="${basedir}/reportunzipsource" />
-			<delete dir="${reportunzipsource}" />
-			<mkdir dir="${reportunzipsource}" />
-			<unzip src="${basedir}/test-eclipse/eclipse/plugins/@{pluginName}.source_${@{pluginName}.source}.jar" dest="${reportunzipsource}" />
-			<jacoco:report>
-				<executiondata>
-					<file file="${exec.file}" />
-				</executiondata>
-				<structure name="@{reportTitle}">
-					<group name="@{pluginName}">
-						<classfiles>
-							<file file="${basedir}/test-eclipse/eclipse/plugins/@{pluginName}_${@{pluginName}}.jar" />
-						</classfiles>
-						<sourcefiles>
-							<fileset dir="${reportunzipsource}" includes="**/*.java" />
-						</sourcefiles>
-					</group>
-				</structure>
-				<html destdir="${results}/reports/@{pluginName}_${@{pluginName}}" />
-			</jacoco:report>
-		</sequential>
-	</macrodef>
-
-
-	<target name="generateJacocoReport" if="codecoverage">
-		<echo message="Coverage output location = ${coverage-output}" />
-		<mkdir dir="${coverage-output}" />
-		<mkdir dir="${results}/reports" />
-		<property name="exec.file" location="${coverage-output}/jacoco_merge.exec" />
-		<property file="finalPluginsVersions.properties" />
-		<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-			<classpath path="${basedir}/test-eclipse/eclipse/plugins/org.eclipse.test_${org.eclipse.test}/lib/jacocoant.jar" />
-		</taskdef>
-		<jacoco:merge destfile="${exec.file}">
-			<fileset dir="${coverage-output}" includes="*.exec" />
-		</jacoco:merge>
-		<antcall target="alljacocoreports" />
+		<runTests testPlugin="org.eclipse.equinox.bidi.tests" />
 	</target>
 
-	<target name="alljacocoreports">
-		<jacocoreport pluginName="org.eclipse.ant.core" reportTitle="org.eclipse.ant.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ant.launching" reportTitle="org.eclipse.ant.launching Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ant.ui" reportTitle="org.eclipse.ant.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.compare" reportTitle="org.eclipse.compare Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.compare.core" reportTitle="org.eclipse.compare.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.commands" reportTitle="org.eclipse.core.commands Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.contenttype" reportTitle="org.eclipse.core.contenttype Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.databinding" reportTitle="org.eclipse.core.databinding Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.databinding.beans" reportTitle="org.eclipse.core.databinding.beans Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.databinding.observable" reportTitle="org.eclipse.core.databinding.observable Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.databinding.property" reportTitle="org.eclipse.core.databinding.property Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.expressions" reportTitle="org.eclipse.core.expressions Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.externaltools" reportTitle="org.eclipse.core.externaltools Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.filebuffers" reportTitle="org.eclipse.core.filebuffers Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.filesystem" reportTitle="org.eclipse.core.filesystem Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.jobs" reportTitle="org.eclipse.core.jobs Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.resources" reportTitle="org.eclipse.core.resources Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.net" reportTitle="org.eclipse.core.net Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.runtime" reportTitle="org.eclipse.core.runtime Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.runtime.compatibility" reportTitle="org.eclipse.core.runtime.compatibility Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.runtime.compatibility.auth" reportTitle="org.eclipse.core.runtime.compatibility.auth Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.core.variables" reportTitle="org.eclipse.core.variables Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.debug.core" reportTitle="org.eclipse.debug.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.debug.ui" reportTitle="org.eclipse.debug.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.app" reportTitle="org.eclipse.equinox.app Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.bidi" reportTitle="org.eclipse.equinox.bidi Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.common" reportTitle="org.eclipse.equinox.common Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.event" reportTitle="org.eclipse.equinox.event Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.ds" reportTitle="org.eclipse.equinox.ds Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.frameworkadmin" reportTitle="org.eclipse.equinox.frameworkadmin Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.frameworkadmin.equinox" reportTitle="org.eclipse.equinox.frameworkadmin.equinox Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.http.jetty" reportTitle="org.eclipse.equinox.http.jetty Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.jsp.jasper" reportTitle="org.eclipse.equinox.jsp.jasper Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.jsp.jasper.registry" reportTitle="org.eclipse.equinox.jsp.jasper.registry Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.launcher" reportTitle="org.eclipse.equinox.launcher Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.artifact.repository" reportTitle="org.eclipse.equinox.p2.artifact.repository Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.console" reportTitle="org.eclipse.equinox.p2.console Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.core" reportTitle="org.eclipse.equinox.p2.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.director" reportTitle="org.eclipse.equinox.p2.director Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.director.app" reportTitle="org.eclipse.equinox.p2.director.app Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.directorywatcher" reportTitle="org.eclipse.equinox.p2.directorywatcher Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.engine" reportTitle="org.eclipse.equinox.p2.engine Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.extensionlocation" reportTitle="org.eclipse.equinox.p2.extensionlocation Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.garbagecollector" reportTitle="org.eclipse.equinox.p2.garbagecollector Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.jarprocessor" reportTitle="org.eclipse.equinox.p2.jarprocessor Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.metadata" reportTitle="org.eclipse.equinox.p2.metadata Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.metadata.repository" reportTitle="org.eclipse.equinox.p2.metadata.repository Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.operations" reportTitle="org.eclipse.equinox.p2.operations Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.publisher" reportTitle="org.eclipse.equinox.p2.publisher Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.ql" reportTitle="org.eclipse.equinox.p2.ql Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.reconciler.dropins" reportTitle="org.eclipse.equinox.p2.reconciler.dropins Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.repository" reportTitle="org.eclipse.equinox.p2.repository Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.repository.tools" reportTitle="org.eclipse.equinox.p2.repository.tools Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.touchpoint.eclipse" reportTitle="org.eclipse.equinox.p2.touchpoint.eclipse Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.touchpoint.natives" reportTitle="org.eclipse.equinox.p2.touchpoint.natives Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.transport.ecf" reportTitle="org.eclipse.equinox.p2.transport.ecf Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.ui" reportTitle="org.eclipse.equinox.p2.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.ui.sdk" reportTitle="org.eclipse.equinox.p2.ui.sdk Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.ui.sdk.scheduler" reportTitle="org.eclipse.equinox.p2.ui.sdk.scheduler Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.updatechecker" reportTitle="org.eclipse.equinox.p2.updatechecker Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.p2.updatesite" reportTitle="org.eclipse.equinox.p2.updatesite Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.preferences" reportTitle="org.eclipse.equinox.preferences Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.registry" reportTitle="org.eclipse.equinox.registry Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.security" reportTitle="org.eclipse.equinox.security Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.security.ui" reportTitle="org.eclipse.equinox.security.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.simpleconfigurator" reportTitle="org.eclipse.equinox.simpleconfigurator Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.simpleconfigurator.manipulator" reportTitle="org.eclipse.equinox.simpleconfigurator.manipulator Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.equinox.util" reportTitle="org.eclipse.equinox.util Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.help" reportTitle="org.eclipse.help Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.help.appserver" reportTitle="org.eclipse.help.appserver Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.help.base" reportTitle="org.eclipse.help.base Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.help.ui" reportTitle="org.eclipse.help.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.help.webapp" reportTitle="org.eclipse.help.webapp Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt" reportTitle="org.eclipse.jdt Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.apt.core" reportTitle="org.eclipse.jdt.apt.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.apt.pluggable.core" reportTitle="org.eclipse.jdt.apt.pluggable.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.apt.ui" reportTitle="org.eclipse.jdt.apt.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.compiler.apt" reportTitle="org.eclipse.jdt.compiler.apt Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.compiler.tool" reportTitle="org.eclipse.jdt.compiler.tool Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.core" reportTitle="org.eclipse.jdt.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.core.manipulation" reportTitle="org.eclipse.jdt.core.manipulation Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.debug.ui" reportTitle="org.eclipse.jdt.debug.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.junit" reportTitle="org.eclipse.jdt.junit Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.junit4.runtime" reportTitle="org.eclipse.jdt.junit4.runtime Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.junit.core" reportTitle="org.eclipse.jdt.junit.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.junit.runtime" reportTitle="org.eclipse.jdt.junit.runtime Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.launching" reportTitle="org.eclipse.jdt.launching Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jdt.ui" reportTitle="org.eclipse.jdt.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jface" reportTitle="org.eclipse.jface Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jface.databinding" reportTitle="org.eclipse.jface.databinding Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jface.text" reportTitle="org.eclipse.jface.text Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jsch.core" reportTitle="org.eclipse.jsch.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.jsch.ui" reportTitle="org.eclipse.jsch.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ltk.core.refactoring" reportTitle="org.eclipse.ltk.core.refactoring Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ltk.ui.refactoring" reportTitle="org.eclipse.ltk.ui.refactoring Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.osgi" reportTitle="org.eclipse.osgi Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.osgi.services" reportTitle="org.eclipse.osgi.services Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.osgi.util" reportTitle="org.eclipse.osgi.util Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde" reportTitle="org.eclipse.pde Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.api.tools" reportTitle="org.eclipse.pde.api.tools Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.api.tools.ui" reportTitle="org.eclipse.pde.api.tools.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.core" reportTitle="org.eclipse.pde.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.ds.core" reportTitle="org.eclipse.pde.ds.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.ds.ui" reportTitle="org.eclipse.pde.ds.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.junit.runtime" reportTitle="org.eclipse.pde.junit.runtime Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.launching" reportTitle="org.eclipse.pde.launching Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.runtime" reportTitle="org.eclipse.pde.runtime Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.ua.core" reportTitle="org.eclipse.pde.ua.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.ua.ui" reportTitle="org.eclipse.pde.ua.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.ui" reportTitle="org.eclipse.pde.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.pde.ui.templates" reportTitle="org.eclipse.pde.ui.templates Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.search" reportTitle="org.eclipse.search Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.team.core" reportTitle="org.eclipse.team.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.team.cvs.core" reportTitle="org.eclipse.team.cvs.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.team.cvs.ssh2" reportTitle="org.eclipse.team.cvs.ssh2 Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.team.cvs.ui" reportTitle="org.eclipse.team.cvs.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.team.ui" reportTitle="org.eclipse.team.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.text" reportTitle="org.eclipse.text Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui" reportTitle="org.eclipse.ui Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.browser" reportTitle="org.eclipse.ui.browser Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.cheatsheets" reportTitle="org.eclipse.ui.cheatsheets Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.console" reportTitle="org.eclipse.ui.console Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.editors" reportTitle="org.eclipse.ui.editors Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.externaltools" reportTitle="org.eclipse.ui.externaltools Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.forms" reportTitle="org.eclipse.ui.forms Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.ide" reportTitle="org.eclipse.ui.ide Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.ide.application" reportTitle="org.eclipse.ui.ide.application Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.intro" reportTitle="org.eclipse.ui.intro Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.net" reportTitle="org.eclipse.ui.net Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.presentations.r21" reportTitle="org.eclipse.ui.presentations.r21 Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.views" reportTitle="org.eclipse.ui.views Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.views.log" reportTitle="org.eclipse.ui.views.log Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.views.properties.tabbed" reportTitle="org.eclipse.ui.views.properties.tabbed Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.workbench" reportTitle="org.eclipse.ui.workbench Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.ui.workbench.texteditor" reportTitle="org.eclipse.ui.workbench.texteditor Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.update.configurator" reportTitle="org.eclipse.update.configurator Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.update.core" reportTitle="org.eclipse.update.core Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.update.scheduler" reportTitle="org.eclipse.update.scheduler Code Coverage" />
-		<jacocoreport pluginName="org.eclipse.update.ui" reportTitle="org.eclipse.update.ui Code Coverage" />
-	</target>
 
-	<target name="all">	
+
+
+
+	<target name="all">		
 		<antcall target="equinoxp2" />
 		<antcall target="equinoxp2ui" />
 		<antcall target="pdeui" />
@@ -958,12 +795,7 @@
 		<antcall target="coreruntime" />
 		<antcall target="coreresources" />
 		<antcall target="osgi" />
-		<antcall target="coreexpressions" />
-
-                <!-- th: looks like the update tests are not run in 4.2
-		<antcall target="update" />
-                -->
-
+		<antcall target="coreexpressions" />	
 		<antcall target="teamcore" />
 		<antcall target="jdtcoreperf" />
 		<antcall target="jdtcorebuilder" />
@@ -1004,11 +836,6 @@
 		<antcall target="equinoxds" />
 		<antcall target="equinoxp2discovery" />
 		<antcall target="bidi" />
-		
-                <!-- per Bug 375575 seems like this test isn't built in
-                     upstream due to issues. Commenting out for now.
-		<antcall target="generateJacocoReport" />
-                -->
 
 	</target>
 </project>
