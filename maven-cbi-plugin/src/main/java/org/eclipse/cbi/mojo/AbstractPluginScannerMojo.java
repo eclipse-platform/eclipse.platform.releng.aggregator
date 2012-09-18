@@ -25,6 +25,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.codehaus.plexus.util.IOUtil;
 import org.eclipse.tycho.core.osgitools.BundleReader;
 import org.eclipse.tycho.core.osgitools.OsgiManifest;
+import org.eclipse.tycho.core.osgitools.OsgiManifestParserException;
 
 abstract class AbstractPluginScannerMojo
     extends AbstractMojo
@@ -53,8 +54,19 @@ abstract class AbstractPluginScannerMojo
                 Map<File, OsgiManifest> manifests = new HashMap<File, OsgiManifest>();
                 for ( File plugin : plugins )
                 {
-                    OsgiManifest manifest = bundleReader.loadManifest( plugin );
-                    manifests.put( plugin, manifest );
+                    if ( plugin.getName().endsWith( ".pack.gz" ) )
+                    {
+                        continue;
+                    }
+                    try
+                    {
+                        OsgiManifest manifest = bundleReader.loadManifest( plugin );
+                        manifests.put( plugin, manifest );
+                    }
+                    catch ( OsgiManifestParserException e )
+                    {
+                        getLog().error( e );
+                    }
                 }
 
                 processPlugins( properties, manifests );
