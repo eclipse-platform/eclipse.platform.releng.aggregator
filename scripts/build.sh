@@ -10,6 +10,7 @@ GIT_PREFIX=ssh://git.eclipse.org
 javaHome=/opt/local/jdk1.7.0_07
 mvnPath=/opt/pwebster/git/cbi/apache-maven-3.0.4/bin
 updateAggregator=false
+mavenBREE=-Pno-bree-libs
 
 while [ $# -gt 0 ]
 do
