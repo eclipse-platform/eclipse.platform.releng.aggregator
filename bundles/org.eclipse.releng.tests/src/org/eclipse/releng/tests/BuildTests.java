@@ -888,7 +888,7 @@ public class BuildTests extends TestCase {
 	 * Compares the feature and plug-in versions contained in this Eclipse
 	 * configuration, against a known previous Eclipse configuration.
 	 */
-	public void testVersionCompare() {
+	public void _testVersionCompare() {
 
 		String os = System.getProperty("os.name");
 
