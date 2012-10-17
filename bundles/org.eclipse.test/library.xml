@@ -86,6 +86,10 @@
         </condition>
         <property name="vmargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}" />
 
+        <condition property="loglocation" value=" ${loglocationarg}=${junit-report-output}/crashlogs/{classname}.log" else="">
+            <isset  property="loglocationarg" />
+        </condition>
+
         <!--set default jvm to use for testing-->
         <property name="jvm" value="${java.home}/bin/java" />
 
@@ -93,6 +97,8 @@
         <echo message="timout property: ${timeout}" />
         <echo message="vmargs: ${vmargs}" />
         <echo message="extraVMargs: ${extraVMargs}" />
+        <echo message="crash loglocationarg (if any): ${loglocationarg}" />
+        <echo message="crash loglocation (if not default): ${loglocation}" />
 
         <java fork="true" dir="." timeout="${timeout}" jvm="${jvm}" logError="true" classname="org.eclipse.core.launcher.Main" output="${junit-report-output}/${classname}.txt">
             <classpath>
@@ -112,7 +118,7 @@
             <arg line="-timeout ${timeout}" />
             <arg value="-junitReportOutput" />
             <arg path="${junit-report-output}" />
-            <jvmarg line="${vmargs} ${extraVMargs}" />
+            <jvmarg line="${vmargs} ${loglocation} ${extraVMargs}" />
             <sysproperty key="PLUGIN_PATH" value="${plugin-path}" />
         </java>
         <antcall target="collect-results" />
