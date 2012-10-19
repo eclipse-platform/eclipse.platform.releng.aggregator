@@ -1,16 +1,17 @@
 #!/bin/bash
 
-if [[ ! -e "setup.sh" ]]; then
-   echo "Copy setup.tpl to setup.sh and modify it for your local environment"
+BASE=$( cd $( dirname "$0" ) > /dev/null ; pwd )
+
+if [[ ! -e "$BASE/setup.sh" ]]; then
+   echo "Copy cbi_setup.tpl to $BASE/setup.sh and modify it for your local environment"
    exit 1
 fi
 
-BASE=$( cd $( dirname "$0" ) > /dev/null ; pwd )
 
 . "$BASE/setup.sh"
 
 if [[ ! -e "${m2settings}" ]]; then
-    echo "Copy $HOME/.m2/settings.xml or settings.tpl to ${m2settings}"
+    echo "Copy $HOME/.m2/settings.xml or cbi_settings.tpl to ${m2settings}"
     exit 1
 fi
 
@@ -26,8 +27,8 @@ case "$cmd" in
         mvnWrapper -f maven-cbi-plugin/pom.xml clean install
         mvnWrapper clean install -Dmaven.test.skip=true
         echo "Build successful"
-        echo "You can find the installation files in $BASE/TMP/org.eclipse.sdk.epp/target/products/"
-        ls -l "$BASE/TMP/org.eclipse.sdk.epp/target/products"
+        echo "You can find the installation files in $BASE/../eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products/"
+        ls -l "$BASE/../eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products"
         ;;
 
     test ) #CMD Run the tests. You must build at least once before you can run this
@@ -41,3 +42,4 @@ case "$cmd" in
 esac
 
 exit 0
+
