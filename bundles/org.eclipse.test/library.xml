@@ -43,7 +43,7 @@
         <property name="formatter" value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter" />
 
         <!--default heap sizes when running performance tests-->
-        <condition property="frameworkargs" value=" -Xms512M -Xmx1024M -XX:MaxPermSize=256m ${envantopts}">
+        <condition property="frameworkvmargs" value=" -Xms512M -Xmx1024M -XX:MaxPermSize=256m ${envantopts}">
             <equals arg1="${test.target}" arg2="performance" />
         </condition>
         <tstamp prefix="NOW" />
@@ -75,17 +75,17 @@
     <target name="java-test">
         <echo message="DEBUG: Running tests using java-test" />
         <!--default vm args-->
-        <condition property="frameworkargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
+        <condition property="frameworkvmargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
             <os family="windows" />
         </condition>
         <!--
             For more info on -XstartOnFirstThread, see
             http://stackoverflow.com/questions/3976342/running-swt-based-cross-platform-jar-properly-on-a-mac 
         -->
-        <condition property="frameworkargs" value=" -XstartOnFirstThread -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
+        <condition property="frameworkvmargs" value=" -XstartOnFirstThread -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
             <os family="mac" />
         </condition>
-        <property name="frameworkargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}" />
+        <property name="frameworkvmargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}" />
 
         <condition property="loglocation" value=" ${loglocationarg}=${junit-report-output}/${classname}-crash.log" else="">
             <isset  property="loglocationarg" />
@@ -97,7 +97,7 @@
         <echo message="Running ${classname}. Result file: ${junit-report-output}/${classname}.xml" />
         <echo message="timout property: ${timeout}" />
       
-        <echo message="frameworkargs: ${frameworkargs}" />
+        <echo message="frameworkvmargs: ${frameworkvmargs}" />
         <echo message="vmargs: ${vmargs}" />
         <echo message="extraVMargs: ${extraVMargs}" />
 
@@ -122,7 +122,7 @@
             <arg line="-timeout ${timeout}" />
             <arg value="-junitReportOutput" />
             <arg path="${junit-report-output}" />
-            <jvmarg line="${frameworkargs} ${loglocation} ${vmargs} ${extraVMargs}" />
+            <jvmarg line="${frameworkvmargs} ${loglocation} ${vmargs} ${extraVMargs}" />
             <sysproperty key="PLUGIN_PATH" value="${plugin-path}" />
         </java>
         <antcall target="collect-results" />
@@ -130,7 +130,7 @@
 
     <target name="eclipse-test" description="Runs the specified classname as a plug-in test.">
         <echo message="DEBUG: Running tests using eclipse-test" />
-        <property name="frameworkargs" value="-Xms256m -Xmx512m -XX:MaxPermSize=256m" />
+        <property name="frameworkvmargs" value="-Xms256m -Xmx512m -XX:MaxPermSize=256m" />
 
         <!--use -consolelog if launching a headless test-->
         <condition property="consolelog" value="-consolelog">
@@ -164,7 +164,7 @@
             <arg line="-nosplash" />
             <arg line="--launcher.suppressErrors" />
             <arg line="${consolelog}" />
-            <arg line="-vmargs ${frameworkargs} ${loglocation} ${vmargs} ${extraVMargs} -DPLUGIN_PATH=${plugin-path}" />
+            <arg line="-vmargs ${frameworkvmargs} ${loglocation} ${vmargs} ${extraVMargs} -DPLUGIN_PATH=${plugin-path}" />
         </exec>
         <antcall target="collect-results" />
     </target>
