@@ -5,7 +5,8 @@
         <echo message="Please refer to the testframework.html in org.eclipse.test for instructions on usage." />
     </target>
 
-    <target name="init">
+    <target name="init"
+        unless="testframeworkinitialized">
         <!-- 
 			Parameters:
 				(Mandatory)
@@ -58,6 +59,7 @@
         <property name="junit-report-output" value="${eclipse-home}/results" />
         <mkdir dir="${junit-report-output}" />
         <property name="junit-stylesheet" value="${eclipse-home}/dropins/eclipse/plugins/org.eclipse.test/JUNIT.XSL" />
+        <property name="testframeworkinitialized" value="true" />
     </target>
 
     <target name="core-test" description="Eclipse application used to launch HEADLESS plugin tests." depends="init">
@@ -72,8 +74,8 @@
         </antcall>
     </target>
 
-    <target name="java-test">
-        <echo message="DEBUG: Running tests using java-test" />
+    <target name="java-test" depends="init">
+        <echo level="debug" message="DEBUG: Running tests using java-test" />
         <!--default vm args-->
         <condition property="frameworkvmargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
             <os family="windows" />
@@ -128,8 +130,10 @@
         <antcall target="collect-results" />
     </target>
 
-    <target name="eclipse-test" description="Runs the specified classname as a plug-in test.">
-        <echo message="DEBUG: Running tests using eclipse-test" />
+    <target name="eclipse-test" 
+           description="Runs the specified classname as a plug-in test."
+           depends="init">
+        <echo level="debug" message="DEBUG: Running tests using eclipse-test" />
         <property name="frameworkvmargs" value="-Xms256m -Xmx512m -XX:MaxPermSize=256m" />
 
         <!--use -consolelog if launching a headless test-->
