@@ -43,13 +43,14 @@
         <property name="formatter" value="org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter" />
 
         <!--default heap sizes when running performance tests-->
-        <condition property="vmargs" value=" -Xms512M -Xmx1024M -XX:MaxPermSize=256m ${envantopts}">
+        <condition property="frameworkargs" value=" -Xms512M -Xmx1024M -XX:MaxPermSize=256m ${envantopts}">
             <equals arg1="${test.target}" arg2="performance" />
         </condition>
         <tstamp prefix="NOW" />
         <property name="coverage-output" value="${eclipse-home}/coverage" />
         <property file="${basedir}/finalPluginsVersions.properties" />
         <echo message="basedir = ${basedir}" />
+        <property name="vmargs" value="" />
         <property name="extraVMargs" value="" />
         <property name="plugin-path" value="" />
         <property name="timeout" value="7200000" />
@@ -74,17 +75,17 @@
     <target name="java-test">
         <echo message="DEBUG: Running tests using java-test" />
         <!--default vm args-->
-        <condition property="vmargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
+        <condition property="frameworkargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
             <os family="windows" />
         </condition>
         <!--
             For more info on -XstartOnFirstThread, see
             http://stackoverflow.com/questions/3976342/running-swt-based-cross-platform-jar-properly-on-a-mac 
         -->
-        <condition property="vmargs" value=" -XstartOnFirstThread -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
+        <condition property="frameworkargs" value=" -XstartOnFirstThread -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}">
             <os family="mac" />
         </condition>
-        <property name="vmargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}" />
+        <property name="frameworkargs" value=" -Xms40m -Xmx512m -XX:MaxPermSize=256m ${envantopts}" />
 
         <condition property="loglocation" value=" ${loglocationarg}=${junit-report-output}/${classname}-crash.log" else="">
             <isset  property="loglocationarg" />
@@ -95,8 +96,11 @@
 
         <echo message="Running ${classname}. Result file: ${junit-report-output}/${classname}.xml" />
         <echo message="timout property: ${timeout}" />
+      
+        <echo message="frameworkargs: ${frameworkargs}" />
         <echo message="vmargs: ${vmargs}" />
         <echo message="extraVMargs: ${extraVMargs}" />
+
         <echo message="crash loglocationarg (if any): ${loglocationarg}" />
         <echo message="crash loglocation (if not default): ${loglocation}" />
 
@@ -118,7 +122,7 @@
             <arg line="-timeout ${timeout}" />
             <arg value="-junitReportOutput" />
             <arg path="${junit-report-output}" />
-            <jvmarg line="${vmargs} ${loglocation} ${extraVMargs}" />
+            <jvmarg line="${frameworkargs} ${loglocation} ${vmargs} ${extraVMargs}" />
             <sysproperty key="PLUGIN_PATH" value="${plugin-path}" />
         </java>
         <antcall target="collect-results" />
@@ -126,7 +130,7 @@
 
     <target name="eclipse-test" description="Runs the specified classname as a plug-in test.">
         <echo message="DEBUG: Running tests using eclipse-test" />
-        <property name="vmargs" value="-Xms256m -Xmx512m -XX:MaxPermSize=256m" />
+        <property name="frameworkargs" value="-Xms256m -Xmx512m -XX:MaxPermSize=256m" />
 
         <!--use -consolelog if launching a headless test-->
         <condition property="consolelog" value="-consolelog">
@@ -160,7 +164,7 @@
             <arg line="-nosplash" />
             <arg line="--launcher.suppressErrors" />
             <arg line="${consolelog}" />
-            <arg line="-vmargs ${vmargs} ${extraVMargs} -DPLUGIN_PATH=${plugin-path}" />
+            <arg line="-vmargs ${frameworkargs} ${loglocation} ${vmargs} ${extraVMargs} -DPLUGIN_PATH=${plugin-path}" />
         </exec>
         <antcall target="collect-results" />
     </target>
