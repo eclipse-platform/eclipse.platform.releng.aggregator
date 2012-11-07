@@ -250,15 +250,20 @@ public class EclipseTestRunner implements TestListener {
 			props.put(key, p.get(key));
 		}
 
-		String timeoutScreenOutputDir = null;
-		if (junitReportOutput == null || junitReportOutput.length() == 0) {
-			timeoutScreenOutputDir = "timeoutScreens";
+		if (timeoutString == null || timeoutString.length() == 0) {
+			System.err.println("INFO: optional timeout was not specified.");
 		} else {
-			timeoutScreenOutputDir = junitReportOutput + "/timeoutScreens";
+			String timeoutScreenOutputDir = null;
+			if (junitReportOutput == null || junitReportOutput.length() == 0) {
+				timeoutScreenOutputDir = "timeoutScreens";
+			} else {
+				timeoutScreenOutputDir = junitReportOutput + "/timeoutScreens";
+			}
+			System.err.println("INFO: timeoutScreenOutputDir: " + timeoutScreenOutputDir);
+			System.err.println("INFO: timeout: " + timeoutString);
+			startStackDumpTimoutTimer(timeoutString, new File(
+					timeoutScreenOutputDir), className);
 		}
-		System.err.println("timeoutScreenOutputDir: " + timeoutScreenOutputDir);
-		startStackDumpTimoutTimer(timeoutString, new File(
-				timeoutScreenOutputDir), className);
 
 		if (testPluginsNames != null && classesNames != null) {
 			// we have several plugins to look tests for, let's parse their
