@@ -26,6 +26,7 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
+signingDir=$( fn-git-dir "$gitCache" "$SIGNING_REPO" )
 
 if [ -r "$aggDir" ]; then
 	fn-git-clean-aggregator "$aggDir" "$BRANCH"
@@ -38,3 +39,15 @@ else
 	  $(fn-local-repo "$AGGREGATOR_REPO") "$BRANCH" 
 fi
 
+if [ -r "$signingDir" ]; then
+	pushd "$signingDir"
+	fn-git-clean
+	fn-git-reset
+	fn-git-checkout "$SIGNING_BRANCH"
+	popd
+else
+	pushd "$gitCache"
+	fn-git-clone $(fn-local-repo "$SIGNING_REPO") "$SIGNING_BRANCH"
+	fn-git-checkout "$SIGNING_BRANCH"
+	popd
+fi

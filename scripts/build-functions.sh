@@ -146,4 +146,15 @@ fn-git-dir () {
 	echo $GIT_CACHE/$( basename "$URL" .git )
 }
 
-
+# USAGE: fn-maven-signer-install REPO_DIR LOCAL_REPO
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/org.eclipse.cbi.maven.plugins
+#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+fn-maven-signer-install () {
+	REPO_DIR="$1"; shift
+	LOCAL_REPO="$1"; shift
+	pushd "$REPO_DIR"
+	mvn -f eclipse-jarsigner-plugin/pom.xml \
+    	clean install \
+    	-Dmaven.repo.local=$LOCAL_REPO
+	popd
+}
