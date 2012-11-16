@@ -38,5 +38,12 @@ export JAVA_HOME="$JAVA_HOME"
 export MAVEN_OPTS="$MAVEN_OPTS"
 export PATH=${JAVA_HOME}/bin:${MAVEN_PATH}:$PATH
 
-fn-maven-signer-install "$signingDir" "$localRepo"
+if $SIGNING; then
+	fn-maven-signer-install "$signingDir" "$localRepo"
+fi
 
+fn-maven-parent-install "$aggDir" "$localRepo"
+
+fn-maven-cbi-install "$aggDir" "$localRepo"
+
+fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$localRepo" $COMPARATOR $SIGNING
