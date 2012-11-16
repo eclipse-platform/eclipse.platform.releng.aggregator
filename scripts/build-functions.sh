@@ -48,8 +48,8 @@ fn-git-clean () {
 
 # USAGE: fn-git-reset
 fn-git-reset () {
-	echo git reset --hard  HEAD
-	git reset --hard  HEAD
+	echo git reset --hard  $@
+	git reset --hard  $@
 }
 
 # USAGE: fn-git-clean-submodules
@@ -121,10 +121,10 @@ fn-git-clean-aggregator () {
 	BRANCH="$1"; shift
 	pushd "$AGGREGATOR_DIR"
 	fn-git-clean
-	fn-git-reset
 	fn-git-clean-submodules
 	fn-git-reset-submodules
 	fn-git-checkout "$BRANCH"
+	fn-git-reset origin/$BRANCH
 	popd
 }
 
@@ -210,5 +210,55 @@ fn-maven-build-aggregator () {
 	    clean install \
 	    -Dmaven.test.skip=true \
 	    -Dmaven.repo.local=$LOCAL_REPO
+	popd
+}
+
+# USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
+#   BUILD_ID: M20121116-1100
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   SCRIPT: /shared/eclipse/builds/scripts/git-submodule-checkout.sh
+#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+fn-submodule-checkout () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	SCRIPT="$1"; shift
+	REPOSITORIES_TXT="$1"; shift
+	pushd "$REPO_DIR"
+	git submodule foreach "/bin/bash $SCRIPT $REPOSITORIES_TXT \$name"
+	uninit=$( git submodule | grep "^-" | cut -f2 -d" " | sort -u )
+	if [ ! -z "$uninit" ]; then
+		echo Some modules are not initialized: $uninit
+		return
+	fi
+	conflict=$( git submodule | grep "^U" | cut -f2 -d" " | sort -u )
+	if [ ! -z "$conflict" ]; then
+		echo Some modules have conflicts: $conflict
+		return
+	fi
+	adds=$( git submodule | grep "^+" | cut -f2 -d" " )
+	if [ -z "$adds" ]; then
+		echo No updates for the submodules
+		return
+	fi
+	echo git add $adds
+	git add $adds
+	git commit -m "Update to include new content for $BUILD_ID"
+	git push origin HEAD
+	popd
+}
+
+
+# USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
+#   BUILD_ID: M20121116-1100
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+fn-tag-build-inputs () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	REPOSITORIES_TXT="$1"; shift
+	pushd "$REPO_DIR"
+	git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; git push origin $BUILD_ID; else echo Skipping \$name; fi"
+	git tag $BUILD_ID
+	git push origin $BUILD_ID
 	popd
 }
