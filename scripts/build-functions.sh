@@ -195,7 +195,7 @@ fn-maven-build-aggregator () {
 	BUILD_ID="$1"; shift
 	REPO_DIR="$1"; shift
 	LOCAL_REPO="$1"; shift
-	MARGS=""
+	MARGS="-DbuildId=$BUILD_ID"
 	if $VERBOSE; then
 		MARGS="$MARGS -X"
 	fi
