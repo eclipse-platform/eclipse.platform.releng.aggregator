@@ -235,6 +235,22 @@ fn-submodule-checkout () {
 		echo Some modules have conflicts: $conflict
 		return
 	fi
+	popd
+	adds=$( git submodule | grep "^+" | cut -f2 -d" " )
+	if [ -z "$adds" ]; then
+		echo No updates for the submodules
+		return
+	fi
+}
+
+# USAGE: fn-add-submodule-updates BUILD_ID REPO_DIR 
+#   BUILD_ID: M20121116-1100
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+fn-add-submodule-updates () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	pushd "$REPO_DIR"
 	adds=$( git submodule | grep "^+" | cut -f2 -d" " )
 	if [ -z "$adds" ]; then
 		echo No updates for the submodules
@@ -242,11 +258,8 @@ fn-submodule-checkout () {
 	fi
 	echo git add $adds
 	git add $adds
-	git commit -m "Update to include new content for $BUILD_ID"
-	git push origin HEAD
 	popd
 }
-
 
 # USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
 #   BUILD_ID: M20121116-1100
@@ -262,3 +275,44 @@ fn-tag-build-inputs () {
 	git push origin $BUILD_ID
 	popd
 }
+
+
+# USAGE: fn-pom-version-updater BUILD_ID REPO_DIR LOCAL_REPO
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+#   VERBOSE: true
+#   SIGNING: true
+fn-pom-version-updater () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	LOCAL_REPO="$1"; shift
+	report=/tmp/pom_${BUILD_ID}.txt
+	MARGS="-DbuildId=$BUILD_ID"
+	pushd "$REPO_DIR"
+	mvn $MARGS \
+		org.eclipse.tycho:tycho-versions-plugin:update-pom \
+	    -Dmaven.repo.local=$LOCAL_REPO
+	changes=$( git status --short -uno | cut -c4- )
+	if [ -z "$changes" ]; then
+		echo No changes in pom versions
+		return
+	fi
+	repos=$( git status --short -uno | cut -c4- | grep -v pom.xml )
+	for CURRENT_REPO in $repos; do
+		pushd "$CURRENT_REPO"
+		pom_only=$( git status --short -uno | grep -v pom.xml | wc -l )
+		if (( pom_only == 0 )); then
+			git add $( git status --short -uno | cut -c4- )
+			git commit -m "Update pom versions for build $BUILD_ID"
+			echo git push origin HEAD
+		else
+			echo Unable to update poms for $CURRENT_REPO
+		fi
+		popd
+	done
+	echo git add $changes
+	git add $changes
+	popd
+}
+
