@@ -158,3 +158,57 @@ fn-maven-signer-install () {
     	-Dmaven.repo.local=$LOCAL_REPO
 	popd
 }
+
+# USAGE: fn-maven-parent-install REPO_DIR LOCAL_REPO
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+fn-maven-parent-install () {
+	REPO_DIR="$1"; shift
+	LOCAL_REPO="$1"; shift
+	pushd "$REPO_DIR"
+	mvn -f eclipse-parent/pom.xml \
+    	clean install \
+    	-Dmaven.repo.local=$LOCAL_REPO
+	popd
+}
+
+# USAGE: fn-maven-cbi-install REPO_DIR LOCAL_REPO
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+fn-maven-cbi-install () {
+	REPO_DIR="$1"; shift
+	LOCAL_REPO="$1"; shift
+	pushd "$REPO_DIR"
+	mvn -f maven-cbi-plugin/pom.xml \
+    	clean install \
+    	-Dmaven.repo.local=$LOCAL_REPO
+	popd
+}
+
+# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+#   VERBOSE: true
+#   SIGNING: true
+fn-maven-build-aggregator () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	LOCAL_REPO="$1"; shift
+	MARGS=""
+	if $VERBOSE; then
+		MARGS="$MARGS -X"
+	fi
+	shift
+	if $SIGNING; then
+		MARGS="$MARGS -Peclipse-sign"
+	fi
+	shift
+	MARGS="$MARGS -Pbree-libs"
+	pushd "$REPO_DIR"
+	mvn $MARGS \
+	    clean install \
+	    -Dmaven.test.skip=true \
+	    -Dmaven.repo.local=$LOCAL_REPO
+	popd
+}
