@@ -12,7 +12,7 @@ fi
 
 git fetch
 
-if [ -z "$(git tag -l $VAL)"]; then
+if [ -z "$(git tag -l $VAL)" ]; then
 	echo Updating branch $VAL
 	git checkout $VAL
 	git pull
