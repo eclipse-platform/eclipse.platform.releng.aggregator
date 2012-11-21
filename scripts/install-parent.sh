@@ -26,6 +26,7 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
+signingDir=$( fn-git-dir "$gitCache" "$SIGNING_REPO" )
 localRepo=$gitCache/localMavenRepo
 
 
@@ -37,5 +38,10 @@ export JAVA_HOME="$JAVA_HOME"
 export MAVEN_OPTS="$MAVEN_OPTS"
 export PATH=${JAVA_HOME}/bin:${MAVEN_PATH}:$PATH
 
+if $SIGNING; then
+	fn-maven-signer-install "$signingDir" "$localRepo"
+fi
 
-fn-pom-version-updater "$aggDir" "$localRepo"
+fn-maven-parent-install "$aggDir" "$localRepo"
+fn-maven-cbi-install "$aggDir" "$localRepo"
+

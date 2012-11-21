@@ -24,24 +24,40 @@ popd >/dev/null
 cd $BUILD_ROOT
 
 # derived values
+
+
+BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
+mkdir -p "$buildDirectory"
+
+
+LOG=$buildDirectory/log_$( date +%Y%m%d%H%M%S ).txt
+exec >$LOG 2>&1
+
+BUILD_ENV_FILE=$buildDirectory/env.$$
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 localRepo=$gitCache/localMavenRepo
 
 
-if [ -z "$BUILD_ID" ]; then
-	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
-fi
+cp "$1" $BUILD_ENV_FILE
+echo "BUILD_ENV_FILE=$1" >>$BUILD_ENV_FILE
+echo "BUILD_ID=$BUILD_ID" >>$BUILD_ENV_FILE
 
-/bin/bash $SCRIPT_PATH/get-aggregator.sh "$1"
-/bin/bash $SCRIPT_PATH/update-build-input.sh "$1"
-/bin/bash $SCRIPT_PATH/pom-version-updater.sh "$1"
+/bin/bash $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE
 
+/bin/bash $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
-echo git push origin HEAD
+$GIT_PUSH origin HEAD
 popd
 
-#/bin/bash $SCRIPT_PATH/tag-build-input.sh "$1"
-#/bin/bash $SCRIPT_PATH/run-maven-build.sh "$1"
+/bin/bash $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE
+
+/bin/bash $SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE
+
+/bin/bash $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE
+
+
+/bin/bash $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE
 
