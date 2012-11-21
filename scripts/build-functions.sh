@@ -146,6 +146,18 @@ fn-git-dir () {
 	echo $GIT_CACHE/$( basename "$URL" .git )
 }
 
+# USAGE: fn-build-dir ROOT BRANCH BUILD_ID
+#   ROOT: /shared/eclipse/builds
+#   BRANCH: R4_2_maintenance
+#   BUILD_ID: M20121119-1900
+fn-build-dir () {
+	ROOT="$1"; shift
+	BRANCH="$1"; shift
+	BUILD_ID="$1"; shift
+	echo $ROOT/$BRANCH/dirs/$BUILD_ID
+}
+
+
 # USAGE: fn-maven-signer-install REPO_DIR LOCAL_REPO
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/org.eclipse.cbi.maven.plugins
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
@@ -235,20 +247,17 @@ fn-submodule-checkout () {
 		echo Some modules have conflicts: $conflict
 		return
 	fi
-	popd
 	adds=$( git submodule | grep "^+" | cut -f2 -d" " )
 	if [ -z "$adds" ]; then
 		echo No updates for the submodules
 		return
 	fi
+	popd
 }
 
-# USAGE: fn-add-submodule-updates BUILD_ID REPO_DIR 
-#   BUILD_ID: M20121116-1100
+# USAGE: fn-add-submodule-updates REPO_DIR 
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
 fn-add-submodule-updates () {
-	BUILD_ID="$1"; shift
 	REPO_DIR="$1"; shift
 	pushd "$REPO_DIR"
 	adds=$( git submodule | grep "^+" | cut -f2 -d" " )
@@ -270,20 +279,40 @@ fn-tag-build-inputs () {
 	REPO_DIR="$1"; shift
 	REPOSITORIES_TXT="$1"; shift
 	pushd "$REPO_DIR"
-	git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; git push origin $BUILD_ID; else echo Skipping \$name; fi"
+	git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH origin $BUILD_ID; else echo Skipping \$name; fi"
 	git tag $BUILD_ID
-	git push origin $BUILD_ID
+	$GIT_PUSH origin $BUILD_ID
 	popd
 }
 
+# USAGE: fn-pom-version-updater REPO_DIR LOCAL_REPO
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+fn-pom-version-updater () {
+	REPO_DIR="$1"; shift
+	LOCAL_REPO="$1"; shift
+	report=/tmp/pom_${BUILD_ID}.txt
+	pushd "$REPO_DIR"
+	mvn $MARGS \
+		org.eclipse.tycho:tycho-versions-plugin:update-pom \
+	    -Dmaven.repo.local=$LOCAL_REPO
+	changes=$( git status --short -uno | cut -c4- )
+	if [ -z "$changes" ]; then
+		echo No changes in pom versions
+		return
+	else
+		echo Changes in pom versions
+	fi
+	popd
+}
 
-# USAGE: fn-pom-version-updater BUILD_ID REPO_DIR LOCAL_REPO
+# USAGE: fn-pom-version-update-with-commit BUILD_ID REPO_DIR LOCAL_REPO
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
 #   VERBOSE: true
 #   SIGNING: true
-fn-pom-version-updater () {
+fn-pom-version-update-with-commit () {
 	BUILD_ID="$1"; shift
 	REPO_DIR="$1"; shift
 	LOCAL_REPO="$1"; shift
@@ -305,7 +334,7 @@ fn-pom-version-updater () {
 		if (( pom_only == 0 )); then
 			git add $( git status --short -uno | cut -c4- )
 			git commit -m "Update pom versions for build $BUILD_ID"
-			echo git push origin HEAD
+			echo $GIT_PUSH origin HEAD
 		else
 			echo Unable to update poms for $CURRENT_REPO
 		fi

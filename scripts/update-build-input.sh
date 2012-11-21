@@ -36,3 +36,4 @@ fi
 
 
 fn-submodule-checkout "$BUILD_ID" "$aggDir" "$repoScript" "$repositories"
+fn-add-submodule-updates "$aggDir"
