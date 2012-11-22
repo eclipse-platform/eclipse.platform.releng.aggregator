@@ -368,6 +368,7 @@ fn-gather-static-drop () {
 	BUILD_DIR="$1"; shift
 	pushd "$REPO_DIR"
 	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
+	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/clickThroughs $BUILD_DIR
 	popd
 }
 
@@ -421,3 +422,34 @@ fn-gather-platform () {
 	popd
 }
 
+
+# USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_DATE
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+#   STREAM: 4.2.2
+#   BUILD_TYPE: M, I, N
+#   BUILD_DATE: Thu Nov 20 17:47:35 EST 2012
+fn-gather-main-index () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	STREAM="$1"; shift
+	BUILD_TYPE="$1"; shift
+	BUILD_TYPE_NAME=Integration
+	if [ "$BUILD_TYPE" = M ]; then
+		BUILD_TYPE_NAME=Maintenance
+	fi
+	BUILD_DATE="$1"; shift
+	pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
+	T1=/tmp/t1_$$
+	T2=/tmp/t2_$$
+	sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
+	sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
+	sed "s/@build@/$BUILD_ID/g" $T2 >$T1
+	sed "s/@date@/$BUILD_DATE/g" $T1 >$T2
+	sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
+	cp $T1 "$BUILD_DIR"/index.php
+	rm $T1 $T2
+	popd
+}

@@ -43,6 +43,7 @@ localRepo=$gitCache/localMavenRepo
 cp "$1" $BUILD_ENV_FILE
 echo "BUILD_ENV_FILE=$1" >>$BUILD_ENV_FILE
 echo "BUILD_ID=$BUILD_ID" >>$BUILD_ENV_FILE
+echo "BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
 
 /bin/bash $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE
 
