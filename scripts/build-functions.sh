@@ -367,6 +367,57 @@ fn-gather-static-drop () {
 	REPO_DIR="$1"; shift
 	BUILD_DIR="$1"; shift
 	pushd "$REPO_DIR"
-	cp eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
+	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
 	popd
 }
+
+# USAGE: fn-gather-sdk BUILD_ID REPO_DIR BUILD_DIR
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-gather-sdk () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products
+	cp org.eclipse.sdk.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc64.zip
+	cp org.eclipse.sdk.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc.zip
+	cp org.eclipse.sdk.ide-hpux.gtk.ia64_32.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-hpux-gtk-ia64_32.zip
+	cp org.eclipse.sdk.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+	cp org.eclipse.sdk.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390.tar.gz
+	cp org.eclipse.sdk.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390x.tar.gz
+	cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+	cp org.eclipse.sdk.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk.tar.gz
+	cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+	cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
+	cp org.eclipse.sdk.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk.zip
+	cp org.eclipse.sdk.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip
+	cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
+	cp org.eclipse.sdk.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32.zip
+	popd
+}
+
+# USAGE: fn-gather-platform BUILD_ID REPO_DIR BUILD_DIR
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-gather-platform () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/rcp.sdk/target/products
+	cp org.eclipse.rcp.sdk.id-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip
+	cp org.eclipse.rcp.sdk.id-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip
+	cp org.eclipse.rcp.sdk.id-hpux.gtk.ia64_32.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64_32.zip
+	cp org.eclipse.rcp.sdk.id-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+	cp org.eclipse.rcp.sdk.id-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+	cp org.eclipse.rcp.sdk.id-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
+	cp org.eclipse.rcp.sdk.id-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+	cp org.eclipse.rcp.sdk.id-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
+	cp org.eclipse.rcp.sdk.id-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
+	cp org.eclipse.rcp.sdk.id-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
+	cp org.eclipse.rcp.sdk.id-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
+	cp org.eclipse.rcp.sdk.id-win32.win32.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32.zip
+	popd
+}
+
