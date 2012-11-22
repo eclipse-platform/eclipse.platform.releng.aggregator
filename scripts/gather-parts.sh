@@ -40,3 +40,4 @@ fn-gather-static-drop "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 fn-gather-sdk "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-platform "$BUILD_ID" "$aggDir" "$buildDirectory"
+fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_DATE"
