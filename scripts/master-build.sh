@@ -28,10 +28,10 @@ cd $BUILD_ROOT
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
-mkdir -p "$buildDirectory"
+mkdir -p "$buildDirectory"/buildlogs
 
 
-LOG=$buildDirectory/log_$( date +%Y%m%d%H%M%S ).txt
+LOG=$buildDirectory/buildlogs/fullmasterBuildOutput_$( date +%Y%m%d%H%M%S ).txt
 exec >$LOG 2>&1
 
 BUILD_ENV_FILE=$buildDirectory/env.$$
