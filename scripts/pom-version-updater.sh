@@ -27,7 +27,7 @@ cd $BUILD_ROOT
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 localRepo=$gitCache/localMavenRepo
-
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
 
 if [ -z "$BUILD_ID" ]; then
 	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
@@ -39,3 +39,5 @@ export PATH=${JAVA_HOME}/bin:${MAVEN_PATH}:$PATH
 
 
 fn-pom-version-updater "$aggDir" "$localRepo"
+fn-pom-version-report "$BUILD_ID" "$aggDir"  "$buildDirectory" 
+
