@@ -61,4 +61,6 @@ popd
 
 
 /bin/bash $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE
+/bin/bash $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE
+
 

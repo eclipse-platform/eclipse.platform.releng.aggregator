@@ -76,12 +76,17 @@ fn-build-id () {
 #   URL: git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git
 #   TO_REPLACE: git://git.eclipse.org
 fn-local-repo () {
-	TO_REPLACE='git://git.eclipse.org'
+	FORCE_LOCAL_REPO=false
 	URL="$1"; shift
-	if [ $# -gt 0 ]; then
-		TO_REPLACE="$1"; shift
+	if [ build = $(hostname) -o $FORCE_LOCAL_REPO = true ]; then
+		TO_REPLACE='git://git.eclipse.org'
+		if [ $# -gt 0 ]; then
+			TO_REPLACE="$1"; shift
+		fi
+		echo $URL | sed "s!$TO_REPLACE!file://!g"
+	else
+		echo $URL
 	fi
-	echo $URL | sed "s!$TO_REPLACE!file://!g"
 }
 
 # USAGE: cat repositories.txt | fn-local-repos [TO_REPLACE]
@@ -464,5 +469,39 @@ fn-gather-main-index () {
 	sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
 	cp $T1 "$BUILD_DIR"/index.php
 	rm $T1 $T2
+	popd
+}
+
+# USAGE: fn-pom-version-report BUILD_ID REPO_DIR BUILD_DIR LOCAL_REPO
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-pom-version-report () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	pushd "$REPO_DIR"
+	mkdir -p "$BUILD_DIR"/pom_updates
+	git submodule foreach "if (git status -s -uno | grep pom.xml >/dev/null ); then git diff >$BUILD_DIR/pom_updates/\$name.diff; fi "
+	pushd "$BUILD_DIR"/pom_updates
+	cat - >index.html <<EOF
+<html>
+<head>
+<title>POM version report for $BUILD_ID</title>
+</head>
+<body>
+<h1>POM version report for $BUILD_ID</h1>
+<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>
+<ul>
+EOF
+	for f in *.diff; do
+		FNAME=$( basename $f .diff )
+		echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
+	done
+	cat - >>index.html <<EOF
+</ul>
+</html>
+EOF
+	popd
 	popd
 }
