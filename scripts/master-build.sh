@@ -31,8 +31,8 @@ buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
 mkdir -p "$buildDirectory"/buildlogs
 
 
-LOG=$buildDirectory/buildlogs/fullmasterBuildOutput_$( date +%Y%m%d%H%M%S ).txt
-exec >$LOG 2>&1
+LOG=$buildDirectory/buildlogs/buildOutput.txt
+exec >>$LOG 2>&1
 
 BUILD_ENV_FILE=$buildDirectory/env.$$
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
