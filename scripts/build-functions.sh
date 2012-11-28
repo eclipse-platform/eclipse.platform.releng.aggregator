@@ -473,6 +473,31 @@ fn-gather-repo-zips () {
 	popd
 }
 
+# USAGE: fn-gather-compile-logs BUILD_ID REPO_DIR BUILD_DIR
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-gather-compile-logs () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	mkdir -p "$BUILD_DIR"/compilelogs/plugins
+	pushd "$REPO_DIR"
+	for dot in $( find * -name "@dot.xml" ); do
+		echo "Processing $dot" # org.eclipse.e4.core.di/target/@dot.xml
+		targetDir=$( dirname "$dot" )
+		if [ ! -r "$targetDir"/MANIFEST.MF ]; then
+			echo "**Failed to process $dot"
+		else
+			BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; )
+			BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " )
+			mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+			cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+		fi
+	done
+	popd
+}
+
 
 # USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_DATE
 #   BUILD_ID: I20121116-0700
