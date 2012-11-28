@@ -456,6 +456,23 @@ fn-gather-test-zips () {
 	popd
 }
 
+# USAGE: fn-gather-repo-zips BUILD_ID REPO_DIR BUILD_DIR
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-gather-repo-zips () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	pushd "$REPO_DIR"/eclipse.platform.repository/target/repos
+	for r in org.eclipse.*; do
+		pushd $r
+		zip "$BUILD_DIR"/${r}-${BUILD_ID}.zip * 
+		popd
+	done
+	popd
+}
+
 
 # USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_DATE
 #   BUILD_ID: I20121116-0700
