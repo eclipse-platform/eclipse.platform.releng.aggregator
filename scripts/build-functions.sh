@@ -451,7 +451,7 @@ fn-gather-test-zips () {
 	pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/target
 	cp eclipse-junit-tests-bundle.zip "$BUILD_DIR"/eclipse-Automated-Tests-${BUILD_ID}.zip
 	pushd eclipse-test-framework
-	zip "$BUILD_DIR"/eclipse-test-framework-${BUILD_ID}.zip *
+	zip -r "$BUILD_DIR"/eclipse-test-framework-${BUILD_ID}.zip *
 	popd
 	popd
 }
@@ -467,7 +467,7 @@ fn-gather-repo-zips () {
 	pushd "$REPO_DIR"/eclipse.platform.repository/target/repos
 	for r in org.eclipse.*; do
 		pushd $r
-		zip "$BUILD_DIR"/${r}-${BUILD_ID}.zip * 
+		zip -r "$BUILD_DIR"/${r}-${BUILD_ID}.zip * 
 		popd
 	done
 	popd
