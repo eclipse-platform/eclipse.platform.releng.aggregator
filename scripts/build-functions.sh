@@ -489,8 +489,8 @@ fn-gather-compile-logs () {
 		if [ ! -r "$targetDir"/MANIFEST.MF ]; then
 			echo "**Failed to process $dot"
 		else
-			BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; )
-			BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " )
+			BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
+			BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
 			mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
 			cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
 		fi
