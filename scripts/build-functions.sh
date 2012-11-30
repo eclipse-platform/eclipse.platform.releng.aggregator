@@ -202,12 +202,13 @@ fn-maven-cbi-install () {
 	popd
 }
 
-# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING
+# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING UPDATE_BRANDING
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
 #   VERBOSE: true
 #   SIGNING: true
+#   UPDATE_BRANDING: true
 fn-maven-build-aggregator () {
 	BUILD_ID="$1"; shift
 	REPO_DIR="$1"; shift
@@ -219,6 +220,10 @@ fn-maven-build-aggregator () {
 	shift
 	if $SIGNING; then
 		MARGS="$MARGS -Peclipse-sign"
+	fi
+	shift
+	if $UPDATE_BRANDING; then
+		MARGS="$MARGS -Pupdate-branding-plugins"
 	fi
 	shift
 	MARGS="$MARGS -Pbree-libs"
@@ -374,6 +379,9 @@ fn-gather-static-drop () {
 	pushd "$REPO_DIR"
 	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
 	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/clickThroughs $BUILD_DIR
+	# FIXME workaround the download page temp directory
+	sed '!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >/tmp/t1_$$
+	mv /tmp/t1_$$ $BUILD_DIR/download.php
 	popd
 }
 
