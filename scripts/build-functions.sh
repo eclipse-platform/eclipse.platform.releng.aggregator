@@ -162,6 +162,18 @@ fn-build-dir () {
 	echo $ROOT/$BRANCH/dirs/$BUILD_ID
 }
 
+# USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
+#   ROOT: /shared/eclipse/builds
+#   BRANCH: R4_2_maintenance
+#   BASEBUILDER_TAG: R38M6PlusRC3D
+fn-basebuilder-dir () {
+	ROOT="$1"; shift
+	BRANCH="$1"; shift
+	BASEBUILDER_TAG="$1"; shift
+	echo $ROOT/$BRANCH/org.eclipse.releng.basebuilder_$BASEBUILDER_TAG
+}
+
+
 
 # USAGE: fn-maven-signer-install REPO_DIR LOCAL_REPO
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/org.eclipse.cbi.maven.plugins
@@ -536,6 +548,50 @@ fn-gather-main-index () {
 	cp $T1 "$BUILD_DIR"/index.php
 	rm $T1 $T2
 	popd
+}
+
+# USAGE: fn-parse-compile-logs BUILD_ID ANT_SCRIPT BUILD_DIR BASEBUILDER_LAUNCHER
+#   BUILD_ID: I20121116-0700
+#   ANT_SCRIPT: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+#   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+fn-parse-compile-logs () {
+	BUILD_ID="$1"; shift
+	ANT_SCRIPT="$1"; shift
+	BUILD_DIR="$1"; shift
+	BASEBUILDER_LAUNCHER="$1"; shift
+	pushd "$BUILD_DIR"
+	java -jar "$BASEBUILDER_LAUNCHER" \
+	-application org.eclipse.ant.core.antRunner \
+	-buildfile "$ANT_SCRIPT" \
+	-DbuildDirectory="$BUILD_DIR"
+	popd
+}
+
+fn-parse-compile-logs "$BUILD_ID" "$buildDirectory" "$launcherJar"
+
+# USAGE: fn-checkout-basebuilder BUILDER_DIR BASEBUILDER_TAG
+#   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
+#   BASEBUILDER_TAG: R3_7
+fn-checkout-basebuilder () {
+	BUILDER_DIR="$1"; shift
+	BASEBUILDER_TAG="$1"; shift
+	if [ -e "$BUILDER_DIR" ]; then
+		return
+	fi
+	pushd $( dirname "$BUILDER_DIR" )
+	cvs -d :pserver:anonymous@dev.eclipse.org:/cvsroot/eclipse -Q ex \
+	-r $BASEBUILDER_TAG \
+	-d org.eclipse.releng.basebuilder_${BASEBUILDER_TAG} \
+	org.eclipse.releng.basebuilder
+	popd
+}
+
+# USAGE: fn-basebuilder-launcher BUILDER_DIR
+#   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
+fn-basebuilder-launcher () {
+	BUILDER_DIR="$1"; shift
+	find "$BUILDER_DIR" -name "org.eclipse.equinox.launcher_*.jar" | tail -1
 }
 
 # USAGE: fn-pom-version-report BUILD_ID REPO_DIR BUILD_DIR LOCAL_REPO
