@@ -380,7 +380,7 @@ fn-gather-static-drop () {
 	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
 	cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/clickThroughs $BUILD_DIR
 	# FIXME workaround the download page temp directory
-	sed '!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >/tmp/t1_$$
+	sed 's!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >/tmp/t1_$$
 	mv /tmp/t1_$$ $BUILD_DIR/download.php
 	popd
 }
