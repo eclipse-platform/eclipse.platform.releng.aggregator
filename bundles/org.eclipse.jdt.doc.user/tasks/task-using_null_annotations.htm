@@ -117,7 +117,10 @@ There are two quick fixes on unresolved references to <code>@NonNull</code>, <co
 <p><img src="images/task-null-annotations-qf-bundle.png" alt="Add library with default null annotations to build path"></p>
 </li>
 </ul> 
-
+<p>
+When manually configuring the build path for a OSGi bundle / plug-in, it is recommended to set an <code>additional.bundles</code> entry
+in file <code>build.properties</code> to avoid an undesired runtime dependency.
+</p>
 <h2 id="interpretation_of_null_annotations">Interpretation of null annotations</h2>
 <p>
 It should be clear now that null annotations add more information to your
@@ -193,6 +196,17 @@ Interestingly, the reverse redefinitions are legal: adding a <code>@Nullable</co
 or a <code>@NonNull</code> return annotation (you may consider these as "improvements" of the method,
 it accepts more values and produces a more specific return value).
 </p>
+<p>By forcing sub-classes to repeat null annotations in any overriding methods, the null contract of
+each method can be understood without searching the inheritance hierarchy. However, in situations
+where an inheritance hierarchy mixes code of different provenance it may not be possible to add
+null annotations to all classes at once. In these situations the compiler can be told to treat
+methods with missing null annotations as if annotations from an overridden method were <strong>inherited</strong>.
+This is enabled using the compiler option 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#inherit_null_annotations">inherit null annotations</a>.
+It is possible that a method overrides two methods with different null contracts. Also a nullness default
+can be applicable at a method which is in conflict with an inherited null annotation.
+These cases are flagged as an error and the overriding method must use an explicit null annotation to resolve the conflict.
+</p> 
 <h3>Legacy super-types</h3>
 <p>
 The previous considerations add a difficulty when annotated code is written as a sub-type
