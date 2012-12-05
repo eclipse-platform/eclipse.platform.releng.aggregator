@@ -476,6 +476,29 @@ fn-gather-test-zips () {
 	popd
 }
 
+# USAGE: fn-slice-repos BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
+#   BUILD_ID: I20121116-0700
+#   ANT_SCRIPT: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+#   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+fn-slice-repos () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	BASEBUILDER_LAUNCHER="$1"; shift
+	ANT_SCRIPT="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/repos/buildAll.xml
+	pushd "$REPO_DIR"
+	java -jar "$BASEBUILDER_LAUNCHER" \
+	-application org.eclipse.ant.core.antRunner \
+	-buildfile "$ANT_SCRIPT" \
+	-Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
+	-DbuildId="$BUILD_ID" \
+	-DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
+	-DbuildDirectory="$BUILD_DIR"
+	popd
+}
+
+
 # USAGE: fn-gather-repo-zips BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator

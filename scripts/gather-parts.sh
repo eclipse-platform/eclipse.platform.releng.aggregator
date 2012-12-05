@@ -34,6 +34,12 @@ if [ -z "$BUILD_ID" ]; then
 fi
 
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
+basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BRANCH" "$BASEBUILDER_TAG" )
+
+fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
+
+launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
+
 
 fn-gather-repo "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-static-drop "$BUILD_ID" "$aggDir" "$buildDirectory"
@@ -42,6 +48,9 @@ fn-gather-sdk "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-platform "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-swt-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-test-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
-fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
+
+fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory"
+fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
+
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_DATE"
