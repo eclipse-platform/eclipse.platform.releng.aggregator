@@ -494,6 +494,8 @@ fn-slice-repos () {
 	-Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
 	-DbuildId="$BUILD_ID" \
 	-DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
+	-DpostingDirectory=$(dirname "$BUILD_DIR") \
+	-DbuildLabel="$BUILD_ID" \
 	-DbuildDirectory="$BUILD_DIR"
 	popd
 }
