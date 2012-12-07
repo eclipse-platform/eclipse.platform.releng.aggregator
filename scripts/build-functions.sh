@@ -495,6 +495,7 @@ fn-slice-repos () {
 	-DbuildId="$BUILD_ID" \
 	-DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
 	-DpostingDirectory=$(dirname "$BUILD_DIR") \
+	-DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
 	-DbuildLabel="$BUILD_ID" \
 	-DbuildDirectory="$BUILD_DIR"
 	popd
