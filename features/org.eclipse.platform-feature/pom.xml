@@ -30,6 +30,22 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <configuration>
+          <dependency-resolution>
+            <extraRequirements>
+              <!-- this guarantees proper reactor build order  -->
+              <requirement>
+                <type>eclipse-plugin</type>
+                <id>org.eclipse.platform.doc.isv</id>
+                <versionRange>0.0.0</versionRange>
+              </requirement>
+            </extraRequirements>
+          </dependency-resolution>
+        </configuration>
+      </plugin>
+      <plugin>
         <groupId>org.eclipse.tycho.extras</groupId>
         <artifactId>tycho-source-feature-plugin</artifactId>
         <executions>
@@ -40,6 +56,9 @@
               <goal>source-feature</goal>
             </goals>
             <configuration>
+              <plugins>
+                <plugin id="org.eclipse.platform.doc.isv" versionRange="0.0.0" />
+              </plugins>
               <excludes>
                 <plugin id="org.eclipse.core.boot"/>
                 <plugin id="org.eclipse.platform.doc.user"/>
@@ -56,6 +75,11 @@
                 <plugin id="org.eclipse.core.filesystem.win32.x86_64"/>
                 <plugin id="org.eclipse.core.resources.win32.x86"/>
                 <plugin id="org.eclipse.core.resources.win32.x86_64"/>
+
+                <plugin id="org.eclipse.core.net.linux.x86"/>
+                <plugin id="org.eclipse.core.net.linux.x86_64"/>
+                <plugin id="org.eclipse.core.net.win32.x86"/>
+                <plugin id="org.eclipse.core.net.win32.x86_64"/>
 
                 <plugin id="org.eclipse.update.core.linux"/>
                 <plugin id="org.eclipse.update.core.win32"/>
