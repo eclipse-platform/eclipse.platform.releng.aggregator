@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2012 Eclipse Foundation.
+  Copyright (c) 2012 Eclipse Foundation and others.
   All rights reserved. This program and the accompanying materials
   are made available under the terms of the Eclipse Distribution License v1.0
   which accompanies this distribution, and is available at
@@ -21,6 +21,119 @@
   </parent>
   <groupId>eclipse.platform.common</groupId>
   <artifactId>org.eclipse.jdt.doc.isv</artifactId>
-  <version>3.8.0-SNAPSHOT</version>
+  <version>3.9.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+
+  <profiles>
+    <profile>
+      <id>build-docs</id>
+      <activation>
+        <property>
+          <!-- workaround. activeByDefault is disabled when another profile is
+            selected. -->
+          <name>!longnotexistingproperty</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin> 
+            <groupId>org.eclipse.tycho</groupId> 
+            <artifactId>target-platform-configuration</artifactId> 
+            <configuration> 
+              <dependency-resolution> 
+                <extraRequirements> 
+                  <requirement> 
+                    <type>eclipse-plugin</type> 
+                    <id>org.eclipse.pde.build</id> 
+                    <versionRange>0.0.0</versionRange> 
+                  </requirement> 
+                  <requirement> 
+                    <type>eclipse-plugin</type> 
+                    <id>org.eclipse.pde.core</id> 
+                    <versionRange>0.0.0</versionRange> 
+                  </requirement> 
+                  <requirement> 
+                    <type>eclipse-plugin</type> 
+                    <id>com.ibm.icu</id> 
+                    <versionRange>0.0.0</versionRange> 
+                  </requirement> 
+                  <requirement> 
+                    <type>eclipse-plugin</type> 
+                    <id>org.apache.ant</id> 
+                    <versionRange>0.0.0</versionRange> 
+                  </requirement> 
+                  <requirement> 
+                    <type>eclipse-plugin</type> 
+                    <id>org.junit</id> 
+                    <versionRange>0.0.0</versionRange> 
+                  </requirement>
+                </extraRequirements> 
+              </dependency-resolution> 
+            </configuration> 
+          </plugin> 
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <version>2.5.1</version>
+            <executions>
+              <execution>
+                <id>copy</id>
+                <phase>process-resources</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <overwriteReleases>true</overwriteReleases>
+                  <overwriteSnapshots>true</overwriteSnapshots>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <!-- this is actually present in any 0.14+ version -->
+            <version>${tycho.version}</version>
+            <configuration>
+              <!-- this is to fix some lucene 3.x compatibility issue -->
+              <argLine>-XX:-UseLoopPredicate -Dhelp.lucene.tokenizer=standard</argLine>
+              <!-- actuall indexer call -->
+              <appArgLine>-application org.eclipse.ant.core.antRunner -buildfile buildDoc.xml -Dbasedir.properties=cbi_basedirs.properties</appArgLine>
+              <dependencies>
+                <!-- list of bundles that we need -->
+                <dependency>
+                  <artifactId>org.eclipse.ant.core</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.apache.ant</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.help.base</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.build</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.core</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+              </dependencies>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>eclipse-run</goal>
+                </goals>
+                <phase>compile</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
