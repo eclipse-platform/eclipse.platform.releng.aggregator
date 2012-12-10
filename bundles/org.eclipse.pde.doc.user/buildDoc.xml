@@ -12,6 +12,8 @@
 
 <project name="PDE Doc ISV Build" default="all"  basedir="." >
 
+	<property file="${basedir.properties}"/>
+
 	<target name="init">
 		<available file="${basedir}/index" property="index.present"/>
 	</target>
@@ -31,10 +33,10 @@
 		<property name="dest" value="reference/extension-points" />
 		<record name="${basedir}/pdeconvert.txt" action="start"/>
 
-		<pde.convertSchemaToHTML manifest="../org.eclipse.pde.core/plugin.xml" destination="${dest}" />
-		<pde.convertSchemaToHTML manifest="../org.eclipse.pde.build/plugin.xml" destination="${dest}" />
-    	<pde.convertSchemaToHTML manifest="../org.eclipse.pde.ui/plugin.xml" destination="${dest}" />
-		<pde.convertSchemaToHTML manifest="../org.eclipse.pde.launching/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.core/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.build}/org.eclipse.pde.build/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.ui/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.launching/plugin.xml" destination="${dest}" />
 
 		<record name="${basedir}/pdeconvert.txt" action="stop"/>
 	</target>
@@ -60,13 +62,16 @@
 		
 		<replaceregexp file="${basedir}/${optionsFile}" flags="g" match="(\r\n?|\n);" replace="${argsListDelimiter}" />
 		<replace file="${basedir}/${optionsFile}" token="@rt@" value="${bootclasspath}" />
-		
+		<replace file="${basedir}/${optionsFile}" token="@eclipse.pde.ui.ui@" value="${eclipse.pde.ui.ui}" />
+		<replace file="${basedir}/${optionsFile}" token="@eclipse.pde.build@" value="${eclipse.pde.build}" />
+
+
 		<!-- expand _* to actual version -->
 			<!-- prepare ${replaceFile} with all files and folders from workspace -->
-		<fileset dir="${basedir}/.." id="fileSet">
+		<fileset dir="${basedir}/${dependency.dir}" id="fileSet">
 			<include name="*"/>
 		</fileset>
-		<dirset dir="${basedir}/.." id="dirSet">
+		<dirset dir="${basedir}/${dependency.dir}" id="dirSet">
 			<include name="*"/>
 		</dirset>
 		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
