@@ -50,7 +50,7 @@ fn-gather-swt-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-test-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
-fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
+#fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_DATE"
