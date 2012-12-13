@@ -578,10 +578,10 @@ fn-checkout-basebuilder () {
 		return
 	fi
 	pushd $( dirname "$BUILDER_DIR" )
-	cvs -d :pserver:anonymous@dev.eclipse.org:/cvsroot/eclipse -Q ex \
-	-r $BASEBUILDER_TAG \
-	-d org.eclipse.releng.basebuilder_${BASEBUILDER_TAG} \
-	org.eclipse.releng.basebuilder
+	wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
+	unzip -q basebuilder-${BASEBUILDER_TAG}.zip
+	mv eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG} "$BUILDER_DIR"
+	rm basebuilder-${BASEBUILDER_TAG}.zip
 	popd
 }
 
