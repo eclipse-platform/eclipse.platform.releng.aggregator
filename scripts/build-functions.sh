@@ -159,7 +159,7 @@ fn-build-dir () {
 	ROOT="$1"; shift
 	BRANCH="$1"; shift
 	BUILD_ID="$1"; shift
-	echo $ROOT/$BRANCH/dirs/$BUILD_ID
+	echo $ROOT/$BRANCH/dirs/$BUILD_ID/$BUILD_ID
 }
 
 # USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
@@ -590,7 +590,10 @@ fn-parse-compile-logs () {
 	java -jar "$BASEBUILDER_LAUNCHER" \
 	-application org.eclipse.ant.core.antRunner \
 	-buildfile "$ANT_SCRIPT" \
-	-DbuildDirectory="$BUILD_DIR"
+	-DbuildDirectory=$( dirname "$BUILD_DIR" ) \
+	-DbuildId="$BUILD_ID" \
+	-DbuildLabel="$BUILD_ID" \
+	verifyCompile
 	popd
 }
 

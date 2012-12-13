@@ -61,7 +61,7 @@ popd
 
 
 /bin/bash $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE
-/bin/bash $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE
-/bin/bash $SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE
-
+#/bin/bash $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE
+#/bin/bash $SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE
+/bin/bash $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE
 
