@@ -590,12 +590,40 @@ fn-parse-compile-logs () {
 	java -jar "$BASEBUILDER_LAUNCHER" \
 	-application org.eclipse.ant.core.antRunner \
 	-buildfile "$ANT_SCRIPT" \
-	-DbuildDirectory=$( dirname "$BUILD_DIR" ) \
+	-DbuildDirectory="$BUILD_DIR" \
 	-DbuildId="$BUILD_ID" \
-	-DbuildLabel="$BUILD_ID" \
+	-DbuildLabel=$(dirname "$BUILD_DIR" ) \
 	verifyCompile
 	popd
 }
+
+# USAGE: fn-publish-eclipse BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+#   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+fn-publish-eclipse () {
+	BUILD_ID="$1"; shift
+	REPO_DIR="$1"; shift
+	BUILD_DIR="$1"; shift
+	BASEBUILDER_LAUNCHER="$1"; shift
+	pushd "$BUILD_DIR"
+	java -jar "$BASEBUILDER_LAUNCHER" \
+	-application org.eclipse.ant.core.antRunner \
+	-v \
+	-buildfile "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
+	-Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
+	-DbuildId="$BUILD_ID" \
+	-DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
+	-DpostingDirectory=$(dirname "$BUILD_DIR") \
+	-DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
+	-DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
+	-DbuildLabel="$BUILD_ID" \
+	-DbuildDirectory=$(dirname "$BUILD_DIR") \
+	publish
+	popd
+}
+
 
 # USAGE: fn-checkout-basebuilder BUILDER_DIR BASEBUILDER_TAG
 #   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
