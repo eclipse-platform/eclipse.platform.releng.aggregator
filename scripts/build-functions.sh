@@ -597,12 +597,14 @@ fn-parse-compile-logs () {
 	popd
 }
 
-# USAGE: fn-publish-eclipse BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
+# USAGE: fn-publish-eclipse BUILD_TYPE BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
+#   BUILD_TYPE: I
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
 fn-publish-eclipse () {
+	BUILD_TYPE="$1"; shift
 	BUILD_ID="$1"; shift
 	REPO_DIR="$1"; shift
 	BUILD_DIR="$1"; shift
@@ -619,6 +621,9 @@ fn-publish-eclipse () {
 	-DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
 	-DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
 	-DbuildLabel="$BUILD_ID" \
+	-Dhudson=true \
+	-DbuildType="$BUILD_TYPE" \
+	-Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
 	-DbuildDirectory=$(dirname "$BUILD_DIR") \
 	publish
 	popd
