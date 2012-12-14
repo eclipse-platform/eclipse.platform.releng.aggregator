@@ -47,4 +47,4 @@ fn-parse-compile-logs "$BUILD_ID" \
 
 touch $(dirname "$buildDirectory")/directory.txt
 
-fn-publish-eclipse "$BUILD_TYPE" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
+fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"

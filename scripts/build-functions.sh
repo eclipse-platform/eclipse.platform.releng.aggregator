@@ -590,21 +590,24 @@ fn-parse-compile-logs () {
 	java -jar "$BASEBUILDER_LAUNCHER" \
 	-application org.eclipse.ant.core.antRunner \
 	-buildfile "$ANT_SCRIPT" \
-	-DbuildDirectory="$BUILD_DIR" \
+	-DbuildDirectory=$(dirname "$BUILD_DIR" ) \
+	-DpostingDirectory=$(dirname "$BUILD_DIR" ) \
 	-DbuildId="$BUILD_ID" \
-	-DbuildLabel=$(dirname "$BUILD_DIR" ) \
+	-DbuildLabel="$BUILD_ID" \
 	verifyCompile
 	popd
 }
 
-# USAGE: fn-publish-eclipse BUILD_TYPE BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
+# USAGE: fn-publish-eclipse BUILD_TYPE BUILD_STREAM BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
 #   BUILD_TYPE: I
+#   BUILD_STREAM: 4.2.2
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
 fn-publish-eclipse () {
 	BUILD_TYPE="$1"; shift
+	BUILD_STREAM="$1"; shift
 	BUILD_ID="$1"; shift
 	REPO_DIR="$1"; shift
 	BUILD_DIR="$1"; shift
@@ -622,6 +625,7 @@ fn-publish-eclipse () {
 	-DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
 	-DbuildLabel="$BUILD_ID" \
 	-Dhudson=true \
+	-DeclipseStream=$BUILD_STREAM \
 	-DbuildType="$BUILD_TYPE" \
 	-Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
 	-DbuildDirectory=$(dirname "$BUILD_DIR") \
