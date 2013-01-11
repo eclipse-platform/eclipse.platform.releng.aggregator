@@ -79,7 +79,10 @@ checkForErrorExit $? "Error occurred during run maven build"
 $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE |& tee $logsDirectory/gather-parts-ouptut.txt
 checkForErrorExit $? "Error occurred during gather parts"
 
-$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE |& tee $logsDirectory/parse-logs-ouptut.txt
+#$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE |& tee $logsDirectory/parse-logs-ouptut.txt
+#checkForErrorExit $? "Error occurred during parse-logs"
+
+/bin/bash $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE
 checkForErrorExit $? "Error occurred during parse-logs"
 
 
