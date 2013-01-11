@@ -4,10 +4,10 @@
 
 function usage () 
 {
-    printf "\n\t%s\n" "$( basename $0 ) <branch> <buildtype> <eclipseStream> where"
-    printf "\t\t%s\t%s\n" "branch:" "branch to build, such as master, R4_2_mainenance, R3_8_maintenance"
-    printf "\t\t%s\t%s\n" "buildtype:" "M, I, N"
-    printf "\t\t%s\t%s\n" "eclipseStream: " "eclipse release being built, such as 4.3.0, 4.2.2, 3.8.2"
+    printf "\n\t%s\n" "$( basename $0 ) <BRANCH> <BUILD_TYPE> <STREAM> where"
+    printf "\t\t%s\t%s\n" "BRANCH:" "BRANCH to build, such as master, R4_2_mainenance, R3_8_maintenance"
+    printf "\t\t%s\t%s\n" "BUILD_TYPE:" "M, I, N"
+    printf "\t\t%s\t%s\n" "STREAM: " "eclipse release being built, such as 4.3.0, 4.2.2, 3.8.2"
 }
 
 if [[ $# != 3 ]] 
@@ -16,62 +16,70 @@ then
     exit 1
 fi
 
-branch="${1}"
-buildtype="${2}"
-eclipseStream="${3}"
+BRANCH=${BRANCH:-"${1}"}
+BUILD_TYPE=${BUILD_TYPE:-"${2}"}
+STREAM=${STREAM:-"${3}"}
 
 BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 reponame=eclipse.platform.releng.aggregator
 
-#branch=master
-#buildtype=N
-#eclipseStream=4.3.0
+#BRANCH=master
+#BUILD_TYPE=N
+#STREAM=4.3.0
 
-#branch=master
-#buildtype=I
-#eclipseStream=4.3.0
+#BRANCH=master
+#BUILD_TYPE=I
+#STREAM=4.3.0
 
-#branch=R3_8_maintenance
-#buildtype=M
-#eclipseStream=3.8.2
+#BRANCH=R3_8_maintenance
+#BUILD_TYPE=M
+#STREAM=3.8.2
 
-#branch=R4_2_maintenance
-#buildtype=M
-#eclipseStream=4.2.2
+#BRANCH=R4_2_maintenance
+#BUILD_TYPE=M
+#STREAM=4.2.2
 
 
 # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
-if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
+if [[ "${STREAM}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
 then
-    eclipseStreamMajor=${BASH_REMATCH[1]}
-    eclipseStreamMinor=${BASH_REMATCH[2]}
-    eclipseStreamService=${BASH_REMATCH[3]}
+    STREAMMajor=${BASH_REMATCH[1]}
+    STREAMMinor=${BASH_REMATCH[2]}
+    STREAMService=${BASH_REMATCH[3]}
 else
-    echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.3.0"
-    echo "    but found ${eclipseStream}"
+    echo "STREAM must contain major, minor, and service versions, such as 4.3.0"
+    echo "    but found ${STREAM}"
     exit 1
 fi
 
-buildRoot=${buildRoot:-${BUILD_HOME}/${eclipseStreamMajor}${eclipseStreamMinor}${eclipseStreamService}${buildtype}}
+if [[ ! "${BUILD_TYPE}" =~ [IMN] ]]
+then
+    echo "BUILD_TYPE must I,M, or N"
+    echo "    but found ${BUILD_TYPE}"
+    exit 1
+fi
 
-echo "eclipseStream: $eclipseStream"
-echo "eclipseStreamMajor: $eclipseStreamMajor"
-echo "eclipseStreamMinor: $eclipseStreamMinor"
-echo "eclipseStreamService: $eclipseStreamService"
-echo "buildType: $buildType"
-echo "buildRoot: $buildRoot"
+BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${STREAMMinor}${STREAMService}${BUILD_TYPE}}
+
+echo "Exporting scripts ... "
+echo "  STREAM: $STREAM"
+echo "  STREAMMajor: $STREAMMajor"
+echo "  STREAMMinor: $STREAMMinor"
+echo "  STREAMService: $STREAMService"
+echo "  BUILD_TYPE: $BUILD_TYPE"
+echo "  BUILD_ROOT: $BUILD_ROOT"
 
 # remove, if exists, from previous run
 rm scripts.zip 2>/dev/null
-rm ${reponame}-${branch} 2>/dev/null
+rm ${reponame}-${BRANCH} 2>/dev/null
 
 # eventually may want to use tagged version of scripts, if not aggregator
 # then the CGit URL for one file would have the form:
 # http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
-# (not sure about "repo" ... I think can just put in tag, for branch?) 
+# (not sure about "repo" ... I think can just put in tag, for BRANCH?) 
 
-wget  --no-verbose -O scripts.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${branch}.zip 2>&1;
+wget  --no-verbose -O scripts.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
 rc=$?
 if [[ $rc != 0 ]]
 then
@@ -80,17 +88,17 @@ then
 fi
 
 #remove any previous versions, to make sure completely fresh
-rm -fr $buildRoot/scripts 2>/dev/null
+rm -fr $BUILD_ROOT/scripts 2>/dev/null
 
-mkdir -p $buildRoot
+mkdir -p $BUILD_ROOT
 if [[ $? != 0 ]] 
 then
-    echo "Exiting, since could not make $buildRoot, as expected."
+    echo "Exiting, since could not make $BUILD_ROOT, as expected."
     exit 1
 fi
 
 # We only need the scripts directory, for this phase
-unzip -o scripts.zip ${reponame}-${branch}/scripts* 
+unzip -q -o scripts.zip ${reponame}-${BRANCH}/scripts* 
 if [[ $? != 0 ]] 
 then
     echo "Exiting, since could not unzip, as expected."
@@ -98,7 +106,7 @@ then
 fi
 
 
-mv ${reponame}-${branch}/scripts $buildRoot
+mv ${reponame}-${BRANCH}/scripts $BUILD_ROOT
 
 if [[ $? != 0 ]] 
 then
@@ -106,7 +114,7 @@ then
     exit 1
 fi
 
-chmod +x $buildRoot/scripts/*.sh
+chmod +x $BUILD_ROOT/scripts/*.sh
 
 if [[ $? != 0 ]] 
 then
@@ -115,4 +123,4 @@ then
 fi
 
 rm scripts.zip
-rm -fr ${reponame}-${branch} 
+rm -fr ${reponame}-${BRANCH} 
