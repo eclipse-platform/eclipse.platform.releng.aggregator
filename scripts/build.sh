@@ -5,7 +5,7 @@ BASEDIR=$(pwd)
 LOG=$BASEDIR/log_$( date +%Y%m%d%H%M%S ).txt
 exec >$LOG 2>&1
 
-BRANCH=R4_2_maintenance
+BRANCH=R3_8_maintenance
 GIT_PREFIX=ssh://git.eclipse.org
 javaHome=/opt/local/jdk1.7.0_07
 mvnPath=/opt/pwebster/git/cbi/apache-maven-3.0.4/bin

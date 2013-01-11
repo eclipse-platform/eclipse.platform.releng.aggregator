@@ -9,10 +9,7 @@
   Contributors:
      Igor Fedorenko - initial implementation
 -->
-
-<project
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -44,6 +41,73 @@
         </configuration>
       </plugin>
         <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-content-jar</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <unjar src="target/repository/content.jar" dest="target/repository"/>
+                <delete file="target/repository/content.jar"/>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>xml-maven-plugin</artifactId>
+        <version>1.0</version>
+        <executions>
+          <execution>
+            <id>generate-extra-iu</id>
+            <phase>package</phase>
+            <goals>
+              <goal>transform</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <transformationSets>
+            <transformationSet>
+              <dir>target/repository</dir>
+              <includes>
+                <include>content.xml</include>
+              </includes>
+              <stylesheet>cp-content.xsl</stylesheet>
+            </transformationSet>
+          </transformationSets>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.6</version>
+        <executions>
+          <execution>
+            <id>copy-extra-iu</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/repository</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/generated-resources/xml/xslt</directory>
+                  <includes>
+                    <include>content.xml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-p2-extras-plugin</artifactId>
             <version>${tycho.version}</version>
@@ -58,11 +122,26 @@
                 <source>
                     <!-- source repositories to mirror from -->
                     <repository>
+                  <url>${project.baseUri}/../eclipse.platform.releng.tychoeclipsebuilder/rcp/target/repository</url>
+                  <layout>p2</layout>
+                  <!-- supported layouts are "p2-metadata", "p2-artifacts", and "p2" (for joint repositories; default) -->
+                </repository>
+                <repository>
+                  <url>${project.baseUri}/../eclipse.platform.releng.tychoeclipsebuilder/rcp.sdk/target/repository</url>
+                  <layout>p2</layout>
+                  <!-- supported layouts are "p2-metadata", "p2-artifacts", and "p2" (for joint repositories; default) -->
+                </repository>
+                <repository>
                         <url>${project.baseUri}/../eclipse.platform.releng.tychoeclipsebuilder/platform/target/repository</url>
                         <layout>p2</layout>
                         <!-- supported layouts are "p2-metadata", "p2-artifacts", and "p2" (for joint repositories; default) -->
                     </repository>
                     <repository>
+                  <url>${project.baseUri}/../eclipse.platform.releng.tychoeclipsebuilder/platform.sdk/target/repository</url>
+                  <layout>p2</layout>
+                  <!-- supported layouts are "p2-metadata", "p2-artifacts", and "p2" (for joint repositories; default) -->
+                </repository>
+                <repository>
                         <url>${project.baseUri}/../eclipse.platform.releng.tychoeclipsebuilder/sdk/target/repository</url>
                         <layout>p2</layout>
                         <!-- supported layouts are "p2-metadata", "p2-artifacts", and "p2" (for joint repositories; default) -->

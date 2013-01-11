@@ -175,7 +175,10 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 				
 				<li><a name="com.ibm.icu"> <b> com.ibm.icu.base binary and source Plug-ins </b> </a>
 				<ul>
-				<li>
+				<li>ICU4J (bundle com.ibm.icu) provides advanced Unicode and Globalization support for
+software applications. The full version is included in Eclipse SDK. For those that do not need that support but 
+need a smaller footprint for their own products, there is a subset of ICU4J, "com.ibm.icu.base" available 
+from the <a href="http://download.eclipse.org/tools/orbit/downloads/">Orbit Download Page</a>.
 				</li></ul>
 				
 				<li><a name="PlatformRuntime"> <b> Platform Runtime Binary </b> </a>
