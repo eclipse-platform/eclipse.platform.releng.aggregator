@@ -39,6 +39,8 @@ else
 	  $(fn-local-repo "$AGGREGATOR_REPO") "$BRANCH" 
 fi
 
+echo "signingDir: $signingDir"
+
 if [ -r "$signingDir" ]; then
 	pushd "$signingDir"
 	fn-git-clean
@@ -48,6 +50,8 @@ if [ -r "$signingDir" ]; then
 else
 	pushd "$gitCache"
 	fn-git-clone $(fn-local-repo "$SIGNING_REPO") "$SIGNING_BRANCH"
+	popd
+	pushd "$signingDir"
 	fn-git-checkout "$SIGNING_BRANCH"
 	popd
 fi
