@@ -27,7 +27,7 @@ wget --no-verbose -O bootstrap.sh http://git.eclipse.org/c/platform/eclipse.plat
 # but will remove it if no differences found.
 # and a command line like the following works well
 
-wget --no-verbose -O wgetFresh.NEW.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/bootstrap/wgetFresh.sh?h=$initScriptTag 2>&1;
+wget --no-verbose -O wgetFresh.NEW.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/wgetFresh.sh?h=$initScriptTag 2>&1;
 
 differs=`diff wgetFresh.NEW.sh wgetFresh.sh`
 echo "differs: ${differs}"
