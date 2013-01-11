@@ -50,7 +50,7 @@ if [ -r "$signingDir" ]; then
 else
 	pushd "$gitCache"
 	fn-git-clone $(fn-local-repo "$SIGNING_REPO") "$SIGNING_BRANCH"
-	pushd eclipse-jarsigner-plugin
+	pushd $gitCache/eclipse-jarsigner-plugin
 	fn-git-checkout "$SIGNING_BRANCH"
 	popd
 	popd
