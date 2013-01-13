@@ -2,14 +2,14 @@
 #
 
 if [ $# -ne 1 ]; then
-	echo USAGE: $0 env_file
-	exit 1
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 if [ ! -r "$1" ]; then
-	echo "$1" cannot be read
-	echo USAGE: $0 env_file
-	exit 1
+    echo "$1" cannot be read
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 pushd $( dirname $0 ) >/dev/null
