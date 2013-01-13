@@ -45,9 +45,9 @@ localRepo=$gitCache/localMavenRepo
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
-echo "BUILD_ROOT=$BUILD_ROOT"  >>$BUILD_ENV_FILE
-echo "BRANCH=$BRANCH" >>$BUILD_ENV_FILE
-echo "STREAM=$STREAM" >>$BUILD_ENV_FILE
+echo "BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
+echo "BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
+echo "STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
 echo "BUILD_TYPE=$BUILD_TYPE" >>$BUILD_ENV_FILE
 echo "TMP_DIR=$TMP_DIR" >>$BUILD_ENV_FILE 
 echo "JAVA_HOME=$JAVA_HOME" >>$BUILD_ENV_FILE
