@@ -16,6 +16,8 @@ pushd $( dirname $0 ) >/dev/null
 SCRIPT_PATH=$(pwd)
 popd >/dev/null
 
+echo "DEBUG: SCRIPT_PATH: ${SCRIPT_PATH}"
+
 . $SCRIPT_PATH/build-functions.sh
 
 . "$1"
@@ -28,6 +30,11 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 repositories=$( echo $SCRIPT_PATH/repositories.txt )
 repoScript=$( echo $SCRIPT_PATH/git-submodule-checkout.sh )
+
+echo "DEBUG: gitCache: ${gitCache}"
+echo "DEBUG: aggDir: ${aggDir}"
+echo "DEBUG: repositories: ${repositories}"
+echo "DEBUG: repoScript: ${repoScript}"
 
 
 if [ -z "$BUILD_ID" ]; then
