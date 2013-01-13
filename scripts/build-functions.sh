@@ -665,7 +665,6 @@ fn-publish-eclipse () {
 	popd
 }
 
-
 # USAGE: fn-checkout-basebuilder BUILDER_DIR BASEBUILDER_TAG
 #   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
 #   BASEBUILDER_TAG: R3_7

@@ -30,7 +30,7 @@ repositories=$( echo $SCRIPT_PATH/repositories.txt )
 
 
 if [ -z "$BUILD_ID" ]; then
-	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
+    BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
