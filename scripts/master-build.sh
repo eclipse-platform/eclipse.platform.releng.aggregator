@@ -3,23 +3,23 @@
 
 
 if [ $# -ne 1 ]; then
-	echo USAGE: $0 env_file
-	exit 1
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
-if [ ! -r "$1" ]; then
-	echo "$1" cannot be read
-	echo USAGE: $0 env_file
-	exit 1
+INITIAL_ENV_FILE=$1
+
+if [ ! -r "$INITIAL_ENV_FILE" ]; then
+    echo "$INITIAL_ENV_FILE" cannot be read
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
-pushd $( dirname $0 ) >/dev/null
-SCRIPT_PATH=$(pwd)
-popd >/dev/null
+SCRIPT_PATH="${BUILD_ROOT}/scripts"
 
-. $SCRIPT_PATH/build-functions.sh
+source "${SCRIPT_PATH}/build-functions.sh"
 
-. "$1"
+source "${INITIAL_ENV_FILE}"
 
 
 cd $BUILD_ROOT
@@ -48,25 +48,25 @@ localRepo=$gitCache/localMavenRepo
 echo "BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
 echo "BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
 echo "STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
-echo "BUILD_TYPE=$BUILD_TYPE" >>$BUILD_ENV_FILE
-echo "TMP_DIR=$TMP_DIR" >>$BUILD_ENV_FILE 
-echo "JAVA_HOME=$JAVA_HOME" >>$BUILD_ENV_FILE
+echo "BUILD_TYPE=\"${BUILD_TYPE}\"" >>$BUILD_ENV_FILE
+echo "TMP_DIR=\"${TMP_DIR}\"" >>$BUILD_ENV_FILE 
+echo "JAVA_HOME=\"${JAVA_HOME}\"" >>$BUILD_ENV_FILE
 echo "MAVEN_OPTS=\"${MAVEN_OPTS}\"" >>$BUILD_ENV_FILE
-echo "MAVEN_PATH=$MAVEN_PATH" >>$BUILD_ENV_FILE
-echo "AGGREGATOR_REPO=$AGGREGATOR_REPO" >>$BUILD_ENV_FILE
-echo "BASEBUILDER_TAG=$BASEBUILDER_TAG" >>$BUILD_ENV_FILE
-echo "SIGNING_REPO=$SIGNING_REPO" >>$BUILD_ENV_FILE
-echo "SIGNING_BRANCH=$SIGNING_BRANCH" >>$BUILD_ENV_FILE
-echo "B_GIT_EMAIL=$B_GIT_EMAIL" >>$BUILD_ENV_FILE
+echo "MAVEN_PATH=\"${MAVEN_PATH}\"" >>$BUILD_ENV_FILE
+echo "AGGREGATOR_REPO=\"${AGGREGATOR_REPO}\"" >>$BUILD_ENV_FILE
+echo "BASEBUILDER_TAG=\"${BASEBUILDER_TAG}\"" >>$BUILD_ENV_FILE
+echo "SIGNING_REPO=\"${SIGNING_REPO}\"" >>$BUILD_ENV_FILE
+echo "SIGNING_BRANCH=\"${SIGNING_BRANCH}\"" >>$BUILD_ENV_FILE
+echo "B_GIT_EMAIL=\"${B_GIT_EMAIL}\"" >>$BUILD_ENV_FILE
 echo "B_GIT_NAME=\"${B_GIT_NAME}\"" >>$BUILD_ENV_FILE
-echo "COMMITTER_ID=$COMMITTER_ID" >>$BUILD_ENV_FILE
-echo "COMPARATOR=$COMPARATOR" >>$BUILD_ENV_FILE
-echo "SIGNING=$SIGNING" >>$BUILD_ENV_FILE
-echo "UPDATE_BRANDING=$UPDATE_BRANDING" >>$BUILD_ENV_FILE
-echo "FORCE_LOCAL_REPO=$FORCE_LOCAL_REPO" >>$BUILD_ENV_FILE
+echo "COMMITTER_ID=\"${COMMITTER_ID}\"" >>$BUILD_ENV_FILE
+echo "COMPARATOR=\"${COMPARATOR}\"" >>$BUILD_ENV_FILE
+echo "SIGNING=\"${SIGNING}\"" >>$BUILD_ENV_FILE
+echo "UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
+echo "FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
-echo "BUILD_ENV_FILE=$1" >>$BUILD_ENV_FILE
-echo "BUILD_ID=$BUILD_ID" >>$BUILD_ENV_FILE
+echo "BUILD_ENV_FILE=\"${1}\"" >>$BUILD_ENV_FILE
+echo "BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
 echo "BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
 
 # dump ALL environment variables in case its helpful in documenting or 
