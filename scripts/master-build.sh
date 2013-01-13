@@ -36,16 +36,42 @@ checkForErrorExit $? "Could not create buildlogs directory"
 LOG=$buildDirectory/buildlogs/buildOutput.txt
 exec >>$LOG 2>&1
 
-BUILD_ENV_FILE=$buildDirectory/env.$$
+BUILD_ENV_FILE=$logsDirectory/$BUILD_ID.env
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 localRepo=$gitCache/localMavenRepo
 
-
-cp "$1" $BUILD_ENV_FILE
+# These variables, from original env file, are re-written to BUILD_ENV_FILE, 
+# with values for this build (some of them computed) partially for documentation, and 
+# partially so this build can be re-ran or re-started using it, instead of 
+# original env file, which would compute different values (in some cases).
+echo "BUILD_ROOT=$BUILD_ROOT"  >>$BUILD_ENV_FILE
+echo "BRANCH=$BRANCH" >>$BUILD_ENV_FILE
+echo "STREAM=$STREAM" >>$BUILD_ENV_FILE
+echo "BUILD_TYPE=$BUILD_TYPE" >>$BUILD_ENV_FILE
+echo "TMP_DIR=$TMP_DIR" >>$BUILD_ENV_FILE 
+echo "JAVA_HOME=$JAVA_HOME" >>$BUILD_ENV_FILE
+echo "MAVEN_OPTS=$MAVEN_OPTS" >>$BUILD_ENV_FILE
+echo "MAVEN_PATH=$MAVEN_PATH" >>$BUILD_ENV_FILE
+echo "AGGREGATOR_REPO=$AGGREGATOR_REPO" >>$BUILD_ENV_FILE
+echo "BASEBUILDER_TAG=$BASEBUILDER_TAG" >>$BUILD_ENV_FILE
+echo "SIGNING_REPO=$SIGNING_REPO" >>$BUILD_ENV_FILE
+echo "SIGNING_BRANCH=$SIGNING_BRANCH" >>$BUILD_ENV_FILE
+echo "B_GIT_EMAIL=$B_GIT_EMAIL" >>$BUILD_ENV_FILE
+echo "B_GIT_NAME=$B_GIT_NAME" >>$BUILD_ENV_FILE
+echo "COMMITTER_ID=$COMMITTER_ID" >>$BUILD_ENV_FILE
+echo "COMPARATOR=$COMPARATOR" >>$BUILD_ENV_FILE
+echo "SIGNING=$SIGNING" >>$BUILD_ENV_FILE
+echo "UPDATE_BRANDING=$UPDATE_BRANDING" >>$BUILD_ENV_FILE
+echo "FORCE_LOCAL_REPO=$FORCE_LOCAL_REPO" >>$BUILD_ENV_FILE
+# any value of interest/usefulness can be added to BUILD_ENV_FILE
 echo "BUILD_ENV_FILE=$1" >>$BUILD_ENV_FILE
 echo "BUILD_ID=$BUILD_ID" >>$BUILD_ENV_FILE
 echo "BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
+
+# dump ALL environment variables in case its helpful in documenting or 
+# debugging build results or differences between runs, especially on different machines
+env 2>&1 | tee $logsDirectory/all-env-variables.txt
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/get-aggregator-ouptut.txt
 checkForErrorExit $? "Error occurred while getting aggregator"
