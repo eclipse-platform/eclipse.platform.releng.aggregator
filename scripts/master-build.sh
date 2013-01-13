@@ -47,6 +47,9 @@ echo "BUILD_ENV_FILE=$1" >>$BUILD_ENV_FILE
 echo "BUILD_ID=$BUILD_ID" >>$BUILD_ENV_FILE
 echo "BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
 
+# log ALL environment variables in case its helpful in documenting or debugging build results or differences
+env 2>&1 | tee $logsDirectory/all-env-variables.txt
+
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/get-aggregator-ouptut.txt
 checkForErrorExit $? "Error occurred while getting aggregator"
 
