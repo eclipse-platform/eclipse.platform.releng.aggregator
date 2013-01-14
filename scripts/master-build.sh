@@ -77,11 +77,7 @@ env 2>&1 | tee $logsDirectory/all-env-variables.txt
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/get-aggregator-ouptut.txt
 checkForErrorExit $? "Error occurred while getting aggregator"
 
-$SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut1.txt
-checkForErrorExit $? "Error occurred while updating build input"
-
-# Does this really need to be called twice?
-$SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut2.txt
+$SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut.txt
 checkForErrorExit $? "Error occurred while updating build input"
 
 pushd "$aggDir"
