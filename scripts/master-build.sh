@@ -41,6 +41,9 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 localRepo=$gitCache/localMavenRepo
 
+# Just in case it doesn't exist yet
+mkdir -p ${TMP_DIR}
+
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
