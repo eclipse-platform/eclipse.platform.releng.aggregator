@@ -64,6 +64,7 @@ echo "COMPARATOR=\"${COMPARATOR}\"" >>$BUILD_ENV_FILE
 echo "SIGNING=\"${SIGNING}\"" >>$BUILD_ENV_FILE
 echo "UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
 echo "FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
+echo "GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 echo "BUILD_ENV_FILE=\"${1}\"" >>$BUILD_ENV_FILE
 echo "BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
