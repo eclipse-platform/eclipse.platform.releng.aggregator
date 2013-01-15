@@ -3,16 +3,16 @@
 
 
 if [ $# -ne 1 ]; then
-	echo USAGE: $0 env_file
-	exit 1
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 INITIAL_ENV_FILE=$1
 
 if [ ! -r "$INITIAL_ENV_FILE" ]; then
     echo "$INITIAL_ENV_FILE" cannot be read
-	echo USAGE: $0 env_file
-	exit 1
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 SCRIPT_PATH="${BUILD_ROOT}/scripts"
