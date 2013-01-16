@@ -46,4 +46,4 @@ fn-maven-parent-install "$aggDir" "$localRepo"
 
 fn-maven-cbi-install "$aggDir" "$localRepo"
 
-fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$localRepo" $COMPARATOR $SIGNING $UPDATE_BRANDING
+fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$localRepo" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE
