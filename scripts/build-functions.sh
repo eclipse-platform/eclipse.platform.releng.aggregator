@@ -292,9 +292,7 @@ fn-maven-build-aggregator ()
         MARGS="$MARGS -Pupdate-branding-plugins"
     fi
     shift
-    if $MAVEN_BREE; then
-        MARGS="$MARGS ${MAVEN_BREE}"
-    fi
+    MARGS="$MARGS ${MAVEN_BREE}"
     echo "DEBUG: BUILD_ID: $BUILD_ID"
     echo "DEBUG: REPO_DIR: $REPO_DIR"
     echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
