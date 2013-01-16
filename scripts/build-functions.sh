@@ -267,7 +267,7 @@ fn-maven-cbi-install ()
     popd
 }
 
-# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING UPDATE_BRANDING
+# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING UPDATE_BRANDING MAVEN_BREE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
@@ -292,7 +292,15 @@ fn-maven-build-aggregator ()
         MARGS="$MARGS -Pupdate-branding-plugins"
     fi
     shift
-    MARGS="$MARGS -Pbree-libs"
+    if $MAVEN_BREE; then
+        MARGS="$MARGS ${MAVEN_BREE}"
+    fi
+    echo "DEBUG: BUILD_ID: $BUILD_ID"
+    echo "DEBUG: REPO_DIR: $REPO_DIR"
+    echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
+    echo "DEBUG: VERBOSE: $VERBOSE"
+    echo "DEBUG: UPDATE_BRANDING: $UPDATE_BRANDING"
+    echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
     pushd "$REPO_DIR"
     mvn $MARGS \
         clean install \
