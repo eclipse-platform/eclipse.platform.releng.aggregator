@@ -809,7 +809,7 @@ fn-pom-version-report ()
     <h1>POM version report for $BUILD_ID</h1>
     <p>These repositories need patches to bring their pom.xml files up to the correct version.</p>
     <ul>
-    EOF
+EOF
     for f in *.diff; do
         FNAME=$( basename $f .diff )
         echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
@@ -817,7 +817,7 @@ fn-pom-version-report ()
     cat - >>index.html <<EOF
     </ul>
     </html>
-    EOF
+EOF
     popd
     popd
 }
