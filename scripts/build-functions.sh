@@ -543,8 +543,8 @@ fn-gather-swt-zips ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
-    # TODO: this one does not accomplish much, since "binaries/bundles" always
-# exists. Results in a lot of "not found" msg. Doubt there's any simple solution.
+    # TODO: this directory sanity check does not accomplish much, since "binaries/bundles" always
+    # exists. Results in "not found" msg. Doubt there's any simple solution.
     SWT_BUNDLES_DIR="$REPO_DIR"/eclipse.platform.swt.binaries/bundles
     if [[ -d "$SWT_BUNDLES_DIR" ]]
     then
@@ -606,7 +606,7 @@ fn-slice-repos ()
             -buildfile "$ANT_SCRIPT" \
             -Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
             -DbuildId="$BUILD_ID" \
-            -DbuildRepo="$REPO_DIR_DIR \
+            -DbuildRepo="$REPO_DIR_DIR" \
             -DpostingDirectory=$(dirname "$BUILD_DIR") \
             -DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
             -DbuildLabel="$BUILD_ID" \
