@@ -543,6 +543,8 @@ fn-gather-swt-zips ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
+    # TODO: this one does not accomplish much, since "binaries/bundles" always
+# exists. Results in a lot of "not found" msg. Doubt there's any simple solution.
     SWT_BUNDLES_DIR="$REPO_DIR"/eclipse.platform.swt.binaries/bundles
     if [[ -d "$SWT_BUNDLES_DIR" ]]
     then
@@ -595,7 +597,8 @@ fn-slice-repos ()
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
     ANT_SCRIPT="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/repos/buildAll.xml
-    if [[ -d "$REPO_DIR" ]]
+    REPO_DIR_DIR="$REPO_DIR"/eclipse.platform.repository/target/repository
+    if [[ -d "$REPO_DIR_DIR" ]]
     then
         pushd "$REPO_DIR"
         java -jar "$BASEBUILDER_LAUNCHER" \
@@ -603,14 +606,14 @@ fn-slice-repos ()
             -buildfile "$ANT_SCRIPT" \
             -Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
             -DbuildId="$BUILD_ID" \
-            -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
+            -DbuildRepo="$REPO_DIR_DIR \
             -DpostingDirectory=$(dirname "$BUILD_DIR") \
             -DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
             -DbuildLabel="$BUILD_ID" \
             -DbuildDirectory="$BUILD_DIR"
         popd
     else
-        echo "   ERROR: $REPO_DIR did not exist in fn-slice-repo"
+        echo "   ERROR: $REPO_DIR_DIR did not exist in fn-slice-repo"
     fi
 }
 
