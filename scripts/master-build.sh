@@ -87,8 +87,8 @@ checkForErrorExit $? "Error occurred while updating build input"
 # temp hack for bug 398201
 # apply the pre-created patch from tempPatches
 echo "INFO: apply temp patch"
-patch -p1  --backup -d ../../eclipse.platform.releng.aggregator/rt.equinox.bundles/bundles  -i ./tempPatches/sbep2.patch
-echeckForErrorExit $? "Error occurred applying patch"
+patch -p1  --backup -d eclipse.platform.releng.aggregator/rt.equinox.bundles/bundles  -i scripts/tempPatches/sbep2.patch
+checkForErrorExit $? "Error occurred applying patch"
 
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
