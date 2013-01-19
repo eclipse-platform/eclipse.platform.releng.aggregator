@@ -4,7 +4,7 @@
 # Normally resides in $BUILD_HOME
 
 # basic path required when starting from cron job
-export PATH=/usr/local/bin:/usr/bin:/bin:${HOME}/bin:
+export PATH=/usr/local/bin:/usr/bin:/bin
 
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, so releng group has write access to anything

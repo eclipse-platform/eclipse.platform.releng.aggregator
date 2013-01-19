@@ -84,6 +84,11 @@ checkForErrorExit $? "Error occurred while getting aggregator"
 $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut.txt
 checkForErrorExit $? "Error occurred while updating build input"
 
+# temp hack for bug 398201
+# apply the pre-created patch from tempPatches
+patch -p1 --quiet --backup -d ../../eclipse.platform.releng.aggregator/rt.equinox.bundles/bundles  -i ./tempPatches/sbep2.patch
+
+
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
 # exits with 1 here? 
