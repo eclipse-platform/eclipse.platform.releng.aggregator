@@ -89,7 +89,7 @@ checkForErrorExit $? "Error occurred while updating build input"
 echo "INFO: apply temp patch"
 echo "DEBUG: aggDir: $aggDir"
 echo "DEBUG: pwd: $PWD"
-patch -p1  --backup -d $aggDir/eclipse.platform.releng.aggregator/rt.equinox.bundles/bundles  -i scripts/tempPatches/sbep2.patch
+patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i scripts/tempPatches/sbep2.patch
 checkForErrorExit $? "Error occurred applying patch"
 
 pushd "$aggDir"
