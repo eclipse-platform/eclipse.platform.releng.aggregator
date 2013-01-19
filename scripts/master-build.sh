@@ -84,6 +84,8 @@ checkForErrorExit $? "Error occurred while getting aggregator"
 $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut.txt
 checkForErrorExit $? "Error occurred while updating build input"
 
+if [[ $BUILD_ID ~= [IN] ]] 
+then
 # temp hack for bug 398201
 # apply the pre-created patch from tempPatches
 echo "INFO: apply temp patch"
@@ -91,6 +93,7 @@ echo "DEBUG: aggDir: $aggDir"
 echo "DEBUG: pwd: $PWD"
 patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
 checkForErrorExit $? "Error occurred applying patch"
+fi 
 
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
