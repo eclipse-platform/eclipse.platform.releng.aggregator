@@ -13,7 +13,7 @@ unset JAVA_JRE
 unset CLASSPATH
 unset JAVA_BINDIR
 
-export BUILD_ROOT=/shared/eclipse/builds/localbuild-$BRANCH
+export BUILD_HOME=/shared/eclipse/builds/
 export JAVA_HOME=/shared/common/jdk1.7.0
 export ANT_HOME=/shared/common/apache-ant-1.8.4
 export TMP_DIR=$BUILD_ROOT/tmp
@@ -24,10 +24,11 @@ export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
 env > env.txt
 
-echo "= = = = = " >> ../env.txt
-java -version  >> ../env.txt 2>&1
-ant -version >> ../env.txt
-mvn -version >> ../env.txt
+echo "= = = = = " >> env.txt
+java -version  >> env.txt 2>&1
+ant -version >> env.txt
+mvn -version >> env.txt
+echo "= = = = = " >> env.txt
 
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, so releng group has write access to anything
@@ -38,8 +39,6 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 
 # this file is to ease local builds to override some variables. It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
-
-export BUILD_HOME=/shared/eclipse/builds
 
 export BRANCH=master
 export BUILD_TYPE=I
