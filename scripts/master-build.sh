@@ -84,7 +84,7 @@ checkForErrorExit $? "Error occurred while getting aggregator"
 $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut.txt
 checkForErrorExit $? "Error occurred while updating build input"
 
-if [[ $BUILD_ID ~= [IN] ]] 
+if [[ $BUILD_ID =~ [IN] ]] 
 then
 # temp hack for bug 398201
 # apply the pre-created patch from tempPatches
