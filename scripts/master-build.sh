@@ -48,31 +48,31 @@ mkdir -p ${TMP_DIR}
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
-echo "BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
-echo "BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
-echo "STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
-echo "BUILD_TYPE=\"${BUILD_TYPE}\"" >>$BUILD_ENV_FILE
-echo "TMP_DIR=\"${TMP_DIR}\"" >>$BUILD_ENV_FILE 
-echo "JAVA_HOME=\"${JAVA_HOME}\"" >>$BUILD_ENV_FILE
-echo "MAVEN_OPTS=\"${MAVEN_OPTS}\"" >>$BUILD_ENV_FILE
-echo "MAVEN_PATH=\"${MAVEN_PATH}\"" >>$BUILD_ENV_FILE
-echo "AGGREGATOR_REPO=\"${AGGREGATOR_REPO}\"" >>$BUILD_ENV_FILE
-echo "BASEBUILDER_TAG=\"${BASEBUILDER_TAG}\"" >>$BUILD_ENV_FILE
-echo "SIGNING_REPO=\"${SIGNING_REPO}\"" >>$BUILD_ENV_FILE
-echo "SIGNING_BRANCH=\"${SIGNING_BRANCH}\"" >>$BUILD_ENV_FILE
-echo "B_GIT_EMAIL=\"${B_GIT_EMAIL}\"" >>$BUILD_ENV_FILE
-echo "B_GIT_NAME=\"${B_GIT_NAME}\"" >>$BUILD_ENV_FILE
-echo "COMMITTER_ID=\"${COMMITTER_ID}\"" >>$BUILD_ENV_FILE
-echo "COMPARATOR=\"${COMPARATOR}\"" >>$BUILD_ENV_FILE
-echo "SIGNING=\"${SIGNING}\"" >>$BUILD_ENV_FILE
-echo "UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
-echo "FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
-echo "MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
-echo "GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
+echo "export BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
+echo "export BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
+echo "export STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
+echo "export BUILD_TYPE=\"${BUILD_TYPE}\"" >>$BUILD_ENV_FILE
+echo "export TMP_DIR=\"${TMP_DIR}\"" >>$BUILD_ENV_FILE 
+echo "export JAVA_HOME=\"${JAVA_HOME}\"" >>$BUILD_ENV_FILE
+echo "export MAVEN_OPTS=\"${MAVEN_OPTS}\"" >>$BUILD_ENV_FILE
+echo "export MAVEN_PATH=\"${MAVEN_PATH}\"" >>$BUILD_ENV_FILE
+echo "export AGGREGATOR_REPO=\"${AGGREGATOR_REPO}\"" >>$BUILD_ENV_FILE
+echo "export BASEBUILDER_TAG=\"${BASEBUILDER_TAG}\"" >>$BUILD_ENV_FILE
+echo "export SIGNING_REPO=\"${SIGNING_REPO}\"" >>$BUILD_ENV_FILE
+echo "export SIGNING_BRANCH=\"${SIGNING_BRANCH}\"" >>$BUILD_ENV_FILE
+echo "export B_GIT_EMAIL=\"${B_GIT_EMAIL}\"" >>$BUILD_ENV_FILE
+echo "export B_GIT_NAME=\"${B_GIT_NAME}\"" >>$BUILD_ENV_FILE
+echo "export COMMITTER_ID=\"${COMMITTER_ID}\"" >>$BUILD_ENV_FILE
+echo "export COMPARATOR=\"${COMPARATOR}\"" >>$BUILD_ENV_FILE
+echo "export SIGNING=\"${SIGNING}\"" >>$BUILD_ENV_FILE
+echo "export UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
+echo "export FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
+echo "export MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
+echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
-echo "BUILD_ENV_FILE=\"${1}\"" >>$BUILD_ENV_FILE
-echo "BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
-echo "BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
+echo "export BUILD_ENV_FILE=\"${1}\"" >>$BUILD_ENV_FILE
+echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
+echo "export BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
@@ -83,6 +83,17 @@ checkForErrorExit $? "Error occurred while getting aggregator"
 
 $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut.txt
 checkForErrorExit $? "Error occurred while updating build input"
+
+if [[ $BUILD_ID =~ [IN] ]] 
+then
+# temp hack for bug 398201
+# apply the pre-created patch from tempPatches
+echo "INFO: apply temp patch"
+echo "DEBUG: aggDir: $aggDir"
+echo "DEBUG: pwd: $PWD"
+patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
+checkForErrorExit $? "Error occurred applying patch"
+fi 
 
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
