@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # this is not really to be executed, but sourced where needed
 
 # general purpose utility for "hard exit" if return code not zero.
@@ -13,22 +13,41 @@ checkForErrorExit ()
     exitCode=$1
     shift
     message="$*"
-    if [ -z "${exitCode}" ]
+    if [[ -z "${exitCode}" ]]
     then
         echo "PROGRAM ERROR: checkForErrorExit called with no arguments"
         exit 1
     fi
-    if [ -z "${message}" ]
+
+    if [[ -z "${message}" ]]
     then
         echo "WARNING: checkForErrorExit called without message"
         message="(Calling program provided no message)"
     fi
-    if [ $exitCode -ne 0 ]
+
+    # first make sure exit code is well formed
+    if [[ "${exitCode}" =~ [0] ]]
+    then
+        #echo "exitcode was zero"
+        exitrc=0
+    else
+        if [[ "${exitCode}" =~ ^-?[0-9]+$ ]]  
+        then
+            #echo "exitcode was non-zero numeric"
+            exitrc=exitCode
+        else
+            #echo "exitode was not numeric, so will force to 1"
+            exitrc=1
+        fi  
+    fi 
+
+    if [[ $exitrc != 0 ]] 
     then
         echo
-        echo "   ERROR. exit code: ${exitCode}  ${message}"
+        echo "   ERROR. exit code: ${exitrc}"
+        echo "   ERROR. message: ${message}"
         echo
-        exit $exitCode
+        exit $exitrc
     fi
 }
 
@@ -377,7 +396,12 @@ fn-pom-version-updater ()
 {
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
-    report=/tmp/pom_${BUILD_ID}.txt
+
+    # fail fast if not set up correctly
+    rc=${fn-check-dir-exists TMP_DIR)
+    checkForErrorExit "$rc" "$rc"
+    
+    report=${TMP_DIR}/pom_${BUILD_ID}.txt
     pushd "$REPO_DIR"
     mvn $MARGS \
         org.eclipse.tycho:tycho-versions-plugin:update-pom \
@@ -403,7 +427,12 @@ fn-pom-version-update-with-commit ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
-    report=/tmp/pom_${BUILD_ID}.txt
+    
+    # fail fast if not set up correctly
+    rc=${fn-check-dir-exists TMP_DIR)
+    checkForErrorExit "$rc" "$rc"
+    
+    report=${TMP_DIR}/pom_${BUILD_ID}.txt
     MARGS="-DbuildId=$BUILD_ID"
     pushd "$REPO_DIR"
     mvn $MARGS \
@@ -468,8 +497,13 @@ fn-gather-static-drop ()
         cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
         cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/clickThroughs $BUILD_DIR
         # FIXME workaround the download page temp directory
-        sed 's!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >/tmp/t1_$$
-        mv /tmp/t1_$$ $BUILD_DIR/download.php
+
+        # fail fast if not set up correctly
+        rc=${fn-check-dir-exists TMP_DIR)
+        checkForErrorExit "$rc" "$rc"
+
+        sed 's!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >${TMP_DIR}/t1_$$
+        mv {TMP_DIR}/t1_$$ $BUILD_DIR/download.php
         popd
     else
         echo "   ERROR: $REPO_DIR_BUILDER did not exist in fn-gather-static-drop"
@@ -699,8 +733,13 @@ fn-gather-main-index ()
     fi
     BUILD_DATE="$1"; shift
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
-    T1=/tmp/t1_$$
-    T2=/tmp/t2_$$
+
+    # fail fast if not set up correctly
+    rc=${fn-check-dir-exists TMP_DIR)
+    checkForErrorExit "$rc" "$rc"
+
+    T1=${TMP_DIR}/t1_$$
+    T2=${TMP_DIR}/t2_$$
     sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
     sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
     sed "s/@build@/$BUILD_ID/g" $T2 >$T1
@@ -809,24 +848,44 @@ fn-pom-version-report ()
     mkdir -p "$BUILD_DIR"/pom_updates
     git submodule foreach "if (git status -s -uno | grep pom.xml >/dev/null ); then git diff >$BUILD_DIR/pom_updates/\$name.diff; fi "
     pushd "$BUILD_DIR"/pom_updates
-    cat - >index.html <<EOF
-    <html>
-    <head>
-    <title>POM version report for $BUILD_ID</title>
-    </head>
-    <body>
-    <h1>POM version report for $BUILD_ID</h1>
-    <p>These repositories need patches to bring their pom.xml files up to the correct version.</p>
-    <ul>
-EOF
+    echo "<html>"  >index.html 
+    echo "<head>"  >>index.html
+    echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
+    echo "</head>"  >>index.html
+    echo "<body>"  >>index.html
+    echo "<h1>POM version report for $BUILD_ID</h1>"  >>index.html
+    echo "<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>"  >>index.html
+    echo "<ul>"  >>index.html
+
     for f in *.diff; do
         FNAME=$( basename $f .diff )
         echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
     done
-    cat - >>index.html <<EOF
-    </ul>
-    </html>
-EOF
+    echo "</ul>" >> index.html
+    echo "</html>" >> index.html
     popd
     popd
 }
+
+# USAGE: fn-check-dir-exists DIR_VAR_NAME
+#   DIR_VAR_NAME: JAVA_HOME (not, $JAVA_HOME, for better error messages)
+#   callers should check for non-zero returned value, which itself is suitable for message, 
+#   but must be quoted. Such as
+#        rc=${fn-check-dir-exists JAVA_HOME)
+#        checkForErrorExit "$rc" "$rc"
+fn-check-dir-exists () 
+{
+    DIR_VAR_NAME=$1
+    if [[ -z "${!DIR_VAR_NAME}" ]]
+    then
+        echo "DIR_VAR_NAME, ${DIR_VAR_NAME}, must be defined before running this script."
+    else 
+        if [[ ! -d  "${!DIR_VAR_NAME}" ]]
+        then
+            echo "The directory DIR_VAR_NAME, ${DIR_VAR_NAME} (\"${!DIR_VAR_NAME}\"), must exist before running this script."
+        else
+            echo 0
+        fi
+    fi
+}
+
