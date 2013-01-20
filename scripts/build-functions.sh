@@ -398,7 +398,7 @@ fn-pom-version-updater ()
     LOCAL_REPO="$1"; shift
 
     # fail fast if not set up correctly
-    rc=${fn-check-dir-exists TMP_DIR)
+    rc=$(fn-check-dir-exists TMP_DIR)
     checkForErrorExit "$rc" "$rc"
     
     report=${TMP_DIR}/pom_${BUILD_ID}.txt
@@ -429,7 +429,7 @@ fn-pom-version-update-with-commit ()
     LOCAL_REPO="$1"; shift
     
     # fail fast if not set up correctly
-    rc=${fn-check-dir-exists TMP_DIR)
+    rc=$(fn-check-dir-exists TMP_DIR)
     checkForErrorExit "$rc" "$rc"
     
     report=${TMP_DIR}/pom_${BUILD_ID}.txt
@@ -499,7 +499,7 @@ fn-gather-static-drop ()
         # FIXME workaround the download page temp directory
 
         # fail fast if not set up correctly
-        rc=${fn-check-dir-exists TMP_DIR)
+        rc=$(fn-check-dir-exists TMP_DIR)
         checkForErrorExit "$rc" "$rc"
 
         sed 's!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >${TMP_DIR}/t1_$$
@@ -735,7 +735,7 @@ fn-gather-main-index ()
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
     # fail fast if not set up correctly
-    rc=${fn-check-dir-exists TMP_DIR)
+    rc=$(fn-check-dir-exists TMP_DIR)
     checkForErrorExit "$rc" "$rc"
 
     T1=${TMP_DIR}/t1_$$
