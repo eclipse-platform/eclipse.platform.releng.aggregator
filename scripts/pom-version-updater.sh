@@ -33,11 +33,6 @@ if [ -z "$BUILD_ID" ]; then
 	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-export JAVA_HOME="$JAVA_HOME"
-export MAVEN_OPTS="$MAVEN_OPTS"
-export PATH=${JAVA_HOME}/bin:${MAVEN_PATH}:$PATH
-
-
 fn-pom-version-updater "$aggDir" "$localRepo"
 fn-pom-version-report "$BUILD_ID" "$aggDir"  "$buildDirectory" 
 
