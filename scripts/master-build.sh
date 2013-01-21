@@ -39,7 +39,7 @@ exec >>$LOG 2>&1
 BUILD_ENV_FILE=$logsDirectory/$BUILD_ID.env
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
-localRepo=$gitCache/localMavenRepo
+export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
 # Just in case it doesn't exist yet
 mkdir -p ${TMP_DIR}
@@ -71,8 +71,10 @@ echo "export UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
 echo "export FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
 echo "export MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
 echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
+echo "export LOCAL_REPO=\"${LOCAL_REPO}\"" >>$BUILD_ENV_FILE
+echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\""  >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
-echo "export BUILD_ENV_FILE=\"${1}\"" >>$BUILD_ENV_FILE
+echo "export BUILD_ENV_FILE=\"${BUILD_ENV_FILE}\"" >>$BUILD_ENV_FILE
 echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
 echo "export BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
 
