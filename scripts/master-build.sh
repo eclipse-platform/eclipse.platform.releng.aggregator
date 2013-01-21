@@ -48,6 +48,8 @@ mkdir -p ${TMP_DIR}
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
+echo "export PATH=\"${PATH}\"" >$BUILD_ENV_FILE
+echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\"" >>$BUILD_ENV_FILE
 echo "export BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
 echo "export BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
 echo "export STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
