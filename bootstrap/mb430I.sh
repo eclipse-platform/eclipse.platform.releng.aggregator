@@ -13,7 +13,7 @@ unset JAVA_JRE
 unset CLASSPATH
 unset JAVA_BINDIR
 
-export BUILD_HOME=/shared/eclipse/builds/
+export BUILD_HOME=/shared/eclipse/builds
 export JAVA_HOME=/shared/common/jdk1.7.0
 export ANT_HOME=/shared/common/apache-ant-1.8.4
 export ANT_OPTS="-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"
