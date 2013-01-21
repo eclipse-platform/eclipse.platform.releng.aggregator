@@ -14,12 +14,12 @@ unset CLASSPATH
 unset JAVA_BINDIR
 
 export BUILD_HOME=/shared/eclipse/builds
-export JAVA_HOME=/shared/common/jdk1.7.0
-export ANT_HOME=/shared/common/apache-ant-1.8.4
-export ANT_OPTS="-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"
-export MAVEN_OPTS="-Xmx3072m -XX:MaxPermSize=512m -Dtycho.localArtifacts=ignore -Djava.io.tmpdir=${TMP_DIR} ${ANT_OPTS}"
+export JAVA_HOME=/shared/common/jdk1.7.0_11
+#export ANT_HOME=/shared/common/apache-ant-1.8.4
+#export ANT_OPTS="-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"
+export MAVEN_OPTS="-Xmx3072m -XX:MaxPermSize=512m -Dtycho.localArtifacts=ignore -Djava.io.tmpdir=${TMP_DIR}"
 export MAVEN_PATH=/shared/common/apache-maven-3.0.4/bin
-export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
+export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$PATH
 
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, so releng group has write access to anything
