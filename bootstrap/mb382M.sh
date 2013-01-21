@@ -13,6 +13,11 @@ unset JAVA_JRE
 unset CLASSPATH
 unset JAVA_BINDIR
 
+# Any invocation of Java, Ant, Maven, etc., should use this as default TMP direcotory, 
+# instead of the default /tmp by using 
+# -Djava.io.tmpdir=${TMP_DIR}
+export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp}
+mkdir -p ${TMP_DIR}
 export BUILD_HOME=/shared/eclipse/builds
 export JAVA_HOME=/shared/common/jdk1.7.0_11
 #export ANT_HOME=/shared/common/apache-ant-1.8.4
@@ -45,12 +50,6 @@ BUILDSTREAMTYPEDIR=${STREAM//./}$BUILD_TYPE
 # for now, we "redfine" BUILD_ROOT for smaller, incremental change, but eventually, may work 
 # though all scripts so "BRANCH" is no longer part of directory name
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
-
-# Any invocation of Java, Ant, Maven, etc., should use this as default TMP direcotory, 
-# instead of the default /tmp by using 
-# -Djava.io.tmpdir=${TMP_DIR}
-export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp}
-mkdir -p ${TMP_DIR}
 
 env > $BUILD_ROOT/env.txt
 echo "= = = = = " >> $BUILD_ROOT/env.txt
