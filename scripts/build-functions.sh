@@ -227,7 +227,7 @@ fn-build-dir ()
     ROOT="$1"; shift
     BRANCH="$1"; shift
     BUILD_ID="$1"; shift
-    echo $ROOT/$BRANCH/dirs/$BUILD_ID/$BUILD_ID
+    echo $ROOT/$BRANCH/dirs/$BUILD_ID
 }
 
 # USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
