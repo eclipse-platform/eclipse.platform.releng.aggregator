@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    name="equinox feature build"
+    default="build">
+
+    <target name="init">
+        <property
+            name="archiveRoot"
+            value="eclipse-${buildId}" />
+        <property
+            name="archiveName"
+            value="${archiveRoot}-delta-pack.zip" />
+        <property
+            name="featureTempRoot"
+            value="${eclipse.build.configs}/rcp.deltapack" />
+        <property
+            name="featureTempDir"
+            value="featureTemp" />
+        <property
+            name="featureTemp"
+            value="${featureTempRoot}/${featureTempDir}" />
+        <property
+            name="featureTemp2"
+            value="${featureTempRoot}/featureTemp2" />
+    </target>
+
+    <target
+        name="build"
+        depends="init">
+        <echo message="DEBUG: echoproperties at beginning of deltapack (after init)" />
+        <echoproperties />
+        <delete
+            verbose="true"
+            dir="${featureTemp}" />
+        <mkdir dir="${featureTemp}" />
+        <delete
+            verbose="true"
+            dir="${featureTemp2}" />
+        <mkdir dir="${featureTemp2}" />
+        <!--need to change slicing options to only include platform specific bits -->
+        <p2.mirror
+            source="file://${buildRepo}"
+            log="deltapackmirrorlog.txt"
+            verbose="true"
+            ignoreerrors="true">
+            <destination
+                kind="metadata"
+                location="file://${featureTemp}"
+                name="RCP Delta Pack Repo"
+                format="file://${buildRepo}" />
+            <destination
+                kind="artifact"
+                location="file://${featureTemp}"
+                name="RCP Delta Pack Repo"
+                format="file://${buildRepo}" />
+            <iu
+                id="org.eclipse.platform.feature.group"
+                version="" />
+            <iu
+                id="org.eclipse.platform.source.feature.group"
+                version="" />
+            <iu
+                id="org.eclipse.rcp.feature.group"
+                version="" />
+            <iu
+                id="org.eclipse.rcp.source.feature.group"
+                version="" />
+            <iu
+                id="org.eclipse.jdt.feature.group"
+                version="" />
+            <iu
+                id="org.eclipse.jdt.source.feature.group"
+                version="" />
+
+            <iu
+                id="org.eclipse.equinox.executable"
+                version="" />
+            <slicingOptions
+                includeOptional="false"
+                includeNonGreedy="false"
+                followStrict="true"
+                followOnlyFilteredRequirements="true" />
+        </p2.mirror>
+        <p2.remove.iu>
+            <repository location="file://${featureTemp}" />
+            <iu id="org.eclipse.jdt.feature" />
+            <iu id="org.eclipse.jdt.source.feature" />
+            <iu id="org.eclipse.platform.feature" />
+            <iu id="org.eclipse.platform.source.feature" />
+            <iu id="org.eclipse.rcp.feature" />
+            <iu id="org.eclipse.rcp.source.feature" />
+            <iu id="org.eclipse.jdt.feature.jar" />
+            <iu id="org.eclipse.jdt.source.feature.jar" />
+            <iu id="org.eclipse.platform.feature.jar" />
+            <iu id="org.eclipse.platform.source.feature.jar" />
+            <iu id="org.eclipse.rcp.feature.jar" />
+            <iu id="org.eclipse.rcp.source.feature.jar" />
+        </p2.remove.iu>
+        <p2.repo2runnable
+            destination="${featureTemp2}/eclipse"
+            failonerror="true">
+            <source
+                dir="${featureTempRoot}"
+                includes="${featureTempDir}" />
+        </p2.repo2runnable>
+        <delete verbose="true">
+            <fileset
+                dir="${featureTemp2}/eclipse"
+                includes="*.jar" />
+            <fileset
+                dir="${featureTemp2}/eclipse"
+                includes="*.xml" />
+        </delete>
+        <antcall target="assembler" />
+    </target>
+
+    <target name="assembler">
+        <mkdir dir="${equinoxPostingDirectory}/${buildLabel}/checksum" />
+        <property
+            name="archiveFullPath"
+            value="${postingDirectory}/${buildLabel}/${archiveName}" />
+        <exec
+            executable="zip"
+            dir="${featureTemp2}">
+            <arg line="${archiveFullPath} -r ." />
+        </exec>
+    </target>
+</project>
