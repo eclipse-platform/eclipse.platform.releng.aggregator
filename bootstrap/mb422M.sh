@@ -5,7 +5,11 @@
 
 # set minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
-export PATH=/usr/local/bin:/usr/bin:/bin
+# care is needed not have anything in ${HOME}/bin that would effect the build 
+# unintentionally, but is required to make use of "source buildeclipse.shsource". 
+# Likely only a "release engineer" would be interested, such as to override "SIGNING" for 
+# a test I-build on a remote machine. 
+export PATH=/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 # unset common variables which we don't want (or, set ourselves)
 unset JAVA_HOME
 unset JAVA_ROOT
@@ -34,7 +38,6 @@ source buildeclipse.shsource 2>/dev/null
 export BRANCH=R4_2_maintenance
 export BUILD_TYPE=M
 export STREAM=4.2.2
-
 
 $BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM
 
