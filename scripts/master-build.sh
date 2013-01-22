@@ -95,7 +95,8 @@ then
 echo "INFO: apply temp patch"
 echo "DEBUG: aggDir: $aggDir"
 echo "DEBUG: pwd: $PWD"
-patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
+#patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
+patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/scripts/tempPatches/e4rcpsource.patch
 checkForErrorExit $? "Error occurred applying patch"
 fi 
 
