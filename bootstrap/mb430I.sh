@@ -17,14 +17,6 @@ unset JAVA_JRE
 unset CLASSPATH
 unset JAVA_BINDIR
 
-
-export BUILD_HOME=/shared/eclipse/builds
-export JAVA_HOME=/shared/common/jdk1.7.0_11
-export ANT_HOME=/shared/common/apache-ant-1.8.4
-export ANT_OPTS="-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"
-export MAVEN_PATH=/shared/common/apache-maven-3.0.4/bin
-export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
-
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, so releng group has write access to anything
 # we create.
@@ -34,6 +26,15 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 
 # this file is to ease local builds to override some variables. It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
+
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0_11}
+export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.8.4}
+export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
+export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.0.4/bin}
+
+# no override for minimal $PATH
+export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
 export BRANCH=master
 export BUILD_TYPE=I
@@ -53,8 +54,8 @@ export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 # -Djava.io.tmpdir=${TMP_DIR}
 export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp}
 mkdir -p ${TMP_DIR}
-export MAVEN_OPTS="-Xmx3072m -XX:MaxPermSize=512m -Dtycho.localArtifacts=ignore -Djava.io.tmpdir=${TMP_DIR}"
-#export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256m -Djava.io.tmpdir=${TMP_DIR}"
+export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2048m -XX:MaxPermSize=512m -Dtycho.localArtifacts=ignore -Djava.io.tmpdir=${TMP_DIR}"}
+#export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2048m -XX:MaxPermSize=512m -Djava.io.tmpdir=${TMP_DIR}"}
 
 env > $BUILD_ROOT/env.txt
 echo "= = = = = " >> $BUILD_ROOT/env.txt
