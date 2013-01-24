@@ -84,7 +84,6 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
 <li><a href="#JDTSDK">JDT SDK</a></li>
 <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
-<li><a href="#JARPROCESSOR">Jar Processor</a></li>
 <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
 <li><a href="#PDESDK">PDE SDK</a></li>
 <li><a href="#CVSRuntime">CVS Client Runtime Binary</a></li>
@@ -213,11 +212,6 @@ from the <a href="http://download.eclipse.org/tools/orbit/downloads/">Orbit Down
 				<ul>
 				<li>
 				These drops contain the standalone batch java compiler, Ant compiler adapter and associated source. The batch compiler and Ant adapter (ecj.jar) are extracted from the org.eclipse.jdt.core plug-in as a 1.2MB download. For examples of usage, please refer to this help section: JDT Plug-in Developer Guide>Programmer's Guide>JDT Core>Compiling Java code.</li></ul>
-
-				<li><a name="JARPROCESSOR"> <b> Jar Processor </b> </a>
-				<ul>
-				<li>
-				These drops contain the standalone jar processor and associated source.  The jar processor is extracted from org.eclipse.update.core.  For details, see the	wiki pages for <a href="http://wiki.eclipse.org/index.php/Update_Site_Optimization">Update Site Optimization</a> and <a href="http://wiki.eclipse.org/index.php/Pack200#Jar_Processor">Pack200 Compression</a>.</li></ul>
 
 				<li><a name="PDERuntime"> <b> PDE Runtime Binary </b> </a>
 				<ul>
