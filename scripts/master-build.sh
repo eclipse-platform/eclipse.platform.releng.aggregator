@@ -90,12 +90,14 @@ checkForErrorExit $? "Error occurred while updating build input"
 
 #if [[ $BUILD_ID =~ [IN] ]] 
 #then
-# temp hack for bug 398201
+# temp hack for bug 398141 and others
 # apply the pre-created patch from tempPatches
 #echo "INFO: apply temp patch"
 #echo "DEBUG: aggDir: $aggDir"
 #echo "DEBUG: pwd: $PWD"
 #patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
+#patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/scripts/tempPatches/e4rcpsource.patch
+#patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/scripts/tempPatches/ppc.patch
 #checkForErrorExit $? "Error occurred applying patch"
 #fi 
 
@@ -128,7 +130,6 @@ checkForErrorExit $? "Error occurred during gather parts"
 #$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
 #checkForErrorExit $? "Error occurred during parse-logs"
 
-/bin/bash $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE
-checkForErrorExit $? "Error occurred during parse-logs"
-
+/bin/bash $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
+checkForErrorExit $? "Error occurred during publish-eclipse"
 
