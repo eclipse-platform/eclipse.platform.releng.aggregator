@@ -562,6 +562,8 @@ fn-gather-platform ()
         cp org.eclipse.rcp.sdk.id-hpux.gtk.ia64_32.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64_32.zip
         cp org.eclipse.rcp.sdk.id-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz
         cp org.eclipse.rcp.sdk.id-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+        cp org.eclipse.rcp.sdk.id-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz
+        cp org.eclipse.rcp.sdk.id-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz
         cp org.eclipse.rcp.sdk.id-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
         cp org.eclipse.rcp.sdk.id-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
         cp org.eclipse.rcp.sdk.id-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
