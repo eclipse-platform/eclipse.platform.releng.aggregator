@@ -127,9 +127,12 @@ checkForErrorExit $? "Error occurred during run maven build"
 $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-parts-ouptut.txt
 checkForErrorExit $? "Error occurred during gather parts"
 
-#$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
-#checkForErrorExit $? "Error occurred during parse-logs"
+$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
+$checkForErrorExit $? "Error occurred during parse-logs"
 
-/bin/bash $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
+$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
+# if all ended well, put "promotion scripts" in known locations
+#$SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
+#checkForErrorExit $? "Error occurred during promote-build"
