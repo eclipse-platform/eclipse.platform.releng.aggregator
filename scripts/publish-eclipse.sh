@@ -45,7 +45,4 @@ fn-parse-compile-logs "$BUILD_ID" \
 "$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
 "$buildDirectory" "$launcherJar"
 
-# TODO Not sure this file is needed?
-touch "$buildDirectory"/directory.txt
-
 fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"

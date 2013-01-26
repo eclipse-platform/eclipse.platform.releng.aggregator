@@ -134,5 +134,5 @@ $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publis
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
 # if all ended well, put "promotion scripts" in known locations
-#$SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
-#checkForErrorExit $? "Error occurred during promote-build"
+$SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
+checkForErrorExit $? "Error occurred during promote-build"

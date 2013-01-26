@@ -6,6 +6,39 @@
 # a different user id must promote things to "downloads". The promotion scripts 
 # also trigger the unit tests on Hudson.
 
+function usage () 
+{
+    printf "\n\n\t%s\n" "promote-build.sh (PDE|CBI) if none specified, PDE assumed"
+}
+
+BUILD_TECH=$1
+if [[ -z "$BUILD_TECH" ]]
+  then
+      BUILD_TECH=PDE
+  fi
+
+case $BUILD_TECH in
+
+        'PDE' )
+                echo "promote PDE build"
+                ;;
+
+        'CBI' )
+                echo "promote CBI build"
+                # always assume true, for now, until debugged
+                testbuildonly=true;
+                ;;
+        *) echo "ERROR: Invalid argument to $(basename $0)";
+           usage;
+           exit 1
+            ;;
+esac
+
+
+source $SCRIPT_PATH/build-functions.sh
+
+source "$2"
+
 
 # The 'workLocation' provides a handy central place to have the
 # promote script, and log results. ASSUMING this works for all
@@ -19,10 +52,8 @@ promoteScriptLocationEclipse=$workLocation/queue
 # directory should normally exist -- best to create first, with committer's ID --
 # but in case not
 mkdir -p "${promoteScriptLocationEclipse}"
-
-#always use TEST for now
-testbuildonly=true
-scriptName=promote-${eclipseStream}-${buildId}.sh
+env > env.txt
+scriptName=promote-${STREAM}-${BUILD_ID}.sh
 if [[ "${testbuildonly}" == "true" ]]
 then
     # allows the "test" creation of promotion script, but, not have it "seen" be cron job
@@ -32,7 +63,8 @@ fi
 ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
-echo "$workLocation/syncDropLocation.sh $eclipseStream $buildId" >> ${promoteScriptLocationEclipse}/${scriptName}
+# TODO: changed "syncDropLocation" to handle a third parameter (CBI or PDE)
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
@@ -40,7 +72,7 @@ chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
 # no need to promote anything for 3.x builds
 # (equinox portion should be the same, so we will
 # create for equinox for for only 4.x primary builds)
-if [[ $eclipseStream > 4 ]]
+if [[ $STREAM > 4 ]]
 then
     # The 'workLocation' provides a handy central place to have the
     # promote script, and log results. ASSUMING this works for all
@@ -56,9 +88,13 @@ then
     mkdir -p "${promoteScriptLocationEquinox}"
 
     eqFromDir=${equinoxPostingDirectory}/${buildId}
-    # fake location, for now
-    eqToDir="/shared/eclipse/temp/eqdrops"
-    #eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
+    if [[ "$BUILD_TECH" == 'PDE' ]]
+    then
+        eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
+    else
+        # TODO temp location, for now
+        eqToDir="/shared/eclipse/temp/download.eclipse.org/equinox/drops/"
+    fi
     
     # Note: for proper mirroring at Eclipse, we probably do not want/need to
     # maintain "times" on build machine, but let them take times at time of copying.
