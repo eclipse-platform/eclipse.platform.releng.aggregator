@@ -60,7 +60,7 @@ then
     exit 1
 fi
 
-BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${STREAMMinor}${STREAMService}${BUILD_TYPE}}
+BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${BUILD_TYPE}}
 
 echo "Exporting scripts ... "
 echo "  STREAM: $STREAM"
@@ -69,6 +69,7 @@ echo "  STREAMMinor: $STREAMMinor"
 echo "  STREAMService: $STREAMService"
 echo "  BUILD_TYPE: $BUILD_TYPE"
 echo "  BUILD_ROOT: $BUILD_ROOT"
+echo "  BUILD_HOME: $BUILD_HOME"
 
 # remove, if exists, from previous run
 rm scripts.zip 2>/dev/null
