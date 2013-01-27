@@ -661,7 +661,7 @@ fn-slice-repos ()
             -DbuildId="$BUILD_ID" \
             -DbuildRepo="$REPO_DIR_DIR" \
             -DpostingDirectory=$(dirname "$BUILD_DIR") \
-            -DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
+            -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops") \
             -DbuildLabel="$BUILD_ID" \
             -DbuildDirectory="$BUILD_DIR"
         popd
