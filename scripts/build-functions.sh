@@ -661,7 +661,7 @@ fn-slice-repos ()
             -DbuildId="$BUILD_ID" \
             -DbuildRepo="$REPO_DIR_DIR" \
             -DpostingDirectory=$(dirname "$BUILD_DIR") \
-            -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops") \
+            -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
             -DbuildLabel="$BUILD_ID" \
             -DbuildDirectory="$BUILD_DIR"
         popd
@@ -810,7 +810,7 @@ fn-publish-eclipse ()
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
         -DpostingDirectory=$(dirname "$BUILD_DIR") \
-        -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops") \
+        -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
         -DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
         -Dhudson=true \
