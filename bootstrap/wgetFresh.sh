@@ -12,11 +12,11 @@ initScriptTag=master
 # to build, all that's needed is the appropriate mbabcX.sh scripts. along with "bootstrap.sh". 
 # It gets what ever else it needs.
 
-wget --no-verbose -O mb3M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb3M.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O mb4M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O mb4I.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O mb4N.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4N.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O bootstrap.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/bootstrap.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache -O mb3M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb3M.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache  -O mb4M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache  -O mb4I.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache  -O mb4N.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4N.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache  -O bootstrap.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/bootstrap.sh?h=$initScriptTag 2>&1;
 
 
 # handy script to "wrap" a normal build script such as mb4I.sh to set global test/debug settings
@@ -27,7 +27,7 @@ wget --no-verbose -O bootstrap.sh http://git.eclipse.org/c/platform/eclipse.plat
 # but will remove it if no differences found.
 # and a command line like the following works well
 
-wget --no-verbose -O wgetFresh.NEW.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/wgetFresh.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache -O wgetFresh.NEW.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/wgetFresh.sh?h=$initScriptTag 2>&1;
 
 differs=`diff wgetFresh.NEW.sh wgetFresh.sh`
 echo "differs: ${differs}"
