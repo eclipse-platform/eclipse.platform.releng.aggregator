@@ -12,10 +12,10 @@ initScriptTag=master
 # to build, all that's needed is the appropriate mbabcX.sh scripts. along with "bootstrap.sh". 
 # It gets what ever else it needs.
 
-wget --no-verbose -O mb382M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb382M.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O mb422M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb422M.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O mb430I.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb430I.sh?h=$initScriptTag 2>&1;
-wget --no-verbose -O mb430N.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb430N.sh?h=$initScriptTag 2>&1;
+wget --no-verbose -O mb3M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb3M.sh?h=$initScriptTag 2>&1;
+wget --no-verbose -O mb4M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
+wget --no-verbose -O mb4I.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;
+wget --no-verbose -O mb4N.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4N.sh?h=$initScriptTag 2>&1;
 wget --no-verbose -O bootstrap.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/bootstrap.sh?h=$initScriptTag 2>&1;
 
 
