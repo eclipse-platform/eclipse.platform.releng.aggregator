@@ -218,10 +218,12 @@ fn-git-dir ()
     echo $GIT_CACHE/$( basename "$URL" .git )
 }
 
-# USAGE: fn-build-dir ROOT BRANCH BUILD_ID
+# USAGE: fn-build-dir ROOT BRANCH BUILD_ID STREAM
 #   ROOT: /shared/eclipse/builds
 #   BRANCH: R4_2_maintenance
 #   BUILD_ID: M20121119-1900
+#   STREAM: 4.3.0
+# TODO: no longer need branch
 fn-build-dir () 
 {
     ROOT="$1"; shift
@@ -234,7 +236,7 @@ fn-build-dir ()
     then
         dropDirSegment=siteDir/eclipse/downloads/drops4cbibased
     fi
-    echo $ROOT/$BRANCH/$dropDirSegment/$BUILD_ID
+    echo $ROOT/$dropDirSegment/$BUILD_ID
 }
 
 # USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
