@@ -87,6 +87,7 @@ then
     # but in case not
     mkdir -p "${promoteScriptLocationEquinox}"
 
+    equinoxPostingDirectory=$BUILD_ROOT/siteDir/equinox/drops"
     eqFromDir=${equinoxPostingDirectory}/${buildId}
     if [[ "$BUILD_TECH" == 'PDE' ]]
     then
@@ -94,6 +95,7 @@ then
     else
         # TODO temp location, for now
         eqToDir="/shared/eclipse/temp/download.eclipse.org/equinox/drops/"
+        #eqToDir="/home/data/httpd/download.eclipse.org/equinox/dropscbibased/"
     fi
     
     # Note: for proper mirroring at Eclipse, we probably do not want/need to

@@ -810,7 +810,7 @@ fn-publish-eclipse ()
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
         -DpostingDirectory=$(dirname "$BUILD_DIR") \
-        -DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
+        -DequinoxPostingDirectory=$BUILD_ROOT/siteDir/equinox/drops") \
         -DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
         -Dhudson=true \
