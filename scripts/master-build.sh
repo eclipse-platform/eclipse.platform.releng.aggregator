@@ -125,7 +125,7 @@ $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-pa
 checkForErrorExit $? "Error occurred during gather parts"
 
 $SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
-$checkForErrorExit $? "Error occurred during parse-logs"
+checkForErrorExit $? "Error occurred during parse-logs"
 
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
