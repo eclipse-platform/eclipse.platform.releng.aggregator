@@ -33,7 +33,7 @@ if [ -z "$BUILD_ID" ]; then
 	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "${STREAM}" )
 basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BRANCH" "$BASEBUILDER_TAG" )
 
 fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"

@@ -227,7 +227,14 @@ fn-build-dir ()
     ROOT="$1"; shift
     BRANCH="$1"; shift
     BUILD_ID="$1"; shift
-    echo $ROOT/$BRANCH/dirs/$BUILD_ID
+    STREAM="$1"; shift
+    eclipseStreamMajor=${STREAM:0:1}
+    dropDirSegment=siteDir/eclipse/downloads/dropscbibased
+    if [[ $eclipseStreamMajor > 3 ]] 
+    then
+        dropDirSegment=siteDir/eclipse/downloads/drops4cbibased
+    fi
+    echo $ROOT/$BRANCH/$dropDirSegment/$BUILD_ID
 }
 
 # USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
@@ -239,7 +246,7 @@ fn-basebuilder-dir ()
     ROOT="$1"; shift
     BRANCH="$1"; shift
     BASEBUILDER_TAG="$1"; shift
-    echo $ROOT/$BRANCH/org.eclipse.releng.basebuilder_$BASEBUILDER_TAG
+    echo $ROOT/org.eclipse.releng.basebuilder_$BASEBUILDER_TAG
 }
 
 

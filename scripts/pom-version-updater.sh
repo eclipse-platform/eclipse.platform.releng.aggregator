@@ -26,7 +26,7 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
 
 if [ -z "$BUILD_ID" ]; then
 	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
