@@ -43,8 +43,6 @@ export BRANCH=master
 export BUILD_TYPE=N
 export STREAM=4.3.0
 
-$BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM
-
 eclipseStreamMajor=${STREAM:0:1}
 
 # unique short name for stream and build type
@@ -53,6 +51,9 @@ BUILDSTREAMTYPEDIR=${eclipseStreamMajor}$BUILD_TYPE
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 
 export PRODUCTION_SCRIPTS_DIR=production
+
+
+$BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM
 
 #BOOTSTRAPENVFILE=$BUILD_ROOT/env${BUILDSTREAMTYPEDIR}.txt
 #timestamp=$( date +%Y%m%d%H%M )

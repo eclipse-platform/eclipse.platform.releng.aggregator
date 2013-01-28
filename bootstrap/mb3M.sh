@@ -39,11 +39,9 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=master
-export BUILD_TYPE=I
-export STREAM=4.3.0
-
-$BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM
+export BRANCH=R4_2_maintenance
+export BUILD_TYPE=M
+export STREAM=3.8.2
 
 eclipseStreamMajor=${STREAM:0:1}
 
@@ -53,6 +51,9 @@ BUILDSTREAMTYPEDIR=${eclipseStreamMajor}$BUILD_TYPE
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 
 export PRODUCTION_SCRIPTS_DIR=production
+
+
+$BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM
 
 #BOOTSTRAPENVFILE=$BUILD_ROOT/env${BUILDSTREAMTYPEDIR}.txt
 #timestamp=$( date +%Y%m%d%H%M )

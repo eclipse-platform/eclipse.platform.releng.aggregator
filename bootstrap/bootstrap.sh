@@ -61,7 +61,6 @@ then
 fi
 
 BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${BUILD_TYPE}}
-
 echo "Exporting production scripts ... "
 echo "  STREAM: $STREAM"
 echo "  STREAMMajor: $STREAMMajor"
@@ -70,17 +69,28 @@ echo "  STREAMService: $STREAMService"
 echo "  BUILD_TYPE: $BUILD_TYPE"
 echo "  BUILD_ROOT: $BUILD_ROOT"
 echo "  BUILD_HOME: $BUILD_HOME"
+echo "  PRODUCTION_SCRIPTS_DIR: $PRODUCTION_SCRIPTS_DIR"
+
+# We put these in build_root in case two builds get started at once. 
+# (such as N and I build, both from master).  
+TEMPZIPFILE=${STREAMMajor}${BUILD_TYPE}tempscripts.zip
+TEMPFETCH=${reponame}-${BRANCH}
+TEMPFETCHFOLDER=${BUILD_ROOT}/${TEMPFETCH}
 
 # remove, if exists, from previous run
-rm tempscripts.zip 2>/dev/null
-rm ${reponame}-${BRANCH} 2>/dev/null
+rm ${TEMPZIPFILE} 2>/dev/null
+rm ${TEMPFETCHFOLDER} 2>/dev/null
+
+echo "TEMPZIPFILE: ${TEMPZIPFILE}"
+echo "TEMPFETCH: ${TEMPFETCH}"
+echo "TEMPFETCHFOLDER ${TEMPFETCHFOLDER}"
 
 # eventually may want to use tagged version of production scripts, if not aggregator
 # then the CGit URL for one file would have the form:
 # http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/production/wgetFresh.sh?tag=vI20120417-0700
 # (not sure about "repo" ... I think can just put in tag, for BRANCH?) 
 
-wget  --no-verbose -O tempscripts.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
+wget  --no-verbose -O ${TEMPZIPFILE} http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
 rc=$?
 if [[ $rc != 0 ]]
 then
@@ -91,23 +101,26 @@ fi
 #remove any previous versions, to make sure completely fresh
 rm -fr $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR} 2>/dev/null
 
-mkdir -p $BUILD_ROOT
+# Make dir in case first run (note: this must be after the above "removes", 
+# or else first time through they will remove this directory itself. 
+mkdir -p ${BUILD_ROOT}
 if [[ $? != 0 ]] 
 then
     echo "Exiting, since could not make $BUILD_ROOT, as expected."
     exit 1
 fi
 
+
 # We only need the production scripts directory, for this phase
-unzip -q -o tempscripts.zip ${reponame}-${BRANCH}/${PRODUCTION_SCRIPTS_DIR}* 
+unzip  -o ${TEMPZIPFILE} ${TEMPFETCH}/${PRODUCTION_SCRIPTS_DIR}* -d ${BUILD_ROOT} > zipout.txt 
 if [[ $? != 0 ]] 
 then
     echo "Exiting, since could not unzip, as expected."
     exit 1
 fi
 
-
-mv ${reponame}-${BRANCH}/${PRODUCTION_SCRIPTS_DIR} $BUILD_ROOT
+# mv whole script directory "up" so directly under build_root, in constant place
+mv ${BUILD_ROOT}/${TEMPFETCH}/${PRODUCTION_SCRIPTS_DIR} ${BUILD_ROOT}
 
 if [[ $? != 0 ]] 
 then
@@ -115,7 +128,7 @@ then
     exit 1
 fi
 
-chmod +x $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR}/*.sh
+chmod +x ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/*.sh
 
 if [[ $? != 0 ]] 
 then
@@ -123,5 +136,5 @@ then
     exit 1
 fi
 
-rm tempscripts.zip
-rm -fr ${reponame}-${BRANCH} 
+rm ${TEMPZIPFILE}
+rm -fr ${TEMPFETCHFOLDER} 
