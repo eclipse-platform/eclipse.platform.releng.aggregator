@@ -87,7 +87,7 @@ then
     # but in case not
     mkdir -p "${promoteScriptLocationEquinox}"
 
-    equinoxPostingDirectory=$BUILD_ROOT/siteDir/equinox/drops"
+    equinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops"
     eqFromDir=${equinoxPostingDirectory}/${buildId}
     if [[ "$BUILD_TECH" == 'PDE' ]]
     then
