@@ -96,6 +96,18 @@
         <extensions>true</extensions>
       </plugin>
       <plugin>
+        <groupId>org.eclipse.cbi</groupId>
+        <artifactId>maven-cbi-plugin</artifactId>
+        <version>0.0.2-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate-api-build-xml</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
         <configuration>
@@ -490,6 +502,72 @@
         <properties>
             <toolsjar>${java.home}/../Classes/classes.jar</toolsjar>
         </properties>
+    </profile>
+    <profile>
+      <id>api-generation</id>
+      <activation>
+        <file>
+          <exists>.apibuild.xml</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <!-- this is actually present in any 0.14+ version -->
+            <version>${tycho.version}</version>
+            <configuration>
+              <repositories>
+                <repository>
+                  <id>juno</id>
+                  <layout>p2</layout>
+                  <url>http://download.eclipse.org/releases/juno</url>
+                </repository>
+              </repositories>
+              <!-- this is to fix some lucene 3.x compatibility issue -->
+              <argLine>-XX:-UseLoopPredicate -Dhelp.lucene.tokenizer=standard</argLine>
+              <!-- actuall indexer call -->
+              <appArgLine>-application org.eclipse.ant.core.antRunner -buildfile .apibuild.xml</appArgLine>
+              <dependencies>
+                <!-- list of bundles that we need -->
+                <dependency>
+                  <artifactId>org.eclipse.ant.core</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.apache.ant</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.api.tools</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.build</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.core</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.equinox.launcher</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+              </dependencies>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>eclipse-run</goal>
+                </goals>
+                <phase>compile</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>
