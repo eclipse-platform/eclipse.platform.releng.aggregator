@@ -15,7 +15,7 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-SCRIPT_PATH="${BUILD_ROOT}/scripts"
+export SCRIPT_PATH="${BUILD_ROOT}/scripts"
 
 source "${SCRIPT_PATH}/build-functions.sh"
 
@@ -70,6 +70,7 @@ echo "export MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
 echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
 echo "export LOCAL_REPO=\"${LOCAL_REPO}\"" >>$BUILD_ENV_FILE
 echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\""  >>$BUILD_ENV_FILE
+echo "export SCRIPT_PATH=\"${SCRIPT_PATH}\""  >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 echo "export BUILD_ENV_FILE=\"${BUILD_ENV_FILE}\"" >>$BUILD_ENV_FILE
 echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
