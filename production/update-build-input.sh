@@ -13,7 +13,7 @@ if [ ! -r "$1" ]; then
 fi
 
 pushd $( dirname $0 ) >/dev/null
-SCRIPT_PATH=$(pwd)
+SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 popd >/dev/null
 
 . $SCRIPT_PATH/build-functions.sh
