@@ -16,7 +16,7 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
 fi
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
-export STREAMS_PATH="${BUILD_ROOT}/streams"
+
 
 source "${SCRIPT_PATH}/build-functions.sh"
 
@@ -41,6 +41,8 @@ BUILD_ENV_FILE=$logsDirectory/$BUILD_ID.env
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
+
+export STREAMS_PATH="${aggDir}/streams"
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
@@ -72,6 +74,7 @@ echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
 echo "export LOCAL_REPO=\"${LOCAL_REPO}\"" >>$BUILD_ENV_FILE
 echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\""  >>$BUILD_ENV_FILE
 echo "export SCRIPT_PATH=\"${SCRIPT_PATH}\""  >>$BUILD_ENV_FILE
+echo "export STREAMS_PATH=\"${STREAMS_PATH}\""  >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 echo "export BUILD_ENV_FILE=\"${BUILD_ENV_FILE}\"" >>$BUILD_ENV_FILE
 echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
