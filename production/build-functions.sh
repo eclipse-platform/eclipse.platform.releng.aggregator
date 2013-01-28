@@ -339,7 +339,7 @@ fn-maven-build-aggregator ()
 #   BUILD_ID: M20121116-1100
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   SCRIPT: /shared/eclipse/builds/scripts/git-submodule-checkout.sh
-#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+#   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-submodule-checkout () 
 {
     BUILD_ID="$1"; shift
@@ -385,7 +385,7 @@ fn-add-submodule-updates ()
 # USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
 #   BUILD_ID: M20121116-1100
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+#   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-tag-build-inputs () 
 {
     BUILD_ID="$1"; shift

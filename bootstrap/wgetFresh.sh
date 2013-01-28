@@ -9,7 +9,7 @@ initScriptTag=master
 # http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/wgetFresh.sh?tag=vI20120417-0700
 
 
-# to build, all that's needed is the appropriate mbabcX.sh scripts. along with "bootstrap.sh". 
+# to build, all that's needed is the appropriate mbXZ.sh scripts. along with "bootstrap.sh". 
 # It gets what ever else it needs.
 
 wget --no-verbose --no-cache -O mb3M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb3M.sh?h=$initScriptTag 2>&1;

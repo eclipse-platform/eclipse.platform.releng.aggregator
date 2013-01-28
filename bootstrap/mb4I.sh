@@ -30,13 +30,14 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 source buildeclipse.shsource 2>/dev/null
 
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
-export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0_11}
-export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.8.4}
-export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
-export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.0.4/bin}
+# we should not need the following here in boot strap, for now, but might in future
+#export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0_11}
+#export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.8.4}
+#export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
+#export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.0.4/bin}
 
 # no override for minimal $PATH
-export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
+#export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
 export BRANCH=master
 export BUILD_TYPE=I
@@ -49,27 +50,19 @@ eclipseStreamMajor=${STREAM:0:1}
 # unique short name for stream and build type
 BUILDSTREAMTYPEDIR=${eclipseStreamMajor}$BUILD_TYPE
 
-# for now, we "redefine" BUILD_ROOT for smaller, incremental change, but eventually, may work 
-# though all scripts so "BRANCH" is no longer part of directory name
 export BUILD_ROOT=${BUILD_HOME}/${BUILDSTREAMTYPEDIR}
 
-# Any invocation of Java, Ant, Maven, etc., should use this as default TMP direcotory, 
-# instead of the default /tmp by using 
-# -Djava.io.tmpdir=${TMP_DIR}
-export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp}
-mkdir -p ${TMP_DIR}
-export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2048m -XX:MaxPermSize=256m -Dtycho.localArtifacts=ignore -Djava.io.tmpdir=${TMP_DIR}"}
-#export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2048m -XX:MaxPermSize=512m -Djava.io.tmpdir=${TMP_DIR}"}
+export PRODUCTION_SCRIPTS_DIR=production
 
-BOOTSTRAPENVFILE=$BUILD_ROOT/env${BUILDSTREAMTYPEDIR}.txt
-timestamp=$( date +%Y%m%d%H%M )
-echo "Environment at time of starting build at ${timestamp}." > $BOOTSTRAPENVFILE
-env >> $BOOTSTRAPENVFILE
-echo "= = = = = " >> $BOOTSTRAPENVFILE
-java -version  >> $BOOTSTRAPENVFILE 2>&1
-ant -version >> $BOOTSTRAPENVFILE
-mvn -version >> $BOOTSTRAPENVFILE
-echo "= = = = = " >> $BOOTSTRAPENVFILE
+#BOOTSTRAPENVFILE=$BUILD_ROOT/env${BUILDSTREAMTYPEDIR}.txt
+#timestamp=$( date +%Y%m%d%H%M )
+#echo "Environment at time of starting build at ${timestamp}." > $BOOTSTRAPENVFILE
+#env >> $BOOTSTRAPENVFILE
+#echo "= = = = = " >> $BOOTSTRAPENVFILE
+#java -version  >> $BOOTSTRAPENVFILE 2>&1
+#ant -version >> $BOOTSTRAPENVFILE
+#mvn -version >> $BOOTSTRAPENVFILE
+#echo "= = = = = " >> $BOOTSTRAPENVFILE
 
-${BUILD_ROOT}/scripts/master-build.sh ${BUILD_ROOT}/scripts/build_eclipse_org.env
+${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.env
 

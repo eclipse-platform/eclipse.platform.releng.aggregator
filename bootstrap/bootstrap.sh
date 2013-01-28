@@ -62,7 +62,7 @@ fi
 
 BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${BUILD_TYPE}}
 
-echo "Exporting scripts ... "
+echo "Exporting production scripts ... "
 echo "  STREAM: $STREAM"
 echo "  STREAMMajor: $STREAMMajor"
 echo "  STREAMMinor: $STREAMMinor"
@@ -72,15 +72,15 @@ echo "  BUILD_ROOT: $BUILD_ROOT"
 echo "  BUILD_HOME: $BUILD_HOME"
 
 # remove, if exists, from previous run
-rm scripts.zip 2>/dev/null
+rm production.zip 2>/dev/null
 rm ${reponame}-${BRANCH} 2>/dev/null
 
-# eventually may want to use tagged version of scripts, if not aggregator
+# eventually may want to use tagged version of production scripts, if not aggregator
 # then the CGit URL for one file would have the form:
-# http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
+# http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/production/wgetFresh.sh?tag=vI20120417-0700
 # (not sure about "repo" ... I think can just put in tag, for BRANCH?) 
 
-wget  --no-verbose -O scripts.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
+wget  --no-verbose -O production.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
 rc=$?
 if [[ $rc != 0 ]]
 then
@@ -98,8 +98,8 @@ then
     exit 1
 fi
 
-# We only need the scripts directory, for this phase
-unzip -q -o scripts.zip ${reponame}-${BRANCH}/scripts* 
+# We only need the production scripts directory, for this phase
+unzip -q -o production.zip ${reponame}-${BRANCH}/production* 
 if [[ $? != 0 ]] 
 then
     echo "Exiting, since could not unzip, as expected."
@@ -107,7 +107,7 @@ then
 fi
 
 
-mv ${reponame}-${BRANCH}/scripts $BUILD_ROOT
+mv ${reponame}-${BRANCH}/production $BUILD_ROOT
 
 if [[ $? != 0 ]] 
 then
@@ -115,13 +115,13 @@ then
     exit 1
 fi
 
-chmod +x $BUILD_ROOT/scripts/*.sh
+chmod +x $BUILD_ROOT/production/*.sh
 
 if [[ $? != 0 ]] 
 then
-    echo "Could not chmod of scripts to executable. Running under wrong id?"
+    echo "Could not chmod of production scripts to executable. Running under wrong id?"
     exit 1
 fi
 
-rm scripts.zip
+rm production.zip
 rm -fr ${reponame}-${BRANCH} 

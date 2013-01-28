@@ -15,7 +15,8 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-export SCRIPT_PATH="${BUILD_ROOT}/scripts"
+export SCRIPT_PATH="${BUILD_ROOT}/production"
+export STREAMS_PATH="${BUILD_ROOT}/streams"
 
 source "${SCRIPT_PATH}/build-functions.sh"
 
@@ -93,9 +94,9 @@ checkForErrorExit $? "Error occurred while updating build input"
 #echo "INFO: apply temp patch"
 #echo "DEBUG: aggDir: $aggDir"
 #echo "DEBUG: pwd: $PWD"
-#patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
-#patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/scripts/tempPatches/e4rcpsource.patch
-#patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/scripts/tempPatches/ppc.patch
+#patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/tempPatches/sbep2.patch
+#patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/tempPatches/e4rcpsource.patch
+#patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/tempPatches/ppc.patch
 #checkForErrorExit $? "Error occurred applying patch"
 #fi 
 
