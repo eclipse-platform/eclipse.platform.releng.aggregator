@@ -72,7 +72,7 @@ echo "  BUILD_ROOT: $BUILD_ROOT"
 echo "  BUILD_HOME: $BUILD_HOME"
 
 # remove, if exists, from previous run
-rm production.zip 2>/dev/null
+rm tempscripts.zip 2>/dev/null
 rm ${reponame}-${BRANCH} 2>/dev/null
 
 # eventually may want to use tagged version of production scripts, if not aggregator
@@ -80,7 +80,7 @@ rm ${reponame}-${BRANCH} 2>/dev/null
 # http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/production/wgetFresh.sh?tag=vI20120417-0700
 # (not sure about "repo" ... I think can just put in tag, for BRANCH?) 
 
-wget  --no-verbose -O production.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
+wget  --no-verbose -O tempscripts.zip http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
 rc=$?
 if [[ $rc != 0 ]]
 then
@@ -89,7 +89,7 @@ then
 fi
 
 #remove any previous versions, to make sure completely fresh
-rm -fr $BUILD_ROOT/scripts 2>/dev/null
+rm -fr $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR} 2>/dev/null
 
 mkdir -p $BUILD_ROOT
 if [[ $? != 0 ]] 
@@ -99,7 +99,7 @@ then
 fi
 
 # We only need the production scripts directory, for this phase
-unzip -q -o production.zip ${reponame}-${BRANCH}/production* 
+unzip -q -o tempscripts.zip ${reponame}-${BRANCH}/${PRODUCTION_SCRIPTS_DIR}* 
 if [[ $? != 0 ]] 
 then
     echo "Exiting, since could not unzip, as expected."
@@ -107,7 +107,7 @@ then
 fi
 
 
-mv ${reponame}-${BRANCH}/production $BUILD_ROOT
+mv ${reponame}-${BRANCH}/${PRODUCTION_SCRIPTS_DIR} $BUILD_ROOT
 
 if [[ $? != 0 ]] 
 then
@@ -115,7 +115,7 @@ then
     exit 1
 fi
 
-chmod +x $BUILD_ROOT/production/*.sh
+chmod +x $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR}/*.sh
 
 if [[ $? != 0 ]] 
 then
@@ -123,5 +123,5 @@ then
     exit 1
 fi
 
-rm production.zip
+rm tempscripts.zip
 rm -fr ${reponame}-${BRANCH} 
