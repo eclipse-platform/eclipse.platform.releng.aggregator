@@ -17,6 +17,7 @@ unset JAVA_ROOT
 unset JAVA_JRE
 unset CLASSPATH
 unset JAVA_BINDIR
+unset JRE_HOME
 
 # 0002 is often the default for shell users, but it is not when ran from
 # a cron job, so we set it explicitly, so releng group has write access to anything
