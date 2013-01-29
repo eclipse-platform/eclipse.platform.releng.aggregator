@@ -36,6 +36,7 @@ if $SIGNING; then
 	fn-maven-signer-install "$signingDir" "$LOCAL_REPO"
 fi
 
-fn-maven-parent-install "$aggDir" "$LOCAL_REPO"
 fn-maven-cbi-install "$aggDir" "$LOCAL_REPO"
+fn-maven-parent-install "$aggDir" "$LOCAL_REPO"
+
 
