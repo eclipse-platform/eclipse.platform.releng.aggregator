@@ -15,7 +15,8 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-SCRIPT_PATH="${BUILD_ROOT}/scripts"
+export SCRIPT_PATH="${BUILD_ROOT}/production"
+
 
 source "${SCRIPT_PATH}/build-functions.sh"
 
@@ -28,7 +29,7 @@ cd $BUILD_ROOT
 
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
 logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory"
@@ -41,8 +42,7 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
-# Just in case it doesn't exist yet
-mkdir -p ${TMP_DIR}
+export STREAMS_PATH="${aggDir}/streams"
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
@@ -73,6 +73,8 @@ echo "export MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
 echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
 echo "export LOCAL_REPO=\"${LOCAL_REPO}\"" >>$BUILD_ENV_FILE
 echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\""  >>$BUILD_ENV_FILE
+echo "export SCRIPT_PATH=\"${SCRIPT_PATH}\""  >>$BUILD_ENV_FILE
+echo "export STREAMS_PATH=\"${STREAMS_PATH}\""  >>$BUILD_ENV_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 echo "export BUILD_ENV_FILE=\"${BUILD_ENV_FILE}\"" >>$BUILD_ENV_FILE
 echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
@@ -90,12 +92,14 @@ checkForErrorExit $? "Error occurred while updating build input"
 
 #if [[ $BUILD_ID =~ [IN] ]] 
 #then
-# temp hack for bug 398201
+# temp hack for bug 398141 and others
 # apply the pre-created patch from tempPatches
 #echo "INFO: apply temp patch"
 #echo "DEBUG: aggDir: $aggDir"
 #echo "DEBUG: pwd: $PWD"
-#patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/scripts/tempPatches/sbep2.patch
+#patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/tempPatches/sbep2.patch
+#patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/tempPatches/e4rcpsource.patch
+#patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/tempPatches/ppc.patch
 #checkForErrorExit $? "Error occurred applying patch"
 #fi 
 
@@ -125,10 +129,12 @@ checkForErrorExit $? "Error occurred during run maven build"
 $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-parts-ouptut.txt
 checkForErrorExit $? "Error occurred during gather parts"
 
-#$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
-#checkForErrorExit $? "Error occurred during parse-logs"
+$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
+checkForErrorExit $? "Error occurred during parse-logs"
 
-/bin/bash $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
+$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
-
+# if all ended well, put "promotion scripts" in known locations
+$SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
+checkForErrorExit $? "Error occurred during promote-build"

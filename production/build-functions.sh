@@ -218,16 +218,25 @@ fn-git-dir ()
     echo $GIT_CACHE/$( basename "$URL" .git )
 }
 
-# USAGE: fn-build-dir ROOT BRANCH BUILD_ID
+# USAGE: fn-build-dir ROOT BRANCH BUILD_ID STREAM
 #   ROOT: /shared/eclipse/builds
 #   BRANCH: R4_2_maintenance
 #   BUILD_ID: M20121119-1900
+#   STREAM: 4.3.0
+# TODO: no longer need branch
 fn-build-dir () 
 {
     ROOT="$1"; shift
     BRANCH="$1"; shift
     BUILD_ID="$1"; shift
-    echo $ROOT/$BRANCH/dirs/$BUILD_ID
+    STREAM="$1"; shift
+    eclipseStreamMajor=${STREAM:0:1}
+    dropDirSegment=siteDir/eclipse/downloads/dropscbibased
+    if [[ $eclipseStreamMajor > 3 ]] 
+    then
+        dropDirSegment=siteDir/eclipse/downloads/drops4cbibased
+    fi
+    echo $ROOT/$dropDirSegment/$BUILD_ID
 }
 
 # USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
@@ -239,7 +248,7 @@ fn-basebuilder-dir ()
     ROOT="$1"; shift
     BRANCH="$1"; shift
     BASEBUILDER_TAG="$1"; shift
-    echo $ROOT/$BRANCH/org.eclipse.releng.basebuilder_$BASEBUILDER_TAG
+    echo $ROOT/org.eclipse.releng.basebuilder_$BASEBUILDER_TAG
 }
 
 
@@ -330,7 +339,7 @@ fn-maven-build-aggregator ()
 #   BUILD_ID: M20121116-1100
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   SCRIPT: /shared/eclipse/builds/scripts/git-submodule-checkout.sh
-#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+#   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-submodule-checkout () 
 {
     BUILD_ID="$1"; shift
@@ -376,7 +385,7 @@ fn-add-submodule-updates ()
 # USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
 #   BUILD_ID: M20121116-1100
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   REPOSITORIES_TXT: /shared/eclipse/builds/scripts/repositories.txt
+#   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-tag-build-inputs () 
 {
     BUILD_ID="$1"; shift
@@ -525,7 +534,7 @@ fn-gather-sdk ()
         pushd "$TARGET_PRODUCTS"
         cp org.eclipse.sdk.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc64.zip
         cp org.eclipse.sdk.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc.zip
-        cp org.eclipse.sdk.ide-hpux.gtk.ia64_32.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-hpux-gtk-ia64_32.zip
+        cp org.eclipse.sdk.ide-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-hpux-gtk-ia64.zip
         cp org.eclipse.sdk.ide-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc.tar.gz
         cp org.eclipse.sdk.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64.tar.gz
         cp org.eclipse.sdk.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390.tar.gz
@@ -559,7 +568,7 @@ fn-gather-platform ()
         pushd "$TARGET_PRODUCTS"
         cp org.eclipse.rcp.sdk.id-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip
         cp org.eclipse.rcp.sdk.id-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip
-        cp org.eclipse.rcp.sdk.id-hpux.gtk.ia64_32.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64_32.zip
+        cp org.eclipse.rcp.sdk.id-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64.zip
         cp org.eclipse.rcp.sdk.id-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz
         cp org.eclipse.rcp.sdk.id-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
         cp org.eclipse.rcp.sdk.id-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz
@@ -652,7 +661,7 @@ fn-slice-repos ()
             -DbuildId="$BUILD_ID" \
             -DbuildRepo="$REPO_DIR_DIR" \
             -DpostingDirectory=$(dirname "$BUILD_DIR") \
-            -DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
+            -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
             -DbuildLabel="$BUILD_ID" \
             -DbuildDirectory="$BUILD_DIR"
         popd
@@ -801,7 +810,7 @@ fn-publish-eclipse ()
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
         -DpostingDirectory=$(dirname "$BUILD_DIR") \
-        -DequinoxPostingDirectory=$(dirname "$BUILD_DIR") \
+        -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
         -DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
         -Dhudson=true \

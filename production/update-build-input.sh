@@ -13,7 +13,7 @@ if [ ! -r "$1" ]; then
 fi
 
 pushd $( dirname $0 ) >/dev/null
-SCRIPT_PATH=$(pwd)
+SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 popd >/dev/null
 
 . $SCRIPT_PATH/build-functions.sh
@@ -26,12 +26,14 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" )
+repositories=$( echo $STREAMS_PATH/repositories.txt )
+repoScript=$( echo $SCRIPT_PATH/git-submodule-checkout.sh )
+
 
 if [ -z "$BUILD_ID" ]; then
 	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-fn-pom-version-updater "$aggDir" "$LOCAL_REPO"
-fn-pom-version-report "$BUILD_ID" "$aggDir"  "$buildDirectory" 
 
+fn-submodule-checkout "$BUILD_ID" "$aggDir" "$repoScript" "$repositories"
+fn-add-submodule-updates "$aggDir"

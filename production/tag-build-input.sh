@@ -13,7 +13,7 @@ if [ ! -r "$1" ]; then
 fi
 
 pushd $( dirname $0 ) >/dev/null
-SCRIPT_PATH=$(pwd)
+SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 popd >/dev/null
 
 . $SCRIPT_PATH/build-functions.sh
@@ -26,7 +26,7 @@ cd $BUILD_ROOT
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
-repositories=$( echo $SCRIPT_PATH/repositories.txt )
+repositories=$( echo $STREAMS_PATH/repositories.txt )
 
 
 
