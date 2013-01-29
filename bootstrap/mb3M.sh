@@ -39,7 +39,7 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=R4_2_maintenance
+export BRANCH=R3_8_maintenance
 export BUILD_TYPE=M
 export STREAM=3.8.2
 
