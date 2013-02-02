@@ -25,8 +25,6 @@ case $BUILD_TECH in
 
         'CBI' )
                 echo "promote CBI build"
-                # always assume true, for now, until debugged
-                testbuildonly=true;
                 ;;
         *) echo "ERROR: Invalid argument to $(basename $0)";
            usage;
