@@ -277,6 +277,7 @@ fn-maven-parent-install ()
     pushd "$REPO_DIR"
     mvn -f eclipse-parent/pom.xml \
         clean install \
+        -q \
         -Dmaven.repo.local=$LOCAL_REPO
     popd
 }
@@ -816,7 +817,7 @@ fn-publish-eclipse ()
      # publishingContent, which is definitely source of content to copy from. 
     PUBLISHING_FILES_DIR=$BUILD_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse
     mkdir -p ${PUBLISHING_FILES_DIR}
-    rsync -r "${REPO_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/*" "${PUBLISHING_FILES_DIR}" 
+    rsync -r "${REPO_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/" "${PUBLISHING_FILES_DIR}" 
      
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
