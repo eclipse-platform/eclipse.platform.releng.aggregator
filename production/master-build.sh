@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # master script to drive Eclipse Platform builds.
-
+RAWDATE=$( date +%s )
 
 if [ $# -ne 1 ]; then
     echo USAGE: $0 env_file
@@ -37,6 +37,8 @@ checkForErrorExit $? "Could not create buildlogs directory"
 LOG=$buildDirectory/buildlogs/buildOutput.txt
 #exec >>$LOG 2>&1
 
+BUILD_PRETTY_DATE=$( date --date='@'$RAWDATE )
+
 # These files have variable/value pairs for this build, suitable for use in 
 # shell scripts, PHP files, or as Ant (or Java) properties
 BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
@@ -48,6 +50,15 @@ aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
 export STREAMS_PATH="${aggDir}/streams"
+
+BUILD_TYPE_NAME="Integration"
+if [ "$BUILD_TYPE" = M ]; then
+      BUILD_TYPE_NAME="Maintenance"
+  elif [ "$BUILD_TYPE" = N ]; then
+      BUILD_TYPE_NAME="Nightly (HEAD)"
+  elif [ "$BUILD_TYPE" = S ]; then
+      BUILD_TYPE_NAME="Stable (Milestone)"
+fi
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
@@ -84,7 +95,8 @@ fn-write-property STREAMS_PATH
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 fn-write-property BUILD_ENV_FILE
 fn-write-property BUILD_ID
-fn-write-property BUILD_DATE
+fn-write-property BUILD_PRETTY_DATE
+fn-write-property BUILD_TYPE_NAME
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines

@@ -53,4 +53,4 @@ fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
 #fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 #fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
-#fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_DATE"
+#fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_PRETTY_DATE"

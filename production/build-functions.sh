@@ -129,8 +129,9 @@ fn-git-reset-submodules ()
 #   BUILD_TYPE: I, M, N
 fn-build-id () 
 {
-    BUILD_TYPE="$1"; shift
-    echo $BUILD_TYPE$(date +%Y%m%d)-$(date +%H%M)
+     BUILD_TYPE="$1"; shift
+     timestamp=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+echo ${BUILD_TYPE}${timestamp}
 }
 
 # USAGE: fn-local-repo URL [TO_REPLACE]
@@ -727,13 +728,13 @@ fn-gather-compile-logs ()
 }
 
 
-# USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_DATE
+# USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_PRETTY_DATE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 #   STREAM: 4.2.2
 #   BUILD_TYPE: M, I, N
-#   BUILD_DATE: Thu Nov 20 17:47:35 EST 2012
+#   BUILD_PRETTY_DATE: Thu Nov 20 17:47:35 EST 2012
 fn-gather-main-index () 
 {
     BUILD_ID="$1"; shift
@@ -741,26 +742,29 @@ fn-gather-main-index ()
     BUILD_DIR="$1"; shift
     STREAM="$1"; shift
     BUILD_TYPE="$1"; shift
-    BUILD_TYPE_NAME=Integration
-    if [ "$BUILD_TYPE" = M ]; then
-        BUILD_TYPE_NAME=Maintenance
-    fi
-    BUILD_DATE="$1"; shift
+    # BUILD_TYPE_NAME=Integration
+    #if [ "$BUILD_TYPE" = M ]; then
+        #    BUILD_TYPE_NAME=Maintenance
+    #fi
+    BUILD_PRETTY_DATE="$1"; shift
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
-    # fail fast if not set up correctly
-    rc=$(fn-check-dir-exists TMP_DIR)
-    checkForErrorExit "$rc" "$rc"
+    # Simplified by creating PHP variables in buildproperties.php
+    cp "index.php.template" "$BUILD_DIR"/index.php
 
-    T1=${TMP_DIR}/t1_$$
-    T2=${TMP_DIR}/t2_$$
-    sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
-    sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
-    sed "s/@build@/$BUILD_ID/g" $T2 >$T1
-    sed "s/@date@/$BUILD_DATE/g" $T1 >$T2
-    sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
-    cp $T1 "$BUILD_DIR"/index.php
-    rm $T1 $T2
+    #    # fail fast if not set up correctly
+    #rc=$(fn-check-dir-exists TMP_DIR)
+    #checkForErrorExit "$rc" "$rc"
+
+    #T1=${TMP_DIR}/t1_$$
+    #T2=${TMP_DIR}/t2_$$
+    #sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
+    #sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
+    #sed "s/@build@/$BUILD_ID/g" $T2 >$T1
+    #sed "s/@date@/$BUILD_PRETTY_DATE/g" $T1 >$T2
+    #sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
+    #cp $T1 "$BUILD_DIR"/index.php
+    #rm $T1 $T2
     popd
 }
 
