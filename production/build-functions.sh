@@ -920,3 +920,40 @@ fn-check-dir-exists ()
     fi
 }
 
+# USAGE: fn-write-property VAR_NAME
+#   VAR_NAME: Variable name to write as "variable=value" form
+# This script assumes the following variables have been defined and are pointing 
+# to an appropriate file (see master-build.sh): 
+# BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
+# BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
+# BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
+
+# Note we always append to file, assuming if doesn't exist yet and will be 
+# created, and for each build, it won't exist, so will be written fresh for 
+# each build. 
+
+# TODO: Could add some sanity checking of if variable name appropriate 
+# for various language (e.g. I forget all the rules, but bash variables 
+# can not start with numerial, PHP variables (or is it Ant) can't have hyphens
+# (or is it underscore :), etc. But may need to add some mangling, or warning? 
+# Similarly, not sure at the moment of what to 
+# write if value is null/empty. For now will leave empty string, but some might need blank?
+# Or literally nothing? Also, unsure of effects of full quoting or if always needed? 
+
+fn-write-property () 
+{
+    VAR_NAME=$1
+    if [[ -z "${VAR_NAME}" ]]
+    then
+        echo "VAR_NAME must be passed to this script, $0."
+        return 1
+     fi 
+
+     # bash scripts (export may be overkill ... but, just in case needed)
+     echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> BUILD_ENV_FILE
+     # PHP, suitable for direct "include"
+     echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> BUILD_ENV_FILE_PHP
+     # standard properties file
+     echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> BUILD_ENV_FILE_PROP
+
+}

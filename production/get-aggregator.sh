@@ -39,6 +39,12 @@ else
 	  $(fn-local-repo "$AGGREGATOR_REPO") "$BRANCH" 
 fi
 
+pushd "$aggDir"
+# save current hash tag value for documenting build (e.g. to reproduce)
+AGGR_HASH=$( git git-show-ref origin/$BRANCH )
+fn-write-property AGGR_HASH
+popd
+
 echo "signingDir: $signingDir"
 
 if [ -r "$signingDir" ]; then

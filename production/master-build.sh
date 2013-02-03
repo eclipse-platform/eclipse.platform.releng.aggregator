@@ -53,37 +53,38 @@ export STREAMS_PATH="${aggDir}/streams"
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
-echo "export PATH=\"${PATH}\"" >$BUILD_ENV_FILE
-echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
-echo "export BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
-echo "export STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_TYPE=\"${BUILD_TYPE}\"" >>$BUILD_ENV_FILE
-echo "export TMP_DIR=\"${TMP_DIR}\"" >>$BUILD_ENV_FILE 
-echo "export JAVA_HOME=\"${JAVA_HOME}\"" >>$BUILD_ENV_FILE
-echo "export MAVEN_OPTS=\"${MAVEN_OPTS}\"" >>$BUILD_ENV_FILE
-echo "export MAVEN_PATH=\"${MAVEN_PATH}\"" >>$BUILD_ENV_FILE
-echo "export AGGREGATOR_REPO=\"${AGGREGATOR_REPO}\"" >>$BUILD_ENV_FILE
-echo "export BASEBUILDER_TAG=\"${BASEBUILDER_TAG}\"" >>$BUILD_ENV_FILE
-echo "export SIGNING_REPO=\"${SIGNING_REPO}\"" >>$BUILD_ENV_FILE
-echo "export SIGNING_BRANCH=\"${SIGNING_BRANCH}\"" >>$BUILD_ENV_FILE
-echo "export B_GIT_EMAIL=\"${B_GIT_EMAIL}\"" >>$BUILD_ENV_FILE
-echo "export B_GIT_NAME=\"${B_GIT_NAME}\"" >>$BUILD_ENV_FILE
-echo "export COMMITTER_ID=\"${COMMITTER_ID}\"" >>$BUILD_ENV_FILE
-echo "export COMPARATOR=\"${COMPARATOR}\"" >>$BUILD_ENV_FILE
-echo "export SIGNING=\"${SIGNING}\"" >>$BUILD_ENV_FILE
-echo "export UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
-echo "export FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
-echo "export MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
-echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
-echo "export LOCAL_REPO=\"${LOCAL_REPO}\"" >>$BUILD_ENV_FILE
-echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\""  >>$BUILD_ENV_FILE
-echo "export SCRIPT_PATH=\"${SCRIPT_PATH}\""  >>$BUILD_ENV_FILE
-echo "export STREAMS_PATH=\"${STREAMS_PATH}\""  >>$BUILD_ENV_FILE
+# The function also writes into appropriate PHP files and Properties files. 
+fn-write-property PATH
+fn-write-property INITIAL_ENV_FILEfn-write-property
+fn-write-property BUILD_ROOTfn-write-property
+fn-write-property BRANCH
+fn-write-property STREAM
+fn-write-property BUILD_TYPE
+fn-write-property TMP_DIR
+fn-write-property JAVA_HOME
+fn-write-property MAVEN_OPTS
+fn-write-property MAVEN_PATH
+fn-write-property AGGREGATOR_REPO
+fn-write-property BASEBUILDER_TAG
+fn-write-property SIGNING_REPO
+fn-write-property SIGNING_BRANCH
+fn-write-property B_GIT_EMAIL
+fn-write-property B_GIT_NAME
+fn-write-property COMMITTER_ID
+fn-write-property COMPARATOR
+fn-write-property SIGNING
+fn-write-property UPDATE_BRANDING
+fn-write-property FORCE_LOCAL_REPO
+fn-write-property MAVEN_BREE
+fn-write-property GIT_PUSH
+fn-write-property LOCAL_REPO
+fn-write-property INITIAL_ENV_FILE
+fn-write-property SCRIPT_PATH
+fn-write-property STREAMS_PATH
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
-echo "export BUILD_ENV_FILE=\"${BUILD_ENV_FILE}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
+fn-write-property BUILD_ENV_FILE
+fn-write-property BUILD_ID
+fn-write-property BUILD_DATE
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
