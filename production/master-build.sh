@@ -66,8 +66,8 @@ fi
 # original env file, which would compute different values (in some cases).
 # The function also writes into appropriate PHP files and Properties files. 
 fn-write-property PATH
-fn-write-property INITIAL_ENV_FILEfn-write-property
-fn-write-property BUILD_ROOTfn-write-property
+fn-write-property INITIAL_ENV_FILE
+fn-write-property BUILD_ROOT
 fn-write-property BRANCH
 fn-write-property STREAM
 fn-write-property BUILD_TYPE
