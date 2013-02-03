@@ -950,10 +950,10 @@ fn-write-property ()
      fi 
 
      # bash scripts (export may be overkill ... but, just in case needed)
-     echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> BUILD_ENV_FILE
+     echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> $BUILD_ENV_FILE
      # PHP, suitable for direct "include"
-     echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> BUILD_ENV_FILE_PHP
+     echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> $BUILD_ENV_FILE_PHP
      # standard properties file
-     echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> BUILD_ENV_FILE_PROP
+     echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
 
 }
