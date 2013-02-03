@@ -16,9 +16,9 @@ pushd $( dirname $0 ) >/dev/null
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 popd >/dev/null
 
-. $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.sh
 
-. "$1"
+source "$1"
 
 
 cd $BUILD_ROOT
