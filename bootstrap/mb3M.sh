@@ -66,5 +66,5 @@ $BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM
 #mvn -version >> $BOOTSTRAPENVFILE
 #echo "= = = = = " >> $BOOTSTRAPENVFILE
 
-${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.env
+${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource
 
