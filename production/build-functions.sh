@@ -961,3 +961,36 @@ fn-write-property ()
      echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
 
 }
+
+# USAGE: fn-write-property-init
+# Must be called (exactly) once before writing properties. 
+fn-write-property-init () 
+{
+
+     # nothing really required for bash shsource, but we'll put in some niceties
+     echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
+     echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
+     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+     echo "<?php " > $BUILD_ENV_FILE_PHP
+     echo "// properties written for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+     # standard properties file: nothing special required
+     echo "! properties written for $BUILD_ID" > $BUILD_ENV_FILE_PROP
+
+}
+
+# USAGE: fn-write-property-close
+# Must be called (exactly) once when completely finished writing properties. 
+fn-write-property-close () 
+{
+
+     # nothing really required for bash shsource, but we'll put in some niceties
+     echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
+     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+     # Note: technically may not need closing ?> for an 'include' ? 
+     echo "// finished properties for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+     echo "?>"  >> $BUILD_ENV_FILE_PHP
+     # standard properties file: nothing special required
+     echo "! finshed properties for $BUILD_ID" >> $BUILD_ENV_FILE_PROP
+
+}
+

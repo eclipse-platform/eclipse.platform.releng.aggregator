@@ -64,7 +64,10 @@ fi
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
-# The function also writes into appropriate PHP files and Properties files. 
+# The function also writes into appropriate PHP files and Properties files.
+ # Init once, here at beginning, but don't close until much later since other functions
+ # may write variables at various points
+fn-write-property-init
 fn-write-property PATH
 fn-write-property INITIAL_ENV_FILE
 fn-write-property BUILD_ROOT
@@ -156,3 +159,5 @@ checkForErrorExit $? "Error occurred during publish-eclipse"
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
 checkForErrorExit $? "Error occurred during promote-build"
+
+fn-write-property-close
