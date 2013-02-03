@@ -38,43 +38,6 @@
             message="The UNIX versions of your build output will be invalid.  Windows will not preserve symbolic links and permissions on executable files." />
     </target>
 
-    <target name="setLabels">
-        <!--required-->
-        <!-- setup the label.properties file packaged in the source builds. -->
-        <!--Set this property to empty string-->
-        <property
-            name="buildType"
-            value="" />
-        <tstamp>
-            <format
-                property="TODAY"
-                pattern="MMMM d, yyyy" />
-            <format
-                property="TSTAMP"
-                pattern="HHmm" />
-        </tstamp>
-        <copy
-            file="label.properties.template"
-            tofile="${buildDirectory}/label.properties"
-            overwrite="true" />
-        <replace
-            file="${buildDirectory}/label.properties"
-            token="@builddate@"
-            value="${TODAY}" />
-        <replace
-            file="${buildDirectory}/label.properties"
-            token="@buildtype@"
-            value="${buildType}" />
-        <replace
-            file="${buildDirectory}/label.properties"
-            token="@ds@"
-            value="${timestamp}" />
-        <replace
-            file="${buildDirectory}/label.properties"
-            token="@buildid@"
-            value="${buildId}" />
-    </target>
-
 
     <target name="buildStandAloneSWT">
         <parallel failonany="true">
@@ -377,12 +340,13 @@
         <antcall target="configure.team.cvs.test" />
 
         <!--replace buildid in vm.properties for JVM location settings-->
-        <replace
+   <!-- I cant see how this is needed any longer
+        < replace
             dir="${eclipse.build.configs}/sdk.tests/testConfigs"
             token="@buildid@"
             value="${buildId}"
             includes="**/vm.properties" />
-
+-->
         <antcall target="addnoperfmarker" />
 
         <parallel>
@@ -424,11 +388,12 @@
                 dir="${buildDirectory}/${buildLabel}"
                 includes="testresults/**,*.php" />
         </copy>
-        <replace
+        <!--
+        < replace
             file="${postingDirectory}/${buildLabel}/testResults.php"
             token="@build@"
             value="${buildId}" />
-
+         -->
     </target>
 
     <!-- ===================================================================== -->
@@ -465,6 +430,7 @@
             failonerror="false" />
     </target>
 
+    <!-- cvs team should do what they need here, not builder. 
     <target
         name="configure.team.cvs.test"
         unless="test.xml.tmp"
@@ -472,25 +438,25 @@
         <copy
             file="${eclipse.build.configs}/sdk.tests/testScripts/test.xml"
             tofile="${eclipse.build.configs}/sdk.tests/testScripts/test.xml.tmp" />
-        <replace
+        < replace
             file="${eclipse.build.configs}/sdk.tests/testScripts/test.xml"
             propertyFile="${cvstest.properties}">
-            <replacefilter
+            < replacefilter
                 token="${cvs_user}"
                 property="cvs_user" />
-            <replacefilter
+            < replacefilter
                 token="${cvs_password}"
                 property="cvs_password" />
-            <replacefilter
+            < replacefilter
                 token="${cvs_host}"
                 property="cvs_host" />
-            <replacefilter
+            < replacefilter
                 token="${cvs_root}"
                 property="cvs_root" />
         </replace>
         <delete file="${eclipse.build.configs}/sdk.tests/testScripts/test.xml.tmp" />
     </target>
-
+-->
     <target name="generateEclipseIndex">
         <condition
             property="generatorClass"
@@ -544,95 +510,6 @@
                 name="testManifestFileName"
                 value="${publishingContent}/testManifest.xml" />
         </ant>
-
-        <!--  Replace build label in generated html files -->
-        <replace
-            dir="${postingDirectory}/${buildLabel}"
-            token="@buildlabel@"
-            value="${buildLabel}"
-            includes="**/*.php" />
-         <replace
-             dir="${postingDirectory}/${buildId}"
-             token="@eclipseStream@"
-             value="${eclipseStream}"
-             includes="**/*.php" />
-
-    </target>
-
-    <target name="generatePerformanceResults">
-        <mkdir dir="${buildDirectory}/${buildLabel}/performance" />
-        <mkdir dir="${postingDirectory}/${buildLabel}/performance" />
-        <taskdef
-            name="performanceResults"
-            classname="org.eclipse.releng.performance.PerformanceResultHtmlGenerator" />
-        <condition
-            property="configArgs"
-            value="-ws gtk -arch ppc">
-            <equals
-                arg1="${os.arch}"
-                arg2="ppc64" />
-        </condition>
-        <condition
-            property="configArgs"
-            value="-ws gtk -arch x86">
-            <equals
-                arg1="${os.arch}"
-                arg2="i386" />
-        </condition>
-        <property
-            name="configArgs"
-            value="" />
-
-        <java
-            jar="${basedir}/../org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar"
-            fork="true"
-            maxmemory="512m"
-            error="${buildlogs}/perfgenerror.txt"
-            output="${buildlogs}/perfgenoutput.txt">
-            <arg
-                line="${configArgs} -consolelog -nosplash -data ${buildDirectory}/perf-workspace -application org.eclipse.test.performance.ui.resultGenerator
-                        -current ${buildId}
-                        -jvm ${eclipse.perf.jvm}
-                        -print                  
-                        -output ${postingDirectory}/${buildLabel}/performance/
-                        -config eplnx1,eplnx2,epwin2,epwin3
-                        -dataDir ${postingDirectory}/../../data/v38
-                        -config.properties ${eclipse.perf.config.descriptors}
-                        -scenario.pattern org.eclipse.%.test%" />
-            <!-- baselines arguments are no longer necessary since bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=209322 has been
-                 fixed...
-                        -baseline ${eclipse.perf.ref}
-                        -baseline.prefix R-3.4_200806172000
-            -->
-            <!-- add this argument to list above when there are milestone builds to highlight
-            -highlight.latest 3.3M1_
-            -->
-            <env
-                key="LD_LIBRARY_PATH"
-                value="${basedir}/../org.eclipse.releng.basebuilder" />
-            <sysproperty
-                key="eclipse.perf.dbloc"
-                value="${dbloc}" />
-        </java>
-
-        <performanceResults
-            xmlDirectoryName="${postingDirectory}/${buildLabel}/performance/xml"
-            dropDirectoryName="${postingDirectory}/${buildLabel}"
-            testResultsTemplateFileName="${publishingContent}/templateFiles/performance.php.template"
-            testResultsHtmlFileName="performance/performance.php"
-            hrefTestResultsTargetPath="html"
-            testManifestFileName="${publishingContent}/performanceTestManifest.xml" />
-
-        <replace
-            file="${postingDirectory}/${buildLabel}/performance/performance.php"
-            token="@buildType@"
-            value="${buildType}" />
-        <copy
-            todir="/home/users/ecperf/data/"
-            failonerror="false"
-            overwrite="true">
-            <fileset dir=" /builds/transfer/files/master/data/v38" />
-        </copy>
 
     </target>
 
