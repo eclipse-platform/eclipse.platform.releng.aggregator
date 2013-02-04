@@ -806,28 +806,11 @@ fn-publish-eclipse ()
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
-    
-    # We make a copy of the tychoeclipsebuilder/eclipse files to the BUILD_DIR for use, partially 
-    # in case we ever do builds in parallel (unlikely) but mostly so that the same files used during 
-    # the build, will be there, and be available during the test publishing phase, which has a higher 
-    # probability of overlapping with another build starting, and we don't want one stepping on the files
-    # from the other. We do, though, need to remember not to rsync that directory to "downloads".
-     # NOTE: assuming for now we do not really use the 'eclipse.build.configs' parameter 
-     # at least as "build.configs" ... we just use it as anchor to find other locations, 
-     # so might have to adjust some "../" relative references to "../../" if there is 
-     # not a more direct way to do it using absolute paths (and, there should be, 
-     # perhaps use $aggrDir and make copies from here, again to make "publish area" 
-     # more independent of current/future contents of gitCache. Or, better, use 
-     # publishingContent, which is definitely source of content to copy from. 
-    PUBLISHING_FILES_DIR=$BUILD_DIR/eclipse.platform.releng.tychoeclipsebuilder/eclipse
-    mkdir -p ${PUBLISHING_FILES_DIR}
-    rsync -r "${REPO_DIR}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/" "${PUBLISHING_FILES_DIR}" 
-     
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
         -application org.eclipse.ant.core.antRunner \
         -v \
-        -buildfile "${PUBLISHING_FILES_DIR}/helper.xml" \
+        -buildfile "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
         -Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
