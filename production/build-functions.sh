@@ -130,8 +130,8 @@ fn-git-reset-submodules ()
 fn-build-id () 
 {
      BUILD_TYPE="$1"; shift
-     timestamp=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
-echo ${BUILD_TYPE}${timestamp}
+     TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+echo ${BUILD_TYPE}${TIMESTAMP}
 }
 
 # USAGE: fn-local-repo URL [TO_REPLACE]

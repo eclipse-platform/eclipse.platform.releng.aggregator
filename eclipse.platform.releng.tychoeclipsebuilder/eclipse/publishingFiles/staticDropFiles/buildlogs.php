@@ -3,7 +3,7 @@
 <head>
 
 <?php
-
+include ('buildproperties.php');
 function listLogs($myDir) {
 
         $aDirectory = dir($myDir);
@@ -30,30 +30,6 @@ function listLogs($myDir) {
             echo "<li>$line</li>";
         }
 }
-
-function getBuildId() {
-        $parts = explode("/", getcwd());
-        $parts2 = explode("-", $parts[count($parts) - 1]);
-        $buildName = $parts2[0] . "-" . $parts2[1];
-
-        // Get build type names
-        $fileHandle = fopen("./dlconfig2.txt", "r");
-        while (!feof($fileHandle)) {
-                $aLine = fgets($fileHandle, 4096); // Length parameter only optional after 4.2.0
-                $parts = explode(",", $aLine);
-                $dropNames[trim($parts[0])] = trim($parts[1]);
-        }
-        fclose($fileHandle);
-
-        $buildType = $dropNames[$parts2[0]];
-
-        $buildId = $buildType.$buildName;
-
-        return($buildId);
-
-}
-
-
 
 
 ?>
@@ -133,9 +109,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div id="midcolumn">
 <div class="homeitem3col">
 <?php
-    global $buildId;
-    $buildId = getBuildId();
-    echo "<title>Release Engineering logs for  $buildId </title>\n";
+    echo "<title>Release Engineering logs for  $BUILD_ID </title>\n";
 
 echo "<h3>Release Engineering Logs for  $buildId</h3>\n";
 ?>

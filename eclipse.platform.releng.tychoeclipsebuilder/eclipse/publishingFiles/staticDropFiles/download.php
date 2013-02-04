@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="../../../default_style.css" type="text/css">
 <?php
 
-
+include("buildproperties.php");
 
    if (array_key_exists("SERVER_NAME", $_SERVER)) {
         $servername = $_SERVER["SERVER_NAME"];
@@ -52,14 +52,6 @@
 		    $url = "http://$servername$path$script";
 		}
 
-		$dropdir = explode("/", getcwd());
-		$parts2 = explode("-", $dropdir[count($dropdir) - 1]);
-                if ($parts2[1]) {
-		    $buildName = $parts2[0] . "-" .$parts2[1];
-                } else {
-		    $buildName = $parts2[1];
-                }
-
         $mirror=true;
         if (strstr($servername,"eclipse.org")) {
 #       if (strstr($servername,"ibm.com")) {
@@ -70,7 +62,7 @@
         }
 
 		$clickFile = "clickThroughs/";
-                $clickFileName = str_replace("-$buildName","",$dropFile);
+                $clickFileName = str_replace("-$BUILD_ID","",$dropFile);
 		$clickFile = $clickFile.$clickFileName.".txt";
 
 		if (file_exists($clickFile)) {

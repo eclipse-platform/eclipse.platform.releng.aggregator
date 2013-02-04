@@ -38,6 +38,7 @@ LOG=$buildDirectory/buildlogs/buildOutput.txt
 #exec >>$LOG 2>&1
 
 BUILD_PRETTY_DATE=$( date --date='@'$RAWDATE )
+TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
 
 # These files have variable/value pairs for this build, suitable for use in 
 # shell scripts, PHP files, or as Ant (or Java) properties
@@ -74,6 +75,7 @@ fn-write-property BUILD_ROOT
 fn-write-property BRANCH
 fn-write-property STREAM
 fn-write-property BUILD_TYPE
+fn-write-property TIMESTAMP
 fn-write-property TMP_DIR
 fn-write-property JAVA_HOME
 fn-write-property MAVEN_OPTS

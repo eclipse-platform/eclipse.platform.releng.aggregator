@@ -2,24 +2,10 @@
 <head>
 
 <?php
-	$parts = explode("/", getcwd());
-	$parts2 = explode("-", $parts[count($parts) - 1]);
-	$buildName = $parts2[1];
-	
-	// Get build type names
 
-	$fileHandle = fopen("./dlconfig2.txt", "r");
-	while (!feof($fileHandle)) {
-		
-		$aLine = fgets($fileHandle, 4096); // Length parameter only optional after 4.2.0
-		$parts = explode(",", $aLine);
-		$dropNames[trim($parts[0])] = trim($parts[1]);
- 	}
-	fclose($fileHandle);
+include("buildproperties.php");
 
-	$buildType = $dropNames[$parts2[0]];
-
-	echo "<title>Test Results for $buildType $buildName </title>";
+	echo "<title>Test Results for $BUILD_ID </title>";
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
