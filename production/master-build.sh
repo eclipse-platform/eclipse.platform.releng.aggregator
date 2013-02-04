@@ -41,9 +41,9 @@ BUILD_PRETTY_DATE=$( date --date='@'$RAWDATE )
 
 # These files have variable/value pairs for this build, suitable for use in 
 # shell scripts, PHP files, or as Ant (or Java) properties
-BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
-BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
-BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
+export BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
+export BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
+export BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
 
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )

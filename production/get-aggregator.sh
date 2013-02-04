@@ -41,7 +41,8 @@ fi
 
 pushd "$aggDir"
 # save current hash tag value for documenting build (e.g. to reproduce, run tests, etc.)
-AGGR_HASH=$( git show-ref --hash --verify origin/$BRANCH )
+AGGR_HASH=$( git show-ref --hash --verify refs/remotes/origin/$BRANCH )
+checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/$BRANCH. Not valid ref?"
 fn-write-property AGGR_HASH
 popd
 
