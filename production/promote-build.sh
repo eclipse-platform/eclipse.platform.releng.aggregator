@@ -62,7 +62,9 @@ ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
 # TODO: changed "syncDropLocation" to handle a third parameter (CBI or PDE)
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH" >> ${promoteScriptLocationEclipse}/${scriptName}
+# And now a fourth ... eBuilder HASHTAG,so won't always have to assume master, and 
+# so the tests can get their own copy.
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $AGGR_HASH" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
