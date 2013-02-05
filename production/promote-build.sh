@@ -20,14 +20,17 @@ if [[ -z "$BUILD_TECH" ]]
 case $BUILD_TECH in
 
         'PDE' )
-                echo "promote PDE build"
+                echo "Promote Build from PDE"
                 ;;
 
         'CBI' )
-                echo "promote CBI build"
+                 echo "Promote Build from CBI"
+                # always assume true, for now, until debugged
+                # testbuildonly=true;
+                
                 ;;
         *) echo "ERROR: Invalid argument to $(basename $0)";
-           usage;
+           usage ();
            exit 1
             ;;
 esac
@@ -50,7 +53,7 @@ promoteScriptLocationEclipse=$workLocation/queue
 # directory should normally exist -- best to create first, with committer's ID --
 # but in case not
 mkdir -p "${promoteScriptLocationEclipse}"
-env > env.txt
+#env > env.txt
 scriptName=promote-${STREAM}-${BUILD_ID}.sh
 if [[ "${testbuildonly}" == "true" ]]
 then
