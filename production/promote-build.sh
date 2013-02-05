@@ -30,15 +30,19 @@ case $BUILD_TECH in
                 
                 ;;
         *) echo "ERROR: Invalid argument to $(basename $0)";
-           usage ()
-           exit 1
+           usage;
+           exit 1;
             ;;
 esac
 
+if [[ -z ${SCRIPT_PATH} ]]
+then
+    SCRIPT_PATH=${PWD}
+fi
 
 source $SCRIPT_PATH/build-functions.sh
 
-source "$2"
+source "$2" 2>/dev/null
 
 
 # The 'workLocation' provides a handy central place to have the
@@ -54,6 +58,13 @@ promoteScriptLocationEclipse=$workLocation/queue
 # but in case not
 mkdir -p "${promoteScriptLocationEclipse}"
 #env > env.txt
+
+if [[ -z ${STREAM} || -z ${BUILD_ID} ]]
+then
+    echo "ERROR: This script requires STREAM and BUILD_ID"
+    exit 1
+fi
+
 scriptName=promote-${STREAM}-${BUILD_ID}.sh
 if [[ "${testbuildonly}" == "true" ]]
 then
