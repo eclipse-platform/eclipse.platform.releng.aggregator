@@ -30,7 +30,7 @@ case $BUILD_TECH in
                 
                 ;;
         *) echo "ERROR: Invalid argument to $(basename $0)";
-           usage ();
+           usage ()
            exit 1
             ;;
 esac
