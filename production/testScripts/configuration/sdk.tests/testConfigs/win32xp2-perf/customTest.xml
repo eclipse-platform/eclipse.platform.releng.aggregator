@@ -1,0 +1,94 @@
+
+<project name="Customized testing instructions" default="customSetup">
+
+	<target name="customSetup">
+		<!--property file containing key value pair for ${eclipse.perf.ref}-->
+		<property file="${ref.properties}" />
+
+		<antcall target="install6.0Vm" />
+		<!--copy the script which sets up environment and invokes the tests on test machine-->
+		<exec dir="." executable="${copyClient}">
+			<arg line="${tester}/testAll.bat ${testMachine}:${executionDir}" />
+		</exec>
+
+		<!--copy in test script modified for running Team CVS tests-->
+		<exec dir="." executable="${copyClient}">
+			<arg line="${tester}/../../testScripts/test.xml ${testMachine}:${executionDir}" />
+		</exec>
+
+		<antcall target="replaceBuildId" />
+
+		<replace file="${tester}/vm.properties" token="@buildType@@timestamp@" value="${buildId}" />
+		<replace file="${tester}/vm.properties" token="@reference@" value="${eclipse.perf.ref}" />
+		<replace file="${tester}/vm.properties" token="@testMachine@" value="${testMachine}" />
+
+		<!--copy in the properties file for testing with performance vm args-->
+		<exec dir="." executable="${copyClient}">
+			<arg line="${tester}/vm.properties ${testMachine}:${executionDir}" />
+		</exec>
+
+		<!--add Cloudscape to junit test zip if it is available-->
+		<available file="${internalPlugins}/org.apache.derby_10.4.2.0" type="dir" property="db.available" />
+		<antcall target="installdb" />
+
+		<!--copy deltapack needed to run pdebuild tests-->
+		<exec dir="." executable="${copyClient}">
+			<arg line="-r ${postingDirectory}/${buildId}/${runtimeDeltapack} ${testMachine}:${executionDir}" />
+		</exec>
+
+		<!--copy platform runtime needed to run p2 tests-->
+		<exec dir="." executable="${copyClient}">
+			<arg line="-r ${postingDirectory}/${buildId}/${runtimePlatform} ${testMachine}:${executionDir}" />
+		</exec>
+
+		<!--copy previous platform runtime needed to run p2 tests-->
+		<exec dir="." executable="${copyClient}">
+			<arg line="-r ${previousPlatformZips}/${previousRuntimePlatform} ${testMachine}:${executionDir}" />
+		</exec>
+
+		<!--copy comparator log so it's accessible via releng tests -->
+		<exec dir="." executable="${copyClient}">
+			<arg line="-r ${buildlogs}/comparatorlog.txt ${testMachine}:${executionDir}" />
+		</exec>
+	</target>
+
+	<target name="installdb" if="db.available">
+		<mkdir dir="${tester}/eclipse/dropins/eclipse/plugins" />
+		<copy todir="${tester}/eclipse/dropins/eclipse/plugins">
+			<fileset dir="${internalPlugins}" includes="org.apache.derby_10.4.2.0/**" />
+		</copy>
+		<exec dir="${tester}" executable="${copyClient}">
+			<arg line="-r eclipse ${testMachine}:${executionDir}" />
+		</exec>
+	</target>
+
+	<target name="replaceBuildId" if="performance.base">
+		<replace file="${tester}/vm.properties" token="@buildType@@timestamp@" value="${testedBuildIdDBLabel}" />
+	</target>
+
+	<target name="installVm">
+		<property name="testVmTag" value="HEAD" />
+		<!--get and install the vm to test with-->
+		<cvs cvsRoot="${cvsRoot}" command="export -r ${testVmTag} ${vmUrl}" dest="${tester}" />
+
+		<exec dir="${tester}" executable="${copyClient}">
+			<arg line="${vmUrl} ${testMachine}:${testDir}" />
+		</exec>
+		<exec dir="." executable="${loginClient}">
+			<arg line="${testMachine} ${vmInstallCommand}" />
+		</exec>
+	</target>
+
+	<target name="install6.0Vm">
+		<property name="testVmTag" value="HEAD" />
+		<!--get and install the vm to test with-->
+		<cvs cvsRoot="${cvsRoot}" command="export -r ${testVmTag} ${vmUrl6}" dest="${tester}" />
+
+		<exec dir="${tester}" executable="${copyClient}">
+			<arg line="${vmUrl6} ${testMachine}:${testDir}" />
+		</exec>
+		<exec dir="." executable="${loginClient}">
+			<arg line="${testMachine} ${vmInstallCommand6}" />
+		</exec>
+	</target>
+</project>

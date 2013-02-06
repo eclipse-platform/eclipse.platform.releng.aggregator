@@ -1,0 +1,93 @@
+<project name="Eclipse Test Configuration" default="JUnitTests" basedir=".">
+
+	<!--
+		Ant properties for buildId, buildLabel, timestamp and buildDirectory must be set before running this script.
+	-->
+	<!--A directory to look in for markers created from other running builds.-->
+    <!-- TODO: we may need to change this to a "real" value on build.eclipse.org? instead of /home/users/releng/buildTools/markers -->
+    <!-- some of the java code in tests seems to depend on it?
+	<property name="markerContainer" value="/home/users/releng/buildTools/markers" />
+    -->
+	<property name="markerContainer" value="${basedir}/markers" />
+	<property name="cfg" value="${basedir}/machine.cfg" />
+	<property name="test.xml" value="${base.builder}/plugins/org.eclipse.build.tools/scripts/test.xml" />
+
+	<target name="test">
+		<!--TODO  find a way to queue requests-->
+		<findMachine cfg="${cfg}" markerContainer="${markerContainer}" cfgKey="${cfgKey}" markerName="${markerName}" waitInterval="30" />
+
+		<!--The result of the findMachine task is a .marker files
+		 with a key-value pair identifying which machine has been assigned for testing.
+		 The ${testMachine} property value is then used in the ${test.xml} script.
+		 The marker is also used by other builds that use <findMachine> to signal that the
+		 specified test machine is in use.-->
+		<property file="${markerContainer}/${markerName}.marker" />
+		<property name="testMachine" value="${0}" />
+
+		<!--A sleep in included here to avoid network timeouts if this target is called multiple times in parallel tasks.
+		  Default overidden by setting in calling targets.-->
+		<property name="sleep" value="0" />
+		<sleep seconds="${sleep}" />
+
+		<!--Run all tests on the test machine-->
+		<ant antfile="${test.xml}" />
+
+		<!--Delete the marker to free up the host to run other tests.-->
+		<delete file="${markerContainer}/${markerName}.marker" />
+	</target>
+
+	<target name="JUnitTests">
+		<parallel>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/macosx" />
+				<param name="cfgKey" value="macosx" />
+				<param name="markerName" value="eclipse-macosx-${buildId}" />
+			</antcall>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/rhelws5-6.0" />
+				<param name="cfgKey" value="rhelws5-6.0" />
+				<param name="markerName" value="eclipse-rhelws5-6.0-${buildId}" />
+			</antcall>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/win32xp-7.0" />
+				<param name="cfgKey" value="win32xp-7.0" />
+				<param name="markerName" value="eclipse-win32xp-7.0-${buildId}" />
+			</antcall>
+		</parallel>
+	</target>
+
+	<target name="performanceTests">
+
+		<condition property="internalPlugins" value="../../../eclipsePerformanceBuildTools/plugins">
+			<isset property="performance.base" />
+		</condition>
+
+		<property name="testResults" value="${postingDirectory}/${buildLabel}/performance" />
+		<mkdir dir="${testResults}" />
+
+		<parallel>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/win32xp-perf" />
+				<param name="cfgKey" value="win32xp-perf" />
+				<param name="markerName" value="eclipse-win32xp-perf-${buildId}" />
+			</antcall>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/win32xp2-perf" />
+				<param name="cfgKey" value="win32xp2-perf" />
+				<param name="markerName" value="eclipse-win32xp2-perf-${buildId}" />
+			</antcall>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/rhelws5-perf" />
+				<param name="sleep" value="120" />
+				<param name="cfgKey" value="rhelws5-perf" />
+				<param name="markerName" value="eclipse-rhelws5-perf-${buildId}" />
+			</antcall>
+			<antcall target="test">
+				<param name="tester" value="${basedir}/sled10-perf" />
+				<param name="sleep" value="300" />
+				<param name="cfgKey" value="sled10-perf" />
+				<param name="markerName" value="eclipse-sled10-perf-${buildId}" />
+			</antcall>
+		</parallel>
+	</target>
+</project>

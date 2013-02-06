@@ -1,0 +1,747 @@
+<project
+    name="runTests2"
+    default="runTests2"
+    basedir=".">
+
+    <!-- hurestic to check if we are running on hudson variable, if so -->
+    <target name="checkHudson">
+        <!-- HUDSON_USER should just be "anonyous" for most of our cases (currently)
+             but seems a safe variable to check ... if set, assume we are on hudson,
+             if not set, assume we are not and leave "hudson" unset (not false)
+             Hmm, seems HUDSON_USER is not reliably set. The only 4 I saw reliably
+             set were
+             [echoproperties] env.HUDSON_COOKIE
+             [echoproperties] env.HUDSON_HOME
+             [echoproperties] env.HUDSON_SERVER_COOKIE
+             [echoproperties] env.HUDSON_URL
+             Not sure which would be best/safest to use in huristic, but
+             I'll go with URL for now.
+             -->
+        <property environment="env" />
+        <condition property="hudson">
+            <isset property="env.HUDSON_URL" />
+        </condition>
+
+    </target>
+
+    <target
+        name="hudson-init"
+        if="hudson"
+        depends="checkHudson">
+        <!-- as of this writing, 04/22/2012, this was current list of
+             hudson provided variables. We take advantage of a number
+             of them, but "translate" them into our own variable names,
+             for a little loser build-system seperattion
+        BUILD_NUMBER
+            The current build number, such as "153"
+        BUILD_ID
+            The current build id, such as "2005-08-22_23-59-59" (YYYY-MM-DD_hh-mm-ss)
+        JOB_NAME
+            Name of the project of this build, such as "foo"
+        BUILD_TAG
+            String of "hudson-${JOB_NAME}-${BUILD_NUMBER}". Convenient to put into a resource file, a jar file, etc for easier identification.
+        EXECUTOR_NUMBER
+            The unique number that identifies the current executor (among executors of the same machine) that's carrying out this build. This is the number you see in the "build executor status", except that the number starts from 0, not 1.
+        NODE_NAME
+            Name of the slave if the build is on a slave, or "" if run on master
+        NODE_LABELS
+            Whitespace-separated list of labels that the node is assigned.
+        JAVA_HOME
+            If your job is configured to use a specific JDK, this variable is set to the JAVA_HOME of the specified JDK. When this variable is set, PATH is also updated to have $JAVA_HOME/bin.
+        WORKSPACE
+            The absolute path of the workspace.
+        HUDSON_URL
+            Full URL of Hudson, like http://server:port/hudson/
+        BUILD_URL
+            Full URL of this build, like http://server:port/hudson/job/foo/15/
+        JOB_URL
+            Full URL of this job, like http://server:port/hudson/job/foo/
+        SVN_REVISION
+            For Subversion-based projects, this variable contains the revision number of the module.
+        CVS_BRANCH
+            For CVS-based projects, this variable contains the branch of the module. If CVS is configured to check out the trunk, this environment variable will not be set.
+        HUDSON_USER
+            Currently logged in user
+            -->
+        <property environment="hudson" />
+        <property
+            name="WORKSPACE"
+            value="${hudson.WORKSPACE}" />
+        <echo message="Found we are running in hudson and set workspace to ${WORKSPACE}" />
+
+    </target>
+    <target
+        name="init"
+        depends="hudson-init, streamSpecificInit">
+
+        <!-- if not specified on command line, assume files come from 'download.eclipse.org' -->
+        <property name="DOWNLOAD_HOST" value="download.eclipse.org"/>
+        
+        <condition
+            property="dropsSuffix"
+            value="cbibased"
+            else="">
+            <equals
+                arg1="${BUILD_TECH}"
+                arg2="CBI" />
+        </condition>
+        
+        <!-- if not otherwise set, such as by hudson-init,
+             assume "current directory" for WORKSPACE -->
+        <property
+            name="WORKSPACE"
+            value="${basedir}" />
+
+
+        <property
+            name="relengBaseBuilderDir"
+            value="${WORKSPACE}/org.eclipse.releng.basebuilder" />
+        <property
+            name="eclipseBuilderDir"
+            value="${WORKSPACE}" />
+
+        <fail
+            unless="buildId"
+            message="buildId value must be provided by caller (such as 'I20120717-0800'" />
+
+        <!--
+             this "buildId check" may be overly strict, but best to start off strict for now,
+             loosen in future if we start to find/have variety
+        -->
+
+        <condition property="buildIdOK">
+            <matches
+                pattern="^[IMNSR]\d{8}-\d{4}$"
+                string="${buildId}" />
+        </condition>
+        <fail
+            message="buildId variable had unexpected format. Should be of the form  [IMNSR] 8 digits '-' 4 digits, but was ${buildId}"
+            unless="buildIdOK" />
+
+        <script language="javascript">
+            var buildId = project.getProperty("buildId");
+            var pattern = new RegExp(/^([IMNSR])(\d{8})-(\d{4})$/);
+
+            var sArray = pattern.exec(buildId);
+            // sArray 0 is "whole match"
+            project.setProperty("buildType", sArray[1]);
+        </script>
+
+
+        <fail unless="buildType" />
+
+
+        <echo message="hudson: ${hudson}" />
+        <echo message="WORKSPACE: ${WORKSPACE}" />
+        <echo message="buildId: ${buildId}" />
+        <echo message="relengBaseBuilderDir: ${relengBaseBuilderDir}" />
+        <echo message="eclipseBuilderDir: ${eclipseBuilderDir}" />
+        <echo message="java.home: ${java.home}" />
+        <echo message="eclipseStream: ${eclipseStream}" />
+        <echo message="buildType: ${buildType}" />
+
+        <property
+            name="testDir"
+            value="${WORKSPACE}/workarea/${buildId}" />
+        <echo message="DEBUG: testDir ${testDir}" />
+        <property
+            name="executionDir"
+            value="${testDir}/eclipse-testing" />
+        <mkdir dir="${executionDir}" />
+        <echo message="executionDir ${executionDir}" />
+
+        <!-- what's intended/needed? specific, simple repo? Or composite? -->
+        <property
+            name="currentbuildrepo"
+            value="http://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
+        <echo message="currentbuildrepo: ${currentbuildrepo}" />
+
+        <property
+            name="buildURL"
+            value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}${dropsSuffix}/${buildId}" />
+
+        <!--
+             there's nothing "automatic" about the local cache (so far).
+             If specified (such as on hudson command line that executes this
+             file, as, say,
+             -DlocalCache=file:///shared/eclipse/localCache
+             then all the downloads required must be already available there.
+             It is intended to speed up local testing to avoid re-downloading
+             files.
+             -->
+        <condition
+            property="archiveLocation"
+            value="${localCache}"
+            else="${buildURL}">
+            <isset property="localCache" />
+        </condition>
+
+        <echo message="buildURL ${buildURL}" />
+        <echo message="archiveLocation ${archiveLocation}" />
+    </target>
+
+    <target
+        name="platformIndependentZips"
+        unless="skipInstall">
+
+        <get
+            httpusecaches="false"
+            src="${archiveLocation}/eclipse-Automated-Tests-${buildId}.zip"
+            dest="${testDir}/eclipse-Automated-Tests-${buildId}.zip" />
+        <get
+            httpusecaches="false"
+            src="${archiveLocation}/eclipse-${buildId}-delta-pack.zip"
+            dest="${executionDir}/eclipse-${buildId}-delta-pack.zip" />
+        <get
+            httpusecaches="false"
+            src="${archiveLocation}/eclipse-Automated-Tests-${buildId}.zip"
+            dest="${executionDir}/eclipse-Automated-Tests-${buildId}.zip" />
+    </target>
+
+    <target
+        name="getwinzips"
+        depends="platformIndependentZips"
+        unless="skipInstall">
+        <get
+            src="${archiveLocation}/eclipse-SDK-${buildId}-win32.zip"
+            dest="${executionDir}/eclipse-SDK-${buildId}-win32.zip" />
+        <get
+            src="${archiveLocation}/eclipse-platform-${buildId}-win32.zip"
+            dest="${executionDir}/eclipse-platform-${buildId}-win32.zip" />
+        <get
+            src="http://archive.eclipse.org/eclipse/downloads/drops/R-3.7.2-201202080800/eclipse-platform-3.7.2-win32.zip"
+            dest="${executionDir}/eclipse-platform-3.7.2-win32.zip" />
+    </target>
+    <target
+        name="getwinzips64"
+        depends="platformIndependentZips"
+        unless="skipInstall">
+        <get
+            src="${archiveLocation}/eclipse-SDK-${buildId}-win32-x86_64.zip"
+            dest="${executionDir}/eclipse-SDK-${buildId}-win32-x86_64.zip" />
+        <get
+            src="${archiveLocation}/eclipse-platform-${buildId}-win32-x86_64.zip"
+            dest="${executionDir}/eclipse-platform-${buildId}-win32-x86_64.zip" />
+        <get
+            src="http://archive.eclipse.org/eclipse/downloads/drops/R-3.7.2-201202080800/eclipse-platform-3.7.2-win32-x86_64.zip"
+            dest="${executionDir}/eclipse-platform-3.7.2-win32.zip-x86_64" />
+    </target>
+    <target
+        name="getlinzips"
+        depends="platformIndependentZips"
+        unless="skipInstall">
+        <get
+            src="${archiveLocation}/eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz" />
+        <get
+            src="${archiveLocation}/eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz" />
+        <get
+            src="http://archive.eclipse.org/eclipse/downloads/drops/R-3.7.2-201202080800/eclipse-platform-3.7.2-linux-gtk-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-platform-3.7.2-linux-gtk-x86_64.tar.gz" />
+    </target>
+
+    <target
+        name="getlinzips32"
+        depends="platformIndependentZips"
+        unless="skipInstall">
+        <get
+            src="${archiveLocation}/eclipse-SDK-${buildId}-linux-gtk.tar.gz"
+            dest="${executionDir}/eclipse-SDK-${buildId}-linux-gtk.tar.gz" />
+        <get
+            src="${archiveLocation}/eclipse-platform-${buildId}-linux-gtk.tar.gz"
+            dest="${executionDir}/eclipse-platform-${buildId}-linux-gtk.tar.gz" />
+        <get
+            src="http://archive.eclipse.org/eclipse/downloads/drops/R-3.7.2-201202080800/eclipse-platform-3.7.2-linux-gtk.tar.gz"
+            dest="${executionDir}/eclipse-platform-3.7.2-linux-gtk.tar.gz" />
+    </target>
+
+    <target
+        name="getmaczips"
+        depends="platformIndependentZips"
+        unless="skipInstall">
+        <get
+            src="${archiveLocation}/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz"
+            dest="${executionDir}/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz" />
+        <get
+            src="${archiveLocation}/eclipse-platform-${buildId}-macosx-cocoa.tar.gz"
+            dest="${executionDir}/eclipse-platform-${buildId}-macosx-cocoa.tar.gz" />
+        <get
+            src="http://archive.eclipse.org/eclipse/downloads/drops/R-3.7.2-201202080800/eclipse-platform-3.7.2-macosx-cocoa.tar.gz"
+            dest="${executionDir}/eclipse-platform-3.7.2-macosx-cocoa.tar.gz" />
+    </target>
+
+    <target
+        name="getmacosx"
+        depends="platformIndependentZips"
+        unless="skipInstall">
+        <get
+            src="${archiveLocation}/eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz" />
+        <get
+            src="${archiveLocation}/eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz" />
+        <get
+            src="http://archive.eclipse.org/eclipse/downloads/drops/R-3.7.2-201202080800/eclipse-platform-3.7.2-macosx-cocoa-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-platform-3.7.2-macosx-cocoa-x86_64.tar.gz" />
+    </target>
+
+    <target
+        name="configure.team.cvs.test"
+        depends="computeExpectedLocation,getcvstestProperties" />
+
+    <target name="computeExpectedLocation">
+        <condition
+            property="cvstest.properties"
+            value="/shared/eclipse/buildtests/cvstest.properties">
+            <and>
+                <os family="unix" />
+                <not>
+                    <os family="mac" />
+                </not>
+            </and>
+        </condition>
+        <condition
+            property="cvstest.properties"
+            value="c:\users\hudsonbuild\cvstest.properties">
+            <os family="windows" />
+        </condition>
+        <condition
+            property="cvstest.properties"
+            value="/Users/hudsonbuild/cvstest.properties">
+            <os family="mac" />
+        </condition>
+    </target>
+
+    <target
+        name="getcvstestProperties"
+        if="cvsPropertiesAvailable"
+        depends="computeExpectedLocation,checkCVSPropExists,logNoExistence">
+
+        <echo message="cvstest.properties file: ${cvstest.properties}" />
+        <replace
+            file="${executionDir}/test.xml"
+            propertyFile="${cvstest.properties}">
+            <replacefilter
+                token="${cvs_user}"
+                property="cvs_user" />
+            <replacefilter
+                token="${cvs_password}"
+                property="cvs_password" />
+            <replacefilter
+                token="${cvs_host}"
+                property="cvs_host" />
+            <replacefilter
+                token="${cvs_root}"
+                property="cvs_root" />
+        </replace>
+
+    </target>
+
+    <target
+        name="checkCVSPropExists"
+        depends="computeExpectedLocation">
+        <condition property="cvsPropertiesAvailable">
+            <available file="${cvstest.properties}" />
+        </condition>
+    </target>
+    <target
+        name="logNoExistence"
+        depends="checkCVSPropExists"
+        unless="cvsPropertiesAvailable">
+        <echo message="cvs properties file was not found in this environment. " />
+        <echo message="   expected file: ${cvstest.properties} " />
+    </target>
+    <target
+        name="runTests2"
+        depends="init">
+
+        <echo message="DEBUG: echoproperties at start of main runTests2.xml (after inits)" />
+        <echoproperties />
+        <property
+            name="test.xml"
+            value="${relengBaseBuilderDir}/plugins/org.eclipse.build.tools/scripts/test.xml" />
+        <condition
+            property="testPlatform"
+            value="win7-64">
+            <and>
+                <equals
+                    arg1="${osgi.os}"
+                    arg2="win32" />
+                <equals
+                    arg1="${osgi.ws}"
+                    arg2="win32" />
+                <equals
+                    arg1="${osgi.arch}"
+                    arg2="x86_64" />
+            </and>
+        </condition>
+        <condition
+            property="testPlatform"
+            value="win7">
+            <and>
+                <equals
+                    arg1="${osgi.os}"
+                    arg2="win32" />
+                <equals
+                    arg1="${osgi.ws}"
+                    arg2="win32" />
+                <equals
+                    arg1="${osgi.arch}"
+                    arg2="x86" />
+            </and>
+        </condition>
+        <echo message="os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
+        <condition
+            property="testPlatform"
+            value="linux">
+            <and>
+                <equals
+                    arg1="${osgi.os}"
+                    arg2="linux" />
+                <equals
+                    arg1="${osgi.ws}"
+                    arg2="gtk" />
+                <equals
+                    arg1="${osgi.arch}"
+                    arg2="x86_64" />
+            </and>
+        </condition>
+        <condition
+            property="testPlatform"
+            value="linux32">
+            <and>
+                <equals
+                    arg1="${osgi.os}"
+                    arg2="linux" />
+                <equals
+                    arg1="${osgi.ws}"
+                    arg2="gtk" />
+                <equals
+                    arg1="${osgi.arch}"
+                    arg2="x86" />
+            </and>
+        </condition>
+        <condition
+            property="testPlatform"
+            value="macosx">
+            <and>
+                <equals
+                    arg1="${osgi.os}"
+                    arg2="macosx" />
+                <equals
+                    arg1="${osgi.ws}"
+                    arg2="cocoa" />
+                <equals
+                    arg1="${osgi.arch}"
+                    arg2="x86_64" />
+            </and>
+        </condition>
+        <condition
+            property="testPlatform"
+            value="macmini">
+            <and>
+                <equals
+                    arg1="${osgi.os}"
+                    arg2="macosx" />
+                <equals
+                    arg1="${osgi.ws}"
+                    arg2="cocoa" />
+                <equals
+                    arg1="${osgi.arch}"
+                    arg2="x86" />
+            </and>
+        </condition>
+        <echo message="testPlatform  ${testPlatform}" />
+        <fail
+            unless="testPlatform"
+            message="testPlatform did not match any of the supported combinations of osgi.os, osgi.ws, osgi.arch" />
+        <condition
+            property="getArtifacts"
+            value="getwinzips">
+            <equals
+                arg1="${testPlatform}"
+                arg2="win7" />
+        </condition>
+        <condition
+            property="getArtifacts"
+            value="getwinzips64">
+            <equals
+                arg1="${testPlatform}"
+                arg2="win7-64" />
+        </condition>
+        <condition
+            property="getArtifacts"
+            value="getlinzips">
+            <equals
+                arg1="${testPlatform}"
+                arg2="linux" />
+        </condition>
+        <condition
+            property="getArtifacts"
+            value="getlinzips32">
+            <equals
+                arg1="${testPlatform}"
+                arg2="linux32" />
+        </condition>
+        <condition
+            property="getArtifacts"
+            value="getmaczips">
+            <equals
+                arg1="${testPlatform}"
+                arg2="macmini" />
+        </condition>
+        <condition
+            property="getArtifacts"
+            value="getmacosx">
+            <equals
+                arg1="${testPlatform}"
+                arg2="macosx" />
+        </condition>
+        <echo message="getArtifacts ${getArtifacts}" />
+        <antcall target="${getArtifacts}" />
+
+        <!--
+            Try using "loadproperties", insstead of "properties file=" to see if
+            that will "evaluate" variables as loaded. Otherwise, the <properties form
+            has to move to "top of file" ... outer scope?
+           <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
+        -->
+        <property
+            name="testingPropertiesfile"
+            value="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
+        <loadproperties>
+            <file file="${testingPropertiesfile}" />
+        </loadproperties>
+
+        <echo message="DEBUG: testingPropertiesfile: ${testingPropertiesfile}" />
+        <echo message="DEBUG: org.eclipse.core.net.prefs: ${org.eclipse.core.net.prefs}" />
+
+        <property
+            name="tester"
+            value="${executionDir}" />
+
+        <echo message="DEBUG: testDir: ${testDir}" />
+        <echo message="DEBUG: executionDir: ${executionDir}" />
+
+		<!--if executiondir starts with c:\ you'll need to escape it so it can load the filename properly with java -->
+        <pathconvert
+            targetos="unix"
+            property="windowsfile">
+            <path location="${executionDir}" />
+        </pathconvert>
+        <echo message="windowsfile ${windowsfile}" />
+        <property
+            name="p2executionDir"
+            value="${windowsfile}" />
+        <replace
+            file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties"
+            token="@executionDir@"
+            value="${p2executionDir}" />
+        <replace
+            file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties"
+            token="@buildId@"
+            value="${buildId}" />
+        <replace
+            file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties"
+            token="@org.eclipse.equinox.p2.tests.current.build.repo@"
+            value="${currentbuildrepo}" />
+        <property file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties" />
+
+        <echo message="executionDir ${executionDir}" />
+
+        <copy
+            todir="${executionDir}"
+            verbose="true">
+            <fileset dir="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}" />
+        </copy>
+        <copy
+            verbose="true"
+            todir="${executionDir}"
+            overwrite="true">
+            <fileset dir="${eclipseBuilderDir}/sdk.tests/testScripts" />
+        </copy>
+
+        <antcall target="configure.team.cvs.test" />
+        <echo message="test.xml: ${test.xml}" />
+        <echoproperties />
+        <ant antfile="${test.xml}">
+        </ant>
+
+
+    </target>
+
+            <!--
+                 This streamSpecificInit target was copied from buildAll.xml and does about exactly the same thing,
+                 purposely left close to original, though not as much is actually required.
+                 TODO: in future, pull out into one file, and reuse
+
+                 Its purpose, here, is entirely to pick up "stream specific" stings from the releng maps
+                 project, 'configuration' folder.
+
+                 Important note: here, unlike the one in buildAll.xml, we assume the maps have already
+                 been checked out, say by hudson, as a peer of eclipseBuilder, rather then us doing
+                 the checkout here, ourselves. Not sure which is easier, but current means hudson job
+                 has to be set up with two git checkout steps, right version for maps (for 3.8 vs 4.2).
+
+             -->
+    <target
+        name="streamSpecificInit"
+        unless="streamSpecificInitComplete"
+        depends="initStreamVariables,hudson-init">
+        <echo message="DEBUG: executing streamSpecificInit" />
+
+
+        <property
+            name="configurationLocation"
+            value="/shared/eclipse/sdk/promotion/testScripts/configuration" />
+
+                <!-- TODO: I moved (copied) this from init, probably only needs to
+                    be set once, but, needs to be set before loading the repo properties -->
+                <!--set local mirror location depending if hudson is running -->
+        <condition
+            property="localmirror"
+            value="${DOWNLOAD_HOST}">
+            <equals
+                arg1="${hudson}"
+                arg2="true" />
+        </condition>
+
+
+
+
+        <!--
+             these condidtions used to be in "init". Conceptually seems right to be in "stream
+             specific" init (since their value depends on stream) but may have side effects?)
+         -->
+        <condition
+            property="dropsDirSegment"
+            value="drops4"
+            else="drops">
+            <equals
+                arg1="${eclipseStreamMajor}"
+                arg2="4" />
+        </condition>
+
+        <copy
+            verbose="true"
+            failonerror="true"
+            todir="${WORKSPACE}"
+            overwrite="true">
+            <fileset dir="${configurationLocation}/">
+                <include name="**" />
+            </fileset>
+        </copy>
+        
+                <!-- bug 376217: repos.properties is one of the files moved from
+                    Eclipsebuild to maps project and into a common file, streamSpecific-build.properties -->
+        <replace
+            token="@localmirror@"
+            file="${WORKSPACE}/streamSpecific-build.properties"
+            value="${localmirror}" />
+                <!-- The reading/loading of the these streamSpecific-build.properties
+                    is critical to several stream specific areas of code, so may have to be moved
+                    "earlier"? Made it own task for depends on clauses? -->
+        <loadproperties srcFile="${WORKSPACE}/streamSpecific-build.properties" />
+
+        <!-- echo a few typically expected properties, to make sure getting right file -->
+
+        <echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
+        <echo message="p2repopreviousR: ${p2repopreviousR}" />
+        <echo message="apiTestsPreviousBaseDLBaseURL: ${apiTestsPreviousBaseDLBaseURL}" />
+        <echo message="apiTestsPreviousBaseWin32Filename: ${apiTestsPreviousBaseWin32Filename}" />
+
+                <!-- now that we have maps (and we already have eclipseBuider from
+                    masterBuild.sh, before calling buildAll.xml, then now its time to "overlay"
+                    the stream specific files of eclipseBuild that are in the maps project, in
+                    the folder named /org.eclipse.releng/configuration/eclipseBuilderOverlays -->
+                <!-- TODO: semi hard code for now, figure out variables later maybe
+                    do away with "supportDir" segment? maybe call 'base' and other variables
+                    'eclipsebulder.base'? -->
+
+        <property
+            name="eclipseBuilderDir"
+            value="${WORKSPACE}" />
+
+
+
+                <!-- now that we've done that little merge, let's "fix up" eclipseBuild
+                    stuff that depends on exact version numbers -->
+        <replace
+            dir="${eclipseBuilderDir}"
+            token="@eclipseStream@"
+            value="${eclipseStream}" />
+        <replace
+            dir="${eclipseBuilderDir}"
+            token="@eclipseStreamMajor@"
+            value="${eclipseStreamMajor}" />
+        <replace
+            dir="${eclipseBuilderDir}"
+            token="@eclipseStreamMinor@"
+            value="${eclipseStreamMinor}" />
+                <!-- seems unlikely we'd ever need this all by itself, and not just
+                    use eclipseStream, which should be all three fields
+                    <replace summary="true"
+                      dir="${eclipseBuilderDir}" token="@eclipseStreamService@"
+                      value="${eclipseStreamService}" />
+                    -->
+
+                <!-- no need to re-init the properties, once done (in this scope)
+                    so no one else can ever set streamSpecificInitComplete properties. It is
+                    our control property -->
+        <property
+            name="streamSpecificInitComplete"
+            value="true" />
+    </target>
+        <!--
+            note: no check for "if maps local". Here we want to be sure to get
+            a fresh copy, but only once
+        -->
+
+    <!--
+       main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor and eclipseStreamMinor
+       Uses script, which requires Java 1.6 (or ... else gets complicated to setup)
+     -->
+    <target name="initStreamVariables">
+        <fail
+            unless="eclipseStream"
+            message="eclipseStream value must be provided by caller, such as '4.3.0'." />
+        <condition property="streamOK">
+            <matches
+                pattern="\d\.\d\.\d"
+                string="${eclipseStream}" />
+        </condition>
+        <fail
+            message="eclipseStream variable had unexpected format. Should be of form digit.digit.digit, but was ${eclipseStream}"
+            unless="streamOK" />
+
+        <script language="javascript">
+            var eclipseStream = project.getProperty("eclipseStream");
+            var pattern = new
+            RegExp(/(\d+)\.(\d+)\.(\d+)/);
+
+            var sArray = pattern.exec(eclipseStream);
+            // sArray[0] is "whole match"
+            project.setProperty("eclipseStreamMajor", sArray[1]);
+            project.setProperty("eclipseStreamMinor", sArray[2]);
+            project.setProperty("eclipseStreamService", sArray[3]);
+            project.setProperty("updateSiteSegment", sArray[1] + "." +
+            sArray[2]);
+        </script>
+
+        <fail
+            unless="eclipseStreamMajor"
+            message="eclipseStreamMajor not defined or computed" />
+        <fail
+            unless="eclipseStreamMinor"
+            message="eclipseStreamMinor not defined or computed" />
+        <fail
+            unless="eclipseStreamService"
+            message="eclipseStreamService not defined or computed" />
+        <fail
+            unless="updateSiteSegment"
+            message="updateSiteSegment not defined or computed" />
+
+    </target>
+
+</project>
