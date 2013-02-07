@@ -119,6 +119,8 @@ echo "EBUILDER_HASH: $EBUILDER_HASH"
 #$fi
 fi
 
+echo "DEBUG: invoking test scripts on Hudson"
+
 HUDSON_TOKEN=windows2012tests ant \
     -DbuildId=${buildId} \
     -DeclipseStream=${eclipseStream} \
