@@ -17,6 +17,56 @@ function usage ()
     printf "\t\t\t\t%s\n" "or, provide those parameters in buildParams.shshource on search path"
 }
 
+# compute main (left part) of download site
+function dlpath()
+{
+    eclipseStream=$1
+    if [[ -z "${eclipseStream}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+    
+    
+    buildId=$2
+    if [[ -z "${buildId}" ]]
+    then
+         printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+         return 1;
+    fi
+    
+    BUILD_TECH=$3
+    if [[ -z "${BUILD_TECH}" ]]
+    then
+         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+    
+
+    
+    eclipseStreamMajor=${eclipseStream:0:1}
+    buildType=${buildId:0:1}
+
+    #TODO: eventual switch so CBI is "normal" one and PDE is marked one
+    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    then 
+        dropsuffix=cbibased
+    else
+        dropsuffix=""
+    fi
+
+    pathToDL=eclipse/downloads/drops
+    if [[ $eclipseStreamMajor > 3 ]]
+    then
+        pathToDL=$pathToDL$eclipseStreamMajor
+    fi
+
+    pathToDL=$pathToDL$dropsuffix
+    
+    echo $pathToDL
+}
+
+
 # This file, buildParams.shsource, normally does not exist on build system,
 # but can be provided if running "by hand" as an easy way to provide the
 # parameters required. For example, the contents might be
