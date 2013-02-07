@@ -85,6 +85,22 @@ echo "BUILD_TECH: $BUILD_TECH"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 
+    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    then 
+       buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
+       eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
+       dlPath=$( dlpath $eclipseStream $buildId $BUILD_TECH )
+       echo "DEBUG dlPath: $dlPath"
+       buildDropDir=${buildRoot}/siteDir/$dlPath/${buildId}
+       echo "DEBGUG buildDropDir: $buildDropDir"
+       builderDropDir=${buildDropDir}/${eclipsebuilder}
+       echo "DEBUG: builderDropDir: ${builderDropDir}"
+    else
+        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+        #buildDir=${buildRoot}/build
+        #supportDir=${buildDir}/supportDir
+        #eclipsebuilder=org.eclipse.releng.eclipsebuilder
+        #builderDir=${supportDir}/$eclipsebuilder
 #$buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
 #$buildDir=${buildRoot}/build
 #$supportDir=${buildDir}/supportDir
@@ -101,11 +117,12 @@ echo "EBUILDER_HASH: $EBUILDER_HASH"
 #$then
     #    $    postingDirectory=${siteDir}/eclipse/downloads/drops${eclipseStreamMajor}
 #$fi
+fi
 
 HUDSON_TOKEN=windows2012tests ant \
     -DbuildId=${buildId} \
     -DeclipseStream=${eclipseStream} \
     -DBUILD_TECH=${BUILD_TECH} \
     -DEBUILDER_HASH=${EBUILDER_HASH} \
-        -f /shared/eclipse/sdk/promotion/testScripts/invokeTestsJSON.xml
+        -f ${builderDropDir}/invokeTestsJSON.xml
 
