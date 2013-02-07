@@ -88,12 +88,12 @@
             value="org.eclipse.releng.basebuilder" />
         
         <!-- the desired folder name (made to stay consistent with cvs module name, though Git project 
-             is named eclipse.platform.releng.basebuilder fil--> 
+             is named eclipse.platform.releng.basebuilder fil-->
         <property
             name="folderName"
             value="org.eclipse.releng.basebuilder" />
-        
-        <property 
+
+        <property
             name="fetchSource"
             value="git" />
 
@@ -107,8 +107,14 @@
         <!-- leave useGit undefined to imply to use CVS. Callers can override git defaults with -DfetchSource=cvs 
              or, anything besides 'git' implies cvs.
         -->
-        <condition property="useGit" value="true">
-           <equals arg1="${fetchSource}" arg2="git" casesensitive="false" trim="true"/>
+        <condition
+            property="useGit"
+            value="true">
+            <equals
+                arg1="${fetchSource}"
+                arg2="git"
+                casesensitive="false"
+                trim="true" />
         </condition>
         <echo message="useGit: ${useGit}" />
         <!-- don't need? yet
@@ -134,7 +140,7 @@
             <isset property="checkout.builder.clean" />
         </condition>
        -->
-        <property 
+        <property
             name="getBaseBuilderInitialized"
             value="true" />
     </target>
@@ -152,8 +158,9 @@
         <delete dir="${WORKSPACE}/${folderName}" />
         <mkdir dir="${WORKSPACE}/${folderName}" />
 
-        <antcall target="fetchBaseBuilder"/>
-        
+        <antcall target="fetchBaseBuilder" />
+        <antcall target="fetchBaseBuilderLocal" />
+
     </target>
     <!-- hurestic to check if we are running on hudson variable, if so -->
     <target name="checkHudson">
@@ -176,28 +183,28 @@
 
     </target>
     <target
-        name="fetchBaseBuilderFromGit" 
+        name="fetchBaseBuilderFromGit"
         depends="init"
         if="useGit">
         <echo message="Fetching basebuilder from Git via CGit" />
-        <get 
-          src="http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${builderVersion}.zip"
-          dest="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
-        <unzip  
+        <get
+            src="http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${builderVersion}.zip"
+            dest="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
+        <unzip
             src="${WORKSPACE}/basebuilder-${builderVersion}.zip"
             dest="${WORKSPACE}"
             overwrite="true" />
 
-        <move  todir="${WORKSPACE}/${folderName}" >
-            <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${builderVersion}" >
+        <move todir="${WORKSPACE}/${folderName}">
+            <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${builderVersion}">
                 <include name="**/*" />
             </fileset>
         </move>
 
-        <chmod  perm="ugo+x" >
+        <chmod perm="ugo+x">
             <fileset dir="${WORKSPACE}/${folderName}">
-                <include name="eclipse"/>
-                <include name="*.so*"/>
+                <include name="eclipse" />
+                <include name="*.so*" />
             </fileset>
         </chmod>
 
@@ -213,12 +220,12 @@
         <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists
         temp leave to save a copy 
         <delete file="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
-        --> 
+        -->
 
     </target>
-    
+
     <target
-        name="fetchBaseBuilderFromCVS" 
+        name="fetchBaseBuilderFromCVS"
         depends="init"
         unless="useGit">
         <echo message="Fetching basebuilder from CVS" />
@@ -231,11 +238,35 @@
             package="${cvsProject}">
         </cvs>
     </target>
-    
+
     <target
-        name="fetchBaseBuilder" 
-        depends="init, fetchBaseBuilderFromCVS, fetchBaseBuilderFromGit" >
+        name="fetchBaseBuilder"
+        depends="init, fetchBaseBuilderFromCVS, fetchBaseBuilderFromGit"
+        unless="basebuilderlocal">
         <echo message="Fetched basebuilder to ${WORKSPACE}/${folderName}" />
+    </target>
+    <target
+        name="fetchBaseBuilderLocal"
+        depends="init"
+        if="basebuilderlocal">
+        <unzip
+            src="${basebuilderlocal}/basebuilder-${builderVersion}.zip"
+            dest="${WORKSPACE}"
+            overwrite="true" />
+
+        <move todir="${WORKSPACE}/${folderName}">
+            <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${builderVersion}">
+                <include name="**/*" />
+            </fileset>
+        </move>
+
+        <chmod perm="ugo+x">
+            <fileset dir="${WORKSPACE}/${folderName}">
+                <include name="eclipse" />
+                <include name="*.so*" />
+            </fileset>
+        </chmod>
+        <echo message="Copied basebuilder to ${WORKSPACE}/${folderName}" />
 
     </target>
 </project>
