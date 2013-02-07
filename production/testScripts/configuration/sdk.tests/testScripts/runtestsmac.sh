@@ -7,7 +7,7 @@
 # to those defined by defaults for production machine.,
 # such as for vmcmd
 
-source localTestsProperties.shsource
+source localTestsProperties.shsource 2>/dev/null
 
 # by default, use the java executable on the path for outer and test jvm
 #vmcmd=/shared/common/jdk-1.6.x86_64/jre/bin/java

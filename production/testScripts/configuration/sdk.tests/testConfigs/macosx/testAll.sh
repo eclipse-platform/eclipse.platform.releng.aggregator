@@ -8,7 +8,7 @@ ulimit -c unlimited
 # to those defined by defaults for production machine.,
 # such as for vmcmd
 
-source localTestsProperties.shsource
+source localTestsProperties.shsource 2>/dev/null
 
 echo "PWD: $PWD"
 vmcmd=${vmcmd:-/Library/Java/JavaVirtualMachines/jdk1.7.0_10.jdk/Contents/Home/jre/bin/java}

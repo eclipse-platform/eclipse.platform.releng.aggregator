@@ -8,7 +8,7 @@
 # to those defined by defaults for production machine.,
 # such as for vmcmd
 
-source localTestsProperties.shsource
+source localTestsProperties.shsource 2>/dev/null
 
 echo "PWD: $PWD"
 vmcmd=${vmcmd:-/shared/common/jdk-1.6.x86_64/jre/bin/java}
