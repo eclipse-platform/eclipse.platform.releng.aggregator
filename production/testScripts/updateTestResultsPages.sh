@@ -88,9 +88,9 @@ fi
 
 # We use a seperate basebuilder for each "drop", to make sure it is specific for that drop, 
 # and they won't interfere with each other.
-basebuilderDir=$fromDir/org.eclipse.releng.basebuilder
+basebuilderDir=${fromDir}/org.eclipse.releng.basebuilder
 
-if [[ ! -d basebuilderDir ]] 
+if [[ ! -d "${basebuilderDir}" ]] 
 then
      ant -f /shared/eclipse/sdk/promotion/getBaseBuilder.xml -DWORKSPACE=$fromDir
 fi
@@ -114,8 +114,6 @@ echo " BUILDFILESTR: $BUILDFILESTR"
 
 # provide blank, to get default
 BUILDTARGET=" "
-
-eclipseStreamMajor=${eclipseStream:0:1}
 
 devworkspace="${basebuilderDir}/workspace-updateTestResults"
 devArgs="-Xmx256m -Dhudson=true -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -DBUILD_TECH=${BUILD_TECH}"
