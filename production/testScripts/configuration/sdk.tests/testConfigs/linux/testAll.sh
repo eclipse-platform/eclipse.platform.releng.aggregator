@@ -25,6 +25,8 @@ propertyFile=${propertyFile:-vm.properties}
 echo "vmcmd in testAll: ${vmcmd}"
 echo "extdir in testAll (if any): ${extdir}"
 echo "propertyFile in testAll: ${propertyFile}"
+echo "buildId in testAll: ${buildId}"
+
 
 #execute command to run tests
 /bin/chmod 755 runtests.sh
