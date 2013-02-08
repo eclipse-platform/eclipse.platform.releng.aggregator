@@ -21,7 +21,7 @@ eclipseStream=$1
 if [ -z "${eclipseStream}" ]
 then
     echo "must provide eclipseStream as first argumnet, for this function $0"
-    return 1;
+    exit 1
 fi
 
 
@@ -29,14 +29,14 @@ buildId=$2
 if [ -z "${buildId}" ]
 then
     echo "must provide buildId as second argumnet, for this function $0"
-    return 1;
+    exit 1
 fi
 
 BUILD_TECH=$3
 if [[ -z "${BUILD_TECH}" ]]
   then
      echo "must provide BUILD_TECH as third argumnet, for this function $0"
-     return 1;
+     exit 1
   fi
 
     eclipseStreamMajor=${eclipseStream:0:1}
