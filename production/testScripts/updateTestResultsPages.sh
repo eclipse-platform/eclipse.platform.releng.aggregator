@@ -89,6 +89,7 @@ fi
 # We use a seperate basebuilder for each "drop", to make sure it is specific for that drop, 
 # and they won't interfere with each other.
 basebuilderDir=${fromDir}/org.eclipse.releng.basebuilder
+aggregatorDir=${fromDir}/eclipse.platform.releng.aggregator
 
 if [[ ! -d "${basebuilderDir}" ]] 
 then
@@ -106,7 +107,7 @@ then
    exit 1
 fi
 
-BUILDFILE=${fromDir}/production/testScripts/genTestIndexes.xml
+BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
 
 BUILDFILESTR="-f ${BUILDFILE}"
 echo
