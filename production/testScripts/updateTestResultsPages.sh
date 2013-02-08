@@ -92,7 +92,7 @@ basebuilderDir=$fromDir/org.eclipse.releng.basebuilder
 
 if [[ ! -d basebuilderDir ]] 
 then
-     ant -f ${fromDir}/production/testScripts/getBaseBuilder.xml -DWORKSPACE=$fromDir
+     ant -f /shared/eclipse/sdk/promotion/getBaseBuilder.xml -DWORKSPACE=$fromDir
 fi
 
 # remember, the Eclipse install must match the VM used (e.g. both 64 bit, both 32 bit, etc).
