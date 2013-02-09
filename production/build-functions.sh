@@ -129,7 +129,7 @@ fn-git-reset-submodules ()
 #   BUILD_TYPE: I, M, N
 fn-build-id () 
 {
-     BUILD_TYPE="$1"; shift
+    BUILD_TYPE="$1"; shift
      TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
 echo ${BUILD_TYPE}${TIMESTAMP}
 }
@@ -741,9 +741,9 @@ fn-gather-main-index ()
     BUILD_DIR="$1"; shift
     STREAM="$1"; shift
     BUILD_TYPE="$1"; shift
-    # BUILD_TYPE_NAME=Integration
+    #BUILD_TYPE_NAME=Integration
     #if [ "$BUILD_TYPE" = M ]; then
-        #    BUILD_TYPE_NAME=Maintenance
+    #    BUILD_TYPE_NAME=Maintenance
     #fi
     BUILD_PRETTY_DATE="$1"; shift
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles

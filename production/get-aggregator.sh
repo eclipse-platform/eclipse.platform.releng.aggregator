@@ -24,26 +24,27 @@ source "$1"
 cd $BUILD_ROOT
 
 # derived values
-gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
+gitCache=$( fn-git-cache "$BUILD_ROOT" "${BRANCH}" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 signingDir=$( fn-git-dir "$gitCache" "$SIGNING_REPO" )
 
 if [ -r "$aggDir" ]; then
-	fn-git-clean-aggregator "$aggDir" "$BRANCH"
+	fn-git-clean-aggregator "$aggDir" "${BRANCH}"
 	pushd "$aggDir"
 	fn-git-pull
 	fn-git-submodule-update
 	popd
 else
 	fn-git-clone-aggregator "$gitCache" \
-	  $(fn-local-repo "$AGGREGATOR_REPO") "$BRANCH" 
+	  $(fn-local-repo "$AGGREGATOR_REPO") "${BRANCH}" 
 fi
 
 pushd "$aggDir"
 # save current hash tag value for documenting build (e.g. to reproduce, run tests, etc.)
-AGGR_HASH=$( git show-ref --hash --verify refs/remotes/origin/$BRANCH )
-checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/$BRANCH. Not valid ref?"
-fn-write-property AGGR_HASH
+EBUILDER_HASH=$( git show-ref --hash --verify refs/remotes/origin/${BRANCH} )
+checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/${BRANCH}. Not valid ref?"
+# remember, literal name as argument ... its defrefernced in function
+fn-write-property EBUILDER_HASH
 popd
 
 echo "signingDir: $signingDir"
