@@ -21,6 +21,7 @@ case $BUILD_TECH in
 
         'PDE' )
                 echo "Promote Build from PDE"
+                EBUILDER_HASH=master
                 ;;
 
         'CBI' )
@@ -78,7 +79,7 @@ echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEcli
 # TODO: changed "syncDropLocation" to handle a third parameter (CBI or PDE)
 # And now a fourth ... eBuilder HASHTAG,so won't always have to assume master, and 
 # so the tests can get their own copy.
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $AGGR_HASH" >> ${promoteScriptLocationEclipse}/${scriptName}
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $EBUILDER_HASH" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
@@ -97,8 +98,8 @@ then
     # location to look for its promotions scripts. (i.e. tight coupling)
     promoteScriptLocationEquinox=${workLocationEquinox}/queue
 
-    # directory should normally exist -- best to create with committer's ID --
-    # but in case not
+    # Directory should normally exist -- best to create with committer's ID before hand, 
+    # but in case not.
     mkdir -p "${promoteScriptLocationEquinox}"
 
     equinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops"
@@ -132,6 +133,6 @@ else
 fi
 
 
-echo "normal exit from build phase of $(basename $0)"
+echo "normal exit from promote phase of $(basename $0)"
 
 exit 0

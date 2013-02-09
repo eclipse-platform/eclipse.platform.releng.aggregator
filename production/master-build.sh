@@ -103,9 +103,6 @@ fn-write-property BUILD_ID
 fn-write-property BUILD_PRETTY_DATE
 fn-write-property BUILD_TYPE_NAME
 
-# dump ALL environment variables in case its helpful in documenting or 
-# debugging build results or differences between runs, especially on different machines
-env 2>&1 | tee $logsDirectory/all-env-variables.txt
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/get-aggregator-ouptut.txt
 checkForErrorExit $? "Error occurred while getting aggregator"
@@ -126,6 +123,7 @@ checkForErrorExit $? "Error occurred while updating build input"
 #checkForErrorExit $? "Error occurred applying patch"
 #fi 
 
+#TODO: Should we do this only at end, if build (relatively) successful?
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
 # exits with 1 here? 
@@ -145,7 +143,6 @@ checkForErrorExit $? "Error occurred during install parent script"
 $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/pom-version-updater-ouptut.txt
 checkForErrorExit $? "Error occurred during pom version updater"
 
-
 $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/run-maven-build-ouptut.txt
 checkForErrorExit $? "Error occurred during run maven build"
 
@@ -163,3 +160,7 @@ $SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/prom
 checkForErrorExit $? "Error occurred during promote-build"
 
 fn-write-property-close
+
+# dump ALL environment variables in case its helpful in documenting or 
+# debugging build results or differences between runs, especially on different machines
+env 2>&1 | tee $logsDirectory/all-env-variables.txt
