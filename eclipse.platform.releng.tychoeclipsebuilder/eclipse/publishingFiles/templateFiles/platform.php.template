@@ -52,6 +52,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 		<li class="tabstart">&#160;&#160;&#160;</li>
 		<li><a class="" href="index.php" target="_self">All Platforms</a></li>
 <?php
+include("buildproperties.php");
+
+
 	$platform = "%platform%";
 	$platforms = array(1 => "Windows", "Linux", "Solaris", "AIX", "Macintosh", "HP-UX");
 	$files = array(1 => "winPlatform.php", "linPlatform.php", "solPlatform.php", "aixPlatform.php", "macPlatform.php", "hpuxPlatform.php");
@@ -120,7 +123,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 		<table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" >
 		<tr>
 			<td>
-				<p><b><font face="Verdana" size="+3">@type@ Build: @build@ - </font><font face="Verdana" size="+2"> <?php echo $platform; ?> </font></b><br> @date@.
+				<p><b><font face="Verdana" size="+3"><?php echo "Build: $BUILD_ID"; ?> - </font><font face="Verdana" size="+2"> <?php echo $platform; ?> </font></b><br> @date@.
 				These downloads are provided under the <a href="http://www.eclipse.org/legal/epl/notice.html">
 				<b>Eclipse Foundation Software User Agreement</b></a>.</p>
 			</td><tr><tr>
@@ -239,10 +242,10 @@ function getDropSize($zipfile) {
 
 }
 
-function genLinks($servername,$buildlabel,$zipfile) {
+function genLinks($servername,$BUILD_ID,$zipfile) {
 
 if (preg_match("/.eclipse.org/i",$servername)) {
-#     $httplink = "http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops/$buildlabel/$zipfile";
+#     $httplink = "http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops/$BUILD_ID/$zipfile";
      $httplink = "download.php?dropFile=$zipfile";
      $httplabel = $zipfile;
      $httpline =  "<div align=\"left\"><a href=\"$httplink\">$httplabel</a>";
@@ -261,8 +264,8 @@ if (preg_match("/.eclipse.org/i",$servername)) {
   echo "&nbsp;&nbsp";
   echo "<td>$filesize</td>";
   echo "<td>$zipfile</td>";
-  echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops/@buildlabel@/checksum/$zipfile.md5\">(md5)</a>";
-  echo " <a href=\"http://download.eclipse.org/eclipse/downloads/drops/@buildlabel@/checksum/$zipfile.sha1\">(sha1)</a>";
+  echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops/$BUILD_ID/checksum/$zipfile.md5\">(md5)</a>";
+  echo " <a href=\"http://download.eclipse.org/eclipse/downloads/drops/$BUILD_ID/checksum/$zipfile.sha1\">(sha1)</a>";
 }
 ?>	
 
@@ -272,23 +275,7 @@ if (preg_match("/.eclipse.org/i",$servername)) {
 <table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
 <tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>Status</b></div></td><td width="36%"><b>Platform</b></td><?php column($_SERVER["SERVER_NAME"]); ?>
 </tr> %sdk% </table><?php
-		 $parts = explode("/", getcwd());
-		 $parts2 = explode("-", $parts[count($parts) - 1]);
-		 $buildName = $parts2[1];
-		
-		 // Get build type names
-
-		 $fileHandle = fopen("./dlconfig2.txt", "r");
-		 while (!feof($fileHandle)) {
-		 		
-		 		 $aLine = fgets($fileHandle, 4096); // Length parameter only optional after 4.2.0
-		 		 $parts = explode(",", $aLine);
-		 		 $dropNames[trim($parts[0])] = trim($parts[1]);
- 		 }
-		 fclose($fileHandle);
-
-		 $buildType = $dropNames[$parts2[0]];
-		
+		 
 ?>
 </div></td></tr>
 

@@ -8,7 +8,7 @@ if [[ ! -e "$BASE/setup.sh" ]]; then
 fi
 
 
-. "$BASE/setup.sh"
+source "$BASE/setup.sh"
 
 if [[ ! -e "${m2settings}" ]]; then
     echo "Copy $HOME/.m2/settings.xml or cbi_settings.tpl to ${m2settings}"

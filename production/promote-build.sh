@@ -20,24 +20,29 @@ if [[ -z "$BUILD_TECH" ]]
 case $BUILD_TECH in
 
         'PDE' )
-                echo "promote PDE build"
+                echo "Promote Build from PDE"
                 ;;
 
         'CBI' )
-                echo "promote CBI build"
+                 echo "Promote Build from CBI"
                 # always assume true, for now, until debugged
-                testbuildonly=true;
+                # testbuildonly=true;
+                
                 ;;
         *) echo "ERROR: Invalid argument to $(basename $0)";
            usage;
-           exit 1
+           exit 1;
             ;;
 esac
 
+if [[ -z ${SCRIPT_PATH} ]]
+then
+    SCRIPT_PATH=${PWD}
+fi
 
 source $SCRIPT_PATH/build-functions.sh
 
-source "$2"
+source "$2" 2>/dev/null
 
 
 # The 'workLocation' provides a handy central place to have the
@@ -52,7 +57,14 @@ promoteScriptLocationEclipse=$workLocation/queue
 # directory should normally exist -- best to create first, with committer's ID --
 # but in case not
 mkdir -p "${promoteScriptLocationEclipse}"
-env > env.txt
+#env > env.txt
+
+if [[ -z ${STREAM} || -z ${BUILD_ID} ]]
+then
+    echo "ERROR: This script requires STREAM and BUILD_ID"
+    exit 1
+fi
+
 scriptName=promote-${STREAM}-${BUILD_ID}.sh
 if [[ "${testbuildonly}" == "true" ]]
 then
@@ -64,7 +76,9 @@ ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
 # TODO: changed "syncDropLocation" to handle a third parameter (CBI or PDE)
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH" >> ${promoteScriptLocationEclipse}/${scriptName}
+# And now a fourth ... eBuilder HASHTAG,so won't always have to assume master, and 
+# so the tests can get their own copy.
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $AGGR_HASH" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}

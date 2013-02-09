@@ -3,7 +3,7 @@
 <?php
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
-include 'buildProperties.php';
+include ('buildproperties.php');
 if (array_key_exists("SERVER_NAME", $_SERVER)) {
     $servername = $_SERVER["SERVER_NAME"];
     if ($servername === "build.eclipse.org") {
@@ -32,24 +32,8 @@ else {
 <head>
 
 <?php
-		 $parts = explode("/", getcwd());
-		 $parts2 = explode("-", $parts[count($parts) - 1]);
-		 $buildName = $parts2[0] . "-" . $parts2[1];
-		
-		 // Get build type names
 
-		 $fileHandle = fopen("./dlconfig2.txt", "r");
-		 while (!feof($fileHandle)) {
-		 		
-		 		 $aLine = fgets($fileHandle, 4096); // Length parameter only optional after 4.2.0
-		 		 $parts = explode(",", $aLine);
-		 		 $dropNames[trim($parts[0])] = trim($parts[1]);
- 		 }
-		 fclose($fileHandle);
-
-		 $buildType = $dropNames[$parts2[0]];
-
-		 echo "<title>Test Results for $buildType $buildName </title>";
+		 echo "<title>Test Results for $BUILD_ID </title>";
 ?>
 
 
@@ -142,7 +126,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div id="midcolumn">
 <p><b><font face="Verdana" size="+3">Test Results</font></b> </p>
 <div class="homeitem">
-<h3><a name="Logs"> Logs <?php echo "$buildType $buildName"; ?></h3>
+<h3><a name="Logs"> Logs <?php echo "$BUILD_ID"; ?></h3>
 <ul>
 <!-- have removed chkpii processing on build.eclilpse.org
 <li> <a href="logs.php#chkpii"><b> CHKPII Test Logs </b></a>
@@ -174,18 +158,18 @@ echo "  This tool generates a report for API deprecated since 3.7.1 </li> ";
 echo"<li><a href=\"apitools/report.html\"><b>API Tools Post-API Freeze Report</b></a>  This report describes API changes since 3.7.  Exclusions are listed in org.eclipse.releng/apiexclude/exclude_list.txt. </li>";
 ?>
 <?php
-echo " <li><a href=\"apitools/apifilters-$buildName.zip\"><b>Zip of .api_filters files used in the build</b></a></li>";
+echo " <li><a href=\"apitools/apifilters-$TIMESTAMP.zip\"><b>Zip of .api_filters files used in the build</b></a></li>";
 ?>
 <?php
 
-    echo"<li>org.eclipse.releng.eclipsebuilder: $eclipsebuilderBranch</li> ";
-    echo"<li>org.eclipse.releng.basebuilder: $basebuilderBranch</li> ";
+    echo"<li>org.eclipse.releng.eclipsebuilder: $BRANCH (hash: $AGGR_HASH)</li> ";
+    echo"<li>org.eclipse.releng.basebuilder: $BASEBUILDER_TAG</li> ";
 
 ?>
 </div>
 
 <div class="homeitem3col">
-<h3><a name="UnitTest"> Unit Test Results for <?php echo "$buildType $buildName"; ?> </a></h3>
+<h3><a name="UnitTest"> Unit Test Results for <?php echo "$BUILD_ID"; ?> </a></h3>
 
 <p>The table shows the unit test results for this build on the platforms
 tested. You may access the test results page specific to each

@@ -16,9 +16,9 @@ pushd $( dirname $0 ) >/dev/null
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 popd >/dev/null
 
-. $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.sh
 
-. "$1"
+source "$1"
 
 
 cd $BUILD_ROOT
@@ -38,6 +38,13 @@ else
 	fn-git-clone-aggregator "$gitCache" \
 	  $(fn-local-repo "$AGGREGATOR_REPO") "$BRANCH" 
 fi
+
+pushd "$aggDir"
+# save current hash tag value for documenting build (e.g. to reproduce, run tests, etc.)
+AGGR_HASH=$( git show-ref --hash --verify refs/remotes/origin/$BRANCH )
+checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/$BRANCH. Not valid ref?"
+fn-write-property AGGR_HASH
+popd
 
 echo "signingDir: $signingDir"
 

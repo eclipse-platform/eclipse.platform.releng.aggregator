@@ -3,6 +3,9 @@
 <?php
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
+
+include("buildproperties.php");
+
 if (array_key_exists("SERVER_NAME", $_SERVER)) {
     $servername = $_SERVER["SERVER_NAME"];
     if ($servername === "build.eclipse.org") {
@@ -178,7 +181,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 		<table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" >
 		<tr>
 			<td>
-				<p><b><font face="Verdana" size="+3">Eclipse @eclipseStream@ @type@ Build: @build@</font></b><br> @date@.
+				<p><b><font face="Verdana" size="+3">Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?></font></b><br> <?php echo $BUILD_PRETTY_DATE; ?>.
 				These downloads are provided under the <a href="http://www.eclipse.org/legal/epl/notice.html">
 				<b>Eclipse Foundation Software User Agreement</b></a>.</p>
 			</td><tr><tr>
@@ -327,8 +330,8 @@ function genLinks($servername,$buildlabel,$zipfile) {
      echo "<td>$filesize</td>";
      echo "<td>$zipfile</td>";
      // make relative so works on build.eclipse.org
-     //echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops/@buildlabel@/checksum/$zipfile.md5\">(md5)</a>";
-     //echo " <a href=\"http://download.eclipse.org/eclipse/downloads/drops/@buildlabel@/checksum/$zipfile.sha1\">(sha1)</a>";
+     //echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops/$BUILD_ID/checksum/$zipfile.md5\">(md5)</a>";
+     //echo " <a href=\"http://download.eclipse.org/eclipse/downloads/drops/$BUILD_ID/checksum/$zipfile.sha1\">(sha1)</a>";
      echo "<td><a href=\"./checksum/$zipfile.md5\">(md5)</a>";
      echo " <a href=\"./checksum/$zipfile.sha1\">(sha1)</a>";
 }
@@ -340,35 +343,7 @@ function genLinks($servername,$buildlabel,$zipfile) {
 <table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
 <tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>Status</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %sdk% </table><?php
-		 $parts = explode("/", getcwd());
-		 $parts2 = explode("-", $parts[count($parts) - 1]);
-		 $buildName = $parts2[1];
 		
-		 // Get build type names
-
-		 $fileHandle = fopen("./dlconfig2.txt", "r");
-		 while (!feof($fileHandle)) {
-		 		
-		 		 $aLine = fgets($fileHandle, 4096); // Length parameter only optional after 4.2.0
-		 		 $parts = explode(",", $aLine);
-		 		 // if two parts do not exist, it is likely just incorrect dlconfig.txt file,
-		 		 // or perhaps empty line. We'll ignore for now, but better solution would be to
-		 		 // display something to error output?
-		 		 if (array_key_exists(1, $parts)) {
-		       		 $dropNames[trim($parts[0])] = trim($parts[1]);
-		       		 // echo "<p>".$parts2[0]."</p>";
-                     // echo "<p>".$dropNames[$parts2[0]]."</p>";
-                     // without this check, was getting 7 "Undefined index: I20120410"
-                     // I assume something in dlconfig2 is out of date ... or something?
-                     // (there are 7 lines in dlconfig2.txt)
-                     // ah, figured it out. the file had windows EOLs. We'll check anyway.
-                     // and, assume there's just one "buildType" so the last value obtained suffices?
-                     if (array_key_exists($parts2[0], $dropNames)) {
-                           $buildType = $dropNames[$parts2[0]];
-                     }
-                }
-      		 }
-		 fclose($fileHandle);
 		
 ?>
 </div></td></tr>
