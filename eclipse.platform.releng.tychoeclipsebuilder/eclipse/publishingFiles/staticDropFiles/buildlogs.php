@@ -3,7 +3,7 @@
 <head>
 
 <?php
-
+include ('buildproperties.php');
 function listLogs($myDir) {
 
         $aDirectory = dir($myDir);

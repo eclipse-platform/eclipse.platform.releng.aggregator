@@ -4,6 +4,8 @@
 
 <?php
 
+include("buildproperties.php");
+
 function checkPlatform($line) {
 
     if (preg_match("/win7|win32|linux|macosx/i", $line)) {
@@ -110,32 +112,6 @@ function listDegailedLogs ($machineplatform) {
     }
 }
 
-function getBuildId() {
-    $parts = explode("/", getcwd());
-    $parts2 = explode("-", $parts[count($parts) - 1]);
-    $buildName = $parts2[0] . "-" . $parts2[1];
-    // echo "<p>buildName: $buildName</p>";
-    // Get build type names
-    $fileHandle = fopen("./dlconfig2.txt", "r");
-    while (!feof($fileHandle)) {
-        $aLine = fgets($fileHandle, 4096); // Length parameter only optional after 4.2.0
-        $parts = explode(",", $aLine);
-        $dropNames[trim($parts[0])] = trim($parts[1]);
-    }
-    fclose($fileHandle);
-
-    $buildType =  $buildType=substr($buildName,0,1);
-    // echo "<p>buildType: $buildType</p>";
-
-    $buildId = $buildName;
-    // echo "<p>buildId: $buildId</p>";
-
-    return($buildId);
-
-}
-
-
-
 
 ?>
 <STYLE TYPE="text/css">
@@ -226,10 +202,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div id="midcolumn">
 <div class="homeitem3col">
 <?php
-global $buildId;
-$buildId = getBuildId();
-echo "<title>Test Results for $buildId </title>\n";
-echo "<h2>Test Results for $buildId </title></h2>\n";
+
+echo "<title>Test Results for $BUILD_ID </title>\n";
+echo "<h2>Test Results for $BUILD_ID </h2>\n";
 
 echo "<h3>Logs</h3>\n";
 

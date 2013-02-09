@@ -16,9 +16,9 @@ pushd $( dirname $0 ) >/dev/null
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 popd >/dev/null
 
-. $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.sh
 
-. "$1"
+source "$1"
 
 
 cd $BUILD_ROOT
@@ -53,4 +53,4 @@ fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
 #fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 #fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
-#fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_DATE"
+#fn-gather-main-index "$BUILD_ID" "$aggDir" "$buildDirectory" "$STREAM" "$BUILD_TYPE" "$BUILD_PRETTY_DATE"

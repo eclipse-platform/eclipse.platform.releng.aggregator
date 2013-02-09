@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # master script to drive Eclipse Platform builds.
-
+RAWDATE=$( date +%s )
 
 if [ $# -ne 1 ]; then
     echo USAGE: $0 env_file
@@ -35,50 +35,73 @@ mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory"
 
 LOG=$buildDirectory/buildlogs/buildOutput.txt
-exec >>$LOG 2>&1
+#exec >>$LOG 2>&1
 
-BUILD_ENV_FILE=$logsDirectory/$BUILD_ID.env
+BUILD_PRETTY_DATE=$( date --date='@'$RAWDATE )
+TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+
+# These files have variable/value pairs for this build, suitable for use in 
+# shell scripts, PHP files, or as Ant (or Java) properties
+export BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
+export BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
+export BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
+
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
 export STREAMS_PATH="${aggDir}/streams"
 
+BUILD_TYPE_NAME="Integration"
+if [ "$BUILD_TYPE" = M ]; then
+      BUILD_TYPE_NAME="Maintenance"
+  elif [ "$BUILD_TYPE" = N ]; then
+      BUILD_TYPE_NAME="Nightly (HEAD)"
+  elif [ "$BUILD_TYPE" = S ]; then
+      BUILD_TYPE_NAME="Stable (Milestone)"
+fi
+
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
-echo "export PATH=\"${PATH}\"" >$BUILD_ENV_FILE
-echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_ROOT=\"${BUILD_ROOT}\""  >>$BUILD_ENV_FILE
-echo "export BRANCH=\"${BRANCH}\"" >>$BUILD_ENV_FILE
-echo "export STREAM=\"${STREAM}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_TYPE=\"${BUILD_TYPE}\"" >>$BUILD_ENV_FILE
-echo "export TMP_DIR=\"${TMP_DIR}\"" >>$BUILD_ENV_FILE 
-echo "export JAVA_HOME=\"${JAVA_HOME}\"" >>$BUILD_ENV_FILE
-echo "export MAVEN_OPTS=\"${MAVEN_OPTS}\"" >>$BUILD_ENV_FILE
-echo "export MAVEN_PATH=\"${MAVEN_PATH}\"" >>$BUILD_ENV_FILE
-echo "export AGGREGATOR_REPO=\"${AGGREGATOR_REPO}\"" >>$BUILD_ENV_FILE
-echo "export BASEBUILDER_TAG=\"${BASEBUILDER_TAG}\"" >>$BUILD_ENV_FILE
-echo "export SIGNING_REPO=\"${SIGNING_REPO}\"" >>$BUILD_ENV_FILE
-echo "export SIGNING_BRANCH=\"${SIGNING_BRANCH}\"" >>$BUILD_ENV_FILE
-echo "export B_GIT_EMAIL=\"${B_GIT_EMAIL}\"" >>$BUILD_ENV_FILE
-echo "export B_GIT_NAME=\"${B_GIT_NAME}\"" >>$BUILD_ENV_FILE
-echo "export COMMITTER_ID=\"${COMMITTER_ID}\"" >>$BUILD_ENV_FILE
-echo "export COMPARATOR=\"${COMPARATOR}\"" >>$BUILD_ENV_FILE
-echo "export SIGNING=\"${SIGNING}\"" >>$BUILD_ENV_FILE
-echo "export UPDATE_BRANDING=\"${UPDATE_BRANDING}\"" >>$BUILD_ENV_FILE
-echo "export FORCE_LOCAL_REPO=\"${FORCE_LOCAL_REPO}\"" >>$BUILD_ENV_FILE
-echo "export MAVEN_BREE=\"${MAVEN_BREE}\"" >>$BUILD_ENV_FILE
-echo "export GIT_PUSH=\"${GIT_PUSH}\"" >>$BUILD_ENV_FILE
-echo "export LOCAL_REPO=\"${LOCAL_REPO}\"" >>$BUILD_ENV_FILE
-echo "export INITIAL_ENV_FILE=\"${INITIAL_ENV_FILE}\""  >>$BUILD_ENV_FILE
-echo "export SCRIPT_PATH=\"${SCRIPT_PATH}\""  >>$BUILD_ENV_FILE
-echo "export STREAMS_PATH=\"${STREAMS_PATH}\""  >>$BUILD_ENV_FILE
+# The function also writes into appropriate PHP files and Properties files.
+ # Init once, here at beginning, but don't close until much later since other functions
+ # may write variables at various points
+fn-write-property-init
+fn-write-property PATH
+fn-write-property INITIAL_ENV_FILE
+fn-write-property BUILD_ROOT
+fn-write-property BRANCH
+fn-write-property STREAM
+fn-write-property BUILD_TYPE
+fn-write-property TIMESTAMP
+fn-write-property TMP_DIR
+fn-write-property JAVA_HOME
+fn-write-property MAVEN_OPTS
+fn-write-property MAVEN_PATH
+fn-write-property AGGREGATOR_REPO
+fn-write-property BASEBUILDER_TAG
+fn-write-property SIGNING_REPO
+fn-write-property SIGNING_BRANCH
+fn-write-property B_GIT_EMAIL
+fn-write-property B_GIT_NAME
+fn-write-property COMMITTER_ID
+fn-write-property COMPARATOR
+fn-write-property SIGNING
+fn-write-property UPDATE_BRANDING
+fn-write-property FORCE_LOCAL_REPO
+fn-write-property MAVEN_BREE
+fn-write-property GIT_PUSH
+fn-write-property LOCAL_REPO
+fn-write-property INITIAL_ENV_FILE
+fn-write-property SCRIPT_PATH
+fn-write-property STREAMS_PATH
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
-echo "export BUILD_ENV_FILE=\"${BUILD_ENV_FILE}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_ID=\"${BUILD_ID}\"" >>$BUILD_ENV_FILE
-echo "export BUILD_DATE=\"$(date)\"" >>$BUILD_ENV_FILE
+fn-write-property BUILD_ENV_FILE
+fn-write-property BUILD_ID
+fn-write-property BUILD_PRETTY_DATE
+fn-write-property BUILD_TYPE_NAME
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
@@ -138,3 +161,5 @@ checkForErrorExit $? "Error occurred during publish-eclipse"
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
 checkForErrorExit $? "Error occurred during promote-build"
+
+fn-write-property-close

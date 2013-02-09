@@ -130,7 +130,8 @@ fn-git-reset-submodules ()
 fn-build-id () 
 {
     BUILD_TYPE="$1"; shift
-    echo $BUILD_TYPE$(date +%Y%m%d)-$(date +%H%M)
+     TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+echo ${BUILD_TYPE}${TIMESTAMP}
 }
 
 # USAGE: fn-local-repo URL [TO_REPLACE]
@@ -726,13 +727,13 @@ fn-gather-compile-logs ()
 }
 
 
-# USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_DATE
+# USAGE: fn-gather-main-index BUILD_ID REPO_DIR BUILD_DIR STREAM BUILD_TYPE BUILD_PRETTY_DATE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 #   STREAM: 4.2.2
 #   BUILD_TYPE: M, I, N
-#   BUILD_DATE: Thu Nov 20 17:47:35 EST 2012
+#   BUILD_PRETTY_DATE: Thu Nov 20 17:47:35 EST 2012
 fn-gather-main-index () 
 {
     BUILD_ID="$1"; shift
@@ -740,26 +741,29 @@ fn-gather-main-index ()
     BUILD_DIR="$1"; shift
     STREAM="$1"; shift
     BUILD_TYPE="$1"; shift
-    BUILD_TYPE_NAME=Integration
-    if [ "$BUILD_TYPE" = M ]; then
-        BUILD_TYPE_NAME=Maintenance
-    fi
-    BUILD_DATE="$1"; shift
+    #BUILD_TYPE_NAME=Integration
+    #if [ "$BUILD_TYPE" = M ]; then
+    #    BUILD_TYPE_NAME=Maintenance
+    #fi
+    BUILD_PRETTY_DATE="$1"; shift
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
-    # fail fast if not set up correctly
-    rc=$(fn-check-dir-exists TMP_DIR)
-    checkForErrorExit "$rc" "$rc"
+    # Simplified by creating PHP variables in buildproperties.php
+    cp "index.php.template" "$BUILD_DIR"/index.php
 
-    T1=${TMP_DIR}/t1_$$
-    T2=${TMP_DIR}/t2_$$
-    sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
-    sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
-    sed "s/@build@/$BUILD_ID/g" $T2 >$T1
-    sed "s/@date@/$BUILD_DATE/g" $T1 >$T2
-    sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
-    cp $T1 "$BUILD_DIR"/index.php
-    rm $T1 $T2
+    #    # fail fast if not set up correctly
+    #rc=$(fn-check-dir-exists TMP_DIR)
+    #checkForErrorExit "$rc" "$rc"
+
+    #T1=${TMP_DIR}/t1_$$
+    #T2=${TMP_DIR}/t2_$$
+    #sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
+    #sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
+    #sed "s/@build@/$BUILD_ID/g" $T2 >$T1
+    #sed "s/@date@/$BUILD_PRETTY_DATE/g" $T1 >$T2
+    #sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
+    #cp $T1 "$BUILD_DIR"/index.php
+    #rm $T1 $T2
     popd
 }
 
@@ -900,5 +904,75 @@ fn-check-dir-exists ()
             echo 0
         fi
     fi
+}
+
+# USAGE: fn-write-property VAR_NAME
+#   VAR_NAME: Variable name to write as "variable=value" form
+# This script assumes the following variables have been defined and are pointing 
+# to an appropriate file (see master-build.sh): 
+# BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
+# BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
+# BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
+
+# Note we always append to file, assuming if doesn't exist yet and will be 
+# created, and for each build, it won't exist, so will be written fresh for 
+# each build. 
+
+# TODO: Could add some sanity checking of if variable name appropriate 
+# for various language (e.g. I forget all the rules, but bash variables 
+# can not start with numerial, PHP variables (or is it Ant) can't have hyphens
+# (or is it underscore :), etc. But may need to add some mangling, or warning? 
+# Similarly, not sure at the moment of what to 
+# write if value is null/empty. For now will leave empty string, but some might need blank?
+# Or literally nothing? Also, unsure of effects of full quoting or if always needed? 
+
+fn-write-property () 
+{
+    VAR_NAME=$1
+    if [[ -z "${VAR_NAME}" ]]
+    then
+        echo "VAR_NAME must be passed to this script, $0."
+        return 1
+     fi 
+
+     # bash scripts (export may be overkill ... but, just in case needed)
+     echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> $BUILD_ENV_FILE
+     # PHP, suitable for direct "include"
+     echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> $BUILD_ENV_FILE_PHP
+     # standard properties file
+     echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
+
+}
+
+# USAGE: fn-write-property-init
+# Must be called (exactly) once before writing properties. 
+fn-write-property-init () 
+{
+
+     # nothing really required for bash shsource, but we'll put in some niceties
+     echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
+     echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
+     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+     echo "<?php " > $BUILD_ENV_FILE_PHP
+     echo "// properties written for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+     # standard properties file: nothing special required
+     echo "! properties written for $BUILD_ID" > $BUILD_ENV_FILE_PROP
+
+}
+
+# USAGE: fn-write-property-close
+# Must be called (exactly) once when completely finished writing properties. 
+fn-write-property-close () 
+{
+
+     # nothing really required for bash shsource, but we'll put in some niceties
+     echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
+     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+     # Note: technically may not need closing ?> for an 'include' ? 
+     echo "// finished properties for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+     echo "?>"  >> $BUILD_ENV_FILE_PHP
+     # standard properties file: nothing special required
+     echo "! finshed properties for $BUILD_ID" >> $BUILD_ENV_FILE_PROP
+
 }
 
