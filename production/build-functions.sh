@@ -278,7 +278,6 @@ fn-maven-parent-install ()
     pushd "$REPO_DIR"
     mvn -f eclipse-parent/pom.xml \
         clean install \
-        -q \
         -Dmaven.repo.local=$LOCAL_REPO
     popd
 }
