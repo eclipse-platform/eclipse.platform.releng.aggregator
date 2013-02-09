@@ -43,7 +43,8 @@ pushd "$aggDir"
 # save current hash tag value for documenting build (e.g. to reproduce, run tests, etc.)
 EBUILDER_HASH=$( git show-ref --hash --verify refs/remotes/origin/${BRANCH} )
 checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/${BRANCH}. Not valid ref?"
-fn-write-property ${EBUILDER_HASH}
+# remember, literal name as argument ... its defrefernced in function
+fn-write-property EBUILDER_HASH
 popd
 
 echo "signingDir: $signingDir"
