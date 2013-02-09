@@ -33,8 +33,8 @@ checkForErrorExit ()
     else
         if [[ "${exitCode}" =~ ^-?[0-9]+$ ]]  
         then
-            #echo "exitcode was non-zero numeric"
-            exitrc=exitCode
+            #echo "exitcode was indeed a legal, non-zero numeric return code"
+            exitrc=$exitCode
         else
             #echo "exitode was not numeric, so will force to 1"
             exitrc=1
