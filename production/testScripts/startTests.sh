@@ -147,6 +147,8 @@ echo "EBUILDER_HASH: $EBUILDER_HASH"
        echo "DEBUG: builderDropDir: ${builderDropDir}"
     else
         buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+# we don't really use this file for PDE build tests. 
+# if we did, we'd need to fix this up.
         #buildDir=${buildRoot}/build
         #supportDir=${buildDir}/supportDir
         #eclipsebuilder=org.eclipse.releng.eclipsebuilder

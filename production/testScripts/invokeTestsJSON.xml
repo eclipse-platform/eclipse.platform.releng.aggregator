@@ -4,6 +4,15 @@
     and is available at http://www.eclipse.org/legal/epl-v10.html Contributors:
     IBM Corporation - initial API and implementation -->
 
+    <!--
+    this script is invoked by the build, on the build machine,
+    to signify to hudson "the build is done", pass a few parameters,
+    then let Hudson take over.
+
+    wget - -no-verbose -O invokeTestsJSON.xml http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/invokeTestsJSON.xml?h=master 2>&1;
+
+    -->
+    
 <project
     name="Hudson-Tests"
     default="runTests"
@@ -36,20 +45,19 @@
         -->
 
         <parallel>
-<!-- 
-            <antcall target="triggerHudsonTests">
-                <param
-                    name="job"
-                    value="ep${eclipseStreamMajor}-unit-win32" />
-            </antcall>
--->
 
             <antcall target="triggerHudsonTests">
                 <param
                     name="job"
                     value="ep${eclipseStreamMajor}-unit-lin64" />
             </antcall>
-<!--
+<!--  TEMP: Linux only, for now, for CBI.
+            <antcall target="triggerHudsonTests">
+                <param
+                    name="job"
+                    value="ep${eclipseStreamMajor}-unit-win32" />
+            </antcall>
+
             <antcall target="triggerHudsonTests">
                 <param
                     name="job"
@@ -65,7 +73,19 @@
         depends="init">
 
 
-        <!-- Hudson jobs currentl have four required parameters -->
+
+     <!--
+     baseURL used to be "required parameter" for Hudson job, but seemed overly complicated so
+     I compute all this later (based on stream and id) but, I've learned, one disadvantage is this
+     restricts test code locations to "downloads". There might be times we want to do from "build"
+     locations, or similar. Not to mention, other, internal test systems someday.
+
+        <property
+            name="baseURL"
+            value="http://download.eclipse.org/eclipse/downloads/${dropsDirSegment}/${buildId}" />
+     -->
+
+        <!-- Hudson jobs currently have four required parameters -->
         <property
             name="JSON_buildId"
             value="{&quot;name&quot;:&quot;buildId&quot;,&quot;value&quot;:&quot;${buildId}&quot;}" />
@@ -85,6 +105,8 @@
 
 
 
+        <echo message="env.HUDSON_PROTOCOL: ${env.HUDSON_PROTOCOL}" />
+        <echo message="env.HUDSON_HOST: ${env.HUDSON_HOST}" />
 
         <echo message="${json}" />
         <exec executable="curl">
