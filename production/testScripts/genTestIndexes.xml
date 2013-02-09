@@ -1,0 +1,252 @@
+<project
+    name="Helper targets"
+    default="generateEclipseIndex"
+    basedir=".">
+
+    <target name="init" depends="initStreamVariables" unless="genTestIndexesInitialized">
+        <fail unless="buildId" />
+        <fail unless="eclipseStream" />
+        <fail unless="BUILD_TECH" />
+
+        
+    <script language="javascript">
+        var buildId = project.getProperty("buildId");
+        var pattern = new RegExp(/^([IMNSR])(\d{8})-(\d{4})$/);
+
+        var sArray = pattern.exec(buildId);
+        // sArray 0 is "whole match"
+        project.setProperty("buildType", sArray[1]);
+    </script>
+
+     <!--
+        TODO: make less exactly hard coded in future
+         also, check for validity using "matches" digit*\.digit*\.digit*
+      -->
+        <condition
+            property="dropsDirSegment"
+            value="drops4"
+            else="drops">
+            <equals
+                arg1="${eclipseStreamMajor}"
+                arg2="4" />
+        </condition>
+
+        <condition
+            property="dropsDirXSegment"
+            value="${dropsDirSegment}cbibased"
+            else="${dropsDirSegment}">
+            <equals
+                arg1="${BUILD_TECH}"
+                arg2="CBI" />
+        </condition>
+
+        <condition
+            property="buildRoot"
+            value="/shared/eclipse/builds/${eclipseStreamMajor}${buildType}"
+            else="/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}">
+            <equals
+                arg1="${BUILD_TECH}"
+                arg2="CBI" />
+        </condition>
+
+        <property
+            name="postingDirectory"
+            value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
+        
+        <!--
+        <property
+            name="builderDir"
+            value="${buildRoot}/build/supportDir/org.eclipse.releng.eclipsebuilder" />
+        -->
+        
+        <!-- This is purely a subset of tychoeclipsebuilder files, copyied at build time, so part of 
+        the results output we are working on, so they will be the same once the tests are done, even if gitCache updated by anohter build,
+        or a run from previous test results -->
+        <!-- /data/shared/eclipse/builds/4N/master/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles -->
+        <property
+            name="publishingContent"
+            value="${postingDirectory}/${buildId}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles" />
+        
+        <!-- This is our new, "safe for every test" location -->
+        <property
+            name="base.builder"
+            value="${postingDirectory}/${buildId}/org.eclipse.releng.basebuilder" />
+
+        <!-- publish.xml expects buildLabel in places, instead of buildId, 
+             though we use them interchangebly -->
+        <property
+            name="buildLabel"
+            value="${buildId}" />
+       <!--
+        <property
+            name="eclipse.build.configs"
+            value="${builderDir}/eclipse/buildConfigs" />
+            -->
+        <!--
+        <property
+            name="buildDirectory"
+            value="${basedir}/../src" />
+-->
+        <!-- Not sure this is the "working directory" expected. May impact ability 
+        to get/find "buildNotes"? Need to copy such "source" things at build time. -->
+        <property
+            name="buildDirectory"
+            value="${postingDirectory}/${buildId}" />
+        
+        
+        <property name="genTestIndexesInitialized" value="true"/>
+
+
+    </target>
+
+    <target name="generateEclipseIndex" depends="init" >
+        <condition
+            property="generatorClass"
+            value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
+            <equals
+                arg1="${hudson}"
+                arg2="true" />
+        </condition>
+        <property
+            name="generatorClass"
+            value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
+
+        <echo message="DEBUG: generatorClass: ${generatorClass}" />
+        <available
+            classname="${generatorClass}"
+            property="class"
+            value="${generatorClass}" />
+
+        <property name="genTestIndexesdropTokenList" 
+            value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%icubase%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
+           
+        <!--regenerate the index page with links to test results -->
+        <!-- function moved from "helpernew.xml" to here, to consolidate yet modularize all it did was set properties and call publish.xml
+        <ant
+            antfile="${builderDir}/eclipse/helpernew.xml"
+            dir="${publishingContent}"
+            target="generateEclipseIndex">
+        -->    
+
+            <property
+                name="isBuildTested"
+                value="true" />
+            <!--<property
+                name="buildType"
+                value="${buildType}" /> -->
+            <property name="dropTokenList" 
+                value="${genTestIndexesdroptTokenList}" />
+            <property
+                name="platformIdentifierToken"
+                value="%platform%" />
+            <property
+                name="platformSpecificTemplateList"
+                value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
+            <property
+                name="indexFileName"
+                value="index.php" />
+            <property
+                name="result"
+                value="${postingDirectory}/${buildId}" />
+            <property
+                name="testResultsTemplateFileName"
+                value="${publishingContent}/templateFiles/testResults.php.template" />
+            <property
+                name="dropTemplateFileName"
+                value="${publishingContent}/templateFiles/index.php.template" />
+            <property
+                name="testManifestFileName"
+                value="${publishingContent}/testManifest.xml" />
+        
+        <antcall target="publishEclipseIndex">
+        </antcall>
+
+    </target>
+    
+    <target name="publishEclipseIndex">
+
+
+        <!--regenerate the index page with links to test results -->
+        <ant
+            antfile="${base.builder}/plugins/org.eclipse.build.tools/scripts/publish.xml"
+            dir="${publishingContent}"
+            target="generateIndex">
+            <property
+                name="isBuildTested"
+                value="true" />
+            <property
+                name="buildType"
+                value="${buildType}" />
+            <property
+                name="dropTokenList" 
+                value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%icubase%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
+            <property
+                name="platformIdentifierToken"
+                value="%platform%" />
+            <property
+                name="platformSpecificTemplateList"
+                value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
+            <property
+                name="indexFileName"
+                value="index.php" />
+            <property
+                name="result"
+                value="${postingDirectory}/${buildLabel}" />
+            <property
+                name="testResultsTemplateFileName"
+                value="${publishingContent}/templateFiles/testResults.php.template" />
+            <property
+                name="dropTemplateFileName"
+                value="${publishingContent}/templateFiles/index.php.template" />
+            <property
+                name="testManifestFileName"
+                value="${publishingContent}/testManifest.xml" />
+        </ant>
+
+        <!-- Replace build label in generated html files 
+             TODO: Make these "php variables" that are read by index.php, from dl directory so we don't need to do this
+        -->
+         <replace
+            dir="${postingDirectory}/${buildLabel}"
+             token="@buildlabel@"
+             value="${buildLabel}"
+             includes="**/*.php" />
+         <replace
+             dir="${postingDirectory}/${buildId}"
+             token="@eclipseStream@"
+             value="${eclipseStream}"
+             includes="**/*.php" />
+
+
+
+    </target>
+    
+    <target name="initStreamVariables">
+
+        <fail
+            unless="eclipseStream"
+            message="eclipseStream must be provided by caller" />
+        <condition property="streamOK">
+            <matches
+                pattern="\d\.\d\.\d"
+                string="${eclipseStream}" />
+        </condition>
+        <fail
+            message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
+            unless="streamOK" />
+        <script language="javascript">
+            var eclipseStream = project.getProperty("eclipseStream");
+            var pattern = new
+            RegExp(/(\d+)\.(\d+)\.(\d+)/);
+
+            var sArray = pattern.exec(eclipseStream);
+            // sArray[0] is "whole match"
+            project.setProperty("eclipseStreamMajor", sArray[1]);
+            project.setProperty("eclipseStreamMinor", sArray[2]);
+            project.setProperty("eclipseStreamService", sArray[3]);
+
+        </script>
+
+    </target>
+
+</project>
