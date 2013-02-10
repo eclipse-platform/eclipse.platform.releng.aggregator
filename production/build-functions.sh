@@ -61,13 +61,13 @@ fn-git-clone ()
 {
     URL="$1"; shift
     if [ $# -gt 0 ]; then
-        BRANCH="-b $1"; shift
+        BRANCH_CMD="-b $1"; shift
     fi
     if [ $# -gt 0 ]; then
         TARGET_DIR="$1"; shift
     fi
-    echo git clone $BRANCH $URL $TARGET_DIR
-    git clone $BRANCH $URL $TARGET_DIR
+    echo git clone $BRANCH_CMD $URL $TARGET_DIR
+    git clone $BRANCH_CMD $URL $TARGET_DIR
 }
 
 # USAGE: fn-git-checkout BRANCH | TAG
