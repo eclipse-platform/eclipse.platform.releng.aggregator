@@ -35,7 +35,7 @@ fi
 rm ebuilder.zip 2>/dev/null
 rm -fr tempebuilder 2>/dev/null
 
-if [[ "${BUILD_TECH}" == 'CBI' ]]
+if [[ "${BUILD_TECH}" == "CBI" ]]
 then 
     EBUILDER=eclipse.platform.releng.aggregator
     TARGETNAME=eclipse.platform.releng.aggregator
@@ -53,7 +53,7 @@ fi
 wget -O ebuilder.zip --no-verbose http://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
 unzip -q ebuilder.zip -d tempebuilder
 mkdir -p ${toDir}/$TARGETNAME
-rsync --recursive -t "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${toDir}/${TARGETNAME}/"
+rsync --recursive "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${toDir}/${TARGETNAME}/"
 rccode=$? 
 if [[ $rccode != 0 ]]
 then
