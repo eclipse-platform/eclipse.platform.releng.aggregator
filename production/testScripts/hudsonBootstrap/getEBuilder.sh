@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-BUILD_TECH=$1
-EBUILDER_HASH=$2
-toDir=$3
+# Utility script to "bootstrap" Hudson Eclipse Platform Unit tests, to get the
+# basic files needed to get all the other required files and start the test framework.
+
+#BUILD_TECH=$1
+#EBUILDER_HASH=$2
+#toDir=$3
 
 if [[ -z "${toDir}" ]]
 then
@@ -40,8 +43,8 @@ then
 elif [[ "$BUILD_TECH" == "PDE" ]] 
 then
     EBUILDER=eclipse.platform.releng.eclipsebuilder
-    TARTGETNAME=org.eclipse.releng.eclipsebuilder
-    ESCRIPT_LOC=${EBUILDER}
+    TARGETNAME=org.eclipse.releng.eclipsebuilder
+    ESCRIPT_LOC=${TARGETNAME}
 else 
     echo "ERROR: Unexpected value of BUILD_TECH: ${BUILD_TECH}"
     exit 1
