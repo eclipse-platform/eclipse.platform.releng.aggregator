@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+BUILD_TECH=$1
+EBUILDER_HASH=$2
+toDir=$3
+
+if [[ -z "${toDir}" ]]
+then
+    echo "toDir not supplied, will assume current directory"
+    toDir=${PWD}
+else
+    if [[ ! -d "${toDir}" ]]
+    then
+        echo "ERROR: toDir did not exist. Perhaps you meant its parent?"
+        exit 1
+    fi
+fi
+
+if [[ -z "${EBUILDER_HASH}" ]]
+then 
+    echo "EBUILDER HASH, BRANCH, or TAG was not supplied, assuming 'master'"
+     EBUILDER_HASH=master 
+fi
+
+if [[ -z "${BUILD_TECH}" ]]
+then
+    echo "BUILD_TECH not supplied, assuming PDE"
+    BUILD_TECH=PDE
+fi
+
+# remove just in case left from previous failed run
+rm ebuilder.zip 2>/dev/null
+rm -fr tempebuilder 2>/dev/null
+
+if [[ "${BUILD_TECH}" == 'CBI' ]]
+then 
+    EBUILDER=eclipse.platform.releng.aggregator
+    TARGETNAME=eclipse.platform.releng.aggregator
+    ESCRIPT_LOC=${EBUILDER}/production/testScripts
+elif [[ "$BUILD_TECH" == "PDE" ]] 
+then
+    EBUILDER=eclipse.platform.releng.eclipsebuilder
+    TARTGETNAME=org.eclipse.releng.eclipsebuilder
+    ESCRIPT_LOC=${EBUILDER}
+else 
+    echo "ERROR: Unexpected value of BUILD_TECH: ${BUILD_TECH}"
+    exit 1
+fi
+
+wget -O ebuilder.zip --no-verbose http://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
+unzip -q ebuilder.zip -d tempebuilder
+mkdir -p ${toDir}/$TARGETNAME
+rsync --recursive -t "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${toDir}/${TARGETNAME}/"
+rccode=$? 
+if [[ $rccode != 0 ]]
+then
+    echo "ERROR: rsync did not complete normally.rccode: $rccode"
+    exit $rccode
+fi
+
+# copy to well-known location so subsequent steps do not need to know which ebuilder they came from
+cp ${WORKSPACE}/${ESCRIPT_LOC}/getBaseBuilder.xml ${WORKSPACE}
+cp ${WORKSPACE}/${ESCRIPT_LOC}/runTests2.xml ${WORKSPACE}
+
+# remove on clean exit
+rm ebuilder.zip
+rm -fr tempebuilder
+exit 0
+
