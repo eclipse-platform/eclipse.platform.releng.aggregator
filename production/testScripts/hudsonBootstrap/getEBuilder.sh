@@ -5,16 +5,16 @@
 
 #BUILD_TECH=$1
 #EBUILDER_HASH=$2
-#toDir=$3
+#WORKSPACE=$3
 
-if [[ -z "${toDir}" ]]
+if [[ -z "${WORKSPACE}" ]]
 then
-    echo "toDir not supplied, will assume current directory"
-    toDir=${PWD}
+    echo "WORKSPACE not supplied, will assume current directory"
+    WORKSPACE=${PWD}
 else
-    if [[ ! -d "${toDir}" ]]
+    if [[ ! -d "${WORKSPACE}" ]]
     then
-        echo "ERROR: toDir did not exist. Perhaps you meant its parent?"
+        echo "ERROR: WORKSPACE did not exist. Perhaps you meant its parent?"
         exit 1
     fi
 fi
@@ -52,8 +52,8 @@ fi
 
 wget -O ebuilder.zip --no-verbose http://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
 unzip -q ebuilder.zip -d tempebuilder
-mkdir -p ${toDir}/$TARGETNAME
-rsync --recursive "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${toDir}/${TARGETNAME}/"
+mkdir -p ${WORKSPACE}/$TARGETNAME
+rsync --recursive "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${WORKSPACE}/${TARGETNAME}/"
 rccode=$? 
 if [[ $rccode != 0 ]]
 then
