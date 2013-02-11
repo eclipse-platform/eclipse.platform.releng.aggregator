@@ -4,7 +4,7 @@
 # re-sync dl site.
 
 
-if [[ $# != 3 ]]
+if [[ $# < 2 ]]
 then
     # usage:
     scriptname=$(basename $0)
@@ -32,12 +32,12 @@ then
     exit 1
 fi
 
+# For now only used by CBI
 BUILD_TECH=$3
 if [[ -z "${BUILD_TECH}" ]]
   then
-     echo "must provide BUILD_TECH as third argumnet, for this function $0"
-     exit 1
-  fi
+     BUILD_TECH=CBI
+fi
 
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
