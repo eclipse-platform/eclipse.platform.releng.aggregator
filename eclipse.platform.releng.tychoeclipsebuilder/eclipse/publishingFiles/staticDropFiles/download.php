@@ -14,18 +14,18 @@ include("buildproperties.php");
            $dlprefix="";
         } else {
            // if not on build.elcipse.org, assume we are on downloads.
-           // we "compute" this segment based on if "drops4" is in the request URI.
+           // we "compute" this segment based on if "drops4cbibased" is in the request URI.
            // Seems we could compute the whole thing, given some thought and good regex?
             // Remember to always use === or !== with strpos.
             // Simply == or != would not work as expected since
             // if found in first position it return 0 (so, must match "type" of false also,
             // to mean truely "not found".
-           $pos=strpos($_SERVER["REQUEST_URI"], "drops4");
+           $pos=strpos($_SERVER["REQUEST_URI"], "drops4cbibased");
            if ($pos === false) {
               $dlprefix="http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops";
            }
            else {
-              $dlprefix="http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops4";
+              $dlprefix="http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops4cbibased";
            }
         }
     }
