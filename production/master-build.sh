@@ -103,6 +103,7 @@ fn-write-property BUILD_ID
 fn-write-property BUILD_PRETTY_DATE
 fn-write-property BUILD_TYPE_NAME
 
+echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/get-aggregator-ouptut.txt
 checkForErrorExit $? "Error occurred while getting aggregator"

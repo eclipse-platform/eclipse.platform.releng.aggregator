@@ -45,6 +45,9 @@ EBUILDER_HASH=$( git show-ref --hash --verify refs/remotes/origin/${BRANCH} )
 checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/${BRANCH}. Not valid ref?"
 # remember, literal name as argument ... its defrefernced in function
 fn-write-property EBUILDER_HASH
+# write to "directory.txt", as "the new map file" 
+# TODO: add "tag" later? Or, write this once tag is known? 
+echo "$AGGREGATOR_REPO $BRANCH $EBUILDER_HASH" >> ${buildDirectory}/directory.txt
 popd
 
 echo "signingDir: $signingDir"
