@@ -151,7 +151,7 @@ then
     # TODO: eventually put in more logic to "track" the failure, so
     # proper actions and emails can be sent. For example, we'd still want to 
     # publish what we have, but not start the tests.  
-    echo "BUILD FAILED. See run-maven-build-ouptut.txt."
+    echo "BUILD FAILED. See run-maven-build-ouptut.txt." >&2
 fi
 
 $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-parts-ouptut.txt

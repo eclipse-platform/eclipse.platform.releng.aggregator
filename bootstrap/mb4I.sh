@@ -75,3 +75,9 @@ $BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM 1>>$LOG_OUT_NAME 2>>$LOG_ER
 #echo "= = = = = " >> $BOOTSTRAPENVFILE
 
 ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/master-build.sh ${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/build_eclipse_org.shsource 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &
+
+rc=$?
+if [[ $rc != 0 ]]
+then 
+    echo "BUILD FAILED. See run-maven-build-ouptut.txt." >&2
+fi
