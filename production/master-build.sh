@@ -145,7 +145,14 @@ $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/po
 checkForErrorExit $? "Error occurred during pom version updater"
 
 $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/run-maven-build-ouptut.txt
-checkForErrorExit $? "Error occurred during run maven build"
+buildrc=$?
+if [[ $buildrc != 0 ]] 
+then 
+    # TODO: eventually put in more logic to "track" the failure, so
+     # proper actions and emails can be sent. For example, we'd still want to 
+      # publish what we have, but not start the tests.  
+    echo "BUILD FAILED. See run-maven-build-ouptut.txt.
+fi
 
 $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-parts-ouptut.txt
 checkForErrorExit $? "Error occurred during gather parts"
@@ -165,3 +172,5 @@ fn-write-property-close
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
 env 2>&1 | tee $logsDirectory/all-env-variables.txt
+
+exit $buildrc

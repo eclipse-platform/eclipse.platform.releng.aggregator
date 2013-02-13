@@ -40,4 +40,6 @@ fi
 fn-maven-cbi-install "$aggDir" "$LOCAL_REPO"
 fn-maven-parent-install "$aggDir" "$LOCAL_REPO"
 
-fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE
+buildresult=$( fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE )
+
+exit $buildresult

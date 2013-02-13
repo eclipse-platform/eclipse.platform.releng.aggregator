@@ -333,7 +333,9 @@ fn-maven-build-aggregator ()
         clean install \
         -Dmaven.test.skip=true \
         -Dmaven.repo.local=$LOCAL_REPO
+    rc=$?
     popd
+    return $rc
 }
 
 # USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
