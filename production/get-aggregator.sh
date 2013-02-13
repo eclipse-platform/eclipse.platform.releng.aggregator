@@ -47,6 +47,11 @@ checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/${BRANC
 fn-write-property EBUILDER_HASH
 # write to "directory.txt", as "the new map file" 
 # TODO: add "tag" later? Or, write this once tag is known? 
+# In particular, this "early one" is the "starting point". 
+# By the time we do a build and commit submodules, there would 
+# be a different one. I'm thinking its the latter that would be needed 
+# to "reproduce a build".
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
 echo "$AGGREGATOR_REPO $BRANCH $EBUILDER_HASH" >> ${buildDirectory}/directory.txt
 popd
 
