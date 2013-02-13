@@ -40,6 +40,22 @@ fi
 fn-maven-cbi-install "$aggDir" "$LOCAL_REPO"
 fn-maven-parent-install "$aggDir" "$LOCAL_REPO"
 
-buildresult=$( fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE )
+exitCode=$( fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE )
 
-exit $buildresult
+    # first make sure exit code is well formed
+    if [[ "${exitCode}" =~ [0] ]]
+    then
+        echo "exitcode was empty or zero"
+        exitrc=0
+    else
+        if [[ "${exitCode}" =~ ^-?[0-9]+$ ]]  
+        then
+            echo "exitcode was a legal, non-zero numeric return code"
+            exitrc=$exitCode
+        else
+            echo "exitode was not numeric, so will force to 1"
+            exitrc=1
+        fi  
+    fi 
+
+exit $exit
