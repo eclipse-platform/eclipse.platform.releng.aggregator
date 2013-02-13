@@ -54,11 +54,11 @@ export STREAMS_PATH="${aggDir}/streams"
 
 BUILD_TYPE_NAME="Integration"
 if [ "$BUILD_TYPE" = M ]; then
-      BUILD_TYPE_NAME="Maintenance"
-  elif [ "$BUILD_TYPE" = N ]; then
-      BUILD_TYPE_NAME="Nightly (HEAD)"
-  elif [ "$BUILD_TYPE" = S ]; then
-      BUILD_TYPE_NAME="Stable (Milestone)"
+    BUILD_TYPE_NAME="Maintenance"
+elif [ "$BUILD_TYPE" = N ]; then
+    BUILD_TYPE_NAME="Nightly (HEAD)"
+elif [ "$BUILD_TYPE" = S ]; then
+    BUILD_TYPE_NAME="Stable (Milestone)"
 fi
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
@@ -66,8 +66,8 @@ fi
 # partially so this build can be re-ran or re-started using it, instead of 
 # original env file, which would compute different values (in some cases).
 # The function also writes into appropriate PHP files and Properties files.
- # Init once, here at beginning, but don't close until much later since other functions
- # may write variables at various points
+# Init once, here at beginning, but don't close until much later since other functions
+# may write variables at various points
 fn-write-property-init
 fn-write-property PATH
 fn-write-property INITIAL_ENV_FILE
@@ -149,9 +149,9 @@ buildrc=$?
 if [[ $buildrc != 0 ]] 
 then 
     # TODO: eventually put in more logic to "track" the failure, so
-     # proper actions and emails can be sent. For example, we'd still want to 
-      # publish what we have, but not start the tests.  
-    echo "BUILD FAILED. See run-maven-build-ouptut.txt.
+    # proper actions and emails can be sent. For example, we'd still want to 
+    # publish what we have, but not start the tests.  
+    echo "BUILD FAILED. See run-maven-build-ouptut.txt."
 fi
 
 $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-parts-ouptut.txt
