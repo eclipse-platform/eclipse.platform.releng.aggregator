@@ -788,7 +788,7 @@ fn-parse-compile-logs ()
         -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
         -DbuildId="$BUILD_ID" \
         -DbuildLabel="$BUILD_ID" \
-        convertCompileLogs
+        verifyCompile
     popd
 }
 
