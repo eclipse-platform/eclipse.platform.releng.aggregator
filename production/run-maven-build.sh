@@ -40,7 +40,8 @@ fi
 fn-maven-cbi-install "$aggDir" "$LOCAL_REPO"
 fn-maven-parent-install "$aggDir" "$LOCAL_REPO"
 
-exitCode=$( fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE )
+$( fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE )
+exitCode=$?
 
 # first make sure exit code is well formed
 if [[ -z "${exitCode}" ]]
