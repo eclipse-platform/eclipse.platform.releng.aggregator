@@ -58,4 +58,4 @@ exitCode=$( fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPA
         fi  
     fi 
 
-exit $exit
+exit $exitrc
