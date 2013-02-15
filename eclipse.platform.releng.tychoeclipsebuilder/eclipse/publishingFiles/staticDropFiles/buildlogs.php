@@ -4,6 +4,36 @@
 
 <?php
 include ('buildproperties.php');
+
+// TODO: copied from logs.php. Should be in common utilities for reuse
+function fileSizeForDisplay($filename) {
+    $onekilo=1024;
+    $onemeg=$onekilo * $onekilo;
+    $criteria = 10 * $onemeg;
+    $scaleChar = " ";
+    if (file_exists($filename)) {
+        $zipfilesize=filesize($filename);
+        if ($zipfilesize > $criteria) {
+            $zipfilesize=round($zipfilesize/$onemeg, 0);
+            $scaleChar = " MB";
+        }
+        else {
+            if ($zipfilesize > $onekilo) {
+                $zipfilesize=round($zipfilesize/$onekilo, 0);
+                $scaleChar = " KB";
+            } else {
+                // use raw size in bytes if less that one 1K
+                $scaleChar = " B";
+            }
+        }
+    }
+    else {
+        $zipfilesize = 0;
+    }
+    $result =  "(" . $zipfilesize . $scaleChar . ")";
+    return $result;
+}
+
 function listLogs($myDir) {
 
         $aDirectory = dir($myDir);
@@ -26,7 +56,7 @@ function listLogs($myDir) {
         }
         for ($i = 0; $i < $index; $i++) {
             $anEntry = $entries[$i];
-            $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a></td>";
+            $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a>" . fileSizeForDisplay("$myDir/$anEntry") . "</td>";
             echo "<li>$line</li>";
         }
 }
@@ -109,9 +139,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div id="midcolumn">
 <div class="homeitem3col">
 <?php
-    echo "<title>Release Engineering logs for  $BUILD_ID </title>\n";
+    echo "<title>Release Engineering logs for $BUILD_ID</title>\n";
 
-echo "<h3>Release Engineering Logs for  $buildId</h3>\n";
+echo "<h3>Release Engineering Logs for $BUILD_ID</h3>\n";
 ?>
 
 <?php
