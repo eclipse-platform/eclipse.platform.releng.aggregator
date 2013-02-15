@@ -89,10 +89,13 @@ public class GenerateAPIBuildXMLMojo extends AbstractMojo {
 		File dotProject = new File(project.getBasedir(), ".project");
 		if (!dotProject.exists()) {
 			// no .project
+			project.getProperties().setProperty("eclipserun.skip", "true");
 			return;
 		}
 		if (dotProjectContainsApiNature(dotProject)) {
 			generateBuildXML();
+		} else {
+			project.getProperties().setProperty("eclipserun.skip", "true");
 		}
 	}
 	
