@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <!--
-        A utility ant script get the eclipse builder from Git.
-        Hudson jobs can call this script from ant
-        as one of it first build steps.
+        A utility ant script get the eclipse builder from Git, either old one used with 
+        our PDE builds, or new one used with CBI builds. 
+        
+        Hudson jobs can call this script from ant as one of it first build steps. 
+        Such as, start with a wget fetch from CGit (where following $dash; is literally a '-', 
+        it is escaped here just for XML rules against two dashes in a comment); 
+        
+        wget -O getEBuilder.xml &dash;&dash;no-verbose   http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+        
+        Then use ant to invoke the functionality. Examples:
+        
+        ant -f getEBuilder.xml  -DBUILD_TECH=CBI -DbuilderVersion=910fca82df3ea649ba8ee758259561582e13bf8b
+
+        ant -f getEBuilder.xml  -DBUILD_TECH=PDE -DbuilderVersion=master -DEBuilderlocal=/home/shared/localcache/
+
     -->
 <project
     name="getEBuilder"
