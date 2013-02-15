@@ -112,13 +112,15 @@
             unless="builderVersion"
             message="This target needs builderVersion to run" />
 
-        <!-- remove old one, if there, and make sure one exists for eventual checkout/copy/globmapper -->
+        <!-- remove old one, if there, and make sure directory exists for 
+             eventual checkout/copy/globmapper 
+        -->
         <delete dir="${WORKSPACE}/${folderName}" />
         <mkdir dir="${WORKSPACE}/${folderName}" />
 
-        <antcall target="fetchBaseBuilder" />
-        <antcall target="fetchBaseBuilderLocal" />
-
+        <antcall target="fetchEBuilder" />
+        <antcall target="fetchEBuilderLocal" />
+        <antcall target="Ebuildercleanup" />
     </target>
 
     <target name="initBuildTech">
@@ -211,7 +213,7 @@
 
     </target>
     <target
-        name="fetchBaseBuilderFromGit"
+        name="fetchEBuilderFromGit"
         depends="init">
         <echo message="Fetching EBuilder from Git via CGit" />
         <get
@@ -228,25 +230,40 @@
             </fileset>
         </move>
 
-        <!-- we've moved the files, now to remove the empty dir 
-        <delete dir="${WORKSPACE}/${scmProject}-${builderVersion}" />
--->
+        <echo message="Fetched Ebuilder to ${WORKSPACE}/${folderName}" />
 
-        <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists
-        <delete file="${WORKSPACE}/${scmProject}-${builderVersion}.zip" />
--->
 
     </target>
 
-
+    <!-- specify -DnoEBuildercleanup=true on command line, to have zip and folder left in place, 
+         such as for debugging or desired to copy the zip to your local cache.
+    -->
     <target
-        name="fetchBaseBuilder"
-        depends="init, fetchBaseBuilderFromGit"
+        name="EBuildercleanup"
+        unless="noEBuildercleanup">
+
+        <!-- we've moved the files, now to remove the empty dir -->
+        <delete dir="${WORKSPACE}/${scmProject}-${builderVersion}" failonerror="false"/>
+
+        <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists -->
+        <delete file="${WORKSPACE}/${scmProject}-${builderVersion}.zip" failonerror="false"/>
+
+        <echo message="Cleaned temporary working copies" />
+
+    </target>
+    
+    <!-- Will leave here for now, though doesn't add much. It used to have an additional 
+        "fetch from cvs task" (That is, we had three choices: local, git, cvs). 
+    -->
+    <target
+        name="fetchEBuilder"
+        depends="init, fetchEBuilderFromGit"
         unless="EBuilderlocal">
-        <echo message="Fetched EBuilder to ${WORKSPACE}/${folderName}" />
+        <echo message="EBuilder now in ${WORKSPACE}/${folderName}" />
     </target>
+
     <target
-        name="fetchBaseBuilderLocal"
+        name="fetchEBuilderLocal"
         depends="init"
         if="EBuilderlocal">
         <unzip
