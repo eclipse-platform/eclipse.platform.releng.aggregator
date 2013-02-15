@@ -99,8 +99,9 @@ fn-git-submodule-update ()
 # USAGE: fn-git-clean 
 fn-git-clean () 
 {
-    echo git clean -f -d
-    git clean -f -d
+    # See bug 400657
+    echo git clean -f -d -x
+    git clean -f -d -x
 }
 
 # USAGE: fn-git-reset
@@ -112,9 +113,10 @@ fn-git-reset ()
 
 # USAGE: fn-git-clean-submodules
 fn-git-clean-submodules () 
-{
-    echo git submodule foreach git clean -f -d
-    git submodule foreach git clean -f -d
+{   
+    # See bug 400657
+    echo git submodule foreach git clean -f -d -x
+    git submodule foreach git clean -f -d -x
 }
 
 
