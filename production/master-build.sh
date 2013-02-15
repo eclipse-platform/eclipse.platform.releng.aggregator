@@ -105,10 +105,10 @@ fn-write-property BUILD_TYPE_NAME
 
 echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 
-$SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/get-aggregator-ouptut.txt
+$SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb010_get-aggregator_output.txt
 checkForErrorExit $? "Error occurred while getting aggregator"
 
-$SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/update-build-input-ouptut.txt
+$SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
 checkForErrorExit $? "Error occurred while updating build input"
 
 #if [[ $BUILD_ID =~ [IN] ]] 
@@ -135,36 +135,34 @@ $GIT_PUSH origin HEAD
 #checkForErrorExit $? "Error occurred during push of build_id commit"
 popd
 
-$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/tag-build-input-ouptut.txt
+$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb030_tag-build-input_output.txt
 checkForErrorExit $? "Error occurred during tag of build input"
 
-$SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/install-parent-ouptut.txt
+$SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb040_install-parent_output.txt
 checkForErrorExit $? "Error occurred during install parent script"
 
-$SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/pom-version-updater-ouptut.txt
+$SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb050_pom-version-updater_output.txt
 checkForErrorExit $? "Error occurred during pom version updater"
 
-$SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/run-maven-build-ouptut.txt
+$SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb060_run-maven-build_output.txt
 buildrc=$?
 if [[ $buildrc != 0 ]] 
 then 
     # TODO: eventually put in more logic to "track" the failure, so
     # proper actions and emails can be sent. For example, we'd still want to 
     # publish what we have, but not start the tests.  
-    echo "BUILD FAILED. See run-maven-build-ouptut.txt." >&2
+    echo "BUILD FAILED. See mb060_run-maven-build_output.txt." >&2
 fi
 
-$SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/gather-parts-ouptut.txt
+$SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
 checkForErrorExit $? "Error occurred during gather parts"
 
-#$SCRIPT_PATH/parse-logs.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/parse-logs-ouptut.txt
-#checkForErrorExit $? "Error occurred during parse-logs"
 
-$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/publish-eclipse-ouptut.txt
+$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
 # if all ended well, put "promotion scripts" in known locations
-$SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/promote-build-ouptut.txt
+$SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
 
 fn-write-property-close
