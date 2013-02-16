@@ -132,8 +132,8 @@ fn-git-reset-submodules ()
 fn-build-id () 
 {
     BUILD_TYPE="$1"; shift
-     TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
-echo ${BUILD_TYPE}${TIMESTAMP}
+    TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+    echo ${BUILD_TYPE}${TIMESTAMP}
 }
 
 # USAGE: fn-local-repo URL [TO_REPLACE]
@@ -414,7 +414,7 @@ fn-pom-version-updater ()
     # fail fast if not set up correctly
     rc=$(fn-check-dir-exists TMP_DIR)
     checkForErrorExit "$rc" "$rc"
-    
+
     report=${TMP_DIR}/pom_${BUILD_ID}.txt
     pushd "$REPO_DIR"
     mvn $MARGS \
@@ -441,11 +441,11 @@ fn-pom-version-update-with-commit ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
-    
+
     # fail fast if not set up correctly
     rc=$(fn-check-dir-exists TMP_DIR)
     checkForErrorExit "$rc" "$rc"
-    
+
     report=${TMP_DIR}/pom_${BUILD_ID}.txt
     MARGS="-DbuildId=$BUILD_ID"
     pushd "$REPO_DIR"
@@ -869,21 +869,27 @@ fn-pom-version-report ()
     mkdir -p "$BUILD_DIR"/pom_updates
     git submodule foreach "if (git status -s -uno | grep pom.xml >/dev/null ); then git diff >$BUILD_DIR/pom_updates/\$name.diff; fi "
     pushd "$BUILD_DIR"/pom_updates
-    echo "<html>"  >index.html 
-    echo "<head>"  >>index.html
-    echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
-    echo "</head>"  >>index.html
-    echo "<body>"  >>index.html
-    echo "<h1>POM version report for $BUILD_ID</h1>"  >>index.html
-    echo "<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>"  >>index.html
-    echo "<ul>"  >>index.html
+    nDiffs=$( ls -1 $BUILD_DIR/pom_updates/*.diff | wc -l )
+    # don't create index.html if no diffs to display, as our PHP DL page knows 
+    # not to display link if index.html is not present. 
+    if [[ $nDiffs > 0 ]] 
+    then
+        echo "<html>"  >index.html 
+        echo "<head>"  >>index.html
+        echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
+        echo "</head>"  >>index.html
+        echo "<body>"  >>index.html
+        echo "<h1>POM version report for $BUILD_ID</h1>"  >>index.html
+        echo "<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>"  >>index.html
+        echo "<ul>"  >>index.html
 
-    for f in *.diff; do
-        FNAME=$( basename $f .diff )
-        echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
-    done
-    echo "</ul>" >> index.html
-    echo "</html>" >> index.html
+        for f in *.diff; do
+            FNAME=$( basename $f .diff )
+            echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
+        done
+        echo "</ul>" >> index.html
+        echo "</html>" >> index.html
+    fi
     popd
     popd
 }
@@ -937,14 +943,14 @@ fn-write-property ()
     then
         echo "VAR_NAME must be passed to this script, $0."
         return 1
-     fi 
+    fi 
 
-     # bash scripts (export may be overkill ... but, just in case needed)
-     echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> $BUILD_ENV_FILE
-     # PHP, suitable for direct "include"
-     echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> $BUILD_ENV_FILE_PHP
-     # standard properties file
-     echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
+    # bash scripts (export may be overkill ... but, just in case needed)
+    echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> $BUILD_ENV_FILE
+    # PHP, suitable for direct "include"
+    echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> $BUILD_ENV_FILE_PHP
+    # standard properties file
+    echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
 
 }
 
@@ -953,14 +959,14 @@ fn-write-property ()
 fn-write-property-init () 
 {
 
-     # nothing really required for bash shsource, but we'll put in some niceties
-     echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
-     echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
-     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
-     echo "<?php " > $BUILD_ENV_FILE_PHP
-     echo "// properties written for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
-     # standard properties file: nothing special required
-     echo "! properties written for $BUILD_ID" > $BUILD_ENV_FILE_PROP
+    # nothing really required for bash shsource, but we'll put in some niceties
+    echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
+    echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
+    # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+    echo "<?php " > $BUILD_ENV_FILE_PHP
+    echo "// properties written for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+    # standard properties file: nothing special required
+    echo "! properties written for $BUILD_ID" > $BUILD_ENV_FILE_PROP
 
 }
 
@@ -969,14 +975,14 @@ fn-write-property-init ()
 fn-write-property-close () 
 {
 
-     # nothing really required for bash shsource, but we'll put in some niceties
-     echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
-     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
-     # Note: technically may not need closing ?> for an 'include' ? 
-     echo "// finished properties for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
-     echo "?>"  >> $BUILD_ENV_FILE_PHP
-     # standard properties file: nothing special required
-     echo "! finshed properties for $BUILD_ID" >> $BUILD_ENV_FILE_PROP
+    # nothing really required for bash shsource, but we'll put in some niceties
+    echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
+    # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+    # Note: technically may not need closing ?> for an 'include' ? 
+    echo "// finished properties for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+    echo "?>"  >> $BUILD_ENV_FILE_PHP
+    # standard properties file: nothing special required
+    echo "! finshed properties for $BUILD_ID" >> $BUILD_ENV_FILE_PROP
 
 }
 

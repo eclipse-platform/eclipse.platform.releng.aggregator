@@ -169,6 +169,6 @@ fn-write-property-close
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
-env 2>&1 | tee $logsDirectory/all-env-variables.txt
+env 2>&1 | tee $logsDirectory/mb100_all-env-variables_output.txt
 
 exit $buildrc
