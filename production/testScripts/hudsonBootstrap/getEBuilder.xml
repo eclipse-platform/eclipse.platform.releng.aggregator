@@ -133,6 +133,11 @@
         <antcall target="fetchEBuilder" />
         <antcall target="fetchEBuilderLocal" />
         <antcall target="Ebuildercleanup" />
+        
+        <!-- copy the files we need for subsequent Hudson steps to "well known" location -->
+        <copy file="${WORKSPACE}/${eScriptLocation}/getBaseBuilder.xml" todir="${WORKSPACE}" />
+        <copy file="${WORKSPACE}/${eScriptLocation}/runTests2.xml" todir="${WORKSPACE}" />
+        
     </target>
 
     <target name="initBuildTech">
@@ -187,6 +192,10 @@
             name="folderName"
             value="eclipse.platform.releng.aggregator" />
 
+        <property
+            name="eScriptLocation"
+            value="${folderName}/production/testScripts" />
+
     </target>
     <target
         name="checkBuildTechPDE"
@@ -202,6 +211,10 @@
         <property
             name="folderName"
             value="org.eclipse.releng.eclipsebuilder" />
+
+        <property
+            name="eScriptLocation"
+            value="${folderName}" />
 
     </target>
     <!-- hurestic to check if we are running on hudson variable, if so -->
@@ -255,10 +268,14 @@
         unless="noEBuildercleanup">
 
         <!-- we've moved the files, now to remove the empty dir -->
-        <delete dir="${WORKSPACE}/${scmProject}-${builderVersion}" failonerror="false"/>
+        <delete
+            dir="${WORKSPACE}/${scmProject}-${builderVersion}"
+            failonerror="false" />
 
         <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists -->
-        <delete file="${WORKSPACE}/${scmProject}-${builderVersion}.zip" failonerror="false"/>
+        <delete
+            file="${WORKSPACE}/${scmProject}-${builderVersion}.zip"
+            failonerror="false" />
 
         <echo message="Cleaned temporary working copies" />
 
