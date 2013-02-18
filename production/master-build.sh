@@ -61,6 +61,8 @@ elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
 
+run-maven-build-log="${logsDirectory}/mb060_run-maven-build_output.txt"
+
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
 # partially so this build can be re-ran or re-started using it, instead of 
@@ -135,7 +137,7 @@ $GIT_PUSH origin HEAD
 #checkForErrorExit $? "Error occurred during push of build_id commit"
 popd
 
-$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb030_tag-build-input_output.txt
+$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $run-maven-build-log
 checkForErrorExit $? "Error occurred during tag of build input"
 
 $SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb040_install-parent_output.txt
@@ -157,7 +159,7 @@ then
 fi
 
 # if build failed, no need to gather parts
-if [[ $buildrc = 0 ]] 
+if [[ ! -f "${buildDirectory}/buildFailed-run-maven-build" ]] 
 then 
   $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
   checkForErrorExit $? "Error occurred during gather parts"
