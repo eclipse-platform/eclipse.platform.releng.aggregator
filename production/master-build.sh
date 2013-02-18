@@ -155,7 +155,7 @@ then
 fi
 
 # if build failed, no need to gather parts
-if [[ $buildrc == 0 ]] 
+if [[ $buildrc = 0 ]] 
 then 
   $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
   checkForErrorExit $? "Error occurred during gather parts"
