@@ -146,6 +146,8 @@ checkForErrorExit $? "Error occurred during pom version updater"
 
 $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb060_run-maven-build_output.txt
 buildrc=$?
+# does not seem be be "catching" error code. Perhaps due to tee? 
+echo "return code from run-maven-build.sh was: $buildrc"
 if [[ $buildrc != 0 ]] 
 then 
     # TODO: eventually put in more logic to "track" the failure, so
