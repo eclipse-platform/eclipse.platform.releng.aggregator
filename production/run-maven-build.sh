@@ -60,5 +60,5 @@ else
     echo "exitode was not numeric, so will force to 1"
     exitrc=1
 fi  
-
+echo "$( basename $0) exiting with exitrc: $exitrc"
 exit $exitrc
