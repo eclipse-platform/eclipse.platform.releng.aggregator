@@ -151,12 +151,15 @@ then
     # TODO: eventually put in more logic to "track" the failure, so
     # proper actions and emails can be sent. For example, we'd still want to 
     # publish what we have, but not start the tests.  
-    echo "BUILD FAILED. See mb060_run-maven-build_output.txt." >&2
+    echo "BUILD FAILED. See mb060_run-maven-build_output.txt." 
 fi
 
-$SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
-checkForErrorExit $? "Error occurred during gather parts"
-
+# if build failed, no need to gather parts
+if [[ $buildrc == 0 ]] 
+then 
+  $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
+  checkForErrorExit $? "Error occurred during gather parts"
+fi 
 
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
