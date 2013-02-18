@@ -61,7 +61,7 @@ elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
 
-run-maven-build-log="${logsDirectory}/mb060_run-maven-build_output.txt"
+RUN_MAVEN_BUILD_LOG="${logsDirectory}/mb060_run-maven-build_output.txt"
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
@@ -137,7 +137,7 @@ $GIT_PUSH origin HEAD
 #checkForErrorExit $? "Error occurred during push of build_id commit"
 popd
 
-$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $run-maven-build-log
+$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $RUN_MAVEN_BUILD_LOG
 checkForErrorExit $? "Error occurred during tag of build input"
 
 $SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb040_install-parent_output.txt

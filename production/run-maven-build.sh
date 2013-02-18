@@ -56,7 +56,7 @@ elif [[ "${exitCode}" =~ ^-?[0-9]+$ ]]
 then
     echo "exitcode was a legal, non-zero numeric return code"
     exitrc=$exitCode
-    grep "\[ERROR\]" "${run-maven-build-log}" >> "${buildDirectory}/buildFailed-$( basename $0)"
+    grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
 else
     echo "exitode was not numeric, so will force to 1"
     exitrc=1
