@@ -147,10 +147,13 @@ $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb
 checkForErrorExit $? "Error occurred during pom version updater"
 
 $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb060_run-maven-build_output.txt
-buildrc=$?
-# does not seem be be "catching" error code. Perhaps due to tee? 
-echo "return code from run-maven-build.sh was: $buildrc"
-if [[ $buildrc != 0 ]] 
+# does not seem be be "catching" error code via $?. Perhaps due to tee? 
+# errors are "indicated" by special file
+if [[ ! -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+    mavenBuildFailed=true
+    grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
+fi
+if [[ "${mavenBuildFailed}" ]] 
 then 
     # TODO: eventually put in more logic to "track" the failure, so
     # proper actions and emails can be sent. For example, we'd still want to 
@@ -159,7 +162,7 @@ then
 fi
 
 # if build failed, no need to gather parts
-if [[ ! -f "${buildDirectory}/buildFailed-run-maven-build" ]] 
+if [[ ! "${mavenBuildFailed}" ]] 
 then 
   $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
   checkForErrorExit $? "Error occurred during gather parts"
