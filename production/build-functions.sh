@@ -267,6 +267,7 @@ fn-maven-signer-install ()
     mvn -f eclipse-jarsigner-plugin/pom.xml \
         clean install \
         -Dmaven.repo.local=$LOCAL_REPO
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     popd
 }
 
@@ -280,7 +281,8 @@ fn-maven-parent-install ()
     pushd "$REPO_DIR"
     mvn -f eclipse-parent/pom.xml \
         clean install \
-        -Dmaven.repo.local=$LOCAL_REPO
+        -Dmaven.repo.local=$LOCAL_REPO \
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     popd
 }
 
@@ -294,7 +296,8 @@ fn-maven-cbi-install ()
     pushd "$REPO_DIR"
     mvn -f maven-cbi-plugin/pom.xml \
         clean install \
-        -Dmaven.repo.local=$LOCAL_REPO
+        -Dmaven.repo.local=$LOCAL_REPO \
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     popd
 }
 
@@ -334,7 +337,8 @@ fn-maven-build-aggregator ()
     mvn $MARGS \
         clean install \
         -Dmaven.test.skip=true \
-        -Dmaven.repo.local=$LOCAL_REPO
+        -Dmaven.repo.local=$LOCAL_REPO \
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     rc=$?
     popd
     return $rc
@@ -419,7 +423,8 @@ fn-pom-version-updater ()
     pushd "$REPO_DIR"
     mvn $MARGS \
         org.eclipse.tycho:tycho-versions-plugin:update-pom \
-        -Dmaven.repo.local=$LOCAL_REPO
+        -Dmaven.repo.local=$LOCAL_REPO \
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     changes=$( git status --short -uno | cut -c4- )
     if [ -z "$changes" ]; then
         echo No changes in pom versions
@@ -451,7 +456,8 @@ fn-pom-version-update-with-commit ()
     pushd "$REPO_DIR"
     mvn $MARGS \
         org.eclipse.tycho:tycho-versions-plugin:update-pom \
-        -Dmaven.repo.local=$LOCAL_REPO
+        -Dmaven.repo.local=$LOCAL_REPO \
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     changes=$( git status --short -uno | cut -c4- )
     if [ -z "$changes" ]; then
         echo No changes in pom versions
