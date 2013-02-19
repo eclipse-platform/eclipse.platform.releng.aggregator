@@ -149,7 +149,7 @@ checkForErrorExit $? "Error occurred during pom version updater"
 $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb060_run-maven-build_output.txt
 # does not seem be be "catching" error code via $?. Perhaps due to tee? 
 # errors are "indicated" by special file
-if [[ ! -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
 then
     mavenBuildFailed=true
     /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
