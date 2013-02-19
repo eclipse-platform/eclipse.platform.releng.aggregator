@@ -266,7 +266,7 @@ fn-maven-signer-install ()
     pushd "$REPO_DIR"
     mvn -f eclipse-jarsigner-plugin/pom.xml \
         clean install \
-        -Dmaven.repo.local=$LOCAL_REPO
+        -Dmaven.repo.local=$LOCAL_REPO \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
     popd
 }
