@@ -98,6 +98,10 @@ fn-write-property INITIAL_ENV_FILE
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
+if [[ "${testbuildonly}" == "true" ]]
+then
+    fn-write-property testbuildonly
+fi
 fn-write-property BUILD_ENV_FILE
 fn-write-property BUILD_ID
 fn-write-property BUILD_PRETTY_DATE
