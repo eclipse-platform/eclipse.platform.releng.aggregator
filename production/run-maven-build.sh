@@ -33,11 +33,11 @@ if [ -z "$BUILD_ID" ]; then
     BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-if $SIGNING; then
-    fn-maven-signer-install "$signingDir" "$LOCAL_REPO"
-fi
+#if $SIGNING; then
+    #    fn-maven-signer-install "$signingDir" "$LOCAL_REPO"
+#fi
 
-fn-maven-cbi-install "$aggDir" "$LOCAL_REPO"
+#fn-maven-cbi-install "$aggDir" "$LOCAL_REPO"
 fn-maven-parent-install "$aggDir" "$LOCAL_REPO"
 
 fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE
