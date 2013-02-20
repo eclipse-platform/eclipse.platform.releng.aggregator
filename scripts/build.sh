@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 BASEDIR=$(pwd)
 LOG=$BASEDIR/log_$( date +%Y%m%d%H%M%S ).txt
 exec >$LOG 2>&1
@@ -80,28 +79,6 @@ installEclipseParent () {
     popd
 }
 
-installMavenCbi () {
-    pushd eclipse.platform.releng.aggregator
-    mvn -f maven-cbi-plugin/pom.xml \
-    clean install \
-    -Dmaven.repo.local=$LOCAL_REPO
-    popd
-}
-
-installEclipseSigner () {
-    if [ ! -d org.eclipse.cbi.maven.plugins ]; then
-	git clone -n \
-	${GIT_PREFIX}/gitroot/cbi/org.eclipse.cbi.maven.plugins.git
-    fi
-    pushd org.eclipse.cbi.maven.plugins
-    git fetch
-    git checkout eclipse-jarsigner-plugin-1.0.1
-    mvn -f eclipse-jarsigner-plugin/pom.xml \
-    clean install \
-    -Dmaven.repo.local=$LOCAL_REPO
-    popd
-}
-
 buildAggregator () {
     pushd eclipse.platform.releng.aggregator
     mvn $mavenVerbose \
@@ -119,14 +96,8 @@ if $updateAggregator; then
     cloneAggregator
 fi
 
-# if you want to sign on build.eclipse.org. you need this
-if [ ! -z "$mavenSign" ]; then
-    installEclipseSigner
-fi
-
 # pick up any changes
 installEclipseParent
-installMavenCbi
 
 # build from the aggregator root
 buildAggregator
