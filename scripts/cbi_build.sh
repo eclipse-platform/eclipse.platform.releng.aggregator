@@ -1,5 +1,13 @@
 #!/bin/bash
 
+###
+### THIS SCRIPT IS DEPRECATED, USE build.sh INSTEAD.
+###
+
+echo "WARNING: This script is deprecated and will be removed in the future, please use build.sh instead."
+
+
+
 BASE=$( cd $( dirname "$0" ) > /dev/null ; pwd )
 
 if [[ ! -e "$BASE/setup.sh" ]]; then
@@ -24,7 +32,6 @@ cmd="$1"
 case "$cmd" in
     build ) #CMD Build all the sources
         mvnWrapper -f eclipse-parent/pom.xml clean install
-        mvnWrapper -f maven-cbi-plugin/pom.xml clean install
         mvnWrapper clean install -Dmaven.test.skip=true
         echo "Build successful"
         echo "You can find the installation files in $BASE/../eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products/"
