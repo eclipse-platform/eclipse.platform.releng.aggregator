@@ -42,7 +42,6 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
 
 fn-gather-repo "$BUILD_ID" "$aggDir" "$buildDirectory"
-#fn-gather-static-drop "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 fn-gather-sdk "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-platform "$BUILD_ID" "$aggDir" "$buildDirectory"

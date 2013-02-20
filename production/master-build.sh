@@ -84,8 +84,6 @@ fn-write-property MAVEN_OPTS
 fn-write-property MAVEN_PATH
 fn-write-property AGGREGATOR_REPO
 fn-write-property BASEBUILDER_TAG
-fn-write-property SIGNING_REPO
-fn-write-property SIGNING_BRANCH
 fn-write-property B_GIT_EMAIL
 fn-write-property B_GIT_NAME
 fn-write-property COMMITTER_ID

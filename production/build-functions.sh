@@ -255,22 +255,6 @@ fn-basebuilder-dir ()
 }
 
 
-
-# USAGE: fn-maven-signer-install REPO_DIR LOCAL_REPO
-#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/org.eclipse.cbi.maven.plugins
-#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
-fn-maven-signer-install () 
-{
-    REPO_DIR="$1"; shift
-    LOCAL_REPO="$1"; shift
-    pushd "$REPO_DIR"
-    mvn -f eclipse-jarsigner-plugin/pom.xml \
-        clean install \
-        -Dmaven.repo.local=$LOCAL_REPO \
-        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
-    popd
-}
-
 # USAGE: fn-maven-parent-install REPO_DIR LOCAL_REPO
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
@@ -286,20 +270,7 @@ fn-maven-parent-install ()
     popd
 }
 
-# USAGE: fn-maven-cbi-install REPO_DIR LOCAL_REPO
-#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
-fn-maven-cbi-install () 
-{
-    REPO_DIR="$1"; shift
-    LOCAL_REPO="$1"; shift
-    pushd "$REPO_DIR"
-    mvn -f maven-cbi-plugin/pom.xml \
-        clean install \
-        -Dmaven.repo.local=$LOCAL_REPO \
-        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
-    popd
-}
+
 
 # USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING UPDATE_BRANDING MAVEN_BREE
 #   BUILD_ID: I20121116-0700
@@ -501,34 +472,7 @@ fn-gather-repo ()
     fi
 }
 
-# USAGE: fn-gather-static-drop BUILD_ID REPO_DIR BUILD_DIR
-#   BUILD_ID: I20121116-0700
-#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
-fn-gather-static-drop () 
-{
-    BUILD_ID="$1"; shift
-    REPO_DIR="$1"; shift
-    BUILD_DIR="$1"; shift
-    REPO_DIR_BUILDER=$REPO_DIR/eclipse.platform.releng.tychoeclipsebuilder
-    if [[ -d "$REPO_DIR_BUILDER" ]]
-    then
-        pushd "$REPO_DIR"
-        cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/staticDropFiles/* $BUILD_DIR
-        cp -r eclipse.platform.releng.tychoeclipsebuilder/eclipse/clickThroughs $BUILD_DIR
-        # FIXME workaround the download page temp directory
 
-        # fail fast if not set up correctly
-        rc=$(fn-check-dir-exists TMP_DIR)
-        checkForErrorExit "$rc" "$rc"
-
-        sed 's!downloads/drops!staging/cbi/drops!g' $BUILD_DIR/download.php >${TMP_DIR}/t1_$$
-        mv {TMP_DIR}/t1_$$ $BUILD_DIR/download.php
-        popd
-    else
-        echo "   ERROR: $REPO_DIR_BUILDER did not exist in fn-gather-static-drop"
-    fi
-}
 
 # USAGE: fn-gather-sdk BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
