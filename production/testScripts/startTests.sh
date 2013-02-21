@@ -50,9 +50,9 @@ function dlpath()
     #TODO: eventual switch so CBI is "normal" one and PDE is marked one
     if [[ "${BUILD_TECH}" == 'CBI' ]]
     then 
-        dropsuffix=cbibased
-    else
         dropsuffix=""
+    else
+        dropsuffix="pdebased"
     fi
 
     pathToDL=eclipse/downloads/drops

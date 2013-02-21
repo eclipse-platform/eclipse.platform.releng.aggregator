@@ -48,16 +48,21 @@ fi
         pathToDL=eclipse/downloads/drops$eclipseStreamMajor
     fi
     
-    if [[ "$BUILD_TECH" == "CBI" ]]
+    if [[ "$BUILD_TECH" == "PDE" ]]
     then
-         pathToDL="${pathToDL}cbibased"
+         pathToDL="${pathToDL}pdebased"
     fi  
 
-    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
     if [[ "$BUILD_TECH" == "CBI" ]]
     then
         buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    fi    
+    elif [[ "$BUILD_TECH" == "PDE" ]]
+    then
+    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+    else
+            echo "ERROR: BUILD_TECH was neither PDE nor CBI."
+            exit 1
+    fi
     
     siteDir=${buildRoot}/siteDir
 
