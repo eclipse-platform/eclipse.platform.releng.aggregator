@@ -34,6 +34,7 @@
     <cbi-jdt-repo.url>http://build.eclipse.org/eclipse/cbi-jdt/</cbi-jdt-repo.url>
     <cbi-jdt-version>3.9.0.v20130129-050623</cbi-jdt-version>
     <eclipse-repo.url>https://repo.eclipse.org/content/groups/releases/</eclipse-repo.url>
+    <eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.3-I-builds</eclipse-p2-repo.url>
   </properties>
   <repositories>
     <repository>
@@ -83,7 +84,6 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
-
     <pluginRepository>
       <id>cbi-jdt</id>
       <url>${cbi-jdt-repo.url}</url>
@@ -94,7 +94,6 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
-
     <pluginRepository>
       <id>eclipse</id>
       <url>${eclipse-repo.url}</url>
@@ -331,6 +330,16 @@
   </build>
   <profiles>
     <profile>
+      <id>build-individual-bundles</id>
+      <repositories>
+        <repository>
+          <id>eclipse-p2-repo</id>
+          <url>${eclipse-p2-repo.url}</url>
+          <layout>p2</layout>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
       <id>eclipse-sign</id>
       <build>
         <plugins>
@@ -499,7 +508,7 @@
         </repository>
       </repositories>
     </profile>
-        <profile>
+    <profile>
       <id>default-toolsjar</id>
       <activation>
         <activeByDefault>true</activeByDefault>
@@ -508,20 +517,20 @@
         </file>
       </activation>
       <properties>
-          <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
+        <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
       </properties>
     </profile>
     <profile>
       <id>missing-toolsjar</id>
-        <activation>
-            <activeByDefault>false</activeByDefault>
-            <file>
-                <exists>${java.home}/../Classes/classes.jar</exists>
-            </file>
-        </activation>
-        <properties>
-            <toolsjar>${java.home}/../Classes/classes.jar</toolsjar>
-        </properties>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <file>
+          <exists>${java.home}/../Classes/classes.jar</exists>
+        </file>
+      </activation>
+      <properties>
+        <toolsjar>${java.home}/../Classes/classes.jar</toolsjar>
+      </properties>
     </profile>
     <profile>
       <id>api-generation</id>
@@ -591,4 +600,3 @@
     </profile>
   </profiles>
 </project>
-
