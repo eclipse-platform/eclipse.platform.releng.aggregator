@@ -234,10 +234,10 @@ fn-build-dir ()
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
     eclipseStreamMajor=${STREAM:0:1}
-    dropDirSegment=siteDir/eclipse/downloads/dropscbibased
+    dropDirSegment=siteDir/eclipse/downloads/drops
     if [[ $eclipseStreamMajor > 3 ]] 
     then
-        dropDirSegment=siteDir/eclipse/downloads/drops4cbibased
+        dropDirSegment=siteDir/eclipse/downloads/drops4
     fi
     echo $ROOT/$dropDirSegment/$BUILD_ID
 }
