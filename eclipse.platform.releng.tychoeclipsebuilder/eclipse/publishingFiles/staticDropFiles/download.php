@@ -7,6 +7,26 @@
 
 include("buildproperties.php");
 
+
+function computeMirrorKey ($refurl, $buildid) {
+    $dropsuffix="";
+    $edpos=strpos($refurl,"/eclipse/downloads/");
+    if ($edpos !== false) {
+        $bidpos=strrpos($refurl,$buildid);
+        if ($bidpos !== false) {
+            //echo "edpos: $edpos\n";
+            //echo "bidpos: $bidpos\n";
+            // sanity check
+            if ($bidpos > $edpos) {
+                $dropsuffix=substr($refurl,$edpos,($bidpos - $edpos -1));
+            }   
+        }   
+    }   
+    return $dropsuffix;
+
+}
+
+
    if (array_key_exists("SERVER_NAME", $_SERVER)) {
         $servername = $_SERVER["SERVER_NAME"];
         if ($servername === "build.eclipse.org") {
@@ -14,19 +34,15 @@ include("buildproperties.php");
            $dlprefix="";
         } else {
            // if not on build.elcipse.org, assume we are on downloads.
-           // we "compute" this segment based on if "drops4cbibased" is in the request URI.
-           // Seems we could compute the whole thing, given some thought and good regex?
-            // Remember to always use === or !== with strpos.
-            // Simply == or != would not work as expected since
-            // if found in first position it return 0 (so, must match "type" of false also,
-            // to mean truely "not found".
-           $pos=strpos($_SERVER["REQUEST_URI"], "drops4cbibased");
-           if ($pos === false) {
-              $dlprefix="http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops";
-           }
-           else {
-              $dlprefix="http://www.eclipse.org/downloads/download.php?file=/eclipse/downloads/drops4cbibased";
-           }
+           // we "compute" based on matching /eclipse/downloads/*/$BUILD_ID  in the request URI.
+           // we want the /eclipse/downloads/* part, such as 
+           // /eclipse/downloads/drops4, or 
+           // /eclipse/downloads/drops, or 
+           // /eclipse/downloads/drops4pdebased, etc.
+           // function can return empty string
+           $refurl=$_SERVER["REQUEST_URI"];
+           // We expect $BUILD_ID to be defined in buildproperties.php
+           $dlprefix=computeMirrorKey($refurl,$BUILD_ID);
         }
     }
     else {
