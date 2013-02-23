@@ -42,7 +42,9 @@ function computeMirrorKey ($refurl, $buildid) {
            // function can return empty string
            $refurl=$_SERVER["REQUEST_URI"];
            // We expect $BUILD_ID to be defined in buildproperties.php
-           $dlprefix=computeMirrorKey($refurl,$BUILD_ID);
+           // But it can be defined several times in reference URI, such as once in directory name, 
+           // and once in filename. We wanted the directory-like part.
+           $dlprefix=computeMirrorKey($refurl,$BUILD_ID."/");
         }
     }
     else {
