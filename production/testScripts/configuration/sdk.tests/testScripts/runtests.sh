@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 
-# This file should never exist or be needed for production machine,
-# but allows an easy way for a "local user" to provide this file
-# somewhere on the search path ($HOME/bin is common),
-# and it will be included here, thus can provide "override values"
-# to those defined by defaults for production machine.,
-# such as for vmcmd
+# This file is used on production machine, running tests on Hudson, Linux
 
 source localTestsProperties.shsource 2>/dev/null
 
@@ -92,56 +87,86 @@ fi
 #necessary when invoking this script through rsh
 cd $dir
 
-    if [ ! -r eclipse ]
-    then
-        tar -xzf eclipse-SDK-*.tar.gz
-        # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
-        unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+if [ ! -r eclipse ]
+then
+    tar -xzf eclipse-SDK-*.tar.gz
+    # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
+    unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+fi
+
+# run tests
+launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
+
+echo " = = = Start list environment variables in effect = = = ="
+env
+echo " = = = End list environment variables in effect = = = ="
+
+# make sure there is a window manager running. See bug 379026
+# we should not have to, but may be a quirk/bug of hudson setup
+# assuming metacity attaches to "current" display by default (which should have
+# already been set by Hudson). We echo its value here just for extra reference/cross-checks.
+
+echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz):"
+wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep)
+echo "Window Manager processes running: $wmpss"
+echo
+
+# in this case, do not "--replace" any existing ones, for this DISPLAY 
+metacity --display=$DISPLAY  --sm-disable  &
+METACITYRC=$?
+METACITYPID=$!
+
+if [[ $METACITYRC == 0 ]]
+then 
+    # TODO: we may want to kill the one we started, at end of tests?
+    echo $METACITYPID > epmetacity.pid
+    echo "  metacity (with no --replace) started ok. PID: $METACITYPID"
+else
+    echo "  metacity (with no --replace) failed. RC: $METACITYRC"
+    # This should not interfere with other jobs running on Hudson, the DISPLAY should be "ours".
+    metacity --display=$DISPLAY --replace --sm-disable  &
+    METACITYRC=$?
+    METACITYPID=$!
+    if [[ $METACITYRC == 0 ]]
+    then 
+        # TODO: we may want to kill the one we started, at end of tests?
+        echo $METACITYPID > epmetacity.pid
+        echo "  metacity (with --replace) started ok. PID: $METACITYPID"
+    else
+        echo "  metacity (with --replace) failed. RC: $METACITYRC"
+        echo "   giving up. But continuing tests"
     fi
+fi
+#if [[ -z $wmpss ]]
+#then
+#         echo "No window managers processes found running, so will start metacity"
+#metacity --replace --sm-disable  &
+#METACITYPID=$!
+#echo $METACITYPID > epmetacity.pid
+#else
+#echo "Existing window manager found running, so did not force start of metacity"
+#fi
 
-    # run tests
-    launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
+echo
 
+# list out metacity processes so overtime we can see if they accumulate, or if killed automatically
+# when our process exits. If not automatic, should use epmetacity.pid to kill it when we are done.
+echo "Current metacity processes running (check for accumulation):"
+ps -ef | grep "metacity" | grep -v grep
+echo
 
-    # make sure there is a window manager running. See bug 379026
-    # we should not have to, but may be a quirk/bug of hudson setup
-    # assuming metacity attaches to "current" display by default (which should have
-    # already been set by Hudson). We echo its value here just for extra reference/cross-checks.
+echo "Triple check if any window managers are running (at least metacity should be!):"
+wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep)
+echo "Window Manager processes: $wmpss"
+echo
 
-    echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz):"
-    wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep)
-    echo "Window Manager processes: $wmpss"
-    echo
+echo "extdirprop in runtest: ${extdirprop}"
+echo "extdirproperty in runtest: ${extdirproperty}"
 
-    if [[ -z $wmpss ]]
-    then
-             echo "No window managers processes found running, so will start metacity"
-             metacity --replace --sm-disable  &
-             METACITYPID=$!
-             echo $METACITYPID > epmetacity.pid
-     else
-             echo "Existing window manager found running, so did not force start of metacity"
-    fi
-
-    echo
-
-    # list out metacity processes so overtime we can see if they accumulate, or if killed automatically
-    # when our process exits. If not automatic, should use epmetacity.pid to kill it when we are done.
-    echo "Current metacity processes running (check for accumulation):"
-    ps -ef | grep "metacity" | grep -v grep
-    echo
-
-    echo "Triple check if any window managers are running (at least metacity should be!):"
-    wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep)
-    echo "Window Manager processes: $wmpss"
-    echo
-    echo "extdirprop in runtest: ${extdirprop}"
-    echo "extdirproperty in runtest: ${extdirproperty}"
-
-    # -Dtimeout=300000 "${ANT_OPTS}"
- if [[ ! -z "${extdirproperty}" ]]
- then
-	$vmcmd "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
- else
-	$vmcmd -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
- fi
+# -Dtimeout=300000 "${ANT_OPTS}"
+if [[ ! -z "${extdirproperty}" ]]
+then
+    $vmcmd "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+else
+    $vmcmd -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+fi
