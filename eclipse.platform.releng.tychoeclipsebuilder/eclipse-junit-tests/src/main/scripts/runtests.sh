@@ -102,6 +102,9 @@ cd $dir
     # run tests
     launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
 
+    echo " = = = Start list environment variables in effect = = = ="
+    env
+    echo " = = = End list environment variables in effect = = = ="
 
     # make sure there is a window manager running. See bug 379026
     # we should not have to, but may be a quirk/bug of hudson setup
