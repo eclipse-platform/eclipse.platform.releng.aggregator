@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:my="http://maven.apache.org/POM/4.0.0" exclude-result-prefixes="my xs" version="2.0">
+<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:my="http://maven.apache.org/POM/4.0.0" exclude-result-prefixes="my xs" version="1.0">
   <!--xsl:output omit-xml-declaration="yes" indent="yes"/>
   <xsl:output indent="yes"/>
   <xsl:strip-space elements="*"/-->
