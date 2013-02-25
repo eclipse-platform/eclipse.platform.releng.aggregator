@@ -3,6 +3,8 @@
 # Simple utility to run as cronjob to run Eclipse Platform builds
 # Normally resides in $BUILD_HOME
 
+#export testbuildonly=true
+
 SCRIPT_NAME=$0
 MB_LOG_DIR=/shared/eclipse/builds
 LOG_BASE_NAME=${SCRIPT_NAME##*/} 
