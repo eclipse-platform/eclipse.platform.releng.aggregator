@@ -164,28 +164,28 @@ fi
 # if updater failed, something fairly large is wrong, so no need to compile
 if [[ ! "${pomUpdateFailed}" ]] 
 
-$SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
-# does not seem be be "catching" error code via $?. Perhaps due to tee? 
-# errors are "indicated" by special file
-if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
-then
-    mavenBuildFailed=true
-    /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
-fi
-if [[ "${mavenBuildFailed}" ]] 
-then 
-    # TODO: eventually put in more logic to "track" the failure, so
-    # proper actions and emails can be sent. For example, we'd still want to 
-    # publish what we have, but not start the tests.  
-    echo "BUILD FAILED. See mb060_run-maven-build_output.txt." 
-fi
+    $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
+    # does not seem be be "catching" error code via $?. Perhaps due to tee? 
+    # errors are "indicated" by special file
+    if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+    then
+        mavenBuildFailed=true
+        /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
+    fi
+    if [[ "${mavenBuildFailed}" ]] 
+    then 
+        # TODO: eventually put in more logic to "track" the failure, so
+        # proper actions and emails can be sent. For example, we'd still want to 
+        # publish what we have, but not start the tests.  
+        echo "BUILD FAILED. See mb060_run-maven-build_output.txt." 
+    fi
 
-# if build failed, no need to gather parts
-if [[ ! "${mavenBuildFailed}" ]] 
-then 
-  $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
-  checkForErrorExit $? "Error occurred during gather parts"
-fi 
+    # if build failed, no need to gather parts
+    if [[ ! "${mavenBuildFailed}" ]] 
+    then 
+        $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
+        checkForErrorExit $? "Error occurred during gather parts"
+    fi 
 
 fi 
 
