@@ -31,7 +31,7 @@ cmd="$1"
 
 case "$cmd" in
     build ) #CMD Build all the sources
-        mvnWrapper -f eclipse-parent/pom.xml clean install
+        mvnWrapper -f eclipse-platform-parent/pom.xml clean install
         mvnWrapper clean install -Dmaven.test.skip=true
         echo "Build successful"
         echo "You can find the installation files in $BASE/../eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products/"

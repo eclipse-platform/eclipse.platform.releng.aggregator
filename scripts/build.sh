@@ -73,7 +73,7 @@ cloneAggregator() {
 
 installEclipseParent () {
     pushd eclipse.platform.releng.aggregator
-    mvn -f eclipse-parent/pom.xml \
+    mvn -f eclipse-platform-parent/pom.xml \
     clean install \
     -Dmaven.repo.local=$LOCAL_REPO
     popd

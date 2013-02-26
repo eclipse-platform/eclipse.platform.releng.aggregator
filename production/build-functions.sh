@@ -263,7 +263,7 @@ fn-maven-parent-install ()
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
     pushd "$REPO_DIR"
-    mvn -f eclipse-parent/pom.xml \
+    mvn -f eclipse-platform-parent/pom.xml \
         clean install \
         -Dmaven.repo.local=$LOCAL_REPO \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
