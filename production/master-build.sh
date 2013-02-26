@@ -177,7 +177,7 @@ if [[ ! "${pomUpdateFailed}" ]]
         # TODO: eventually put in more logic to "track" the failure, so
         # proper actions and emails can be sent. For example, we'd still want to 
         # publish what we have, but not start the tests.  
-        echo "BUILD FAILED. See mb060_run-maven-build_output.txt." 
+        echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
     fi
 
     # if build failed, no need to gather parts
