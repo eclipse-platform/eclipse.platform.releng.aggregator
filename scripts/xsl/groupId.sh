@@ -33,3 +33,15 @@ rm "${POM}.out"
 done
 
 
+find * -name pom.xml -print0 | xargs -0 grep eclipse-test-plugin | cut -f1 -d: | sort -u >/tmp/t1_$$.txt
+
+for POM in $( cat /tmp/t1_$$.txt ); do
+$ECLIPSE -noSplash \
+-application org.eclipse.ant.core.antRunner -v \
+-buildfile run-xsl.xml  \
+-Dfile.sheet="fix-pom.xsl" \
+-Dfile.in="$(pwd)/$POM" \
+-Dfile.out="$(pwd)/${POM}.out"
+xmllint --format "${POM}.out" >"${POM}"
+rm "${POM}.out"
+done
