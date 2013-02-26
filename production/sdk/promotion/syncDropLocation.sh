@@ -24,7 +24,13 @@ function dropDir()
 
     siteDir=${buildRoot}/siteDir
 
-    fromDir=${siteDir}/${pathToDL}/${buildId}
+    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    then 
+        fromDir=${siteDir}/${pathToDL}/${buildId}
+    else
+        fromDir=${siteDir}/${pathFromDL}/${buildId}
+    fi
+    
     if [[ ! -d "${fromDir}" ]]
     then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
@@ -82,6 +88,47 @@ function dlpath()
 
     echo $pathToDL
 }
+
+# compute main (left part) of download site (This is needed only for PDE?)
+# because we want "from" on build machine to stay the same, only change "to" part, to be "pdebased"
+function dlFrompath()
+{
+    eclipseStream=$1
+    if [[ -z "${eclipseStream}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+
+
+    buildId=$2
+    if [[ -z "${buildId}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+
+    BUILD_TECH=$3
+    if [[ -z "${BUILD_TECH}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+
+    eclipseStreamMajor=${eclipseStream:0:1}
+    buildType=${buildId:0:1}
+
+
+
+    pathFromDL=eclipse/downloads/drops
+    if [[ $eclipseStreamMajor > 3 ]]
+    then
+        pathFromDL=$pathFromDL$eclipseStreamMajor
+    fi
+
+    echo $pathFromDL
+}
+
 
 function sendPromoteMail ()
 {
@@ -226,6 +273,10 @@ function startTests()
         builderDir=${supportDir}/$eclipsebuilder
         # assumed in fixed location, for now, for PDE builds
         builderDropDir=/shared/eclipse/sdk/promotion
+        echo "DEBUG: PDE builderDropDir for PDE: ${builderDropDir}"
+        dlFromPath=$( dlFrompath $eclipseStream $buildId $BUILD_TECH )
+        echo "DEBUG: PDE dlPath: $dlFromPath"
+        buildDropDir=${buildRoot}/siteDir/$dlFromPath/${buildId}
         echo "DEBUG: PDE builderDropDir: ${builderDropDir}"
     fi  
 

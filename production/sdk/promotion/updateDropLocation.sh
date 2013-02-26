@@ -108,6 +108,47 @@ function dlpath()
     echo $pathToDL
 }
 
+# compute main (left part) of download site
+function dlFrompath()
+{
+    eclipseStream=$1
+    if [[ -z "${eclipseStream}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+
+
+    buildId=$2
+    if [[ -z "${buildId}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+
+    BUILD_TECH=$3
+    if [[ -z "${BUILD_TECH}" ]]
+    then
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+        return 1;
+    fi
+
+
+
+    eclipseStreamMajor=${eclipseStream:0:1}
+    buildType=${buildId:0:1}
+
+    pathToDL=eclipse/downloads/drops
+    if [[ $eclipseStreamMajor > 3 ]]
+    then
+        pathToDL=$pathToDL$eclipseStreamMajor
+    fi
+
+
+    echo $pathFromDL
+}
+
+
 # Function is designed with rsync so it can be called
 # at multiple times during a build, to make progresive updates.
 function updateDropLocation ()
@@ -157,7 +198,7 @@ function updateDropLocation ()
     fi
     siteDir=${buildRoot}/siteDir
 
-    fromDir=${siteDir}/${pathToDL}/${buildId}
+    fromDir=${siteDir}/${pathFromDL}/${buildId}
     if [[ ! -d "${fromDir}" ]]
     then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
