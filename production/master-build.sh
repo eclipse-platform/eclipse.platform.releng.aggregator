@@ -163,7 +163,8 @@ fi
 
 # if updater failed, something fairly large is wrong, so no need to compile
 if [[ ! "${pomUpdateFailed}" ]] 
-
+then
+    
     $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
     # does not seem be be "catching" error code via $?. Perhaps due to tee? 
     # errors are "indicated" by special file
