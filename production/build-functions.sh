@@ -396,6 +396,12 @@ fn-pom-version-updater ()
         org.eclipse.tycho:tycho-versions-plugin:update-pom \
         -Dmaven.repo.local=$LOCAL_REPO \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
+    RC=$?
+    if [[ $RC != 0 ]]
+    then
+        echo "ERROR: tycho-versions-plugin:update-pom returned non-zero return code: $RC"
+        return $RC
+    fi
     changes=$( git status --short -uno | cut -c4- )
     if [ -z "$changes" ]; then
         echo No changes in pom versions

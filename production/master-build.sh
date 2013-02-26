@@ -61,6 +61,8 @@ elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
 
+TAG_BUILD_INPUT_LOG="${logsDirectory}/mb030_tag_build_input_output.txt"
+POM_VERSION_UPDATE_BUILD_LOG="${logsDirectory}/mb050_pom-version-updater_output.txt"
 RUN_MAVEN_BUILD_LOG="${logsDirectory}/mb060_run-maven-build_output.txt"
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
@@ -128,7 +130,7 @@ checkForErrorExit $? "Error occurred while updating build input"
 #checkForErrorExit $? "Error occurred applying patch"
 #fi 
 
-#TODO: Should we do this only at end, if build (relatively) successful?
+# We always tag, if build successful or not
 pushd "$aggDir"
 git commit -m "Build input for build $BUILD_ID"
 # exits with 1 here? 
@@ -139,16 +141,30 @@ $GIT_PUSH origin HEAD
 #checkForErrorExit $? "Error occurred during push of build_id commit"
 popd
 
-$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $RUN_MAVEN_BUILD_LOG
+$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
 checkForErrorExit $? "Error occurred during tag of build input"
 
 $SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb040_install-parent_output.txt
 checkForErrorExit $? "Error occurred during install parent script"
 
-$SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb050_pom-version-updater_output.txt
-checkForErrorExit $? "Error occurred during pom version updater"
+$SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
+then
+    pomUpdateFailed=true
+    /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
+fi
+if [[ "${pomUpdateFailed}" ]] 
+then 
+    # TODO: eventually put in more logic to "track" the failure, so
+    # proper actions and emails can be sent. For example, we'd still want to 
+    # publish what we have, but not start the tests.  
+    echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
+fi
 
-$SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb060_run-maven-build_output.txt
+# if updater failed, something fairly large is wrong, so no need to compile
+if [[ ! "${pomUpdateFailed}" ]] 
+
+$SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
 # does not seem be be "catching" error code via $?. Perhaps due to tee? 
 # errors are "indicated" by special file
 if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
@@ -169,6 +185,8 @@ if [[ ! "${mavenBuildFailed}" ]]
 then 
   $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
   checkForErrorExit $? "Error occurred during gather parts"
+fi 
+
 fi 
 
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb080_publish-eclipse_output.txt
