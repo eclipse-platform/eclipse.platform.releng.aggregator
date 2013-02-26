@@ -105,6 +105,8 @@ then
     fn-write-property testbuildonly
 fi
 fn-write-property BUILD_ENV_FILE
+fn-write-property BUILD_ENV_FILE_PHP
+fn-write-property BUILD_ENV_FILE_PROP
 fn-write-property BUILD_ID
 fn-write-property BUILD_PRETTY_DATE
 fn-write-property BUILD_TYPE_NAME
@@ -190,7 +192,7 @@ then
 
 fi 
 
-$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb080_publish-eclipse_output.txt
+$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
 # if all ended well, put "promotion scripts" in known locations
@@ -201,6 +203,6 @@ fn-write-property-close
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
-env 2>&1 | tee $logsDirectory/mb100_all-env-variables_output.txt
+env 1>$logsDirectory/mb100_all-env-variables_output.txt
 
 exit $buildrc
