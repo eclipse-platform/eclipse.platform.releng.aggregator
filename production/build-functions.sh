@@ -267,7 +267,9 @@ fn-maven-parent-install ()
         clean install \
         -Dmaven.repo.local=$LOCAL_REPO \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
+    RCCODE=?$
     popd
+    return $RCCODE
 }
 
 
