@@ -196,8 +196,8 @@ function syncRepoSite ()
         exit 1
     fi
 
-    fromDir=updateSiteOnBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" 
-    toDir=updateSiteOnDL "$eclipseStream" "$buildId" "$BUILD_TECH" 
+    fromDir=$(updateSiteOnBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH") 
+    toDir=$(updateSiteOnDL "$eclipseStream" "$buildId" "$BUILD_TECH") 
     #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/"
 
     echo "   In syncRepoSite"
@@ -212,85 +212,6 @@ function syncRepoSite ()
         #TODO update composite
     fi
 }
-
-
-function syncDropLocation ()
-{
-    echo "start syncDropLocation"
-    eclipseStream=$1
-    if [[ -z "${eclipseStream}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-    echo "eclipseStream: $eclipseStream"
-
-    buildId=$2
-    if [[ -z "${buildId}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-    echo "buildId: $buildId"
-
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-    echo "BUILD_TECH: $BUILD_TECH"
-
-    EBUILDER_HASH=$4
-    if [[ -z "${EBUILDER_HASH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-    echo "EBUILDER_HASH: $EBUILDER_HASH"
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-    fromDir=$(dropFromBuildDir $eclipseStream $buildId $BUILD_TECH)
-    if [[ ! -d "${fromDir}" ]]
-    then
-        echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
-        return 1
-    fi
-    
-
-    toDir=$(dropOnDLServer $eclipseStream $buildId $BUILD_TECH)
-    if [[ ! -d "${toDir}" ]]
-    then
-        echo "ERROR: toDir is not a directory? toDir: ${toDir}"
-        return 1
-    fi
-
-    echo "   fromDir: ${fromDir}"
-    echo "     toDir: ${toDir}"
-
-    # here, for dl site, best not to preserve times, since (if mirrored)
-    # would be more accurate for mirroring system to have
-    # actual times (and we are copying only one specific
-    # sub-sirectory) (But, we do for now, for easier testing) 
-    rsync --recursive  --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
-    rccode=$?
-    if [[ $rccode != 0 ]]
-    then
-        echo "ERROR: rsync did not complete normally.rccode: $rccode"
-        return $rccode
-    else
-        # Now update main DL page index pages, to show available
-        source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-        updateIndex $eclipseStreamMajor $BUILD_TECH
-    fi
-
-
-
-    echo "ending syncDropLocation"
-}
-
 
 
 
@@ -400,7 +321,7 @@ then
 fi
 
 
-syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" 
+syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" "${EBUILDER_HASH}"
 rccode=$?
 if [[ $rccode != 0 ]]
 then
