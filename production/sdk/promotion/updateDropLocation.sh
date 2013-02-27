@@ -292,7 +292,7 @@ then
     exit $rccode
 fi
 
-syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" 
+syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" "${EBUILDER_HASH}"
 rccode=$?
 if [ $rccode -ne 0 ]
 then
