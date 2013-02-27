@@ -1,134 +1,8 @@
 #!/usr/bin/env bash
 
-# compute build machine drop directory
-function dropDir()
-{
-
-    pathToDL=$( dlpath "$eclipseStream" "$buildId" "$BUILD_TECH" )
-
-    if [[ "$pathToDL" == 1 ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: dlpath could not be computed."
-        return 1
-    fi
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    else
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    fi
-
-    siteDir=${buildRoot}/siteDir
-
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        fromDir=${siteDir}/${pathToDL}/${buildId}
-    else
-        fromDir=${siteDir}/${pathFromDL}/${buildId}
-    fi
-    
-    if [[ ! -d "${fromDir}" ]]
-    then
-        echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
-        return 1
-    else
-        echo "$fromDir"
-    fi
-}
-
-# compute main (left part) of download site
-function dlpath()
-{
-    eclipseStream=$1
-    if [[ -z "${eclipseStream}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-
-    buildId=$2
-    if [[ -z "${buildId}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-    #TODO: eventual switch so CBI is "normal" one and PDE is marked one
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        dropsuffix=""
-    else
-        dropsuffix="pdebased"
-    fi
-
-    pathToDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
-    then
-        pathToDL=$pathToDL$eclipseStreamMajor
-    fi
-
-    pathToDL=$pathToDL$dropsuffix
-
-    echo $pathToDL
-}
-
-# compute main (left part) of download site (This is needed only for PDE?)
-# because we want "from" on build machine to stay the same, only change "to" part, to be "pdebased"
-function dlFrompath()
-{
-    eclipseStream=$1
-    if [[ -z "${eclipseStream}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-
-    buildId=$2
-    if [[ -z "${buildId}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-
-
-    pathFromDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
-    then
-        pathFromDL=$pathFromDL$eclipseStreamMajor
-    fi
-
-    echo $pathFromDL
-}
-
+SCRIPTDIR=$( dirname $0 )
+echo "SCRIPTDIR: ${SCRIPTDIR}"
+source ${SCRIPTDIR}/synchUpdateUtils.shshource
 
 function sendPromoteMail ()
 {
@@ -182,7 +56,7 @@ function sendPromoteMail ()
     # /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/N20120415-2015
 
 
-    mainPath=$( dlpath "$eclipseStream" "$buildId" "$BUILD_TECH" )
+    mainPath=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_TECH" )
     echo "     mainPath: $mainPath"
     if [[ "$mainPath" == 1 ]]
     then
@@ -209,7 +83,7 @@ function sendPromoteMail ()
     # for initial testing, only to me -- change to PDE, after switch over
     if [[ "${BUILD_TECH}" == "PDE" ]]
     then 
-       TO="david_williams@us.ibm.com"
+        TO="david_williams@us.ibm.com"
     fi
 
     # make sure reply to goes back to the list
@@ -259,9 +133,9 @@ function startTests()
     then 
         buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
         eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
-        dlPath=$( dlpath $eclipseStream $buildId $BUILD_TECH )
-        echo "DEBUG CBI dlPath: $dlPath"
-        buildDropDir=${buildRoot}/siteDir/$dlPath/${buildId}
+        dlFromPath=$( dlFromPath $eclipseStream $buildId $BUILD_TECH )
+        echo "DEBUG CBI dlFromPath: $dlFromPath"
+        buildDropDir=${buildRoot}/siteDir/$dlFromPath/${buildId}
         echo "DEBGUG CBI buildDropDir: $buildDropDir"
         builderDropDir=${buildDropDir}/${eclipsebuilder}
         echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
@@ -274,8 +148,8 @@ function startTests()
         # assumed in fixed location, for now, for PDE builds
         builderDropDir=/shared/eclipse/sdk/promotion
         echo "DEBUG: PDE builderDropDir for PDE: ${builderDropDir}"
-        dlFromPath=$( dlFrompath $eclipseStream $buildId $BUILD_TECH )
-        echo "DEBUG: PDE dlPath: $dlFromPath"
+        dlFromPath=$( dlFromPath $eclipseStream $buildId $BUILD_TECH )
+        echo "DEBUG: PDE dlFromPath: $dlFromPath"
         buildDropDir=${buildRoot}/siteDir/$dlFromPath/${buildId}
         echo "DEBUG: PDE builderDropDir: ${builderDropDir}"
     fi  
@@ -289,7 +163,6 @@ function startTests()
 # provides an easy way to "fix" the remote repo by fixing the local one first.
 function syncRepoSite ()
 {
-
     eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
     then
@@ -322,31 +195,10 @@ function syncRepoSite ()
         echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0"
         exit 1
     fi
-    echo "eclipseStream: $eclipseStream"
-    echo "eclipseStreamMajor: $eclipseStreamMajor"
-    echo "eclipseStreamMinor: $eclipseStreamMinor"
-    echo "eclipseStreamService: $eclipseStreamService"
-    echo "BUILD_TECH: $BUILD_TECH"
-    echo "buildType: $buildType"
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    else
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    fi
-
-    siteDir=${buildRoot}/siteDir
-
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        updatesSuffix="builds"
-    else
-        updatesSuffix="buildspdebased"
-    fi
-
-    fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}
-    toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/"
+    fromDir=updateSiteOnBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" 
+    toDir=updateSiteOnDL "$eclipseStream" "$buildId" "$BUILD_TECH" 
+    #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/"
 
     echo "   In syncRepoSite"
     echo "fromDir: $fromDir"
@@ -356,19 +208,12 @@ function syncRepoSite ()
     then
         echo "skipping syncRepoSite, for now, for CBI"
     else
-        # here, for update site, good to maintain times, so
-        # we don't re-copy things each time
-        # TODO: ideally, for the "new" subdirectory, we would
-        # resursively touch first, so its time is "now", time
-        # of copy, not time of build.
-        # remove -t for now, due to permission problems
-        rsync --recursive -t --delete  "${fromDir}" "${toDir}"
+        rsync --recursive "${fromDir}" "${toDir}"
+        #TODO update composite
     fi
 }
 
 
-# Function is designed with rsync so it can be called
-# at multiple times during a build, to make progresive updates.
 function syncDropLocation ()
 {
     echo "start syncDropLocation"
@@ -407,33 +252,15 @@ function syncDropLocation ()
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
 
-
-    pathToDL=$( dlpath "$eclipseStream" "$buildId" "$BUILD_TECH" )
-    echo "pathToDL: $pathToDL"
-
-    if [[ "$pathToDL" == 1 ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: dlpath could not be computed."
-        return 1
-    fi
-
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    else
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    fi
-
-    siteDir=${buildRoot}/siteDir
-
-    fromDir=${siteDir}/${pathToDL}/${buildId}
+    fromDir=$(dropFromBuildDir $eclipseStream $buildId $BUILD_TECH)
     if [[ ! -d "${fromDir}" ]]
     then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
         return 1
     fi
+    
 
-    toDir="/home/data/httpd/download.eclipse.org/${pathToDL}"
+    toDir=$(dropOnDLServer $eclipseStream $buildId $BUILD_TECH)
     if [[ ! -d "${toDir}" ]]
     then
         echo "ERROR: toDir is not a directory? toDir: ${toDir}"
@@ -447,15 +274,13 @@ function syncDropLocation ()
     # would be more accurate for mirroring system to have
     # actual times (and we are copying only one specific
     # sub-sirectory) (But, we do for now, for easier testing) 
-    rsync --recursive -t --delete --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
+    rsync --recursive  --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
     rccode=$?
     if [[ $rccode != 0 ]]
     then
         echo "ERROR: rsync did not complete normally.rccode: $rccode"
         return $rccode
     else
-        # if update to downloads succeeded, start the unit tests on Hudson
-        startTests $eclipseStreamMajor $buildType $eclipseStream $buildId $BUILD_TECH ${EBUILDER_HASH}
         # Now update main DL page index pages, to show available
         source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
         updateIndex $eclipseStreamMajor $BUILD_TECH
@@ -465,9 +290,6 @@ function syncDropLocation ()
 
     echo "ending syncDropLocation"
 }
-
-
-
 
 
 
@@ -496,6 +318,7 @@ fi
 
 echo "Starting $0"
 
+# = = = = = = = = =  argument checks
 eclipseStream=$1
 if [[ -z "${eclipseStream}" ]]
 then
@@ -534,19 +357,39 @@ eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
 echo "buildType: $buildType"
 
-# call generic fetcher (it checks if it already exists)
-toDir=$( dropDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
-echo "toDir: $toDir"
-if [[ ! -d "${toDir}" ]]
+# contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
+if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
+then
+    eclipseStreamMajor=${BASH_REMATCH[1]}
+    eclipseStreamMinor=${BASH_REMATCH[2]}
+    eclipseStreamService=${BASH_REMATCH[3]}
+else
+    echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0"
+    exit 1
+fi
+
+echo "eclipseStream: $eclipseStream"
+echo "eclipseStreamMajor: $eclipseStreamMajor"
+echo "eclipseStreamMinor: $eclipseStreamMinor"
+echo "eclipseStreamService: $eclipseStreamService"
+echo "BUILD_TECH: $BUILD_TECH"
+echo "buildType: $buildType"
+
+# = = = = = = = = = 
+# compute dirctiory on build machine
+dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
+echo "dropFromBuildDir: $dropFromBuildDir"
+if [[ ! -d "${dropFromBuildDir}" ]]
 then 
-    echo "ERROR: expected toDir (drop directory) did not exist"
-    echo "       drop directory: ${toDir}"
+    echo "ERROR: the expected dropFromBuildDir (drop directory) did not exist"
+    echo "       drop directory: ${dropFromBuildDir}"
     exit 1
 fi
 SCRIPTDIR=$( dirname $0 )
+echo "SCRIPTDIR: ${SCRIPTDIR}"
 ${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${toDir}"
 
-syncRepoSite "$eclipseStream" "$buildType" "$BUILD_TECH" "$EBUILDER_HASH"
+syncRepoSite "$eclipseStream" "$buildType" "$BUILD_TECH" 
 
 rccode=$?
 
@@ -557,13 +400,17 @@ then
 fi
 
 
-syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" "$EBUILDER_HASH"
+syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" 
 rccode=$?
 if [[ $rccode != 0 ]]
 then
     printf "\n\n\t%s\n\n" "ERROR occurred during promotion to download server, so halted promotion and did not send mail."
     exit 1
 fi
+
+# if update to downloads succeeded, start the unit tests on Hudson
+startTests $eclipseStreamMajor $buildType $eclipseStream $buildId $BUILD_TECH ${EBUILDER_HASH}
+
 
 sendPromoteMail "$eclipseStream" "$buildId" "$BUILD_TECH"
 rccode=$?
@@ -574,3 +421,4 @@ then
 fi
 
 exit 0
+

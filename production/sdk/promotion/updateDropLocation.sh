@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+SCRIPTDIR=$( dirname $0 )
+echo "SCRIPTDIR: ${SCRIPTDIR}"
+source ${SCRIPTDIR}/synchUpdateUtils.shshource
+
 # compute build machine drop directory
 function dropDir()
 {
@@ -149,95 +153,6 @@ function dlFrompath()
 }
 
 
-# Function is designed with rsync so it can be called
-# at multiple times during a build, to make progresive updates.
-function updateDropLocation ()
-{
-    eclipseStream=$1
-    if [ -z "${eclipseStream}" ]
-    then
-        echo "must provide EclipseStream as first argumnet, for this function $0"
-        return 1;
-    fi
-
-    buildId=$2
-    if [[ -z "${buildId}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-    pathToDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
-    then
-        pathToDL=eclipse/downloads/drops$eclipseStreamMajor
-    fi
-
-    if [[ "${BUILD_TECH}" == "PDE" ]]
-    then
-        pathToDL=${pathToDL}pdebased
-    fi
-
-
-    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    if [[ "$BUILD_TECH" == "CBI" ]]
-    then
-            buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    else 
-            buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    fi
-    siteDir=${buildRoot}/siteDir
-
-    fromDir=${siteDir}/${pathFromDL}/${buildId}
-    if [[ ! -d "${fromDir}" ]]
-    then
-        echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
-        return 1
-    fi
-
-    toDir="/home/data/httpd/download.eclipse.org/${pathToDL}"
-    if [[ ! -d "${toDir}" ]]
-    then
-        echo "ERROR: toDir is not a directory? toDir: ${toDir}"
-        return 1
-    fi
-
-    echo "   fromDir: ${fromDir}"
-    echo "     toDir: ${toDir}"
-
-    # here, for updating dl site, best to preserve times,
-    # but only if initial first-time upload are all "touched" to
-    # have "current time" (otherwise, that first time throws off mirrors,
-    # and to "change" times at this point would be bad ... sending some
-    # "back in time"?
-    # TODO: we probably only need to do this for a few types of files, but not sure
-    # which yet .. PHP, XML?, HTML? properties?
-    rsync --recursive -tv --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
-    rccode=$?
-    if [[ $rccode != 0 ]]
-    then
-        echo "ERROR: rsync did not complete normally.rccode: $rccode"
-        return $rccode
-    else
-        # Now update main DL page index pages, to show available
-        source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-        updateIndex $eclipseStreamMajor $BUILD_TECH
-    fi        
-
-
-
-    echo "ending updateDropLocation"
-}
 
 # update index on build machine with test results
 function updatePages()
@@ -377,7 +292,7 @@ then
     exit $rccode
 fi
 
-updateDropLocation $eclipseStream $buildId $BUILD_TECH
+syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" 
 rccode=$?
 if [ $rccode -ne 0 ]
 then
