@@ -308,7 +308,7 @@ then
 fi
 SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
-${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${toDir}"
+${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
 syncRepoSite "$eclipseStream" "$buildType" "$BUILD_TECH" 
 
