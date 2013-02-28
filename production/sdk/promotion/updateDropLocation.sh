@@ -4,65 +4,6 @@ SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
 source ${SCRIPTDIR}/synchUpdateUtils.shshource
 
-# compute build machine drop directory
-function dropDir()
-{
-
-    
-    eclipseStream=$1
-    if [ -z "${eclipseStream}" ]
-    then
-        echo "must provide EclipseStream as first argumnet, for this function $0"
-        return 1;
-    fi
-
-
-    buildId=$2
-    if [[ -z "${buildId}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    
-    pathToDL=$( dlpath "$eclipseStream" "$buildId" "$BUILD_TECH" )
-
-    if [[ "$pathToDL" == 1 ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: dlpath could not be computed."
-        return 1
-    fi
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-    if [[ "${BUILD_TECH}" == "CBI" ]]
-    then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    else
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    fi
-
-    siteDir=${buildRoot}/siteDir
-
-    dropDir=${siteDir}/${pathToDL}/${buildId}
-    if [[ -d "${dropDir}" ]]
-    then
-        echo "${dropDir}"
-    else
-        echo "ERROR: dropDir is not a directory? dropDir: ${dropDir}"
-        return 1
-    fi
-}
-
 # compute main (left part) of download site
 function dlpath()
 {
@@ -112,47 +53,6 @@ function dlpath()
     echo $pathToDL
 }
 
-# compute main (left part) of download site
-function dlFrompath()
-{
-    eclipseStream=$1
-    if [[ -z "${eclipseStream}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-
-    buildId=$2
-    if [[ -z "${buildId}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
-    then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
-        return 1;
-    fi
-
-
-
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
-
-    pathToDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
-    then
-        pathToDL=$pathToDL$eclipseStreamMajor
-    fi
-
-
-    echo $pathFromDL
-}
-
-
 
 # update index on build machine with test results
 function updatePages()
@@ -178,24 +78,23 @@ function updatePages()
     echo "buildId: $buildId"
     echo "BUILD_TECH: $BUILD_TECH"
     echo "EBUILDER_HASH: $EBUILDER_HASH"
+    
+    # compute dirctiory on build machine
+	dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
+	echo "dropFromBuildDir: $dropFromBuildDir"
+
     if [[ "${BUILD_TECH}" == "CBI" ]]
     then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
         eclipsebuilder=eclipse.platform.releng.aggregator
-        dlPath=$( dlpath $eclipseStream $buildId $BUILD_TECH )
-        echo "DEBUG dlPath: $dlPath"
-        buildDropDir=${buildRoot}/siteDir/$dlPath/${buildId}
-        echo "DEBGUG buildDropDir: $buildDropDir"
-        ebuilderDropDir="${buildDropDir}/${eclipsebuilder}/production/testScripts"
-        echo "DEBUG: ebuilderDropDir: ${ebuilderDropDir}"
-    else
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-        buildDir=${buildRoot}/build
-        supportDir=${buildDir}/supportDir
+        ebuilderDropDir="${dropFromBuildDir}/${eclipsebuilder}/production/testScripts"
+    elif [[ "${BUILD_TECH}" == "PDE" ]]
+    then
         eclipsebuilder=org.eclipse.releng.eclipsebuilder
-        builderDir=${supportDir}/$eclipsebuilder
         ebuilderDropDir="${builderDir}/testScripts"
+    else 
+        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH"
     fi
+    echo "DEBUG: ebuilderDropDir: ${ebuilderDropDir}"
 
     ${ebuilderDropDir}/updateTestResultsPages.sh  $eclipseStream $buildId $BUILD_TECH
      rccode=$?
@@ -267,22 +166,25 @@ eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
 echo "buildType: $buildType"
 
-# call generic fetcher (it checks if it already exists)
-toDir=$( dropDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
-if [[ "${toDir}" == "1" ]]
+# = = = = = = = = = 
+# compute dirctiory on build machine
+dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
+echo "dropFromBuildDir: $dropFromBuildDir"
+
+if [[ "${dropFromBuildDir}" == "1" ]]
 then
     echo "dropDir did not complete normally, returned '1'."
     exit 1
 fi
 
-if [[ ! -d "${toDir}" ]]
+if [[ ! -d "${dropFromBuildDir}" ]]
 then 
     echo "ERROR: expected toDir (drop directory) did not exist"
-    echo "       drop directory: ${toDir}"
+    echo "       drop directory: ${dropFromBuildDir}"
     exit 1
 fi
 SCRIPTDIR=$( dirname $0 )
-${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${toDir}"
+${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
 updatePages $eclipseStream $buildId $BUILD_TECH "${EBUILDER_HASH}"
 rccode=$?
