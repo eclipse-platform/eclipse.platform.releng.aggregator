@@ -255,25 +255,6 @@ fn-basebuilder-dir ()
 }
 
 
-# USAGE: fn-maven-parent-install REPO_DIR LOCAL_REPO
-#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
-#   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
-fn-maven-parent-install () 
-{
-    REPO_DIR="$1"; shift
-    LOCAL_REPO="$1"; shift
-    pushd "$REPO_DIR"
-    mvn -f eclipse-platform-parent/pom.xml \
-        clean install \
-        -Dmaven.repo.local=$LOCAL_REPO \
-        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
-    RCCODE=?$
-    popd
-    return $RCCODE
-}
-
-
-
 # USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING UPDATE_BRANDING MAVEN_BREE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
