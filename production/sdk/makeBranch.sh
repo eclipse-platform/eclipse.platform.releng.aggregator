@@ -2,19 +2,21 @@
 
 # Utility script to semi-automate creation of a branch using committer shell (or, e4Build id)
 
-project=simrel
-#project=platform
+#project=simrel
+project=platform
 #project=jdt
 
 #reponame=eclipse.platform.team
 #reponame=eclipse.jdt.debug
 #reponame=eclipse.platform.releng
-reponame=org.eclipse.simrel.build
+#reponame=org.eclipse.simrel.build
+reponame=eclipse.platform.releng.maps
 
-startTag=JunoSR0
+startTag=R4_2_2
+#startTag=JunoSR0
 #startTag=R4_2
 #startTag=R3_8
-branchName=Juno_maintenance
+branchName=R4_2_2_maintenance_patches
 #branchName=R4_2_maintenance
 #branchName=R3_8_maintenance
 
@@ -27,7 +29,7 @@ repo=${repoprojectroot}/${gitreponame}
 printf "\n\t%s" "Creating branch $branchName from $startTag "
 printf "\n\t%s\n\n" "   for repo $repo "
 
-temprepoarea=/shared/eclipse/sdk/gittemp
+temprepoarea=/shared/eclipse/temp/mkbranch
 mkdir -p $temprepoarea
 checkForErrorExit $? "Could not create temprepoarea!?: $temprepoarea"
 cd $temprepoarea
@@ -72,8 +74,8 @@ git config --unset hooks.allowcreatenottopicbranch
 checkForErrorExit $? "Could not unset config hook"
 
 # simple cleanup ...
-rm -fr $temprepoarea
-checkForErrorExit $? "Error while removing temp repo"
+#rm -fr $temprepoarea
+#checkForErrorExit $? "Error while removing temp repo"
 
 printf "\n\t%s" "Completed creating branch $branchName from $startTag "
 printf "\n\t%s\n\n" "   for repo $repo "
