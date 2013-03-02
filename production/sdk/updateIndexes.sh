@@ -13,3 +13,5 @@ updateIndex 3 PDE
 updateIndex 4 PDE
 updateIndex 3 CBI
 updateIndex 4 CBI
+updateIndex 3 MAIN
+updateIndex 4 MAIN
