@@ -9,24 +9,57 @@ then
 else
     source updateIndexFilesFunction.shsource
 fi
-
 echo "= = = = invalid args"
 updateIndex xys
+echo "returned: $?"
 updateIndex 8
+echo "returned: $?"
+updateIndex xyx 8
+echo "returned: $?"
 updateIndex 8 PDE
+echo "returned: $?"
 updateIndex 3 CBIxx
-echo "= = = = dual args" 
+echo "returned: $?"
+echo "= = = = dual args, MAJOR first" 
+updateIndex 3 MAIN
+echo "returned: $?"
+updateIndex 4 MAIN
+echo "returned: $?"
 updateIndex 3 PDE
+echo "returned: $?"
 updateIndex 4 PDE
+echo "returned: $?"
 updateIndex 3 CBI
+echo "returned: $?"
 updateIndex 4 CBI
-echo "= = = = single arg"
-unset MAJOR BUILD_TECH
+echo "returned: $?"
+echo "= = = = dual args, BUILD_TECH first" 
+updateIndex MAIN 3
+echo "returned: $?"
+updateIndex MAIN 4
+echo "returned: $?"
+updateIndex PDE 3
+echo "returned: $?"
+updateIndex PDE 4
+echo "returned: $?"
+updateIndex CBI 3
+echo "returned: $?"
+updateIndex CBI 4
+echo "returned: $?"
+echo "= = = = single arg, MAJOR"
 updateIndex 3
+echo "returned: $?"
 updateIndex 4
+echo "returned: $?"
+echo "= = = = single arg, BUILD_TECH"
 updateIndex PDE
+echo "returned: $?"
 updateIndex CBI
+echo "returned: $?"
+updateIndex MAIN
+echo "returned: $?"
 echo "= = = = no arg"
 updateIndex 
+echo "returned: $?"
 
 

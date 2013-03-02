@@ -4,7 +4,8 @@
 # could be done like this, on the download server (in .../eclipse/downloads directory):
 # php createIndex4x.php > index.html
 # php eclipse3x.php > eclipse3x.html
-
+# with the important exception that doing from a client, such as using wget, resolves
+# such variables as _SERVER, and similar, which are null if ran from command line.
 
 
 function internalUpdateIndex ()
@@ -20,7 +21,8 @@ function internalUpdateIndex ()
     then
         echo "PROGRAM ERROR: this function requires two arguments, in order, "
         echo "    the php page to use to create the html page, named in second argument)."
-        exit 1
+        echo "    Returning 1"
+        return 1
     fi
 
     PHP_PAGE=$1
@@ -47,14 +49,33 @@ function internalUpdateIndex ()
         echo "ERROR: Could not create or pull ${TEMP_INDEX_TXT} from downloads file ${PHP_PAGE}. rccode: $rccode"
         return $rccode
     fi
-
+    # cleanup
     rm  ${TEMP_INDEX_TXT}
+}
+function updateIndex3 ()
+{
+    internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
+    internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
+    internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
+}
+
+function updateIndex4 ()
+{
+    internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
+    internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
+    internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
+}
+
+function updateIndexMAIN ()
+{
+    internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
+    internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
 }
 
 function updateIndexPDE ()
 {
-    internalUpdateIndex ${x4X_PHP_PAGE} ${x4X_HTML_PAGE}
-    internalUpdateIndex ${x3X_PHP_PAGE} ${x3X_HTML_PAGE}
+    internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
+    internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
 }
 
 function updateIndexCBI ()
@@ -66,51 +87,113 @@ function updateIndexCBI ()
 function updateIndex ()
 {
 
-
-    x4X_PHP_PAGE="pdebasedcreateIndex4x.php"
-    x4X_HTML_PAGE="pdebasedindex.html"
-    x3X_PHP_PAGE="pdebasedeclipse3x.php"
-    x3X_HTML_PAGE="pdebasedeclipse3x.html"
-    x4X_PHP_PAGE_CBI="createIndex4x.php"
-    x4X_HTML_PAGE_CBI="index.html"
-    x3X_PHP_PAGE_CBI="eclipse3x.php"
-    x3X_HTML_PAGE_CBI="eclipse3x.html"
+    x4X_PHP_PAGE_PDE="pdebasedcreateIndex4x.php"
+    x4X_HTML_PAGE_PDE="pdebasedindex.html"
+    x3X_PHP_PAGE_PDE="pdebasedeclipse3x.php"
+    x3X_HTML_PAGE_PDE="pdebasedeclipse3x.html"
+    x4X_PHP_PAGE_CBI="cbibasedcreateIndex4x.php"
+    x4X_HTML_PAGE_CBI="cbibasedindex.html"
+    x3X_PHP_PAGE_CBI="cbibasedeclipse3x.php"
+    x3X_HTML_PAGE_CBI="cbibasedeclipse3x.html"
+    x4X_PHP_PAGE_MAIN="createIndex4x.php"
+    x4X_HTML_PAGE_MAIN="index.html"
+    x3X_PHP_PAGE_MAIN="eclipse3x.php"
+    x3X_HTML_PAGE_MAIN="eclipse3x.html"
 
     # if no arguments, do all
-    # TODO: would be polite to detect unexpected arguments and give warnings.
     if [[ $# == 0 ]]
     then
         # if 0 args, assume to do all
+        updateIndexMAIN
         updateIndexPDE
         updateIndexCBI
     elif [[ $# == 1 ]] 
     then
-        # assume the one argument is build_tech, and still call for both 3 and 4
-        BUILD_TECH=$1
-        if [[ "$BUILD_TECH" == "PDE" ]]
+        # if only one argument, check for each specific type and do that group
+        # unset any values that might have been set before, from multile calls, from same caller (such as our test case)
+        unset MAJOR BUILD_TECH
+        ARG=$1
+        if [[ $ARG =~ [[:digit:]] ]]
         then
-            internalUpdateIndex ${x4X_PHP_PAGE} ${x4X_HTML_PAGE}
-            internalUpdateIndex ${x3X_PHP_PAGE} ${x3X_HTML_PAGE}
-        elif [[ "$BUILD_TECH" == "CBI" ]]
+            MAJOR=$ARG
+        elif [[ $ARG =~ PDE|CBI|MAIN ]]
         then
-            internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
-            internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
+            BUILD_TECH=$ARG
         else
-            echo "ERROR: BUILD_TECH not recognized as 'CBI' or 'PDE'. Found ${BUILD_TECH}"
+            echo "ERROR: single argument not recognized as 'CBI' or 'PDE' or 'MAIN' or digit. Found ${ARG}."
+            echo "       Returning 1"
+            return 1
+        fi
+
+        # if no 'MAJOR', then assume we found BUILD_TECH
+        if [[ -z "${MAJOR}" ]]
+        then
+            if [[ "$BUILD_TECH" == "PDE" ]]
+            then
+                updateIndexPDE
+            elif [[ "$BUILD_TECH" == "CBI" ]]
+            then
+                updateIndexCBI
+            elif [[ "$BUILD_TECH" == "MAIN" ]]
+            then
+                updateIndexMAIN
+            else
+                echo "PROGRAM ERROR: BUILD_TECH not recognized as 'CBI' or 'PDE' or 'MAIN'. Found ${BUILD_TECH}."
+                echo "       Returning 1"
+                return 1
+            fi
+        elif [[ -z "${BUILD_TECH}" ]]
+        then
+            if [[ "$MAJOR" == 3 ]]
+            then
+                updateIndex3
+            elif [[ "$MAJOR" == 4 ]]
+            then
+                updateIndex4
+            else 
+                echo "PROGRAM ERROR: MAJOR not recognized as '3' or '4'. Found ${MAJOR}."
+                echo "       Returning 1"
+                return 1
+            fi
+        else
+            echo "PROGRAM ERROR: one argument case. Appears two set?"
+            echo "       ARG: $ARG, MAJOR: $MAJOR, BUILD_TECH: $BUILD_TECH"
+            echo "       Returning 1"
+            return 1
         fi
     elif [[ $# == 2 ]] 
     then
         # two arguments given for specific update
-        MAJOR=$1
-        BUILD_TECH=$2
-        #echo "BUILD_TECH: $BUILD_TECH"
-        #echo "MAJOR: $MAJOR"
-        if [[ "$BUILD_TECH" == "PDE" && "$MAJOR" == "3" ]]
+        # accept either order
+        ARG1=$1
+        ARG2=$2
+        if [[ $ARG1 =~ [[:digit:]] && $ARG2 =~ PDE|CBI|MAIN  ]]
         then
-            internalUpdateIndex ${x3X_PHP_PAGE} ${x3X_HTML_PAGE}
+            MAJOR=$ARG1
+            BUILD_TECH=$ARG2
+        elif [[ $ARG1 =~ PDE|CBI|MAIN && $ARG2 =~ [[:digit:]] ]]
+        then
+            BUILD_TECH=$ARG1
+            MAJOR=$ARG2
+        else
+            echo "ERROR: two argument case did not recognized either as 'CBI' or 'PDE' or 'MAIN' or digit."
+            echo "       Found ARG1: ${ARG1}, ARG2: ${ARG2}."
+            echo "       Returning 1"
+            return 1
+        fi
+
+        if [[ "$BUILD_TECH" == "MAIN" && "$MAJOR" == "3" ]]
+        then
+            internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
+        elif [[ "$BUILD_TECH" == "MAIN" && "$MAJOR" == "4" ]]
+        then
+            internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
+        elif [[ "$BUILD_TECH" == "PDE" && "$MAJOR" == "3" ]]
+        then
+            internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
         elif [[ "$BUILD_TECH" == "PDE" && "$MAJOR" == "4" ]]
         then
-            internalUpdateIndex ${x4X_PHP_PAGE} ${x4X_HTML_PAGE}
+            internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
         elif [[ "$BUILD_TECH" == "CBI" && "$MAJOR" == "3" ]]
         then
             internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
@@ -119,6 +202,9 @@ function updateIndex ()
             internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
         else
             echo "ERROR. Combination of parameters did not patch any conditions."
+            echo "       Found BUILD_TECH: $BUILD_TECH and MAJOR: $MAJOR"
+            echo "       Returning 1"
+            return 1
         fi
     fi
 
