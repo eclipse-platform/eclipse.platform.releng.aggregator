@@ -198,19 +198,16 @@ function syncRepoSite ()
 
     fromDir=$(updateSiteOnBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH") 
     toDir=$(updateSiteOnDL "$eclipseStream" "$buildId" "$BUILD_TECH") 
-    #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/"
+    #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/4.3-builds"
 
     echo "   In syncRepoSite"
     echo "fromDir: $fromDir"
     echo "toDir: $toDir"
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then
-        echo "skipping syncRepoSite, for now, for CBI"
-    else
-        rsync --recursive "${fromDir}" "${toDir}"
-        #TODO update composite
-    fi
+    rsync --recursive "${fromDir}" "${toDir}"
+    
+    #TODO update composite!
+    # add ${buildId} to {toDir}
 }
 
 

@@ -71,17 +71,6 @@ function updateSiteOnDL()
     fi
     buildType=${buildId:0:1}
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
-    then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    elif [[ "${BUILD_TECH}" == 'PDE' ]]
-    then
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    else
-        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH"
-        return 1
-    fi
-
     toSiteDir="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
     if [[ "${BUILD_TECH}" == 'CBI' ]]
@@ -95,7 +84,7 @@ function updateSiteOnDL()
     fi
 
     toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
-    echo $toMainUpdateDir    
+    echo $toMainUpdateDir
 }
 # compute update site on build server
 function updateSiteOnBuildDir()
@@ -145,16 +134,37 @@ function updateSiteOnBuildDir()
         return 1
     fi
 
-    siteDir=${buildRoot}/siteDir
+    
 
     if [[ "${BUILD_TECH}" == 'CBI' ]]
     then 
+        #TODO: need branch! or ... guess with "find"
+        if [[ -z ${BRANCH}" ]]
+        then
+           BRANCH=master
+        if
+        siteDir=${buildRoot}/siteDir
         updatesSuffix="builds"
+        fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
+        mkdir -p ${fromDir}
+        # for now, straight copy from what was produced to local build machine directory. This is done so that 
+        #   Rest of scripts stay common
+        #   Eventually, we might put in some mirror/comparator tasks (just as sanity check on new build ... should be impossible since new build does that early-on?) 
+        #   and mirror in EMF too? Here for now, POM later? 
+        # 
+        # full form is simiilar to
+        # ${buildRoot}/${BRANCH}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository
+        find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository"  -execdir rsync -vr ./repository/ "${fromDir}/" \;
+    elif [[ "${BUILD_TECH}" == 'PDE' ]]
+    then
+        siteDir=${buildRoot}/siteDir
+        updatesSuffix="builds"
+        fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
     else
-        updatesSuffix="builds"
+        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH"
+        return 1
     fi
 
-    fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
     echo $fromDir
 }
 
