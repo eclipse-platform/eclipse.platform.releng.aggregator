@@ -33,6 +33,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
     <cbi-jdt-version>3.9.0.v20130129-050623</cbi-jdt-version>
+    <cbi-snapshots-repo.url>https://repo.eclipse.org/content/repositories/cbi-snapshots/</cbi-snapshots-repo.url>
     <eclipse-repo.url>https://repo.eclipse.org/content/repositories/releases/</eclipse-repo.url>
     <eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.3-I-builds</eclipse-p2-repo.url>
   </properties>
@@ -104,6 +105,16 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
+    <pluginRepository>
+      <id>cbi-snapshots</id>
+      <url>${cbi-snapshots-repo.url}</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </pluginRepository>
   </pluginRepositories>
   <build>
     <plugins>
@@ -116,7 +127,7 @@
       <plugin>
         <groupId>org.eclipse.cbi.maven.plugins</groupId>
         <artifactId>eclipse-cbi-plugin</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
         <executions>
           <execution>
             <goals>
@@ -284,6 +295,14 @@
             <archive>
                <addMavenDescriptor>false</addMavenDescriptor>
             </archive>
+			<additionalFileSets>
+				<fileSet>
+					<directory>${project.build.directory}</directory>
+					<includes>
+						<include>.api_description</include>
+					</includes>
+				</fileSet>
+			</additionalFileSets>
           </configuration>
         </plugin>
         <plugin>
@@ -565,7 +584,7 @@
               <!-- this is to fix some lucene 3.x compatibility issue -->
               <argLine>-XX:-UseLoopPredicate -Dhelp.lucene.tokenizer=standard</argLine>
               <!-- actuall indexer call -->
-              <appArgLine>-application org.eclipse.ant.core.antRunner -buildfile .apibuild.xml</appArgLine>
+              <appArgLine>-application org.eclipse.ant.core.antRunner -buildfile target/.apibuild.xml</appArgLine>
               <dependencies>
                 <!-- list of bundles that we need -->
                 <dependency>
