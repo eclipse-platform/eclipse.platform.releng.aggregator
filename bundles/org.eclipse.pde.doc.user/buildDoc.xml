@@ -95,7 +95,7 @@
 		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
 		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
 		<property name="replaceFile" value="platformOptions.replace.txt" />
-		<echo file="${basedir}/${replaceFile}">dummyForBug402392=dummyForBug402392&#xA;${fileList}&#xA;&#xA;${dirList}</echo>
+		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
 
 			<!-- strip away leading path -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^.*/([^/]*)$$" replace="\1" />
@@ -103,6 +103,9 @@
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^[^_\r\n]*$$" replace="" />
 			<!-- create "aa_*[.jar]=aa_[version][.jar]" property for lines with a "_" -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^([^_]*)_.*?(.jar)?$$" replace="\1_*\2=\0" />
+		
+		<!-- workaround for bug 402392, which can make the ${replaceFile} end up empty: -->
+		<echo file="${basedir}/${replaceFile}" append="true">dummyForBug402392=dummyForBug402392&#xA;</echo>
 		
 		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
 

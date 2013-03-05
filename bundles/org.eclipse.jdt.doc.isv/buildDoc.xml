@@ -93,7 +93,7 @@
 		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
 		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
 		<property name="replaceFile" value="platformOptions.replace.txt" />
-		<echo file="${basedir}/${replaceFile}">dummyForBug402392=dummyForBug402392&#xA;${fileList}&#xA;&#xA;${dirList}</echo>
+		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
 
 <echo>org.eclipse.jdt.doc.isv/buildDoc.xml - generateJavadoc:
 ${basedir}/${replaceFile} before _* expansion:</echo>
@@ -108,6 +108,9 @@ ${basedir}/${replaceFile} before _* expansion:</echo>
 		
 <echo>${basedir}/${replaceFile} after _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
+		
+		<!-- workaround for bug 402392, which can make the ${replaceFile} end up empty: -->
+		<echo file="${basedir}/${replaceFile}" append="true">dummyForBug402392=dummyForBug402392&#xA;</echo>
 		
 		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
 
