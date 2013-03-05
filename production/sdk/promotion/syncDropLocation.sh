@@ -2,7 +2,7 @@
 
 SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
-source ${SCRIPTDIR}/synchUpdateUtils.shshource
+source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
 function sendPromoteMail ()
 {

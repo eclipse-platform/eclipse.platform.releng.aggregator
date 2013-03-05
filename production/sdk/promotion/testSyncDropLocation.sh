@@ -3,7 +3,7 @@
 # test code, to test individual functions of syncDropLocation.sh
 SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
-source ${SCRIPTDIR}/synchUpdateUtils.shshource
+source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
 # 4.3.0 I20130227-0112 PDE master
 
