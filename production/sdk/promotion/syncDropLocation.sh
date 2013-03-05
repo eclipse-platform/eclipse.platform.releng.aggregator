@@ -93,7 +93,7 @@ function sendPromoteMail ()
     #we could? to "fix up" TODIR since it's in file form, not URL
     # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
-    message1="\n\n\tDownload:\n\t${downloadURL}\n\n"
+    message1="\n\n\tDownload:\n\t${downloadURL}\n\n\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds"
     message2="\n\n\tDownload:\n\t${downloadURL}\n\n\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased"
 
     if [[ "${BUILD_TECH}" == "CBI" ]]
