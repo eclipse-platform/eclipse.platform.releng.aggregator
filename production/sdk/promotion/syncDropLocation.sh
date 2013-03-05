@@ -166,7 +166,7 @@ function syncRepoSite ()
     eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"  >&2
         return 1;
     fi
 
@@ -174,14 +174,14 @@ function syncRepoSite ()
     buildType=$2
     if [[ -z "${buildType}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)"
+        printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
     BUILD_TECH=$3
     if [[ -z "${BUILD_TECH}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
@@ -192,8 +192,8 @@ function syncRepoSite ()
         eclipseStreamMinor=${BASH_REMATCH[2]}
         eclipseStreamService=${BASH_REMATCH[3]}
     else
-        echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0"
-        exit 1
+        echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
+         return 1
     fi
 
     fromDir=$(updateSiteOnBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH") 
@@ -202,13 +202,13 @@ function syncRepoSite ()
 
 
     rsync --recursive "${fromDir}" "${toDir}"
-    RC=?$
+    RC=$?
     if [[ $RC != 0 ]] 
     then
-        echo "ERROR: rsync failed. RC: $RC"
-        echo "   In syncRepoSite"
-        echo "fromDir: $fromDir"
-        echo "toDir: $toDir"
+        echo "ERROR: rsync failed. RC: $RC" >&2
+        echo "   In syncRepoSite" >&2
+        echo "fromDir: $fromDir" >&2
+        echo "toDir: $toDir" >&2
     fi
     #TODO update composite!
     # add ${buildId} to {toDir}
