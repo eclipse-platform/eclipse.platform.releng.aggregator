@@ -3,7 +3,7 @@
 
 function dropOnDLServer()
 {
-        eclipseStream=$1
+    eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
     then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
@@ -134,14 +134,14 @@ function updateSiteOnBuildDir()
         return 1
     fi
 
-    
+
 
     if [[ "${BUILD_TECH}" == 'CBI' ]]
     then 
         #TODO: need branch! or ... guess with "find"
         if [[ -z "${BRANCH}" ]]
         then
-           BRANCH=master
+            BRANCH=master
         fi
         siteDir=${buildRoot}/siteDir
         updatesSuffix="builds"
@@ -154,7 +154,10 @@ function updateSiteOnBuildDir()
         # 
         # full form is simiilar to
         # ${buildRoot}/${BRANCH}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository
-        find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository"  -execdir rsync -vr ./repository/ "${fromDir}/" \;
+        sdir=$( find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository" -type d)
+        echo "INFO: original source dir: $sdir" >&2
+                
+        rsync -vr "${sdir}/" "${fromDir}/" >&2 
     elif [[ "${BUILD_TECH}" == 'PDE' ]]
     then
         siteDir=${buildRoot}/siteDir
@@ -345,7 +348,7 @@ function syncDropLocation ()
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
         return 1
     fi
-    
+
 
     toDir=$(dropOnDLServer $eclipseStream $buildId $BUILD_TECH)
     if [[ ! -d "${toDir}" ]]
