@@ -200,14 +200,19 @@ function syncRepoSite ()
     toDir=$(updateSiteOnDL "$eclipseStream" "$buildId" "$BUILD_TECH") 
     #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/4.3-builds"
 
-    echo "   In syncRepoSite"
-    echo "fromDir: $fromDir"
-    echo "toDir: $toDir"
 
     rsync --recursive "${fromDir}" "${toDir}"
-    
+    RC=?$
+    if [[ $RC != 0 ]] 
+    then
+        echo "ERROR: rsync failed. RC: $RC"
+        echo "   In syncRepoSite"
+        echo "fromDir: $fromDir"
+        echo "toDir: $toDir"
+    fi
     #TODO update composite!
     # add ${buildId} to {toDir}
+    return $RC
 }
 
 
