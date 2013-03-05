@@ -32,7 +32,7 @@ if [ -z "$BUILD_ID" ]; then
     BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-fn-pom-version-updater "$aggDir" "$LOCAL_REPO"
+fn-pom-version-updater "$aggDir" "$LOCAL_REPO" $MVN_DEBUG $MVN_QUIET
 RC=$?
 if [[ $RC != 0 ]]
 then

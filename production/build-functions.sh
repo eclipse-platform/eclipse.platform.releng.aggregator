@@ -255,7 +255,7 @@ fn-basebuilder-dir ()
 }
 
 
-# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO VERBOSE SIGNING UPDATE_BRANDING MAVEN_BREE
+# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO DEBUG QUIET SIGNING UPDATE_BRANDING MAVEN_BREE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
@@ -267,24 +267,32 @@ fn-maven-build-aggregator ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
+    DEBUG=$1; shift
+    QUIET=$1; shift
+    SIGNING=$1; shift
+    UPDATE_BRANDING=$1; shift
+    MAVEN_BREE=$1; shift
+    
     MARGS="-DbuildId=$BUILD_ID"
-    if $VERBOSE; then
+    if $DEBUG; then
         MARGS="$MARGS -X"
     fi
-    shift
+    if $QUIET; then
+        MARGS="$MARGS -q"
+    fi
     if $SIGNING; then
         MARGS="$MARGS -Peclipse-sign"
     fi
-    shift
     if $UPDATE_BRANDING; then
         MARGS="$MARGS -Pupdate-branding-plugins"
     fi
-    shift
     MARGS="$MARGS ${MAVEN_BREE}"
+    echo "DEBUG: Variables in $0" 
     echo "DEBUG: BUILD_ID: $BUILD_ID"
     echo "DEBUG: REPO_DIR: $REPO_DIR"
     echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
-    echo "DEBUG: VERBOSE: $VERBOSE"
+    echo "DEBUG: DEBUG: $DEBUG"
+    echo "DEBUG: QUIET: $QUIET"
     echo "DEBUG: UPDATE_BRANDING: $UPDATE_BRANDING"
     echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
     pushd "$REPO_DIR"
@@ -361,14 +369,29 @@ fn-tag-build-inputs ()
     popd
 }
 
-# USAGE: fn-pom-version-updater REPO_DIR LOCAL_REPO
+# USAGE: fn-pom-version-updater REPO_DIR LOCAL_REPO DEBUG QUIET
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
 fn-pom-version-updater () 
 {
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
-
+    DEBUG=$1; shift
+    QUIET=$1; shift
+    
+    MARGS=""
+    if $DEBUG; then
+        MARGS="$MARGS -X"
+    fi
+    if $QUIET; then
+        MARGS="$MARGS -q"
+    fi
+    echo "DEBUG: Variables in $0" 
+    echo "DEBUG: REPO_DIR: $REPO_DIR"
+    echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
+    echo "DEBUG: DEBUG: $DEBUG"
+    echo "DEBUG: QUIET: $QUIET"
+    echo "DEBUG: MARGS: $MARGS"
     # fail fast if not set up correctly
     rc=$(fn-check-dir-exists TMP_DIR)
     checkForErrorExit "$rc" "$rc"
@@ -382,17 +405,19 @@ fn-pom-version-updater ()
     RC=$?
     if [[ $RC != 0 ]]
     then
-        echo "ERROR: tycho-versions-plugin:update-pom returned non-zero return code: $RC"
-        return $RC
-    fi
-    changes=$( git status --short -uno | cut -c4- )
-    if [ -z "$changes" ]; then
-        echo No changes in pom versions
-        return
+        echo "ERROR: tycho-versions-plugin:update-pom returned non-zero return code: $RC" >&2
     else
-        echo Changes in pom versions
+        changes=$( git status --short -uno | cut -c4- )
+        if [ -z "$changes" ]; then
+              echo "INFO: No changes in pom versions" >&2
+              RC=0
+           else
+              echo "INFO: Changes in pom versions: $changes" >&2
+              RC=0
+       fi
     fi
     popd
+    return $RC
 }
 
 # USAGE: fn-pom-version-update-with-commit BUILD_ID REPO_DIR LOCAL_REPO

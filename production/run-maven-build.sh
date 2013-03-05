@@ -31,7 +31,7 @@ if [ -z "$BUILD_ID" ]; then
     BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $SIGNING $UPDATE_BRANDING $MAVEN_BREE
+fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $MVN_QUIET $SIGNING $UPDATE_BRANDING $MAVEN_BREE
 exitCode=$?
 
 # first make sure exit code is well formed
@@ -53,7 +53,7 @@ then
 else
     echo "exitode was not numeric, so will force to 1"
     exitrc=1
-fi  
+fi
 
 echo "$( basename $0) exiting with exitrc: $exitrc"
 exit $exitrc
