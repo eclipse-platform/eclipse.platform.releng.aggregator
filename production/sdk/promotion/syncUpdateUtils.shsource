@@ -156,14 +156,14 @@ function updateSiteOnBuildDir()
         # ${buildRoot}/${BRANCH}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository.
         # If things are as expected, there can be only one, but we put in head -1 for good form, 
         # in case things change, since rest expects only one.
-        sdir=$( find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository" -type d | head -1)
+        sdir=$( find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository" -type d | head -1 )
         echo "INFO: original source dir: $sdir" >&2
         # make posiitive ${sdir} is not empty, or we are basically copying
         # all of root! (and, sdir is empty if we had a failed build!)
         if [[ -n "${sdir}" && -d "${sdir}" && -n "${fromDir}" && -d "${fromDir}" ]]
         then
-           rsync -vr "${sdir}/" "${fromDir}/" >&2
-           if [[ $? != 0 ]] ; then return $? fi
+            rsync -vr "${sdir}/" "${fromDir}/" >&2
+            if [[ $? != 0 ]]; then return $? fi
         fi 
     elif [[ "${BUILD_TECH}" == 'PDE' ]]
     then
@@ -179,7 +179,7 @@ function updateSiteOnBuildDir()
 }
 
 # compute main part of download server drop directory
-function dropFromBuildDir()
+function dropFromBuildDir ()
 {
 
     eclipseStream=$1
@@ -349,7 +349,7 @@ function syncDropLocation ()
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
 
-    fromDir=$(dropFromBuildDir $eclipseStream $buildId $BUILD_TECH)
+    fromDir=$( dropFromBuildDir $eclipseStream $buildId $BUILD_TECH )
     if [[ ! -d "${fromDir}" ]]
     then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
@@ -357,7 +357,7 @@ function syncDropLocation ()
     fi
 
 
-    toDir=$(dropOnDLServer $eclipseStream $buildId $BUILD_TECH)
+    toDir=$( dropOnDLServer $eclipseStream $buildId $BUILD_TECH )
     if [[ ! -d "${toDir}" ]]
     then
         echo "ERROR: toDir is not a directory? toDir: ${toDir}"
@@ -373,10 +373,10 @@ function syncDropLocation ()
     # sub-sirectory) (But, we do for now, for easier testing) 
     if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}"]]
     then
-       rsync --recursive  --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
-       rccode=$?
+        rsync --recursive  --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
+        rccode=$?
     else
-       rccode=9
+        rccode=9
     fi
     if [[ $rccode != 0 ]]
     then

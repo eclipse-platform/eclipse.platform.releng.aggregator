@@ -193,7 +193,7 @@ function syncRepoSite ()
         eclipseStreamService=${BASH_REMATCH[3]}
     else
         echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
-         return 1
+        return 1
     fi
 
     fromDir=$(updateSiteOnBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH") 
@@ -201,12 +201,12 @@ function syncRepoSite ()
     #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/4.3-builds"
 
     if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
-	then
-	  rsync --recursive "${fromDir}" "${toDir}"
-	  RC=$?
-	else
-	  RC=9
-	fi
+    then
+        rsync --recursive "${fromDir}" "${toDir}"
+        RC=$?
+    else
+        RC=9
+    fi
 
     if [[ $RC != 0 ]] 
     then
