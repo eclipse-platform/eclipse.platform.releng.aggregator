@@ -156,8 +156,12 @@ function updateSiteOnBuildDir()
         # ${buildRoot}/${BRANCH}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository
         sdir=$( find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository" -type d)
         echo "INFO: original source dir: $sdir" >&2
-                
-        rsync -vr "${sdir}/" "${fromDir}/" >&2 
+        # make posiitive ${sdir} is not empty, or we are basically copying
+        # all of root! (and, sdir is empty if we had a failed build!)
+        if [[ ! -z "${sdir}" && -d "${sdir}" ]]
+        then
+           rsync -vr "${sdir}/" "${fromDir}/" >&2
+        fi 
     elif [[ "${BUILD_TECH}" == 'PDE' ]]
     then
         siteDir=${buildRoot}/siteDir
