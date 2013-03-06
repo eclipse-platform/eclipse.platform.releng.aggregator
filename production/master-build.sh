@@ -89,7 +89,7 @@ fn-write-property BASEBUILDER_TAG
 fn-write-property B_GIT_EMAIL
 fn-write-property B_GIT_NAME
 fn-write-property COMMITTER_ID
-fn-write-property COMPARATOR
+fn-write-property MVN_DEBUG
 fn-write-property MVN_QUIET
 fn-write-property SIGNING
 fn-write-property UPDATE_BRANDING
