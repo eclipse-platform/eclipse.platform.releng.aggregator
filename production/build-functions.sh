@@ -293,6 +293,7 @@ fn-maven-build-aggregator ()
     echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
     echo "DEBUG: DEBUG: $DEBUG"
     echo "DEBUG: QUIET: $QUIET"
+    echo "DEBUG: SIGNING: $SIGNING"
     echo "DEBUG: UPDATE_BRANDING: $UPDATE_BRANDING"
     echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
     echo "DEBUG: MARGS: $MARGS"
