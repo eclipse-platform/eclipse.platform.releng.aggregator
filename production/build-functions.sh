@@ -295,6 +295,7 @@ fn-maven-build-aggregator ()
     echo "DEBUG: QUIET: $QUIET"
     echo "DEBUG: UPDATE_BRANDING: $UPDATE_BRANDING"
     echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
+    echo "DEBUG: MARGS: $MARGS"
     pushd "$REPO_DIR"
     mvn $MARGS \
         clean install \
