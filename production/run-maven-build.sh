@@ -31,7 +31,7 @@ if [ -z "$BUILD_ID" ]; then
     BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
-fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $COMPARATOR $MVN_QUIET $SIGNING $UPDATE_BRANDING $MAVEN_BREE
+fn-maven-build-aggregator "$BUILD_ID" "$aggDir" "$LOCAL_REPO" $MVN_DEBUG $MVN_QUIET $SIGNING $UPDATE_BRANDING $MAVEN_BREE
 exitCode=$?
 
 # first make sure exit code is well formed
