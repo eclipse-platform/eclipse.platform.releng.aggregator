@@ -151,7 +151,7 @@ function updateSiteOnBuildDir()
         #   Rest of scripts stay common
         #   Eventually, we might put in some mirror/comparator tasks (just as sanity check on new build ... should be impossible since new build does that early-on?) 
         #   and mirror in EMF too? Here for now, POM later? 
-        # 
+        # TODO: we are doing this important "side effect" of finding "fromDir" name. Should pull up.
         # full form is simiilar to
         # ${buildRoot}/${BRANCH}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository.
         # If things are as expected, there can be only one, but we put in head -1 for good form, 
@@ -160,9 +160,10 @@ function updateSiteOnBuildDir()
         echo "INFO: original source dir: $sdir" >&2
         # make posiitive ${sdir} is not empty, or we are basically copying
         # all of root! (and, sdir is empty if we had a failed build!)
-        if [[ ! -z "${sdir}" && -d "${sdir}" ]]
+        if [[ -n "${sdir}" && -d "${sdir}" && -n "${fromDir}" && -d "${fromDir}" ]]
         then
            rsync -vr "${sdir}/" "${fromDir}/" >&2
+           if [[ $? != 0 ]] ; then return $? fi
         fi 
     elif [[ "${BUILD_TECH}" == 'PDE' ]]
     then
@@ -370,8 +371,13 @@ function syncDropLocation ()
     # would be more accurate for mirroring system to have
     # actual times (and we are copying only one specific
     # sub-sirectory) (But, we do for now, for easier testing) 
-    rsync --recursive  --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
-    rccode=$?
+    if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}"]]
+    then
+       rsync --recursive  --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" "${fromDir}" "${toDir}"
+       rccode=$?
+    else
+       rccode=9
+    fi
     if [[ $rccode != 0 ]]
     then
         echo "ERROR: rsync did not complete normally.rccode: $rccode"

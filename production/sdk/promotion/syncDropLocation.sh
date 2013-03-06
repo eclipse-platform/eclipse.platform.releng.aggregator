@@ -200,9 +200,14 @@ function syncRepoSite ()
     toDir=$(updateSiteOnDL "$eclipseStream" "$buildId" "$BUILD_TECH") 
     #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/4.3-builds"
 
+    if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
+	then
+	  rsync --recursive "${fromDir}" "${toDir}"
+	  RC=$?
+	else
+	  RC=9
+	fi
 
-    rsync --recursive "${fromDir}" "${toDir}"
-    RC=$?
     if [[ $RC != 0 ]] 
     then
         echo "ERROR: rsync failed. RC: $RC" >&2
