@@ -533,25 +533,25 @@ fn-gather-platform ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
-    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/rcp.sdk/target/products
+    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/platform/target/products
     if [[ -d "$TARGET_PRODUCTS" ]]
     then
         pushd "$TARGET_PRODUCTS"
-        cp org.eclipse.rcp.sdk.id-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip
-        cp org.eclipse.rcp.sdk.id-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip
-        cp org.eclipse.rcp.sdk.id-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64.zip
-        cp org.eclipse.rcp.sdk.id-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz
-        cp org.eclipse.rcp.sdk.id-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
-        cp org.eclipse.rcp.sdk.id-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz
-        cp org.eclipse.rcp.sdk.id-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz
-        cp org.eclipse.rcp.sdk.id-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
-        cp org.eclipse.rcp.sdk.id-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
-        cp org.eclipse.rcp.sdk.id-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-        cp org.eclipse.rcp.sdk.id-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
-        cp org.eclipse.rcp.sdk.id-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
-        cp org.eclipse.rcp.sdk.id-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
-        cp org.eclipse.rcp.sdk.id-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
-        cp org.eclipse.rcp.sdk.id-win32.win32.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32.zip
+        cp org.eclipse.platform.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip
+        cp org.eclipse.platform.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip
+        cp org.eclipse.platform.ide-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64.zip
+        cp org.eclipse.platform.ide-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz
+        cp org.eclipse.platform.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+        cp org.eclipse.platform.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz
+        cp org.eclipse.platform.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz
+        cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+        cp org.eclipse.platform.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
+        cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+        cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
+        cp org.eclipse.platform.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
+        cp org.eclipse.platform.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
+        cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
+        cp org.eclipse.platform.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32.zip
         popd
     else
         echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-platform"
