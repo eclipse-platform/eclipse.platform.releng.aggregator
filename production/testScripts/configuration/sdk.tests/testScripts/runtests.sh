@@ -111,8 +111,12 @@ wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egr
 echo "Window Manager processes running: $wmpss"
 echo
 
-# in this case, do not "--replace" any existing ones, for this DISPLAY 
-metacity --display=$DISPLAY  --sm-disable  &
+# in this case, do not "--replace" any existing ones, for this DISPLAY
+# added bit bucket for errors, in attempt to keep from filling up Hudson log with "warnings", such as hundreds of 
+#     [exec] Window manager warning: Buggy client sent a _NET_ACTIVE_WINDOW message with a timestamp of 0 for 0x800059 (Java - Ecl)
+#     [exec] Window manager warning: meta_window_activate called by a pager with a 0 timestamp; the pager needs to be fixed.
+#
+metacity --display=$DISPLAY  --sm-disable 2>/dev/null &
 METACITYRC=$?
 METACITYPID=$!
 
