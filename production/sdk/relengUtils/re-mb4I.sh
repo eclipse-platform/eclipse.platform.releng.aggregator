@@ -14,7 +14,8 @@ fi
 #export testbuildonly=true
 
 SCRIPT_NAME=$0
-MB_LOG_DIR=/shared/eclipse/builds
+# since not from a cronjob, we can use "current directory"
+MB_LOG_DIR=${PWD}
 LOG_BASE_NAME=${SCRIPT_NAME##*/} 
 LOG_OUT_NAME=${MB_LOG_DIR}/${LOG_BASE_NAME%.*}.out.log
 LOG_ERR_NAME=${MB_LOG_DIR}/${LOG_BASE_NAME%.*}.err.log
@@ -92,7 +93,7 @@ $BUILD_HOME/bootstrap.sh $BRANCH $BUILD_TYPE $STREAM 1>>$LOG_OUT_NAME 2>>$LOG_ER
 #mvn -version >> $BOOTSTRAPENVFILE
 #echo "= = = = = " >> $BOOTSTRAPENVFILE
 
-${BUILD_ROOT}/${PRODUCTION_SCRIPTS_DIR}/re-master-build.sh ${buildParametersInput} 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &
+${PWD}/re-master-build.sh ${buildParametersInput} 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME &
 
 rc=$?
 if [[ $rc != 0 ]]
