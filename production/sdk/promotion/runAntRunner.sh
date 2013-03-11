@@ -103,5 +103,5 @@ echo "   BUILDFILESTR:      $BUILDFILESTR"
 echo "   extraArgs:         ${extraArgs}"
 echo
 
-${javaCMD}  -jar ${launcherJar} --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vmargs $devArgs
+${javaCMD}  -jar ${launcherJar} -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vmargs $devArgs
 
