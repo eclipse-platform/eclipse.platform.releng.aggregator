@@ -218,7 +218,7 @@ function syncRepoSite ()
     fi
     #TODO update composite!
     # add ${buildId} to {toDir}
-    ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${SCRIPTDIR}/addToComposite.xml -Drepodir=${toDir} -Dcomplocation=${buildId}
+${SCRIPTDIR}/runAntRunner.sh ${buildId} ${SCRIPTDIR}/addToComposite.xml addTocomposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     return $RC
 }
 
