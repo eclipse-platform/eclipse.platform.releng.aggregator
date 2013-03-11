@@ -97,8 +97,10 @@ echo "   launcherJar:       ${launcherJar}"
 echo "   BUILD_HOME:        ${BUILD_HOME}"
 echo "   dev script:        $0"
 echo "   devworkspace:      $devworkspace"
-echo "   devArgs:           $devArgs"
+echo "   devArgs (-vmargs):  $devArgs"
 echo "   javaCMD:           $javaCMD"
+echo "   BUILDFILESTR:      $BUILDFILESTR" 
+echo "   extraArgs:         ${extraArgs}"
 echo
 
 ${javaCMD}  -jar ${launcherJar} --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vmargs $devArgs
