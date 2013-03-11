@@ -609,6 +609,32 @@ fn-gather-test-zips ()
     fi
 }
 
+
+# USAGE: fn-gather-test-zips BUILD_ID REPO_DIR BUILD_DIR
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-gather-ecj-jars () 
+{
+    BUILD_ID="$1"; shift
+    REPO_DIR="$1"; shift
+    BUILD_DIR="$1"; shift
+    ECJ_JAR_DIR="$REPO_DIR"/eclipse.jdt.core/org.eclipse.jdt.core/target
+    if [[ -d "$ECJ_JAR_DIR" ]]
+    then 
+        pushd "$ECJ_JAR_DIR"
+        # TODO: How to avoid hard coding '3.9.0'? Is blob wildcard ('*') safe enouch?
+        cp org.eclipse.jdt.core-3.9.0-SNAPSHOT-batch-compiler.jar "$BUILD_DIR"/ecj-${BUILD_ID}.jar
+        cp org.eclipse.jdt.core-3.9.0-SNAPSHOT-sources.jar "$BUILD_DIR"/ecjsrc-${BUILD_ID}.jar
+        popd
+    else
+        echo "   ERROR: $ECJ_JAR_DIR did not exist in fn-gather-ecj-jars."
+        #TODO eventually, fail the build here? If they don't exist, something must be pretty wrong?
+    fi
+}
+
+
+
 # USAGE: fn-slice-repos BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
 #   BUILD_ID: I20121116-0700
 #   ANT_SCRIPT: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator

@@ -47,6 +47,7 @@ fn-gather-sdk "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-platform "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-swt-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-test-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
+fn-gather-ecj-jars "$BUILD_ID" "$aggDir" "$buildDirectory"
 
 fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
 #fn-gather-repo-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
