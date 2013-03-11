@@ -21,6 +21,9 @@ then
 fi
 shift
 
+BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+# TODO: make stream sensitive
+BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/4I}
 # TODO: make stream sensitive
 basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${buildId}
 if [[ ! -d "${basebuilderParent}" ]]
@@ -59,7 +62,7 @@ then
     echo "    JAVA_HOME: ${JAVA_HOME}"
     exit 1
 fi
-javaCMD={JAVA_HOME}/bin/java
+javaCMD=${JAVA_HOME}/bin/java
 
 BUILDFILE=$1
 if [ -e $BUILDFILE ]
@@ -98,5 +101,5 @@ echo "   devArgs:           $devArgs"
 echo "   javaCMD:           $javaCMD"
 echo
 
-${javaCMD}  --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vmargs $devArgs
+${javaCMD}  -jar ${launcherJar} --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vmargs $devArgs
 
