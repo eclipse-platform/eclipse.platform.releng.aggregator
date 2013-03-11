@@ -218,6 +218,18 @@ function syncRepoSite ()
     fi
     # update composite!
     # add ${buildId} to {toDir}
+    
+    # runAntRunner requires basebuilder to be installed at drop site, so we'll check here if it exists yet, 
+    # and if not, fetch it.
+     basebuilderDir="${fromDir}/org.eclipse.releng.basebuilder" 
+    if [[ -d $basebuilderDir ]]
+    then
+        echo "INFO: basebuilder directory found to exist already, so not re-fetched"
+    else
+        # assume ant is on the path
+        ant -f ${SCRIPTDIR}/getBaseBuilder.xml -DWORKSPACE=$fromDir
+    fi
+
 ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     return $RC
 }
