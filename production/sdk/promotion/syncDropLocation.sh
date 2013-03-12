@@ -221,16 +221,18 @@ function syncRepoSite ()
     
     # runAntRunner requires basebuilder to be installed at drop site, so we'll check here if it exists yet, 
     # and if not, fetch it.
-     basebuilderDir="${fromDir}/org.eclipse.releng.basebuilder" 
+    
+    dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
+    basebuilderDir="${dropFromBuildDir}/org.eclipse.releng.basebuilder" 
     if [[ -d $basebuilderDir ]]
     then
         echo "INFO: basebuilder directory found to exist already, so not re-fetched"
     else
         # assume ant is on the path
-        ant -f ${SCRIPTDIR}/getBaseBuilder.xml -DWORKSPACE=$fromDir
+        ant -f ${SCRIPTDIR}/getBaseBuilder.xml -DWORKSPACE=$dropFromBuildDir
     fi
 
-    ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
+${SCRIPTDIR}/runAntRunner.sh ${buildId}  ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     RC=$?
     return $RC
 }
