@@ -21,7 +21,7 @@ DL_TYPE=S
 BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
-cd /shared/eclipse/eclipse4I/siteDir/equinox/drops
+cd /shared/eclipse/builds/4I/siteDir/equinox/drops
 cp /shared/eclipse/sdk/renameBuild.sh .
 
 rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
@@ -32,7 +32,7 @@ mv ${DROP_ID}ORIG ${DROP_ID}
 
 rm renameBuild.sh
 
-echo "rsync -r /shared/eclipse/eclipse4I/siteDir/equinox/drops/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
+echo "rsync -r /shared/eclipse/builds/4I/siteDir/equinox/drops/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
     > /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL}.sh
 
 chmod +x /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL}.sh

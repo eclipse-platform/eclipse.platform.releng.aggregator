@@ -21,7 +21,7 @@ DL_TYPE=S
 BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
-cd /shared/eclipse/eclipse4I/siteDir/eclipse/downloads/drops4
+cd /shared/eclipse/builds/4I/siteDir/eclipse/downloads/drops4
 cp /shared/eclipse/sdk/renameBuild.sh ${PWD}
 
 rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG

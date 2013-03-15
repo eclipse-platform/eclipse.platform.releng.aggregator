@@ -21,7 +21,7 @@ DL_TYPE=S
 BUILD_TIMESTAMP=${DROP_SITE_ID//[MI-]/}
 DL_SITE_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
-BUILDMACHINE_BASE_SITE=/opt/public/eclipse/eclipse4I/siteDir/updates/4.3-I-builds
+BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4I/siteDir/updates/4.3-I-builds
 
 BUILDMACHINE_SITE=${BUILDMACHINE_BASE_SITE}/${DROP_SITE_ID}
 
