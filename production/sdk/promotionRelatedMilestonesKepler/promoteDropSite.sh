@@ -39,7 +39,7 @@ rccode=$?
 if [ $rccode -eq 0 ]
 then
     source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-    updateIndex 4
+    updateIndex 4 MAIN
 else
     printf "\n\n\t%s\n\n" "ERROR: rsync failed. rccode: $rccode" >&2
     exit $rccode
