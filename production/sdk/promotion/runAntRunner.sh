@@ -21,11 +21,29 @@ then
 fi
 shift
 
+eclipseStream=$1
+if [[ -z "${eclipseStream}" ]]
+then
+    echo "This script requires eclipseStream as input."
+    echo "    For example, $( basename $0 ) I20130306-0033 4.3.0"
+    exit 1
+fi
+shift
+
+eclipseStreamMajor=${eclipseStream:0:1}
+buildType=${buildId:0:1}
+
 BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
-# TODO: make stream sensitive
-BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/4I}
-# TODO: make stream sensitive
-basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${buildId}
+
+BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${buildType}}
+
+dropSegment=drops
+if [[ ${eclipseStreamMajor} > 3 ]]
+then
+    dropSegment=drops${eclipseStreamMajor}
+fi
+
+basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/${dropSegment}/${buildId}
 if [[ ! -d "${basebuilderParent}" ]]
 then
     echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed."
@@ -33,8 +51,8 @@ then
     exit 1
 fi
 
-# TODO: we could call/check install basebuilder here, but not required for 
-# immediate use case of using to composite repos.
+# TODO: we could check basebuilder here and if not, install it? 
+#        but not required for immediate use case of using to composite repos.
 
 baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
 if [[ ! -d "${baseBuilderDir}" ]]
@@ -91,6 +109,7 @@ devArgs=-Xmx256m
 
 echo
 echo "   buildId:           ${buildId}"
+echo "   buildId:           ${eclipseStream}"
 echo "   basebuilderParent: ${basebuilderParent}"
 echo "   baseBuilderDir:    ${baseBuilderDir}"
 echo "   launcherJar:       ${launcherJar}"

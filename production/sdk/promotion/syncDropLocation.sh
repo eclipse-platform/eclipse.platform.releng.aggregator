@@ -232,7 +232,7 @@ function syncRepoSite ()
         ant -f ${SCRIPTDIR}/getBaseBuilder.xml -DWORKSPACE=$dropFromBuildDir
     fi
 
-${SCRIPTDIR}/runAntRunner.sh ${buildId}  ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
+${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     RC=$?
     return $RC
 }
