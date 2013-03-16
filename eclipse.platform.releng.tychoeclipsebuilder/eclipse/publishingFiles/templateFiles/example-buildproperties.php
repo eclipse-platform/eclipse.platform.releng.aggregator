@@ -1,9 +1,10 @@
 <?php 
 
-// This is purely an example, to use as reference while in workspace. The actual file is produced 
-// during the build, and so will not only be different values for each build, will likely have variables 
+// This is purely an example, to use as reference while in workspace. The actual file, named 'buildproperties.php,
+// is produced during the build, and so will not only be different values for each build, 
+// but will likely have variables 
 // some and go as the build changes over the months and years. So, for accurate reference, be sure to get 
-// a recent copy. This was copied cira March 14, 2013.
+// a recent copy. This was copied circa March 14, 2013.
 
 // properties written for I20130314-1330 
 $PATH = "/shared/common/jdk1.7.0_11/bin:/shared/common/apache-maven-3.0.4/bin:/shared/common/apache-ant-1.8.4/bin:/usr/local/bin:/usr/bin:/bin:/opt/buildhomes/e4Build/bin";
