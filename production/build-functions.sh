@@ -287,6 +287,16 @@ fn-maven-build-aggregator ()
         MARGS="$MARGS -Pupdate-branding-plugins"
     fi
     MARGS="$MARGS ${MAVEN_BREE}"
+    
+    # Here we count on $BUILD_TYPE being exported. TODO: make parameter later? 
+    if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]] 
+    then
+        FORCEQUALIFIERARG="-DforceContextQualifier=${BUILD_ID}"
+    else
+        # just for safety, make sure unset
+        FORCEQUALIFIERARG=
+    fi
+    
     echo "DEBUG: Variables in $0" 
     echo "DEBUG: BUILD_ID: $BUILD_ID"
     echo "DEBUG: REPO_DIR: $REPO_DIR"
@@ -297,12 +307,14 @@ fn-maven-build-aggregator ()
     echo "DEBUG: UPDATE_BRANDING: $UPDATE_BRANDING"
     echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
     echo "DEBUG: MARGS: $MARGS"
+    echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
+    
     pushd "$REPO_DIR"
     mvn $MARGS \
         clean install \
         -Dmaven.test.skip=true \
         -Dmaven.repo.local=$LOCAL_REPO \
-        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
+        -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" $FORCEQUALIFIERARG
     rc=$?
     popd
     return $rc
