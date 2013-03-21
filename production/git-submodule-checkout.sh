@@ -12,8 +12,8 @@ then
     if [[ "master" != $VAL ]]
     then
        echo "INFO: Branch forced to 'master', instead of '$VAL', since doing N-Build"
+       VAL="master"
     fi
-    VAL="master"
 fi
 
 
