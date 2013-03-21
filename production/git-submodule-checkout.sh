@@ -9,7 +9,10 @@ VAL=$( grep "^${name}:" "$REPOSITORIES_TXT" | cut -f2 -d" ")
  # Here we count on $BUILD_TYPE being exported. TODO: make parameter later? 
 if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]] 
 then
-    echo "INFO: Branch forced to master, instead of $VAL, since doing N-Build"
+    if [[ "master" != $VAL ]]
+    then
+       echo "INFO: Branch forced to 'master', instead of '$VAL', since doing N-Build"
+    fi
     VAL="master"
 fi
 
