@@ -2,14 +2,14 @@
 #
 
 if [ $# -ne 1 ]; then
-	echo USAGE: $0 env_file
-	exit 1
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 if [ ! -r "$1" ]; then
-	echo "$1" cannot be read
-	echo USAGE: $0 env_file
-	exit 1
+    echo "$1" cannot be read
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 pushd $( dirname $0 ) >/dev/null
@@ -28,14 +28,38 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "${BRANCH}" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -r "$aggDir" ]; then
-	fn-git-clean-aggregator "$aggDir" "${BRANCH}"
-	pushd "$aggDir"
-	fn-git-pull
-	fn-git-submodule-update
-	popd
+    fn-git-clean-aggregator "$aggDir" "${BRANCH}"
+    RC=$?
+    if [[ $RC != 0 ]]
+    then
+        exit $RC
+    else
+        pushd "$aggDir"
+        fn-git-pull
+        RC=$?
+        if [[ $RC != 0 ]]
+        then
+            popd
+            exit $RC
+        else
+            fn-git-submodule-update
+            RC=$?
+            if [[ $RC != 0 ]]
+            then
+                popd
+                exit $RC
+            else
+                popd
+            fi
+        fi
+    fi
 else
-	fn-git-clone-aggregator "$gitCache" \
-	  $(fn-local-repo "$AGGREGATOR_REPO") "${BRANCH}" 
+    fn-git-clone-aggregator "$gitCache" \
+        $(fn-local-repo "$AGGREGATOR_REPO") "${BRANCH}" 
+    if [[ $RC != 0 ]]
+    then
+        exit $RC
+    fi
 fi
 
 pushd "$aggDir"
