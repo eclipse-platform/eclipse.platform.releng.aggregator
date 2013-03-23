@@ -72,8 +72,8 @@ fn-write-property EBUILDER_HASH
 # TODO: add this "hash tag" later? Or, write this once tag is known? 
 # In particular, this "early one" is the "starting point". 
 # By the time we do a build and commit submodules, there would 
-# be a different one. I'm thinking it is the latter that would be needed 
-# to "reproduce a build".
+# be a different one that is tagged with buildId. I'm thinking it is the latter that would be needed 
+# to "reproduce a build" but this early one may be important to debug what went wrong with a build.
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
 echo "$AGGREGATOR_REPO $BRANCH $EBUILDER_HASH" >> ${buildDirectory}/directory.txt
 popd
