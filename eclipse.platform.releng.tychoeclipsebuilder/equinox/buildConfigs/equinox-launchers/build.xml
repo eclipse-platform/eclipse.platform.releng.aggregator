@@ -1,0 +1,99 @@
+<project name="Build Repos" default="all" basedir=".">
+
+	<target name="init">
+		<property name="featureTempRoot" value="${equinox.build.configs}/equinox-launchers" />
+		<property name="featureTempDir" value="featureTemp" />
+		<property name="featureTemp" value="${featureTempRoot}/${featureTempDir}" />
+		<property name="featureTemp2" value="${featureTempRoot}/featureTemp2" />
+	</target>
+
+	<target name="all" depends="init">
+		<antcall target="equinoxlaunchers" />
+	</target>
+	
+	<target name="equinoxlaunchers">
+		<property name="archiveRoot" value="launchers" />
+		<buildRepos os="win32" ws="win32" arch="x86" archiveName="${archiveRoot}-win32.win32.x86.${buildId}.zip" />
+		<buildRepos os="win32" ws="win32" arch="x86_64" archiveName="${archiveRoot}-win32.win32.x86_64.${buildId}.zip" />		
+		<buildRepos os="linux" ws="gtk" arch="x86" archiveName="${archiveRoot}-linux.gtk.x86.${buildId}.tar.gz" />
+		<buildRepos os="linux" ws="gtk" arch="x86_64" archiveName="${archiveRoot}-linux.gtk.x86_64.${buildId}.tar.gz" />	
+	    <buildRepos os="linux" ws="gtk" arch="ppc" archiveName="${archiveRoot}-linux.gtk.ppc.${buildId}.tar.gz" />
+		<buildRepos os="linux" ws="gtk" arch="ppc64" archiveName="${archiveRoot}-linux.gtk.ppc64.${buildId}.tar.gz" />
+		<buildRepos os="solaris" ws="gtk" arch="sparc" archiveName="${archiveRoot}-solaris.gtk.sparc.${buildId}.zip" />
+		<buildRepos os="solaris" ws="gtk" arch="x86" archiveName="${archiveRoot}-solaris.gtk.x86.${buildId}.zip" />
+
+		<buildRepos os="hpux" ws="gtk" arch="${hpuxia64bitness}" archiveName="${archiveRoot}-hpux.gtk.${hpuxia64bitness}.${buildId}.zip" />	
+
+		<buildRepos os="aix" ws="gtk" arch="ppc" archiveName="${archiveRoot}-aix.gtk.ppc.${buildId}.zip" />
+		<buildRepos os="aix" ws="gtk" arch="ppc64" archiveName="${archiveRoot}-aix.gtk.ppc64.${buildId}.zip" />	
+		<buildRepos os="macosx" ws="cocoa" arch="x86_64" archiveName="${archiveRoot}-macosx.cocoa.x86.${buildId}.tar.gz" />
+		<buildRepos os="macosx" ws="cocoa" arch="x86_64" archiveName="${archiveRoot}-macosx.cocoa.x86_64.${buildId}.tar.gz" />
+	</target>
+
+
+	<macrodef name="buildRepos">
+		<attribute name="os" />
+		<attribute name="ws" />
+		<attribute name="arch" />
+		<attribute name="archiveName" />
+
+		<sequential>
+			<delete dir="${featureTemp}" />
+			<mkdir dir="${featureTemp}" />
+			<delete dir="${featureTemp2}" />
+			<mkdir dir="${featureTemp2}" />
+			<p2.mirror source="file://${buildRepo}">
+				<destination kind="metadata" location="file://${featureTemp}" name="Equinox Launchers Repo" format="file://${buildRepo}" />
+				<destination kind="artifact" location="file://${featureTemp}" name="Equinox Launchers Repo" format="file://${buildRepo}" />
+				<iu id="org.eclipse.equinox.executable.feature.group" version="" />
+				<iu id="org.eclipse.equinox.executable" version="" />
+				<slicingOptions platformFilter="@{os},@{ws},@{arch}" includeOptional="false" includeNonGreedy="false" followStrict="true" />
+			</p2.mirror>
+			<p2.repo2runnable destination="${featureTemp2}/eclipse">
+				<source dir="${featureTempRoot}" includes="${featureTempDir}" />			
+			</p2.repo2runnable>
+			<delete>
+				<fileset dir="${featureTemp2}/eclipse" includes="*.jar" />
+				<fileset dir="${featureTemp2}/eclipse" includes="*.xml" />
+			</delete>
+			<!-- assemble compressed files and create checksums -->
+			<antcall target="compress">
+				<param name="archiveName" value="@{archiveName}" />
+				<param name="dir" value="${featureTemp2}" />
+			</antcall>
+		</sequential>
+	</macrodef>
+
+	<target name="compress">
+		<!-- set the target based on which OS we are running on since there
+		is a difference between unzip and untar/gunzip -->
+		<property name="archiveFullPath" value="${equinoxPostingDirectory}/${buildLabel}/${archiveName}" />
+		<condition property="compress.target" value="compress-zip">
+			<contains string="${archiveName}" substring=".zip" />
+		</condition>
+		<condition property="compress.target" value="compress-tar.gz">
+			<contains string="${archiveName}" substring=".tar.gz" />
+		</condition>
+		<antcall target="${compress.target}">
+			<param name="dir" value="${featureTemp2}" />
+			<param name="filename" value="${archiveName}" />
+		</antcall>		
+	</target>
+
+	<target name="compress-zip">
+		<exec dir="${dir}" executable="zip">
+			<arg line="-q ${dir}/${filename} -r ." />
+		</exec>
+		<move file="${dir}/${filename}" tofile="${archiveFullPath}" />
+	</target>
+
+	<target name="compress-tar.gz">
+		<exec dir="${dir}" executable="sh">
+			<arg line='-c "tar -cvzf ${dir}/${filename} *"' />
+		</exec>
+		<move file="${dir}/${filename}" tofile="${archiveFullPath}" />
+	</target>	
+
+
+</project>
+
