@@ -3,6 +3,9 @@
     default="noDefault"
     basedir=".">
 
+    <!-- postingDirectory is the Eclipse drop directory ... we pull a few things from it to 
+         make equinox drop.
+         -->
     <property
         name="postingDirectory"
         value="${buildDirectory}" />
@@ -13,6 +16,13 @@
         name="eqpublishingContent"
         value="${equinox.build.configs}/../publishingFiles" />
 
+    <property environment="env" />
+    
+    <!-- we typically expect TMP_DIR to be set in environnment -->
+    <condition property="TMP" value="${env.TMP_DIR}" else="/tmp">
+      <isset property="env.TMP_DIR"/>
+    </condition>
+    
     <target name="publish">
         <echo message="DEBUG: echo properties at start of equinox publish" />
         <echoproperties />
@@ -452,7 +462,7 @@
     <target name="updateTestManifest">
         <apply
             executable="ls"
-            output="${buildDirectory}/${bundle.id}.txt"
+            output="${TMP}/${bundle.id}.txt"
             dir="${equinoxPostingDirectory}/${buildLabel}">
             <fileset dir="${equinoxPostingDirectory}/${buildLabel}">
                 <patternset>
@@ -462,23 +472,23 @@
         </apply>
 
         <replaceregexp
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             match="/.+/"
             replace="" />
         <replaceregexp
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             match="\.jar"
             replace="" />
         <replaceregexp
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             match="\n"
             replace="" />
         <loadfile
             property="bundle.jar"
-            srcFile="${buildDirectory}/${bundle.id}.txt"
+            srcFile="${TMP}/${bundle.id}.txt"
             failonerror="off" />
         <delete
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             failonerror="false" />
         <replace
             file="${eqpublishingContent}/testManifest.xml"
@@ -491,7 +501,7 @@
 		<!--unzip binary version of equinox launcher fragments into ${baseLocation} so they are available to be used in the build-->
         <property
             name="output"
-            value="${buildDirectory}/${bundle.id}.txt" />
+            value="${TMP}/${bundle.id}.txt" />
         <apply
             executable="ls"
             output="${output}"
@@ -503,11 +513,11 @@
             </fileset>
         </apply>
         <replaceregexp
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             match="\.jar"
             replace="" />
         <replaceregexp
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             match="\n"
             replace="" />
         <loadfile
@@ -515,7 +525,7 @@
             srcFile="${output}"
             failonerror="off" />
         <delete
-            file="${buildDirectory}/${bundle.id}.txt"
+            file="${TMP}/${bundle.id}.txt"
             failonerror="false" />
         <exec
             executable="unzip"
@@ -560,7 +570,7 @@
 		<!-- unzip delta pack in a temporary location to get binary versions of launchers for product build -->
         <property
             name="pPath"
-            value="${buildDirectory}/${buildId}/p2launchertmp" />
+            value="${TMP}/${buildId}/p2launchertmp" />
         <unzip
             src="${postingDirectory}/${buildLabel}/eclipse-${buildId}-delta-pack.zip"
             dest="${pPath}">
