@@ -44,35 +44,45 @@ fn-eq-build-dir ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-eq-gather-starterkit () 
 {
+    if [[ $# != 3 ]]
+    then
+        echo "PROGRAM ERROR: this function, fn-eq-gather-starterkit, requires 3 arguments"
+        return 1
+    fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
-    BUILD_DIR="$1"; shift
+    DROP_DIR="$1"; shift
     TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox.starterkit.product/target/products
+    echo "Starting fn-eq-gather-starterkit"
+    echo "BUILD_ID: $BUILD_ID"
+    echo "REPO_DIR: $REPO_DIR"
+    echo "DROP_DIR: $DROP_DIR"
     if [[ -d "$TARGET_PRODUCTS" ]]
     then
         pushd "$TARGET_PRODUCTS"
 
-        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc64.zip 
-        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc.zip 
-        cp org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux.gtk.ia64.zip 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc64.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390x.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86_64.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86_64.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.sparc.zip 
-        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.x86.zip 
-        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86_64.zip 
-        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86.zip 
+        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc64.zip 
+        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc.zip 
+        cp org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux.gtk.ia64.zip 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc64.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390x.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86_64.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86_64.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.sparc.zip 
+        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.x86.zip 
+        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86_64.zip 
+        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86.zip 
 
         popd
     else
-        echo "   ERROR: $TARGET_PRODUCTS did not exist in $0"
+        echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-eq-gather-starterkit"
         return 1
     fi
+    echo "Ending fn-eq-gather-starterkit"
     return 0
 }
 
@@ -94,7 +104,9 @@ fn-publish-equinox ()
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
     BUILD_MACHINE_ROOT=/shared/eclipse/builds
-    fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_DIR
+    BUILD_MACHINE_DROP_DIR=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM")
+    BUILD_MACHINE_DROP_DIR_PARENT=$(dirname $BUILD_MACHINE_DROP_DIR)
+    fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
         -application org.eclipse.ant.core.antRunner \
@@ -103,15 +115,15 @@ fn-publish-equinox ()
         -Dequinox.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/buildConfigs \
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
-        -DpostingDirectory=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM") \
-        -DequinoxPostingDirectory=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM") \
+        -DpostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
+        -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
         -DeqpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
         -Dhudson=true \
         -DeclipseStream=$BUILD_STREAM \
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
-        -DbuildDirectory=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM") \
+        -DbuildDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
         publish
     popd
 }
