@@ -20,6 +20,64 @@ source $SCRIPT_PATH/build-functions.sh
 
 source "$1"
 
+# USAGE: fn-eq-build-dir ROOT BUILD_ID STREAM
+#   ROOT: /shared/eclipse/builds
+#   BUILD_ID: M20121119-1900
+#   STREAM: 4.3.0
+fn-eq-build-dir () 
+{
+    ROOT="$1"; shift
+    BUILD_ID="$1"; shift
+    STREAM="$1"; shift
+    eclipseStreamMajor=${STREAM:0:1}
+    dropDirSegment=siteDir/equinox/drops3
+    if [[ $eclipseStreamMajor > 3 ]] 
+    then
+        dropDirSegment=siteDir/equinox/drops
+    fi
+    echo $ROOT/$dropDirSegment/$BUILD_ID
+}
+
+# USAGE: fn-eq-gather-starterkit BUILD_ID REPO_DIR BUILD_DIR
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-eq-gather-starterkit () 
+{
+    BUILD_ID="$1"; shift
+    REPO_DIR="$1"; shift
+    BUILD_DIR="$1"; shift
+    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox.starterkit.product/target/products
+    if [[ -d "$TARGET_PRODUCTS" ]]
+    then
+        pushd "$TARGET_PRODUCTS"
+
+        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc64.zip 
+        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc.zip 
+        cp org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux.gtk.ia64.zip 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc64.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390x.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86_64.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86_64.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86.tar.gz 
+        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.sparc.zip 
+        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.x86.zip 
+        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86_64.zip 
+        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$BUILD_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86.zip 
+
+        popd
+    else
+        echo "   ERROR: $TARGET_PRODUCTS did not exist in $0"
+        return 1
+    fi
+    return 0
+}
+
+
+
 # USAGE: fn-publish-equinox BUILD_TYPE BUILD_STREAM BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
 #   BUILD_TYPE: I
 #   BUILD_STREAM: 4.2.2
@@ -35,6 +93,7 @@ fn-publish-equinox ()
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
+    fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_DIR
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
         -application org.eclipse.ant.core.antRunner \
