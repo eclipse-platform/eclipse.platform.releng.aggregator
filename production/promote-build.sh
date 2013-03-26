@@ -104,14 +104,7 @@ then
 
     equinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops"
     eqFromDir=${equinoxPostingDirectory}/${buildId}
-    if [[ "$BUILD_TECH" == 'PDE' ]]
-    then
-        eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
-    else
-        # TODO temp location, for now
-        eqToDir="/shared/eclipse/temp/download.eclipse.org/equinox/drops/"
-        #eqToDir="/home/data/httpd/download.eclipse.org/equinox/dropscbibased/"
-    fi
+    eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
     
     # Note: for proper mirroring at Eclipse, we probably do not want/need to
     # maintain "times" on build machine, but let them take times at time of copying.
