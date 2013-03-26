@@ -202,7 +202,7 @@ function syncRepoSite ()
 
     if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
     then
-        rsync --recursive "${fromDir}" "${toDir}"
+        rsync --times --omit-dir-times --recursive "${fromDir}" "${toDir}"
         RC=$?
     else
         RC=9
