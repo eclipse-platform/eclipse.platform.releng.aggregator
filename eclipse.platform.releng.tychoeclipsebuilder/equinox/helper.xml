@@ -44,21 +44,33 @@
         name="publish"
         depends="init">
 
+        <!-- there are three "buildproperties.* files, each with same variables defined/used
+             during the build, such as BUILD_ID, etc. One for PHP, one for Ant, and one for BASH scripts.
+             The one for PHP is most likely to be useful on download site.
+        -->
         <copy todir="${equinoxPostingDirectory}/${buildId}">
             <fileset
                 dir="${postingDirectory}"
                 includes="buildproperties.*" />
         </copy>
+        
+        <!-- 
+          These two steps were "blindly" copied from previosly eclipsebuilder, buildAll.xml file.
+          They were the only two things done for equininox before "publish" was called, so we call 
+          them as the first step of "publish".
+        -->
+
         <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox/build.xml" />
         <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox-launchers/build.xml" />
         
-		<!--temporary hack to copy orbit files to equinox download directory -->
+		<!-- copy orbit files to equinox download directory -->
         <copy
             todir="${equinoxPostingDirectory}/${buildLabel}"
             overwrite="true">
             <fileset
                 dir="${buildRepo}/plugins"
-                includes="javax.servlet_*,org.apache.commons.logging_*,org.apache.commons.el_*,org.mortbay.jetty_*" />
+                includes="org.apache.felix.gogo.*,javax.servlet_*,org.apache.commons.logging_*,javax.el_*"
+                excludes="*.source_*, *.jar.pack.gz" />
         </copy>
 
         <antcall target="updateTestManifests" />
@@ -72,7 +84,7 @@
             property="class"
             value="${generatorClass}" />
 
-		<!-- generate md5s and sha1s for bundle -->
+		<!-- generate md5s and sha1s for bundles -->
         <mkdir dir="${equinoxPostingDirectory}/${buildLabel}/checksum" />
         <exec
             executable="sh"
@@ -81,40 +93,53 @@
         </exec>
 
         
-		<!--post clickThroughs
+		<!--post clickThroughs. Removed 03/26/2013. There are no clickthroughs for current equinox. 
+		    if ever added back, will have to be re-worked. 
         <copy todir="${equinoxPostingDirectory}/${buildLabel}">
             <fileset
                 dir="${buildDirectory}/maps/org.eclipse.releng"
                 includes="clickThroughs/" />
         </copy>
--->
-		<!--copy compile logs to this posting directory
+        -->
+        
+		<!--copy compile logs to this posting directory. Not sure needed. Is this where API reports come from? -->
         <copy
             todir="${equinoxPostingDirectory}/${buildLabel}"
             overwrite="true">
             <fileset
-                dir="${postingDirectory}/${buildLabel}"
+                dir="${postingDirectory}"
                 includes="compilelogs/**/plugins/org.eclipse.osgi*/**,compilelogs/**/plugins/org.eclipse.equinox*/**"
                 excludes="compilelogs/**/plugins/org.eclipse.osgi.test*/**" />
         </copy>
--->
-		<!--post directory.txt
+        
+
+        <!--post directory.txt.  Removed 03/26/2013. I don't think ever displayed on Equinox page. 
+		    and current directory.txt has limited usefulness.
         <copy
             file="${buildDirectory}/directory.txt"
             todir="${equinoxPostingDirectory}/${buildLabel}" />
--->
+        -->
         <copy todir="${equinoxPostingDirectory}/${buildLabel}">
             <fileset dir="${eqpublishingContent}/staticDropFiles" />
         </copy>
 
-		<!--regenerate the index page with links to test results-->
+		<!-- regenerate the index page with links to test results.
+		     Removed 3/26/20113. There are no test results, at this point on initial promote, 
+		     and for at least past year and a half we have never "reran" this to pick up 
+		     test results. I do not see any test results links on DL page .... though, 
+		     probably could be in icons. 
+		     Turns out we still need to run the "indexer" to update DL page, even though
+		     there are no test results. That's how it fills in the symbols in drop token list.
+		-->
         <property
             name="class"
             value="org.eclipse.releng.generators.TestResultsGenerator" />
         <taskdef
             name="indexResults"
             classname="${class}" />
+        
         <!-- equinox uses same test results -->
+        
         <!-- provisioning removed per bug 368488
           dropTokenList="%equinox%,%framework%,%extrabundles%,%other%,%provisioning%,%launchers%,%osgistarterkits%"
           -->
@@ -330,13 +355,19 @@
         <antcall target="updateTestManifest">
             <param
                 name="bundle.id"
-                value="org.apache.commons.el" />
+                value="org.apache.felix.gogo.command" />
         </antcall>
         <antcall target="updateTestManifest">
             <param
                 name="bundle.id"
-                value="org.mortbay.jetty" />
+                value="org.apache.felix.gogo.runtime" />
         </antcall>
+        <antcall target="updateTestManifest">
+            <param
+                name="bundle.id"
+                value="org.apache.felix.gogo.shell" />
+        </antcall>
+
         <antcall target="updateTestManifest">
             <param
                 name="bundle.id"
@@ -440,96 +471,6 @@
             token="@${bundle.id}@"
             value="${bundle.jar}" />
     </target>
-
-
-    <target
-        name="unziplauncherfragment"
-        depends="init">
-		<!--unzip binary version of equinox launcher fragments into ${baseLocation} so they are available to be used in the build-->
-        <property
-            name="output"
-            value="${TMP}/${bundle.id}.txt" />
-        <apply
-            executable="ls"
-            output="${output}"
-            dir="${p2InstallBaseLocation}/plugins">
-            <fileset dir="${p2InstallBaseLocation}/plugins">
-                <patternset>
-                    <include name="${bundle.id}*.jar" />
-                </patternset>
-            </fileset>
-        </apply>
-        <replaceregexp
-            file="${TMP}/${bundle.id}.txt"
-            match="\.jar"
-            replace="" />
-        <replaceregexp
-            file="${TMP}/${bundle.id}.txt"
-            match="\n"
-            replace="" />
-        <loadfile
-            property="bundledir"
-            srcFile="${output}"
-            failonerror="off" />
-        <delete
-            file="${TMP}/${bundle.id}.txt"
-            failonerror="false" />
-        <exec
-            executable="unzip"
-            dir="${p2InstallBaseLocation}/plugins">
-            <arg line="-q ${bundledir}.jar -d ${bundledir}" />
-        </exec>
-        <move
-            file="${bundledir}.jar"
-            tofile="${bundledir}.jar.bak"
-            failonerror="false" />
-    </target>
-
-    <target
-        name="build.p2.installer.product"
-        depends="init">
-        <property
-            name="p2InstallBaseLocation"
-            value="${reposource}" />
-        <antcall target="unziplauncherfragment">
-            <param
-                name="bundle.id"
-                value="org.eclipse.equinox.launcher.win32.win32.x86_1" />
-            <param
-                name="p2InstallBaseLocation"
-                value="${reposource}" />
-        </antcall>
-        <antcall target="unziplauncherfragment">
-            <param
-                name="bundle.id"
-                value="org.eclipse.equinox.launcher.gtk.linux.x86_1" />
-            <param
-                name="p2InstallBaseLocation"
-                value="${reposource}" />
-        </antcall>
-        <antcall target="unziplauncherfragment">
-            <param
-                name="bundle.id"
-                value="org.eclipse.equinox.launcher.cocoa.macosx_" />
-            <param
-                name="p2InstallBaseLocation"
-                value="${reposource}" />
-        </antcall>
-
-		<!-- unzip delta pack in a temporary location to get binary versions of launchers for product build -->
-        <property
-            name="pPath"
-            value="${TMP}/${buildId}/p2launchertmp" />
-        <unzip
-            src="${postingDirectory}/${buildLabel}/eclipse-${buildId}-delta-pack.zip"
-            dest="${pPath}">
-            <patternset>
-                <include name="eclipse/features/" />
-            </patternset>
-        </unzip>
-
-    </target>
-
 
 
 	<!-- ===================================================================== -->
