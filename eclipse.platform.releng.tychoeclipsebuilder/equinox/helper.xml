@@ -3,22 +3,17 @@
     default="noDefault"
     basedir=".">
 
-    <!-- postingDirectory is the Eclipse drop directory ... we pull a few things from it to 
-         make equinox drop.
-         -->
-    <property
-        name="postingDirectory"
-        value="${buildDirectory}" />
-    <property
-        name="equinoxPostingDirectory"
-        value="${postingDirectory}/../../equinox/drops" />
-    <property
-        name="eqpublishingContent"
-        value="${equinox.build.configs}/../publishingFiles" />
+    <fail unless="postingDirectory" message="Eclipse drop directory must be provided (yes, even for Equinox drop site creation)." />
+
+    <fail unless="equinoxPostingDirectory" message="Root (or parent) of Equinox drop direcotry to be created must be provided." />
+
+    <fail unless="eqpublishingContent" message="Root of Equinox template and static files must be provided." /> 
+   
+    <fail unless="EBuilderDir" message="Root of Eclipse Builder (or Tycho Eclipse Builder) must be provided." />
 
     <property environment="env" />
     
-    <!-- we typically expect TMP_DIR to be set in environnment -->
+    <!-- we typically expect TMP_DIR to be set in environnment. But, if not, /tmp might work. -->
     <condition property="TMP" value="${env.TMP_DIR}" else="/tmp">
       <isset property="env.TMP_DIR"/>
     </condition>
@@ -26,9 +21,11 @@
     <target name="publish">
         <echo message="DEBUG: echo properties at start of equinox publish" />
         <echoproperties />
-        
-        <ant antfile="${equinox.build.configs}/equinox/build.xml" />
-        <ant antfile="${equinox.build.configs}/equinox-launchers/build.xml" />
+        <copy todir="${equinoxPostingDirectory}/${BUILD_ID}" >
+            <fileset dir="{postingDirectory}/${BUILD_ID}" includes="buildproperties.*" />
+        </copy>
+        <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox/build.xml" />
+        <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox-launchers/build.xml" />
         
 		<!--temporary hack to copy orbit files to equinox download directory -->
         <copy
@@ -40,15 +37,7 @@
         </copy>
 
         <antcall target="updateTestManifests" />
-        <!--
-        <condition
-            property="generatorClass"
-            value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
-            <equals
-                arg1="${hudson}"
-                arg2="true" />
-        </condition>
-        -->
+
         <property
             name="generatorClass"
             value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
@@ -63,7 +52,7 @@
         <exec
             executable="sh"
             dir="${equinoxPostingDirectory}/${buildLabel}">
-            <arg line="${equinox.build.configs}/../../extras/produceChecksum" />
+            <arg line="${EBuilderDir}/extras/produceChecksum" />
         </exec>
 
         
@@ -120,80 +109,7 @@
             hrefCompileLogsTargetPath="compilelogs"
             compileLogsDirectoryName="${equinoxPostingDirectory}/${buildLabel}/compilelogs"
             testManifestFileName="${eqpublishingContent}/testManifest.xml" />
-        <tstamp>
-            <format
-                property="TODAY"
-                pattern="MMMM d, yyyy" />
-        </tstamp>
 
-		<!--  Insert Build Type descriptor  -->
-        <condition
-            property="typeDescription"
-            value="Integration">
-            <equals
-                arg1="${buildType}"
-                arg2="I" />
-        </condition>
-        <condition
-            property="typeDescription"
-            value="Nightly">
-            <equals
-                arg1="${buildType}"
-                arg2="N" />
-        </condition>
-        <condition
-            property="typeDescription"
-            value="Release">
-            <equals
-                arg1="${buildType}"
-                arg2="R" />
-        </condition>
-        <condition
-            property="typeDescription"
-            value="Stable">
-            <equals
-                arg1="${buildType}"
-                arg2="S" />
-        </condition>
-        <condition
-            property="typeDescription"
-            value="Maintenance">
-            <equals
-                arg1="${buildType}"
-                arg2="M" />
-        </condition>
-        <condition
-            property="typeDescription"
-            value="Test">
-            <equals
-                arg1="${buildType}"
-                arg2="T" />
-        </condition>
-
-        <replace
-            file="${equinoxPostingDirectory}/${buildLabel}/index.php"
-            token="@type@"
-            value="${typeDescription}" />
-
-		<!--  Insert Build Date  -->
-        <replace
-            file="${equinoxPostingDirectory}/${buildLabel}/index.php"
-            token="@date@"
-            value="${TODAY}" />
-
-		<!--  Insert Build Name  -->
-        <replace
-            file="${equinoxPostingDirectory}/${buildLabel}/index.php"
-            token="@buildid@"
-            value="${buildId}" />
-
-		<!--  Update timestamp on file to permit overwrite through Ant copy task  -->
-        <touch file="${equinoxPostingDirectory}/${buildLabel}/index.php" />
-		<!--  Insert ftp url for drop directory  -->
-        <replace
-            file="${equinoxPostingDirectory}/${buildLabel}/index.php"
-            token="@buildlabel@"
-            value="${buildLabel}" />
 
     </target>
 
@@ -579,28 +495,6 @@
             </patternset>
         </unzip>
 
-	    <!-- remvoed per bug 368488
-		<property name="tmpdatadir" value="${equinox.build.configs}/equinox.p2.installer/data" />
-		<mkdir dir="${tmpdatadir}" />
-		<java jar="${eclipse.home}/plugins/org.eclipse.equinox.launcher.jar" dir="${eclipse.pdebuild.scripts}/productBuild" fork="true" failonerror="false" jvm="${java15home}/bin/java">
-			<jvmarg value="-Xmx768M" />
-			<arg value="-data" />
-			<arg file="${tmpdatadir}" />
-			<arg value="-application" />
-			<arg value="org.eclipse.ant.core.antRunner" />
-			<arg value="-buildfile" />
-			<arg value="${equinox.build.configs}/equinox.p2.installer/productBuild.xml" />
-			<arg value="-DmapsRepo=${mapsRepo}" />
-			<arg value="-DbuildId=${buildId}" />
-			<arg value="-DbuildLabel=${buildLabel}" />
-			<arg value="-Dbuilder=${equinox.build.configs}/equinox.p2.installer" />
-			<arg value="-DbuildDirectory=${buildDirectory}/${buildId}/tmp" />
-			<arg value="-DbaseLocation=${p2InstallBaseLocation}" />
-			<arg value="-DeclipseBuildDirectory=${buildDirectory}" />
-			<arg value="-DpluginPath=${pPath}/eclipse/features" />
-			<arg value="-DequinoxPostingDirectory=${equinoxPostingDirectory}" />
-		</java>
-		-->
     </target>
 
 

@@ -115,11 +115,11 @@ fn-publish-equinox ()
         -Dequinox.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/buildConfigs \
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
-        -DpostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
+        -DpostingDirectory=$BUILD_DIR \
         -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
         -DeqpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
-        -Dhudson=true \
+        -DEBuilderDir="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
         -DeclipseStream=$BUILD_STREAM \
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
