@@ -93,6 +93,7 @@ fn-publish-equinox ()
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
+    BUILD_MACHINE_ROOT=/shared/eclipse/builds
     fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_DIR
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
@@ -102,15 +103,15 @@ fn-publish-equinox ()
         -Dequinox.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/buildConfigs \
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
-        -DpostingDirectory=$(dirname "$BUILD_DIR") \
-        -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
+        -DpostingDirectory=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM") \
+        -DequinoxPostingDirectory=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM") \
         -DeqpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
         -Dhudson=true \
         -DeclipseStream=$BUILD_STREAM \
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
-        -DbuildDirectory=$(dirname "$BUILD_DIR") \
+        -DbuildDirectory=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM") \
         publish
     popd
 }
