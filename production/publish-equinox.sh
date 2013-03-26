@@ -30,10 +30,11 @@ fn-eq-build-dir ()
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
     eclipseStreamMajor=${STREAM:0:1}
-    dropDirSegment=siteDir/equinox/drops3
+    buildType=${BUILD_ID:0:1}
+    dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops3
     if [[ $eclipseStreamMajor > 3 ]] 
     then
-        dropDirSegment=siteDir/equinox/drops
+        dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops
     fi
     echo $ROOT/$dropDirSegment/$BUILD_ID
 }
@@ -57,25 +58,30 @@ fn-eq-gather-starterkit ()
     echo "BUILD_ID: $BUILD_ID"
     echo "REPO_DIR: $REPO_DIR"
     echo "DROP_DIR: $DROP_DIR"
+    if [[ ! -d $DROP_DIR ]]
+    then
+        echo "Making DROP_DIR at $DROP_DIR"
+        mkdir -p $DROP_DIR
+    fi
     if [[ -d "$TARGET_PRODUCTS" ]]
     then
         pushd "$TARGET_PRODUCTS"
 
-        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc64.zip 
-        cp org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix.gtk.ppc.zip 
-        cp org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux.gtk.ia64.zip 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc64.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.ppc.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.s390x.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86_64.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux.gtk.x86.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86_64.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx.cocoa.x86.tar.gz 
-        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.sparc.zip 
-        cp org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris.gtk.x86.zip 
-        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86_64.zip 
-        cp org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32.win32.x86.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86.zip 
 
         popd
     else

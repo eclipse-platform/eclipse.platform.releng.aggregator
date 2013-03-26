@@ -3,26 +3,51 @@
     default="noDefault"
     basedir=".">
 
-    <fail unless="postingDirectory" message="Eclipse drop directory must be provided (yes, even for Equinox drop site creation)." />
+    <target
+        name="init"
+        unless="helperInitialized">
+        <fail
+            unless="postingDirectory"
+            message="Eclipse drop directory must be provided (yes, even for Equinox drop site creation)." />
 
-    <fail unless="equinoxPostingDirectory" message="Root (or parent) of Equinox drop direcotry to be created must be provided." />
+        <fail
+            unless="equinoxPostingDirectory"
+            message="Root (or parent) of Equinox drop direcotry to be created must be provided." />
 
-    <fail unless="eqpublishingContent" message="Root of Equinox template and static files must be provided." /> 
-   
-    <fail unless="EBuilderDir" message="Root of Eclipse Builder (or Tycho Eclipse Builder) must be provided." />
+        <fail
+            unless="eqpublishingContent"
+            message="Root of Equinox template and static files must be provided." />
 
-    <property environment="env" />
+        <fail
+            unless="EBuilderDir"
+            message="Root of Eclipse Builder (or Tycho Eclipse Builder) must be provided." />
+
+        <property environment="env" />
     
     <!-- we typically expect TMP_DIR to be set in environnment. But, if not, /tmp might work. -->
-    <condition property="TMP" value="${env.TMP_DIR}" else="/tmp">
-      <isset property="env.TMP_DIR"/>
-    </condition>
-    
-    <target name="publish">
+        <condition
+            property="TMP"
+            value="${env.TMP_DIR}"
+            else="/tmp">
+            <isset property="env.TMP_DIR" />
+        </condition>
+        <!-- make dir, in case we are first to use it, unlikely as that is -->
+        <mkdir dir="$TMP" />
         <echo message="DEBUG: echo properties at start of equinox publish" />
         <echoproperties />
-        <copy todir="${equinoxPostingDirectory}/${buildId}" >
-            <fileset dir="${postingDirectory}/${buildId}" includes="buildproperties.*" />
+        <property
+            name="helperInitialized"
+            value="true" />
+
+    </target>
+    <target
+        name="publish"
+        depends="init">
+
+        <copy todir="${equinoxPostingDirectory}/${buildId}">
+            <fileset
+                dir="${postingDirectory}"
+                includes="buildproperties.*" />
         </copy>
         <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox/build.xml" />
         <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox-launchers/build.xml" />
@@ -114,7 +139,9 @@
     </target>
 
 
-    <target name="updateTestManifests">
+    <target
+        name="updateTestManifests"
+        depends="init">
         <antcall target="updateTestManifest">
             <param
                 name="bundle.id"
@@ -375,7 +402,9 @@
 	<!-- ===================================================================== -->
 	<!-- Helper targets -->
 	<!-- ===================================================================== -->
-    <target name="updateTestManifest">
+    <target
+        name="updateTestManifest"
+        depends="init">
         <apply
             executable="ls"
             output="${TMP}/${bundle.id}.txt"
@@ -413,7 +442,9 @@
     </target>
 
 
-    <target name="unziplauncherfragment">
+    <target
+        name="unziplauncherfragment"
+        depends="init">
 		<!--unzip binary version of equinox launcher fragments into ${baseLocation} so they are available to be used in the build-->
         <property
             name="output"
@@ -454,7 +485,9 @@
             failonerror="false" />
     </target>
 
-    <target name="build.p2.installer.product">
+    <target
+        name="build.p2.installer.product"
+        depends="init">
         <property
             name="p2InstallBaseLocation"
             value="${reposource}" />
