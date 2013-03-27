@@ -130,7 +130,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
                 Eclipse (such as Equinox and a few bundles from EMF and Orbit). Please be aware that repositories
                 have different retention policies, and restrictions on what types can be updated with what
                 other types. See
-                the wiki's <a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites>Update Sites</a> 
+                the wiki's <a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites">Update Sites</a> 
                 document for details.
                 </li></ul>
 				<li><a name="EclipseSDK"> <b>Eclipse SDK</b> </a>
