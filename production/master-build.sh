@@ -120,7 +120,7 @@ $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD
 if [[ -f "${buildDirectory}/buildFailed-get-aggregator" ]]
 then
     getAggregatorFailed=true
-    /bin/grep -e "\[ERROR\]" "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
+    /bin/grep "\[ERROR\]" "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
     BUILD_FAILED="${GET_AGGREGATOR_BUILD_LOG}"
     fn-write-property BUILD_FAILED
 fi
