@@ -78,7 +78,10 @@ fn-git-checkout ()
     echo git checkout "$BRANCH"
     git checkout "$BRANCH"
     RC=$?
-    $RC && echo "[ERROR] RC from git checkout: $RC"
+    if [[ $RC != 0 ]
+    then 
+        echo "[ERROR] RC from git checkout: $RC"
+    fi
     return $RC
 }
 
@@ -106,7 +109,10 @@ fn-git-clean ()
     echo git clean -f -d -x
     git clean -f -d -x
     RC=$?
-    $RC && echo "[ERROR] RC from git clean: $RC"
+    if [[ $RC != 0 ]]
+    then 
+        echo "[ERROR] RC from git clean: $RC"
+    fi
     return $RC
 }
 
@@ -116,7 +122,10 @@ fn-git-reset ()
     echo git reset --hard  $@
     git reset --hard  $@
     RC=$?
-    $RC && echo "[ERROR] RC from git reset: $RC"
+    if [[ $RC != 0 ]] 
+    then 
+        echo "[ERROR] RC from git reset: $RC"
+    fi
     return $RC
 }
 
@@ -127,7 +136,10 @@ fn-git-clean-submodules ()
     echo git submodule foreach git clean -f -d -x
     git submodule foreach git clean -f -d -x
     RC=$?
-    $RC && echo "[ERROR] RC from submodule foreach git clean: $RC"
+    if [[ $RC != 0 ]]
+    then
+        echo "[ERROR] RC from submodule foreach git clean: $RC"
+    fi
     return $RC
 }
 
@@ -138,7 +150,10 @@ fn-git-reset-submodules ()
     echo git submodule foreach git reset --hard HEAD
     git submodule foreach git reset --hard HEAD
     RC=$?
-    $RC && echo "[ERROR] RC from submodule foreach git reset: $RC"
+    if [[ $RC != 0 ]] 
+    then
+        echo "[ERROR] RC from submodule foreach git reset: $RC"
+    fi
     return $RC
 }
 
