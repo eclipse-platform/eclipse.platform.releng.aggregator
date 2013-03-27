@@ -147,8 +147,6 @@ popd
 $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
 checkForErrorExit $? "Error occurred during tag of build input"
 
-#$SCRIPT_PATH/install-parent.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb040_install-parent_output.txt
-#checkForErrorExit $? "Error occurred during install parent script"
 
 $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
 if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
@@ -162,6 +160,8 @@ then
     # proper actions and emails can be sent. For example, we'd still want to 
     # publish what we have, but not start the tests.  
     echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
+    BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
+    fn-write-property BUILD_FAILED
 fi
 
 # if updater failed, something fairly large is wrong, so no need to compile
@@ -175,6 +175,8 @@ then
     then
         mavenBuildFailed=true
         /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
+        BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
+        fn-write-property BUILD_FAILED
     fi
     if [[ "${mavenBuildFailed}" ]] 
     then 

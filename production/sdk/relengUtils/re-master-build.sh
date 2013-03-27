@@ -123,6 +123,26 @@ echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.t
 
 
     
+$SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
+then
+    pomUpdateFailed=true
+    /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
+fi
+if [[ "${pomUpdateFailed}" ]] 
+then 
+    # TODO: eventually put in more logic to "track" the failure, so
+    # proper actions and emails can be sent. For example, we'd still want to 
+    # publish what we have, but not start the tests.  
+    echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
+    BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
+    fn-write-property BUILD_FAILED
+fi
+
+# if updater failed, something fairly large is wrong, so no need to compile
+if [[ ! "${pomUpdateFailed}" ]] 
+then
+    
     $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
     # does not seem be be "catching" error code via $?. Perhaps due to tee? 
     # errors are "indicated" by special file
@@ -130,6 +150,8 @@ echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.t
     then
         mavenBuildFailed=true
         /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
+        BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
+        fn-write-property BUILD_FAILED
     fi
     if [[ "${mavenBuildFailed}" ]] 
     then 
@@ -146,10 +168,14 @@ echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.t
         checkForErrorExit $? "Error occurred during gather parts"
     fi 
 
+fi 
 
 
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
+
+$SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
+checkForErrorExit $? "Error occurred during publish-equinox"
 
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
