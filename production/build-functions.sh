@@ -277,6 +277,11 @@ fn-git-dir ()
 # TODO: no longer need branch
 fn-build-dir () 
 {
+    if [[ $# != 4 ]]
+    then
+        exit "This function, fn-build-dir, requires 4 arguments"
+        exit 1
+    fi
     ROOT="$1"; shift
     BRANCH="$1"; shift
     BUILD_ID="$1"; shift
