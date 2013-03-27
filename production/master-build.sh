@@ -120,12 +120,12 @@ $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD
 if [[ -f "${buildDirectory}/buildFailed-get-aggregator" ]]
 then
     getAggregatorFailed=true
-    /bin/grep "\[ERROR\]" "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
-    BUILD_FAILED=${GET_AGGREGATOR_BUILD_LOG}
+    /bin/grep -e "\[ERROR\]|^warning:" "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
+    BUILD_FAILED="${GET_AGGREGATOR_BUILD_LOG}"
     fn-write-property BUILD_FAILED
 fi
 
-if [[ ! $getAggregatorFailed ]]
+if [[ ! "${getAggregatorFailed}" ]]
 then
 
     $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
