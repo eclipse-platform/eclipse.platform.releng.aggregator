@@ -194,11 +194,29 @@ fn-git-clean-aggregator ()
     BRANCH="$1"; shift
     pushd "$AGGREGATOR_DIR"
     fn-git-clean
-    fn-git-clean-submodules
-    fn-git-reset-submodules
-    fn-git-checkout "$BRANCH"
-    fn-git-reset origin/$BRANCH
+    RC=$?
+    if [[ $RC == 0 ]]
+    then 
+        fn-git-clean-submodules
+        RC=$?
+        if [[ $RC == 0 ]]
+        then
+            fn-git-reset-submodules
+            RC=$?
+            if [[ $RC == 0 ]]
+            then
+                fn-git-checkout "$BRANCH"
+                RC=$?
+                if [[ $RC == 0 ]]
+                then
+                    fn-git-reset origin/$BRANCH
+                    RC=$?
+                fi
+            fi
+        fi
+    fi
     popd
+    return $RC
 }
 
 # USAGE: fn-git-cache ROOT BRANCH
@@ -272,7 +290,7 @@ fn-maven-build-aggregator ()
     SIGNING=$1; shift
     UPDATE_BRANDING=$1; shift
     MAVEN_BREE=$1; shift
-    
+
     MARGS="-DbuildId=$BUILD_ID"
     if $DEBUG; then
         MARGS="$MARGS -X"
@@ -287,7 +305,7 @@ fn-maven-build-aggregator ()
         MARGS="$MARGS -Pupdate-branding-plugins"
     fi
     MARGS="$MARGS ${MAVEN_BREE}"
-    
+
     # Here we count on $BUILD_TYPE being exported. TODO: make parameter later? 
     if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]] 
     then
@@ -296,7 +314,7 @@ fn-maven-build-aggregator ()
         # just for safety, make sure unset
         FORCEQUALIFIERARG=
     fi
-    
+
     echo "DEBUG: Variables in $0" 
     echo "DEBUG: BUILD_ID: $BUILD_ID"
     echo "DEBUG: REPO_DIR: $REPO_DIR"
@@ -308,7 +326,7 @@ fn-maven-build-aggregator ()
     echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
     echo "DEBUG: MARGS: $MARGS"
     echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
-    
+
     pushd "$REPO_DIR"
     mvn $MARGS \
         clean install \
@@ -392,7 +410,7 @@ fn-pom-version-updater ()
     LOCAL_REPO="$1"; shift
     DEBUG=$1; shift
     QUIET=$1; shift
-    
+
     MARGS=""
     if $DEBUG; then
         MARGS="$MARGS -X"
@@ -423,12 +441,12 @@ fn-pom-version-updater ()
     else
         changes=$( git status --short -uno | cut -c4- )
         if [ -z "$changes" ]; then
-              echo "INFO: No changes in pom versions" >&2
-              RC=0
-           else
-              echo "INFO: Changes in pom versions: $changes" >&2
-              RC=0
-       fi
+            echo "INFO: No changes in pom versions" >&2
+            RC=0
+        else
+            echo "INFO: Changes in pom versions: $changes" >&2
+            RC=0
+        fi
     fi
     popd
     return $RC
@@ -525,9 +543,9 @@ fn-gather-sdk ()
         cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-x86_64.tar.gz
         cp org.eclipse.sdk.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk.tar.gz
         #cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-	tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86_64 eclipse
+        tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86_64 eclipse
         #cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
-	tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
+        tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
         cp org.eclipse.sdk.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk.zip
         cp org.eclipse.sdk.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip
         cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
