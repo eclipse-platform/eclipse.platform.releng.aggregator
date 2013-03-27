@@ -57,11 +57,18 @@ else
     fn-git-clone-aggregator "$gitCache" \
         $(fn-local-repo "$AGGREGATOR_REPO") "${BRANCH}" 
     RC=$?
-    if [[ $RC != 0 ]]
-    then
-        exit $RC
-    fi
 fi
+
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
+
+if [[ $RC != 0 ]]
+then
+    # create as "indicator file" ... gets filled in more once there is a log to grep
+    touch  "${buildDirectory}/buildFailed-get-aggregator"
+    echo "ERROR: get-aggregator returned non-zero return code: $RC"
+    exit $RC
+fi
+
 
 pushd "$aggDir"
 # save current hash tag value for documenting build (e.g. to reproduce, run tests, etc.)
