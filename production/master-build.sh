@@ -32,7 +32,7 @@ BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
 logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
-checkForErrorExit $? "Could not create buildlogs directory"
+checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
 
 LOG=$buildDirectory/buildlogs/buildOutput.txt
 #exec >>$LOG 2>&1
