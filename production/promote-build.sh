@@ -45,6 +45,7 @@ source $SCRIPT_PATH/build-functions.sh
 
 source "$2" 2>/dev/null
 
+env 
 
 # The 'workLocation' provides a handy central place to have the
 # promote script, and log results. ASSUMING this works for all
