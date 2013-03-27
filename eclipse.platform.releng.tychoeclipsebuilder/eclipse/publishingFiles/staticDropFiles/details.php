@@ -121,17 +121,27 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 		<div class="homeitem3col">
 			<h3>Details</h3>
 				<ul class="midlist">
+				<li><a name="Repository"> <b>Eclipse Repository</b> </a>
+                <ul>
+                <li>
+                The Eclipse Repository includes all that is produced by the Eclipse Project, including 
+                the Eclipse Platform, Java development tools, and Plug-in Development
+                Environment, Unit Tests, and even some extra items from other projects required by 
+                Eclipse (such as Equinox and a few bundles from EMF and Orbit). Please be aware that repositories
+                have different retention policies, and restrictions on what types can be updated with what
+                other types. See
+                the wiki's <a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites>Update Sites</a> 
+                document for details.
+                </li></ul>
 				<li><a name="EclipseSDK"> <b>Eclipse SDK</b> </a>
 				<ul>
 				<li>
 				The Eclipse SDK includes the Eclipse Platform, Java development tools, and Plug-in Development
 				Environment, including source and both user and programmer documentation. If you
-				aren't sure which download you want... then you probably want this one.<br> <b>Eclipse
-				does not include a Java runtime environment (JRE).</b> You will need a 1.4.2 level
-				or higher Java runtime or Java development kit (JDK) installed on your machine
-				in order to run Eclipse. Click <a href="<?php echo "$jre";?>"><b>here</b></a> if you
-				need help finding a Java runtime.</li></ul>
-				
+				aren't sure which download you want... then you probably want this one. 
+				You will need a <a href="http://wiki.eclipse.org/Eclipse/Installation#Install_a_JVM">Java runtime environment (JRE)</a> 
+				to use Eclipse (Java SE 6 or greater is recommended). 
+				</li></ul>
 				<li><a name="JUnitPlugin"> <b> JUnit Plugin Tests and Automated Testing Framework </b> </a>
 				<ul>
 				<li>
