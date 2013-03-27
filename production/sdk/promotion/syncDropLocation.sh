@@ -15,7 +15,7 @@ function sendPromoteMail ()
     eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"
         return 1;
     fi
     echo "     eclipseStream: ${eclipseStream}"
@@ -23,7 +23,7 @@ function sendPromoteMail ()
     buildId=$2
     if [[ -z "${buildId}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)"
         return 1;
     fi
     echo "     buildId: ${buildId}"
@@ -35,6 +35,10 @@ function sendPromoteMail ()
         return 1;
     fi
     echo "     BUILD_TECH: ${BUILD_TECH}"
+
+    # optional? Or blank? 
+    BUILD_FAILED=$4
+
 
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
@@ -66,15 +70,20 @@ function sendPromoteMail ()
 
     downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
 
-
+    if [[ -z "${BUILD_FAILED}" ]] 
+    then
+        BUILD_FAILED_STRING="BUILD FAILED"
+    else
+        BUILD_FAILED_STRING=""
+    fi
 
     if [[ "${BUILD_TECH}" == "CBI" ]]
     then 
         # 4.3.0 Build: I20120411-2034
-        SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId}"
+        SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $BUILD_FAILED_STRING"
     else
         # 4.3.0 Build: I20120411-2034
-        SUBJECT="PDE based ${eclipseStream} ${buildType}-Build: ${buildId}"
+        SUBJECT="PDE based ${eclipseStream} ${buildType}-Build: ${buildId} $BUILD_FAILED_STRING"
     fi
 
     # override in buildeclipse.shsource if doing local tests
@@ -93,8 +102,14 @@ function sendPromoteMail ()
     #we could? to "fix up" TODIR since it's in file form, not URL
     # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
-    message1="\n\n\tDownload:\n\t${downloadURL}\n\n\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds"
-    message2="\n\n\tDownload:\n\t${downloadURL}\n\n\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased"
+    message1="\n\n\tDownload:\n\t${downloadURL}\n"
+    message2="\n\n\tDownload:\n\t${downloadURL}\n"
+    # Do not include repo, if build failed
+    if [[ -z "${BUILD_FAILED}" ]]
+    then 
+        message1=$message1+"\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds"
+        message2=$message2+"\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased"
+    fi
 
     if [[ "${BUILD_TECH}" == "CBI" ]]
     then 
@@ -218,10 +233,10 @@ function syncRepoSite ()
     fi
     # update composite!
     # add ${buildId} to {toDir}
-    
+
     # runAntRunner requires basebuilder to be installed at drop site, so we'll check here if it exists yet, 
     # and if not, fetch it.
-    
+
     dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
     basebuilderDir="${dropFromBuildDir}/org.eclipse.releng.basebuilder" 
     if [[ -d $basebuilderDir ]]
@@ -232,7 +247,7 @@ function syncRepoSite ()
         ant -f ${SCRIPTDIR}/getBaseBuilder.xml -DWORKSPACE=$dropFromBuildDir
     fi
 
-${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
+    ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     RC=$?
     return $RC
 }
@@ -247,7 +262,7 @@ ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToCompo
 #    BUILD_TECH    (CBI or PDE)
 #    EBUILDER_HASH (SHA1 HASH or branch of eclipse builder to used
 
-if [[ $# != 4 ]]
+if [[ $# < 4 ]]
 then
     # usage:
     scriptname=$(basename $0)
@@ -298,6 +313,11 @@ then
 fi
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
+# we get all build variables here. Currently need it to check if BUILD_FAILED is defined. 
+# if BUILD FAILED, we still "publish", but dont' update bad repo nor start tests
+BUILD_ENV_FILE=$5 
+source $BUILD_ENV_FILE
+
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
 echo "buildType: $buildType"
@@ -319,6 +339,7 @@ echo "eclipseStreamMinor: $eclipseStreamMinor"
 echo "eclipseStreamService: $eclipseStreamService"
 echo "BUILD_TECH: $BUILD_TECH"
 echo "buildType: $buildType"
+echo "BUILD_ENV_FILE: $BUILD_ENV_FILE"
 
 # = = = = = = = = = 
 # compute dirctiory on build machine
@@ -334,17 +355,21 @@ SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
 ${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
-syncRepoSite "$eclipseStream" "$buildType" "$BUILD_TECH" 
+# if build failed, don't promote repo
+if [[ ! -z "$BUILD_FAILED" ]]
+then 
+    syncRepoSite "$eclipseStream" "$buildType" "$BUILD_TECH" 
 
-rccode=$?
+    rccode=$?
 
-if [[ $rccode != 0 ]]
-then
-    printf "\n\n\t%s\n\n"  "ERROR: something went wrong putting repo on download site. Rest of promoting build halted."
-    exit 1
+    if [[ $rccode != 0 ]]
+    then
+        printf "\n\n\t%s\n\n"  "ERROR: something went wrong putting repo on download site. Rest of promoting build halted."
+        exit 1
+    fi
 fi
 
-
+# We still update drop location, even if failed, just to get the logs up there on downloads
 syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" "${EBUILDER_HASH}"
 rccode=$?
 if [[ $rccode != 0 ]]
@@ -353,11 +378,14 @@ then
     exit 1
 fi
 
-# if update to downloads succeeded, start the unit tests on Hudson
-startTests $eclipseStreamMajor $buildType $eclipseStream $buildId $BUILD_TECH ${EBUILDER_HASH}
+# if build failed, don't run tests ... they'll fail right away
+if [[ ! -z "$BUILD_FAILED" ]]
+then 
+    # if update to downloads succeeded, start the unit tests on Hudson
+    startTests $eclipseStreamMajor $buildType $eclipseStream $buildId $BUILD_TECH ${EBUILDER_HASH}
+fi
 
-
-sendPromoteMail "$eclipseStream" "$buildId" "$BUILD_TECH"
+sendPromoteMail "$eclipseStream" "$buildId" "$BUILD_TECH" "$BUILD_FAILED"
 rccode=$?
 if [[ $rccode != 0 ]]
 then

@@ -79,7 +79,9 @@ echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEcli
 # TODO: changed "syncDropLocation" to handle a third parameter (CBI or PDE)
 # And now a fourth ... eBuilder HASHTAG,so won't always have to assume master, and 
 # so the tests can get their own copy.
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $EBUILDER_HASH" >> ${promoteScriptLocationEclipse}/${scriptName}
+# and now a fifth, so we can 'source' all relevent variables ... in particular, we want
+# to see if BUILD_FAILED is defined. 
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $EBUILDER_HASH $BUILD_ENV_FILE" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
