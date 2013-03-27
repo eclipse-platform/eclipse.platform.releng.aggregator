@@ -115,91 +115,95 @@ fn-write-property BUILD_TYPE_NAME
 
 echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 
+getAggregatorFailed=false
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
 if [[ -f "${buildDirectory}/buildFailed-get-aggregator" ]]
 then
     getAggregatorFailed=true
     /bin/grep "\[ERROR\]" "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
-
 fi
-$SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
-checkForErrorExit $? "Error occurred while updating build input"
 
-#if [[ $BUILD_ID =~ [IN] ]] 
-#then
-# temp hack for bug 398141 and others
-# apply the pre-created patch from tempPatches
-#echo "INFO: apply temp patch"
-#echo "DEBUG: aggDir: $aggDir"
-#echo "DEBUG: pwd: $PWD"
-#patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/tempPatches/sbep2.patch
-#patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/tempPatches/e4rcpsource.patch
-#patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/tempPatches/ppc.patch
-#checkForErrorExit $? "Error occurred applying patch"
-#fi 
-
-# We always tag, if build successful or not
-pushd "$aggDir"
-git commit -m "Build input for build $BUILD_ID"
-# exits with 1 here? 
-#checkForErrorExit $? "Error occurred during commit of build_id"
-
-# just echos, for the moment
-$GIT_PUSH origin HEAD
-#checkForErrorExit $? "Error occurred during push of build_id commit"
-popd
-
-$SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
-checkForErrorExit $? "Error occurred during tag of build input"
-
-
-$SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
-if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
+if [[ ! $getAggregatorFailed ]]
 then
-    pomUpdateFailed=true
-    /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
-fi
-if [[ "${pomUpdateFailed}" ]] 
-then 
-    # TODO: eventually put in more logic to "track" the failure, so
-    # proper actions and emails can be sent. For example, we'd still want to 
-    # publish what we have, but not start the tests.  
-    echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
-    BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
-    fn-write-property BUILD_FAILED
-fi
 
-# if updater failed, something fairly large is wrong, so no need to compile
-if [[ ! "${pomUpdateFailed}" ]] 
-then
-    
-    $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
-    # does not seem be be "catching" error code via $?. Perhaps due to tee? 
-    # errors are "indicated" by special file
-    if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+    $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
+    checkForErrorExit $? "Error occurred while updating build input"
+
+    #if [[ $BUILD_ID =~ [IN] ]] 
+    #then
+    # temp hack for bug 398141 and others
+    # apply the pre-created patch from tempPatches
+    #echo "INFO: apply temp patch"
+    #echo "DEBUG: aggDir: $aggDir"
+    #echo "DEBUG: pwd: $PWD"
+    #patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/tempPatches/sbep2.patch
+    #patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/tempPatches/e4rcpsource.patch
+    #patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/tempPatches/ppc.patch
+    #checkForErrorExit $? "Error occurred applying patch"
+    #fi 
+
+    # We always tag, if build successful or not
+    pushd "$aggDir"
+    git commit -m "Build input for build $BUILD_ID"
+    # exits with 1 here? 
+    #checkForErrorExit $? "Error occurred during commit of build_id"
+
+    # just echos, for the moment
+    $GIT_PUSH origin HEAD
+    #checkForErrorExit $? "Error occurred during push of build_id commit"
+    popd
+
+    $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
+    checkForErrorExit $? "Error occurred during tag of build input"
+
+
+    $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+    if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
     then
-        mavenBuildFailed=true
-        /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
-        BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
-        fn-write-property BUILD_FAILED
+        pomUpdateFailed=true
+        /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
     fi
-    if [[ "${mavenBuildFailed}" ]] 
+    if [[ "${pomUpdateFailed}" ]] 
     then 
         # TODO: eventually put in more logic to "track" the failure, so
         # proper actions and emails can be sent. For example, we'd still want to 
         # publish what we have, but not start the tests.  
-        echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
+        echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
+        BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
+        fn-write-property BUILD_FAILED
     fi
 
-    # if build failed, no need to gather parts
-    if [[ ! "${mavenBuildFailed}" ]] 
-    then 
-        $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
-        checkForErrorExit $? "Error occurred during gather parts"
+    # if updater failed, something fairly large is wrong, so no need to compile
+    if [[ ! "${pomUpdateFailed}" ]] 
+    then
+
+        $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
+        # does not seem be be "catching" error code via $?. Perhaps due to tee? 
+        # errors are "indicated" by special file
+        if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
+        then
+            mavenBuildFailed=true
+            /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
+            BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
+            fn-write-property BUILD_FAILED
+        fi
+        if [[ "${mavenBuildFailed}" ]] 
+        then 
+            # TODO: eventually put in more logic to "track" the failure, so
+            # proper actions and emails can be sent. For example, we'd still want to 
+            # publish what we have, but not start the tests.  
+            echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
+        fi
+
+        # if build failed, no need to gather parts
+        if [[ ! "${mavenBuildFailed}" ]] 
+        then 
+            $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
+            checkForErrorExit $? "Error occurred during gather parts"
+        fi 
+
     fi 
-
-fi 
-
+fi
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
