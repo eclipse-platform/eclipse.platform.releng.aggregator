@@ -70,7 +70,7 @@ function sendPromoteMail ()
 
     downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
 
-    if [[ -z "${BUILD_FAILED}" ]] 
+    if [[ -n "${BUILD_FAILED}" ]] 
     then
         BUILD_FAILED_STRING="BUILD FAILED"
     else
