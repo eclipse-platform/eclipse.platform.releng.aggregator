@@ -72,7 +72,7 @@ function sendPromoteMail ()
 
     if [[ -n "${BUILD_FAILED}" ]] 
     then
-        BUILD_FAILED_STRING="BUILD FAILED"
+        BUILD_FAILED_STRING="- BUILD FAILED"
     else
         BUILD_FAILED_STRING=""
     fi
