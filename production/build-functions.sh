@@ -78,7 +78,7 @@ fn-git-checkout ()
     echo git checkout "$BRANCH"
     git checkout "$BRANCH"
     RC=$?
-    if [[ $RC != 0 ]
+    if [[ $RC != 0 ]]
     then 
         echo "[ERROR] RC from git checkout: $RC"
     fi
