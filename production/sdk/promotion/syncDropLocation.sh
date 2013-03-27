@@ -379,7 +379,7 @@ then
 fi
 
 # if build failed, don't run tests ... they'll fail right away
-if [[ ! -z "$BUILD_FAILED" ]]
+if [[ -z "$BUILD_FAILED" ]]
 then 
     # if update to downloads succeeded, start the unit tests on Hudson
     startTests $eclipseStreamMajor $buildType $eclipseStream $buildId $BUILD_TECH ${EBUILDER_HASH}
