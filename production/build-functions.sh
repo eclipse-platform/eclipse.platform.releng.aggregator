@@ -102,6 +102,9 @@ fn-git-clean ()
     # See bug 400657
     echo git clean -f -d -x
     git clean -f -d -x
+    RC=$?
+    echo "RC from git clean: $RC"
+    return $RC
 }
 
 # USAGE: fn-git-reset
