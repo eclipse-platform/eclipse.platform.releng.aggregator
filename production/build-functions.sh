@@ -77,6 +77,9 @@ fn-git-checkout ()
     BRANCH="$1"; shift
     echo git checkout "$BRANCH"
     git checkout "$BRANCH"
+    RC=$?
+    echo "RC from git checkout: $RC"
+    return $RC
 }
 
 # USAGE: fn-git-pull
@@ -112,6 +115,9 @@ fn-git-reset ()
 {
     echo git reset --hard  $@
     git reset --hard  $@
+    RC=$?
+    echo "RC from git reset: $RC"
+    return $RC
 }
 
 # USAGE: fn-git-clean-submodules
@@ -120,6 +126,9 @@ fn-git-clean-submodules ()
     # See bug 400657
     echo git submodule foreach git clean -f -d -x
     git submodule foreach git clean -f -d -x
+    RC=$?
+    echo "RC from submodule foreach git clean: $RC"
+    return $RC
 }
 
 
@@ -128,6 +137,9 @@ fn-git-reset-submodules ()
 {
     echo git submodule foreach git reset --hard HEAD
     git submodule foreach git reset --hard HEAD
+    RC=$?
+    echo "RC from submodule foreach git reset: $RC"
+    return $RC
 }
 
 # USAGE: fn-build-id BUILD_TYPE
