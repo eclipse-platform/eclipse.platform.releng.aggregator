@@ -56,6 +56,7 @@ if [ -r "$aggDir" ]; then
 else
     fn-git-clone-aggregator "$gitCache" \
         $(fn-local-repo "$AGGREGATOR_REPO") "${BRANCH}" 
+    RC=$?
     if [[ $RC != 0 ]]
     then
         exit $RC
