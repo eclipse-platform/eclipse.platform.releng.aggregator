@@ -12,9 +12,7 @@ if [ ! -r "$1" ]; then
     exit 1
 fi
 
-pushd $( dirname $0 ) >/dev/null
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
-popd >/dev/null
 
 source $SCRIPT_PATH/build-functions.sh
 
@@ -134,15 +132,11 @@ fn-publish-equinox ()
     popd
 }
 
-
-
 cd $BUILD_ROOT
 
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
-repositories=$( echo $STREAMS_PATH/repositories.txt )
-
 
 if [ -z "$BUILD_ID" ]; then
     BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
@@ -155,18 +149,6 @@ fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
-#fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
-#fn-parse-compile-logs "$BUILD_ID" \
-    #    "$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
-    #"$buildDirectory" "$launcherJar"
-
-#fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
-#RC=$?
-#if [[ $RC != 0 ]] 
-#then
-    #    echo "ERROR: Somethign went wrong publishing Eclipse. RC: $RC"
-    #exit $RC
-#else
     fn-publish-equinox "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
     RC=$?
     if [[ $RC != 0 ]] 
@@ -174,4 +156,3 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
         echo "ERROR: Somethign went wrong publishing Equinox. RC: $RC"
         exit $RC
     fi
-#fi

@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 #
 
-pushd $( dirname $0 ) >/dev/null
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
-popd >/dev/null
 
 set -- $( getopt -l buildArea:,stream:,branch: -o "" --  "$@" )
 
