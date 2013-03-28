@@ -30,27 +30,14 @@ aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 if [ -r "$aggDir" ]; then
     fn-git-clean-aggregator "$aggDir" "${BRANCH}"
     RC=$?
-    if [[ $RC != 0 ]]
-    then
-        exit $RC
-    else
+    if [[ $RC == 0 ]]
         pushd "$aggDir"
         fn-git-pull
         RC=$?
-        if [[ $RC != 0 ]]
-        then
-            popd
-            exit $RC
-        else
+        if [[ $RC == 0 ]]
             fn-git-submodule-update
             RC=$?
-            if [[ $RC != 0 ]]
-            then
-                popd
-                exit $RC
-            else
-                popd
-            fi
+            popd
         fi
     fi
 else
