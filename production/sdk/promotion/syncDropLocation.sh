@@ -107,8 +107,8 @@ function sendPromoteMail ()
     # Do not include repo, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
-        message1=$message1+"\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds"
-        message2=$message2+"\n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased"
+        message1="$message1 \n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds"
+        message2="$message2 \n\tSoftware site repository:\n\thttp://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased"
     fi
 
     if [[ "${BUILD_TECH}" == "CBI" ]]
@@ -356,17 +356,17 @@ echo "SCRIPTDIR: ${SCRIPTDIR}"
 ${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
 # if build failed, don't promote repo
-if [[ ! -z "$BUILD_FAILED" ]]
+if [[ -z "$BUILD_FAILED" ]]
 then 
     syncRepoSite "$eclipseStream" "$buildType" "$BUILD_TECH" 
-
     rccode=$?
-
     if [[ $rccode != 0 ]]
     then
         printf "\n\n\t%s\n\n"  "ERROR: something went wrong putting repo on download site. Rest of promoting build halted."
         exit 1
     fi
+else 
+    echo "Repository site not updated since BUILD FAILED"
 fi
 
 # We still update drop location, even if failed, just to get the logs up there on downloads
