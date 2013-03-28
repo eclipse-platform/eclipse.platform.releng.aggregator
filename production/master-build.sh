@@ -29,7 +29,12 @@ cd $BUILD_ROOT
 
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
+if [[ -z "${buildDirectory}" ]]
+then
+    echo "PROGRAM ERROR: buildDirectory returned from fn-build-dir was empty"
+    exit 1
+fi
 logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"

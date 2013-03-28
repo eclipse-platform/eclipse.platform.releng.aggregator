@@ -269,21 +269,18 @@ fn-git-dir ()
     echo $GIT_CACHE/$( basename "$URL" .git )
 }
 
-# USAGE: fn-build-dir ROOT BRANCH BUILD_ID STREAM
+# USAGE: fn-build-dir ROOT BUILD_ID STREAM
 #   ROOT: /shared/eclipse/builds
-#   BRANCH: R4_2_maintenance
 #   BUILD_ID: M20121119-1900
 #   STREAM: 4.3.0
-# TODO: no longer need branch
 fn-build-dir () 
 {
-    if [[ $# != 4 ]]
+    if [[ $# != 3 ]]
     then
-        exit "This function, fn-build-dir, requires 4 arguments"
+        exit "This function, fn-build-dir, requires 3 arguments, but $# provided."
         exit 1
     fi
     ROOT="$1"; shift
-    BRANCH="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
     eclipseStreamMajor=${STREAM:0:1}
@@ -295,16 +292,22 @@ fn-build-dir ()
     echo $ROOT/$dropDirSegment/$BUILD_ID
 }
 
-# USAGE: fn-basebuilder-dir ROOT BRANCH BASEBUILDER_TAG
+# USAGE: fn-basebuilder-dir ROOT BUILD_ID STREAM
 #   ROOT: /shared/eclipse/builds
-#   BRANCH: R4_2_maintenance
-#   BASEBUILDER_TAG: R38M6PlusRC3D
+#   BUILD_ID: M20121116-1100
+#   STREAM: 4.2.2
 fn-basebuilder-dir () 
 {
+    if [[ $# != 3 ]] 
+    then 
+        echo "PROGRAM ERROR: this function, fn-basebuilder-dir, requires 3 arguments"
+        exit 1
+    fi
     ROOT="$1"; shift
-    BRANCH="$1"; shift
-    BASEBUILDER_TAG="$1"; shift
-    echo $ROOT/org.eclipse.releng.basebuilder_$BASEBUILDER_TAG
+    BUILD_ID="$1"; shift
+    STREAM="$1"; shift
+    buildDirectory=$( fn-build-dir "$ROOT" "$BUILD_ID" "$STREAM" )
+    echo $buildDirectory/org.eclipse.releng.basebuilder
 }
 
 

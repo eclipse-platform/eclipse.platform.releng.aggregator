@@ -49,7 +49,7 @@ else
     RC=$?
 fi
 
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 
 if [[ $RC != 0 ]]
 then
@@ -75,7 +75,7 @@ fn-write-property EBUILDER_HASH
 # By the time we do a build and commit submodules, there would 
 # be a different one that is tagged with buildId. I'm thinking it is the latter that would be needed 
 # to "reproduce a build" but this early one may be important to debug what went wrong with a build.
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 echo "$AGGREGATOR_REPO $BRANCH $EBUILDER_HASH" >> ${buildDirectory}/directory.txt
 popd
 

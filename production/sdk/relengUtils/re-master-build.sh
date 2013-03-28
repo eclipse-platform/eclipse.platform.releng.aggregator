@@ -35,10 +35,15 @@ cd $BUILD_ROOT
 
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
+buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
+if [[ -z "${buildDirectory}" ]]
+then
+    echo "PROGRAM ERROR: buildDirectory returned from fn-build-dir was empty"
+    exit 1
+fi
 logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
-checkForErrorExit $? "Could not create buildlogs directory"
+checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
 
 LOG=$buildDirectory/buildlogs/buildOutput.txt
 #exec >>$LOG 2>&1
@@ -67,6 +72,7 @@ elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
 
+GET_AGGREGATOR_BUILD_LOG="${logsDirectory}/mb010_get-aggregator_output.txt"
 TAG_BUILD_INPUT_LOG="${logsDirectory}/mb030_tag_build_input_output.txt"
 POM_VERSION_UPDATE_BUILD_LOG="${logsDirectory}/mb050_pom-version-updater_output.txt"
 RUN_MAVEN_BUILD_LOG="${logsDirectory}/mb060_run-maven-build_output.txt"
@@ -123,13 +129,14 @@ echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.t
 
 
     
+    pomUpdateFailed=false
 $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
 if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
 then
     pomUpdateFailed=true
     /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
 fi
-if [[ "${pomUpdateFailed}" ]] 
+    if $pomUpdateFailed 
 then 
     # TODO: eventually put in more logic to "track" the failure, so
     # proper actions and emails can be sent. For example, we'd still want to 
@@ -140,7 +147,7 @@ then
 fi
 
 # if updater failed, something fairly large is wrong, so no need to compile
-if [[ ! "${pomUpdateFailed}" ]] 
+    if ! $pomUpdateFailed 
 then
     
     $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
@@ -169,7 +176,6 @@ then
     fi 
 
 fi 
-
 
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"

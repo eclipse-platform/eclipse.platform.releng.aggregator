@@ -47,7 +47,7 @@ elif [[ "${exitCode}" =~ ^-?[0-9]+$ ]]
 then
     echo "exitcode was a legal, non-zero numeric return code"
     exitrc=$exitCode
-    buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BRANCH" "$BUILD_ID" "$STREAM" )
+    buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
     # create as "indicator file" ... gets filled in more once there is a log to grep
     touch  "${buildDirectory}/buildFailed-run-maven-build"
 else
