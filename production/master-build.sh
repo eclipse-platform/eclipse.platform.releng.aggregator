@@ -25,6 +25,8 @@ source "${INITIAL_ENV_FILE}"
 
 cd $BUILD_ROOT
 
+buildrc=0
+
 # derived values
 
 
@@ -62,7 +64,7 @@ export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 # compare "what's changed". 
 if [[ -d ${LOCAL_REPO} ]]
 then
-  mv ${LOCAL_REPO} ${LOCAL_REPO}.bak 
+    mv ${LOCAL_REPO} ${LOCAL_REPO}.bak 
 fi
 export STREAMS_PATH="${aggDir}/streams"
 
@@ -129,21 +131,18 @@ fn-write-property BUILD_TYPE_NAME
 
 echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 
-getAggregatorFailed=false
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
+# if file exists, then get-aggregator failed
 if [[ -f "${buildDirectory}/buildFailed-get-aggregator" ]]
 then
-    getAggregatorFailed=true
-    # Git sometimes returns non-zero error codes for "warnings". 
+    buildrc=1
+    # Git sometimes fails (returns non-zero error codes) for "warnings". 
     # In most cases, but not all, these would be considered errors. 
     /bin/grep  "^warning: \|\[ERROR\]"  "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
     BUILD_FAILED="${GET_AGGREGATOR_BUILD_LOG}"
     fn-write-property BUILD_FAILED
-fi
-
-if ! $getAggregatorFailed
-then
-
+else
+    # if get-aggregator failed, there is no reason to try and update input or run build
     $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
     checkForErrorExit $? "Error occurred while updating build input"
 
@@ -160,13 +159,14 @@ then
     #checkForErrorExit $? "Error occurred applying patch"
     #fi 
 
-    # We always tag, if build successful or not
+    # We always make tag commits, if build successful or not, but don't push
+    # back to origin if doing N builds or test builds.
     pushd "$aggDir"
     git commit -m "Build input for build $BUILD_ID"
-    # exits with 1 here? 
+    # exits with 1 here ... with warning, if commit already exists?  
     #checkForErrorExit $? "Error occurred during commit of build_id"
 
-    # just echos, for the moment
+    # GIT_PUSH just echos, for N builds and test builds
     $GIT_PUSH origin HEAD
     #checkForErrorExit $? "Error occurred during push of build_id commit"
     popd
@@ -174,54 +174,38 @@ then
     $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
     checkForErrorExit $? "Error occurred during tag of build input"
 
-    pomUpdateFailed=false
+
     $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+    # if file exists, pom update failed
     if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
     then
-        pomUpdateFailed=true
+        buildrc=1
         /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
-    fi
-    if $pomUpdateFailed 
-    then 
-        # TODO: eventually put in more logic to "track" the failure, so
-        # proper actions and emails can be sent. For example, we'd still want to 
-        # publish what we have, but not start the tests.  
         echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
         BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
         fn-write-property BUILD_FAILED
-    fi
-
-    # if updater failed, something fairly large is wrong, so no need to compile
-    if ! $pomUpdateFailed 
-    then
-
+    else
+        # if updater failed, something fairly large is wrong, so no need to compile
         $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
-        # does not seem be be "catching" error code via $?. Perhaps due to tee? 
-        # errors are "indicated" by special file
+        # if file exists, then run maven build failed.
         if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
         then
-            mavenBuildFailed=true
+            buildrc=1
             /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
             BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
             fn-write-property BUILD_FAILED
-        fi
-        if [[ "${mavenBuildFailed}" ]] 
-        then 
             # TODO: eventually put in more logic to "track" the failure, so
             # proper actions and emails can be sent. For example, we'd still want to 
             # publish what we have, but not start the tests.  
             echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
-        fi
-
-        # if build failed, no need to gather parts
-        if [[ ! "${mavenBuildFailed}" ]] 
-        then 
+        else
+            # if build run maven build failed, no need to gather parts
             $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
             checkForErrorExit $? "Error occurred during gather parts"
         fi 
-
     fi 
 fi
+
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
