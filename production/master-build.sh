@@ -50,6 +50,11 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
+# for now, remove any existing LOCAL_REPO, and re-fetch. 
+# At some point we may reconsider this only remove once a week, 
+# or something. 
+rm -fr ${LOCAL_REPO}
+
 export STREAMS_PATH="${aggDir}/streams"
 
 BUILD_TYPE_NAME="Integration"
