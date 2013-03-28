@@ -53,7 +53,9 @@ export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 # for now, remove any existing LOCAL_REPO, and re-fetch. 
 # At some point we may reconsider this only remove once a week, 
 # or something. 
-rm -fr ${LOCAL_REPO}
+# We "remove" by moving to backup, in case there's ever any reason to 
+# compare "what's changed". 
+mv -fr ${LOCAL_REPO} ${LOCAL_REPO}.bak
 
 export STREAMS_PATH="${aggDir}/streams"
 
