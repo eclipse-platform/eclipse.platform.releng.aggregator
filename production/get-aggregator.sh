@@ -56,6 +56,9 @@ then
     # create as "indicator file" ... gets filled in more once there is a log to grep
     touch  "${buildDirectory}/buildFailed-get-aggregator"
     echo "ERROR: get-aggregator returned non-zero return code: $RC"
+    echo "       assuming 'master' for EBUILDER_HASH (for later use), since could not reliably get aggregator."
+    EBUILDER_HASH=master
+    fn-write-property EBUILDER_HASH
     exit $RC
 fi
 
