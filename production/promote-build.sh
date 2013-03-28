@@ -71,6 +71,13 @@ then
     # allows the "test" creation of promotion script, but, not have it "seen" be cron job
     scriptName=TEST-$scriptName
 fi
+
+# if EBUILDER_HASH is not defined, assume master, so order of following parameters are maintained. 
+if [[ -z "${EBUILDER_HASH}" ]] 
+then
+    EBUILDER_HASH=master
+fi
+
 # Here is content of promtion script:
 ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
