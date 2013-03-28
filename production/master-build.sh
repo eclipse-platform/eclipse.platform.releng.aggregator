@@ -55,8 +55,10 @@ export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 # or something. 
 # We "remove" by moving to backup, in case there's ever any reason to 
 # compare "what's changed". 
-mv -fr ${LOCAL_REPO} ${LOCAL_REPO}.bak
-
+if [[ -d ${LOCAL_REPO} ]]
+then
+  mv ${LOCAL_REPO} ${LOCAL_REPO}.bak 
+fi
 export STREAMS_PATH="${aggDir}/streams"
 
 BUILD_TYPE_NAME="Integration"
