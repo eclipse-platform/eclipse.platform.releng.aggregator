@@ -125,7 +125,7 @@ then
     fn-write-property BUILD_FAILED
 fi
 
-if [[ ! "${getAggregatorFailed}" ]]
+if ! $getAggregatorFailed
 then
 
     $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
@@ -158,14 +158,14 @@ then
     $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
     checkForErrorExit $? "Error occurred during tag of build input"
 
-
+    pomUpdateFailed=false
     $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
     if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
     then
         pomUpdateFailed=true
         /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
     fi
-    if [[ "${pomUpdateFailed}" ]] 
+    if $pomUpdateFailed 
     then 
         # TODO: eventually put in more logic to "track" the failure, so
         # proper actions and emails can be sent. For example, we'd still want to 
@@ -176,7 +176,7 @@ then
     fi
 
     # if updater failed, something fairly large is wrong, so no need to compile
-    if [[ ! "${pomUpdateFailed}" ]] 
+    if ! $pomUpdateFailed 
     then
 
         $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
