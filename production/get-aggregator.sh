@@ -27,14 +27,17 @@ cd $BUILD_ROOT
 gitCache=$( fn-git-cache "$BUILD_ROOT" "${BRANCH}" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
-if [ -r "$aggDir" ]; then
+if [[ -r "$aggDir" ]]
+then
     fn-git-clean-aggregator "$aggDir" "${BRANCH}"
     RC=$?
     if [[ $RC == 0 ]]
+    then
         pushd "$aggDir"
         fn-git-pull
         RC=$?
         if [[ $RC == 0 ]]
+        then
             fn-git-submodule-update
             RC=$?
             popd
