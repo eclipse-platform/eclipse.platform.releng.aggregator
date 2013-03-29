@@ -59,6 +59,8 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
+export TRACE_OUTPUT=${PWD}/trace_output.txt
+
 export BRANCH=master
 export BUILD_TYPE=I
 export STREAM=4.3.0

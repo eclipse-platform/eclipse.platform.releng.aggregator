@@ -6,29 +6,29 @@ name="$1"; shift
 
 VAL=$( grep "^${name}:" "$REPOSITORIES_TXT" | cut -f2 -d" ")
 
- # Here we count on $BUILD_TYPE being exported. TODO: make parameter later? 
+# Here we count on $BUILD_TYPE being exported. TODO: make parameter later? 
 if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]] 
 then
     if [[ "master" != $VAL ]]
     then
-       echo "INFO: Branch forced to 'master', instead of '$VAL', since doing N-Build"
-       VAL="master"
+        echo "INFO: Branch forced to 'master', instead of '$VAL', since doing N-Build"
+        VAL="master"
     fi
 fi
 
 
 if [ -z "$VAL" ]; then
-	echo No tag or branch specified for $name
-	exit
+    echo No tag or branch specified for $name
+    exit
 fi
 
 git fetch
 
 if [ -z "$(git tag -l $VAL)" ]; then
-	echo Updating branch $VAL
-	git checkout $VAL
-	git pull
+    echo Updating branch $VAL
+    git checkout $VAL
+    git pull
 else
-	echo Updating to tag $VAL
-	git checkout $VAL
+    echo Updating to tag $VAL
+    git checkout $VAL
 fi

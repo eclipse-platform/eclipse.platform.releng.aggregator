@@ -14,7 +14,7 @@ fi
 
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
-source $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.shsource
 
 source "$1"
 

@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
 # this is not really to be executed, but sourced where needed
 
+# A general purpose utility to check number of arguments match
+# what was expected. Its purpose is to help bullet-proof these scripts
+# when future changes made. 
+# Example: (such as in first line of a function)
+#   checkNArgs $# 3
+checkNArgs ()
+{
+    actual=$1
+    expected=$2
+    #echo "     DEBUG checkNArgs funcName[1]: ${FUNCNAME[1]}" >> ${TRACE_OUTPUT}
+    #echo "     DEBUG checkNArgs bashSource[2]:   ${BASH_SOURCE[2]}" >> ${TRACE_OUTPUT}
+    #echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
+    if [[ $actual != $expected ]]
+    then
+        echo "PROGRAM ERROR: expected $expected arguments but was passed $actual."
+        echo "               Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}."
+        exit 1
+    fi
+}
+
 # general purpose utility for "hard exit" if return code not zero.
 # especially useful to call/check after basic things that should normally
 # easily succeeed.
@@ -159,8 +179,10 @@ fn-git-reset-submodules ()
 
 # USAGE: fn-build-id BUILD_TYPE
 #   BUILD_TYPE: I, M, N
+# TODO: depends on RAWDATE being exported/global
 fn-build-id () 
 {
+    checkNArgs $# 1
     BUILD_TYPE="$1"; shift
     TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
     echo ${BUILD_TYPE}${TIMESTAMP}
@@ -169,8 +191,10 @@ fn-build-id ()
 # USAGE: fn-local-repo URL [TO_REPLACE]
 #   URL: git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git
 #   TO_REPLACE: git://git.eclipse.org
+# TODO: since we compute here, do we really need to define in build_eclipse_org.shsource?
 fn-local-repo () 
 {
+    checkNArgs $# 2
     FORCE_LOCAL_REPO=false
     URL="$1"; shift
     if [ build = $(hostname) -o $FORCE_LOCAL_REPO = true ]; then
@@ -188,6 +212,7 @@ fn-local-repo ()
 #   TO_REPLACE: git://git.eclipse.org
 fn-local-repos () 
 {
+    checkNArgs $# 1
     TO_REPLACE='git://git.eclipse.org'
     if [ $# -gt 0 ]; then
         TO_REPLACE="$1"; shift
@@ -201,6 +226,7 @@ fn-local-repos ()
 #   BRANCH: R4_2_maintenance
 fn-git-clone-aggregator () 
 {
+    checkNArgs $# 3
     GIT_CACHE="$1"; shift
     URL="$1"; shift
     BRANCH="$1"; shift
@@ -220,6 +246,7 @@ fn-git-clone-aggregator ()
 #   BRANCH: R4_2_maintenance
 fn-git-clean-aggregator () 
 {
+    checkNArgs $# 2
     AGGREGATOR_DIR="$1"; shift
     BRANCH="$1"; shift
     pushd "$AGGREGATOR_DIR"
@@ -254,6 +281,7 @@ fn-git-clean-aggregator ()
 #   BRANCH: R4_2_maintenance
 fn-git-cache () 
 {
+    checkNArgs $# 2
     ROOT="$1"; shift
     BRANCH="$1"; shift
     echo $ROOT/$BRANCH/gitCache
@@ -264,6 +292,7 @@ fn-git-cache ()
 #   URL: file:///gitroot/platform/eclipse.platform.releng.aggregator.git
 fn-git-dir () 
 {
+    checkNArgs $# 2
     GIT_CACHE="$1"; shift
     URL="$1"; shift
     echo $GIT_CACHE/$( basename "$URL" .git )
@@ -275,11 +304,7 @@ fn-git-dir ()
 #   STREAM: 4.3.0
 fn-build-dir () 
 {
-    if [[ $# != 3 ]]
-    then
-        exit "This function, fn-build-dir, requires 3 arguments, but $# provided."
-        exit 1
-    fi
+    checkNArgs $# 3
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
@@ -298,11 +323,7 @@ fn-build-dir ()
 #   STREAM: 4.2.2
 fn-basebuilder-dir () 
 {
-    if [[ $# != 3 ]] 
-    then 
-        echo "PROGRAM ERROR: this function, fn-basebuilder-dir, requires 3 arguments"
-        exit 1
-    fi
+    checkNArgs $# 3
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
@@ -318,8 +339,10 @@ fn-basebuilder-dir ()
 #   VERBOSE: true
 #   SIGNING: true
 #   UPDATE_BRANDING: true
+# TODO: depends on BUILD_TYPE being exported/global
 fn-maven-build-aggregator () 
 {
+    checkNArgs $# 8
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
@@ -383,6 +406,7 @@ fn-maven-build-aggregator ()
 #   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-submodule-checkout () 
 {
+    checkNArgs $# 4
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     SCRIPT="$1"; shift
@@ -411,6 +435,7 @@ fn-submodule-checkout ()
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 fn-add-submodule-updates () 
 {
+    checkNArgs $# 1
     REPO_DIR="$1"; shift
     pushd "$REPO_DIR"
     adds=$( git submodule | grep "^+" | cut -f2 -d" " )
@@ -429,6 +454,7 @@ fn-add-submodule-updates ()
 #   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-tag-build-inputs () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     REPOSITORIES_TXT="$1"; shift
@@ -442,8 +468,10 @@ fn-tag-build-inputs ()
 # USAGE: fn-pom-version-updater REPO_DIR LOCAL_REPO DEBUG QUIET
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
+# TODO: depends on TMP_DIR being exported/global
 fn-pom-version-updater () 
 {
+    checkNArgs $# 4
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
     DEBUG=$1; shift
@@ -498,6 +526,7 @@ fn-pom-version-updater ()
 #   SIGNING: true
 fn-pom-version-update-with-commit () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
@@ -542,6 +571,7 @@ fn-pom-version-update-with-commit ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-repo () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -564,6 +594,7 @@ fn-gather-repo ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-sdk () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -600,6 +631,7 @@ fn-gather-sdk ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-platform () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -634,6 +666,7 @@ fn-gather-platform ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-swt-zips () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -656,6 +689,7 @@ fn-gather-swt-zips ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-test-zips () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -686,6 +720,7 @@ fn-gather-test-zips ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-ecj-jars () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -712,6 +747,7 @@ fn-gather-ecj-jars ()
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
 fn-slice-repos () 
 {
+    checkNArgs $# 4
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -744,6 +780,7 @@ fn-slice-repos ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-repo-zips () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -767,6 +804,7 @@ fn-gather-repo-zips ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-compile-logs () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -802,34 +840,18 @@ fn-gather-compile-logs ()
 #   BUILD_PRETTY_DATE: Thu Nov 20 17:47:35 EST 2012
 fn-gather-main-index () 
 {
+    checkNArgs $# 6
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     STREAM="$1"; shift
     BUILD_TYPE="$1"; shift
-    #BUILD_TYPE_NAME=Integration
-    #if [ "$BUILD_TYPE" = M ]; then
-    #    BUILD_TYPE_NAME=Maintenance
-    #fi
     BUILD_PRETTY_DATE="$1"; shift
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
     # Simplified by creating PHP variables in buildproperties.php
     cp "index.php.template" "$BUILD_DIR"/index.php
 
-    #    # fail fast if not set up correctly
-    #rc=$(fn-check-dir-exists TMP_DIR)
-    #checkForErrorExit "$rc" "$rc"
-
-    #T1=${TMP_DIR}/t1_$$
-    #T2=${TMP_DIR}/t2_$$
-    #sed "s/@eclipseStream@/$STREAM/g" index.php.template >$T1
-    #sed "s/@type@/$BUILD_TYPE_NAME/g" $T1 >$T2
-    #sed "s/@build@/$BUILD_ID/g" $T2 >$T1
-    #sed "s/@date@/$BUILD_PRETTY_DATE/g" $T1 >$T2
-    #sed "s/@buildlabel@/$BUILD_ID/g" $T2 >$T1
-    #cp $T1 "$BUILD_DIR"/index.php
-    #rm $T1 $T2
     popd
 }
 
@@ -840,6 +862,7 @@ fn-gather-main-index ()
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
 fn-parse-compile-logs () 
 {
+    checkNArgs $# 4
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
@@ -865,6 +888,7 @@ fn-parse-compile-logs ()
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
 fn-publish-eclipse () 
 {
+    checkNArgs $# 6
     BUILD_TYPE="$1"; shift
     BUILD_STREAM="$1"; shift
     BUILD_ID="$1"; shift
@@ -897,10 +921,14 @@ fn-publish-eclipse ()
 #   BASEBUILDER_TAG: R3_7
 fn-checkout-basebuilder () 
 {
+    checkNArgs $# 2
     BUILDER_DIR="$1"; shift
     BASEBUILDER_TAG="$1"; shift
     if [ -e "$BUILDER_DIR" ]; then
-        return
+        return 0
+    else 
+        echo "Basebuilder directory already existed, so not re-fetched."
+        echo "   Directory found at $BUILDER_DIR."
     fi
     pushd $( dirname "$BUILDER_DIR" )
     wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
@@ -914,6 +942,7 @@ fn-checkout-basebuilder ()
 #   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
 fn-basebuilder-launcher () 
 {
+    checkNArgs $# 1
     BUILDER_DIR="$1"; shift
     find "$BUILDER_DIR" -name "org.eclipse.equinox.launcher_*.jar" | tail -1
 }
@@ -924,6 +953,7 @@ fn-basebuilder-launcher ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-pom-version-report () 
 {
+    checkNArgs $# 3
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -964,6 +994,7 @@ fn-pom-version-report ()
 #        checkForErrorExit "$rc" "$rc"
 fn-check-dir-exists () 
 {
+    checkNArgs $# 1
     DIR_VAR_NAME=$1
     if [[ -z "${!DIR_VAR_NAME}" ]]
     then
@@ -1000,6 +1031,7 @@ fn-check-dir-exists ()
 
 fn-write-property () 
 {
+    checkNArgs $# 1
     VAR_NAME=$1
     if [[ -z "${VAR_NAME}" ]]
     then
@@ -1020,7 +1052,7 @@ fn-write-property ()
 # Must be called (exactly) once before writing properties. 
 fn-write-property-init () 
 {
-
+    checkNArgs $# 0
     # nothing really required for bash shsource, but we'll put in some niceties
     echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
     echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
@@ -1036,7 +1068,7 @@ fn-write-property-init ()
 # Must be called (exactly) once when completely finished writing properties. 
 fn-write-property-close () 
 {
-
+    checkNArgs $# 0
     # nothing really required for bash shsource, but we'll put in some niceties
     echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>

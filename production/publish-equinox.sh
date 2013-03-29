@@ -14,7 +14,7 @@ fi
 
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
-source $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.shsource
 
 source "$1"
 
@@ -149,10 +149,10 @@ fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
-    fn-publish-equinox "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
-    RC=$?
-    if [[ $RC != 0 ]] 
-    then
-        echo "ERROR: Somethign went wrong publishing Equinox. RC: $RC"
-        exit $RC
-    fi
+fn-publish-equinox "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
+RC=$?
+if [[ $RC != 0 ]] 
+then
+    echo "ERROR: Somethign went wrong publishing Equinox. RC: $RC"
+    exit $RC
+fi

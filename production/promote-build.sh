@@ -41,7 +41,7 @@ then
     SCRIPT_PATH=${PWD}
 fi
 
-source $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.shsource
 
 source "$2" 2>/dev/null
 

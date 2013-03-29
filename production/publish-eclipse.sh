@@ -14,7 +14,7 @@ fi
 
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
-source $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.shsource
 
 source "$1"
 
@@ -37,7 +37,7 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-parse-compile-logs "$BUILD_ID" \
-"$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
-"$buildDirectory" "$launcherJar"
+    "$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
+    "$buildDirectory" "$launcherJar"
 
 fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"

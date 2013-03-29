@@ -24,12 +24,14 @@ fi
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
 
-source "${SCRIPT_PATH}/build-functions.sh"
+source "${SCRIPT_PATH}/build-functions.shsource"
 
 source "${INITIAL_ENV_FILE}"
 
 
 cd $BUILD_ROOT
+
+buildrc=0
 
 # derived values
 
@@ -50,6 +52,14 @@ LOG=$buildDirectory/buildlogs/buildOutput.txt
 
 BUILD_PRETTY_DATE=$( date --date='@'$RAWDATE )
 TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+
+# TRACE_OUTPUT is not normally used. But, it comes in handy for debugging
+# when output from some functions can not be written to stdout or stderr 
+# (due to the nature of the function ... it's "output" being its returned value).
+# When needed for local debugging, usually more convenient to provide 
+# a value relative to PWD in startup scripts. 
+export TRACE_OUTPUT=${TRACE_OUTPUT:-$buildDirectory/buildlogs/trace_output.txt}
+echo $BUILD_PRETTY_DATE > ${TRACE_OUTPUT}
 
 # These files have variable/value pairs for this build, suitable for use in 
 # shell scripts, PHP files, or as Ant (or Java) properties
@@ -128,49 +138,33 @@ echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.t
 
 
 
-    
-    pomUpdateFailed=false
+
+
 $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+# if file exists, pom update failed
 if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
 then
-    pomUpdateFailed=true
+    buildrc=1
     /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
-fi
-    if $pomUpdateFailed 
-then 
-    # TODO: eventually put in more logic to "track" the failure, so
-    # proper actions and emails can be sent. For example, we'd still want to 
-    # publish what we have, but not start the tests.  
     echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}." 
     BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
     fn-write-property BUILD_FAILED
-fi
-
-# if updater failed, something fairly large is wrong, so no need to compile
-    if ! $pomUpdateFailed 
-then
-    
+else
+    # if updater failed, something fairly large is wrong, so no need to compile
     $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
-    # does not seem be be "catching" error code via $?. Perhaps due to tee? 
-    # errors are "indicated" by special file
+    # if file exists, then run maven build failed.
     if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
     then
-        mavenBuildFailed=true
+        buildrc=1
         /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
         BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
         fn-write-property BUILD_FAILED
-    fi
-    if [[ "${mavenBuildFailed}" ]] 
-    then 
         # TODO: eventually put in more logic to "track" the failure, so
         # proper actions and emails can be sent. For example, we'd still want to 
         # publish what we have, but not start the tests.  
         echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
-    fi
-
-    # if build failed, no need to gather parts
-    if [[ ! "${mavenBuildFailed}" ]] 
-    then 
+    else
+        # if build run maven build failed, no need to gather parts
         $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
         checkForErrorExit $? "Error occurred during gather parts"
     fi 

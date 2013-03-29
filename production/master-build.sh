@@ -18,9 +18,10 @@ fi
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
 
-source "${SCRIPT_PATH}/build-functions.sh"
+source "${SCRIPT_PATH}/build-functions.shsource"
 
 source "${INITIAL_ENV_FILE}"
+
 
 
 cd $BUILD_ROOT
@@ -46,6 +47,14 @@ LOG=$buildDirectory/buildlogs/buildOutput.txt
 
 BUILD_PRETTY_DATE=$( date --date='@'$RAWDATE )
 TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
+
+# TRACE_OUTPUT is not normally used. But, it comes in handy for debugging
+# when output from some functions can not be written to stdout or stderr 
+# (due to the nature of the function ... it's "output" being its returned value).
+# When needed for local debugging, usually more convenient to provide 
+# a value relative to PWD in startup scripts. 
+export TRACE_OUTPUT=${TRACE_OUTPUT:-$buildDirectory/buildlogs/trace_output.txt}
+echo $BUILD_PRETTY_DATE > ${TRACE_OUTPUT}
 
 # These files have variable/value pairs for this build, suitable for use in 
 # shell scripts, PHP files, or as Ant (or Java) properties

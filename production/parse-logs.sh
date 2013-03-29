@@ -2,19 +2,19 @@
 #
 
 if [ $# -ne 1 ]; then
-	echo USAGE: $0 env_file
-	exit 1
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 if [ ! -r "$1" ]; then
-	echo "$1" cannot be read
-	echo USAGE: $0 env_file
-	exit 1
+    echo "$1" cannot be read
+    echo USAGE: $0 env_file
+    exit 1
 fi
 
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
-source $SCRIPT_PATH/build-functions.sh
+source $SCRIPT_PATH/build-functions.shsource
 
 source "$1"
 
@@ -26,7 +26,7 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then
-	BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
+    BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "${STREAM}" )
@@ -37,5 +37,5 @@ fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
 fn-parse-compile-logs "$BUILD_ID" \
-"$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/eclipse_convert.xml \
-"$buildDirectory" "$launcherJar"
+    "$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/buildScripts/eclipse_convert.xml \
+    "$buildDirectory" "$launcherJar"
