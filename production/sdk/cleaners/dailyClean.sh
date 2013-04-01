@@ -4,7 +4,7 @@
 #       This logic, though, in theory, depending on when ran, could find say 6 builds,
 #       then remove them all if all older than 4 days.
 nbuilds=$( find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -name "N*" -exec echo '{}' \; | wc -l )
-if [[ $nbuilds > 4 ]]
+if (( $nbuilds > 4 ))
 then
     echo "Number of builds before cleaning: $nbuilds"
     find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -ctime +3 -name "N*" -ls -exec rm -fr '{}' \;
