@@ -8,11 +8,6 @@
         name="publishingContent"
         value="${eclipse.build.configs}/../publishingFiles" />
 
-    <!-- stream specific. Kepler only is ia64. Juno is ia64_32 -->
-    <property
-        name="hpuxia64bitness"
-        value="ia64" />
-    
     
     <!-- ===================================================================== -->
     <!-- Set of helper targets for building the Eclipse SDK -->
@@ -123,7 +118,7 @@
                         value="gtk" />
                     <param
                         name="arch"
-                        value="${hpuxia64bitness}" />
+                        value="ia64" />
                 </antcall>
             </sequential>
         </parallel>
@@ -414,49 +409,6 @@
         <antcall target="generatePerformanceResults" />
     </target>
 
-    <!-- ===================================================================== -->
-    <!-- Helper targets                                                        -->
-    <!-- ===================================================================== -->
-    <target
-        name="mail"
-        unless="noMail">
-        <!-- helper target for sending email messages related to build. -->
-        <mail
-            mailhost="${host}"
-            from="${sender}"
-            tolist="${recipients}"
-            subject="[eclipse-build] ${buildId}: ${subject}"
-            message="${message}"
-            failonerror="false" />
-    </target>
-
-    <!-- cvs team should do what they need here, not builder. 
-    <target
-        name="configure.team.cvs.test"
-        unless="test.xml.tmp"
-        if="cvstest.properties">
-        <copy
-            file="${eclipse.build.configs}/sdk.tests/testScripts/test.xml"
-            tofile="${eclipse.build.configs}/sdk.tests/testScripts/test.xml.tmp" />
-        < replace
-            file="${eclipse.build.configs}/sdk.tests/testScripts/test.xml"
-            propertyFile="${cvstest.properties}">
-            < replacefilter
-                token="${cvs_user}"
-                property="cvs_user" />
-            < replacefilter
-                token="${cvs_password}"
-                property="cvs_password" />
-            < replacefilter
-                token="${cvs_host}"
-                property="cvs_host" />
-            < replacefilter
-                token="${cvs_root}"
-                property="cvs_root" />
-        </replace>
-        <delete file="${eclipse.build.configs}/sdk.tests/testScripts/test.xml.tmp" />
-    </target>
--->
     <target name="generateEclipseIndex">
         <condition
             property="generatorClass"
@@ -525,51 +477,11 @@
         <!-- <verifyCompile install="${postingDirectory}/${buildLabel}/compilelogs" /> -->
     </target>
 
-    <target
-        name="rSyncWithSnzZrh"
-        if="rsync">
-        <!--copy drops to local directory for rsync with zrh-->
-        <copy todir="/builds/transfer/files/zrh">
-            <fileset
-                dir="${postingDirectory}"
-                includes="${buildLabel}/eclipse-SDK-*-win32.zip,${buildLabel}/eclipse-SDK-*-linux-*.tar.gz"
-                excludes="${buildLabel}/eclipse-SDK-examples-*-win32.zip,${buildLabel}/eclipse-SDK-*-linux-gtk-x86_64.tar.gz,${buildLabel}/eclipse-SDK-*-linux-gtk-ppc.tar.gz,${buildLabel}/eclipse-SDK-*-linux-motif.tar.gz,${buildLabel}/eclipse-SDK-*-linux-gtk-s390.tar.gz,${buildLabel}/eclipse-SDK-*-linux-gtk-s390x.tar.gz,${buildLabel}/eclipse-SDK-*-linux-gtk-ppc64.tar.gz" />
-        </copy>
-    </target>
     <!-- ===================================================================== -->
     <!-- Default target                                                        -->
     <!-- ===================================================================== -->
     <target name="noDefault">
         <echo message="You must specify a target when invoking this file" />
-    </target>
-
-    <target
-        name="cleanSites"
-        unless="skip.clean.sites">
-        <cleanSite
-            ageInMinutes="1440"
-            directoryName="/builds/transfer/files/master/downloads/drops"
-            realDelete="true" />
-        <cleanSite
-            ageInMinutes="1440"
-            directoryName="/builds/transfer/files/master/equinox/drops"
-            realDelete="true" />
-        <cleanSite
-            ageInMinutes="1440"
-            directoryName="/builds/transfer/files/bogus/downloads/drops"
-            realDelete="true" />
-        <cleanSite
-            ageInMinutes="1440"
-            directoryName="/builds/transfer/files/bogus/equinox/drops"
-            realDelete="true" />
-        <cleanSite
-            ageInMinutes="1440"
-            directoryName="/builds/transfer/files/zrh"
-            realDelete="true" />
-        <cleanSite
-            ageInMinutes="1440"
-            directoryName="/builds/transfer/files/snz"
-            realDelete="true" />
     </target>
 
 </project>
