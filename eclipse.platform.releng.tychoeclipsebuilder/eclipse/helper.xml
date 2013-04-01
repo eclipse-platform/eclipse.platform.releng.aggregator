@@ -8,6 +8,8 @@
         name="publishingContent"
         value="${eclipse.build.configs}/../publishingFiles" />
 
+    <fail unless="EBuilderDir" message="EBuilderDir must be passed in to this script" />
+    
     
     <!-- ===================================================================== -->
     <!-- Set of helper targets for building the Eclipse SDK -->
@@ -304,122 +306,9 @@
 
     </target>
 
-
-    <!-- ===================================================================== -->
-    <!-- Target used to test the build                                         -->
-    <!-- ===================================================================== -->
-    <target
-        name="testAll"
-        unless="skip.tests">
-        <waitfor
-            maxwait="4"
-            maxwaitunit="hour"
-            checkevery="1"
-            checkeveryunit="minute">
-            <and>
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-Automated-Tests-${buildId}.zip.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-SDK-${buildId}-win32.zip.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-SDK-${buildId}-linux-gtk.tar.gz.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-${buildId}-delta-pack.zip.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-platform-${buildId}-win32.zip.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-platform-${buildId}-linux-gtk.tar.gz.md5" />
-                <available file="${postingDirectory}/${buildLabel}/checksum/eclipse-platform-${buildId}-macosx-cocoa.tar.gz.md5" />
-            </and>
-        </waitfor>
-
-        <property
-            name="cvstest.properties"
-            value="${base.builder}/../eclipseInternalBuildTools/cvstest.properties" />
-        <echo message="cvstest.properties ${cvstest.properties}" />
-        <antcall target="configure.team.cvs.test" />
-
-        <!--replace buildid in vm.properties for JVM location settings-->
-   <!-- I cant see how this is needed any longer
-        < replace
-            dir="${eclipse.build.configs}/sdk.tests/testConfigs"
-            token="@buildid@"
-            value="${buildId}"
-            includes="**/vm.properties" />
--->
-        <antcall target="addnoperfmarker" />
-
-        <parallel>
-            <antcall target="test-JUnit" />
-            <antcall target="test-performance" />
-        </parallel>
-    </target>
-
-    <target
-        name="addnoperfmarker"
-        if="skip.performance.tests">
-        <mkdir dir="${postingDirectory}/${buildLabel}/noperf" />
-    </target>
-
-    <target name="test-JUnit">
-        <echo message="Starting tests." />
-        <property
-            name="dropLocation"
-            value="${postingDirectory}" />
-        <condition
-            propertyname="testsInvoke"
-            value="testHudsonAll.xml">
-            <equals
-                arg1="${hudson}"
-                arg2="true" />
-        </condition>
-        <property testsInvoke="testAll.xml" />
-        <ant
-            antfile="${testsInvoke}"
-            dir="${eclipse.build.configs}/sdk.tests/testConfigs" />
-
-        <antcall target="generateEclipseIndex" />
-
-        <!--copy the test results and new index page to the posting location-->
-        <copy
-            todir="${postingDirectory}/${buildLabel}"
-            overwrite="true">
-            <fileset
-                dir="${buildDirectory}/${buildLabel}"
-                includes="testresults/**,*.php" />
-        </copy>
-        <!--
-        < replace
-            file="${postingDirectory}/${buildLabel}/testResults.php"
-            token="@build@"
-            value="${buildId}" />
-         -->
-    </target>
-
-    <!-- ===================================================================== -->
-    <!-- Target used to test the build                                         -->
-    <!-- ===================================================================== -->
-    <target
-        name="test-performance"
-        unless="skip.performance.tests">
-
-        <echo message="Starting performance tests." />
-        <property
-            name="dropLocation"
-            value="${postingDirectory}" />
-        <ant
-            antfile="testAll.xml"
-            dir="${eclipse.build.configs}/sdk.tests/testConfigs"
-            target="performanceTests" />
-        <antcall target="generatePerformanceResults" />
-    </target>
-
     <target name="generateEclipseIndex">
-        <condition
-            property="generatorClass"
-            value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
-            <equals
-                arg1="${hudson}"
-                arg2="true" />
-        </condition>
-        <property
-            name="generatorClass"
-            value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
+        <property name="generatorClass"
+            value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail" />
 
         <available
             classname="${generatorClass}"
@@ -428,7 +317,7 @@
 
         <!--regenerate the index page with links to test results-->
         <ant
-            antfile="${base.builder}/plugins/org.eclipse.build.tools/scripts/publish.xml"
+            antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
             dir="${publishingContent}"
             target="generateIndex">
             <property
