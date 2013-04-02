@@ -110,20 +110,21 @@ fn-publish-equinox ()
     BUILD_MACHINE_ROOT=/shared/eclipse/builds
     BUILD_MACHINE_DROP_DIR=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM")
     BUILD_MACHINE_DROP_DIR_PARENT=$(dirname $BUILD_MACHINE_DROP_DIR)
+    EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
         -application org.eclipse.ant.core.antRunner \
         -v \
-        -buildfile "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/helper.xml \
-        -Dequinox.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/buildConfigs \
+        -buildfile "$EBuilderDir"/equinox/helper.xml \
+        -Dequinox.build.configs="$EBuilderDir"/equinox/buildConfigs \
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
         -DpostingDirectory=$BUILD_DIR \
         -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
-        -DeqpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox/publishingFiles \
+        -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
-        -DEBuilderDir="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
+        -DEBuilderDir="$EBuilderDir" \
         -DeclipseStream=$BUILD_STREAM \
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
@@ -144,6 +145,8 @@ fi
 
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
+
+$SCRIPT_PATH/getEBuilderForDropDir.sh $buildDirectory $EBUILDER_HASH
 
 fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 

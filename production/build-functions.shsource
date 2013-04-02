@@ -875,7 +875,7 @@ fn-parse-compile-logs ()
         -buildfile "$ANT_SCRIPT" \
         -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
         -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
-        -DEBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+        -DEBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder \
         -DbuildId="$BUILD_ID" \
         -DbuildLabel="$BUILD_ID" \
         verifyCompile
@@ -898,19 +898,20 @@ fn-publish-eclipse ()
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
+    EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
         -application org.eclipse.ant.core.antRunner \
         -v \
-        -buildfile "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
-        -Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
+        -buildfile "$EBuilderDir"/eclipse/helper.xml \
+        -Declipse.build.configs="$EBuilderDir" \
         -DbuildId="$BUILD_ID" \
         -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
         -DpostingDirectory=$(dirname "$BUILD_DIR") \
         -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
-        -DpublishingContent="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles \
+        -DpublishingContent="$EBuilderDir"/eclipse/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
-        -DEBuilderDir="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
+        -DEBuilderDir="$EBuilderDir" \
         -Dhudson=true \
         -DeclipseStream=$BUILD_STREAM \
         -DbuildType="$BUILD_TYPE" \

@@ -31,13 +31,17 @@ fi
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 
+$SCRIPT_PATH/getEBuilderForDropDir.sh $buildDirectory $EBUILDER_HASH
+
 fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
+EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-parse-compile-logs "$BUILD_ID" \
-    "$aggDir"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/helper.xml \
+    "$EBuilderDir"/eclipse/helper.xml \
     "$buildDirectory" "$launcherJar"
 
 fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
