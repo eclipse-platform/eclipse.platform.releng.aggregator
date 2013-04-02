@@ -73,6 +73,8 @@ export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 # compare "what's changed". 
 if [[ -d ${LOCAL_REPO} ]]
 then
+    # remove existing backup, if it exists
+    rm -fr ${LOCAL_REPO}.bak 2>/dev/null
     mv ${LOCAL_REPO} ${LOCAL_REPO}.bak 
 fi
 export STREAMS_PATH="${aggDir}/streams"
