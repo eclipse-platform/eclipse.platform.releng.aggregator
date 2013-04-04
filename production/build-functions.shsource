@@ -977,6 +977,7 @@ fn-pom-version-report ()
     # not to display link if index.html is not present. 
     if [[ $nDiffs > 0 ]] 
     then
+        POM_UPDATES=""
         echo "<html>"  >index.html 
         echo "<head>"  >>index.html
         echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
@@ -989,9 +990,12 @@ fn-pom-version-report ()
         for f in *.diff; do
             FNAME=$( basename $f .diff )
             echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
+            POM_UPDATES=$POM_UPDATES "<li><a href=\"$f\">$FNAME</a></li>"
         done
         echo "</ul>" >> index.html
         echo "</html>" >> index.html
+        # we write to property files, for later use in email message
+        fn-write-property POM_UPDATES
     fi
     popd
     popd
