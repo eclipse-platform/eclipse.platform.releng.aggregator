@@ -72,18 +72,23 @@ function sendPromoteMail ()
 
     if [[ -n "${BUILD_FAILED}" ]] 
     then
-        BUILD_FAILED_STRING="- BUILD FAILED"
+        EXTRA_SUBJECT_STRING=" - BUILD FAILED"
     else
-        BUILD_FAILED_STRING=""
+        EXTRA_SUBJECT_STRING=""
+    fi
+    
+    if [[ -n "${POM_UPDATES}" ]] 
+    then
+        EXTRA_SUBJECT_STRING="${EXTRA_SUBJECT_STRING} - POM UPDATES REQUIRED"
     fi
 
     if [[ "${BUILD_TECH}" == "CBI" ]]
     then 
         # 4.3.0 Build: I20120411-2034
-        SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $BUILD_FAILED_STRING"
+        SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
     else
         # 4.3.0 Build: I20120411-2034
-        SUBJECT="PDE based ${eclipseStream} ${buildType}-Build: ${buildId} $BUILD_FAILED_STRING"
+        SUBJECT="PDE based ${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
     fi
 
     # override in buildeclipse.shsource if doing local tests
@@ -102,8 +107,8 @@ function sendPromoteMail ()
     #we could? to "fix up" TODIR since it's in file form, not URL
     # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
-    message1="\n\n\tDownload:\n\t${downloadURL}\n"
-    message2="\n\n\tDownload:\n\t${downloadURL}\n"
+    message1="\n\tDownload:\n\t${downloadURL}\n"
+    message2="\n\tDownload:\n\t${downloadURL}\n"
     # Do not include repo, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
@@ -113,9 +118,21 @@ function sendPromoteMail ()
 
     if [[ "${BUILD_TECH}" == "CBI" ]]
     then 
-        echo -e ${message1} | mail -s "${SUBJECT}" "${TO}"  
+        (
+        echo "To: ${TO}"
+        echo "MIME-Version: 1.0"
+        echo "Content-Type: text/html; charset=utf-8"
+        echo "Subject: ${SUBJECT}"
+        echo -e ${message1}
+        ) | /usr/lib/sendmail -t
     else
-        echo -e ${message2} | mail -s "${SUBJECT}" "${TO}"  
+        (
+        echo "To: ${TO}"
+        echo "MIME-Version: 1.0"
+        echo "Content-Type: text/html; charset=utf-8"
+        echo "Subject: ${SUBJECT}"
+        echo -e ${message2}
+        ) | /usr/lib/sendmail -t
     fi
     echo "mail sent for $eclipseStream $buildType-build $buildId"
     return 0
