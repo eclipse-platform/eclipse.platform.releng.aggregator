@@ -109,6 +109,13 @@ function sendPromoteMail ()
 
     message1="\n\tDownload:\n\t${downloadURL}\n"
     message2="\n\tDownload:\n\t${downloadURL}\n"
+    #TODO: later can use sed, form a property linked list
+    if [[ -n "${POM_UPDATES}" ]]
+    then 
+        message1="$message1 \n\POM Update Required: ${downloadURL}/pom_updates/"
+        message2="$message2 \n\POM Update Required: ${downloadURL}/pom_updates/"
+    fi
+
     # Do not include repo, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
