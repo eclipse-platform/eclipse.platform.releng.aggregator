@@ -943,18 +943,18 @@ fn-checkout-basebuilder ()
     fi
     echo "Basebuilder did not exist, so will fetch version ${BASEBUILDER_TAG}"
     DROP_DIR=$( dirname "$BUILDER_DIR" )
-    # Are these the same?
+    # Are these as expected? TODO: change comments.
     echo "Drop directory: $DROP_DIR"
-    echo "BUILD_DIR: $BUILD_DIR"
-    EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+    echo "BUILDER_DIR: $BUILDER_DIR"
+    EBuilderDir=$DROP_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     if [[ ! -d "${EBuilderDir}" ]]
     then
         echo "EBuilderDir did not exist, so will fetch that first"
-        ${SCRIPT_DIR}/getEBuilderForDropDir $BUILD_DIR $EBUILDER_HASH
+        ${SCRIPT_PATH}/getEBuilderForDropDir.sh $DROP_DIR $EBUILDER_HASH
     else
         echo "EBuilderDir already existed, so no need to fetch that"
     fi
-    ant -f $EBuilderDir/eclipse/getBaseBuilder.xml -DWORKSPACE=$BUILD_DIR -DbuilderVersion=${BASEBUILDER_TAG}
+    ant -f $EBuilderDir/eclipse/getBaseBuilder.xml -DWORKSPACE=$DROP_DIR -DbuilderVersion=${BASEBUILDER_TAG}
 
     #pushd $( dirname "$BUILDER_DIR" )
     #wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
