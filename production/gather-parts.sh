@@ -37,6 +37,7 @@ fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
+fn-gather-repo "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-sdk "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-platform "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-swt-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
