@@ -14,6 +14,7 @@ while getopts 'ht' OPTION
 do
     case $OPTION in
         h)    usage
+              exit
         ;;
         t)    export testbuildonly=true
         ;;
