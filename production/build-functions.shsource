@@ -942,17 +942,31 @@ fn-checkout-basebuilder ()
         return 0
     fi
     echo "Basebuilder did not exist, so will fetch version ${BASEBUILDER_TAG}"
-    pushd $( dirname "$BUILDER_DIR" )
-    wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
-    unzip -q basebuilder-${BASEBUILDER_TAG}.zip
-    mv eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG} "$BUILDER_DIR"
+    DROP_DIR=$( dirname "$BUILDER_DIR" )
+    # Are these the same?
+    echo "Drop directory: $DROP_DIR"
+    echo "BUILD_DIR: $BUILD_DIR"
+    EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+    if [[ ! -d "${EBuilderDir}" ]]
+    then
+        echo "EBuilderDir did not exist, so will fetch that first"
+        ${SCRIPT_DIR}/getEBuilderForDropDir $BUILD_DIR $EBUILDER_HASH
+    else
+        echo "EBuilderDir already existed, so no need to fetch that"
+    fi
+    ant -f $EBuilderDir/eclipse/getBaseBuilder.xml -DWORKSPACE=$BUILD_DIR -DbuilderVersion=${BASEBUILDER_TAG}
+
+    #pushd $( dirname "$BUILDER_DIR" )
+    #wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
+    #unzip -q basebuilder-${BASEBUILDER_TAG}.zip
+    #mv eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG} "$BUILDER_DIR"
     # Wile we use 'launcher' here, 'eclipse' is used in other code that shares this install, 
     # so we make sure it is executable. 
-    chmod +x "$BUILDER_DIR"/eclipse
+    #chmod +x "$BUILDER_DIR"/eclipse
     # blob characters, '*', aren't interpreted right in string
-    chmod +x "$BUILDER_DIR"/*.so*
-    rm basebuilder-${BASEBUILDER_TAG}.zip
-    popd
+    #chmod +x "$BUILDER_DIR"/*.so*
+    #rm basebuilder-${BASEBUILDER_TAG}.zip
+    #popd
 }
 
 # USAGE: fn-basebuilder-launcher BUILDER_DIR
