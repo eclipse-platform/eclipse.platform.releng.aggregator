@@ -2,16 +2,42 @@
 
 # Simple utility to run as cronjob to run Eclipse Platform builds
 # Normally resides in $BUILD_HOME
+function usage() {
+    printf "\n\tSimple script start a build of a certain stream." >&2
+    printf "\n\tUsage: %s [[-h] | [-t]] -b <buildId>" $(basename $0) >&2
+    printf "\n\t\t%s\n" "where h==help, t==test build b==buildId" >&2
+}
+# all optional
+# normally, when ran from crobjob, none should be specified
+while getopts 'htb:' OPTION
+do
+    case $OPTION in
+        h)    usage
+              exit 1
+        ;;
+        t)    export testbuildonly=true
+        ;;
+        b)    buildId=$OPTARG
+        ;;
+        '?')    usage
+              exit 2
+        ;;
+        '*')    usage
+              exit 2
+        ;;
+        esac
+done
+# no other args expected, just good reminder
+shift $(($OPTIND - 1))
 
-buildId=$1
+
 if [[ -z "${buildId}" ]]
 then
-    echo "This script requires previous (local) build Id as input."
-    echo "    For example, $( basename $0 ) I20130306-0033"
+    echo "This script requires previous (local) build Id as input." >&2
+    echo "    For example, $( basename $0 ) I20130306-0033" >&2
     exit 1
 fi
 
-#export testbuildonly=true
 
 SCRIPT_NAME=$0
 # since not from a cronjob, we can use "current directory"

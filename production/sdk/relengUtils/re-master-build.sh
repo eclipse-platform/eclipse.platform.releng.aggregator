@@ -174,8 +174,14 @@ fi
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
-$SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
-checkForErrorExit $? "Error occurred during publish-equinox"
+# We don't promote equinox if there was a build failure, and we should not even try to 
+# create the site locally, because it depends heavily on having a valid repository to 
+# work from. 
+if [[ -z "${BUILD_FAILED}" ]] 
+then
+  $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
+  checkForErrorExit $? "Error occurred during publish-equinox"
+fi 
 
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
