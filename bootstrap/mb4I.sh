@@ -6,7 +6,7 @@
 function usage() {
     printf "\n\tSimple script start a build of a certain stream." >&2
     printf "\n\tUsage: %s [[-h] | [-t]] " $(basename $0) >&2
-    printf "\n\t\t%s" "where h==help, t==test build " >&2
+    printf "\n\t\t%s\n" "where h==help, t==test build " >&2
 }
 # all optional
 # normally, when ran from crobjob, none should be specified
