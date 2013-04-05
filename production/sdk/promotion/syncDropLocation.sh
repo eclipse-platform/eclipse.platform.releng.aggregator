@@ -101,7 +101,7 @@ function sendPromoteMail ()
         TO="david_williams@us.ibm.com"
     fi
 
-    FROM=${FROM:-"'e4Builder' <david_williams@eclipse.org>"
+    FROM=${FROM:-"'e4Builder' <david_williams@eclipse.org>"}
     
     # make sure reply to goes back to the list
     # I'm not positive this is required for mailing list?
