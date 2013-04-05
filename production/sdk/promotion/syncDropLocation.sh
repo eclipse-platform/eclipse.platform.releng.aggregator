@@ -52,7 +52,7 @@ function sendPromoteMail ()
     # sent to mail list (just other email addresses)
     # espeically handy if send from one id (e.g. "david_williams)
     # only good with 'mail', not 'sendmail'
-    export MAILRC=~/.e4Buildmailrc
+    #export MAILRC=~/.e4Buildmailrc
 
     # common part of URL and file path
     # varies by build stream
@@ -101,7 +101,7 @@ function sendPromoteMail ()
         TO="david_williams@us.ibm.com"
     fi
 
-    FROM=${FROM:-"'e4Builder' <david_williams@eclipse.org>"}
+    FROM=${FROM:-"e4Builder <david_williams@eclipse.org>"}
     
     # make sure reply to goes back to the list
     # I'm not positive this is required for mailing list?
@@ -110,22 +110,34 @@ function sendPromoteMail ()
     #we could? to "fix up" TODIR since it's in file form, not URL
     # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
-    message1="<p>Download: ${downloadURL}</p>"
-    message2="<p>Download: ${downloadURL}</p>"
-    #TODO: later can use sed, form a property linked list
+    message1=""
+    message2=""
+    
+        #TODO: later can use sed, form a proper list
     if [[ -n "${POM_UPDATES}" ]]
     then 
         message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>"
         message2="$message2 <p>POM Update Required: ${downloadURL}/pom_updates/</p>"
     fi
+    
+    message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>"
+    message2="$message2 <p>Eclipse downloads: ${downloadURL}</p>"
+
 
     # Do not include repo, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
         message1="$message1 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>"
-        message2="$message2 <p>tSoftware site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased</p>"
+        message2="$message2 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased</p>"
     fi
 
+    # Do not include Equinox, if build failed
+    if [[ -z "${BUILD_FAILED}" ]]
+    then 
+        message1="$message1 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>"
+        message2="$message2 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>"
+    fi
+    
     if [[ "${BUILD_TECH}" == "CBI" ]]
     then 
         (
@@ -134,9 +146,9 @@ function sendPromoteMail ()
         echo "MIME-Version: 1.0"
         echo "Content-Type: text/html; charset=utf-8"
         echo "Subject: ${SUBJECT}"
-        echo "<html><body>
-        echo -e ${message1}
-        echo "</body></html>
+        echo "<html><body>"
+        echo -e "${message1}"
+        echo "</body></html>"
         ) | /usr/lib/sendmail -t
     else
         (
@@ -145,9 +157,9 @@ function sendPromoteMail ()
         echo "MIME-Version: 1.0"
         echo "Content-Type: text/html; charset=utf-8"
         echo "Subject: ${SUBJECT}"
-        echo "<html><body>
-        echo -e ${message2}
-        echo "</body></html>
+        echo "<html><body>"
+        echo -e "${message2}"
+        echo "</body></html>"
         ) | /usr/lib/sendmail -t
     fi
     echo "mail sent for $eclipseStream $buildType-build $buildId"
