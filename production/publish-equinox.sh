@@ -114,6 +114,7 @@ fn-publish-equinox ()
     fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
     pushd "$BUILD_DIR"
     java -jar "$BASEBUILDER_LAUNCHER" \
+        -data ${BUILD_DIR}/workspace-publishEquinox \
         -application org.eclipse.ant.core.antRunner \
         -v \
         -buildfile "$EBuilderDir"/equinox/helper.xml \
