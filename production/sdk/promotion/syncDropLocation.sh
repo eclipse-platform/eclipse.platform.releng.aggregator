@@ -134,7 +134,9 @@ function sendPromoteMail ()
         echo "MIME-Version: 1.0"
         echo "Content-Type: text/html; charset=utf-8"
         echo "Subject: ${SUBJECT}"
+        echo "<html><body>
         echo -e ${message1}
+        echo "</body></html>
         ) | /usr/lib/sendmail -t
     else
         (
@@ -143,7 +145,9 @@ function sendPromoteMail ()
         echo "MIME-Version: 1.0"
         echo "Content-Type: text/html; charset=utf-8"
         echo "Subject: ${SUBJECT}"
+        echo "<html><body>
         echo -e ${message2}
+        echo "</body></html>
         ) | /usr/lib/sendmail -t
     fi
     echo "mail sent for $eclipseStream $buildType-build $buildId"
