@@ -218,9 +218,8 @@ function startTests()
     ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${BUILD_TECH} ${EBUILDER_HASH}
 }
 
-# this funtion currently just synchs up the whole local repo
-# with the whole remote repo ... so, important to use --delete and
-# provides an easy way to "fix" the remote repo by fixing the local one first.
+# this funtion currently syncs local repo on build machine, and adds 
+# it to composite, on download server.
 function syncRepoSite ()
 {
     eclipseStream=$1

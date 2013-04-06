@@ -138,40 +138,14 @@ function updateSiteOnBuildDir()
 
     if [[ "${BUILD_TECH}" == 'CBI' ]]
     then 
-        #TODO: need branch! or ... guess with "find"
-        if [[ -z "${BRANCH}" ]]
-        then
-            BRANCH=master
-        fi
         siteDir=${buildRoot}/siteDir
         updatesSuffix="builds"
         fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
-        mkdir -p ${fromDir}
-        # for now, straight copy from what was produced to local build machine directory. This is done so that 
-        #   Rest of scripts stay common
-        #   Eventually, we might put in some mirror/comparator tasks (just as sanity check on new build ... should be impossible since new build does that early-on?) 
-        #   and mirror in EMF too? Here for now, POM later? 
-        # TODO: we are doing this important "side effect" of finding "fromDir" name. Should pull up.
-        # full form is simiilar to
-        # ${buildRoot}/${BRANCH}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository.
-        # If things are as expected, there can be only one, but we put in head -1 for good form, 
-        # in case things change, since rest expects only one.
-        sdir=$( find ${buildRoot} -regex ".*/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.repository/target/repository" -type d | head -1 )
-        echo "INFO: original source dir: $sdir" >&2
-        # make posiitive ${sdir} is not empty, or we are basically copying
-        # all of root! (and, sdir is empty if we had a failed build!)
-        if [[ -n "${sdir}" && -d "${sdir}" && -n "${fromDir}" && -d "${fromDir}" ]]
-        then
-            rsync -vr "${sdir}/" "${fromDir}/" >&2
-            if [[ $? != 0 ]]
-            then 
-                return $? 
-            fi
-        fi 
+
     elif [[ "${BUILD_TECH}" == 'PDE' ]]
     then
         siteDir=${buildRoot}/siteDir
-        updatesSuffix="builds"
+        updatesSuffix="buildspdebased"
         fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
     else
         echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH" >&2
