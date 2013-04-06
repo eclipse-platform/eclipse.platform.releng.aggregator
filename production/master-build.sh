@@ -220,6 +220,15 @@ fi
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
+
+# We don't promote repo if there was a build failure, it likely doesn't exist.
+if [[ -z "${BUILD_FAILED}" ]] 
+then
+  $SCRIPT_PATH/publish-repo.sh $BUILD_ENV_FILE >$logsDirectory/mb083_publish-repo_output.txt
+  checkForErrorExit $? "Error occurred during publish-repo"
+fi 
+
+
 # We don't promote equinox if there was a build failure, and we should not even try to 
 # create the site locally, because it depends heavily on having a valid repository to 
 # work from. 
