@@ -101,7 +101,7 @@ function sendPromoteMail ()
         TO="david_williams@us.ibm.com"
     fi
 
-    FROM=${FROM:-"e4Builder <david_williams@eclipse.org>"}
+    FROM=${FROM:-"e4Builder@eclipse.org"}
     
     # make sure reply to goes back to the list
     # I'm not positive this is required for mailing list?
@@ -116,26 +116,26 @@ function sendPromoteMail ()
         #TODO: later can use sed, form a proper list
     if [[ -n "${POM_UPDATES}" ]]
     then 
-        message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>"
-        message2="$message2 <p>POM Update Required: ${downloadURL}/pom_updates/</p>"
+        message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
+        message2="$message2 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
     fi
     
-    message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>"
-    message2="$message2 <p>Eclipse downloads: ${downloadURL}</p>"
+    message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>\n"
+    message2="$message2 <p>Eclipse downloads: ${downloadURL}</p>\n"
 
 
     # Do not include repo, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
-        message1="$message1 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>"
-        message2="$message2 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased</p>"
+        message1="$message1 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
+        message2="$message2 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased</p>\n"
     fi
 
     # Do not include Equinox, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
-        message1="$message1 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>"
-        message2="$message2 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>"
+        message1="$message1 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
+        message2="$message2 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
     fi
     
     if [[ "${BUILD_TECH}" == "CBI" ]]
