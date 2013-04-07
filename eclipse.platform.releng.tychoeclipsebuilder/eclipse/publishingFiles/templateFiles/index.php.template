@@ -215,13 +215,19 @@ if (isset ($BUILD_FAILED) ) {
     echo "Build Failed. See <a href=\"buildlogs.php\">logs</a>. <br />\n";
     $PATTERN='!(.*)(/buildlogs/)(.*)!';
     $result = preg_match($PATTERN, $BUILD_FAILED, $MATCHES);
+    // cheap short cut, since we expect only 1 such file
+    $summaryFile=glob("buildFailed-*");
     if ($result !== FALSE) {
-       $SPECIFIC_LOG=$MATCHES[3];
-       echo "Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>. <br />\n";
-    }
+        $SPECIFIC_LOG=$MATCHES[3];
+        echo "Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>, \n";
+        echo "or a <a href=\"$summaryFile[0]\">summary</a>. <br /> \n";
+        echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a>. \n";
+    } 
     echo "</td><tr>";
     // early end to table, since build failed is all we'll print.
     echo "</table>";
+    
+    
 }
 else {
 ?>
