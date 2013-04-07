@@ -282,14 +282,10 @@ function syncRepoSite ()
     # and if not, fetch it.
 
     dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
-    basebuilderDir="${dropFromBuildDir}/org.eclipse.releng.basebuilder" 
-    if [[ -d $basebuilderDir ]]
-    then
-        echo "INFO: basebuilder directory found to exist already, so not re-fetched"
-    else
-        # assume ant is on the path
-        ant -f ${SCRIPTDIR}/getBaseBuilder.xml -DWORKSPACE=$dropFromBuildDir
-    fi
+    EBuilderDir=$dropFromBuildDir/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+
+    # assume ant is on the path
+    ant -f $EBuilderDir/eclipse/getBaseBuilder.xml -DWORKSPACE=$dropFromBuildDir
 
     ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     RC=$?
