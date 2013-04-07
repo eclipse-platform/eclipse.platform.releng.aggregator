@@ -652,9 +652,9 @@ fn-gather-platform ()
         cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
         cp org.eclipse.platform.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
         #cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-	tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86_64 eclipse
+        tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86_64 eclipse
         #cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
-	tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
+        tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
         cp org.eclipse.platform.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
         cp org.eclipse.platform.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
         cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
@@ -819,10 +819,20 @@ fn-gather-compile-logs ()
         mkdir -p "$BUILD_DIR"/compilelogs/plugins
         pushd "$REPO_DIR"
         for dot in $( find * -name "@dot.xml" ); do
-            echo "Processing $dot" # org.eclipse.e4.core.di/target/@dot.xml
             targetDir=$( dirname "$dot" )
+            echo "Processing $dot in $targetDir" 
             if [ ! -r "$targetDir"/MANIFEST.MF ]; then
-                echo "**Failed to process $dot"
+                echo "**Failed to process $dot in $targetDir. Likely compile error. Will try source MANIFEST.MF in directory containing target." 
+                targetDir=$( dirname "${targetDir}" )
+                if [ ! -r "$targetDir"/META-INF/MANIFEST.MF ]
+                then
+                    echo "**Failed to process $dot in $targetDir."
+                else
+                    BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
+                    BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
+                    mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+                    cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+                fi
             else
                 BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
                 BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
@@ -832,7 +842,7 @@ fn-gather-compile-logs ()
         done
         popd
     else
-        echo "   ERROR: $REPO_DIR did not exist in fn-gather-compile-logs"
+        echo "   ERROR: $REPO_DIR did not exist in fn-gather-compile-logs"  
     fi
 }
 
