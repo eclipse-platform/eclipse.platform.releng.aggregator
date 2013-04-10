@@ -49,22 +49,24 @@ function updateSiteOnBuildMachine()
 
 
     # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
-    if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
+    if [[ "${STREAM}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
     then
         eclipseStreamMajor=${BASH_REMATCH[1]}
         eclipseStreamMinor=${BASH_REMATCH[2]}
         eclipseStreamService=${BASH_REMATCH[3]}
     else
-        echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
+        echo "STREAM, $STREAM, must contain major, minor, and service versions, such as 4.3.0" >&2
         return 1
     fi
 
     siteDir=${ROOT}/siteDir
     updatesSuffix="builds"
+
     siteDirOnBuildMachine=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${BUILD_ID}
+
     mkdir -p ${siteDirOnBuildMachine}
     RC=$?
-    if [[ RC != 0 ]] 
+    if (( RC != 0 )) 
     then 
         echo "ERROR: could not create update site on build machine. RC: $RC"
         echo "       obtained error trying to create ${siteDirOnBuildMachine}"
@@ -75,9 +77,9 @@ function updateSiteOnBuildMachine()
 }
 
 siteDirOnBuildMachine=$( updateSiteOnBuildMachine "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
-
+echo "siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
 repositoryDir=${buildDirectory}/repository
-
+echo "repositoryDir: ${repositoryDir}"
 # for now, straight copy from what was produced to local build machine directory. 
 # This is partially done so that 
 #   rest of scripts stay common
@@ -92,10 +94,10 @@ if [[ -n "${repositoryDir}" && -d "${repositoryDir}" && -n "${siteDirOnBuildMach
 then
     rsync --times --omit-dir-times --recursive "${repositoryDir}/" "${siteDirOnBuildMachine}/"
     RC=$? 
-    if [[ $RC != 0 ]]
+    if (( $RC != 0 ))
     then 
         echo "ERROR: rsync of repo returned error. RC: $RC"
-        echo "       obtained while copying 
+        echo "       obtained while copying"
         echo "       from ${repositoryDir}"
         echo "       to ${siteDirOnBuildMachine}"
         exit $RC
@@ -104,12 +106,16 @@ then
     buildType=${BUILD_ID:0:1}
     rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
     RC=$? 
-    if [[ $RC != 0 ]]
+    if (( $RC != 0 ))
     then 
         echo "ERROR: rsync of repo returned error. RC: $RC"
-        echo "       obtained while copying 
+        echo "       obtained while copying"
         echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
         echo "       to ${siteDirOnBuildMachine}"
         exit $RC
     fi
+else
+    echo "ERROR: Some directory didn't exist for update site copy."
+    echo "  repositoryDir: ${repositoryDir}"
+    echo "  siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
 fi 
