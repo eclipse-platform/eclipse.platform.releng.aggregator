@@ -1,25 +1,25 @@
 <?php  
-  # Begin: page-specific settings.  Change these.
-  $pageTitle    = "Eclipse Project Downloads";
-  $pageKeywords = "";
-  $pageAuthor   = "";
- 
-  //ini_set("display_errors", "true");
-  //error_reporting (E_ALL);
-  $eclipseStream="4";
-  $otherIndexFile="eclipse3x.html";
-  $otherStream="3";
-  include('dlconfig4.php');
-  $subdirDrops="drops4";
+# Begin: page-specific settings.  Change these.
+$pageTitle    = "Eclipse Project Downloads";
+$pageKeywords = "";
+$pageAuthor   = "";
 
-  # Use the basic white layout if the file is not hosted on download.eclipse.org
-  $layout = (array_key_exists("SERVER_NAME", $_SERVER) && ($_SERVER['SERVER_NAME'] == "download.eclipse.org")) ? "default" : "html";
- 
-  ob_start();
+//ini_set("display_errors", "true");
+//error_reporting (E_ALL);
+$eclipseStream="4";
+$otherIndexFile="eclipse3x.html";
+$otherStream="3";
+include('dlconfig4.php');
+$subdirDrops="drops4";
 
-  switch($layout){
-    case 'html':
-      #If this file is not on download.eclipse.org print the legacy headers.?>
+# Use the basic white layout if the file is not hosted on download.eclipse.org
+$layout = (array_key_exists("SERVER_NAME", $_SERVER) && ($_SERVER['SERVER_NAME'] == "download.eclipse.org")) ? "default" : "html";
+
+ob_start();
+
+switch($layout){
+case 'html':
+    #If this file is not on download.eclipse.org print the legacy headers.?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -27,19 +27,19 @@
 <link rel="stylesheet" href="../default_style.css" />
 <title><?php echo $pageTitle;?></title></head>
 <body><?php
-      break;   
-    default:
-      #Otherwise use the default layout (content printed inside the nova theme).
-      require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
-      require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/nav.class.php");
-      require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/menu.class.php");
-      $App  = new App();
-      $Nav  = new Nav();
-      $Menu   = new Menu();
-      break;     
-  }?>
+        break;   
+default:
+    #Otherwise use the default layout (content printed inside the nova theme).
+    require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
+    require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/nav.class.php");
+    require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/menu.class.php");
+    $App  = new App();
+    $Nav  = new Nav();
+    $Menu   = new Menu();
+    break;     
+}?>
 <div class="container_<?php echo $layout;?>">
-<table border="0" cellspacing="5" cellpadding="2" width="100%" >
+<table style="border:0px" cellspacing="5" cellpadding="2" width="100%" >
 
 <tr>
 
@@ -63,7 +63,7 @@ Latest downloads from the Eclipse project
 
 </table>
 
-<table border="0" cellspacing="5" cellpadding="2" width="100%" >
+<table style="border:0px" cellspacing="5" cellpadding="2" width="100%" >
 <tr>
 <td align="left" valign="top" colspan="2" bgcolor="#0080C0"><font color="#FFFFFF" face="Arial,Helvetica">Latest
 Downloads</font></td></tr> <!-- The Eclipse Projects --> <tr> <td>
@@ -94,53 +94,67 @@ builds</a>, access <a href="http://archive.eclipse.org/eclipse/downloads/">archi
 
 <?php
 
-function startsWithDropPrefix($dirName, $dropPrefix)
-{ 
+    function startsWithDropPrefix($dirName, $dropPrefix)
+    { 
 
-    $result = false;
-    // sanity check "setup" is as we expect
-    if (isset($dropPrefix) && is_array($dropPrefix)) {
-        // sanity check input
-        if (isset($dirName) && strlen($dirName) > 0) {
-            $firstChar = substr($dirName, 0, 1);
-            //echo "first char: ".$firstChar;
-            foreach($dropPrefix as $type) { 
-                if ($firstChar == "$type") {
-                    $result = true;
-                    break;
+        $result = false;
+        // sanity check "setup" is as we expect
+        if (isset($dropPrefix) && is_array($dropPrefix)) {
+            // sanity check input
+            if (isset($dirName) && strlen($dirName) > 0) {
+                $firstChar = substr($dirName, 0, 1);
+                //echo "first char: ".$firstChar;
+                foreach($dropPrefix as $type) { 
+                    if ($firstChar == "$type") {
+                        $result = true;
+                        break;
+                    }
                 }
             }
         }
+        else {
+            echo "dropPrefix not defined as expected\n";
+        }
+        return $result;
     }
-    else {
-        echo "dropPrefix not defined as expected\n";
-    }
-    return $result;
-}
 function runTestBoxes($buildName, $testResultsDirName) {
     // hard code for now the tests ran on one box (or, zero, if no testResultsDirName yet)
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
-    if ($testResultsDirName === "" ) {
-       return 0;
-    } else {
-       return 1;
-    }
+    //if ($testResultsDirName === "" ) {
+    //   return 0;
+    //} else {
+    //   return 1;
+    //}
     global $subdirDrops;
     $testBoxes=array("linux", "macosx", "win32");
     $length=count($testBoxes);
     $boxes=0;
-    // TEMP? appears "old style" builds had directories named "results"
-    if (file_exists("$subdirDrops/$buildName/$testResultsDirName")) {
-        $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName");
-        while ($file = $buildDir->read()) {
-            for ($i = 0 ; $i < $length ; $i++) {
-                if (strncmp($file, $testBoxes[$i], count($testBoxes[$i])) == 0) {
-                    $boxes++;
-                    break;
+    if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
+        // be sure any previous are reset
+        unset ($BUILD_FAILED);
+        include "$subdirDrops/$buildName/buildproperties.php"; 
+        if (isset ($BUILD_FAILED) && strlen($BUILD_FAILED) > 0) {
+            $boxes=-1;
+            unset ($BUILD_FAILED);
+        }
+    }
+    if ($boxes != -1)  {
+
+        // TEMP? appears "old style" builds had directories named "results", but now "testresults" 
+        // and we want to look in $testResultsDirName/consolelogs
+        if (file_exists("$subdirDrops/$buildName/$testResultsDirName/consolelogs")) {
+            $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName/consolelogs");
+            while ($file = $buildDir->read()) {
+                for ($i = 0 ; $i < $length ; $i++) {
+                    if (strncmp($file, $testBoxes[$i], count($testBoxes[$i])) == 0) {
+                        $boxes++;
+                        break;
+                    }
                 }
             }
         }
     }
+    //echo "boxes: $boxes";
     return $boxes;
 }
 function printBuildColumns($fileName, $parts) {
@@ -167,7 +181,7 @@ function printBuildColumns($fileName, $parts) {
     $time=intval(date("H"))*60+intval(date("i"));
     $diff=($day-$buildDay)*24*60+$time-$buildTime;
     // Add icons
-    echo "<td valign=\"baseline\">\n";
+    echo "<td valign=\"baseline\" >\n";
     // hard code for now the build is done
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
     // but later, changed ...
@@ -179,91 +193,113 @@ function printBuildColumns($fileName, $parts) {
         $build_done=false;
     }
     if ($build_done) {
-    	// test results location changed. 'testresults' is new standard
-    	// but we check for 'results' for older stuff.
-    	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=379408
+        // test results location changed. 'testresults' is new standard
+        // but we check for 'results' for older stuff.
+        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=379408
         $testResultsDirName="";
         if (file_exists("$dropDir/testresults")) {
             $testResultsDirName="testresults";
-        } else
-        if (file_exists("$dropDir/results")) {
-            $testResultsDirName="results";
-        }
-        $boxes=runTestBoxes($fileName, $testResultsDirName);
-        echo "<a href=\"$dropDir/\"><img border=\"0\" src=\"../images/build_done.gif\" title=\"Build is available\" alt=\"Build is available\" /></a>\n";
-
-        switch ($boxes) {
-        case 0:
-            // if more than 12 hours then consider that the regression tests did not start
-            if ($diff > 720) {
-            // for now, hard code to "0" since we are not reunning tests
-            //if ($diff > 0) {
-                echo "<img src=\"../images/caution.gif\" title=\"Regression tests did not run!\" alt=\"Regression tests did not run!\" />\n";
-            } else {
-                echo "<img src=\"../images/runtests.gif\" title=\"Regression tests are running...\" alt=\"Regression tests are running...\" />\n";
-            }
-            break;
-
-        case 5:
-            if ($testResultsDirName === "testresults") {
-                echo "<a href=\"$dropDir/testResults.php\">";
-            } else {
-                echo "<a href=\"$dropDir/results/testResults.html\">";
-            }
-            echo "<img border=\"0\" src=\"../images/junit.gif\" title=\"Tests results are available\" alt=\"Tests results are available\" /></a>\n";
-            break;
-        default:
-            // if more than 24 hours then consider that the regression tests did not finish
-            if ($diff > 1440) {
-                if ($testResultsDirName === "testresults") {
-                    echo "<a href=\"$dropDir/testResults.php\">";
-                } else {
-                    echo "<a href=\"$dropDir/results/testResults.html\">";
-                }
-                echo "<img border=\"0\" src=\"../images/junit.gif\" title=\"Tests results are available but did not finish on all machines\" alt=\"Tests results are available but did not finish on all machines\" /></a>\n";
-            } else {
-                echo "<img border=\"0\" src=\"../images/runtests.gif\" title=\"Tests are still running on some machines...\" alt=\"Tests are still running on some machines...\" />\n";
-            }
-        }
-        //break;
-    }
-    //    $perfsDir="$dropDir/performance";
-    //  if (file_exists("$perfsDir")) {
-    //    $perfsFile="$perfsDir/performance.php";
-    //  if (file_exists("$perfsFile")) {
-    //     if (file_exists("$perfsDir/global.php")) {
-    //echo "<a href=\"$perfsFile\"><img border=\"0\" src=\"../images/perfs.gif\" title=\"Performance tests are available\" alt=\"Performance tests are available\"/></a>\n";
-    //    } else {
-    //        echo "<img src=\"../images/caution.gif\" title=\"Performance tests ran and results should have been generated but unfortunately they are not available!\" alt=\"No Performance tests\"/>\n";
-    ///   }
-    // } else {
-    //            if (file_exists("$perfsDir/consolelogs")) {
-    // if more than one day then consider that perf tests did not finish
-    //              if ($diff > 1440) {
-    //                if (substr($buildName, 0, 1) == "I") {
-    //                  $reason="see bug 259350";
-    //            } else {
-    //              $reason="either they were not stored in DB or not generated";
-    //        }
-    //  echo "<img src=\"../images/caution.gif\" title=\"Performance tests ran but no results are available: $reason!\" alt=\"No Performance Tests\" />\n";
-    //} else {
-    //   echo "<img src=\"../images/runperfs.gif\" title=\"Performance tests are running...\" alt=\"Performance tests are running\" />\n";
-    // }
-    // }
-    // }
-    //}
-    //}
-    else {
-        // if more than 5 hours then consider that the build did not finish
-        if ($diff > 300) {
-            echo "<img src=\"../images/build_failed.gif\" title=\"Build failed!\" alt=\"Build failed!\" />\n";
         } else {
-            echo "<img src=\"../images/build_progress.gif\" title=\"Build is in progress...\" alt=\"Build is in progress.\"/>\n";
+            if (file_exists("$dropDir/results")) {
+                $testResultsDirName="results";
+            }
         }
+
+        $boxes=runTestBoxes($fileName, $testResultsDirName);
+        // boses == -1 is code that "bulid failed" and no tests are expected.
+        if ($boxes == -1) {
+            $buildimage="build_failed.gif";
+            $buildalt="Build failed";
+        } else {
+            $buildimage="build_done.gif";
+            $buildalt="Build is available";
+        }
+        echo "<a href=\"$dropDir/\"><img style=\"border:0px\" src=\"../images/$buildimage\" title=\"$buildalt\" alt=\"$buildalt\" /></a>\n";
+
+        // hard code here, for now, but make come from property file, later
+        $expectedTestBoxes=3;
+
+
+        // always put in links, since someone may want to look at logs, even if not tests results, per se
+        // don't forget to end link, after images decided.
+        $boxesTitle="";
+        if ($boxes > -1) { 
+            $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
+        }
+        if ($testResultsDirName === "results") {
+            echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+        } else {
+            echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+        }   
+
+        if ($boxes == -1) {
+            $testimage="caution.gif";
+            $testalt="Integration tests did not run due to failed build";
+        } elseif ($boxes == 0 && $diff > 720) {
+            // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
+            $testimage="caution.gif";
+            $testalt="Integration tests did not run, due to unknown reasons.";
+        } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
+            if ($diff > 1440) {
+                $testimage="junit.gif";
+                $testalt="Tests results are available but did not finish on all machines";
+            } else {
+                $testimage="runtests.gif";
+                $testalt="Integration tests are running ...";
+            }
+        } elseif ($boxes == $expectedTestBoxes) {
+            $testimage="junit.gif";
+            $testalt="Tests results are available";
+        } else {
+            $testimage="runtests.gif";
+            $testalt="Integration tests are running ...";
+        }
+        echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+        if ($boxes > -1) { 
+            echo "&nbsp;(".$boxes." of ".$expectedTestBoxes.")";
+        }
+        echo "</a>\n";
     }
     echo "</td>\n";
     return $buildName;
 }
+?>
+<?php
+//}
+//    $perfsDir="$dropDir/performance";
+//  if (file_exists("$perfsDir")) {
+//    $perfsFile="$perfsDir/performance.php";
+//  if (file_exists("$perfsFile")) {
+//     if (file_exists("$perfsDir/global.php")) {
+// echo "<a href=\"$perfsFile\"><img border=\"0\" src=\"../images/perfs.gif\" title=\"Performance tests are available\" alt=\"Performance tests are available\"/></a>\n";
+//    } else {
+//        echo "<img src=\"../images/caution.gif\" title=\"Performance tests ran and results should have been generated but unfortunately they are not available!\" alt=\"No Performance tests\"/>\n";
+///   }
+// } else {
+//            if (file_exists("$perfsDir/consolelogs")) {
+// if more than one day then consider that perf tests did not finish
+//              if ($diff > 1440) {
+//                if (substr($buildName, 0, 1) == "I") {
+//                  $reason="see bug 259350";
+//            } else {
+//              $reason="either they were not stored in DB or not generated";
+//        }
+//  echo "<img src=\"../images/caution.gif\" title=\"Performance tests ran but no results are available: $reason!\" alt=\"No Performance Tests\" />\n";
+//} else {
+//   echo "<img src=\"../images/runperfs.gif\" title=\"Performance tests are running...\" alt=\"Performance tests are running\" />\n";
+// }
+// }
+// }
+//}
+//}
+//else {
+// if more than 5 hours then consider that the build did not finish
+//    if ($diff > 300) {
+//        echo "<img src=\"../images/build_failed.gif\" title=\"Build failed!\" alt=\"Build failed!\" />\n";
+//    } else {
+//        echo "<img src=\"../images/build_progress.gif\" title=\"Build is in progress...\" alt=\"Build is in progress.\"/>\n";
+//    }
+//}
 ?>
 <?php
 // this is the main data computation part
@@ -332,7 +368,7 @@ while ($anEntry = $aDirectory->read()) {
 <tr>
 <th width="30%">Build Type</th>
 <th width="15%">Build Name</th>
-<th width="15%">Build Status</th>
+<th width="25%">Build Status</th>
 <th>Build Date</th>
 </tr>
 <?php
@@ -402,7 +438,7 @@ foreach($dropType as $value) {
         echo "<tr>\n";
 
         echo "<th width=\"15%\">Build Name</th>\n";
-        echo "<th width=\"15%\">Build Status</th>\n";
+        echo "<th width=\"25%\">Build Status</th>\n";
         echo "<th>Build Date</th>\n";
 
         echo "</tr>\n";
@@ -448,18 +484,18 @@ echo '</div>';
 $html = ob_get_clean();
 
 switch($layout){
-    case 'html':
-      #echo the computed content with the body and html closing tag. This is for the old layout.
-      echo $html;
-      echo '</body>';
-      echo '</html>';
-      break;
+case 'html':
+    #echo the computed content with the body and html closing tag. This is for the old layout.
+    echo $html;
+    echo '</body>';
+    echo '</html>';
+    break;
 
-	default:
-      #For the default view we use $App->generatePage to generate the page inside nova.
-	  $App->AddExtraHtmlHeader('<link rel="stylesheet" href="../default_style.css" />');
-	  $App->Promotion = FALSE;
-	  $App->generatePage('Nova', $Menu, NULL , $pageAuthor, $pageKeywords, $pageTitle, $html);
-	  break;
+default:
+    #For the default view we use $App->generatePage to generate the page inside nova.
+    $App->AddExtraHtmlHeader('<link rel="stylesheet" href="../default_style.css" />');
+    $App->Promotion = FALSE;
+    $App->generatePage('Nova', $Menu, NULL , $pageAuthor, $pageKeywords, $pageTitle, $html);
+    break;
 }
 
