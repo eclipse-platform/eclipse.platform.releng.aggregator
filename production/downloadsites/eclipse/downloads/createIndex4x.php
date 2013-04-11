@@ -256,7 +256,7 @@ function printBuildColumns($fileName, $parts) {
         }
         echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
         if ($boxes > -1) { 
-            echo "&nbsp;(".$boxes." of ".$expectedTestBoxes.")";
+            echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
         }
         echo "</a>\n";
     }
