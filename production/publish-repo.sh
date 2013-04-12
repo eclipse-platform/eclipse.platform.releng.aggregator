@@ -61,9 +61,7 @@ function updateSiteOnBuildMachine()
 
     siteDir=${ROOT}/siteDir
     updatesSuffix="builds"
-
     siteDirOnBuildMachine=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${BUILD_ID}
-
     mkdir -p ${siteDirOnBuildMachine}
     RC=$?
     if (( RC != 0 )) 
