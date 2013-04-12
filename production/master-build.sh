@@ -125,7 +125,6 @@ fn-write-property FORCE_LOCAL_REPO
 fn-write-property MAVEN_BREE
 fn-write-property GIT_PUSH
 fn-write-property LOCAL_REPO
-fn-write-property INITIAL_ENV_FILE
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
