@@ -15,9 +15,10 @@ checkNArgs ()
     #echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
     if [[ $actual != $expected ]]
     then
-        echo "PROGRAM ERROR: expected $expected arguments but was passed $actual."
-        echo "               Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}."
-        exit 1
+        BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
+        echo "PROGRAM ERROR: expected $expected arguments but was passed $actual." >${BUILD_FAILD}
+        echo "               Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}." >>${BUILD_FAILD}
+        return 1
     fi
 }
 
@@ -281,10 +282,12 @@ fn-git-clean-aggregator ()
 #   BRANCH: R4_2_maintenance
 fn-git-cache () 
 {
+    # we (now) leave branch our of git-cache path, or else "topic branches", such as 
+    # 'david_williams/II20130409-0900' complicates directory structure
     checkNArgs $# 2
     ROOT="$1"; shift
     BRANCH="$1"; shift
-    echo $ROOT/$BRANCH/gitCache
+    echo $ROOT/gitCache
 }
 
 # USAGE: fn-git-dir GIT_CACHE URL
@@ -394,7 +397,7 @@ fn-maven-build-aggregator ()
     pushd "$REPO_DIR"
     #mvn $MARGS --fail-never -V \
     mvn $MARGS --fail-at-end -V \
-        clean install  \
+        clean verify \
         -DskipTests=true \
         -Dmaven.repo.local=$LOCAL_REPO \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" $FORCEQUALIFIERARG
