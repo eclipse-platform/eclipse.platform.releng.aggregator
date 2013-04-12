@@ -92,6 +92,7 @@ GET_AGGREGATOR_BUILD_LOG="${logsDirectory}/mb010_get-aggregator_output.txt"
 TAG_BUILD_INPUT_LOG="${logsDirectory}/mb030_tag_build_input_output.txt"
 POM_VERSION_UPDATE_BUILD_LOG="${logsDirectory}/mb050_pom-version-updater_output.txt"
 RUN_MAVEN_BUILD_LOG="${logsDirectory}/mb060_run-maven-build_output.txt"
+GATHER_PARTS_BUILD_LOG="${logsDirectory}/mb070_gather-parts_output.txt"
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE, 
 # with values for this build (some of them computed) partially for documentation, and 
@@ -211,41 +212,47 @@ else
             echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
         else
             # if build run maven build failed, no need to gather parts
-            $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb070_gather-parts_output.txt
-            checkForErrorExit $? "Error occurred during gather parts"
+            $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
+            if [[ -f "${buildDirectory}/buildFailed-gather-parts" ]]
+            then
+                buildrc=1
+                /bin/grep -i "ERROR" "${GATHER_PARTS_BUILD_LOG}" >> "${buildDirectory}/buildFailed-gather-parts"
+                BUILD_FAILED=${GATHER_PARTS_BUILD_LOG}
+                fn-write-property BUILD_FAILED
+                echo "BUILD FAILED. See ${GATHER_PARTS_BUILD_LOG}." 
+            fi 
         fi 
+    fi
+
+    $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
+    checkForErrorExit $? "Error occurred during publish-eclipse"
+
+
+    # We don't promote repo if there was a build failure, it likely doesn't exist.
+    if [[ -z "${BUILD_FAILED}" ]] 
+    then
+        $SCRIPT_PATH/publish-repo.sh $BUILD_ENV_FILE >$logsDirectory/mb083_publish-repo_output.txt
+        checkForErrorExit $? "Error occurred during publish-repo"
     fi 
-fi
-
-$SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
-checkForErrorExit $? "Error occurred during publish-eclipse"
 
 
-# We don't promote repo if there was a build failure, it likely doesn't exist.
-if [[ -z "${BUILD_FAILED}" ]] 
-then
-  $SCRIPT_PATH/publish-repo.sh $BUILD_ENV_FILE >$logsDirectory/mb083_publish-repo_output.txt
-  checkForErrorExit $? "Error occurred during publish-repo"
-fi 
+    # We don't promote equinox if there was a build failure, and we should not even try to 
+    # create the site locally, because it depends heavily on having a valid repository to 
+    # work from. 
+    if [[ -z "${BUILD_FAILED}" ]] 
+    then
+        $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
+        checkForErrorExit $? "Error occurred during publish-equinox"
+    fi 
 
+    # if all ended well, put "promotion scripts" in known locations
+    $SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
+    checkForErrorExit $? "Error occurred during promote-build"
 
-# We don't promote equinox if there was a build failure, and we should not even try to 
-# create the site locally, because it depends heavily on having a valid repository to 
-# work from. 
-if [[ -z "${BUILD_FAILED}" ]] 
-then
-  $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
-  checkForErrorExit $? "Error occurred during publish-equinox"
-fi 
+    fn-write-property-close
 
-# if all ended well, put "promotion scripts" in known locations
-$SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
-checkForErrorExit $? "Error occurred during promote-build"
+    # dump ALL environment variables in case its helpful in documenting or 
+    # debugging build results or differences between runs, especially on different machines
+    env 1>$logsDirectory/mb100_all-env-variables_output.txt
 
-fn-write-property-close
-
-# dump ALL environment variables in case its helpful in documenting or 
-# debugging build results or differences between runs, especially on different machines
-env 1>$logsDirectory/mb100_all-env-variables_output.txt
-
-exit $buildrc
+    exit $buildrc

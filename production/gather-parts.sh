@@ -43,5 +43,17 @@ fn-gather-platform "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-swt-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-test-zips "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-gather-ecj-jars "$BUILD_ID" "$aggDir" "$buildDirectory"
+
+# Note, we check for error here, because of all these functions this is one 
+# that I've seen occur once.
 fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
+RC=$?
+if (( $RC != 0 ))
+then
+    ${buildDirectory}/buildFailed-gather-parts
+    BUILD_FAILED_OUTPUT="${buildDirectory}/buildFailed-gather-parts"
+    echo "   ERROR: a function from gather-parts.sh returned non-zero return code, $RC" >>${BUILD_FAILED_OUTPUT}
+    exit $RC
+fi
+exit 0
 

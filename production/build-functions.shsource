@@ -777,9 +777,18 @@ fn-slice-repos ()
             -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
             -DbuildLabel="$BUILD_ID" \
             -DbuildDirectory="$BUILD_DIR"
+        RC=$?
         popd
+        if (( $RC != 0 ))
+        then
+            BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
+            echo "   ERROR: Java antrunner call with $ANT_SCRIPT returned non-zero return code, $RC, in fn-slice-repo" >>${BUILD_FAILED}
+            return $RC
+        fi
     else
-        echo "   ERROR: $REPO_DIR_DIR did not exist in fn-slice-repo"
+        BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
+        echo "   ERROR: $REPO_DIR_DIR did not exist in fn-slice-repo. Probably due to an earlier error?" >>${BUILD_FAILED}
+        return 1
     fi
 }
 
