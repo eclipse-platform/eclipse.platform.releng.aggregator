@@ -50,7 +50,6 @@ fn-slice-repos "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
 RC=$?
 if (( $RC != 0 ))
 then
-    ${buildDirectory}/buildFailed-gather-parts
     BUILD_FAILED_OUTPUT="${buildDirectory}/buildFailed-gather-parts"
     echo "   ERROR: a function from gather-parts.sh returned non-zero return code, $RC" >>${BUILD_FAILED_OUTPUT}
     exit $RC
