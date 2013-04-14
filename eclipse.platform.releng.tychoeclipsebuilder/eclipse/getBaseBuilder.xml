@@ -87,11 +87,20 @@
         -->
         <property
             name="platformURL"
-            value="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz" />
+            value="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/" />
+        
+        <!-- we currently use binary platform, since smaller, but could use SDK, if ever a reason to -->
+        <property
+            name="platformFile"
+            value="eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz" />
 
-        <property name="buildTools.repository" value="http://build.eclipse.org/eclipse/buildtools/"/>
+        <property
+            name="buildTools.repository"
+            value="http://build.eclipse.org/eclipse/buildtools/" />
 
-        <property name="buildTools.feature" value="org.eclipse.releng.build.tools.feature.feature.group"/>
+        <property
+            name="buildTools.feature"
+            value="org.eclipse.releng.build.tools.feature.feature.group" />
 
         
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
@@ -200,50 +209,47 @@ TODO: should I just use file system version? (would assume local bulds have one 
 -->
         <get
             dest="${TMP}"
-            src="${platformURL}" 
-            usetimestamp="true"
-        />
-        <untar compression="gzip"
-            src="${TMP}/eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz"
-            dest="${WORKSPACE}/${folderName}">
+            src="${platformURL}/${platformFile}"
+            usetimestamp="true" />
+        <untar
+            compression="gzip"
+            src="${TMP}/${platformFile}"
+            dest="${TMP}">
         </untar>
 
         <chmod perm="ugo+x">
-            <fileset dir="${WORKSPACE}/${folderName}">
+            <fileset dir="${TMP}/eclipse">
                 <include name="eclipse" />
                 <include name="*.so*" />
             </fileset>
         </chmod>
 
-
-        <java
-            taskname="p2Director Install of eclispe tools"
-            dir="${WORKSPACE}/${folderName}"
-            classname="org.eclipse.equinox.launcher.Main">
-            <classpath>
-                <fileset dir="${WORKSPACE}/${folderName}/plugins">
-                    <include name="org.eclipse.equinox.launcher_*.jar" />
-                </fileset>
-            </classpath>
-            <jvmarg value="-Djava.io.tmpdir=${TMP}" />
+        <exec
+            dir="${TMP}/eclipse"
+            executable="${TMP}/eclipse/eclipse">
             <arg value="-nosplash" />
             <arg value="-debug" />
             <arg value="-consolelog" />
             <arg value="-data" />
             <arg value="${WORKSPACE}/workspace-toolsinstall" />
-            <jvmarg value="-Dosgi.instance.area=${WORKSPACE}/${folderName}/configuration" />
-
             <arg value="-application" />
             <arg value="org.eclipse.equinox.p2.director" />
-            <arg value="-destination" />
-            <arg value="${WORKSPACE}/${folderName}" />
-
             <arg value="-repository" />
             <arg value="${buildTools.repository}" />
             <arg value="-installIU" />
             <arg value="${buildTools.feature}" />
-        </java>
+            <arg line="-vmargs -Djava.io.tmpdir=${TMP}" />
+        </exec>
 
+        <!-- we "move" so the directory structure so it flat under basebuilder ... 
+             for compatibility to older code/scripts  -->
+        <move todir="${WORKSPACE}/${folderName}">
+            <fileset dir="${TMP}/eclipse/">
+                <include name="**/*" />
+            </fileset>
+        </move>
+
+       
     </target>
     <target
         name="doGetBaseBuilder"
