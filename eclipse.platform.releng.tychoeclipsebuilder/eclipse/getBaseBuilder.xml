@@ -71,6 +71,25 @@
         depends="hudson-init"
         unless="getBaseBuilderInitialized">
 
+        <property environment="env" />
+
+        <condition
+            property="TMP"
+            value="${env.TMP}"
+            else="/tmp">
+            <isset property="env.TMP" />
+        </condition>
+        
+        <!--
+            TODO: need make platform independendent, as in test.xml, to compute right one. 
+            (and, pass in?)
+            (and make "version" variable)
+        -->
+        <property
+            name="platformURL"
+            value="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz" />
+
+        
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
         <property
             name="WORKSPACE"
@@ -93,10 +112,12 @@
             name="folderName"
             value="org.eclipse.releng.basebuilder" />
 
-        <condition property="fetchSource" value="git">
-          <not>
-              <isset property="basebuilderlocal" />
-          </not>
+        <condition
+            property="fetchSource"
+            value="git">
+            <not>
+                <isset property="basebuilderlocal" />
+            </not>
         </condition>
 
         <echo message="hudson: ${hudson}" />
@@ -160,10 +181,39 @@
         <delete dir="${WORKSPACE}/${folderName}" />
         <mkdir dir="${WORKSPACE}/${folderName}" />
 
+        <antcall target="goGetBaseBuilder" />
+        <antcall target="fetchBasePlatform" />
+
+    </target>
+
+    <target
+        name="fetchBasePlatform"
+        if="platformURL">
+
+
+        <get
+            dest="${TMP}"
+            src="${platformURL}" />
+        <untar dest="${WORKSPACE}/${folderName}">
+        </untar>
+
+        <chmod perm="ugo+x">
+            <fileset dir="${WORKSPACE}/${folderName}">
+                <include name="eclipse" />
+                <include name="*.so*" />
+            </fileset>
+        </chmod>
+
+    </target>
+    <target
+        name="doGetBaseBuilder"
+        unless="platformURL">
+
         <antcall target="fetchBaseBuilder" />
         <antcall target="fetchBaseBuilderLocal" />
 
-        <echo message="basebuilder, version ${builderVersion}, fetched using tychoeclipsebuilder/getBaseBuilder.xml"/>
+        <echo message="basebuilder, version ${builderVersion}, fetched using tychoeclipsebuilder/getBaseBuilder.xml" />
+
     </target>
     <!-- hurestic to check if we are running on hudson variable, if so -->
     <target name="checkHudson">
@@ -252,7 +302,8 @@
     <target
         name="fetchBaseBuilderLocal"
         depends="init"
-        if="basebuilderlocal">
+        if="basebuilderlocal"
+        unless="platformURL">
         <unzip
             src="${basebuilderlocal}/basebuilder-${builderVersion}.zip"
             dest="${WORKSPACE}"
