@@ -75,9 +75,9 @@
 
         <condition
             property="TMP"
-            value="${env.TMP}"
+            value="${env.TMP_DIR}"
             else="/tmp">
-            <isset property="env.TMP" />
+            <isset property="env.TMP_DIR" />
         </condition>
         
         <!--
@@ -88,6 +88,10 @@
         <property
             name="platformURL"
             value="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz" />
+
+        <property name="buildTools.repository" value="http://build.eclipse.org/eclipse/buildtools/"/>
+
+        <property name="buildTools.feature" value="org.eclipse.releng.build.tools.feature.feature.group"/>
 
         
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
@@ -188,13 +192,20 @@
 
     <target
         name="fetchBasePlatform"
+        depends="init"
         if="platformURL">
 
-
+<!-- 
+TODO: should I just use file system version? (would assume local bulds have one in same location)
+-->
         <get
             dest="${TMP}"
-            src="${platformURL}" />
-        <untar dest="${WORKSPACE}/${folderName}">
+            src="${platformURL}" 
+            usetimestamp="true"
+        />
+        <untar compression="gzip"
+            src="${TMP}/eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz"
+            dest="${WORKSPACE}/${folderName}">
         </untar>
 
         <chmod perm="ugo+x">
@@ -203,6 +214,35 @@
                 <include name="*.so*" />
             </fileset>
         </chmod>
+
+
+        <java
+            taskname="p2Director Install of eclispe tools"
+            dir="${WORKSPACE}/${folderName}"
+            classname="org.eclipse.equinox.launcher.Main">
+            <classpath>
+                <fileset dir="${WORKSPACE}/${folderName}/plugins">
+                    <include name="org.eclipse.equinox.launcher_*.jar" />
+                </fileset>
+            </classpath>
+            <jvmarg value="-Djava.io.tmpdir=${TMP}" />
+            <arg value="-nosplash" />
+            <arg value="-debug" />
+            <arg value="-consolelog" />
+            <arg value="-data" />
+            <arg value="${WORKSPACE}/workspace-toolsinstall" />
+            <jvmarg value="-Dosgi.instance.area=${WORKSPACE}/${folderName}/configuration" />
+
+            <arg value="-application" />
+            <arg value="org.eclipse.equinox.p2.director" />
+            <arg value="-destination" />
+            <arg value="${WORKSPACE}/${folderName}" />
+
+            <arg value="-repository" />
+            <arg value="${buildTools.repository}" />
+            <arg value="-installIU" />
+            <arg value="${buildTools.feature}" />
+        </java>
 
     </target>
     <target
