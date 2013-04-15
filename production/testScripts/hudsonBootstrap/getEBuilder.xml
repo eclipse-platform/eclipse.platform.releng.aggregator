@@ -136,14 +136,8 @@
         <antcall target="EBuildercleanup" />
 
         <!-- copy the files we need for subsequent Hudson steps to "well known" location -->
-        <copy
-            verbose="true"
-            file="${WORKSPACE}/${folderName}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/getBaseBuilder.xml"
-            todir="${WORKSPACE}" />
-        <copy
-            verbose="true"
-            file="${WORKSPACE}/${eScriptLocation}/runTests2.xml"
-            todir="${WORKSPACE}" />
+        <copy file="${WORKSPACE}/${eScriptLocation}/getBaseBuilder.xml" todir="${WORKSPACE}" />
+        <copy file="${WORKSPACE}/${eScriptLocation}/runTests2.xml" todir="${WORKSPACE}" />
 
     </target>
 
@@ -251,14 +245,14 @@
         <get
             verbose="true"
             src="http://git.eclipse.org/c/platform/${scmProject}.git/snapshot/${scmProject}-${builderVersion}.zip"
-            dest="${WORKSPACE}/${scmProject}.zip" />
+            dest="${WORKSPACE}/${scmProject}-${builderVersion}.zip" />
         <unzip
-            src="${WORKSPACE}/${scmProject}.zip"
+            src="${WORKSPACE}/${scmProject}-${builderVersion}.zip"
             dest="${WORKSPACE}"
             overwrite="true" />
 
         <move todir="${WORKSPACE}/${folderName}">
-            <fileset dir="${WORKSPACE}/${scmProject}">
+            <fileset dir="${WORKSPACE}/${scmProject}-${builderVersion}">
                 <include name="**/*" />
             </fileset>
         </move>
