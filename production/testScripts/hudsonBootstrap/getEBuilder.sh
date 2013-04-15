@@ -62,7 +62,7 @@ then
 fi
 
 # copy to well-known location so subsequent steps do not need to know which ebuilder they came from
-cp ${WORKSPACE}/${ESCRIPT_LOC}/getBaseBuilder.xml ${WORKSPACE}
+cp ${WORKSPACE}/${EBUILDER}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/getBaseBuilder.xml ${WORKSPACE}
 cp ${WORKSPACE}/${ESCRIPT_LOC}/runTests2.xml ${WORKSPACE}
 
 # remove on clean exit
