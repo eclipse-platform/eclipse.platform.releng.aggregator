@@ -95,10 +95,11 @@ fi
 # and they won't interfere with each other.
 basebuilderDir=${fromDir}/org.eclipse.releng.basebuilder
 aggregatorDir=${fromDir}/eclipse.platform.releng.aggregator
+EBuilderDir=${aggregatorDir}/eclipse.platform.releng.tychoeclipsebuilder
 
 if [[ ! -d "${basebuilderDir}" ]] 
 then
-     ant -f /shared/eclipse/sdk/promotion/getBaseBuilder.xml -DWORKSPACE=$fromDir
+     ant -f $EBuilderDir/shared/eclipse/sdk/promotion/getBaseBuilder.xml -DWORKSPACE=$fromDir
 fi
 
 # remember, the Eclipse install must match the VM used (e.g. both 64 bit, both 32 bit, etc).

@@ -912,6 +912,34 @@ fn-parse-compile-logs ()
     popd
 }
 
+# USAGE: fn-summarize-comparator-logs BUILD_ID ANT_SCRIPT BUILD_DIR BASEBUILDER_LAUNCHER
+#   BUILD_ID: I20121116-0700
+#   ANT_SCRIPT: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+#   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
+#   TODO: I think this could be pure ant task
+fn-summarize-comparator-logs () 
+{
+    checkNArgs $# 4
+    BUILD_ID="$1"; shift
+    ANT_SCRIPT="$1"; shift
+    BUILD_DIR="$1"; shift
+    BASEBUILDER_LAUNCHER="$1"; shift
+    EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+    pushd "$BUILD_DIR"
+    java -jar "$BASEBUILDER_LAUNCHER" \
+        -data ${BUILD_DIR}/workspace-comparatorLogs \
+        -application org.eclipse.ant.core.antRunner \
+        -buildfile "$ANT_SCRIPT" \
+        -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
+        -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
+        -DEBuilderDir=$EBuilderDir \
+        -DbuildId="$BUILD_ID" \
+        -DbuildLabel="$BUILD_ID" \
+        compare
+    popd
+}
+
 # USAGE: fn-publish-eclipse BUILD_TYPE BUILD_STREAM BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
 #   BUILD_TYPE: I
 #   BUILD_STREAM: 4.2.2
@@ -978,7 +1006,8 @@ fn-checkout-basebuilder ()
     else
         echo "EBuilderDir already existed, so no need to fetch that"
     fi
-    ant -f $EBuilderDir/eclipse/getBaseBuilder.xml -DWORKSPACE=$DROP_DIR -DbuilderVersion=${BASEBUILDER_TAG}
+    #    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR -DbuilderVersion=${BASEBUILDER_TAG}
+    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR
 
     #pushd $( dirname "$BUILDER_DIR" )
     #wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1

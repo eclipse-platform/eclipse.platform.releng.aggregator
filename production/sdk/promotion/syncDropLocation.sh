@@ -285,7 +285,7 @@ function syncRepoSite ()
     EBuilderDir=$dropFromBuildDir/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
 
     # assume ant is on the path
-    ant -f $EBuilderDir/eclipse/getBaseBuilder.xml -DWORKSPACE=$dropFromBuildDir
+    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$dropFromBuildDir
 
     ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     RC=$?
