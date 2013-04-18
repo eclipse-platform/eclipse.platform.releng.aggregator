@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <!--
-        A utility ant script get the base builder from CVS.
-        Hudson jobs can call this script from ant
-        as one of it first build steps.
+        A utility ant script get the base builder from Git (or CVS).
+        Hudson jobs (or builds) can call this script from generic ant
+        as one of it first build steps to get the eclipse antRunner, for example.
     -->
 <project
     name="getBaseBuilder"
@@ -71,6 +71,38 @@
         depends="hudson-init"
         unless="getBaseBuilderInitialized">
 
+        <property environment="env" />
+
+        <condition
+            property="TMP"
+            value="${env.TMP_DIR}"
+            else="/tmp">
+            <isset property="env.TMP_DIR" />
+        </condition>
+        <echoproperties />
+        <!--
+            TODO: need make platform independendent, as in test.xml, to compute right one. 
+            (and, pass in?)
+            (and make "version" variable)
+        -->
+        <property
+            name="platformURL"
+            value="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/" />
+        
+        <!-- we currently use binary platform, since smaller, but could use SDK, if ever a reason to -->
+        <property
+            name="platformFile"
+            value="eclipse-platform-4.3M6-linux-gtk-x86_64.tar.gz" />
+
+        <property
+            name="buildTools.repository"
+            value="http://build.eclipse.org/eclipse/buildtools/" />
+
+        <property
+            name="buildTools.feature"
+            value="org.eclipse.releng.build.tools.feature.feature.group" />
+
+        
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
         <property
             name="WORKSPACE"
@@ -93,10 +125,12 @@
             name="folderName"
             value="org.eclipse.releng.basebuilder" />
 
-        <condition property="fetchSource" value="git">
-          <not>
-              <isset property="basebuilderlocal" />
-          </not>
+        <condition
+            property="fetchSource"
+            value="git">
+            <not>
+                <isset property="basebuilderlocal" />
+            </not>
         </condition>
 
         <echo message="hudson: ${hudson}" />
@@ -160,8 +194,71 @@
         <delete dir="${WORKSPACE}/${folderName}" />
         <mkdir dir="${WORKSPACE}/${folderName}" />
 
+        <antcall target="doGetBaseBuilder" />
+        <antcall target="fetchBasePlatform" />
+
+    </target>
+
+    <target
+        name="fetchBasePlatform"
+        depends="init"
+        if="platformURL">
+
+<!-- 
+TODO: should I just use file system version? (would assume local bulds have one in same location)
+-->
+        <get
+            dest="${TMP}"
+            src="${platformURL}/${platformFile}"
+            usetimestamp="true" />
+        <untar
+            compression="gzip"
+            src="${TMP}/${platformFile}"
+            dest="${TMP}">
+        </untar>
+
+        <chmod perm="ugo+x">
+            <fileset dir="${TMP}/eclipse">
+                <include name="eclipse" />
+                <include name="*.so*" />
+            </fileset>
+        </chmod>
+
+        <exec
+            dir="${TMP}/eclipse"
+            executable="${TMP}/eclipse/eclipse">
+            <arg value="-nosplash" />
+            <arg value="-debug" />
+            <arg value="-consolelog" />
+            <arg value="-data" />
+            <arg value="${WORKSPACE}/workspace-toolsinstall" />
+            <arg value="-application" />
+            <arg value="org.eclipse.equinox.p2.director" />
+            <arg value="-repository" />
+            <arg value="${buildTools.repository}" />
+            <arg value="-installIU" />
+            <arg value="${buildTools.feature}" />
+            <arg line="-vmargs -Djava.io.tmpdir=${TMP}" />
+        </exec>
+
+        <!-- we "move" so the directory structure so it flat under basebuilder ... 
+             for compatibility to older code/scripts  -->
+        <move todir="${WORKSPACE}/${folderName}">
+            <fileset dir="${TMP}/eclipse/">
+                <include name="**/*" />
+            </fileset>
+        </move>
+
+       
+    </target>
+    <target
+        name="doGetBaseBuilder"
+        unless="platformURL">
+
         <antcall target="fetchBaseBuilder" />
         <antcall target="fetchBaseBuilderLocal" />
+
+        <echo message="basebuilder, version ${builderVersion}, fetched using tychoeclipsebuilder/getBaseBuilder.xml" />
 
     </target>
     <!-- hurestic to check if we are running on hudson variable, if so -->
@@ -219,10 +316,11 @@
                 to="${folderName}/*" />
          -->
 
-        <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists
-        temp leave to save a copy 
-        <delete file="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
+        <!-- 
+            cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists
         -->
+        <delete file="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
+
 
     </target>
 
@@ -250,7 +348,8 @@
     <target
         name="fetchBaseBuilderLocal"
         depends="init"
-        if="basebuilderlocal">
+        if="basebuilderlocal"
+        unless="platformURL">
         <unzip
             src="${basebuilderlocal}/basebuilder-${builderVersion}.zip"
             dest="${WORKSPACE}"

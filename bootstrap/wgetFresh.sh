@@ -3,7 +3,7 @@
 # gets a fresh copy of the primary/working "bootstrap" scripts needed in build home.
 
 # codifying the branch (or tag) to use, so it can be set/chagned in one place
-initScriptTag=master
+initScriptTag=david_williams/testbranch
 
 # tags:
 # http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/wgetFresh.sh?tag=vI20120417-0700
