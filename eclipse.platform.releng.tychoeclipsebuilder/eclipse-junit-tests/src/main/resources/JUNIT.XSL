@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
         xmlns:lxslt="http://xml.apache.org/xslt"
-        xmlns:stringutils="xalan://org.apache.tools.ant.util.StringUtils">
+        xmlns:string="xalan://java.lang.String">
 <xsl:output method="html" indent="yes" encoding="UTF-8"
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" />
 <xsl:decimal-format decimal-separator="." grouping-separator="," />
@@ -31,7 +31,7 @@
  It creates a non-framed report that can be useful to send via
  e-mail or such.
  
- NOTE: This file was copied from ant-junit.jar 1.8.3 
+ NOTE: This file was copied from ant-junit.jar 1.8.4 (plus fixes from https://issues.apache.org/bugzilla/show_bug.cgi?id=54641 and https://issues.apache.org/bugzilla/show_bug.cgi?id=54180 )
  /org/apache/tools/ant/taskdefs/optional/junit/xsl/junit-noframes.xsl
  and should be compared to similar files when ant version changes. 
 
@@ -124,6 +124,64 @@
           doc.close();
           win.focus();
         }
+      ]]>
+      </script>
+      <script type="text/javascript" language="JavaScript"><![CDATA[
+        function findTop(obj) {
+          var curtop = 0;
+          if (obj.offsetParent) {
+            do {
+              curtop += obj.offsetTop;
+            } while (obj = obj.offsetParent);
+            return curtop;
+          }
+        }
+        
+        function keyHandler(e) {
+          if (typeof(e) == "undefined") {
+            e = event;
+          }
+          if (e && e.ctrlKey && e.keyCode == 190 /*Ctrl+.*/) {
+            if (typeof(document.getElementsByClassName) == "undefined") {
+              document.getElementsByClassName = function (className) {
+                var trs = document.getElementsByTagName("tr");
+                var res = new Array();
+                for (i = 0; i < trs.length; i++) {
+                  var tr = trs[i];
+                  var cls = tr.className;
+                  if (cls == className) {
+                    res.push(tr);
+                  }
+                }
+                return res;
+              }
+            }
+            var windowY = typeof(window.scrollY) != "undefined" ? window.scrollY : document.body.scrollTop;
+            windowY++; // want to jump to the next
+            var targetY = Number.MAX_VALUE;
+            var target;
+            var errs = document.getElementsByClassName("Error");
+            for (var i = 0; i < errs.length; i++) {
+              var elt = errs[i];
+              if (elt.childNodes.length > 2) {
+                  var status = elt.childNodes[2].firstChild.nodeValue;
+                  if (status != "Error" && status != "Failure")
+                      continue; // only stop in test results, not in summary header
+              }
+              var y = findTop(elt);
+              if (y > windowY && y < targetY) {
+                target = elt;
+                targetY = y;
+              }
+            }
+            if (target) {
+              target.scrollIntoView();
+            }
+            
+            return false;
+          }
+        }
+        document.onkeydown = keyHandler;
       ]]>
       </script>
         </head>
@@ -316,7 +374,7 @@
     <h1><xsl:value-of select="$TITLE"/></h1>
     <table width="100%">
     <tr>
-        <td align="left"></td>
+        <td align="left">(Press Ctrl+. to scroll to the next problem.)</td>
         <td align="right">Designed for use with <a href='http://www.junit.org'>JUnit</a> and <a href='http://ant.apache.org/ant'>Ant</a>.</td>
     </tr>
     </table>
@@ -443,10 +501,10 @@
 
 <xsl:template name="JS-escape">
     <xsl:param name="string"/>
-    <xsl:param name="tmp1" select="stringutils:replace(string($string),'\','\\')"/>
-    <xsl:param name="tmp2" select="stringutils:replace(string($tmp1),&quot;'&quot;,&quot;\&apos;&quot;)"/>
-    <xsl:param name="tmp3" select="stringutils:replace(string($tmp2),&quot;&#10;&quot;,'\n')"/>
-    <xsl:param name="tmp4" select="stringutils:replace(string($tmp3),&quot;&#13;&quot;,'\r')"/>
+    <xsl:param name="tmp1" select="string:replaceAll(string:new(string($string)),'\\','\\\\')"/>
+    <xsl:param name="tmp2" select="string:replaceAll(string:new(string($tmp1)),&quot;'&quot;,&quot;\\&apos;&quot;)"/>
+    <xsl:param name="tmp3" select="string:replaceAll(string:new(string($tmp2)),&quot;&#10;&quot;,'\\n')"/>
+    <xsl:param name="tmp4" select="string:replaceAll(string:new(string($tmp3)),&quot;&#13;&quot;,'\\r')"/>
     <xsl:value-of select="$tmp4"/>
 </xsl:template>
 
