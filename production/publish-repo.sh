@@ -78,42 +78,61 @@ siteDirOnBuildMachine=$( updateSiteOnBuildMachine "$BUILD_ROOT" "$BUILD_ID" "$ST
 echo "siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
 repositoryDir=${buildDirectory}/repository
 echo "repositoryDir: ${repositoryDir}"
-# for now, straight copy from what was produced to local build machine directory. 
-# This is partially done so that 
-#   rest of scripts stay common
-#   but eventually, we might put in some mirror/comparator/remove tasks here.
 
-# NOTE: we are using the "safe copy" we put in drop directory on build machine.
-
-# make posiitive ${repositoryDir} is not empty, or we are basically copying
-# all of root! (and, if repositoryDir is empty if we had a failed build! 
-# and should not be calling this method, anyway.)
-if [[ -n "${repositoryDir}" && -d "${repositoryDir}" && -n "${siteDirOnBuildMachine}" && -d "${siteDirOnBuildMachine}" ]]
+# leave both old and new methods for now, so true ==> old straight copy. 
+# change to false to test new method.
+if (( true )) 
 then
-    rsync --times --omit-dir-times --recursive "${repositoryDir}/" "${siteDirOnBuildMachine}/"
-    RC=$? 
-    if (( $RC != 0 ))
-    then 
-        echo "ERROR: rsync of repo returned error. RC: $RC"
-        echo "       obtained while copying"
-        echo "       from ${repositoryDir}"
-        echo "       to ${siteDirOnBuildMachine}"
-        exit $RC
-    fi
-    # copy "human readable" (user friendly) HTML file
-    buildType=${BUILD_ID:0:1}
-    rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
-    RC=$? 
-    if (( $RC != 0 ))
-    then 
-        echo "ERROR: rsync of repo returned error. RC: $RC"
-        echo "       obtained while copying"
-        echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
-        echo "       to ${siteDirOnBuildMachine}"
-        exit $RC
-    fi
+    # for now, straight copy from what was produced to local build machine directory. 
+    # This is partially done so that 
+    #   rest of scripts stay common
+    #   but eventually, we might put in some mirror/comparator/remove tasks here.
+
+    # NOTE: we are using the "safe copy" we put in drop directory on build machine.
+
+    # make posiitive ${repositoryDir} is not empty, or we are basically copying
+    # all of root! (and, if repositoryDir is empty if we had a failed build! 
+    # and should not be calling this method, anyway.)
+    if [[ -n "${repositoryDir}" && -d "${repositoryDir}" && -n "${siteDirOnBuildMachine}" && -d "${siteDirOnBuildMachine}" ]]
+    then
+        rsync --times --omit-dir-times --recursive "${repositoryDir}/" "${siteDirOnBuildMachine}/"
+        RC=$? 
+        if (( $RC != 0 ))
+        then 
+            echo "ERROR: rsync of repo returned error. RC: $RC"
+            echo "       obtained while copying"
+            echo "       from ${repositoryDir}"
+            echo "       to ${siteDirOnBuildMachine}"
+            exit $RC
+        fi
+        # copy "human readable" (user friendly) HTML file
+        buildType=${BUILD_ID:0:1}
+        rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
+        RC=$? 
+        if (( $RC != 0 ))
+        then 
+            echo "ERROR: rsync of repo returned error. RC: $RC"
+            echo "       obtained while copying"
+            echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
+            echo "       to ${siteDirOnBuildMachine}"
+            exit $RC
+        fi
+    else
+        echo "ERROR: Some directory didn't exist for update site copy."
+        echo "  repositoryDir: ${repositoryDir}"
+        echo "  siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
+    fi 
+
 else
-    echo "ERROR: Some directory didn't exist for update site copy."
-    echo "  repositoryDir: ${repositoryDir}"
-    echo "  siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
-fi 
+
+    java -jar "$launcherJar" \
+        -data ${BUILD_DIR}/workspace-mirrorRepo \
+        -application org.eclipse.ant.core.antRunner \
+        -v \
+        -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
+        -DrepositoryDir="$REPO_DIR"/eclipse.platform.repository/target/repository \
+        -Dbuildlogs=$logsDirectory \
+        -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
+        -DcomparatorRepository=$comparatorRepository 
+
+fi
