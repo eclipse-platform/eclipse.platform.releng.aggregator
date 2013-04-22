@@ -25,6 +25,8 @@ propertyFile=${propertyFile:-vm.properties}
 echo "vmcmd in testAll: ${vmcmd}"
 echo "extdir in testAll (if any): ${extdir}"
 echo "propertyFile in testAll: ${propertyFile}"
+echo "contents of propertyFile:"
+cat ${propertyFile}
 
 #execute command to run tests
 /bin/chmod 755 runtestsmac.sh
