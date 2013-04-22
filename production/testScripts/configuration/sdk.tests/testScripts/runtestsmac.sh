@@ -112,6 +112,8 @@ launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
     #echo "list all environment variables in effect as tests start"
     #printenv
 
+echo "properties: $properties"
+
 # -Dtimeout=300000 "${ANT_OPTS}"
  if [[ ! -z "${extdirproperty}" ]]
  then
