@@ -79,9 +79,9 @@ echo "siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
 repositoryDir=${buildDirectory}/repository
 echo "repositoryDir: ${repositoryDir}"
 
-# leave both old and new methods for now, so true ==> old straight copy. 
-# change to false to test new method.
-if (( true )) 
+# leave both old and new methods for now, so true (1) ==> old straight copy. 
+# change to false (0) to test new method.
+if (( 1 )) 
 then
     # for now, straight copy from what was produced to local build machine directory. 
     # This is partially done so that 
