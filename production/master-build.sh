@@ -38,7 +38,7 @@ then
     echo "PROGRAM ERROR: buildDirectory returned from fn-build-dir was empty"
     exit 1
 fi
-logsDirectory="${buildDirectory}/buildlogs"
+export logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
 
