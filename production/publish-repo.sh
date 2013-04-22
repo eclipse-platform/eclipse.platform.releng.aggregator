@@ -130,7 +130,7 @@ else
         -application org.eclipse.ant.core.antRunner \
         -v \
         -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
-        -DrepositoryDir="$REPO_DIR"/eclipse.platform.repository/target/repository \
+        -DrepositoryDir=${repositoryDir} \
         -Dbuildlogs=$logsDirectory \
         -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
         -DcomparatorRepository=$comparatorRepository 
