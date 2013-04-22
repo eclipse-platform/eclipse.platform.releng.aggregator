@@ -1,0 +1,90 @@
+<project
+    default="processArtifacts"
+    basedir=".">
+    <target name="processArtifacts">
+
+    	 <!-- normally, caller would set repositoryDir, but for local operation, can hard code here -->
+        <property
+            name="repositoryDir"
+            value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
+
+        <!-- this first call is to get MD5 hash sums included. We do NOT call pack, since 
+             already should be, whare appropriate. -->
+        <p2.process.artifacts repositoryPath="file:/${repositoryDir}" />
+
+
+        <!-- This is to remove IUs handy during the build, but not really
+            needed in final repo -->
+        <!--
+           we used to remove this IU, but leavig it now.
+           See bug 378137
+           https://bugs.eclipse.org/bugs/show_bug.cgi?id=378137
+           <iu id="org.aspectj.runtime" />
+        -->
+        <!--
+           Note, we used to not remove
+           master-equinox.feature.group
+           but that technically makes the repo invalid since
+           it requires other things we removed. See bug 377314
+           https://bugs.eclipse.org/bugs/show_bug.cgi?id=377314
+        -->
+        <p2.remove.iu>
+            <repository location="file://${repositoryDir}" />
+            <iu id="org.aspectj.weaver" />
+            <iu id="master.feature.group" />
+            <iu id="master-ecf.feature.group" />
+            <iu id="master-jetty.feature.group" />
+            <iu id="master-equinox-weaving.feature.group" />
+            <iu id="master-equinox.feature.group" />
+
+        </p2.remove.iu>
+
+        <!-- 
+             We run this final mirror task, rather than a straight copy, in order to 
+             do a sanity check with traditional comparator. There should be few differences 
+             from buildtime comparator log, but might be some special cases, such as when 
+             third party jars change. See 
+             https://bugs.eclipse.org/bugs/show_bug.cgi?id=402448 
+        -->
+        <echo message="Mirroring main repo: ${repositoryDir}" />
+        <echo message="   to build machine location: ${siteDirOnBuildMachine}" />
+        <echo message="Mirroring main repo: see log at ${buildlogs}/mirrorlog.txt" />
+        <p2.mirror
+            source="file://${repositoryDir}"
+            log="${buildlogs}/mirrorlog.txt"
+            ignoreErrors="false">
+            <destination
+                compressed="true"
+                name="Eclipse Project Repository"
+                location="file:${siteDirOnBuildMachine}"
+                append="false"
+                format="file://${repositoryDir}"
+                kind="artifact" />
+            <destination
+                compressed="true"
+                name="Eclipse Project Repository"
+                location="file:${buildRepo}"
+                append="false"
+                format="file://${repositoryDir}" />
+            <comparator
+                comparator="org.eclipse.equinox.p2.repository.tools.jar.comparator"
+                comparatorLog="${buildlogs}/comparatorlog.txt">
+                <repository location="${comparator.repo}" />
+                <!-- eclude none, for now
+                <exclude>
+                    <artifact id="org.eclipse.jdt.doc.isv" />
+                    <artifact id="org.eclipse.jdt.doc.user" />
+                    <artifact id="org.eclipse.pde.doc.user" />
+                    <artifact id="org.eclipse.platform.doc.isv" />
+                    <artifact id="org.eclipse.platform.doc.user" />
+                    <artifact id="org.eclipse.equinox.executable" />
+                    <artifact id="master-equinox" />
+                </exclude>
+                -->
+            </comparator>
+        </p2.mirror>
+
+
+    </target>
+</project>
+

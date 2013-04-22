@@ -88,6 +88,12 @@ elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
 
+# we need this value for later, post build processing, so want it saved to variables file. 
+# We can either compute here, 
+# or just make sure it matches that is in parent pom for various streams (e.g. 4.3 vs 4.4)
+# and build types, (e.g. M vs. I). For N builds, we still use "I". 
+comparatorRepository=http://download.eclipse.org/eclipse/updates/4.3-I-builds
+
 GET_AGGREGATOR_BUILD_LOG="${logsDirectory}/mb010_get-aggregator_output.txt"
 TAG_BUILD_INPUT_LOG="${logsDirectory}/mb030_tag_build_input_output.txt"
 POM_VERSION_UPDATE_BUILD_LOG="${logsDirectory}/mb050_pom-version-updater_output.txt"
@@ -140,6 +146,8 @@ fn-write-property BUILD_ID
 fn-write-property BUILD_PRETTY_DATE
 fn-write-property BUILD_TYPE_NAME
 fn-write-property TRACE_OUTPUT
+fn-write-property comparatorRepository
+fn-wirte-property logsDirectory
 
 echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 
