@@ -147,7 +147,7 @@ fn-write-property BUILD_PRETTY_DATE
 fn-write-property BUILD_TYPE_NAME
 fn-write-property TRACE_OUTPUT
 fn-write-property comparatorRepository
-fn-wirte-property logsDirectory
+fn-write-property logsDirectory
 
 echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 

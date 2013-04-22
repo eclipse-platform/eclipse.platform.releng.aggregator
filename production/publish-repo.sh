@@ -126,7 +126,7 @@ then
 else
 
     java -jar "$launcherJar" \
-        -data ${BUILD_DIR}/workspace-mirrorRepo \
+        -data ${buildDirectory}/workspace-mirrorRepo \
         -application org.eclipse.ant.core.antRunner \
         -v \
         -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
