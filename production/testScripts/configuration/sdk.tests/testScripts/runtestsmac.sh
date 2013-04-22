@@ -13,7 +13,7 @@ source localTestsProperties.shsource 2>/dev/null
 #vmcmd=/shared/common/jdk-1.6.x86_64/jre/bin/java
 if [[ -z "{vmcmd}" ]]
 then
-    echo "vmcmd was unexpectly undefined, so using 'java'. 
+    echo "vmcmd was unexpectly undefined, so using 'java'."
     vmcmd=java
 fi
 
