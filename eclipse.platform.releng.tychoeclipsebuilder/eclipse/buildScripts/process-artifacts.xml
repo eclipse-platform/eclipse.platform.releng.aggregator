@@ -8,39 +8,16 @@
             name="repositoryDir"
             value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
 
-        <!-- this first call is to get MD5 hash sums included. We do NOT call pack, since 
-             already should be, whare appropriate. -->
-        <p2.process.artifacts repositoryPath="file:/${repositoryDir}" />
-
-
-        <!-- This is to remove IUs handy during the build, but not really
-            needed in final repo -->
-        <!--
-           we used to remove this IU, but leavig it now.
-           See bug 378137
-           https://bugs.eclipse.org/bugs/show_bug.cgi?id=378137
-           <iu id="org.aspectj.runtime" />
-        -->
-        <!--
-           Note, we used to not remove
-           master-equinox.feature.group
-           but that technically makes the repo invalid since
-           it requires other things we removed. See bug 377314
-           https://bugs.eclipse.org/bugs/show_bug.cgi?id=377314
-        -->
-        <p2.remove.iu>
-            <repository location="file://${repositoryDir}" />
-            <iu id="org.aspectj.weaver" />
-            <iu id="master.feature.group" />
-            <iu id="master-ecf.feature.group" />
-            <iu id="master-jetty.feature.group" />
-            <iu id="master-equinox-weaving.feature.group" />
-            <iu id="master-equinox.feature.group" />
-
-        </p2.remove.iu>
-
         <!-- 
-             We run this final mirror task, rather than a straight copy, in order to 
+             Note: we mirror first (with comparator) to leave original repository in build machines 
+             drop directory untouched. That allows for emergency "redos" without rebuilding, plus, 
+             in case there are differences, it 
+             allows an easy way to compare "old" with "new" (at least for a few days), until 
+             build drop is cleaned off. 
+        -->
+        
+        <!-- 
+             We run this mirror task, rather than a straight copy, in order to 
              do a sanity check with traditional comparator. There should be few differences 
              from buildtime comparator log, but might be some special cases, such as when 
              third party jars change. See 
@@ -85,6 +62,47 @@
                 -->
             </comparator>
         </p2.mirror>
+        
+        
+
+        <!-- This is to remove IUs handy during the build, but not really
+            needed in final repo -->
+        <!--
+           we used to remove this IU, but leavig it now.
+           See bug 378137
+           https://bugs.eclipse.org/bugs/show_bug.cgi?id=378137
+           <iu id="org.aspectj.runtime" />
+        -->
+        <!--
+           Note, we used to not remove
+           master-equinox.feature.group
+           but that technically makes the repo invalid since
+           it requires other things we removed. See bug 377314
+           https://bugs.eclipse.org/bugs/show_bug.cgi?id=377314
+           There should be only one category to remove, the "Uncategorized" one that Tycho 
+           always creates (see bug 404103) so if there is ever any we want to leave, 
+           we'll need to make the final iu query more exact.
+        -->
+        <p2.remove.iu>
+            <repository location="file://${siteDirOnBuildMachine}" />
+            <iu id="org.aspectj.weaver" />
+            <iu id="master.feature.group" />
+            <iu id="master-ecf.feature.group" />
+            <iu id="master-jetty.feature.group" />
+            <iu id="master-equinox-weaving.feature.group" />
+            <iu id="master-equinox.feature.group" />
+            <iu query="property[@name='org.eclipse.equinox.p2.type.category']" />
+
+        </p2.remove.iu>
+
+        <!-- 
+             This call is to get MD5 hash sums included. We do NOT call pack, since 
+             already should be packed, where appropriate.
+             This is a work around we can likely remove eventually. See bug 406263.  
+        -->
+        <p2.process.artifacts repositoryPath="file://${siteDirOnBuildMachine}" />
+
+
 
 
     </target>
