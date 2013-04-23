@@ -105,18 +105,7 @@ then
             echo "       to ${siteDirOnBuildMachine}"
             exit $RC
         fi
-        # copy "human readable" (user friendly) HTML file
-        buildType=${BUILD_ID:0:1}
-        rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
-        RC=$? 
-        if (( $RC != 0 ))
-        then 
-            echo "ERROR: rsync of repo returned error. RC: $RC"
-            echo "       obtained while copying"
-            echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
-            echo "       to ${siteDirOnBuildMachine}"
-            exit $RC
-        fi
+
     else
         echo "ERROR: Some directory didn't exist for update site copy."
         echo "  repositoryDir: ${repositoryDir}"
@@ -135,4 +124,17 @@ else
         -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
         -DcomparatorRepository=$comparatorRepository 
 
+fi
+
+# copy "human readable" (user friendly) HTML file
+buildType=${BUILD_ID:0:1}
+rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
+RC=$? 
+if (( $RC != 0 ))
+then 
+    echo "ERROR: rsync of repo returned error. RC: $RC"
+    echo "       obtained while copying"
+    echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
+    echo "       to ${siteDirOnBuildMachine}"
+    exit $RC
 fi
