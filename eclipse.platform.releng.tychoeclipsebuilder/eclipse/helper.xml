@@ -1,14 +1,15 @@
 <project
     name="Helper targets"
     default="noDefault">
-    <property
-        name="postingDirectory"
-        value="${buildDirectory}" />
+    
+    <fail unless="EBuilderDir" message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
+    <fail unless="postingDirectory" message="postingDirectory must be passed to this script." />
+    <fail unless="buildLabel" message="buildLabel must be passed to this script." />
     <property
         name="publishingContent"
-        value="${eclipse.build.configs}/../publishingFiles" />
+        value="${EBuilderDir}/eclipse/publishingFiles" />
 
-    <fail unless="EBuilderDir" message="EBuilderDir must be passed in to this script" />
+   
     
     
     <!-- ===================================================================== -->
@@ -229,34 +230,37 @@
         name="publish"
         description="Preparing to post the build...">
 
+        <fail unless="AGGR_DIR" message="AGGR_DIR must be defined for this this script" />
+        
         <mkdir dir="${postingDirectory}/${buildLabel}/checksum" />
         <exec
             executable="sh"
             dir="${postingDirectory}/${buildLabel}">
-            <arg line="${eclipse.build.configs}/extras/produceChecksum" />
+            <arg line="${EBuilderDir}/extras/produceChecksum" />
         </exec>
 
         <!--post clickThroughs-->
         <copy todir="${postingDirectory}/${buildLabel}">
             <fileset
-                dir="${eclipse.build.configs}/eclipse"
+                dir="${EBuilderDir}/eclipse"
                 includes="clickThroughs/" />
         </copy>
 
-        <!--post directory.txt-->
+        <!--post directory.txt ... no longer done this way
         <copy
             file="${buildDirectory}/directory.txt"
             todir="${postingDirectory}/${buildLabel}"
             failonerror="false"/>
+            -->
 
         <!--post instructions on automated testing-->
         <copy
             failonerror="false"
-            file="${eclipse.build.configs}/eclipse-junit-tests/src/main/scripts/readme.html"
+            file="${EBuilderDir}/eclipse-junit-tests/src/main/scripts/automatedtesting.html"
             tofile="${postingDirectory}/${buildLabel}/automatedtesting.html" />
         <copy
             failonerror="false"
-            file="${eclipse.build.configs}/../eclipse.platform.releng/bundles/org.eclipse.test/testframework.html"
+            file="${EBuilderDir}/eclipse-junit-tests/src/main/scripts/testframework.html"
             tofile="${postingDirectory}/${buildLabel}/testframework.html" />
 
         <antcall target="generateEclipseIndex" />
@@ -278,31 +282,31 @@
 
         <!--copy javadoc logs-->
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/doc.bin.log"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.javadoc.txt"
             failonerror="false" />
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/doc.bin.log"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.javadoc.txt"
             failonerror="false" />
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/jdtapt.doc.bin.log"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/jdtapt.doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.apt.javadoc.txt"
             failonerror="false" />
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.pde.doc.user/doc.bin.log"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/doc.bin.log"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.javadoc.txt"
             failonerror="false" />
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/platformconvert.txt"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/platformconvert.txt"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.schema.txt"
             failonerror="false" />
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/jdtconvert.txt"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/jdtconvert.txt"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.schema.txt"
             failonerror="false" />
         <copy
-            file="${eclipse.build.configs}/../eclipse.platform.common/bundles/org.eclipse.pde.doc.user/pdeconvert.txt"
+            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/pdeconvert.txt"
             tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.schema.txt"
             failonerror="false" />
 

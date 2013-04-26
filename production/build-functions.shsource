@@ -955,7 +955,7 @@ fn-publish-eclipse ()
     BUILD_TYPE="$1"; shift
     BUILD_STREAM="$1"; shift
     BUILD_ID="$1"; shift
-    REPO_DIR="$1"; shift
+    AGGR_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
     EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
@@ -965,15 +965,14 @@ fn-publish-eclipse ()
         -application org.eclipse.ant.core.antRunner \
         -v \
         -buildfile "$EBuilderDir"/eclipse/helper.xml \
-        -Declipse.build.configs="$EBuilderDir" \
         -DbuildId="$BUILD_ID" \
-        -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
-        -DpostingDirectory=$(dirname "$BUILD_DIR") \
+        -DbuildRepo="$AGGR_DIR"/eclipse.platform.repository/target/repository \
+        -DpostingDirectory="$BUILD_ROOT/siteDir/eclipse/downloads/drops" \
         -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
         -DpublishingContent="$EBuilderDir"/eclipse/publishingFiles \
         -DbuildLabel="$BUILD_ID" \
         -DEBuilderDir="$EBuilderDir" \
-        -Dhudson=true \
+        -DAGGR_DIR="$AGGR_DIR" \
         -DeclipseStream=$BUILD_STREAM \
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
