@@ -56,11 +56,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.storage.file.FileRepository;
 import org.junit.Assert;
 
 /**
@@ -93,7 +93,7 @@ public class LocalDiskRepositoryTest extends TestCase {
 	 * @throws IOException
 	 *             the repository could not be created in the temporary area
 	 */
-	protected Repository createWorkRepository() throws IOException {
+	protected FileRepository createWorkRepository() throws IOException {
 		return createRepository(false /* not bare */);
 	}
 
@@ -107,9 +107,9 @@ public class LocalDiskRepositoryTest extends TestCase {
 	 * @throws IOException
 	 *             the repository could not be created in the temporary area
 	 */
-	private Repository createRepository(boolean bare) throws IOException {
+	private FileRepository createRepository(boolean bare) throws IOException {
 		File gitdir = createUniqueTestGitDir(bare);
-		Repository db = new FileRepository(gitdir);
+		FileRepository db = new FileRepository(gitdir);
 		Assert.assertFalse(gitdir.exists());
 		db.create();
 		toClose.add(db);
