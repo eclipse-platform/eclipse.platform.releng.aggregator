@@ -122,7 +122,7 @@ else
         -DrepositoryDir=${repositoryDir} \
         -Dbuildlogs=$logsDirectory \
         -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
-        -DcomparatorRepository=$comparatorRepository
+        -DcomparatorRepository=$comparatorRepository \
          -Djava.io.tmpdir=$TMP_DIR 
 
 fi
