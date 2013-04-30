@@ -120,7 +120,7 @@ else
         -v \
         -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
         -DrepositoryDir=${repositoryDir} \
-        -Dbuildlogs=$logsDirectory \
+        -Dbuildlogs=$logsDirectory/comparatorlogs \
         -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
         -DcomparatorRepository=$comparatorRepository \
          -Djava.io.tmpdir=$TMP_DIR 
