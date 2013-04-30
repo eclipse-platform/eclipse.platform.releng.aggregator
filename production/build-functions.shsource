@@ -769,7 +769,7 @@ fn-slice-repos ()
     if [[ -d "$REPO_DIR_DIR" ]]
     then
         pushd "$REPO_DIR"
-        java -jar "$BASEBUILDER_LAUNCHER" \
+        java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
             -data ${BUILD_DIR}/workspace-buildrepos \
             -application org.eclipse.ant.core.antRunner \
             -buildfile "$ANT_SCRIPT" \
@@ -779,6 +779,7 @@ fn-slice-repos ()
             -DpostingDirectory=$(dirname "$BUILD_DIR") \
             -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
             -DbuildLabel="$BUILD_ID" \
+            -Djava.io.tmpdir=$TMP_DIR \
             -DbuildDirectory="$BUILD_DIR"
         RC=$?
         popd
@@ -901,7 +902,7 @@ fn-parse-compile-logs ()
     BASEBUILDER_LAUNCHER="$1"; shift
     EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     pushd "$BUILD_DIR"
-    java -jar "$BASEBUILDER_LAUNCHER" \
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
         -data ${BUILD_DIR}/workspace-verifyCompile \
         -application org.eclipse.ant.core.antRunner \
         -buildfile "$ANT_SCRIPT" \
@@ -910,6 +911,7 @@ fn-parse-compile-logs ()
         -DEBuilderDir=$EBuilderDir \
         -DbuildId="$BUILD_ID" \
         -DbuildLabel="$BUILD_ID" \
+        -Djava.io.tmpdir=$TMP_DIR \
         verifyCompile
     popd
 }
@@ -929,7 +931,7 @@ fn-summarize-comparator-logs ()
     BASEBUILDER_LAUNCHER="$1"; shift
     EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     pushd "$BUILD_DIR"
-    java -jar "$BASEBUILDER_LAUNCHER" \
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
         -data ${BUILD_DIR}/workspace-comparatorLogs \
         -application org.eclipse.ant.core.antRunner \
         -buildfile "$ANT_SCRIPT" \
@@ -938,6 +940,7 @@ fn-summarize-comparator-logs ()
         -DEBuilderDir=$EBuilderDir \
         -DbuildId="$BUILD_ID" \
         -DbuildLabel="$BUILD_ID" \
+        -Djava.io.tmpdir=$TMP_DIR \
         compare
     popd
 }
@@ -960,7 +963,7 @@ fn-publish-eclipse ()
     BASEBUILDER_LAUNCHER="$1"; shift
     EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     pushd "$BUILD_DIR"
-    java -jar "$BASEBUILDER_LAUNCHER" \
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
         -data ${BUILD_DIR}/workspace-publish \
         -application org.eclipse.ant.core.antRunner \
         -v \
@@ -977,6 +980,7 @@ fn-publish-eclipse ()
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
         -DbuildDirectory=$(dirname "$BUILD_DIR") \
+        -Djava.io.tmpdir=$TMP_DIR \
         publish
     popd
 }

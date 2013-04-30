@@ -113,7 +113,7 @@ fn-publish-equinox ()
     EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
     pushd "$BUILD_DIR"
-    java -jar "$BASEBUILDER_LAUNCHER" \
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
         -data ${BUILD_DIR}/workspace-publishEquinox \
         -application org.eclipse.ant.core.antRunner \
         -v \
@@ -130,6 +130,7 @@ fn-publish-equinox ()
         -DbuildType="$BUILD_TYPE" \
         -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
         -DbuildDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
+        -Djava.io.tmpdir=$TMP_DIR \
         publish
     popd
 }

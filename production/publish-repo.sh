@@ -114,7 +114,7 @@ then
 
 else
 
-    java -jar "$launcherJar" \
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
         -data ${buildDirectory}/workspace-mirrorRepo \
         -application org.eclipse.ant.core.antRunner \
         -v \
@@ -122,7 +122,8 @@ else
         -DrepositoryDir=${repositoryDir} \
         -Dbuildlogs=$logsDirectory \
         -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
-        -DcomparatorRepository=$comparatorRepository 
+        -DcomparatorRepository=$comparatorRepository
+         -Djava.io.tmpdir=$TMP_DIR 
 
 fi
 
