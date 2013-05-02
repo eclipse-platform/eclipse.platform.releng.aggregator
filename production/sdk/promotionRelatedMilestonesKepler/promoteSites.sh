@@ -1,19 +1,26 @@
 #!/usr/bin/env bash
 
-DROP_ID=I20130314-1330
-DL_LABEL=4.3M6
-DL_LABEL_EQ=KeplerM6
+DROP_ID=I20130501-2105
+DL_LABEL=4.3M7
+DL_LABEL_EQ=KeplerM7
 
-#./promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ}
-#rccode=$?
-#if [[ $rccode != 0 ]]
-#then
-    #    printf "\n\n\t%s\n\n" "ERROR: promoteDropSiteEq.sh failed. Subsequent promotion cancelled."
-    #exit $rccode
-#fi
+printf "\n\n\t%s\t%s\n" "DROP_ID" "$DROP_ID"
+printf "\n\t%s\t%s\n" "DL_LABEL" "$DL_LABEL"
+printf "\n\t%s\t%s\n" "DL_LABEL_EQ" "$DL_LABEL_EQ"
+
+# we do Equinox first, since it has to wait in que until 
+# cronjob promotes it
+./promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ}
+rccode=$?
+if (( $rccode != 0 ))
+then
+    printf "\n\n\t%s\n\n" "ERROR: promoteDropSiteEq.sh failed. Subsequent promotion cancelled."
+    exit $rccode
+fi
 
 ./promoteDropSite.sh   ${DROP_ID} ${DL_LABEL}
-if [[ $rccode != 0 ]]
+rccode=$?
+if (( $rccode != 0 ))
 then
     printf "\n\n\t%s\n\n" "ERROR: promoteDropSite.sh failed. Subsequent promotion cancelled."
     exit $rccode
@@ -21,7 +28,8 @@ fi
 
 
 ./promoteRepo.sh ${DROP_ID} ${DL_LABEL}
-if [[ $rccode != 0 ]]
+rccode=$?
+if (( $rccode != 0 ))
 then
     printf "\n\n\t%s\n\n" "ERROR: promoteRepo.sh failed."
     exit $rccode

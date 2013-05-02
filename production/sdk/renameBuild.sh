@@ -3,6 +3,9 @@
 # Important: it is assumed this script is ran from the directory
 # that is the parent of the directory to rename
 
+# CAUTION: this is hard coded for going from "I" build to "S" build. 
+# Needs adjustment for "R" build.
+
 # its assumed oldname is old name of directory and buildId, such as I20120503-1800
 # newdirname is new name for directory, such as S-3.8M7-201205031800 and
 # newlabel is the new "short name" of the deliverables, such as 3.8M7
@@ -55,11 +58,36 @@ perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 # Integration --> Release Candidate
 # Integration --> Release
 # These are for cases where used in headers, titles, etc.
-oldBuildName="Integration Build"
-newBuildName="Stable Build"
-replaceBuildNameCommand="s!${oldBuildName}!${newBuildName}!g"
+oldString="Integration Build"
+newString="Stable Build"
+replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
+
+# some special cases, for the buildproperties.php file
+# Note, we do php only, since that's what we need, and if we did want 
+# to rebuild, say using buildproperties.shsource, would be best to work 
+# from original values. Less sure what to do with Ant properties, 
+# buildproperties.properties ... but, we'll decide when needed.
+oldString="BUILD_TYPE = \"I\""
+newString="BUILD_TYPE = \"S\""
+replaceBuildNameCommand="s!${oldString}!${newString}!g"
+# quotes are critical here, since strings contain spaces!
+perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
+
+oldString="BUILD_TYPE_NAME = \"Integration\""
+newString="BUILD_TYPE_NAME = \"Stable\""
+replaceBuildNameCommand="s!${oldString}!${newString}!g"
+# quotes are critical here, since strings might contain spaces!
+perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
+
+# One special case for promoted builds, is the "FAILED" icons are 
+# changed to "OK", since all unit tests accounted for, if not fixed. 
+oldString="FAIL.gif"
+newString="OK.gif"
+replaceBuildNameCommand="s!${oldString}!${newString}!g"
+# quotes are critical here, since strings might contain spaces!
+perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/index.php
 
 # move directory before file renames, so it won't be in file path name twice
 mv $oldname $newdirname

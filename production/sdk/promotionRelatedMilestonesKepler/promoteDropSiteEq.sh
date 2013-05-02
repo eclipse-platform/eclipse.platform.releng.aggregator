@@ -24,18 +24,23 @@ DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 cd /shared/eclipse/builds/4I/siteDir/equinox/drops
 cp /shared/eclipse/sdk/renameBuild.sh .
 
+printf "\n\n\t%s\n" "Making promote script for Equinox"
+
+printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID" "${DROP_ID}ORIG"
 rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
 
+printf "\n\t%s\n" "Doing rename of original."
 ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
 
+printf "\n\t%s\n" "Moving backup copy back to original."
 mv ${DROP_ID}ORIG ${DROP_ID}
 
 rm renameBuild.sh
 
+printf "\n\t%s\n" "Creating promote script."
 echo "rsync -r /shared/eclipse/builds/4I/siteDir/equinox/drops/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
     > /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL}.sh
 
+printf "\n\t%s\n" "Make sure promote script is 'executable'."
 chmod +x /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL}.sh
-
-
 
