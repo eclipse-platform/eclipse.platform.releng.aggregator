@@ -20,7 +20,7 @@ do
     then
         pushd $repo
         git fetch
-        if [[$branch = "R4_2_maintenance"] -o [$branch = "R3_8_maintenance"]]
+        if [ "$branch" == "R4_2_maintenance" ] || [ "$branch" == "R3_8_maintenance" ]
         then
             git checkout origin/$branch
         else
