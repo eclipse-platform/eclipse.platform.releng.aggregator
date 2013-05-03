@@ -48,7 +48,7 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
             $BUILD_DIR_NAME = $BUILD_ID;
         } else {
             if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S") {
-                $timestamp = str_replace('', '-', $TIMESTAMP);
+                $timestamp = str_replace('-', '', $TIMESTAMP);
                 $BUILD_DIR_NAME = $BUILD_TYPE."-".$BUILD_ID."-".$timestamp;
             } else {
                 echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />";
@@ -76,13 +76,6 @@ if (array_key_exists("QUERY_STRING", $_SERVER)) {
     $dropFile=array_pop(split("=",$qstring,-1));
 }
 
-
-// 'url' does not seemed used anywhere. Will comment out for now. Delete later if no effect. 
-//if ($qstring) {
-//    $url = "http://$servername$script?$qstring";
-//} else {
-//    $url = "http://$servername$path$script";
-//}
 
 $mirror=true;
 if (strstr($servername,"eclipse.org")) {
@@ -141,6 +134,9 @@ if (file_exists($clickFile)) {
     } else {
         echo '<a href="'.$eclipselink.'">Download</a>';
     }
+    
+    echo "<!-- dropFile: $dropFile -->";
+    echo "<!-- eclipselink: $eclipselink -->";
 }
 ?>
 </body>
