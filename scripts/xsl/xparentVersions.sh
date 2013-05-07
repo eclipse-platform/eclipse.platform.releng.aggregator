@@ -2,6 +2,10 @@
 #
 
 DIR=$( dirname $0 )
+NEW_VER=0.14.0-SNAPSHOT
+if [ $# -eq 1 ]; then
+	NEW_VER="$1"
+fi
 
 find * -name pom.xml -print0 | xargs -0 grep "^<project>" | cut -f1 -d: | sort -u >/tmp/t1_$$.txt
 
@@ -15,27 +19,27 @@ find * -name pom.xml -print0 | xargs -0 grep packaging.pom..packaging | cut -f1 
 find * -name pom.xml -print0 | xargs -0 grep packaging.eclipse-repository..packaging | cut -f1 -d: | sort -u >>/tmp/t1_$$.txt
 
 for POM in $( cat /tmp/t1_$$.txt ); do
-xsltproc -o "${POM}.out" $DIR/fix-pom-version.xsl "${POM}"
+xsltproc --stringparam new-version "$NEW_VER" -o "${POM}.out" $DIR/fix-pom-version.xsl "${POM}"
 mv "${POM}.out" "${POM}"
 done
 
 find * -name pom.xml | sort -u >/tmp/t1_$$.txt
 
 for POM in $( cat /tmp/t1_$$.txt ); do
-xsltproc -o "${POM}.out" $DIR/fix-pom-parent-version.xsl "${POM}"
+xsltproc --stringparam new-version "$NEW_VER" -o "${POM}.out" $DIR/fix-pom-parent-version.xsl "${POM}"
 mv "${POM}.out" "${POM}"
 done
 
-find * -name pom.xml -print0 | xargs -0 grep eclipse-plugin | cut -f1 -d: | sort -u >/tmp/t1_$$.txt
-find * -name pom.xml -print0 | xargs -0 grep eclipse-feature | cut -f1 -d: | sort -u >>/tmp/t1_$$.txt
-find * -name pom.xml -print0 | xargs -0 grep eclipse-test-plugin | cut -f1 -d: | sort -u >>/tmp/t1_$$.txt
+find * -name pom.xml -print0 | xargs -0 grep packaging.eclipse-plugin | cut -f1 -d: | sort -u >/tmp/t1_$$.txt
+find * -name pom.xml -print0 | xargs -0 grep packaging.eclipse-feature | cut -f1 -d: | sort -u >>/tmp/t1_$$.txt
+find * -name pom.xml -print0 | xargs -0 grep packaging.eclipse-test-plugin | cut -f1 -d: | sort -u >>/tmp/t1_$$.txt
 
 
 for POM in $( cat /tmp/t1_$$.txt ); do
 POM_DIR=$( dirname $POM )
 cat >${POM_DIR}/forceQualifierUpdate.txt <<EOF
 # To force a version qualifier update add the bug here
-Bug 403237 - o.e.e4.tools cannot be build with "mvn clean install"
+Bug 403352 - Update all parent versions to match our build stream
 EOF
 done
 
