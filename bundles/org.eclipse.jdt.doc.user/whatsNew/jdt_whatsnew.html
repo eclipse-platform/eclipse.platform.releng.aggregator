@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
@@ -13,14 +13,14 @@ table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
 table.news tr td.content {vertical-align: top; width: 70%;}
 ul {padding-left: 13px;}
 </style>
-<title>What's New in Juno (JDT)</title>
+<title>What's New in Kepler (JDT)</title>
 <script type="text/javascript" language="JavaScript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js"> </script>
 </head>
 
 <body>
-<h2>What's New in Juno (JDT)</h2>
+<h2>What's New in Kepler (JDT)</h2>
 <p>Here are descriptions of some of the more interesting or significant changes made to the Java development tools
-for the Juno release of Eclipse. They are grouped into:</p>
+for the Kepler release of Eclipse. They are grouped into:</p>
 <ul>
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<li><a href="#JavaCompiler">Java Compiler</a></li>
@@ -29,7 +29,6 @@ for the Juno release of Eclipse. They are grouped into:</p>
 	<li><a href="#Debug">Debug</a></li>
 	<li><a href="#JUnit">JUnit</a></li>
 </ul>
-<p>See also the <b><a href="Java7news/whats-new-java-7.html">What's new for Java 7</a></b> for features added to support the Java 7 language.</p>
 <p>See also the <b><a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">Eclipse Platform What's New</a></b>
 document for changes in the Platform.</p>
 <br/>
@@ -46,95 +45,395 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="quick-outline-camel-case">
-    <td class="title">CamelCase in Quick Outline</td>
+  <tr id="convert-if-else-to-switch">
+    <td class="title">New 'Convert if-else to switch' quick assist</td>
     <td class="content">
-        The <b>Quick Outline (Ctrl+O)</b> and <b>Quick Hierarchy (Ctrl+T)</b> in the Java Editor now also
-        support camelCase matching on the element name, quite similar to the Open Type dialog and Content Assist.
-		<p><img src="images/quick-outline-camel-case.png" alt="Quick Outline of StyledText with pattern 'gCa'"/></p>
-		The * and ? wildcards still work, of course.
+      The new <b>Convert 'if-else' to 'switch'</b> quick assist (<b>Ctrl+1</b>) allows you to convert an if-else statement to 
+      an equivalent switch statement.
+      <p><img src="images/convert-if-else-to-switch.png" alt=""/></p>
+      
+      This quick assist is the reverse of the existing <b>Convert 'switch' to 'if-else'</b> quick assist.
     </td>
   </tr>
 
-  <tr id="jdt-convert-enhanced-for-loop">
-    <td class="title">Quick Assist to convert enhanced <code>for</code> loop</td>
+  <tr id="tolerateIllegalAmbiguousVarargsInvocation">
+    <td class="title">Force Eclipse to compile (illegal) ambiguous varargs code</td>
+    <td class="content"> JDK 6 and below had a bug and considered the code below legal.
+	However, this bug was fixed in JDK 7 and the code now reports an ambiguous invocation error at the call site for test(..).
+	Eclipse Juno followed and fixed this across all compliance levels.
+	<p><a href="images/illegal-ambiguous-varargs-error.txt"><img src="images/illegal-ambiguous-varargs-error.png" alt="follow link for source"/></a></p>
+	<p>If you still want the above code to compile in compliance &lt; 1.7, to mimic JDK 6 or below, you can use the
+	system property <b>tolerateIllegalAmbiguousVarargsInvocation</b> to force Eclipse to tolerate such ambiguous varargs cases.
+	This property can e.g. be set in the eclipse.ini file after the -vmargs setting:</p>
+	<pre><code>...
+        	 -vmargs
+			-DtolerateIllegalAmbiguousVarargsInvocation=true
+			...</code></pre>
+	<p><i>Note</i>: With this setting, Eclipse also	mimics JDK 6 and below in raising an error in other cases that are legal in both JDK 7 and Eclipse:</p>
+	<p><a href="images/illegal-ambiguous-varargs-error2.txt"><img src="images/illegal-ambiguous-varargs-error2.png" alt="follow link for source"/></a></p>
+	</td>
+  </tr>
+  
+  <tr id="new-batch-compiler-options">
+    <td class="title">New batch compiler options</td>
+    <td class="content"> If you use the ECJ batch compiler using the command line or Ant tasks, you can now configure the following options which previously could only be set through
+	the <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings</b> page:
+	<ul>
+      <li>invalidJavadoc: set all warnings for malformed Javadoc tags</li>
+      <li>invalidJavadocTag: validate Javadoc tag arguments</li>
+      <li>invalidJavadocTagDep: validate deprecated references in Javadoc tag args</li>
+      <li>invalidJavadocTagNotVisible: validate non-visible references in Javadoc tag args</li>
+      <li>invalidJavadocVisibility(&lt;visibility&gt;): specify visibility modifier for malformed Javadoc tag warnings</li>
+      <li>missingJavadocTags: enable detection of missing Javadoc tags</li>
+      <li>missingJavadocTagsOverriding: detect missing Javadoc tags in overriding methods</li>
+      <li>missingJavadocTagsMethod: detect missing Javadoc tags for method type parameter</li>
+      <li>missingJavadocTagsVisibility(&lt;visibility&gt;): specify visibility modifier for missing Javadoc tags warnings</li>
+      <li>missingJavadocComments: detect missing Javadoc comments</li>
+      <li>missingJavadocCommentsOverriding: detect missing Javadoc tags in overriding methods</li>
+      <li>missingJavadocCommentsVisibility(&lt;visibility&gt;): specify visibility modifier for missing Javadoc comments warnings</li>
+      <li>nullAnnotConflict: detect conflict between null annotation specified and nullness inferred. Is effective only with nullAnnot option enabled</li>
+      <li>nullAnnotRedundant: detect redundant specification of null annotation. Is effective only with nullAnnot option enabled</li>
+      <li>nullUncheckedConversion: detect unchecked conversion from non-annotated type to @NonNull type. Is effective only with nullAnnot option enabled</li>
+      <li>unusedParam: detect unused parameter</li>
+      <li>unusedParamOverriding: detect unused parameter for overriding method</li>
+      <li>unusedParamImplementing: detect unused parameter for implementing method</li>
+      <li>unusedParamIncludeDoc: detect unused parameter documented in comment tag</li>
+      <li>unusedThrownWhenOverriding: detect unused declared thrown exception in overriding method</li>
+      <li>unusedThrownIncludeDocComment: detect unused declared thrown exception, documented in a comment tag</li>
+      <li>unusedThrownExemptExceptionThrowable: detect unused declared thrown exception, exempt Exception and Throwable</li>
+	</ul>
+	<p> For more information on using batch compiler options, please refer to <b>Help &gt; Java Development User Guide &gt; Tasks &gt; Compiling Java Code &gt; Using the batch compiler</b>.</p>
+    </td>
+  </tr>
+  
+  <tr id="content-assist-TL_CONSTRUCTOR_START">
+    <td class="title">New API to indicate content assist requested on the start of a constructor</td>
     <td class="content">
-      Ever encountered an enhanced <code>for</code> loop and needed access to the <code>Iterator</code> or to the loop index?
-      Now, you can just use a Quick Assist (<b>Ctrl+1</b>) to convert the loop:
+      org.eclipse.jdt.core.CompletionContext.TL_CONSTRUCTOR_START:
+      <pre>
+	  /**
+	   * The completed token is the first token of a constructor
+	   * invocation expression.
+	   * e.g.
+	   * 
+	   * public class X {
+	   *   public void bar() {
+	   *     new Foo| // completion occurs at |
+	   *   }
+	   * }
+	   */
+	</pre>
+    </td>
+  </tr>
+
+  <tr id="content-assist-additional-info-in-debug-views">
+    <td class="title">Content assist shows Javadoc in Display, Expressions and Variables view</td>
+    <td class="content">
+        Content assist in the Display, Expressions and Variables view now shows Javadoc:
+		<p><img src="images/additional-info.png" alt="Screenshot showing Javadoc when doing content assist"/></p>
+	</td>
+  </tr>
+  
+  <tr id="javadoc-view-target">
+    <td class="title">Javadoc view resolves enclosing method call and keeps last target</td>
+    <td class="content">
+      The <b>Javadoc</b> and <b>Declaration</b> views now try to find the enclosing method call
+      if the selection or caret position doesn't resolve to a valid Java element.
       <p>
-          <img src="images/convert-to-for-loop.png" alt="Screenshot of Quick Assist on the 'for' keyword of an enhanced 'for' loop"/>
+        <img src="images/javadoc-view-target.png" alt="'String.copyValueOf(data, offset, count)', with 'data' selected."/>
       </p>
+      Furthermore, they keep the last resolved target element even if no new target can be resolved.
+    </td>
+  </tr>
+  
+  <tr id="detection-unused-type-parameter">
+    <td class="title">Detection of unused type parameters</td>
+    <td class="content">
+      The compiler can now detect unused type parameters:
+      <p>
+        <img src="images/unused-type-parameter.png" alt=""/>
+      </p>
+      <p>
+        The <b>Unused type parameter</b> diagnostic is set to Ignore by default and can be enabled on the 
+		<b>Java &gt; Compiler &gt; Errors/Warnings</b>
+		preference page.
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="unused-type-parameter">
+    <td class="title">Option to omit @Override for interface methods</td>
+    <td class="content">
+      Eclipse can add <code>@Override</code> annotations for overriding methods:
+      <p>
+        <img src="images/override-annotation-code-style.png" alt="Code Style preference page"/>
+      </p>
+      <p>
+        If your code uses Java 1.6 or higher, the <code>@Override</code> annotation is also added to
+        methods that override an interface method. If you don't want to use <code>@Override</code>
+        in this case, then follow the link and disable the corresponding compiler option:
+      </p>
+      <p>
+        <img src="images/override-annotation-compiler.png" alt="Errors/Warnings preference page, checkbox 'Include implementations of interface methods (1.6 or higher)'"/>
+      </p>
+      <p>
+        You may also want to enable the diagnostic for Missing '@Override' annotation.   
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="xml-dom-structure">
+    <td class="title">XML DOM logical structures</td>
+    <td class="content">
+      JDT now provides a default logical structure for XML DOMs, which can be used during debugging to view the children and attributes of a node as simple arrays.
+      <p>
+      <img src="images/dom-structure.png" alt="Variables view showing the XML DOM logical structure"/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="combine-strings">
+    <td class="title">Quick assist to combine Strings</td>
+    <td class="content">
+      The new <b>Combine to single String</b> quick assist (<b>Ctrl+1</b>) replaces String concatenations
+      with a single String literal. 
+      <p>
+        <img src="images/combine-strings.png" alt="String s = &quot;Delete &quot; + &quot;two&quot; + &quot; files?&quot; // becomes: String s = &quot;Delete two files?&quot;"/>
+      </p>
+    </td>
+  </tr>
+  
+    <tr id="inherit-null-annotations">
+    <td class="title">Option to inherit null annotations</td>
+    <td class="content">
+        JDT has a new option controlling how to interpret null annotations in the presence of inheritance.
+        This should facilitate the migration towards null annotations in projects with
+        mixed code ownership.
+      <p>For the sake of code readability, JDT expects null annotations of an overridden
+        method to be repeated in overriding methods. In the following example the analysis
+        normally complains that <code>arg</code> is not annotated in <code>ClientClass</code>,
+        which means, this class doesn't formally conform to the contract of its super-interface.
+      </p>
+      <p><img title="Example for inheritance of null annotations" src="images/inherit-null-annotations-example.png" 
+          alt="Example for inheritance of null annotations"/></p>
+      <p>Starting with 4.3M4 this behavior can be changed by selecting the option
+        <strong>Inherit null annotations</strong>.
+      </p>
+      <p><img title="Option for inheritance of null annotations" src="images/inherit-null-annotations-option.png"
+           alt="Option for inheritance of null annotations"/></p>
+      <p>In this new mode the analysis implicitly fills in all missing annotations
+        in overriding methods and uses the annotations from the overridden method.
+        In the above example the error will go away, and analysis concludes that the
+        code is actually safe, which is likely when the contract had already been
+        defined in the javadoc comment and the implementor actually adheres to that
+        contract. If, on the other hand, the implementation does not comply with the
+        inherited specification, new errors will be reported as shown below.
+      </p>
+      <p><img title="Negative example for inheritance of null annotations" src="images/inherit-null-annotations-example2.png"
+          alt="Negative example for inheritance of null annotations"/></p>
+      <p>If inheritance of null annotations encounters any ambiguity or conflict
+        the analysis falls back to requiring explicit annotations.
+      </p>
+    </td>
+  </tr>
+
+  <tr id="close-quietly">
+    <td class="title">Leak analysis respects well-known utilities</td>
+    <td class="content">
+        JDT's analysis for resource leaks has been made aware of well known utilities
+        from google and apache libraries.
+      <p>Generally, this analysis looks for <code>close()</code> method calls
+        directly on a resource (any value of type <code>Closeable</code>).
+        However, in order to reduce boilerplate exception handling, several libraries
+        are providing methods like <code>closeQuietly(Closeable)</code>.
+        Previously, the analysis would complain about the missing call to <code>close()</code>
+        as shown below:
+      </p>
+      <p><img title="Example for close quietly" src="images/close-quietly-example.png"
+          alt="Example for close quietly"/></p>
+      <p>This warning is not relevant and will no longer be reported.
+        To achieve this, JDT now hardcodes a (short) white list of functions that
+        are known to safely close a given resource.
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="null-annotations-for-fields">
+    <td class="title">Null annotations for fields</td>
+    <td class="content">
+      The annotation-based null analysis &mdash; first released with Eclipse Indigo &mdash; has been extended
+      to apply also to fields. If enabled, this analysis will now detect the following problems
+      concerning any field annotated with <code>@NonNull</code>:
       <ul>
-        <li><b>Convert to indexed 'for' loop</b> is available for expressions of array- and <code>List</code>-based types.</li>
-        <li><b>Convert to Iterator-based 'for' loop</b> is available for expressions of type <code>Iterable</code>.</li>
+      <li>If the field is not properly initialized to a non-null value.</li>
+      <li>If a value is assigned to the field that is not known to be non-null.</li>
       </ul>
-    </td>
-  </tr>
-
-  <tr id="bracket-matching">
-	<td class="title">Improved bracket matching support in Java editor</td>
-	<td class="content">
-		The Java editor now supports highlighting of enclosing brackets.
-		<p><img src="images/enclosing-brackets.png" alt="Enclosing brackets"/></p>
-		
-		This can be configured on the <b>Java &gt; Editor</b> preference page.
-		<p><img src="images/bracket-highlighting-preferences.png" alt="Preferences for bracket highlighting"/></p>
-		
-		<p>Also, the <b>Navigate &gt; Go To &gt; Matching Bracket</b> action <b>(Ctrl+Shift+P)</b> now works everywhere in a file. If a bracket is not selected 
-		before invoking the action, the action navigates to the nearest enclosing end bracket. On invoking the action a second time, it
-		navigates to the corresponding start bracket. On the third invocation, the original selection is restored.</p>
-		
-		<p>So far, a matching bracket was found when the caret was placed immediately after a bracket. Now,
-		a matching bracket is found both when the caret is placed either immediately before or immediately after a bracket.</p>
-		<p><img src="images/matching-bracket.png" alt="Matching bracket examples"/></p>
-		
-		<p>You can hover over a closing curly brace and see the source near the matching opening brace in a hover. 
-		This is helpful when you want to see the code near the start of a long code block. The hover also tells the number of lines in the code block.</p> 
-		<p><img src="images/bracket-hover-1.png" alt="Bracket hover example 1"/></p>
-		<p>The hover is also useful to temporarily 'highlight' a short code block.</p>
-		<p><img src="images/bracket-hover-2.png" alt="Bracket hover example 2"/></p>
+      <p>In return to these obligations, dereferencing a <code>@NonNull</code> field is regarded as always safe.
+      </p>
+      <p>If a field is marked as <code>@Nullable</code>, generally every direct dereference
+      	of the field is flagged as a potential null pointer access. Even a null check for such a field is not
+      	a perfect protection due to dangers of side effects, effects via aliased references, and concurrency.</p>
+      <p>As a compromise between safety and convenience, the compiler can be configured to apply
+      	<strong>"syntactic null analysis for fields"</strong>.
+      	With this option enabled, the compiler syntactically recognizes
+      	a narrow range of code patterns where a null-check of a field is <em>directly</em> followed by
+      	a dereference or an assignment to a <code>@NonNull</code> variable. For these particular situations,
+      	no problem will be reported.</p>
+      <p>In the following example, the check in line 12 properly protects the access in line 13, whereas
+      	the knowledge that field <code>nullable</code> holds a non-null value (in line 15) is spoiled by
+      	the intermediate statement in line 16.</p>
+	  <p><a href="images/null-annotations-for-fields-examples.txt"><img src="images/null-annotations-for-fields-examples.png" alt=""/></a></p>
+      <p>This is the option that enables the syntactic analysis (under the heading <strong>Java Compiler &gt; Errors/Warnings</strong>):</p>
+	  <p><img src="images/option-syntactic-null-analysis-for-fields.png" alt=""/></p>
 	</td>
-  </tr>
-
-  <tr id="javadoc-hover-parameter-annotations">
-    <td class="title">Javadoc hover shows parameter annotations</td>
+  </tr>   
+  <tr id="Support-for-package-Javadoc-in-Javadoc-hover-and-view">
+    <td class="title">Support for package Javadoc in Javadoc hover and view</td>
     <td class="content">
-        Javadoc hovers now render the annotations on method parameters:
-        <p><img src="images/javadoc-hover-parameter-annotations.png" alt="org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)"/></p>
+      The Javadoc hover and view now display package Javadoc from either the package-info.java or the package.html file.
+      <p><img src="images/package-javadoc-hover-examples.png" alt=""/></p>
+    </td>
+  </tr>
+  <tr id="Quick-Assist-for-unused-type-parameters">
+    <td class="title">Quick Assist for unused type parameters</td>
+    <td class="content">
+      The Java editor now provides a Quick Assist (<b>Ctrl+1</b>) to remove or document unused type parameters.
+      <p><img src="images/quickassist-for-unused-type-parameter-example.png" alt=""/></p>
+    </td>
+  </tr>
+  <tr id="pre-fill-package-name">
+	<td class="title">Pre-filling package name in creation wizards</td>
+	<td class="content">
+      All the type and package creation wizards now pre-fill the package name
+      if a suitable package name can be suggested for the selected project or source folder.
+      <p><img src="images/pre-fill-package-name.png" alt=""/></p>
+      <p>The suggested package name is the name of the project if the source folder does not contain any package
+      and if the project name is a valid package name.
+      In case of type creation wizards, if the source folder contains exactly one package then the name of that package
+      is used as the suggested package name.</p>
+  </td>
+  </tr>
+  
+  <tr id="convert-to-if-return">
+    <td class="title">'Convert to if-!-return' Quick Assist</td>
+    <td class="content">
+     Ever encountered a long <code>if</code> statement that can be safely inverted to an early return, so that you can ignore the code that follows, and make it easier to understand? 
+     Now, you can just use a Quick Assist <b>(Ctrl+1)</b> on the <code>if</code> statement to do this refactoring:
+     <p><img src="images/convert-to-if-!-return.png" alt=""/></p>
     </td>
   </tr>
 
-  <tr id="JDT-editor-for-class-without-source">
-    <td class="title">'*.class without source' file type</td>
+  <tr id="linked-Javadoc-package-names">
+   <td class="title">Package names are linked in Javadoc hover and view</td>
+   <td class="content">
+     You can now click individual package names displayed in the header of the Javadoc hover or the Javadoc view to see the package Javadoc:
+     <p><img src="images/javadoc-package-names-linked.png" alt=""/></p>
+   </td>
+  </tr>
+   <tr id="InfoViews-should-indicate-when-linking-is-outOfSync">
+   <td class="title">Javadoc and Declaration view indicate when out of sync</td>
+   <td class="content">
+     The Javadoc and Declaration view now indicate when their content is no longer in sync with the current selection:
+     <p><img src="images/declaration-view-indicating-outofsync.png" alt=""/></p>
+   </td>
+  </tr>
+  
+  <tr id="junit-4-11">
+    <td class="title">Only one JUnit (4.11)</td>
     <td class="content">
-      The new <b>*.class without source</b> file type allows to associate an internal or external editor
-      to class files that have no source attached. This e.g. allows to open the class file in a decompiler:
+        The org.junit bundle has been updated to
+        <a href="http://htmlpreview.github.com/?https://github.com/junit-team/junit/blob/master/doc/ReleaseNotes4.11.html">JUnit 4.11</a>.
       <p>
-          <img src="images/file-associations-page.png" alt="Screenshot of the 'File Associations' preference page"/>
+        At the same time, our good old friend org.junit_3.8.2 has been retired, and the org.junit4 compatibility bundle
+        has also been removed. Your <code>Require-Bundle:</code> entries should just point to
+        <code>org.junit;bundle-version="4.11.0"</code> (or an earlier version, if you like).
+      </p>
+      <p>Note that JUnit 4 still contains the JUnit 3 APIs. If you need org.junit_3.8.2 back for
+        whatever reason, you can still get it from <a href="http://download.eclipse.org/tools/orbit/downloads/">Orbit</a>.
       </p>
     </td>
   </tr>
-
-  <tr id="default-implementations-for-correction-proposals">
-	<td class="title">Default im&shy;ple&shy;men&shy;ta&shy;tions for correction proposals</td>
-	<td class="content">
-		JDT now provides the following default implementations for correction proposals that can be used to contribute quick fixes and quick assists.
-		<ul>
-			<li><code>org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal</code></li>
-			<li><code>org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal</code></li>
-			<li><code>org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal</code></li>
-		</ul>
-		This makes it easier to implement quick fixes/assists that operate on .java files and use an ASTRewrite.
-	</td>
+  
+  <tr id="debug-improved-generics-eval">
+   <td class="title">Improved evaluation of generics while debugging</td>
+   <td class="content">
+     Significant improvements have been made in the debug evaluation engine to support the use of
+     generics. This impacts the use of conditional breakpoints, the display view, the expressions view,
+     and the inspect/display/execute actions. Previously, evaluations acting on classes with generics
+     would sometimes encounter compilation errors.
+   </td>
   </tr>
-
-  <tr id="content-assist-package-info">
-    <td class="title">Content assist in package-info.java</td>
+  
+  <tr id="debug-ext-source-api">
+   <td class="title">API to contribute location information for non-standard JRE / JDK libraries</td>
+   <td class="content">
+     JDT Debug now provides an extension point <code>org.eclipse.jdt.launching.libraryLocationResolvers</code>
+     that you can use to contribute location information for non-standard JRE / JDK libraries.  For example,
+     this extension point can be used to provide Javadoc and source locations for JARs in the ext location
+     of a JRE.
+     <p>
+     Extenders must provide an implementation of <code>org.eclipse.jdt.launching.ILibraryLocationResolver</code>
+     which can provide package roots, source paths, Javadoc locations and index locations for a library.
+     </p> 
+   </td>
+  </tr>
+  
+  <tr id="remove-type-arguments">
+    <td class="title">Remove type arguments after content assist</td>
     <td class="content">
-      Content assist (<b>Ctrl+Space</b>) is now available inside package-info.java, which is used to declare package-level annotations and Javadocs.
-      <p><img src = "images/content-assist-pkg-info.png" alt = "Content assist popup to add package-level annotations on package declaration"/></p>
+     Ever encountered a case where content assist added type arguments for a generic type, but you do not want them
+     because you need the <code>.class</code> literal or you want to invoke a static method?
+     Now, rather than deleting all the arguments manually, 
+     you can just delete the '<code>&lt;</code>' and that will remove the entire text up to '<code>&gt;</code>'.
     </td>
   </tr>
+  <tr id="proposals-without-prefix">
+    <td class="title">Template and keyword proposals without prefix</td>
+    <td class="content">
+      Content assist now proposes templates and keywords without needing a prefix first:
+      <p><img src="images/content-assist.png" alt=""/></p>
+    </td>
+  </tr>
+  <tr id="semicolon-key-inserts-method">
+    <td class="title">Use ';' key to insert method invocation</td>
+    <td class="content">
+    Irrespective of the return type of a method, you can now use the semicolon (<b>;</b>) key to select any method invocation proposal
+    from the content assist popup. The '<code>;</code>' will be appended at the end of the method invocation.
+    </td>
+  </tr>   
+  <tr id="semicolon-appended-for-void-methods">
+    <td class="title">Content assist appends ';' to void methods</td>
+    <td class="content">
+    If a void method is selected during content assist, then a semicolon is now automatically
+    appended at the end of the method invocation.
+    </td>
+  </tr>
+  <tr id="test-templates">
+    <td class="title">JUnit test templates</td>
+    <td class="content">
+      The JUnit test templates have been renamed to show the JUnit 4 template before the JUnit 3 template:
+      <p><img src="images/junit-templates.png" alt="'test' for JUnit 4; 'test3' for JUnit 3"/></p>
+    </td>
+  </tr>
+  <tr id="junit-view-assumptions">
+    <td class="title">JUnit view shows assumption failures</td>
+    <td class="content">
+      The JUnit view now counts <code>@Ignore</code>d tests and tests that didn't meet
+      an assumption as "skipped' tests. The skipped tests also got new icons, and
+      tests with an assumption failure no longer get the 'passed' checkmark.
+      <p><img src="images/junit-view-assumptions.png" alt="Test cases using @Ignore and Assume.assumeFalse(true)"/></p>
+    </td>
+  </tr>
+  <tr id="create-loop-variable">
+    <td class="title">Quick Fix to create 'for' loop variable</td>
+    <td class="content">
+      The new <b>Create loop variable</b> quick fix corrects an incomplete 'for' loop
+      by adding the type of the loop variable.
+      <p><img src="images/create-loop-variable.png" alt="Corrects 'for (e: elements) {}' to 'for (ElementType e: elements) {}'"/></p>
+    </td>
+  </tr>
+  
+  
 
   <!-- ******************* Java Compiler ************************************* -->
   <tr>
@@ -143,225 +442,9 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="ignore-warnings-source-folders">
-    <td class="title">Selectively ignore errors/warnings from source folders</td>
-    <td class="content">
-        You can now configure JDT to ignore optional errors/warnings from certain source folders. 
-		<b>Project properties &gt; Java Build Path &gt; Compiler &gt; Source</b>.
-		<p><img src="images/ignore-warnings-source-folders.png" alt="Java Build path page with 'Ignore optional compile problems' highlighted"/></p>
-        <p>
-		With this option set to <b>Yes</b>, JDT will suppress errors/warnings configured in the 
-		<b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings</b> page. This can be desirable
-		for source folders that contain auto-generated classes or tests.
-      </p>
-    </td>
-  </tr>
+ 
 
-  <tr id="enhanced-switch-diagnostics">
-    <td class="title">Enhanced diagnostics for detection of incomplete switch statements</td>
-    <td class="content">
-      	The JDT's analysis regarding incomplete switch statements is now stronger and can be configured more in detail. See <a href="../tasks/task-ensuring_switch_completeness.htm">here</a> for background. 
-	  	<p>The compiler now separately checks two criteria for a switch statement to be complete:</p>
-	  	<ul>
-	  	<li>A switch statement on an enum should define one case statement for each of the enum's constants</li>
-	  	<li>Each switch statement independent of type should define a default case.</li>
-	  	</ul>
-	  	<p>By default the compiler warns for an enum switch where both criteria are violated:</p>
-      	<p><img src="images/switch-case-enum.png" alt="Warning on switch over enum with missing default case"/></p>
-	  	<p>This warning is controlled by the option <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Incomplete 'switch' cases on enum</b>.
-	  	  This option can be strengthened by selecting the new sub-option <b>Signal even if 'default' case exists</b>,
-	  	  in which case JDT will flag switch statements over an enum type which may have an enum value covered only through a default statement, but not directly through
-	  	  a case statement. When new enum constants are added, this option will help in detecting the switch statements that do not cover the new value.</p>
-	  	<p><img src="images/switch-missing-case-enum.png" alt="Warning on switch with missing case statement for enum value even though default is present"/></p>
-      	<p><img src = "images/switch-new-warnings.png" alt = "Compiler Errors/warnings preference page with new switch diagnostic options highlighted"/></p>
-	  	<p> A second addition in the same section of the compiler preferences, <b>Switch is missing 'default' case</b>, controls whether the JDT will flag switch statements 
-	  	  with a missing default case, because such a switch statement will be skipped entirely at runtime if an unexpected value occurs.</p>
-		<p><img src="images/switch-missing-default.png" alt="Warning on switch with missing default case"/></p>
-		<p> Note that in cases like the above, the warning also helps to understand another
-		error against the last statement:<br/>
-		"The local variable printString may not have been initialized"
-		is reported because clients could possibly call the method <code>print(Color)</code> with an 
-		enum value that is not known at the time of compiling this method.</p>
-    </td>
-  </tr>
-
-  <tr id="JDT-resource-leaks">
-    <td class="title">New options to detect resource leaks</td>
-    <td class="content">The compiler can now detect leakage of resources i.e. local variables of type
-      <code>java.lang.AutoCloseable</code> (compliance &gt;= 1.7) and <code>java.io.Closeable</code> (compliance &lt;= 1.6).
-      See <a href="../tasks/task-avoiding_resource_leaks.htm">here</a> for background information.
-	  <p><img src="images/resource-leak-default-warning.png" alt="Errors/Warnings page with 'Resource leaks' highlighted"/></p>
-      <p> When the <b>Resource leak</b> option on the <b>Java &gt; Compiler &gt; Errors/Warnings</b> preference page is enabled,
-      the compiler will issue an error or a warning if the <code>close()</code> method is not invoked locally on a resource.</p>
-      <p>
-       <img src="images/resource-leak-example.png"
-          alt="Resource leak example"
-          title="Compiler warning on an unclosed resource"/>
-      </p>
-
-      <p> When you enable the <b>Potential resource leak</b> option on the <b>Java &gt; Compiler &gt; Errors/Warnings</b> preference page,
-      the compiler will issue an error or a warning if the <code>close()</code> method is not invoked locally on a resource
-      on all the execution paths.</p>
-      <p>
-       <img src="images/pot-resource-leak-example.png"
-          alt="Potential resource leak example"
-          title="Compiler warning on a resource not closed on all execution paths"/>
-      </p>
-      <p> This analysis is less aggressive if a resource is <em>shared between methods</em>, possibly via a field, 
-        where any party accessing the resource could possibly issue the desired call to close().
-        In some cases (e.g.: passed as an argument to another method) the warning will be softened
-        to only report a <em>potential</em> leak, in other cases (stored in a field) the analysis
-        will be entirely silent.
-	  </p>
-	  <p> Additionally the analysis recognizes certain cases as being <em>practically unimportant</em>. 
-	  	Some examples where the absence of a close() call does not trigger any error/warning are given below:
-	  </p>
-		<ul>
-		<li> Resource-less implementors of Closeable, such as StringReader.
-		<p><img src="images/os-less-unclosed-resource.png" alt="no resource leak reported if resource-less implentor of Closeable is not closed"/></p>
-		</li>
-		<li> Wrapping implementors of Closeable, such as BufferedReader, that simply wrap a resource-less Closeable, directly or indirectly.
-		<p><img src="images/wrapped-os-less-unclosed-resource.png" alt="no resource leak reported when a resource which wraps a resource-less implentor of Closeable is not closed"/></p>
-		</li>
-		<li> Wrapped resources where any resource in the chain is (potentially) closed.
-		<p><img src="images/wrapped-resource.png" alt="potential resource leak reported when any resource in the chain of wrapper resources is closed along some execution path."/></p>
-		</li>
-		</ul>
-      </td>
-    </tr>
-
-  <tr id="JDT-batch-compiler">
-    <td class="title">New Batch compiler warning options</td>
-
-    <td class="content">Two new batch compiler options are now available to configure the
-      compile time warnings:
-      <ul>
-        <li><b>-warn:all</b> can be used to enable all compiler warnings</li>
-        <li><b>-warn:resource</b> can be used to enable resource leak warnings</li>
-      </ul>
-      </td></tr>
-      <tr id="JDT-build-path">
-    <td class="title">New build path option to warn when a source folder's output location overlaps another source folder</td>
-
-    <td class="content">JDT now shows a build path error when a source folder's output location overlaps another source folder.
-       This error can be configured on the <b>Java &gt; Compiler &gt; Building &gt; Output location overlaps source location</b> preference page.
-       <p>
-       <img src="images/buildpath-error.png"
-          alt="Build path error when source folder's output location overlaps another source folder"
-          title="Build path error because src2's output location is src"/></p>
-    </td>
-  </tr>
-
-  <tr id="annotation-null-analysis">
-    <td class="title">Annotation-based null analysis</td>
-    <td class="content">
-        JDT can now be configured to use annotations designated as null annotations to 
-		perform enhanced inter-procedural null analysis. This feature can be enabled in
-		
-		<b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Null analysis</b>:
-		<p><img src="images/null-prefs.png" alt="Errors/Warnings preference page with 'Enable annotation-based null analysis' highlighted"/></p>
-		
-		<p> You can use either the default annotations bundled with JDT or use your own annotations
-		as null annotations. In addition to enabling the null analysis, the annotations need to be on the 
-		Java build path of your project. The default annotations can be found in the <b>org.eclipse.jdt.annotation</b> JAR
-		in the <code>plugins</code> directory, which can be consumed as an OSGi bundle or plain JAR.</p>
-		<p>When annotation-based null analysis is enabled, JDT issues new diagnostics based on the nullness
-			of a variable or a method return type as specified by a null annotation.</p>
-		
-		<p><img src="images/null-annotation-problems1.png" alt="	public void foo(@NonNull Object o1) {&para;		System.out.println(o1.toString()); // OK: o1 cannot be null&para;	}&para;	&para;	@NonNull Object bar(@Nullable String s1) {&para;		foo(null); // cannot pass null argument&para;		@NonNull String s= null; // cannot assign null value &para;		@NonNull String t= s1; // cannot assign potentially null value &para;		return null; // cannot return null value&para;	}"/></p>
-		<p> Similar diagnostics are also elicited when the value assigned/returned may potentially be null or has unknown nullness.</p>
-		
-		<p> Overriding methods are also checked for correctness:</p>
-		<p><img src="images/null-annotation-problems2.png" alt="class Base {&para;	@NonNull Object method(@Nullable Object o) {&para;		return new Object();&para;	}&para;}&para;&para;class Sub extends Base {&para;	@Override            // method parameter must allow null&para;	@Nullable Object method(@NonNull Object o) {&para;		return new Object();&para;	}&para;}"/></p>
-
-		<p> You can also use the <code>@NonNullByDefault</code> annotation to set a global default on an element (package, type, method) for all enclosed elements.</p>
-		<p><img src="images/null-annotation-problems-redundant1.png" alt="@NonNullByDefault&para;class MyClass {&para;	// redundant @NonNull annotations:&para;	public @NonNull Object foo(@NonNull Object o) {&para;		return o;&para;	}&para;	&para;	@NonNullByDefault(false) // cancels the default&para;	Object bar(@NonNull Object o) {&para;		return o;&para;	}&para;}"/></p>
-
-		<p> As a result of annotating method signatures, the existing intra-procedural null analysis has even more information
-		because of user-specified annotations and thus provides better results. In the example below, the compiler would not have
-		been able to evaluate the null status of parameter 'obj' without the null annotation 
-		(option <b>Redundant null check</b> must be enabled to see the warning).</p>
-		<p><img src="images/null-annotation-problems-redundant2.png" alt="public void foo(@NonNull Object obj) {&para;		if (obj == null) { }&para;	}"/></p>
-		
-		<p>The new diagnostics are classified in three categories:</p>
-		<ul>
-		<li><b>Violation of null specification</b><br/>
-			<img src="images/new-null-analysis-message1.png" alt="This option produces the&para;			'Null type mismatch: required '@NonNull String' but the provided value is specified as @Nullable' warning"/>
-			<p>Here, 'in' is not a legal return value because of the @Nullable annotation in its <b>declaration</b>.</p>
-		</li>
-		<li><b>Conflict between null annotations and null inference</b><br/>
-			<img src="images/new-null-analysis-message2.png" alt="This option produces the&para;			'Null type mismatch: required @NonNull String but the provided value is inferred as @Nullable' warning"/>
-			<p>Here, 'local' is not a legal return value, because flow analysis for the un-annotated variable 'local' <b>infers</b> that 
-			it can be null on some path.</p>
-		</li>
-		<li><b>Unchecked conversion from non-annotated type to @NonNull type</b><br/>
-			<img src="images/new-null-analysis-message3.png" alt="This option produces the&para;			'Null type safety: The expression of type String needs unchecked conversion to conform to @NonNull String' warning"/>
-			<p>Here, the return value from 'getLegacyValue()' may or may not be compatible to '@NonNull String'. 
-			Similar to converting a legacy raw type to a generic type, also here essential type information is missing 
-			since 'getLegacyValue()' has no @NonNull or @Nullable annotation.</p>
-		</li>
-		</ul>
-		<p><b>Note:</b> This is the first version of this feature. We are working on making this
-		easier to consume in Java project setups.
-		The implemented features are complete and tested, but e.g. support for annotating fields or
-		APIs from third-party libraries is currently missing.
-		An initial set of quick fixes is included which will be further improved in the future.
-		</p>
-		<p>Also see <a href="../tasks/task-using_null_annotations.htm">here</a> for background information.</p>
-    </td>
-  </tr>
-
-  <tr id="batch-compiler-null-annotations">
-    <td class="title">Batch compiler options for using null annotations</td>
-    <td class="content">
-        You can now configure the batch compiler to use annotations for null analysis by passing the token <b>nullAnnot(nullable|nonnull|nonnullbydefault)</b> to the <code>-warn</code> option, 
-		where nullable, nonnull and nonnullbydefault are the fully qualified names of the annotation types to be used for null analysis. You can use <b>nullAnnot</b> alone
-		to use JDT's default annotations.
-		<p>In addition, you can use the <b>-nonNullByDefault</b> token to globally use nonnull as the default when
-		annotation-based null analysis is enabled. This implies that all types in method signatures without a null annotation are considered as specified non-null.</p>
-	</td>
-  </tr>
-  
-  <tr id="missing-non-null-by-default-annotation">
-    <td class="title">Detection of missing default nullness annotation</td>
-    <td class="content">
-    	In order to make non-null the default for un-annotated types in method signatures you may
-    	use the '@NonNullByDefault' annotation on all packages.
-        To ensure full coverage of all packages you can configure JDT to detect a missing default nullness annotation.
-        When <b>Preferences &gt; Java &gt; Compiler &gt; Errors/Warnings &gt; Null analysis &gt; Missing '@NonNullByDefault' annotation on package</b>
-        is enabled, JDT will issue an error/warning in the following cases:
-		<ul>
-		<li> When a package does not contain an '@NonNullByDefault' annotation in the package-info.java:
-		<p><img src="images/missing-nonnullbydefault-package.png" alt="Missing @NonNullByDefault annotation on package warning"/></p>
-		</li>
-		<li> When a type inside a default package does not contain a default nullness annotation.
-		<p><img src="images/missing-nonnullbydefault-type.png" alt="Missing @NonNullByDefault annotation on type warning"/></p>
-		</li>
-		</ul>
-	</td>
-  </tr>
-  
-    <tr id="Assert-like-java-assert-null-analysis">
-    <td class="title">Null analysis treats org.&#8203;eclipse.&#8203;core.&#8203;runtime.&#8203;Assert like Java assert</td>
-    <td class="content">
-        Since <b>org.eclipse.core.runtime.Assert</b> is often used just like the Java <b>assert</b> keyword, JDT's null analysis considers
-		the boolean expression passed into the former as always true after the Assert reference, since if the condition did turn out to be false,
-		the control flow will never go further than the org.eclipse.core.runtime.Assert reference.
-		<p><img src="images/assert-warnings.png" alt="Code snippet showing the boolean expression passed into org.eclipse.core.runtime.Assert.isLegal(..) is considered true after the call"/></p>
-	</td>
-  </tr>
-  
-  <tr id="pre-built-index-support">
-    <td class="title">Faster search with pre-built indexes</td>
-    <td class="content">
-        <i>Note: This feature is mainly intended for plug-ins that implement their own classpath container, not for the end user.</i>
-        <p>You can now tell JDT search to use pre-built indexes instead of having the compiler generate the indexes the first time a JAR is added to the classpath. 
-		This prevents indexing from occurring on the user's machine and lets the user obtain first search results faster.</p>
-		<p>You can specify the index file as a classpath attribute <code>IClasspathAttribute.INDEX_LOCATION_ATTRIBUTE_NAME</code> of the library.</p>
-		<p>See <b>Help &gt; JDT Plug-in Developer Guide &gt; Programmer's Guide &gt; JDT Core &gt; Indexes for the Java search</b> for more details.</p>
-	</td>
-  </tr>
-
+ 
   <!-- ******************* Java Views and Dialogs ************************************* -->
   <tr>
     <td id="JavaViews" class="section" colspan="2">
@@ -369,27 +452,7 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="encoding-for-source-attachments">
-    <td class="title">Encoding for source attachments</td>
-    <td class="content">
-        You can now specify the encoding for source attachments for libraries e.g.
-		in <b>Build Path &gt; Libraries &gt;</b> expand the library <b>&gt; Source attachment &gt; Edit...</b>
-		<p><img src="images/source-attachment-encoding.png" alt="Dialog to specify encoding for source attachments."/></p>
-	</td>
-  </tr>
-  
-  <tr id="errors-warnings-highlight">
-    <td class="title">Highlighting on Errors/Warnings preference pages</td>
-    <td class="content">
-        On Errors/Warnings preference pages, it is sometimes hard to see which item is selected, especially
-        when you opened the dialog via the "Configure Problem Severity" button.
-        <p><img src="images/configure-problem-severity.png" alt="Configure Problem Severity button in Java Editor problem hover"/></p>
-        Now, an arrow highlights the selected item, and another arrow highlights the item under the mouse.
-        <p><img src="images/errors-warnings-highlight.png" alt="Highlighting in preference pages"/></p>
-        The highlighting also works on the PDE and API Tools preference pages.
-    </td>
-  </tr>
-
+ 
   <!-- ******************* Properties File Editor ************************************* -->
   <tr>
     <td id="PropertiesEditor" class="section" colspan="2">
@@ -397,20 +460,7 @@ document for changes in the Platform.</p>
     </td>
   </tr>
   
-  <tr id="JDT-property-key-quick-assists">
-    <td class="title">Quick assists to reorganize property keys</td>
-    <td class="content">
-      If you use Eclipse-style externalized strings, the following new quick assists make it easier to
-      reorganize keys inside the <b>Properties File Editor</b>:
-      <ul>
-          <li><b>Rename in workspace</b> - renames the key in the properties file and updates all references</li>
-          <li><b>Create field in '...'</b> - creates the corresponding field in the resource bundle accessor class</li>
-          <li><b>Remove property</b> - deletes the property from the properties file and the field from the resource bundle accessor class</li>
-          <li><b>Remove properties</b> - deletes the selected properties from the properties file and the fields from the resource bundle accessor class</li>
-      </ul>
-    </td>
-  </tr>
-
+ 
   <!-- *********************** Debug ******************************** -->
   <tr>
     <td id="Debug" class="section" colspan="2">
@@ -418,40 +468,7 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="export-detail-formatters">
-    <td class="title">Export detail formatters</td>
-    <td class="content">
-        Detail formatters (which are e.g. used to render objects in the Variables view) can now be exported as separate preferences. Previously, the only way to share detail formatters was to export
-        all of your workspace settings.    
-        <p><img src="images/detail-formatters.png" alt="Detail formatters in the export dialog"/></p>
-    </td>
-  </tr>
-
-  <tr id="show-monitors-default">
-    <td class="title">Show Monitors on by default</td>
-    <td class="content">
-      The default setting for displaying monitor information in the <b>Debug</b> view is now set to <em>on</em>.
-      This change only affects new workspaces and does not change existing settings.
-      <p>
-      Showing monitor information can be turned on or off using the <b>Java &gt; Show Monitors</b> view action
-      within the <b>Debug</b> view.
-      </p>
-    </td>
-  </tr>
-  <tr id="toggle-bp-mod-keys">
-    <td class="title">Toggle breakpoint modifier keys</td>
-    <td class="content">
-      There is now support for modifier keys while toggling breakpoints in the Java editor:
-      <ul>
-        <li><p>Holding the <b>Ctrl</b> key while double-clicking (toggling) a breakpoint will cause the <b>Properties 
-        dialog</b> for that breakpoint to be displayed (on the Mac, use <b>Command</b>)</p>
-        </li>
-        <li>Holding the <b>Shift</b> key while double-clicking (toggling) a breakpoint will <b>enable / disable</b> that breakpoint</li>
-      </ul>
-      If there is no existing breakpoint, a normal breakpoint toggle takes place even if a modifier key is held down.
-    </td>
-  </tr>
-
+ 
   <!-- ******************* JUnit ************************************* -->
   <tr>
     <td id="JUnit" class="section" colspan="2">
@@ -459,13 +476,7 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="junit-4-10">
-    <td class="title">JUnit 4.10</td>
-    <td class="content">
-      The JUnit 4 version shipped with Eclipse has been updated to <a href="https://github.com/KentBeck/junit/blob/r4.10/doc/ReleaseNotes4.10.txt">4.10</a>.
-    </td>
-  </tr>
-
+ 
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
 </table>
