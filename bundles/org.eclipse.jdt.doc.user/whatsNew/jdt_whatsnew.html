@@ -25,7 +25,6 @@ for the Kepler release of Eclipse. They are grouped into:</p>
 	<li><a href="#JavaEditor">Java Editor</a></li>
 	<li><a href="#JavaCompiler">Java Compiler</a></li>
 	<li><a href="#JavaViews">Java Views and Dialogs</a></li>
-	<li><a href="#PropertiesEditor">Properties File Editor</a></li>
 	<li><a href="#Debug">Debug</a></li>
 	<li><a href="#JUnit">JUnit</a></li>
 </ul>
@@ -44,23 +43,121 @@ document for changes in the Platform.</p>
     <h2>Java Editor </h2>
     </td>
   </tr>
-
+  
   <tr id="convert-if-else-to-switch">
-    <td class="title">New 'Convert if-else to switch' quick assist</td>
+    <td class="title">New 'Convert if-else to switch' Quick Assist</td>
     <td class="content">
       The new <b>Convert 'if-else' to 'switch'</b> quick assist (<b>Ctrl+1</b>) allows you to convert an if-else statement to 
-      an equivalent switch statement.
+      an equivalent switch statement:
       <p><img src="images/convert-if-else-to-switch.png" alt=""/></p>
       
       This quick assist is the reverse of the existing <b>Convert 'switch' to 'if-else'</b> quick assist.
     </td>
+  </tr>  
+    
+  <tr id="convert-to-if-return">
+    <td class="title">'Convert to if-!-return' Quick Assist</td>
+    <td class="content">
+     Ever encountered a long <code>if</code> statement that can be safely inverted to an early return, so that you can ignore the code that follows, and make it easier to understand? 
+     Now, you can just use a quick assist <b>(Ctrl+1)</b> on the <code>if</code> statement to do this refactoring:
+     <p><img src="images/convert-to-if-!-return.png" alt=""/></p>
+    </td>
   </tr>
-
-  <tr id="tolerateIllegalAmbiguousVarargsInvocation">
+  
+  <tr id="create-loop-variable">
+    <td class="title">Quick Fix to create 'for' loop variable</td>
+    <td class="content">
+      The new <b>Create loop variable</b> quick fix corrects an incomplete 'for' loop
+      by adding the type of the loop variable:
+      <p><img src="images/create-loop-variable.png" alt="Corrects 'for (e: elements) {}' to 'for (ElementType e: elements) {}'"/></p>
+    </td>
+  </tr>
+          
+  <tr id="combine-strings">
+    <td class="title">Quick Assist to combine Strings</td>
+    <td class="content">
+      The new <b>Combine to single String</b> quick assist (<b>Ctrl+1</b>) replaces String concatenations
+      with a single String literal:
+      <p>
+        <img src="images/combine-strings.png" alt="String s = &quot;Delete &quot; + &quot;two&quot; + &quot; files?&quot; // becomes: String s = &quot;Delete two files?&quot;"/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="Quick-Assist-for-unused-type-parameters">
+    <td class="title">Quick Assist for unused type parameters</td>
+    <td class="content">
+      The Java editor now provides a quick assist (<b>Ctrl+1</b>) to remove or document unused type parameters:
+      <p><img src="images/quickassist-for-unused-type-parameter-example.png" alt=""/></p>
+    </td>
+  </tr>
+  
+  <tr id="proposals-without-prefix">
+    <td class="title">Template and keyword proposals without prefix</td>
+    <td class="content">
+      Content assist now proposes templates and keywords without needing a prefix first:
+      <p><img src="images/content-assist.png" alt=""/></p>
+    </td>
+  </tr>
+       
+  <tr id="remove-type-arguments">
+    <td class="title">Remove type arguments after content assist</td>
+    <td class="content">
+     Ever encountered a case where content assist added type arguments for a generic type, but you do not want them
+     because you need the <code>.class</code> literal or you want to invoke a static method?
+     Now, rather than deleting all the arguments manually, 
+     you can just delete the '<code>&lt;</code>' and that will remove the entire text up to '<code>&gt;</code>'.
+    </td>
+  </tr>
+  
+  <tr id="semicolon-appended-for-void-methods">
+    <td class="title">Content assist appends ';' to void methods</td>
+    <td class="content">
+    If a void method is selected during content assist, then a semicolon is now automatically
+    appended at the end of the method invocation.
+    </td>
+  </tr>
+  
+  <tr id="semicolon-key-inserts-method">
+    <td class="title">Use ';' key to insert method invocation</td>
+    <td class="content">
+    Irrespective of the return type of a method, you can now use the semicolon (<b>;</b>) key to select any method invocation proposal
+    from the content assist popup. The '<code>;</code>' will be appended at the end of the method invocation.
+    </td>
+  </tr>  
+  
+  <!-- ******************* Java Compiler ************************************* -->
+  <tr>
+    <td id="JavaCompiler" class="section" colspan="2">
+    <h2>Java Compiler</h2>
+    </td>
+  </tr>
+  
+  <tr id="content-assist-TL_CONSTRUCTOR_START">
+    <td class="title">New API to indicate content assist requested on the start of a constructor</td>
+    <td class="content">
+      org.eclipse.jdt.core.CompletionContext.TL_CONSTRUCTOR_START:
+      <pre>
+	  /**
+	   * The completed token is the first token of a constructor
+	   * invocation expression.
+	   * e.g.
+	   * 
+	   * public class X {
+	   *   public void bar() {
+	   *     new Foo| // completion occurs at |
+	   *   }
+	   * }
+	   */
+	</pre>
+    </td>
+  </tr>
+  
+   <tr id="tolerateIllegalAmbiguousVarargsInvocation">
     <td class="title">Force Eclipse to compile (illegal) ambiguous varargs code</td>
     <td class="content"> JDK 6 and below had a bug and considered the code below legal.
 	However, this bug was fixed in JDK 7 and the code now reports an ambiguous invocation error at the call site for test(..).
-	Eclipse Juno followed and fixed this across all compliance levels.
+	Eclipse Juno followed and fixed this across all compliance levels:
 	<p><a href="images/illegal-ambiguous-varargs-error.txt"><img src="images/illegal-ambiguous-varargs-error.png" alt="follow link for source"/></a></p>
 	<p>If you still want the above code to compile in compliance &lt; 1.7, to mimic JDK 6 or below, you can use the
 	system property <b>tolerateIllegalAmbiguousVarargsInvocation</b> to force Eclipse to tolerate such ambiguous varargs cases.
@@ -73,7 +170,7 @@ document for changes in the Platform.</p>
 	<p><a href="images/illegal-ambiguous-varargs-error2.txt"><img src="images/illegal-ambiguous-varargs-error2.png" alt="follow link for source"/></a></p>
 	</td>
   </tr>
-  
+
   <tr id="new-batch-compiler-options">
     <td class="title">New batch compiler options</td>
     <td class="content"> If you use the ECJ batch compiler using the command line or Ant tasks, you can now configure the following options which previously could only be set through
@@ -105,62 +202,7 @@ document for changes in the Platform.</p>
 	<p> For more information on using batch compiler options, please refer to <b>Help &gt; Java Development User Guide &gt; Tasks &gt; Compiling Java Code &gt; Using the batch compiler</b>.</p>
     </td>
   </tr>
-  
-  <tr id="content-assist-TL_CONSTRUCTOR_START">
-    <td class="title">New API to indicate content assist requested on the start of a constructor</td>
-    <td class="content">
-      org.eclipse.jdt.core.CompletionContext.TL_CONSTRUCTOR_START:
-      <pre>
-	  /**
-	   * The completed token is the first token of a constructor
-	   * invocation expression.
-	   * e.g.
-	   * 
-	   * public class X {
-	   *   public void bar() {
-	   *     new Foo| // completion occurs at |
-	   *   }
-	   * }
-	   */
-	</pre>
-    </td>
-  </tr>
-
-  <tr id="content-assist-additional-info-in-debug-views">
-    <td class="title">Content assist shows Javadoc in Display, Expressions and Variables view</td>
-    <td class="content">
-        Content assist in the Display, Expressions and Variables view now shows Javadoc:
-		<p><img src="images/additional-info.png" alt="Screenshot showing Javadoc when doing content assist"/></p>
-	</td>
-  </tr>
-  
-  <tr id="javadoc-view-target">
-    <td class="title">Javadoc view resolves enclosing method call and keeps last target</td>
-    <td class="content">
-      The <b>Javadoc</b> and <b>Declaration</b> views now try to find the enclosing method call
-      if the selection or caret position doesn't resolve to a valid Java element.
-      <p>
-        <img src="images/javadoc-view-target.png" alt="'String.copyValueOf(data, offset, count)', with 'data' selected."/>
-      </p>
-      Furthermore, they keep the last resolved target element even if no new target can be resolved.
-    </td>
-  </tr>
-  
-  <tr id="detection-unused-type-parameter">
-    <td class="title">Detection of unused type parameters</td>
-    <td class="content">
-      The compiler can now detect unused type parameters:
-      <p>
-        <img src="images/unused-type-parameter.png" alt=""/>
-      </p>
-      <p>
-        The <b>Unused type parameter</b> diagnostic is set to Ignore by default and can be enabled on the 
-		<b>Java &gt; Compiler &gt; Errors/Warnings</b>
-		preference page.
-      </p>
-    </td>
-  </tr>
-  
+      
   <tr id="unused-type-parameter">
     <td class="title">Option to omit @Override for interface methods</td>
     <td class="content">
@@ -181,29 +223,23 @@ document for changes in the Platform.</p>
       </p>
     </td>
   </tr>
-  
-  <tr id="xml-dom-structure">
-    <td class="title">XML DOM logical structures</td>
+    
+  <tr id="detection-unused-type-parameter">
+    <td class="title">Detection of unused type parameters</td>
     <td class="content">
-      JDT now provides a default logical structure for XML DOMs, which can be used during debugging to view the children and attributes of a node as simple arrays.
+      The compiler can now detect unused type parameters:
       <p>
-      <img src="images/dom-structure.png" alt="Variables view showing the XML DOM logical structure"/>
+        <img src="images/unused-type-parameter.png" alt=""/>
+      </p>
+      <p>
+        The <b>Unused type parameter</b> diagnostic is set to Ignore by default and can be enabled on the 
+		<b>Java &gt; Compiler &gt; Errors/Warnings</b>
+		preference page.
       </p>
     </td>
-  </tr>
+  </tr>  
   
-  <tr id="combine-strings">
-    <td class="title">Quick assist to combine Strings</td>
-    <td class="content">
-      The new <b>Combine to single String</b> quick assist (<b>Ctrl+1</b>) replaces String concatenations
-      with a single String literal. 
-      <p>
-        <img src="images/combine-strings.png" alt="String s = &quot;Delete &quot; + &quot;two&quot; + &quot; files?&quot; // becomes: String s = &quot;Delete two files?&quot;"/>
-      </p>
-    </td>
-  </tr>
-  
-    <tr id="inherit-null-annotations">
+  <tr id="inherit-null-annotations">
     <td class="title">Option to inherit null annotations</td>
     <td class="content">
         JDT has a new option controlling how to interpret null annotations in the presence of inheritance.
@@ -212,12 +248,12 @@ document for changes in the Platform.</p>
       <p>For the sake of code readability, JDT expects null annotations of an overridden
         method to be repeated in overriding methods. In the following example the analysis
         normally complains that <code>arg</code> is not annotated in <code>ClientClass</code>,
-        which means, this class doesn't formally conform to the contract of its super-interface.
+        which means, this class doesn't formally conform to the contract of its super-interface:
       </p>
       <p><img title="Example for inheritance of null annotations" src="images/inherit-null-annotations-example.png" 
           alt="Example for inheritance of null annotations"/></p>
       <p>Starting with 4.3M4 this behavior can be changed by selecting the option
-        <strong>Inherit null annotations</strong>.
+        <strong>Inherit null annotations</strong>:
       </p>
       <p><img title="Option for inheritance of null annotations" src="images/inherit-null-annotations-option.png"
            alt="Option for inheritance of null annotations"/></p>
@@ -227,7 +263,7 @@ document for changes in the Platform.</p>
         code is actually safe, which is likely when the contract had already been
         defined in the javadoc comment and the implementor actually adheres to that
         contract. If, on the other hand, the implementation does not comply with the
-        inherited specification, new errors will be reported as shown below.
+        inherited specification, new errors will be reported as shown below:
       </p>
       <p><img title="Negative example for inheritance of null annotations" src="images/inherit-null-annotations-example2.png"
           alt="Negative example for inheritance of null annotations"/></p>
@@ -237,27 +273,6 @@ document for changes in the Platform.</p>
     </td>
   </tr>
 
-  <tr id="close-quietly">
-    <td class="title">Leak analysis respects well-known utilities</td>
-    <td class="content">
-        JDT's analysis for resource leaks has been made aware of well known utilities
-        from google and apache libraries.
-      <p>Generally, this analysis looks for <code>close()</code> method calls
-        directly on a resource (any value of type <code>Closeable</code>).
-        However, in order to reduce boilerplate exception handling, several libraries
-        are providing methods like <code>closeQuietly(Closeable)</code>.
-        Previously, the analysis would complain about the missing call to <code>close()</code>
-        as shown below:
-      </p>
-      <p><img title="Example for close quietly" src="images/close-quietly-example.png"
-          alt="Example for close quietly"/></p>
-      <p>This warning is not relevant and will no longer be reported.
-        To achieve this, JDT now hardcodes a (short) white list of functions that
-        are known to safely close a given resource.
-      </p>
-    </td>
-  </tr>
-  
   <tr id="null-annotations-for-fields">
     <td class="title">Null annotations for fields</td>
     <td class="content">
@@ -281,55 +296,90 @@ document for changes in the Platform.</p>
       	no problem will be reported.</p>
       <p>In the following example, the check in line 12 properly protects the access in line 13, whereas
       	the knowledge that field <code>nullable</code> holds a non-null value (in line 15) is spoiled by
-      	the intermediate statement in line 16.</p>
+      	the intermediate statement in line 16:</p>
 	  <p><a href="images/null-annotations-for-fields-examples.txt"><img src="images/null-annotations-for-fields-examples.png" alt=""/></a></p>
       <p>This is the option that enables the syntactic analysis (under the heading <strong>Java Compiler &gt; Errors/Warnings</strong>):</p>
 	  <p><img src="images/option-syntactic-null-analysis-for-fields.png" alt=""/></p>
 	</td>
   </tr>   
-  <tr id="Support-for-package-Javadoc-in-Javadoc-hover-and-view">
-    <td class="title">Support for package Javadoc in Javadoc hover and view</td>
+ 
+  <tr id="close-quietly">
+    <td class="title">Leak analysis respects well-known utilities</td>
     <td class="content">
-      The Javadoc hover and view now display package Javadoc from either the package-info.java or the package.html file.
-      <p><img src="images/package-javadoc-hover-examples.png" alt=""/></p>
+        JDT's analysis for resource leaks has been made aware of well known utilities
+        from google and apache libraries.
+      <p>Generally, this analysis looks for <code>close()</code> method calls
+        directly on a resource (any value of type <code>Closeable</code>).
+        However, in order to reduce boilerplate exception handling, several libraries
+        are providing methods like <code>closeQuietly(Closeable)</code>.
+        Previously, the analysis would complain about the missing call to <code>close()</code>
+        as shown below:
+      </p>
+      <p><img title="Example for close quietly" src="images/close-quietly-example.png"
+          alt="Example for close quietly"/></p>
+      <p>This warning is not relevant and will no longer be reported.
+        To achieve this, JDT now hardcodes a (short) white list of functions that
+        are known to safely close a given resource.
+      </p>
     </td>
   </tr>
-  <tr id="Quick-Assist-for-unused-type-parameters">
-    <td class="title">Quick Assist for unused type parameters</td>
-    <td class="content">
-      The Java editor now provides a Quick Assist (<b>Ctrl+1</b>) to remove or document unused type parameters.
-      <p><img src="images/quickassist-for-unused-type-parameter-example.png" alt=""/></p>
+  
+  <!-- ******************* Java Views and Dialogs ************************************* -->
+  <tr>
+    <td id="JavaViews" class="section" colspan="2">
+    <h2>Java Views and Dialogs</h2>
     </td>
   </tr>
+  
   <tr id="pre-fill-package-name">
 	<td class="title">Pre-filling package name in creation wizards</td>
 	<td class="content">
       All the type and package creation wizards now pre-fill the package name
-      if a suitable package name can be suggested for the selected project or source folder.
+      if a suitable package name can be suggested for the selected project or source folder:
       <p><img src="images/pre-fill-package-name.png" alt=""/></p>
       <p>The suggested package name is the name of the project if the source folder does not contain any package
       and if the project name is a valid package name.
       In case of type creation wizards, if the source folder contains exactly one package then the name of that package
       is used as the suggested package name.</p>
-  </td>
+   </td>
   </tr>
   
-  <tr id="convert-to-if-return">
-    <td class="title">'Convert to if-!-return' Quick Assist</td>
+   <tr id="content-assist-additional-info-in-debug-views">
+    <td class="title">Content assist shows Javadoc in Display, Expressions and Variables view</td>
     <td class="content">
-     Ever encountered a long <code>if</code> statement that can be safely inverted to an early return, so that you can ignore the code that follows, and make it easier to understand? 
-     Now, you can just use a Quick Assist <b>(Ctrl+1)</b> on the <code>if</code> statement to do this refactoring:
-     <p><img src="images/convert-to-if-!-return.png" alt=""/></p>
+        Content assist in the Display, Expressions and Variables view now shows Javadoc:
+		<p><img src="images/additional-info.png" alt="Screenshot showing Javadoc when doing content assist"/></p>
+	</td>
+  </tr>
+  
+  <tr id="javadoc-view-target">
+    <td class="title">Javadoc view resolves enclosing method call and keeps last target</td>
+    <td class="content">
+      The <b>Javadoc</b> and <b>Declaration</b> views now try to find the enclosing method call
+      if the selection or caret position doesn't resolve to a valid Java element:
+      <p>
+        <img src="images/javadoc-view-target.png" alt="'String.copyValueOf(data, offset, count)', with 'data' selected."/>
+      </p>
+      Furthermore, they keep the last resolved target element even if no new target can be resolved.
     </td>
   </tr>
-
+  
+  <tr id="Support-for-package-Javadoc-in-Javadoc-hover-and-view">
+    <td class="title">Support for package Javadoc in Javadoc hover and view</td>
+    <td class="content">
+      The Javadoc hover and view now display package Javadoc from either the package-info.java or the package.html file:
+      <p><img src="images/package-javadoc-hover-examples.png" alt=""/></p>
+    </td>
+  </tr>
+    
   <tr id="linked-Javadoc-package-names">
    <td class="title">Package names are linked in Javadoc hover and view</td>
    <td class="content">
      You can now click individual package names displayed in the header of the Javadoc hover or the Javadoc view to see the package Javadoc:
      <p><img src="images/javadoc-package-names-linked.png" alt=""/></p>
    </td>
-  </tr>
+  </tr>  
+  
    <tr id="InfoViews-should-indicate-when-linking-is-outOfSync">
    <td class="title">Javadoc and Declaration view indicate when out of sync</td>
    <td class="content">
@@ -338,6 +388,54 @@ document for changes in the Platform.</p>
    </td>
   </tr>
   
+  <!-- *********************** Debug ******************************** -->
+  <tr>
+    <td id="Debug" class="section" colspan="2">
+    <h2>Debug</h2>
+    </td>
+  </tr>  
+     
+  <tr id="debug-improved-generics-eval">
+   <td class="title">Improved evaluation of generics while debugging</td>
+   <td class="content">
+     Significant improvements have been made in the debug evaluation engine to support the use of
+     generics. This impacts the use of conditional breakpoints, the display view, the expressions view,
+     and the inspect/display/execute actions. Previously, evaluations acting on classes with generics
+     would sometimes encounter compilation errors.
+   </td>
+  </tr>
+   
+  <tr id="debug-ext-source-api">
+   <td class="title">API to contribute location information for non-standard JRE / JDK libraries</td>
+   <td class="content">
+     JDT Debug now provides an extension point <code>org.eclipse.jdt.launching.libraryLocationResolvers</code>
+     that you can use to contribute location information for non-standard JRE / JDK libraries.  For example,
+     this extension point can be used to provide Javadoc and source locations for JARs in the ext location
+     of a JRE.
+     <p>
+     Extenders must provide an implementation of <code>org.eclipse.jdt.launching.ILibraryLocationResolver</code>
+     which can provide package roots, source paths, Javadoc locations and index locations for a library.
+     </p> 
+   </td>
+  </tr>  
+  
+  <tr id="xml-dom-structure">
+    <td class="title">XML DOM logical structures</td>
+    <td class="content">
+      JDT now provides a default logical structure for XML DOMs, which can be used during debugging to view the children and attributes of a node as simple arrays:
+      <p>
+      <img src="images/dom-structure.png" alt="Variables view showing the XML DOM logical structure"/>
+      </p>
+    </td>
+  </tr>
+ 
+  <!-- ******************* JUnit ************************************* -->
+  <tr>
+    <td id="JUnit" class="section" colspan="2">
+    <h2>JUnit</h2>
+    </td>
+  </tr>
+    
   <tr id="junit-4-11">
     <td class="title">Only one JUnit (4.11)</td>
     <td class="content">
@@ -353,61 +451,7 @@ document for changes in the Platform.</p>
       </p>
     </td>
   </tr>
-  
-  <tr id="debug-improved-generics-eval">
-   <td class="title">Improved evaluation of generics while debugging</td>
-   <td class="content">
-     Significant improvements have been made in the debug evaluation engine to support the use of
-     generics. This impacts the use of conditional breakpoints, the display view, the expressions view,
-     and the inspect/display/execute actions. Previously, evaluations acting on classes with generics
-     would sometimes encounter compilation errors.
-   </td>
-  </tr>
-  
-  <tr id="debug-ext-source-api">
-   <td class="title">API to contribute location information for non-standard JRE / JDK libraries</td>
-   <td class="content">
-     JDT Debug now provides an extension point <code>org.eclipse.jdt.launching.libraryLocationResolvers</code>
-     that you can use to contribute location information for non-standard JRE / JDK libraries.  For example,
-     this extension point can be used to provide Javadoc and source locations for JARs in the ext location
-     of a JRE.
-     <p>
-     Extenders must provide an implementation of <code>org.eclipse.jdt.launching.ILibraryLocationResolver</code>
-     which can provide package roots, source paths, Javadoc locations and index locations for a library.
-     </p> 
-   </td>
-  </tr>
-  
-  <tr id="remove-type-arguments">
-    <td class="title">Remove type arguments after content assist</td>
-    <td class="content">
-     Ever encountered a case where content assist added type arguments for a generic type, but you do not want them
-     because you need the <code>.class</code> literal or you want to invoke a static method?
-     Now, rather than deleting all the arguments manually, 
-     you can just delete the '<code>&lt;</code>' and that will remove the entire text up to '<code>&gt;</code>'.
-    </td>
-  </tr>
-  <tr id="proposals-without-prefix">
-    <td class="title">Template and keyword proposals without prefix</td>
-    <td class="content">
-      Content assist now proposes templates and keywords without needing a prefix first:
-      <p><img src="images/content-assist.png" alt=""/></p>
-    </td>
-  </tr>
-  <tr id="semicolon-key-inserts-method">
-    <td class="title">Use ';' key to insert method invocation</td>
-    <td class="content">
-    Irrespective of the return type of a method, you can now use the semicolon (<b>;</b>) key to select any method invocation proposal
-    from the content assist popup. The '<code>;</code>' will be appended at the end of the method invocation.
-    </td>
-  </tr>   
-  <tr id="semicolon-appended-for-void-methods">
-    <td class="title">Content assist appends ';' to void methods</td>
-    <td class="content">
-    If a void method is selected during content assist, then a semicolon is now automatically
-    appended at the end of the method invocation.
-    </td>
-  </tr>
+
   <tr id="test-templates">
     <td class="title">JUnit test templates</td>
     <td class="content">
@@ -415,67 +459,16 @@ document for changes in the Platform.</p>
       <p><img src="images/junit-templates.png" alt="'test' for JUnit 4; 'test3' for JUnit 3"/></p>
     </td>
   </tr>
+  
   <tr id="junit-view-assumptions">
     <td class="title">JUnit view shows assumption failures</td>
     <td class="content">
       The JUnit view now counts <code>@Ignore</code>d tests and tests that didn't meet
       an assumption as "skipped' tests. The skipped tests also got new icons, and
-      tests with an assumption failure no longer get the 'passed' checkmark.
+      tests with an assumption failure no longer get the 'passed' checkmark:
       <p><img src="images/junit-view-assumptions.png" alt="Test cases using @Ignore and Assume.assumeFalse(true)"/></p>
     </td>
   </tr>
-  <tr id="create-loop-variable">
-    <td class="title">Quick Fix to create 'for' loop variable</td>
-    <td class="content">
-      The new <b>Create loop variable</b> quick fix corrects an incomplete 'for' loop
-      by adding the type of the loop variable.
-      <p><img src="images/create-loop-variable.png" alt="Corrects 'for (e: elements) {}' to 'for (ElementType e: elements) {}'"/></p>
-    </td>
-  </tr>
-  
-  
-
-  <!-- ******************* Java Compiler ************************************* -->
-  <tr>
-    <td id="JavaCompiler" class="section" colspan="2">
-    <h2>Java Compiler</h2>
-    </td>
-  </tr>
-
- 
-
- 
-  <!-- ******************* Java Views and Dialogs ************************************* -->
-  <tr>
-    <td id="JavaViews" class="section" colspan="2">
-    <h2>Java Views and Dialogs</h2>
-    </td>
-  </tr>
-
- 
-  <!-- ******************* Properties File Editor ************************************* -->
-  <tr>
-    <td id="PropertiesEditor" class="section" colspan="2">
-    <h2>Properties File Editor </h2>
-    </td>
-  </tr>
-  
- 
-  <!-- *********************** Debug ******************************** -->
-  <tr>
-    <td id="Debug" class="section" colspan="2">
-    <h2>Debug</h2>
-    </td>
-  </tr>
-
- 
-  <!-- ******************* JUnit ************************************* -->
-  <tr>
-    <td id="JUnit" class="section" colspan="2">
-    <h2>JUnit</h2>
-    </td>
-  </tr>
-
  
     <!-- ****************** END OF N&N TABLE ****************** -->
   </tbody>
