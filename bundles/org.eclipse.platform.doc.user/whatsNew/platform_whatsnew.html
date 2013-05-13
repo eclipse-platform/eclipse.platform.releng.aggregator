@@ -45,16 +45,6 @@ document in the plug-in developer's guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform</h2></td>
   </tr>
-
-  <tr id="ua-lucene">
-    <td class="title">Migrated to Lucene 3.5</td>
-    <td class="content">
-      The Eclipse platform help system has migrated from Lucene 2.9.1 to Lucene 3.5.
-      This change brings improved performance and many bug fixes in help search.
-      Some old help system API related to Lucene has been changed or removed as part
-      of this fix. Refer to the platform 4.3 migration guide for more details.
-    </td>
-  </tr>
   
   <tr id="detached-sash">
     <td class="title">Detached windows with sash</td>
@@ -86,14 +76,6 @@ document in the plug-in developer's guide.
       recursively within any project it finds. This allows you to import physically nested projects
       at the same time.
       <p><img src="images/import-nested.png" alt="Import nested projects."/></p>
-    </td>
-  </tr>
-
-  <tr id="ant184">
-    <td class="title">Platform updated to Ant 1.8.4</td>
-    <td class="content">
-      The platform has been updated to use Apache Ant version 1.8.4. To see what is new in version 1.8.4 you can
-      check the <a href="http://apache.mirrors.tds.net//ant/README.html">Apache Ant what's new</a>.
     </td>
   </tr>
   
@@ -183,14 +165,6 @@ document in the plug-in developer's guide.
     </td>
   </tr>
   
-  <tr id="linkColor">
-    <td class="title">BIDI Text Direction</td>
-    <td class="content">
-     New API has been added to allow text direction to be set independent of the widget orientation. For more info see <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet364.java">Snippet 364</a>.
-     <p><img src="images/bidi.png" alt=""/></p>
-    </td>
-  </tr>
-  
   <tr id="bidi">
     <td class="title">New SWT color constant for hyperlinks</td>
     <td class="content">
@@ -215,70 +189,6 @@ document in the plug-in developer's guide.
     </td>
   </tr>
  
- <tr id="e4-api">
-    <td class="title">Initial Eclipse 4 API released</td>
-    <td class="content">
-      As was announced at EclipseCon this year, the first set of official API based on the new Eclipse 
-      Platform 4 architecture is now available. This is the first step in allowing developers to use the 
-      new simpler and more powerful mechanisms to build Eclipse plug-ins and applications.
-    <p>
-      This API is comprised of two basic concepts:
-    </p><p>
-      <b>The user interface model</b>: The content of this model describes the structure of the user interface.
-      The Eclipse Platform reacts to changes in this model by updating the presentation, and the complete
-      model is now available through the new API.
-    </p><p>
-      Note that the model represents everything on the screen and these elements can be modified
-      by your code (see the example below).
-    </p><p>
-      <b>IEclipseContext / Dependency Injection (DI)</b>: Contexts are containers of UI runtime state
-      including all the available services. The typical Eclipse Platform 4 pattern is that contributions
-      are created and configured through dependency injection based on state and services found in the local
-      context for that model element.
-    </p><p>
-      Here are a few links to more information about the UI Model, the services and DI (the Javadoc and supporting
-      Eclipse documentation will be available before Kepler is released):
-    </p>
-    <ul>
-      <li><a href="http://www.eclipsecon.org/2013/sites/eclipsecon.org.2013/files/FormalAPI.pdf">EclipseCon 2013 API Slides</a></li>
-      <li><a href="http://www.vogella.com/articles/EclipseRCP/article.html">Lars' RCP Tutorial</a></li>
-      <li><a href="http://www.vogella.com/articles/Eclipse4Services/article.html">Lars' Services Tutorial</a></li>
-      <li><a href="http://eclipsesource.com/blogs/2013/04/18/eclipse-4-e4-tutorial-behavior-annotations/">Jonas Helming's DI Tutorials</a></li>
-    </ul>
-    <p>
-      There is quite a lot of information already available for Eclipse Platform 4. While parts of the API are just being
-      formalized now, most of the concepts and API existed in provisional form in previous Eclipse 4 releases.
-    </p><p>
-      Just to give a taste of what working in a modeled UI is all about, here's a code snippet showing
-      how to get a 'standard' Command handler to toggle the visibility of the 'Quick Access' text field
-      that appears in the top trim. First we gain access to the model by getting the MApplication as a
-      'service'. Form there we can access the EModelService and use it to find the model element
-      representing the search in the UI. Then it's just a simple matter of toggling the element's
-      'toBeRendered' flag to get it to (dis)appear.
-    </p>
-    <pre>
-public Object execute(ExecutionEvent event) throws ExecutionException {
-  IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);		
-  MApplication theApp = (MApplication) window.getService(MApplication.class);
-  MWindow activeWin = theApp.getSelectedElement();
-  EModelService ms = activeWin.getContext().get(EModelService.class);
-  EPartService ps = activeWin.getContext().get(EPartService.class);
-  MToolControl search = (MToolControl) ms.find("SearchField", activeWin);
-  if (search != null) {
-    search.setToBeRendered(!search.isToBeRendered());
-    window.getShell().layout(true, true);
-  }
-  return null;
-}
-      </pre>
-    </td>
-  </tr>
-
-  <tr id="xulrunner64">
-    <td class="title">XULRunner on 64-bit Windows</td>
-    <td class="content">The browser widget now supports the embedding of XULRunner on Windows x86_64.</td>
-  </tr> 
-
   <tr id="open-resource-buttons">
     <td class="title">Open Resource dialog enhancements</td>
     <td class="content">
