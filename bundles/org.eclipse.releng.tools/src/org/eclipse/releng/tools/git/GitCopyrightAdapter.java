@@ -16,12 +16,6 @@ package org.eclipse.releng.tools.git;
 import java.io.IOException;
 import java.util.Calendar;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -34,6 +28,14 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.RelEngPlugin;
 import org.eclipse.releng.tools.RepositoryProviderCopyrightAdapter;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 
@@ -75,6 +77,13 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 								// ignore commits with above comments
 								return 0;
 							}
+
+							boolean isPlatform= file.getProject().getName().equals("eclipse.platform"); //$NON-NLS-1$
+							if (isPlatform && (logComment.indexOf("Merge in ant and update from origin/master") != -1 || logComment.indexOf("Fixed bug 381684: Remove update from repository and map files") != -1 || logComment.indexOf("Restored 'org.eclipse.update.core'") != -1)) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								// ignore commits with above comments
+								return 0;
+							}
+
 
 							final Calendar calendar = Calendar.getInstance();
 							calendar.setTimeInMillis(0);
