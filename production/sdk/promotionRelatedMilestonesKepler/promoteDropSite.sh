@@ -37,6 +37,11 @@ mv ${DROP_ID}ORIG ${DROP_ID}
 
 rm renameBuild.sh
 
+# keep hidden, initially, both to confirm all is correct, 
+# and in theory could wait a bit to get a mirror or two 
+# (in some cases). 
+touch ${DL_DROP_ID}/buildHidden
+
 printf "\n\t%s\n" "rsync to downloads."
 # Here we can rsync with committer id. For Equinox, we have to create a promotion file.
 rsync -r --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" --exclude="*repository*" --exclude="*workspace-*" ${DL_DROP_ID} /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/
