@@ -96,12 +96,23 @@ fn-git-clone ()
 fn-git-checkout () 
 {
     BRANCH="$1"; shift
-    echo git checkout "$BRANCH"
-    git checkout "$BRANCH"
+    # always fetch before checkout, to be sure new 
+    # branches are in local repo (in case we are switching
+    # to a new branch).
+    echo git fetch current repo before checkout
+    git fetch
     RC=$?
     if [[ $RC != 0 ]]
     then 
-        echo "[ERROR] RC from git checkout: $RC"
+        echo "[ERROR] RC from git fetch: $RC"
+    else
+        echo git checkout "$BRANCH"
+        git checkout "$BRANCH"
+        RC=$?
+        if [[ $RC != 0 ]]
+        then 
+            echo "[ERROR] RC from git checkout: $RC"
+        fi
     fi
     return $RC
 }
@@ -396,9 +407,9 @@ fn-maven-build-aggregator ()
     # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
     pushd "$REPO_DIR"
     #mvn $MARGS --fail-never -V \
-    #mvn $MARGS --fail-at-end -V \
-    #mvn $MARGS  -V \
-    mvn $MARGS --fail-at-end -V \
+        #mvn $MARGS --fail-at-end -V \
+        #mvn $MARGS  -V \
+        mvn $MARGS --fail-at-end -V \
         clean verify \
         -DskipTests=true \
         -Dmaven.repo.local=$LOCAL_REPO \
