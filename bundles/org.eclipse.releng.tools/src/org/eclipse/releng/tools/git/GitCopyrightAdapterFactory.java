@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 AGETO Service GmbH and others.
+ * Copyright (c) 2010, 2012 AGETO Service GmbH and others.
  * All rights reserved.
  *
  * This program and the accompanying materials are made available under the
