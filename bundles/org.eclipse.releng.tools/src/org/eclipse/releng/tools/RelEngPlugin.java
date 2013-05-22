@@ -15,8 +15,8 @@ import java.util.ResourceBundle;
 
 import org.osgi.framework.BundleContext;
 
-import org.eclipse.releng.tools.pomversion.IPomVersionConstants;
-import org.eclipse.releng.tools.pomversion.PomVersionErrorReporter;
+import org.eclipse.releng.internal.tools.pomversion.IPomVersionConstants;
+import org.eclipse.releng.internal.tools.pomversion.PomVersionErrorReporter;
 import org.eclipse.team.core.RepositoryProvider;
 
 import org.eclipse.core.runtime.Assert;

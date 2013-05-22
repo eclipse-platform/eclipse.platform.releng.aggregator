@@ -20,9 +20,12 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+
 import org.eclipse.jface.dialogs.Dialog;
+
+import org.eclipse.releng.internal.tools.pomversion.IPomVersionConstants;
 import org.eclipse.releng.tools.RelEngPlugin;
-import org.eclipse.releng.tools.pomversion.IPomVersionConstants;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,9 +36,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
+
 import org.osgi.service.prefs.BackingStoreException;
 
 /**

@@ -12,9 +12,9 @@ package org.eclipse.releng.tools.preferences;
 
 import java.util.Calendar;
 
+import org.eclipse.releng.internal.tools.pomversion.IPomVersionConstants;
 import org.eclipse.releng.tools.Messages;
 import org.eclipse.releng.tools.RelEngPlugin;
-import org.eclipse.releng.tools.pomversion.IPomVersionConstants;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 

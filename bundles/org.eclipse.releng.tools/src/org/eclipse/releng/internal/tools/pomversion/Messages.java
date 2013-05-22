@@ -8,14 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.releng.tools.pomversion;
+package org.eclipse.releng.internal.tools.pomversion;
 
 import org.eclipse.osgi.util.NLS;
 
 
 final class Messages extends NLS {
 
-	private static final String BUNDLE_NAME = "org.eclipse.releng.tools.pomversion.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.releng.internal.tools.pomversion.messages"; //$NON-NLS-1$
 
 	public static String PomVersionErrorReporter_pom_version_error_marker_message;
 	public static String PomVersionMarkerResolution_label;

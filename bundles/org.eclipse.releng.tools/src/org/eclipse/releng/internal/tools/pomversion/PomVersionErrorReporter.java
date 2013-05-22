@@ -8,7 +8,7 @@
  *  Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.releng.tools.pomversion;
+package org.eclipse.releng.internal.tools.pomversion;
 
 import java.io.IOException;
 import java.util.HashMap;
