@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,14 +13,24 @@ package org.eclipse.releng.tools;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.osgi.framework.BundleContext;
+
+import org.eclipse.releng.tools.pomversion.IPomVersionConstants;
+import org.eclipse.releng.tools.pomversion.PomVersionErrorReporter;
+import org.eclipse.team.core.RepositoryProvider;
+
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.team.core.RepositoryProvider;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 
@@ -39,7 +49,9 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	public static final String MAP_FOLDER = Messages.getString("RelEngPlugin.2"); //$NON-NLS-1$
 	private static final String BINARY_REPOSITORY_PROVIDER_CLASS_NAME= "org.eclipse.pde.internal.core.BinaryRepositoryProvider"; //$NON-NLS-1$
 
-	
+	private PomVersionErrorReporter fPomReporter = new PomVersionErrorReporter();
+
+
 	//The shared instance.
 	private static RelEngPlugin plugin;
 	//Resource bundle.
@@ -55,6 +67,33 @@ public class RelEngPlugin extends AbstractUIPlugin {
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 */
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		IEclipsePreferences node = InstanceScope.INSTANCE.getNode(ID);
+		if(node != null) {
+			node.addPreferenceChangeListener(fPomReporter);
+			String severity = getPreferenceStore().getString(IPomVersionConstants.POM_VERSION_ERROR_LEVEL);
+			if(!IPomVersionConstants.VALUE_IGNORE.equals(severity)) {
+				ResourcesPlugin.getWorkspace().addResourceChangeListener(fPomReporter, IResourceChangeEvent.POST_BUILD);
+			}
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 */
+	public void stop(BundleContext context) throws Exception {
+		IEclipsePreferences node = InstanceScope.INSTANCE.getNode(ID);
+		if(node != null) {
+			node.removePreferenceChangeListener(fPomReporter);
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fPomReporter);
+		}
+		super.stop(context);
 	}
 
 	/**
@@ -103,7 +142,16 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	public static void log(int severity, String message, Throwable e) {
 		log(new Status(severity, ID, 0, message, e));
 	}
-	
+
+	/**
+	 * Log the given exception as an error.
+	 * 
+	 * @param e exception to log
+	 */
+	public static void log(Throwable e){
+		log(new Status(IStatus.ERROR, ID, 0, e.getMessage(), e));
+	}
+
 	/**
 	 * Log the given status. Do not use this method for the IStatus from a CoreException.
 	 * Use<code>log(CoreException)</code> instead so the stack trace is not lost.

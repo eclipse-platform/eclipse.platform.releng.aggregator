@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2008 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,7 @@ import java.util.Calendar;
 
 import org.eclipse.releng.tools.Messages;
 import org.eclipse.releng.tools.RelEngPlugin;
+import org.eclipse.releng.tools.pomversion.IPomVersionConstants;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 
@@ -40,6 +41,8 @@ public class RelEngPreferenceInitializer extends AbstractPreferenceInitializer {
         store.setDefault(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY, false);
         store.setDefault(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, false);
         store.setDefault(RelEngCopyrightConstants.IGNORE_XML_KEY, false);
+
+        store.setDefault(IPomVersionConstants.POM_VERSION_ERROR_LEVEL, IPomVersionConstants.VALUE_IGNORE);
 	}
 
 }
