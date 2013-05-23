@@ -3,7 +3,7 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta name="copyright" content=
-"Copyright (c) IBM Corporation and others 2000, 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
+"Copyright (c) IBM Corporation and others 2000, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="Content-Style-Type" content="text/css" />
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css" />
@@ -140,7 +140,11 @@ parentheses and the default value is shown in bold italics.</p>
   <a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_REDUNDANT_NULL_ANNOTATION">COMPILER_PB_REDUNDANT_NULL_ANNOTATION</a>,
   <a href=
-"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION">COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION</a> and
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION">COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION</a>,
+  <a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_SYNTACTIC_NULL_ANALYSIS_FOR_FIELDS">COMPILER_PB_SYNTACTIC_NULL_ANALYSIS_FOR_FIELDS</a>,
+  <a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED">COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED</a>, and
   <a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_INHERIT_NULL_ANNOTATIONS">COMPILER_INHERIT_NULL_ANNOTATIONS</a>.</p></td>
 <td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLED">ENABLED</a></b></td>
@@ -277,7 +281,7 @@ elements.</td>
 </tr>
 
 <tr>
-<td colspan="2"><b>Inheritance of Null Annotations</b> (<b><a href=
+<td colspan="2"><a name="COMPILER_INHERIT_NULL_ANNOTATIONS" id="COMPILER_INHERIT_NULL_ANNOTATIONS"></a><b>Inheritance of Null Annotations</b> (<b><a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_INHERIT_NULL_ANNOTATIONS">COMPILER_INHERIT_NULL_ANNOTATIONS</a></b>)</td>
 </tr>
 <tr valign="top">
@@ -331,7 +335,7 @@ bigger).</td>
 </tr>
 
 <tr>
-<td colspan="2"><b>Name of Annotation Type for Non-Null Types</b> (<b><a href=
+<td colspan="2"><a name="COMPILER_NONNULL_ANNOTATION_NAME" id="COMPILER_NONNULL_ANNOTATION_NAME"></a><b>Name of Annotation Type for Non-Null Types</b> (<b><a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_NONNULL_ANNOTATION_NAME">COMPILER_NONNULL_ANNOTATION_NAME</a></b>)</td>
 </tr>
 <tr valign="top">
@@ -381,7 +385,7 @@ bigger).</td>
 </tr>
 
 <tr>
-<td colspan="2"><b>Name of Annotation Type to specify a nullness default for unannotated types.</b> (<b><a href=
+<td colspan="2"><a name="COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME" id="COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME"></a><b>Name of Annotation Type to specify a nullness default for unannotated types.</b> (<b><a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME">COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME</a></b>)</td>
 </tr>
 <tr valign="top">
@@ -1255,8 +1259,39 @@ String literal (i.e. non tagged with //$NON-NLS-&lt;n&gt;$).</td>
 <td><b><i><a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></i></b></td>
 </tr>
-<tr>
 
+<tr>
+<td colspan="2"><a name="NONNULL_PARAMETER_ANNOTATION_DROPPED" id="NONNULL_PARAMETER_ANNOTATION_DROPPED"></a><b>Reporting Dropped Nonnull Parameter Annotations</b>
+(<b><a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED">COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED</a></b>)</td>
+</tr>
+<tr valign="top">
+<td rowspan="3">
+When enabled, the compiler will issue an error or a warning against a parameter of 
+a method that overrides an inherited method if all of the following hold:
+<ul>
+<li>The overridden method declares the corresponding parameter as non-null (see <a href="#COMPILER_NONNULL_ANNOTATION_NAME">COMPILER_NONNULL_ANNOTATION_NAME</a>).</li>
+<li>The parameter in the overriding method has no null annotation.</li>
+<li>The overriding method is not affected by a nullness default (see <a href="#COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME">COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME</a>).</li>
+<li>Inheritance of null annotations is disabled (see <a href="#COMPILER_INHERIT_NULL_ANNOTATIONS">COMPILER_INHERIT_NULL_ANNOTATIONS</a>).</li>
+</ul>
+This particular situation bears the same inherent risk as any unannotated method parameter,
+because the compiler's null ananysis cannot decide wither <code>null</code> is or is not a legal value for this parameter.
+However, the annotation in the overridden method <em>suggests</em> that the parameter should also be annotated as non-null.
+If that is not intended or possible, it is recommended to annotate the parameter as nullable,
+in order to make this (legal) change of contract explicit.
+</td>
+<td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></b></td>
+</tr>
+<tr valign="top">
+<td><b><a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING"><i>WARNING</i></a></b></td>
+</tr>
+<tr valign="top">
+<td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#IGNORE">IGNORE</a></b></td>
+</tr>
+
+<tr>
 <td colspan="2"><a name="NULL_REFERENCE" id="NULL_REFERENCE"></a><b>Reporting Null Dereference</b>
 (<b><a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_NULL_REFERENCE">COMPILER_PB_NULL_REFERENCE</a></b>)</td>
@@ -1667,6 +1702,22 @@ they occur in the scope of an entity that carries an @SuppressWarnings annotatio
 <tr valign="top">
 <td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED">DISABLED</a></b></td>
 </tr>
+
+<tr>
+<td colspan="2"><b>Perform syntactic null analysis for fields</b> (<b><a href=
+"../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_SYNTACTIC_NULL_ANALYSIS_FOR_FIELDS">COMPILER_PB_SYNTACTIC_NULL_ANALYSIS_FOR_FIELDS</a></b>)</td>
+</tr>
+<tr valign="top">
+<td rowspan="2">When enabled, the compiler will detect certain syntactic constellations where
+a null related warning against a field reference would normally be raised but can be suppressed
+at low risk given that the same field reference was known to be non-null immediately before.
+</td>
+<td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ENABLES">ENABLED</a></b></td>
+</tr>
+<tr>
+<td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#DISABLED"><i>DISABLED</i></a></b></td>
+</tr>
+
 <tr>
 <td colspan="2"><b>Reporting Synthetic Access Emulation</b> (<b><a href=
 "../reference/api/org/eclipse/jdt/core/JavaCore.html#COMPILER_PB_SYNTHETIC_ACCESS_EMULATION">COMPILER_PB_SYNTHETIC_ACCESS_EMULATION</a></b>)</td>
@@ -1676,8 +1727,8 @@ they occur in the scope of an entity that carries an @SuppressWarnings annotatio
 access to a non-accessible member of an enclosing type. Such access can have performance
 implications.</td>
 <td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#ERROR">ERROR</a></b></td>
-
 </tr>
+
 <tr valign="top">
 <td><b><a href="../reference/api/org/eclipse/jdt/core/JavaCore.html#WARNING">WARNING</a></b></td>
 </tr>

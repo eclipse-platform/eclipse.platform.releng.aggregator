@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html lang="en">
 <head>
-<meta name="copyright" content="Copyright (c) GK Software AG and others 2012. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) GK Software AG and others 2012, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta http-equiv="Content-Style-Type" content="text/css">
 <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
@@ -207,7 +207,34 @@ This is enabled using the compiler option
 It is possible that a method overrides two methods with different null contracts. Also a nullness default
 can be applicable at a method which is in conflict with an inherited null annotation.
 These cases are flagged as an error and the overriding method must use an explicit null annotation to resolve the conflict.
-</p> 
+</p>
+<h4>Relaxing a <code>@NonNull</code> parameter to unspecified?</h4> 
+<p>
+If <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#inherit_null_annotations">inheritance of null annotations</a>
+is <em>not</em> enabled one particular situation is safe from a type theory point of view
+but may still indicate a problem:
+Given a super method that declares a parameter as <code>@NonNull</code> and an overriding method
+that does not constrain the corresponding parameter (neither by an explicit null annotation, nor
+by an applicable @NonNullByDefault).</p>
+<p>
+This is <b>safe</b> because clients seeing the super-declaration will be forced to avoid <code>null</code>
+whereas the the overriding implementation simply cannot leverage this guarantee due to the
+lack of a specification in this specific method.</p>
+<p>
+Still this may lead to misconceptions because it may be <b>intended</b> that the declaration 
+in the super type should apply also to all overrides.</p>
+<p>
+For this reasons the compiler provides an option 
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#nonnull_annotation_dropped">'@NonNull' parameter not annotated in overriding method</a>:
+<ul>
+<li>Enabling this warning/error is useful for forcing developers to be explicit about the contract of overriding methods.
+	If <code>null</code> should indeed be acceptable it is good practice to add a <code>@Nullable</code> annotation to
+	override the <code>@NonNull</code> from the super method.</li>
+<li>Disabling this warning/error is useful in scenarii of mixed code ownership: it facilitates the use of
+    legacy implementations (without null annotations) in combination with super types that have adopted
+    the approach of null annotations.</li>
+</ul>
+
 <h3>Legacy super-types</h3>
 <p>
 The previous considerations add a difficulty when annotated code is written as a sub-type
@@ -251,6 +278,70 @@ class MyClass extends LegacyClass {
     }
 }
 </pre>
+<h3 id="fields">The case of fields</h3>
+<p>Null annotations work best when applied in <b>method signatures</b> (<b>local variables</b>
+typically don't even need these, but may also leverage null annotations for bridging between
+annotated code and "legacy" code).
+In such usage null annotations connect the chunks of intra procedural analysis as to achieve 
+statements about global data flows. Starting with Eclipse Kepler null annotations can also be 
+applied to <b>fields</b>, but here the situation is slightly different.</p>
+<p>Consider a field marked with <b><code>@NonNull</code></b>: this obviously requires that any
+assignment to the field provides a value that is known not to be null.
+Additionally, the compiler must be able to verify that a non-null field can never be accessed
+in its <b>uninitialized state</b> (in which it still has the value <code>null</code>).
+If it can be verified that every <b>constructor</b> complies to this rule (similarly a static
+field must have an initializer), the program benefits from the safety that dereferencing
+the field can never cause a <code>NullPointerException</code>.</p>
+<p>The situation is more delicate when considering a field marked <b><code>@Nullable</code></b>.
+Such a field should always be considered as dangerous and the recommended way of working
+with nullable fields is: <b>always assign the value to a local variable before working with it</b>.
+Using a local variable the flow analysis can tell exactly, whether a dereference is 
+sufficiently protected by a null check. When following this general rule working with nullable
+fields poses no problems.</p>
+<p>Things get more involved when the code directly dereferences the value of a nullable field.
+The problem is that any null checks that the code may perform before the dereference can
+easily be invalidated by one of these:</p>
+<ul>
+<li>effects via aliased references</li>
+<li>side effects of another method</li>
+<li>concurrency</li>
+</ul>
+<p>One can easily see that without also analyzing thread synchronization (which is beyond
+the compiler's capabilities) no null-check against a nullable field will ever grant
+100% safety for a subsequent dereference. So if concurrent access to a nullable field
+is possible, the field's value should <em>never</em> be directly dereferenced,
+<em>always</em> a local variable should be used instead.
+Even if no concurrency is involved, the remaining issues pose a challenge to a
+complete analysis that is harder than what a compiler can typically handle.</p>
+<h4 id="syntactic_analysis">Flow analysis vs. syntactic analysis</h4>
+<p>Given the compiler cannot fully analyze the effects of aliasing, side effects and
+concurrency, <b>the Eclipse compiler does not perform any flow analysis for fields</b>
+(other than regarding their initialization). Since many developers will consider this
+limitation as too restrictive&mdash;requiring the use of local variables where developers
+<em>feel</em> that their code should actually be safe&mdash;a new option has been introduced
+as a tentative compromise:</p>
+<p>The compiler can be configured to perform some
+<a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#syntactic_null_analysis_for_fields"><b>syntactic analysis</b></a>.
+This will detect the most obvious patterns like this:
+<pre>
+    @Nullable Object f;
+    void printChecked() {
+        if (this.f != null)
+            System.out.println(this.f.toString());
+    }
+</pre>
+<p>
+With the given option enabled the above code will not be flagged by the compiler.
+It is important to see that this syntactic analysis is not "smart" in any way.
+If any code appears between the check and the dereference the compiler will cowardly
+"forget" the information of the previous null check, without even trying to see if
+the intermediate code could perhaps be harmless according to some criteria.
+Thus <b>please be advised</b>: whenever the compiler flags a dereference of a nullable field
+as unsafe although the human eye may see that null should not occur, please either
+rewrite your code to closely follow the recognized pattern shown above, or, even better:
+use a local variable to leverage all the sophistication of flow analysis, which syntactic
+analysis will never attain.
+</p>
 <h3>Benefits of Design-by-Contract</h3>
 <p>
 Using null annotations in the style of Design-by-Contract as outlined above,
