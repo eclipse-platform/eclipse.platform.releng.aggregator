@@ -12,19 +12,22 @@ package org.eclipse.releng.internal.tools.pomversion;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.RelEngPlugin;
 
@@ -255,7 +258,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		if(project == null || !project.isAccessible()) {
 			return;
 		}
-		//clean up existing markers
+		// Clean up existing markers
 		cleanMarkers(project);
 		
 		String severity = RelEngPlugin.getPlugin().getPreferenceStore().getString(IPomVersionConstants.POM_VERSION_ERROR_LEVEL);
@@ -274,18 +277,24 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		// Get the manifest version
 		Version bundleVersion = Version.emptyVersion;
 		try {
-			Manifest mani = new Manifest(manifest.getContents());
-			java.util.jar.Attributes attributes = mani.getMainAttributes();
-			String ver = attributes.getValue("Bundle-Version"); //$NON-NLS-1$
+			Map headers = new HashMap();
+			ManifestElement.parseBundleManifest(manifest.getContents(), headers);
+			String ver = (String)headers.get(Constants.BUNDLE_VERSION);
 			if(ver == null) {
 				return;
 			}
-			bundleVersion = new Version(ver);
+			bundleVersion = Version.parseVersion(ver);
 		} catch (IOException e) {
-			RelEngPlugin.log(e);
+			// Ignored, if there is a problem with the manifest, don't create a marker
 			return;
-		} catch (CoreException e) {
-			RelEngPlugin.log(e);
+		} catch (CoreException e){
+			// Ignored, if there is a problem with the manifest, don't create a marker
+			return;
+		} catch (BundleException e) {
+			// Ignored, if there is a problem with the manifest, don't create a marker
+			return;
+		} catch (IllegalArgumentException e){
+			// Ignored, if there is a problem with the manifest, don't create a marker
 			return;
 		}
 		// Compare it to the POM file version
@@ -294,8 +303,9 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			SAXParser parser = parserFactory.newSAXParser();
 			PomVersionHandler handler = new PomVersionHandler(pom, bundleVersion, severity);
 			parser.parse(pom.getContents(), handler);
-		} catch (Exception e1) {
+		} catch (Exception e) {
 			// Ignored, if there is a problem with the POM file don't create a marker
+			return;
 		}
 	}
 
