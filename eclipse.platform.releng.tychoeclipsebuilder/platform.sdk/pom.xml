@@ -9,64 +9,99 @@
   Contributors:
      Igor Fedorenko - initial implementation
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>eclipse.platform.releng.tychoeclipsebuilder</groupId>
-    <artifactId>eclipse.platform.releng.tychoeclipsebuilder</artifactId>
+    <parent>
+        <groupId>eclipse.platform.releng.tychoeclipsebuilder</groupId>
+        <artifactId>eclipse.platform.releng.tychoeclipsebuilder</artifactId>
+        <version>4.3.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>org.eclipse.platform.sdk</artifactId>
     <version>4.3.0-SNAPSHOT</version>
-  </parent>
+    <packaging>eclipse-repository</packaging>
 
-  <artifactId>org.eclipse.platform.sdk</artifactId>
-  <version>4.3.0-SNAPSHOT</version>
-  <packaging>eclipse-repository</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-packaging-plugin</artifactId>
+                <version>${tycho.version}</version>
+                <configuration>
+                    <format>'${buildId}'</format>
+                </configuration>
+            </plugin>
+           <!-- 
+            This is necessary as the icons can't be found otherwise.
+            Tycho seems to resolve the icons from the target/products/<product.id>
+            directory whereas PDE seems to prefix with 'platform:/plugin' and then
+            resolve it appropriately... 
+           -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <id>copy-icons</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../../rt.equinox.framework/features/org.eclipse.equinox.executable.feature/bin/cocoa/macosx/x86/Eclipse.app/Contents/Resources
+                                    </directory>
+                                    <includes>
+                                        <include>Eclipse.icns</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-packaging-plugin</artifactId>
-        <version>${tycho.version}</version>
-        <configuration>
-          <format>'${buildId}'</format>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-p2-director-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>materialize-products</id>
-            <goals>
-              <goal>materialize-products</goal>
-            </goals>
-            <configuration>
-              <profile>SDKProfile</profile>
-              <products>
-                <product>
-                  <id>org.eclipse.platform.sdk</id>
-                  <rootFolder>eclipse</rootFolder>
-                </product>
-              </products>
-            </configuration>
-          </execution>
-          <execution>
-            <id>archive-products</id>
-            <goals>
-              <goal>archive-products</goal>
-            </goals>
-            <configuration>
-              <formats>
-                <win32>zip</win32>
-                <linux>tar.gz</linux>
-                <macosx>tar.gz</macosx>
-              </formats>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-p2-director-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>materialize-products</id>
+                        <goals>
+                            <goal>materialize-products</goal>
+                        </goals>
+                        <configuration>
+                            <profile>SDKProfile</profile>
+                            <products>
+                                <product>
+                                    <id>org.eclipse.platform.sdk</id>
+                                    <rootFolder>eclipse</rootFolder>
+                                </product>
+                            </products>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>archive-products</id>
+                        <goals>
+                            <goal>archive-products</goal>
+                        </goals>
+                        <configuration>
+                            <formats>
+                                <win32>zip</win32>
+                                <linux>tar.gz</linux>
+                                <macosx>tar.gz</macosx>
+                            </formats>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
