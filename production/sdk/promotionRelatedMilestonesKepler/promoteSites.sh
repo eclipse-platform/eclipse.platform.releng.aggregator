@@ -12,7 +12,7 @@ printf "\n\t%s\t%s\n" "DL_LABEL_EQ" "$DL_LABEL_EQ"
 # cronjob promotes it
 ./promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ}
 rccode=$?
-if (( $rccode != 0 ))
+if [[ $rccode != 0 ]]
 then
     printf "\n\n\t%s\n\n" "ERROR: promoteDropSiteEq.sh failed. Subsequent promotion cancelled."
     exit $rccode
@@ -20,7 +20,7 @@ fi
 
 ./promoteDropSite.sh   ${DROP_ID} ${DL_LABEL}
 rccode=$?
-if (( $rccode != 0 ))
+if [[ $rccode != 0 ]]
 then
     printf "\n\n\t%s\n\n" "ERROR: promoteDropSite.sh failed. Subsequent promotion cancelled."
     exit $rccode
@@ -29,7 +29,7 @@ fi
 
 ./promoteRepo.sh ${DROP_ID} ${DL_LABEL}
 rccode=$?
-if (( $rccode != 0 ))
+if [[ $rccode != 0 ]]
 then
     printf "\n\n\t%s\n\n" "ERROR: promoteRepo.sh failed."
     exit $rccode

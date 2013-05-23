@@ -67,13 +67,20 @@ EBUILDER_HASH=$( git show-ref --hash --verify refs/remotes/origin/${BRANCH} )
 checkForErrorExit $? "git show-ref --hash failed for refs/remotes/origin/${BRANCH}. Not valid ref?"
 # remember, literal name as argument ... its defrefernced in function
 fn-write-property EBUILDER_HASH
-# write to "directory.txt", as "the new map file" 
-# TODO: add this "hash tag" later? Or, write this once tag is known? 
+# write to "relengdirectory.txt", as a double check on build input" 
 # In particular, this "early one" is the "starting point". 
 # By the time we do a build and commit submodules, there would 
 # be a different one that is tagged with buildId. I'm thinking it is the latter that would be needed 
 # to "reproduce a build" but this early one may be important to debug what went wrong with a build.
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
-echo "$AGGREGATOR_REPO $BRANCH $EBUILDER_HASH" >> ${buildDirectory}/directory.txt
+
+echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${logsDirectory}/relengdirectory.txt
+echo "# " >> ${logsDirectory}/relengdirectory.txt
+echo "# This is a listing of reverse lookup of commits and tags in a build."  >> ${logsDirectory}/relengdirectory.txt
+echo "# It is intended to serve as double check or source of debug information if something appears wrong with a build."  >> ${logsDirectory}/relengdirectory.txt
+echo "# "  >> ${logsDirectory}/relengdirectory.txt
+echo "# Starting point, directing build:" >> ${logsDirectory}/relengdirectory.txt
+echo "$AGGREGATOR_REPO $BRANCH $EBUILDER_HASH"  >> ${logsDirectory}/relengdirectory.txt
+echo "# " >> ${logsDirectory}/relengdirectory.txt
 popd
 

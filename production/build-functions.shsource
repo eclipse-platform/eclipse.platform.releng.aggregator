@@ -572,7 +572,7 @@ fn-pom-version-update-with-commit ()
     for CURRENT_REPO in $repos; do
         pushd "$CURRENT_REPO"
         pom_only=$( git status --short -uno | grep -v pom.xml | wc -l )
-        if (( pom_only == 0 )); then
+        if [[ pom_only == 0 ]]; then
             git add $( git status --short -uno | cut -c4- )
             git commit -m "Update pom versions for build $BUILD_ID"
             echo $GIT_PUSH origin HEAD
@@ -794,7 +794,7 @@ fn-slice-repos ()
             -DbuildDirectory="$BUILD_DIR"
         RC=$?
         popd
-        if (( $RC != 0 ))
+        if [[ $RC != 0 ]]
         then
             BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
             echo "   ERROR: Java antrunner call with $ANT_SCRIPT returned non-zero return code, $RC, in fn-slice-repo" >>${BUILD_FAILED}

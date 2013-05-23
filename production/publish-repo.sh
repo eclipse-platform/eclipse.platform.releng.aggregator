@@ -55,7 +55,7 @@ function updateSiteOnBuildMachine()
         eclipseStreamMinor=${BASH_REMATCH[2]}
         eclipseStreamService=${BASH_REMATCH[3]}
     else
-        echo "STREAM, $STREAM, must contain major, minor, and service versions, such as 4.3.0" >&2
+        echo "STREAM, $STREAM, must contain major, minor, and service versions, such as 4.3.0" >${TRACE_OUTPUT}
         return 1
     fi
 
@@ -64,10 +64,10 @@ function updateSiteOnBuildMachine()
     siteDirOnBuildMachine=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${BUILD_ID}
     mkdir -p ${siteDirOnBuildMachine}
     RC=$?
-    if (( RC != 0 )) 
+    if [[ $RC != 0 ]]
     then 
-        echo "ERROR: could not create update site on build machine. RC: $RC"
-        echo "       obtained error trying to create ${siteDirOnBuildMachine}"
+        echo "ERROR: could not create update site on build machine. RC: $RC" >${TRACE_OUTPUT}
+        echo "       obtained error trying to create ${siteDirOnBuildMachine}" >${TRACE_OUTPUT}
         return 1
     fi
 
@@ -97,7 +97,7 @@ then
     then
         rsync --times --omit-dir-times --recursive "${repositoryDir}/" "${siteDirOnBuildMachine}/"
         RC=$? 
-        if (( $RC != 0 ))
+        if [[ $RC != 0 ]]
         then 
             echo "ERROR: rsync of repo returned error. RC: $RC"
             echo "       obtained while copying"
@@ -123,15 +123,20 @@ else
         -Dbuildlogs=$logsDirectory/comparatorlogs \
         -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
         -DcomparatorRepository=$comparatorRepository \
-         -Djava.io.tmpdir=$TMP_DIR 
+        -Djava.io.tmpdir=$TMP_DIR 
 
+    RC=$? 
+    if [[ $RC != 0 ]]
+    then 
+        echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
+    fi
 fi
 
 # copy "human readable" (user friendly) HTML file
 buildType=${BUILD_ID:0:1}
 rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
 RC=$? 
-if (( $RC != 0 ))
+if [[ $RC != 0 ]]
 then 
     echo "ERROR: rsync of repo returned error. RC: $RC"
     echo "       obtained while copying"
@@ -139,3 +144,6 @@ then
     echo "       to ${siteDirOnBuildMachine}"
     exit $RC
 fi
+
+exit 0
+

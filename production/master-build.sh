@@ -149,7 +149,6 @@ fn-write-property TRACE_OUTPUT
 fn-write-property comparatorRepository
 fn-write-property logsDirectory
 
-echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
 # if file exists, then get-aggregator failed
@@ -193,6 +192,44 @@ else
 
     $SCRIPT_PATH/tag-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $TAG_BUILD_INPUT_LOG
     checkForErrorExit $? "Error occurred during tag of build input"
+
+    # At this point, everything should be checked out, updated, and tagged
+    # (tagged unless N build or test build) 
+    # So is a good point to capture listing of build input to directory.txt file.
+    # TODO: hard to find good/easy git commands that work for any repo, 
+    # to query actual branches/commits/tags on remote, in a reliable way?
+    pushd "$aggDir"
+    # = = = = directtory.txt section
+    echo "# Build ${BUILD_ID}, ${BUILD_PRETTY_DATE}" > ${buildDirectory}/directory.txt
+
+    echo "# " >> ${buildDirectory}/directory.txt
+    echo "# This is simply a listing of repositories.txt. Remember that for N-builds, "  >> ${buildDirectory}/directory.txt
+    echo "# 'master' is always used, and N-builds are not tagged."  >> ${buildDirectory}/directory.txt
+    echo "# I and M builds are tagged with buildId: ${BUILD_ID} "  >> ${buildDirectory}/directory.txt
+    echo "# (when repository is a branch, which it typcally is)."  >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+
+    if [[ $BUILD_TYPE =~ [IM] ]]
+    then
+        AGGRCOMMIT=$( git rev-parse HEAD )
+        echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
+        echo "       http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/commit/?id=${AGGRCOMMIT}"  >> ${buildDirectory}/directory.txt
+    fi
+
+    echo "# " >> ${buildDirectory}/directory.txt
+    echo "# .../streams/repositories.txt" >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+    cat $STREAMS_PATH/repositories.txt >> ${buildDirectory}/directory.txt
+    echo "# " >> ${buildDirectory}/directory.txt
+
+
+    # = = = = relengirectory.txt section
+    echo "# " >> ${logsDirectory}/relengdirectory.txt
+    echo "# Build Input: " >> ${logsDirectory}/relengdirectory.txt
+    $SCRIPT_PATH/git-doclog >> ${logsDirectory}/relengdirectory.txt
+    git submodule foreach --quiet $SCRIPT_PATH/git-doclog >> ${logsDirectory}/relengdirectory.txt
+    echo "# " >> ${logsDirectory}/relengdirectory.txt
+    popd
 
 
     $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}

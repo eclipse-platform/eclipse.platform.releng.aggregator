@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+GITCOMMIT=$( git rev-parse HEAD )
+#GITDATE=$( git log -1 --format="%H%n%aD" --date=short )
+
+# we go to a lot of trouble here, just to get 
+# short form, in prettiest way, using git commands
+# as much a possible, instead of heuristic parsing.
+git symbolic-ref --quiet HEAD >/dev/null 
+if (( $? == 0 )) 
+then 
+    GITBRANCH=$( git rev-parse --abbrev-ref HEAD )   
+else
+    GITBRANCH='[Not on a branch]'
+fi
+
+GITTAG=$( git describe --abbrev=0 --exact-match --all --tags $GITCOMMIT )
+#echo "GITTAG: $GITTAG"
+SHORT_TAG=${GITTAG##*/}
+#echo "SHORT_TAG: $SHORT_TAG"
+
+#echo "pwd: ${PWD}"
+REPONAME=${PWD##*/}
+
+case "$REPONAME" in 
+    eclipse.platform*) 
+        REPOROOT="platform";;
+    eclipse.jdt*) 
+        REPOROOT="jdt";;
+    eclipse.pde*) 
+        REPOROOT="pde";;
+    rt.equinox*) 
+        REPOROOT="equinox";;
+    *)
+        echo "WARNING: unrecognized reponame pattern for $REPONAME";;
+esac
+#echo "REPOROOT: $REPOROOT"
+#echo "reponame: ${REPONAME}"
+#echo "git_dir: $GIT_DIR"
+# git ls-remote http://www.kernel.org/pub/scm/git/git.git master pu rc
+# git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git
+REMOTETAG=$( git ls-remote --tags git://git.eclipse.org/gitroot/${REPOROOT}/${REPONAME}.git $SHORT_TAG ) 
+if [[ -z "${REMOTETAG}" ]] 
+then
+    REMOTETAG='[No tag in remote (canoical) repository]'
+else
+    REMOTETAG=${REMOTETAG##*/}
+fi
+#echo "REMOTETAG: $REMOTETAG" 
+printf "  %s \t%s \t%s \t%s \t%s \n" "$REPONAME $GITCOMMIT $GITBRANCH $SHORT_TAG $REMOTETAG"
