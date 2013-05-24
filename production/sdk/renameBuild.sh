@@ -59,7 +59,20 @@ perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 # Integration --> Release
 # These are for cases where used in headers, titles, etc.
 oldString="Integration Build"
-newString="Stable Build"
+
+if [[ "${newlabel}" =~ .*RC.* ]]
+then 
+    newString="Release Candidate Build"
+else if [[ "${newlabel}" =~ .*R.* ]]
+then
+    newString="Released Build"
+else if [[ "${newlabel}" =~ .*S.* ]]
+then
+    newString="Stable Build"
+else 
+    newString="Unknown Build Type"
+fi
+
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
@@ -70,13 +83,36 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
 # from original values. Less sure what to do with Ant properties, 
 # buildproperties.properties ... but, we'll decide when needed.
 oldString="BUILD_TYPE = \"I\""
-newString="BUILD_TYPE = \"S\""
+if [[ "${newlabel}" =~ .*RC.* ]]
+then 
+    newString="BUILD_TYPE = \"S\""
+else if [[ "${newlabel}" =~ .*R.* ]]
+then
+    newString="BUILD_TYPE = \"R\""
+else if [[ "${newlabel}" =~ .*S.* ]]
+then
+    newString="BUILD_TYPE = \"S\""
+else 
+    newString="BUILD_TYPE = \"T\""
+fi
+
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
 
 oldString="BUILD_TYPE_NAME = \"Integration\""
-newString="BUILD_TYPE_NAME = \"Stable\""
+if [[ "${newlabel}" =~ .*RC.* ]]
+then 
+    newString="BUILD_TYPE_NAME = \"Release Candidate\""
+else if [[ "${newlabel}" =~ .*R.* ]]
+then
+    newString="BUILD_TYPE_NAME = \"Released\""
+else if [[ "${newlabel}" =~ .*S.* ]]
+then
+    newString="BUILD_TYPE_NAME = \"Stable\""
+else 
+    newString="BUILD_TYPE_NAME = \"Unknown Type\""
+fi
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
