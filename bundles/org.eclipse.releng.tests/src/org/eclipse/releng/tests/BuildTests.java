@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -812,9 +813,14 @@ public class BuildTests extends TestCase {
 		return properties;
 	}
 
+	private String getVersionCompareCommand() {
+		String javadir= System.getProperty("java.home");
+		return javadir + File.separator + "bin" + File.separator + "java";
+	}
+
 	// private String buildCommandLine(String source, String destination, String
 	// options, String output) {
-	private String buildCommandLine(String source, String destination,
+	private String getVersionCompareArguments(String source, String destination,
 			String output, String option) {
 
 		Bundle bundle = Platform.getBundle("org.eclipse.equinox.launcher");
@@ -831,11 +837,8 @@ public class BuildTests extends TestCase {
 			return null;
 		}
 
-		String javadir = System.getProperty("java.home");
-		javadir += File.separator + "bin" + File.separator + "java";
 
-		String command = javadir
-				+ " -cp "
+		String command= "-cp "
 				+ t
 				+ " org.eclipse.core.launcher.Main -application org.eclipse.pde.tools.versioning.application -clean";
 
@@ -846,7 +849,7 @@ public class BuildTests extends TestCase {
 			command += " -option " + option;
 		}
 		
-		System.out.println("commmand "+ command);
+		System.out.println("arguments " + command);
 		System.out.println("option "+ option);
 
 		return command;
@@ -976,13 +979,17 @@ public class BuildTests extends TestCase {
 */
 		 
 
-		String command = buildCommandLine(compareNewPath, compareOldPath,
-				outputFileName, compareOptions);
+		String command= getVersionCompareCommand();
+		String arguments= getVersionCompareArguments(compareNewPath, compareOldPath, outputFileName, compareOptions);
 
-		// System.out.println("command "+ command);
+		StringTokenizer tokenizer= new StringTokenizer(arguments);
+		String[] commandArray= new String[tokenizer.countTokens() + 1];
+		commandArray[0]= command;
+		for (int i= 1; tokenizer.hasMoreTokens(); i++)
+			commandArray[i]= tokenizer.nextToken();
 
 		try {
-			Process aProcess = Runtime.getRuntime().exec(command);
+			Process aProcess= Runtime.getRuntime().exec(commandArray);
 			try {
 				// wait until the comparison finishes
 				aProcess.waitFor();
