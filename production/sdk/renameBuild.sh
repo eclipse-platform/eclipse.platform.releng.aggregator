@@ -63,10 +63,10 @@ oldString="Integration Build"
 if [[ "${newlabel}" =~ .*RC.* ]]
 then 
     newString="Release Candidate Build"
-else if [[ "${newlabel}" =~ .*R.* ]]
+elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="Released Build"
-else if [[ "${newlabel}" =~ .*S.* ]]
+elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="Stable Build"
 else 
@@ -86,10 +86,10 @@ oldString="BUILD_TYPE = \"I\""
 if [[ "${newlabel}" =~ .*RC.* ]]
 then 
     newString="BUILD_TYPE = \"S\""
-else if [[ "${newlabel}" =~ .*R.* ]]
+elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE = \"R\""
-else if [[ "${newlabel}" =~ .*S.* ]]
+elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="BUILD_TYPE = \"S\""
 else 
@@ -104,10 +104,10 @@ oldString="BUILD_TYPE_NAME = \"Integration\""
 if [[ "${newlabel}" =~ .*RC.* ]]
 then 
     newString="BUILD_TYPE_NAME = \"Release Candidate\""
-else if [[ "${newlabel}" =~ .*R.* ]]
+elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Released\""
-else if [[ "${newlabel}" =~ .*S.* ]]
+elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Stable\""
 else 
