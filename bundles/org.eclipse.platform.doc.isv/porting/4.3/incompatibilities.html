@@ -24,6 +24,7 @@ See also the list of <a href="../removals.html">deprecated API removals</a> for 
 
 <ol>
 	<li><a href="#lucene">New incompatible Lucene version</a></li>
+	<li><a href="#oleListeners">OleListeners must not dispose OleEvent arguments</a></li>
 </ol>
 
 <hr>
@@ -40,6 +41,22 @@ Lucene Change Log</a> for complete details.
 </p>
 <p><strong>Action required:</strong> Clients that directly use Lucene APIs
 should refer to the Lucene change log for details on what has changed.
+</p>
+
+<!-- ############################################## -->
+<h2>2. <a name="oleListeners">OleListeners must not dispose OleEvent arguments</a></h2>
+<p><strong>What is affected:</strong> Plug-ins that dispose the arguments (Variants) in received OleEvents.
+</p>
+<p><strong>Description:</strong> Prior to Eclipse 4.3, the arguments (Variants) in OleEvents were never
+disposed by SWT, so an OleListener that disposed these arguments would not have a problem.  While it was never
+stated that OleListeners should dispose these arguments, there were example snippets on the SWT page that incorrectly
+did this.
+<p>As of Eclipse 4.3, SWT now disposes these arguments after all appropriate OleListeners have been notified, in
+order to fix a significant memory leak.  As a result, OleListeners that also dispose these arguments can cause
+native COM objects to be over-released, which can lead them to be cleaned up prematurely and potentially crash.
+</p>
+<p><strong>Action required:</strong> Clients that hook OleListeners must ensure that they are not invoking dispose()
+on the arguments (Variants) in received OleEvents.
 </p>
 
 <!-- ############################################## -->
