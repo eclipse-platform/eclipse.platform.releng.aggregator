@@ -81,8 +81,9 @@ echo "repositoryDir: ${repositoryDir}"
 
 # leave both old and new methods for now, so true (1) ==> old straight copy. 
 # change to false (0) to test new method.
-if (( 0 )) 
+if (( 1 )) 
 then
+    DO_NOT_MIRROR_IN_ASSEMBLY="-DdoNotMirror=true"
     # for now, straight copy from what was produced to local build machine directory. 
     # This is partially done so that 
     #   rest of scripts stay common
@@ -110,27 +111,29 @@ then
         echo "ERROR: Some directory didn't exist for update site copy."
         echo "  repositoryDir: ${repositoryDir}"
         echo "  siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
+        exit $RC
     fi 
 
-else
-
-    java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
-        -data ${buildDirectory}/workspace-mirrorRepo \
-        -application org.eclipse.ant.core.antRunner \
-        -v \
-        -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
-        -DrepositoryDir=${repositoryDir} \
-        -Dbuildlogs=$logsDirectory/comparatorlogs \
-        -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
-        -DcomparatorRepository=$comparatorRepository \
-        -Djava.io.tmpdir=$TMP_DIR 
-
-    RC=$? 
-    if [[ $RC != 0 ]]
-    then 
-        echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
-    fi
 fi
+
+java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
+    -data ${buildDirectory}/workspace-mirrorRepo \
+    -application org.eclipse.ant.core.antRunner \
+    -v \
+    -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
+    -DrepositoryDir=${repositoryDir} \
+    -Dbuildlogs=$logsDirectory/comparatorlogs \
+    -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
+    -DcomparatorRepository=$comparatorRepository \
+    -Djava.io.tmpdir=$TMP_DIR ${DO_NOT_MIRROR_IN_ASSEMBLY}
+
+RC=$? 
+if [[ $RC != 0 ]]
+then 
+    echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
+    exit $RC
+fi
+
 
 # copy "human readable" (user friendly) HTML file
 buildType=${BUILD_ID:0:1}

@@ -1,69 +1,9 @@
 <project
     default="processArtifacts"
     basedir=".">
-    <target name="processArtifacts">
-
-    	 <!-- normally, caller would set repositoryDir, but for local operation, can hard code here -->
-        <property
-            name="repositoryDir"
-            value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
-
-        <!-- 
-             Note: we mirror first (with comparator) to leave original repository in build machines 
-             drop directory untouched. That allows for emergency "redos" without rebuilding, plus, 
-             in case there are differences, it 
-             allows an easy way to compare "old" with "new" (at least for a few days), until 
-             build drop is cleaned off. 
-        -->
-        
-        <!-- 
-             We run this mirror task, rather than a straight copy, in order to 
-             do a sanity check with traditional comparator. There should be few differences 
-             from buildtime comparator log, but might be some special cases, such as when 
-             third party jars change. See 
-             https://bugs.eclipse.org/bugs/show_bug.cgi?id=402448 
-        -->
-        <echo message="Mirroring main repo: ${repositoryDir}" />
-        <echo message="   to build machine location: ${siteDirOnBuildMachine}" />
-        <echo message="Comparator repo: ${comparatorRepository}" />
-        <echo message="Mirroring main repo: see log at ${buildlogs}/postbuild-mirrorlog.txt" />
-        <echo message="Comparator log: see log at ${buildlogs}/postbuild-comparatorlog.txt" />
-        <p2.mirror
-            source="file://${repositoryDir}"
-            log="${buildlogs}/postbuild-mirrorlog.txt"
-            ignoreErrors="true">
-            <destination
-                compressed="true"
-                name="Eclipse Project Repository"
-                location="file:${siteDirOnBuildMachine}"
-                append="false"
-                format="file://${repositoryDir}"
-                kind="artifact" />
-            <destination
-                compressed="true"
-                name="Eclipse Project Repository"
-                location="file:${siteDirOnBuildMachine}"
-                append="false"
-                format="file://${repositoryDir}" />
-            <comparator
-                comparator="org.eclipse.equinox.p2.repository.tools.jar.comparator"
-                comparatorLog="${buildlogs}/postbuild-comparatorlog.txt">
-                <repository location="${comparatorRepository}" />
-                <!-- eclude none, for now
-                <exclude>
-                    <artifact id="org.eclipse.jdt.doc.isv" />
-                    <artifact id="org.eclipse.jdt.doc.user" />
-                    <artifact id="org.eclipse.pde.doc.user" />
-                    <artifact id="org.eclipse.platform.doc.isv" />
-                    <artifact id="org.eclipse.platform.doc.user" />
-                    <artifact id="org.eclipse.equinox.executable" />
-                    <artifact id="master-equinox" />
-                </exclude>
-                -->
-            </comparator>
-        </p2.mirror>
-        
-        
+    <target
+        name="processArtifacts"
+        depends="doMirror">
 
         <!-- This is to remove IUs handy during the build, but not really
             needed in final repo -->
@@ -113,8 +53,70 @@
         <p2.process.artifacts repositoryPath="file://${siteDirOnBuildMachine}" />
 
 
+    </target>
 
+    <target
+        name="doMirror"
+        unless="doNotMirror">
+        <!-- normally, caller would set repositoryDir, but for local operation, can hard code here -->
+        <property
+            name="repositoryDir"
+            value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
 
+       <!-- 
+            Note: we mirror first (with comparator) to leave original repository in build machines 
+            drop directory untouched. That allows for emergency "redos" without rebuilding, plus, 
+            in case there are differences, it 
+            allows an easy way to compare "old" with "new" (at least for a few days), until 
+            build drop is cleaned off. 
+       -->
+       
+       <!-- 
+            We run this mirror task, rather than a straight copy, in order to 
+            do a sanity check with traditional comparator. There should be few differences 
+            from buildtime comparator log, but might be some special cases, such as when 
+            third party jars change. See 
+            https://bugs.eclipse.org/bugs/show_bug.cgi?id=402448 
+       -->
+        <echo message="Mirroring main repo: ${repositoryDir}" />
+        <echo message="   to build machine location: ${siteDirOnBuildMachine}" />
+        <echo message="Comparator repo: ${comparatorRepository}" />
+        <echo message="Mirroring main repo: see log at ${buildlogs}/postbuild-mirrorlog.txt" />
+        <echo message="Comparator log: see log at ${buildlogs}/postbuild-comparatorlog.txt" />
+        <p2.mirror
+            source="file://${repositoryDir}"
+            log="${buildlogs}/postbuild-mirrorlog.txt"
+            ignoreErrors="true">
+            <destination
+                compressed="true"
+                name="Eclipse Project Repository"
+                location="file:${siteDirOnBuildMachine}"
+                append="false"
+                format="file://${repositoryDir}"
+                kind="artifact" />
+            <destination
+                compressed="true"
+                name="Eclipse Project Repository"
+                location="file:${siteDirOnBuildMachine}"
+                append="false"
+                format="file://${repositoryDir}" />
+            <comparator
+                comparator="org.eclipse.equinox.p2.repository.tools.jar.comparator"
+                comparatorLog="${buildlogs}/postbuild-comparatorlog.txt">
+                <repository location="${comparatorRepository}" />
+               <!-- eclude none, for now
+               <exclude>
+                   <artifact id="org.eclipse.jdt.doc.isv" />
+                   <artifact id="org.eclipse.jdt.doc.user" />
+                   <artifact id="org.eclipse.pde.doc.user" />
+                   <artifact id="org.eclipse.platform.doc.isv" />
+                   <artifact id="org.eclipse.platform.doc.user" />
+                   <artifact id="org.eclipse.equinox.executable" />
+                   <artifact id="master-equinox" />
+               </exclude>
+               -->
+            </comparator>
+        </p2.mirror>
     </target>
 </project>
 
