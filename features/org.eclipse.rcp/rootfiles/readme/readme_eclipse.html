@@ -487,6 +487,19 @@ disable the compiler with the VM arg &quot;-Xint&quot;.
 
 <h3>3.2.1 <a name="I-Platform-Core">Platform - Core</a></h3>
 
+<h4>Cannot edit non-ASCII files on Mac OS X</h4>
+<p>If eclipse is launched from the Finder/dock on MacOS X using the 64-bit Oracle JVM, 
+it cannot be used to edit files and folders with non-ASCII file names. The workaround 
+is to edit the file /etc/launchd.conf and add the following line:
+</p>
+<pre>
+  setenv LANG en_CA.UTF-8
+</pre>
+<p>If you're not running as an Admin user and can't directly edit the file: Create 
+the launchd.conf file using a text editor, save it to the desktop, open a Finder window, 
+choose <b>Go &gt; Go to Folder...</b>, enter <b>"/etc"</b>, and then drag the launchd.conf into that folder.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=397226">397226</a>)</p>
+
 <h4>Installing plug-ins by unzipping them into the plugins directory</h4>
 <p>New plug-ins can be installed into the system by unzipping them into the plugins
 directory. However this is not recommended, and the dropins directory should be
@@ -862,13 +875,7 @@ Ubuntu 12.04). A workaround for this is to disable the overlay scrollbars
 (export LIBOVERLAY_SCROLLBAR=0 ) before launching Eclipse.</p>
 
 <h4>BIDI Segments in Text controls</h4>
-<p>BIDI Segments in text controls only work on Windows and GTK.</p>
-
-<h4>Toolbar controls on GTK are not properly sized</h4>
-
-<p>There is a known problem in ToolItem that prevents control set in separators
-from being sized properly. (See Bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=377961">377961</a>)
-</p>
+<p>BIDI Segments in Text controls only work on Windows and GTK.</p>
 
 <h3>3.2.7 <a name="I-Platform-Team-CVS">Platform - Team - CVS</a></h3>
 <p>The following are known problems with the CVS repository provider only, and
@@ -995,23 +1002,6 @@ virtual machine should be aware that breakpoints are unreliable (i.e. do
 not always suspend execution). The problem occurs on Windows and Linux 
 platforms. This is an issue with the VM and not with Eclipse.
 The workaround is to use the <code>-XX:+UseParallelGC</code> VM option. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=279137">279137</a>).
-
-<h4>Some refactoring script operations fail with Sun 6.0 JREs</h4>
-<p>Creating and applying refactoring scripts sometimes fails with Sun 6.0 JREs
-due to a bug in the XML parser that is shipped with those VMs.
-A workaround is to use a J2SE 5.0 VM or an IBM 6.0 VM.
-Another workaround is to replace the XML parser using the
-<a href="http://download.oracle.com/javase/6/docs/technotes/guides/standards/index.html">Java Endorsed Standards Override Mechanism</a>:
-</p>
-<ol>
-  <li>Get original versions of xml-apis.jar, xercesImpl.jar, xalan.jar, and serializer.jar from Apache, e.g.
-    xalan-j_2_7_1-bin.zip from <a href="http://xml.apache.org/xalan-j/downloads.html">here</a>.
-  </li>
-  <li>Unpack the archive and copy the 4 JARs into <code>&lt;path-to-your-JavaSE6.0-install&gt;\jre\lib\endorsed\</code>.
-  </li>
-</ol>
-(see Sun bug <a href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6760982">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6760982</a>,
-Eclipse bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=262820">262820</a>)
 
 <h4>Suspend on uncaught exception overrides exception breakpoint location filters</h4>
 <p>Exception breakpoints can be configured with location filters (inclusive and 
