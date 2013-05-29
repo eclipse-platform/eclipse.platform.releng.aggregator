@@ -25,6 +25,7 @@ See also the list of <a href="../removals.html">deprecated API removals</a> for 
 <ol>
 	<li><a href="#lucene">New incompatible Lucene version</a></li>
 	<li><a href="#oleListeners">OleListeners must not dispose OleEvent arguments</a></li>
+	<li><a href="#handlerProcessingAddon">Models created in 4.2 need HandlerProcessAddon added</a></li>
 </ol>
 
 <hr>
@@ -58,6 +59,20 @@ native COM objects to be over-released, which can lead them to be cleaned up pre
 <p><strong>Action required:</strong> Clients that hook OleListeners must ensure that they are not invoking dispose()
 on the arguments (Variants) in received OleEvents.
 </p>
+
+<h2>3. <a name="handlerProcessingAddon">Models created in 4.2 need HandlerProcessAddon added</a></h2>
+<p><strong>What is affected:</strong> All Eclipse 4 RCP applications </p>
+<p><strong>Description:</strong> The static method processHierarchy of the E4Workbench class was removed. This method at the
+time of this removal supported the dynamically changing contexts in which handlers are executed. It was required to be called 
+every time you added/removed handlers at runtime. Now this functionality has moved to an add-on. 
+The add-on is in org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon .
+It makes the changes automatically by listening in the event broker. Being an add-on it has the advantage of being 
+replaceable, in case you don't like the way the processing is done now (though it is not recommended).</p>
+
+<p><strong>Action required: </strong> Remove all calls to E4Workbench.processHierarchy in your application and
+add the HandlerProcessingAddon mentioned above to the list of add-ons of your application.
+</p>
+
 
 <!-- ############################################## -->
 
