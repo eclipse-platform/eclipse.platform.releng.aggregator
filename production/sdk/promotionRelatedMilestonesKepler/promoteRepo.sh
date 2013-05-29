@@ -29,12 +29,19 @@ DLMACHINE_BASE_SITE=/home/data/httpd/download.eclipse.org/eclipse/updates/4.3mil
 
 DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
 
-./addRepoProperties.sh ${BUILDMACHINE_SITE} 4.3milestones ${DL_SITE_ID}
+source promoteUtilities.shsource
+findEclipseExe ${DL_SITE_ID}
+RC=$?
+if [[ $RC == 0 ]]
+then
+    ./addRepoProperties.sh ${BUILDMACHINE_SITE} 4.3milestones ${DL_SITE_ID}
+else
+    echo "ERROR: could not run add repo properties. Add manually."
+fi 
 
 printf "\n\t%s\n" "rsync build machine repo site, to downloads repo site."
 # remember, need trailing slash since going from existing directories
 # contents to new directories contents
 rsync -r "${BUILDMACHINE_SITE}/"  "${DLMACHINE_SITE}"
 
-# TODO: automate this
-printf "\n\n\t%s\n\n" "Remember to update composite files and mirrors URL." >&2
+./runAntRunner.sh ${PWD}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}
