@@ -29,6 +29,8 @@ DLMACHINE_BASE_SITE=/home/data/httpd/download.eclipse.org/eclipse/updates/4.3mil
 
 DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
 
+./addRepoProperties.sh ${BUILDMACHINE_SITE} 4.3milestones ${DL_SITE_ID}
+
 printf "\n\t%s\n" "rsync build machine repo site, to downloads repo site."
 # remember, need trailing slash since going from existing directories
 # contents to new directories contents

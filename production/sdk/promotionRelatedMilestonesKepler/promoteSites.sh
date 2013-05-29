@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-DROP_ID=I20130523-1400
-DL_LABEL=4.3RC2
-DL_LABEL_EQ=KeplerRC2
+DROP_ID=I20130529-200
+DL_LABEL=4.3RC3
+DL_LABEL_EQ=KeplerRC3
 
 printf "\n\n\t%s\t%s\n" "DROP_ID" "$DROP_ID"
 printf "\n\t%s\t%s\n" "DL_LABEL" "$DL_LABEL"
