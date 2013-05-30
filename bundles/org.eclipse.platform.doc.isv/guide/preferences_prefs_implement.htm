@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html lang="en">
 <HEAD>
 
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2005. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2000, 2013. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
 
 <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=ISO-8859-1">
 <META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
@@ -66,7 +66,7 @@ protected Control createContents(Composite parent)
 	return new Composite(parent, SWT.NULL);
 }</pre>
 <p>
-Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.&nbsp;
+Most of the code in this method is concerned with creating and laying out the controls, so we won't dissect it here.
 Here is what the corresponding page looks like:</p>
 <p>
 <img src="images/readmepreferences.png" alt="Readme tool preferences page" border="0"></p>
@@ -74,11 +74,10 @@ Here is what the corresponding page looks like:</p>
 The other primary responsibility of a preference page is to react to the <b> performOk</b> message. Typically, this 
 method updates and stores the user preferences and, if necessary, updates any other plug-in objects to reflect the 
 change in preferences.  The <b>performDefaults</b> method is used to restore preferences to their
-default state when the user presses the <b>Restore Defaults</b>
-button.&nbsp;&nbsp;</p>
+default state when the user presses <b>Restore Defaults</b>.</p>
 <p>
 You may override <b>performApply</b> if you have additional processing when the
-user selects <b>Apply</b>.&nbsp; The default implementation is to call <b>performOk</b>.&nbsp;&nbsp;</p>
+user selects <b>Apply</b>. The default implementation is to call <b>performOk</b>.</p>
 <p>
 Preference pages should override the <b> doGetPreferenceStore()</b> method to return a preference store for 
 storing their values. </p>
@@ -101,15 +100,18 @@ The following code in the <b> ReadmePreferencePage</b> obtains the preference st
       return ReadmePlugin.getDefault().getPreferenceStore();
    }
 </pre>
+<blockquote><i>
+Note: If there are no preferences saved anywhere for a plug-in, the plug-in will get an empty preference
+store.</i></blockquote>
 <p>
-Because <b> ReadmePlugin</b> extends the <b><a href="../reference/api/org/eclipse/ui/plugin/AbstractUIPlugin.html"> AbstractUIPlugin</a></b> class, it automatically inherits a preference store. 
-This preference store is initialized using the platform preferences service. The only thing the <b>ReadmePlugin</b> has 
-to do is implement a method that initializes the preference controls to their default values. These values are used the 
-first time the preference page is shown or when the user presses the <b>Defaults</b> button in the preferences page.</p>
+The preference store is initialized with default values in <b>ReadmePreferenceInitializer</b>.  The preference initializer
+is contributed to the preferences service using the <b>org.eclipse.core.runtime.preferences</b> extension point. These values 
+are used the first time the preference page is shown or when the user presses <b>Restore Defaults</b> in the preferences 
+page.</p>
 <pre>
-protected void initializeDefaultPreferences(IPreferenceStore store) {
-	// These settings will show up when Preference dialog
-	// opens up for the first time.
+public void initializeDefaultPreferences() {
+	// These settings will show up when the Readme preference page
+	// is shown for the first time.
 	store.setDefault(IReadmeConstants.PRE_CHECK1, true);
 	store.setDefault(IReadmeConstants.PRE_CHECK2, true);
 	store.setDefault(IReadmeConstants.PRE_CHECK3, false);
@@ -117,9 +119,6 @@ protected void initializeDefaultPreferences(IPreferenceStore store) {
 	store.setDefault(IReadmeConstants.PRE_TEXT, MessageUtil.getString(&quot;Default_text&quot;)); //$NON-NLS-1$
 }</pre>
 
-<blockquote><i>
-Note:&nbsp; If there are no preferences saved anywhere for a plug-in, the plug-in will get an empty preference
-store.</i></blockquote>
 <h4>
 Retrieving and saving preferences</h4>
 <p>
@@ -137,7 +136,7 @@ process is similar to initializing dialog control values from dialog settings. T
 	...
 }</pre>
 <p>
-When the <b>OK</b> (or <b>Apply</b>) button is pressed, the current values of the controls on the preference page should be stored back into the
+When <b>OK</b> or <b>Apply</b> is pressed, the current values of the controls on the preference page should be stored back into the
 preference store. The
 <b> ReadmePreferencePage</b> implements this logic in a separate method,
 <b>storeValues</b>.</p>
@@ -150,9 +149,10 @@ private void storeValues() {
 	...
 }</pre>
 <p>
-When the user presses the <b>Defaults</b> button, the platform will restore all preference store values to the default values specified in the plug-in class. However, your preference page is responsible for reflecting these default values
-in the controls on the preference page. The
-<b> ReadmePreferencePage</b> implements this in <b>initializeDefaults</b>.</p>
+When the user presses <b>Restore Defaults</b>, the current values of the controls on the preference page should be
+reset to the default values in the preference store. The default values are defined using a preference initializer,
+<b>ReadmePreferenceInitializer</b>. The <b>ReadmePreferencePage</b> implements this logic in a separate method,
+<b>initializeDefaults</b>.</p>
 <pre>
    private void initializeDefaults() {
       IPreferenceStore store = getPreferenceStore();
