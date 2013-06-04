@@ -12,23 +12,15 @@
      ====================================================================== -->
 <project name="API Tools builder integration" default="apiToolsReports">
 	
-	<!-- The name for the build - i.e. I20130603-2000 -->
-	<property name="buildLabel" value=""/>
-	
-	<!-- The on-disk location of the previous Eclipse build - for example Eclipse 4.2.2	-->
-	<property name="previousBaselineName" value=""/>
-	
-	<!-- Default buildDirectory -->
-    <property name="buildDirectory" value=""/>
+
 	
 	<!--
 		The default target that calls apitooling.apifreeze, apitooling.analysis and apitooling.apideprecation
 		and their respective _reportconversion tasks
 	-->
-	<target name="apiToolsReports">
-		<!-- a dir to extract previous baselines in -->
-        <property name="reference" value="${buildDirectory}/apitooolingreference" />
-        <mkdir dir="${reference}"/>
+	<target name="apiToolsReports"
+	    depends="init">
+
         
 		<!-- make a dir to place the XML and HTML output in, per build -->
 		<property name="report" value="${buildDirectory}/${buildLabel}/apitools"/>
@@ -111,5 +103,30 @@
             xmlfile="${deprecation_report}"
             debug="true"
             htmlfile="${deprecation_html}"/>
+    </target>
+    
+    <target name="init"
+         unless="apitoolinginitialized">
+        
+        <!-- The name for the build - i.e. I20130603-2000 -->
+        <fail unless="buildLabel" message="buildLabel must be provided."/>
+        
+        <!-- The on-disk location of the previous Eclipse build - for example Eclipse 4.2.2 -->
+        <fail unless="previousBaselineName" message="previousBaselineName must be provided"/>
+        
+        <fail unless="previousBaseURL" message="full URL of previous build must be provided" /> 
+        
+        <!-- Default buildDirectory -->
+        <fail unless="buildDirectory" message="buildDirectory much be provided"/>
+        
+        <!-- a dir to extract previous baselines in -->
+        <property name="reference" value="${buildDirectory}/apitooolingreference" />
+        <mkdir dir="${reference}"/>
+        
+        <get dest="${reference}" src="${previousBaseURL}"/>
+        
+        
+        <property name="apitoolinginitialized" value="true"/>
+
     </target>
 </project>
