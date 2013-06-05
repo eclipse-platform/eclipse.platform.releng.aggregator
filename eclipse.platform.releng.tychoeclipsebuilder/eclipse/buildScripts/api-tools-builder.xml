@@ -10,7 +10,9 @@
                    
      mrennie                                                                
      ====================================================================== -->
-<project name="API Tools builder integration" default="apiToolsReports">
+<project
+  name="API Tools builder integration"
+  default="apiToolsReports">
 	
 
 	
@@ -18,120 +20,204 @@
 		The default target that calls apitooling.apifreeze, apitooling.analysis and apitooling.apideprecation
 		and their respective _reportconversion tasks
 	-->
-	<target name="apiToolsReports"
-	    depends="init">
+  <target
+    name="apiToolsReports"
+    depends="init">
 
         
 		<!-- make a dir to place the XML and HTML output in, per build -->
-		<property name="report" value="${buildDirectory}/${buildLabel}/apitools"/>
-        <mkdir dir="${report}"/>
-		<property name="freeze_report" value="${report}/freeze_report.xml"/>
-		<touch file="${freeze_report}"/>
-		<property name="freeze_html" value="${report}/freeze_report.html"/>
+    <property
+      name="report"
+      value="${buildDirectory}/${buildLabel}/apitools" />
+    <mkdir dir="${report}" />
+    <property
+      name="freeze_report"
+      value="${report}/freeze_report.xml" />
+    <touch file="${freeze_report}" />
+    <property
+      name="freeze_html"
+      value="${report}/freeze_report.html" />
 		
 		<!-- grab the currently built + zipped build -->
-        <property name="current_location"  value="${buildDirectory}/${buildLabel}/eclipse-SDK-${buildLabel}-win32.zip" />
+    <property
+      name="current_location"
+      value="${buildDirectory}/${buildLabel}/eclipse-SDK-${buildLabel}-win32.zip" />
 
 		<!-- we would have to fetch the baseline we wanted, or perhaps just link to its location -->
-        <property name="baseline" value="${reference}/${previousBaselineFilename}" />
+    <property
+      name="baseline"
+      value="${reference}/${previousBaselineFilename}" />
         
 		<!-- create properties for the filters -->
-        <property name="exclude_list_location" value="${EBuilderDir}/eclipse/apiexclude/exclude_list.txt" />
-        <property name="exclude_list_external_location" value="${EBuilderDir}/eclipse/apiexclude/exclude_list_external.txt" />
+    <property
+      name="exclude_list_location"
+      value="${EBuilderDir}/eclipse/apiexclude/exclude_list.txt" />
+    <property
+      name="exclude_list_external_location"
+      value="${EBuilderDir}/eclipse/apiexclude/exclude_list_external.txt" />
 		
 		<!-- run the freeze task -->
-        <apitooling.apifreeze
-            baseline="${baseline}"
-            profile="${current_location}"
-            report="${freeze_report}"
-            excludelist="${exclude_list_location}"
-            debug="true" />
-        <apitooling.apifreeze_reportconversion
-            xmlfile="${freeze_report}"
-        	htmlfile="${freeze_html}"
-            debug="true"/>
+    <antcall target="dofreezeReport" />
 		
 		<!-- create the Ant filterstore directory -->
-        <property name="filter_store" value="${buildDirectory}/${buildLabel}/apifilters"/>
-        <mkdir dir="${filter_store}"/>
+    <property
+      name="filter_store"
+      value="${buildDirectory}/${buildLabel}/apifilters" />
+    <mkdir dir="${filter_store}" />
 		
 		<!-- copy all of the .api_filters files out of the plugins from their source -->
-        <copy todir="${filter_store}">
-            <fileset
-                dir="${buildWorkingArea}"
-                includes="**/.settings/.api_filters" />
-            <regexpmapper
-                from=".*(org.eclipse.*\/)(\.settings\/)(\.api_filters)"
-                to="\1\3" />
-        </copy>
+    <copy todir="${filter_store}">
+      <fileset
+        dir="${buildWorkingArea}"
+        includes="**/.settings/.api_filters" />
+      <regexpmapper
+        from=".*(org.eclipse.*\/)(\.settings\/)(\.api_filters)"
+        to="\1\3" />
+    </copy>
 		
 		<!-- create a zip of API filters -->
-        <property name="apifilterzip" value="${report}/apifilters-${buildId}.zip" />
-        <exec
-            executable="zip"
-            dir="${report}">
-            <arg line="-r ${apifilterzip} ${filter_store}" />
-        </exec>
+    <property
+      name="apifilterzip"
+      value="${report}/apifilters-${buildId}.zip" />
+    <exec
+      executable="zip"
+      dir="${report}">
+      <arg line="-r ${apifilterzip} ${filter_store}" />
+    </exec>
 		
-		<!-- create HTML output directory --> 
-        <property name="analysis_html" value="${report}/analysis/html"/>
-        <property name="analysis_report" value="${report}/analysis/xml"/>
+		<!-- create HTML output directory -->
+    <property
+      name="analysis_html"
+      value="${report}/analysis/html" />
+    <property
+      name="analysis_report"
+      value="${report}/analysis/xml" />
         
 		<!-- run the analysis -->
-        <apitooling.analysis
-            baseline="${baseline}"
-            profile="${current_location}"
-            report="${analysis_report}"
-            filters="${filter_store}"
-            excludelist="${exclude_list_external_location}"
-            debug="true"/>
-        <apitooling.analysis_reportconversion
-            xmlfiles="${analysis_report}"
-        	htmlfiles="${analysis_html}"
-            debug="true"/>
-		
-        <property name="deprecation_report" value="${report}/deprecation/apideprecation.xml" />
-        <property name="deprecation_html" value="${report}/deprecation/apideprecation.html" />
+    <apitooling.analysis
+      baseline="${baseline}"
+      profile="${current_location}"
+      report="${analysis_report}"
+      filters="${filter_store}"
+      excludelist="${exclude_list_external_location}"
+      debug="true" />
+    <apitooling.analysis_reportconversion
+      xmlfiles="${analysis_report}"
+      htmlfiles="${analysis_html}"
+      debug="true" />
+
+    <property
+      name="deprecation_report"
+      value="${report}/deprecation/apideprecation.xml" />
+    <property
+      name="deprecation_html"
+      value="${report}/deprecation/apideprecation.html" />
         
 		<!-- run the deprecation tasks -->
-		<apitooling.apideprecation
-            baseline="${baseline}"
-            profile="${current_location}"
-            report="${deprecation_report}"
-            debug="true"/>
-        <apitooling.apideprecation_reportconversion
-            xmlfile="${deprecation_report}"
-            debug="true"
-            htmlfile="${deprecation_html}"/>
-    </target>
-    
-    <target name="init"
-         unless="apitoolinginitialized">
+    <apitooling.apideprecation
+      baseline="${baseline}"
+      profile="${current_location}"
+      report="${deprecation_report}"
+      debug="true" />
+    <apitooling.apideprecation_reportconversion
+      xmlfile="${deprecation_report}"
+      debug="true"
+      htmlfile="${deprecation_html}" />
+  </target>
+
+  <target
+    name="init"
+    unless="apitoolinginitialized"
+    depends="getfreezereference">
         
         <!-- The name for the build - i.e. I20130603-2000 -->
-        <fail unless="buildLabel" message="buildLabel must be provided."/>
-        <fail unless="buildWorkingArea" message="buildWorkingArea must be provided" />
-        <fail unless="previousBaselineFilename" message="previousBaselineFilename must be provided"/>
+    <fail
+      unless="buildLabel"
+      message="buildLabel must be provided." />
+    <fail
+      unless="buildWorkingArea"
+      message="buildWorkingArea must be provided" />
+    <fail
+      unless="previousBaselineFilename"
+      message="previousBaselineFilename must be provided" />
         
         <!-- 
           The ?on-disk? location of the previous Eclipse build - for example Eclipse 4.2.2 
           If not defined, assume same as file name ... otherwise, assume can be used for "human readable name"?
         -->
-        <property name="previousBaselineName" value="${previousBaselineFilename}"/>
-        
-        <fail unless="previousBaseURL" message="full URL of previous build must be provided" /> 
-        
-        <!-- Default buildDirectory -->
-        <fail unless="buildDirectory" message="buildDirectory much be provided"/>
-        
-        <!-- a dir to extract previous baselines in ... remember not to copy to downloads -->
-        <property name="reference" value="${buildDirectory}/${buildLabel}/apitoolingreference" />
-        <mkdir dir="${reference}"/>
-        
-        <get dest="${reference}" src="${previousBaseURL}"/>
-        <untar src="${reference}/${previousBaselineFilename}" dest="${reference}" compression="gzip" />
-        
-        <property name="apitoolinginitialized" value="true"/>
+    <property
+      name="previousBaselineName"
+      value="${previousBaselineFilename}" />
 
-    </target>
+    <fail
+      unless="previousBaseURL"
+      message="full URL of previous build must be provided" /> 
+        
+    <!-- Default buildDirectory -->
+    <fail
+      unless="buildDirectory"
+      message="buildDirectory much be provided" />
+        
+    <!-- a dir to extract previous baselines in ... remember not to copy apitoolingreference to downloads -->
+    <property
+      name="reference"
+      value="${buildDirectory}/${buildLabel}/apitoolingreference/${previousBaselineName}" />
+    <mkdir dir="${reference}" />
+
+    <get
+      dest="${reference}"
+      src="${previousBaseURL}" />
+    <unzip
+      src="${reference}/${previousBaselineFilename}"
+      dest="${reference}" />
+
+    <property
+      name="apitoolinginitialized"
+      value="true" />
+
+  </target>
+    
+    <!-- there will not always be a freeze report, only after M6 -->
+  <target
+    name="getfreezereference"
+    if="freezeFilename">
+    <fail
+      unless="freezeBaseURL"
+      message="full URL of freeze build must be provided, if freezeFilename is." />
+
+        <!-- if not provided, assume freezeName is same as freezeFilename -->
+    <property
+      name="freezeName"
+      value="freezeFilename" />
+
+    <property
+      name="freezereference"
+      value="${buildDirectory}/${buildLabel}/apitoolingreference/${freezeName}" />
+    <mkdir dir="${freezereference}" />
+
+    <get
+      dest="${freezereference}"
+      src="${freezeBaseURL}" />
+    <unzip
+      src="${freezeBaseURL}/${freezeFilename}"
+      dest="${freezereference}" />
+
+  </target>
+    
+    <!-- there will not always be a freeze report, only after M6 -->
+  <target
+    name="dofreezeReport"
+    if="freezereference">
+      <!-- run the freeze task -->
+    <apitooling.apifreeze
+      baseline="${freezereference}"
+      profile="${current_location}"
+      report="${freeze_report}"
+      excludelist="${exclude_list_location}"
+      debug="true" />
+    <apitooling.apifreeze_reportconversion
+      xmlfile="${freeze_report}"
+      htmlfile="${freeze_html}"
+      debug="true" />
+  </target>
 </project>
