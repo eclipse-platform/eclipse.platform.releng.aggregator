@@ -44,7 +44,7 @@ touch ${DL_DROP_ID}/buildHidden
 
 printf "\n\t%s\n" "rsync to downloads."
 # Here we can rsync with committer id. For Equinox, we have to create a promotion file.
-rsync --times --omit-dir-times --recursive --exclude="*apitooolingreference*" --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" --exclude="*repository*" --exclude="*workspace-*" ${DL_DROP_ID} /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/
+rsync --recursive --exclude="*apitooolingreference*" --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" --exclude="*repository*" --exclude="*workspace-*" ${DL_DROP_ID} /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/
 rccode=$?
 if [ $rccode -eq 0 ]
 then
