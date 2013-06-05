@@ -33,7 +33,7 @@
         <property name="current_location"  value="${buildDirectory}/${buildLabel}/eclipse-SDK-${buildLabel}-win32.zip" />
 
 		<!-- we would have to fetch the baseline we wanted, or perhaps just link to its location -->
-        <property name="baseline" value="${reference}/${previousBaselineName}" />
+        <property name="baseline" value="${reference}/${previousBaselineFilename}" />
         
 		<!-- create properties for the filters -->
         <property name="exclude_list_location" value="${EBuilderDir}/eclipse/apiexclude/exclude_list.txt" />
@@ -111,8 +111,13 @@
         <!-- The name for the build - i.e. I20130603-2000 -->
         <fail unless="buildLabel" message="buildLabel must be provided."/>
         
-        <!-- The on-disk location of the previous Eclipse build - for example Eclipse 4.2.2 -->
-        <fail unless="previousBaselineName" message="previousBaselineName must be provided"/>
+        <fail unless="previousBaselineFilename" message="previousBaselineFilename must be provided"/>
+        
+        <!-- 
+          The ?on-disk? location of the previous Eclipse build - for example Eclipse 4.2.2 
+          If not defined, assume same as file name ... otherwise, assume can be used for "human readable name"?
+        -->
+        <property name="previousBaselineName" value="${previousBaselineFilename}"/>
         
         <fail unless="previousBaseURL" message="full URL of previous build must be provided" /> 
         
@@ -124,7 +129,7 @@
         <mkdir dir="${reference}"/>
         
         <get dest="${reference}" src="${previousBaseURL}"/>
-        <untar src="${reference}/${previousBaselineName}" dest="${reference}" compression="gzip" />
+        <untar src="${reference}/${previousBaselineFilename}" dest="${reference}" compression="gzip" />
         
         <property name="apitoolinginitialized" value="true"/>
 
