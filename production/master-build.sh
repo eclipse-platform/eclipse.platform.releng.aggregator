@@ -32,7 +32,7 @@ buildrc=0
 
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
-buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
+export buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 if [[ -z "${buildDirectory}" ]]
 then
     echo "PROGRAM ERROR: buildDirectory returned from fn-build-dir was empty"
