@@ -48,7 +48,7 @@ fn-summarize-comparator-logs "$BUILD_ID" \
     "$EBuilderDir"/eclipse/buildScripts/eclipse_compare.xml \
     "$buildDirectory" "$launcherJar"    
 
-fn-summarize-apitooling $BUILD_ID" \
+fn-summarize-apitooling "$BUILD_ID" \
     "$EBuilderDir"/eclipse/buildScripts/api-tools-builder.xml \
     "$buildDirectory" "$launcherJar" 
 
