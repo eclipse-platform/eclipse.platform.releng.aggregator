@@ -48,8 +48,8 @@ else
     MIRRORURL_ARG=""
 fi
 
-ART_REPO_NAME="Eclipse Project Artifacts Repository for Kepler"
-CON_REPO_NAME="Eclipse Project Metadata Repository for Kepler"
+ART_REPO_NAME="Eclipse Project Repository for Kepler"
+CON_REPO_NAME="Eclipse Project Repository for Kepler"
 
 MIRRORS_URL_ARG="-Dp2MirrorsURL=${MIRRORURL_ARG}"
 ART_REPO_ARG="-DartifactRepoDirectory=${REPO}"
