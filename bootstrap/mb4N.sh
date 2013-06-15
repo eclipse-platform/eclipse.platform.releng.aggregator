@@ -71,7 +71,7 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export BRANCH=master
 export BUILD_TYPE=N
-export STREAM=4.3.0
+export STREAM=4.4.0
 
 eclipseStreamMajor=${STREAM:0:1}
 

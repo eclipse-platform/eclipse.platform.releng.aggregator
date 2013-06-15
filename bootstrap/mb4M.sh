@@ -69,9 +69,9 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=R4_2_maintenance
+export BRANCH=R4_3_maintenance
 export BUILD_TYPE=M
-export STREAM=4.2.2
+export STREAM=4.3.1
 
 eclipseStreamMajor=${STREAM:0:1}
 
