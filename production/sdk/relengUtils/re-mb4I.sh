@@ -89,7 +89,7 @@ export TRACE_OUTPUT=${PWD}/trace_output.txt
 
 export BRANCH=master
 export BUILD_TYPE=I
-export STREAM=4.3.0
+export STREAM=4.4.0
 
 eclipseStreamMajor=${STREAM:0:1}
 
