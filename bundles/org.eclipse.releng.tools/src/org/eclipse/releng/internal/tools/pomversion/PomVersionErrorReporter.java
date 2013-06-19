@@ -392,13 +392,13 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	 */
 	public void preferenceChange(PreferenceChangeEvent event) {
 		if(IPomVersionConstants.POM_VERSION_ERROR_LEVEL.equals(event.getKey())) {
-			final String severity = (String) event.getNewValue();
-			if(severity != null) {
-				if(IPomVersionConstants.VALUE_IGNORE.equals(severity)) {
+			final String newSeverity = (String) event.getNewValue();
+			final Object oldSeverity= event.getOldValue();
+			if(newSeverity != null) {
+				if(IPomVersionConstants.VALUE_IGNORE.equals(newSeverity)) {
 					//we turned it off
 					ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
-				}
-				else if(IPomVersionConstants.VALUE_IGNORE.equals(event.getOldValue())) {
+				} else if(oldSeverity == null || IPomVersionConstants.VALUE_IGNORE.equals(oldSeverity)) {
 					// we turned it on
 					ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_BUILD);
 				}
