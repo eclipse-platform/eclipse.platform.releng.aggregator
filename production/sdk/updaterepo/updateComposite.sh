@@ -7,7 +7,7 @@
 #JAVA_5_HOME=${JAVA_5_HOME:-/home/shared/orbit/apps/ibm-java2-i386-50/jre}
 JAVA_5_HOME=${JAVA_5_HOME:-/shared/common/jdk-1.5.0-22.x86_64/jre}
 JAVA_6_HOME=${JAVA_6_HOME:-/shared/common/sun-jdk1.6.0_21_x64}
-JAVA_7_HOME=${JAVA_7_HOME:-/shared/common/jdk1.7.0_11}
+JAVA_7_HOME=${JAVA_7_HOME:-/shared/common/jdk1.7.0_25}
 
 export JAVA_HOME=${JAVA_7_HOME}
 
