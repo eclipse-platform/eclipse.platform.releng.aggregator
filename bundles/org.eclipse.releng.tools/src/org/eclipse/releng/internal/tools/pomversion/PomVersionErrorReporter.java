@@ -73,10 +73,13 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 				IResource resource = delta.getResource();
 				switch(resource.getType()) {
 					case IResource.PROJECT: {
+						if(delta.getKind() == IResourceDelta.REMOVED) {
+							return false;
+						}
 						//Should we not care about non-plugin projects?
 						IProject project = (IProject) resource;
 						try {
-							if(project.getDescription().hasNature("org.eclipse.pde.PluginNature")) { //$NON-NLS-1$
+							if(project.isAccessible() && project.getDescription().hasNature("org.eclipse.pde.PluginNature")) { //$NON-NLS-1$
 								if((delta.getFlags() & IResourceDelta.OPEN) > 0) {
 									validate(project);
 									return false;
