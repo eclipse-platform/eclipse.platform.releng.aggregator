@@ -92,7 +92,9 @@ fi
 # We can either compute here, 
 # or just make sure it matches that is in parent pom for various streams (e.g. 4.3 vs 4.4)
 # and build types, (e.g. M vs. I). For N builds, we still use "I". 
-comparatorRepository=http://download.eclipse.org/eclipse/updates/4.3-I-builds
+# 5/31013. We no longer do the post build comparator, but leaving it, just 
+# in case we want an occasionally double check ... but, should never be routine. 
+comparatorRepository=http://download.eclipse.org/eclipse/updates/4.4-I-builds
 
 GET_AGGREGATOR_BUILD_LOG="${logsDirectory}/mb010_get-aggregator_output.txt"
 TAG_BUILD_INPUT_LOG="${logsDirectory}/mb030_tag_build_input_output.txt"
