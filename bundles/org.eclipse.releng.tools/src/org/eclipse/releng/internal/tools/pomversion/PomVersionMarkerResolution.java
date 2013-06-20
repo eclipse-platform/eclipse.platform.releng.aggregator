@@ -10,36 +10,24 @@
  *******************************************************************************/
 package org.eclipse.releng.internal.tools.pomversion;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.xml.sax.SAXException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.RelEngPlugin;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IMarkerResolution;
 
@@ -51,7 +39,6 @@ import org.eclipse.ui.IMarkerResolution;
  */
 public class PomVersionMarkerResolution implements IMarkerResolution {
 
-	private static final String ELEMENT_VERSION = "version"; //$NON-NLS-1$
 	private String correctedVersion;
 
 	/**
@@ -76,66 +63,44 @@ public class PomVersionMarkerResolution implements IMarkerResolution {
 		if (correctedVersion == null || correctedVersion.trim().length() == 0) {
 			return;
 		}
+		int charstart = marker.getAttribute(IMarker.CHAR_START, -1);
+		int charend = marker.getAttribute(IMarker.CHAR_END, -1);
+		if(charstart < 0 || charend < 0) {
+			return;
+		}
 		IResource resource = marker.getResource();
 		if (resource.exists() && resource.getType() == IResource.FILE) {
 			IFile file = (IFile) resource;
 			if (!file.isReadOnly()) {
-				InputStream fileInput = null;
+				NullProgressMonitor monitor = new NullProgressMonitor();
+				ITextFileBufferManager fbm = FileBuffers.getTextFileBufferManager();
+				IPath location = file.getFullPath();
+				ITextFileBuffer buff = null;
 				try {
-
-					DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-					DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-					fileInput = file.getContents();
-					Document doc = docBuilder.parse(fileInput);
-
-					Node root = doc.getDocumentElement();
-					NodeList list = root.getChildNodes();
-
-					for (int i = 0; i < list.getLength(); i++) {
-						Node node = list.item(i);
-						if (ELEMENT_VERSION.equals(node.getNodeName())) {
-							// TODO Need to check this method is as robust as setTextContent in 1.5
-							node.getFirstChild().setNodeValue(correctedVersion);
-//							node.setTextContent(correctedVersion);
+					fbm.connect(location, LocationKind.IFILE, monitor);
+					buff = fbm.getTextFileBuffer(location, LocationKind.IFILE);
+					if(buff != null) {
+						IDocument doc = buff.getDocument();
+						try {
+							if(charstart > -1 && charend > -1) {
+								doc.replace(charstart, charend-charstart, correctedVersion);
+								buff.commit(monitor, true);
+							}
+						} catch(BadLocationException ble) {
+							RelEngPlugin.log(ble);
 						}
 					}
-
-					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-					TransformerFactory transformerFactory = TransformerFactory.newInstance();
-					Transformer transformer = transformerFactory.newTransformer();
-					DOMSource source = new DOMSource(doc);
-					StreamResult result = new StreamResult(outputStream);
-					transformer.transform(source, result);
-
-					IStatus status = ResourcesPlugin.getWorkspace().validateEdit(new IFile[] {file}, null);
-					if (!status.isOK()) {
-						throw new CoreException(status);
-					}
-
-					ByteArrayInputStream stream = new ByteArrayInputStream(outputStream.toByteArray());
-					file.setContents(stream, true, false, null);
-
-				} catch (ParserConfigurationException e) {
-					RelEngPlugin.log(e);
-				} catch (SAXException e) {
-					RelEngPlugin.log(e);
-				} catch (IOException e) {
-					RelEngPlugin.log(e);
-				} catch (TransformerException e) {
-					RelEngPlugin.log(e);
 				} catch (CoreException e) {
 					RelEngPlugin.log(e);
 				} finally {
-					if (fileInput != null) {
-						try {
-							fileInput.close();
-						} catch (IOException e) {
-						}
+					try {
+						if (buff != null)
+							fbm.disconnect(location, LocationKind.IFILE, monitor);
+					} catch (CoreException e) {
+						RelEngPlugin.log(e);
 					}
 				}
-
 			}
-
 		}
 	}
 }

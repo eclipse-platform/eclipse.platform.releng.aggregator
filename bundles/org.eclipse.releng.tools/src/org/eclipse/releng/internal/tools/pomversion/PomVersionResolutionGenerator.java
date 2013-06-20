@@ -11,7 +11,8 @@
 package org.eclipse.releng.internal.tools.pomversion;
 
 import org.eclipse.core.resources.IMarker;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.releng.tools.RelEngPlugin;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 
@@ -21,18 +22,18 @@ public class PomVersionResolutionGenerator implements IMarkerResolutionGenerator
 	private static IMarkerResolution[] NO_RESOLUTIONS = new IMarkerResolution[0];
 
 	public IMarkerResolution[] getResolutions(IMarker marker) {
-
-		// FIXME: Disabled because of bug 411100: POM version problem quick fix mangles the pom.xml file
-//		try {
-//			if (marker.getType().equals(IPomVersionConstants.PROBLEM_MARKER_TYPE)){
-//				String correctedVersion = (String) marker.getAttribute(IPomVersionConstants.POM_CORRECT_VERSION);
-//				return new IMarkerResolution[] {new PomVersionMarkerResolution(correctedVersion)};
-//			}
-//		} catch (CoreException e){
-//			RelEngPlugin.log(e);
-//		}
-
+		int charstart = marker.getAttribute(IMarker.CHAR_START, -1);
+		int charend = marker.getAttribute(IMarker.CHAR_END, -1);
+		if(charstart > -1 && charend > -1) {
+			try {
+				if (marker.getType().equals(IPomVersionConstants.PROBLEM_MARKER_TYPE)){
+					String correctedVersion = (String) marker.getAttribute(IPomVersionConstants.POM_CORRECT_VERSION);
+					return new IMarkerResolution[] {new PomVersionMarkerResolution(correctedVersion)};
+				}
+			} catch (CoreException e){
+				RelEngPlugin.log(e);
+			}
+		}
 		return NO_RESOLUTIONS;
 	}
-
 }
