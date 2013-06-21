@@ -169,15 +169,11 @@ else
 
     #if [[ $BUILD_ID =~ [IN] ]] 
     #then
-    # temp hack for bug 398141 and others
-    # apply the pre-created patch from tempPatches
-    #echo "INFO: apply temp patch"
-    #echo "DEBUG: aggDir: $aggDir"
-    #echo "DEBUG: pwd: $PWD"
-    #patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/tempPatches/sbep2.patch
-    #patch -p1  --backup -d $aggDir/eclipse.platform.ui/features  -i $aggDir/tempPatches/e4rcpsource.patch
-    #patch -p1  --backup -d $aggDir/rt.equinox.framework/bundles  -i $aggDir/tempPatches/ppc.patch
-    #checkForErrorExit $? "Error occurred applying patch"
+        # temp hack for bug 398141 and others
+        # apply the pre-created patch from tempPatches
+        #echo "INFO: apply temp patch, if any"
+        #patch -p1  --backup -d $aggDir/eclipse.platform.ui/bundles  -i $aggDir/production/tempPatches/jface.patch
+        #checkForErrorExit $? "Error occurred applying patch"
     #fi 
 
     # We always make tag commits, if build successful or not, but don't push
