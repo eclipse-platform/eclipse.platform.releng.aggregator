@@ -21,7 +21,7 @@ find /shared/eclipse/builds/4I/siteDir/updates/4.4-I-builds -maxdepth 1 -ctime +
 # don't really need these yet, until after Kepler 
 find /shared/eclipse/builds/4M/siteDir/eclipse/downloads/drops4 -maxdepth 1 -ctime +2 -name "M*" -ls -exec rm -fr '{}' \;
 find /shared/eclipse/builds/4M/siteDir/equinox/drops -maxdepth 1 -ctime +2 -name "M*" -ls -exec rm -fr '{}' \;
-find /shared/eclipse/builds/4M/siteDir/updates/4.4-M-builds -maxdepth 1 -ctime +2 -name "M*" -ls -exec rm -fr '{}' \;
+find /shared/eclipse/builds/4M/siteDir/updates/4.3-M-builds -maxdepth 1 -ctime +2 -name "M*" -ls -exec rm -fr '{}' \;
 
 
 
