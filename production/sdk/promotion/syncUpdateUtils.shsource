@@ -84,6 +84,27 @@ function updateSiteOnDL()
     fi
 
     toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
+    # We'll check for existence, and create if doesn't exist ... as long as it is "under" our 
+    # toSiteDir, it is likely an intentional new one, rather than an error. 
+    if [[ ! -d "${toMainUpdateDir}" ]]
+    then
+        if [[ -d "${toSiteDir}" ]]
+        then
+            # create
+            mkdir -p "${toMainUpdateDir}"
+            RC=$?
+            if [[ $RC != 0 ]]
+            then
+                echo "ERROR: could not create main update site: ${toMainUpdateDir}" >&2
+                # "return" empty string, as indication of error"
+                toMainUpdateDir=""
+            fi
+        else
+            echo "PROGRAM ERROR: main update site root did not exist: ${toSiteDir}" >&2
+            # "return" empty string, as indication of error"
+            toMainUpdateDir=""
+        fi
+    fi
     echo $toMainUpdateDir
 }
 # compute update site on build server
@@ -345,7 +366,7 @@ function syncDropLocation ()
     # sub-sirectory) (But, we do for now, for easier testing) 
     if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
     then
-        rsync --recursive --exclude="*apitooolingreference*" --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" --exclude="*repository*" --exclude="*workspace-*" "${fromDir}" "${toDir}"
+        rsync --recursive --exclude="*apitoolingreference*" --exclude="*org.eclipse.releng.basebuilder*" --exclude="*eclipse.platform.releng.aggregator*" --exclude="*repository*" --exclude="*workspace-*" "${fromDir}" "${toDir}"
         rccode=$?
     else
         rccode=9

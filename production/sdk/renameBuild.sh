@@ -58,6 +58,9 @@ perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 # Integration --> Release Candidate
 # Integration --> Release
 # These are for cases where used in headers, titles, etc.
+# TODO: final "fall through" case should be based on matching
+# new label with digits only, such as "4.3" ... not sure 
+# if this would work for Equinox "Kepler" or "Kepler Released Build"? 
 oldString="Integration Build"
 
 if [[ "${newlabel}" =~ .*RC.* ]]
@@ -65,12 +68,12 @@ then
     newString="Release Candidate Build"
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
-    newString="Released Build"
+    newString="Release Build"
 elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="Stable Build"
 else 
-    newString="Unknown Build Type"
+    newString="Release Build"
 fi
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
@@ -82,6 +85,10 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
 # to rebuild, say using buildproperties.shsource, would be best to work 
 # from original values. Less sure what to do with Ant properties, 
 # buildproperties.properties ... but, we'll decide when needed.
+# TODO: New label doesn't have "R" in it ... just, for example, "4.3". 
+# for now, we'll "fall through" to "R",  if doesn't match anything else, 
+# but this won't work well if/when we add others, such as X or T for test 
+# builds. 
 oldString="BUILD_TYPE = \"I\""
 if [[ "${newlabel}" =~ .*RC.* ]]
 then 
@@ -93,7 +100,7 @@ elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="BUILD_TYPE = \"S\""
 else 
-    newString="BUILD_TYPE = \"T\""
+    newString="BUILD_TYPE = \"R\""
 fi
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
@@ -106,12 +113,12 @@ then
     newString="BUILD_TYPE_NAME = \"Release Candidate\""
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
-    newString="BUILD_TYPE_NAME = \"Released\""
+    newString="BUILD_TYPE_NAME = \"Release\""
 elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Stable\""
 else 
-    newString="BUILD_TYPE_NAME = \"Unknown Type\""
+    newString="BUILD_TYPE_NAME = \"Release\""
 fi
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!

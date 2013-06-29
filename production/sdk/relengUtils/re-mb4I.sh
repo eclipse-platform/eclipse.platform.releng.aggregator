@@ -77,7 +77,7 @@ source buildeclipse.shsource 2>/dev/null
 
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # we should not need the following here in boot strap, for now, but might in future
-#export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0_11}
+#export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 #export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.8.4}
 #export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
 #export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.0.4/bin}
@@ -89,7 +89,7 @@ export TRACE_OUTPUT=${PWD}/trace_output.txt
 
 export BRANCH=master
 export BUILD_TYPE=I
-export STREAM=4.3.0
+export STREAM=4.4.0
 
 eclipseStreamMajor=${STREAM:0:1}
 

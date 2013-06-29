@@ -30,10 +30,14 @@
 
  It creates a non-framed report that can be useful to send via
  e-mail or such.
- 
- NOTE: This file was copied from ant-junit.jar 1.8.4 (plus fixes from https://issues.apache.org/bugzilla/show_bug.cgi?id=54641 and https://issues.apache.org/bugzilla/show_bug.cgi?id=54180 )
+
+ NOTE: This file was copied from ant-junit.jar 1.8.4
  /org/apache/tools/ant/taskdefs/optional/junit/xsl/junit-noframes.xsl
- and should be compared to similar files when ant version changes. 
+ and should be compared to similar files when the Ant version changes.
+ Additional fixes:
+ https://issues.apache.org/bugzilla/show_bug.cgi?id=54641
+ https://issues.apache.org/bugzilla/show_bug.cgi?id=54180
+ https://bugs.eclipse.org/bugs/show_bug.cgi?id=410484
 
 -->
 <xsl:template match="testsuites">
@@ -141,46 +145,67 @@
           if (typeof(e) == "undefined") {
             e = event;
           }
-          if (e && e.ctrlKey && e.keyCode == 190 /*Ctrl+.*/) {
-            if (typeof(document.getElementsByClassName) == "undefined") {
-              document.getElementsByClassName = function (className) {
-                var trs = document.getElementsByTagName("tr");
-                var res = new Array();
-                for (i = 0; i < trs.length; i++) {
-                  var tr = trs[i];
-                  var cls = tr.className;
-                  if (cls == className) {
-                    res.push(tr);
-                  }
-                }
-                return res;
-              }
+          if (e && e.ctrlKey) {
+            if (e.keyCode == 188 /*Ctrl+,*/) {
+              jumpToNextError(false);
+            } else if (e.keyCode == 190 /*Ctrl+.*/) {
+              jumpToNextError(true);
             }
-            var windowY = typeof(window.scrollY) != "undefined" ? window.scrollY : document.body.scrollTop;
-            windowY++; // want to jump to the next
-            var targetY = Number.MAX_VALUE;
-            var target;
-            var errs = document.getElementsByClassName("Error");
-            for (var i = 0; i < errs.length; i++) {
-              var elt = errs[i];
-              if (elt.childNodes.length > 2) {
-                  var status = elt.childNodes[2].firstChild.nodeValue;
-                  if (status != "Error" && status != "Failure")
-                      continue; // only stop in test results, not in summary header
-              }
-              var y = findTop(elt);
-              if (y > windowY && y < targetY) {
-                target = elt;
-                targetY = y;
-              }
-            }
-            if (target) {
-              target.scrollIntoView();
-            }
-            
-            return false;
           }
         }
+        
+        function jumpToNextError(forward) {
+          if (typeof(document.getElementsByClassName) == "undefined") {
+            document.getElementsByClassName = function (className) {
+              var trs = document.getElementsByTagName("tr");
+              var res = new Array();
+              for (i = 0; i < trs.length; i++) {
+                var tr = trs[i];
+                var cls = tr.className;
+                if (cls == className) {
+                  res.push(tr);
+                }
+              }
+              return res;
+            }
+          }
+          var windowY = typeof(window.scrollY) != "undefined" ? window.scrollY : document.body.scrollTop;
+          if (forward) {  // want to jump to the next/prev
+              windowY++;
+          } else {
+              windowY--;
+          }
+          var targetY = forward ? Number.MAX_VALUE : Number.MIN_VALUE;
+          var target;
+          var errs = document.getElementsByClassName("Error");
+          for (var i = 0; i < errs.length; i++) {
+            var elt = errs[i];
+            var tds = elt.getElementsByTagName("td");
+            if (tds.length >= 2) {
+                var status = tds[1].firstChild.nodeValue;
+                if (status != "Error" && status != "Failure")
+                    continue; // only stop in test results, not in summary header
+            }
+            var y = findTop(elt);
+            if (forward) {
+                if (y > windowY && y < targetY) {
+                    target = elt;
+                    targetY = y;
+                }
+            } else {
+                if (y < windowY && y > targetY) {
+                    target = elt;
+                    targetY = y;
+                }
+            }
+          }
+          if (target) {
+            target.scrollIntoView();
+          }
+          
+          return false;
+        }
+        
         document.onkeydown = keyHandler;
       ]]>
       </script>
@@ -372,9 +397,13 @@
 <!-- Page HEADER -->
 <xsl:template name="pageHeader">
     <h1><xsl:value-of select="$TITLE"/></h1>
+    <div style="position:fixed; top:8px; right:8px; _position:absolute; _top:expression(eval(document.body.scrollTop + 8));">
+        <button title="Scroll to previous failure/error (Ctrl+,)" onclick="javascript:jumpToNextError(false);">&#x25B2;</button>
+        <button title="Scroll to next failure/error (Ctrl+.)"     onclick="javascript:jumpToNextError(true );">&#x25BC;</button>
+    </div>
     <table width="100%">
     <tr>
-        <td align="left">(Press Ctrl+. to scroll to the next problem.)</td>
+        <td align="left"></td>
         <td align="right">Designed for use with <a href='http://www.junit.org'>JUnit</a> and <a href='http://ant.apache.org/ant'>Ant</a>.</td>
     </tr>
     </table>
@@ -448,7 +477,10 @@
                 <xsl:when test="failure | error">Error</xsl:when>
             </xsl:choose>
         </xsl:attribute>
-        <td><xsl:value-of select="@name"/></td>
+        <td>
+            <xsl:attribute name="title"><xsl:value-of select="@classname"/></xsl:attribute>
+            <xsl:value-of select="@name"/>
+        </td>
         <xsl:choose>
             <xsl:when test="failure">
                 <td>Failure</td>

@@ -36,7 +36,7 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 source buildeclipse.shsource 2>/dev/null
 
 
-export JAVA_HOME=/shared/common/jdk1.7.0_11
+export JAVA_HOME=/shared/common/jdk1.7.0-latest
 export ANT_HOME=/shared/common/apache-ant-1.8.4
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH

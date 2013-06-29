@@ -24,23 +24,6 @@ BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 reponame=eclipse.platform.releng.aggregator
 
-#BRANCH=master
-#BUILD_TYPE=N
-#STREAM=4.3.0
-
-#BRANCH=master
-#BUILD_TYPE=I
-#STREAM=4.3.0
-
-#BRANCH=R3_8_maintenance
-#BUILD_TYPE=M
-#STREAM=3.8.2
-
-#BRANCH=R4_2_maintenance
-#BUILD_TYPE=M
-#STREAM=4.2.2
-
-
 # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
 if [[ "${STREAM}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
 then

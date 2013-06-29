@@ -7,7 +7,7 @@
 // a recent copy. This was copied circa March 14, 2013.
 
 // properties written for I20130314-1330 
-$PATH = "/shared/common/jdk1.7.0_11/bin:/shared/common/apache-maven-3.0.4/bin:/shared/common/apache-ant-1.8.4/bin:/usr/local/bin:/usr/bin:/bin:/opt/buildhomes/e4Build/bin";
+$PATH = "/shared/common/jdk1.7.0-latest/bin:/shared/common/apache-maven-3.0.4/bin:/shared/common/apache-ant-1.8.4/bin:/usr/local/bin:/usr/bin:/bin:/opt/buildhomes/e4Build/bin";
 $INITIAL_ENV_FILE = "/shared/eclipse/builds/4I/production/build_eclipse_org.shsource";
 $BUILD_ROOT = "/shared/eclipse/builds/4I";
 $BRANCH = "master";
@@ -15,7 +15,7 @@ $STREAM = "4.3.0";
 $BUILD_TYPE = "I";
 $TIMESTAMP = "20130314-1330";
 $TMP_DIR = "/shared/eclipse/builds/4I/tmp";
-$JAVA_HOME = "/shared/common/jdk1.7.0_11";
+$JAVA_HOME = "/shared/common/jdk1.7.0-latest";
 $MAVEN_OPTS = "-Xmx2048m -XX:MaxPermSize=256M -Djava.io.tmpdir=/shared/eclipse/builds/4I/tmp -Dtycho.localArtifacts=ignore";
 $MAVEN_PATH = "/shared/common/apache-maven-3.0.4/bin";
 $AGGREGATOR_REPO = "git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git";

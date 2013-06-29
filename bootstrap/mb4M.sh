@@ -61,7 +61,7 @@ source buildeclipse.shsource 2>/dev/null
 
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # we should not need the following here in boot strap, for now, but might in future
-#export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0_11}
+#export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 #export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.8.4}
 #export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
 #export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.0.4/bin}
@@ -69,9 +69,9 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=R4_2_maintenance
+export BRANCH=R4_3_maintenance
 export BUILD_TYPE=M
-export STREAM=4.2.2
+export STREAM=4.3.1
 
 eclipseStreamMajor=${STREAM:0:1}
 

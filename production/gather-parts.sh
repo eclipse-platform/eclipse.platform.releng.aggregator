@@ -31,6 +31,11 @@ fi
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM")
 basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 
+# copy "mvn.properties" created/saved by parent pom to buildDirectory, 
+# so can more easily be used by other scripts, reports, php page?
+# Note: likely need to "fixup" some variables to be usable by PHP. 
+cp "${aggDir}/eclipse-platform-parent/target/resources/mavenproperties.properties" "${buildDirectory}/mavenproperties.properties"
+
 $SCRIPT_PATH/getEBuilderForDropDir.sh $buildDirectory $EBUILDER_HASH
 
 fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"

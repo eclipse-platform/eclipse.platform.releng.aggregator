@@ -72,7 +72,7 @@ fi
 
 if [[ -z "${JAVA_HOME}" ]]
 then
-  export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0_11}
+  export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 fi
 if [[ ! -d "${JAVA_HOME}" ]]
 then

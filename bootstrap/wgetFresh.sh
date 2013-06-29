@@ -12,7 +12,6 @@ initScriptTag=master
 # to build, all that's needed is the appropriate mbXZ.sh scripts. along with "bootstrap.sh". 
 # It gets what ever else it needs.
 
-wget --no-verbose --no-cache -O mb3M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb3M.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4I.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4N.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4N.sh?h=$initScriptTag 2>&1;
