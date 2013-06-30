@@ -22,7 +22,10 @@ source "${SCRIPT_PATH}/build-functions.shsource"
 
 source "${INITIAL_ENV_FILE}"
 
-
+# BUILD_KIND allows fine tuning of how promoted, tested, download site name, etc. 
+# CBI is only primary production build value. In future may use special values for 
+# special cases, such as TEST, JAVA8, etc.
+export BUILD_KIND=${BUILD_KIND:-CBI}
 
 cd $BUILD_ROOT
 
@@ -136,6 +139,7 @@ fn-write-property GIT_PUSH
 fn-write-property LOCAL_REPO
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
+fn-write-property BUILD_KIND
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
@@ -290,7 +294,7 @@ then
 fi 
 
 # if all ended well, put "promotion scripts" in known locations
-$SCRIPT_PATH/promote-build.sh CBI $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
+$SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
 
 fn-write-property-close
