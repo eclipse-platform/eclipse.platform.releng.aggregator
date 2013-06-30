@@ -89,14 +89,14 @@ function sendPromoteMail ()
         SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
     else
         # 4.3.0 Build: I20120411-2034
-        SUBJECT="PDE based ${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
+        SUBJECT="${BUILD_KIND} based ${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
     fi
 
     # override in buildeclipse.shsource if doing local tests
     TO=${TO:-"platform-releng-dev@eclipse.org"}
 
-    # for initial testing, only to me -- change to PDE, after switch over
-    if [[ "${BUILD_KIND}" == "PDE" ]]
+    # for initial testing, only to me -- change as desired after initial testing. 
+    if [[ "${BUILD_KIND}" != "CBI" ]]
     then 
         TO="david_williams@us.ibm.com"
     fi
@@ -199,7 +199,7 @@ function startTests()
         echo "DEBGUG CBI buildDropDir: $buildDropDir"
         builderDropDir=${buildDropDir}/${eclipsebuilder}
         echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
-    else
+    elif [[ "${BUILD_KIND}" == 'PDE' ]]
         buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
         buildDir=${buildRoot}/build
         supportDir=${buildDir}/supportDir
@@ -212,6 +212,8 @@ function startTests()
         echo "DEBUG: PDE dlFromPath: $dlFromPath"
         buildDropDir=${buildRoot}/siteDir/$dlFromPath/${buildId}
         echo "DEBUG: PDE builderDropDir: ${builderDropDir}"
+    else
+        echo "ERROR. Unrecognized value of BUILD_KIND: $BUILD_KIND"
     fi  
 
     # finally, execute 
@@ -299,7 +301,7 @@ function syncRepoSite ()
 # it requires four arguments
 #    eclipseStream (e.g. 4.2 or 3.8)
 #    buildId       (e.g. N20120415-2015)
-#    BUILD_KIND    (CBI or PDE)
+#    BUILD_KIND    (CBI or special value)
 #    EBUILDER_HASH (SHA1 HASH or branch of eclipse builder to used
 
 if [[ $# < 4 ]]
@@ -309,7 +311,7 @@ then
     printf "\n\t%s\n" "This script, $scriptname requires four arguments, in order: "
     printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.2 or 3.8.2) "
     printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. PDE or CBI) "
+    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. PDE or special cased value) "
     printf "\t\t%s\t%s\n" "EBUILDER_HASH" "(SHA1 HASH for eclipe builder used) "
     printf "\t%s\n" "for example,"
     printf "\t%s\n\n" "./$scriptname 4.2 N N20120415-2015 CBI master"

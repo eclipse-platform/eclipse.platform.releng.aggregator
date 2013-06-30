@@ -47,7 +47,7 @@ function dlpath()
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
 
-    #TODO: eventual switch so CBI is "normal" one and PDE is marked one
+    #CBI is "normal" one and can add clauses in future for special cases
     if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         dropsuffix=""
@@ -91,7 +91,7 @@ fi
 
 if [[ -z "${BUILD_KIND}" ]]
 then
-    BUILD_KIND=PDE
+    BUILD_KIND=CBI
 fi
 
 if [[ -z "${EBUILDER_HASH}" ]]
