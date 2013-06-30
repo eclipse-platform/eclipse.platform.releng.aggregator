@@ -27,8 +27,8 @@ fi
 
 if [[ -z "${BUILD_KIND}" ]]
 then
-    echo "BUILD_KIND not supplied, assuming PDE"
-    BUILD_KIND=PDE
+    echo "BUILD_KIND not supplied, assuming CBI"
+    BUILD_KIND=CBI
 fi
 
 # remove just in case left from previous failed run

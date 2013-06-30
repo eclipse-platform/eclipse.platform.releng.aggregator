@@ -41,7 +41,7 @@ fi
 
 if [[ -z "${BUILD_KIND}" ]]
 then
-    BUILD_KIND=PDE
+    BUILD_KIND=CBI
 fi
 
 if [[ -z "${EBUILDER_HASH}" ]]
