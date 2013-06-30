@@ -16,18 +16,12 @@ updateIndex 8
 echo "returned: $?"
 updateIndex xyx 8
 echo "returned: $?"
-updateIndex 8 PDE
-echo "returned: $?"
 updateIndex 3 CBIxx
 echo "returned: $?"
 echo "= = = = dual args, MAJOR first" 
 updateIndex 3 MAIN
 echo "returned: $?"
 updateIndex 4 MAIN
-echo "returned: $?"
-updateIndex 3 PDE
-echo "returned: $?"
-updateIndex 4 PDE
 echo "returned: $?"
 updateIndex 3 CBI
 echo "returned: $?"
@@ -37,10 +31,6 @@ echo "= = = = dual args, BUILD_KIND first"
 updateIndex MAIN 3
 echo "returned: $?"
 updateIndex MAIN 4
-echo "returned: $?"
-updateIndex PDE 3
-echo "returned: $?"
-updateIndex PDE 4
 echo "returned: $?"
 updateIndex CBI 3
 echo "returned: $?"
@@ -52,8 +42,6 @@ echo "returned: $?"
 updateIndex 4
 echo "returned: $?"
 echo "= = = = single arg, BUILD_KIND"
-updateIndex PDE
-echo "returned: $?"
 updateIndex CBI
 echo "returned: $?"
 updateIndex MAIN

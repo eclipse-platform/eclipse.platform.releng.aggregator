@@ -53,61 +53,29 @@ function internalUpdateIndex ()
     rm  ${TEMP_INDEX_TXT}
     return 0
 }
-function updateIndex3 ()
-{
-    internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
-    internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
-    internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
-}
 
 function updateIndex4 ()
 {
     internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
-    internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
-    internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
 }
 
 function updateIndexMAIN ()
 {
     internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
-    internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
 }
 
-function updateIndexPDE ()
-{
-    internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
-    internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
-}
-
-function updateIndexCBI ()
-{
-    internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
-    internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
-}
 
 function updateIndex ()
 {
 
-    x4X_PHP_PAGE_PDE="pdebasedcreateIndex4x.php"
-    x4X_HTML_PAGE_PDE="pdebasedindex.html"
-    x3X_PHP_PAGE_PDE="pdebasedeclipse3x.php"
-    x3X_HTML_PAGE_PDE="pdebasedeclipse3x.html"
-    x4X_PHP_PAGE_CBI="cbibasedcreateIndex4x.php"
-    x4X_HTML_PAGE_CBI="cbibasedindex.html"
-    x3X_PHP_PAGE_CBI="cbibasedeclipse3x.php"
-    x3X_HTML_PAGE_CBI="cbibasedeclipse3x.html"
     x4X_PHP_PAGE_MAIN="createIndex4x.php"
     x4X_HTML_PAGE_MAIN="index.html"
-    x3X_PHP_PAGE_MAIN="eclipse3x.php"
-    x3X_HTML_PAGE_MAIN="eclipse3x.html"
 
     # if no arguments, do all
     if [[ $# == 0 ]]
     then
         # if 0 args, assume to do all
         updateIndexMAIN
-        updateIndexPDE
-        updateIndexCBI
     elif [[ $# == 1 ]] 
     then
         # if only one argument, check for each specific type and do that group
@@ -117,11 +85,11 @@ function updateIndex ()
         if [[ $ARG =~ [[:digit:]] ]]
         then
             MAJOR=$ARG
-        elif [[ $ARG =~ PDE|CBI|MAIN ]]
+        elif [[ $ARG =~ CBI|MAIN ]]
         then
             BUILD_KIND=$ARG
         else
-            echo "ERROR: single argument not recognized as 'CBI' or 'PDE' or 'MAIN' or digit. Found ${ARG}."
+            echo "ERROR: single argument not recognized as 'CBI' or 'MAIN' or digit. Found ${ARG}."
             echo "       Returning 1"
             return 1
         fi
@@ -129,26 +97,20 @@ function updateIndex ()
         # if no 'MAJOR', then assume we found BUILD_KIND
         if [[ -z "${MAJOR}" ]]
         then
-            if [[ "$BUILD_KIND" == "PDE" ]]
+            if [[ "$BUILD_KIND" == "CBI" ]]
             then
-                updateIndexPDE
-            elif [[ "$BUILD_KIND" == "CBI" ]]
-            then
-                updateIndexCBI
+                updateIndexMAIN
             elif [[ "$BUILD_KIND" == "MAIN" ]]
             then
                 updateIndexMAIN
             else
-                echo "PROGRAM ERROR: BUILD_KIND not recognized as 'CBI' or 'PDE' or 'MAIN'. Found ${BUILD_KIND}."
+                echo "PROGRAM ERROR: BUILD_KIND not recognized. Found ${BUILD_KIND}."
                 echo "       Returning 1"
                 return 1
             fi
         elif [[ -z "${BUILD_KIND}" ]]
         then
-            if [[ "$MAJOR" == 3 ]]
-            then
-                updateIndex3
-            elif [[ "$MAJOR" == 4 ]]
+            if [[ "$MAJOR" == 4 ]]
             then
                 updateIndex4
             else 
@@ -168,16 +130,16 @@ function updateIndex ()
         # accept either order
         ARG1=$1
         ARG2=$2
-        if [[ $ARG1 =~ [[:digit:]] && $ARG2 =~ PDE|CBI|MAIN  ]]
+        if [[ $ARG1 =~ [[:digit:]] && $ARG2 =~ CBI|MAIN  ]]
         then
             MAJOR=$ARG1
             BUILD_KIND=$ARG2
-        elif [[ $ARG1 =~ PDE|CBI|MAIN && $ARG2 =~ [[:digit:]] ]]
+        elif [[ $ARG1 =~ CBI|MAIN && $ARG2 =~ [[:digit:]] ]]
         then
             BUILD_KIND=$ARG1
             MAJOR=$ARG2
         else
-            echo "ERROR: two argument case did not recognized either as 'CBI' or 'PDE' or 'MAIN' or digit."
+            echo "ERROR: two argument case did not recognized either as 'CBI' or 'MAIN' or digit."
             echo "       Found ARG1: ${ARG1}, ARG2: ${ARG2}."
             echo "       Returning 1"
             return 1
@@ -185,25 +147,8 @@ function updateIndex ()
 
         # note special case, as of now, if two arguments given, "CBI" in 
         # interpreted to mean "MAIN". 
-        if [[ "$BUILD_KIND" == "MAIN" && "$MAJOR" == "3" ]]
+        if [[ "$BUILD_KIND" == "MAIN" && "$MAJOR" == "4" ]]
         then
-            internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
-        elif [[ "$BUILD_KIND" == "MAIN" && "$MAJOR" == "4" ]]
-        then
-            internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
-        elif [[ "$BUILD_KIND" == "PDE" && "$MAJOR" == "3" ]]
-        then
-            internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
-        elif [[ "$BUILD_KIND" == "PDE" && "$MAJOR" == "4" ]]
-        then
-            internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
-        elif [[ "$BUILD_KIND" == "CBI" && "$MAJOR" == "3" ]]
-        then
-            #internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
-            internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
-        elif [[ "$BUILD_KIND" == "CBI" && "$MAJOR" == "4" ]]
-        then
-            #internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
             internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
         else
             echo "ERROR. Combination of parameters did not patch any conditions."
