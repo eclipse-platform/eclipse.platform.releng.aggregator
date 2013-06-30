@@ -18,14 +18,14 @@ function dropOnDLServer()
         return 1;
     fi
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
-    pathToDL=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_TECH" )
+    pathToDL=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
 
     if [[ "$pathToDL" == 1 ]]
     then
@@ -52,10 +52,10 @@ function updateSiteOnDL()
         return 1;
     fi
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
@@ -73,14 +73,14 @@ function updateSiteOnDL()
 
     toSiteDir="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         updatesSuffix="builds"
-    elif  [[ "${BUILD_TECH}" == 'PDE' ]]
+    elif  [[ "${BUILD_KIND}" == 'PDE' ]]
     then
         updatesSuffix="buildspdebased"
     else
-        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH"  >&2
+        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND"  >&2
     fi
 
     toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
@@ -125,10 +125,10 @@ function updateSiteOnBuildDir()
         return 1;
     fi
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
@@ -144,32 +144,32 @@ function updateSiteOnBuildDir()
     fi
     buildType=${buildId:0:1}
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    elif [[ "${BUILD_TECH}" == 'PDE' ]]
+    elif [[ "${BUILD_KIND}" == 'PDE' ]]
     then
         buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
     else
-        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH" >&2
+        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
         return 1
     fi
 
 
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         siteDir=${buildRoot}/siteDir
         updatesSuffix="builds"
         fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
 
-    elif [[ "${BUILD_TECH}" == 'PDE' ]]
+    elif [[ "${BUILD_KIND}" == 'PDE' ]]
     then
         siteDir=${buildRoot}/siteDir
         updatesSuffix="buildspdebased"
         fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
     else
-        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH" >&2
+        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
         return 1
     fi
 
@@ -182,8 +182,8 @@ function dropFromBuildDir ()
 
     eclipseStream=$1
     buildId=$2
-    BUILD_TECH=$3
-    pathFromDL=$( dlFromPath "$eclipseStream" "$buildId" "$BUILD_TECH" )
+    BUILD_KIND=$3
+    pathFromDL=$( dlFromPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
 
 
     if [[ "$pathFromDL" == 1 ]]
@@ -195,14 +195,14 @@ function dropFromBuildDir ()
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    elif [[ "${BUILD_TECH}" == 'PDE' ]]
+    elif [[ "${BUILD_KIND}" == 'PDE' ]]
     then
         buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
     else
-        echo "ERROR: BUILD_TECH value not recognized, $BUILD_TECH" >&2
+        echo "ERROR: BUILD_KIND value not recognized, $BUILD_KIND" >&2
         return 1
     fi
 
@@ -232,10 +232,10 @@ function dlToPath()
         return 1;
     fi
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
@@ -245,7 +245,7 @@ function dlToPath()
     buildType=${buildId:0:1}
 
     #TODO: eventual switch so CBI is "normal" one and PDE is marked one
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         dropsuffix=""
     else
@@ -282,10 +282,10 @@ function dlFromPath()
         return 1;
     fi
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
 
@@ -323,13 +323,13 @@ function syncDropLocation ()
     fi
     echo "buildId: $buildId"
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)" >&2
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
     fi
-    echo "BUILD_TECH: $BUILD_TECH"
+    echo "BUILD_KIND: $BUILD_KIND"
 
     EBUILDER_HASH=$4
     if [[ -z "${EBUILDER_HASH}" ]]
@@ -342,7 +342,7 @@ function syncDropLocation ()
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
 
-    fromDir=$( dropFromBuildDir $eclipseStream $buildId $BUILD_TECH )
+    fromDir=$( dropFromBuildDir $eclipseStream $buildId $BUILD_KIND )
     if [[ ! -d "${fromDir}" ]]
     then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
@@ -350,7 +350,7 @@ function syncDropLocation ()
     fi
 
 
-    toDir=$( dropOnDLServer $eclipseStream $buildId $BUILD_TECH )
+    toDir=$( dropOnDLServer $eclipseStream $buildId $BUILD_KIND )
     if [[ ! -d "${toDir}" ]]
     then
         echo "ERROR: toDir is not a directory? toDir: ${toDir}"
@@ -378,7 +378,7 @@ function syncDropLocation ()
     else
         # Now update main DL page index pages, to show available
         source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-        updateIndex $eclipseStreamMajor $BUILD_TECH
+        updateIndex $eclipseStreamMajor $BUILD_KIND
     fi
 
 

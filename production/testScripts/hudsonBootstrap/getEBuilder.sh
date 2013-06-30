@@ -3,7 +3,7 @@
 # Utility script to "bootstrap" Hudson Eclipse Platform Unit tests, to get the
 # basic files needed to get all the other required files and start the test framework.
 
-#BUILD_TECH=$1
+#BUILD_KIND=$1
 #EBUILDER_HASH=$2
 #WORKSPACE=$3
 
@@ -25,28 +25,28 @@ then
      EBUILDER_HASH=master 
 fi
 
-if [[ -z "${BUILD_TECH}" ]]
+if [[ -z "${BUILD_KIND}" ]]
 then
-    echo "BUILD_TECH not supplied, assuming PDE"
-    BUILD_TECH=PDE
+    echo "BUILD_KIND not supplied, assuming PDE"
+    BUILD_KIND=PDE
 fi
 
 # remove just in case left from previous failed run
 rm ebuilder.zip 2>/dev/null
 rm -fr tempebuilder 2>/dev/null
 
-if [[ "${BUILD_TECH}" == "CBI" ]]
+if [[ "${BUILD_KIND}" == "CBI" ]]
 then 
     EBUILDER=eclipse.platform.releng.aggregator
     TARGETNAME=eclipse.platform.releng.aggregator
     ESCRIPT_LOC=${EBUILDER}/production/testScripts
-elif [[ "$BUILD_TECH" == "PDE" ]] 
+elif [[ "$BUILD_KIND" == "PDE" ]] 
 then
     EBUILDER=eclipse.platform.releng.eclipsebuilder
     TARGETNAME=org.eclipse.releng.eclipsebuilder
     ESCRIPT_LOC=${TARGETNAME}
 else 
-    echo "ERROR: Unexpected value of BUILD_TECH: ${BUILD_TECH}"
+    echo "ERROR: Unexpected value of BUILD_KIND: ${BUILD_KIND}"
     exit 1
 fi
 

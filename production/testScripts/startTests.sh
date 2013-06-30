@@ -35,10 +35,10 @@ function dlpath()
          return 1;
     fi
     
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)"
         return 1;
     fi
     
@@ -48,7 +48,7 @@ function dlpath()
     buildType=${buildId:0:1}
 
     #TODO: eventual switch so CBI is "normal" one and PDE is marked one
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
         dropsuffix=""
     else
@@ -79,7 +79,7 @@ source buildParams.shsource 2>/dev/null
 # which is how invoke from "promote script"
 eclipseStream=${eclipseStream:-${1}}
 buildId=${buildId:-${2}}
-BUILD_TECH=${BUILD_TECH:-${3}}
+BUILD_KIND=${BUILD_KIND:-${3}}
 EBUILDER_HASH=${EBUILDER_HASH:-${4}}
 
 if [[ -z ${eclipseStream} || -z ${buildId} ]]
@@ -89,9 +89,9 @@ then
     exit 1
 fi
 
-if [[ -z "${BUILD_TECH}" ]]
+if [[ -z "${BUILD_KIND}" ]]
 then
-    BUILD_TECH=PDE
+    BUILD_KIND=PDE
 fi
 
 if [[ -z "${EBUILDER_HASH}" ]]
@@ -131,15 +131,15 @@ echo "eclipseStreamMinor: $eclipseStreamMinor"
 echo "eclipseStreamService: $eclipseStreamService"
 echo "buildType: $buildType"
 echo "buildId: $buildId"
-echo "BUILD_TECH: $BUILD_TECH"
+echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 
-    if [[ "${BUILD_TECH}" == 'CBI' ]]
+    if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
        eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
-       dlPath=$( dlpath $eclipseStream $buildId $BUILD_TECH )
+       dlPath=$( dlpath $eclipseStream $buildId $BUILD_KIND )
        echo "DEBUG dlPath: $dlPath"
        buildDropDir=${buildRoot}/siteDir/$dlPath/${buildId}
        echo "DEBGUG buildDropDir: $buildDropDir"
@@ -176,7 +176,7 @@ echo "DEBUG: invoking test scripts on Hudson"
 HUDSON_TOKEN=windows2012tests ant \
     -DbuildId=${buildId} \
     -DeclipseStream=${eclipseStream} \
-    -DBUILD_TECH=${BUILD_TECH} \
+    -DBUILD_KIND=${BUILD_KIND} \
     -DEBUILDER_HASH=${EBUILDER_HASH} \
         -f ${builderDropDir}/invokeTestsJSON.xml
 
