@@ -11,7 +11,7 @@ then
     printf "\n\t%s\n" "This script, $scriptname requires three arguments, in order: "
     printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.0 or 3.8.0) "
     printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. CBI or PDE) "
+    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. CBI or special case) "
     printf "\t%s\n" "for example,"
     printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 CBI"
     exit 1
@@ -60,7 +60,7 @@ fi
     then
     buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
     else
-            echo "ERROR: BUILD_KIND was neither PDE nor CBI."
+            echo "ERROR: BUILD_KIND was not recognized."
             exit 1
     fi
     

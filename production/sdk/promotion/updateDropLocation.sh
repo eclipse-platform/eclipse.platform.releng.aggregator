@@ -34,7 +34,7 @@ function dlpath()
     eclipseStreamMajor=${eclipseStream:0:1}
     buildType=${buildId:0:1}
 
-    #TODO: eventual switch so CBI is "normal" one and PDE is marked one
+    # CBI is "normal" one. Other clauses can be added in future for special cases.
     if [[ "${BUILD_KIND}" == "CBI" ]]
     then 
         dropsuffix=""
@@ -111,7 +111,7 @@ function updatePages()
 # it requires four arguments
 #    eclipseStream (e.g. 4.2 or 3.8)
 #    buildId       (e.g. N20120415-2015)
-#    BUILD_KIND    (CBI or PDE)
+#    BUILD_KIND    (CBI or special case)
 #    EBUILDER_HASH (SHA1 HASH or branch of eclipse builder to used
 
 if [[ $# != 4 ]]
@@ -121,7 +121,7 @@ then
     printf "\n\t%s\n" "This script, $scriptname requires four arguments, in order: "
     printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.2 or 3.8.2) "
     printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. PDE or CBI) "
+    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. PDE or special case) "
     printf "\t\t%s\t%s\n" "EBUILDER_HASH" "(SHA1 HASH for eclipe builder used) "
     printf "\t%s\n" "for example,"
     printf "\t%s\n\n" "./$scriptname 4.2 N N20120415-2015 CBI master"

@@ -3,10 +3,6 @@
 # Small utility to start unit tests (or re-run them) after a build
 # and after upload to downloads server is complete.
 
-# This file mentions "CBI" but is really only used for PDE builds. 
-# It was modified to more closely resemble (for double checking) the 
-# corresponding file in aggregator/production
-
 # need to be running Java 6 and Ant 1.8 for <sript> to work in invokeTestsJSON
 # and, default on current build system is Ant 1.7 ... so ...
 export ANT_HOME=/shared/common/apache-ant-1.8.4

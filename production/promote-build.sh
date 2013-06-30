@@ -8,21 +8,16 @@
 
 function usage () 
 {
-    printf "\n\n\t%s\n" "promote-build.sh (PDE|CBI) if none specified, PDE assumed"
+    printf "\n\n\t%s\n" "promote-build.sh (BUILD_KIND) if none specified, CBI assumed"
 }
 
 BUILD_KIND=$1
 if [[ -z "$BUILD_KIND" ]]
 then
-    BUILD_KIND=PDE
+    BUILD_KIND=CBI
 fi
 
 case $BUILD_KIND in
-
-    'PDE' )
-        echo "Promote Build from PDE"
-        EBUILDER_HASH=master
-        ;;
 
     'CBI' )
         echo "Promote Build from CBI"
@@ -30,7 +25,7 @@ case $BUILD_KIND in
         # testbuildonly=true;
 
         ;;
-    *) echo "ERROR: Invalid argument to $(basename $0)";
+    *) echo "ERROR: Invalid or missing argument to $(basename $0)";
         usage;
         exit 1;
         ;;
@@ -82,7 +77,7 @@ fi
 ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
-# TODO: changed "syncDropLocation" to handle a third parameter (CBI or PDE)
+# TODO: changed "syncDropLocation" to handle a third parameter (BUILD_KIND)
 # And now a fourth ... eBuilder HASHTAG,so won't always have to assume master, and 
 # so the tests can get their own copy.
 # and now a fifth, so we can 'source' all relevent variables ... in particular, we want
