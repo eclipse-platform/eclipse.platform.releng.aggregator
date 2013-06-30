@@ -112,38 +112,38 @@ function updateIndex ()
     then
         # if only one argument, check for each specific type and do that group
         # unset any values that might have been set before, from multile calls, from same caller (such as our test case)
-        unset MAJOR BUILD_TECH
+        unset MAJOR BUILD_KIND
         ARG=$1
         if [[ $ARG =~ [[:digit:]] ]]
         then
             MAJOR=$ARG
         elif [[ $ARG =~ PDE|CBI|MAIN ]]
         then
-            BUILD_TECH=$ARG
+            BUILD_KIND=$ARG
         else
             echo "ERROR: single argument not recognized as 'CBI' or 'PDE' or 'MAIN' or digit. Found ${ARG}."
             echo "       Returning 1"
             return 1
         fi
 
-        # if no 'MAJOR', then assume we found BUILD_TECH
+        # if no 'MAJOR', then assume we found BUILD_KIND
         if [[ -z "${MAJOR}" ]]
         then
-            if [[ "$BUILD_TECH" == "PDE" ]]
+            if [[ "$BUILD_KIND" == "PDE" ]]
             then
                 updateIndexPDE
-            elif [[ "$BUILD_TECH" == "CBI" ]]
+            elif [[ "$BUILD_KIND" == "CBI" ]]
             then
                 updateIndexCBI
-            elif [[ "$BUILD_TECH" == "MAIN" ]]
+            elif [[ "$BUILD_KIND" == "MAIN" ]]
             then
                 updateIndexMAIN
             else
-                echo "PROGRAM ERROR: BUILD_TECH not recognized as 'CBI' or 'PDE' or 'MAIN'. Found ${BUILD_TECH}."
+                echo "PROGRAM ERROR: BUILD_KIND not recognized as 'CBI' or 'PDE' or 'MAIN'. Found ${BUILD_KIND}."
                 echo "       Returning 1"
                 return 1
             fi
-        elif [[ -z "${BUILD_TECH}" ]]
+        elif [[ -z "${BUILD_KIND}" ]]
         then
             if [[ "$MAJOR" == 3 ]]
             then
@@ -158,7 +158,7 @@ function updateIndex ()
             fi
         else
             echo "PROGRAM ERROR: one argument case. Appears two set?"
-            echo "       ARG: $ARG, MAJOR: $MAJOR, BUILD_TECH: $BUILD_TECH"
+            echo "       ARG: $ARG, MAJOR: $MAJOR, BUILD_KIND: $BUILD_KIND"
             echo "       Returning 1"
             return 1
         fi
@@ -171,10 +171,10 @@ function updateIndex ()
         if [[ $ARG1 =~ [[:digit:]] && $ARG2 =~ PDE|CBI|MAIN  ]]
         then
             MAJOR=$ARG1
-            BUILD_TECH=$ARG2
+            BUILD_KIND=$ARG2
         elif [[ $ARG1 =~ PDE|CBI|MAIN && $ARG2 =~ [[:digit:]] ]]
         then
-            BUILD_TECH=$ARG1
+            BUILD_KIND=$ARG1
             MAJOR=$ARG2
         else
             echo "ERROR: two argument case did not recognized either as 'CBI' or 'PDE' or 'MAIN' or digit."
@@ -185,29 +185,29 @@ function updateIndex ()
 
         # note special case, as of now, if two arguments given, "CBI" in 
         # interpreted to mean "MAIN". 
-        if [[ "$BUILD_TECH" == "MAIN" && "$MAJOR" == "3" ]]
+        if [[ "$BUILD_KIND" == "MAIN" && "$MAJOR" == "3" ]]
         then
             internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
-        elif [[ "$BUILD_TECH" == "MAIN" && "$MAJOR" == "4" ]]
+        elif [[ "$BUILD_KIND" == "MAIN" && "$MAJOR" == "4" ]]
         then
             internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
-        elif [[ "$BUILD_TECH" == "PDE" && "$MAJOR" == "3" ]]
+        elif [[ "$BUILD_KIND" == "PDE" && "$MAJOR" == "3" ]]
         then
             internalUpdateIndex ${x3X_PHP_PAGE_PDE} ${x3X_HTML_PAGE_PDE}
-        elif [[ "$BUILD_TECH" == "PDE" && "$MAJOR" == "4" ]]
+        elif [[ "$BUILD_KIND" == "PDE" && "$MAJOR" == "4" ]]
         then
             internalUpdateIndex ${x4X_PHP_PAGE_PDE} ${x4X_HTML_PAGE_PDE}
-        elif [[ "$BUILD_TECH" == "CBI" && "$MAJOR" == "3" ]]
+        elif [[ "$BUILD_KIND" == "CBI" && "$MAJOR" == "3" ]]
         then
             #internalUpdateIndex ${x3X_PHP_PAGE_CBI} ${x3X_HTML_PAGE_CBI}
             internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
-        elif [[ "$BUILD_TECH" == "CBI" && "$MAJOR" == "4" ]]
+        elif [[ "$BUILD_KIND" == "CBI" && "$MAJOR" == "4" ]]
         then
             #internalUpdateIndex ${x4X_PHP_PAGE_CBI} ${x4X_HTML_PAGE_CBI}
             internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
         else
             echo "ERROR. Combination of parameters did not patch any conditions."
-            echo "       Found BUILD_TECH: $BUILD_TECH and MAJOR: $MAJOR"
+            echo "       Found BUILD_KIND: $BUILD_KIND and MAJOR: $MAJOR"
             echo "       Returning 1"
             return 1
         fi

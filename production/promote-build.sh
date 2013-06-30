@@ -11,13 +11,13 @@ function usage ()
     printf "\n\n\t%s\n" "promote-build.sh (PDE|CBI) if none specified, PDE assumed"
 }
 
-BUILD_TECH=$1
-if [[ -z "$BUILD_TECH" ]]
+BUILD_KIND=$1
+if [[ -z "$BUILD_KIND" ]]
 then
-    BUILD_TECH=PDE
+    BUILD_KIND=PDE
 fi
 
-case $BUILD_TECH in
+case $BUILD_KIND in
 
     'PDE' )
         echo "Promote Build from PDE"
@@ -87,7 +87,7 @@ echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEcli
 # so the tests can get their own copy.
 # and now a fifth, so we can 'source' all relevent variables ... in particular, we want
 # to see if BUILD_FAILED is defined. 
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_TECH $EBUILDER_HASH $BUILD_ENV_FILE" >> ${promoteScriptLocationEclipse}/${scriptName}
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_KIND $EBUILDER_HASH $BUILD_ENV_FILE" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}

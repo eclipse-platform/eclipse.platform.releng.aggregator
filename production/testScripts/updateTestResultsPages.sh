@@ -11,7 +11,7 @@ then
     printf "\n\t%s\n" "This script, $scriptname requires three arguments, in order: "
     printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.0 or 3.8.0) "
     printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-    printf "\t\t%s\t%s\n" "BUILD_TECH" "(e.g. CBI or PDE) "
+    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. CBI or PDE) "
     printf "\t%s\n" "for example,"
     printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 CBI"
     exit 1
@@ -33,10 +33,10 @@ then
 fi
 
 # For now only used by CBI
-BUILD_TECH=$3
-if [[ -z "${BUILD_TECH}" ]]
+BUILD_KIND=$3
+if [[ -z "${BUILD_KIND}" ]]
   then
-     BUILD_TECH=CBI
+     BUILD_KIND=CBI
 fi
 
     eclipseStreamMajor=${eclipseStream:0:1}
@@ -48,19 +48,19 @@ fi
         pathToDL=eclipse/downloads/drops$eclipseStreamMajor
     fi
     
-    if [[ "$BUILD_TECH" == "PDE" ]]
+    if [[ "$BUILD_KIND" == "PDE" ]]
     then
          pathToDL="${pathToDL}pdebased"
     fi  
 
-    if [[ "$BUILD_TECH" == "CBI" ]]
+    if [[ "$BUILD_KIND" == "CBI" ]]
     then
         buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    elif [[ "$BUILD_TECH" == "PDE" ]]
+    elif [[ "$BUILD_KIND" == "PDE" ]]
     then
     buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
     else
-            echo "ERROR: BUILD_TECH was neither PDE nor CBI."
+            echo "ERROR: BUILD_KIND was neither PDE nor CBI."
             exit 1
     fi
     
@@ -123,7 +123,7 @@ echo " BUILDFILESTR: $BUILDFILESTR"
 BUILDTARGET=" "
 
 devworkspace="${basebuilderDir}/workspace-updateTestResults"
-devArgs="-Xmx256m -Dhudson=true -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -DBUILD_TECH=${BUILD_TECH}"
+devArgs="-Xmx256m -Dhudson=true -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -DBUILD_KIND=${BUILD_KIND}"
 
 echo
 echo "   dev script:   $0"

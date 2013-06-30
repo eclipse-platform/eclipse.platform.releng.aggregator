@@ -22,10 +22,10 @@ function dlpath()
         return 1;
     fi
 
-    BUILD_TECH=$3
-    if [[ -z "${BUILD_TECH}" ]]
+    BUILD_KIND=$3
+    if [[ -z "${BUILD_KIND}" ]]
     then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)"
         return 1;
     fi
 
@@ -35,7 +35,7 @@ function dlpath()
     buildType=${buildId:0:1}
 
     #TODO: eventual switch so CBI is "normal" one and PDE is marked one
-    if [[ "${BUILD_TECH}" == "CBI" ]]
+    if [[ "${BUILD_KIND}" == "CBI" ]]
     then 
         dropsuffix=""
     else
@@ -59,7 +59,7 @@ function updatePages()
 {
     eclipseStream=$1
     buildId=$2
-    BUILD_TECH=$3
+    BUILD_KIND=$3
     EBUILDER_HASH=$4
     if [[ -z "${EBUILDER_HASH}" ]]
     then
@@ -76,27 +76,27 @@ function updatePages()
     echo "buildType: $buildType"
     echo "eclipseStream: $eclipseStream"
     echo "buildId: $buildId"
-    echo "BUILD_TECH: $BUILD_TECH"
+    echo "BUILD_KIND: $BUILD_KIND"
     echo "EBUILDER_HASH: $EBUILDER_HASH"
     
     # compute dirctiory on build machine
-	dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
+	dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_KIND" )
 	echo "dropFromBuildDir: $dropFromBuildDir"
 
-    if [[ "${BUILD_TECH}" == "CBI" ]]
+    if [[ "${BUILD_KIND}" == "CBI" ]]
     then 
         eclipsebuilder=eclipse.platform.releng.aggregator
         ebuilderDropDir="${dropFromBuildDir}/${eclipsebuilder}/production/testScripts"
-    elif [[ "${BUILD_TECH}" == "PDE" ]]
+    elif [[ "${BUILD_KIND}" == "PDE" ]]
     then
         eclipsebuilder=org.eclipse.releng.eclipsebuilder
         ebuilderDropDir="${builderDir}/testScripts"
     else 
-        echo "ERROR: Unexpected value of BUILD_TECH, $BUILD_TECH"
+        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND"
     fi
     echo "DEBUG: ebuilderDropDir: ${ebuilderDropDir}"
 
-    ${ebuilderDropDir}/updateTestResultsPages.sh  $eclipseStream $buildId $BUILD_TECH
+    ${ebuilderDropDir}/updateTestResultsPages.sh  $eclipseStream $buildId $BUILD_KIND
      rccode=$?
      if [[ $rccode != 0 ]]
      then
@@ -111,7 +111,7 @@ function updatePages()
 # it requires four arguments
 #    eclipseStream (e.g. 4.2 or 3.8)
 #    buildId       (e.g. N20120415-2015)
-#    BUILD_TECH    (CBI or PDE)
+#    BUILD_KIND    (CBI or PDE)
 #    EBUILDER_HASH (SHA1 HASH or branch of eclipse builder to used
 
 if [[ $# != 4 ]]
@@ -121,7 +121,7 @@ then
     printf "\n\t%s\n" "This script, $scriptname requires four arguments, in order: "
     printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.2 or 3.8.2) "
     printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-    printf "\t\t%s\t%s\n" "BUILD_TECH" "(e.g. PDE or CBI) "
+    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. PDE or CBI) "
     printf "\t\t%s\t%s\n" "EBUILDER_HASH" "(SHA1 HASH for eclipe builder used) "
     printf "\t%s\n" "for example,"
     printf "\t%s\n\n" "./$scriptname 4.2 N N20120415-2015 CBI master"
@@ -146,13 +146,13 @@ then
 fi
 echo "buildId: $buildId"
 
-BUILD_TECH=$3
-if [[ -z "${BUILD_TECH}" ]]
+BUILD_KIND=$3
+if [[ -z "${BUILD_KIND}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_TECH as third argumnet, for this function $(basename $0)"
+    printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)"
     exit 1
 fi
-echo "BUILD_TECH: $BUILD_TECH"
+echo "BUILD_KIND: $BUILD_KIND"
 
 EBUILDER_HASH=$4
 if [[ -z "${EBUILDER_HASH}" ]]
@@ -168,7 +168,7 @@ echo "buildType: $buildType"
 
 # = = = = = = = = = 
 # compute dirctiory on build machine
-dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_TECH" )
+dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" "$BUILD_KIND" )
 echo "dropFromBuildDir: $dropFromBuildDir"
 
 if [[ "${dropFromBuildDir}" == "1" ]]
@@ -184,9 +184,9 @@ then
     exit 1
 fi
 SCRIPTDIR=$( dirname $0 )
-${SCRIPTDIR}/getEBuilder.sh "${BUILD_TECH}" "${EBUILDER_HASH}" "${dropFromBuildDir}"
+${SCRIPTDIR}/getEBuilder.sh "${BUILD_KIND}" "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
-updatePages $eclipseStream $buildId $BUILD_TECH "${EBUILDER_HASH}"
+updatePages $eclipseStream $buildId $BUILD_KIND "${EBUILDER_HASH}"
 rccode=$?
 if [ $rccode -ne 0 ]
 then
@@ -194,7 +194,7 @@ then
     exit $rccode
 fi
 
-syncDropLocation "$eclipseStream" "$buildId" "$BUILD_TECH" "${EBUILDER_HASH}"
+syncDropLocation "$eclipseStream" "$buildId" "$BUILD_KIND" "${EBUILDER_HASH}"
 rccode=$?
 if [ $rccode -ne 0 ]
 then

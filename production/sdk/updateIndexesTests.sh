@@ -33,7 +33,7 @@ updateIndex 3 CBI
 echo "returned: $?"
 updateIndex 4 CBI
 echo "returned: $?"
-echo "= = = = dual args, BUILD_TECH first" 
+echo "= = = = dual args, BUILD_KIND first" 
 updateIndex MAIN 3
 echo "returned: $?"
 updateIndex MAIN 4
@@ -51,7 +51,7 @@ updateIndex 3
 echo "returned: $?"
 updateIndex 4
 echo "returned: $?"
-echo "= = = = single arg, BUILD_TECH"
+echo "= = = = single arg, BUILD_KIND"
 updateIndex PDE
 echo "returned: $?"
 updateIndex CBI

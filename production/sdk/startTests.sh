@@ -33,7 +33,7 @@ source buildParams.shsource 2>/dev/null
 # which is how invoke from "promote script"
 eclipseStream=${eclipseStream:-${1}}
 buildId=${buildId:-${2}}
-BUILD_TECH=${BUILD_TECH:-${3}}
+BUILD_KIND=${BUILD_KIND:-${3}}
 EBUILDER_HASH=${EBUILDER_HASH:-${4}}
 
 if [[ -z ${eclipseStream} || -z ${buildId} ]]
@@ -43,9 +43,9 @@ then
     exit 1
 fi
 
-if [[ -z "${BUILD_TECH}" ]]
+if [[ -z "${BUILD_KIND}" ]]
 then
-    BUILD_TECH=PDE
+    BUILD_KIND=PDE
 fi
 
 if [[ -z "${EBUILDER_HASH}" ]]
@@ -85,7 +85,7 @@ echo "eclipseStreamMinor: $eclipseStreamMinor"
 echo "eclipseStreamService: $eclipseStreamService"
 echo "buildType: $buildType"
 echo "buildId: $buildId"
-echo "BUILD_TECH: $BUILD_TECH"
+echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 
@@ -111,7 +111,7 @@ HUDSON_TOKEN=windows2012tests ant \
     -DpostingDirectory=${postingDirectory} \
     -DbuildId=${buildId} \
     -DeclipseStream=${eclipseStream} \
-    -DBUILD_TECH=${BUILD_TECH} \
+    -DBUILD_KIND=${BUILD_KIND} \
     -DEBUILDER_HASH=${EBUILDER_HASH} \
     -f ${builderDir}/invokeTestsJSON.xml
 

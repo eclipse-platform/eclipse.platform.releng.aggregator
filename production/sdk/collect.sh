@@ -48,14 +48,14 @@ job="$(echo $inputline | cut -d\  -f1)"
 buildNumber="$(echo $inputline | cut -d\  -f2)"
 buildId="$(echo $inputline | cut -d\  -f3)"
 eclipseStream="$(echo $inputline | cut -d\  -f4)"
-BUILD_TECH="$(echo $inputline | cut -d\  -f5)"
+BUILD_KIND="$(echo $inputline | cut -d\  -f5)"
 EBUILDER_HASH="$(echo $inputline | cut -d\  -f6)"
 
 echo "job: $job"
 echo "buildNumber: $buildNumber"
 echo "buildId: $buildId"
 echo "eclipseStream: $eclipseStream"
-echo "BUILD_TECH: $BUILD_TECH"
+echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 ${ANT_HOME}/bin/ant -version
@@ -65,5 +65,5 @@ ${ANT_HOME}/bin/ant -f /shared/eclipse/sdk/collectTestResults.xml \
    -DbuildNumber=${buildNumber} \
    -DbuildId=${buildId} \
    -DeclipseStream=${eclipseStream} \
-   -DBUILD_TECH=${BUILD_TECH} \
+   -DBUILD_KIND=${BUILD_KIND} \
    -DEBUILDER_HASH=${EBUILDER_HASH}
