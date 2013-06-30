@@ -121,7 +121,7 @@ then
     printf "\n\t%s\n" "This script, $scriptname requires four arguments, in order: "
     printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.2 or 3.8.2) "
     printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. PDE or special case) "
+    printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. CBI or special case) "
     printf "\t\t%s\t%s\n" "EBUILDER_HASH" "(SHA1 HASH for eclipe builder used) "
     printf "\t%s\n" "for example,"
     printf "\t%s\n\n" "./$scriptname 4.2 N N20120415-2015 CBI master"

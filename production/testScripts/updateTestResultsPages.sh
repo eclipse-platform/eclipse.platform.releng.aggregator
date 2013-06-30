@@ -35,43 +35,43 @@ fi
 # For now only used by CBI
 BUILD_KIND=$3
 if [[ -z "${BUILD_KIND}" ]]
-  then
-     BUILD_KIND=CBI
+then
+    BUILD_KIND=CBI
 fi
 
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
+eclipseStreamMajor=${eclipseStream:0:1}
+buildType=${buildId:0:1}
 
-    pathToDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
-    then
-        pathToDL=eclipse/downloads/drops$eclipseStreamMajor
-    fi
-    
-    if [[ "$BUILD_KIND" == "PDE" ]]
-    then
-         pathToDL="${pathToDL}pdebased"
-    fi  
+pathToDL=eclipse/downloads/drops
+if [[ $eclipseStreamMajor > 3 ]]
+then
+    pathToDL=eclipse/downloads/drops$eclipseStreamMajor
+fi
 
-    if [[ "$BUILD_KIND" == "CBI" ]]
-    then
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
-    elif [[ "$BUILD_KIND" == "PDE" ]]
-    then
+if [[ "$BUILD_KIND" == "PDE" ]]
+then
+    pathToDL="${pathToDL}pdebased"
+fi  
+
+if [[ "$BUILD_KIND" == "CBI" ]]
+then
+    buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
+elif [[ "$BUILD_KIND" == "PDE" ]]
+then
     buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    else
-            echo "ERROR: BUILD_KIND was not recognized."
-            exit 1
-    fi
-    
-    siteDir=${buildRoot}/siteDir
+else
+    echo "ERROR: BUILD_KIND was not recognized."
+    exit 1
+fi
 
-    fromDir=${siteDir}/${pathToDL}/${buildId}
-    if [ ! -d "${fromDir}" ]
-    then
-        echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
-        exit 1
-    fi
+siteDir=${buildRoot}/siteDir
+
+fromDir=${siteDir}/${pathToDL}/${buildId}
+if [ ! -d "${fromDir}" ]
+then
+    echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
+    exit 1
+fi
 
 
 
@@ -99,7 +99,7 @@ EBuilderDir=${aggregatorDir}/eclipse.platform.releng.tychoeclipsebuilder
 
 if [[ ! -d "${basebuilderDir}" ]] 
 then
-     ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$fromDir
+    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$fromDir
 fi
 
 # remember, the Eclipse install must match the VM used (e.g. both 64 bit, both 32 bit, etc).
@@ -109,8 +109,8 @@ chmod -c +x $ECLIPSE_EXE
 
 if [ ! -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
-   echo "ERROR: ECLIPSE_EXE is not defined or not executable: ${ECLIPSE_EXE}"
-   exit 1
+    echo "ERROR: ECLIPSE_EXE is not defined or not executable: ${ECLIPSE_EXE}"
+    exit 1
 fi
 
 BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
@@ -136,7 +136,7 @@ echo
 if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
 
-${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
+    ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
     RC=$?
 else
     echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse"
