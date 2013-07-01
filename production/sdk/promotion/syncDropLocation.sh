@@ -77,7 +77,7 @@ function sendPromoteMail ()
     else
         EXTRA_SUBJECT_STRING=""
     fi
-    
+
     if [[ -n "${POM_UPDATES}" ]] 
     then
         EXTRA_SUBJECT_STRING="${EXTRA_SUBJECT_STRING} - POM UPDATES REQUIRED"
@@ -102,7 +102,7 @@ function sendPromoteMail ()
     fi
 
     FROM=${FROM:-"e4Builder@eclipse.org"}
-    
+
     # make sure reply to goes back to the list
     # I'm not positive this is required for mailing list?
     # does anything "from" list, automatically get reply-to: list?
@@ -112,14 +112,14 @@ function sendPromoteMail ()
 
     message1=""
     message2=""
-    
-        #TODO: later can use sed, form a proper list
+
+    #TODO: later can use sed, form a proper list
     if [[ -n "${POM_UPDATES}" ]]
     then 
         message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
         message2="$message2 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
     fi
-    
+
     message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>\n"
     message2="$message2 <p>Eclipse downloads: ${downloadURL}</p>\n"
 
@@ -137,7 +137,7 @@ function sendPromoteMail ()
         message1="$message1 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
         message2="$message2 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
     fi
-    
+
     if [[ "${BUILD_KIND}" == "CBI" ]]
     then 
         (
@@ -200,6 +200,7 @@ function startTests()
         builderDropDir=${buildDropDir}/${eclipsebuilder}
         echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
     elif [[ "${BUILD_KIND}" == 'PDE' ]]
+    then
         buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
         buildDir=${buildRoot}/build
         supportDir=${buildDir}/supportDir
