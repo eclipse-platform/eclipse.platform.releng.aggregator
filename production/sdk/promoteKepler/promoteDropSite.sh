@@ -61,7 +61,7 @@ if [ $rccode -eq 0 ]
 then
     printf "\n\t%s\n" "Update main overall download index page so it shows new build."
     source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-    updateIndex 4 MAIN
+    updateIndex 
 else
     printf "\n\n\t%s\n\n" "ERROR: rsync failed. rccode: $rccode" >&2
     exit $rccode
