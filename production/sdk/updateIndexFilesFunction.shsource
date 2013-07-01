@@ -29,6 +29,8 @@ function internalUpdateIndex ()
     HTML_PAGE=$2
 
     TEMP_INDEX_TXT=tempIndex.txt
+    # remove previous vesrsions, if exists
+    rm ${TEMP_INDEX_TXT} 2>/dev/null
 
     wget --no-verbose -O ${TEMP_INDEX_TXT} http://${SITE_HOST}/eclipse/downloads/${PHP_PAGE} 2>&1
     rccode=$?
@@ -54,14 +56,10 @@ function internalUpdateIndex ()
     return 0
 }
 
-function updateIndex4 ()
-{
-    internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
-}
-
 function updateIndexMAIN ()
 {
     internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
+    internalUpdateIndex ${x3X_PHP_PAGE_MAIN} ${x3X_HTML_PAGE_MAIN}
 }
 
 
@@ -70,92 +68,20 @@ function updateIndex ()
 
     x4X_PHP_PAGE_MAIN="createIndex4x.php"
     x4X_HTML_PAGE_MAIN="index.html"
+    x3X_PHP_PAGE_MAIN="createIndex3x.php"
+    x3X_HTML_PAGE_MAIN="eclipse3x.html"
 
     # if no arguments, do all
     if [[ $# == 0 ]]
     then
         # if 0 args, assume to do all
         updateIndexMAIN
-    elif [[ $# == 1 ]] 
+    elif [[ $# > 0 ]] 
     then
-        # if only one argument, check for each specific type and do that group
-        # unset any values that might have been set before, from multile calls, from same caller (such as our test case)
-        unset MAJOR BUILD_KIND
-        ARG=$1
-        if [[ $ARG =~ [[:digit:]] ]]
-        then
-            MAJOR=$ARG
-        elif [[ $ARG =~ CBI|MAIN ]]
-        then
-            BUILD_KIND=$ARG
-        else
-            echo "ERROR: single argument not recognized as 'CBI' or 'MAIN' or digit. Found ${ARG}."
-            echo "       Returning 1"
-            return 1
-        fi
-
-        # if no 'MAJOR', then assume we found BUILD_KIND
-        if [[ -z "${MAJOR}" ]]
-        then
-            if [[ "$BUILD_KIND" == "CBI" ]]
-            then
-                updateIndexMAIN
-            elif [[ "$BUILD_KIND" == "MAIN" ]]
-            then
-                updateIndexMAIN
-            else
-                echo "PROGRAM ERROR: BUILD_KIND not recognized. Found ${BUILD_KIND}."
-                echo "       Returning 1"
-                return 1
-            fi
-        elif [[ -z "${BUILD_KIND}" ]]
-        then
-            if [[ "$MAJOR" == 4 ]]
-            then
-                updateIndex4
-            else 
-                echo "PROGRAM ERROR: MAJOR not recognized as '3' or '4'. Found ${MAJOR}."
-                echo "       Returning 1"
-                return 1
-            fi
-        else
-            echo "PROGRAM ERROR: one argument case. Appears two set?"
-            echo "       ARG: $ARG, MAJOR: $MAJOR, BUILD_KIND: $BUILD_KIND"
-            echo "       Returning 1"
-            return 1
-        fi
-    elif [[ $# == 2 ]] 
-    then
-        # two arguments given for specific update
-        # accept either order
-        ARG1=$1
-        ARG2=$2
-        if [[ $ARG1 =~ [[:digit:]] && $ARG2 =~ CBI|MAIN  ]]
-        then
-            MAJOR=$ARG1
-            BUILD_KIND=$ARG2
-        elif [[ $ARG1 =~ CBI|MAIN && $ARG2 =~ [[:digit:]] ]]
-        then
-            BUILD_KIND=$ARG1
-            MAJOR=$ARG2
-        else
-            echo "ERROR: two argument case did not recognized either as 'CBI' or 'MAIN' or digit."
-            echo "       Found ARG1: ${ARG1}, ARG2: ${ARG2}."
-            echo "       Returning 1"
-            return 1
-        fi
-
-        # note special case, as of now, if two arguments given, "CBI" in 
-        # interpreted to mean "MAIN". 
-        if [[ "$BUILD_KIND" == "MAIN" && "$MAJOR" == "4" ]]
-        then
-            internalUpdateIndex ${x4X_PHP_PAGE_MAIN} ${x4X_HTML_PAGE_MAIN}
-        else
-            echo "ERROR. Combination of parameters did not patch any conditions."
-            echo "       Found BUILD_KIND: $BUILD_KIND and MAJOR: $MAJOR"
-            echo "       Returning 1"
-            return 1
-        fi
+        # still do all, but print warning
+        updateIndexMAIN
+        echo "WARNING: arguments to updateIndex were ignored. We update all pages each call."
     fi
+
 return 0
 }
