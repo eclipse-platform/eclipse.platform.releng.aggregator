@@ -28,3 +28,5 @@ echo eclipse.platform.team ; cd ../eclipse.platform.team ; git fetch; git checko
 echo eclipse.platform.text ; cd ../eclipse.platform.text ; git fetch; git checkout R4_3_maintenance ; git pull ; 
 echo eclipse.platform.ua ; cd ../eclipse.platform.ua ; git fetch; git checkout R4_3_maintenance ; git pull ;  
 echo eclipse.platform.ui ; cd ../eclipse.platform.ui ; git fetch; git checkout R4_3_maintenance ; git pull ;  
+echo eclipse.platform.swt ; cd ../eclipse.platform.swt ; git fetch; git checkout R4_3_maintenance ; git pull ;  
+echo eclipse.platform.swt.binaries ; cd ../eclipse.platform.swt.binaries ; git fetch; git checkout R4_3_maintenance ; git pull ;  
