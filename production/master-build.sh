@@ -15,6 +15,8 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
+export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
+
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
 
@@ -154,6 +156,7 @@ fn-write-property BUILD_TYPE_NAME
 fn-write-property TRACE_OUTPUT
 fn-write-property comparatorRepository
 fn-write-property logsDirectory
+fn-write-property BUILD_TIME_PATCHES
 
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
@@ -171,8 +174,7 @@ else
     $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
     checkForErrorExit $? "Error occurred while updating build input"
 
-    if [[ $BUILD_ID =~ [IN] ]] 
-    then
+    if $BUILD_TIME_PATCHES ; then
         # temp hack for bug 398141 and others
         # apply the pre-created patch from tempPatches
         echo "INFO: apply temp patch, if any"
