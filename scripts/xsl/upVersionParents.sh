@@ -11,7 +11,7 @@ export JAVA_HOME=/opt/local/jdk1.7.0-latest
 TMP_DIR=$(pwd)/../tmp
 mkdir -p $TMP_DIR
 export MAVEN_OPTS="-Xmx2048m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR}"
-export MAVEN_PATH=/opt/local/apache-maven-3.0.4/bin
+export MAVEN_PATH=/opt/local/apache-maven-3.1.0/bin
 export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$PATH
 
 DIR=$( dirname $0 )
