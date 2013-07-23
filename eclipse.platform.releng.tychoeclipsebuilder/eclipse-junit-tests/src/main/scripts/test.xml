@@ -6,23 +6,23 @@
 
     <!--properties file containing the build information-->
     <property file="label.properties" />
-    
+
     <!--properties file containing the plugin directory name including version number,
          and list of required test plug-ins expressed as command-line argument to unzip executable.
          Generated and packaged at build time.-->
-    <property file="test.properties" /> 
-        <!--
+    <property file="test.properties" />
+    <!--
             Try using "loadproperties", instead of "properties file=" to see if
             that will "evaluate" variables as loaded. Otherwise, the <properties form
             has to move to "top of file" ... outer scope?
            <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
         -->
-        <property
+    <property
             name="testingPropertiesfile"
             value="testing.properties" />
-        <loadproperties>
-            <file file="${testingPropertiesfile}" />
-        </loadproperties>
+    <loadproperties>
+        <file file="${testingPropertiesfile}" />
+    </loadproperties>
 
     <!--default directory where test-eclipse will be installed-->
     <property
@@ -102,9 +102,17 @@
         <condition
             property="extraIU"
             value="org.eclipse.osgi.compatibility.plugins.feature.feature.group">
-            <equals
-                arg1="${testPlugin}"
-                arg2="org.eclipse.osgi.tests" />
+            <or>
+                <equals 
+                    arg1="${testPlugin}" 
+                    arg2="org.eclipse.osgi.tests" />
+                <equals 
+                    arg1="${testPlugin}" 
+                    arg2="org.eclipse.pde.ui.tests" />
+                <equals 
+                    arg1="${testPlugin}" 
+                    arg2="org.eclipse.pde.api.tools.tests" />
+            </or>
         </condition>
         <antcall target="setupRepo" />
         <antcall target="${setupTarget}" />
@@ -919,20 +927,20 @@
         <!-- some "failures" are "bad enough" that the tests were not unpacked, so style sheet won't exist -->
         <available file="${junit-stylesheet}" property="stylesheetexists" />
         <antcall target="convertToHTML" />
-        
+
     </target>
- 
+
     <target name="convertToHTML" if="stylesheetexists" depends="checkStylesheetexists">
-    <xslt 
+        <xslt 
         style="${junit-stylesheet}"
         basedir="${results}/xml"
         destdir="${results}/html" />
-    </target>            
+    </target>
 
-        <target name="checkStylesheetexists" unless="stylesheetexists">
-            <echo message="ERROR: previous suite test install failed, so style sheet did not exist" />
-        </target>
-        
+    <target name="checkStylesheetexists" unless="stylesheetexists">
+        <echo message="ERROR: previous suite test install failed, so style sheet did not exist" />
+    </target>
+
     <target name="ant">
         <runTests testPlugin="org.eclipse.ant.tests.core" />
     </target>
@@ -1393,7 +1401,7 @@
         relatively quick, and realtively reliable on build.eclipse.org hardware 
     -->
     <target name="platform">
-       <!-- remove for now, bug 400385 <antcall target="relEng" /> -->
+        <!-- remove for now, bug 400385 <antcall target="relEng" /> -->
         <antcall target="ant" />
         <antcall target="antui" />
         <antcall target="compare" />
@@ -1410,7 +1418,7 @@
         <antcall target="uinavigator" />
         <antcall target="uiworkbenchtexteditor" />
 
-        
+
 
         <antcall target="ua" />
         <antcall target="uiforms" />
@@ -1429,7 +1437,7 @@
         <antcall target="bidi" />
         <antcall target="ltkuirefactoringtests" />
         <antcall target="ltkcorerefactoringtests" />
-        
+
     </target>
 
     <!-- this group is "platform tests" that are Long Running (or, perhaps
@@ -1479,7 +1487,7 @@
         <antcall target="jdtcoremodel" />
         <antcall target="jdtcorecompiler" />
     </target>
-    
+
     <!-- we could put other variables/os checks here, if needed -->
     <target name="checkOS">
         <condition
