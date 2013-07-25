@@ -16,7 +16,7 @@ $BUILD_TYPE = "I";
 $TIMESTAMP = "20130314-1330";
 $TMP_DIR = "/shared/eclipse/builds/4I/tmp";
 $JAVA_HOME = "/shared/common/jdk1.7.0-latest";
-$MAVEN_OPTS = "-Xmx2048m -XX:MaxPermSize=256M -Djava.io.tmpdir=/shared/eclipse/builds/4I/tmp -Dtycho.localArtifacts=ignore";
+$MAVEN_OPTS = "-Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=/shared/eclipse/builds/4I/tmp -Dtycho.localArtifacts=ignore";
 $MAVEN_PATH = "/shared/common/apache-maven-3.1.0/bin";
 $AGGREGATOR_REPO = "git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git";
 $BASEBUILDER_TAG = "R38M6PlusRC3G";
