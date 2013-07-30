@@ -19,24 +19,10 @@ import java.util.jar.JarFile;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
-import org.xml.sax.Attributes;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.eclipse.osgi.util.ManifestElement;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.releng.tools.RelEngPlugin;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
-
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -47,16 +33,24 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-
+import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.releng.tools.RelEngPlugin;
 import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 /**
@@ -72,73 +66,73 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			if (delta != null) {
 				IResource resource = delta.getResource();
 				switch(resource.getType()) {
-					case IResource.PROJECT: {
-						if(delta.getKind() == IResourceDelta.REMOVED) {
-							return false;
-						}
-						//Should we not care about non-plugin projects?
-						IProject project = (IProject) resource;
-						try {
-							if(project.isAccessible() && project.getDescription().hasNature("org.eclipse.pde.PluginNature")) { //$NON-NLS-1$
-								if((delta.getFlags() & IResourceDelta.OPEN) > 0) {
-									validate(project);
-									return false;
-								}
-								return true;
-							}
-						}
-						catch(CoreException ce) {
-							RelEngPlugin.log(ce);
-						}
-						return false;
- 					}
-					case IResource.ROOT:
-					case IResource.FOLDER: {
-						return true;
-					}
-					case IResource.FILE: {
-						switch(delta.getKind()) {
-							case IResourceDelta.REMOVED: {
-								//if manifest removed, clean up markers
-								if(resource.getProjectRelativePath().equals(MANIFEST_PATH)) {
-									//manifest content changed
-									IProject p = resource.getProject();
-									if(p.isAccessible()) {
-										cleanMarkers(p);
-									}
-								}
-								break;
-							}
-							case IResourceDelta.ADDED: {
-								//if the POM or manifest has been added scan them
-								if(resource.getProjectRelativePath().equals(MANIFEST_PATH) ||
-										resource.getProjectRelativePath().equals(POM_PATH)) {
-									validate(resource.getProject());
-								}
-								break;
-							}
-							case IResourceDelta.CHANGED: {
-								//if the content has changed clean + scan
-								if((delta.getFlags() & IResourceDelta.CONTENT) > 0) {
-									if(resource.getProjectRelativePath().equals(MANIFEST_PATH) ||
-											resource.getProjectRelativePath().equals(POM_PATH)) {
-										validate(resource.getProject());
-									}
-								}
-								break;
-							}
-							default: {
-								break;
-							}
-						}
+				case IResource.PROJECT: {
+					if(delta.getKind() == IResourceDelta.REMOVED) {
 						return false;
 					}
+					//Should we not care about non-plugin projects?
+					IProject project = (IProject) resource;
+					try {
+						if(project.isAccessible() && project.getDescription().hasNature("org.eclipse.pde.PluginNature")) { //$NON-NLS-1$
+							if((delta.getFlags() & IResourceDelta.OPEN) > 0) {
+								validate(project);
+								return false;
+							}
+							return true;
+						}
+					}
+					catch(CoreException ce) {
+						RelEngPlugin.log(ce);
+					}
+					return false;
+				}
+				case IResource.ROOT:
+				case IResource.FOLDER: {
+					return true;
+				}
+				case IResource.FILE: {
+					switch(delta.getKind()) {
+					case IResourceDelta.REMOVED: {
+						//if manifest removed, clean up markers
+						if(resource.getProjectRelativePath().equals(MANIFEST_PATH)) {
+							//manifest content changed
+							IProject p = resource.getProject();
+							if(p.isAccessible()) {
+								cleanMarkers(p);
+							}
+						}
+						break;
+					}
+					case IResourceDelta.ADDED: {
+						//if the POM or manifest has been added scan them
+						if(resource.getProjectRelativePath().equals(MANIFEST_PATH) ||
+								resource.getProjectRelativePath().equals(POM_PATH)) {
+							validate(resource.getProject());
+						}
+						break;
+					}
+					case IResourceDelta.CHANGED: {
+						//if the content has changed clean + scan
+						if((delta.getFlags() & IResourceDelta.CONTENT) > 0) {
+							if(resource.getProjectRelativePath().equals(MANIFEST_PATH) ||
+									resource.getProjectRelativePath().equals(POM_PATH)) {
+								validate(resource.getProject());
+							}
+						}
+						break;
+					}
+					default: {
+						break;
+					}
+					}
+					return false;
+				}
 				}
 			}				
 			return false;
 		}
 	}
-	
+
 	/**
 	 * XML parsing handler to check the POM version infos
 	 */
@@ -176,53 +170,77 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		public void characters(char[] ch, int start, int length) throws SAXException {
 			if (checkVersion) {
 				checkVersion = false;
-				// Compare the versions
-				String versionString = new String(ch, start, length);
-				String origVer = versionString;
+
 				try {
-					// Remove snapshot suffix
+					// Remove the snapshot suffix
+					String versionString = new String(ch, start, length);
+					String origVer = versionString;
 					int index = versionString.indexOf(SNAPSHOT_SUFFIX);
 					if (index >= 0) {
 						versionString = versionString.substring(0, index);
 					}
-					Version pomVersion = Version.parseVersion(versionString);
-					// Remove qualifiers and snapshot
+
+					// Create corrected version (no qualifiers, add back snapshot suffix)
 					Version bundleVersion2 = new Version(bundleVersion.getMajor(), bundleVersion.getMinor(), bundleVersion.getMicro());
+					String correctedVersion = bundleVersion2.toString();
+					if (index >= 0) {
+						correctedVersion = correctedVersion.concat(SNAPSHOT_SUFFIX);
+					}
+
+					// Check if the pom version is a valid OSGi version
+					Version pomVersion = null;
+					try {
+						pomVersion = Version.parseVersion(versionString);
+					} catch (IllegalArgumentException e){
+						// Need to create a document to calculate the markers charstart and charend
+						IDocument doc = createDocument(pom);
+						int lineOffset = doc.getLineOffset(locator.getLineNumber() - 1); // locator lines start at 1
+						int linLength = doc.getLineLength(locator.getLineNumber() - 1);
+						String str = doc.get(lineOffset, linLength);
+						index = str.indexOf(origVer);
+						int charStart = lineOffset + index;
+						int charEnd = charStart + origVer.length();
+						reportMarker(NLS.bind(Messages.PomVersionErrorReporter_pom_version_error_marker_message, versionString, bundleVersion2.toString()), 
+								locator.getLineNumber(), 
+								charStart, 
+								charEnd, 
+								correctedVersion,
+								pom,
+								severity);
+					}
+
+					if (pomVersion == null){
+						return;
+					}
+
+					// Compare the versions
 					Version pomVersion2 = new Version(pomVersion.getMajor(), pomVersion.getMinor(), pomVersion.getMicro());
-
 					if (!bundleVersion2.equals(pomVersion2)) {
-						String correctedVersion = bundleVersion2.toString();
-						if (index >= 0) {
-							correctedVersion = correctedVersion.concat(SNAPSHOT_SUFFIX);
-						}
-
-						try {
-							// Need to create a document to calculate the markers charstart and charend
-							IDocument doc = createDocument(pom);
-							int lineOffset = doc.getLineOffset(locator.getLineNumber() - 1); // locator lines start at 1
-							int linLength = doc.getLineLength(locator.getLineNumber() - 1);
-							String str = doc.get(lineOffset, linLength);
-							index = str.indexOf(origVer);
-							int charStart = lineOffset + index;
-							int charEnd = charStart + origVer.length();
-							reportMarker(NLS.bind(Messages.PomVersionErrorReporter_pom_version_error_marker_message, pomVersion2.toString(), bundleVersion2.toString()), 
-									locator.getLineNumber(), 
-									charStart, 
-									charEnd, 
-									correctedVersion,
-									pom,
-									severity);
-						} catch (BadLocationException e) {
-							RelEngPlugin.log(e);
-						}
+						// Need to create a document to calculate the markers charstart and charend
+						IDocument doc = createDocument(pom);
+						int lineOffset = doc.getLineOffset(locator.getLineNumber() - 1); // locator lines start at 1
+						int linLength = doc.getLineLength(locator.getLineNumber() - 1);
+						String str = doc.get(lineOffset, linLength);
+						index = str.indexOf(origVer);
+						int charStart = lineOffset + index;
+						int charEnd = charStart + origVer.length();
+						reportMarker(NLS.bind(Messages.PomVersionErrorReporter_pom_version_error_marker_message, pomVersion2.toString(), bundleVersion2.toString()), 
+								locator.getLineNumber(), 
+								charStart, 
+								charEnd, 
+								correctedVersion,
+								pom,
+								severity);
 					}
 				} catch (IllegalArgumentException e) {
-					// Do nothing, user has a bad version
+					// If the manifest version is broken, let PDE report the problem
+				} catch (BadLocationException e) {
+					RelEngPlugin.log(e);
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Project relative path to the pom.xml file
 	 */
@@ -236,7 +254,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	private static final String ELEMENT_VERSION = "version"; //$NON-NLS-1$
 	private static final String SNAPSHOT_SUFFIX = "-SNAPSHOT"; //$NON-NLS-1$
 
-	
+
 	/**
 	 * Clean up all markers
 	 * 
@@ -250,7 +268,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			RelEngPlugin.log(e);
 		}
 	}
-	
+
 	/**
 	 * Validates the version in the Manifest.MF file against the version in the <code>pom.xml</code> file
 	 * 
@@ -263,7 +281,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		}
 		// Clean up existing markers
 		cleanMarkers(project);
-		
+
 		String severity = RelEngPlugin.getPlugin().getPreferenceStore().getString(IPomVersionConstants.POM_VERSION_ERROR_LEVEL);
 		if (IPomVersionConstants.VALUE_IGNORE.equals(severity)) {
 			return;
@@ -276,7 +294,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		if(!pom.exists()) {
 			return;
 		}
-		
+
 		// Get the manifest version
 		Version bundleVersion = Version.emptyVersion;
 		try {

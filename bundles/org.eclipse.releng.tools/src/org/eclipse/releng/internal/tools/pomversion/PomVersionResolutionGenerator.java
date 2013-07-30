@@ -28,7 +28,9 @@ public class PomVersionResolutionGenerator implements IMarkerResolutionGenerator
 			try {
 				if (marker.getType().equals(IPomVersionConstants.PROBLEM_MARKER_TYPE)){
 					String correctedVersion = (String) marker.getAttribute(IPomVersionConstants.POM_CORRECT_VERSION);
-					return new IMarkerResolution[] {new PomVersionMarkerResolution(correctedVersion)};
+					if (correctedVersion != null && correctedVersion.length() > 0){
+						return new IMarkerResolution[] {new PomVersionMarkerResolution(correctedVersion)};
+					}
 				}
 			} catch (CoreException e){
 				RelEngPlugin.log(e);
