@@ -21,7 +21,7 @@ fi
 
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
-cd /shared/eclipse/builds/4I/siteDir/eclipse/downloads/drops4
+cd ${BUILDMACHINE_BASE_DL}
 cp /shared/eclipse/sdk/renameBuild.sh ${PWD}
 
 printf "\n\n\t%s\n" "Promoting Eclipse site."

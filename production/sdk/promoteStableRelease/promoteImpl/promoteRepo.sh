@@ -39,7 +39,7 @@ findEclipseExe ${DL_SITE_ID}
 RC=$?
 if [[ $RC == 0 ]]
 then
-./addRepoProperties.sh ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_SITE_ID}
+${PROMOTE_IMPL}/addRepoProperties.sh ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_SITE_ID}
 else
     echo "ERROR: could not run add repo properties. Add manually."
 fi 
@@ -51,13 +51,13 @@ rsync -r "${BUILDMACHINE_SITE}/"  "${DLMACHINE_SITE}"
 
 if [[ "${HIDE_SITE}" != "true" ]]
 then
-   ./runAntRunner.sh ${PWD}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}
+   ${PROMOTE_IMPL}/runAntRunner.sh ${PROMOTE_IMPL}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}
 else
     echo "#!/usr/bin/env bash" > deferedCompositeAdd.sh
     echo "export JAVA_CMD=$JAVA_CMD" >> deferedCompositeAdd.sh
     echo "export JAVA_EXEC_DIR=${JAVA_EXEC_DIR}" >> deferedCompositeAdd.sh
     echo "export ECLIPSE_EXE=${ECLIPSE_EXE}" >> deferedCompositeAdd.sh
-    echo "./runAntRunner.sh ${PWD}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}" >> deferedCompositeAdd.sh
+    echo "${PROMOTE_IMPL}/runAntRunner.sh ${PROMOTE_IMPL}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}" >> deferedCompositeAdd.sh
     chmod +x deferedCompositeAdd.sh
     echo "Remember to add to composite, deferedCompositeAdd.sh, since HIDE_SITE was ${HIDE_SITE}" >> "${CL_SITE}/checklist.txt"
 fi

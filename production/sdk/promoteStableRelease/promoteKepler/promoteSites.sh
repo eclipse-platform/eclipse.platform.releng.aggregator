@@ -14,6 +14,8 @@ echo "CL_SITE: ${CL_SITE}"
 export DL_TYPE=R
 export TRAIN_NAME=Kepler
 export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4M/siteDir/updates/4.3-M-builds
+export BUILDMACHINE_BASE_DL=/shared/eclipse/builds/4M/siteDir/eclipse/downloads/drops4
+
 export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 
