@@ -26,7 +26,7 @@ printf "\n\t%s\t\t\t%s\n\n" "HIDE_SITE" "$HIDE_SITE" >> "${CL_SITE}/checklist.tx
 
 # we do Equinox first, since it has to wait in que until 
 # cronjob promotes it
-./promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ} ${HIDE_SITE}
+../promoteImpl/promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
@@ -34,7 +34,7 @@ then
     exit $rccode
 fi
 
-./promoteDropSite.sh   ${DROP_ID} ${DL_LABEL} ${HIDE_SITE}
+../promoteImpl/promoteDropSite.sh   ${DROP_ID} ${DL_LABEL} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
@@ -43,7 +43,7 @@ then
 fi
 
 
-./promoteRepo.sh ${DROP_ID} ${DL_LABEL} ${REPO_SITE_SEGMENT} ${HIDE_SITE}
+../promoteImpl/promoteRepo.sh ${DROP_ID} ${DL_LABEL} ${REPO_SITE_SEGMENT} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
