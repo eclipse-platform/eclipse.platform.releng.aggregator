@@ -14,7 +14,7 @@ export DL_TYPE=S
 #export DL_TYPE=R
 export TRAIN_NAME=Luna
 export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4I/siteDir/updates/4.3-I-builds
-
+export PROMOTE_IMPL=/shared/eclipse/sdk/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 
 echo "Promoted: $( date )" > "${CL_SITE}/checklist.txt"
