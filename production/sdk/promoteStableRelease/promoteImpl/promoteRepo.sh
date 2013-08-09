@@ -34,7 +34,7 @@ DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
 # just in case first time
 mkdir -p $DLMACHINE_SITE
 
-source promoteUtilities.shsource
+source ${PROMOTE_IMPL}/promoteUtilities.shsource
 findEclipseExe ${DL_SITE_ID}
 RC=$?
 if [[ $RC == 0 ]]

@@ -14,7 +14,7 @@ echo "CL_SITE: ${CL_SITE}"
 export DL_TYPE=R
 export TRAIN_NAME=Kepler
 export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4M/siteDir/updates/4.3-M-builds
-
+export PROMOTE_IMPL=/shared/eclipse/sdk/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 
 echo "Promoted: $( date )" > "${CL_SITE}/checklist.txt"
@@ -26,7 +26,7 @@ printf "\n\t%s\t\t\t%s\n\n" "HIDE_SITE" "$HIDE_SITE" >> "${CL_SITE}/checklist.tx
 
 # we do Equinox first, since it has to wait in que until 
 # cronjob promotes it
-../promoteImpl/promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ} ${HIDE_SITE}
+${PROMOTE_IMPL}/promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
@@ -34,7 +34,7 @@ then
     exit $rccode
 fi
 
-../promoteImpl/promoteDropSite.sh   ${DROP_ID} ${DL_LABEL} ${HIDE_SITE}
+${PROMOTE_IMPL}/promoteDropSite.sh   ${DROP_ID} ${DL_LABEL} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
@@ -43,7 +43,7 @@ then
 fi
 
 
-../promoteImpl/promoteRepo.sh ${DROP_ID} ${DL_LABEL} ${REPO_SITE_SEGMENT} ${HIDE_SITE}
+${PROMOTE_IMPL}/promoteRepo.sh ${DROP_ID} ${DL_LABEL} ${REPO_SITE_SEGMENT} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
