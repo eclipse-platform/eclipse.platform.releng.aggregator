@@ -14,7 +14,7 @@ export DL_TYPE=S
 #export DL_TYPE=R
 export TRAIN_NAME=Luna
 export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4I/siteDir/updates/4.3-I-builds
-export BUILDMACHINE_BASE_DL=/shared/eclipse/builds/4M/siteDir/eclipse/downloads/drops4
+export BUILDMACHINE_BASE_DL=/shared/eclipse/builds/4I/siteDir/eclipse/downloads/drops4
 
 export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
