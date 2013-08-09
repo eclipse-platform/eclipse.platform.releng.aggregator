@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+export JAVA_HOME=/shared/common/jdk1.7.0-latest
+export JAVA_EXEC_DIR=${JAVA_HOME}/jre/bin
+export JAVA_CMD=${JAVA_EXEC_DIR}/java
+
+function findEclipseExe ()
+{
+
+    BUILD_ID=$1
+
+    if [[ -z "${BUILD_ID}" ]]
+    then
+        echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID"
+        return 1
+    fi
+
+    BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse/builds/4I}
+    basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_ID}
+    if [[ ! -d "${basebuilderParent}" ]]
+    then
+        echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed."
+        echo "    basebuilderParent: ${basebuilderParent}"
+        return 1
+    fi
+
+    # TODO: we could check basebuilder here and if not, install it? 
+    #        but not required for immediate use case of using to composite repos.
+
+    baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
+    if [[ ! -d "${baseBuilderDir}" ]]
+    then
+        echo "ERROR: The directory did not exist."
+        echo "    baseBuilderDir: ${baseBuilderDir}"
+        return 1
+    fi
+
+    export ECLIPSE_EXE=$baseBuilderDir/eclipse
+    echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}"      
+
+    if [[ -n ${ECLIPSE_EXE} && -x ${ECLIPSE_EXE} ]]
+    then 
+        RC=0
+    else
+        echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse"
+        RC=11
+    fi
+
+    return $RC
+}

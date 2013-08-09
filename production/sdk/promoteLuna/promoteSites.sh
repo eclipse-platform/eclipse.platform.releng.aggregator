@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-DROP_ID=I20130605-2000
+DROP_ID=I20130807-1709
 #DROP_ID=I20130605-1939
-DL_LABEL=4.3
-DL_LABEL_EQ=Kepler
-#REPO_SITE_SEGMENT=4.3milestones
-REPO_SITE_SEGMENT=4.3
+DL_LABEL=4.4M1
+DL_LABEL_EQ=LunaM1
+REPO_SITE_SEGMENT=4.4milestones
+#REPO_SITE_SEGMENT=4.4
 HIDE_SITE=true
 #HIDE_SITE=false
 export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
-#export DL_TYPE=S
-export DL_TYPE=R
-export TRAIN_NAME=Kepler
-export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4M/siteDir/updates/4.3-M-builds
+export DL_TYPE=S
+#export DL_TYPE=R
+export TRAIN_NAME=Luna
+export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4I/siteDir/updates/4.3-I-builds
 
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 
