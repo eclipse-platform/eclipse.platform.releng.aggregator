@@ -18,6 +18,7 @@ final class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.releng.internal.tools.pomversion.messages"; //$NON-NLS-1$
 
 	public static String PomVersionErrorReporter_pom_version_error_marker_message;
+	public static String PomVersionErrorReporter_pom_version_error_marker_message_feature;
 	public static String PomVersionMarkerResolution_label;
 
 	static {
