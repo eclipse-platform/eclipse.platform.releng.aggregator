@@ -38,14 +38,25 @@ while ($anEntry = $aDirectory->read()) {
     if ($anEntry != "." && $anEntry!=".." && $anEntry!="TIME") {
         $parts = explode("-", $anEntry);
         if (count($parts) == 3) {
-            $buckets[$parts[0]][] = $anEntry;
+
+            //$buckets[$parts[0]][] = $anEntry;
+
             $timePart = $parts[2];
             $year = substr($timePart, 0, 4);
             $month = substr($timePart, 4, 2);
             $day = substr($timePart, 6, 2);
             $hour = substr($timePart,8,2);
             $minute = substr($timePart,10,2);
-            $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+            // special logic adds 1 second if build id contains "RC" ... this was 
+            // added for the M build case, where there is an M build and and RC version that 
+            // have same time stamp. One second should not effect desplayed values.
+            $isRC = strpos($anEntry, "RC");
+            if ($isRC === false) {
+               $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+            } else { 
+               $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+            }
+            $buckets[$parts[0]][$timeStamp] = $anEntry; 
             $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
             if ($timeStamp > $latestTimeStamp[$parts[0]]) {
                 $latestTimeStamp[$parts[0]] = $timeStamp;
@@ -55,7 +66,7 @@ while ($anEntry = $aDirectory->read()) {
 
         if (count($parts) == 2) {
             $buildType=substr($parts[0],0,1);
-            $buckets[$buildType][] = $anEntry;
+            //$buckets[$buildType][] = $anEntry;
             $datePart = substr($parts[0],1);
             $timePart = $parts[1];
             $year = substr($datePart, 0, 4);
@@ -63,7 +74,14 @@ while ($anEntry = $aDirectory->read()) {
             $day = substr($datePart, 6, 2);
             $hour = substr($timePart,0,2);
             $minute = substr($timePart,2,2);
-            $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+            $isRC = strpos($anEntry, "RC");
+            if ($isRC === false) {
+                $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+            } else { 
+                $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+            }
+            $buckets[$buildType[0]][$timeStamp] = $anEntry;   
+
             $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
             if ($timeStamp > $latestTimeStamp[$buildType]) {
                 $latestTimeStamp[$buildType] = $timeStamp;

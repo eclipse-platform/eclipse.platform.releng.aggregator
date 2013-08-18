@@ -316,7 +316,7 @@ while ($anEntry = $aDirectory->read()) {
         if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")) {
             if (count($parts) == 3) {
 
-                //$buckets[$parts[0]][[]] = $anEntry;
+                //$buckets[$parts[0]][] = $anEntry;
 
                 $timePart = $parts[2];
                 $year = substr($timePart, 0, 4);
@@ -353,7 +353,12 @@ while ($anEntry = $aDirectory->read()) {
                 $day = substr($datePart, 6, 2);
                 $hour = substr($timePart,0,2);
                 $minute = substr($timePart,2,2);
-                $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+                $isRC = strpos($anEntry, "RC");
+                if ($isRC === false) {
+                    $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+                } else { 
+                    $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+                }
                 $buckets[$buildType[0]][$timeStamp] = $anEntry;   
 
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
