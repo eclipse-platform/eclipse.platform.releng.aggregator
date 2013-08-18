@@ -316,7 +316,7 @@ while ($anEntry = $aDirectory->read()) {
         if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")) {
             if (count($parts) == 3) {
 
-                $buckets[$parts[0]][] = $anEntry;
+                //$buckets[$parts[0]][[]] = $anEntry;
 
                 $timePart = $parts[2];
                 $year = substr($timePart, 0, 4);
@@ -325,7 +325,7 @@ while ($anEntry = $aDirectory->read()) {
                 $hour = substr($timePart,8,2);
                 $minute = substr($timePart,10,2);
                 $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-
+                $buckets[$parts[0]][$timeStamp] = $anEntry; 
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
                 // latestTimeStamp will not be defined, first time through
                 if (!isset($latestTimeStamp) || !array_key_exists($parts[0],$latestTimeStamp)  || $timeStamp > $latestTimeStamp[$parts[0]]) {
@@ -337,7 +337,7 @@ while ($anEntry = $aDirectory->read()) {
             if (count($parts) == 2) {
 
                 $buildType=substr($parts[0],0,1);
-                $buckets[$buildType][] = $anEntry;
+                //$buckets[$buildType][] = $anEntry;
                 $datePart = substr($parts[0],1);
                 $timePart = $parts[1];
                 $year = substr($datePart, 0, 4);
@@ -346,6 +346,8 @@ while ($anEntry = $aDirectory->read()) {
                 $hour = substr($timePart,0,2);
                 $minute = substr($timePart,2,2);
                 $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+                $buckets[$buildType[0]][$timeStamp] = $anEntry;   
+
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
 
                 if (!isset($latestTimeStamp) || !array_key_exists($buildType,$latestTimeStamp) || $timeStamp > $latestTimeStamp[$buildType]) {
@@ -442,10 +444,9 @@ foreach($dropType as $value) {
         echo "<th>Build Date</th>\n";
 
         echo "</tr>\n";
-
         $aBucket = $buckets[$prefix];
         if (isset($aBucket)) {
-            rsort($aBucket);
+            krsort($aBucket);
             foreach($aBucket as $innerValue) {
 
                 if (!file_exists($subdirDrops."/".$innerValue."/buildHidden")) {
