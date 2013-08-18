@@ -12,3 +12,6 @@ is on the downlaod server, so its recommended, before making changes,
 to get a copy, manually compare with that's here, to see if things
 have changed but not be put into the repository.
 
+Something similar to following is a good way to get all the interesting files, while avoiding the large download drops
+
+rsync -aP --delete-excluded  --include '**/drops/index.html'  --include '**/drops4/index.html' --exclude '**/drops/**' --exclude '**/drops4/**'  build:/home/data/httpd/download.eclipse.org/eclipse/downloads/ .
