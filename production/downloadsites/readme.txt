@@ -12,9 +12,11 @@ is on the downlaod server, so its recommended, before making changes,
 to get a copy, manually compare with that's here, to see if things
 have changed but not be put into the repository.
 
-Something similar to following is a good way to get all the interesting files, while avoiding the large download drops
-index.html and eclipse3x.html are the files created when new drops are uploaded, via "updateIndexes.sh" in sdk directory, 
-so are excluded, since would often be "out of date" and should not be replaced on downloads (via rsync) but instead recreated.
+Something similar to following is a good way to get all the interesting files, 
+while avoiding the large download drops. index.html and eclipse3x.html are the 
+files created when new drops are uploaded, via "updateIndexes.sh" in sdk directory, 
+so are excluded, since would often be "out of date" and 
+should not be replaced on downloads (via rsync) but instead recreated.
 
 rsync -aP --delete-excluded \
   --exclude '/TIME' --exclude '**/ztime/' --exclude '**/pde/' --exclude '**/equinox/' --exclude '**/eclipse.org-common/' \
