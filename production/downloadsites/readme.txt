@@ -12,7 +12,7 @@ is on the downlaod server, so its recommended, before making changes,
 to get a copy, manually compare with that's here, to see if things
 have changed but not be put into the repository.
 
-Something similar to following is a good way to get all the interesting files, 
+Something similar to following is a good way to get all the interesting files for /eclipse/downloadsites, 
 while avoiding the large download drops. index.html and eclipse3x.html are the 
 files created when new drops are uploaded, via "updateIndexes.sh" in sdk directory, 
 so are excluded, since would often be "out of date" and 
@@ -24,5 +24,12 @@ rsync -aP --delete-excluded \
   --include '/index.html' --include '**/drops/index.html'  --include '**/drops4/index.html'  \
   --exclude '**/drops/**' --exclude '**/drops4/**' --exclude 'downloads/index.html' --exclude '**/downloads/eclipse3x.html' \
   build:/home/data/httpd/download.eclipse.org/eclipse/ .
+
+Similar for equinox
+
+rsync -aP --delete-excluded \
+  --exclude '**/devicekit/' --exclude '**/drops/' --exclude '**/R-3.7.2-201202080800/' \
+  --exclude '**/S-3.7RC4-201106030909/' --exclude '**/testweb/' --exclude '**/.*.swp/' \
+  build:/home/data/httpd/download.eclipse.org/equinox/ .
 
 
