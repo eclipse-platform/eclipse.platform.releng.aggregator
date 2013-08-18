@@ -23,7 +23,13 @@ rsync -aP --delete-excluded \
   --exclude '**/e4/' --exclude '**/updates/' \
   --include '/index.html' --include '**/drops/index.html'  --include '**/drops4/index.html'  \
   --exclude '**/drops/**' --exclude '**/drops4/**' --exclude 'downloads/index.html' --exclude '**/downloads/eclipse3x.html' \
-  build:/home/data/httpd/download.eclipse.org/eclipse/ .
+  build:/home/data/httpd/download.eclipse.org/eclipse/ . 
+  
+To upload whole directory, do not include --delete-excluded (Could likely not do with out any 
+of the excludes/includes, if working with "clean" directory). 
+
+rsync -aP \
+  . build:/home/data/httpd/download.eclipse.org/eclipse/ 
 
 Similar for equinox
 
