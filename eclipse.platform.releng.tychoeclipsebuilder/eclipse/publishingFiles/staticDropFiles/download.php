@@ -47,7 +47,7 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
         if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I") {
             $BUILD_DIR_NAME = $BUILD_ID;
         } else {
-            if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S") {
+            if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S" || $BUILD_TYPE === "M") {
                 $timestamp = str_replace('-', '', $TIMESTAMP);
                 $BUILD_DIR_NAME = $BUILD_TYPE."-".$BUILD_ID."-".$timestamp;
             } else {
