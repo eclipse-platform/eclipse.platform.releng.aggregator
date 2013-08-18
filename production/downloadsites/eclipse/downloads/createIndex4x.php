@@ -324,7 +324,15 @@ while ($anEntry = $aDirectory->read()) {
                 $day = substr($timePart, 6, 2);
                 $hour = substr($timePart,8,2);
                 $minute = substr($timePart,10,2);
-                $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+                // special logic adds 1 second if build id contains "RC" ... this was 
+                // added for the M build case, where there is an M build and and RC version that 
+                // have same time stamp. One second should not effect desplayed values.
+                $isRC = strpos($anEntry, "RC");
+                if ($isRC === false) {
+                    $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+                } else { 
+                    $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+                }
                 $buckets[$parts[0]][$timeStamp] = $anEntry; 
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
                 // latestTimeStamp will not be defined, first time through
