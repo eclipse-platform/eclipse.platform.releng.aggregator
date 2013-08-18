@@ -1,20 +1,29 @@
 #!/usr/bin/env bash
 
-DROP_ID=I20130605-2000
-#DROP_ID=I20130605-1939
-DL_LABEL=4.3
-DL_LABEL_EQ=Kepler
+DROP_ID=M20130814-0800
+
+DL_LABEL=4.3.1RC1
+DL_LABEL_EQ=KeplerSR1RC1
+
 #REPO_SITE_SEGMENT=4.3milestones
-REPO_SITE_SEGMENT=4.3
+REPO_SITE_SEGMENT=4.3-M-builds
+
 HIDE_SITE=true
 #HIDE_SITE=false
+
 export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
+
 #export DL_TYPE=S
-export DL_TYPE=R
+#export DL_TYPE=R
+export DL_TYPE=M
+
 export TRAIN_NAME=Kepler
-export BUILDMACHINE_BASE_SITE=/shared/eclipse/builds/4M/siteDir/updates/4.3-M-builds
-export BUILDMACHINE_BASE_DL=/shared/eclipse/builds/4M/siteDir/eclipse/downloads/drops4
+
+export BUILD_ROOT=/shared/eclipse/builds/4M
+export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.3-M-builds
+export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
+export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
 
 export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
