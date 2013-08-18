@@ -149,7 +149,7 @@ EOHTML;
 
     $aBucket = $buckets[$prefix];
     if (isset($aBucket)) {
-        rsort($aBucket);
+        krsort($aBucket);
         foreach($aBucket as $innerValue) {
             $parts = explode("-", $innerValue);
             $html .= <<<EOHTML
