@@ -15,6 +15,8 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
+export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
+
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
 
@@ -97,7 +99,8 @@ fi
 # and build types, (e.g. M vs. I). For N builds, we still use "I". 
 # 5/31013. We no longer do the post build comparator, but leaving it, just 
 # in case we want an occasionally double check ... but, should never be routine. 
-comparatorRepository=http://download.eclipse.org/eclipse/updates/4.4-M-builds
+#comparatorRepository=http://download.eclipse.org/eclipse/updates/4.4-M-builds
+comparatorRepository=NOT_CURRENTLY_USED
 
 GET_AGGREGATOR_BUILD_LOG="${logsDirectory}/mb010_get-aggregator_output.txt"
 TAG_BUILD_INPUT_LOG="${logsDirectory}/mb030_tag_build_input_output.txt"
@@ -154,6 +157,7 @@ fn-write-property BUILD_TYPE_NAME
 fn-write-property TRACE_OUTPUT
 fn-write-property comparatorRepository
 fn-write-property logsDirectory
+fn-write-property BUILD_TIME_PATCHES
 
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
@@ -171,14 +175,13 @@ else
     $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
     checkForErrorExit $? "Error occurred while updating build input"
 
-    #if [[ $BUILD_ID =~ [IN] ]] 
-    #then
+    if $BUILD_TIME_PATCHES ; then
         # temp hack for bug 398141 and others
         # apply the pre-created patch from tempPatches
-        #echo "INFO: apply temp patch, if any"
-        #patch -p1  --backup -d $aggDir/eclipse.platform.ui/bundles  -i $aggDir/production/tempPatches/jface.patch
-        #checkForErrorExit $? "Error occurred applying patch"
-    #fi 
+        echo "INFO: apply temp patch, if any"
+        patch -p1  --backup -d $aggDir/eclipse.platform.ui/bundles  -i $aggDir/production/tempPatches/ui.patch
+        checkForErrorExit $? "Error occurred applying patch"
+    fi 
 
     # We always make tag commits, if build successful or not, but don't push
     # back to origin if doing N builds or test builds.
