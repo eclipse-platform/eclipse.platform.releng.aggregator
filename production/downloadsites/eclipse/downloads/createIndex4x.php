@@ -1,14 +1,12 @@
 <?php  
 # Begin: page-specific settings.  Change these.
 $pageTitle    = "Eclipse Project Downloads";
-$pageKeywords = "";
-$pageAuthor   = "";
+$pageKeywords = "eclipse sdk pde jdt downloads";
+$pageAuthor   = "David Williams";
 
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
 $eclipseStream="4";
-$otherIndexFile="eclipse3x.html";
-$otherStream="3";
 include('dlconfig4.php');
 $subdirDrops="drops4";
 
@@ -19,15 +17,34 @@ ob_start();
 
 switch($layout){
 case 'html':
-    #If this file is not on download.eclipse.org print the legacy headers.?>
+    #If this file is not on download.eclipse.org print the legacy headers.
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="stylesheet" href="../default_style.css" />
-<title><?php echo $pageTitle;?></title></head>
-<body><?php
-        break;   
+<title><?php echo $pageTitle;?></title>
+<style>
+table {
+    border-collapse: separate;
+    border-spacing: 1px;
+    *border-collapse: expression('separate', cellSpacing = '1px');
+    width:100%;
+}
+td {
+ text-align:left;
+ padding: 1px;
+ vertical-align:top;
+}
+
+</style>
+
+</head>
+<body>
+
+<?php
+    break;   
 default:
     #Otherwise use the default layout (content printed inside the nova theme).
     require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
@@ -39,57 +56,63 @@ default:
     break;     
 }?>
 <div class="container_<?php echo $layout;?>">
-<table style="border:0px" cellspacing="5" cellpadding="2" width="100%" >
+<table width="100%">
 
-<tr>
+<tr align="left">
 
+<!--
 <td align="left" width="72%">
-<font class="indextop"> Eclipse Project <?php echo $eclipseStream;?>.x Stream Downloads</font> <br />
+-->
+<td>
+<font class="indextop">The Eclipse Project Downloads</font> <br />
 <font class="indexsub">
 Latest downloads from the Eclipse project
 </font><br />
 </td>
-
+<!--
 <td width="28%">
-
+-->
 <!-- not sure, might need this "rowspan 2" then eclipsecon logo included?
 <td width="19%" rowspan="2"></td>
 -->
+<!--
 <img src="../images/friendslogo.jpg" alt="Friends of Eclipse Logo" /><br />Support Eclipse! Become a <a href="http://www.eclipse.org/donate/">friend</a>.<br />
 </td>
+-->
 <!--  <td width="19%" rowspan="2"><a href="http://www.eclipsecon.org/" target="_blank"><img src="../images/prom-eclipsecon1.gif" width="125" height="125" border="0" /></a></td> -->
 
 </tr>
 
 </table>
-
-<table style="border:0px" cellspacing="5" cellpadding="2" width="100%" >
-<tr>
-<td align="left" valign="top" colspan="2" bgcolor="#0080C0"><font color="#FFFFFF" face="Arial,Helvetica">Latest
-Downloads</font></td></tr> <!-- The Eclipse Projects --> <tr> <td>
 <p>On this
-page you can find the latest <a href="build_types.html" target="_top">builds</a> produced by
+page you can find the latest builds produced by
 the <a href="http://www.eclipse.org/eclipse" target="_top">Eclipse
 Project</a>. To get started run the program and go through the user and developer
-documentation provided in the online help system. If you have problems downloading
+documentation provided in the on-line help system. If you have problems downloading
 the drops, contact the <font size="-1" face="arial,helvetica,geneva"><a href="mailto:webmaster@eclipse.org">webmaster</a></font>.
 If you have problems installing or getting the workbench to run, <a href="http://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs" target="_top">check
 out the Eclipse Project FAQ,</a> or try posting a question to the <a href="http://www.eclipse.org/newsgroups" target="_top">newsgroup</a>.
-All downloads are provided under the terms and conditions of the <a href="http://www.eclipse.org/legal/epl/notice.php" target="_top">Eclipse Foundation
-Software User Agreement</a> unless otherwise specified. </p>
-
-
-<p><a href="http://download.eclipse.org/eclipse/downloads/<?php echo $otherIndexFile;?>">Eclipse <?php echo $otherStream;?>.x downloads</a> are available.</p>
-<p>See the <a href="http://www.eclipse.org/downloads/"> main Eclipse download site for other packages and projects</a>.</p>
-<p>Help out with Eclipse translations - check out the <a href="http://babel.eclipse.org/babel/">Babel project</a>.</p>
-<p>If you prefer, try downloading with the <a href="http://build.eclipse.org/technology/phoenix/torrents/SDK/">SDK Torrents</a> </p>
-
-<p>
-See also the <a href="http://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>, read information about different <a href="build_types.html">kinds of
-builds</a>, access <a href="http://archive.eclipse.org/eclipse/downloads/">archived builds</a> (including language packs), or see a list of
-<a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites">p2 update sites</a>.
+<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=415540
+If prefered, downloads are available with <a href="http://build.eclipse.org/technology/phoenix/torrents/SDK/">SDK Torrents</a>.
+--> 
+<!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=415509
+Please consider helping with Eclipse translations; see the <a href="http://babel.eclipse.org/babel/">Babel project</a>.
+-->
 </p>
-</td></tr>
+
+<p>See the <a href="http://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.<br />
+The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).<br />
+For reference, see also<br />  
+<a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>.<br />
+<a href="build_types.html">meaning of kinds of builds</a> (M,N,I,S, and R).<br />
+<a href="http://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.<br />
+&nbsp;</p>
+<table width="100%">
+<tr>
+<td width="100%" bgcolor="#0080C0"><font color="#FFFFFF" face="Arial,Helvetica">Latest
+Downloads</font>
+</td>
+</tr> 
 </table>
 
 <?php
@@ -161,7 +184,7 @@ function printBuildColumns($fileName, $parts) {
     global $subdirDrops;
     // no file name, write empty column
     if ($fileName == "") {
-        echo "<td></td>\n";
+        echo "<td width=\"25%\">&nbsp;</td>\n";
         return;
     }
     // get build name, date and time
@@ -181,7 +204,7 @@ function printBuildColumns($fileName, $parts) {
     $time=intval(date("H"))*60+intval(date("i"));
     $diff=($day-$buildDay)*24*60+$time-$buildTime;
     // Add icons
-    echo "<td valign=\"baseline\" >\n";
+    echo "<td width=\"25%\">\n";
     // hard code for now the build is done
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
     // but later, changed ...
@@ -374,17 +397,18 @@ while ($anEntry = $aDirectory->read()) {
 ?>
 
 <!-- This is the summary section, showing latest of each -->
-<table width="100%" cellspacing="0" cellpadding="3" align="center">
+<!--
+<table width="100%">
 <tr>
-<td align="left">
+<td>
+-->
 
-
-<table  width="100%" cellspacing="0" cellpadding="3">
+<table width="100%">
 <tr>
-<th width="30%">Build Type</th>
-<th width="15%">Build Name</th>
-<th width="25%">Build Status</th>
-<th>Build Date</th>
+<th align="left" width="20%">Build Type</th>
+<th align="left"  width="15%">Build Name</th>
+<th align="left"  width="25%">Build Status</th>
+<th align="left"  width-"40%">Build Date</th>
 </tr>
 <?php
 foreach($dropType as $value) {
@@ -410,21 +434,25 @@ foreach($dropType as $value) {
         }
         if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
             echo "<tr>\n";
-            echo "<td width=\"30%\">$value</td>\n";
+            echo "<td width=\"20%\">$value</td>\n";
             if ($fileName == "") {
-                echo "<td></td>\n";
+                echo "<td width=\"15%\">&nbsp;</td>\n";
             } else {
-                echo "<td><a href=\"$subdirDrops/$fileName/\">$buildName</a></td>\n";
+                echo "<td width=\"15%\"><a href=\"$subdirDrops/$fileName/\">$buildName</a></td>\n";
             }
             $buildName = printBuildColumns($fileName, $parts);
-            echo "<td>$timeStamps[$fileName]</td>\n";
+            echo "<td width=\"40%\">$timeStamps[$fileName]</td>\n";
             echo "</tr>\n";
         }
     }
 }
 ?>
-    </table></td></tr></table>
-
+</td>
+</tr>
+    </table>
+<!-- </td></tr></table> 
+<table  width="100%" >
+-->
 
 <?php
 foreach($dropType as $value) {
@@ -432,29 +460,29 @@ foreach($dropType as $value) {
     // skip whole section, if bucket is empty
     if (array_key_exists($prefix,$buckets)) {
 
-        echo " <table width=\"100%\" cellspacing=\"0\" cellpadding=\"3\" align=\"center\" >\n";
+        echo "<table width=\"100%\">\n";
         // header, colored row
         echo "<tr bgcolor=\"#999999\">\n";
         // name attribute can have no spaces, so we tranlate them to underscores
         // (could effect targeted links)
         $valueName=strtr($value,' ','_');
-        echo "<td align=\"left\" width=\"30%\"><a name=\"$valueName\">\n";
+        echo "<td width=\"100%\"><a name=\"$valueName\">\n";
         echo "<font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value\n";
         echo "</font></a></td>\n";
         echo "</tr>\n";
+        echo "</table>";
 
-        echo "<tr>\n";
-        echo "<td align=\"left\" >\n";
-        echo "\n";
-        echo "\n";
-        echo "\n";
-        echo "\n";
-        echo "<table  width=\"100%\" cellspacing=\"0\" cellpadding=\"4\" >\n";
+       // echo "<tr>\n";
+       // echo "<td>\n";
+        //echo "<br/>\n";
+        echo "<table width=\"100%\">\n";
         echo "<tr>\n";
 
+        // first cell blank, for alignment with top block
+        echo "<th width=\"20%\"></th>";
         echo "<th width=\"15%\">Build Name</th>\n";
         echo "<th width=\"25%\">Build Status</th>\n";
-        echo "<th>Build Date</th>\n";
+        echo "<th width=\"40%\">Build Date</th>\n";
 
         echo "</tr>\n";
         $aBucket = $buckets[$prefix];
@@ -467,32 +495,31 @@ foreach($dropType as $value) {
                     $parts = explode("-", $innerValue);
 
                     echo "<tr>\n";
-
+                    echo "<td width=\"20%\">&nbsp;</td>\n";
                     // Uncomment the line below if we need click through licenses.
                     // echo "<td><a href=\"license.php?license=$subdirDrops/$innerValue\">$parts[1]</a></td>\n";
 
                     // Comment the line below if we need click through licenses.
                     $buildName=$innerValue;
                     if (count ($parts)==3) {
-                        echo "<td><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
+                        echo "<td width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
                     } else if (count ($parts)==2) {
-                        echo "<td><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
+                        echo "<td width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
                     } else {
-                        echo "<td>Unexpected numberof parts?</td>\n";
+                        echo "<td width=\"15%\">Unexpected numberof parts?</td>\n";
                     }
 
                     $buildName = printBuildColumns($innerValue, $parts);
-                    echo "<td>$timeStamps[$innerValue]</td>\n";
+                    echo "<td width=\"40%\">$timeStamps[$innerValue]</td>\n";
                     echo "</tr>\n";
                 }
             }
         }
         echo "</table>\n";
-        echo "</td></tr>\n";
-        echo "</table>\n";
-
     }
 }
+echo "<hr>";
+echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"http://www.eclipse.org/legal/epl/notice.php\" target=\"_top\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>"; 
 
 echo '</div>';
 $html = ob_get_clean();
