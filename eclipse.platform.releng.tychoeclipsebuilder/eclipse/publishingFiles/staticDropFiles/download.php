@@ -43,11 +43,20 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
         // But it can be defined several times in reference URI, such as once in directory name, 
         // and once in filename. We want the directory-like part.
         // And to complicate things, in S and R builds, the segment is no longer BUILD_ID, 
-        // but a more complicated concatination. 
-        if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I") {
+        // but a more complicated concatination. And M builds even more complicated, since 
+        // there are two types, some are "RCs", and some not. 
+        
+        $pos = strpos($BUILD_ID, "RC");
+        if ($pos === false) {
+           $isRC = false;
+        } else { 
+           $isRC = true;
+        }
+        
+        if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || ($BUILD_TYPE === "M" && ! $isRC)) {
             $BUILD_DIR_NAME = $BUILD_ID;
         } else {
-            if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S" || $BUILD_TYPE === "M") {
+            if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S" || ($BUILD_TYPE === "M" && $isRC)) {
                 $timestamp = str_replace('-', '', $TIMESTAMP);
                 $BUILD_DIR_NAME = $BUILD_TYPE."-".$BUILD_ID."-".$timestamp;
             } else {
