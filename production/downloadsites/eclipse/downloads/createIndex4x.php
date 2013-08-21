@@ -56,18 +56,20 @@ default:
     break;     
 }?>
 <div class="container_<?php echo $layout;?>">
-<table width="100%">
+<table width="100%" style="border-spacing:2px;">
 
-<tr align="left">
+<tr>
 
 <!--
 <td align="left" width="72%">
 -->
-<td>
-<font class="indextop">The Eclipse Project Downloads</font> <br />
+<td align="left" width="100%" style="padding:2px;">
+<font class="indextop"><br />The Eclipse Project Downloads</font> <br />
+<!--
 <font class="indexsub">
 Latest downloads from the Eclipse project
 </font><br />
+-->
 </td>
 <!--
 <td width="28%">
@@ -184,7 +186,7 @@ function printBuildColumns($fileName, $parts) {
     global $subdirDrops;
     // no file name, write empty column
     if ($fileName == "") {
-        echo "<td width=\"25%\">&nbsp;</td>\n";
+        echo "<td align=\"left\" width=\"25%\">&nbsp;</td>\n";
         return;
     }
     // get build name, date and time
@@ -204,7 +206,7 @@ function printBuildColumns($fileName, $parts) {
     $time=intval(date("H"))*60+intval(date("i"));
     $diff=($day-$buildDay)*24*60+$time-$buildTime;
     // Add icons
-    echo "<td width=\"25%\">\n";
+    echo "<td align=\"left\" width=\"25%\">\n";
     // hard code for now the build is done
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
     // but later, changed ...
@@ -434,14 +436,14 @@ foreach($dropType as $value) {
         }
         if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
             echo "<tr>\n";
-            echo "<td width=\"20%\">$value</td>\n";
+            echo "<td align=\"left\" width=\"20%\">$value</td>\n";
             if ($fileName == "") {
-                echo "<td width=\"15%\">&nbsp;</td>\n";
+                echo "<td align=\"left\" width=\"15%\">&nbsp;</td>\n";
             } else {
-                echo "<td width=\"15%\"><a href=\"$subdirDrops/$fileName/\">$buildName</a></td>\n";
+                echo "<td align=\"left\"  width=\"15%\"><a href=\"$subdirDrops/$fileName/\">$buildName</a></td>\n";
             }
             $buildName = printBuildColumns($fileName, $parts);
-            echo "<td width=\"40%\">$timeStamps[$fileName]</td>\n";
+            echo "<td  align=\"left\" width=\"40%\">$timeStamps[$fileName]</td>\n";
             echo "</tr>\n";
         }
     }
@@ -466,7 +468,7 @@ foreach($dropType as $value) {
         // name attribute can have no spaces, so we tranlate them to underscores
         // (could effect targeted links)
         $valueName=strtr($value,' ','_');
-        echo "<td width=\"100%\"><a name=\"$valueName\">\n";
+        echo "<td align=\"left\" width=\"100%\"><a name=\"$valueName\">\n";
         echo "<font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value\n";
         echo "</font></a></td>\n";
         echo "</tr>\n";
@@ -479,10 +481,10 @@ foreach($dropType as $value) {
         echo "<tr>\n";
 
         // first cell blank, for alignment with top block
-        echo "<th width=\"20%\"></th>";
-        echo "<th width=\"15%\">Build Name</th>\n";
-        echo "<th width=\"25%\">Build Status</th>\n";
-        echo "<th width=\"40%\">Build Date</th>\n";
+        echo "<th align=\"left\" width=\"20%\"></th>";
+        echo "<th align=\"left\" width=\"15%\">Build Name</th>\n";
+        echo "<th align=\"left\" width=\"25%\">Build Status</th>\n";
+        echo "<th align=\"left\" width=\"40%\">Build Date</th>\n";
 
         echo "</tr>\n";
         $aBucket = $buckets[$prefix];
@@ -495,22 +497,22 @@ foreach($dropType as $value) {
                     $parts = explode("-", $innerValue);
 
                     echo "<tr>\n";
-                    echo "<td width=\"20%\">&nbsp;</td>\n";
+                    echo "<td align=\"left\" width=\"20%\">&nbsp;</td>\n";
                     // Uncomment the line below if we need click through licenses.
                     // echo "<td><a href=\"license.php?license=$subdirDrops/$innerValue\">$parts[1]</a></td>\n";
 
                     // Comment the line below if we need click through licenses.
                     $buildName=$innerValue;
                     if (count ($parts)==3) {
-                        echo "<td width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
+                        echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
                     } else if (count ($parts)==2) {
-                        echo "<td width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
+                        echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
                     } else {
-                        echo "<td width=\"15%\">Unexpected numberof parts?</td>\n";
+                        echo "<td align=\"left\" width=\"15%\">Unexpected numberof parts?</td>\n";
                     }
 
                     $buildName = printBuildColumns($innerValue, $parts);
-                    echo "<td width=\"40%\">$timeStamps[$innerValue]</td>\n";
+                    echo "<td align=\"left\" width=\"40%\">$timeStamps[$innerValue]</td>\n";
                     echo "</tr>\n";
                 }
             }

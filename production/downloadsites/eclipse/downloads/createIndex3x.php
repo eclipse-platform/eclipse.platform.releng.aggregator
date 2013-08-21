@@ -44,7 +44,7 @@ default:
 <tr>
 
 <td align="left">
-<font class="indextop"> Eclipse Project <?php echo $eclipseStream;?>.x Stream Downloads</font> <br />
+<font class="indextop"><br /> Eclipse Project <?php echo $eclipseStream;?>.x Stream Downloads</font> <br />
 <br />
 </td>
 
