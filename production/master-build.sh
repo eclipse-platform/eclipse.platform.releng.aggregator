@@ -179,7 +179,7 @@ else
         # temp hack for bug 398141 and others
         # apply the pre-created patch from tempPatches
         echo "INFO: apply temp patch, if any"
-        patch -p1  --backup -d $aggDir/eclipse.platform.ui/bundles  -i $aggDir/production/tempPatches/ui.patch
+        patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/production/tempPatches/eqweave.patch
         checkForErrorExit $? "Error occurred applying patch"
     fi 
 
