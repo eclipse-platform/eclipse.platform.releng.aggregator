@@ -45,17 +45,22 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
     <cbi-jdt-version>3.10.0.v20130801-1514</cbi-jdt-version>
+
     <!-- 
-       Normal bundles produced for production deliverables can use 
-             <compilerArgument>${code-compilerArgs}</compilerArgument>
-       Bundles that contain only unit tests can use ${test-compilerArgs}.
-             <compilerArgument>${test-compilerArgs}</compilerArgument>
-       Naturally, any individual bundle or repo can use what ever they'd like, 
-       but these are the "standard" Eclipse project settings. 
+       Production bundles are produced by ignoring the compiler warnings specified
+       by ${code.ignoredWarnings} (see further down).
+       Good citizens don't override those default settings for their production bundles.
+       NOTE: The goal is to remove raw and unchecked, once JFace is correctly generified.
     -->
-    <code-compilerArgs>-warn:-deprecation,raw,unchecked</code-compilerArgs>
-    <test-compilerArgs>-warn:-deprecation,raw,unchecked,-discouraged,forbidden,warningToken</test-compilerArgs>
-    
+    <code.ignoredWarnings>-warn:-deprecation,raw,unchecked</code.ignoredWarnings>
+
+    <!-- 
+       Test bundles may override the list of ignored warnings by setting the compiler argument with:
+             <compilerArgument>${tests.ignoredWarnings}</compilerArgument>
+       Good citizens use those default settings for their test bundles.
+    -->
+    <tests.ignoredWarnings>-warn:-deprecation,raw,unchecked,discouraged</tests.ignoredWarnings>
+
     <eclipse-repo.url>https://repo.eclipse.org/content/repositories/releases/</eclipse-repo.url>
     <cbi-snapshots-repo.url>https://repo.eclipse.org/content/repositories/cbi-snapshots/</cbi-snapshots-repo.url>
     <!-- this eclipse-p2-repo.url is specifically for the build individual bundles profile. -->
@@ -310,7 +315,7 @@
             </dependency>
           </dependencies>
           <configuration>
-            <compilerArgument>${code-compilerArgs}</compilerArgument>
+            <compilerArgument>${code.ignoredWarnings}</compilerArgument>
             <compilerArguments>
               <verbose/>
               <inlineJSR/>
