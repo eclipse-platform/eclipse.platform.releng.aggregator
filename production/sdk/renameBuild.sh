@@ -48,7 +48,6 @@ replaceCommand="s!${fromString}!${toString}!g"
 # if the perl command fails.
 # TODO: could add some "smarts" here to see if all was as expected before making changes.
 perl -w -pi -e ${replaceCommand} ${oldname}/*.php
-perl -w -pi -e ${replaceCommand} ${oldname}/*.map
 perl -w -pi -e ${replaceCommand} ${oldname}/*.html
 perl -w -pi -e ${replaceCommand} ${oldname}/*.xml
 perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
@@ -114,6 +113,7 @@ then
     newString="BUILD_TYPE = \"S\""
 elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == M]]
     newString="BUILD_TYPE = \"M\""
+then
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE = \"R\""
