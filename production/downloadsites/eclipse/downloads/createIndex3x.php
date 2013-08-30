@@ -25,7 +25,14 @@ case 'html':
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link rel="stylesheet" href="../default_style.css" />
-<title><?php echo $pageTitle;?></title></head>
+<title><?php echo $pageTitle;?></title>
+<!-- 
+note, for Nova (default) secion below, this 'refresh' 
+header is hadded 'by hand' after nova version is created ... 
+since it generates its own 'header section'
+-->
+<meta http-equiv="refresh" content="10; URL=index.html">
+</head>
 <body><?php
         break;   
 default:
@@ -61,7 +68,9 @@ Downloads</font></td></tr> <!-- The Eclipse Projects --> <tr> <td>
 <a href="http://archive.eclipse.org/eclipse/downloads/">archived builds</a>. 
 Specifically, for the last 3.8.x build see the <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2 build</a> there.</p>
 
-<p>The most recent Eclipse builds are available at the <a href="http://download.eclipse.org/eclipse/downloads/">Eclipse download site</a>.</p>
+<p>You should be re-directed within 10 seconds to the page for 
+<a href="http://download.eclipse.org/eclipse/downloads/">the most recent Eclipse builds</a>. If not, 
+simply click on the link. Pleaese update your bookmarks.</p>
 
 <p>This page
 has been left in place for now, in case some have it bookmarked, but soon this 
