@@ -43,6 +43,15 @@ fromString=$oldname
 toString=$newlabel
 replaceCommand="s!${fromString}!${toString}!g"
 
+# As far as is known, the "directory name" only comes into play in 
+# the various "buildproperties.*" files, so that's all we'll replace, for now. 
+# In most files, it's a "relative" location so newdirname should not be needed.
+# We assume if "oldName" is surrounded by path separators ('/') it needs whole directory 
+# name, not just "label".
+# See https://bugs.eclipse.org/bugs/show_bug.cgi?id=414739
+replaceDirCommand="s!/${fromString}/!/${newdirname}/!g"
+perl -w -pi -e ${replaceDirCommand} ${oldname}/buildproperties.*
+
 # not all these file types may exist, we include all the commonly used ones, though,
 # just in case future changes to site files started to have them. There is no harm, per se,
 # if the perl command fails.
