@@ -108,12 +108,12 @@ else
     oldString="Unexpected BUILD_TYPE: $BUILDTYPE"
 fi
 
-if [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == I]]
+if [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "I" ]]
 then 
     newString="BUILD_TYPE = \"S\""
-elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == M]]
-    newString="BUILD_TYPE = \"M\""
+elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "M"]]
 then
+    newString="BUILD_TYPE = \"M\""
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE = \"R\""
