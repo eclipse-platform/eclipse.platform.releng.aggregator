@@ -111,7 +111,7 @@ fi
 if [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "I" ]]
 then 
     newString="BUILD_TYPE = \"S\""
-elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "M"]]
+elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "M" ]]
 then
     newString="BUILD_TYPE = \"M\""
 elif [[ "${newlabel}" =~ .*R.* ]]
@@ -133,9 +133,9 @@ then
     oldString="BUILD_TYPE_NAME = \"Integration\""
 elif [[ $BUILD_TYPE == "M" ]]
 then
-    oldString=""BUILD_TYPE_NAME = \"Maintenance\""
+    oldString="BUILD_TYPE_NAME = \"Maintenance\""
 else
-    oldString=""BUILD_TYPE_NAME = \"Unknown BUILD_TYPE\""
+    oldString="BUILD_TYPE_NAME = \"Unknown BUILD_TYPE\""
 fi
 
 if [[ "${newlabel}" =~ .*RC.* ]]
