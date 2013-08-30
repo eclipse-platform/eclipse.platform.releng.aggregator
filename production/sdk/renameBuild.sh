@@ -61,7 +61,16 @@ perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 # TODO: final "fall through" case should be based on matching
 # new label with digits only, such as "4.3" ... not sure 
 # if this would work for Equinox "Kepler" or "Kepler Released Build"? 
-oldString="Integration Build"
+BUILD_TYPE=${oldname:0:1} 
+if [[ $BUILD_TYPE == "I" ]]
+then
+    oldString="Integration Build"
+elif [[ $BUILD_TYPE == "M" ]]
+then
+    oldString="Maintenance Build"
+else
+    oldString="Unexpected BUILD_TYPE: $BUILDTYPE"
+fi
 
 if [[ "${newlabel}" =~ .*RC.* ]]
 then 
@@ -89,10 +98,22 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
 # for now, we'll "fall through" to "R",  if doesn't match anything else, 
 # but this won't work well if/when we add others, such as X or T for test 
 # builds. 
-oldString="BUILD_TYPE = \"I\""
-if [[ "${newlabel}" =~ .*RC.* ]]
+
+if [[ $BUILD_TYPE == "I" ]]
+then
+    oldString="BUILD_TYPE = \"I\""
+elif [[ $BUILD_TYPE == "M" ]]
+then
+    oldString="BUILD_TYPE = \"M\""
+else
+    oldString="Unexpected BUILD_TYPE: $BUILDTYPE"
+fi
+
+if [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == I]]
 then 
     newString="BUILD_TYPE = \"S\""
+elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == M]]
+    newString="BUILD_TYPE = \"M\""
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE = \"R\""
@@ -107,7 +128,16 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
 
-oldString="BUILD_TYPE_NAME = \"Integration\""
+if [[ $BUILD_TYPE == "I" ]]
+then
+    oldString="BUILD_TYPE_NAME = \"Integration\""
+elif [[ $BUILD_TYPE == "M" ]]
+then
+    oldString=""BUILD_TYPE_NAME = \"Maintenance\""
+else
+    oldString=""BUILD_TYPE_NAME = \"Unknown BUILD_TYPE\""
+fi
+
 if [[ "${newlabel}" =~ .*RC.* ]]
 then 
     newString="BUILD_TYPE_NAME = \"Release Candidate\""
