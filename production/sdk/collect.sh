@@ -37,7 +37,7 @@ source buildeclipse.shsource 2>/dev/null
 
 
 export JAVA_HOME=/shared/common/jdk1.7.0-latest
-export ANT_HOME=/shared/common/apache-ant-1.8.4
+export ANT_HOME=/shared/common/apache-ant-1.9.2
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 
@@ -59,7 +59,7 @@ echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 ${ANT_HOME}/bin/ant -version
-#       -lib /shared/common/apache-ant-1.8.4/lib/ \
+#       -lib /shared/common/apache-ant-1.9.2/lib/ \
 ${ANT_HOME}/bin/ant -f /shared/eclipse/sdk/collectTestResults.xml \
    -Djob=${job} \
    -DbuildNumber=${buildNumber} \
