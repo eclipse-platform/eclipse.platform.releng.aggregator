@@ -179,24 +179,32 @@ else
         # temp hack for temp bugs
         # apply the pre-created patch from tempPatches
         echo "INFO: apply temp patch, if any"
-        patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
-        checkForErrorExit $? "Error occurred applying patch"
-        cd $aggDir/rt.equinox.bundle
-        git commit -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
-        git commit -m "temp patch" -- features/org.eclipse.equinox.starterkit.product.feature/forceQualifierUpdate.txt
-        cd -
+        
         patch -p1  --backup -d $aggDir/rt.equinox.p2/features  -i $aggDir/production/tempPatches/rt.equinox.p2-ecfpatch
         checkForErrorExit $? "Error occurred applying patch"
         cd $aggDir/rt.equinox.p2
         git commit -m "temp patch" -- features/org.eclipse.equinox.p2.core.feature/forceQualifierUpdate.txt
-        git commit -m "temp patch" -- features/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txtfeatures/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txt
+        echo "RC from commit: $?"
+        git commit -m "temp patch" -- features/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txt
+        echo "RC from commit: $?"
         cd -
+        
+        patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
+        checkForErrorExit $? "Error occurred applying patch"
+        cd $aggDir/rt.equinox.bundle
+        git commit -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
+        echo "RC from commit: $?"
+        git commit -m "temp patch" -- features/org.eclipse.equinox.starterkit.product.feature/forceQualifierUpdate.txt
+        echo "RC from commit: $?"
+        cd -
+
     fi 
 
     # We always make tag commits, if build successful or not, but don't push
     # back to origin if doing N builds or test builds.
     pushd "$aggDir"
     git commit -m "Build input for build $BUILD_ID"
+    echo "RC from commit with $BUILD_ID: $?"
     # exits with 1 here ... with warning, if commit already exists?  
     #checkForErrorExit $? "Error occurred during commit of build_id"
 
