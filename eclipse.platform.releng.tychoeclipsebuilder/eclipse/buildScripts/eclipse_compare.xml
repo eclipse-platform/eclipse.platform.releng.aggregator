@@ -1,19 +1,44 @@
 <project
-    name="Eclipse summarize comparator logs"
-    default="compare">
+  name="Eclipse summarize comparator logs"
+  default="compare">
 
-    <target
-        name="compare">
-        <echo message="Genererating comparator log summaries ..." />
+  <target
+    name="compare"
+    depends="checkAvailability, init"
+    if="propertyFileAvailable">
+    <echo message="Genererating comparator log summaries ..." />
         <!-- 
              we get these properties so we can print out the repository 
              used by comparator, 'comparator.repo'.
         -->
-        <loadproperties srcfile="${buildDirectory}/${buildId}/mavenproperties.properties" />
+    <loadproperties srcfile="${buildDirectory}/${buildId}/mavenproperties.properties" />
         <!--create html output for compile logs -->
-        <comparatorSummary
-            builddirectory="${buildDirectory}/${buildId}"
-            comparatorRepo="${comparator.repo}" />
-   </target>
+    <comparatorSummary
+      builddirectory="${buildDirectory}/${buildId}"
+      comparatorRepo="${comparator.repo}" />
+  </target>
+  <target
+    name="checkAvailability"
+    depends="init"
+    unless="propertyFileAvailable">
+    <echo message="WARNING: eclipse_compare not performed since property file did not exist: " />
+    <echo message="       ${buildDirectory}/${buildId}/mavenproperties.properties" />
+  </target>
+  <target
+    name="init"
+    unless="eclipse_compare.initialized">
+      <!-- 
+           if this property file is not available, that means some other part of the build 
+           failed (or intentionally skipped) so there is no ability to do this task. Having
+           the explicit check here has advantage of avoiding error messages in error log.
+      -->
+    <available
+      resource="${buildDirectory}/${buildId}/mavenproperties.properties"
+      property="propertyFileAvailable" />
+    <property
+      name="eclipse_compare.initialized"
+      value="true" />
+  </target>
+
 
 </project>
