@@ -193,7 +193,7 @@ else
         patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
         echo "RC from patch: $?"
         #checkForErrorExit $? "Error occurred applying patch"
-        cd $aggDir/rt.equinox.bundle
+        cd $aggDir/rt.equinox.bundles
         git commit -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
         echo "RC from commit: $?"
         git commit -m "temp patch" -- features/org.eclipse.equinox.starterkit.product.feature/forceQualifierUpdate.txt
