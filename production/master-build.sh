@@ -181,8 +181,16 @@ else
         echo "INFO: apply temp patch, if any"
         patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
         checkForErrorExit $? "Error occurred applying patch"
+        cd $aggDir/rt.equinox.bundle
+        git commit -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
+        git commit -m "temp patch" -- features/org.eclipse.equinox.starterkit.product.feature/forceQualifierUpdate.txt
+        cd -
         patch -p1  --backup -d $aggDir/rt.equinox.p2/features  -i $aggDir/production/tempPatches/rt.equinox.p2-ecfpatch
         checkForErrorExit $? "Error occurred applying patch"
+        cd $aggDir/rt.equinox.p2
+        git commit -m "temp patch" -- features/org.eclipse.equinox.p2.core.feature/forceQualifierUpdate.txt
+        git commit -m "temp patch" -- features/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txtfeatures/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txt
+        cd -
     fi 
 
     # We always make tag commits, if build successful or not, but don't push
