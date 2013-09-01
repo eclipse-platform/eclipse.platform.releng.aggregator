@@ -8,39 +8,39 @@
 #   checkNArgs $# 3
 checkNArgs ()
 {
-    funcion usage ()
-    {
-        printf "\n\tThe function, checkNArgs, expects 2 or 3 arguments:\n"
-        printf "\t\t First: number of observed arguments.\n"
-        printf "\t\t Second: minimum number of arguments.\n"
-        printf "\t\t Third: maximum number of arguments, if some are optional.\n\n"
-    }
     actual=$1
     expected=$2
     if [[ -z "$actual" || -z "$expected" ]]
     then 
         BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
         printf "\n\tPROGRAM ERROR: number of arguments, $actual, or number expected, $expected, was not provided as arguments.\n\n" >${BUILD_FAILED}
-        usage >>${BUILD_FAILED}
         printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
         return 9
     fi
-    # possible is used when there are optional arguments
+    # possible is used when there are optional arguments, corresponds to "max possible", then "expected" means "min possible"
     possible=$3
     #echo "     DEBUG checkNArgs funcName[1]: ${FUNCNAME[1]}" >> ${TRACE_OUTPUT}
     #echo "     DEBUG checkNArgs bashSource[2]:   ${BASH_SOURCE[2]}" >> ${TRACE_OUTPUT}
     #echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
-    if [[ -n "${3}" ]]
+    if [[ -n "${possible}" ]]
     then
         # if 3 total arguments, make sure first is between 2 and 3rd args (inclusive)
-        if [[ $expected => $actual && $actual <= $possible ]]
+        #echo DEBUG: actual:   $actual
+        #echo DEBUG: min expected: $expected
+        #echo DEBUG: max possible: $possible
+        #arg1=$(( $expected <= $actual ))
+        #arg2=$(( $actual <= $possible ))
+        #echo "DEBUG: expected <= actual $arg1"
+        #echo "DEBUG: actual <= possible $arg2"
+        if  (( $expected <= $actual )) && (( $actual <= $possible )) 
         then 
+            #echo DEBUG: return 0
             return 0
         else 
             BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
             printf "\n\tPROGRAM ERROR: number of arguments, $actual, was not betwen expected, $expected, and possible, $possible.\n" >${BUILD_FAILED}
-            usage >>${BUILD_FAILED}
             printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
+            #echo DEBUG: return 1
             return 1
         fi
     elif [[ $actual != $expected ]]
@@ -228,7 +228,7 @@ fn-git-reset-submodules ()
 fn-build-id () 
 {
     checkNArgs $# 1
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_TYPE="$1"; shift
     TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
     echo ${BUILD_TYPE}${TIMESTAMP}
@@ -241,7 +241,7 @@ fn-build-id ()
 fn-local-repo () 
 {
     checkNArgs $# 1 2 
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     FORCE_LOCAL_REPO=false
     URL="$1"; shift
     if [ build = $(hostname) -o $FORCE_LOCAL_REPO = true ]; then
@@ -260,7 +260,7 @@ fn-local-repo ()
 fn-local-repos () 
 {
     checkNArgs $# 1 2
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     TO_REPLACE='git://git.eclipse.org'
     if [ $# -gt 0 ]; then
         TO_REPLACE="$1"; shift
@@ -275,7 +275,7 @@ fn-local-repos ()
 fn-git-clone-aggregator () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     GIT_CACHE="$1"; shift
     URL="$1"; shift
     BRANCH="$1"; shift
@@ -296,7 +296,7 @@ fn-git-clone-aggregator ()
 fn-git-clean-aggregator () 
 {
     checkNArgs $# 2
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     AGGREGATOR_DIR="$1"; shift
     BRANCH="$1"; shift
     pushd "$AGGREGATOR_DIR"
@@ -334,7 +334,7 @@ fn-git-cache ()
     # we (now) leave branch our of git-cache path, or else "topic branches", such as 
     # 'david_williams/II20130409-0900' complicates directory structure
     checkNArgs $# 2
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     ROOT="$1"; shift
     BRANCH="$1"; shift
     echo $ROOT/gitCache
@@ -346,7 +346,7 @@ fn-git-cache ()
 fn-git-dir () 
 {
     checkNArgs $# 2
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     GIT_CACHE="$1"; shift
     URL="$1"; shift
     echo $GIT_CACHE/$( basename "$URL" .git )
@@ -359,7 +359,7 @@ fn-git-dir ()
 fn-build-dir () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
@@ -379,7 +379,7 @@ fn-build-dir ()
 fn-basebuilder-dir () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
@@ -399,7 +399,7 @@ fn-basebuilder-dir ()
 fn-maven-build-aggregator () 
 {
     checkNArgs $# 8
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
@@ -471,7 +471,7 @@ fn-maven-build-aggregator ()
 fn-submodule-checkout () 
 {
     checkNArgs $# 4
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     SCRIPT="$1"; shift
@@ -501,7 +501,7 @@ fn-submodule-checkout ()
 fn-add-submodule-updates () 
 {
     checkNArgs $# 1
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     REPO_DIR="$1"; shift
     pushd "$REPO_DIR"
     adds=$( git submodule | grep "^+" | cut -f2 -d" " )
@@ -521,7 +521,7 @@ fn-add-submodule-updates ()
 fn-tag-build-inputs () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     REPOSITORIES_TXT="$1"; shift
@@ -539,7 +539,7 @@ fn-tag-build-inputs ()
 fn-pom-version-updater () 
 {
     checkNArgs $# 4
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
     DEBUG=$1; shift
@@ -595,7 +595,7 @@ fn-pom-version-updater ()
 fn-pom-version-update-with-commit () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
@@ -641,7 +641,7 @@ fn-pom-version-update-with-commit ()
 fn-gather-repo () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -665,7 +665,7 @@ fn-gather-repo ()
 fn-gather-sdk () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -703,7 +703,7 @@ fn-gather-sdk ()
 fn-gather-platform () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -741,7 +741,7 @@ fn-gather-platform ()
 fn-gather-swt-zips () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -765,7 +765,7 @@ fn-gather-swt-zips ()
 fn-gather-test-zips () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -797,7 +797,7 @@ fn-gather-test-zips ()
 fn-gather-ecj-jars () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -825,7 +825,7 @@ fn-gather-ecj-jars ()
 fn-slice-repos () 
 {
     checkNArgs $# 4
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -870,7 +870,7 @@ fn-slice-repos ()
 fn-gather-repo-zips () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -895,7 +895,7 @@ fn-gather-repo-zips ()
 fn-gather-compile-logs () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -942,7 +942,7 @@ fn-gather-compile-logs ()
 fn-gather-main-index () 
 {
     checkNArgs $# 6
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -965,7 +965,7 @@ fn-gather-main-index ()
 fn-parse-compile-logs () 
 {
     checkNArgs $# 4
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
@@ -995,7 +995,7 @@ fn-parse-compile-logs ()
 fn-summarize-comparator-logs () 
 {
     checkNArgs $# 4
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
@@ -1024,7 +1024,7 @@ fn-summarize-comparator-logs ()
 fn-summarize-apitooling () 
 {
     checkNArgs $# 4
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
@@ -1071,7 +1071,7 @@ fn-summarize-apitooling ()
 fn-publish-eclipse () 
 {
     checkNArgs $# 6
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_TYPE="$1"; shift
     BUILD_STREAM="$1"; shift
     BUILD_ID="$1"; shift
@@ -1108,7 +1108,7 @@ fn-publish-eclipse ()
 fn-checkout-basebuilder () 
 {
     checkNArgs $# 2
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILDER_DIR="$1"; shift
     BASEBUILDER_TAG="$1"; shift
     if [ -e "$BUILDER_DIR" ]; then
@@ -1150,7 +1150,7 @@ fn-checkout-basebuilder ()
 fn-basebuilder-launcher () 
 {
     checkNArgs $# 1
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILDER_DIR="$1"; shift
     find "$BUILDER_DIR" -name "org.eclipse.equinox.launcher_*.jar" | tail -1
 }
@@ -1162,7 +1162,7 @@ fn-basebuilder-launcher ()
 fn-pom-version-report () 
 {
     checkNArgs $# 3
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -1208,7 +1208,7 @@ fn-pom-version-report ()
 fn-check-dir-exists () 
 {
     checkNArgs $# 1
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     DIR_VAR_NAME=$1
     if [[ -z "${!DIR_VAR_NAME}" ]]
     then
@@ -1246,7 +1246,7 @@ fn-check-dir-exists ()
 fn-write-property () 
 {
     checkNArgs $# 1
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     VAR_NAME=$1
     if [[ -z "${VAR_NAME}" ]]
     then
@@ -1268,7 +1268,7 @@ fn-write-property ()
 fn-write-property-init () 
 {
     checkNArgs $# 0
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     # nothing really required for bash shsource, but we'll put in some niceties
     echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
     echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
@@ -1285,7 +1285,7 @@ fn-write-property-init ()
 fn-write-property-close () 
 {
     checkNArgs $# 0
-    if $? != 0 ; then return 1
+    if [[ $? != 0 ]]; then return 1; fi
     # nothing really required for bash shsource, but we'll put in some niceties
     echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
