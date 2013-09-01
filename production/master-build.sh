@@ -181,7 +181,8 @@ else
         echo "INFO: apply temp patch, if any"
         
         patch -p1  --backup -d $aggDir/rt.equinox.p2/features  -i $aggDir/production/tempPatches/rt.equinox.p2-ecfpatch
-        checkForErrorExit $? "Error occurred applying patch"
+        echo "RC from patch: $?"
+        #checkForErrorExit $? "Error occurred applying patch"
         cd $aggDir/rt.equinox.p2
         git commit -m "temp patch" -- features/org.eclipse.equinox.p2.core.feature/forceQualifierUpdate.txt
         echo "RC from commit: $?"
@@ -190,7 +191,8 @@ else
         cd -
         
         patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
-        checkForErrorExit $? "Error occurred applying patch"
+        echo "RC from patch: $?"
+        #checkForErrorExit $? "Error occurred applying patch"
         cd $aggDir/rt.equinox.bundle
         git commit -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
         echo "RC from commit: $?"
