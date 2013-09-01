@@ -15,7 +15,7 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
+export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-true}
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
@@ -176,10 +176,12 @@ else
     checkForErrorExit $? "Error occurred while updating build input"
 
     if $BUILD_TIME_PATCHES ; then
-        # temp hack for bug 398141 and others
+        # temp hack for temp bugs
         # apply the pre-created patch from tempPatches
         echo "INFO: apply temp patch, if any"
-        patch -p1  --backup -d $aggDir/rt.equinox.bundles/bundles  -i $aggDir/production/tempPatches/eqweave.patch
+        patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
+        checkForErrorExit $? "Error occurred applying patch"
+        patch -p1  --backup -d $aggDir/rt.equinox.p2/features  -i $aggDir/production/tempPatches/rt.equinox.p2-ecfpatch
         checkForErrorExit $? "Error occurred applying patch"
     fi 
 
