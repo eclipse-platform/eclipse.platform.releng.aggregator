@@ -248,7 +248,7 @@ function syncRepoSite ()
     fi
 
     # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
-    if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
+    if [[ "${eclipseStream}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
     then
         eclipseStreamMajor=${BASH_REMATCH[1]}
         eclipseStreamMinor=${BASH_REMATCH[2]}
@@ -366,7 +366,7 @@ buildType=${buildId:0:1}
 echo "buildType: $buildType"
 
 # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
-if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
+if [[ "${eclipseStream}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
 then
     eclipseStreamMajor=${BASH_REMATCH[1]}
     eclipseStreamMinor=${BASH_REMATCH[2]}

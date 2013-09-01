@@ -25,7 +25,7 @@ BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 reponame=eclipse.platform.releng.aggregator
 
 # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
-if [[ "${STREAM}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
+if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
 then
     STREAMMajor=${BASH_REMATCH[1]}
     STREAMMinor=${BASH_REMATCH[2]}

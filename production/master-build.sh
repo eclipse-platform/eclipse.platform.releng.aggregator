@@ -184,9 +184,9 @@ else
         echo "RC from patch: $?"
         #checkForErrorExit $? "Error occurred applying patch"
         cd $aggDir/rt.equinox.p2
-        git commit -m "temp patch" -- features/org.eclipse.equinox.p2.core.feature/forceQualifierUpdate.txt
+        git commit --all -m "temp patch" -- features/org.eclipse.equinox.p2.core.feature/forceQualifierUpdate.txt
         echo "RC from commit: $?"
-        git commit -m "temp patch" -- features/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txt
+        git commit --all -m "temp patch" -- features/org.eclipse.equinox.p2.sdk/forceQualifierUpdate.txt
         echo "RC from commit: $?"
         cd -
         
@@ -194,9 +194,9 @@ else
         echo "RC from patch: $?"
         #checkForErrorExit $? "Error occurred applying patch"
         cd $aggDir/rt.equinox.bundles
-        git commit -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
+        git commit --all -m "temp patch" -- features/org.eclipse.equinox.server.p2/forceQualifierUpdate.txt
         echo "RC from commit: $?"
-        git commit -m "temp patch" -- features/org.eclipse.equinox.starterkit.product.feature/forceQualifierUpdate.txt
+        git commit --all -m "temp patch" -- features/org.eclipse.equinox.starterkit.product.feature/forceQualifierUpdate.txt
         echo "RC from commit: $?"
         cd -
 
