@@ -1,0 +1,21 @@
+import java.util.List;
+public class OldRawAPI {
+    public void set(List arg) { } // OK to warn in 1.5 code
+    public List get() { return null; } // OK to warn in 1.5 code
+}
+
+import java.util.ArrayList;
+import java.util.List;
+public class Sub extends OldRawAPI {
+    @Override
+    public void set(List arg) { // overrides method with raw argument type
+        super.set(arg);
+        arg.set(0, "A"); // 'arg' is forced to be raw
+    }
+    <T> void process (OldRawAPI thing) {
+        thing.get().add("x"); // get() returns a raw List
+        
+        List<String> strings= thing.get(); // unchecked conversion from raw List
+        ArrayList<String> al= (ArrayList<String>) thing.get(); // unchecked cast
+    }
+}
