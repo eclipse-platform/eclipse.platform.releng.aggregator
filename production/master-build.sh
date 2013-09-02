@@ -187,14 +187,6 @@ else
         git commit --all -m "temp patch for Bug 416293" 
         echo "RC from commit: $?"
         cd -
-        
-        patch -p1  --backup -d $aggDir/rt.equinox.bundles/features  -i $aggDir/production/tempPatches/rt.equinox.bundles-ecfpatch
-        echo "RC from patch: $?"
-        #checkForErrorExit $? "Error occurred applying patch"
-        cd $aggDir/rt.equinox.bundles
-        git commit --all -m "temp patch for Bug 416293"
-        echo "RC from commit: $?"
-        cd -
 
     fi 
 
