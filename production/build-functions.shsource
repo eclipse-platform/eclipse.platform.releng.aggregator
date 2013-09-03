@@ -133,14 +133,14 @@ fn-git-checkout ()
     # branches are in local repo (in case we are switching
     # to a new branch).
     echo git fetch current repo before checkout
-    git fetch --recurse-submodules
+    git fetch
     RC=$?
     if [[ $RC != 0 ]]
     then 
         echo "[ERROR] RC from git fetch: $RC"
     else
-        echo git checkout "$BRANCH" 
-        git checkout "$BRANCH" 
+        echo git checkout "$BRANCH"
+        git checkout "$BRANCH"
         RC=$?
         if [[ $RC != 0 ]]
         then 
@@ -196,8 +196,7 @@ fn-git-reset ()
 
 # USAGE: fn-git-clean-submodules
 fn-git-clean-submodules () 
-{   
-    echo git
+{
     # See bug 400657
     echo git submodule foreach git clean -f -d -x
     git submodule foreach git clean -f -d -x
@@ -301,29 +300,29 @@ fn-git-clean-aggregator ()
     AGGREGATOR_DIR="$1"; shift
     BRANCH="$1"; shift
     pushd "$AGGREGATOR_DIR"
+    fn-complete-status "Status before any cleaning."
     fn-git-clean
     RC=$?
     if [[ $RC == 0 ]]
     then
-        fn-git-checkout "$BRANCH"
+        fn-git-clean-submodules
         RC=$?
         if [[ $RC == 0 ]]
         then
-            fn-git-reset
+            fn-complete-status "Status after cleaning but before reset."
+            fn-git-reset-submodules
             RC=$?
             if [[ $RC == 0 ]]
             then
-                git submodule update
+                fn-complete-status "Status after submodules reset but before checkout."
+                fn-git-checkout "$BRANCH"
                 RC=$?
                 if [[ $RC == 0 ]]
-                then 
-                    fn-git-clean-submodules
+                then
+                    fn-complete-status "Status after checkout but final reset."
+                    fn-git-reset origin/$BRANCH
                     RC=$?
-                    if [[ $RC == 0 ]]
-                    then
-                        fn-git-reset-submodules
-                        RC=$?
-                    fi
+                    fn-complete-status "Status after all cleanup in clean-aggregator."
                 fi
             fi
         fi
@@ -1303,3 +1302,19 @@ fn-write-property-close ()
 
 }
 
+# USAGE: fn-complete-status "message"
+# Assumed called while in aggregator directory, so get's its git status, 
+# then iterates through each submodule for status. 
+# This is/was intend to debug why "cleanup" does not always clean up/reset everything, 
+# so if too verbose, can remove in future.
+# Message is a quoted string that can be printed out before each status, for 
+# improved logging. 
+fn-complete-status () 
+{
+    checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
+    MESSAGE=$1
+    printf "\n\t%s\n\n" "${MESSAGE}"
+    git status
+    git submodule foreach git status
+}
