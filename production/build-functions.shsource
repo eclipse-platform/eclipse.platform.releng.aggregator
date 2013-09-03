@@ -139,8 +139,8 @@ fn-git-checkout ()
     then 
         echo "[ERROR] RC from git fetch: $RC"
     else
-        echo git checkout "$BRANCH"
-        git checkout "$BRANCH"
+        echo git checkout "$BRANCH" --force
+        git checkout "$BRANCH" --force
         RC=$?
         if [[ $RC != 0 ]]
         then 
@@ -166,6 +166,12 @@ fn-git-submodule-update ()
     git submodule update
 }
 
+# USAGE: fn-git-update-submodules
+fn-git-update-submodules () 
+{
+    echo git submodule update --init --force
+    git submodule update --init --force
+}
 
 # USAGE: fn-git-clean 
 fn-git-clean () 
@@ -323,6 +329,47 @@ fn-git-clean-aggregator ()
                     fn-git-reset origin/$BRANCH
                     RC=$?
                     fn-complete-status "Status after all cleanup in clean-aggregator."
+                fi
+            fi
+        fi
+    fi
+    popd
+    return $RC
+}
+
+# USAGE: fn-git-clean-aggregator AGGREGATOR_DIR BRANCH 
+#   AGGREGATOR_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BRANCH: R4_2_maintenance
+fn-git-clean-aggregator2 () 
+{
+    checkNArgs $# 2
+    if [[ $? != 0 ]]; then return 1; fi
+    AGGREGATOR_DIR="$1"; shift
+    BRANCH="$1"; shift
+    pushd "$AGGREGATOR_DIR"
+    fn-complete-status "Status before any cleaning."
+    fn-git-clean
+    RC=$?
+    if [[ $RC == 0 ]]
+    then
+        fn-git-clean-submodules
+        RC=$?
+        if [[ $RC == 0 ]]
+        then
+            fn-complete-status "Status after clean but before checkout."
+            fn-git-checkout "$BRANCH"
+            RC=$?
+            if [[ $RC == 0 ]]
+            then
+                fn-complete-status "Status after checkout but before reset."
+                fn-git-reset origin/$BRANCH
+                RC=$?
+                if [[ $RC == 0 ]]
+                then
+                    fn-complete-status "Status after reset but before forced update."
+                    fn-git-update-submodules
+                    RC=$?
+                    fn-complete-status "Status after all cleanup and init in clean-aggregator."
                 fi
             fi
         fi
