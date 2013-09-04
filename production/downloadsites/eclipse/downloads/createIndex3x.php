@@ -70,7 +70,7 @@ Specifically, for the last 3.8.x build see the <a href="http://archive.eclipse.o
 
 <p>You should be re-directed within 10 seconds to the page for 
 <a href="http://download.eclipse.org/eclipse/downloads/">the most recent Eclipse builds</a>. If not, 
-simply click on the link. Pleaese update your bookmarks.</p>
+simply click on the link. Please update your bookmarks.</p>
 
 <p>This page
 has been left in place for now, in case some have it bookmarked, but soon this 
