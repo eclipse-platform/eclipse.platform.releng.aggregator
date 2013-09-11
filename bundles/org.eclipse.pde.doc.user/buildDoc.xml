@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-     Copyright (c) 2005, 2012 IBM Corporation and others.
+     Copyright (c) 2005, 2013 IBM Corporation and others.
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
      which accompanies this distribution, and is available at
@@ -32,11 +32,17 @@
 	<target name="convertSchemaToHtml" if="eclipse.running">
 		<property name="dest" value="reference/extension-points" />
 		<record name="${basedir}/pdeconvert.txt" action="start"/>
+		
+		<property name="pdeSearchPath" value="${eclipse.pde.build},${eclipse.pde.ui.ui}" />
+		<property name="jdtSearchPath" value="${eclipse.jdt.core},${eclipse.jdt.debug},${eclipse.jdt.ui}" />
+		<property name="platformSearchPath" value="${eclipse.platform.ant},${eclipse.platform.debug},${eclipse.platform.platform},${eclipse.platform.resources.bundles},${eclipse.platform.runtime.bundles},${eclipse.platform.swt.bundles},${eclipse.platform.team.bundles},${eclipse.platform.text},${eclipse.platform.ua},${eclipse.platform.ui.bundles}" />
+		<property name="runtimeSearchPath" value="${rt.equinox.bundles.bundles},${rt.equinox.framework.bundles},${rt.equinox.p2.bundles}" />
+		<property name="searchPaths" value="${pdeSearchPath},${jdtSearchPath},${platformSearchPath},${runtimeSearchPath}" />
 
-		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.core/plugin.xml" destination="${dest}" />
-		<pde.convertSchemaToHTML manifest="${eclipse.pde.build}/org.eclipse.pde.build/plugin.xml" destination="${dest}" />
-		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.ui/plugin.xml" destination="${dest}" />
-		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.launching/plugin.xml" destination="${dest}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.core/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.build}/org.eclipse.pde.build/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
+		<pde.convertSchemaToHTML manifest="${eclipse.pde.ui.ui}/org.eclipse.pde.launching/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 
 		<record name="${basedir}/pdeconvert.txt" action="stop"/>
 	</target>
