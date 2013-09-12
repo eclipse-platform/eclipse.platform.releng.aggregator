@@ -2,8 +2,6 @@
 
 # clean 4.x M builds
 find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -ctime +30 -name "M*" -ls -exec rm -fr '{}' \;
-# clean 3.x M builds
-find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops -maxdepth 1 -ctime +30 -name "M*" -ls -exec rm -fr '{}' \;
 
 source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
 updateIndex 
