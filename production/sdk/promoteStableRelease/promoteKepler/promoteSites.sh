@@ -2,11 +2,11 @@
 
 DROP_ID=M20130911-1000
 
-DL_LABEL=4.3.1RC4
-DL_LABEL_EQ=KeplerSR1RC4
+DL_LABEL=4.3.1
+DL_LABEL_EQ=KeplerSR1
 
-#REPO_SITE_SEGMENT=4.3milestones
-REPO_SITE_SEGMENT=4.3-M-builds
+#REPO_SITE_SEGMENT=4.4milestones
+REPO_SITE_SEGMENT=4.3
 
 HIDE_SITE=true
 #HIDE_SITE=false
@@ -15,8 +15,8 @@ export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
 #export DL_TYPE=S
-#export DL_TYPE=R
-export DL_TYPE=M
+export DL_TYPE=R
+#export DL_TYPE=M
 
 export TRAIN_NAME=Kepler
 
