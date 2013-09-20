@@ -58,7 +58,7 @@ perl -w -pi -e ${replaceDirCommand} ${oldname}/buildproperties.*
 # TODO: could add some "smarts" here to see if all was as expected before making changes.
 perl -w -pi -e ${replaceCommand} ${oldname}/*.php
 perl -w -pi -e ${replaceCommand} ${oldname}/*.html
-perl -w -pi -e ${replaceCommand} ${oldname}/*.xml
+perl -w -pi -e ${replaceCommand} ${oldname}/*.xml 2>/dev/null
 perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 
 # TODO: need to make this part of case statement, to handle
@@ -144,6 +144,7 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
 
+# We only ever promote "I" or "M" builds, so this ends with sanity check.
 if [[ $OLD_BUILD_TYPE == "I" ]]
 then
     oldString="BUILD_TYPE_NAME = \"Integration\""
@@ -183,12 +184,20 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/index.php
 
 echo -e "\n\n\tMove old directory, $oldname, to new directory, $newdirname.\n\n"
 
-# move directory before file renames, so it won't be in file path name twice
+# move directory before file renames
 mv $oldname $newdirname
 
-echo -e "\n\n\tRename files in new directory, /${newdirname}, to new name.\n\n"
+# We (currently) rename files under current direcotry, and in 'checksums'. 
+# No need to go deeper (currently) and can be harm, since we do have a copy of 
+# 'repository' in there (so things things with same name as build directory, such 
+# as branding bundles? and /repository/binaries get renamed too, if we go too deep. 
+# Even though we should not need that copy of 'repository' any longer, we might, 
+# some day?
+echo -e "\n\n\tRename files in new directory, ./${newdirname}, to new name.\n\n"
+nFiles=$(find ./${newdirname} -mindepth 1 -maxdepth 2 -name "*${oldname}*" -print | wc -l)
+echo -e "\n\t $nFiles files found to rename.\n"
 
-for file in `find ./${newdirname} -name "*${oldname}*" -print `
+for file in $(find ./${newdirname} -mindepth 1 -maxdepth 2 -name "*${oldname}*" -print)
 do
     renamefile $file
 done

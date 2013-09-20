@@ -5,7 +5,8 @@ DROP_ID=M20130911-1000
 DL_LABEL=4.3.1
 DL_LABEL_EQ=KeplerSR1
 
-#REPO_SITE_SEGMENT=4.4milestones
+# in maintenance, even RCs go in "M-builds"
+#REPO_SITE_SEGMENT=4.3-M-builds
 REPO_SITE_SEGMENT=4.3
 
 HIDE_SITE=true
@@ -14,26 +15,48 @@ HIDE_SITE=true
 export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
+# These are what precedes main drop directory name
 #export DL_TYPE=S
 export DL_TYPE=R
 #export DL_TYPE=M
 
+# Used in naming repo, etc
 export TRAIN_NAME=Kepler
 
+# Build machine locations (would very seldome change)
 export BUILD_ROOT=/shared/eclipse/builds/4M
 export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.3-M-builds
+
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
 
 export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 
+# Eclipse Drop Site (final segment)
+ECLIPSE_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
+# Equinox Drop Site (final segment)
+EQUINOX_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}
+
 echo "Promoted: $( date )" > "${CL_SITE}/checklist.txt"
-printf "\n\t%s\t\t\t%s\n" "DROP_ID" "$DROP_ID" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%s\t\t\t%s" "DL_LABEL" "$DL_LABEL" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%s\t\t\t%s" "DL_LABEL_EQ" "$DL_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%s\t%s" "REPO_SITE_SEGMENT" "$REPO_SITE_SEGMENT" >> "${CL_SITE}/checklist.txt"
-printf "\n\t%s\t\t\t%s\n\n" "HIDE_SITE" "$HIDE_SITE" >> "${CL_SITE}/checklist.txt"
+printf "\n\t%s\t%s\n" "DROP_ID" "$DROP_ID" >> "${CL_SITE}/checklist.txt"
+printf "\t%s\t%s\n" "DL_LABEL" "$DL_LABEL" >> "${CL_SITE}/checklist.txt"
+printf "\t%s\t%s\n" "DL_LABEL_EQ" "$DL_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
+printf "\t%s\t%s\n" "REPO_SITE_SEGMENT" "$REPO_SITE_SEGMENT" >> "${CL_SITE}/checklist.txt"
+printf "\t%s\t%s\n\n" "HIDE_SITE" "$HIDE_SITE" >> "${CL_SITE}/checklist.txt"
+
+printf "\t%s\n" "Eclipse downloads:"
+printf "\t%s\n\n" "http://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/"
+
+printf "\t%s\n" "Update existing (non-production) installs:"
+printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/"
+
+printf "\t%s\n" "Specific repository good for building against:"
+printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}"
+
+printf "\t%s\n" "Equinox specific downloads:"
+printf "\t%s\n\n" "http://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" 
+
 
 # we do Equinox first, since it has to wait in que until 
 # cronjob promotes it
