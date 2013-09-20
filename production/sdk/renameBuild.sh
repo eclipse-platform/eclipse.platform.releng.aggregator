@@ -90,7 +90,11 @@ elif [[ "${newlabel}" =~ .*M.* ]]
 then
     newString="Stable Build"
 else 
-    newString="newlabel value unexpected or not matched: ${newlabel}"
+    # releases have labels such as 4.4 or 4.3.1 so won't match any of 
+    # the above.
+    # TODO: put in sanity check to match known release patterns
+    # of digits and periods, else bail.
+    newString="Release Build"
 fi
 
 echo -e "\n\treplacing ${oldString} with ${newString} in ${oldname}/*.php\n"
