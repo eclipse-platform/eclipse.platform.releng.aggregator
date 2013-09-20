@@ -167,7 +167,7 @@ else
     newString="BUILD_TYPE_NAME = \"Release\""
 fi
 
-echo "\n\tReplacing ${oldString} with ${newString} in ${oldname}/buildproperties.php\n"
+echo -e "\n\tReplacing ${oldString} with ${newString} in ${oldname}/buildproperties.php\n"
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
