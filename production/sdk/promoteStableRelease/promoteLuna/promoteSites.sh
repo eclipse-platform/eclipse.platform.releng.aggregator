@@ -38,7 +38,7 @@ ECLIPSE_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 # Equinox Drop Site (final segment)
 EQUINOX_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}
 
-printf "\n\t%s\n\n: "Promoted on: $( date )" > "${CL_SITE}/checklist.txt"
+printf "\n\t%s\n\n" "Promoted on: $( date )" > "${CL_SITE}/checklist.txt"
 printf "\n\t%15s\t%20s\n" "DROP_ID" "$DROP_ID" >> "${CL_SITE}/checklist.txt"
 printf "\t%15s\t%20s\n" "DL_LABEL" "$DL_LABEL" >> "${CL_SITE}/checklist.txt"
 printf "\t%15s\t%20s\n" "DL_LABEL_EQ" "$DL_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
@@ -52,7 +52,7 @@ printf "\t%s\n" "Update existing (non-production) installs:"
 printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/"
 
 printf "\t%s\n" "Specific repository good for building against:"
-printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}"
+printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/"
 
 printf "\t%s\n" "Equinox specific downloads:"
 printf "\t%s\n\n" "http://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" 
