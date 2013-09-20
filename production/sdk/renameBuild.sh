@@ -136,7 +136,8 @@ elif [[ "${newlabel}" =~ .*M.* ]]
 then
     newString="BUILD_TYPE = \"S\""
 else 
-    newString="BUILD_TYPE = \"Unknown\""
+    # see previous comment on forms of "releases" (4.3.1, 4.2, Kepler, KeplerSR1, etc.)
+    newString="BUILD_TYPE = \"R\""
 fi
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
@@ -150,7 +151,7 @@ elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
     oldString="BUILD_TYPE_NAME = \"Maintenance\""
 else
-    oldString="BUILD_TYPE_NAME = \"Unknown BUILD_TYPE\""
+    oldString="BUILD_TYPE_NAME = \"Unknown OLD_BUILD_TYPE, $OLD_BUILD_TYPE\""
 fi
 
 if [[ "${newlabel}" =~ .*RC.* ]]
@@ -163,7 +164,7 @@ elif [[ "${newlabel}" =~ .*M.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Stable\""
 else 
-    newString="BUILD_TYPE_NAME = \"newlabel, ${newlabel}, unexpected or unmatched\""
+    newString="BUILD_TYPE_NAME = \"Release\""
 fi
 
 echo "\n\tReplacing ${oldString} with ${newString} in ${oldname}/buildproperties.php\n"
