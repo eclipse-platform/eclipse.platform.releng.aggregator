@@ -77,7 +77,7 @@ elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
     oldString="Maintenance Build"
 else
-    oldString="Unexpected BUILD_TYPE: $BUILDTYPE"
+    oldString="Unexpected OLD_BUILD_TYPE: $OLD_BUILD_TYPE"
 fi
 
 if [[ "${newlabel}" =~ .*RC.* ]]
@@ -86,14 +86,14 @@ then
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="Release Build"
-elif [[ "${newlabel}" =~ .*S.* ]]
+elif [[ "${newlabel}" =~ .*M.* ]]
 then
     newString="Stable Build"
 else 
     newString="newlabel value unexpected or not matched: ${newlabel}"
 fi
 
-echo "replacing ${oldString} with ${newString} in ${oldname}/*.php"
+echo -e "\n\treplacing ${oldString} with ${newString} in ${oldname}/*.php\n"
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
@@ -128,11 +128,11 @@ then
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE = \"R\""
-elif [[ "${newlabel}" =~ .*S.* ]]
+elif [[ "${newlabel}" =~ .*M.* ]]
 then
     newString="BUILD_TYPE = \"S\""
 else 
-    newString="BUILD_TYPE = \"R\""
+    newString="BUILD_TYPE = \"Unknown\""
 fi
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
@@ -155,14 +155,14 @@ then
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Release\""
-elif [[ "${newlabel}" =~ .*S.* ]]
+elif [[ "${newlabel}" =~ .*M.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Stable\""
 else 
     newString="BUILD_TYPE_NAME = \"newlabel, ${newlabel}, unexpected or unmatched\""
 fi
 
-echo "Replacing ${oldString} with ${newString} in ${oldname}/buildproperties.php"
+echo "\n\tReplacing ${oldString} with ${newString} in ${oldname}/buildproperties.php\n"
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
@@ -176,8 +176,12 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/index.php
 
+echo -e "\n\nMove old directory, $oldname, to new directory, $newdirname.\n\n"
+
 # move directory before file renames, so it won't be in file path name twice
 mv $oldname $newdirname
+
+echo -e "\n\nRename files in new direcory, /${newdirname}, to new name.\n\n"
 
 for file in `find ./${newdirname} -name "*${oldname}*" -print `
 do
