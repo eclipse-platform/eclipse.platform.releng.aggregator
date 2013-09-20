@@ -97,7 +97,7 @@ else
     newString="Release Build"
 fi
 
-echo -e "\n\treplacing ${oldString} with ${newString} in ${oldname}/*.php\n"
+echo -e "\n\tReplacing ${oldString} with ${newString} in ${oldname}/*.php\n"
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
