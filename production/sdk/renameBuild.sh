@@ -181,12 +181,12 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/index.php
 
-echo -e "\n\nMove old directory, $oldname, to new directory, $newdirname.\n\n"
+echo -e "\n\n\tMove old directory, $oldname, to new directory, $newdirname.\n\n"
 
 # move directory before file renames, so it won't be in file path name twice
 mv $oldname $newdirname
 
-echo -e "\n\nRename files in new direcory, /${newdirname}, to new name.\n\n"
+echo -e "\n\n\tRename files in new directory, /${newdirname}, to new name.\n\n"
 
 for file in `find ./${newdirname} -name "*${oldname}*" -print `
 do
