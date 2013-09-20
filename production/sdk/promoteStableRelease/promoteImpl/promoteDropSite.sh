@@ -30,6 +30,9 @@ printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID
 rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
 
 printf "\n\t%s\n" "Doing rename of original."
+# TODO: if ${DL_DROP_ID} already exists, we should remove it, 
+# since basically means we are "re-running" the script after
+# running it once.
 ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
 
 printf "\n\t%s\n" "Moving backup copy back to original."
