@@ -38,12 +38,12 @@ ECLIPSE_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 # Equinox Drop Site (final segment)
 EQUINOX_DL_DROP_DIR_SEGMENT=${DL_TYPE}-${DL_LABEL_EQ}-${BUILD_TIMESTAMP}
 
-echo "Promoted: $( date )" > "${CL_SITE}/checklist.txt"
-printf "\n\t%s\t%s\n" "DROP_ID" "$DROP_ID" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\t%s\n" "DL_LABEL" "$DL_LABEL" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\t%s\n" "DL_LABEL_EQ" "$DL_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\t%s\n" "REPO_SITE_SEGMENT" "$REPO_SITE_SEGMENT" >> "${CL_SITE}/checklist.txt"
-printf "\t%s\t%s\n\n" "HIDE_SITE" "$HIDE_SITE" >> "${CL_SITE}/checklist.txt"
+printf "\n\t%s\n\n: "Promoted on: $( date )" > "${CL_SITE}/checklist.txt"
+printf "\n\t%15s\t%20s\n" "DROP_ID" "$DROP_ID" >> "${CL_SITE}/checklist.txt"
+printf "\t%15s\t%20s\n" "DL_LABEL" "$DL_LABEL" >> "${CL_SITE}/checklist.txt"
+printf "\t%15s\t%20s\n" "DL_LABEL_EQ" "$DL_LABEL_EQ" >> "${CL_SITE}/checklist.txt"
+printf "\t%15s\t%20s\n" "REPO_SITE_SEGMENT" "$REPO_SITE_SEGMENT" >> "${CL_SITE}/checklist.txt"
+printf "\t%15s\t%20s\n\n" "HIDE_SITE" "$HIDE_SITE" >> "${CL_SITE}/checklist.txt"
 
 printf "\t%s\n" "Eclipse downloads:"
 printf "\t%s\n\n" "http://download.eclipse.org/eclipse/downloads/drops4/${ECLIPSE_DL_DROP_DIR_SEGMENT}/"
