@@ -42,15 +42,15 @@ rm renameBuild.sh
 # (in some cases). 
 if [[ "${HIDE_SITE}" == "true" ]]
 then
-   touch ${DL_DROP_ID}/buildHidden
-   if [[ $? != 0 ]] 
-   then 
-       echo "touch failed. Exiting."
-       exit 1
-   fi
-   echo "Remember to remove 'buildHidden' file, and re-run updateIndexes.sh since HIDE_SITE was ${HIDE_SITE}." >> "${CL_SITE}/checklist.txt"
+    touch ${DL_DROP_ID}/buildHidden
+    if [[ $? != 0 ]] 
+    then 
+        echo "touch failed. Exiting."
+        exit 1
+    fi
+    echo "Remember to remove 'buildHidden' file, and re-run updateIndexes.sh since HIDE_SITE was ${HIDE_SITE}." >> "${CL_SITE}/checklist.txt"
 else
-   echo "HIDE_SITE value was ${HIDE_SITE}"
+    echo "HIDE_SITE value was ${HIDE_SITE}"
 fi
 
 printf "\n\t%s\n" "rsync to downloads."
@@ -59,9 +59,12 @@ rsync --recursive --exclude="*apitoolingreference*" --exclude="*org.eclipse.rele
 rccode=$?
 if [ $rccode -eq 0 ]
 then
-    printf "\n\t%s\n" "Update main overall download index page so it shows new build."
-    source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-    updateIndex 
+    if [[ "${HIDE_SITE}" != "true" ]]
+    then
+        printf "\n\t%s\n" "Update main overall download index page so it shows new build."
+        source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
+        updateIndex 
+    fi
 else
     printf "\n\n\t%s\n\n" "ERROR: rsync failed. rccode: $rccode" >&2
     exit $rccode
