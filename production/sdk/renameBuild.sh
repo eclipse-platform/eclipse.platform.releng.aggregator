@@ -69,11 +69,11 @@ perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 # TODO: final "fall through" case should be based on matching
 # new label with digits only, such as "4.3" ... not sure 
 # if this would work for Equinox "Kepler" or "Kepler Released Build"? 
-BUILD_TYPE=${oldname:0:1} 
-if [[ $BUILD_TYPE == "I" ]]
+OLD_BUILD_TYPE=${oldname:0:1} 
+if [[ $OLD_BUILD_TYPE == "I" ]]
 then
     oldString="Integration Build"
-elif [[ $BUILD_TYPE == "M" ]]
+elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
     oldString="Maintenance Build"
 else
@@ -90,8 +90,10 @@ elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="Stable Build"
 else 
-    newString="Release Build"
+    newString="newlabel value unexpected or not matched: ${newlabel}"
 fi
+
+echo "replacing ${oldString} with ${newString} in ${oldname}/*.php"
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
@@ -107,20 +109,20 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
 # but this won't work well if/when we add others, such as X or T for test 
 # builds. 
 
-if [[ $BUILD_TYPE == "I" ]]
+if [[ $OLD_BUILD_TYPE == "I" ]]
 then
     oldString="BUILD_TYPE = \"I\""
-elif [[ $BUILD_TYPE == "M" ]]
+elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
     oldString="BUILD_TYPE = \"M\""
 else
-    oldString="Unexpected BUILD_TYPE: $BUILDTYPE"
+    oldString="Unexpected OLD_BUILD_TYPE: $OLD_BUILD_TYPE"
 fi
 
-if [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "I" ]]
+if [[ "${newlabel}" =~ .*RC.* && $OLD_BUILD_TYPE == "I" ]]
 then 
     newString="BUILD_TYPE = \"S\""
-elif [[ "${newlabel}" =~ .*RC.* && $BUILD_TYPE == "M" ]]
+elif [[ "${newlabel}" =~ .*RC.* && $OLD_BUILD_TYPE == "M" ]]
 then
     newString="BUILD_TYPE = \"M\""
 elif [[ "${newlabel}" =~ .*R.* ]]
@@ -137,10 +139,10 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
 
-if [[ $BUILD_TYPE == "I" ]]
+if [[ $OLD_BUILD_TYPE == "I" ]]
 then
     oldString="BUILD_TYPE_NAME = \"Integration\""
-elif [[ $BUILD_TYPE == "M" ]]
+elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
     oldString="BUILD_TYPE_NAME = \"Maintenance\""
 else
@@ -157,8 +159,11 @@ elif [[ "${newlabel}" =~ .*S.* ]]
 then
     newString="BUILD_TYPE_NAME = \"Stable\""
 else 
-    newString="BUILD_TYPE_NAME = \"Release\""
+    newString="BUILD_TYPE_NAME = \"newlabel, ${newlabel}, unexpected or unmatched\""
 fi
+
+echo "Replacing ${oldString} with ${newString} in ${oldname}/buildproperties.php"
+
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
