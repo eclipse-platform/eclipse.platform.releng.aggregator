@@ -15,7 +15,7 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
+export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-true}
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
@@ -179,14 +179,14 @@ else
         # temp patches for bugs
         # apply the pre-created patch from tempPatches
         echo "INFO: apply temp patch, if any"
-        
-        patch -p1  --backup -d $aggDir/rt.equinox.p2/features  -i $aggDir/production/tempPatches/rt.equinox.p2-ecfpatch
-        echo "RC from patch: $?"
-        #checkForErrorExit $? "Error occurred applying patch"
-        cd $aggDir/rt.equinox.p2
-        git commit --all -m "temp patch for Bug 416293" 
-        echo "RC from commit: $?"
-        cd -
+
+        patch -p1  --backup -d $aggDir/org.eclipse.jdt.core  -i $aggDir/production/tempPatches/jdtComparatorFix.patch
+        #echo "RC from patch: $?"
+        checkForErrorExit $? "Error occurred applying patch"
+        #cd $aggDir/rt.equinox.p2
+        #git commit --all -m "temp patch for Bug 416293" 
+        #echo "RC from commit: $?"
+        #cd -
 
     fi 
 
