@@ -198,6 +198,14 @@ else
         #checkForErrorExit $? "Error occurred committing patch"
         #popd
 
+        repoToPatch=rt.equinox.p2
+        patchFile=p2SourceFix.patch
+        echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
+
+        patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
+        checkForErrorExit $? "Error occurred applying patch"
+
+
     fi 
 
     # We always make tag commits, if build successful or not, but don't push
