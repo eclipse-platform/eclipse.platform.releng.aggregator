@@ -180,9 +180,12 @@ else
         # apply the pre-created patch from tempPatches
         echo "INFO: apply temp patch, if any"
 
+        pushd $aggDir/eclipse.jdt.core
         patch -p0  --backup -d $aggDir/org.eclipse.jdt.core  -i $aggDir/production/tempPatches/jdtComparatorFix.patch
         #echo "RC from patch: $?"
         checkForErrorExit $? "Error occurred applying patch"
+        popd
+        
         #cd $aggDir/rt.equinox.p2
         #git commit --all -m "temp patch for Bug 416293" 
         #echo "RC from commit: $?"
