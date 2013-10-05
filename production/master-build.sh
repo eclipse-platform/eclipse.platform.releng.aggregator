@@ -15,7 +15,7 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-true}
+export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
@@ -186,7 +186,7 @@ else
         patchFile=jdtComparatorFix.patch
         echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
         patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
-        checkForErrorExit $? "Error occurred applying patch"
+        #checkForErrorExit $? "Error occurred applying patch"
 
         # Note: to "simulate" qualifier increases, when needed,
         # the fix/patch must be "committed" (to build repo, not pushed to origin).
@@ -195,7 +195,7 @@ else
         echo "INFO: commit to build machine repository (no push): $repoToPatch"
         pushd $aggDir/$repoToPatch/
         git commit --all -m "temp patch for testing" 
-        checkForErrorExit $? "Error occurred committing patch"
+        #checkForErrorExit $? "Error occurred committing patch"
         popd
 
         # Note: to "simulate" qualifier increases, when needed,
@@ -207,12 +207,12 @@ else
         #checkForErrorExit $? "Error occurred committing patch"
         #popd
 
-        repoToPatch=rt.equinox.p2
-        patchFile=p2SourceFix.patch
-        echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
+        #repoToPatch=rt.equinox.p2
+        #patchFile=p2SourceFix.patch
+        #echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
 
-        patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
-        checkForErrorExit $? "Error occurred applying patch"
+        #patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
+        #checkForErrorExit $? "Error occurred applying patch"
 
 
     fi 
