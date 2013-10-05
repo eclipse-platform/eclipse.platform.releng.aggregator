@@ -185,7 +185,7 @@ else
         repoToPatch=eclipse.jdt.core
         patchFile=jdtComparatorFix.patch
         echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
-        pushd $aggDir/$repoToPatch
+        pushd $aggDir/$repoToPatch/org.eclipse.jdt.core
         git commit --all -m "temp patch for testing" 
         checkForErrorExit $? "Error occurred committing patch"
         popd
