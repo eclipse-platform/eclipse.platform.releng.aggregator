@@ -178,13 +178,13 @@ else
     if $BUILD_TIME_PATCHES ; then
         # temp patches for bugs
         # apply the pre-created patch from tempPatches
-        echo "INFO: apply temp patch, if any"
 
-        pushd $aggDir/eclipse.jdt.core
-        patch -p0  --backup -d $aggDir/org.eclipse.jdt.core  -i $aggDir/production/tempPatches/jdtComparatorFix.patch
-        #echo "RC from patch: $?"
+        repoToPatch=eclipse.jdt.core
+        patchFile=jdtComparatorFix.patch
+        echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
+        
+        patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
         checkForErrorExit $? "Error occurred applying patch"
-        popd
         
         #cd $aggDir/rt.equinox.p2
         #git commit --all -m "temp patch for Bug 416293" 
