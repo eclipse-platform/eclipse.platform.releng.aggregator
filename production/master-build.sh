@@ -185,13 +185,18 @@ else
         repoToPatch=eclipse.jdt.core
         patchFile=jdtComparatorFix.patch
         echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
-        pushd $aggDir/$repoToPatch/org.eclipse.jdt.core
+        patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
+        checkForErrorExit $? "Error occurred applying patch"
+
+        # Note: to "simulate" qualifier increases, when needed,
+        # the fix/patch must be "committed" (to build repo, not pushed to origin).
+        # This requires more effort to "reset" ... say to HEAD~1, or re-clone the repo, 
+        # or else the 'checkout/pull' in next run will not succeed.
+        echo "INFO: commit to build machine repository (no push): $repoToPatch"
+        pushd $aggDir/$repoToPatch/
         git commit --all -m "temp patch for testing" 
         checkForErrorExit $? "Error occurred committing patch"
         popd
-        
-        patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
-        checkForErrorExit $? "Error occurred applying patch"
 
         # Note: to "simulate" qualifier increases, when needed,
         # the fix/patch must be "committed" (to build repo, not pushed to origin).
