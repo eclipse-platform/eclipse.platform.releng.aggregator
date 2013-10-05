@@ -179,7 +179,7 @@ else
         # temp patches for bugs
         # apply the pre-created patch from tempPatches
         # patches created, typically, by navigating to repoToPath, then
-        # git diff --no-prefix > ../eclipse.platform.releng.aggregator/production/tempPatches/
+        # git diff --no-prefix > ../eclipse.platform.releng.aggregator/production/tempPatches/<patchFileName>
         # (then commit and push aggregator)
 
         repoToPatch=eclipse.jdt.core
