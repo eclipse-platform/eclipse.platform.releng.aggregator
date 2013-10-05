@@ -15,7 +15,7 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
     exit 1
 fi
 
-export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
+export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-true}
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
