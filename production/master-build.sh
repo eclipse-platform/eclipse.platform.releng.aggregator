@@ -189,10 +189,14 @@ else
         patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
         checkForErrorExit $? "Error occurred applying patch"
 
-        #cd $aggDir/rt.equinox.p2
-        #git commit --all -m "temp patch for Bug 416293" 
-        #echo "RC from commit: $?"
-        #cd -
+        # Note: to "simulate" qualifier increases, when needed,
+        # the fix/patch must be "committed" (to build repo, not pushed to origin).
+        # This requires more effort to "reset" ... say to HEAD~1, or re-clone the repo, 
+        # or else the 'checkout/pull' in next run will not succeed.
+        #pushd $aggDir/$repoToPatch
+        #git commit --all -m "temp patch for testing" 
+        #checkForErrorExit $? "Error occurred committing patch"
+        #popd
 
     fi 
 
