@@ -178,14 +178,17 @@ else
     if $BUILD_TIME_PATCHES ; then
         # temp patches for bugs
         # apply the pre-created patch from tempPatches
+        # patches created, typically, by navigating to repoToPath, then
+        # git diff --no-prefix > ../eclipse.platform.releng.aggregator/production/tempPatches/
+        # (then commit and push aggregator)
 
         repoToPatch=eclipse.jdt.core
         patchFile=jdtComparatorFix.patch
         echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
-        
+
         patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
         checkForErrorExit $? "Error occurred applying patch"
-        
+
         #cd $aggDir/rt.equinox.p2
         #git commit --all -m "temp patch for Bug 416293" 
         #echo "RC from commit: $?"
