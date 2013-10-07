@@ -184,6 +184,26 @@ fn-git-clean ()
     then 
         echo "[ERROR] RC from git clean: $RC"
         return $RC
+    else
+        # after initial clean, we'll also use git stash to clean up any temp commits
+        # and modified tracked files, which will also call clean under the covers, I believe, 
+        # so may eventually want to do this first? (But, that may not allow the -x type cleanup).
+        git stash
+        RC=$?
+        if [[ $RC != 0 ]]
+        then 
+            echo "[ERROR] RC from git stash: $RC"
+            return $RC
+        else
+            # we don't really want to save this stash in build directory
+            git stash clear
+            RC=$?
+            if [[ $RC != 0 ]]
+            then 
+                echo "[ERROR] RC from git stash clear: $RC"
+                return $RC
+            fi
+        fi
     fi
     return 0
 }
@@ -212,6 +232,26 @@ fn-git-clean-submodules ()
     then
         echo "[ERROR] RC from submodule foreach git clean: $RC"
         return $RC
+    else
+        # after initial clean, we'll also use git stash to clean up any temp commits
+        # and modified tracked files, which will also call clean under the covers, I believe, 
+        # so may eventually want to do this first? (But, that may not allow the -x type cleanup).
+        git submodule foreach git stash
+        RC=$?
+        if [[ $RC != 0 ]]
+        then 
+            echo "[ERROR] RC from git submodule stash: $RC"
+            return $RC
+        else
+            # we don't really want to save this stash in build directory
+            git submodule foreach git stash clear
+            RC=$?
+            if [[ $RC != 0 ]]
+            then 
+                echo "[ERROR] RC from git submodule stash clear: $RC"
+                return $RC
+            fi
+        fi
     fi
     return 0
 }
