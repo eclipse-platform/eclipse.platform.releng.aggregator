@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-if [ $# -ne 3 ]; then
-    echo USAGE: $0 BUILD_ID REPOSITORIES_TXT SUBMODULE_NAME
-    exit 1
-fi
-
 # USAGE: fn-tag-submodule.sh BUILD_ID REPOSITORIES_TXT SUBMODULE_NAME
 #   BUILD_ID: M20121116-1100
 #   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
