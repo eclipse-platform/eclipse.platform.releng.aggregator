@@ -17,6 +17,35 @@ fi
 
 export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
 
+# force "test build" if doing patch build (since, it really is for tests) 
+# and this simply makes sure a human does not forget the "-t" and end up 
+# trying to push some patched build (and promoting to downloads). 
+
+if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
+then
+    testbuildonly=true
+fi
+
+# remember, local "test builds" that use this script must change
+# or override 'GIT_PUSH' to simply echo, not actually push. Only 
+# e4Build should 'push' these tags.
+#GIT_PUSH='echo git push'
+if [[ "${testbuildonly}" == "true" ]]
+then
+    GIT_PUSH='echo no git push since testbuildonly'
+fi
+if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
+then
+    GIT_PUSH='echo no git push since testbuildonly AND patched build'
+fi
+if [[ "${BUILD_TYPE}" == "N" ]]
+then
+    GIT_PUSH='echo no git push done since Nightly'
+fi
+GIT_PUSH=${GIT_PUSH:-'git push'}
+
+
+
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
 
@@ -180,7 +209,7 @@ else
         # apply the pre-created patch from tempPatches
         # patches created, typically, by navigating to repoToPath, then
         # git diff --no-prefix > ../eclipse.platform.releng.aggregator/production/tempPatches/<patchFileName>
-        # (then commit and push aggregator)
+        # (then commit and push change to "tempPatches" directory, with normal ID, not with build id)
 
         repoToPatch=eclipse.jdt.core
         patchFile=jdtComparatorFix.patch
