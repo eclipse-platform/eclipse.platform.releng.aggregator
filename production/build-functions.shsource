@@ -609,36 +609,6 @@ fn-add-submodule-updates ()
     popd
 }
 
-# USAGE: fn-tag-submodule BUILD_ID REPOSITORIES_TXT SUBMODULE_NAME
-#   BUILD_ID: M20121116-1100
-#   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
-#   SUBMODULE_NAME: 
-fn-tag-submodule () 
-{
-    checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-    BUILD_ID="$1"; shift
-    REPOSITORIES_TXT="$1"; shift
-    SUBMODULE_NAME="$1"; shift
-
-    RC=0
-    # should already be in correct subdirectory? 
-    echo "[DEBUG] tagging $SUBMODULE_NAME from directory ${PWD}" > $TRACE_OUTPUT
-    if [[ $( grep \"^\${SUBMODULE_NAME}:\" $REPOSITORIES_TXT >/dev/null ) ]]
-    then 
-      git tag $BUILD_ID 
-      RC=$?
-      if [[ $RC == 0 ]] 
-      then
-         $GIT_PUSH origin $BUILD_ID;
-         RC=$?
-       fi
-     else
-       # should be rare. Perhaps should be ERROR?  
-       echo "[WARNING] In tag-submodule, $SUBMODULE_NAME was not found in repositories.txt." > $TRACE_OUTPUT 
-     fi
-     return $RC
-}
 
 # USAGE: fn-tag-build-inputs BUILD_ID REPO_DIR REPOSITORIES_TXT
 #   BUILD_ID: M20121116-1100
@@ -653,7 +623,7 @@ fn-tag-build-inputs ()
     REPOSITORIES_TXT="$1"; shift
     pushd "$REPO_DIR"
     # Tag each submodule
-    git submodule foreach fn-tag-submodule $BUILD_ID $REPOSITORIES_TXT $name
+    git submodule foreach ${SCRIPT_PATH}/tag-submodule.sh $BUILD_ID $REPOSITORIES_TXT $name
     RC=$?
     if [[ $RC == 0 ]] 
     then
