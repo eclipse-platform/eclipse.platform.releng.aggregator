@@ -17,6 +17,35 @@ fi
 
 export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
 
+# force "test build" if doing patch build (since, it really is for tests) 
+# and this simply makes sure a human does not forget the "-t" and end up 
+# trying to push some patched build (and promoting to downloads). 
+
+if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
+then
+    testbuildonly=true
+fi
+
+# remember, local "test builds" that use this script must change
+# or override 'GIT_PUSH' to simply echo, not actually push. Only 
+# e4Build should 'push' these tags.
+#GIT_PUSH='echo git push'
+if [[ "${testbuildonly}" == "true" ]]
+then
+    GIT_PUSH='echo no git push since testbuildonly'
+fi
+if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
+then
+    GIT_PUSH='echo no git push since testbuildonly AND patched build'
+fi
+if [[ "${BUILD_TYPE}" == "N" ]]
+then
+    GIT_PUSH='echo no git push done since Nightly'
+fi
+GIT_PUSH=${GIT_PUSH:-'git push'}
+
+
+
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
 
@@ -176,17 +205,52 @@ else
     checkForErrorExit $? "Error occurred while updating build input"
 
     if $BUILD_TIME_PATCHES ; then
-        # temp hack for bug 398141 and others
+        # temp patches for bugs
         # apply the pre-created patch from tempPatches
-        echo "INFO: apply temp patch, if any"
-        patch -p1  --backup -d $aggDir/eclipse.platform.ui/bundles  -i $aggDir/production/tempPatches/ui.patch
-        checkForErrorExit $? "Error occurred applying patch"
+        # patches created, typically, by navigating to repoToPath, then
+        # git diff --no-prefix > ../eclipse.platform.releng.aggregator/production/tempPatches/<patchFileName>
+        # (then commit and push change to "tempPatches" directory, with normal ID, not with build id)
+
+        repoToPatch=eclipse.jdt.core
+        patchFile=jdtComparatorFix.patch
+        echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
+        patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
+        #checkForErrorExit $? "Error occurred applying patch"
+
+        # Note: to "simulate" qualifier increases, when needed,
+        # the fix/patch must be "committed" (to build repo, not pushed to origin).
+        # This requires more effort to "reset" ... say to HEAD~1, or re-clone the repo, 
+        # or else the 'checkout/pull' in next run will not succeed.
+        echo "INFO: commit to build machine repository (no push): $repoToPatch"
+        pushd $aggDir/$repoToPatch/
+        git commit --all -m "temp patch for testing" 
+        #checkForErrorExit $? "Error occurred committing patch"
+        popd
+
+        # Note: to "simulate" qualifier increases, when needed,
+        # the fix/patch must be "committed" (to build repo, not pushed to origin).
+        # This requires more effort to "reset" ... say to HEAD~1, or re-clone the repo, 
+        # or else the 'checkout/pull' in next run will not succeed.
+        #pushd $aggDir/$repoToPatch
+        #git commit --all -m "temp patch for testing" 
+        #checkForErrorExit $? "Error occurred committing patch"
+        #popd
+
+        #repoToPatch=rt.equinox.p2
+        #patchFile=p2SourceFix.patch
+        #echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
+
+        #patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
+        #checkForErrorExit $? "Error occurred applying patch"
+
+
     fi 
 
     # We always make tag commits, if build successful or not, but don't push
     # back to origin if doing N builds or test builds.
     pushd "$aggDir"
     git commit -m "Build input for build $BUILD_ID"
+    echo "RC from commit with $BUILD_ID: $?"
     # exits with 1 here ... with warning, if commit already exists?  
     #checkForErrorExit $? "Error occurred during commit of build_id"
 

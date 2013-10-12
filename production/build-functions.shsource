@@ -10,16 +10,48 @@ checkNArgs ()
 {
     actual=$1
     expected=$2
+    if [[ -z "$actual" || -z "$expected" ]]
+    then 
+        BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
+        printf "\n\tPROGRAM ERROR: number of arguments, $actual, or number expected, $expected, was not provided as arguments.\n\n" >${BUILD_FAILED}
+        printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
+        return 9
+    fi
+    # possible is used when there are optional arguments, corresponds to "max possible", then "expected" means "min possible"
+    possible=$3
     #echo "     DEBUG checkNArgs funcName[1]: ${FUNCNAME[1]}" >> ${TRACE_OUTPUT}
     #echo "     DEBUG checkNArgs bashSource[2]:   ${BASH_SOURCE[2]}" >> ${TRACE_OUTPUT}
     #echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
-    if [[ $actual != $expected ]]
+    if [[ -n "${possible}" ]]
+    then
+        # if 3 total arguments, make sure first is between 2 and 3rd args (inclusive)
+        #echo DEBUG: actual:   $actual
+        #echo DEBUG: min expected: $expected
+        #echo DEBUG: max possible: $possible
+        #arg1=$(( $expected <= $actual ))
+        #arg2=$(( $actual <= $possible ))
+        #echo "DEBUG: expected <= actual $arg1"
+        #echo "DEBUG: actual <= possible $arg2"
+        if  (( $expected <= $actual )) && (( $actual <= $possible )) 
+        then 
+            #echo DEBUG: return 0
+            return 0
+        else 
+            BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
+            printf "\n\tPROGRAM ERROR: number of arguments, $actual, was not betwen expected, $expected, and possible, $possible.\n" >${BUILD_FAILED}
+            printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
+            #echo DEBUG: return 1
+            return 1
+        fi
+    elif [[ $actual != $expected ]]
     then
         # depends on buildDirectory being exported
         BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-        echo "PROGRAM ERROR: expected $expected arguments but was passed $actual." >${BUILD_FAILED}
-        echo "               Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}." >>${BUILD_FAILED}
+        printf "\n\tPROGRAM ERROR: expected $expected arguments but was passed $actual.\n" >${BUILD_FAILED}
+        printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
         return 1
+    else
+        return 0
     fi
 }
 
@@ -107,8 +139,8 @@ fn-git-checkout ()
     then 
         echo "[ERROR] RC from git fetch: $RC"
     else
-        echo git checkout "$BRANCH"
-        git checkout "$BRANCH"
+        echo git checkout "$BRANCH" --force
+        git checkout "$BRANCH" --force
         RC=$?
         if [[ $RC != 0 ]]
         then 
@@ -134,6 +166,12 @@ fn-git-submodule-update ()
     git submodule update
 }
 
+# USAGE: fn-git-update-submodules
+fn-git-update-submodules () 
+{
+    echo git submodule update --init
+    git submodule update --init
+}
 
 # USAGE: fn-git-clean 
 fn-git-clean () 
@@ -145,8 +183,29 @@ fn-git-clean ()
     if [[ $RC != 0 ]]
     then 
         echo "[ERROR] RC from git clean: $RC"
+        return $RC
+    else
+        # after initial clean, we'll also use git stash to clean up any temp commits
+        # and modified tracked files, which will also call clean under the covers, I believe, 
+        # so may eventually want to do this first? (But, that may not allow the -x type cleanup).
+        git stash
+        RC=$?
+        if [[ $RC != 0 ]]
+        then 
+            echo "[ERROR] RC from git stash: $RC"
+            return $RC
+        else
+            # we don't really want to save this stash in build directory
+            git stash clear
+            RC=$?
+            if [[ $RC != 0 ]]
+            then 
+                echo "[ERROR] RC from git stash clear: $RC"
+                return $RC
+            fi
+        fi
     fi
-    return $RC
+    return 0
 }
 
 # USAGE: fn-git-reset
@@ -164,7 +223,7 @@ fn-git-reset ()
 
 # USAGE: fn-git-clean-submodules
 fn-git-clean-submodules () 
-{   
+{
     # See bug 400657
     echo git submodule foreach git clean -f -d -x
     git submodule foreach git clean -f -d -x
@@ -172,8 +231,29 @@ fn-git-clean-submodules ()
     if [[ $RC != 0 ]]
     then
         echo "[ERROR] RC from submodule foreach git clean: $RC"
+        return $RC
+    else
+        # after initial clean, we'll also use git stash to clean up any temp commits
+        # and modified tracked files, which will also call clean under the covers, I believe, 
+        # so may eventually want to do this first? (But, that may not allow the -x type cleanup).
+        git submodule foreach git stash
+        RC=$?
+        if [[ $RC != 0 ]]
+        then 
+            echo "[ERROR] RC from git submodule stash: $RC"
+            return $RC
+        else
+            # we don't really want to save this stash in build directory
+            git submodule foreach git stash clear
+            RC=$?
+            if [[ $RC != 0 ]]
+            then 
+                echo "[ERROR] RC from git submodule stash clear: $RC"
+                return $RC
+            fi
+        fi
     fi
-    return $RC
+    return 0
 }
 
 
@@ -196,6 +276,7 @@ fn-git-reset-submodules ()
 fn-build-id () 
 {
     checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_TYPE="$1"; shift
     TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
     echo ${BUILD_TYPE}${TIMESTAMP}
@@ -239,6 +320,7 @@ fn-local-repo ()
 fn-git-clone-aggregator () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     GIT_CACHE="$1"; shift
     URL="$1"; shift
     BRANCH="$1"; shift
@@ -259,27 +341,74 @@ fn-git-clone-aggregator ()
 fn-git-clean-aggregator () 
 {
     checkNArgs $# 2
+    if [[ $? != 0 ]]; then return 1; fi
     AGGREGATOR_DIR="$1"; shift
     BRANCH="$1"; shift
     pushd "$AGGREGATOR_DIR"
+    fn-complete-status "Repo state status before any cleaning."
     fn-git-clean
     RC=$?
     if [[ $RC == 0 ]]
-    then 
+    then
         fn-git-clean-submodules
         RC=$?
         if [[ $RC == 0 ]]
         then
+            fn-complete-status "Repo state status after cleaning but before reset."
             fn-git-reset-submodules
             RC=$?
             if [[ $RC == 0 ]]
             then
+                fn-complete-status "Repo state status after submodules reset but before checkout."
                 fn-git-checkout "$BRANCH"
                 RC=$?
                 if [[ $RC == 0 ]]
                 then
+                    fn-complete-status "Repo state status after checkout but final reset."
                     fn-git-reset origin/$BRANCH
                     RC=$?
+                    fn-complete-status "Repo state status after all cleanup in clean-aggregator."
+                fi
+            fi
+        fi
+    fi
+    popd
+    return $RC
+}
+
+# USAGE: fn-git-clean-aggregator AGGREGATOR_DIR BRANCH 
+#   AGGREGATOR_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BRANCH: R4_2_maintenance
+fn-git-clean-aggregator2 () 
+{
+    checkNArgs $# 2
+    if [[ $? != 0 ]]; then return 1; fi
+    AGGREGATOR_DIR="$1"; shift
+    BRANCH="$1"; shift
+    pushd "$AGGREGATOR_DIR"
+    fn-complete-status "Repo state status before any cleaning."
+    fn-git-clean
+    RC=$?
+    if [[ $RC == 0 ]]
+    then
+        fn-git-clean-submodules
+        RC=$?
+        if [[ $RC == 0 ]]
+        then
+            fn-complete-status "Repo state status after clean but before checkout."
+            fn-git-checkout "$BRANCH"
+            RC=$?
+            if [[ $RC == 0 ]]
+            then
+                fn-complete-status "Repo state status after checkout but before reset."
+                fn-git-reset origin/$BRANCH
+                RC=$?
+                if [[ $RC == 0 ]]
+                then
+                    fn-complete-status "Repo state status after reset but before forced update."
+                    fn-git-update-submodules
+                    RC=$?
+                    fn-complete-status "Repo state status after all cleanup and init in clean-aggregator."
                 fi
             fi
         fi
@@ -296,6 +425,7 @@ fn-git-cache ()
     # we (now) leave branch our of git-cache path, or else "topic branches", such as 
     # 'david_williams/II20130409-0900' complicates directory structure
     checkNArgs $# 2
+    if [[ $? != 0 ]]; then return 1; fi
     ROOT="$1"; shift
     BRANCH="$1"; shift
     echo $ROOT/gitCache
@@ -307,6 +437,7 @@ fn-git-cache ()
 fn-git-dir () 
 {
     checkNArgs $# 2
+    if [[ $? != 0 ]]; then return 1; fi
     GIT_CACHE="$1"; shift
     URL="$1"; shift
     echo $GIT_CACHE/$( basename "$URL" .git )
@@ -319,6 +450,7 @@ fn-git-dir ()
 fn-build-dir () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
@@ -338,6 +470,7 @@ fn-build-dir ()
 fn-basebuilder-dir () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
     STREAM="$1"; shift
@@ -357,6 +490,7 @@ fn-basebuilder-dir ()
 fn-maven-build-aggregator () 
 {
     checkNArgs $# 8
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
@@ -414,6 +548,7 @@ fn-maven-build-aggregator ()
         -DskipTests=true \
         -Dmaven.repo.local=$LOCAL_REPO \
         -Dtycho.debug.artifactcomparator \
+        -DcontinueOnFail=true \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"  $FORCEQUALIFIERARG
     rc=$?
     popd
@@ -428,6 +563,7 @@ fn-maven-build-aggregator ()
 fn-submodule-checkout () 
 {
     checkNArgs $# 4
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     SCRIPT="$1"; shift
@@ -457,6 +593,7 @@ fn-submodule-checkout ()
 fn-add-submodule-updates () 
 {
     checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
     REPO_DIR="$1"; shift
     pushd "$REPO_DIR"
     adds=$( git submodule | grep "^+" | cut -f2 -d" " )
@@ -469,13 +606,14 @@ fn-add-submodule-updates ()
     popd
 }
 
-# USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
+# USAGE: fn-tag-build-inputs BUILD_ID REPO_DIR REPOSITORIES_TXT
 #   BUILD_ID: M20121116-1100
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   REPOSITORIES_TXT: /shared/eclipse/builds/streams/repositories.txt
 fn-tag-build-inputs () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     REPOSITORIES_TXT="$1"; shift
@@ -493,6 +631,7 @@ fn-tag-build-inputs ()
 fn-pom-version-updater () 
 {
     checkNArgs $# 4
+    if [[ $? != 0 ]]; then return 1; fi
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
     DEBUG=$1; shift
@@ -548,6 +687,7 @@ fn-pom-version-updater ()
 fn-pom-version-update-with-commit () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     LOCAL_REPO="$1"; shift
@@ -593,6 +733,7 @@ fn-pom-version-update-with-commit ()
 fn-gather-repo () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -616,6 +757,7 @@ fn-gather-repo ()
 fn-gather-sdk () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -653,6 +795,7 @@ fn-gather-sdk ()
 fn-gather-platform () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -690,6 +833,7 @@ fn-gather-platform ()
 fn-gather-swt-zips () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -713,6 +857,7 @@ fn-gather-swt-zips ()
 fn-gather-test-zips () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -744,6 +889,7 @@ fn-gather-test-zips ()
 fn-gather-ecj-jars () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -771,6 +917,7 @@ fn-gather-ecj-jars ()
 fn-slice-repos () 
 {
     checkNArgs $# 4
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -815,6 +962,7 @@ fn-slice-repos ()
 fn-gather-repo-zips () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -839,6 +987,7 @@ fn-gather-repo-zips ()
 fn-gather-compile-logs () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -885,6 +1034,7 @@ fn-gather-compile-logs ()
 fn-gather-main-index () 
 {
     checkNArgs $# 6
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -907,6 +1057,7 @@ fn-gather-main-index ()
 fn-parse-compile-logs () 
 {
     checkNArgs $# 4
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
@@ -936,6 +1087,7 @@ fn-parse-compile-logs ()
 fn-summarize-comparator-logs () 
 {
     checkNArgs $# 4
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
@@ -964,17 +1116,18 @@ fn-summarize-comparator-logs ()
 fn-summarize-apitooling () 
 {
     checkNArgs $# 4
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     ANT_SCRIPT="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
     EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     pushd "$BUILD_DIR"
-            # No "freeze" in effect for 4.4. Add these back after M6.
-            #-DfreezeBaseURL="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/eclipse-SDK-4.3M6-win32.zip" \
-            #-DfreezeName="Eclipse-SDK-43M6" \
-            #-DfreezeFilename="eclipse-SDK-4.3M6-win32.zip" \
-    # this API_PREV_REF_LABEL variable should be changed any time the version used 
+    # No "freeze" in effect for 4.4. Add these back after M6.
+    #-DfreezeBaseURL="http://download.eclipse.org/eclipse/downloads/drops4/S-4.3M6-201303141330/eclipse-SDK-4.3M6-win32.zip" \
+        #-DfreezeName="Eclipse-SDK-43M6" \
+        #-DfreezeFilename="eclipse-SDK-4.3M6-win32.zip" \
+        # this API_PREV_REF_LABEL variable should be changed any time the version used 
     # by previousBaseURL changes. Its purpose is just to localize changes to this one
     # place, and not have to make further, hard-coded changes to testResults.php.template.
     # Similar for freeze label.   
@@ -1010,6 +1163,7 @@ fn-summarize-apitooling ()
 fn-publish-eclipse () 
 {
     checkNArgs $# 6
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_TYPE="$1"; shift
     BUILD_STREAM="$1"; shift
     BUILD_ID="$1"; shift
@@ -1046,6 +1200,7 @@ fn-publish-eclipse ()
 fn-checkout-basebuilder () 
 {
     checkNArgs $# 2
+    if [[ $? != 0 ]]; then return 1; fi
     BUILDER_DIR="$1"; shift
     BASEBUILDER_TAG="$1"; shift
     if [ -e "$BUILDER_DIR" ]; then
@@ -1087,6 +1242,7 @@ fn-checkout-basebuilder ()
 fn-basebuilder-launcher () 
 {
     checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
     BUILDER_DIR="$1"; shift
     find "$BUILDER_DIR" -name "org.eclipse.equinox.launcher_*.jar" | tail -1
 }
@@ -1098,6 +1254,7 @@ fn-basebuilder-launcher ()
 fn-pom-version-report () 
 {
     checkNArgs $# 3
+    if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
@@ -1143,6 +1300,7 @@ fn-pom-version-report ()
 fn-check-dir-exists () 
 {
     checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
     DIR_VAR_NAME=$1
     if [[ -z "${!DIR_VAR_NAME}" ]]
     then
@@ -1180,6 +1338,7 @@ fn-check-dir-exists ()
 fn-write-property () 
 {
     checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
     VAR_NAME=$1
     if [[ -z "${VAR_NAME}" ]]
     then
@@ -1201,6 +1360,7 @@ fn-write-property ()
 fn-write-property-init () 
 {
     checkNArgs $# 0
+    if [[ $? != 0 ]]; then return 1; fi
     # nothing really required for bash shsource, but we'll put in some niceties
     echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
     echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
@@ -1217,6 +1377,7 @@ fn-write-property-init ()
 fn-write-property-close () 
 {
     checkNArgs $# 0
+    if [[ $? != 0 ]]; then return 1; fi
     # nothing really required for bash shsource, but we'll put in some niceties
     echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
     # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
@@ -1228,3 +1389,19 @@ fn-write-property-close ()
 
 }
 
+# USAGE: fn-complete-status "message"
+# Assumed called while in aggregator directory, so get's its git status, 
+# then iterates through each submodule for status. 
+# This is/was intend to debug why "cleanup" does not always clean up/reset everything, 
+# so if too verbose, can remove in future.
+# Message is a quoted string that can be printed out before each status, for 
+# improved logging. 
+fn-complete-status () 
+{
+    checkNArgs $# 1
+    if [[ $? != 0 ]]; then return 1; fi
+    MESSAGE=$1
+    printf "\n\t%s\n\n" "${MESSAGE}"
+    git status
+    git submodule foreach git status
+}

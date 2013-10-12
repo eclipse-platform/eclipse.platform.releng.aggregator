@@ -27,7 +27,7 @@ aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [[ -r "$aggDir" ]]
 then
-    fn-git-clean-aggregator "$aggDir" "${BRANCH}"
+    fn-git-clean-aggregator2 "$aggDir" "${BRANCH}"
     RC=$?
     if [[ $RC == 0 ]]
     then
