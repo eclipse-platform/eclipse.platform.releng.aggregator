@@ -204,13 +204,24 @@ fn-build-id ()
 # USAGE: fn-local-repo URL [TO_REPLACE]
 #   URL: git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git
 #   TO_REPLACE: git://git.eclipse.org
-# TODO: since we compute here, do we really need to define in build_eclipse_org.shsource?
+# Note: we also define in build_eclipse_org.shsource. 
+# There it may already be set to 'true', for some special test 
+# build using a local mirror repo, for example. 
+# So, we change its value here, only if not defined yet.
+# That's the only time
+# the 'build' hostname is relevent to possibly change its 
+# value to true.
 fn-local-repo () 
 {
-    checkNArgs $# 2
-    FORCE_LOCAL_REPO=false
+    checkNArgs $# 1 2 
+    if [[ $? != 0 ]]; then return 1; fi
+    export FORCE_LOCAL_REPO=${FORCE_LOCAL_REPO:-false}
     URL="$1"; shift
-    if [ build = $(hostname) -o $FORCE_LOCAL_REPO = true ]; then
+    if [[ "build" == "$(hostname)" || "${FORCE_LOCAL_REPO} == "true" ]]
+    then
+        # we may have gotten "here" simply because hostname is "build", 
+        # and if so want to be sure "FORCE_LOCAL_REPO" matches
+        export FORCE_LOCAL_REPO=true
         TO_REPLACE='git://git.eclipse.org'
         if [ $# -gt 0 ]; then
             TO_REPLACE="$1"; shift
@@ -219,18 +230,6 @@ fn-local-repo ()
     else
         echo $URL
     fi
-}
-
-# USAGE: cat repositories.txt | fn-local-repos [TO_REPLACE]
-#   TO_REPLACE: git://git.eclipse.org
-fn-local-repos () 
-{
-    checkNArgs $# 1
-    TO_REPLACE='git://git.eclipse.org'
-    if [ $# -gt 0 ]; then
-        TO_REPLACE="$1"; shift
-    fi
-    sed "s!$TO_REPLACE!file://!g"
 }
 
 # USAGE: fn-git-clone-aggregator GIT_CACHE URL BRANCH 
