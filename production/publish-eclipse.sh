@@ -33,7 +33,7 @@ basebuilderDir=$( fn-basebuilder-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
 
 $SCRIPT_PATH/getEBuilderForDropDir.sh $buildDirectory $EBUILDER_HASH
 
-fn-checkout-basebuilder "$basebuilderDir"
+fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 

@@ -282,18 +282,32 @@ fn-build-id ()
     echo ${BUILD_TYPE}${TIMESTAMP}
 }
 
-# USAGE: fn-local-repo URL
+# USAGE: fn-local-repo URL [TO_REPLACE]
 #   URL: git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git
+#   TO_REPLACE: git://git.eclipse.org
+# Note: we also define in build_eclipse_org.shsource. 
+# There it may already be set to 'true', for some special test 
+# build using a local mirror repo, for example. 
+# So, we change its value here, only if not defined yet.
+# That's the only time
+# the 'build' hostname is relevent to possibly change its 
+# value to true.
 fn-local-repo () 
 {
-    checkNArgs $# 1
+    checkNArgs $# 1 2 
     if [[ $? != 0 ]]; then return 1; fi
-    # we assume REPO_AND_ACCESS is exported from calling scripts
+    export FORCE_LOCAL_REPO=${FORCE_LOCAL_REPO:-false}
     URL="$1"; shift
-    TO_REPLACE='git://git.eclipse.org'
-    if [[ -n ${REPO_AND_ACCESS} && ${REPO_AND_ACCESS} != "${TO_REPLACE}" ]]
+    if [[ "build" == "$(hostname)" || "${FORCE_LOCAL_REPO}" == "true" ]]
     then
-        echo $URL | sed "s!$TO_REPLACE!${REPO_AND_ACCESS}!g"
+        # we may have gotten "here" simply because hostname is "build", 
+        # and if so want to be sure "FORCE_LOCAL_REPO" matches
+        export FORCE_LOCAL_REPO=true
+        TO_REPLACE='git://git.eclipse.org'
+        if [ $# -gt 0 ]; then
+            TO_REPLACE="$1"; shift
+        fi
+        echo $URL | sed "s!$TO_REPLACE!file://!g"
     else
         echo $URL
     fi
@@ -1180,19 +1194,21 @@ fn-publish-eclipse ()
     popd
 }
 
-# USAGE: fn-checkout-basebuilder BUILDER_DIR
+# USAGE: fn-checkout-basebuilder BUILDER_DIR BASEBUILDER_TAG
 #   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
+#   BASEBUILDER_TAG: R3_7
 fn-checkout-basebuilder () 
 {
-    checkNArgs $# 1
+    checkNArgs $# 2
     if [[ $? != 0 ]]; then return 1; fi
     BUILDER_DIR="$1"; shift
+    BASEBUILDER_TAG="$1"; shift
     if [ -e "$BUILDER_DIR" ]; then
-        echo "A basic builder directory already existed, so not re-fetched."
+        echo "Basebuilder directory already existed, so not re-fetched."
         echo "   Directory found at $BUILDER_DIR."
         return 0
     fi
-    echo "A basic builder did not exist, so will fetch platform and tools."
+    echo "Basebuilder did not exist, so will fetch version ${BASEBUILDER_TAG}"
     DROP_DIR=$( dirname "$BUILDER_DIR" )
     # Are these as expected? TODO: change comments.
     echo "Drop directory: $DROP_DIR"
@@ -1205,7 +1221,20 @@ fn-checkout-basebuilder ()
     else
         echo "EBuilderDir already existed, so no need to fetch that"
     fi
+    #    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR -DbuilderVersion=${BASEBUILDER_TAG}
     ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR
+
+    #pushd $( dirname "$BUILDER_DIR" )
+    #wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
+    #unzip -q basebuilder-${BASEBUILDER_TAG}.zip
+    #mv eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG} "$BUILDER_DIR"
+    # Wile we use 'launcher' here, 'eclipse' is used in other code that shares this install, 
+    # so we make sure it is executable. 
+    #chmod +x "$BUILDER_DIR"/eclipse
+    # blob characters, '*', aren't interpreted right in string
+    #chmod +x "$BUILDER_DIR"/*.so*
+    #rm basebuilder-${BASEBUILDER_TAG}.zip
+    #popd
 }
 
 # USAGE: fn-basebuilder-launcher BUILDER_DIR

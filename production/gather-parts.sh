@@ -38,7 +38,7 @@ cp "${aggDir}/eclipse-platform-parent/target/resources/mavenproperties.propertie
 
 $SCRIPT_PATH/getEBuilderForDropDir.sh $buildDirectory $EBUILDER_HASH
 
-fn-checkout-basebuilder "$basebuilderDir"
+fn-checkout-basebuilder "$basebuilderDir" "$BASEBUILDER_TAG"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 

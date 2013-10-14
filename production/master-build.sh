@@ -165,7 +165,7 @@ fn-write-property MVN_DEBUG
 fn-write-property MVN_QUIET
 fn-write-property SIGNING
 fn-write-property UPDATE_BRANDING
-fn-write-property REPO_AND_ACCESS
+fn-write-property FORCE_LOCAL_REPO
 fn-write-property MAVEN_BREE
 fn-write-property GIT_PUSH
 fn-write-property LOCAL_REPO
