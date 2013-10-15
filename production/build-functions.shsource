@@ -1194,21 +1194,19 @@ fn-publish-eclipse ()
     popd
 }
 
-# USAGE: fn-checkout-basebuilder BUILDER_DIR BASEBUILDER_TAG
+# USAGE: fn-checkout-basebuilder BUILDER_DIR
 #   BUILDER_DIR: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7
-#   BASEBUILDER_TAG: R3_7
 fn-checkout-basebuilder () 
 {
-    checkNArgs $# 2
+    checkNArgs $# 1
     if [[ $? != 0 ]]; then return 1; fi
     BUILDER_DIR="$1"; shift
-    BASEBUILDER_TAG="$1"; shift
     if [ -e "$BUILDER_DIR" ]; then
-        echo "Basebuilder directory already existed, so not re-fetched."
+        echo "A basic builder directory already existed, so not re-fetched."
         echo "   Directory found at $BUILDER_DIR."
         return 0
     fi
-    echo "Basebuilder did not exist, so will fetch version ${BASEBUILDER_TAG}"
+    echo "A basic builder did not exist, so will fetch platform and tools."
     DROP_DIR=$( dirname "$BUILDER_DIR" )
     # Are these as expected? TODO: change comments.
     echo "Drop directory: $DROP_DIR"
@@ -1221,20 +1219,7 @@ fn-checkout-basebuilder ()
     else
         echo "EBuilderDir already existed, so no need to fetch that"
     fi
-    #    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR -DbuilderVersion=${BASEBUILDER_TAG}
     ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR
-
-    #pushd $( dirname "$BUILDER_DIR" )
-    #wget --no-verbose -O basebuilder-${BASEBUILDER_TAG}.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG}.zip 2>&1
-    #unzip -q basebuilder-${BASEBUILDER_TAG}.zip
-    #mv eclipse.platform.releng.basebuilder-${BASEBUILDER_TAG} "$BUILDER_DIR"
-    # Wile we use 'launcher' here, 'eclipse' is used in other code that shares this install, 
-    # so we make sure it is executable. 
-    #chmod +x "$BUILDER_DIR"/eclipse
-    # blob characters, '*', aren't interpreted right in string
-    #chmod +x "$BUILDER_DIR"/*.so*
-    #rm basebuilder-${BASEBUILDER_TAG}.zip
-    #popd
 }
 
 # USAGE: fn-basebuilder-launcher BUILDER_DIR
