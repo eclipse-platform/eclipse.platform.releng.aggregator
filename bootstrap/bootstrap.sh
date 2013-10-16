@@ -5,6 +5,7 @@
 # this buildeclipse.shsource file is to ease local builds to override some variables. 
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 function usage () 
 {
@@ -23,8 +24,6 @@ fi
 export BRANCH=${BRANCH:-"${1}"}
 export BUILD_TYPE=${BUILD_TYPE:-"${2}"}
 export STREAM=${STREAM:-"${3}"}
-
-export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 reponame=eclipse.platform.releng.aggregator
 

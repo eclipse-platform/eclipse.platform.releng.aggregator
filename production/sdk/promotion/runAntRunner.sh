@@ -9,6 +9,7 @@
 # this buildeclipse.shsource file is to ease local builds to override some variables. 
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 # If used for other things, where a build doesn't exist, 
 # could/should likely use something like 'temp' or some other "cache" directory.
@@ -32,8 +33,6 @@ shift
 
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
-
-export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${buildType}}
 

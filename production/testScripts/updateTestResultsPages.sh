@@ -55,7 +55,7 @@ fi
 
 if [[ "$BUILD_KIND" == "CBI" ]]
 then
-    buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
+    buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
 elif [[ "$BUILD_KIND" == "PDE" ]]
 then
     buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}

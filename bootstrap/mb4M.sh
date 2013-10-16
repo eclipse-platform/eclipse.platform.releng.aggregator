@@ -6,6 +6,7 @@
 # this buildeclipse.shsource file is to ease local builds to override some variables. 
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 function usage() {
     printf "\n\tSimple script start a build of a certain stream." >&2
@@ -29,7 +30,7 @@ do
 done
 
 SCRIPT_NAME=$0
-export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+
 
 LOG_BASE_NAME=${SCRIPT_NAME##*/} 
 LOG_OUT_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.out.log

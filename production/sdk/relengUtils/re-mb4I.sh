@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 
+
 # Simple utility to run as cronjob to run Eclipse Platform builds
 # Normally resides in $BUILD_HOME
 function usage() {
@@ -74,8 +78,8 @@ echo "umask explicitly set to 0002, old value was $oldumask" 1>>$LOG_OUT_NAME 2>
 # this buildeclipse.shsource file is to ease local builds to override some variables. 
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
-
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+
 # we should not need the following here in boot strap, for now, but might in future
 #export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 #export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.9.2}

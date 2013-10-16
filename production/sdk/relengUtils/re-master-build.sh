@@ -6,6 +6,10 @@
 # must be called with an existing "env.shsource" file from the previous build.
 # basically skips the first steps and does not "clean" or re-pull from git.
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 
+
 RAWDATE=$( date +%s )
 
 if [ $# -ne 1 ]; then

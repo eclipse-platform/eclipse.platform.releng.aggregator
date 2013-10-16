@@ -34,7 +34,7 @@ echo "umask explicitly set to 0002, old value was $oldumask"
 # this buildeclipse.shsource file is to ease local builds to override some variables. 
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
-
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export JAVA_HOME=/shared/common/jdk1.7.0-latest
 export ANT_HOME=/shared/common/apache-ant-1.9.2
