@@ -31,8 +31,9 @@ RC=0
 # don't clone, if already exists. 
 if [[ ! -d ${BUILD_DIR}/${EBUILDER} ]]
 then
-    #TODO: make git repo location and access variable
-    git clone file:///gitroot/platform/${EBUILDER} ${BUILD_DIR}/${EBUILDER}
+    # Not sure 'REPO_AND_ACCESS' is defined in all possible scenerios, so we'll provide a default. 
+    # It is in main scenerios, but not sure about things like "re-running unit tests at a later time".
+    git clone ${REPO_AND_ACCESS:-git://git.eclipse.org/gitroot}/platform/${EBUILDER} ${BUILD_DIR}/${EBUILDER}
     RC=$?
     if [[ $RC != 0 ]] 
     then
