@@ -7,7 +7,7 @@
 // a recent copy. This was copied circa March 14, 2013.
 
 // properties written for I20130314-1330 
-$PATH = "/shared/common/jdk1.7.0-latest/bin:/shared/common/apache-maven-3.1.0/bin:/shared/common/apache-ant-1.8.4/bin:/usr/local/bin:/usr/bin:/bin:/opt/buildhomes/e4Build/bin";
+$PATH = "/shared/common/jdk1.7.0-latest/bin:/shared/common/apache-maven-3.1.0/bin:/shared/common/apache-ant-1.9.2/bin:/usr/local/bin:/usr/bin:/bin:/opt/buildhomes/e4Build/bin";
 $INITIAL_ENV_FILE = "/shared/eclipse/builds/4I/production/build_eclipse_org.shsource";
 $BUILD_ROOT = "/shared/eclipse/builds/4I";
 $BRANCH = "master";
@@ -27,7 +27,7 @@ $MVN_DEBUG = "false";
 $MVN_QUIET = "false";
 $SIGNING = "true";
 $UPDATE_BRANDING = "true";
-$FORCE_LOCAL_REPO = "false";
+$REPO_AND_ACCESS = "file:///localgitroot";
 $MAVEN_BREE = "-Pbree-libs";
 $GIT_PUSH = "git push";
 $LOCAL_REPO = "/shared/eclipse/builds/4I/localMavenRepo";

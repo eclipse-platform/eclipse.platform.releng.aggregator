@@ -11,10 +11,11 @@ then
     echo "BUILD_DIR not supplied, will assume current directory, for testing."
     BUILD_DIR=${PWD}
 else
+    # normally will exist by now, but if not, we'll create it.
     if [[ ! -d "${BUILD_DIR}" ]]
     then
-        echo "ERROR: BUILD_DIR did not exist."
-        exit 1
+        echo "WARNING: BUILD_DIR did not exist, so created it: $BUILD_DIR."
+        mkdir -p $BUILD_DIR
     fi
 fi
 
@@ -25,45 +26,41 @@ then
 fi
 
 EBUILDER=eclipse.platform.releng.aggregator
-TARGETNAME=eclipse.platform.releng.aggregator
-ESCRIPT_LOC=${EBUILDER}/production/testScripts
 
-# don't re-fetch, if already exists. 
-if [[ ! -d ${BUILD_DIR}/${TARGETNAME} ]]
+RC=0
+# don't clone, if already exists. 
+if [[ ! -d ${BUILD_DIR}/${EBUILDER} ]]
 then
-    # remove just in case left from previous failed run
-    # if they exist
-    if [[ -f ebuilder.zip ]]
-    then 
-        rm ebuilder.zip
-    fi 
-    if [[ -d tempebuilder ]]
+    #TODO: make git repo location and access variable
+    git clone file:///gitroot/platform/${EBUILDER} ${BUILD_DIR}/${EBUILDER}
+    RC=$?
+    if [[ $RC != 0 ]] 
     then
-        rm -fr tempebuilder
-    fi
-    wget -O ebuilder.zip --no-verbose http://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
-    unzip -q ebuilder.zip -d tempebuilder
-    mkdir -p ${BUILD_DIR}/${TARGETNAME}
-    rsync --recursive "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${BUILD_DIR}/${TARGETNAME}/"
-    rccode=$? 
-    if [[ $rccode != 0 ]]
-    then
-        echo "ERROR: rsync did not complete normally in $0. rccode: $rccode"
-        exit $rccode
-    fi
+       echo "[ERROR] Cloning EBUILDER returned non zero return code: $RC"
+       exit $RC
+     fi
 else 
-    echo "INFO: ebuilder directory found to exist. Not re-fetching."
-    echo "INFO:    Found: ${BUILD_DIR}/${TARGETNAME}"
+    echo "INFO: ebuilder directory found to exist. Not re-cloneing."
+    echo "INFO:    Found: ${BUILD_DIR}/${EBUILDER}"
+    echo "INFO:    But fetching to make sure up to date,"
+    echo "INFO:    before checking out specific HASH (which may make it detached)."
+    pushd ${BUILD_DIR}/${EBUILDER}
+    git fetch
+    RC=$?
+    if [[ $RC != 0 ]] 
+    then
+       echo "[ERROR] Fetch EBUILDER returned non zero return code: $RC"
+       exit $RC
+     fi
+    git checkout $EBUILDER_HASH
+        RC=$?
+    if [[ $RC != 0 ]] 
+    then
+       echo "[ERROR] Checking out EBUILDER for $EBUILDER_HASH returned non zero return code: $RC"
+       exit $RC
+     fi
+    popd
 fi 
 
-# remove on clean exit, if they exist
-if [[ -f ebuilder.zip ]]
-then 
-    rm ebuilder.zip
-fi 
-if [[ -d tempebuilder ]]
-then
-    rm -fr tempebuilder
-fi
-exit 0
+exit $RC
 

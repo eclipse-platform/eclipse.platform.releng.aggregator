@@ -128,7 +128,7 @@ fi
 # and build types, (e.g. M vs. I). For N builds, we still use "I". 
 # 5/31013. We no longer do the post build comparator, but leaving it, just 
 # in case we want an occasionally double check ... but, should never be routine. 
-#comparatorRepository=http://download.eclipse.org/eclipse/updates/4.4-M-builds
+#comparatorRepository=http://download.eclipse.org/eclipse/updates/4.4-I-builds
 comparatorRepository=NOT_CURRENTLY_USED
 
 GET_AGGREGATOR_BUILD_LOG="${logsDirectory}/mb010_get-aggregator_output.txt"
@@ -165,7 +165,7 @@ fn-write-property MVN_DEBUG
 fn-write-property MVN_QUIET
 fn-write-property SIGNING
 fn-write-property UPDATE_BRANDING
-fn-write-property FORCE_LOCAL_REPO
+fn-write-property REPO_AND_ACCESS
 fn-write-property MAVEN_BREE
 fn-write-property GIT_PUSH
 fn-write-property LOCAL_REPO
