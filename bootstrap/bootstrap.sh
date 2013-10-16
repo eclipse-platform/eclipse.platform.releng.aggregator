@@ -2,6 +2,10 @@
 
 # Utility to get basic "startup" files for Platform's CBI Build
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 2>/dev/null
+
 function usage () 
 {
     printf "\n\t%s\n" "$( basename $0 ) <BRANCH> <BUILD_TYPE> <STREAM> where"
@@ -16,20 +20,20 @@ then
     exit 1
 fi
 
-BRANCH=${BRANCH:-"${1}"}
-BUILD_TYPE=${BUILD_TYPE:-"${2}"}
-STREAM=${STREAM:-"${3}"}
+export BRANCH=${BRANCH:-"${1}"}
+export BUILD_TYPE=${BUILD_TYPE:-"${2}"}
+export STREAM=${STREAM:-"${3}"}
 
-BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 reponame=eclipse.platform.releng.aggregator
 
 # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
 if [[ "${STREAM}" =~ ^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$ ]]
 then
-    STREAMMajor=${BASH_REMATCH[1]}
-    STREAMMinor=${BASH_REMATCH[2]}
-    STREAMService=${BASH_REMATCH[3]}
+    export STREAMMajor=${BASH_REMATCH[1]}
+    export STREAMMinor=${BASH_REMATCH[2]}
+    export STREAMService=${BASH_REMATCH[3]}
 else
     echo "STREAM must contain major, minor, and service versions, such as 4.3.0"
     echo "    but found ${STREAM}"
@@ -43,7 +47,20 @@ then
     exit 1
 fi
 
-BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${BUILD_TYPE}}
+# if not defined "externally", we use default for eclipse.org
+if [[ -z $REPO_AND_ACCESS ]]
+then
+    # unless we are on 'build' machine
+    if [[ "build" == "$(hostname)" ]]
+    then
+        export REPO_AND_ACCESS=file:///gitroot
+    else
+        export REPO_AND_ACCESS=git://git.eclipse.org/gitroot
+    fi
+fi
+
+
+export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${STREAMMajor}${BUILD_TYPE}}
 echo "Exporting production scripts ... "
 echo "  STREAM: $STREAM"
 echo "  STREAMMajor: $STREAMMajor"
@@ -53,61 +70,46 @@ echo "  BUILD_TYPE: $BUILD_TYPE"
 echo "  BUILD_ROOT: $BUILD_ROOT"
 echo "  BUILD_HOME: $BUILD_HOME"
 echo "  PRODUCTION_SCRIPTS_DIR: $PRODUCTION_SCRIPTS_DIR"
+echo "  REPO_AND_ACCESS: $REPO_AND_ACCESS"
 
 # We put these in build_root in case two builds get started at once. 
 # (such as N and I build, both from master).  
-TEMPZIPFILE=${STREAMMajor}${BUILD_TYPE}tempscripts.zip
-TEMPFETCH=${reponame}-${BRANCH}
-TEMPFETCHFOLDER=${BUILD_ROOT}/${TEMPFETCH}
 
-# remove, if exists, from previous run
-rm ${TEMPZIPFILE} 2>/dev/null
-rm ${TEMPFETCHFOLDER} 2>/dev/null
-
-echo "TEMPZIPFILE: ${TEMPZIPFILE}"
-echo "TEMPFETCH: ${TEMPFETCH}"
-echo "TEMPFETCHFOLDER ${TEMPFETCHFOLDER}"
-
-# eventually may want to use tagged version of production scripts, if not aggregator
-# then the CGit URL for one file would have the form:
-# http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/production/wgetFresh.sh?tag=vI20120417-0700
-# (not sure about "repo" ... I think can just put in tag, for BRANCH?) 
-
-wget  --no-verbose -O ${TEMPZIPFILE} http://git.eclipse.org/c/platform/${reponame}.git/snapshot/${reponame}-${BRANCH}.zip 2>&1;
-rc=$?
-if [[ $rc != 0 ]]
+# TODO: could maybe do pull here, if already exists?
+rm -fr $BUILD_ROOT/tmp/eclipse.platform.releng.aggregator 2>/dev/null
+if [[ $? != 0 ]] 
 then
-    echo "wget failed: $rc"
+    echo "[ERROR] Exiting, since could not remove $BUILD_ROOT/tmp/eclipse.platform.releng.aggregator as expected."
     exit 1
 fi
-
-#remove any previous versions, to make sure completely fresh
-rm -fr $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR} 2>/dev/null
 
 # Make dir in case first run (note: this must be after the above "removes", 
 # or else first time through they will remove this directory itself. 
-mkdir -p ${BUILD_ROOT}
+mkdir -p ${BUILD_ROOT}/tmp
 if [[ $? != 0 ]] 
 then
-    echo "Exiting, since could not make $BUILD_ROOT, as expected."
+    echo "[ERROR] Exiting, since could not make $BUILD_ROOT/tmp, as expected."
     exit 1
 fi
 
 
-# We only need the production scripts directory, for this phase
-unzip  -o ${TEMPZIPFILE} ${TEMPFETCH}/${PRODUCTION_SCRIPTS_DIR}* -d ${BUILD_ROOT} > zipout.txt 
-if [[ $? != 0 ]] 
-then
-    echo "Exiting, since could not unzip, as expected."
-    exit 1
+git clone -b ${BRANCH} ${REPO_AND_ACCESS}/platform/eclipse.platform.releng.aggregator $BUILD_ROOT/tmp/eclipse.platform.releng.aggregator
+RC=$?
+if [[ $RC != 0 ]]
+then 
+    echo "Could not clone repo as expected"
+    exit $RC
 fi
 
-# mv whole script directory "up" so directly under build_root, in constant place
-mv ${BUILD_ROOT}/${TEMPFETCH}/${PRODUCTION_SCRIPTS_DIR} ${BUILD_ROOT}
+#remove any previous production scripts, to make sure completely fresh
+rm -fr $BUILD_ROOT/${PRODUCTION_SCRIPTS_DIR} 2>/dev/null
+
+# cp whole script directory "up" so directly under build_root, in constant place
+cp -r $BUILD_ROOT/tmp/eclipse.platform.releng.aggregator/${PRODUCTION_SCRIPTS_DIR} ${BUILD_ROOT}
 
 if [[ $? != 0 ]] 
 then
-    echo "Exiting, since could not move, as expected."
+    echo "Exiting, since could not copy production scripts, as expected."
     exit 1
 fi
 
@@ -119,5 +121,3 @@ then
     exit 1
 fi
 
-rm ${TEMPZIPFILE}
-rm -fr ${TEMPFETCHFOLDER} 

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 2>/dev/null
+
 # gets a fresh copy of the primary/working "bootstrap" scripts needed in build home.
 
 # codifying the branch (or tag) to use, so it can be set/chagned in one place
@@ -11,6 +15,8 @@ initScriptTag=master
 
 # to build, all that's needed is the appropriate mbXZ.sh scripts. along with "bootstrap.sh". 
 # It gets what ever else it needs.
+
+
 
 wget --no-verbose --no-cache  -O mb4M.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4I.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;

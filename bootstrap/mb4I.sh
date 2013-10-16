@@ -3,6 +3,10 @@
 # Simple utility to run as cronjob to run Eclipse Platform builds
 # Normally resides in $BUILD_HOME
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 2>/dev/null
+
 function usage() {
     printf "\n\tSimple script start a build of a certain stream." >&2
     printf "\n\tUsage: %s [[-h] | [-t]] " $(basename $0) >&2
@@ -25,10 +29,11 @@ do
 done
 
 SCRIPT_NAME=$0
-MB_LOG_DIR=/shared/eclipse/builds
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+
 LOG_BASE_NAME=${SCRIPT_NAME##*/} 
-LOG_OUT_NAME=${MB_LOG_DIR}/${LOG_BASE_NAME%.*}.out.log
-LOG_ERR_NAME=${MB_LOG_DIR}/${LOG_BASE_NAME%.*}.err.log
+LOG_OUT_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.out.log
+LOG_ERR_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.err.log
 
 echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_ERR_NAME
 
@@ -59,7 +64,6 @@ echo "umask explicitly set to 0002, old value was $oldumask" 1>>$LOG_OUT_NAME 2>
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
 
-export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # we should not need the following here in boot strap, for now, but might in future
 #export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 #export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.9.2}
