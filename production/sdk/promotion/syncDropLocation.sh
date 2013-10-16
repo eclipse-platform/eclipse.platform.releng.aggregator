@@ -193,18 +193,18 @@ function startTests()
     echo "EBUILDER_HASH: $EBUILDER_HASH"
     if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
-        buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+        BUILD_ROOT=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
         eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
         dlFromPath=$( dlFromPath $eclipseStream $buildId $BUILD_KIND )
         echo "DEBUG CBI dlFromPath: $dlFromPath"
-        buildDropDir=${buildRoot}/siteDir/$dlFromPath/${buildId}
+        buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
         echo "DEBGUG CBI buildDropDir: $buildDropDir"
         builderDropDir=${buildDropDir}/${eclipsebuilder}
         echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
     elif [[ "${BUILD_KIND}" == 'PDE' ]]
     then
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-        buildDir=${buildRoot}/build
+        BUILD_ROOT=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+        buildDir=${BUILD_ROOT}/build
         supportDir=${buildDir}/supportDir
         eclipsebuilder=org.eclipse.releng.eclipsebuilder
         builderDir=${supportDir}/$eclipsebuilder
@@ -213,7 +213,7 @@ function startTests()
         echo "DEBUG: PDE builderDropDir for PDE: ${builderDropDir}"
         dlFromPath=$( dlFromPath $eclipseStream $buildId $BUILD_KIND )
         echo "DEBUG: PDE dlFromPath: $dlFromPath"
-        buildDropDir=${buildRoot}/siteDir/$dlFromPath/${buildId}
+        buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
         echo "DEBUG: PDE builderDropDir: ${builderDropDir}"
     else
         echo "ERROR. Unrecognized value of BUILD_KIND: $BUILD_KIND"

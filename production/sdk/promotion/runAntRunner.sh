@@ -33,9 +33,9 @@ shift
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
 
-BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
-BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${buildType}}
+export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${buildType}}
 
 dropSegment=drops
 if [[ ${eclipseStreamMajor} > 3 ]]
