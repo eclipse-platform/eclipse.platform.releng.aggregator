@@ -193,7 +193,7 @@ function startTests()
     echo "EBUILDER_HASH: $EBUILDER_HASH"
     if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
-        buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
+        buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
         eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
         dlFromPath=$( dlFromPath $eclipseStream $buildId $BUILD_KIND )
         echo "DEBUG CBI dlFromPath: $dlFromPath"
