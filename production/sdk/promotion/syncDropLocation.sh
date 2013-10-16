@@ -4,11 +4,13 @@ SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
 source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 2>/dev/null
+
 function sendPromoteMail ()
 {
-    # this buildeclipse.shsource file is to ease local builds to override some variables. 
-    # It should not be used for production builds.
-    source buildeclipse.shsource 2>/dev/null
+
     SITE_HOST=${SITE_HOST:-download.eclipse.org}
 
     echo "     Starting sendPromoteMail"
