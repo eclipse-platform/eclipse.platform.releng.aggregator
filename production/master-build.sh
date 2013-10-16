@@ -187,6 +187,8 @@ fn-write-property TRACE_OUTPUT
 fn-write-property comparatorRepository
 fn-write-property logsDirectory
 fn-write-property BUILD_TIME_PATCHES
+fn-write-property BUILD_HOME
+
 
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}

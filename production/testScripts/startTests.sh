@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+
 # Small utility to start unit tests (or re-run them) after a build
 # and after upload to downloads server is complete.
 
@@ -122,7 +127,6 @@ else
     exit 1
 fi
 
-source buildeclipse.shsource 2>/dev/null
 
 echo "values in ${0}"
 echo "eclipseStream: $eclipseStream"
@@ -133,11 +137,12 @@ echo "buildType: $buildType"
 echo "buildId: $buildId"
 echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
+echo "BUILD_HOME: ${BUILD_HOME}"
 
 
     if [[ "${BUILD_KIND}" == 'CBI' ]]
     then 
-       buildRoot=/shared/eclipse/builds/${eclipseStreamMajor}${buildType}
+       buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
        eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
        dlPath=$( dlpath $eclipseStream $buildId $BUILD_KIND )
        echo "DEBUG dlPath: $dlPath"

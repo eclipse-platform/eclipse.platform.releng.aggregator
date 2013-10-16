@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# It should not be used for production builds.
+source buildeclipse.shsource 2>/dev/null
+
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 if [ $# -ne 1 ]; then
     echo USAGE: $0 env_file
