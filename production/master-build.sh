@@ -100,12 +100,14 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
-# for now, remove any existing LOCAL_REPO, and re-fetch. 
-# At some point we may reconsider this only remove once a week, 
-# or something. 
+# In production builds, we normally specify CLEAN_LOCAL, 
+# and remove any existing LOCAL_REPO, and re-fetch. 
+# But CLEAN_LOCAL can be overridden for remote builds, quick test builds, 
+# etc. 
+export CLEAN_LOCAL=${CLEAN_LOCAL:-true}
 # We "remove" by moving to backup, in case there's ever any reason to 
 # compare "what's changed". 
-if [[ -d ${LOCAL_REPO} ]]
+if [[ -d ${LOCAL_REPO} && "${CLEAN_LOCAL}" == "true" ]]
 then
     # remove existing backup, if it exists
     rm -fr ${LOCAL_REPO}.bak 2>/dev/null
