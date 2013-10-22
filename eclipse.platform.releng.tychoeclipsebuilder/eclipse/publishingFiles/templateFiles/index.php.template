@@ -11,13 +11,11 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
     if ($servername === "build.eclipse.org") {
         $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
         $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
-        $appsource="/home/data/httpd/download.eclipse.org/eclipse.org-common/system";
         $clickthroughstr="";
     }
     else {
         $imagesource="../../../eclipse.org-common/stylesheets";
         $csssource="../../../eclipse.org-common/stylesheets";
-        $appsource="../../../eclipse.org-common/system";
         $clickthroughstr="download.php?dropFile=";
 
     }
@@ -26,7 +24,6 @@ else {
     $servername = "localhost";
     $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
     $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
-    $appsource="NONE";
     $clickthroughstr="";
 }
 
@@ -76,59 +73,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
                 <li class="first"><a href="http://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
                 <li><a href="http://www.eclipse.org/legal/">Legal</a></li>
         </ul>
-<?php
-if ($appsource === "NONE" ) {
-    $anchor = "index.php#EclipseSDK";
-    $link = "winPlatform.php";
-    $code = 0;
-}
-else {
-    require_once("$appsource/app.class.php");
-    $App = new App();
-    $clientOS = $App->getClientOS();
-    if($clientOS == "win32") {
-        $clientOS = Windows;
-        $anchor = "winPlatform.php#EclipseSDK";
-        $link = "winPlatform.php";
-        $code = 1;
-    }
-    else if($clientOS == "macosx") {
-        $clientOS = Macintosh;
-        $anchor = "macPlatform.php#EclipseSDK";
-        $link = "macPlatform.php";
-        $code = 1;
-    }
-    else if($clientOS == "linux") {
-        $clientOS = Linux;
-        $anchor = "linPlatform.php#EclipseSDK";
-        $link = "linPlatform.php";
-        $code = 1;
-    }
-    else if($clientOS == "solaris") {
-        $clientOS = Solaris;
-        $anchor = "solPlatform.php#EclipseSDK";
-        $link = "solPlatform.php";
-        $code = 1;
-    }				
-    else if($clientOS == "aix") {
-        $clientOS = AIX;
-        $anchor = "aixPlatform.php#EclipseSDK";
-        $link = "aixPlatform.php";
-        $code = 1;
-    }
-    else if($clientOS == "hpux") {
-        $clientOS = HPUX;
-        $anchor = "hpuxPlatform.php#EclipseSDK";
-        $link = "hpuxPlatform.php";
-        $code = 1;
-    }
-    else {
-        $anchor = "index.php#EclipseSDK";
-        $link = "winPlatform.php";
-        $code = 0;
-    }
-}
-?>
+
 
 </div>
 <?php if (! isset ($BUILD_FAILED) ) { ?>
@@ -211,29 +156,17 @@ if (isset ($BUILD_FAILED) ) {
 }
 else {
 ?>
-            <tr>
-                                <td width="75%">
-                                        The page provides access to the various sections of this build along with details
-                                        relating to its results and unit tests.
-                                </td>
-                        </tr>
-                </table>
+    <tr>
+        <td width="75%">
+                The page provides access to the various sections of Eclipse Platform build along with details
+                relating to its results and unit tests.
+        </td>
+     </tr>
+   </table>
 
-<?php
-if($code == 1) {
-    echo "<br /><br /><a href=\"$link\"><img align=\"left\" src=\"../../../eclipse.org-common/stylesheets/update_wiz.gif\" border=\"0\" alt=\"Download Eclipse SDK\" /></a>
-        &#160;&#160;<font size=\"+1\"><b>Download now: <a href=\"$anchor\">Eclipse SDK</a></b></font>, $clientOS<br /><br />
-        &#160;&#160;You are currently running on <a href=\"$link\"><b>$clientOS</b></a>";
-}
-else {
-    echo "<br /><br /><a href=\"$link\"><img align=\"left\" src=\"../../../eclipse.org-common/stylesheets/update_wiz.gif\" border=\"0\" alt=\"Download Eclipse SDK\" /></a>
-        &#160;&#160;<font size=\"+1\"><b>Download now: <a href=\"$anchor\">Eclipse SDK</a></b></font><br /><br />";
-}
-?>
-                <br /><br />
 
-                <div>
-                <table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" > </br>
+    <div>
+    <table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" > 
 <?php
 //$servername = $_SERVER["SERVER_NAME"];
 if (! preg_match("/.eclipse.org/i",$servername)) {
