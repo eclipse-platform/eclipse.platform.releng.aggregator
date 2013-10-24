@@ -1,103 +1,19 @@
 #!/bin/bash
 
-BASEDIR=$(pwd)
-LOG=$BASEDIR/log_$( date +%Y%m%d%H%M%S ).txt
-exec >$LOG 2>&1
+clean up "dirt" from previous build
+# see Bug 420078  
+git submodule foreach git clean -f -d -x
+git submodule foreach git reset --hard HEAD
+git clean -f -d -x
+git reset --hard HEAD
 
-BRANCH=master
-GIT_PREFIX=ssh://git.eclipse.org
-javaHome=/opt/local/jdk1.7.0_07
-mvnPath=/opt/pwebster/git/cbi/apache-maven-3.1.0/bin
-updateAggregator=false
+# update master and submodules
+git checkout master
+git pull --recurse-submodules
+git submodule update
 
-while [ $# -gt 0 ]
-do
-    case "$1" in
-	"-v")
-	    mavenVerbose=-X;;
-	"-bree-libs")
-	    mavenBREE=-Pbree-libs;;
-	"-sign")
-	    mavenSign=-Peclipse-sign;;
-	"-update")
-	    updateAggregator=true;;
-	"-anonymous")
-	    GIT_PREFIX=git://git.eclipse.org;;
-	"-gitPrefix")
-	    GIT_PREFIX="$2" ; shift;;
-	"-branch")
-	    BRANCH="$2" ; shift;;
-	"-javaHome")
-	    javaHome="$2" ; shift;;
-	"-mavenPath")
-	    mvnPath="$2" ; shift;;
-    esac
-    shift
-done
+# run the build
+mvn clean verify 
 
-
-export MAVEN_OPTS=-Xmx2560m
-LOCAL_REPO=$BASEDIR/localRepo
-
-
-if [ -z "$JAVA_HOME" ]; then
-    export JAVA_HOME=$javaHome
-fi
-
-mvnRegex=$( echo $mvnPath | sed 's!/!.!g' )
-if ! (echo $PATH | grep "$mvnRegex" >/dev/null ); then
-    export PATH=${mvnPath}:$PATH
-fi
-
-
-cloneAggregator() {
-    if [ ! -d eclipse.platform.releng.aggregator ]; then
-	git clone \
-	-b $BRANCH \
-	${GIT_PREFIX}/gitroot/platform/eclipse.platform.releng.aggregator.git
-	pushd eclipse.platform.releng.aggregator
-	git submodule init
-	# this will take a while ... a long while
-	git submodule update
-	popd
-    else
-	pushd eclipse.platform.releng.aggregator
-	git fetch
-	git checkout $BRANCH
-	git pull
-	git submodule update
-	popd
-    fi
-}
-
-installEclipseParent () {
-    pushd eclipse.platform.releng.aggregator
-    mvn -f eclipse-platform-parent/pom.xml \
-    clean install \
-    -Dmaven.repo.local=$LOCAL_REPO
-    popd
-}
-
-buildAggregator () {
-    pushd eclipse.platform.releng.aggregator
-    mvn $mavenVerbose \
-    clean install \
-    $mavenSign \
-    $mavenBREE \
-    -Dmaven.test.skip=true \
-    -Dmaven.repo.local=$LOCAL_REPO
-    popd
-}
-
-# steps to get going
-
-if $updateAggregator; then
-    cloneAggregator
-fi
-
-# pick up any changes
-installEclipseParent
-
-# build from the aggregator root
-buildAggregator
-
+# find the results in 
+# eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products/*
