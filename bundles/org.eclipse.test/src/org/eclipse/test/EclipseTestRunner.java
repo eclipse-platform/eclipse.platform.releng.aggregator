@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -397,6 +397,7 @@ public class EclipseTestRunner implements TestListener {
 									exception.setStackTrace(stack);
 									exception.printStackTrace();
 								}
+								System.err.flush(); // for bug 420258
 
 								final Display display = getDisplay();
 								display.syncExec(new Runnable() {
@@ -430,6 +431,7 @@ public class EclipseTestRunner implements TestListener {
 														+ shell);
 											}
 										}
+										System.err.flush(); // for bug 420258
 
 										// Take a screenshot:
 										if (!outputDirectory.exists())
