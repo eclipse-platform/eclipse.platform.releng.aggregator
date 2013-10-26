@@ -465,17 +465,16 @@ fn-basebuilder-dir ()
 }
 
 
-# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO DEBUG QUIET SIGNING UPDATE_BRANDING MAVEN_BREE
+# USAGE: fn-maven-build-aggregator BUILD_ID REPO_DIR LOCAL_REPO DEBUG QUIET SIGNING MAVEN_BREE
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   LOCAL_REPO: /shared/eclipse/builds/R4_2_maintenance/localMavenRepo
 #   VERBOSE: true
 #   SIGNING: true
-#   UPDATE_BRANDING: true
 # TODO: depends on BUILD_TYPE being exported/global
 fn-maven-build-aggregator () 
 {
-    checkNArgs $# 8
+    checkNArgs $# 7
     if [[ $? != 0 ]]; then return 1; fi
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
@@ -496,9 +495,7 @@ fn-maven-build-aggregator ()
     if $SIGNING; then
         MARGS="$MARGS -Peclipse-sign"
     fi
-    if $UPDATE_BRANDING; then
-        MARGS="$MARGS -Pupdate-branding-plugins"
-    fi
+
     MARGS="$MARGS ${MAVEN_BREE}"
 
     # Here we count on $BUILD_TYPE being exported. TODO: make parameter later? 
