@@ -26,7 +26,6 @@ $COMMITTER_ID = "e4Build";
 $MVN_DEBUG = "false";
 $MVN_QUIET = "false";
 $SIGNING = "true";
-$UPDATE_BRANDING = "true";
 $REPO_AND_ACCESS = "file:///localgitroot";
 $MAVEN_BREE = "-Pbree-libs";
 $GIT_PUSH = "git push";
