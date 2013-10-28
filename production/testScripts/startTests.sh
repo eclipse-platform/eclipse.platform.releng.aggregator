@@ -2,7 +2,7 @@
 
 # this buildeclipse.shsource file is to ease local builds to override some variables. 
 # It should not be used for production builds.
-source buildeclipse.shsource 
+source buildeclipse.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 # Small utility to start unit tests (or re-run them) after a build
