@@ -31,11 +31,24 @@ of the excludes/includes, if working with "clean" directory).
 rsync -aP \
   . build:/home/data/httpd/download.eclipse.org/eclipse/ 
 
-Similar for equinox
+== Similar for equinox
 
 rsync -aP --delete-excluded \
   --exclude '**/devicekit/' --exclude '**/drops/' --exclude '**/R-3.7.2-201202080800/' \
   --exclude '**/S-3.7RC4-201106030909/' --exclude '**/testweb/' --exclude '**/.*.swp/' \
   build:/home/data/httpd/download.eclipse.org/equinox/ .
 
+== Similar for "updates"
 
+The files are the "categories" displayed for the composites sites, such as for 
+Kepler sites, such as :
+http://download.eclipse.org/eclipse/updates/4.3/
+http://download.eclipse.org/eclipse/updates/4.3-M-builds/
+and 
+Luna sites, such as :
+http://download.eclipse.org/eclipse/updates/4.4/
+http://download.eclipse.org/eclipse/updates/4.4-I-builds/
+http://download.eclipse.org/eclipse/updates/4.4-N-builds/
+
+As for download sites, there's nothing here that's built or automatically updated, 
+but the files are in in this repo for reference and/or easier review, modification, and to maintain history. 
