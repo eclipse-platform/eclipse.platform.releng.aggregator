@@ -71,6 +71,12 @@ if [[ -z "${buildDirectory}" ]]
 then
     echo "PROGRAM ERROR: buildDirectory returned from fn-build-dir was empty"
     exit 1
+else 
+    # this should be when we first create buildDirectory
+    echo "Making buildDirectory: ${buildDirectory}"
+    mkdir -p "${buildDirectory}"
+    # it appears GID bit is not always set correctly, so we'll do so explicitly
+    chmod -c g+s "${buildDirectory}"
 fi
 export logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
