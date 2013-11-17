@@ -33,6 +33,10 @@ if [[ ! -d ${BUILD_DIR}/${EBUILDER} ]]
 then
     # Not sure 'REPO_AND_ACCESS' is defined in all possible scenerios, so we'll provide a default. 
     # It is in main scenerios, but not sure about things like "re-running unit tests at a later time".
+    # If directory doesn't exist yet, create it first, so we can assign proper access 
+    # permissions for later "clean up" routines.
+    mkdir -p "${BUILD_DIR}/${EBUILDER}"
+    chmod -c g+ws "${BUILD_DIR}/${EBUILDER}"
     git clone ${REPO_AND_ACCESS:-git://git.eclipse.org/gitroot}/platform/${EBUILDER} ${BUILD_DIR}/${EBUILDER}
     RC=$?
     if [[ $RC != 0 ]] 
