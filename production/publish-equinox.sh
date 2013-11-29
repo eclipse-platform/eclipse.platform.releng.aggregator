@@ -112,7 +112,7 @@ fn-publish-equinox ()
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
     BASEBUILDER_LAUNCHER="$1"; shift
-    BUILD_MACHINE_ROOT=/shared/eclipse/builds
+    BUILD_MACHINE_ROOT=${BUILD_HOME}
     BUILD_MACHINE_DROP_DIR=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM")
     BUILD_MACHINE_DROP_DIR_PARENT=$(dirname $BUILD_MACHINE_DROP_DIR)
     EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder

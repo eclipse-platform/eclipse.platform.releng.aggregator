@@ -37,8 +37,17 @@ export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.1.0/bin}
 
 export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-# REPO_AND_ACCESS normally defined by now, by bootstrap, but if not, we assume git access to eclipse.org
-export REPO_AND_ACCESS=${REPO_AND_ACCESS:-git://git.eclipse.org/gitroot}
+# if not defined "externally", we use default for eclipse.org
+if [[ -z "${REPO_AND_ACCESS}" ]]
+then
+    # unless we are on 'build' machine
+    if [[ "build" == "$(hostname)" ]]
+    then
+        export REPO_AND_ACCESS=file:///gitroot
+    else
+        export REPO_AND_ACCESS=git://git.eclipse.org/gitroot
+    fi
+fi
 
 AGGREGATOR_REPO=${REPO_AND_ACCESS}/platform/eclipse.platform.releng.aggregator.git
 
@@ -52,7 +61,6 @@ COMMITTER_ID=e4Build
 # MVN_DEBUG=true means verbose; gives comparator info
 export MVN_DEBUG=${MVN_DEBUG:-true}
 export MVN_QUIET=${MVN_QUIET:-false}
-export UPDATE_BRANDING=true
 
 # Need bree-libs for production builds
 MAVEN_BREE=-Pbree-libs
