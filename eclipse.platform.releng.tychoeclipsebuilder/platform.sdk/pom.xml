@@ -32,37 +32,6 @@
                     <format>'${buildId}'</format>
                 </configuration>
             </plugin>
-           <!-- 
-            This is necessary as the icons can't be found otherwise.
-            Tycho seems to resolve the icons from the target/products/<product.id>
-            directory whereas PDE seems to prefix with 'platform:/plugin' and then
-            resolve it appropriately... 
-           -->
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <id>copy-icons</id>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../../rt.equinox.framework/features/org.eclipse.equinox.executable.feature/bin/cocoa/macosx/x86/Eclipse.app/Contents/Resources
-                                    </directory>
-                                    <includes>
-                                        <include>Eclipse.icns</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
@@ -85,6 +54,7 @@
                     </execution>
                     <execution>
                         <id>archive-products</id>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>archive-products</goal>
                         </goals>
@@ -100,5 +70,39 @@
             </plugin>
         </plugins>
     </build>
-
+    <profiles>
+        <profile>
+            <id>eclipse-sign</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.cbi.maven.plugins</groupId>
+                        <artifactId>eclipse-winsigner-plugin</artifactId>
+                        <version>${cbi-plugins.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.eclipse.cbi.maven.plugins</groupId>
+                        <artifactId>eclipse-macsigner-plugin</artifactId>
+                        <version>${cbi-plugins.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
