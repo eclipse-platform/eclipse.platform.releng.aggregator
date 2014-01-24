@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-DROP_ID=I20140123-1600
+export DROP_ID=I20140123-1600
 
-DL_LABEL=4.4M5
-DL_LABEL_EQ=LunaM5
+export DL_LABEL=4.4M5
+export DL_LABEL_EQ=LunaM5
 
 # for I builds, stable and RCs to in milestones
-REPO_SITE_SEGMENT=4.4milestones
+export REPO_SITE_SEGMENT=4.4milestones
 #REPO_SITE_SEGMENT=4.4
 
-HIDE_SITE=true
+export HIDE_SITE=true
 #HIDE_SITE=false
 
 export CL_SITE=${PWD}

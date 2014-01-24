@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-DROP_ID=M20140117-0910
+export DROP_ID=M20140117-0910
 
 #DL_LABEL=4.3.2
-DL_LABEL=4.3.2RC1
+export DL_LABEL=4.3.2RC1
 #DL_LABEL_EQ=KeplerSR2
-DL_LABEL_EQ=KeplerSR2RC1
+export DL_LABEL_EQ=KeplerSR2RC1
 
 # in maintenance, even RCs go in "M-builds"
-REPO_SITE_SEGMENT=4.3-M-builds
+export REPO_SITE_SEGMENT=4.3-M-builds
 #REPO_SITE_SEGMENT=4.3
 
-HIDE_SITE=true
+export HIDE_SITE=true
 # almost always use 'true', to allow some sanity checking, and even mirroring
-#HIDE_SITE=false
+#export HIDE_SITE=false
 
 export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
