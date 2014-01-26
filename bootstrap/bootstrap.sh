@@ -39,7 +39,7 @@ else
     exit 1
 fi
 
-if [[ ! "${BUILD_TYPE}" =~ [IMN] ]]
+if [[ ! "${BUILD_TYPE}" =~ [IMNXY] ]]
 then
     echo "BUILD_TYPE must I,M, or N"
     echo "    but found ${BUILD_TYPE}"
