@@ -288,7 +288,7 @@ else
     echo "# (when repository is a branch, which it typcally is)."  >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
 
-    if [[ $BUILD_TYPE =~ [IM] ]]
+    if [[ $BUILD_TYPE =~ [IMXY] ]]
     then
         AGGRCOMMIT=$( git rev-parse HEAD )
         echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
