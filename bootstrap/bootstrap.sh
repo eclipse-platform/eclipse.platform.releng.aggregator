@@ -41,7 +41,7 @@ fi
 
 if [[ ! "${BUILD_TYPE}" =~ [IMNXY] ]]
 then
-    echo "BUILD_TYPE must I,M, or N"
+    echo "BUILD_TYPE must I,M, X, Y, or N"
     echo "    but found ${BUILD_TYPE}"
     exit 1
 fi
