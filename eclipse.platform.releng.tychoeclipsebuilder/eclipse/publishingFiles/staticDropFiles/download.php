@@ -53,10 +53,10 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
            $isRC = true;
         }
         
-        if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || ($BUILD_TYPE === "M" && ! $isRC)) {
+        if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y" || ($BUILD_TYPE === "M" && ! $isRC)) {
             $BUILD_DIR_NAME = $BUILD_ID;
         } else {
-            if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S" || ($BUILD_TYPE === "M" && $isRC)) {
+            if ($BUILD_TYPE === "R" || $BUILD_TYPE === "S" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y" || ($BUILD_TYPE === "M" && $isRC)) {
                 $timestamp = str_replace('-', '', $TIMESTAMP);
                 $BUILD_DIR_NAME = $BUILD_TYPE."-".$BUILD_ID."-".$timestamp;
             } else {
@@ -71,6 +71,7 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
 else {
     // not sure what to put here (we are essentially not running on a host?)
     // we _might_ need to assume "downloads" here, for "convert to html to work?"
+    // or, on build machine?
     $servername=localhost;
 }
 
