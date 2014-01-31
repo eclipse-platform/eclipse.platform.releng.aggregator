@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-export DROP_ID=M20140117-0910
+export DROP_ID=M20140129-0800
 
 #DL_LABEL=4.3.2
-export DL_LABEL=4.3.2RC1
+export DL_LABEL=4.3.2RC2
 #DL_LABEL_EQ=KeplerSR2
-export DL_LABEL_EQ=KeplerSR2RC1
+export DL_LABEL_EQ=KeplerSR2RC2
 
 # in maintenance, even RCs go in "M-builds"
 export REPO_SITE_SEGMENT=4.3-M-builds
@@ -25,7 +25,7 @@ export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?) 
 # Could probably compute this tag ... but for now easier to type it in each time. 
-export NEW_TAG=M4_3_2_RC1
+export NEW_TAG=M4_3_2_RC2
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
@@ -36,7 +36,7 @@ export AGGR_LOCATION="gitCache/eclipse.platform.releng.aggregator"
 # Used in naming repo, etc
 export TRAIN_NAME=Kepler
 
-# Build machine locations (would very seldome change)
+# Build machine locations (would very seldom change)
 export BUILD_ROOT=/shared/eclipse/builds/4M
 export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.3-M-builds
 
