@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * This class allows the repository provider to plug into the Fix Copyright action
+ * This class allows the repository provider to plug into the Fix [Copyright] action
  * in order to provide the last modified year for one or more files.
  */
 public abstract class RepositoryProviderCopyrightAdapter {
