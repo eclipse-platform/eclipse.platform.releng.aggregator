@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-export DROP_ID=M20140129-0800
+export DROP_ID=M20140206-1000
 
 #DL_LABEL=4.3.2
-export DL_LABEL=4.3.2RC2
+export DL_LABEL=4.3.2RC3
 #DL_LABEL_EQ=KeplerSR2
-export DL_LABEL_EQ=KeplerSR2RC2
+export DL_LABEL_EQ=KeplerSR2RC3
 
 # in maintenance, even RCs go in "M-builds"
 export REPO_SITE_SEGMENT=4.3-M-builds
@@ -25,7 +25,7 @@ export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?) 
 # Could probably compute this tag ... but for now easier to type it in each time. 
-export NEW_TAG=M4_3_2_RC2
+export NEW_TAG=M4_3_2_RC3
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
