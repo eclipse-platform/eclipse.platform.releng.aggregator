@@ -104,14 +104,14 @@ then
             echo "       obtained while copying"
             echo "       from ${repositoryDir}"
             echo "       to ${siteDirOnBuildMachine}"
-            exit $RC
+           #exit $RC
         fi
 
     else
         echo "ERROR: Some directory didn't exist for update site copy."
         echo "  repositoryDir: ${repositoryDir}"
         echo "  siteDirOnBuildMachine: ${siteDirOnBuildMachine}"
-        exit $RC
+        #exit $RC
     fi 
 
 fi
@@ -131,7 +131,7 @@ RC=$?
 if [[ $RC != 0 ]]
 then 
     echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
-    exit $RC
+    #exit $RC
 fi
 
 
@@ -145,7 +145,7 @@ then
     echo "       obtained while copying"
     echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
     echo "       to ${siteDirOnBuildMachine}"
-    exit $RC
+    #exit $RC
 fi
 
 exit 0

@@ -126,6 +126,12 @@ if [ "$BUILD_TYPE" = M ]; then
     BUILD_TYPE_NAME="Maintenance"
 elif [ "$BUILD_TYPE" = N ]; then
     BUILD_TYPE_NAME="Nightly (HEAD)"
+elif [ "$BUILD_TYPE" = X ]; then
+    BUILD_TYPE_NAME="Experimental Branch"
+elif [ "$BUILD_TYPE" = Y ]; then
+    BUILD_TYPE_NAME="Experimental Branch"
+elif [ "$BUILD_TYPE" = P ]; then
+    BUILD_TYPE_NAME="Patch"
 elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
@@ -288,7 +294,7 @@ else
     echo "# (when repository is a branch, which it typcally is)."  >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
 
-    if [[ $BUILD_TYPE =~ [IMXY] ]]
+    if [[ $BUILD_TYPE =~ [IMXYP] ]]
     then
         AGGRCOMMIT=$( git rev-parse HEAD )
         echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
@@ -296,9 +302,9 @@ else
     fi
 
     echo "# " >> ${buildDirectory}/directory.txt
-    echo "# .../streams/repositories.txt" >> ${buildDirectory}/directory.txt
+    echo "# .../streams/repositories${PATCH_BUILD}.txt" >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
-    cat $STREAMS_PATH/repositories.txt >> ${buildDirectory}/directory.txt
+    cat $STREAMS_PATH/repositories${PATCH_BUILD}.txt >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
 
 
@@ -310,8 +316,14 @@ else
     echo "# " >> ${logsDirectory}/relengdirectory.txt
     popd
 
-
+# For right now, skip pom updater, if doing patch build, 
+# Just to avoid a yet another variable in build ... and 
+# would guess few  changes going on ... but can add back 
+# once things are running more smoothly.
+    if [[ -z ${PATCH_BUILD} ]]
+    then
     $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+    fi
     # if file exists, pom update failed
     if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
     then
@@ -336,7 +348,7 @@ else
             echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
         else
             # if build run maven build failed, no need to gather parts
-            $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
+            $SCRIPT_PATH/gather-parts${PATCH_BUILD}.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
             if [[ -f "${buildDirectory}/buildFailed-gather-parts" ]]
             then
                 buildrc=1
@@ -360,6 +372,13 @@ then
     checkForErrorExit $? "Error occurred during publish-repo"
 fi 
 
+#For now, only "publish equinox and promote" if I or M build, skip if P, X, or Y
+
+# TODO: probably never need to promote equinox, for patch build? 
+# TODO: Unclear how/when to send mailing list notification for patch builds. 
+
+if [[ $BUILD_TYPE =~  [IM] ]] 
+then
 
 # We don't promote equinox if there was a build failure, and we should not even try to 
 # create the site locally, because it depends heavily on having a valid repository to 
@@ -374,10 +393,13 @@ fi
 $SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
 
+fi
+
 fn-write-property-close
 
 # dump ALL environment variables in case its helpful in documenting or 
 # debugging build results or differences between runs, especially on different machines
 env 1>$logsDirectory/mb100_all-env-variables_output.txt
 
+echo "Exiting build with RC code of $buildrc"
 exit $buildrc
