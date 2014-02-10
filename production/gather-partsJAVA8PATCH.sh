@@ -14,12 +14,13 @@ fn-gather-repo-patch ()
     BUILD_DIR="$1"; shift
     
     REPOPATH=eclipse.platform.releng.tychoeclipsebuilder/JAVA8PATCH/eclipse.releng.repository.patch/target
-    REPO_DIR_REPOSITORY=$REPO_DIR/$REPOPATH/repository
+    REPO_DIR_REPOSITORY=$REPO_DIR/$REPOPATH/site
     if [[ -d "$REPO_DIR_REPOSITORY" ]]
     then
         pushd "$REPO_DIR"
+        mkdir $BUILD_DIR/repository
         # This will be the http: accessible version, from build machine's BUILD_DIR
-        cp -r $REPOPATH/repository $BUILD_DIR
+        cp -r $REPOPATH/site/ $BUILD_DIR/repository/
         popd
         #TODO: fix up here, in BUILD_DIR/repository? remove extra ius, add checksums? 
         # And then create (new) zip from that?
