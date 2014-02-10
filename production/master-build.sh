@@ -36,11 +36,19 @@ then
 fi
 if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
 then
-    GIT_PUSH='echo no git push since testbuildonly AND patched build'
+    GIT_PUSH='echo no git push since build-time patched build'
 fi
 if [[ "${BUILD_TYPE}" == "N" ]]
 then
     GIT_PUSH='echo no git push done since Nightly'
+fi
+if [[ "${BUILD_TYPE}" == "P" ]]
+then
+    GIT_PUSH='echo no git push done since PATCH BUILD'
+fi
+if [[ "${BUILD_TYPE}" =~ [XY] ]]
+then
+    GIT_PUSH='echo no git push done since X or Y build'
 fi
 GIT_PUSH=${GIT_PUSH:-'git push'}
 
