@@ -194,6 +194,8 @@ fn-write-property LOCAL_REPO
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
 fn-write-property BUILD_KIND
+fn-write-property PATCH_BUILD
+fn-write-property ALT_POM_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
@@ -324,13 +326,13 @@ else
     echo "# " >> ${logsDirectory}/relengdirectory.txt
     popd
 
-# For right now, skip pom updater, if doing patch build, 
-# Just to avoid a yet another variable in build ... and 
-# would guess few  changes going on ... but can add back 
-# once things are running more smoothly.
+    # For right now, skip pom updater, if doing patch build, 
+    # Just to avoid a yet another variable in build ... and 
+    # would guess few  changes going on ... but can add back 
+    # once things are running more smoothly.
     if [[ -z ${PATCH_BUILD} ]]
     then
-    $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+        $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
     fi
     # if file exists, pom update failed
     if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
@@ -356,7 +358,7 @@ else
             echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}." 
         else
             # if build run maven build failed, no need to gather parts
-            $SCRIPT_PATH/gather-parts${PATCH_BUILD}.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
+            $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
             if [[ -f "${buildDirectory}/buildFailed-gather-parts" ]]
             then
                 buildrc=1
@@ -373,11 +375,13 @@ $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-ec
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
 
-# We don't promote repo if there was a build failure, it likely doesn't exist.
+# We don't publish repo if there was a build failure, it likely doesn't exist.
 if [[ -z "${BUILD_FAILED}" ]] 
 then
     $SCRIPT_PATH/publish-repo.sh $BUILD_ENV_FILE >$logsDirectory/mb083_publish-repo_output.txt
     checkForErrorExit $? "Error occurred during publish-repo"
+else
+    echo "No repo published, since BUILD_FAILED"
 fi 
 
 #For now, only "publish equinox and promote" if I or M build, skip if P, X, or Y
@@ -388,18 +392,19 @@ fi
 if [[ $BUILD_TYPE =~  [IM] ]] 
 then
 
-# We don't promote equinox if there was a build failure, and we should not even try to 
-# create the site locally, because it depends heavily on having a valid repository to 
-# work from. 
-if [[ -z "${BUILD_FAILED}" ]] 
-then
-    $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
-    checkForErrorExit $? "Error occurred during publish-equinox"
-fi 
+    # We don't promote equinox if there was a build failure, and we should not even try to 
+    # create the site locally, because it depends heavily on having a valid repository to 
+    # work from. 
+    if [[ -z "${BUILD_FAILED}" ]] 
+    then
+        $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
+        checkForErrorExit $? "Error occurred during publish-equinox"
+    fi 
 
-# if all ended well, put "promotion scripts" in known locations
-$SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
-checkForErrorExit $? "Error occurred during promote-build"
+    # do not promte, if doing P,X, or Y build
+    # if all ended well, put "promotion scripts" in known locations
+    $SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
+    checkForErrorExit $? "Error occurred during promote-build"
 
 fi
 

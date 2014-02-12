@@ -725,11 +725,22 @@ fn-gather-repo ()
     BUILD_ID="$1"; shift
     REPO_DIR="$1"; shift
     BUILD_DIR="$1"; shift
-    REPO_DIR_REPOSITORY=$REPO_DIR/eclipse.platform.repository/target/repository
+    if [[ -n "${PATCH_BUILD}" ]]
+    then
+       ORIG_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.patch/target/site
+       TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.patch/target/repository
+       ORIG_DIR_REPOSITORY=$REPO_DIR/${ORIG_PATH}
+       REPO_DIR_REPOSITORY=$REPO_DIR/${TARGET_PATH}
+       mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
+
+    else
+       TARGET_PATH=eclipse.platform.repository/target/repository
+       REPO_DIR_REPOSITORY=$REPO_DIR/$TAGET_PATH
+    fi
     if [[ -d "$REPO_DIR_REPOSITORY" ]]
     then
         pushd "$REPO_DIR"
-        cp -r eclipse.platform.repository/target/repository $BUILD_DIR
+        cp -r ${TARGET_PATH} $BUILD_DIR
         popd
     else
         echo "   ERROR: $REPO_DIR_REPOSITORY did not exist in fn-gather-repo"
@@ -1032,7 +1043,7 @@ fn-gather-main-index ()
     pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
     # Simplified by creating PHP variables in buildproperties.php
-    cp "index.php.template${PATCH_BUILD}" "$BUILD_DIR"/indexORIG.php
+    cp "index.php.template${PATCH_BUILD}" "$BUILD_DIR"/index.php
 
     popd
 }

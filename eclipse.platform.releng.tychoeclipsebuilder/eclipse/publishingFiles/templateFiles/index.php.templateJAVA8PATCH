@@ -81,27 +81,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <ul id="leftnav">
 <li><a href="#Repository">Eclipse p2 Repository (patch only)</a></li>
 <li><a href="#ZippedRepo">Zipped repository (patch only)</a></li>
-<!--
-<li><a href="#EclipseSDK">Eclipse SDK</a></li>
-<li><a href="#JUnitPlugin">JUnit Plugin Tests and Automated Testing Framework</a></li>
-<li><a href="#ExamplePlugins">Example Plug-ins</a></li>
-<li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
-<li><a href="#RCPSDK">RCP SDK</a></li>
-<li><a href="#DeltaPack">Delta Pack</a></li>
-<li><a href="#com.ibm.icu">com.ibm.icu.base Binary and Source Plug-ins</a></li>
-<li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
-<li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
-<li><a href="#JDTSDK">JDT SDK</a></li>
--->
+
 <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
-<!--
-<li><a href="#PDERuntime">PDE Runtime Binary</a></li>
-<li><a href="#PDESDK">PDE SDK</a></li>
-<li><a href="#CVSRuntime">CVS Runtim</a></li>
-<li><a href="#CVSSDK">CVS SDK</a></li>
-<li><a href="#SWT">SWT binary and Source</a></li>
-<li><a href="#org.eclipse.releng">Releng Tools</a></li>
--->
+
 </ul>
 
 </div>
@@ -189,6 +171,9 @@ if (! preg_match("/.eclipse.org/i",$servername)) {
 
 <?php
     $testResultsStatus = "%testsStatus%";
+    // for PATCH_BUILDS, no tests
+    $testResultsStatus = "";
+    
 if($testResultsStatus == "pending") {
     echo "<li><a title=\"Tests are pending\" href=\"testResults.php\">View the <b>test results</b> for the current build.</a></li>";
 }
@@ -302,8 +287,12 @@ if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_
     }
 }
 
-$STREAM_REPO_URL="http://download.eclipse.org/eclipse/updates/".$STREAM_REPO_NAME;
-
+// assuming "patch_build" means on build machine only, for now. 
+if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
+   $STREAM_REPO_URL="http://build.eclipse.org/eclipse//builds/4P/siteDir/updates/".$STREAM_REPO_NAME;
+} else {
+   $STREAM_REPO_URL="http://download.eclipse.org/eclipse/updates/".$STREAM_REPO_NAME;
+}
 $pos = strpos($BUILD_ID, "RC");
 if ($pos === false) {
     $isRC = false;
@@ -325,7 +314,12 @@ if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_
     }
 }
 
-$BUILD_REPO_URL="http://download.eclipse.org/eclipse/updates/".$BUILD_REPO_NAME;
+// assuming "patch_build" means on build machine only, for now. 
+if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
+   $BUILD_REPO_URL="http://build.eclipse.org/eclipse//builds/4P/siteDir/updates/".$BUILD_REPO_NAME;
+} else {
+   $BUILD_REPO_URL="http://download.eclipse.org/eclipse/updates/".$BUILD_REPO_NAME;
+}
 // checking for existence is especially important for BUILD_REPOs, since they might have been removed. 
 // but we do it here too for sanity check. 
 if (file_exists("../../../updates/".$STREAM_REPO_NAME)) {
@@ -347,11 +341,11 @@ if (file_exists("../../../updates/"."$BUILD_REPO_NAME")) {
 <tr><td><div class="homeitem3col">
 <h3><a name="Zipped Repo"> Zipped Repository (patch only)&nbsp;<a href="details.html#ZippedRepo"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>Status</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>&nbsp;</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> 
 
 <tr><td>&nbsp;</td>
-<td>Zipped Repo </td><td><?php genLinks($_SERVER["SERVER_NAME"],$BUILD_ID,"eclipse.platform.repository.patch-1.0.0-$BUILD_ID.zip"); ?></td>
+<td>Zipped Repo </td><td><?php genLinks($_SERVER["SERVER_NAME"],$BUILD_ID,"patch-$BUILD_ID-repository.zip"); ?></td>
 </tr> 
 
 </table>
@@ -364,7 +358,7 @@ if (file_exists("../../../updates/"."$BUILD_REPO_NAME")) {
 <tr><td><div class="homeitem3col">
 <h3><a name="JDTCORE"> JDT Core Batch Compiler &nbsp;<a href="details.html#JDTCORE"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>Status</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>&nbsp;</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %jdtc% </table>
 </div></td></tr>
 

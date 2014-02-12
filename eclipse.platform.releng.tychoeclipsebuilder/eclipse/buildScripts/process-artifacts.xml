@@ -3,56 +3,86 @@
     basedir=".">
     <target
         name="processArtifacts"
-        depends="doMirror">
+        depends="doRemoves,doMirror">
 
-        <!-- This is to remove IUs handy during the build, but not really
-            needed in final repo -->
-        <!--
-           we used to remove this IU, but leavig it now.
-           See bug 378137
-           https://bugs.eclipse.org/bugs/show_bug.cgi?id=378137
-           <iu id="org.aspectj.runtime" />
-        -->
-        <!--
-           Note, we used to not remove
-           master-equinox.feature.group
-           but that technically makes the repo invalid since
-           it requires other things we removed. See bug 377314
-           https://bugs.eclipse.org/bugs/show_bug.cgi?id=377314
-           There should be only one category to remove, the "Uncategorized" one that Tycho 
-           always creates (see bug 404103) so if there is ever any we want to leave, 
-           we'll need to make the final iu query more exact.
-           See bug 406389 for why we remove rcp.configuration.feature ... 
-           it too is a "build time" mechanism, but not valid to install. 
-        -->
-        <p2.remove.iu>
-            <repository location="file://${siteDirOnBuildMachine}" />
-            <iu id="org.aspectj.weaver" />
-            <iu id="master.feature.group" />
-            <iu id="master.feature.jar" />
-            <!-- 406756
-            <iu id="master-ecf.feature.group" />
-            --> 
-            <!--  bug 406746 
-            <iu id="master-jetty.feature.group" />
-            -->
-            <iu id="master-equinox-weaving.feature.group" />
-            <iu id="master-equinox-weaving.feature.jar" />
-            <iu id="master-equinox.feature.group" />
-            <iu id="master-equinox.feature.jar" />
-            <iu id="eclipse-junit-tests" />
-            <iu query="property[@name='org.eclipse.equinox.p2.type.category']" />
-
-        </p2.remove.iu>
-
+        <!-- if not specified, assume doPack = false ... maintains default behavior, if nothing done --> 
+        <property name="doPack" value="false" />
+        
         <!-- 
              This call is to get MD5 hash sums included. We do NOT call pack, since 
              already should be packed, where appropriate.
-             This is a work around we can likely remove eventually. See bug 406263.  
+             This is a work around we can likely remove eventually. See bug 406263.
+             For PATCH_BUILDs we call twice, once with doPack=false, (do we can do zip file, 
+             without pack.gz files, and a second time, with doPack=true, for 
+             better access via http.  
         -->
-        <p2.process.artifacts repositoryPath="file://${siteDirOnBuildMachine}" />
+        <p2.process.artifacts pack="${doPack}" repositoryPath="file://${siteDirOnBuildMachine}" />
 
 
+    </target>
+
+    <target
+        name="doRemoves"
+        unless="doNotRemove">
+        <!-- normally, caller would set repositoryDir, but for local operation, can hard code here -->
+        <property
+            name="repositoryDir"
+            value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
+
+       <!-- 
+            Note: we mirror first (with comparator) to leave original repository in build machines 
+            drop directory untouched. That allows for emergency "redos" without rebuilding, plus, 
+            in case there are differences, it 
+            allows an easy way to compare "old" with "new" (at least for a few days), until 
+            build drop is cleaned off. 
+       -->
+       
+       <!-- 
+            We run this mirror task, rather than a straight copy, in order to 
+            do a sanity check with traditional comparator. There should be few differences 
+            from buildtime comparator log, but might be some special cases, such as when 
+            third party jars change. See 
+            https://bugs.eclipse.org/bugs/show_bug.cgi?id=402448 
+       -->
+        <echo message="Mirroring main repo: ${repositoryDir}" />
+        <echo message="   to build machine location: ${siteDirOnBuildMachine}" />
+        <echo message="Comparator repo: ${comparatorRepository}" />
+        <echo message="Mirroring main repo: see log at ${buildlogs}/postbuild-mirrorlog.txt" />
+        <echo message="Comparator log: see log at ${buildlogs}/postbuild-comparatorlog.txt" />
+        <p2.mirror
+            source="file://${repositoryDir}"
+            log="${buildlogs}/postbuild-mirrorlog.txt"
+            ignoreErrors="true">
+            <destination
+                compressed="true"
+                name="Eclipse Project Repository"
+                location="file:${siteDirOnBuildMachine}"
+                append="false"
+                format="file://${repositoryDir}"
+                kind="artifact" />
+            <destination
+                compressed="true"
+                name="Eclipse Project Repository"
+                location="file:${siteDirOnBuildMachine}"
+                append="false"
+                format="file://${repositoryDir}" />
+            <comparator
+                comparator="org.eclipse.equinox.p2.repository.tools.jar.comparator"
+                comparatorLog="${buildlogs}/postbuild-comparatorlog.txt">
+                <repository location="${comparatorRepository}" />
+               <!-- eclude none, for now
+               <exclude>
+                   <artifact id="org.eclipse.jdt.doc.isv" />
+                   <artifact id="org.eclipse.jdt.doc.user" />
+                   <artifact id="org.eclipse.pde.doc.user" />
+                   <artifact id="org.eclipse.platform.doc.isv" />
+                   <artifact id="org.eclipse.platform.doc.user" />
+                   <artifact id="org.eclipse.equinox.executable" />
+                   <artifact id="master-equinox" />
+               </exclude>
+               -->
+            </comparator>
+        </p2.mirror>
     </target>
 
     <target
