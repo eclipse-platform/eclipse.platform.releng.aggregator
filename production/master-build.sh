@@ -330,10 +330,10 @@ else
     # Just to avoid a yet another variable in build ... and 
     # would guess few  changes going on ... but can add back 
     # once things are running more smoothly.
-    if [[ -z ${PATCH_BUILD} ]]
-    then
+    #if [[ -z ${PATCH_BUILD} ]]
+    #then
         $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
-    fi
+    #fi
     # if file exists, pom update failed
     if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
     then
