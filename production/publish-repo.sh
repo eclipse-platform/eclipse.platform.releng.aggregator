@@ -217,33 +217,34 @@ then
     zip -r ${buildDirectory}/patch-${BUILD_ID}-repository.zip  . 
     popd
     
-#    if [[ -n "${PATCH_BUILD}" ]]
-#    then
-#        # nothing to remove for patch builds, for now, and we 
-#        # do not want to remove the category we put there intentionally.
-#        DO_REMOVE="-DdoNotRemove=true"
-#        # https://bugs.eclipse.org/bugs/show_bug.cgi?id=427873
-#        # uses 'false' for now. 
-#        DO_PACK="-DdoPack=false"
-#    fi
+    if [[ -n "${PATCH_BUILD}" ]]
+    then
+        # nothing to remove for patch builds, for now, and we 
+        # do not want to remove the category we put there intentionally.
+        DO_REMOVE="-DdoNotRemove=true"
+        # https://bugs.eclipse.org/bugs/show_bug.cgi?id=427873
+        # uses 'false' for now.
+        # switch to 'true' now that signed, and using Java 1.7 
+        DO_PACK="-DdoPack=true"
+    fi
 #
-#    java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
-#        -data ${buildDirectory}/workspace-processArtifacts2 \
-#        -application org.eclipse.ant.core.antRunner \
-#        -v \
-#        -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
-#        -DrepositoryDir=${repositoryDir} ${DO_REMOVE} ${DO_PACK} \
-#        -Dbuildlogs=$logsDirectory/comparatorlogs \
-#        -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
-#        -DcomparatorRepository=$comparatorRepository \
-#        -Djava.io.tmpdir=$TMP_DIR ${DO_NOT_MIRROR_IN_ASSEMBLY}
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
+        -data ${buildDirectory}/workspace-processArtifacts2 \
+        -application org.eclipse.ant.core.antRunner \
+        -v \
+        -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
+        -DrepositoryDir=${repositoryDir} ${DO_REMOVE} ${DO_PACK} \
+        -Dbuildlogs=$logsDirectory/comparatorlogs \
+        -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
+        -DcomparatorRepository=$comparatorRepository \
+        -Djava.io.tmpdir=$TMP_DIR ${DO_NOT_MIRROR_IN_ASSEMBLY}
 #
-#    RC=$? 
-#    if [[ $RC != 0 ]]
-#    then 
-#        echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
-#        #exit $RC
-#    fi
+    RC=$? 
+    if [[ $RC != 0 ]]
+    then 
+        echo "ERROR: java invocation to process-artifacts did not return normally: $RC"
+        #exit $RC
+    fi
 
 # Make composite directly on build machine, for patches only
 # repodir is absolute path to composite repository, 
