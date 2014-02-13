@@ -81,7 +81,7 @@ source buildeclipse.shsource 2>/dev/null
 export BRANCH=BETA_JAVA8
 export BUILD_TYPE=P
 export STREAM=4.3.2
-export PATCH_BUILD=JAVA8PATCH
+export PATCH_BUILD=java8patch
 
 eclipseStreamMajor=${STREAM:0:1}
 
