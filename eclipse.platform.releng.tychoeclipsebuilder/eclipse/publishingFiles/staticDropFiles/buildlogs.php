@@ -142,7 +142,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div class="homeitem3col">
 <?php
 echo "<title>Release Engineering logs for $BUILD_ID</title>\n";
-
+echo "<h3>Build Properties for $BUILD_ID</h3>\n";
+echo "<p><a href="mavenproperties.properties">Key Maven Properties</a></p>\n;
+echo "<p><a href="buildproperties.properties">Other Build Properties</a></p>\n;
 echo "<h3>Release Engineering Logs for $BUILD_ID</h3>\n";
 ?>
 
