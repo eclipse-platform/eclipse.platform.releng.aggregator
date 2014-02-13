@@ -634,6 +634,9 @@ fn-pom-version-updater ()
     if $QUIET; then
         MARGS="$MARGS -q"
     fi
+    if [[ -n "${PATCH_BUILD}" ]]; then
+        MARGS="$MARGS -PpatchBuild"
+    fi
     echo "DEBUG: Variables in $0" 
     echo "DEBUG: PATCH_BUILD: $PATCH_BUILD"
     echo "DEBUG: REPO_DIR: $REPO_DIR"
@@ -689,6 +692,9 @@ fn-pom-version-update-with-commit ()
 
     report=${TMP_DIR}/pom_${BUILD_ID}.txt
     MARGS="-DbuildId=$BUILD_ID"
+    if [[ -n "${PATCH_BUILD}" ]]; then
+        MARGS="$MARGS -PpatchBuild"
+    fi
     pushd "$REPO_DIR"
     mvn $MARGS  ${ALT_POM_FILE} \
         org.eclipse.tycho:tycho-versions-plugin:0.17.0:update-pom \
