@@ -26,7 +26,7 @@ desired primary as an occasional sanity check ... not plans to deliver a complet
 of 4.3.2. 
 
 The second use is to rebuild only the dozen or so bundles that are involved in the changes. 
-This requires setting a view environment variables, and involking maven with a specific pom file. 
+This requires setting a view environment variables, and invoking maven with a specific pom file. 
 
 Specifically, the key "environment variables" are to to set/export
 export BUILD_TYPE=P
@@ -47,9 +47,8 @@ So all together, the mvn command line, in addition to what ever else you'd norma
 mvn -f eclipse.platform.releng.tychoeclipsebuilder/java8patch/pom.xml -PpatchBuild
 
 CAUTION: the above procedure is untested and is meant as an outline, 
-so anyone in community that wants to can have basicis documents. 
-If you find errors or improvements, feel free to fix this file 
-(Or open a bug in Platform-->Releng.)
+so anyone in community that wants to try and build the patch, can at least have basics documented. 
+If you find errors or improvements, feel free to fix this file (or open a bug in Platform-->Releng.)
 
 License
 -------
