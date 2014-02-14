@@ -35,7 +35,7 @@ fn-checkout-basebuilder "$basebuilderDir"
 
 launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
-EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+EBuilderDir="${buildDirectory}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
 
 # compute update site parent directory on build server
 function updateSiteParent()
@@ -164,7 +164,7 @@ java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
     -data ${buildDirectory}/workspace-processArtifacts \
     -application org.eclipse.ant.core.antRunner \
     -v \
-    -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
+    -buildfile "${EBuilderDir}/eclipse/buildScripts/process-artifacts.xml" \
     -DrepositoryDir=${repositoryDir} ${DO_REMOVE} ${DO_PACK} \
     -Dbuildlogs=$logsDirectory/comparatorlogs \
     -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
@@ -231,7 +231,7 @@ then
 #        -data ${buildDirectory}/workspace-processArtifacts2 \
 #        -application org.eclipse.ant.core.antRunner \
 #        -v \
-#        -buildfile "$EBuilderDir"/eclipse/buildScripts/process-artifacts.xml \
+#        -buildfile "${EBuilderDir}/eclipse/buildScripts/process-artifacts.xml" \
 #        -DrepositoryDir=${repositoryDir} ${DO_REMOVE} ${DO_PACK} \
 #        -Dbuildlogs=$logsDirectory/comparatorlogs \
 #        -DsiteDirOnBuildMachine=$siteDirOnBuildMachine \
@@ -254,7 +254,7 @@ java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
     -data ${buildDirectory}/workspace-makeComposite \
     -application org.eclipse.ant.core.antRunner \
     -v \
-    -buildfile "$EBuilderDir"/eclipse/buildScripts/addToComposite.xml \
+    -buildfile "${EBuilderDir}/eclipse/buildScripts/addToComposite.xml" \
     -Drepodir=${siteDirParentOnBuildMachine}  \
     -Dcomplocation=${BUILD_ID}
 

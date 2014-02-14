@@ -41,15 +41,15 @@ EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platfor
 
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-parse-compile-logs "$BUILD_ID" \
-    "$EBuilderDir"/eclipse/helper.xml \
+    "${EBuilderDir}/eclipse/helper.xml" \
     "$buildDirectory" "$launcherJar"
 
 fn-summarize-comparator-logs "$BUILD_ID" \
-    "$EBuilderDir"/eclipse/buildScripts/eclipse_compare.xml \
+    "${EBuilderDir}/eclipse/buildScripts/eclipse_compare.xml" \
     "$buildDirectory" "$launcherJar"    
 
 fn-summarize-apitooling "$BUILD_ID" \
-    "$EBuilderDir"/eclipse/buildScripts/api-tools-builder.xml \
+    "${EBuilderDir}/eclipse/buildScripts/api-tools-builder.xml" \
     "$buildDirectory" "$launcherJar" 
 
 fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
