@@ -42,10 +42,7 @@ if [[ "${BUILD_TYPE}" == "N" ]]
 then
     GIT_PUSH='echo no git push done since Nightly'
 fi
-if [[ "${BUILD_TYPE}" == "P" ]]
-then
-    GIT_PUSH='echo no git push done since PATCH BUILD'
-fi
+
 if [[ "${BUILD_TYPE}" =~ [XY] ]]
 then
     GIT_PUSH='echo no git push done since X or Y build'
