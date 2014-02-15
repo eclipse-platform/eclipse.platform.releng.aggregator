@@ -154,10 +154,11 @@ then
 
 fi
 
+DO_PACK="-DdoPack=false"
+
 if [[ -n "${PATCH_BUILD}" ]]
 then
     DO_REMOVE="-DdoNotRemove=true"
-    DO_PACK="-DdoPack=false"
 fi
 
 java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
