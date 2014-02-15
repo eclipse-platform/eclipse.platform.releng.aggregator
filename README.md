@@ -1,9 +1,9 @@
 eclipse.platform.releng.aggregator
 ==================================
 
-Aggregator repo for an Eclipse SDK build
+Aggregator repo for Eclipse SDK builds.
 
-To run a complete build, on your local machine, run the commands from ./scripts/build.sh in this folder
+To run a complete build, on your local machine, run the commands from ./scripts/build.sh in this folder.
 
 These commands requires the installation and setup of Java 1.7 or higher and Maven version 3.0.5 or higher Plus, other settings, alternatives, and other recommendations are made in the complete instructions on the [Platform Build wiki](http://wiki.eclipse.org/Platform-releng/Platform_Build "Platform Build").
 
