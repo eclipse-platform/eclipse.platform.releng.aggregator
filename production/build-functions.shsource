@@ -517,11 +517,17 @@ fn-maven-build-aggregator ()
     echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
     echo "DEBUG: DEBUG: $DEBUG"
     echo "DEBUG: QUIET: $QUIET"
+    echo ""
+    echo "DEBUG: CBI_JDT_REPO_URL: $CBI_JDT_REPO_URL"
+    echo "DEBUG: CBI_JDT_VERSION: $CBI_JDT_VERSION"
+    echo ""
     echo "DEBUG: SIGNING: $SIGNING"
     echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
     echo "DEBUG: MARGS: $MARGS"
     echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
 
+
+    
     # -fail-at-end gives chance for bundles to compile, even after
     # a compile error. Might have to specify --fail-never to see them all? See 
     # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
@@ -532,7 +538,7 @@ fn-maven-build-aggregator ()
         mvn $MARGS --fail-at-end -V \
         clean verify \
         -DskipTests=true \
-        -Dmaven.repo.local=$LOCAL_REPO \
+        -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
         -Dtycho.debug.artifactcomparator \
         -DcontinueOnFail=true -Djgit.dirtyWorkingTree=error \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"  $FORCEQUALIFIERARG
@@ -645,7 +651,7 @@ fn-pom-version-updater ()
     pushd "$REPO_DIR"
     mvn $MARGS \
         org.eclipse.tycho:tycho-versions-plugin:0.17.0:update-pom \
-        -Dmaven.repo.local=$LOCAL_REPO \
+        -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
         -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}"
     RC=$?
     if [[ $RC != 0 ]]

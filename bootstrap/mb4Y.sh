@@ -74,7 +74,10 @@ source buildeclipse.shsource 2>/dev/null
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=david_williams/BETA_JAVA8
+export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
+export CBI_JDT_VERSION="3.9.2.v20140129-2151"
+
+export BRANCH=master
 export BUILD_TYPE=Y
 export STREAM=4.4.0
 

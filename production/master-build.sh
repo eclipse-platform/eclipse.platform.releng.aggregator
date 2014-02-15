@@ -64,6 +64,18 @@ buildrc=0
 
 # derived values
 
+# correct valuse for cbi-jdt-repo.url and cbi-jdt-version are 
+# codified in the parent pom. These variables give an easy way 
+# to test "experimental versions" in production build. 
+
+if [[ -n $CBI_JDT_REPO_URL ]]
+then
+   export CBI_JDT_REPO_URL_ARG="-Dcbi-jdt-repo.url=$CBI_JDT_REPO_URL"
+fi
+if [[ -n $CBI_JDT_VERSION ]]
+then
+   export CBI_JDT_VERSION_ARG="-Dcbi-jdt-version=$CBI_JDT_VERSION"
+fi
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 export buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
@@ -179,6 +191,10 @@ fn-write-property LOCAL_REPO
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
 fn-write-property BUILD_KIND
+fn-write-property CBI_JDT_REPO_URL
+fn-write-property CBI_JDT_REPO_URL_ARG
+fn-write-property CBI_JDT_VERSION
+fn-write-property CBI_JDT_VERSION_ARG
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
