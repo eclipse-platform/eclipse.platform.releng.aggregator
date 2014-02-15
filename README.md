@@ -9,7 +9,7 @@ These commands requires the installation and setup of Java 1.7 or higher and Mav
 
 Eclipse Platform Project committers should also read [Automated Platform Builds](http://wiki.eclipse.org/Platform-releng/Automated_Platform_Build "Automated Platform Builds").
 
-Release Engineers should also be familiar with other documents on the [Releng Wiki](http://wiki.eclipse.org/Category:Eclipse_Platform_Releng "Releng Wiki") 
+Release Engineers should also be familiar with other documents on the [Releng Wiki](http://wiki.eclipse.org/Category:Eclipse_Platform_Releng "Releng Wiki").
 
 License
 -------
