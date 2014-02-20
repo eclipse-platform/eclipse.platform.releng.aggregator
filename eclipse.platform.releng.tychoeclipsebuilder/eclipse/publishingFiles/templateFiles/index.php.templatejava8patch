@@ -1,0 +1,386 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<?php
+//ini_set("display_errors", "true");
+//error_reporting (E_ALL);
+
+include("buildproperties.php");
+
+if (array_key_exists("SERVER_NAME", $_SERVER)) {
+    $servername = $_SERVER["SERVER_NAME"];
+    if ($servername === "build.eclipse.org") {
+        $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
+        $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
+        $clickthroughstr="";
+    }
+    else {
+        $imagesource="../../../eclipse.org-common/stylesheets";
+        $csssource="../../../eclipse.org-common/stylesheets";
+        $clickthroughstr="download.php?dropFile=";
+
+    }
+}
+else {
+    $servername = "localhost";
+    $imagesource="http://download.eclipse.org/eclipse.org-common/themes/Phoenix/images";
+    $csssource="http://download.eclipse.org/eclipse.org-common//themes/Phoenix/css";
+    $clickthroughstr="";
+}
+
+?>
+<head>
+        <title>Eclipse Project</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <meta name="author" content="Eclipse Foundation, Inc." />
+        <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
+        <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/visual.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/layout.css" media="screen" />
+        <link rel="stylesheet" type="text/css" href="<?php echo $csssource;?>/print.css" media="print" />
+<script type="text/javascript">
+
+sfHover = function() {
+    var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
+    for (var i=0; i<sfEls.length; i++) {
+        sfEls[i].onmouseover=function() {
+            this.className+=" sfhover";
+        }
+        sfEls[i].onmouseout=function() {
+            this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
+        }
+    }
+}
+if (window.attachEvent) window.attachEvent("onload", sfHover);
+</script>
+</head>
+<body>
+
+<div id="header">
+        <a href="http://www.eclipse.org/"><img src="<?php echo $imagesource;?>/header_logo.gif" width="163" height="68" border="0" alt="Eclipse Logo" class="logo" /></a>
+        <div id="searchbar">
+                <img src="<?php echo $imagesource;?>/searchbar_transition.gif" width="92" height="26" class="transition" alt="" />
+                <img src="<?php echo $imagesource;?>/searchbar_header.gif" width="64" height="17" class="header" alt="Search" />
+                <form method="get" action="http://www.eclipse.org/search/search.cgi">
+                        <input type="hidden" name="t" value="All" />
+                        <input type="hidden" name="t" value="Doc" />
+                        <input type="hidden" name="t" value="Downloads" />
+                        <input type="hidden" name="t" value="Wiki" />
+                        <input type="hidden" name="wf" value="574a74" />
+                        <input type="text" name="q" value="" />
+                        <input type="image" class="button" src="<?php echo $imagesource;?>/searchbar_submit.gif" alt="Submit" onclick="this.submit();" />
+                </form>
+        </div>
+        <ul id="headernav">
+                <li class="first"><a href="http://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
+                <li><a href="http://www.eclipse.org/legal/">Legal</a></li>
+        </ul>
+
+</div>
+<?php if (! isset ($BUILD_FAILED) ) { ?>
+
+<div id="leftcol">
+<ul id="leftnav">
+<li><a href="#Repository">Eclipse p2 Repository (patch only)</a></li>
+<li><a href="#ZippedRepo">Zipped repository (patch only)</a></li>
+
+<li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
+
+</ul>
+
+</div>
+<!-- end 'not build failed' -->
+<?php } ?>
+
+
+<div id="midcolumn">
+                <table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" >
+                <tr>
+                        <td>
+           <b><font face="Verdana" size="+3">Eclipse <?php echo $STREAM; ?> <?php echo $BUILD_TYPE_NAME; ?> Build: <?php echo $BUILD_ID; ?></font></b>
+        </td>
+        <tr>
+        <tr>
+<?php
+if (file_exists("pom_updates/index.html")) {
+    echo "<tr><td width=\"75%\"><font size=\"+1\">";
+    echo "<a href=\"pom_updates/\"><b>POM updates made</b></a></font></td></tr>";
+}
+?>
+<?php
+// check if test build only, just to give warning of oversite. 
+// see bug 404545
+if (isset($testbuildonly) && ($testbuildonly)) {
+    echo "<tr><td width=\"75%\">\n";
+    echo "<font size=\"+1\">\n";
+    echo "Test-Build-Only flag found set. Input was not tagged.\n";
+    echo "</font>\n";
+    echo "</td></tr>\n";
+}
+?>
+<?php
+if (file_exists("news/")) {
+    echo "<tr><td width=\"75%\"><font size=\"+1\">";
+    echo "<a href=\"news/\"><b>New and Noteworthy</b></a></font></td></tr>";
+}
+
+
+if (isset ($BUILD_FAILED) ) {
+    echo "<tr><td width=\"75%\"><font size=\"+1\">";
+    echo "Build Failed. See <a href=\"buildlogs.php\">logs</a>. <br />\n";
+    $PATTERN='!(.*)(/buildlogs/)(.*)!';
+    $result = preg_match($PATTERN, $BUILD_FAILED, $MATCHES);
+    // cheap short cut, since we expect only 1 such file
+    $summaryFile=glob("buildFailed-*");
+    if ($result !== FALSE) {
+        $SPECIFIC_LOG=$MATCHES[3];
+        echo "Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>, \n";
+        echo "or a <a href=\"$summaryFile[0]\">summary</a>. <br /> \n";
+        echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any). \n";
+    } 
+    echo "</td><tr>";
+    // early end to table, since build failed is all we'll print.
+    echo "</table>";
+    
+    
+}
+else {
+?>
+            <tr>
+                                <td width="75%">
+                The page provides access to 
+                Eclipse Java 8 Support (BETA) - This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP.
+                                </td>
+                        </tr>
+                </table>
+
+
+                <div>
+    <table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" > 
+<?php
+//$servername = $_SERVER["SERVER_NAME"];
+if (! preg_match("/.eclipse.org/i",$servername)) {
+    echo "<tr> To download a file via HTTP click on its corresponding http link below.";			
+} else {
+    echo "<tr>";
+} ?>
+                </table>
+                </div>
+
+                <div class="homeitem">
+                        <h3>Related Links</h3>
+                                <ul class="midlist">
+
+<?php
+    //$testResultsStatus = "%testsStatus%";
+    // for PATCH_BUILDS, no tests
+    $testResultsStatus = "";
+    
+if($testResultsStatus === "pending") {
+    echo "<li><a title=\"Tests are pending\" href=\"testResults.php\">View the <b>test results</b> for the current build.</a></li>";
+}
+else if($testResultsStatus === "successful") {
+    echo "<li><a title=\"Test results have no failures\" href=\"testResults.php\">View the <b><font color=\"#00FF00\">test results</font></b> for the current build.</a></li>";	
+}
+else if($testResultsStatus === "failed") {
+    echo "<li><a title=\"Test results have failures\" href=\"testResults.php\">View the <b><font color=\"#FF0000\">test results</font></b> for the current build.</a></li>";	
+}
+else {
+    echo "<li><a href=\"testResults.php\">View the <b>test results</b> for the current build.</a></li>";
+}
+if (file_exists("performance/performance.php")) {
+    echo "<li>";
+    $generated=file_exists("performance/global_fp.php");
+    if (!$generated) echo "<i>";
+    echo "<a href=\"performance/performance.php\">View the <b>performance results</b> for the current build.</a>";
+    if (!$generated) echo "</i>";
+    echo "</li>";
+}
+?>
+
+                                <li><a href="directory.txt">View the repositories used for the current build.</a></li>
+                                <li><a href="buildNotes.php">View build notes for the current build.</a></li>
+        <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download</a></li>
+                                </ul>
+                </div>
+
+
+        <hr class="clearer" />
+        </div>
+
+<?php
+
+function column($servername) {
+
+    echo "<td width=\"7%\"><b>Download</b></td>";
+    echo "<td width=\"7%\"><b>Size</b></td>";
+    echo "<td width=\"37%\"><b>File</b></td>";
+    echo "<td width=\"11%\"><b>Checksum</b></td>";
+    return;
+}
+
+function getDropSize($zipfile) {
+
+    $filesize = "N/A";
+    $filesizebytes  = filesize($zipfile);
+    if($filesizebytes > 0) {
+        if($filesizebytes < 1048576)
+            $filesize = round($filesizebytes / 1048576, 2) . " MB";
+        else if ($filesizebytes >= 1048576 && $filesizebytes < 10485760)
+            $filesize = round($filesizebytes / 1048576, 1) . " MB";
+        else
+            $filesize = round($filesizebytes / 1048576, 0) . " MB";
+    }
+    return($filesize);
+}
+
+function genLinks($servername,$BUILD_ID,$zipfile) {
+
+    global $clickthroughstr;
+
+    $httplink = "$clickthroughstr$zipfile";
+    $httplabel = "(http)";
+    $httpline =  "<div align=\"left\"><a href=\"$httplink\">$httplabel</a>";
+    $filesize = getDropSize($zipfile);
+
+    echo "$httpline";
+    echo "&nbsp;&nbsp";
+    echo "<td>$filesize</td>";
+    echo "<td>$zipfile</td>";
+    // make relative so works on build.eclipse.org
+    //echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops/$BUILD_ID/checksum/$zipfile.md5\">(md5)</a>";
+    //echo " <a href=\"http://download.eclipse.org/eclipse/downloads/drops/$BUILD_ID/checksum/$zipfile.sha1\">(sha1)</a>";
+    echo "<td><a href=\"./checksum/$zipfile.md5\">(md5)</a>";
+    echo " <a href=\"./checksum/$zipfile.sha1\">(sha1)</a>";
+}
+?>	
+
+<table align="left" BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%">
+
+<tr><td><div class="homeitem3col">
+<h3><a name="Repository"> Eclipse p2 Repository&nbsp;<a href="details.html#Repository"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
+<table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
+
+<?php
+$streamArr = explode(".", $STREAM);
+$STREAM_MAJOR = $streamArr[0];
+$STREAM_MINOR = $streamArr[1];
+$STREAM_SERVICE = $streamArr[2];
+
+// We expect $BUILD_ID to be defined in buildproperties.php
+// But it can be defined several times in reference URI, such as once in directory name, 
+// and once in filename. We want the directory-like part.
+// And to complicate things, in S and R builds, the segment is no longer BUILD_ID, 
+// but a more complicated concatination. 
+if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_TYPE === "M" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y") {
+    $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
+} else {
+    if ($BUILD_TYPE === "S") {
+        $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."milestones";
+    } else {
+        if ($BUILD_TYPE === "R") {
+            $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR;
+        }
+        else {
+            echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />";
+            // We'll make an assumption that might work. 
+            $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
+        }
+    }
+}
+
+// assuming "patch_build" means on build machine only, for now. 
+if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
+   $STREAM_REPO_URL="http://build.eclipse.org/eclipse/builds/4P/siteDir/updates/".$STREAM_REPO_NAME;
+} else {
+   $STREAM_REPO_URL="http://download.eclipse.org/eclipse/updates/".$STREAM_REPO_NAME;
+}
+$pos = strpos($BUILD_ID, "RC");
+if ($pos === false) {
+    $isRC = false;
+} else { 
+    $isRC = true;
+}
+
+// There are two types of M builds, some RCs, some not.
+if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y" || ($BUILD_TYPE === "M" && ! $isRC)) {
+    $BUILD_REPO_NAME=$STREAM_REPO_NAME."/".$BUILD_ID;
+} else {
+    $timestamp = str_replace('-', '', $TIMESTAMP);
+    if ($BUILD_TYPE === "S" || $BUILD_TYPE === "R" || ($BUILD_TYPE === "M" && $isRC)) {
+        $BUILD_REPO_NAME=$STREAM_REPO_NAME."/".$BUILD_TYPE."-".$BUILD_ID."-".$timestamp;
+    } else {
+        echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />\n";
+        // We'll make an assumption that might work. 
+        $BUILD_REPO_NAME=$STREAM_REPO_NAME."/".$BUILD_ID;
+    }
+}
+
+// assuming "patch_build" means on build machine only, for now. 
+if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
+   $BUILD_REPO_URL="http://build.eclipse.org/eclipse/builds/4P/siteDir/updates/".$BUILD_REPO_NAME;
+} else {
+   $BUILD_REPO_URL="http://download.eclipse.org/eclipse/updates/".$BUILD_REPO_NAME;
+}
+// checking for existence is especially important for BUILD_REPOs, since they might have been removed. 
+// but we do it here too for sanity check. 
+if ($servername === "build.eclipse.org") {
+    $relativePath="../../../../";
+}
+else {
+    $relativePath="../../../";
+}
+if (file_exists("$relativePath/updates/".$STREAM_REPO_NAME)) {
+    echo "<tr> \n";
+    echo "<p>To update your Eclipse installation to this development stream, you can use the software repository at<br />\n";
+    echo "&nbsp;&nbsp;<a href=\"$STREAM_REPO_URL\">$STREAM_REPO_URL</a><br />\n";
+    echo "</tr> \n";
+} 
+if (file_exists("$relativePath/updates/"."$BUILD_REPO_NAME")) {
+    echo "<tr> \n";
+    echo "<p>To update your build to use this specific build, you can use the software repository at<br />\n";
+    echo "&nbsp;&nbsp;<a href=\"$BUILD_REPO_URL\">$BUILD_REPO_URL</a><br />\n";
+    echo "</tr> \n";
+}
+?>
+
+</table>
+
+<tr><td><div class="homeitem3col">
+<h3><a name="Zipped Repo"> Zipped Repository (patch only)&nbsp;<a href="details.html#ZippedRepo"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
+<table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
+<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>&nbsp;</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+</tr> 
+
+<tr><td>&nbsp;</td>
+<td>Zipped Repo </td><td><?php genLinks($_SERVER["SERVER_NAME"],$BUILD_ID,"java8patch-$BUILD_ID-repository.zip"); ?></td>
+</tr> 
+
+</table>
+
+
+</div></td></tr>
+
+
+
+<tr><td><div class="homeitem3col">
+<h3><a name="JDTCORE"> JDT Core Batch Compiler &nbsp;<a href="details.html#JDTCORE"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
+<table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
+<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>&nbsp;</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+</tr> %jdtc% </table>
+</div></td></tr>
+
+
+</table>
+<p><br /></p>
+<?php } ?>
+<div id="footer">
+        <ul id="footernav">
+                <li class="first"><a href="http://www.eclipse.org">Home</a></li>
+                <li><a href="http://www.eclipse.org/legal/privacy.php">Privacy Policy</a></li>
+                <li><a href="http://www.eclipse.org/legal/termsofuse.php">Terms of Use</a></li>
+        <li>Downloads provided under the <a href="http://www.eclipse.org/legal/epl/notice.html">Eclipse Foundation Software User Agreement</a></li>
+        </ul>
+    <p>Copyright &copy; 2006-2014 The Eclipse Foundation. All Rights
+Reserved</p>
+</div>
+</body>
+</html>
