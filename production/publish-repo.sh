@@ -156,10 +156,11 @@ fi
 
 DO_PACK="-DdoPack=false"
 
-if [[ -n "${PATCH_BUILD}" ]]
-then
-    DO_REMOVE="-DdoNotRemove=true"
-fi
+# Have to remove after all, but only "Uncategorized" for bug 428099.
+#if [[ -n "${PATCH_BUILD}" ]]
+#then
+#    DO_REMOVE="-DdoNotRemove=true"
+#fi
 
 java -Djava.io.tmpdir=$TMP_DIR -jar "$launcherJar" \
     -data ${buildDirectory}/workspace-processArtifacts \
