@@ -84,7 +84,7 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 #export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 #export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.9.2}
 #export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
-#export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.1.0/bin}
+#export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.1.1/bin}
 
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
