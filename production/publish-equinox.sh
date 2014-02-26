@@ -70,13 +70,14 @@ fn-eq-gather-starterkit ()
     then
         pushd "$TARGET_PRODUCTS"
 
-        cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip 
-        cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip 
-        cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz 
+        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip 
+        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip 
+        #cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip 
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz 
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz 
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz 
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz 
+        
         cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz 
         cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz 
         
@@ -86,8 +87,9 @@ fn-eq-gather-starterkit ()
         # no longer an x86 version. Bug 420725 
         #tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86 rt
         
-        cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip 
-        cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip 
+        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip 
+        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip 
+        
         cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip 
         cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86.zip 
 
