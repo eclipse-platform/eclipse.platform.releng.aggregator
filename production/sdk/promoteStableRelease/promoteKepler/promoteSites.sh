@@ -2,14 +2,14 @@
 
 export DROP_ID=M20140221-1700
 
-#DL_LABEL=4.3.2
-export DL_LABEL=4.3.2RC4a
-#DL_LABEL_EQ=KeplerSR2
-export DL_LABEL_EQ=KeplerSR2RC4a
+DL_LABEL=4.3.2
+#export DL_LABEL=4.3.2RC4a
+DL_LABEL_EQ=KeplerSR2
+#export DL_LABEL_EQ=KeplerSR2RC4a
 
 # in maintenance, even RCs go in "M-builds"
-export REPO_SITE_SEGMENT=4.3-M-builds
-#REPO_SITE_SEGMENT=4.3
+#export REPO_SITE_SEGMENT=4.3-M-builds
+export REPO_SITE_SEGMENT=4.3
 
 export HIDE_SITE=true
 # almost always use 'true', to allow some sanity checking, and even mirroring
@@ -20,12 +20,12 @@ echo "CL_SITE: ${CL_SITE}"
 
 # These are what precedes main drop directory name
 #export DL_TYPE=S
-#export DL_TYPE=R
-export DL_TYPE=M
+export DL_TYPE=R
+#export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?) 
 # Could probably compute this tag ... but for now easier to type it in each time. 
-export NEW_TAG=M4_3_2_RC4a
+export NEW_TAG=M4_3_2
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
