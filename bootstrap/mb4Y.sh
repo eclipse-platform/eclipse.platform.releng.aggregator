@@ -75,7 +75,7 @@ source buildeclipse.shsource 2>/dev/null
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
 export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
-export CBI_JDT_VERSION="3.9.2.v20140216-2054"
+export CBI_JDT_VERSION="3.9.2.v20140302-1952"
 
 export BRANCH=master
 export BUILD_TYPE=Y
