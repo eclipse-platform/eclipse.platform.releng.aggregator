@@ -138,6 +138,12 @@ if [ "$BUILD_TYPE" = M ]; then
     BUILD_TYPE_NAME="Maintenance"
 elif [ "$BUILD_TYPE" = N ]; then
     BUILD_TYPE_NAME="Nightly (HEAD)"
+elif [ "$BUILD_TYPE" = X ]; then
+    BUILD_TYPE_NAME="Experimental Branch"
+elif [ "$BUILD_TYPE" = Y ]; then
+    BUILD_TYPE_NAME="Experimental Branch"
+elif [ "$BUILD_TYPE" = P ]; then
+    BUILD_TYPE_NAME="Patch"
 elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
@@ -303,7 +309,7 @@ else
     echo "# (when repository is a branch, which it typcally is)."  >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
 
-    if [[ $BUILD_TYPE =~ [IMXY] ]]
+    if [[ $BUILD_TYPE =~ [IMXYP] ]]
     then
         AGGRCOMMIT=$( git rev-parse HEAD )
         echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
@@ -368,11 +374,13 @@ $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-ec
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
 
-# We don't promote repo if there was a build failure, it likely doesn't exist.
+# We don't publish repo if there was a build failure, it likely doesn't exist.
 if [[ -z "${BUILD_FAILED}" ]] 
 then
     $SCRIPT_PATH/publish-repo.sh $BUILD_ENV_FILE >$logsDirectory/mb083_publish-repo_output.txt
     checkForErrorExit $? "Error occurred during publish-repo"
+else
+    echo "No repo published, since BUILD_FAILED"
 fi 
 
 
@@ -395,4 +403,5 @@ fn-write-property-close
 # debugging build results or differences between runs, especially on different machines
 env 1>$logsDirectory/mb100_all-env-variables_output.txt
 
+echo "Exiting build with RC code of $buildrc"
 exit $buildrc

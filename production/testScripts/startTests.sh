@@ -116,7 +116,7 @@ else
     exit 1
 fi
 
-if [[ "${buildId}" =~ ([MNI]+)([[:digit:]]*)\-([[:digit:]]*) ]]
+if [[ "${buildId}" =~ ([MNIXYP]+)([[:digit:]]*)\-([[:digit:]]*) ]]
 then
     # old, simpler way, if we don't do regex and input checkinging
     #buildType=${buildId:0:1}

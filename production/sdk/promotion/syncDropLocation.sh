@@ -98,7 +98,7 @@ function sendPromoteMail ()
     TO=${TO:-"platform-releng-dev@eclipse.org"}
 
     # for initial testing, only to me -- change as desired after initial testing. 
-    if [[ "${BUILD_KIND}" != "CBI" ]]
+    if [[ "${"${buildId}"}" =~ [PYI] ]]
     then 
         TO="david_williams@us.ibm.com"
     fi
@@ -140,7 +140,7 @@ function sendPromoteMail ()
         message2="$message2 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
     fi
 
-    if [[ "${BUILD_KIND}" == "CBI" ]]
+    if [[ "${BUILD_KIND}" == "CBI" && "${buildId}" =~ [MI] ]]
     then 
         (
         echo "To: ${TO}"
@@ -152,13 +152,14 @@ function sendPromoteMail ()
         echo -e "${message1}"
         echo "</body></html>"
         ) | /usr/lib/sendmail -t
-    else
+    elif [[ "${BUILD_KIND}" == "CBI" && "${buildId}" =~ [PYX] ]]
+    then
         (
         echo "To: ${TO}"
         echo "From: ${FROM}"
         echo "MIME-Version: 1.0"
         echo "Content-Type: text/html; charset=utf-8"
-        echo "Subject: ${SUBJECT}"
+        echo "Subject: Experimental: ${SUBJECT}"
         echo "<html><body>"
         echo -e "${message2}"
         echo "</body></html>"

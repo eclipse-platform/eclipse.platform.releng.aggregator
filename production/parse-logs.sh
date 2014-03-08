@@ -41,5 +41,5 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
 
 fn-parse-compile-logs "$BUILD_ID" \
-    "$EBuilderDir"/eclipse/buildScripts/eclipse_convert.xml \
+    "${EBuilderDir}/eclipse/buildScripts/eclipse_convert.xml" \
     "$buildDirectory" "$launcherJar"
