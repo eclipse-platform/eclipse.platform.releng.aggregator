@@ -41,7 +41,7 @@ EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platfor
 
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-parse-compile-logs "$BUILD_ID" \
-    "$EBuilderDir"/eclipse/helper.xml \
+    "${EBuilderDir}/eclipse/helper.xml" \
     "$buildDirectory" "$launcherJar"
 
 fn-summarize-comparator-logs "$BUILD_ID" \

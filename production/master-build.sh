@@ -64,6 +64,18 @@ buildrc=0
 
 # derived values
 
+# correct valuse for cbi-jdt-repo.url and cbi-jdt-version are 
+# codified in the parent pom. These variables give an easy way 
+# to test "experimental versions" in production build. 
+
+if [[ -n $CBI_JDT_REPO_URL ]]
+then
+   export CBI_JDT_REPO_URL_ARG="-Dcbi-jdt-repo.url=$CBI_JDT_REPO_URL"
+fi
+if [[ -n $CBI_JDT_VERSION ]]
+then
+   export CBI_JDT_VERSION_ARG="-Dcbi-jdt-version=$CBI_JDT_VERSION"
+fi
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 export buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
@@ -126,6 +138,12 @@ if [ "$BUILD_TYPE" = M ]; then
     BUILD_TYPE_NAME="Maintenance"
 elif [ "$BUILD_TYPE" = N ]; then
     BUILD_TYPE_NAME="Nightly (HEAD)"
+elif [ "$BUILD_TYPE" = X ]; then
+    BUILD_TYPE_NAME="Experimental Branch"
+elif [ "$BUILD_TYPE" = Y ]; then
+    BUILD_TYPE_NAME="Experimental Branch"
+elif [ "$BUILD_TYPE" = P ]; then
+    BUILD_TYPE_NAME="Patch"
 elif [ "$BUILD_TYPE" = S ]; then
     BUILD_TYPE_NAME="Stable (Milestone)"
 fi
@@ -180,6 +198,10 @@ fn-write-property LOCAL_REPO
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
 fn-write-property BUILD_KIND
+fn-write-property CBI_JDT_REPO_URL
+fn-write-property CBI_JDT_REPO_URL_ARG
+fn-write-property CBI_JDT_VERSION
+fn-write-property CBI_JDT_VERSION_ARG
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
@@ -288,7 +310,7 @@ else
     echo "# (when repository is a branch, which it typcally is)."  >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
 
-    if [[ $BUILD_TYPE =~ [IMXY] ]]
+    if [[ $BUILD_TYPE =~ [IMXYP] ]]
     then
         AGGRCOMMIT=$( git rev-parse HEAD )
         echo "eclipse.platform.releng.aggregator TAGGED: ${BUILD_ID}"  >> ${buildDirectory}/directory.txt
@@ -353,11 +375,13 @@ $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-ec
 checkForErrorExit $? "Error occurred during publish-eclipse"
 
 
-# We don't promote repo if there was a build failure, it likely doesn't exist.
+# We don't publish repo if there was a build failure, it likely doesn't exist.
 if [[ -z "${BUILD_FAILED}" ]] 
 then
     $SCRIPT_PATH/publish-repo.sh $BUILD_ENV_FILE >$logsDirectory/mb083_publish-repo_output.txt
     checkForErrorExit $? "Error occurred during publish-repo"
+else
+    echo "No repo published, since BUILD_FAILED"
 fi 
 
 
@@ -380,4 +404,5 @@ fn-write-property-close
 # debugging build results or differences between runs, especially on different machines
 env 1>$logsDirectory/mb100_all-env-variables_output.txt
 
+echo "Exiting build with RC code of $buildrc"
 exit $buildrc

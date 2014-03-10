@@ -11,6 +11,26 @@ export BRANCH=${BRANCH:-master}
 export STREAM=${STREAM:-4.4.0}
 export BUILD_TYPE=${BUILD_TYPE:-N}
 
+# If not set be caller, make sure its an empty string
+# as the variable is sometimes used to "complete" a name,
+# such as "repositories${PATCH_BUILD}.txt"
+# (not sure this makes a difference in bash?
+# undefined is same as empty string?)
+export PATCH_BUILD=${PATCH_BUILD:-""}
+
+
+# special POM for patch builds, but by default use POM at root of $REPO_DIR
+# which is default behavior
+if [[ -n ${PATCH_BUILD} ]]
+then
+    export ALT_POM_FILE="-f eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/pom.xml"
+    echo "DEBUG: ALT_POM_FILE: $ALT_POM_FILE"
+else 
+    export ALT_POM_FILE=""
+    echo "DEBUG: ALT_POM_FILE: None. Using normal default."
+fi
+
+
 eclipseStreamMajor=${STREAM:0:1}
 
 export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${BUILD_TYPE}}
@@ -69,7 +89,7 @@ MAVEN_BREE=-Pbree-libs
 # local, non build.eclipse.org builds (or, test builds) may need to override, and turn off signing.
 # otherwwise, we always sign if I or M builds, but not N builds
 # 
-if [[ $BUILD_TYPE =~ [IMXY] ]]
+if [[ $BUILD_TYPE =~ [IMXYP] ]]
 then
     SIGNING=${SIGNING:-true}
 else
