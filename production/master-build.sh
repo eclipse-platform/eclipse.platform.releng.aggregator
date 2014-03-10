@@ -69,6 +69,18 @@ buildrc=0
 
 # derived values
 
+# correct valuse for cbi-jdt-repo.url and cbi-jdt-version are 
+# codified in the parent pom. These variables give an easy way 
+# to test "experimental versions" in production build. 
+
+if [[ -n $CBI_JDT_REPO_URL ]]
+then
+   export CBI_JDT_REPO_URL_ARG="-Dcbi-jdt-repo.url=$CBI_JDT_REPO_URL"
+fi
+if [[ -n $CBI_JDT_VERSION ]]
+then
+   export CBI_JDT_VERSION_ARG="-Dcbi-jdt-version=$CBI_JDT_VERSION"
+fi
 
 BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 export buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
@@ -191,6 +203,10 @@ fn-write-property LOCAL_REPO
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
 fn-write-property BUILD_KIND
+fn-write-property CBI_JDT_REPO_URL
+fn-write-property CBI_JDT_REPO_URL_ARG
+fn-write-property CBI_JDT_VERSION
+fn-write-property CBI_JDT_VERSION_ARG
 fn-write-property PATCH_BUILD
 fn-write-property ALT_POM_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
@@ -323,14 +339,8 @@ else
     echo "# " >> ${logsDirectory}/relengdirectory.txt
     popd
 
-    # For right now, skip pom updater, if doing patch build, 
-    # Just to avoid a yet another variable in build ... and 
-    # would guess few  changes going on ... but can add back 
-    # once things are running more smoothly.
-    #if [[ -z ${PATCH_BUILD} ]]
-    #then
-        $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
-    #fi
+
+    $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
     # if file exists, pom update failed
     if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
     then
@@ -397,13 +407,11 @@ then
         $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
         checkForErrorExit $? "Error occurred during publish-equinox"
     fi 
-
-    # do not promte, if doing P,X, or Y build
-    # if all ended well, put "promotion scripts" in known locations
-    $SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
-    checkForErrorExit $? "Error occurred during promote-build"
-
 fi
+
+# if all ended well, put "promotion scripts" in known locations
+$SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
+checkForErrorExit $? "Error occurred during promote-build"
 
 fn-write-property-close
 

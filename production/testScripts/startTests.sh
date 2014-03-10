@@ -116,7 +116,7 @@ else
     exit 1
 fi
 
-if [[ "${buildId}" =~ ([MNI]+)([[:digit:]]*)\-([[:digit:]]*) ]]
+if [[ "${buildId}" =~ ([MNIXYP]+)([[:digit:]]*)\-([[:digit:]]*) ]]
 then
     # old, simpler way, if we don't do regex and input checkinging
     #buildType=${buildId:0:1}
@@ -126,6 +126,7 @@ else
     usage
     exit 1
 fi
+
 
 
 echo "values in ${0}"
@@ -152,29 +153,29 @@ echo "BUILD_HOME: ${BUILD_HOME}"
        echo "DEBUG: builderDropDir: ${builderDropDir}"
     else
         buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-# we don't really use this file for PDE build tests. 
-# if we did, we'd need to fix this up.
+        # we don't really use this file for PDE build tests. 
+        # if we did, we'd need to fix this up.
         #buildDir=${buildRoot}/build
         #supportDir=${buildDir}/supportDir
         #eclipsebuilder=org.eclipse.releng.eclipsebuilder
         #builderDir=${supportDir}/$eclipsebuilder
-#$buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-#$buildDir=${buildRoot}/build
-#$supportDir=${buildDir}/supportDir
-#$eclipsebuilder=org.eclipse.releng.eclipsebuilder
-#$builderDir=${supportDir}/$eclipsebuilder
+        #$buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+        #$buildDir=${buildRoot}/build
+        #$supportDir=${buildDir}/supportDir
+        #$eclipsebuilder=org.eclipse.releng.eclipsebuilder
+        #$builderDir=${supportDir}/$eclipsebuilder
 
-# should buildDirectory be set at "main" one from actual build?
-#$buildDirectory=${supportDir}/src
+        # should buildDirectory be set at "main" one from actual build?
+        #$buildDirectory=${supportDir}/src
 
-# note, to be consistent, I changed json xml file so it adds buildId to postingDirectory
-#$siteDir=${buildRoot}/siteDir
-#$postingDirectory=${siteDir}/eclipse/downloads/drops
-#$if [[ "${eclipseStreamMajor}" > 3 ]]
-#$then
-    #    $    postingDirectory=${siteDir}/eclipse/downloads/drops${eclipseStreamMajor}
-#$fi
-fi
+        # note, to be consistent, I changed json xml file so it adds buildId to postingDirectory
+        #$siteDir=${buildRoot}/siteDir
+        #$postingDirectory=${siteDir}/eclipse/downloads/drops
+        #$if [[ "${eclipseStreamMajor}" > 3 ]]
+        #$then
+            # $postingDirectory=${siteDir}/eclipse/downloads/drops${eclipseStreamMajor}
+        #$fi
+  fi
 
 echo "DEBUG: invoking test scripts on Hudson"
 
