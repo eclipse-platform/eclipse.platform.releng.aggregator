@@ -133,6 +133,7 @@ fn-publish-equinox ()
         -DpostingDirectory=$BUILD_DIR \
         -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
         -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
+        -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
         -DbuildLabel="$BUILD_ID" \
         -DEBuilderDir="$EBuilderDir" \
         -DeclipseStream=$BUILD_STREAM \

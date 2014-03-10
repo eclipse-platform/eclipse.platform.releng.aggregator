@@ -42,6 +42,10 @@ if [[ "${BUILD_TYPE}" == "N" ]]
 then
     GIT_PUSH='echo no git push done since Nightly'
 fi
+if [[ "${BUILD_TYPE}" =~ [XY] ]]
+then
+    GIT_PUSH='echo no git push done since Experimental build'
+fi
 GIT_PUSH=${GIT_PUSH:-'git push'}
 
 
@@ -202,6 +206,8 @@ fn-write-property CBI_JDT_REPO_URL
 fn-write-property CBI_JDT_REPO_URL_ARG
 fn-write-property CBI_JDT_VERSION
 fn-write-property CBI_JDT_VERSION_ARG
+fn-write-property PATCH_BUILD
+fn-write-property ALT_POM_FILE
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
@@ -218,7 +224,6 @@ fn-write-property comparatorRepository
 fn-write-property logsDirectory
 fn-write-property BUILD_TIME_PATCHES
 fn-write-property BUILD_HOME
-
 
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
@@ -318,9 +323,9 @@ else
     fi
 
     echo "# " >> ${buildDirectory}/directory.txt
-    echo "# .../streams/repositories.txt" >> ${buildDirectory}/directory.txt
+    echo "# .../streams/repositories${PATCH_BUILD}.txt" >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
-    cat $STREAMS_PATH/repositories.txt >> ${buildDirectory}/directory.txt
+    cat $STREAMS_PATH/repositories${PATCH_BUILD}.txt >> ${buildDirectory}/directory.txt
     echo "# " >> ${buildDirectory}/directory.txt
 
 
@@ -384,15 +389,23 @@ else
     echo "No repo published, since BUILD_FAILED"
 fi 
 
+#For now, only "publish equinox and promote" if I or M build, skip if P, X, or Y
 
-# We don't promote equinox if there was a build failure, and we should not even try to 
-# create the site locally, because it depends heavily on having a valid repository to 
-# work from. 
-if [[ -z "${BUILD_FAILED}" ]] 
+# TODO: probably never need to promote equinox, for patch build? 
+# TODO: Unclear how/when to send mailing list notification for patch builds. 
+
+if [[ $BUILD_TYPE =~  [IM] ]] 
 then
-    $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
-    checkForErrorExit $? "Error occurred during publish-equinox"
-fi 
+
+    # We don't promote equinox if there was a build failure, and we should not even try to 
+    # create the site locally, because it depends heavily on having a valid repository to 
+    # work from. 
+    if [[ -z "${BUILD_FAILED}" ]] 
+    then
+        $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
+        checkForErrorExit $? "Error occurred during publish-equinox"
+    fi 
+fi
 
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
