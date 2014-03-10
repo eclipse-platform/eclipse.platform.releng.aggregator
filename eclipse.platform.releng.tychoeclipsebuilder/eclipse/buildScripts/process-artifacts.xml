@@ -3,8 +3,31 @@
     basedir=".">
     <target
         name="processArtifacts"
-        depends="doMirror">
+        depends="doRemoves,doMirror">
 
+        <!-- if not specified, assume doPack = false ... maintains default behavior, if nothing done --> 
+        <property name="doPack" value="false" />
+
+        <!-- 
+             This call is to get MD5 hash sums included. We do NOT call pack, since 
+             already should be packed, where appropriate.
+             This is a work around we can likely remove eventually. See bug 406263.
+             For PATCH_BUILDs we call twice, once with doPack=false, (do we can do zip file, 
+             without pack.gz files, and a second time, with doPack=true, for 
+             better access via http.  
+        -->
+        <p2.process.artifacts pack="${doPack}" repositoryPath="file://${siteDirOnBuildMachine}" />
+
+
+    </target>
+
+    <target
+        name="doRemoves"
+        unless="doNotRemove">
+        <!-- normally, caller would set repositoryDir, but for local operation, can hard code here -->
+        <property
+            name="repositoryDir"
+            value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
         <!-- This is to remove IUs handy during the build, but not really
             needed in final repo -->
 
@@ -27,18 +50,8 @@
             <iu id="master-equinox.feature.group" />
             <iu id="master-equinox.feature.jar" />
             <iu id="eclipse-junit-tests" />
-            <iu query="property[@name='org.eclipse.equinox.p2.type.category']" />
-
+            <iu query="property[@name='org.eclipse.equinox.p2.name' @value='Uncategorized']" />
         </p2.remove.iu>
-
-        <!-- 
-             This call is to get MD5 hash sums included. We do NOT call pack, since 
-             already should be packed, where appropriate.
-             This is a work around we can likely remove eventually. See bug 406263.  
-        -->
-        <p2.process.artifacts repositoryPath="file://${siteDirOnBuildMachine}" />
-
-
     </target>
 
     <target
