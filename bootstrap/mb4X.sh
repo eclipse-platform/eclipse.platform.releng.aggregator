@@ -74,7 +74,7 @@ source buildeclipse.shsource 2>/dev/null
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=BETA_JAVA8
+export BRANCH=R4_3_maintenance_Java8
 export BUILD_TYPE=X
 export STREAM=4.3.2
 
