@@ -77,7 +77,7 @@ source buildeclipse.shsource 2>/dev/null
 export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
 export CBI_JDT_VERSION="3.9.2.v20140309-1413"
 
-export BRANCH=master
+export BRANCH=david_williams/BETA_JAVA8_LUNA
 export BUILD_TYPE=Y
 export STREAM=4.4.0
 
