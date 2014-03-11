@@ -98,7 +98,7 @@ function sendPromoteMail ()
     TO=${TO:-"platform-releng-dev@eclipse.org"}
 
     # for initial testing, only to me -- change as desired after initial testing. 
-    if [[ "${"${buildId}"}" =~ [PYX] ]]
+    if [[ "${buildId}" =~ [PYX] ]]
     then 
         TO="david_williams@us.ibm.com"
     fi
