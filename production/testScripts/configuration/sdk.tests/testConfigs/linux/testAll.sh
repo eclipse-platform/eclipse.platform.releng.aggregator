@@ -11,7 +11,7 @@
 source localTestsProperties.shsource 2>/dev/null
 
 echo "PWD: $PWD"
-vmcmd=${vmcmd:-/shared/common/jdk1.7.0-latest/jre/bin/java}
+vmcmd=${vmcmd:-/shared/common/jdk1.8.0_x64-latest/jre/bin/java}
 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
 # this value in localTestsProperties.shsource.
