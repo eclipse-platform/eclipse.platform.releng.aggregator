@@ -113,31 +113,26 @@ function sendPromoteMail ()
     # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
     message1=""
-    message2=""
 
     #TODO: later can use sed, form a proper list
     if [[ -n "${POM_UPDATES}" ]]
     then 
         message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
-        message2="$message2 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
     fi
 
     message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>\n"
-    message2="$message2 <p>Eclipse downloads: ${downloadURL}</p>\n"
 
 
     # Do not include repo, if build failed
     if [[ -z "${BUILD_FAILED}" ]]
     then 
         message1="$message1 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
-        message2="$message2 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-buildspdebased</p>\n"
     fi
 
-    # Do not include Equinox, if build failed
-    if [[ -z "${BUILD_FAILED}" ]]
+    # Do not include Equinox, if build failed, or if patch or experimental build
+    if [[ -z "${BUILD_FAILED}" && ! "${buildId}" =~ [PYX]  ]]
     then 
         message1="$message1 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
-        message2="$message2 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
     fi
 
     if [[ "${BUILD_KIND}" == "CBI" && "${buildId}" =~ [NMI] ]]
@@ -161,7 +156,7 @@ function sendPromoteMail ()
         echo "Content-Type: text/html; charset=utf-8"
         echo "Subject: Experimental: ${SUBJECT}"
         echo "<html><body>"
-        echo -e "${message2}"
+        echo -e "${message1}"
         echo "</body></html>"
         ) | /usr/lib/sendmail -t
     fi
