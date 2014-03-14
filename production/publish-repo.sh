@@ -203,8 +203,8 @@ fi
 if [[ -n "${PATCH_BUILD}" ]]
 then
 
-    # no longer needed, will remove
-    rm "${siteDirOnBuildMachine}/site.xml"
+    # not needed, will rename
+    mv "${siteDirOnBuildMachine}/site.xml" "${siteDirOnBuildMachine}/siteHOLD.xml"
     RC=$? 
     if [[ $RC != 0 ]]
     then 
