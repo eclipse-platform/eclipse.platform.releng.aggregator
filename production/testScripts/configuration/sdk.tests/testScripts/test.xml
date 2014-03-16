@@ -4,6 +4,12 @@
   default="all"
   basedir=".">
 
+  <!--
+     Should be able to record "hudson slave" as part of test results?
+     Or, if that's not defined, perhaps simply "hostname"? 
+  -->
+  <property environment="env" />
+
   <!--properties file containing the build information-->
   <property file="label.properties" />
   <!-- 
@@ -704,6 +710,7 @@
   <target
     name="setJVMfromUserSpecified"
     if="jvm">
+
     <exec
       executable="${jvm}"
       outputproperty="javaversion">
@@ -711,13 +718,27 @@
     </exec>
     <echo message="java version of ${jvm} is ${javaversion}" />
 
+    <!--
+         TODO: this only works if 'jvm' is set, else won't be called. 
+         While we always set in production runs, should make this more general purpose, 
+         and put in seperate "antcall"?
+    -->
     <!-- properties to use on test results summary, to be sure accurate -->
     <property
       name="platformResults"
       value="${results}_${os}-${ws}-${arch}" />
     <mkdir dir="${platformResults}" />
     <echo
-      message="JAVA_VERSION=${javaversion}"
+      message="JAVA_LONG_VERSION=${javaversion}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <!--
+      Note: there might be times, the java.runtime.version at this point in time, 
+      may not be quite right ... such as if invoked with some other VM with the intent of 
+      using 'jvm' on "eclipse" command line ... which we currently do not do.
+    -->
+    <echo
+      message="JAVA_VERSION=${java.runtime.version}"
       append="true"
       file="${platformResults}/testProperties.php" />
     <echo
@@ -730,6 +751,48 @@
       file="${platformResults}/testProperties.php" />
     <echo
       message="ARCH=${arch}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <!-- NODE_NAME will be empty string, if on master -->
+    <echo
+      message="HUDSON_SLAVE=${env.NODE_NAME}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <!-- 
+      I believe all (common) platforms have env variable for HOSTNAME.
+      If not, user might want to set/export to be meaningful.
+    -->
+    <echo
+      message="HOSTNAME=${env.HOSTNAME"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <echo
+      message="HUDSON_SLAVE=${env.NODE_NAME}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <echo
+      message="HUDSON_JOB_NAME=${env.JOB_NAME}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <echo
+      message="HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <echo
+      message="HUDSON_BUILD_URL=${env.BUILD_URL}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <!-- 
+         With HUDSON_URL and WORKSPACE_PATH should be able
+         to figure out URL to WORKSPACE, though only temporarily
+         available (until next job is ran).
+    -->
+    <echo
+      message="HUDSON_URL=${env.HUDSON_URL}"
+      append="true"
+      file="${platformResults}/testProperties.php" />
+    <echo
+      message="HUDSON_WORKSPACE=${env.WORKSPACE}"
       append="true"
       file="${platformResults}/testProperties.php" />
 
