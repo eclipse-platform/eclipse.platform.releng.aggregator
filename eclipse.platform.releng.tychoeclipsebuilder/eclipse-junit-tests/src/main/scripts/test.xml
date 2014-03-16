@@ -6,23 +6,23 @@
 
     <!--properties file containing the build information-->
     <property file="label.properties" />
-
     <!--properties file containing the plugin directory name including version number,
          and list of required test plug-ins expressed as command-line argument to unzip executable.
          Generated and packaged at build time.-->
     <property file="test.properties" />
-    <!--
+        <!--
             Try using "loadproperties", instead of "properties file=" to see if
             that will "evaluate" variables as loaded. Otherwise, the <properties form
             has to move to "top of file" ... outer scope?
            <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
         -->
-    <property
+        <property
             name="testingPropertiesfile"
             value="testing.properties" />
-    <loadproperties>
-        <file file="${testingPropertiesfile}" />
-    </loadproperties>
+        <loadproperties>
+            <file file="${testingPropertiesfile}" />
+        </loadproperties>
+
 
     <!--default directory where test-eclipse will be installed-->
     <property
@@ -54,13 +54,13 @@
         name="results"
         value="${basedir}/results" />
 
-    <!--Directory for JUnit report output, console log output and .log content for each test suite.  
+    <!--Directory for JUnit report output, console log output and .log content for each test suite.
             Overrides default in org.eclipse.test/library.xml-->
     <property
         name="junit-report-output"
         value="${results}/${platform}" />
 
-    <!-- this dirctory, with some sort files are created during unit tests 
+    <!-- this dirctory, with some sort files are created during unit tests
     ... need to find where to disable jacoco -->
     <property
         name="coverage-output"
@@ -103,14 +103,14 @@
             property="extraIU"
             value="org.eclipse.osgi.compatibility.plugins.feature.feature.group">
             <or>
-                <equals 
-                    arg1="${testPlugin}" 
-                    arg2="org.eclipse.osgi.tests" />
-                <equals 
-                    arg1="${testPlugin}" 
+            <equals
+                arg1="${testPlugin}"
+                arg2="org.eclipse.osgi.tests" />
+                <equals
+                    arg1="${testPlugin}"
                     arg2="org.eclipse.pde.ui.tests" />
-                <equals 
-                    arg1="${testPlugin}" 
+                <equals
+                    arg1="${testPlugin}"
                     arg2="org.eclipse.pde.api.tools.tests" />
             </or>
         </condition>
@@ -264,7 +264,7 @@
 
         <fail
             unless="platformArchive"
-            message="platformArchive is not defined. Check that condidtions cover os arch ${os.arch}. May be VM dependent.)" />
+            message="platformArchive is not defined. Check that conditions cover os arch ${os.arch}. May be VM dependent.)" />
 
         <condition
             property="platformTarget"
@@ -475,6 +475,21 @@
         </condition>
         <condition
             property="runtimeArchive"
+            value="eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz">
+            <and>
+                <equals
+                    arg1="${os}"
+                    arg2="linux" />
+                <equals
+                    arg1="${ws}"
+                    arg2="gtk" />
+                <equals
+                    arg1="${arch}"
+                    arg2="x86_64" />
+            </and>
+        </condition>
+        <condition
+            property="runtimeArchive"
             value="eclipse-SDK-${buildId}-linux-gtk-ppc64.tar.gz">
             <and>
                 <equals
@@ -501,21 +516,6 @@
                 <equals
                     arg1="${arch}"
                     arg2="ppc" />
-            </and>
-        </condition>
-        <condition
-            property="runtimeArchive"
-            value="eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz">
-            <and>
-                <equals
-                    arg1="${os}"
-                    arg2="linux" />
-                <equals
-                    arg1="${ws}"
-                    arg2="gtk" />
-                <equals
-                    arg1="${arch}"
-                    arg2="x86_64" />
             </and>
         </condition>
         <condition
@@ -644,22 +644,23 @@
     <target
         name="setJVMProperties"
         depends="setJVMfromUserSpecified">
-        <!--enable tests requiring 1.5 or 1.6 vms to run if running vm level detected matches required execution environment-->
+        <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment-->
         <condition
             property="J2SE-5.0"
             value="${java.home}/bin/java">
             <or>
-                <or>
                     <equals
                         arg1="${ant.java.version}"
                         arg2="1.5" />
                     <equals
                         arg1="${ant.java.version}"
                         arg2="1.6" />
-                </or>
-                <equals
-                    arg1="${ant.java.version}"
-                    arg2="1.7" />
+                    <equals
+                        arg1="${ant.java.version}"
+                        arg2="1.7" />
+                    <equals
+                        arg1="${ant.java.version}"
+                        arg2="1.8" />
             </or>
         </condition>
         <condition
@@ -672,16 +673,31 @@
                 <equals
                     arg1="${ant.java.version}"
                     arg2="1.7" />
+                <equals
+                    arg1="${ant.java.version}"
+                    arg2="1.8" />
             </or>
         </condition>
         <condition
             property="J2SE-7.0"
             value="${java.home}/bin/java">
+            <or>
             <equals
                 arg1="${ant.java.version}"
                 arg2="1.7" />
+            <equals
+                arg1="${ant.java.version}"
+                arg2="1.8" />
+             </or>
         </condition>
-    </target>
+        <condition
+            property="J2SE-8.0"
+            value="${java.home}/bin/java">
+            <equals
+                arg1="${ant.java.version}"
+                arg2="1.8" />
+        </condition>
+        </target>
     <target
         name="setJVMfromUserSpecified"
         if="jvm">
@@ -692,6 +708,13 @@
         </exec>
         <echo message="java version of ${jvm} is ${javaversion}" />
         <condition
+            property="J2SE-8.0"
+            value="${jvm}">
+            <contains
+                string="${javaversion}"
+                substring="java version &quot;1.8" />
+        </condition>
+        <condition
             property="J2SE-7.0"
             value="${jvm}">
             <contains
@@ -701,32 +724,18 @@
         <condition
             property="J2SE-6.0"
             value="${jvm}">
-            <or>
-                <contains
-                    string="${javaversion}"
-                    substring="java version &quot;1.6" />
-                <contains
-                    string="${javaversion}"
-                    substring="java version &quot;1.7" />
-            </or>
+            <contains
+                string="${javaversion}"
+                substring="java version &quot;1.6" />
         </condition>
         <condition
             property="J2SE-5.0"
             value="${jvm}">
-            <or>
-                <or>
-                    <contains
-                        string="${javaversion}"
-                        substring="java version &quot;1.7" />
-                    <contains
-                        string="${javaversion}"
-                        substring="java version &quot;1.6" />
-                </or>
-                <contains
-                    string="${javaversion}"
-                    substring="java version &quot;1.5" />
-            </or>
+            <contains
+                string="${javaversion}"
+                substring="java version &quot;1.5" />
         </condition>
+        <echo message="J2SE-8.0:  ${J2SE-8.0}" />
         <echo message="J2SE-7.0:  ${J2SE-7.0}" />
         <echo message="J2SE-6.0:  ${J2SE-6.0}" />
         <echo message="J2SE-5.0:  ${J2SE-5.0}" />
@@ -931,15 +940,15 @@
     </target>
 
     <target name="convertToHTML" if="stylesheetexists" depends="checkStylesheetexists">
-        <xslt 
+    <xslt
         style="${junit-stylesheet}"
         basedir="${results}/xml"
         destdir="${results}/html" />
     </target>
 
-    <target name="checkStylesheetexists" unless="stylesheetexists">
-        <echo message="ERROR: previous suite test install failed, so style sheet did not exist" />
-    </target>
+        <target name="checkStylesheetexists" unless="stylesheetexists">
+            <echo message="ERROR: previous suite test install failed, so style sheet did not exist" />
+        </target>
 
     <target name="ant">
         <runTests testPlugin="org.eclipse.ant.tests.core" />
@@ -1073,6 +1082,7 @@
                 <or>
                     <isset property="J2SE-6.0" />
                     <isset property="J2SE-7.0" />
+                    <isset property="J2SE-8.0" />
                 </or>
             </not>
         </condition>
@@ -1098,12 +1108,13 @@
         <property
             name="jvm"
             value="${J2SE-6.0}" />
-        <!--only run test if J2SE-6.0 property  set-->
+        <!--only run test if J2SE-6.0 property or greater is set-->
         <condition property="skip.test">
             <not>
                 <or>
                     <isset property="J2SE-6.0" />
                     <isset property="J2SE-7.0" />
+                    <isset property="J2SE-8.0" />
                 </or>
             </not>
         </condition>
@@ -1116,12 +1127,13 @@
         <property
             name="jvm"
             value="${J2SE-6.0}" />
-        <!--only run test if J2SE-6.0 property  set-->
+        <!--only run test if J2SE-6.0 property or greater is set-->
         <condition property="skip.test">
             <not>
                 <or>
                     <isset property="J2SE-6.0" />
                     <isset property="J2SE-7.0" />
+                    <isset property="J2SE-8.0" />
                 </or>
             </not>
         </condition>
@@ -1395,13 +1407,13 @@
 
     </target>
 
-    <!-- 
-        admittedly, not quite all of 'platform', but for 
-        now serves dual purpose of a "short set" of tests, that area 
-        relatively quick, and realtively reliable on build.eclipse.org hardware 
+    <!--
+        admittedly, not quite all of 'platform', but for
+        now serves dual purpose of a "short set" of tests, that area
+        relatively quick, and realtively reliable on build.eclipse.org hardware
     -->
     <target name="platform">
-        <!-- remove for now, bug 400385 <antcall target="relEng" /> -->
+       <!-- remove for now, bug 400385 <antcall target="relEng" /> -->
         <antcall target="ant" />
         <antcall target="antui" />
         <antcall target="compare" />
@@ -1441,7 +1453,7 @@
     </target>
 
     <!-- this group is "platform tests" that are Long Running (or, perhaps
-         hang, during performance tests 
+         hang, during performance tests
          -->
     <target name="platformLR">
         <antcall target="osgi" />
@@ -1451,13 +1463,13 @@
         <antcall target="jface" />
         <antcall target="ui" />
         <antcall target="uiperformance" />
+
         <!-- don't run now, for 4.2. See bug 380553.
         <antcall target="uircp" />
         -->
-
         <!--  disable for now, bug 398717
-	antcall target="uiviews" /
-	-->
+	    antcall target="uiviews" /
+	   -->
     </target>
 
     <target name="pde">
@@ -1504,9 +1516,9 @@
     <macrodef name="markTime">
         <attribute name="msg" />
         <sequential>
-            <!-- 
-               we write the message first, with no ${line.separator} so that the timestamp can 
-               go on same line, and my side-effect writes an EOL 
+            <!--
+               we write the message first, with no ${line.separator} so that the timestamp can
+               go on same line, and my side-effect writes an EOL
              -->
             <echo
                 message="@{msg}     "
