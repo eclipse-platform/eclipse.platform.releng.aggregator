@@ -1550,82 +1550,110 @@
     <markTime msg="${message}" />
   </target>
 
+  <!-- 
+       Prints properties in "PHP form" to use on test results summary, 
+       to be sure accurate and meaningful. 
+  -->
   <target name="printMainProperties"
     depends="setJVMProperties"
     unless="printedMainProperties">
 
+    <property name="EOL" value="${line.separator}"/>
+
+    <script language="javascript">
+        var javaVersion = project.getProperty("JAVA_VERSION");
+        var pattern = new RegExp(/^1\.([56789]).*$/);
+
+        var sArray = pattern.exec(javaVersion);
+        // sArray 0 is "whole match"
+        project.setProperty("javaMajorVersion", sArray[1]);
+    </script>
+    
     <!-- properties to use on test results summary, to be sure accurate -->
     <property
       name="platformResults"
-      value="${results}_${os}-${ws}-${arch}" />
+      value="${results}/${os}.${ws}.${arch}_${javaMajorVersion}" />
     <mkdir dir="${platformResults}" />
+    <property name="phpPropertyFile" value="${platformResults}/testProperties.php"/>
+
+    <!-- first write don't append -->
+    <echo 
+      message="&lt;?php${EOL}"
+      append="false"
+      file="${phpPropertyFile}" />
     <echo
-      message="JAVA_LONG_VERSION=${javaversion}"
+      message="JAVA_LONG_VERSION=${javaversion}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <!--
       Note: there might be times, the java.runtime.version at this point in time,
       may not be quite right ... such as if invoked with some other VM with the intent of
       using 'jvm' on "eclipse" command line ... which we currently do not do.
     -->
     <echo
-      message="JAVA_VERSION=${java.runtime.version}"
+      message="JAVA_VERSION=${java.runtime.version}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="OS=${os}"
+      message="OS=${os}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="WS=${ws}"
+      message="WS=${ws}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="ARCH=${arch}"
+      message="ARCH=${arch}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <!-- NODE_NAME will be empty string, if on master -->
+    <condition property="hudsonSlave" value="master">
+      <equals arg1="${env.NODE_NAME}" arg2=""/>
+    </condition>
+    <!-- if not set above, we'll set to the non blank NODE_NAME -->
+    <property name="hudsonSlave" value="${env.NODE_NAME}"/>
+
     <echo
-      message="HUDSON_SLAVE=${env.NODE_NAME}"
+      message="HUDSON_SLAVE=${hudsonSlave}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <!--
       I believe all (common) platforms have env variable for HOSTNAME.
       If not, user might want to set/export to be meaningful.
     -->
     <echo
-      message="HOSTNAME=${env.HOSTNAME}"
+      message="HOSTNAME=${env.HOSTNAME}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="HUDSON_SLAVE=${env.NODE_NAME}"
+      message="HUDSON_SLAVE=${env.NODE_NAME}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="HUDSON_JOB_NAME=${env.JOB_NAME}"
+      message="HUDSON_JOB_NAME=${env.JOB_NAME}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}"
+      message="HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="HUDSON_BUILD_URL=${env.BUILD_URL}"
+      message="HUDSON_BUILD_URL=${env.BUILD_URL}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <!--
          With HUDSON_URL and WORKSPACE_PATH should be able
          to figure out URL to WORKSPACE, though only temporarily
          available (until next job is ran).
     -->
     <echo
-      message="HUDSON_URL=${env.HUDSON_URL}"
+      message="HUDSON_URL=${env.HUDSON_URL}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
     <echo
-      message="HUDSON_WORKSPACE=${env.WORKSPACE}"
+      message="HUDSON_WORKSPACE=${env.WORKSPACE}${EOL}"
       append="true"
-      file="${platformResults}/testProperties.php" />
+      file="${phpPropertyFile}" />
   
     <property name="printedMainProperties" value="true" />
 
