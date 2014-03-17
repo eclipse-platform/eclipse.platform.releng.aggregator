@@ -4,12 +4,19 @@
     default="all"
     basedir=".">
 
+  <!--
+     Should be able to record "hudson slave" as part of test results?
+     Or, if that's not defined, perhaps simply "hostname"? 
+  -->
+  <property environment="env" />
+
     <!--properties file containing the build information-->
     <property file="label.properties" />
-    
-    <!--properties file containing the plugin directory name including version number,
+  <!-- 
+    properties file containing the plugin directory name including version number,
          and list of required test plug-ins expressed as command-line argument to unzip executable.
-         Generated and packaged at build time.-->
+    Generated and packaged at build time.
+  -->
     <property file="test.properties" /> 
         <!--
             Try using "loadproperties", instead of "properties file=" to see if
@@ -67,7 +74,9 @@
         name="coverage-output"
         value="${results}/coverageIGNORE" />
 
-    <echo level="debug" message="DEBUG: org.eclipse.core.net.prefs: ${org.eclipse.core.net.prefs}" />
+  <echo
+    level="debug"
+    message="DEBUG: org.eclipse.core.net.prefs: ${org.eclipse.core.net.prefs}" />
 
     <!--Directory name of org.eclipse.test plug-in installed in ${eclipse-home}-->
     <target
@@ -100,6 +109,21 @@
                 arg1="${testPlugin}"
                 arg2="org.eclipse.equinox.p2.tests.discovery" />
         </condition>
+    <condition
+      property="extraIU"
+      value="org.eclipse.osgi.compatibility.plugins.feature.feature.group">
+      <or>
+        <equals
+          arg1="${testPlugin}"
+          arg2="org.eclipse.osgi.tests" />
+        <equals
+          arg1="${testPlugin}"
+          arg2="org.eclipse.pde.ui.tests" />
+        <equals
+          arg1="${testPlugin}"
+          arg2="org.eclipse.pde.api.tools.tests" />
+      </or>
+    </condition>
         <antcall target="setupRepo" />
         <antcall target="${setupTarget}" />
         <antcall target="configureDeltaPack" />
@@ -250,7 +274,7 @@
 
         <fail
             unless="platformArchive"
-            message="platformArchive is not defined. Check that condidtions cover os arch ${os.arch}. May be VM dependent.)" />
+      message="platformArchive is not defined. Check that conditions cover os arch ${os.arch}. May be VM dependent.)" />
 
         <condition
             property="platformTarget"
@@ -410,6 +434,9 @@
             os="Mac OS X">
             <arg line="-R nouchg ${install}" />
         </exec>
+
+    <antcall target="printMainProperties" />
+
     </target>
 
     <target name="setRuntimeArchive">
@@ -461,7 +488,7 @@
         </condition>
         <condition
             property="runtimeArchive"
-            value="eclipse-SDK-${buildId}-linux-gtk-ppc64.tar.gz">
+      value="eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz">
             <and>
                 <equals
                     arg1="${os}"
@@ -471,12 +498,12 @@
                     arg2="gtk" />
                 <equals
                     arg1="${arch}"
-                    arg2="ppc64" />
+          arg2="x86_64" />
             </and>
         </condition>
         <condition
             property="runtimeArchive"
-            value="eclipse-SDK-${buildId}-linux-gtk-ppc.tar.gz">
+      value="eclipse-SDK-${buildId}-linux-gtk-ppc64.tar.gz">
             <and>
                 <equals
                     arg1="${os}"
@@ -486,12 +513,12 @@
                     arg2="gtk" />
                 <equals
                     arg1="${arch}"
-                    arg2="ppc" />
+          arg2="ppc64" />
             </and>
         </condition>
         <condition
             property="runtimeArchive"
-            value="eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz">
+      value="eclipse-SDK-${buildId}-linux-gtk-ppc.tar.gz">
             <and>
                 <equals
                     arg1="${os}"
@@ -501,7 +528,7 @@
                     arg2="gtk" />
                 <equals
                     arg1="${arch}"
-                    arg2="x86_64" />
+          arg2="ppc" />
             </and>
         </condition>
         <condition
@@ -630,47 +657,50 @@
     <target
         name="setJVMProperties"
         depends="setJVMfromUserSpecified">
-        <!--enable tests requiring 1.5 or 1.6 vms to run if running vm level detected matches required execution environment-->
+    <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment-->
         <condition
             property="J2SE-5.0"
             value="${java.home}/bin/java">
-            <or>
-                <or>
-                    <equals
-                        arg1="${ant.java.version}"
-                        arg2="1.5" />
-                    <equals
-                        arg1="${ant.java.version}"
-                        arg2="1.6" />
-                </or>
-                <equals
-                    arg1="${ant.java.version}"
-                    arg2="1.7" />
-            </or>
+        <matches
+          string="${java.runtime.version}"
+          pattern="^1\.[5678].*$" />
         </condition>
         <condition
             property="J2SE-6.0"
             value="${java.home}/bin/java">
-            <or>
-                <equals
-                    arg1="${ant.java.version}"
-                    arg2="1.6" />
-                <equals
-                    arg1="${ant.java.version}"
-                    arg2="1.7" />
-            </or>
+        <matches
+          string="${java.runtime.version}"
+          pattern="^1\.[678].*$" />
         </condition>
         <condition
             property="J2SE-7.0"
             value="${java.home}/bin/java">
-            <equals
-                arg1="${ant.java.version}"
-                arg2="1.7" />
+        <matches
+          string="${java.runtime.version}"
+          pattern="^1\.[78].*$" />
+    </condition>
+    <condition
+      property="J2SE-8.0"
+      value="${java.home}/bin/java">
+      <matches
+        string="${java.runtime.version}"
+        pattern="^1\.[8].*$" />
         </condition>
+    <echo message="values from setJVMProperties" />
+    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
+    <echo message="J2SE-7.0:  ${J2SE-7.0}" />
+    <echo message="J2SE-6.0:  ${J2SE-6.0}" />
+    <echo message="J2SE-5.0:  ${J2SE-5.0}" />
     </target>
     <target
         name="setJVMfromUserSpecified"
         if="jvm">
+    <!--
+       TODO: it is unclear of the purpose (use-case) and relationship of this "user specified" method,
+       compared to the setJVMProperties method above. Here, it seems only one "J2SE-N.M" variable
+       gets a value, depending on how user (or, unit test?) set 'jvm'; where as above,
+       each gets a value, in a "hierarchical" fashion, based on currently running VM..
+    -->
         <exec
             executable="${jvm}"
             outputproperty="javaversion">
@@ -678,6 +708,13 @@
         </exec>
         <echo message="java version of ${jvm} is ${javaversion}" />
         <condition
+      property="J2SE-8.0"
+      value="${jvm}">
+      <contains
+        string="${javaversion}"
+        substring="java version &quot;1.8" />
+    </condition>
+    <condition
             property="J2SE-7.0"
             value="${jvm}">
             <contains
@@ -687,32 +724,19 @@
         <condition
             property="J2SE-6.0"
             value="${jvm}">
-            <or>
                 <contains
                     string="${javaversion}"
                     substring="java version &quot;1.6" />
-                <contains
-                    string="${javaversion}"
-                    substring="java version &quot;1.7" />
-            </or>
         </condition>
         <condition
             property="J2SE-5.0"
             value="${jvm}">
-            <or>
-                <or>
                     <contains
                         string="${javaversion}"
-                        substring="java version &quot;1.7" />
-                    <contains
-                        string="${javaversion}"
-                        substring="java version &quot;1.6" />
-                </or>
-                <contains
-                    string="${javaversion}"
                     substring="java version &quot;1.5" />
-            </or>
         </condition>
+    <echo message="values from setJVMfromUserSpecified" />
+    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
         <echo message="J2SE-7.0:  ${J2SE-7.0}" />
         <echo message="J2SE-6.0:  ${J2SE-6.0}" />
         <echo message="J2SE-5.0:  ${J2SE-5.0}" />
@@ -911,19 +935,26 @@
             name="junit-stylesheet"
             value="${basedir}/JUNIT.XSL" />
         <!-- some "failures" are "bad enough" that the tests were not unpacked, so style sheet won't exist -->
-        <available file="${junit-stylesheet}" property="stylesheetexists" />
+    <available
+      file="${junit-stylesheet}"
+      property="stylesheetexists" />
         <antcall target="convertToHTML" />
         
     </target>
  
-    <target name="convertToHTML" if="stylesheetexists" depends="checkStylesheetexists">
+  <target
+    name="convertToHTML"
+    if="stylesheetexists"
+    depends="checkStylesheetexists">
     <xslt 
         style="${junit-stylesheet}"
         basedir="${results}/xml"
         destdir="${results}/html" />
     </target>            
 
-        <target name="checkStylesheetexists" unless="stylesheetexists">
+  <target
+    name="checkStylesheetexists"
+    unless="stylesheetexists">
             <echo message="ERROR: previous suite test install failed, so style sheet did not exist" />
         </target>
         
@@ -1059,6 +1090,7 @@
                 <or>
                     <isset property="J2SE-6.0" />
                     <isset property="J2SE-7.0" />
+          <isset property="J2SE-8.0" />
                 </or>
             </not>
         </condition>
@@ -1084,12 +1116,13 @@
         <property
             name="jvm"
             value="${J2SE-6.0}" />
-        <!--only run test if J2SE-6.0 property  set-->
+    <!--only run test if J2SE-6.0 property or greater is set-->
         <condition property="skip.test">
             <not>
                 <or>
                     <isset property="J2SE-6.0" />
                     <isset property="J2SE-7.0" />
+          <isset property="J2SE-8.0" />
                 </or>
             </not>
         </condition>
@@ -1102,12 +1135,13 @@
         <property
             name="jvm"
             value="${J2SE-6.0}" />
-        <!--only run test if J2SE-6.0 property  set-->
+    <!--only run test if J2SE-6.0 property or greater is set-->
         <condition property="skip.test">
             <not>
                 <or>
                     <isset property="J2SE-6.0" />
                     <isset property="J2SE-7.0" />
+          <isset property="J2SE-8.0" />
                 </or>
             </not>
         </condition>
@@ -1387,7 +1421,9 @@
         relatively quick, and realtively reliable on build.eclipse.org hardware 
     -->
     <target name="platform">
-       <!-- remove for now, bug 400385 <antcall target="relEng" /> -->
+    <!-- remove for now, bug 400385
+       <antcall target="relEng" />
+    -->
         <antcall target="ant" />
         <antcall target="antui" />
         <antcall target="compare" />
@@ -1426,8 +1462,8 @@
         
     </target>
 
-    <!-- this group is "platform tests" that are Long Running (or, perhaps
-         hang, during performance tests 
+  <!-- this group is "platform tests" that are Long Running
+       (or, perhaps hang?, during performance tests.
          -->
     <target name="platformLR">
         <antcall target="osgi" />
@@ -1519,4 +1555,124 @@
         <markTime msg="${message}" />
     </target>
 
+  <!-- 
+       Prints properties in "PHP form" to use on test results summary, 
+       to be sure accurate and meaningful. 
+  -->
+  <target name="printMainProperties"
+    depends="setJVMProperties"
+    unless="printedMainProperties">
+
+    <property name="EOL" value="${line.separator}"/>
+
+    <script language="javascript">
+        var javaVersion = project.getProperty("java.runtime.version");
+        var pattern = new RegExp(/^1\.([456789]).*$/);
+
+        var sArray = pattern.exec(javaVersion);
+        // sArray 0 is "whole match"
+        // for safety from programing errors, we'll check that there is 
+        // something in '1'. 
+        var length = sArray.length;
+        if (length > 1) 
+         {
+           project.setProperty("javaMajorVersion", sArray[1]);
+         } 
+         else 
+         {
+           project.setProperty("javaMajorVersion", "0");
+         }
+    </script>
+    
+    <!-- properties to use on test results summary, to be sure accurate -->
+    <property
+      name="platformResults"
+      value="${results}/${os}.${ws}.${arch}_${javaMajorVersion}" />
+    <mkdir dir="${platformResults}" />
+    <property name="phpPropertyFile" value="${platformResults}/testProperties.php"/>
+
+    <!-- first write don't append -->
+    <echo 
+      message="&lt;?php${EOL}"
+      append="false"
+      file="${phpPropertyFile}" />
+    <echo
+      message="JAVA_LONG_VERSION=${javaversion}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!--
+      Note: there might be times, the java.runtime.version at this point in time,
+      may not be quite right ... such as if invoked with some other VM with the intent of
+      using 'jvm' on "eclipse" command line ... which we currently do not do.
+    -->
+    <echo
+      message="JAVA_VERSION=${java.runtime.version}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="OS=${os}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="WS=${ws}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="ARCH=${arch}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!-- NODE_NAME will be empty string, if on master -->
+    <condition property="hudsonSlave" value="master">
+     <or>
+      <not>
+        <isset property="env.NODE_NAME" />
+      </not>
+      <equals arg1="${env.NODE_NAME}" arg2=""/>
+      <equals arg1="${env.NODE_NAME}" arg2=" "/>
+     </or>
+    </condition>
+    <!-- if not set above, we'll set to the non blank NODE_NAME -->
+    <property name="hudsonSlave" value="${env.NODE_NAME}"/>
+
+    <echo
+      message="HUDSON_SLAVE=${hudsonSlave}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!--
+      I believe all (common) platforms have env variable for HOSTNAME.
+      If not, user might want to set/export to be meaningful.
+    -->
+    <echo
+      message="HOSTNAME=${env.HOSTNAME}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_JOB_NAME=${env.JOB_NAME}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_BUILD_URL=${env.BUILD_URL}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!--
+         With HUDSON_URL and WORKSPACE_PATH should be able
+         to figure out URL to WORKSPACE, though only temporarily
+         available (until next job is ran).
+    -->
+    <echo
+      message="HUDSON_URL=${env.HUDSON_URL}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_WORKSPACE=${env.WORKSPACE}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+  
+    <property name="printedMainProperties" value="true" />
+
+    </target>
 </project>
