@@ -1561,12 +1561,22 @@
     <property name="EOL" value="${line.separator}"/>
 
     <script language="javascript">
-        var javaVersion = project.getProperty("JAVA_VERSION");
+        var javaVersion = project.getProperty("env.JAVA_VERSION");
         var pattern = new RegExp(/^1\.([56789]).*$/);
 
         var sArray = pattern.exec(javaVersion);
         // sArray 0 is "whole match"
-        project.setProperty("javaMajorVersion", sArray[1]);
+        // for safety from programing errors, we'll check that there is 
+        // something in '1'. 
+        var length = sArray.length;
+        if (length > 1) 
+         {
+           project.setProperty("javaMajorVersion", sArray[1]);
+         } 
+         else 
+         {
+           project.setProperty("javaMajorVersion", 0;
+         }
     </script>
     
     <!-- properties to use on test results summary, to be sure accurate -->
