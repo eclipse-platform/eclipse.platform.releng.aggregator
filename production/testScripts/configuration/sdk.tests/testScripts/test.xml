@@ -1618,7 +1618,13 @@
       file="${phpPropertyFile}" />
     <!-- NODE_NAME will be empty string, if on master -->
     <condition property="hudsonSlave" value="master">
+     <or>
+      <not>
+        <isset property="env.NODE_NAME" />
+      </not>
       <equals arg1="${env.NODE_NAME}" arg2=""/>
+      <equals arg1="${env.NODE_NAME}" arg2=" "/>
+     </or>
     </condition>
     <!-- if not set above, we'll set to the non blank NODE_NAME -->
     <property name="hudsonSlave" value="${env.NODE_NAME}"/>
@@ -1633,10 +1639,6 @@
     -->
     <echo
       message="HOSTNAME=${env.HOSTNAME}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="HUDSON_SLAVE=${env.NODE_NAME}${EOL}"
       append="true"
       file="${phpPropertyFile}" />
     <echo
