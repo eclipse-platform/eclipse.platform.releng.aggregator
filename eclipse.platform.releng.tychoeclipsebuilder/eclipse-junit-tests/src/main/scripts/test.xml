@@ -433,6 +433,9 @@
       os="Mac OS X">
       <arg line="-R nouchg ${install}" />
     </exec>
+
+    <antcall target="printMainProperties" />
+
   </target>
 
   <target name="setRuntimeArchive">
@@ -657,144 +660,52 @@
     <condition
       property="J2SE-5.0"
       value="${java.home}/bin/java">
-      <or>
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.5" />
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.6" />
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.7" />
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.8" />
-      </or>
+        <matches
+          string="${java.runtime.version}"
+          pattern="^1\.[5678].*$" />
     </condition>
     <condition
       property="J2SE-6.0"
       value="${java.home}/bin/java">
-      <or>
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.6" />
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.7" />
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.8" />
-      </or>
+        <matches
+          string="${java.runtime.version}"
+          pattern="^1\.[678].*$" />
     </condition>
     <condition
       property="J2SE-7.0"
       value="${java.home}/bin/java">
-      <or>
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.7" />
-        <equals
-          arg1="${ant.java.version}"
-          arg2="1.8" />
-      </or>
+        <matches
+          string="${java.runtime.version}"
+          pattern="^1\.[78].*$" />
     </condition>
     <condition
       property="J2SE-8.0"
       value="${java.home}/bin/java">
-      <equals
-        arg1="${ant.java.version}"
-        arg2="1.8" />
+      <matches
+        string="${java.runtime.version}"
+        pattern="^1\.[8].*$" />
     </condition>
+    <echo message="values from setJVMProperties" />
+    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
+    <echo message="J2SE-7.0:  ${J2SE-7.0}" />
+    <echo message="J2SE-6.0:  ${J2SE-6.0}" />
+    <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
   <target
     name="setJVMfromUserSpecified"
     if="jvm">
-
+    <!--
+       TODO: it is unclear of the purpose (use-case) and relationship of this "user specified" method,
+       compared to the setJVMProperties method above. Here, it seems only one "J2SE-N.M" variable
+       gets a value, depending on how user (or, unit test?) set 'jvm'; where as above,
+       each gets a value, in a "hierarchical" fashion, based on currently running VM..
+    -->
     <exec
       executable="${jvm}"
       outputproperty="javaversion">
       <arg line="-version" />
     </exec>
     <echo message="java version of ${jvm} is ${javaversion}" />
-
-    <!--
-         TODO: this only works if 'jvm' is set, else won't be called. 
-         While we always set in production runs, should make this more general purpose, 
-         and put in seperate "antcall"?
-    -->
-    <!-- properties to use on test results summary, to be sure accurate -->
-    <property
-      name="platformResults"
-      value="${results}_${os}-${ws}-${arch}" />
-    <mkdir dir="${platformResults}" />
-    <echo
-      message="JAVA_LONG_VERSION=${javaversion}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <!--
-      Note: there might be times, the java.runtime.version at this point in time, 
-      may not be quite right ... such as if invoked with some other VM with the intent of 
-      using 'jvm' on "eclipse" command line ... which we currently do not do.
-    -->
-    <echo
-      message="JAVA_VERSION=${java.runtime.version}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="OS=${os}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="WS=${ws}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="ARCH=${arch}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <!-- NODE_NAME will be empty string, if on master -->
-    <echo
-      message="HUDSON_SLAVE=${env.NODE_NAME}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <!-- 
-      I believe all (common) platforms have env variable for HOSTNAME.
-      If not, user might want to set/export to be meaningful.
-    -->
-    <echo
-      message="HOSTNAME=${env.HOSTNAME"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="HUDSON_SLAVE=${env.NODE_NAME}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="HUDSON_JOB_NAME=${env.JOB_NAME}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="HUDSON_BUILD_URL=${env.BUILD_URL}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <!-- 
-         With HUDSON_URL and WORKSPACE_PATH should be able
-         to figure out URL to WORKSPACE, though only temporarily
-         available (until next job is ran).
-    -->
-    <echo
-      message="HUDSON_URL=${env.HUDSON_URL}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
-    <echo
-      message="HUDSON_WORKSPACE=${env.WORKSPACE}"
-      append="true"
-      file="${platformResults}/testProperties.php" />
 
     <condition
       property="J2SE-8.0"
@@ -824,6 +735,7 @@
         string="${javaversion}"
         substring="java version &quot;1.5" />
     </condition>
+    <echo message="values from setJVMfromUserSpecified" />
     <echo message="J2SE-8.0:  ${J2SE-8.0}" />
     <echo message="J2SE-7.0:  ${J2SE-7.0}" />
     <echo message="J2SE-6.0:  ${J2SE-6.0}" />
@@ -1507,7 +1419,9 @@
         relatively quick, and realtively reliable on build.eclipse.org hardware
     -->
   <target name="platform">
-    <!-- remove for now, bug 400385 <antcall target="relEng" /> -->
+    <!-- remove for now, bug 400385
+       <antcall target="relEng" />
+    -->
     <antcall target="ant" />
     <antcall target="antui" />
     <antcall target="compare" />
@@ -1639,4 +1553,124 @@
     <markTime msg="${message}" />
   </target>
 
+  <!-- 
+       Prints properties in "PHP form" to use on test results summary, 
+       to be sure accurate and meaningful. 
+  -->
+  <target name="printMainProperties"
+    depends="setJVMProperties"
+    unless="printedMainProperties">
+
+    <property name="EOL" value="${line.separator}"/>
+
+    <script language="javascript">
+        var javaVersion = project.getProperty("java.runtime.version");
+        var pattern = new RegExp(/^1\.([456789]).*$/);
+
+        var sArray = pattern.exec(javaVersion);
+        // sArray 0 is "whole match"
+        // for safety from programing errors, we'll check that there is 
+        // something in '1'. 
+        var length = sArray.length;
+        if (length > 1) 
+         {
+           project.setProperty("javaMajorVersion", sArray[1]);
+         } 
+         else 
+         {
+           project.setProperty("javaMajorVersion", "0");
+         }
+    </script>
+    
+    <!-- properties to use on test results summary, to be sure accurate -->
+    <property
+      name="platformResults"
+      value="${results}/${os}.${ws}.${arch}_${javaMajorVersion}" />
+    <mkdir dir="${platformResults}" />
+    <property name="phpPropertyFile" value="${platformResults}/testProperties.php"/>
+
+    <!-- first write don't append -->
+    <echo 
+      message="&lt;?php${EOL}"
+      append="false"
+      file="${phpPropertyFile}" />
+    <echo
+      message="JAVA_LONG_VERSION=${javaversion}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!--
+      Note: there might be times, the java.runtime.version at this point in time,
+      may not be quite right ... such as if invoked with some other VM with the intent of
+      using 'jvm' on "eclipse" command line ... which we currently do not do.
+    -->
+    <echo
+      message="JAVA_VERSION=${java.runtime.version}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="OS=${os}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="WS=${ws}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="ARCH=${arch}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!-- NODE_NAME will be empty string, if on master -->
+    <condition property="hudsonSlave" value="master">
+     <or>
+      <not>
+        <isset property="env.NODE_NAME" />
+      </not>
+      <equals arg1="${env.NODE_NAME}" arg2=""/>
+      <equals arg1="${env.NODE_NAME}" arg2=" "/>
+     </or>
+    </condition>
+    <!-- if not set above, we'll set to the non blank NODE_NAME -->
+    <property name="hudsonSlave" value="${env.NODE_NAME}"/>
+
+    <echo
+      message="HUDSON_SLAVE=${hudsonSlave}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!--
+      I believe all (common) platforms have env variable for HOSTNAME.
+      If not, user might want to set/export to be meaningful.
+    -->
+    <echo
+      message="HOSTNAME=${env.HOSTNAME}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_JOB_NAME=${env.JOB_NAME}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_BUILD_URL=${env.BUILD_URL}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <!--
+         With HUDSON_URL and WORKSPACE_PATH should be able
+         to figure out URL to WORKSPACE, though only temporarily
+         available (until next job is ran).
+    -->
+    <echo
+      message="HUDSON_URL=${env.HUDSON_URL}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+    <echo
+      message="HUDSON_WORKSPACE=${env.WORKSPACE}${EOL}"
+      append="true"
+      file="${phpPropertyFile}" />
+  
+    <property name="printedMainProperties" value="true" />
+
+    </target>
 </project>
