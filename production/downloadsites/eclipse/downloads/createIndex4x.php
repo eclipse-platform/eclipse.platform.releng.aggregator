@@ -109,7 +109,7 @@ For reference, see also
 <a href="build_types.html">meaning of kinds of builds</a> (M,N,I,S, and R), and the
 <a href="http://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
 </p>
-<p><img src="..images/new.gif" alt="New News Item 1" /> ﻿Eclipse support for Java&trade; 8: Starting with I20140318-0830 all our Luna 
+<p><img src="new.gif" alt="News Item 1" /> ﻿Eclipse support for Java&trade; 8: Starting with <a href="drops4/I20140318-0830/">I20140318-0830</a> all our Luna 
 (4.4) builds contain the Eclipse support for <a href="http://www.oracle.com/technetwork/java/javase/overview/java8-2100321.html">Java&trade; 8</a>. 
 For Kepler SR2 (4.3.2) a <a href="https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler">feature patch</a> is available.
 </p>
