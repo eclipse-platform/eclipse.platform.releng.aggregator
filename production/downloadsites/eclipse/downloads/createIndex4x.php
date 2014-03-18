@@ -1,4 +1,4 @@
-<?php  
+<?php
 # Begin: page-specific settings.  Change these.
 $pageTitle    = "Eclipse Project Downloads";
 $pageKeywords = "eclipse platform sdk pde jdt downloads";
@@ -44,7 +44,7 @@ td {
 <body>
 
 <?php
-    break;   
+    break;
 default:
     #Otherwise use the default layout (content printed inside the nova theme).
     require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
@@ -53,7 +53,7 @@ default:
     $App  = new App();
     $Nav  = new Nav();
     $Menu   = new Menu();
-    break;     
+    break;
 }?>
 <div class="container_<?php echo $layout;?>">
 <table width="100%" style="border-spacing:2px;">
@@ -96,31 +96,31 @@ If you have problems installing or getting the workbench to run, <a href="http:/
 out the Eclipse Project FAQ,</a> or try posting a question to the <a href="http://www.eclipse.org/newsgroups" target="_top">newsgroup</a>.
 <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=415540
 If prefered, downloads are available with <a href="http://build.eclipse.org/technology/phoenix/torrents/SDK/">SDK Torrents</a>.
---> 
+-->
 <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=415509
 Please consider helping with Eclipse translations; see the <a href="http://babel.eclipse.org/babel/">Babel project</a>.
 -->
 </p>
 
-<p>See the <a href="http://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.<br />
-The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).<br />
-For reference, see also<br />  
-<a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>.<br />
-<a href="build_types.html">meaning of kinds of builds</a> (M,N,I,S, and R).<br />
-<a href="http://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.<br />
-&nbsp;</p>
+<p>See the <a href="http://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
+The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
+For reference, see also
+<a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>,
+<a href="build_types.html">meaning of kinds of builds</a> (M,N,I,S, and R), and the
+<a href="http://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
+</p>
 <table width="100%">
 <tr>
 <td width="100%" bgcolor="#0080C0"><font color="#FFFFFF" face="Arial,Helvetica">Latest
 Downloads</font>
 </td>
-</tr> 
+</tr>
 </table>
 
 <?php
 
     function startsWithDropPrefix($dirName, $dropPrefix)
-    { 
+    {
 
         $result = false;
         // sanity check "setup" is as we expect
@@ -129,7 +129,7 @@ Downloads</font>
             if (isset($dirName) && strlen($dirName) > 0) {
                 $firstChar = substr($dirName, 0, 1);
                 //echo "first char: ".$firstChar;
-                foreach($dropPrefix as $type) { 
+                foreach($dropPrefix as $type) {
                     if ($firstChar == "$type") {
                         $result = true;
                         break;
@@ -157,7 +157,7 @@ function runTestBoxes($buildName, $testResultsDirName) {
     if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
         // be sure any previous are reset
         unset ($BUILD_FAILED);
-        include "$subdirDrops/$buildName/buildproperties.php"; 
+        include "$subdirDrops/$buildName/buildproperties.php";
         if (isset ($BUILD_FAILED) && strlen($BUILD_FAILED) > 0) {
             $boxes=-1;
             unset ($BUILD_FAILED);
@@ -165,7 +165,7 @@ function runTestBoxes($buildName, $testResultsDirName) {
     }
     if ($boxes != -1)  {
 
-        // TEMP? appears "old style" builds had directories named "results", but now "testresults" 
+        // TEMP? appears "old style" builds had directories named "results", but now "testresults"
         // and we want to look in $testResultsDirName/consolelogs
         if (file_exists("$subdirDrops/$buildName/$testResultsDirName/consolelogs")) {
             $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName/consolelogs");
@@ -246,49 +246,49 @@ function printBuildColumns($fileName, $parts) {
         // hard code here, for now, but make come from property file, later
         $expectedTestBoxes=3;
 
-        // We skip this "tests" part for patch builds, since don't expect any (for now). 
+        // We skip this "tests" part for patch builds, since don't expect any (for now).
         if ($buildType !== "P") {
 
-            // always put in links, since someone may want to look at logs, even if not tests results, per se
-            // don't forget to end link, after images decided.
-            $boxesTitle="";
-            if ($boxes > -1) { 
-                $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
-            }
-            if ($testResultsDirName === "results") {
-                echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-            } else {
-                echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-            }   
-    
-            if ($boxes == -1) {
-                $testimage="caution.gif";
-                $testalt="Integration tests did not run due to failed build";
-            } elseif ($boxes == 0 && $diff > 720) {
-                // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
-                $testimage="caution.gif";
-                $testalt="Integration tests did not run, due to unknown reasons.";
-            } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
-                if ($diff > 1440) {
-                    $testimage="junit.gif";
-                    $testalt="Tests results are available but did not finish on all machines";
-                } else {
-                    $testimage="runtests.gif";
-                    $testalt="Integration tests are running ...";
-                }
-            } elseif ($boxes == $expectedTestBoxes) {
-                $testimage="junit.gif";
-                $testalt="Tests results are available";
-            } else {
-                $testimage="runtests.gif";
-                $testalt="Integration tests are running ...";
-            }
-            echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-            if ($boxes > -1) { 
-                echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
-            }
-            echo "</a>\n";
-        }
+          // always put in links, since someone may want to look at logs, even if not tests results, per se
+          // don't forget to end link, after images decided.
+          $boxesTitle="";
+          if ($boxes > -1) {
+              $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
+          }
+          if ($testResultsDirName === "results") {
+              echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+          } else {
+              echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+          }
+
+          if ($boxes == -1) {
+              $testimage="caution.gif";
+              $testalt="Integration tests did not run due to failed build";
+          } elseif ($boxes == 0 && $diff > 720) {
+              // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
+              $testimage="caution.gif";
+              $testalt="Integration tests did not run, due to unknown reasons.";
+          } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
+              if ($diff > 1440) {
+                  $testimage="junit.gif";
+                  $testalt="Tests results are available but did not finish on all machines";
+              } else {
+                  $testimage="runtests.gif";
+                  $testalt="Integration tests are running ...";
+              }
+          } elseif ($boxes == $expectedTestBoxes) {
+              $testimage="junit.gif";
+              $testalt="Tests results are available";
+          } else {
+              $testimage="runtests.gif";
+              $testalt="Integration tests are running ...";
+          }
+          echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+          if ($boxes > -1) {
+              echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
+          }
+          echo "</a>\n";
+      }
     }
     echo "</td>\n";
     return $buildName;
@@ -354,16 +354,16 @@ while ($anEntry = $aDirectory->read()) {
                 $day = substr($timePart, 6, 2);
                 $hour = substr($timePart,8,2);
                 $minute = substr($timePart,10,2);
-                // special logic adds 1 second if build id contains "RC" ... this was 
-                // added for the M build case, where there is an M build and and RC version that 
+                // special logic adds 1 second if build id contains "RC" ... this was
+                // added for the M build case, where there is an M build and and RC version that
                 // have same time stamp. One second should not effect desplayed values.
                 $isRC = strpos($anEntry, "RC");
                 if ($isRC === false) {
                     $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-                } else { 
+                } else {
                     $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
                 }
-                $buckets[$parts[0]][$timeStamp] = $anEntry; 
+                $buckets[$parts[0]][$timeStamp] = $anEntry;
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
                 // latestTimeStamp will not be defined, first time through
                 if (!isset($latestTimeStamp) || !array_key_exists($parts[0],$latestTimeStamp)  || $timeStamp > $latestTimeStamp[$parts[0]]) {
@@ -386,10 +386,10 @@ while ($anEntry = $aDirectory->read()) {
                 $isRC = strpos($anEntry, "RC");
                 if ($isRC === false) {
                     $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-                } else { 
+                } else {
                     $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
                 }
-                $buckets[$buildType[0]][$timeStamp] = $anEntry;   
+                $buckets[$buildType[0]][$timeStamp] = $anEntry;
 
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
 
@@ -445,10 +445,10 @@ foreach($dropType as $value) {
             if ($fileName == "") {
                 echo "<td align=\"left\" width=\"15%\">&nbsp;</td>\n";
             } else {
-                // Note: '$value' basically comes from dlconfig4.php and serves two purposes: 
-                // 1) the "tool tip" when hovering over the "Latest" build. 
-                // 2) the "title bar" of remaining sections. 
-                // In other words dlconfig4.php would have to be expanded if we ever wanted 
+                // Note: '$value' basically comes from dlconfig4.php and serves two purposes:
+                // 1) the "tool tip" when hovering over the "Latest" build.
+                // 2) the "title bar" of remaining sections.
+                // In other words dlconfig4.php would have to be expanded if we ever wanted
                 // "tool tip" and "section title" to be (slightly) different from each other.
                 echo "<td align=\"left\"  width=\"15%\"><a href=\"$subdirDrops/$fileName/\" title=\"$value\">$buildName</a></td>\n";
             }
@@ -462,7 +462,7 @@ foreach($dropType as $value) {
 </td>
 </tr>
     </table>
-<!-- </td></tr></table> 
+<!-- </td></tr></table>
 <table  width="100%" >
 -->
 
@@ -531,7 +531,7 @@ foreach($dropType as $value) {
     }
 }
 echo "<hr>";
-echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"http://www.eclipse.org/legal/epl/notice.php\" target=\"_top\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>"; 
+echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"http://www.eclipse.org/legal/epl/notice.php\" target=\"_top\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>";
 
 echo '</div>';
 $html = ob_get_clean();
@@ -551,4 +551,3 @@ default:
     $App->generatePage('Nova', $Menu, NULL , $pageAuthor, $pageKeywords, $pageTitle, $html);
     break;
 }
-
