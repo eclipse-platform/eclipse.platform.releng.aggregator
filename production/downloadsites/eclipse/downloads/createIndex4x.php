@@ -195,11 +195,13 @@ function printBuildColumns($fileName, $parts) {
         $buildName=$parts[1];
         $buildDay=intval(substr($parts[2], 0, 8));
         $buildTime=intval(substr($parts[2], 8, 4));
+        $buildType=$parts[0];
     }
     if (count($parts)==2) {
         $buildName=$fileName;
         $buildDay=intval(substr($buildName, 1, 8));
         $buildTime=intval(substr($buildName, 10, 2))*60+intval(substr($buildName, 12, 2));
+        $buildType=substr($buildName, 0, 1);
     }
     // compute minutes elapsed since build started
     $day=intval(date("Ymd"));
@@ -244,46 +246,49 @@ function printBuildColumns($fileName, $parts) {
         // hard code here, for now, but make come from property file, later
         $expectedTestBoxes=3;
 
+        // We skip this "tests" part for patch builds, since don't expect any (for now). 
+        if ($buildType !== "P") {
 
-        // always put in links, since someone may want to look at logs, even if not tests results, per se
-        // don't forget to end link, after images decided.
-        $boxesTitle="";
-        if ($boxes > -1) { 
-            $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
-        }
-        if ($testResultsDirName === "results") {
-            echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-        } else {
-            echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-        }   
-
-        if ($boxes == -1) {
-            $testimage="caution.gif";
-            $testalt="Integration tests did not run due to failed build";
-        } elseif ($boxes == 0 && $diff > 720) {
-            // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
-            $testimage="caution.gif";
-            $testalt="Integration tests did not run, due to unknown reasons.";
-        } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
-            if ($diff > 1440) {
+            // always put in links, since someone may want to look at logs, even if not tests results, per se
+            // don't forget to end link, after images decided.
+            $boxesTitle="";
+            if ($boxes > -1) { 
+                $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
+            }
+            if ($testResultsDirName === "results") {
+                echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+            } else {
+                echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+            }   
+    
+            if ($boxes == -1) {
+                $testimage="caution.gif";
+                $testalt="Integration tests did not run due to failed build";
+            } elseif ($boxes == 0 && $diff > 720) {
+                // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
+                $testimage="caution.gif";
+                $testalt="Integration tests did not run, due to unknown reasons.";
+            } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
+                if ($diff > 1440) {
+                    $testimage="junit.gif";
+                    $testalt="Tests results are available but did not finish on all machines";
+                } else {
+                    $testimage="runtests.gif";
+                    $testalt="Integration tests are running ...";
+                }
+            } elseif ($boxes == $expectedTestBoxes) {
                 $testimage="junit.gif";
-                $testalt="Tests results are available but did not finish on all machines";
+                $testalt="Tests results are available";
             } else {
                 $testimage="runtests.gif";
                 $testalt="Integration tests are running ...";
             }
-        } elseif ($boxes == $expectedTestBoxes) {
-            $testimage="junit.gif";
-            $testalt="Tests results are available";
-        } else {
-            $testimage="runtests.gif";
-            $testalt="Integration tests are running ...";
+            echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+            if ($boxes > -1) { 
+                echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
+            }
+            echo "</a>\n";
         }
-        echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-        if ($boxes > -1) { 
-            echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
-        }
-        echo "</a>\n";
     }
     echo "</td>\n";
     return $buildName;
