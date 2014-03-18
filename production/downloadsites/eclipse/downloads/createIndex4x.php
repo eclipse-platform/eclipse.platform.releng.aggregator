@@ -250,7 +250,7 @@ function printBuildColumns($fileName, $parts) {
         // hard code here, for now, but make come from property file, later
         $expectedTestBoxes=3;
 
-        // We skip this "tests" part for patch builds, since don't expect any (for now).
+        // We skip the main "tests" part for patch builds, since don't expect any (for now).
         if ($buildType !== "P") {
 
           // always put in links, since someone may want to look at logs, even if not tests results, per se
@@ -292,6 +292,13 @@ function printBuildColumns($fileName, $parts) {
               echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
           }
           echo "</a>\n";
+      } else {
+        echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+        $testimage="results.gif";
+        $testalt="Logs from build";
+        echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+        echo "&nbsp;(No automated tests)";
+        echo "</a>\n";
       }
     }
     echo "</td>\n";
