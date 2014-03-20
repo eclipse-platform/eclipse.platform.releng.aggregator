@@ -1703,4 +1703,50 @@
       value="true" />
 
   </target>
+
+  <!-- 
+      function to centralize how we get (that is, set) the value of 
+      'javaMajorVersion'. (expected to be integter, such as 5,6,7,8,9, 
+      or will be "0" if the version could not be determined, for some reason.
+  -->
+
+  <target name="getJavaMajorVersion">
+  <!-- 
+       TODO: this assumes we are running ant, with same VM as we'll eventuall use 
+       during test. Valid assumption most the time, but ... not necessarily always.
+  -->
+    <script language="javascript">
+    <!--
+         technically does not have to be wrapped in "CDATA" (Ant and BSD define 
+         it that way, but if not done, other tools (such as XML Editor) can 
+         break the code by changing the formatting. 
+    -->
+    <![CDATA[
+      var javaVersion = project.getProperty("java.runtime.version");
+      var pattern = new
+      RegExp(/^1\.([456789]).*$/);
+
+      var sArray = pattern.exec(javaVersion);
+      // sArray 0 is "whole match"
+      // so will always exist (even
+      // if no match?)
+      // for safety from programing
+      // errors, we'll check that there is
+      // something in '1'.
+      var length = sArray.length;
+      if (length > 1) {
+      project.setProperty("javaMajorVersion", sArray[1]);
+      } else {
+      project.setProperty("javaMajorVersion", "0");
+      }
+      ]]>
+    </script>
+  </target>
+
+  <target
+    name="test-getJavaMajorVersion"
+    depends="getJavaMajorVersion">
+    <echo message="Java Version: ${javaMajorVersion}" />
+    <echo message="java.runtime.version: ${java.runtime.version}" />
+  </target>
 </project>
