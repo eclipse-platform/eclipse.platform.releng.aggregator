@@ -438,7 +438,9 @@
 
   </target>
 
-  <target name="setRuntimeArchive">
+  <target
+    name="setRuntimeArchive"
+    depends="initOSes">
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
     <condition
       property="runtimeArchive"
@@ -659,30 +661,34 @@
     <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment-->
     <condition
       property="J2SE-5.0"
-      value="${java.home}/bin/java">
+      value="${java.home}/bin/java"
+      else="NotSet">
       <matches
-        string="${java.runtime.version}"
+        string="${java.version}"
         pattern="^1\.[5678].*$" />
     </condition>
     <condition
       property="J2SE-6.0"
-      value="${java.home}/bin/java">
+      value="${java.home}/bin/java"
+      else="NotSet">
       <matches
-        string="${java.runtime.version}"
+        string="${java.version}"
         pattern="^1\.[678].*$" />
     </condition>
     <condition
       property="J2SE-7.0"
-      value="${java.home}/bin/java">
+      value="${java.home}/bin/java"
+      else="NotSet">
       <matches
-        string="${java.runtime.version}"
+        string="${java.version}"
         pattern="^1\.[78].*$" />
     </condition>
     <condition
       property="J2SE-8.0"
-      value="${java.home}/bin/java">
+      value="${java.home}/bin/java"
+      else="NotSet">
       <matches
-        string="${java.runtime.version}"
+        string="${java.version}"
         pattern="^1\.[8].*$" />
     </condition>
     <echo message="values from setJVMProperties" />
@@ -691,49 +697,65 @@
     <echo message="J2SE-6.0:  ${J2SE-6.0}" />
     <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
+
+  <target
+    name="checkAndReporJVM"
+    unless="jvm">
+    <echo
+      level="info"
+      message="INFO: No user specified jvm was found." />
+  </target>
+
   <target
     name="setJVMfromUserSpecified"
+    depends="checkAndReporJVM"
     if="jvm">
+    <echo
+          level="info"
+          message="INFO: User specified jvm value of ${jvm}." />
     <!--
        TODO: it is unclear of the purpose (use-case) and relationship of this "user specified" method,
        compared to the setJVMProperties method above. Here, it seems only one "J2SE-N.M" variable
        gets a value, depending on how user (or, unit test?) set 'jvm'; where as above,
        each gets a value, in a "hierarchical" fashion, based on currently running VM..
+
+       Note: here we do NOT want to set "NotSet" if no match, since there is 
+       a second chance to set, in setJVMProperties.
     -->
     <exec
       executable="${jvm}"
       outputproperty="javaversion">
       <arg line="-version" />
     </exec>
-    <echo message="java version of ${jvm} is ${javaversion}" />
+    <echo message="full output from java -version of ${jvm} is ${javaversion}" />
 
     <condition
       property="J2SE-8.0"
       value="${jvm}">
-      <contains
+      <matches
         string="${javaversion}"
-        substring="java version &quot;1.8" />
+        pattern="^java version &quot;1\.[5678].*$" />
     </condition>
     <condition
       property="J2SE-7.0"
       value="${jvm}">
-      <contains
+      <matches
         string="${javaversion}"
-        substring="java version &quot;1.7" />
+        pattern="^java version &quot;1\.[567].*$" />
     </condition>
     <condition
       property="J2SE-6.0"
       value="${jvm}">
-      <contains
+      <matches
         string="${javaversion}"
-        substring="java version &quot;1.6" />
+        pattern="^java version &quot;1\.[56].*$" />
     </condition>
     <condition
       property="J2SE-5.0"
       value="${jvm}">
-      <contains
+      <matches
         string="${javaversion}"
-        substring="java version &quot;1.5" />
+        pattern="^java version &quot;1\.[5].*$" />
     </condition>
     <echo message="values from setJVMfromUserSpecified" />
     <echo message="J2SE-8.0:  ${J2SE-8.0}" />
@@ -1577,36 +1599,53 @@
       name="phpPropertyFile"
       value="${platformResults}/testProperties.php" />
 
-    <!-- first write don't append -->
+    <!-- on first write to php file, don't append -->
     <echo
       message="&lt;?php${EOL}"
       append="false"
       file="${phpPropertyFile}" />
-    <echo
-      message="$JAVA_LONG_VERSION=${javaversion}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
+
+    <printPHPProperty
+      phpvar="ANT_VERSION"
+      value="${ant.version}" />
+    <printPHPProperty
+      phpvar="ANT_JAVA_VERSION"
+      value="${ant.java.version}" />
+    <printPHPProperty
+      phpvar="INVOKED_JAVA_VERSION"
+      value="javaversion" />
     <!--
       Note: there might be times, the java.runtime.version at this point in time,
       may not be quite right ... such as if invoked with some other VM with the intent of
       using 'jvm' on "eclipse" command line ... which we currently do not do.
     -->
-    <echo
-      message="$JAVA_VERSION=${java.runtime.version}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$OS=${os}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$WS=${ws}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$ARCH=${arch}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
+    <printPHPProperty
+      phpvar="JAVA_VERSION"
+      value="java.version" />
+    <printPHPProperty
+      phpvar="JAVA_MAJOR_VERSION"
+      value="javaMajorVersion" />
+    <printPHPProperty
+      phpvar="JAVA_RUNTIME_VERSION"
+      value="java.runtime.version" />
+    <printPHPProperty
+      phpvar="JAVA_VM_INFO"
+      value="java.vm.info" />
+    <printPHPProperty
+      phpvar="JAVA_SPECIFICATION_VERSION"
+      value="java.specification.version" />
+    <printPHPProperty
+      phpvar="JAVA_VENDOR"
+      value="java.vendor" />
+    <printPHPProperty
+      phpvar="OS"
+      value="os" />
+    <printPHPProperty
+      phpvar="WS"
+      value="ws" />
+    <printPHPProperty
+      phpvar="ARCH"
+      value="arch" />
     <!-- NODE_NAME will be empty string, if on master -->
     <condition
       property="hudsonSlave"
@@ -1628,45 +1667,38 @@
       name="hudsonSlave"
       value="${env.NODE_NAME}" />
 
-    <echo
-      message="$HUDSON_NODE_NAME=${hudsonSlave}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
+    <printPHPProperty
+      phpvar="HUDSON_NODE_NAME"
+      value="hudsonSlave" />
     <!--
       I believe all (common) platforms have env variable for HOSTNAME.
       If not, user might want to set/export to be meaningful.
       (Surprisingly, it doesn't seem obvious that Hudson makes this available
       in its process environment).
     -->
-    <echo
-      message="$HOSTNAME=${env.HOSTNAME}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$HUDSON_JOB_NAME=${env.JOB_NAME}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$HUDSON_BUILD_NUMBER=${env.BUILD_NUMBER}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$HUDSON_BUILD_URL=${env.BUILD_URL}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
+    <printPHPProperty
+      phpvar="HOSTNAME"
+      value="env.HOSTNAME" />
+    <printPHPProperty
+      phpvar="HUDSON_JOB_NAME"
+      value="env.JOB_NAME" />
+    <printPHPProperty
+      phpvar="HUDSON_BUILD_NUMBER"
+      value="env.BUILD_NUMBER" />
+    <printPHPProperty
+      phpvar="HUDSON_BUILD_URL"
+      value="env.BUILD_URL" />
     <!--
          With HUDSON_URL and WORKSPACE_PATH should be able
          to figure out URL to WORKSPACE, though only temporarily
          available (until next job is ran).
     -->
-    <echo
-      message="$HUDSON_URL=${env.HUDSON_URL}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
-    <echo
-      message="$HUDSON_WORKSPACE=${env.WORKSPACE}${EOL}"
-      append="true"
-      file="${phpPropertyFile}" />
+    <printPHPProperty
+      phpvar="HUDSON_URL"
+      value="env.HUDSON_URL" />
+    <printPHPProperty
+      phpvar="HUDSON_WORKSPACE"
+      value="env.WORKSPACE" />
 
      <!--
         We end with an empty line, but it is recommended to not 
@@ -1690,19 +1722,23 @@
       or will be "0" if the version could not be determined, for some reason.
   -->
 
-  <target name="getJavaMajorVersion">
+  <target
+    name="getJavaMajorVersion"
+    depends="initOSes">
   <!-- 
        TODO: this assumes we are running ant, with same VM as we'll eventuall use 
        during test. Valid assumption most the time, but ... not necessarily always.
   -->
+
     <script language="javascript">
+
     <!--
          technically does not have to be wrapped in "CDATA" (Ant and BSD define 
          it that way, but if not done, other tools (such as XML Editor) can 
          break the code by changing the formatting. 
     -->
     <![CDATA[
-      var javaVersion = project.getProperty("java.runtime.version");
+      var javaVersion = project.getProperty("java.version");
       var pattern = new
       RegExp(/^1\.([456789]).*$/);
 
@@ -1723,10 +1759,166 @@
     </script>
   </target>
 
+  <macrodef name="printProperty">
+    <attribute name="property" />
+    <sequential>
+      <echo message="@{property}: ${@{property}}" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="printPHPProperty">
+    <attribute name="phpvar" />
+    <attribute name="value" />
+    <sequential>
+      <!-- DEBUG <echo message="@{value}" /> -->
+      <condition
+        property="printValue@{value}"
+        value="${@{value}}"
+        else="NotSet">
+        <isset property="@{value}" />
+      </condition>
+      <echo
+        message="$@{phpvar}=&quot;${printValue@{value}}&quot;;${EOL}"
+        file="${phpPropertyFile}"
+        append="true" />
+    </sequential>
+  </macrodef>
+
+  <target name="debug-allJavaProperties">
+    <echoproperties regex="^java\..*$" />
+  </target>
+  <target name="debug-allOSProperties">
+    <echoproperties regex="^os\..*$" />
+  </target>
+  
+  <!-- 
+      initOSes is to make sure the values of os, ws, and arch are set.
+      We need them to match their "osgi.X" counterparts, so users often will 
+      need to simply set the "osgi.X" values as system variables, since 
+      our ability to guess varies from OS to OS and VM to VM ... but, if 
+      the osgi.X values are not set, we'll take a guess based on common systems.
+   -->
+  <target name="initOSes">
+
+    <condition
+      property="guessed.os"
+      value="win32">
+      <os family="windows" />
+    </condition>
+    <condition
+      property="guessed.os"
+      value="macosx">
+      <os family="mac" />
+    </condition>
+    <condition
+      property="guessed.os"
+      value="linux">
+      <or>
+        <os family="unix" />
+        <os family="linux" />
+      </or>
+    </condition>
+    <!-- if not set above, set to a ridulous value, that will at least give hint of action to take once it causes a failure -->
+    <property
+      name="guessed.os"
+      value="Value of 'os' could not be determined. 'osgi.os' must be set as system variable." />
+
+    <condition
+      property="os"
+      value="${osgi.os}"
+      else="${guessed.os}">
+      <isset property="osgi.os" />
+    </condition>
+
+    <!-- luckily, these days, not multiple windowing systems, for common OSes -->
+    <condition
+      property="guessed.ws"
+      value="win32">
+      <os family="windows" />
+    </condition>
+    <condition
+      property="guessed.ws"
+      value="cocoa">
+      <os family="mac" />
+    </condition>
+    <condition
+      property="guessed.ws"
+      value="gtk">
+      <os family="unix" />
+    </condition>
+    <!-- if not set above, set to a ridulous value, that will at least give hint of action to take once it causes a failure -->
+    <property
+      name="guessed.ws"
+      value="Value of 'ws' could not be determined. 'osgi.ws' must be set as system variable." />
+
+    <condition
+      property="ws"
+      value="${osgi.ws}"
+      else="${guessed.ws}">
+      <isset property="osgi.ws" />
+    </condition> 
+
+    <!-- not sure this will work well? -->
+    <condition
+      property="guessed.arch"
+      value="x86_64">
+      <or>
+        <os arch="x86_64" />
+        <os arch="amd64" />
+      </or>
+    </condition>
+    <condition
+      property="guessed.arch"
+      value="x86">
+      <or>
+        <os arch="x86" />
+        <os arch="i386" />
+        <os arch="i586" />
+      </or>
+    </condition>
+    <!-- if not set above, set to a ridulous value, that will at least give hint of action to take once it causes a failure -->
+    <property
+      name="guessed.ws"
+      value="Value of 'arch' could not be determined. 'osgi.arch' must be set as system variable." />
+
+    <condition
+      property="arch"
+      value="${osgi.arch}"
+      else="${guessed.arch}">
+      <isset property="osgi.arch" />
+    </condition>
+
+  </target>
+
   <target
     name="test-getJavaMajorVersion"
-    depends="getJavaMajorVersion">
-    <echo message="Java Version: ${javaMajorVersion}" />
-    <echo message="java.runtime.version: ${java.runtime.version}" />
+    depends="debug-allJavaProperties,debug-allOSProperties,getJavaMajorVersion">
+    <printProperty property="javaMajorVersion" />
+    <printProperty property="java.version" />
+    <printProperty property="java.runtime.version" />
+    <printProperty property="java.vm.info" />
+    <printProperty property="java.specification.version" />
+    <printProperty property="java.vendor" />
+    <antcall target="printMainProperties" />
+  </target>
+
+  <target
+    name="test-initOSes"
+    depends="debug-allProperties,initOSes">
+    <printProperty property="os" />
+    <printProperty property="ws" />
+    <printProperty property="arch" />
+    <printProperty property="osgi.os" />
+    <printProperty property="osgi.ws" />
+    <printProperty property="osgi.arch" />
+  </target>
+
+  <target
+    name="test-all"
+    depends="test-initOSes,test-getJavaMajorVersion">
+  </target>
+
+  <target name="debug-allProperties">
+    <echoproperties />
   </target>
 </project>
