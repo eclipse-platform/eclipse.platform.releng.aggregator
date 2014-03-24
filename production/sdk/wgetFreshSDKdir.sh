@@ -39,9 +39,15 @@ checkForErrorExit $? "could not get aggregator?!"
 unzip -q ${branch}.zip -d tempeb
 checkForErrorExit $? "could not unzip master?!"
 
-# save a copy to diff with (and revert to if needed)
-# after first removing any previous copies.
-rm -fr sdkTempSave 2>/dev/null
+# save a copy to diff with (and to revert to if needed)
+# after first moving any previous copies.
+# will need to manually cleanup dated backups occasionally
+if [[ -d sdkTempSave ]]
+then
+    NOWDATE=`date -u +%Y%m%d%H%M`
+    NEWNAME=sdkTempSave${NOWDATE}
+    mv sdkTempSave ${NEWNAME}
+fi
 mv sdk sdkTempSave
 
 #rsync -r tempeb/master/scripts/sdk/ sdk
