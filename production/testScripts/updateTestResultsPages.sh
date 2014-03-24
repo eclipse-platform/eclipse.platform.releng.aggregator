@@ -122,7 +122,7 @@ echo " BUILDFILESTR: $BUILDFILESTR"
 # provide blank, to get default
 BUILDTARGET=" "
 
-devworkspace="${basebuilderDir}/workspace-updateTestResults"
+devworkspace="${fromDir}/workspace-updateTestResults"
 devArgs="-Xmx256m -Dhudson=true -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -DBUILD_KIND=${BUILD_KIND}"
 
 echo
