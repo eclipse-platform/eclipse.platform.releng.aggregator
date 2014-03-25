@@ -34,9 +34,9 @@ echo "buildId in testAll: ${buildId}"
 
 if [[ -n "${extdir}" ]]
 then
-./runtests.sh -os linux -ws gtk -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_64_6.0_consolelog.txt
+./runtests.sh -os linux -ws gtk -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_64_8.0_consolelog.txt
 else
-./runtests.sh -os linux -ws gtk -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_64_6.0_consolelog.txt	
+./runtests.sh -os linux -ws gtk -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_64_8.0_consolelog.txt	
 fi
 
 

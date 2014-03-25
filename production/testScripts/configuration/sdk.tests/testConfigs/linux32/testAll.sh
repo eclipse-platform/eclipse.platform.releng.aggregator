@@ -33,9 +33,9 @@ echo "propertyFile in testAll: ${propertyFile}"
 
 if [[ -n "${extdir}" ]]
 then
-./runtests.sh -os linux -ws gtk -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk-6.0_consolelog.txt
+./runtests.sh -os linux -ws gtk -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_8.0_consolelog.txt
 else
-./runtests.sh -os linux -ws gtk -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk-6.0_consolelog.txt	
+./runtests.sh -os linux -ws gtk -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_8.0_consolelog.txt	
 fi
 
 

@@ -28,10 +28,10 @@ ECHO propertyFile in testAll: %propertyFile%
 mkdir results\consolelogs
 
 IF DEFINED extdir (
-runtests.bat -extdirprop "%extdir%" -os win32 -ws win32 -arch x86 -vm %vmcmd% -properties %propertyFile%  %* > results\consolelogs\win7consolelog.txt
+runtests.bat -extdirprop "%extdir%" -os win32 -ws win32 -arch x86 -vm %vmcmd% -properties %propertyFile%  %* > results\consolelogs\win32.win32.x86_7.0_consolelog.txt
 GOTO END
 )
 
-runtests.bat -os win32 -ws win32 -arch x86 -vm %vmcmd% -properties %propertyFile%  %* > results\consolelogs\win7consolelog.txt
+runtests.bat -os win32 -ws win32 -arch x86 -vm %vmcmd% -properties %propertyFile%  %* > results\win32.win32.x86_7.0_consolelog.txt
 
 :END
