@@ -231,9 +231,9 @@ listLogs("compilelogs");
 
 listLogs("testresults/consolelogs");
 
-listDegailedLogs("linux.gtk.x86_6.0");
+listDegailedLogs("linux.gtk.x86_64_8.0");
 listDegailedLogs("win32.win32.x86_7.0");
-listDegailedLogs("macosx.cocoa.x86_5.0");
+listDegailedLogs("macosx.cocoa.x86_64_7.0");
 
 
 ?>
