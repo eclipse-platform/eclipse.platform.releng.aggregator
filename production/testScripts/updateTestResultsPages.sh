@@ -99,7 +99,8 @@ EBuilderDir=${aggregatorDir}/eclipse.platform.releng.tychoeclipsebuilder
 
 if [[ ! -d "${basebuilderDir}" ]] 
 then
-    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=${fromDir}/workspace-installtools
+    # WORKSPACE, here, is the "Hudson-type" of workspace, not eclipse. 
+    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=${fromDir}
 fi
 
 # remember, the Eclipse install must match the VM used (e.g. both 64 bit, both 32 bit, etc).
