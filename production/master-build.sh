@@ -207,6 +207,7 @@ fn-write-property CBI_JDT_VERSION
 fn-write-property CBI_JDT_VERSION_ARG
 fn-write-property PATCH_BUILD
 fn-write-property ALT_POM_FILE
+fn-write-property JAVA_DOC_TOOL
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
