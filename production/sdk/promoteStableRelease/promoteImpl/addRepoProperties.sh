@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 
+# Utility to add "stats" to repos. For documentation, see 
+# https://wiki.eclipse.org/WTP/Releng/Tools/addRepoProperties
+
+
+export PROMOTE_IMPL=${PROMOTE_IMPL:-/shared/eclipse/sdk/promoteStableRelease/promoteImpl}
+
+source ${PROMOTE_IMPL}/promoteUtilities.shsource
+source promoteUtilities.shsource
 
 APP_NAME=org.eclipse.wtp.releng.tools.addRepoProperties
 
-devworkspace=${PWD}/workspaceAddRepoProperties
+devworkspace=${devworkspace:-${PWD}/workspaceAddRepoProperties}
 
 REPO=$1
 REPO_TYPE=$2
@@ -39,8 +47,10 @@ else
     MIRRORURL_ARG=""
 fi
 
-ART_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
-CON_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
+#ART_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
+#CON_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
+ART_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
+CON_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
 
 MIRRORS_URL_ARG="-Dp2MirrorsURL=${MIRRORURL_ARG}"
 ART_REPO_ARG="-DartifactRepoDirectory=${REPO}"
@@ -50,6 +60,7 @@ CON_REPO_NAME_ARG="-Dp2MetadataRepositoryName=${CON_REPO_NAME}"
 
 # not currently used
 #-Dp2StatsURI=http://download.eclipse.org/stats/eclipse/updates${STATS_TAG_VERSIONINDICATOR} -DstatsArtifactsSuffix="${STATS_TAG_SUFFIX}" -DstatsTrackedArtifacts=org.eclipse.wst.jsdt.feature,org.eclipse.wst.xml_ui.feature,org.eclipse.wst.web_ui.feature,org.eclipse.jst.enterprise_ui.feature"
+-Dp2StatsURI=http://download.eclipse.org/stats/eclipse/updates${STATS_TAG_VERSIONINDICATOR} -DstatsArtifactsSuffix="${STATS_TAG_SUFFIX}" -DstatsTrackedArtifacts=org.eclipse.jdt.java8patch"
 
 
 echo "dev:               ${BASH_SOURCE}"
