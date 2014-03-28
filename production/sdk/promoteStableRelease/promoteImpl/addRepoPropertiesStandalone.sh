@@ -11,10 +11,12 @@ export BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse/builds/4P}
 printf "\n\tDEBUG: %s\n" "BUILD_ROOT: ${BUILD_ROOT}"
 
 ./addRepoProperties.sh \
-  file:///home/data/users/david_williams/downloads/eclipse/updates/4.3-P-builds/
-  4.3-P-builds \
-  P20140317-1600 \
-  1.0.0.v20140317-1956
+  "/home/data/httpd/download.eclipse.org/eclipse/updates/4.3-P-builds/P20140317-1600" \
+  "4.3-P-builds" \
+  "P20140317-1600" \
+  "org.eclipse.jdt.java8patch" \
+  "_1.0.0.v20140317-1956"
+  
 #./addRepoProperties.sh\
 #  "/data/httpd/download.eclipse.org/eclipse/updates/4.3-P-builds/P20140311-1530"\
 #  "4.3-P-builds"\

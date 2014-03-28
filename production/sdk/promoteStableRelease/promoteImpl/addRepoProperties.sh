@@ -55,7 +55,7 @@ fi
 ART_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
 CON_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
 
-MIRRORS_URL_ARG="-Dp2MirrorsURL=${MIRRORURL}"
+MIRRORS_URL_ARG="-Dp2MirrorsURL=${MIRRORURL_ARG}"
 ART_REPO_ARG="-DartifactRepoDirectory=${REPO}"
 CON_REPO_ARG="-DmetadataRepoDirectory=${REPO}"
 ART_REPO_NAME_ARG="-Dp2ArtifactRepositoryName=${ART_REPO_NAME}"
