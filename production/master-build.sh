@@ -390,12 +390,12 @@ else
     echo "No repo published, since BUILD_FAILED"
 fi 
 
-#For now, only "publish equinox and promote" if I or M build, skip if P, X, or Y
+#For now, only "publish equinox and promote" if N, I or M build, skip if P, X, or Y
 
 # TODO: probably never need to promote equinox, for patch build? 
 # TODO: Unclear how/when to send mailing list notification for patch builds. 
 
-if [[ $BUILD_TYPE =~  [IM] ]] 
+if [[ $BUILD_TYPE =~  [NIM] ]] 
 then
 
     # We don't promote equinox if there was a build failure, and we should not even try to 
