@@ -68,7 +68,7 @@ buildrc=0
 
 # derived values
 
-# correct valuse for cbi-jdt-repo.url and cbi-jdt-version are 
+# correct values for cbi-jdt-repo.url and cbi-jdt-version are 
 # codified in the parent pom. These variables give an easy way 
 # to test "experimental versions" in production build. 
 
