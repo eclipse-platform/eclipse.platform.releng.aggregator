@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# this buildeclipse.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
 
@@ -27,7 +27,7 @@ source "$1"
 #   ROOT: /shared/eclipse/builds
 #   BUILD_ID: M20121119-1900
 #   STREAM: 4.3.0
-fn-eq-build-dir () 
+fn-eq-build-dir ()
 {
     ROOT="$1"; shift
     BUILD_ID="$1"; shift
@@ -35,7 +35,7 @@ fn-eq-build-dir ()
     eclipseStreamMajor=${STREAM:0:1}
     buildType=${BUILD_ID:0:1}
     dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops3
-    if [[ $eclipseStreamMajor > 3 ]] 
+    if [[ $eclipseStreamMajor > 3 ]]
     then
         dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops
     fi
@@ -46,7 +46,7 @@ fn-eq-build-dir ()
 #   BUILD_ID: I20121116-0700
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
-fn-eq-gather-starterkit () 
+fn-eq-gather-starterkit ()
 {
     if [[ $# != 3 ]]
     then
@@ -70,28 +70,28 @@ fn-eq-gather-starterkit ()
     then
         pushd "$TARGET_PRODUCTS"
 
-        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip 
-        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip 
-        #cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip 
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz 
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz 
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz 
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz 
+        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip
+        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip
+        #cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz
+        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz
 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz 
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz
 
-        #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz 
+        #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
         tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86_64 rt
         #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz
-        # no longer an x86 version. Bug 420725 
+        # no longer an x86 version. Bug 420725
         #tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86 rt
 
-        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip 
-        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip 
+        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip
+        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip
 
-        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip 
-        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86.zip 
+        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip
+        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86.zip
 
         popd
     else
@@ -111,7 +111,7 @@ fn-eq-gather-starterkit ()
 #   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
-fn-publish-equinox () 
+fn-publish-equinox ()
 {
     BUILD_TYPE="$1"; shift
     BUILD_STREAM="$1"; shift
@@ -124,6 +124,19 @@ fn-publish-equinox ()
     BUILD_MACHINE_DROP_DIR_PARENT=$(dirname $BUILD_MACHINE_DROP_DIR)
     EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
+
+    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox-dir/target
+    if [[ -d "$TARGET_PRODUCTS" ]]
+    then
+        pushd "$TARGET_PRODUCTS"
+        # The glob '*' here, is to match (and hence remove) "version number" in built version, such as 3.10.0, 4.4.0, etc.
+        # And leave only BUILD_ID.
+        cp equinox-sdk-*-SNAPSHOT.zip "$BUILD_DIR"/equinox-SDK-${BUILD_ID}.zip
+    else
+        echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
+    fi
+    popd
+
     pushd "$BUILD_DIR"
     java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
         -data ${BUILD_DIR}/workspace-publishEquinox \
@@ -169,7 +182,7 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
 fn-publish-equinox "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
 RC=$?
-if [[ $RC != 0 ]] 
+if [[ $RC != 0 ]]
 then
     echo "ERROR: Somethign went wrong publishing Equinox. RC: $RC"
     exit $RC
