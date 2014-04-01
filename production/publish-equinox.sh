@@ -125,7 +125,7 @@ fn-publish-equinox ()
     EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
     fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
 
-    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox-dir/target
+    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox-sdk/target
     if [[ -d "$TARGET_PRODUCTS" ]]
     then
         pushd "$TARGET_PRODUCTS"
