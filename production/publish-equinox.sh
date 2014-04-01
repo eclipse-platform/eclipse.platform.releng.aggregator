@@ -131,7 +131,13 @@ fn-publish-equinox ()
         pushd "$TARGET_PRODUCTS"
         # The glob '*' here, is to match (and hence remove) "version number" in built version, such as 3.10.0, 4.4.0, etc.
         # And leave only BUILD_ID.
-        cp -v equinox-sdk-*-SNAPSHOT.zip "$BUILD_DIR"/equinox-SDK-${BUILD_ID}.zip
+        cp -v equinox-sdk-*-SNAPSHOT.zip "${BUILD_MACHINE_DROP_DIR}/equinox-SDK-${BUILD_ID}.zip"
+        RC=$?
+        if [[ $RC != 0 ]]
+        then
+            TODO: change 'cp' above to rsync .. it gives better error messages and logging?
+            echo "ERROR: cp command could not copy equinox-sdk-*-SNAPSHOT.zip. RC: $RC"
+        fi
     else
         echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
     fi
