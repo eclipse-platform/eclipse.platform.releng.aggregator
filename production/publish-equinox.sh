@@ -138,6 +138,11 @@ fn-publish-equinox ()
             TODO: change 'cp' above to rsync .. it gives better error messages and logging?
             echo "ERROR: cp command could not copy equinox-sdk-*-SNAPSHOT.zip. RC: $RC"
         fi
+        # following used to be done in "build-configs", based on "master-equinox" feature, 
+        # but that has now "gone away". 
+        pushd "${BUILD_MACHINE_DROP_DIR}"
+        unzip -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
+        popd
     else
         echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
     fi
