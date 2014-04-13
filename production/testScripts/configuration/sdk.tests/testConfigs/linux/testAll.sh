@@ -11,8 +11,15 @@
 source localTestsProperties.shsource 2>/dev/null
 
 echo "PWD: $PWD"
+
+# This is the VM used to start the "ant runner" process. 
+# It can be, but does not have to be, the same Java that's used for 
+# running the tests. The Java can be (optionally) defined in 'vm.properties'.
+# But, occasionally we do need to know exact path to VM, such as see bug 390286
 vmcmd=${vmcmd:-/shared/common/jdk1.8.0_x64-latest/jre/bin/java}
 
+# TODO: This doesn't seem all that useful. Should be removed. 
+# But, allow values to be specified in vm.properties, as well as command line? 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
 # this value in localTestsProperties.shsource.
 eclipseArch=${eclipseArch:-x86_64}
