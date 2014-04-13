@@ -11,15 +11,9 @@
 source localTestsProperties.shsource 2>/dev/null
 
 echo "PWD: $PWD"
+vmcmd=${vmcmd:-/shared/common/jdk-1.6.x86_64/jre/bin/java}
 
-# This is the VM used to start the "ant runner" process. 
-# It can be, but does not have to be, the same Java that's used for 
-# running the tests. The Java can be (optionally) defined in 'vm.properties'.
-# But, occasionally we do need to know exact path to VM, such as see bug 390286
-vmcmd=${vmcmd:-/shared/common/jdk1.8.0_x64-latest/jre/bin/java}
 
-# TODO: This doesn't seem all that useful. Should be removed. 
-# But, allow values to be specified in vm.properties, as well as command line? 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
 # this value in localTestsProperties.shsource.
 eclipseArch=${eclipseArch:-x86}
@@ -32,24 +26,16 @@ propertyFile=${propertyFile:-vm.properties}
 echo "vmcmd in testAll: ${vmcmd}"
 echo "extdir in testAll (if any): ${extdir}"
 echo "propertyFile in testAll: ${propertyFile}"
-echo "buildId in testAll: ${buildId}"
-echo "contents of propertyFile:"
-cat ${propertyFile}
-
 
 #execute command to run tests
 /bin/chmod 755 runtests.sh
 /bin/mkdir -p results/consolelogs
 
-#TODO: console logs can be renamed at end of process, with more exact names, if need,
-#such as to reflect bitness, and VM level. 
-consoleLog="results/consolelogs/linux-${buildId}_consolelog.txt"
-
 if [[ -n "${extdir}" ]]
 then
-./runtests.sh -os linux -ws gtk -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > ${consoleLog}
+./runtests.sh -os linux -ws gtk -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_8.0_consolelog.txt
 else
-./runtests.sh -os linux -ws gtk -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > ${consoleLog}
+./runtests.sh -os linux -ws gtk -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/linux.gtk.x86_8.0_consolelog.txt	
 fi
 
 

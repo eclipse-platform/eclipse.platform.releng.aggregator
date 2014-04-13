@@ -13,14 +13,6 @@ source localTestsProperties.shsource 2>/dev/null
 echo "PWD: $PWD"
 vmcmd=${vmcmd:-/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/jre/bin/java}
 
-# This is the VM used to start the "ant runner" process. 
-# It can be, but does not have to be, the same Java that's used for 
-# running the tests. The Java can be (optionally) defined in 'vm.properties'.
-# But, occasionally we do need to know exact path to VM, such as see bug 390286
-${vmcmd:-/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/jre/bin/java}
-
-# TODO: This doesn't seem all that useful. Should be removed. 
-# But, allow values to be specified in vm.properties, as well as command line? 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
 # this value in localTestsProperties.shsource.
 eclipseArch=${eclipseArch:-x86_64}
@@ -33,7 +25,6 @@ propertyFile=${propertyFile:-vm.properties}
 echo "vmcmd in testAll: ${vmcmd}"
 echo "extdir in testAll (if any): ${extdir}"
 echo "propertyFile in testAll: ${propertyFile}"
-echo "buildId in testAll: ${buildId}"
 echo "contents of propertyFile:"
 cat ${propertyFile}
 
@@ -41,13 +32,9 @@ cat ${propertyFile}
 /bin/chmod 755 runtestsmac.sh
 /bin/mkdir -p results/consolelogs
 
-#TODO: console logs can be renamed at end of process, with more exact names, if need,
-#such as to reflect bitness, and VM level. 
-consoleLog="results/consolelogs/macosx-${buildId}_consolelog.txt"
-
 if [[ -n "${extdir}" ]]
 then
-./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > ${consoleLog}
+./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -extdirprop "${extdir}" -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/macosx.cocoa.x86_64_7.0_consolelog.txt
 else
-./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > ${consoleLog}
+./runtestsmac.sh -os macosx -ws cocoa -arch $eclipseArch -vm "${vmcmd}" -properties ${propertyFile} $* > results/consolelogs/macosx.cocoa.x86_64_7.0_consolelog.txt
 fi

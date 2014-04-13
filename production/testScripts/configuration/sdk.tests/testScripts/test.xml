@@ -24,9 +24,59 @@
     has to move to "top of file" ... outer scope?
    <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
 -->
+  <property
+    name="testingPropertiesfile"
+    value="testing.properties" />
+  <loadproperties>
+    <file file="${testingPropertiesfile}" />
+  </loadproperties>
 
 
+  <!--default directory where test-eclipse will be installed-->
+  <property
+    name="install"
+    value="${basedir}/test-eclipse" />
 
+  <!--suffix added to test output files to identify platform on which tests ran.-->
+  <property
+    name="platform"
+    value="${os}.${ws}.${arch}" />
+
+  <!-- The root of the eclipse installation -->
+  <property
+    name="eclipse-home"
+    value="${install}/eclipse" />
+
+  <property
+    name="repoZip"
+    value="${basedir}/eclipse-junit-tests-${buildId}.zip" />
+  <property
+    name="repoLocation"
+    value="${basedir}/testRepo" />
+  <property
+    name="platformLocation"
+    value="${basedir}/platformLocation" />
+
+  <!-- The directory that will contain all files containing information on the tests that ran.-->
+  <property
+    name="results"
+    value="${basedir}/results" />
+
+  <!--Directory for JUnit report output, console log output and .log content for each test suite.
+            Overrides default in org.eclipse.test/library.xml-->
+  <property
+    name="junit-report-output"
+    value="${results}/${platform}" />
+
+  <!-- this dirctory, with some sort files are created during unit tests
+    ... need to find where to disable jacoco -->
+  <property
+    name="coverage-output"
+    value="${results}/coverageIGNORE" />
+
+  <echo
+    level="debug"
+    message="DEBUG: org.eclipse.core.net.prefs: ${org.eclipse.core.net.prefs}" />
 
   <!--Directory name of org.eclipse.test plug-in installed in ${eclipse-home}-->
   <target
@@ -93,21 +143,14 @@
 
   <target
     name="installNetworkPreferences"
-    depends="checkIfNetPrefsExists"
-    if="org.eclipse.core.net.prefs.exists">
+    if="org.eclipse.core.net.prefs">
 
     <copy
-      file="org.eclipse.core.net.prefs"
+      file="${org.eclipse.core.net.prefs}"
       todir="${preferenceDirectory}"
       failonerror="false"
       verbose="true" />
-    <echo message="copied org.eclipse.core.net.prefs to ${preferenceDirectory}" />
-  </target>
-
-  <target name="checkIfNetPrefsExists">
-    <condition property="org.eclipse.core.net.prefs.exists">
-      <available file="org.eclipse.core.net.prefs" />
-    </condition>
+    <echo message="copied ${org.eclipse.core.net.prefs} to ${preferenceDirectory}" />
   </target>
 
   <!--Extract test bundles repo -->
@@ -156,9 +199,7 @@
   </target>
 
   <!--use an stable version of the director so that instability in the current build doesn't cause all the tests to fail -->
-  <target
-    name="setupPlatform"
-    depends="initOSes,initFromVMProperties">
+  <target name="setupPlatform">
     <echo message="os.arch ${os.arch}" />
     <loadproperties srcfile="equinoxp2tests.properties" />
     <condition
@@ -380,69 +421,7 @@
 
   <target
     name="init"
-    depends="initOSes,initFromVMProperties,setRuntimeArchive">
-
-
-    <condition
-      property="platform"
-      value="${os}.${ws}.${arch}_${javaMajorVersion}_${platformSuffix}"
-      else="${os}.${ws}.${arch}_{javaMajorVersion}">
-      <isset property="platformSuffix" />
-    </condition>
-
-      <!-- The directory that will contain all files containing information on the tests that ran.-->
-    <property
-      name="results"
-      value="${basedir}/results" />
-
-      <!--Directory for JUnit report output, console log output and .log content for each test suite.
-                Overrides default in org.eclipse.test/library.xml-->
-    <property
-      name="junit-report-output"
-      value="${results}/${platform}" />
-
-
-
-    <property
-      name="testingPropertiesfile"
-      value="testing.properties" />
-    <loadproperties>
-      <file file="${testingPropertiesfile}" />
-    </loadproperties>
-
-
-    <!--default directory where test-eclipse will be installed-->
-    <property
-      name="install"
-      value="${basedir}/test-eclipse" />
-
-    <!--suffix added to test output files to identify platform on which tests ran.
-    <property
-      name="platform"
-      value="${os}.${ws}.${arch}" />
-      -->
-
-    <!-- The root of the eclipse installation -->
-    <property
-      name="eclipse-home"
-      value="${install}/eclipse" />
-
-    <property
-      name="repoZip"
-      value="${basedir}/eclipse-junit-tests-${buildId}.zip" />
-    <property
-      name="repoLocation"
-      value="${basedir}/testRepo" />
-    <property
-      name="platformLocation"
-      value="${basedir}/platformLocation" />
-    <!-- this dirctory, with some sort files are created during unit tests
-        ... need to find where to disable jacoco -->
-    <property
-      name="coverage-output"
-      value="${results}/coverageIGNORE" />
-
-
+    depends="setRuntimeArchive">
     <mkdir dir="${results}/xml" />
     <mkdir dir="${results}/html" />
     <mkdir dir="${junit-report-output}" />
@@ -455,7 +434,7 @@
       <arg line="-R nouchg ${install}" />
     </exec>
 
-    <antcall target="printMainProperties" />
+    <!-- <antcall target="printMainProperties" /> -->
 
   </target>
 
@@ -678,16 +657,7 @@
 
   <target
     name="setJVMProperties"
-    depends="initFromVMProperties,setJVMfromUserSpecified,setDefaultJVMProperties,setJavaMajorVersion">
-    <echo message="Ant Running in VM ${java.runtime.version}" />
-    <echo message="Ant detected java version: ${ant.java.version}" />
-    <echo message="User specified to use following VM for tests, if any: " />
-    <echo message="    ${jvm}" />
-  </target>
-
-  <target
-    name="setDefaultJVMProperties"
-    depends="initFromVMProperties,setJVMfromUserSpecified"
+    depends="setJVMfromUserSpecified"
     unless="jvm">
     <property
       name="VMSource"
@@ -703,33 +673,33 @@
       outputproperty="javaversion">
       <arg line="-version" />
     </exec>
-    <echo message="full output from 'java -version' of ${java.home}/bin/java is: " />
+    <echo message="full output from 'java -version' of ${java.home}/bin/java is " />
     <echo message="${javaversion}" />
 
     <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment-->
     <condition
-      property="J2SE-1.5"
+      property="J2SE-5.0"
       value="${java.home}/bin/java">
       <matches
         string="${java.version}"
         pattern="^1\.[5678].*$" />
     </condition>
     <condition
-      property="JavaSE-1.6"
+      property="J2SE-6.0"
       value="${java.home}/bin/java">
       <matches
         string="${java.version}"
-        pattern="^java version 1\.[678].*$" />
+        pattern="^1\.[678].*$" />
     </condition>
     <condition
-      property="JavaSE-1.7"
+      property="J2SE-7.0"
       value="${java.home}/bin/java">
       <matches
         string="${java.version}"
-        pattern="^java version 1\.[78].*$" />
+        pattern="^1\.[78].*$" />
     </condition>
     <condition
-      property="JavaSE-1.8"
+      property="J2SE-8.0"
       value="${java.home}/bin/java">
       <matches
         string="${java.version}"
@@ -740,27 +710,26 @@
       message="DEBUG: values from setJVMProperties" />
     <echo
       level="info"
-      message="JavaSE-1.8:  ${JavaSE-1.8}" />
+      message="J2SE-8.0:  ${J2SE-8.0}" />
     <echo
       level="info"
-      message="JavaSE-1.7:  ${JavaSE-1.7}" />
+      message="J2SE-7.0:  ${J2SE-7.0}" />
     <echo
       level="info"
-      message="JavaSE-1.6:  ${JavaSE-1.6}" />
+      message="J2SE-6.0:  ${J2SE-6.0}" />
     <echo
       level="info"
-      message="J2SE-1.5:  ${J2SE-1.5}" />
+      message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
 
   <target
     name="setJVMfromUserSpecified"
-    depends="initFromVMProperties"
     if="jvm">
 
     <property
       name="VMSource"
       value="VM used for tests, specified by caller: 'jvm'=${jvm}" />
-    <echo message="VMSource: ${jvm}" />
+    <echo message="VMSource: $VMSource" />
     <!--
         Remember, we don't want J2SE-X.0 set at all, if there is nothing
         that can run tests that require that level.
@@ -770,32 +739,32 @@
       outputproperty="javaversion">
       <arg line="-version" />
     </exec>
-    <echo message="full output user specified jvm, from '${jvm} -version' of ${jvm} is " />
+    <echo message="full output from 'java -version' of ${jvm} is " />
     <echo message="${javaversion}" />
 
     <condition
-      property="JavaSE-1.8"
+      property="J2SE-8.0"
       value="${jvm}">
       <matches
         string="${javaversion}"
         pattern='^java version "1\.[8].*"' />
     </condition>
     <condition
-      property="JavaSE-1.7"
+      property="J2SE-7.0"
       value="${jvm}">
       <matches
         string="${javaversion}"
         pattern='^java version "1\.[78].*"' />
     </condition>
     <condition
-      property="JavaSE-1.6"
+      property="J2SE-6.0"
       value="${jvm}">
       <matches
         string="${javaversion}"
         pattern='^java version "1\.[678].*"' />
     </condition>
     <condition
-      property="J2SE-1.5"
+      property="J2SE-5.0"
       value="${jvm}">
       <matches
         string="${javaversion}"
@@ -804,10 +773,10 @@
     <echo
       level="info"
       message="DEBUG: values from setJVMfromUserSpecified" />
-    <echo message="JavaSE-1.8:  ${JavaSE-1.8}" />
-    <echo message="JavaSE-1.7:  ${JavaSE-1.7}" />
-    <echo message="JavaSE-1.6:  ${JavaSE-1.6}" />
-    <echo message="J2SE-1.5:  ${J2SE-1.5}" />
+    <echo message="J2SE-8.0:  ${J2SE-8.0}" />
+    <echo message="J2SE-7.0:  ${J2SE-7.0}" />
+    <echo message="J2SE-6.0:  ${J2SE-6.0}" />
+    <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
   <target
     name="configureTeamTest"
@@ -1124,8 +1093,8 @@
     depends="setJVMProperties">
     <condition
       property="jvm"
-      value="${J2SE-1.5}">
-      <isset property="J2SE-1.5" />
+      value="${J2SE-5.0}">
+      <isset property="J2SE-5.0" />
     </condition>
     <runTests testPlugin="org.eclipse.jdt.core.tests.compiler" />
   </target>
@@ -1135,11 +1104,11 @@
     depends="setJVMProperties">
     <property
       name="jvm"
-      value="${J2SE-1.5}" />
-    <!--only run test if J2SE-1.5 property  set-->
+      value="${J2SE-5.0}" />
+    <!--only run test if J2SE-5.0 property  set-->
     <condition property="skip.test">
       <not>
-        <isset property="J2SE-1.5" />
+        <isset property="J2SE-5.0" />
       </not>
     </condition>
     <runTests testPlugin="org.eclipse.jdt.apt.tests" />
@@ -1150,14 +1119,14 @@
     depends="setJVMProperties">
     <property
       name="jvm"
-      value="${JavaSE-1.6}" />
-    <!--only run test if J2SE-1.5 property  set-->
+      value="${J2SE-6.0}" />
+    <!--only run test if J2SE-5.0 property  set-->
     <condition property="skip.test">
       <not>
         <or>
-          <isset property="JavaSE-1.6" />
-          <isset property="JavaSE-1.7" />
-          <isset property="JavaSE-1.8" />
+          <isset property="J2SE-6.0" />
+          <isset property="J2SE-7.0" />
+          <isset property="J2SE-8.0" />
         </or>
       </not>
     </condition>
@@ -1171,8 +1140,8 @@
     <!--Run with 1.5 vm if it is available-->
     <condition
       property="jvm"
-      value="${J2SE-1.5}">
-      <isset property="J2SE-1.5" />
+      value="${J2SE-5.0}">
+      <isset property="J2SE-5.0" />
     </condition>
     <runTests testPlugin="org.eclipse.jdt.core.tests.builder" />
   </target>
@@ -1182,14 +1151,14 @@
     depends="setJVMProperties">
     <property
       name="jvm"
-      value="${JavaSE-1.6}" />
-    <!--only run test if JavaSE-1.6 property or greater is set-->
+      value="${J2SE-6.0}" />
+    <!--only run test if J2SE-6.0 property or greater is set-->
     <condition property="skip.test">
       <not>
         <or>
-          <isset property="JavaSE-1.6" />
-          <isset property="JavaSE-1.7" />
-          <isset property="JavaSE-1.8" />
+          <isset property="J2SE-6.0" />
+          <isset property="J2SE-7.0" />
+          <isset property="J2SE-8.0" />
         </or>
       </not>
     </condition>
@@ -1201,14 +1170,14 @@
     depends="setJVMProperties">
     <property
       name="jvm"
-      value="${JavaSE-1.6}" />
-    <!--only run test if JavaSE-1.6 property or greater is set-->
+      value="${J2SE-6.0}" />
+    <!--only run test if J2SE-6.0 property or greater is set-->
     <condition property="skip.test">
       <not>
         <or>
-          <isset property="JavaSE-1.6" />
-          <isset property="JavaSE-1.7" />
-          <isset property="JavaSE-1.8" />
+          <isset property="J2SE-6.0" />
+          <isset property="J2SE-7.0" />
+          <isset property="J2SE-8.0" />
         </or>
       </not>
     </condition>
@@ -1220,8 +1189,8 @@
     depends="setJVMProperties">
     <condition
       property="jvm"
-      value="${J2SE-1.5}">
-      <isset property="J2SE-1.5" />
+      value="${J2SE-5.0}">
+      <isset property="J2SE-5.0" />
     </condition>
     <runTests testPlugin="org.eclipse.jdt.core.tests.model" />
   </target>
@@ -1309,11 +1278,11 @@
     depends="setJVMProperties">
     <property
       name="jvm"
-      value="${J2SE-1.5}" />
-    <!--only run test if J2SE-1.5 property  set-->
+      value="${J2SE-5.0}" />
+    <!--only run test if J2SE-5.0 property  set-->
     <condition property="skip.test">
       <not>
-        <isset property="J2SE-1.5" />
+        <isset property="J2SE-5.0" />
       </not>
     </condition>
     <runTests testPlugin="org.eclipse.pde.api.tools.tests" />
@@ -1624,7 +1593,7 @@
   -->
   <target
     name="printMainProperties"
-    depends="initFromVMProperties,setJVMProperties,setJavaMajorVersion"
+    depends="setJVMProperties,getJavaMajorVersion"
     unless="printedMainProperties">
 
     <property
@@ -1633,7 +1602,7 @@
 
     <property
       name="platformResults"
-      value="${results}/${platform}" />
+      value="${results}/${os}.${ws}.${arch}-${javaMajorVersion}" />
     <mkdir dir="${platformResults}" />
     <property
       name="phpPropertyFile"
@@ -1741,7 +1710,7 @@
       value="env.WORKSPACE" />
 
      <!--
-        We end with an empty line, but it is recommended to not
+        We end with an empty line, but it is recommended to not 
         end included PHP files with "end PHP" marker.
       -->
     <echo
@@ -1756,29 +1725,30 @@
 
   </target>
 
-  <!--
-      function to centralize how we get (that is, set) the value of
-      'javaMajorVersion'. (expected to be <integter>.<integer>, such as 5.0,6.0,7.1,8.0,9.0,
-      or will be "0.0" if the version could not be determined, for some reason.
+  <!-- 
+      function to centralize how we get (that is, set) the value of 
+      'javaMajorVersion'. (expected to be integter, such as 5,6,7,8,9, 
+      or will be "0" if the version could not be determined, for some reason.
   -->
 
-  <target name="setJavaMajorVersion">
+  <target
+    name="getJavaMajorVersion">
+  <!-- 
+       TODO: this assumes we are running ant, with same VM as we'll eventuall use 
+       during test. Valid assumption most the time, but ... not necessarily always.
+  -->
 
-    <fail
-      unless="javaversion"
-      message="Programming error: for some reason did not detech any version of Java" />
-
-    <echo message="DEBUG: javaversion: ${javaversion}" />
     <script language="javascript">
 
     <!--
-         technically does not have to be wrapped in "CDATA" (Ant and BSD define
-         it that way, but if not done, other tools (such as XML Editor) can
-         break the code by changing the formatting.
+         technically does not have to be wrapped in "CDATA" (Ant and BSD define 
+         it that way, but if not done, other tools (such as XML Editor) can 
+         break the code by changing the formatting. 
     -->
     <![CDATA[
-      var javaVersion = project.getProperty("javaversion");
-      var pattern = new RegExp(/^.*java version \"1\.([456789])\.([0123456789])/);
+      var javaVersion = project.getProperty("java.version");
+      var pattern = new
+      RegExp(/^1\.([456789]).*$/);
 
       var sArray = pattern.exec(javaVersion);
       // sArray 0 is "whole match"
@@ -1787,18 +1757,11 @@
       // for safety from programing
       // errors, we'll check that there is
       // something in '1'.
-      var length = 0;
-      if (sArray != null) {
-        length = sArray.length;
-      }
-      if (length > 2) {
-        project.setProperty("javaMajorVersion", sArray[1]+"\."+sArray[2]);
+      var length = sArray.length;
+      if (length > 1) {
+      project.setProperty("javaMajorVersion", sArray[1]);
       } else {
-        if (length > 1) {
-          project.setProperty("javaMajorVersion", sArray[1]);
-        } else {
-          project.setProperty("javaMajorVersion", "0.0");
-        }
+      project.setProperty("javaMajorVersion", "0");
       }
       ]]>
     </script>
@@ -1816,38 +1779,14 @@
     <attribute name="value" />
     <sequential>
       <!-- DEBUG <echo message="@{value}" /> -->
-      <!-- by using local in this way, we require to be on Ant 1.8 or greater -->
-      <local name="unescaped" />
-      <local name="escaped" />
       <condition
-        property="unescaped"
+        property="printValue@{value}"
         value="${@{value}}"
         else="NotSet">
         <isset property="@{value}" />
       </condition>
-        <!--
-             technically does not have to be wrapped in "CDATA" (Ant and BSD define
-             it that way) but if not done, other tools (such as XML Editor) can
-             break the code by changing the formatting.
-        -->
-        <!-- <echo message="unescaped: ${unescaped}" /> -->
-        <!-- I could not get "regex" form of escape to work in this context -->
-      <script language="javascript">
-        <![CDATA[
-          var unescapedvar = project.getProperty("unescaped");
-          //print("unescapedvar: " + unescapedvar);
-          var escapedvar = unescapedvar.replace('"', '\\"');
-          escapedvar = escapedvar.replace("'", "\\'");
-          escapedvar = escapedvar.replace("\r\n", " <br />\n");
-          escapedvar = escapedvar.replace("\n", " <br />\n");
-          escapedvar = escapedvar.replace("$", "\$");
-          //print("  escapedvar: " + escapedvar);
-          project.setProperty("escaped", escapedvar);
-          ]]>
-      </script>
-        <!-- <echo message="escaped: ${escaped}" /> -->
       <echo
-        message="$@{phpvar}=&quot;${escaped}&quot;;${EOL}"
+        message="$@{phpvar}=&quot;${printValue@{value}}&quot;;${EOL}"
         file="${phpPropertyFile}"
         append="true" />
     </sequential>
@@ -1859,17 +1798,15 @@
   <target name="debug-allOSProperties">
     <echoproperties regex="^os\..*$" />
   </target>
-
-  <!--
+  
+  <!-- 
       initOSes is to make sure the values of os, ws, and arch are set.
-      We need them to match their "osgi.X" counterparts, so users often will
-      need to simply set the "osgi.X" values as system variables, since
-      our ability to guess varies from OS to OS and VM to VM ... but, if
+      We need them to match their "osgi.X" counterparts, so users often will 
+      need to simply set the "osgi.X" values as system variables, since 
+      our ability to guess varies from OS to OS and VM to VM ... but, if 
       the osgi.X values are not set, we'll take a guess based on common systems.
    -->
-  <target
-    name="initOSes"
-    depends="initFromVMProperties">
+  <target name="initOSes">
 
     <condition
       property="guessed.os"
@@ -1926,7 +1863,7 @@
       value="${ws}"
       else="${guessed.ws}">
       <isset property="ws" />
-    </condition>
+    </condition> 
 
     <!-- not sure this will work well? -->
     <condition
@@ -1961,39 +1898,8 @@
   </target>
 
   <target
-    name="initFromVMProperties"
-    depends="checkIfvmPropertiesExists,logStatusVMProperties"
-    if="vmPropertiesFileExists">
-      <!--
-         vm.properties is optional, but it is useful if you want to run
-         the tests with a VM that is different than the one currently running
-         this ant instance. We use "loadproperties" instead of "<properties file="vm.properties">"
-         so in theory an ${antvariables} in vm.properties are evaluated and given a value.
-      -->
-    <loadproperties srcfile="vm.properties" />
-    <echo message="DEBUG: found jvm=${jvm} after loading vm.properties" />
-  </target>
-  <target name="checkIfvmPropertiesExists">
-    <condition property="vmPropertiesFileExists">
-      <available file="vm.properties" />
-    </condition>
-  </target>
-  <target
-    name="logStatusVMProperties"
-    depends="checkIfvmPropertiesExists,logStatusVMPropertiesNot"
-    if="vmPropertiesFileExists">
-    <echo message="INFO: vm.properties found, and will be loaded" />
-  </target>
-  <target
-    name="logStatusVMPropertiesNot"
-    depends="checkIfvmPropertiesExists"
-    unless="vmPropertiesFileExists">
-    <echo message="INFO: The optional 'vm.properties' was not found." />
-  </target>
-
-  <target
-    name="test-setJavaMajorVersion"
-    depends="setJVMProperties,debug-allJavaProperties,debug-allOSProperties">
+    name="test-getJavaMajorVersion"
+    depends="debug-allJavaProperties,debug-allOSProperties,getJavaMajorVersion">
     <printProperty property="javaMajorVersion" />
     <printProperty property="java.version" />
     <printProperty property="java.runtime.version" />
@@ -2002,13 +1908,12 @@
     <printProperty property="java.vendor" />
     <printProperty property="ant.version" />
     <printProperty property="ant.java.version" />
-    <antcall target="printMainProperties" />
+    <!-- <antcall target="printMainProperties" /> -->
   </target>
 
-    <!-- debug-allProperties, -->
   <target
     name="test-initOSes"
-    depends="initOSes">
+    depends="debug-allProperties,initOSes">
     <printProperty property="os" />
     <printProperty property="ws" />
     <printProperty property="arch" />
@@ -2016,7 +1921,7 @@
 
   <target
     name="test-all"
-    depends="test-initOSes,test-setJavaMajorVersion">
+    depends="test-initOSes,test-getJavaMajorVersion">
   </target>
 
   <target name="debug-allProperties">
