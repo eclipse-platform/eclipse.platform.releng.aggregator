@@ -156,7 +156,7 @@ fn-publish-equinox ()
         -buildfile "$EBuilderDir"/equinox/helper.xml \
         -Dequinox.build.configs="$EBuilderDir"/equinox/buildConfigs \
         -DbuildId="$BUILD_ID" \
-        -DbuildRepo="$REPO_DIR"/eclipse.platform.repository/target/repository \
+        -DbuildRepo="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository \
         -DpostingDirectory=$BUILD_DIR \
         -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
         -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
