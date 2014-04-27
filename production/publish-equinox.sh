@@ -35,7 +35,7 @@ fn-eq-build-dir ()
     eclipseStreamMajor=${STREAM:0:1}
     buildType=${BUILD_ID:0:1}
     dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops3
-    if [[ $eclipseStreamMajor > 3 ]]
+    if (( $eclipseStreamMajor > 3 ))
     then
         dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops
     fi

@@ -43,7 +43,7 @@ function dlpath()
     fi
 
     pathToDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
+    if (( $eclipseStreamMajor > 3 ))
     then
         pathToDL=$pathToDL$eclipseStreamMajor
     fi

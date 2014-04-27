@@ -303,7 +303,7 @@ function syncRepoSite ()
 #    BUILD_KIND    (CBI or special value)
 #    EBUILDER_HASH (SHA1 HASH or branch of eclipse builder to used
 
-if [[ $# < 4 ]]
+if (( $# < 4 ))
 then
     # usage:
     scriptname=$(basename $0)

@@ -4,7 +4,7 @@
 # re-sync dl site.
 
 
-if [[ $# < 2 ]]
+if (( $# < 2 ))
 then
     # usage:
     scriptname=$(basename $0)
@@ -43,7 +43,7 @@ eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
 
 pathToDL=eclipse/downloads/drops
-if [[ $eclipseStreamMajor > 3 ]]
+if (( $eclipseStreamMajor > 3 ))
 then
     pathToDL=eclipse/downloads/drops$eclipseStreamMajor
 fi

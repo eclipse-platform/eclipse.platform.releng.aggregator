@@ -37,7 +37,7 @@ buildType=${buildId:0:1}
 export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${buildType}}
 
 dropSegment=drops
-if [[ ${eclipseStreamMajor} > 3 ]]
+if (( ${eclipseStreamMajor} > 3 ))
 then
     dropSegment=drops${eclipseStreamMajor}
 fi

@@ -61,7 +61,7 @@ function dlpath()
     fi
 
     pathToDL=eclipse/downloads/drops
-    if [[ $eclipseStreamMajor > 3 ]]
+    if (( $eclipseStreamMajor > 3 ))
     then
         pathToDL=$pathToDL$eclipseStreamMajor
     fi
@@ -171,7 +171,7 @@ echo "BUILD_HOME: ${BUILD_HOME}"
         # note, to be consistent, I changed json xml file so it adds buildId to postingDirectory
         #$siteDir=${buildRoot}/siteDir
         #$postingDirectory=${siteDir}/eclipse/downloads/drops
-        #$if [[ "${eclipseStreamMajor}" > 3 ]]
+        #$if (( "${eclipseStreamMajor}" > 3 ))
         #$then
             # $postingDirectory=${siteDir}/eclipse/downloads/drops${eclipseStreamMajor}
         #$fi

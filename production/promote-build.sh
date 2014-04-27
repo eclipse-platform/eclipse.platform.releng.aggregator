@@ -93,7 +93,7 @@ then
     # no need to promote anything for 3.x builds
     # (equinox portion should be the same, so we will
     # create for equinox for for only 4.x primary builds)
-    if [[ $STREAM > 4 ]]
+    if (( $STREAM > 4 ))
     then
         # The 'workLocation' provides a handy central place to have the
         # promote script, and log results. ASSUMING this works for all
