@@ -1,15 +1,40 @@
 #!/usr/bin/env bash
 
-# TODO: The idea is to remove builds over 4 days old, but leave at least 4 on site.
-#       This logic, though, in theory, depending on when ran, could find say 6 builds,
-#       then remove them all if all older than 4 days.
-nbuilds=$( find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -name "N*" -exec echo '{}' \; | wc -l )
-if [[ $nbuilds > 4 ]]
+# Utility to remove builds over 4 days old, but leave at least 4 on site.
+
+cDir="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
+buildType="N*"
+allOldBuilds=$( find ${cDir} -maxdepth 1 -type d -ctime +3 -name "${buildType}" )
+#DEBUG echo -e "\n\tallOldBuilds: \n${allOldBuilds}"
+nOldBuilds=$( echo -e "${allOldBuilds}" | wc -l )
+echo -e "nOldBuilds: $nbuildsOldBuilds"
+if (( ${nOldBuilds} > 4 ))
 then
-    echo "Number of builds before cleaning: $nbuilds"
-    find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -ctime +3 -name "N*" -ls -exec rm -fr '{}' \;
-    nbuilds=$( find /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4 -maxdepth 1 -name "N*" -exec echo '{}' \; | wc -l )
+    # Make sure we leave at least 4 on DL server, no matter how old
+    # TODO: how to avoid 'ls' (see http://mywiki.wooledge.org/ParsingLs)
+    newest=$( ls -1 -t -d ${cDir}/${buildType} | head -4)
+    #DEBUG    echo -e "\n\tnewest: \n${newest}";
+    reNotToDelete=$(printf '%s\n' "${newest[@]}" | paste -sd '|')
+    echo "DEBUG: reNotToDelete: ${reNotToDelete}"
+    for buildname in ${allOldBuilds}; do 
+        if [[ $buildname =~ $reNotToDelete ]] 
+        then
+            echo -e "Not removed (since one of 4 newest, even though old): \n$buildname"
+        else
+            rm -fr $buildname
+            RC=$?
+            if [[ $RC = 0 ]]
+            then
+                echo -e "Removed: $buildname"
+            else
+                echo -e "\n\tAn Error occured removeding $buildname. RC: $RC"
+            fi
+        fi
+    done
+
+    nbuilds=$( find ${cDir} -maxdepth 1 -name ${buildType} | wc -l )
     echo "Number of builds after cleaning: $nbuilds"
+
     source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
     updateIndex 
 
