@@ -90,46 +90,40 @@ chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}
 # we do not promote equinox, if BUILD_FAILED since no need. 
 if [[ -z "${BUILD_FAILED}" ]] 
 then
-    # no need to promote anything for 3.x builds
-    # (equinox portion should be the same, so we will
-    # create for equinox for for only 4.x primary builds)
-    if (( $STREAM > 4 ))
-    then
-        # The 'workLocation' provides a handy central place to have the
-        # promote script, and log results. ASSUMING this works for all
-        # types of builds, etc (which is the goal for the sdk promotions).
-        workLocationEquinox=/shared/eclipse/equinox/promotion
 
-        # the cron job must know about and use this same
-        # location to look for its promotions scripts. (i.e. tight coupling)
-        promoteScriptLocationEquinox=${workLocationEquinox}/queue
+    # The 'workLocation' provides a handy central place to have the
+    # promote script, and log results. ASSUMING this works for all
+    # types of builds, etc (which is the goal for the sdk promotions).
+    workLocationEquinox=/shared/eclipse/equinox/promotion
 
-        # Directory should normally exist -- best to create with committer's ID before hand, 
-        # but in case not.
-        mkdir -p "${promoteScriptLocationEquinox}"
+    # the cron job must know about and use this same
+    # location to look for its promotions scripts. (i.e. tight coupling)
+    promoteScriptLocationEquinox=${workLocationEquinox}/queue
 
-        equinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops"
-        eqFromDir=${equinoxPostingDirectory}/${buildId}
-        eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
+    # Directory should normally exist -- best to create with committer's ID before hand, 
+    # but in case not.
+    mkdir -p "${promoteScriptLocationEquinox}"
 
-        # Note: for proper mirroring at Eclipse, we probably do not want/need to
-        # maintain "times" on build machine, but let them take times at time of copying.
-        # If it turns out to be important to maintain times (such as ran more than once,
-        # to pick up a "more" output, such as test results, then add -t to rsync
-        # Similarly, if download server is set up right, it will end up with the
-        # correct permissions, but if not, we may need to set some permissions first,
-        # then use -p on rsync
+    equinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops"
+    eqFromDir=${equinoxPostingDirectory}/${buildId}
+    eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
 
-        # Here is content of promtion script (note, use same ptimestamp created above):
-        echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEquinox}/${scriptName}
-        echo "# promotion script created at $ptimestamp" >  ${promoteScriptLocationEquinox}/${scriptName}
-        echo "rsync --times --omit-dir-times --recursive \"${eqFromDir}\" \"${eqToDir}\"" >> ${promoteScriptLocationEquinox}/${scriptName}
+    # Note: for proper mirroring at Eclipse, we probably do not want/need to
+    # maintain "times" on build machine, but let them take times at time of copying.
+    # If it turns out to be important to maintain times (such as ran more than once,
+    # to pick up a "more" output, such as test results, then add -t to rsync
+    # Similarly, if download server is set up right, it will end up with the
+    # correct permissions, but if not, we may need to set some permissions first,
+    # then use -p on rsync
 
-        # we restrict "others" rights for a bit more security or safety from accidents
-        chmod -v ug=rwx,o-rwx ${promoteScriptLocationEquinox}/${scriptName}
-    else
-        echo "Did not create promote script for equinox since $eclipseStream less than 4"
-    fi
+    # Here is content of promtion script (note, use same ptimestamp created above):
+    echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEquinox}/${scriptName}
+    echo "# promotion script created at $ptimestamp" >  ${promoteScriptLocationEquinox}/${scriptName}
+    echo "rsync --times --omit-dir-times --recursive \"${eqFromDir}\" \"${eqToDir}\"" >> ${promoteScriptLocationEquinox}/${scriptName}
+
+    # we restrict "others" rights for a bit more security or safety from accidents
+    chmod -v ug=rwx,o-rwx ${promoteScriptLocationEquinox}/${scriptName}
+
 else
     echo "Did not create promote script for equinox since BUILD_FAILED"
 fi
