@@ -101,7 +101,8 @@ then
     else 
         if [[ -x ${ECLIPSE_EXE} ]]
         then
-            ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -vm ${JAVA_EXEC_DIR} -application ${APP_NAME} -vmargs "${MIRRORS_URL_ARG}" "${ART_REPO_ARG}" "${CON_REPO_ARG}" "${ART_REPO_NAME_ARG}" "${CON_REPO_NAME_ARG}" "${STATS_TAG_FEATURE_LIST_ARG}" "${STATS_TAG_VERSIONINDICATOR_ARG}" "${STATS_TAG_SUFFIX_ARG}"
+            # we 'clean' here, since using an installation that has been moved.
+            ${ECLIPSE_EXE} -clean --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -vm ${JAVA_EXEC_DIR} -application ${APP_NAME} -vmargs "${MIRRORS_URL_ARG}" "${ART_REPO_ARG}" "${CON_REPO_ARG}" "${ART_REPO_NAME_ARG}" "${CON_REPO_NAME_ARG}" "${STATS_TAG_FEATURE_LIST_ARG}" "${STATS_TAG_VERSIONINDICATOR_ARG}" "${STATS_TAG_SUFFIX_ARG}"
             RC=$?
         else
             printf "\n\tERROR: %s\n\n" "The Eclipse commmand, ${ECLIPSE_EXE}, was not executable or not specified"
