@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export DROP_ID=I20140306-1200
+export DROP_ID=I20140501-0200
 
-export DL_LABEL=4.4M6
-export DL_LABEL_EQ=LunaM6
+export DL_LABEL=4.4M7
+export DL_LABEL_EQ=LunaM7
 
 # for I builds, stable and RCs go to in milestones
 export REPO_SITE_SEGMENT=4.4milestones
@@ -22,7 +22,7 @@ export DL_TYPE=S
 
 # variables used on tagging aggregator for milestones (and RCs?) 
 # Could probably compute this tag ... but for now easier to type it in each time. 
-export NEW_TAG=S4_4_0_M6
+export NEW_TAG=S4_4_0_M7
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
