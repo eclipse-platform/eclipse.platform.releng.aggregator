@@ -11,7 +11,7 @@ function findEclipseExe ()
 
     if [[ -z "${BUILD_ID}" ]]
     then
-        echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID" 2>tracelog.txt
+        echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID" 2>>${TRACE_LOG}
         return 1
     fi
 
@@ -19,8 +19,8 @@ function findEclipseExe ()
     basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_ID}
     if [[ ! -d "${basebuilderParent}" ]]
     then
-        echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed." 2>tracelog.txt
-        echo "    basebuilderParent: ${basebuilderParent}" 2>tracelog.txt
+        echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed." 2>>${TRACE_LOG}
+        echo "    basebuilderParent: ${basebuilderParent}" 2>>${TRACE_LOG}
         return 1
     fi
 
@@ -30,19 +30,19 @@ function findEclipseExe ()
     baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
     if [[ ! -d "${baseBuilderDir}" ]]
     then
-        echo "ERROR: The directory did not exist." 2>tracelog.txt
-        echo "    baseBuilderDir: ${baseBuilderDir}" 2>tracelog.txt
+        echo "ERROR: The directory did not exist." 2>>${TRACE_LOG}
+        echo "    baseBuilderDir: ${baseBuilderDir}" 2>>${TRACE_LOG}
         return 1
     fi
 
     export ECLIPSE_EXE=$baseBuilderDir/eclipse
-    echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" 2>tracelog.txt     
+    echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}     
 
     if [[ -n ${ECLIPSE_EXE} && -x ${ECLIPSE_EXE} ]]
     then 
-        echo "Found Eclipse executable: ${ECLIPSE_EXE}" 2>tracelog.txt
+        echo "Found Eclipse executable: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
     else
-        echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse" 2>tracelog.txt
+        echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse" 2>>${TRACE_LOG}
         return 1
     fi
 

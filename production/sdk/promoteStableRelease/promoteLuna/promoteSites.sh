@@ -29,11 +29,12 @@ export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # should very seldom need to change, if ever. 
 export AGGR_LOCATION="gitCache/eclipse.platform.releng.aggregator"
 
+export TRACE_LOG=${PWD}/traceLog.txt
 
 # Used in naming repo, etc
 export TRAIN_NAME=Luna
 
-# Build machine locations (would very seldome change)
+# Build machine locations (would very seldom change)
 export BUILD_ROOT=/shared/eclipse/builds/4I
 export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.4-I-builds
 
