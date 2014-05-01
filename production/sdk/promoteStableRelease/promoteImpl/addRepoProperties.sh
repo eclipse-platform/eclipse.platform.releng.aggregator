@@ -18,7 +18,7 @@ export STATS_TAG_FEATURE_LIST=$4
 #export STATS_TAG_VERSIONINDICATOR=$5
 export STATS_TAG_SUFFIX=$5
 
-source promoteUtilities.shsource
+source ${PROMOTE_IMPL}/promoteUtilities.shsource
 
 
 echo "REPO: ${REPO}"
@@ -50,10 +50,11 @@ else
     MIRRORURL_ARG=""
 fi
 
-#ART_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
-#CON_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
-ART_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
-CON_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
+# TODO: control with variable!
+ART_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
+CON_REPO_NAME="Eclipse Project Repository for ${TRAIN_NAME}"
+#ART_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
+#CON_REPO_NAME="Eclipse Project Java 8 Patch Repository for Kepler SR2"
 
 MIRRORS_URL_ARG="-Dp2MirrorsURL=${MIRRORURL_ARG}"
 ART_REPO_ARG="-DartifactRepoDirectory=${REPO}"
