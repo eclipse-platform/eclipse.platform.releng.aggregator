@@ -116,12 +116,12 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
                                                                                                                                    <li><a href="/legal/">Legal</a></li>
                                                                    </ul>
 </div>
-<div id="topnavsep"></div>
+
 </div>
 
 
 </div>
-<div id="topnavsep"></div>
+
 <div id="leftcol">
 <ul id="leftnav">
 <li><a href="logs.php">Logs</a></li>

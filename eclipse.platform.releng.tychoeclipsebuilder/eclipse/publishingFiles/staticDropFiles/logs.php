@@ -164,27 +164,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <li class="first"><a href="/org/foundation/contact.php">Contact</a></li>
 <li><a href="/legal/">Legal</a></li>
 </ul>
-</div><div id="topnav">
-<ul>
-<li><a>Platform Navigation</a></li>
-<li class="tabstart">&#160;&#160;&#160;</li>
-<li><a class="" href="index.php" target="_self">All Platforms</a></li>
-<li class="tabstart">&#160;&#160;&#160;</li>
-<li><a class="" href="winPlatform.php" target="_self">Windows</a></li>
-<li class="tabstart">&#160;&#160;&#160;</li>
-<li><a class="" href="linPlatform.php" target="_self">Linux</a></li>
-<li class="tabstart">&#160;&#160;&#160;</li>
-<li><a class="" href="solPlatform.php" target="_self">Solaris</a></li>
-<li class="tabstart">&#160;&#160;&#160;</li>
-<li><a class="" href="aixPlatform.php" target="_self">AIX</a></li>
-<li class="tabstart">&#160;&#160;&#160;</li>		 		  		 		
-<li><a class="" href="macPlatform.php" target="_self">Macintosh</a></li>
-<li class="tabseparator">&#160;&#160;&#160;</li>
-<li><a class="" href="hpuxPlatform.php" target="_self">HP-UX</a></li>
-<li class="tabseparator">&#160;&#160;&#160;</li>		 		  		 		  		 		
-</ul>
-</div>
-<div id="topnavsep"></div>
+
 <div id="leftcol">
 <ul id="leftnav">
 <li><a href="logs.php">Logs</a></li>
