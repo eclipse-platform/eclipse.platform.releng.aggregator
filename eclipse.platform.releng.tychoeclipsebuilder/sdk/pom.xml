@@ -5,116 +5,116 @@
   are made available under the terms of the Eclipse Distribution License v1.0
   which accompanies this distribution, and is available at
   http://www.eclipse.org/org/documents/edl-v10.php
- 
+
   Contributors:
      Igor Fedorenko - initial implementation
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+  <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>eclipse.platform.releng.tychoeclipsebuilder</groupId>
-        <artifactId>eclipse.platform.releng.tychoeclipsebuilder</artifactId>
-        <version>4.4.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <groupId>eclipse.platform.releng.tychoeclipsebuilder</groupId>
+    <artifactId>eclipse.platform.releng.tychoeclipsebuilder</artifactId>
+    <version>4.4.0-SNAPSHOT</version>
+  </parent>
 
-    <!-- 
+  <!--
        Note: when we use "eclipse-repository" packaging, the artifact ID version should
-       match the first three fields of the release, since that is used for the 
-       ${unqualifiedVersion} Tycho variable, which is used in the p2 metadata, which in 
-       turn becomes part of the 'config.ini' file (as part of eclipse.buildId property). 
-       This value shows up, for example, in the splash screen. See bug 423677. 
+       match the first three fields of the release, since that is used for the
+       ${unqualifiedVersion} Tycho variable, which is used in the p2 metadata, which in
+       turn becomes part of the 'config.ini' file (as part of eclipse.buildId property).
+       This value shows up, for example, in the splash screen. See bug 423677.
     -->
     <artifactId>org.eclipse.sdk.ide</artifactId>
     <version>4.4.0-SNAPSHOT</version>
     <packaging>eclipse-repository</packaging>
 
     <properties>
-     <product-id>org.eclipse.sdk.ide</product-id>
+      <product-id>org.eclipse.sdk.ide</product-id>
     </properties>
- 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-packaging-plugin</artifactId>
-                <version>${tycho.version}</version>
-                <configuration>
-                    <format>'${buildId}'</format>
-                </configuration>
-            </plugin>
 
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-p2-director-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>materialize-products</id>
-                        <goals>
-                            <goal>materialize-products</goal>
-                        </goals>
-                        <configuration>
-                            <profile>SDKProfile</profile>
-                            <products>
-                                <product>
-                                    <id>org.eclipse.sdk.ide</id>
-                                    <rootFolder>eclipse</rootFolder>
-                                </product>
-                            </products>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>archive-products</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>archive-products</goal>
-                        </goals>
-                        <configuration>
-                            <formats>
-                                <win32>zip</win32>
-                                <linux>tar.gz</linux>
-                                <macosx>tar.gz</macosx>
-                            </formats>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+    <build>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
+          <version>${tycho.version}</version>
+          <configuration>
+            <format>'${buildId}'</format>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-p2-director-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>materialize-products</id>
+              <goals>
+                <goal>materialize-products</goal>
+              </goals>
+              <configuration>
+                <profile>SDKProfile</profile>
+                <products>
+                  <product>
+                    <id>org.eclipse.sdk.ide</id>
+                    <rootFolder>eclipse</rootFolder>
+                  </product>
+                </products>
+              </configuration>
+            </execution>
+            <execution>
+              <id>archive-products</id>
+              <phase>pre-integration-test</phase>
+              <goals>
+                <goal>archive-products</goal>
+              </goals>
+              <configuration>
+                <formats>
+                  <win32>zip</win32>
+                  <linux>tar.gz</linux>
+                  <macosx>tar.gz</macosx>
+                </formats>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
     </build>
 
     <profiles>
-        <profile>
-            <id>eclipse-sign</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.eclipse.cbi.maven.plugins</groupId>
-                        <artifactId>eclipse-winsigner-plugin</artifactId>
-                        <version>${cbi-plugins.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.eclipse.cbi.maven.plugins</groupId>
-                        <artifactId>eclipse-macsigner-plugin</artifactId>
-                        <version>${cbi-plugins.version}</version>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
+      <profile>
+        <id>eclipse-sign</id>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.cbi.maven.plugins</groupId>
+              <artifactId>eclipse-winsigner-plugin</artifactId>
+              <version>${cbi-plugins.version}</version>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                  <phase>package</phase>
+                </execution>
+              </executions>
+            </plugin>
+            <plugin>
+              <groupId>org.eclipse.cbi.maven.plugins</groupId>
+              <artifactId>eclipse-macsigner-plugin</artifactId>
+              <version>${cbi-plugins.version}</version>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>sign</goal>
+                  </goals>
+                  <phase>package</phase>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </build>
+      </profile>
     </profiles>
-</project>
+  </project>

@@ -17,7 +17,7 @@ ob_start();
 
 switch($layout){
 case 'html':
-    #If this file is not on download.eclipse.org print the legacy headers.
+  #If this file is not on download.eclipse.org print the legacy headers.
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -44,16 +44,16 @@ td {
 <body>
 
 <?php
-    break;
+  break;
 default:
-    #Otherwise use the default layout (content printed inside the nova theme).
-    require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
-    require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/nav.class.php");
-    require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/menu.class.php");
-    $App  = new App();
-    $Nav  = new Nav();
-    $Menu   = new Menu();
-    break;
+  #Otherwise use the default layout (content printed inside the nova theme).
+  require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
+  require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/nav.class.php");
+  require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/menu.class.php");
+  $App  = new App();
+  $Nav  = new Nav();
+  $Menu   = new Menu();
+  break;
 }?>
 <div class="container_<?php echo $layout;?>">
 <table width="100%" style="border-spacing:2px;">
@@ -123,186 +123,186 @@ Downloads</font>
 
 <?php
 
-    function startsWithDropPrefix($dirName, $dropPrefix)
-    {
+  function startsWithDropPrefix($dirName, $dropPrefix)
+  {
 
-        $result = false;
-        // sanity check "setup" is as we expect
-        if (isset($dropPrefix) && is_array($dropPrefix)) {
-            // sanity check input
-            if (isset($dirName) && strlen($dirName) > 0) {
-                $firstChar = substr($dirName, 0, 1);
-                //echo "first char: ".$firstChar;
-                foreach($dropPrefix as $type) {
-                    if ($firstChar == "$type") {
-                        $result = true;
-                        break;
-                    }
-                }
-            }
-        }
-        else {
-            echo "dropPrefix not defined as expected\n";
-        }
-        return $result;
-    }
-function runTestBoxes($buildName, $testResultsDirName) {
-    // hard code for now the tests ran on one box (or, zero, if no testResultsDirName yet)
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
-    //if ($testResultsDirName === "" ) {
-    //   return 0;
-    //} else {
-    //   return 1;
-    //}
-    global $subdirDrops;
-    $testBoxes=array("linux", "macosx", "win32");
-    $length=count($testBoxes);
-    $boxes=0;
-    if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
-        // be sure any previous are reset
-        unset ($BUILD_FAILED);
-        include "$subdirDrops/$buildName/buildproperties.php";
-        if (isset ($BUILD_FAILED) && strlen($BUILD_FAILED) > 0) {
-            $boxes=-1;
-            unset ($BUILD_FAILED);
-        }
-    }
-    if ($boxes != -1)  {
-
-        // TEMP? appears "old style" builds had directories named "results", but now "testresults"
-        // and we want to look in $testResultsDirName/consolelogs
-        if (file_exists("$subdirDrops/$buildName/$testResultsDirName/consolelogs")) {
-            $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName/consolelogs");
-            while ($file = $buildDir->read()) {
-                for ($i = 0 ; $i < $length ; $i++) {
-                    if (strncmp($file, $testBoxes[$i], count($testBoxes[$i])) == 0) {
-                        $boxes++;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    //echo "boxes: $boxes";
-    return $boxes;
-}
-function printBuildColumns($fileName, $parts) {
-    global $subdirDrops;
-    // no file name, write empty column
-    if ($fileName == "") {
-        echo "<td align=\"left\" width=\"25%\">&nbsp;</td>\n";
-        return;
-    }
-    // get build name, date and time
-    $dropDir="$subdirDrops/$fileName";
-    if (count($parts)==3) {
-        $buildName=$parts[1];
-        $buildDay=intval(substr($parts[2], 0, 8));
-        $buildTime=intval(substr($parts[2], 8, 4));
-        $buildType=$parts[0];
-    }
-    if (count($parts)==2) {
-        $buildName=$fileName;
-        $buildDay=intval(substr($buildName, 1, 8));
-        $buildTime=intval(substr($buildName, 10, 2))*60+intval(substr($buildName, 12, 2));
-        $buildType=substr($buildName, 0, 1);
-    }
-    // compute minutes elapsed since build started
-    $day=intval(date("Ymd"));
-    $time=intval(date("H"))*60+intval(date("i"));
-    $diff=($day-$buildDay)*24*60+$time-$buildTime;
-    // Add icons
-    echo "<td align=\"left\" width=\"25%\">\n";
-    // hard code for now the build is done
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
-    // but later, changed ...
-    // compute build done based on "buildPending" file, but if not
-    // present, assume build is done
-    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382196
-    $build_done=true;
-    if (file_exists("$dropDir/buildPending")) {
-        $build_done=false;
-    }
-    if ($build_done) {
-        // test results location changed. 'testresults' is new standard
-        // but we check for 'results' for older stuff.
-        // https://bugs.eclipse.org/bugs/show_bug.cgi?id=379408
-        $testResultsDirName="";
-        if (file_exists("$dropDir/testresults")) {
-            $testResultsDirName="testresults";
-        } else {
-            if (file_exists("$dropDir/results")) {
-                $testResultsDirName="results";
-            }
-        }
-
-        $boxes=runTestBoxes($fileName, $testResultsDirName);
-        // boses == -1 is code that "bulid failed" and no tests are expected.
-        if ($boxes == -1) {
-            $buildimage="build_failed.gif";
-            $buildalt="Build failed";
-        } else {
-            $buildimage="build_done.gif";
-            $buildalt="Build is available";
-        }
-        echo "<a href=\"$dropDir/\"><img style=\"border:0px\" src=\"../images/$buildimage\" title=\"$buildalt\" alt=\"$buildalt\" /></a>\n";
-
-        // hard code here, for now, but make come from property file, later
-        $expectedTestBoxes=3;
-
-        // We skip the main "tests" part for patch builds, since don't expect any (for now).
-        if ($buildType !== "P") {
-
-          // always put in links, since someone may want to look at logs, even if not tests results, per se
-          // don't forget to end link, after images decided.
-          $boxesTitle="";
-          if ($boxes > -1) {
-              $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
+    $result = false;
+    // sanity check "setup" is as we expect
+    if (isset($dropPrefix) && is_array($dropPrefix)) {
+      // sanity check input
+      if (isset($dirName) && strlen($dirName) > 0) {
+        $firstChar = substr($dirName, 0, 1);
+        //echo "first char: ".$firstChar;
+        foreach($dropPrefix as $type) {
+          if ($firstChar == "$type") {
+            $result = true;
+            break;
           }
-          if ($testResultsDirName === "results") {
-              echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-          } else {
-              echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-          }
-
-          if ($boxes == -1) {
-              $testimage="caution.gif";
-              $testalt="Integration tests did not run due to failed build";
-          } elseif ($boxes == 0 && $diff > 720) {
-              // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
-              $testimage="caution.gif";
-              $testalt="Integration tests did not run, due to unknown reasons.";
-          } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
-              if ($diff > 1440) {
-                  $testimage="junit.gif";
-                  $testalt="Tests results are available but did not finish on all machines";
-              } else {
-                  $testimage="runtests.gif";
-                  $testalt="Integration tests are running ...";
-              }
-          } elseif ($boxes == $expectedTestBoxes) {
-              $testimage="junit.gif";
-              $testalt="Tests results are available";
-          } else {
-              $testimage="runtests.gif";
-              $testalt="Integration tests are running ...";
-          }
-          echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-          if ($boxes > -1) {
-              echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
-          }
-          echo "</a>\n";
-      } else {
-        echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-        $testimage="results.gif";
-        $testalt="Logs from build";
-        echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-        echo "&nbsp;(No automated tests)";
-        echo "</a>\n";
+        }
       }
     }
-    echo "</td>\n";
-    return $buildName;
+    else {
+      echo "dropPrefix not defined as expected\n";
+    }
+    return $result;
+  }
+function runTestBoxes($buildName, $testResultsDirName) {
+  // hard code for now the tests ran on one box (or, zero, if no testResultsDirName yet)
+  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
+  //if ($testResultsDirName === "" ) {
+  //   return 0;
+  //} else {
+  //   return 1;
+  //}
+  global $subdirDrops;
+  $testBoxes=array("linux", "macosx", "win32");
+  $length=count($testBoxes);
+  $boxes=0;
+  if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
+    // be sure any previous are reset
+    unset ($BUILD_FAILED);
+    include "$subdirDrops/$buildName/buildproperties.php";
+    if (isset ($BUILD_FAILED) && strlen($BUILD_FAILED) > 0) {
+      $boxes=-1;
+      unset ($BUILD_FAILED);
+    }
+  }
+  if ($boxes != -1)  {
+
+    // TEMP? appears "old style" builds had directories named "results", but now "testresults"
+    // and we want to look in $testResultsDirName/consolelogs
+    if (file_exists("$subdirDrops/$buildName/$testResultsDirName/consolelogs")) {
+      $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName/consolelogs");
+      while ($file = $buildDir->read()) {
+        for ($i = 0 ; $i < $length ; $i++) {
+          if (strncmp($file, $testBoxes[$i], count($testBoxes[$i])) == 0) {
+            $boxes++;
+            break;
+          }
+        }
+      }
+    }
+  }
+  //echo "boxes: $boxes";
+  return $boxes;
+}
+function printBuildColumns($fileName, $parts) {
+  global $subdirDrops;
+  // no file name, write empty column
+  if ($fileName == "") {
+    echo "<td align=\"left\" width=\"25%\">&nbsp;</td>\n";
+    return;
+  }
+  // get build name, date and time
+  $dropDir="$subdirDrops/$fileName";
+  if (count($parts)==3) {
+    $buildName=$parts[1];
+    $buildDay=intval(substr($parts[2], 0, 8));
+    $buildTime=intval(substr($parts[2], 8, 4));
+    $buildType=$parts[0];
+  }
+  if (count($parts)==2) {
+    $buildName=$fileName;
+    $buildDay=intval(substr($buildName, 1, 8));
+    $buildTime=intval(substr($buildName, 10, 2))*60+intval(substr($buildName, 12, 2));
+    $buildType=substr($buildName, 0, 1);
+  }
+  // compute minutes elapsed since build started
+  $day=intval(date("Ymd"));
+  $time=intval(date("H"))*60+intval(date("i"));
+  $diff=($day-$buildDay)*24*60+$time-$buildTime;
+  // Add icons
+  echo "<td align=\"left\" width=\"25%\">\n";
+  // hard code for now the build is done
+  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
+  // but later, changed ...
+  // compute build done based on "buildPending" file, but if not
+  // present, assume build is done
+  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382196
+  $build_done=true;
+  if (file_exists("$dropDir/buildPending")) {
+    $build_done=false;
+  }
+  if ($build_done) {
+    // test results location changed. 'testresults' is new standard
+    // but we check for 'results' for older stuff.
+    // https://bugs.eclipse.org/bugs/show_bug.cgi?id=379408
+    $testResultsDirName="";
+    if (file_exists("$dropDir/testresults")) {
+      $testResultsDirName="testresults";
+    } else {
+      if (file_exists("$dropDir/results")) {
+        $testResultsDirName="results";
+      }
+    }
+
+    $boxes=runTestBoxes($fileName, $testResultsDirName);
+    // boses == -1 is code that "bulid failed" and no tests are expected.
+    if ($boxes == -1) {
+      $buildimage="build_failed.gif";
+      $buildalt="Build failed";
+    } else {
+      $buildimage="build_done.gif";
+      $buildalt="Build is available";
+    }
+    echo "<a href=\"$dropDir/\"><img style=\"border:0px\" src=\"../images/$buildimage\" title=\"$buildalt\" alt=\"$buildalt\" /></a>\n";
+
+    // hard code here, for now, but make come from property file, later
+    $expectedTestBoxes=3;
+
+    // We skip the main "tests" part for patch builds, since don't expect any (for now).
+    if ($buildType !== "P") {
+
+      // always put in links, since someone may want to look at logs, even if not tests results, per se
+      // don't forget to end link, after images decided.
+      $boxesTitle="";
+      if ($boxes > -1) {
+        $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
+      }
+      if ($testResultsDirName === "results") {
+        echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+      } else {
+        echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+      }
+
+      if ($boxes == -1) {
+        $testimage="caution.gif";
+        $testalt="Integration tests did not run due to failed build";
+      } elseif ($boxes == 0 && $diff > 720) {
+        // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
+        $testimage="caution.gif";
+        $testalt="Integration tests did not run, due to unknown reasons.";
+      } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
+        if ($diff > 1440) {
+          $testimage="junit.gif";
+          $testalt="Tests results are available but did not finish on all machines";
+        } else {
+          $testimage="runtests.gif";
+          $testalt="Integration tests are running ...";
+        }
+      } elseif ($boxes == $expectedTestBoxes) {
+        $testimage="junit.gif";
+        $testalt="Tests results are available";
+      } else {
+        $testimage="runtests.gif";
+        $testalt="Integration tests are running ...";
+      }
+      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+      if ($boxes > -1) {
+        echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
+      }
+      echo "</a>\n";
+    } else {
+      echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
+      $testimage="results.gif";
+      $testalt="Logs from build";
+      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+      echo "&nbsp;(No automated tests)";
+      echo "</a>\n";
+    }
+  }
+  echo "</td>\n";
+  return $buildName;
 }
 ?>
 <?php
@@ -347,70 +347,70 @@ function printBuildColumns($fileName, $parts) {
 $aDirectory = dir($subdirDrops);
 while ($anEntry = $aDirectory->read()) {
 
-    // Short cut because we know aDirectory only contains other directories.
+  // Short cut because we know aDirectory only contains other directories.
 
-    if ($anEntry != "." && $anEntry!=".." && $anEntry!="TIME" && startsWithDropPrefix($anEntry,$dropPrefix)) {
-        $parts = explode("-", $anEntry);
-        // echo "<p>an entry: $anEntry\n";
-        // do not count hidden directories in computation
-        // allows non-hidden ones to still show up as "most recent" else will be blank.
-        if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")) {
-            if (count($parts) == 3) {
+  if ($anEntry != "." && $anEntry!=".." && $anEntry!="TIME" && startsWithDropPrefix($anEntry,$dropPrefix)) {
+    $parts = explode("-", $anEntry);
+    // echo "<p>an entry: $anEntry\n";
+    // do not count hidden directories in computation
+    // allows non-hidden ones to still show up as "most recent" else will be blank.
+    if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")) {
+      if (count($parts) == 3) {
 
-                //$buckets[$parts[0]][] = $anEntry;
+        //$buckets[$parts[0]][] = $anEntry;
 
-                $timePart = $parts[2];
-                $year = substr($timePart, 0, 4);
-                $month = substr($timePart, 4, 2);
-                $day = substr($timePart, 6, 2);
-                $hour = substr($timePart,8,2);
-                $minute = substr($timePart,10,2);
-                // special logic adds 1 second if build id contains "RC" ... this was
-                // added for the M build case, where there is an M build and and RC version that
-                // have same time stamp. One second should not effect desplayed values.
-                $isRC = strpos($anEntry, "RC");
-                if ($isRC === false) {
-                    $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-                } else {
-                    $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
-                }
-                $buckets[$parts[0]][$timeStamp] = $anEntry;
-                $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
-                // latestTimeStamp will not be defined, first time through
-                if (!isset($latestTimeStamp) || !array_key_exists($parts[0],$latestTimeStamp)  || $timeStamp > $latestTimeStamp[$parts[0]]) {
-                    $latestTimeStamp[$parts[0]] = $timeStamp;
-                    $latestFile[$parts[0]] = $anEntry;
-                }
-            }
-
-            if (count($parts) == 2) {
-
-                $buildType=substr($parts[0],0,1);
-                //$buckets[$buildType][] = $anEntry;
-                $datePart = substr($parts[0],1);
-                $timePart = $parts[1];
-                $year = substr($datePart, 0, 4);
-                $month = substr($datePart, 4, 2);
-                $day = substr($datePart, 6, 2);
-                $hour = substr($timePart,0,2);
-                $minute = substr($timePart,2,2);
-                $isRC = strpos($anEntry, "RC");
-                if ($isRC === false) {
-                    $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-                } else {
-                    $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
-                }
-                $buckets[$buildType[0]][$timeStamp] = $anEntry;
-
-                $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
-
-                if (!isset($latestTimeStamp) || !array_key_exists($buildType,$latestTimeStamp) || $timeStamp > $latestTimeStamp[$buildType]) {
-                    $latestTimeStamp[$buildType] = $timeStamp;
-                    $latestFile[$buildType] = $anEntry;
-                }
-            }
+        $timePart = $parts[2];
+        $year = substr($timePart, 0, 4);
+        $month = substr($timePart, 4, 2);
+        $day = substr($timePart, 6, 2);
+        $hour = substr($timePart,8,2);
+        $minute = substr($timePart,10,2);
+        // special logic adds 1 second if build id contains "RC" ... this was
+        // added for the M build case, where there is an M build and and RC version that
+        // have same time stamp. One second should not effect desplayed values.
+        $isRC = strpos($anEntry, "RC");
+        if ($isRC === false) {
+          $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+        } else {
+          $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
         }
+        $buckets[$parts[0]][$timeStamp] = $anEntry;
+        $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
+        // latestTimeStamp will not be defined, first time through
+        if (!isset($latestTimeStamp) || !array_key_exists($parts[0],$latestTimeStamp)  || $timeStamp > $latestTimeStamp[$parts[0]]) {
+          $latestTimeStamp[$parts[0]] = $timeStamp;
+          $latestFile[$parts[0]] = $anEntry;
+        }
+      }
+
+      if (count($parts) == 2) {
+
+        $buildType=substr($parts[0],0,1);
+        //$buckets[$buildType][] = $anEntry;
+        $datePart = substr($parts[0],1);
+        $timePart = $parts[1];
+        $year = substr($datePart, 0, 4);
+        $month = substr($datePart, 4, 2);
+        $day = substr($datePart, 6, 2);
+        $hour = substr($timePart,0,2);
+        $minute = substr($timePart,2,2);
+        $isRC = strpos($anEntry, "RC");
+        if ($isRC === false) {
+          $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+        } else {
+          $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+        }
+        $buckets[$buildType[0]][$timeStamp] = $anEntry;
+
+        $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
+
+        if (!isset($latestTimeStamp) || !array_key_exists($buildType,$latestTimeStamp) || $timeStamp > $latestTimeStamp[$buildType]) {
+          $latestTimeStamp[$buildType] = $timeStamp;
+          $latestFile[$buildType] = $anEntry;
+        }
+      }
     }
+  }
 }
 ?>
 
@@ -431,43 +431,43 @@ while ($anEntry = $aDirectory->read()) {
 <?php
 foreach($dropType as $value) {
 
-    $prefix=$typeToPrefix[$value];
-    // if empty bucket, do not print this row
-    if (array_key_exists($prefix,$buckets)) {
+  $prefix=$typeToPrefix[$value];
+  // if empty bucket, do not print this row
+  if (array_key_exists($prefix,$buckets)) {
 
 
-        if (array_key_exists($prefix,$latestFile)) {
-            $fileName = $latestFile[$prefix];
-        }
-        $parts = explode("-", $fileName);
-
-        // Uncomment the line below if we need click through licenses.
-        // echo "<td><a href=license.php?license=$subdirDrops/$fileName>$parts[1]</a></td>\n";
-
-        // Comment the line below if we need click through licenses.
-
-        $buildName=$fileName;
-        if (count($parts)==3) {
-            $buildName=$parts[1];
-        }
-        if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
-            echo "<tr>\n";
-            //            echo "<td align=\"left\" width=\"20%\">$value</td>\n";
-            if ($fileName == "") {
-                echo "<td align=\"left\" width=\"15%\">&nbsp;</td>\n";
-            } else {
-                // Note: '$value' basically comes from dlconfig4.php and serves two purposes:
-                // 1) the "tool tip" when hovering over the "Latest" build.
-                // 2) the "title bar" of remaining sections.
-                // In other words dlconfig4.php would have to be expanded if we ever wanted
-                // "tool tip" and "section title" to be (slightly) different from each other.
-                echo "<td align=\"left\"  width=\"15%\"><a href=\"$subdirDrops/$fileName/\" title=\"$value\">$buildName</a></td>\n";
-            }
-            $buildName = printBuildColumns($fileName, $parts);
-            echo "<td  align=\"left\" width=\"40%\">$timeStamps[$fileName]</td>\n";
-            echo "</tr>\n";
-        }
+    if (array_key_exists($prefix,$latestFile)) {
+      $fileName = $latestFile[$prefix];
     }
+    $parts = explode("-", $fileName);
+
+    // Uncomment the line below if we need click through licenses.
+    // echo "<td><a href=license.php?license=$subdirDrops/$fileName>$parts[1]</a></td>\n";
+
+    // Comment the line below if we need click through licenses.
+
+    $buildName=$fileName;
+    if (count($parts)==3) {
+      $buildName=$parts[1];
+    }
+    if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
+      echo "<tr>\n";
+      //            echo "<td align=\"left\" width=\"20%\">$value</td>\n";
+      if ($fileName == "") {
+        echo "<td align=\"left\" width=\"15%\">&nbsp;</td>\n";
+      } else {
+        // Note: '$value' basically comes from dlconfig4.php and serves two purposes:
+        // 1) the "tool tip" when hovering over the "Latest" build.
+        // 2) the "title bar" of remaining sections.
+        // In other words dlconfig4.php would have to be expanded if we ever wanted
+        // "tool tip" and "section title" to be (slightly) different from each other.
+        echo "<td align=\"left\"  width=\"15%\"><a href=\"$subdirDrops/$fileName/\" title=\"$value\">$buildName</a></td>\n";
+      }
+      $buildName = printBuildColumns($fileName, $parts);
+      echo "<td  align=\"left\" width=\"40%\">$timeStamps[$fileName]</td>\n";
+      echo "</tr>\n";
+    }
+  }
 }
 ?>
 </td>
@@ -479,67 +479,67 @@ foreach($dropType as $value) {
 
 <?php
 foreach($dropType as $value) {
-    $prefix=$typeToPrefix[$value];
-    // skip whole section, if bucket is empty
-    if (array_key_exists($prefix,$buckets)) {
+  $prefix=$typeToPrefix[$value];
+  // skip whole section, if bucket is empty
+  if (array_key_exists($prefix,$buckets)) {
 
-        echo "<table width=\"100%\">\n";
-        // header, colored row
-        echo "<tr bgcolor=\"#999999\">\n";
-        // name attribute can have no spaces, so we tranlate them to underscores
-        // (could effect targeted links)
-        $valueName=strtr($value,' ','_');
-        echo "<td align=\"left\" width=\"100%\"><a name=\"$valueName\">\n";
-        echo "<font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value\n";
-        echo "</font></a></td>\n";
-        echo "</tr>\n";
-        echo "</table>";
+    echo "<table width=\"100%\">\n";
+    // header, colored row
+    echo "<tr bgcolor=\"#999999\">\n";
+    // name attribute can have no spaces, so we tranlate them to underscores
+    // (could effect targeted links)
+    $valueName=strtr($value,' ','_');
+    echo "<td align=\"left\" width=\"100%\"><a name=\"$valueName\">\n";
+    echo "<font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value\n";
+    echo "</font></a></td>\n";
+    echo "</tr>\n";
+    echo "</table>";
 
-        // echo "<tr>\n";
-        // echo "<td>\n";
-        //echo "<br/>\n";
-        echo "<table width=\"100%\">\n";
-        echo "<tr>\n";
+    // echo "<tr>\n";
+    // echo "<td>\n";
+    //echo "<br/>\n";
+    echo "<table width=\"100%\">\n";
+    echo "<tr>\n";
 
-        // first cell blank, for alignment with top block
-        //echo "<th align=\"left\" width=\"20%\"></th>";
-        echo "<th align=\"left\" width=\"15%\">Build Name</th>\n";
-        echo "<th align=\"left\" width=\"25%\">Build Status</th>\n";
-        echo "<th align=\"left\" width=\"40%\">Build Date</th>\n";
+    // first cell blank, for alignment with top block
+    //echo "<th align=\"left\" width=\"20%\"></th>";
+    echo "<th align=\"left\" width=\"15%\">Build Name</th>\n";
+    echo "<th align=\"left\" width=\"25%\">Build Status</th>\n";
+    echo "<th align=\"left\" width=\"40%\">Build Date</th>\n";
 
-        echo "</tr>\n";
-        $aBucket = $buckets[$prefix];
-        if (isset($aBucket)) {
-            krsort($aBucket);
-            foreach($aBucket as $innerValue) {
+    echo "</tr>\n";
+    $aBucket = $buckets[$prefix];
+    if (isset($aBucket)) {
+      krsort($aBucket);
+      foreach($aBucket as $innerValue) {
 
-                if (!file_exists($subdirDrops."/".$innerValue."/buildHidden")) {
+        if (!file_exists($subdirDrops."/".$innerValue."/buildHidden")) {
 
-                    $parts = explode("-", $innerValue);
+          $parts = explode("-", $innerValue);
 
-                    echo "<tr>\n";
-                    //echo "<td align=\"left\" width=\"20%\">&nbsp;</td>\n";
-                    // Uncomment the line below if we need click through licenses.
-                    // echo "<td><a href=\"license.php?license=$subdirDrops/$innerValue\">$parts[1]</a></td>\n";
+          echo "<tr>\n";
+          //echo "<td align=\"left\" width=\"20%\">&nbsp;</td>\n";
+          // Uncomment the line below if we need click through licenses.
+          // echo "<td><a href=\"license.php?license=$subdirDrops/$innerValue\">$parts[1]</a></td>\n";
 
-                    // Comment the line below if we need click through licenses.
-                    $buildName=$innerValue;
-                    if (count ($parts)==3) {
-                        echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
-                    } else if (count ($parts)==2) {
-                        echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
-                    } else {
-                        echo "<td align=\"left\" width=\"15%\">Unexpected numberof parts?</td>\n";
-                    }
+          // Comment the line below if we need click through licenses.
+          $buildName=$innerValue;
+          if (count ($parts)==3) {
+            echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
+          } else if (count ($parts)==2) {
+            echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
+          } else {
+            echo "<td align=\"left\" width=\"15%\">Unexpected numberof parts?</td>\n";
+          }
 
-                    $buildName = printBuildColumns($innerValue, $parts);
-                    echo "<td align=\"left\" width=\"40%\">$timeStamps[$innerValue]</td>\n";
-                    echo "</tr>\n";
-                }
-            }
+          $buildName = printBuildColumns($innerValue, $parts);
+          echo "<td align=\"left\" width=\"40%\">$timeStamps[$innerValue]</td>\n";
+          echo "</tr>\n";
         }
-        echo "</table>\n";
+      }
     }
+    echo "</table>\n";
+  }
 }
 echo "<hr>";
 echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"http://www.eclipse.org/legal/epl/notice.php\" target=\"_top\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>";
@@ -549,16 +549,16 @@ $html = ob_get_clean();
 
 switch($layout){
 case 'html':
-    #echo the computed content with the body and html closing tag. This is for the old layout.
-    echo $html;
-    echo '</body>';
-    echo '</html>';
-    break;
+  #echo the computed content with the body and html closing tag. This is for the old layout.
+  echo $html;
+  echo '</body>';
+  echo '</html>';
+  break;
 
 default:
-    #For the default view we use $App->generatePage to generate the page inside nova.
-    $App->AddExtraHtmlHeader('<link rel="stylesheet" href="../default_style.css" />');
-    $App->Promotion = FALSE;
-    $App->generatePage('Nova', $Menu, NULL , $pageAuthor, $pageKeywords, $pageTitle, $html);
-    break;
+  #For the default view we use $App->generatePage to generate the page inside nova.
+  $App->AddExtraHtmlHeader('<link rel="stylesheet" href="../default_style.css" />');
+  $App->Promotion = FALSE;
+  $App->generatePage('Nova', $Menu, NULL , $pageAuthor, $pageKeywords, $pageTitle, $html);
+  break;
 }

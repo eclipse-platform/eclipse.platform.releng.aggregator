@@ -20,13 +20,13 @@ export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 
-# variables used on tagging aggregator for milestones (and RCs?) 
-# Could probably compute this tag ... but for now easier to type it in each time. 
+# variables used on tagging aggregator for milestones (and RCs?)
+# Could probably compute this tag ... but for now easier to type it in each time.
 export NEW_TAG=S4_4_0_RC1
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
-# should very seldom need to change, if ever. 
+# should very seldom need to change, if ever.
 export AGGR_LOCATION="gitCache/eclipse.platform.releng.aggregator"
 
 export TRACE_LOG=${PWD}/traceLog.txt
@@ -69,22 +69,22 @@ printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/checklist.txt"
 printf "\t%s\n\n" "http://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
 
 
-# we do Equinox first, since it has to wait in que until 
+# we do Equinox first, since it has to wait in que until
 # cronjob promotes it
 ${PROMOTE_IMPL}/promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
-    printf "\n\n\t%s\n\n" "ERROR: promoteDropSiteEq.sh failed. Subsequent promotion cancelled."
-    exit $rccode
+  printf "\n\n\t%s\n\n" "ERROR: promoteDropSiteEq.sh failed. Subsequent promotion cancelled."
+  exit $rccode
 fi
 
 ${PROMOTE_IMPL}/promoteDropSite.sh   ${DROP_ID} ${DL_LABEL} ${HIDE_SITE}
 rccode=$?
 if [[ $rccode != 0 ]]
 then
-    printf "\n\n\t%s\n\n" "ERROR: promoteDropSite.sh failed. Subsequent promotion cancelled."
-    exit $rccode
+  printf "\n\n\t%s\n\n" "ERROR: promoteDropSite.sh failed. Subsequent promotion cancelled."
+  exit $rccode
 fi
 
 
@@ -92,19 +92,19 @@ ${PROMOTE_IMPL}/promoteRepo.sh ${DROP_ID} ${DL_LABEL} ${REPO_SITE_SEGMENT} ${HID
 rccode=$?
 if [[ $rccode != 0 ]]
 then
-    printf "\n\n\t%s\n\n" "ERROR: promoteRepo.sh failed."
-    exit $rccode
+  printf "\n\n\t%s\n\n" "ERROR: promoteRepo.sh failed."
+  exit $rccode
 fi
 
 # If all goes well, we create the "tag script", but don't actually run it
-# until we make the site visible, after doing sanity checking, etc.    
+# until we make the site visible, after doing sanity checking, etc.
 # Note, this script relies on a number of exported variables
 ${PROMOTE_IMPL}/tagPromotedBuilds.sh
 rccode=$?
 if [[ $rccode != 0 ]]
 then
-    printf "\n\n\t%s\n\n" "ERROR: tagPromotedBuilds.sh failed."
-    exit $rccode
+  printf "\n\n\t%s\n\n" "ERROR: tagPromotedBuilds.sh failed."
+  exit $rccode
 fi
 
 exit 0

@@ -10,11 +10,11 @@
 
 # Start with minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
-# care is needed not have anything in ${HOME}/bin that would effect the build 
-# unintentionally, but is required to make use of "source buildeclipse.shsource" on 
-# local machines.  
-# Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it 
-# to false) for a test I-build on a remote machine. 
+# care is needed not have anything in ${HOME}/bin that would effect the build
+# unintentionally, but is required to make use of "source buildeclipse.shsource" on
+# local machines.
+# Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
+# to false) for a test I-build on a remote machine.
 export PATH=/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 # unset common variables (some defined for e4Build) which we don't want (or, set ourselves)
 unset JAVA_HOME
@@ -31,7 +31,7 @@ oldumask=`umask`
 umask 0002
 echo "umask explicitly set to 0002, old value was $oldumask"
 
-# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# this buildeclipse.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
@@ -60,10 +60,10 @@ echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 ${ANT_HOME}/bin/ant -version
 #       -lib /shared/common/apache-ant-1.9.2/lib/ \
-${ANT_HOME}/bin/ant -f /shared/eclipse/sdk/collectTestResults.xml \
-   -Djob=${job} \
-   -DbuildNumber=${buildNumber} \
-   -DbuildId=${buildId} \
-   -DeclipseStream=${eclipseStream} \
-   -DBUILD_KIND=${BUILD_KIND} \
-   -DEBUILDER_HASH=${EBUILDER_HASH}
+  ${ANT_HOME}/bin/ant -f /shared/eclipse/sdk/collectTestResults.xml \
+  -Djob=${job} \
+  -DbuildNumber=${buildNumber} \
+  -DbuildId=${buildId} \
+  -DeclipseStream=${eclipseStream} \
+  -DBUILD_KIND=${BUILD_KIND} \
+  -DEBUILDER_HASH=${EBUILDER_HASH}

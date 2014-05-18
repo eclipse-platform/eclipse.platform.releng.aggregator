@@ -44,9 +44,9 @@ checkForErrorExit $? "could not unzip master?!"
 # will need to manually cleanup dated backups occasionally
 if [[ -d sdkTempSave ]]
 then
-    NOWDATE=`date -u +%Y%m%d%H%M`
-    NEWNAME=sdkTempSave${NOWDATE}
-    mv sdkTempSave ${NEWNAME}
+  NOWDATE=`date -u +%Y%m%d%H%M`
+  NEWNAME=sdkTempSave${NOWDATE}
+  mv sdkTempSave ${NEWNAME}
 fi
 mv sdk sdkTempSave
 

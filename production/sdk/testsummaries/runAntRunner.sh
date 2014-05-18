@@ -10,8 +10,8 @@ BUILD_HOME=${BUILD_HOME:-/shared/eclipse/eclipse3I}
 
 if [ ! -d "${BUILD_HOME}" ]
 then
-    echo "ERROR: BUILD_HOME was not an existing directory as expected: ${BUILD_HOME}"
-    exit 1
+  echo "ERROR: BUILD_HOME was not an existing directory as expected: ${BUILD_HOME}"
+  exit 1
 fi
 
 # For most uses, this directory does not HAVE to literally be
@@ -21,8 +21,8 @@ ECLIPSEBUILDER_DIR=${ECLIPSEBUILDER_DIR:-${BUILD_HOME}/build/supportDir/org.ecli
 
 if [ ! -d "${ECLIPSEBUILDER_DIR}/scripts" ]
 then
-    echo "ERROR: builder scripts was not an existing directory as expected: ${ECLIPSEBUILDER_DIR}/scripts}"
-    exit 1
+  echo "ERROR: builder scripts was not an existing directory as expected: ${ECLIPSEBUILDER_DIR}/scripts}"
+  exit 1
 fi
 
 # specify devworkspace and JRE to use to runEclipse
@@ -39,12 +39,12 @@ devJRE=$JAVA_HOME/jre/bin/java
 
 if [ ! -n ${devJRE} -a -x ${devJRE} ]
 then
-    echo "ERROR: could not find (or execute) JRE were expected: ${devJRE}"
-    exit 1
+  echo "ERROR: could not find (or execute) JRE were expected: ${devJRE}"
+  exit 1
 else
-    # display version, just to be able to log it.
-    echo "JRE Location and Version: ${devJRE}"
-    echo $( $devJRE -version )
+  # display version, just to be able to log it.
+  echo "JRE Location and Version: ${devJRE}"
+  echo $( $devJRE -version )
 fi
 
 # remember, the eclispe install must match the VM used (e.g. both 64 bit, both 32 bit, etc).
@@ -52,8 +52,8 @@ ECLIPSE_EXE=${ECLIPSE_EXE:-/shared/eclipse/eclipse3I/build/supportDir/org.eclips
 
 if [ ! -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
-   echo "ERROR: ECLIPSE_EXE is not defined or not executable: ${ECLIPSE_EXE}"
-   exit 1001
+  echo "ERROR: ECLIPSE_EXE is not defined or not executable: ${ECLIPSE_EXE}"
+  exit 1001
 fi
 
 
@@ -62,17 +62,17 @@ buildId=$1
 shift
 if [[ -z "${buildId}" ]]
 then
-echo "need buildId as first argument"
+  echo "need buildId as first argument"
 fi
 
 BUILDFILE=$1
 shift
 if [ -e $BUILDFILE ]
 then
-    BUILDFILESTR=" -file $BUILDFILE"
-    shift
+  BUILDFILESTR=" -file $BUILDFILE"
+  shift
 else
-    BUILDFILESTR=" -file build.xml"
+  BUILDFILESTR=" -file build.xml"
 fi
 
 # use special $@ to keep all arguments quoted (instead of one big string)
@@ -82,8 +82,8 @@ echo
 echo " BUILDFILESTR: $BUILDFILESTR"
 if [ -n "${extraArgs}" ]
 then
-    echo "   extraArgs: ${extraArgs}"
-    echo "      as it is right now, target name must be first \"extraArg\" if specifying one."
+  echo "   extraArgs: ${extraArgs}"
+  echo "      as it is right now, target name must be first \"extraArg\" if specifying one."
 fi
 echo
 
@@ -100,10 +100,10 @@ echo
 if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
 
-    ${ECLIPSE_EXE}  -Dhuson=true --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vm $devJRE -vmargs $devArgs
-    RC=$?
+  ${ECLIPSE_EXE}  -Dhuson=true --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR ${extraArgs} -vm $devJRE -vmargs $devArgs
+  RC=$?
 else
-    echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse"
-    RC=1
+  echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse"
+  RC=1
 fi
 exit $RC

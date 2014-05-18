@@ -8,108 +8,108 @@ include("buildproperties.php");
 
 function checkPlatform($line) {
 
-    if (preg_match("/win7|win32|linux|macosx/i", $line)) {
-        return 1;
-    } else {
-        return 0;
-    }
+  if (preg_match("/win7|win32|linux|macosx/i", $line)) {
+    return 1;
+  } else {
+    return 0;
+  }
 
 }
 
 
 function checkFile($p) {
 
-    if ((is_file($p)) && (preg_match("/.txt|.log|.png/i", $p)))  {
-        return 1;
-    } else {
-        return 0;
-    }
+  if ((is_file($p)) && (preg_match("/.txt|.log|.png/i", $p)))  {
+    return 1;
+  } else {
+    return 0;
+  }
 
 }
 
 function fileSizeForDisplay($filename) {
-    $onekilo=1024;
-    $onemeg=$onekilo * $onekilo;
-    $criteria = 10 * $onemeg;
-    $scaleChar = " ";
-    if (file_exists($filename)) {
-        $zipfilesize=filesize($filename);
-        if ($zipfilesize > $criteria) {
-            $zipfilesize=round($zipfilesize/$onemeg, 0);
-            $scaleChar = " MB";
-        }
-        else {
-            if ($zipfilesize > $onekilo) {
-                $zipfilesize=round($zipfilesize/$onekilo, 0);
-                $scaleChar = " KB";
-            } else {
-                // use raw size in bytes if less that one 1K
-                $scaleChar = " B";
-            }
-        }
+  $onekilo=1024;
+  $onemeg=$onekilo * $onekilo;
+  $criteria = 10 * $onemeg;
+  $scaleChar = " ";
+  if (file_exists($filename)) {
+    $zipfilesize=filesize($filename);
+    if ($zipfilesize > $criteria) {
+      $zipfilesize=round($zipfilesize/$onemeg, 0);
+      $scaleChar = " MB";
     }
     else {
-        $zipfilesize = 0;
+      if ($zipfilesize > $onekilo) {
+        $zipfilesize=round($zipfilesize/$onekilo, 0);
+        $scaleChar = " KB";
+      } else {
+        // use raw size in bytes if less that one 1K
+        $scaleChar = " B";
+      }
     }
-    $result =  "(" . $zipfilesize . $scaleChar . ")";
-    return $result;
+  }
+  else {
+    $zipfilesize = 0;
+  }
+  $result =  "(" . $zipfilesize . $scaleChar . ")";
+  return $result;
 }
 
 function listLogs($myDir) {
-    $entries = array();
-    $aDirectory = dir($myDir);
-    if ($aDirectory === NULL || $aDirectory === FALSE)
-    {
-        return;
+  $entries = array();
+  $aDirectory = dir($myDir);
+  if ($aDirectory === NULL || $aDirectory === FALSE)
+  {
+    return;
+  }
+  $index = 0;
+  $cdir = getcwd();
+  while ($anEntry = $aDirectory->read()) {
+    $path = $cdir . "/" . $myDir . "/" . $anEntry;
+    #            if ((is_file($path)) && (preg_match("/.txt/i", $path))) {
+    $c = checkFile($path);
+    if ($c == 1) {
+      $entries[$index] = $anEntry;
+      $index++;
     }
-    $index = 0;
-    $cdir = getcwd();
-    while ($anEntry = $aDirectory->read()) {
-        $path = $cdir . "/" . $myDir . "/" . $anEntry;
-        #            if ((is_file($path)) && (preg_match("/.txt/i", $path))) {
-        $c = checkFile($path);
-        if ($c == 1) {
-            $entries[$index] = $anEntry;
-            $index++;
-        }
-    }
+  }
 
-    $aDirectory->close();
-    if (count($entries) > 0) {
-        sort($entries);
-    }
+  $aDirectory->close();
+  if (count($entries) > 0) {
+    sort($entries);
+  }
 
-    if ($index < 0) {
-        echo "<br>There are no test logs for this build.";
-        return;
+  if ($index < 0) {
+    echo "<br>There are no test logs for this build.";
+    return;
+  }
+  for ($i = 0; $i < $index; $i++) {
+    $anEntry = $entries[$i];
+    $updateLine = 0;
+    $updateLine = checkPlatform($anEntry);
+    if (($updateLine == 0) && (preg_match("/\//",$myDir))) {
+      $linktext = $myDir . "_" . $anEntry;
+      # remove the directory name from the link to the log
+      $dir = substr(strrchr($linktext, "/"), 1);
+      $line = "<td><a href=\"$myDir/$anEntry\">$dir</a> " . fileSizeForDisplay("$myDir/$anEntry") . " </td>";
+    } else {
+      $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a> " . fileSizeForDisplay("$myDir/$anEntry") . " </td>";
     }
-    for ($i = 0; $i < $index; $i++) {
-        $anEntry = $entries[$i];
-        $updateLine = 0;
-        $updateLine = checkPlatform($anEntry);
-        if (($updateLine == 0) && (preg_match("/\//",$myDir))) {
-            $linktext = $myDir . "_" . $anEntry;
-            # remove the directory name from the link to the log
-            $dir = substr(strrchr($linktext, "/"), 1);
-            $line = "<td><a href=\"$myDir/$anEntry\">$dir</a> " . fileSizeForDisplay("$myDir/$anEntry") . " </td>";
-        } else {
-            $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a> " . fileSizeForDisplay("$myDir/$anEntry") . " </td>";
-        }
-        echo "<li>$line</li>";
-    }
+    echo "<li>$line</li>";
+  }
 }
 
 function listDegailedLogs ($machineplatform) {
-    echo "<strong>Individual $machineplatform test logs</strong><br />";
-    listLogs("testresults/$machineplatform");
-    if (file_exists("testresults/$machineplatform/crashlogs")) {
-        echo "<strong>Crash logs captured on $machineplatform</strong>";
-        listLogs("testresults/$machineplatform/crashlogs");
-    }
-    if (file_exists("testresults/$machineplatform/timeoutScreens")) {
-        echo "<strong>Screen captures for tests timing out on $machineplatform</strong>";
-        listLogs("testresults/$machineplatform/timeoutScreens");
-    }
+  echo "<strong>Individual $machineplatform test logs</strong><br />";
+  listLogs("testresults/$machineplatform");
+  if (file_exists("testresults/$machineplatform/crashlogs")) {
+    echo "<strong>Crash logs captured on $machineplatform</strong>";
+    listLogs("testresults/$machineplatform/crashlogs");
+  }
+  if (file_exists("testresults/$machineplatform/timeoutScreens")) {
+    echo "<strong>Screen captures for tests timing out on $machineplatform</strong>";
+    listLogs("testresults/$machineplatform/timeoutScreens");
+  }
 }
 
 
@@ -131,15 +131,15 @@ P {text-indent: 30pt;}
 <script type="text/javascript">
 
 sfHover = function() {
-    var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
-    for (var i=0; i<sfEls.length; i++) {
-        sfEls[i].onmouseover=function() {
-            this.className+=" sfhover";
-        }
-        sfEls[i].onmouseout=function() {
-            this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
-        }
+  var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
+  for (var i=0; i<sfEls.length; i++) {
+    sfEls[i].onmouseover=function() {
+      this.className+=" sfhover";
     }
+    sfEls[i].onmouseout=function() {
+      this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
+    }
+  }
 }
 if (window.attachEvent) window.attachEvent("onload", sfHover);
 </script>

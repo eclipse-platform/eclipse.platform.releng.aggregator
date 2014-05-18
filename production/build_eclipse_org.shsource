@@ -2,7 +2,7 @@
 
 # default definitions for this branch
 
-# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# this buildeclipse.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
@@ -23,11 +23,11 @@ export PATCH_BUILD=${PATCH_BUILD:-""}
 # which is default behavior
 if [[ -n ${PATCH_BUILD} ]]
 then
-    export ALT_POM_FILE="-f eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/pom.xml"
-    echo "DEBUG: ALT_POM_FILE: $ALT_POM_FILE"
-else 
-    export ALT_POM_FILE=""
-    echo "DEBUG: ALT_POM_FILE: None. Using normal default."
+export ALT_POM_FILE="-f eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/pom.xml"
+echo "DEBUG: ALT_POM_FILE: $ALT_POM_FILE"
+else
+export ALT_POM_FILE=""
+echo "DEBUG: ALT_POM_FILE: None. Using normal default."
 fi
 
 
@@ -35,8 +35,8 @@ eclipseStreamMajor=${STREAM:0:1}
 
 export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/${eclipseStreamMajor}${BUILD_TYPE}}
 
-# Any invocation of Java, Ant, Maven, etc., should use this as default TMP direcotory, 
-# instead of the default /tmp by using 
+# Any invocation of Java, Ant, Maven, etc., should use this as default TMP direcotory,
+# instead of the default /tmp by using
 # -Djava.io.tmpdir=${TMP_DIR}
 export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp}
 # Just in case it doesn't exist yet (it must exist first, or Java will fail)
@@ -44,14 +44,14 @@ mkdir -p ${TMP_DIR}
 
 # these could be machine specific
 export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
-# required for when ant is used. Unclear how maven's "antrun" finds its version of Ant, 
-# built in? Or system path? 
+# required for when ant is used. Unclear how maven's "antrun" finds its version of Ant,
+# built in? Or system path?
 # But, without the ANT_OPTS, we do get messages about "to get repeatable builds, to ignore sysclasspath"
 export ANT_HOME=${ANT_HOME:-/shared/common/apache-ant-1.9.2}
 export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=false"}
 #
-# remember, MaxPermSize is specific to "Oracle VMs". It has to be removed (or over ridden) 
-# for other VMs or the VM might fail to start due to unrecognized -XX option. 
+# remember, MaxPermSize is specific to "Oracle VMs". It has to be removed (or over ridden)
+# for other VMs or the VM might fail to start due to unrecognized -XX option.
 export MAVEN_OPTS=${MAVEN_OPTS:--Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR} -Dtycho.localArtifacts=ignore -Declipse.p2.mirrors=false}
 export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.1.1/bin}
 
@@ -60,13 +60,13 @@ export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 # if not defined "externally", we use default for eclipse.org
 if [[ -z "${REPO_AND_ACCESS}" ]]
 then
-    # unless we are on 'build' machine
-    if [[ "build" == "$(hostname)" ]]
-    then
-        export REPO_AND_ACCESS=file:///gitroot
-    else
-        export REPO_AND_ACCESS=git://git.eclipse.org/gitroot
-    fi
+# unless we are on 'build' machine
+if [[ "build" == "$(hostname)" ]]
+then
+export REPO_AND_ACCESS=file:///gitroot
+else
+export REPO_AND_ACCESS=git://git.eclipse.org/gitroot
+fi
 fi
 
 AGGREGATOR_REPO=${REPO_AND_ACCESS}/platform/eclipse.platform.releng.aggregator.git
@@ -88,15 +88,15 @@ MAVEN_BREE=-Pbree-libs
 
 # local, non build.eclipse.org builds (or, test builds) may need to override, and turn off signing.
 # otherwwise, we always sign if I or M builds, but not N builds
-# 
+#
 if [[ $BUILD_TYPE =~ [IMXYP] ]]
 then
-    SIGNING=${SIGNING:-true}
+SIGNING=${SIGNING:-true}
 else
-    SIGNING=${SIGNING:-false}
+SIGNING=${SIGNING:-false}
 fi
 
 # custom, environment specific setting, required to generate java doc correctly for Java 8 additions,
-# in our production builds. This is anticipated to be temporary, until we find a better way 
+# in our production builds. This is anticipated to be temporary, until we find a better way
 # to do it.
 export JAVA_DOC_TOOL="-Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc"

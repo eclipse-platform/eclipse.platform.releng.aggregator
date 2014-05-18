@@ -1,391 +1,391 @@
 #!/usr/bin/env bash
 
-# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# this buildeclipse.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 function dropOnDLServer()
 {
-    eclipseStream=$1
+  eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
 
     buildId=$2
     if [[ -z "${buildId}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     BUILD_KIND=$3
     if [[ -z "${BUILD_KIND}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     pathToDL=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
 
     if [[ "$pathToDL" == 1 ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: pathToDL could not be computed." >&2
         return 1
-    fi
-    toDir="/home/data/httpd/download.eclipse.org/${pathToDL}"
-    echo $toDir
+        fi
+        toDir="/home/data/httpd/download.eclipse.org/${pathToDL}"
+        echo $toDir
 }
 function updateSiteOnDL()
 {
-    eclipseStream=$1
+  eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
 
     buildId=$2
     if [[ -z "${buildId}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     BUILD_KIND=$3
     if [[ -z "${BUILD_KIND}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
-    # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
+# contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
     if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
-    then
+      then
         eclipseStreamMajor=${BASH_REMATCH[1]}
-        eclipseStreamMinor=${BASH_REMATCH[2]}
-        eclipseStreamService=${BASH_REMATCH[3]}
+  eclipseStreamMinor=${BASH_REMATCH[2]}
+  eclipseStreamService=${BASH_REMATCH[3]}
     else
-        echo "ERROR: eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
+      echo "ERROR: eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
         exit 1
-    fi
-    buildType=${buildId:0:1}
+        fi
+        buildType=${buildId:0:1}
 
-    toSiteDir="/home/data/httpd/download.eclipse.org/eclipse/updates"
+  toSiteDir="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
     if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then 
+      then
         updatesSuffix="builds"
-    elif  [[ "${BUILD_KIND}" == 'PDE' ]]
-    then
+        elif  [[ "${BUILD_KIND}" == 'PDE' ]]
+        then
         updatesSuffix="buildspdebased"
     else
-        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND"  >&2
-    fi
-
-    toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
-    # We'll check for existence, and create if doesn't exist ... as long as it is "under" our 
-    # toSiteDir, it is likely an intentional new one, rather than an error. 
-    if [[ ! -d "${toMainUpdateDir}" ]]
-    then
-        if [[ -d "${toSiteDir}" ]]
-        then
-            # create
-            mkdir -p "${toMainUpdateDir}"
-            RC=$?
-            if [[ $RC != 0 ]]
-            then
-                echo "ERROR: could not create main update site: ${toMainUpdateDir}" >&2
-                # "return" empty string, as indication of error"
-                toMainUpdateDir=""
-            fi
-        else
-            echo "PROGRAM ERROR: main update site root did not exist: ${toSiteDir}" >&2
-            # "return" empty string, as indication of error"
-            toMainUpdateDir=""
+      echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND"  >&2
         fi
-    fi
-    echo $toMainUpdateDir
+
+        toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
+# We'll check for existence, and create if doesn't exist ... as long as it is "under" our
+# toSiteDir, it is likely an intentional new one, rather than an error.
+  if [[ ! -d "${toMainUpdateDir}" ]]
+    then
+      if [[ -d "${toSiteDir}" ]]
+        then
+# create
+          mkdir -p "${toMainUpdateDir}"
+          RC=$?
+          if [[ $RC != 0 ]]
+            then
+              echo "ERROR: could not create main update site: ${toMainUpdateDir}" >&2
+# "return" empty string, as indication of error"
+              toMainUpdateDir=""
+              fi
+          else
+            echo "PROGRAM ERROR: main update site root did not exist: ${toSiteDir}" >&2
+# "return" empty string, as indication of error"
+              toMainUpdateDir=""
+              fi
+              fi
+              echo $toMainUpdateDir
 }
 # compute update site on build server
 function updateSiteOnBuildDir()
 {
-    eclipseStream=$1
+  eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
 
     buildId=$2
     if [[ -z "${buildId}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     BUILD_KIND=$3
     if [[ -z "${BUILD_KIND}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
-    # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
+# contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
     if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
-    then
+      then
         eclipseStreamMajor=${BASH_REMATCH[1]}
-        eclipseStreamMinor=${BASH_REMATCH[2]}
-        eclipseStreamService=${BASH_REMATCH[3]}
+  eclipseStreamMinor=${BASH_REMATCH[2]}
+  eclipseStreamService=${BASH_REMATCH[3]}
     else
-        echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
+      echo "eclipseStream, $eclipseStream, must contain major, minor, and service versions, such as 4.2.0" >&2
         return 1
-    fi
-    buildType=${buildId:0:1}
+        fi
+        buildType=${buildId:0:1}
 
-    if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then 
-        buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-    elif [[ "${BUILD_KIND}" == 'PDE' ]]
+  if [[ "${BUILD_KIND}" == 'CBI' ]]
     then
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    else
-        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
-        return 1
-    fi
-
-
-
-    if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then 
-        siteDir=${buildRoot}/siteDir
-        updatesSuffix="builds"
-        fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
-
-    elif [[ "${BUILD_KIND}" == 'PDE' ]]
+      buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  elif [[ "${BUILD_KIND}" == 'PDE' ]]
     then
-        siteDir=${buildRoot}/siteDir
-        updatesSuffix="buildspdebased"
-        fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
-    else
-        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
-        return 1
-    fi
+    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+  else
+    echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
+      return 1
+      fi
 
-    echo $fromDir
+
+
+      if [[ "${BUILD_KIND}" == 'CBI' ]]
+        then
+          siteDir=${buildRoot}/siteDir
+          updatesSuffix="builds"
+          fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
+
+  elif [[ "${BUILD_KIND}" == 'PDE' ]]
+    then
+    siteDir=${buildRoot}/siteDir
+    updatesSuffix="buildspdebased"
+    fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
+      else
+        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
+          return 1
+          fi
+
+          echo $fromDir
 }
 
 # compute main part of download server drop directory
 function dropFromBuildDir ()
 {
 
-    eclipseStream=$1
+  eclipseStream=$1
     buildId=$2
     BUILD_KIND=$3
     pathFromDL=$( dlFromPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
 
 
     if [[ "$pathFromDL" == 1 ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: pathToDL could not be computed." >&2
         return 1
-    fi
+        fi
 
-    eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
+        eclipseStreamMajor=${eclipseStream:0:1}
+  buildType=${buildId:0:1}
 
-    if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then 
-        buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-    elif [[ "${BUILD_KIND}" == 'PDE' ]]
+  if [[ "${BUILD_KIND}" == 'CBI' ]]
     then
-        buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-    else
-        echo "ERROR: BUILD_KIND value not recognized, $BUILD_KIND" >&2
-        return 1
-    fi
+      buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  elif [[ "${BUILD_KIND}" == 'PDE' ]]
+    then
+    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
+  else
+    echo "ERROR: BUILD_KIND value not recognized, $BUILD_KIND" >&2
+      return 1
+      fi
 
-    siteDir=${buildRoot}/siteDir
+      siteDir=${buildRoot}/siteDir
 
-    fromDir=${siteDir}/${pathFromDL}/${buildId}
+      fromDir=${siteDir}/${pathFromDL}/${buildId}
 
-    echo "$fromDir"
+  echo "$fromDir"
 
 }
 
 # compute main (middle part) of download site
 function dlToPath()
 {
-    eclipseStream=$1
+  eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
 
     buildId=$2
     if [[ -z "${buildId}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     BUILD_KIND=$3
     if [[ -z "${BUILD_KIND}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
 
 
     eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
+  buildType=${buildId:0:1}
 
-    # CBI is "normal" case. In future might have special cases.
-    if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then 
-        dropsuffix=""
-    else
-        dropsuffix="pdebased"
-    fi
-
-    pathToDL=eclipse/downloads/drops
-    if (( $eclipseStreamMajor > 3 ))
+# CBI is "normal" case. In future might have special cases.
+  if [[ "${BUILD_KIND}" == 'CBI' ]]
     then
-        pathToDL=$pathToDL$eclipseStreamMajor
-    fi
+      dropsuffix=""
+  else
+    dropsuffix="pdebased"
+      fi
 
-    pathToDL=$pathToDL$dropsuffix
-    #echo "pathToDL: $pathToDL"
-    echo $pathToDL
+      pathToDL=eclipse/downloads/drops
+      if (( $eclipseStreamMajor > 3 ))
+        then
+          pathToDL=$pathToDL$eclipseStreamMajor
+          fi
+
+          pathToDL=$pathToDL$dropsuffix
+#echo "pathToDL: $pathToDL"
+          echo $pathToDL
 }
 
 # compute main (left part) of download site.
 # because we want "from" on build machine to stay the same, only change "to" part, to be "pdebased"
 function dlFromPath()
 {
-    eclipseStream=$1
+  eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
 
     buildId=$2
     if [[ -z "${buildId}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     BUILD_KIND=$3
     if [[ -z "${BUILD_KIND}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
 
     eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
+  buildType=${buildId:0:1}
 
 
 
-    pathFromDL=eclipse/downloads/drops
+  pathFromDL=eclipse/downloads/drops
     if (( $eclipseStreamMajor > 3 ))
-    then
+      then
         pathFromDL=$pathFromDL$eclipseStreamMajor
-    fi
+        fi
 
-    echo $pathFromDL
+        echo $pathFromDL
 }
 
 
 function syncDropLocation ()
 {
-    echo "start syncDropLocation"
+  echo "start syncDropLocation"
     eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
     echo "eclipseStream: $eclipseStream"
 
     buildId=$2
     if [[ -z "${buildId}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
     echo "buildId: $buildId"
 
     BUILD_KIND=$3
     if [[ -z "${BUILD_KIND}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
     echo "BUILD_KIND: $BUILD_KIND"
 
     EBUILDER_HASH=$4
     if [[ -z "${EBUILDER_HASH}" ]]
-    then
+      then
         printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function $(basename $0)" >&2
         return 1;
-    fi
+  fi
     echo "EBUILDER_HASH: $EBUILDER_HASH"
 
     eclipseStreamMajor=${eclipseStream:0:1}
-    buildType=${buildId:0:1}
+  buildType=${buildId:0:1}
 
-    fromDir=$( dropFromBuildDir $eclipseStream $buildId $BUILD_KIND )
+  fromDir=$( dropFromBuildDir $eclipseStream $buildId $BUILD_KIND )
     if [[ ! -d "${fromDir}" ]]
-    then
+      then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
         return 1
-    fi
+        fi
 
 
-    toDir=$( dropOnDLServer $eclipseStream $buildId $BUILD_KIND )
-    if [[ ! -d "${toDir}" ]]
-    then
-        echo "ERROR: toDir is not a directory? toDir: ${toDir}"
-        return 1
-    fi
+        toDir=$( dropOnDLServer $eclipseStream $buildId $BUILD_KIND )
+        if [[ ! -d "${toDir}" ]]
+          then
+            echo "ERROR: toDir is not a directory? toDir: ${toDir}"
+            return 1
+            fi
 
-    echo "   fromDir: ${fromDir}" >&2
-    echo "     toDir: ${toDir}" >&2
+            echo "   fromDir: ${fromDir}" >&2
+            echo "     toDir: ${toDir}" >&2
 
-    # here, for dl site, best not to preserve times, since (if mirrored)
-    # would be more accurate for mirroring system to have
-    # actual times (and we are copying only one specific
-    # sub-sirectory) (But, we do for now, for easier testing) 
-    if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
-    then
-        rsync --recursive --prune-empty-dirs --exclude="*apitoolingreference/*" --exclude="*org.eclipse.releng.basebuilder/*" --exclude="*eclipse.platform.releng.aggregator/*" --exclude="*repository/*" --exclude="*workspace-*/*" "${fromDir}" "${toDir}"
-        rccode=$?
-    else
-        rccode=9
-    fi
-    if [[ $rccode != 0 ]]
-    then
-        echo "ERROR: rsync did not complete normally.rccode: $rccode"
-        return $rccode
-    else
-        # Now update main DL page index pages, to show available
-        source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-        updateIndex 
-    fi
+# here, for dl site, best not to preserve times, since (if mirrored)
+# would be more accurate for mirroring system to have
+# actual times (and we are copying only one specific
+# sub-sirectory) (But, we do for now, for easier testing)
+            if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
+              then
+                rsync --recursive --prune-empty-dirs --exclude="*apitoolingreference/*" --exclude="*org.eclipse.releng.basebuilder/*" --exclude="*eclipse.platform.releng.aggregator/*" --exclude="*repository/*" --exclude="*workspace-*/*" "${fromDir}" "${toDir}"
+                rccode=$?
+            else
+              rccode=9
+                fi
+                if [[ $rccode != 0 ]]
+                  then
+                    echo "ERROR: rsync did not complete normally.rccode: $rccode"
+                    return $rccode
+                else
+# Now update main DL page index pages, to show available
+                  source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
+                    updateIndex
+                    fi
 
 
 
-    echo "ending syncDropLocation"
+                    echo "ending syncDropLocation"
 }

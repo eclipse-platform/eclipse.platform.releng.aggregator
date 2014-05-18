@@ -3,7 +3,7 @@
 # Important: it is assumed this script is ran from the directory
 # that is the parent of the directory to rename
 
-# CAUTION: this is hard coded for going from "I" build to "S" build. 
+# CAUTION: this is hard coded for going from "I" build to "S" build.
 # Needs adjustment for "R" build.
 
 # its assumed oldname is old name of directory and buildId, such as I20120503-1800
@@ -15,27 +15,27 @@ newlabel=$3
 
 function renamefile ()
 {
-    # file name is input parameter
-    if [[ $1 =~ (.*)($oldname)(.*) ]]
-    then
-        echo "changing $1 to ${BASH_REMATCH[1]}$newlabel${BASH_REMATCH[3]}"
-        mv "$1" "${BASH_REMATCH[1]}$newlabel${BASH_REMATCH[3]}"
+  # file name is input parameter
+  if [[ $1 =~ (.*)($oldname)(.*) ]]
+  then
+    echo "changing $1 to ${BASH_REMATCH[1]}$newlabel${BASH_REMATCH[3]}"
+    mv "$1" "${BASH_REMATCH[1]}$newlabel${BASH_REMATCH[3]}"
 
-    fi
+  fi
 
 }
 
 if [[ $# != 3 ]]
 then
-    # usage:
-    scriptname=$(basename $0)
-    printf "\n\t%s\n" "This script, $scriptname requires three arguments, in order: "
-    printf "\t\t%s\t%s\n" "oldname" "(e.g. I20120503-1800) "
-    printf "\t\t%s\t%s\n" "newdirname" "(e.g. S-3.8M7-201205031800) "
-    printf "\t\t%s\t%s\n" "newlabel" "(e.g. 3.8M7 or 4.2M7 or KeplerM3) "
-    printf "\t%s\n" "for example,"
-    printf "\t%s\n\n" "./$scriptname I20120503-1800 S-3.8M7-201205031800 3.8M7"
-    exit 1
+  # usage:
+  scriptname=$(basename $0)
+  printf "\n\t%s\n" "This script, $scriptname requires three arguments, in order: "
+  printf "\t\t%s\t%s\n" "oldname" "(e.g. I20120503-1800) "
+  printf "\t\t%s\t%s\n" "newdirname" "(e.g. S-3.8M7-201205031800) "
+  printf "\t\t%s\t%s\n" "newlabel" "(e.g. 3.8M7 or 4.2M7 or KeplerM3) "
+  printf "\t%s\n" "for example,"
+  printf "\t%s\n\n" "./$scriptname I20120503-1800 S-3.8M7-201205031800 3.8M7"
+  exit 1
 fi
 echo "Renaming build $oldname to $newdirname with $newlabel"
 
@@ -43,10 +43,10 @@ fromString=$oldname
 toString=$newlabel
 replaceCommand="s!${fromString}!${toString}!g"
 
-# As far as is known, the "directory name" only comes into play in 
-# the various "buildproperties.*" files, so that's all we'll replace, for now. 
+# As far as is known, the "directory name" only comes into play in
+# the various "buildproperties.*" files, so that's all we'll replace, for now.
 # In most files, it's a "relative" location so newdirname should not be needed.
-# We assume if "oldName" is surrounded by path separators ('/') it needs whole directory 
+# We assume if "oldName" is surrounded by path separators ('/') it needs whole directory
 # name, not just "label".
 # See https://bugs.eclipse.org/bugs/show_bug.cgi?id=414739
 replaceDirCommand="s!/${fromString}/!/${newdirname}/!g"
@@ -67,34 +67,34 @@ perl -w -pi -e ${replaceCommand} ${oldname}/checksum/*
 # Integration --> Release
 # These are for cases where used in headers, titles, etc.
 # TODO: final "fall through" case should be based on matching
-# new label with digits only, such as "4.3" ... not sure 
-# if this would work for Equinox "Kepler" or "Kepler Released Build"? 
-OLD_BUILD_TYPE=${oldname:0:1} 
+# new label with digits only, such as "4.3" ... not sure
+# if this would work for Equinox "Kepler" or "Kepler Released Build"?
+OLD_BUILD_TYPE=${oldname:0:1}
 if [[ $OLD_BUILD_TYPE == "I" ]]
 then
-    oldString="Integration Build"
+  oldString="Integration Build"
 elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
-    oldString="Maintenance Build"
+  oldString="Maintenance Build"
 else
-    oldString="Unexpected OLD_BUILD_TYPE: $OLD_BUILD_TYPE"
+  oldString="Unexpected OLD_BUILD_TYPE: $OLD_BUILD_TYPE"
 fi
 
 if [[ "${newlabel}" =~ .*RC.* ]]
-then 
-    newString="Release Candidate Build"
+then
+  newString="Release Candidate Build"
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
-    newString="Release Build"
+  newString="Release Build"
 elif [[ "${newlabel}" =~ .*M.* ]]
 then
-    newString="Stable Build"
-else 
-    # releases have labels such as 4.4 or 4.3.1 (or KeplerSR1)  so former 
-    # won't match any of the above.
-    # TODO: put in sanity check to match known release patterns
-    # of digits and periods, else bail.
-    newString="Release Build"
+  newString="Stable Build"
+else
+  # releases have labels such as 4.4 or 4.3.1 (or KeplerSR1)  so former
+  # won't match any of the above.
+  # TODO: put in sanity check to match known release patterns
+  # of digits and periods, else bail.
+  newString="Release Build"
 fi
 
 echo -e "\n\tReplacing ${oldString} with ${newString} in ${oldname}/*.php\n"
@@ -104,40 +104,40 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/*.php
 
 # some special cases, for the buildproperties.php file
-# Note, we do php only, since that's what we need, and if we did want 
-# to rebuild, say using buildproperties.shsource, would be best to work 
-# from original values. Less sure what to do with Ant properties, 
+# Note, we do php only, since that's what we need, and if we did want
+# to rebuild, say using buildproperties.shsource, would be best to work
+# from original values. Less sure what to do with Ant properties,
 # buildproperties.properties ... but, we'll decide when needed.
-# TODO: New label doesn't have "R" in it ... just, for example, "4.3". 
-# for now, we'll "fall through" to "R",  if doesn't match anything else, 
-# but this won't work well if/when we add others, such as X or T for test 
-# builds. 
+# TODO: New label doesn't have "R" in it ... just, for example, "4.3".
+# for now, we'll "fall through" to "R",  if doesn't match anything else,
+# but this won't work well if/when we add others, such as X or T for test
+# builds.
 
 if [[ $OLD_BUILD_TYPE == "I" ]]
 then
-    oldString="BUILD_TYPE = \"I\""
+  oldString="BUILD_TYPE = \"I\""
 elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
-    oldString="BUILD_TYPE = \"M\""
+  oldString="BUILD_TYPE = \"M\""
 else
-    oldString="Unexpected OLD_BUILD_TYPE: $OLD_BUILD_TYPE"
+  oldString="Unexpected OLD_BUILD_TYPE: $OLD_BUILD_TYPE"
 fi
 
 if [[ "${newlabel}" =~ .*RC.* && $OLD_BUILD_TYPE == "I" ]]
-then 
-    newString="BUILD_TYPE = \"S\""
+then
+  newString="BUILD_TYPE = \"S\""
 elif [[ "${newlabel}" =~ .*RC.* && $OLD_BUILD_TYPE == "M" ]]
 then
-    newString="BUILD_TYPE = \"M\""
+  newString="BUILD_TYPE = \"M\""
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
-    newString="BUILD_TYPE = \"R\""
+  newString="BUILD_TYPE = \"R\""
 elif [[ "${newlabel}" =~ .*M.* ]]
 then
-    newString="BUILD_TYPE = \"S\""
-else 
-    # see previous comment on forms of "releases" (4.3.1, 4.2, Kepler, KeplerSR1, etc.)
-    newString="BUILD_TYPE = \"R\""
+  newString="BUILD_TYPE = \"S\""
+else
+  # see previous comment on forms of "releases" (4.3.1, 4.2, Kepler, KeplerSR1, etc.)
+  newString="BUILD_TYPE = \"R\""
 fi
 
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
@@ -147,25 +147,25 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
 # We only ever promote "I" or "M" builds, so this ends with sanity check.
 if [[ $OLD_BUILD_TYPE == "I" ]]
 then
-    oldString="BUILD_TYPE_NAME = \"Integration\""
+  oldString="BUILD_TYPE_NAME = \"Integration\""
 elif [[ $OLD_BUILD_TYPE == "M" ]]
 then
-    oldString="BUILD_TYPE_NAME = \"Maintenance\""
+  oldString="BUILD_TYPE_NAME = \"Maintenance\""
 else
-    oldString="BUILD_TYPE_NAME = \"Unknown OLD_BUILD_TYPE, $OLD_BUILD_TYPE\""
+  oldString="BUILD_TYPE_NAME = \"Unknown OLD_BUILD_TYPE, $OLD_BUILD_TYPE\""
 fi
 
 if [[ "${newlabel}" =~ .*RC.* ]]
-then 
-    newString="BUILD_TYPE_NAME = \"Release Candidate\""
+then
+  newString="BUILD_TYPE_NAME = \"Release Candidate\""
 elif [[ "${newlabel}" =~ .*R.* ]]
 then
-    newString="BUILD_TYPE_NAME = \"Release\""
+  newString="BUILD_TYPE_NAME = \"Release\""
 elif [[ "${newlabel}" =~ .*M.* ]]
 then
-    newString="BUILD_TYPE_NAME = \"Stable\""
-else 
-    newString="BUILD_TYPE_NAME = \"Release\""
+  newString="BUILD_TYPE_NAME = \"Stable\""
+else
+  newString="BUILD_TYPE_NAME = \"Release\""
 fi
 
 echo -e "\n\tReplacing ${oldString} with ${newString} in ${oldname}/buildproperties.php\n"
@@ -174,8 +174,8 @@ replaceBuildNameCommand="s!${oldString}!${newString}!g"
 # quotes are critical here, since strings might contain spaces!
 perl -w -pi -e "${replaceBuildNameCommand}" ${oldname}/buildproperties.php
 
-# One special case for promoted builds, is the "FAILED" icons are 
-# changed to "OK", since all unit tests accounted for, if not fixed. 
+# One special case for promoted builds, is the "FAILED" icons are
+# changed to "OK", since all unit tests accounted for, if not fixed.
 oldString="FAIL.gif"
 newString="OK.gif"
 replaceBuildNameCommand="s!${oldString}!${newString}!g"
@@ -187,11 +187,11 @@ echo -e "\n\n\tMove old directory, $oldname, to new directory, $newdirname.\n\n"
 # move directory before file renames
 mv $oldname $newdirname
 
-# We (currently) rename files under current direcotry, and in 'checksums'. 
-# No need to go deeper (currently) and can be harm, since we do have a copy of 
-# 'repository' in there (so things things with same name as build directory, such 
-# as branding bundles? and /repository/binaries get renamed too, if we go too deep. 
-# Even though we should not need that copy of 'repository' any longer, we might, 
+# We (currently) rename files under current direcotry, and in 'checksums'.
+# No need to go deeper (currently) and can be harm, since we do have a copy of
+# 'repository' in there (so things things with same name as build directory, such
+# as branding bundles? and /repository/binaries get renamed too, if we go too deep.
+# Even though we should not need that copy of 'repository' any longer, we might,
 # some day?
 echo -e "\n\n\tRename files in new directory, ./${newdirname}, to new name.\n\n"
 nFiles=$(find ./${newdirname} -mindepth 1 -maxdepth 2 -name "*${oldname}*" -print | wc -l)
@@ -199,5 +199,5 @@ echo -e "\n\t $nFiles files found to rename.\n"
 
 for file in $(find ./${newdirname} -mindepth 1 -maxdepth 2 -name "*${oldname}*" -print)
 do
-    renamefile $file
+  renamefile $file
 done

@@ -5,7 +5,7 @@
 
 include("buildproperties.php");
 
-	echo "<title>Test Results for $BUILD_ID </title>";
+echo "<title>Test Results for $BUILD_ID </title>";
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">

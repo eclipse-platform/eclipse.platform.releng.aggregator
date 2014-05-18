@@ -7,14 +7,14 @@ source buildeclipse.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 if [ $# -ne 1 ]; then
-    echo USAGE: $0 env_file
-    exit 1
+  echo USAGE: $0 env_file
+  exit 1
 fi
 
 if [ ! -r "$1" ]; then
-    echo "$1" cannot be read
-    echo USAGE: $0 env_file
-    exit 1
+  echo "$1" cannot be read
+  echo USAGE: $0 env_file
+  exit 1
 fi
 
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
@@ -29,17 +29,17 @@ source "$1"
 #   STREAM: 4.3.0
 fn-eq-build-dir ()
 {
-    ROOT="$1"; shift
-    BUILD_ID="$1"; shift
-    STREAM="$1"; shift
-    eclipseStreamMajor=${STREAM:0:1}
-    buildType=${BUILD_ID:0:1}
-    dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops3
-    if (( $eclipseStreamMajor > 3 ))
-    then
-        dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops
-    fi
-    echo $ROOT/$dropDirSegment/$BUILD_ID
+  ROOT="$1"; shift
+  BUILD_ID="$1"; shift
+  STREAM="$1"; shift
+  eclipseStreamMajor=${STREAM:0:1}
+  buildType=${BUILD_ID:0:1}
+  dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops3
+  if (( $eclipseStreamMajor > 3 ))
+  then
+    dropDirSegment=${eclipseStreamMajor}${buildType}/siteDir/equinox/drops
+  fi
+  echo $ROOT/$dropDirSegment/$BUILD_ID
 }
 
 # USAGE: fn-eq-gather-starterkit BUILD_ID REPO_DIR BUILD_DIR
@@ -48,58 +48,58 @@ fn-eq-build-dir ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-eq-gather-starterkit ()
 {
-    if [[ $# != 3 ]]
-    then
-        echo "PROGRAM ERROR: this function, fn-eq-gather-starterkit, requires 3 arguments"
-        return 1
-    fi
-    BUILD_ID="$1"; shift
-    REPO_DIR="$1"; shift
-    DROP_DIR="$1"; shift
-    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox.starterkit.product/target/products
-    echo "Starting fn-eq-gather-starterkit"
-    echo "BUILD_ID: $BUILD_ID"
-    echo "REPO_DIR: $REPO_DIR"
-    echo "DROP_DIR: $DROP_DIR"
-    if [[ ! -d $DROP_DIR ]]
-    then
-        echo "Making DROP_DIR at $DROP_DIR"
-        mkdir -p $DROP_DIR
-    fi
-    if [[ -d "$TARGET_PRODUCTS" ]]
-    then
-        pushd "$TARGET_PRODUCTS"
+  if [[ $# != 3 ]]
+  then
+    echo "PROGRAM ERROR: this function, fn-eq-gather-starterkit, requires 3 arguments"
+    return 1
+  fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  DROP_DIR="$1"; shift
+  TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox.starterkit.product/target/products
+  echo "Starting fn-eq-gather-starterkit"
+  echo "BUILD_ID: $BUILD_ID"
+  echo "REPO_DIR: $REPO_DIR"
+  echo "DROP_DIR: $DROP_DIR"
+  if [[ ! -d $DROP_DIR ]]
+  then
+    echo "Making DROP_DIR at $DROP_DIR"
+    mkdir -p $DROP_DIR
+  fi
+  if [[ -d "$TARGET_PRODUCTS" ]]
+  then
+    pushd "$TARGET_PRODUCTS"
 
-        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip
-        #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip
-        #cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz
-        #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz
+    #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc64.zip
+    #cp -v org.eclipse.rt.osgistarterkit.product-aix.gtk.ppc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-aix-gtk-ppc.zip
+    #cp -v org.eclipse.rt.osgistarterkit.product-hpux.gtk.ia64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-hpux-gtk-ia64.zip
+    #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+    #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.ppc.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-ppc.tar.gz
+    #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390.tar.gz
+    #cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.s390x.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-s390x.tar.gz
 
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz
-        cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz
+    cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+    cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz
 
-        #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-        tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86_64 rt
-        #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz
-        # no longer an x86 version. Bug 420725
-        #tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86 rt
+    #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86_64 rt
+    #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz
+    # no longer an x86 version. Bug 420725
+    #tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86 rt
 
-        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip
-        #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip
+    #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.sparc.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-sparc.zip
+    #cp -v org.eclipse.rt.osgistarterkit.product-solaris.gtk.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-solaris-gtk-x86.zip
 
-        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip
-        cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86.zip
+    cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86_64.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86_64.zip
+    cp -v org.eclipse.rt.osgistarterkit.product-win32.win32.x86.zip "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-win32-win32-x86.zip
 
-        popd
-    else
-        echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-eq-gather-starterkit"
-        return 1
-    fi
-    echo "Ending fn-eq-gather-starterkit"
-    return 0
+    popd
+  else
+    echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-eq-gather-starterkit"
+    return 1
+  fi
+  echo "Ending fn-eq-gather-starterkit"
+  return 0
 }
 
 
@@ -113,63 +113,63 @@ fn-eq-gather-starterkit ()
 #   BASEBUILDER_LAUNCHER: /shared/eclipse/builds/R4_2_maintenance/org.eclipse.releng.basebuilder_R3_7/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar
 fn-publish-equinox ()
 {
-    BUILD_TYPE="$1"; shift
-    BUILD_STREAM="$1"; shift
-    BUILD_ID="$1"; shift
-    REPO_DIR="$1"; shift
-    BUILD_DIR="$1"; shift
-    BASEBUILDER_LAUNCHER="$1"; shift
-    BUILD_MACHINE_ROOT=${BUILD_HOME}
-    BUILD_MACHINE_DROP_DIR=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM")
-    BUILD_MACHINE_DROP_DIR_PARENT=$(dirname $BUILD_MACHINE_DROP_DIR)
-    EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-    fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
+  BUILD_TYPE="$1"; shift
+  BUILD_STREAM="$1"; shift
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  BASEBUILDER_LAUNCHER="$1"; shift
+  BUILD_MACHINE_ROOT=${BUILD_HOME}
+  BUILD_MACHINE_DROP_DIR=$(fn-eq-build-dir "$BUILD_MACHINE_ROOT" "$BUILD_ID" "$BUILD_STREAM")
+  BUILD_MACHINE_DROP_DIR_PARENT=$(dirname $BUILD_MACHINE_DROP_DIR)
+  EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+  fn-eq-gather-starterkit $BUILD_ID $REPO_DIR $BUILD_MACHINE_DROP_DIR
 
-    TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox-sdk/target
-    if [[ -d "$TARGET_PRODUCTS" ]]
+  TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/equinox-sdk/target
+  if [[ -d "$TARGET_PRODUCTS" ]]
+  then
+    pushd "$TARGET_PRODUCTS"
+    # The glob '*' here, is to match (and hence remove) "version number" in built version, such as 3.10.0, 4.4.0, etc.
+    # And leave only BUILD_ID.
+    cp -v equinox-sdk-*-SNAPSHOT.zip "${BUILD_MACHINE_DROP_DIR}/equinox-SDK-${BUILD_ID}.zip"
+    RC=$?
+    if [[ $RC != 0 ]]
     then
-        pushd "$TARGET_PRODUCTS"
-        # The glob '*' here, is to match (and hence remove) "version number" in built version, such as 3.10.0, 4.4.0, etc.
-        # And leave only BUILD_ID.
-        cp -v equinox-sdk-*-SNAPSHOT.zip "${BUILD_MACHINE_DROP_DIR}/equinox-SDK-${BUILD_ID}.zip"
-        RC=$?
-        if [[ $RC != 0 ]]
-        then
-            TODO: change 'cp' above to rsync .. it gives better error messages and logging?
-            echo "ERROR: cp command could not copy equinox-sdk-*-SNAPSHOT.zip. RC: $RC"
-        fi
-        # following used to be done in "build-configs", based on "master-equinox" feature, 
-        # but that has now "gone away". 
-        pushd "${BUILD_MACHINE_DROP_DIR}"
-        unzip -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
-        popd
-    else
-        echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
+      TODO: change 'cp' above to rsync .. it gives better error messages and logging?
+      echo "ERROR: cp command could not copy equinox-sdk-*-SNAPSHOT.zip. RC: $RC"
     fi
+    # following used to be done in "build-configs", based on "master-equinox" feature,
+    # but that has now "gone away".
+    pushd "${BUILD_MACHINE_DROP_DIR}"
+    unzip -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
     popd
+  else
+    echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
+  fi
+  popd
 
-    pushd "$BUILD_DIR"
-    java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-        -data ${BUILD_DIR}/workspace-publishEquinox \
-        -application org.eclipse.ant.core.antRunner \
-        -v \
-        -buildfile "$EBuilderDir"/equinox/helper.xml \
-        -Dequinox.build.configs="$EBuilderDir"/equinox/buildConfigs \
-        -DbuildId="$BUILD_ID" \
-        -DbuildRepo="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository \
-        -DpostingDirectory=$BUILD_DIR \
-        -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
-        -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
-        -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
-        -DbuildLabel="$BUILD_ID" \
-        -DEBuilderDir="$EBuilderDir" \
-        -DeclipseStream=$BUILD_STREAM \
-        -DbuildType="$BUILD_TYPE" \
-        -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
-        -DbuildDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
-        -Djava.io.tmpdir=$TMP_DIR \
-        publish
-    popd
+  pushd "$BUILD_DIR"
+  java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
+    -data ${BUILD_DIR}/workspace-publishEquinox \
+    -application org.eclipse.ant.core.antRunner \
+    -v \
+    -buildfile "$EBuilderDir"/equinox/helper.xml \
+    -Dequinox.build.configs="$EBuilderDir"/equinox/buildConfigs \
+    -DbuildId="$BUILD_ID" \
+    -DbuildRepo="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository \
+    -DpostingDirectory=$BUILD_DIR \
+    -DequinoxPostingDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
+    -DeqpublishingContent="$EBuilderDir"/equinox/publishingFiles \
+    -DdropTemplateFileName="$EBuilderDir/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
+    -DbuildLabel="$BUILD_ID" \
+    -DEBuilderDir="$EBuilderDir" \
+    -DeclipseStream=$BUILD_STREAM \
+    -DbuildType="$BUILD_TYPE" \
+    -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
+    -DbuildDirectory=$BUILD_MACHINE_DROP_DIR_PARENT \
+    -Djava.io.tmpdir=$TMP_DIR \
+    publish
+  popd
 }
 
 cd $BUILD_ROOT
@@ -179,7 +179,7 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then
-    BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
+  BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
@@ -195,6 +195,6 @@ fn-publish-equinox "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirector
 RC=$?
 if [[ $RC != 0 ]]
 then
-    echo "ERROR: Somethign went wrong publishing Equinox. RC: $RC"
-    exit $RC
+  echo "ERROR: Somethign went wrong publishing Equinox. RC: $RC"
+  exit $RC
 fi

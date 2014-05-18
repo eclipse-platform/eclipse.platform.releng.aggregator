@@ -7,60 +7,60 @@ include ('buildproperties.php');
 
 // TODO: copied from logs.php. Should be in common utilities for reuse
 function fileSizeForDisplay($filename) {
-    $onekilo=1024;
-    $onemeg=$onekilo * $onekilo;
-    $criteria = 10 * $onemeg;
-    $scaleChar = " ";
-    if (file_exists($filename)) {
-        $zipfilesize=filesize($filename);
-        if ($zipfilesize > $criteria) {
-            $zipfilesize=round($zipfilesize/$onemeg, 0);
-            $scaleChar = " MB";
-        }
-        else {
-            if ($zipfilesize > $onekilo) {
-                $zipfilesize=round($zipfilesize/$onekilo, 0);
-                $scaleChar = " KB";
-            } else {
-                // use raw size in bytes if less that one 1K
-                $scaleChar = " B";
-            }
-        }
+  $onekilo=1024;
+  $onemeg=$onekilo * $onekilo;
+  $criteria = 10 * $onemeg;
+  $scaleChar = " ";
+  if (file_exists($filename)) {
+    $zipfilesize=filesize($filename);
+    if ($zipfilesize > $criteria) {
+      $zipfilesize=round($zipfilesize/$onemeg, 0);
+      $scaleChar = " MB";
     }
     else {
-        $zipfilesize = 0;
+      if ($zipfilesize > $onekilo) {
+        $zipfilesize=round($zipfilesize/$onekilo, 0);
+        $scaleChar = " KB";
+      } else {
+        // use raw size in bytes if less that one 1K
+        $scaleChar = " B";
+      }
     }
-    $result =  "(" . $zipfilesize . $scaleChar . ")";
-    return $result;
+  }
+  else {
+    $zipfilesize = 0;
+  }
+  $result =  "(" . $zipfilesize . $scaleChar . ")";
+  return $result;
 }
 
 function listLogs($myDir) {
 
-    $aDirectory = dir($myDir);
-    $index = 0;
-    $cdir = getcwd();
-    while ($anEntry = $aDirectory->read()) {
-        $path = $cdir . "/" . $myDir . "/" . $anEntry;
-        if (is_file($path)) {
-            $entries[$index] = $anEntry;
-            $index++;
-        }
+  $aDirectory = dir($myDir);
+  $index = 0;
+  $cdir = getcwd();
+  while ($anEntry = $aDirectory->read()) {
+    $path = $cdir . "/" . $myDir . "/" . $anEntry;
+    if (is_file($path)) {
+      $entries[$index] = $anEntry;
+      $index++;
     }
+  }
 
-    $aDirectory->close();
-    if (!empty($entries)) {
-        sort($entries);
-    }
+  $aDirectory->close();
+  if (!empty($entries)) {
+    sort($entries);
+  }
 
-    if ($index < 0) {
-        echo "<br>There are no logs for this build.";
-        return;
-    }
-    for ($i = 0; $i < $index; $i++) {
-        $anEntry = $entries[$i];
-        $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a>" . fileSizeForDisplay("$myDir/$anEntry") . "</td>";
-        echo "<li>$line</li>";
-    }
+  if ($index < 0) {
+    echo "<br>There are no logs for this build.";
+    return;
+  }
+  for ($i = 0; $i < $index; $i++) {
+    $anEntry = $entries[$i];
+    $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a>" . fileSizeForDisplay("$myDir/$anEntry") . "</td>";
+    echo "<li>$line</li>";
+  }
 }
 
 
@@ -82,15 +82,15 @@ P {text-indent: 30pt;}
 <script type="text/javascript">
 
 sfHover = function() {
-    var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
-    for (var i=0; i<sfEls.length; i++) {
-        sfEls[i].onmouseover=function() {
-            this.className+=" sfhover";
-        }
-        sfEls[i].onmouseout=function() {
-            this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
-        }
+  var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
+  for (var i=0; i<sfEls.length; i++) {
+    sfEls[i].onmouseover=function() {
+      this.className+=" sfhover";
     }
+    sfEls[i].onmouseout=function() {
+      this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
+    }
+  }
 }
 if (window.attachEvent) window.attachEvent("onload", sfHover);
 </script>
@@ -142,9 +142,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div class="homeitem3col">
 <?php
 echo "<title>Release Engineering logs for $BUILD_ID</title>\n";
-        echo "<h3>Build Properties for $BUILD_ID</h3>\n";
-        echo "<p><a href=\"mavenproperties.properties\">Key Maven Properties</a></p>\n";
-        echo "<p><a href=\"buildproperties.properties\">Other Build Properties</a></p>\n";
+echo "<h3>Build Properties for $BUILD_ID</h3>\n";
+echo "<p><a href=\"mavenproperties.properties\">Key Maven Properties</a></p>\n";
+echo "<p><a href=\"buildproperties.properties\">Other Build Properties</a></p>\n";
 echo "<h3>Release Engineering Logs for $BUILD_ID</h3>\n";
 ?>
 

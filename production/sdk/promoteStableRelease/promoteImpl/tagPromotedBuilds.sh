@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-# TODO: might want to add if [[ "${HIDE_SITE}" != "true" ]] logic as we do for 
+# TODO: might want to add if [[ "${HIDE_SITE}" != "true" ]] logic as we do for
 # deferedCompositeAdd script
 
 echo "#!/usr/bin/env bash" > deferedTag.sh
-echo "# navigate to gitcache aggregator" >> deferedTag.sh 
+echo "# navigate to gitcache aggregator" >> deferedTag.sh
 echo "pushd ${BUILD_ROOT}/${AGGR_LOCATION}" >> deferedTag.sh
 echo "" >> deferedTag.sh
 echo "# DROP_ID == BUILD_ID, which should already exist as tag (for all I and M builds)" >> deferedTag.sh

@@ -1,12 +1,12 @@
 
 function checkrepo ()
 {
- cd $1
- echo $1
- #git fsck --unreachable | wc -l
- #find objects/?? -type f | wc -l
- #find objects/pack -ls | wc -l
- git gc
+  cd $1
+  echo $1
+  #git fsck --unreachable | wc -l
+  #find objects/?? -type f | wc -l
+  #find objects/pack -ls | wc -l
+  git gc
 }
 PROJECTROOT=/gitroot/platform
 

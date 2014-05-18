@@ -38,27 +38,27 @@ usage="usage: $0 -os <osType> -ws <windowingSystemType> -arch <architecture> [-n
 # proces command line arguments
 while [ $# -gt 0 ]
 do
-    case "${1}" in
-        -dir)
-            dir="${2}"; shift;;
-        -os)
-            os="${2}"; shift;;
-        -ws)
-            ws="${2}"; shift;;
-        -arch)
-            arch="${2}"; shift;;
-        -noclean)
-            installmode="noclean";;
-        -properties)
-            properties="-propertyfile ${2}";shift;;
-        -extdirprop)
-            extdirproperty="-Djava.ext.dirs=${2}";shift;;
-        -vm)
-            vmcmd="${2}"; shift;;
-        *)
-            tests=$tests\ ${1};;
-    esac
-    shift
+  case "${1}" in
+    -dir)
+      dir="${2}"; shift;;
+    -os)
+      os="${2}"; shift;;
+    -ws)
+      ws="${2}"; shift;;
+    -arch)
+      arch="${2}"; shift;;
+    -noclean)
+      installmode="noclean";;
+    -properties)
+      properties="-propertyfile ${2}";shift;;
+    -extdirprop)
+      extdirproperty="-Djava.ext.dirs=${2}";shift;;
+    -vm)
+      vmcmd="${2}"; shift;;
+    *)
+      tests=$tests\ ${1};;
+  esac
+  shift
 done
 
 echo "Specified test targets (if any): ${tests}"
@@ -68,20 +68,20 @@ echo "Specified ext dir (if any): ${extdirproperty}"
 # for *nix systems, os, ws and arch values must be specified
 if [ "x$os" = "x" ]
 then
-    echo >&2 "$usage"
-    exit 1
+  echo >&2 "$usage"
+  exit 1
 fi
 
 if [ "x$ws" = "x" ]
 then
-    echo >&2 "$usage"
-    exit 1
+  echo >&2 "$usage"
+  exit 1
 fi
 
 if [ "x$arch" = "x" ]
 then
-    echo >&2 "$usage"
-    exit 1
+  echo >&2 "$usage"
+  exit 1
 fi
 
 #necessary when invoking this script through rsh
@@ -89,9 +89,9 @@ cd $dir
 
 if [ ! -r eclipse ]
 then
-    tar -xzf eclipse-SDK-*.tar.gz
-    # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
-    unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+  tar -xzf eclipse-SDK-*.tar.gz
+  # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
+  unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
 fi
 
 # run tests
@@ -112,7 +112,7 @@ echo "Window Manager processes running: $wmpss"
 echo
 
 # in this case, do not "--replace" any existing ones, for this DISPLAY
-# added bit bucket for errors, in attempt to keep from filling up Hudson log with "warnings", such as hundreds of 
+# added bit bucket for errors, in attempt to keep from filling up Hudson log with "warnings", such as hundreds of
 #     [exec] Window manager warning: Buggy client sent a _NET_ACTIVE_WINDOW message with a timestamp of 0 for 0x800059 (Java - Ecl)
 #     [exec] Window manager warning: meta_window_activate called by a pager with a 0 timestamp; the pager needs to be fixed.
 #
@@ -121,25 +121,25 @@ METACITYRC=$?
 METACITYPID=$!
 
 if [[ $METACITYRC == 0 ]]
-then 
+then
+  # TODO: we may want to kill the one we started, at end of tests?
+  echo $METACITYPID > epmetacity.pid
+  echo "  metacity (with no --replace) started ok. PID: $METACITYPID"
+else
+  echo "  metacity (with no --replace) failed. RC: $METACITYRC"
+  # This should not interfere with other jobs running on Hudson, the DISPLAY should be "ours".
+  metacity --display=$DISPLAY --replace --sm-disable  &
+  METACITYRC=$?
+  METACITYPID=$!
+  if [[ $METACITYRC == 0 ]]
+  then
     # TODO: we may want to kill the one we started, at end of tests?
     echo $METACITYPID > epmetacity.pid
-    echo "  metacity (with no --replace) started ok. PID: $METACITYPID"
-else
-    echo "  metacity (with no --replace) failed. RC: $METACITYRC"
-    # This should not interfere with other jobs running on Hudson, the DISPLAY should be "ours".
-    metacity --display=$DISPLAY --replace --sm-disable  &
-    METACITYRC=$?
-    METACITYPID=$!
-    if [[ $METACITYRC == 0 ]]
-    then 
-        # TODO: we may want to kill the one we started, at end of tests?
-        echo $METACITYPID > epmetacity.pid
-        echo "  metacity (with --replace) started ok. PID: $METACITYPID"
-    else
-        echo "  metacity (with --replace) failed. RC: $METACITYRC"
-        echo "   giving up. But continuing tests"
-    fi
+    echo "  metacity (with --replace) started ok. PID: $METACITYPID"
+  else
+    echo "  metacity (with --replace) failed. RC: $METACITYRC"
+    echo "   giving up. But continuing tests"
+  fi
 fi
 #if [[ -z $wmpss ]]
 #then
@@ -170,7 +170,7 @@ echo "extdirproperty in runtest: ${extdirproperty}"
 # -Dtimeout=300000 "${ANT_OPTS}"
 if [[ ! -z "${extdirproperty}" ]]
 then
-    $vmcmd "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+  $vmcmd "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
 else
-    $vmcmd -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+  $vmcmd -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
 fi

@@ -6,17 +6,17 @@ HIDE_SITE=$3
 
 function usage ()
 {
-    printf "\n\tUsage: %s DROP_ID DL_LABEL HIDE_SITE" $(basename $0) >&2
-    printf "\n\t\t%s\t%s" "DROP_ID " "such as I20121031-2000." >&2
-    printf "\n\t\t%s\t%s" "DL_LABEL " "such as LunaM3." >&2
-    printf "\n\t\t%s\t%s" "HIDE_SITE " "true or false." >&2
+  printf "\n\tUsage: %s DROP_ID DL_LABEL HIDE_SITE" $(basename $0) >&2
+  printf "\n\t\t%s\t%s" "DROP_ID " "such as I20121031-2000." >&2
+  printf "\n\t\t%s\t%s" "DL_LABEL " "such as LunaM3." >&2
+  printf "\n\t\t%s\t%s" "HIDE_SITE " "true or false." >&2
 }
 
 if [[ -z "${DROP_ID}" || -z "${DL_LABEL}" || -z "${HIDE_SITE}" ]]
 then
-    printf "\n\n\t%s\n\n" "ERROR: arguments missing in call to $( basename $0 )" >&2
-    usage
-    exit 1
+  printf "\n\n\t%s\n\n" "ERROR: arguments missing in call to $( basename $0 )" >&2
+  usage
+  exit 1
 fi
 
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
@@ -30,7 +30,7 @@ printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID
 rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
 
 printf "\n\t%s\n" "Doing rename of original."
-# TODO: if ${DL_DROP_ID} already exists, we should remove it, 
+# TODO: if ${DL_DROP_ID} already exists, we should remove it,
 # since basically means we are "re-running" the script after
 # running it once.
 ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
@@ -43,13 +43,13 @@ rm renameBuild.sh
 PROMOTE_PREFIX="promote"
 if [[ "${HIDE_SITE}" == "true" ]]
 then
-   PROMOTE_PREFIX="manual"
-   echo "Remember to change Equinox promote script name from 'manual-' to 'promote-' when time to promote." >> "${CL_SITE}/checklist.txt" 
-fi 
+  PROMOTE_PREFIX="manual"
+  echo "Remember to change Equinox promote script name from 'manual-' to 'promote-' when time to promote." >> "${CL_SITE}/checklist.txt"
+fi
 
 printf "\n\t%s\n" "Creating promote script."
 echo "rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
-    > /shared/eclipse/equinox/promotion/queue/${PROMOTE_PREFIX}-${DL_LABEL}.sh
+  > /shared/eclipse/equinox/promotion/queue/${PROMOTE_PREFIX}-${DL_LABEL}.sh
 
 printf "\n\t%s\n" "Make sure promote script is 'executable'."
 chmod +x /shared/eclipse/equinox/promotion/queue/${PROMOTE_PREFIX}-${DL_LABEL}.sh

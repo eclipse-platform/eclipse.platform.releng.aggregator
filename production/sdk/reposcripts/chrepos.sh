@@ -1,14 +1,14 @@
 
 function checkrepo ()
 {
- cd $1
- echo $1
+  cd $1
+  echo $1
 
- NUNREACHABLE=`git fsck --unreachable | wc -l`
- echo "Unreachable: " $NUNREACHABLE
- #find objects/?? -type f | wc -l
- #find objects/pack -ls | wc -l
- git count-objects -v
+  NUNREACHABLE=`git fsck --unreachable | wc -l`
+  echo "Unreachable: " $NUNREACHABLE
+  #find objects/?? -type f | wc -l
+  #find objects/pack -ls | wc -l
+  git count-objects -v
 }
 PROJECTROOT=/gitroot/platform
 

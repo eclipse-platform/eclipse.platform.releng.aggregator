@@ -13,7 +13,7 @@ $dropType[]="3.8 Maintenance Build";
 $dropType[]="3.8 Nightly Build";
 // the "prefix" array and dropType array must be of same size, defined in right order
 for ($i = 0; $i < count($dropType); $i++) {
-    $typeToPrefix[$dropType[$i]] = $dropPrefix[$i];
+  $typeToPrefix[$dropType[$i]] = $dropPrefix[$i];
 }
 
 ?>

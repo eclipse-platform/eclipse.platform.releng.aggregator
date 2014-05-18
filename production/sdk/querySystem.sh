@@ -37,14 +37,14 @@ rpm -q glib2
 echo
 
 echo
-    echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz):"
-    ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep
-    echo
-    echo
-    # unity|mint|gnome|kde|xfce|ion|wmii|dwm (was original list, but matched too much,
-    # espeically "ion' I suppose.
-    echo "Check for popular desktop environments (gnome or kde):"
-    ps -ef | egrep -i "gnome|kde" | grep -v egrep
+echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz):"
+ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep
+echo
+echo
+# unity|mint|gnome|kde|xfce|ion|wmii|dwm (was original list, but matched too much,
+# espeically "ion' I suppose.
+echo "Check for popular desktop environments (gnome or kde):"
+ps -ef | egrep -i "gnome|kde" | grep -v egrep
 
 echo
 echo " == all env variables == "

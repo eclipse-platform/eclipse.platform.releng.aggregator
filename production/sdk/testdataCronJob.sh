@@ -11,11 +11,11 @@
 
 # Start with minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
-# care is needed not have anything in ${HOME}/bin that would effect the build 
-# unintentionally, but is required to make use of "source buildeclipse.shsource" on 
-# local machines.  
-# Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it 
-# to false) for a test I-build on a remote machine. 
+# care is needed not have anything in ${HOME}/bin that would effect the build
+# unintentionally, but is required to make use of "source buildeclipse.shsource" on
+# local machines.
+# Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
+# to false) for a test I-build on a remote machine.
 export PATH=/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 # unset common variables (some defined for e4Build) which we don't want (or, set ourselves)
 unset JAVA_HOME
@@ -30,7 +30,7 @@ unset JRE_HOME
 # we create.
 oldumask=`umask`
 umask 0002
-# Remember, don't echo except when testing, or mail will be sent each time it runs. 
+# Remember, don't echo except when testing, or mail will be sent each time it runs.
 # echo "umask explicitly set to 0002, old value was $oldumask"
 
 
@@ -50,49 +50,49 @@ allfiles=$( find $testdataLocation -name "testjobdata*.txt" )
 for datafile in $allfiles
 do
 
-    # having an echo here will cause cron job to send mail for EACH job, even if all is fine.
-    # so use only for testing.
-    #echo $datafile
+  # having an echo here will cause cron job to send mail for EACH job, even if all is fine.
+  # so use only for testing.
+  #echo $datafile
 
-    if [[ -z "$datafile" ]]
+  if [[ -z "$datafile" ]]
+  then
+    # would be an odd error, but nothing to do (Remember, can not have an empty if/then/else clause! Syntax error.
+    echo "WARNING: unexpectedly found datafile variable to be null or empty."
+  else
+    # found a file, confirm is file for safety
+    if [[ -f $datafile ]]
     then
-        # would be an odd error, but nothing to do (Remember, can not have an empty if/then/else clause! Syntax error.
-        echo "WARNING: unexpectedly found datafile variable to be null or empty."
-    else
-        # found a file, confirm is file for safety
-        if [[ -f $datafile ]]
-        then
 
-            # if found a file to execute, temporarily change its name to "RUNNING-$datafile
-            # so a subsequent cron job won't find it (if it does not finish by the time of the next cron job).
-            runningdatafile=$testdataLocation/RUNNING_$(basename $datafile)
-            mv  $datafile $runningdatafile
-            # notice these logs are concatenated on purpose, to give some "history", but
-            # that means has to be "manually" removed every now and then.
-            # improve as desired.
-            /bin/bash /shared/eclipse/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
-            # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
-            # then try various types of files file names, etc.
-            # echo "DEBUG: normally would execute file here: $datafile" 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/datacollect-err.txt
-            rccode=$?
-            if [[ $rccode != 0 ]]
-            then
-                echo "ERROR: collection returned an error: $rccode"
-                echo "       datafile: $datafile"
-                mv $runningdatafile $testdataLocation/ERROR_$(basename $datafile)
-                exit 1
-            else
-                # all is ok, we'll move the file to "RAN-" in case needed for later inspection,
-                # if things go wrong. Perhaps eventually just remove them?
-                mv $runningdatafile $testdataLocation/RAN_$(basename $datafile)
-                # if testing scripts, only, sometimes handy to leave named to catch the next cronjob
-                #mv $runningdatafile $testdataLocation/$(basename $datafile)
-            fi
-        else
-            echo "ERROR: data file found, but was not an actual file?"
-            echo "         datafile: $datafile"
-            exit 1
-        fi
+      # if found a file to execute, temporarily change its name to "RUNNING-$datafile
+      # so a subsequent cron job won't find it (if it does not finish by the time of the next cron job).
+      runningdatafile=$testdataLocation/RUNNING_$(basename $datafile)
+      mv  $datafile $runningdatafile
+      # notice these logs are concatenated on purpose, to give some "history", but
+      # that means has to be "manually" removed every now and then.
+      # improve as desired.
+      /bin/bash /shared/eclipse/sdk/collect.sh < $runningdatafile 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/collection-err.txt
+      # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
+      # then try various types of files file names, etc.
+      # echo "DEBUG: normally would execute file here: $datafile" 1>>$testdataLocation/collection-out.txt 2>>$testdataLocation/datacollect-err.txt
+      rccode=$?
+      if [[ $rccode != 0 ]]
+      then
+        echo "ERROR: collection returned an error: $rccode"
+        echo "       datafile: $datafile"
+        mv $runningdatafile $testdataLocation/ERROR_$(basename $datafile)
+        exit 1
+      else
+        # all is ok, we'll move the file to "RAN-" in case needed for later inspection,
+        # if things go wrong. Perhaps eventually just remove them?
+        mv $runningdatafile $testdataLocation/RAN_$(basename $datafile)
+        # if testing scripts, only, sometimes handy to leave named to catch the next cronjob
+        #mv $runningdatafile $testdataLocation/$(basename $datafile)
+      fi
+    else
+      echo "ERROR: data file found, but was not an actual file?"
+      echo "         datafile: $datafile"
+      exit 1
     fi
+  fi
 done
 

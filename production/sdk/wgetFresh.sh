@@ -32,14 +32,14 @@ differs=`diff wgetFresh.NEW.sh wgetFresh.sh`
 
 if [ -z "${differs}" ]
 then
-    # 'new' not different from existing, so remove 'new' one
-    rm wgetFresh.NEW.sh
+  # 'new' not different from existing, so remove 'new' one
+  rm wgetFresh.NEW.sh
 else
-    echo " "
-    echo "     wgetFresh.sh has changed. Compare with and consider replacing with wgetFresh.NEW.sh"
-    echo "  "
-    echo "differences: ${differs}"
-    echo "  "
+  echo " "
+  echo "     wgetFresh.sh has changed. Compare with and consider replacing with wgetFresh.NEW.sh"
+  echo "  "
+  echo "differences: ${differs}"
+  echo "  "
 fi
 
 chmod ug+x *.sh

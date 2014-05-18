@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# this buildeclipse.shsource file is to ease local builds to override some variables. 
+# this buildeclipse.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source buildeclipse.shsource 2>/dev/null
 
@@ -13,7 +13,7 @@ initScriptTag=master
 # http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/wgetFresh.sh?tag=vI20120417-0700
 
 
-# to build, all that's needed is the appropriate mbXZ.sh scripts. along with "bootstrap.sh". 
+# to build, all that's needed is the appropriate mbXZ.sh scripts. along with "bootstrap.sh".
 # It gets what ever else it needs.
 
 
@@ -41,12 +41,12 @@ differs=`diff wgetFresh.NEW.sh wgetFresh.sh`
 echo "differs: ${differs}"
 if [ -z "${differs}" ]
 then
-    # 'new' not different from existing, so remove 'new' one
-    rm wgetFresh.NEW.sh
+  # 'new' not different from existing, so remove 'new' one
+  rm wgetFresh.NEW.sh
 else
-    echo " "
-    echo "     wgetFresh.sh has changed. Compare with and consider replacing with wgetFresh.NEW.sh"
-    echo "  "
+  echo " "
+  echo "     wgetFresh.sh has changed. Compare with and consider replacing with wgetFresh.NEW.sh"
+  echo "  "
 fi
 
 chmod +x *.sh

@@ -10,36 +10,36 @@ nOldBuilds=$( echo -e "${allOldBuilds}" | wc -l )
 echo -e "nOldBuilds: $nbuildsOldBuilds"
 if (( ${nOldBuilds} > 4 ))
 then
-    # Make sure we leave at least 4 on DL server, no matter how old
-    # TODO: how to avoid 'ls' (see http://mywiki.wooledge.org/ParsingLs)
-    newest=$( ls -1 -t -d ${cDir}/${buildType} | head -4)
-    #DEBUG    echo -e "\n\tnewest: \n${newest}";
-    reNotToDelete=$(printf '%s\n' "${newest[@]}" | paste -sd '|')
-    echo "DEBUG: reNotToDelete: ${reNotToDelete}"
-    for buildname in ${allOldBuilds}; do 
-        if [[ $buildname =~ $reNotToDelete ]] 
-        then
-            echo -e "Not removed (since one of 4 newest, even though old): \n$buildname"
-        else
-            rm -fr $buildname
-            RC=$?
-            if [[ $RC = 0 ]]
-            then
-                echo -e "Removed: $buildname"
-            else
-                echo -e "\n\tAn Error occured removeding $buildname. RC: $RC"
-            fi
-        fi
-    done
+  # Make sure we leave at least 4 on DL server, no matter how old
+  # TODO: how to avoid 'ls' (see http://mywiki.wooledge.org/ParsingLs)
+  newest=$( ls -1 -t -d ${cDir}/${buildType} | head -4)
+  #DEBUG    echo -e "\n\tnewest: \n${newest}";
+  reNotToDelete=$(printf '%s\n' "${newest[@]}" | paste -sd '|')
+  echo "DEBUG: reNotToDelete: ${reNotToDelete}"
+  for buildname in ${allOldBuilds}; do
+    if [[ $buildname =~ $reNotToDelete ]]
+    then
+      echo -e "Not removed (since one of 4 newest, even though old): \n$buildname"
+    else
+      rm -fr $buildname
+      RC=$?
+      if [[ $RC = 0 ]]
+      then
+        echo -e "Removed: $buildname"
+      else
+        echo -e "\n\tAn Error occured removeding $buildname. RC: $RC"
+      fi
+    fi
+  done
 
-    nbuilds=$( find ${cDir} -maxdepth 1 -name ${buildType} | wc -l )
-    echo "Number of builds after cleaning: $nbuilds"
+  nbuilds=$( find ${cDir} -maxdepth 1 -name ${buildType} | wc -l )
+  echo "Number of builds after cleaning: $nbuilds"
 
-    source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
-    updateIndex 
+  source /shared/eclipse/sdk/updateIndexFilesFunction.shsource
+  updateIndex
 
 else
-    echo "Nothing cleaned, not more than 4 days"
+  echo "Nothing cleaned, not more than 4 days"
 fi
 
 # shared (build machine)

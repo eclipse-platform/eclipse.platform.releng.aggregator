@@ -2,14 +2,14 @@
 #
 
 if [ $# -ne 1 ]; then
-    echo USAGE: $0 env_file
-    exit 1
+  echo USAGE: $0 env_file
+  exit 1
 fi
 
 if [ ! -r "$1" ]; then
-    echo "$1" cannot be read
-    echo USAGE: $0 env_file
-    exit 1
+  echo "$1" cannot be read
+  echo USAGE: $0 env_file
+  exit 1
 fi
 
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
@@ -25,7 +25,7 @@ gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then
-    BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
+  BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
 fi
 
 buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
@@ -41,15 +41,15 @@ EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platfor
 
 fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
 fn-parse-compile-logs "$BUILD_ID" \
-    "${EBuilderDir}/eclipse/helper.xml" \
-    "$buildDirectory" "$launcherJar"
+  "${EBuilderDir}/eclipse/helper.xml" \
+  "$buildDirectory" "$launcherJar"
 
 fn-summarize-comparator-logs "$BUILD_ID" \
-    "${EBuilderDir}/eclipse/buildScripts/eclipse_compare.xml" \
-    "$buildDirectory" "$launcherJar"    
+  "${EBuilderDir}/eclipse/buildScripts/eclipse_compare.xml" \
+  "$buildDirectory" "$launcherJar"
 
 fn-summarize-apitooling "$BUILD_ID" \
-    "${EBuilderDir}/eclipse/buildScripts/api-tools-builder.xml" \
-    "$buildDirectory" "$launcherJar" 
+  "${EBuilderDir}/eclipse/buildScripts/api-tools-builder.xml" \
+  "$buildDirectory" "$launcherJar"
 
 fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"
