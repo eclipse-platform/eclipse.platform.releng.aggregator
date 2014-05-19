@@ -20,6 +20,7 @@ function getDropSize($zipfile) {
 }
 
 function generateChecksumLinks($zipfile, $buildlabel) {
-  return "<td><a href=\"http://download.eclipse.org/equinox/drops/$buildlabel/checksum/$zipfile.md5\"><img src=\"/equinox/images/md5.png\" alt=\"md5\"/></a><a href=\"http://download.eclipse.org/equinox/drops/$buildlabel/checksum/$zipfile.sha1\"><img src=\"/equinox/images/sha1.png\" alt=\"sha1\"/></a></td>";
+  //return "<td><a href=\"http://download.eclipse.org/equinox/drops/$buildlabel/checksum/$zipfile.md5\"><img src=\"/equinox/images/md5.png\" alt=\"md5\"/></a><a href=\"http://download.eclipse.org/equinox/drops/$buildlabel/checksum/$zipfile.sha1\"><img src=\"/equinox/images/sha1.png\" alt=\"sha1\"/></a></td>";
+  return "<td><a href=\"http://download.eclipse.org/equinox/drops/$buildlabel/checksum/$zipfile.sha512\"><img src=\"/equinox/images/sha1.png\" alt=\"sha512\"/></a></td>";
 }
 ?>
