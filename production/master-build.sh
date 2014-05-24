@@ -169,8 +169,8 @@ GATHER_PARTS_BUILD_LOG="${logsDirectory}/mb070_gather-parts_output.txt"
 
 # These "build_dir" variables are needed for checksum URLs, in especially
 # after promotion to milestone or release. (see bug 435671)
-export BUILD_DIR=$BUILD_ID
-export EQ_BUILD_DIR=$BUILD_ID
+export BUILD_DIR_SEG=$BUILD_ID
+export EQ_BUILD_DIR_SEG=$BUILD_ID
 
 # These variables, from original env file, are re-written to BUILD_ENV_FILE,
 # with values for this build (some of them computed) partially for documentation, and
@@ -222,8 +222,8 @@ fn-write-property BUILD_ENV_FILE
 fn-write-property BUILD_ENV_FILE_PHP
 fn-write-property BUILD_ENV_FILE_PROP
 fn-write-property BUILD_ID
-fn-write-property BUILD_DIR
-fn-write-property EQ_BUILD_DIR
+fn-write-property BUILD_DIR_SEG
+fn-write-property EQ_BUILD_DIR_SEG
 fn-write-property BUILD_PRETTY_DATE
 fn-write-property BUILD_TYPE_NAME
 fn-write-property TRACE_OUTPUT
