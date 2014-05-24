@@ -10,7 +10,7 @@ $servername=$_SERVER['SERVER_NAME'];
 $script = $_SERVER['SCRIPT_NAME'];
 $patharray = pathinfo($_SERVER['SCRIPT_NAME']);
 $path = $patharray['dirname'];
-$buildLabel = array_pop(split("/",$path,-1));
+$buildDir = array_pop(split("/",$path,-1));
 $qstring = $_SERVER['QUERY_STRING'];
 $dropFile=array_pop(split("=",$qstring,-1));
 
@@ -32,7 +32,7 @@ $mirror=true;
 if (strstr($_SERVER['SERVER_NAME'],"eclipse.org")) {
   #       if (strstr($_SERVER['SERVER_NAME'],"ibm.com")) {
   $mirror=false;
-  $eclipselink="http://www.eclipse.org/downloads/download.php?file=/equinox/drops/$buildLabel/$dropFile";
+  $eclipselink="http://www.eclipse.org/downloads/download.php?file=/equinox/drops/$builDir/$dropFile";
 } else {
   $mirrorlink  = "http://$servername$path/$dropFile";
 }

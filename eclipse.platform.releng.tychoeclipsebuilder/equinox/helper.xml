@@ -65,7 +65,7 @@
         
 		<!-- copy orbit files to equinox download directory (I'm not sure this is necessary any longer?) -->
         <copy
-            todir="${equinoxPostingDirectory}/${buildLabel}"
+            todir="${equinoxPostingDirectory}/${buildDir}"
             overwrite="true">
             <fileset
                 dir="${buildRepo}/plugins"
@@ -85,17 +85,17 @@
             value="${generatorClass}" />
 
 		<!-- generate md5s and sha1s for bundles -->
-        <mkdir dir="${equinoxPostingDirectory}/${buildLabel}/checksum" />
+        <mkdir dir="${equinoxPostingDirectory}/${buildDir}/checksum" />
         <exec
             executable="sh"
-            dir="${equinoxPostingDirectory}/${buildLabel}">
+            dir="${equinoxPostingDirectory}/${buildDir}">
             <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
         </exec>
 
         
 		<!--post clickThroughs. Removed 03/26/2013. There are no clickthroughs for current equinox. 
 		    if ever added back, will have to be re-worked. 
-        <copy todir="${equinoxPostingDirectory}/${buildLabel}">
+        <copy todir="${equinoxPostingDirectory}/${buildDir}">
             <fileset
                 dir="${buildDirectory}/maps/org.eclipse.releng"
                 includes="clickThroughs/" />
@@ -104,7 +104,7 @@
         
 		<!--copy compile logs to this posting directory. Not sure needed. Is this where API reports come from? -->
         <copy
-            todir="${equinoxPostingDirectory}/${buildLabel}"
+            todir="${equinoxPostingDirectory}/${buildDir}"
             overwrite="true">
             <fileset
                 dir="${postingDirectory}"
@@ -117,9 +117,9 @@
 		    and current directory.txt has limited usefulness.
         <copy
             file="${buildDirectory}/directory.txt"
-            todir="${equinoxPostingDirectory}/${buildLabel}" />
+            todir="${equinoxPostingDirectory}/${buildDir}" />
         -->
-        <copy todir="${equinoxPostingDirectory}/${buildLabel}">
+        <copy todir="${equinoxPostingDirectory}/${buildDir}">
             <fileset dir="${eqpublishingContent}/staticDropFiles" />
         </copy>
 
@@ -151,13 +151,13 @@
             platformSpecificTemplateList=""
             dropHtmlFileName="index.php"
             xmlDirectoryName="${postingDirectory}/testresults/xml"
-            dropDirectoryName="${equinoxPostingDirectory}/${buildLabel}"
+            dropDirectoryName="${equinoxPostingDirectory}/${buildDir}"
             testResultsTemplateFileName="${eqpublishingContent}/templateFiles/testResults.php.template"
             dropTemplateFileName="${eqpublishingContent}/templateFiles/index.php.template"
             testResultsHtmlFileName="testResults.php"
-            hrefTestResultsTargetPath="../../../downloads/drops/${buildLabel}/testresults/html"
+            hrefTestResultsTargetPath="../../../downloads/drops/${buildDir}/testresults/html"
             hrefCompileLogsTargetPath="compilelogs"
-            compileLogsDirectoryName="${equinoxPostingDirectory}/${buildLabel}/compilelogs"
+            compileLogsDirectoryName="${equinoxPostingDirectory}/${buildDir}/compilelogs"
             testManifestFileName="${eqpublishingContent}/testManifest.xml" />
 
 
@@ -448,8 +448,8 @@
         <apply
             executable="ls"
             output="${TMP}/${bundle.id}.txt"
-            dir="${equinoxPostingDirectory}/${buildLabel}">
-            <fileset dir="${equinoxPostingDirectory}/${buildLabel}">
+            dir="${equinoxPostingDirectory}/${buildDir}">
+            <fileset dir="${equinoxPostingDirectory}/${buildDir}">
                 <patternset>
                     <include name="${bundle.id}*.jar" />
                 </patternset>
