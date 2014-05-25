@@ -39,6 +39,19 @@ then
 fi
 echo "Renaming build $oldname to $newdirname with $newlabel"
 
+# specific "replace" to make sure checksums URLs are correct for eclipse
+fromString="BUILD_DIR_SEG = \"${oldname}\""
+toString="BUILD_DIR_SEG = \"${ECLIPSE_DL_DROP_DIR_SEGMENT}\""
+replaceDirCommand="s!/${fromString}/!/${toString}/!g"
+echo "replaceDirCommand: $replaceDirCommand"
+perl -w -pi -e "${replaceDirCommand}" ${oldname}/buildproperties.*
+# specific "replaces" to make sure checksums URLs are correct for equinox
+fromString="EQ_BUILD_DIR_SEG = \"${oldname}\""
+toString="EQ_BUILD_DIR_SEG = \"${EQUINOX_DL_DROP_DIR_SEGMENT}\""
+replaceDirCommand="s!/${fromString}/!/${toString}/!g"
+echo "replaceDirCommand: $replaceDirCommand"
+perl -w -pi -e "${replaceDirCommand}" ${oldname}/buildproperties.*
+
 fromString=$oldname
 toString=$newlabel
 replaceCommand="s!${fromString}!${toString}!g"
