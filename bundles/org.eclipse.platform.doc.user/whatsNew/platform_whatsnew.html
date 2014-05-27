@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2012, 2013. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2014. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
@@ -12,13 +12,13 @@ table.news tr td.section {font-size: 20px; font-weight: bold;}
 table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
 table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
-<title>Eclipse Platform What's New in Kepler</title>
+<title>Eclipse Platform What's New in Luna</title>
 </head>
 
 <body>
-<h2>What's New in Kepler</h2>
+<h2>What's New in Luna</h2>
 <p>Here are descriptions of some of the more interesting or significant changes 
-made to the Eclipse Platform for the Kepler (4.3) release of Eclipse.</p>
+made to the Eclipse Platform for the Luna (4.4) release of Eclipse.</p>
 <p>
 Plug-in developers will also be interested in the corresponding 
 <a href="../../org.eclipse.platform.doc.isv/whatsNew/platform_isv_whatsnew.html">What's new</a>
@@ -26,177 +26,308 @@ document in the plug-in developer's guide.
 </p>
 
 <!-- ****************** START OF N&N TABLE ****************** -->
-<table class="news" border="0" cellpadding="10" cellspacing="0" width="600">
+<table class="news" border="0" cellpadding="10" cellspacing="0" width="80%">
   <tbody>
 
-  <tr id="detached-sash">
-    <td class="title">Detached windows with sash</td>
+  <tr id="e4-views-1">
+    <td class="title">Contribute E4 Views into the IDE</td>
     <td class="content">
-      When you detach a view or editor into its own separate window, it now
-      has all the capabilities of a normal workbench window. They now support multiple stacks of
-      views separated by sashes with arbitrary layouts. The detached parts will remain synchronized
-      with the master window that they were detached from. This is especially handy for people developing
-      with two or more monitors, so they can spread views across several monitors and keep them synchronized.
-		<p><img src="images/detached-sash.png" alt="Detached window with multiple views separated by sash."/></p>
-    </td>
-  </tr>
-
-  <tr id="trim-drag">
-    <td class="title">Trim dragging</td>
-    <td class="content">
-      You can now drag toolbars to reposition them. 
-      <p><img src="images/trim-drag.png" alt="Dragging a toolbar."/></p>
-      <p>The perspective switcher can also be dragged to the left or right of the window and it will switch to a 
-        vertical orientation.</p>
-	  <p><img src="images/vertical-switcher.png" alt="Dragging perspective switcher to vertical orientation."/></p>
-    </td>
-  </tr>
-
-  <tr id="import-nested">
-    <td class="title">Import nested projects</td>
-    <td class="content">
-      The <b>Import Projects</b> wizard now has an option to continue searching for projects to import
-      recursively within any project it finds. This allows you to import physically nested projects
-      at the same time.
-      <p><img src="images/import-nested.png" alt="Import nested projects."/></p>
-    </td>
-  </tr>
-  
-  <tr id="x-start-on-first-thread">
-    <td class="title">Option to omit <span style="letter-spacing:-0.05em">-XstartOnFirstThread</span></td>
-    <td class="content">
-      If you are launching an SWT program on Mac OS X, you can now selectively add / remove the <code>-XstartOnFirstThread</code> VM argument
-      in the event your VM does not support it. This option can be configured per launch configuration and is available on the standard Arguments
-      tab for Java configurations (Java Application, Eclipse, etc.).
-      <p><img src="images/x-start-on-first-thread.png" alt="New VM preference allowing users to selectively add the -XstartOnFirstThread argument per-configuration"/></p>
-    </td>
-  </tr>
-  
-  <tr id="only-include-exported-entries">
-    <td class="title">Global preference to include exported entries during launching</td>
-    <td class="content">
-      A new global preference has been added so you can only allow exported classpath entries to be used during launching. Previously, this 
-      was only customizable per launch configuration on the default classpath entry on the Java Classpath tab. The new preference does not affect 
-      launch configuration data, so no migration is needed.
-      
+      As part of our goal to remove some of the barriers between e4-based code and the IDE
+      we've just added a new element 'e4view' into the <code>org.eclipse.ui.views</code>
+      extension point. This allows you to declare a new view for the IDE whose implementation
+      is done in the e4 style (i.e. an annotated POJO).
       <p>
-      The new preference can be found on the <b>Java &gt; Debug</b> preference page.</p>
-      <p><img src="images/only-include-exported.png" alt="New global preference to only include exported classpath entries"/></p>
-      
+        <img src="images/new-e4view-extension.png" alt="new extension"/>
+      </p><p>
+        The new type of extension is identical to the original 'view' except for relaxing the
+        requirement that the 'class' implement IViewPart.
+      </p><p>
+        This is the first trial run for this type of extension. Once we are sure we have the pattern
+        correct, we'll make similar changes to other extension points such as <code>org.eclipse.ui.menus</code>.
+      </p><p>
+        For those that are unaware of the e4 way of coding, here's what the implementation of an e4 view
+        looks like:
+      </p>
+      <pre>
+import javax.annotation.PostConstruct;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+public class RealE4View {
+	Label label;
+
+	@PostConstruct
+	void createView(Composite parent) {
+		label = new Label(parent, SWT.BORDER);	
+		label.setText("Testing");
+	}
+
+	@Focus
+	void setFocus() {
+		label.setFocus();
+	}
+}
+      </pre>
+      <p>
+        Note how it's a simple POJO and how few dependencies it has; this has already proven itself as
+        a far more convenient way to write the code and has great advantages in testing (because of its
+        few dependencies).
+      </p>
     </td>
   </tr>
   
-  <tr id="launch-dialog-warnings">
-    <td class="title">Launch configuration dialog can show warnings</td>
+   <tr id="e4-views-2">
+    <td class="title">Tweaking the UX</td>
     <td class="content">
-      Previously, contributors could only set an 'ok' or an 'error' state in their launch configuration tags / groups. Now,
-      contributors can set a warning state with a message for their tabs / groups - possibly warning users about set options
-      that might be problematic, but do not necessarily need to prevent launching.
-      <p><img src="images/lcd-warnings.png" alt="Launch configuration dialog showing warning message / state"/></p>
+      We've finally gotten to the point where we can return and address some of the current pain
+      points you all see when using Eclipse 4. This will be part of our focus for each milestone
+      in Luna...while not necessarily 'New' these changes *are* 'Noteworthy'...;-).
+      <p>
+        First up is fixing how we handle minimized views that are brought up by the framework
+        being hard to dismiss. The most common (and justifiably complained about) use case for
+        this is having the Debug view overlay the editor when it hits a breakpoint. This has
+        been refactored to match the 3.x behavior more closely and should now work as expected.
+      </p><p>
+        Next up will be re-enabling the ability to reorder the perspectives on the perspective bar.
+      </p>
     </td>
   </tr>
   
-   <tr id="performance">
-    <td class="title">Performance enhancements</td>
-    <td class="content">
-      Significant performance enhancements have been made in the Platform user interface in this release. In particular, some applications
-      that were experiencing slow editor opening, closing, and switching are now much faster. Editor selection changes and the <b>Open Resource</b>
-      dialog have also been made faster. A number of leaks have been addressed to avoid long-running applications don't run out of memory.
-      <p><img src="images/speed.jpg" alt="Speedometer"/><br/>
-	  <small>Photographer: YtseJam Photography / Creative Commons Attribution 2.0</small>
-	  </p>
-	</td>
+  <tr id="signed-executables">
+    <td class="title">Signed SDK Executables (for Windows and Mac)</td>
+    <td class="content">Thanks to the efforts of the
+              Eclipse Foundation (see <a
+              href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=388878">bug
+                388878</a>), we now provide signed Windows and Mac
+              executables for the Eclipse SDK. This improves the initial impression of the
+              software, as well as improves security for you, since
+              there is no need to disable "Gatekeeper" or other
+              security measures of the operating systems.
+    </td>
   </tr>
 
-  <tr id="gtk3">
-    <td class="title">SWT for GTK3</td>
+  <tr id="ant-view-collapse-all">
+    <td class="title">Collapse All in Ant view</td>
     <td class="content">
-      32-bit and 64-bit GTK3 have joined the lineup of supported configurations for which SWT and Eclipse are routinely built. This implementation is currently early access. Everyone is encouraged to download and test these new builds, and to log bugs in <a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Platform">bugzilla</a>.
-      <p>Note to load the SWT GTK3 libraries, you must set an environment variable SWT_GTK3 prior to starting Eclipse. (ex. export SWT_GTK3=1)</p>
-      <p><img src="images/gtk3.png" alt="GTK3 Control Example"/></p>  
-	</td>
+    	The Ant view now supports the <b>Collapse All</b> command:
+    	<p>
+    	<img src="images/ant-view.png" alt="The Ant view showing the collapse all action"/>
+    	</p>
+    </td>
   </tr>
 
-  <tr id="ant-augment">
-    <td class="title">Support for the Ant augment task</td>
+  <tr id="reorder-perspectives"> 
+    <td class="title">Perspective re-ordering</td>
     <td class="content">
-      The Ant editor now has support for the Ant
-      <a href="http://ant.apache.org/manual/Tasks/augment.html">
-      <code>augment</code></a> task.  
+      You can now drag and drop the items in the perspective switcher to change the order of your open perspectives.
+    <p><img src="images/move-persp-items.png" alt="moveitems"/></p>
     </td>
   </tr>
   
-  <tr id="open-resource-buttons">
-    <td class="title">Open Resource dialog enhancements</td>
+  <tr id="debug-examples"> 
+    <td class="title">New debugger examples</td>
+    <td class="content"> 
+      New examples have been added to the Platform Debug git repository. The <code>org.eclipse.debug.examples.mixedmode</code> project demonstrates
+      how to use Debug's mixed-mode launching support. The <code>org.eclipse.debug.examples.memory</code> project provides sample content to display
+      in the <b>Memory</b> and <b>Registers</b> views.
+    </td>
+  </tr>
+
+  <tr id="import-filter-conflicts"> 
+    <td class="title">Filter conflicting projects during import</td>
     <td class="content">
-      The <b>Open Resource</b> (<b>Ctrl+Shift+R</b>) dialog now offers direct access to the
-      <b>Show In</b> and <b>Open With</b> menus via drop-down buttons. On platforms that
-      support mnemonics, the buttons are also accessible via <b>Alt+W</b> and <b>Alt+H</b>.
-      <p><img src="images/open-resource-buttons.png" alt=""/></p>
+      When importing existing projects, you can now filter out any
+      conflicting projects (projects that are already present in your workspace).
+      <p><img src="images/import-filter-conflicts-before.png" alt="filter conflicting projects"/></p>
     </td>
   </tr>
   
-  <tr id="whole-word-option">
-    <td class="title">Whole word option on File Search page</td>
+  <tr id="split-editors"> 
+    <td class="title">Split Editors</td>
     <td class="content">
-     The <b>File Search</b> page now allows to search for words via a new option:
-     <p><img src="images/whole-word-option.png" alt=""/></p>
+     Finally, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=8009">Bug 8009</a> has been addressed! You can now split / unsplit
+     the currently active editor. Just use one of the new key bindings
+     supplied in Luna:
+     <ul>
+     <li><b>Ctrl+_</b> splits the editor one above the other</li>
+     <li><b>Ctrl+{</b> splits the editor side by side</li>
+     <li>Re-applying the command to an already split editor reverts it to only have one pane.</li>
+     </ul>
+    <p><img src="images/split_editors.png" alt=""/></p>
+    <p>Try it out on <i>your</i> favorite editor!</p>
     </td>
   </tr>
   
-  <tr id="use-last-page-option">
-    <td class="title">Open Search dialog on last used page</td>
+  <tr id="minimized-stack-option"> 
+    <td class="title">New option for minimized stacks</td>
     <td class="content">
-     The Search dialog can now be configured to open on the last used page, instead of 
-     computing the best matching page based on the current selection:
-     <p><img src="images/use-last-page-option.png" alt=""/></p>
+    We've extended the MinMaxAddon to have two different display modes:
+    <ul>
+    <li>Use Overlays: This is the current mode where showing a view in a
+    minimized stack opens it in a 'fly out', overlaying part of the
+    presentation.</li>
+    <li>Show in the Original Location: This is a new mode that will temporarily put the
+    stack back into the perspective layout while one of its views is active. This
+    has the advantage that the minimized view won't overlay anything in the
+    current presentation (e.g. your editor...).</li>
+    </ul>
+    <p>
+    In order to access the new mode, right-click on the <b>Restore</b> button
+    of a minimized stack and select the <b>Show in the Original Location</b> menu item (see image
+    below). Note that this change is global, so once it's set, all minimized
+    stacks will use the selected mode.</p>
+    <p><img src="images/restore-btn.png" alt=""/></p>
+
+    <p>Here's what the current mode looks like:</p>
+    <p><img src="images/use-overlays.png" alt=""/></p>
+    <p>Here's what the new mode looks like. Note how the editor
+    has been pushed to the right rather than being obscured:</p>
+    <p><img src="images/no-overlays.png" alt=""/></p>
+    <p>
+    We're really interested in your feedback on this! The initial response
+    has been positive enough that we're considering making the non-overlay
+    mode the default. What do you think? (Post your comments on <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=426556">bug 426556</a>).
+    </p>
     </td>
   </tr>
- 
-   <tr id="detect-shared-install-change">
-    <td class="title">Detection of shared install changes</td>
+
+  <tr id="bidi-segments">
+    <td class="title">BIDI segments support for Combo on Windows</td>
     <td class="content">
-	  When running in a read-only folder (also known as shared install) and the read-only
-	  installation has changed (e.g. new plugins installed, new version of Eclipse installed), Eclipse 
-	  will now detect this change and warn that your personal additional plugins have been uninstalled.
-	  A migration wizard will then guide you through the steps to re-install your plug-ins, if they are
-	  still compatible with your other installed software.
-	 <p>This wizard is presented in two situations. First, when a read-only installation is being 
-	 changed (i.e. your application is being updated or plugins are added or removed), second when a new read-only 
-	 installation is run for the first time.</p>
-     <p><img src="images/migration-wizard.png" alt=""/></p>
+      The <code>Combo</code> widget now supports the same <code>SegmentListener</code> API as <code>Text</code>.
+      This allows an application to specify
+      segment boundaries and Unicode Control Characters to use in the segment boundaries.
+      <p>
+      <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet332.java"> 
+      Snippet332</a> shows how to accomplish RTL override in a Combo.
+      </p>
+      <p><img src="images/combo-bidi-segments.png" alt=""/></p>
+      <p>JFace clients can use <code>BidiUtils#applyBidiProcessing(...)</code> to set pre-defined text types.</p>
     </td>
   </tr>
   
-  <tr id="remediation"> 
-    <td class="title">Installation Remediation</td>
+  <tr id="darktheme">
+    <td class="title">Dark theme</td>
     <td class="content">
-	 In order to help you deal with dependency errors while installing software, the various installation wizards now contain 
-	 a new wizard page. This page, called <b>remediation</b>, proposes various solutions in order to help you proceed 
-	 with the installation, even when the exact change you requested is not possible.
+      A new experimental CSS theme based on a community contribution has been added. This popular community
+      theme demonstrates the capabilities of the current CSS styling. This new theme helps the Platform team
+      to continue to improve these capabilities.
+     
+      <p>
+          CSS theming in Eclipse 4 does currently not allow to configure the syntax highlighting in text editors (e.g. 
+          the Java editor), so it is recommended to use the dark theme together with additional settings as for 
+          example provided by the <a href="http://eclipsecolorthemes.org/">Eclipse color theme project</a>.
+       </p>
+       <p>
+      <img src="images/darktheme.png" alt=""/>
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="OpenAsProject">
+    <td class="title">Open as project</td>
+    <td class="content">
+      In the <b>Project Explorer</b>, a folder that contains a <code>.project</code> file and whose related project
+      isn't already in the workspace now shows an <b>Open As Project</b> context menu entry that imports the folder
+      as existing project into the workspace.
+      <p><img src="images/OpenAsProject.png" alt=""/></p>
+    </td>
+  </tr>
+  
+   <tr id="launch-options">
+    <td class="title">Updated launch options</td>
+    <td class="content">
+      The default preference for the fall-back behavior of context-sensitive launching has been changed to launch the previous application.
+      <p>
+      <img src="images/launch-options.png" alt=""/>
+      </p>
+      <p>
+      Existing workspaces that use the "Always launch the previously launched application" option are not affected by this change.
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="css-bridge"> 
+    <td class="title">CSS&nbsp;bridge</td>
+    <td class="content">
+     The CSS support for the 3.x theme element definitions is now available (the CSS bridge), for more details see the following bugs:
+	 <ul>
+	  <li><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419016" target="_blank">Bug 419016</a></li>
+	  <li><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419018" target="_blank">Bug 419018</a></li>
+	  <li><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=429338" target="_blank">Bug 429338</a></li>
+     </ul>
+	 The use cases for the bridge:
+	 <ul>
+		<li>
+			Using the Color and FontDefinitions in the CSS style sheet:
+			<p>
+				<img src="images/css-bridge/using-definitions.png" alt=""/>
+			</p>
+		</li>
+		<li>
+			Overriding of the definitions in the CSS style sheet:
+			<p>
+				<img src="images/css-bridge/overriding-definitions.png" alt=""/>
+			</p>
+		</li>
+		<li>
+			Adding the new definitions with the CSS style sheet:
+			<p>
+				<img src="images/css-bridge/new-definitions.png" alt=""/>
+			</p>
+		</li>
+	 </ul>
+	 The 3.x theme definitions overridden or added in the CSS style sheet are merged with the current 3.x theme.<br/>
+	 After switching the 3.x theme they are re-merged with the new theme.<br/><br/>
+	 The new definitions added with the CSS file (the last use case) are available in the CSS theme that provides it.<br/>
+	 After switching the CSS theme the definitions can be unavailable in the theme registries when the new theme doesn't re-define it.
+	 So using such definitions out of the CSS files, we have to be prepared for such situation and use proper default values in the case when some definitions are missing.
+    </td>
+  </tr>
+  
+  <tr id="theme-association"> 
+    <td class="title">New 'themeAssociation' element of the 'org.eclipse.e4.ui.css.swt.theme' extension&nbsp;point</td>
+    <td class="content">
+     Currently the user is able to connect the CSS theme with proper 3.x theme. After defining the proper association between themes, 
+	 when user changes the CSS theme with the combo in the preference dialog, the proper 3.x theme will be set automatically.
 	 <p>
-	 The picture below shows a screenshot of this page in action. In this particular case the user is trying to install something
-	 that is conflicting with what is installed, and the wizard gives the option to update what is installed so that the installation
-	 can proceed.
-	 </p>
-     <p><img src="images/remediation.png" alt=""/></p>
+		<img src="images/theme-association.png" alt=""/>
+	</p>
+	</td>
+  </tr>
+  
+  <tr id="darktheme-improments">
+    <td class="title">Improvements in the dark theme</td>
+    <td class="content">
+      <p>
+      The dark theme has been customized to work better on Window, Linux and Mac. 
+      </p>
+      <img src="images/darklinux.png" alt="Dark theme improvements"/>
+      <p>
+      The platform also supports that projects can extend existing themes like the dark theme with settings for fitting 
+      syntax coloring. See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=433475">bug 433475</a> for details.
+      </p>
+    </td>
+  </tr>
+  
+  <tr id="ide-icons">
+    <td class="title">Platform icons converted to png files</td>
+    <td class="content">
+      Based on a community contribution, lots of of the existing GIF icons in the Eclipse platform have been replaced by PNG files. This makes Eclipse icons look better on a dark background, as
+      for example the toolbar on Mac OS X or on a dark theme.
+      <p><img src="images/iconupdate.png" alt="New platform icons"/></p>
     </td>
   </tr>
  
-  <tr id="stop-thread">
-    <td class="title">Stop thread from OSGi console</td>
+  <tr id="appmodel-perspective"> 
+    <td class="title">Model dynamics - perspectives</td>
     <td class="content">
-      If a bad plug-in runs into an endless loop, then you usually had to kill the whole Eclipse process.
-      Now, you can launch Eclipse with <code>-console [[host:]port]</code> to get a safety ring.
-      If you're then stuck in an endless loop and Eclipse doesn't respond any more, you can just execute
-      <pre>osgi&gt; threads stop main</pre>
-      at the OSGi prompt. This will send an IllegalStateException to the "main" thread.
-      This is usually enough to stop the endless loop, but keep the Eclipse workbench running.
-      <p>If you don't want to keep a console window around, you can pass a port number (e.g. 12345) after
-      the <code>-console</code> command line argument and later use <code>telnet localhost:12345</code> to connect.</p>
+        The renderer of the application model supports now that the icons of perspectives are exchanged at runtime. Such a change is immediately reflected in the user interface.
     </td>
   </tr>
-
+ 
   <!-- ****************** END OF N&N TABLE ****************** -->
 </tbody>
 </table>

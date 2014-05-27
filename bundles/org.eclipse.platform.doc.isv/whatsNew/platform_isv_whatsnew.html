@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2012, 2013. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2014. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
@@ -12,14 +12,14 @@ table.news tr td.section {font-size: 20px; font-weight: bold;}
 table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
 table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
-<title>Eclipse Platform What's New in Kepler (SWT and Plug-in Developers)</title>
+<title>Eclipse Platform What's New in Luna (SWT and Plug-in Developers)</title>
 </head>
 
 <body>
-<h2>What's New in Kepler</h2>
+<h2>What's New in Luna</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
-made to the Eclipse <a href="#Platform">Platform</a> and
-<a href="#SWT">SWT</a> for the Kepler (4.3) release of Eclipse.
+made to the Eclipse <a href="#Platform">Platform</a>, <a href="#Equinox">Equinox</a> and
+<a href="#SWT">SWT</a> for the Luna (4.4) release of Eclipse.
 </p>
 
 <p>
@@ -30,119 +30,507 @@ section of the Workbench User Guide.
 </p>
 
 <!-- ****************** START OF N&N TABLE ****************** -->
-<table class="news" border="0" cellpadding="10" cellspacing="0" width="600">
+<table class="news" border="0" cellpadding="10" cellspacing="0" width="80%">
 <tbody>
   <!-- ******************** Platform ********************** -->
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  
-  <tr id="e4-api">
-    <td class="title">Initial Eclipse 4 API released</td>
+      
+  <tr id="recenter-command">
+    <td class="title">Improved Recenter command</td>
     <td class="content">
-      The first set of official API based on the new Eclipse Platform 4 architecture is now available. 
-      This is the first step in allowing developers to use the new simpler and more powerful mechanisms 
-      to build Eclipse plug-ins and applications.
-    <p>
-      This API is comprised of two basic concepts:
-    </p><p>
-      <b>The user interface model</b>: The content of this model describes the structure of the user interface.
-      The Eclipse Platform reacts to changes in this model by updating the presentation, and the complete
-      model is now available through the new API.
-    </p><p>
-      Note that the model represents everything on the screen and these elements can be modified
-      by your code (see the example below).
-    </p><p>
-      <b>IEclipseContext / Dependency Injection (DI)</b>: Contexts are containers of UI runtime state
-      including all the available services. The typical Eclipse Platform 4 pattern is that contributions
-      are created and configured through dependency injection based on state and services found in the local
-      context for that model element.
-    </p><p>
-      Here are a few links to more information about the UI Model, the services and DI (the Javadoc and supporting
-      Eclipse documentation will be available before Kepler is released):
-    </p>
-    <ul>
-      <li><a href="http://www.eclipsecon.org/2013/sites/eclipsecon.org.2013/files/FormalAPI.pdf">EclipseCon 2013 API Slides</a></li>
-      <li><a href="http://www.vogella.com/articles/EclipseRCP/article.html">Lars' RCP Tutorial</a></li>
-      <li><a href="http://www.vogella.com/articles/Eclipse4Services/article.html">Lars' Services Tutorial</a></li>
-      <li><a href="http://eclipsesource.com/blogs/2013/04/18/eclipse-4-e4-tutorial-behavior-annotations/">Jonas Helming's DI Tutorials</a></li>
-    </ul>
-    <p>
-      There is quite a lot of information already available for Eclipse Platform 4. While parts of the API are just being
-      formalized now, most of the concepts and API existed in provisional form in previous Eclipse 4 releases.
-    </p><p>
-      Just to give a taste of what working in a modeled UI is all about, here's a code snippet showing
-      how to get a 'standard' Command handler to toggle the visibility of the 'Quick Access' text field
-      that appears in the top trim. First we gain access to the model by getting the MApplication as a
-      'service'. Form there we can access the EModelService and use it to find the model element
-      representing the search in the UI. Then it's just a simple matter of toggling the element's
-      'toBeRendered' flag to get it to (dis)appear.
-    </p>
-    <pre>
-public Object execute(ExecutionEvent e) throws ExecutionException {
-  IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(e);
-  MApplication theApp = (MApplication) window.getService(MApplication.class);
-  MWindow activeWin = theApp.getSelectedElement();
-  EModelService ms = activeWin.getContext().get(EModelService.class);
-  EPartService ps = activeWin.getContext().get(EPartService.class);
-  MToolControl search = (MToolControl) ms.find("SearchField", activeWin);
-  if (search != null) {
-    search.setToBeRendered(!search.isToBeRendered());
-    window.getShell().layout(true, true);
-  }
-  return null;
-}
-      </pre>
+        Like in Emacs, the <b>Recenter</b> command in textual editors now cycles between center, bottom and top.
+    </td>
+  </tr>
+  
+  <tr id="ant-1.9.2-update">
+    <td class="title">Ant 1.9.2</td>
+    <td class="content">
+    	The platform has been updated to use the latest version of Apache Ant (1.9.2). For
+    more information on what is new in Ant 1.9.2, see the official <a href="http://mirror.olnevhost.net/pub/apache//ant/README.html">what's new</a>.
+    </td>
+  </tr>
+    
+   <tr id="ant-bree-update">
+    <td class="title">Platform Ant BREE update</td>
+    <td class="content">
+    	Platform Ant has had a BREE update to require a Java 1.6 compatible execution environment (or newer).
+    </td>
+  </tr>
+    
+  <tr>
+    <td class="title">Platform Debug BREE update</td>
+    <td class="content">
+    	Platform Debug has had a BREE update to require a Java 1.6 compatible execution environment (or newer).
+    </td>
+  </tr>
+  
+  <tr id="batik-1-7">
+    <td class="title">Updated to Batik 1.7</td>
+    <td class="content">The Platform now includes a newer version of Apache Batik, version 1.7.0. 
+    This new version is being used for CSS parsing in the declarative styling engine, and is 
+    notably faster than the previous version.
     </td>
   </tr>
 
-  <tr id="ua-lucene">
-    <td class="title">Migrated to Lucene 3.5</td>
+  <tr id="workspaceLock">
+    <td class="title">Removed WorkspaceLock API</td>
     <td class="content">
-      The Eclipse platform help system has migrated from Lucene 2.9.1 to Lucene 3.5.
-      This change brings improved performance and many bug fixes in help search.
-      Some old help system API related to Lucene has been changed or removed as part
-      of this fix. Refer to the platform 4.3 migration guide for more details.
+      The <code>WorkspaceLock</code> API allowed a special client (usually Platform UI) to
+      hook into the locking protocols used by the workspace implementation. This hook
+      was used to mitigate deadlocks due to interaction with synchronous SWT events,
+      and was never intended to be used by other clients. In the 3.0 release this API
+      was deprecated in favor of a more general API provided by the <code>org.eclipse.core.jobs</code>
+      bundle. Invoking this API has had no effect since the 3.0 release. The specific API
+      being removed includes:
+      <ul>
+        <li>The <code>org.eclipse.core.resources.WorkspaceLock</code> class.</li>
+        <li>The method <code>org.eclipse.core.resources.IWorkspace#setWorkspaceLock</code></li>
+      </ul>
+      Clients that directly use an API listed above should remove any references to it.
     </td>
-  </tr>  
+  </tr>
   
-  <tr id="ant184">
-    <td class="title">Platform updated to Ant 1.8.4</td>
+  <tr id="incrementalProjectBuilder-getRule">
+    <td class="title">Removed IncrementalProjectBuilder#getRule() API</td>
     <td class="content">
-      The platform has been updated to use Apache Ant version 1.8.4. To see what is new in version 1.8.4 you can
-      check the <a href="http://apache.mirrors.tds.net/ant/README.html">Apache Ant what's new</a>.
+      The <code>IncrementalProjectBuilder#getRule()</code> method returned a scheduling rule 
+      that was required for building the project by the builder. This method was intended to be used by the builder framework only.
+      In the 3.6 release this method was deprecated in favor of a more general method <code>IncrementalProjectBuilder#getRule(int, Map)</code>. 
+      The specific API being removed includes:
+      <ul>
+        <li>The method <code>org.eclipse.core.resources.IncrementalProjectBuilder#getRule()</code></li>
+      </ul>
+      Clients that directly call the API listed above should remove any references to it
+      or replace them with calls to <code>IncrementalProjectBuilder#getRule(int, Map)</code>. Clients that implement the API listed
+      above should implement <code>IncrementalProjectBuilder#getRule(int, Map)</code> instead.
     </td>
-  </tr> 
+  </tr>
+   
+  <tr id="eclipse-api"> 
+    <td class="title">EMenuService released as API</td>
+    <td class="content">
+        The <code>EMenuService</code> service has been released as API. RCP clients must adjust their package imports to <code>org.eclipse.e4.ui.services</code>.  
+    </td>
+  </tr>
+   
+  <tr id="os-ubuntu"> 
+    <td class="title">Ubuntu menu integration </td>
+    <td class="content">
+       In cooperation with Canonical, the Platform team worked on the support of Eclipse in Ubuntu 14.04. Ubuntu 14.04 supports the Eclipse 4 menu implementation, which had issues
+       in Ubuntu 13.04 and 13.10. For more details, see bugs <a href="https://bugs.launchpad.net/appmenu-gtk/+bug/613119">Eclipse menu does not render correctly in unity bar</a> and <a href="https://bugs.launchpad.net/ubuntu/+source/unity-gtk-module/+bug/1208019">Eclipse menus doesn't show up in Saucy</a>.
+    </td>
+  </tr>
+
+  <tr id="MLocalizable">
+    <td class="title">MLocalizable mixin interface</td>
+    <td class="content">
+      Changed the way in which localization is done in the application model. While before EOperations (methods) where used to get
+	  a localized value, now volatile, transient, derived, unchangeable EStructuralFeatures are used. Doing this enables to send 
+	  notifications if a localizable value has changed. To mark EClasses who hold localizable informations and to inform them
+	  externally about a changed Locale, the <code>MLocalizable</code> mixin interface is introduced, which contains the single method 
+	  <code>updateLocalization()</code>. This enables to generically search the model for model elements affected by a Locale change and 
+	  force them sending out updates.
+    </td>
+  </tr>
+  
+  <tr id="Locale_Change_Propagation">
+    <td class="title">Locale change propagation</td>
+    <td class="content">
+      Introduced the <code>ILocaleChangeService</code> which need to be used to change a Locale at runtime. Using this service will:
+	  <ol>
+	    <li>Update the Locale in the application context.</li>
+	    <li>Inform all model elements of an application that implement <code>MLocalization</code> about the change.</li>
+	    <li>Post an event via event broker.</li>
+	  </ol>
+    </td>
+  </tr>
+  
+  <tr id="Locale_Change_Consumption">
+    <td class="title">Locale change consumption</td>
+    <td class="content">
+      There are now three ways to get informed about a Locale change:
+	  <ol>
+	    <li>Via event broker by listening to the topic <i>org/eclipse/e4/core/NLS/LOCALE_CHANGE</i></li>
+	    <li>Via dependency injection by getting the value for <code>TranslationService.LOCALE</code> injected (e.g. via method injection)</li>
+	    <li>Via attaching to the model events listening to the newly introduced LOCALIZED-Features</li>
+	  </ol>
+	  <b>Note:</b> The renderers need to be modified to listen to the LOCALIZED-Features, otherwise the Locale change at runtime isn't supported!
+    </td>
+  </tr>
+  
+  <tr id="ResourceBundleProvider">
+    <td class="title">ResourceBundleProvider</td>
+    <td class="content">
+      Introduced the <code>ResourceBundleProvider</code> service to abstract out the reference to <code>BundleLocalization</code> OSGi service.
+	  This way users are able to change how ResourceBundles should be looked up within their Eclipse application, e.g. using class-based 
+	  ResourceBundles, loading translations out of a database, loading ResourceBundles from a server by using a different ResourceBundle.Control.
+	  The default implementation <code>DefaultResourceBundleProvider</code> is internally using <code>BundleLocalization</code> to keep the
+	  known default behaviour.
+    </td>
+  </tr>
+  
+  <tr id="TranslationService">
+    <td class="title">TranslationService update</td>
+    <td class="content">
+      The <code>TranslationService</code>, that is used to localize the application model, had several downsides regarding extensibility.
+	  A lot of code needed to be copied in order to create a custom <code>TranslationService</code> that retrieves translations from a different location 
+	  than the OSGi-ResourceBundle. To make it easier for users to implement a custom <code>TranslationService</code>, the API was modified. The method 
+	  <code>getResourceString(String, ResourceBundle)</code> is moved from <code>BundleTranslationProvider</code> to <code>TranslationService</code> with 
+	  protected visibility, as it contains the logic to retrieve and transform the translation key that is set in the application model. The default
+	  implementation <code>BundleTranslationProvider</code> is now using the <code>ResourceBundleHelper</code> in combination with the 
+	  <code>ResourceBundleProvider</code>. This way the localization of the application model and the localization via new message extension are using 
+	  the same mechanisms. As a small enhancement, this also enables the usage of dot separated keys for translating the application model.
+	  <p>
+	  Also with 4.4 the package <code>org.eclipse.e4.core.services.translation</code> is released as API.
+	  </p>
+    </td>
+  </tr>
+  
+  <tr id="CSSIncludes">
+    <td class="title">CSS includes </td>
+    <td class="content">
+      CSS files for Eclipse can now include other CSS files via the 
+      <code>@import url("platform:/plugin/Bundle-Symbolic-Name/path/file.extension");</code> statement. This allows easy reuse of 
+      existing style sheets.
+    </td>
+  </tr>
+  
+  <tr id="osgi-integration"> 
+    <td class="title">Improved OSGi integration</td>
+    <td class="content">
+        Eclipse implementations can retrieve the OSGI <code>BundleContext</code> via an extended object supplier and the <code>@Inject @OSGiBundle</code> annotations. 
+    </td>
+  </tr>
+  
+  <tr id="code-cleanup"> 
+    <td class="title">Platform code improvements</td>
+    <td class="content">
+       During the last milestones, the platform team has invested in cleaning up the existing codes basis to simplify contributions by new and existing contributors. 
+       For more details, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=420779">bug 420779</a>.
+       During this update, several plug-ins have been upgraded to require Java 1.6 instead of Java 1.4 or Java 1.5.
+    </td>
+  </tr>
+    
+  <tr id="java7-filesystem-fragment">
+    <td class="title">New filesystem fragment for Java 7 API</td>
+    <td class="content">
+      A new filesystem fragment supporting Java 7 file API has been added. The
+      new fragment named <code>org.eclipse.core.filesystem.java7</code> allows
+      to retrieve information about files like attributes, file length,
+      permissions, etc. on operating systems that already have JRE supporting
+      Java 7 API but don't have any native Eclipse filesystem fragment. There are three
+      different types of filesystems supported:
+      <ul>
+        <li>DOS/Windows filesystems,</li>
+        <li>POSIX compliant filesystems, and</li>
+        <li>filesystems that are neither DOS/Windows nor POSIX compliant.</li>
+      </ul>
+      The new fragment will be loaded and used automatically when you run
+      Eclipse with JRE 7 or newer and no native filesystem fragment applicable
+      for your operating system can be found.
+    </td>
+  </tr>
+    
+  
+  <!-- ******************** Equinox ********************** -->
+  <tr>
+    <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
+  </tr>
+  
+  <tr id="framework-update-1">
+    <td class="title">Equinox OSGi framework update</td>
+    <td class="content">
+      The Equinox Framework implementation has been updated to implement the latest
+      API available for the upcoming OSGi R6 Framework specification.  The OSGi
+      R6 Core Framework specification (finalized in March 2014) will contain
+      enhancements in the following areas:
+      <ul>
+         <li> Introduction of Service Scopes to the OSGi Service Registry
+             (<a href="http://www.osgi.org/Specifications/Drafts">RFC 195</a>)
+         </li>
+         <li> Improvements of Weaving Hooks
+             (<a href="http://www.osgi.org/Specifications/Drafts">RFC 191</a>)
+         </li>
+         <li> Clarification of hooks on the system bundle
+             (<a href="http://www.osgi.org/Specifications/Drafts">RFC 198</a>)
+         </li>
+         <li> Native environment namespace
+             (<a href="http://www.osgi.org/Specifications/Drafts">RFC 188</a>)
+         </li>
+         <li> Data Transfer Objects
+             (<a href="http://www.osgi.org/Specifications/Drafts">RFC 185</a>)
+         </li>
+         <li> Addition of FrameworkWiring.findProviders
+         </li>
+      </ul>
+      From an Equinox perspective these are considered incremental enhancements.
+      The enhancements mentioned above are implemented in M1.  A majority of the
+      development effort during this release cycle is focused on refactoring and, in
+      many cases, rewriting the core Equinox Framework implementation to be based on
+      the OSGi generic dependency model.
+      <p>
+      For most consumers and developers this change should not be noticed.  But, as
+      documented in the <a href="http://wiki.eclipse.org/Equinox/Luna_Framework">wiki</a>,
+      there are four main areas of concern that the community should be aware of:
+      </p>
+      <ul>
+         <li>The Framework no longer uses the old Equinox resolver API
+             org.eclipse.osgi.service.resolver internally to resolve bundles.</li>
+         <li>All Equinox Framework specific hook implementations are broken and will
+             need to migrate.</li>
+         <li>Removal of old style plug-in support. A compatibility fragment is available to add the support back.</li>
+         <li>Removal of PlatformAdmin Service Implementation. A compatibility fragment is available to add support back.</li>
+      </ul>
+    </td>
+  </tr>
+  
+  <tr id="framework-update-2">
+    <td class="title">Equinox OSGi framework update</td>
+    <td class="content">
+      The Equinox Framework implementation has been updated to implement the latest
+      API available for the upcoming OSGi R6 Core Framework specification 
+      (to be finalized in March 2014).  Most of these
+      were implemented as part of M1 also.  They are mentioned here again because
+      OSGi has made the RFCs publicly available in a git repository as they are
+      being written.  See the links below for the latest RFC documents:
+      <ul>
+         <li> Introduction of Service Scopes to the OSGi Service Registry
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0195">RFC 195</a>)
+         </li>
+         <li> Improvements of Weaving Hooks
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0191">RFC 191</a>)
+         </li>
+         <li> Clarification of hooks on the system bundle
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0198">RFC 198</a>)
+         </li>
+         <li> Native environment namespace
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0188">RFC 188</a>)
+         </li>
+         <li> Data Transfer Objects
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0185">RFC 185</a>)
+         </li>
+         <li> Extension Bundle Activators - new to M2
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0204">RFC 204</a>)
+         </li>
+         <li> Addition of FrameworkWiring.findProviders - no RFC
+         </li>
+      </ul>
+    </td>
+  </tr>
+   
+  <tr id="framework-update-3">
+    <td class="title">Equinox OSGi framework update</td>
+    <td class="content">
+      The Equinox Framework implementation has been updated to implement the latest
+      API available for the upcoming OSGi R6 Core Framework specification 
+      (to be finalized in March 2014).  See 
+      <a href="http://download.eclipse.org/eclipse/downloads/drops4/S-4.4M2-201309182000/news/#Equinox">Equinox M2 News</a>
+      for the complete list.  The following had some additional functionality added since M2:
+      <ul>
+         <li> Clarification of hooks on the system bundle
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0198">RFC 198</a>).
+             The framework must honor the results of bundle collision hooks when the system
+             bundle context is used to install bundles.
+         </li>
+         <li> Extension Bundle Activators
+             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0204">RFC 204</a>).
+             New API added to allow the Framework to be initialized with a list of
+             framework listeners that can capture errors that occur while initializing the
+             framework.
+         </li>
+      </ul>
+    </td>
+  </tr>
+  
+  <tr id="cm-update">
+    <td class="title">Equinox Configuration Admin update</td>
+    <td class="content">
+      The Equinox Configuration Admin implementation has been updated to implement
+      the OSGi Configuration Admin Service Specification version 1.5.  The previous
+      release of Equinox Configuration Admin implemented version 1.3.
+    </td>
+  </tr>
+  
+  <tr id="region-update-1">
+    <td class="title">Equinox Regions update</td>
+    <td class="content">
+      The Equinox Regions implementation has been updated to take advantage
+      of Extension Bundle Activators
+      (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0204">RFC 204</a>)
+       coming in the OSGi R6 specification.
+      This allows Equinox Regions to insert its isolation model before
+      the framework is launched so that proper region behavior can be
+      established before any bundles are loaded in the framework.
+    </td>
+  </tr>
+  
+  <tr id="region-update-2">
+    <td class="title">Equinox Regions update</td>
+    <td class="content">
+      The Equinox Regions has added a new namespace for sharing bundle lifecycle 
+      operations between regions.  In previous versions of Equinox regions the only way 
+      to share bundle lifecycle operations across different regions was to share complete
+      bundles which also shared all capabilities provided by the bundle.  Now it is
+      possible to use the org.eclipse.equinox.allow.bundle.lifecycle namespace to share
+      only the bundle lifecycle operations between different regions.
+      (see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=418224">bug 418224</a>)
+    </td>
+  </tr>
+ 
+  
+  <tr id="metatype-update">
+    <td class="title">Equinox Metatype update</td>
+    <td class="content">
+      The Equinox Metatype API has been updated to add the methods to
+      get the minimum and maximum values of an attribute definition.
+      (see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=416640">bug 416640</a>)
+    </td>
+  </tr>
+ 
+ <tr> 
+    <td class="title">Framework Trace Options</td>
+    <td class="content">
+      The new OSGi framework implementation now supports many of the 
+      previously supported trace options and adds a few more trace options
+      to help debug issues with the framework.  The following trace options 
+      are now implemented:
+      <dl>
+         <dt>debug/bundleTime</dt>
+           <dd>Prints out timing information for bundle activation</dd>
+         <dt>debug/cachedmanifest</dt>
+           <dd>Debug the caching of bundle headers</dd>
+         <dt>debug/location</dt>
+           <dd>Prints out location service debug information</dd>
+         <dt>debug/startlevel</dt>
+           <dd>Prints out start level service debug information</dd>
+         <dt>monitor/activation</dt>
+           <dd>Monitor persistent bundle activation</dd>
+         <dt>resolver/providers</dt>
+           <dd>Prints out information about matching capabilities returned to the resolver and why any were filtered out</dd>
+         <dt>resolver/hooks</dt>
+           <dd>Prints out information about capabilities or resources that were filtered by resolver hooks</dd>
+         <dt>resolver/uses</dt>
+           <dd>Prints out information about uses constraint violations</dd>
+         <dt>resolver/wiring</dt>
+           <dd>Prints out wiring information after the resolve process completes</dd>
+         <dt>resolver/report</dt>
+           <dd>Prints out the resolution report information</dd>
+         <dt>resolver</dt>
+           <dd>enables all resolver trace options</dd>
+      </dl>
+    </td>
+  </tr>
 
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
-
-  <tr id="xulrunner64">
-    <td class="title">XULRunner on 64-bit Windows</td>
-    <td class="content">The browser widget now supports the embedding of XULRunner on Windows x86_64.</td>
-  </tr> 
-
-  <tr id="bidi">
-    <td class="title">New SWT color constant for hyperlinks</td>
-    <td class="content">
-     A new constant (SWT_COLOR_LINK_FOREGROUND) has been added that returns the native color of hyperlinks on all platforms.
-     <p><img src="images/linkColor.png" alt=""/></p>
+   
+  <tr id="timing-api"> 
+    <td class="title">Added UI timing API</td>
+    <td class="content"> 
+      SWT has added two new events, <tt>SWT.PreEvent</tt> and <tt>SWT.PostEvent</tt>,
+      which are sent before and after all events and async runnables. These events can
+      be used to measure the time spent on processing any events. This 
+      can be useful for detecting slow event listeners. Because of its pervasive effect
+      on all events, this listener should be used with <b>extreme</b> caution.
+      For an example of how this can be used, take a look at the 
+      <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.examples.watchdog">
+      Watchdog</a> plugin in SWT examples.
     </td>
   </tr>
-    
-  <tr id="linkColor">
-    <td class="title">BIDI Text Direction</td>
+     
+  <tr id="gtk3-as-default"> 
+    <td class="title">GTK+ 3 used by default</td>
     <td class="content">
-     New API has been added to allow text direction to be set independent of the widget orientation.
-     Note that this API is currently only implemented on Windows. 
-     <p>For more info see <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet364.java">Snippet 364</a>.
-     </p>
-     <p><img src="images/bidi.png" alt=""/></p>
+      SWT and Eclipse will now use the GTK+ 3 libraries by default on all Linux/Unix platforms,
+      whenever GTK+ 3 is installed and available. Previously SWT defaulted to using GTK+ 2.
+      <p>The GTK+ 3 port of SWT is still early access and you can force Eclipse to use the 
+      more stable GTK+2 port by setting the environment variable SWT_GTK3 to 0, if needed.
+      (For example: export SWT_GTK3=0) </p>
     </td>
   </tr>
+
+  <tr id="styled-text-api"> 
+    <td class="title">Added new API in StyledText to get text selection state</td>
+    <td class="content">
+      <code>StyledText.isTextSelected()</code> can be used to quickly determine whether any text
+      in the widget is selected or not.
+    </td>
+  </tr>
+  
+  <tr id="styledtext-bidi">
+    <td class="title">Set text direction for the <code>StyledText</code> widget on Windows</td>
+    <td class="content">
+      The <code>StyledText</code> widget now supports setting the text direction via the 
+      <code>setTextDirection(int)</code> API on the Windows platform. The <code>setTextDirection 
+      (int)</code> and <code>getTextDirection ()</code> APIs are also added to <code>TextLayout</code> 
+      (implemented only on Windows currently).
+    </td>
+  </tr>
+  
+  <tr id="swt-needs-1.5"> 
+    <td class="title">SWT requires JRE 1.5</td>
+    <td class="content">
+      The SWT project has moved to Java 1.5 compliance level. SWT applications will now require JRE 1.5 or higher to run.
+    </td>
+  </tr>
+  
+  <tr id="swt-xulrunner24"> 
+    <td class="title">SWT Browser now supports XULRunner 24.x</td>
+    <td class="content">
+        An SWT Browser created with style <code>SWT.MOZILLA</code> can now be used with the XULRunner 24.x runtime.
+    </td>
+  </tr>
+  
+  <tr id="sleep-monitor-api"> 
+    <td class="title">Added API for sleep monitoring</td>
+    <td class="content">
+        SWT has added two new events, <code>SWT.Sleep</code> and <code>SWT.Wakeup</code>,
+        which are sent before the <code>Display</code> event loop goes into sleep and after
+        it wakes up from sleep respectively. These events can e.g. be used to monitor the duration
+        of sleep time in SWT applications.
+    </td>
+  </tr>
+  
+  <tr id="swt-webkit">
+    <td class="title">Experimental support for WebKit2 added to the SWT Browser</td>
+    <td class="content">
+      The SWT Browser now has preliminary support for WebKit2. To try it out, create a browser
+      widget with style <code>SWT.WEBKIT</code>, and set the environment variable SWT_WEBKIT2
+      to 1. This is only supported with GTK+ 3.x; if GTK+ 3 is disabled the browser will 
+      fallback to WebKit1.
+    </td>
+  </tr>
+  
+  <tr id="swt-gtk-problem"> 
+    <td class="title">SWT does not work on Linux with GTK+ 3 version &gt; 3.8.x</td>
+    <td class="content">
+        The Linux GTK+ 3 port of SWT is currently broken for GTK+ versions above 3.8.x.
+        This primarily affects users running Fedora 20, Ubuntu 14.04 (Alpha builds), openSUSE 13.1 and any other Linux distributions that bundle GTK+ 3.10.x.
+        In those setups, the launcher will automatically switch back to GTK+ 2.
+        For more details see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=421127">bug 421127</a>.
+    </td>
+  </tr>
+  
+  <tr id="windows-taskbar-grouping">
+    <td class="title">SWT applications will not be grouped together in the Windows taskbar by default</td>
+    <td class="content">
+      SWT does not initialize the <b>AppUserModelID</b> (which is used by Windows for taskbar grouping) 
+      to "SWT" by default anymore. SWT applications which desire to be grouped together in the
+      Windows taskbar should set an appropriate application name before creating the
+      <code>Display</code> object as shown below:
+      <pre>
+		Display.setAppName("APP_NAME"); // APP_NAME will used as AppUserModelID
+		Display display = new Display();
+	  </pre> 
+    </td>
+  </tr>
+  
+  
 
   </tbody>
 <!-- ****************** END OF N&N TABLE ****************** -->
