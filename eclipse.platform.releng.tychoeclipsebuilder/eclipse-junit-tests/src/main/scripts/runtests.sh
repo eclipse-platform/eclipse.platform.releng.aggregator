@@ -111,8 +111,8 @@ echo " = = = End list environment variables in effect = = = ="
 # assuming metacity attaches to "current" display by default (which should have
 # already been set by Hudson). We echo its value here just for extra reference/cross-checks.
 
-echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz):"
-wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep)
+echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz|kwin):"
+wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin" | grep -v egrep)
 echo "Window Manager processes: $wmpss"
 echo
 
