@@ -681,5 +681,60 @@
         
       </build>
     </profile>
+
+    <profile>
+      <id>update-branding-plugins-about.mappings</id>
+      <activation>
+        <file>
+          <exists>${basedir}/about.mappings</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>2.6</version>
+            <executions>
+              <execution>
+                <id>process-about.mappings</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <overwrite>true</overwrite>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}</directory>
+                      <includes>
+                        <include>about.mappings</include>
+                      </includes>
+                      <filtering>true</filtering>
+                    </resource>
+                  </resources>
+                </configuration>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-packaging-plugin</artifactId>
+            <version>${tycho.version}</version>
+            <configuration>
+              <additionalFileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
+                  <includes>
+                    <include>about.mappings</include>
+                  </includes>
+                </fileSet>
+              </additionalFileSets>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
