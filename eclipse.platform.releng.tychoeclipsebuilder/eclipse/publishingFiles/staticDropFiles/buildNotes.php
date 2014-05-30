@@ -18,34 +18,26 @@ if (file_exists("report.txt")) {
   echo "<p><a href=\"report.txt\">Report of changes</a> from previous build.</p>";
 }
 
-
-if (file_exists("buildnotes")) {
-  $hasNotes = false;
-  $aDirectory = dir("buildnotes");
-  while ($anEntry = $aDirectory->read()) {
-    if (($anEntry != "." && $anEntry != "..") && (! preg_match("/\.css/",$anEntry))) {
-      // found something, so we do "have notes"
-      if (! $hasNotes) {
-        echo "<h2>Build Notes</h2>\n";
-        echo "<ul>";
-        $hasNotes=true;
-      }
-      $parts = explode("_", $anEntry);
-      $baseName = $parts[1];
-      $parts = explode(".", $baseName);
-      $component = $parts[0];
-      $line = "<li>Component: <a href=\"buildnotes/$anEntry\">$component</a> ";
-      echo "$line";
-      echo "</li>";
-    }
+# buildnotes.php is not included or linked to, unless the directory 'buildnotes' already exists
+# at top of drop directory. See
+# https://bugs.eclipse.org/bugs/show_bug.cgi?id=436219
+echo "<p>Build notes are used to notify the community of notable issues or changes in a particular build.</p>";
+echo "<p>Committers, see <a =\"https://wiki.eclipse.org/Platform-releng/Platform_Build_Automated#Build_Notes\">Build notes</a> on Eclipse releng wiki for instructions.</p>";
+echo "<ul>";
+$aDirectory = dir("buildnotes");
+while ($anEntry = $aDirectory->read()) {
+  if (($anEntry != "." && $anEntry != "..") && (! preg_match("/\.css/",$anEntry))) {
+    $parts = explode("_", $anEntry);
+    $baseName = $parts[1];
+    $parts = explode(".", $baseName);
+    $component = $parts[0];
+    $line = "<li>Component: <a href=\"buildnotes/$anEntry\">$component</a> ";
+    echo "$line";
+    echo "</li>";
   }
-  if ($hasNotes) {
-    echo "</ul>\n";
-  }
-  echo "<p>Build notes (if any) are used to notify the community of notable issues or changes in a particular build.</p>";
-  echo "<p>Committers, to include build notes for your component, add a file with the pattern buildnotes_&lt;component-name&gt;.html to the root of one of your bundle's source tree.</p>";
-
-  aDirectory.closedir();
+}
+echo "</ul>";
+aDirectory.closedir();
 }
 
 ?>
