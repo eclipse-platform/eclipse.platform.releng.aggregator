@@ -12,17 +12,13 @@ echo "<title>Build Notes for $BUILD_ID </title>";
 <body>
 
 <?php
-if (file_exists("report.txt")) {
-
-  echo "<h2>Change Reports</h2>";
-  echo "<p><a href=\"report.txt\">Report of changes</a> from previous build.</p>";
-}
 
 # buildnotes.php is not included or linked to, unless the directory 'buildnotes' already exists
 # at top of drop directory. See
 # https://bugs.eclipse.org/bugs/show_bug.cgi?id=436219
+echo "<h1>Build Notes for $BUILD_ID </h1>";
 echo "<p>Build notes are used to notify the community of notable issues or changes in a particular build.</p>";
-echo "<p>Committers, see <a =\"https://wiki.eclipse.org/Platform-releng/Platform_Build_Automated#Build_Notes\">Build notes</a> on Eclipse releng wiki for instructions.</p>";
+echo "<p>Committers, see <a href=\"https://wiki.eclipse.org/Platform-releng/Platform_Build_Automated#Build_Notes\">Build notes</a> on Eclipse releng wiki for instructions.</p>";
 echo "<ul>";
 $aDirectory = dir("buildnotes");
 while ($anEntry = $aDirectory->read()) {
@@ -38,7 +34,7 @@ while ($anEntry = $aDirectory->read()) {
 }
 echo "</ul>";
 aDirectory.closedir();
-}
+
 
 ?>
 
