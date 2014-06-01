@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <!--
-        A utility ant script get the eclipse builder from Git, either old one used with 
+        A utility ant script get the eclipse builder from Git, either old one used with
         our PDE builds, or new one used with CBI builds. It includes copying getBaseBuilder.xml
         and runTest2.xml to root of workspace, where subsequent Hudson build steps can easily use them.
-        
-        Hudson jobs can call this script from ant as one of it first build steps. 
-        Such as, start with a wget fetch from CGit (where following $dash; is literally a '-', 
-        it is escaped here just for XML rules against two dashes in a comment); 
-        
+
+        Hudson jobs can call this script from ant as one of it first build steps.
+        Such as, start with a wget fetch from CGit (where following $dash; is literally a '-',
+        it is escaped here just for XML rules against two dashes in a comment);
+
         wget -O getEBuilder.xml &dash;&dash;no-verbose   http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
-        
+
         Then use ant to invoke the functionality. Examples:
-        
+
         ant -f getEBuilder.xml  -DBUILD_KIND=CBI -DbuilderVersion=910fca82df3ea649ba8ee758259561582e13bf8b
 
         ant -f getEBuilder.xml  -DBUILD_KIND=PDE -DbuilderVersion=master -DEBuilderlocal=/home/shared/localcache/
@@ -125,8 +125,8 @@
             unless="builderVersion"
             message="This target needs builderVersion to run" />
 
-        <!-- remove old one, if there, and make sure directory exists for 
-             eventual checkout/copy/globmapper 
+        <!-- remove old one, if there, and make sure directory exists for
+             eventual checkout/copy/globmapper
         -->
         <delete dir="${WORKSPACE}/${folderName}" />
         <mkdir dir="${WORKSPACE}/${folderName}" />
@@ -166,13 +166,13 @@
     <target
         name="checkBuildTech"
         depends="checkBuildTechPDE, checkBuildTechCBI">
-        
+
         <!-- by default, if not set yet, set according to what PDE needs -->
         <property
             name="scmProject"
             value="eclipse.platform.releng.eclipsebuilder" />
 
-        <!-- the desired folder name (made to stay consistent with exisiting scripts, 
+        <!-- the desired folder name (made to stay consistent with exisiting scripts,
              though normally name of scm project -->
         <property
             name="folderName"
@@ -207,7 +207,7 @@
             name="scmProject"
             value="eclipse.platform.releng.eclipsebuilder" />
 
-        <!-- the desired folder name (made to stay consistent with exisiting scripts, 
+        <!-- the desired folder name (made to stay consistent with exisiting scripts,
              though normally name of scm project -->
         <property
             name="folderName"
@@ -261,7 +261,7 @@
 
     </target>
 
-    <!-- specify -DnoEBuildercleanup=true on command line, to have zip and folder left in place, 
+    <!-- specify -DnoEBuildercleanup=true on command line, to have zip and folder left in place,
          such as for debugging or desired to copy the zip to your local cache.
     -->
     <target
@@ -281,9 +281,9 @@
         <echo message="Cleaned temporary working copies" />
 
     </target>
-    
-    <!-- Will leave here for now, though doesn't add much. It used to have an additional 
-        "fetch from cvs task" (That is, we had three choices: local, git, cvs). 
+
+    <!-- Will leave here for now, though doesn't add much. It used to have an additional
+        "fetch from cvs task" (That is, we had three choices: local, git, cvs).
     -->
     <target
         name="fetchEBuilder"

@@ -15,28 +15,28 @@
 	<antcall target="generateIndex" />
 	<antcall target="getStaticFiles" />
 </target>
-	
+
 <target name="generateIndex">
- 
+
   <property name="class" value="org.eclipse.releng.generators.TestResultsGenerator" />
   <taskdef name="indexResults" classname="${class}" />
-   
+
 <!--
 	isBuildTested:  true|false  should JUnit plugin test results be used to generate index page
 	dropTokenList:  comma separated list of strings which should be replaced by the fileName attribute settings in the testManifest.xml.
 	xmlDirectoryName:  path to directory containing JUnit plugin test results in xml format (see doc is org.eclipse.test).
 	dropDirectoryName: path to directory containing the result of the build.
-	testResultsTemplateFileName:  path to template file used to generate page with links to JUnit test results	
+	testResultsTemplateFileName:  path to template file used to generate page with links to JUnit test results
 	testResultsHtmlFileName:  name of file which will be generated with links to JUnit test results
 	dropHtmlFileName:  name of generated index page
 	hrefTestResultsTargetPath:  relative path from index page to directory containing JUnit html test results
 	hrefCompileLogsTargetPath:  relative path from index page directory containing compilelogs
 	testManifestFileName:	name of xml file containing descriptions of zip types and log files
 
-	
-	
+
+
 -->
-	
+
 	<property name="xmlDirectoryName" value="${result}/testresults/xml" />
 	<property name="dropDirectoryName" value="${result}" />
 	<property name="testResultsTemplateFileName" value="${basedir}/templateFiles/testResults.php.template" />
@@ -48,8 +48,8 @@
 	<property name="compileLogsDirectoryName" value="${result}/compilelogs" />
 	<property name="testManifestFileName" value="${basedir}/testManifest.xml" />
 
-	
-  <indexResults 
+
+  <indexResults
     isBuildTested="${isBuildTested}"
     buildType="${buildType}"
     dropTokenList="${dropTokenList}"
@@ -68,25 +68,25 @@
   />
 
 
-    
+
     <!--  Insert Build Name ... apparently still required, until we can update indexing task directly -->
     <replace file="${result}/${indexFileName}" token="@build@" value="${buildId}"/>
 
-    
+
     <replace dir="${result}" value="${buildId}">
       <include name="**/*.php"/>
       <replacetoken><![CDATA[@build@]]></replacetoken>
     </replace>
-    
+
     <replace file="${result}/${indexFileName}" token="@buildlabel@" value="${buildId}"/>
 
     <replace dir="${result}" value="${buildId}">
       <include name="**/*.php"/>
       <replacetoken><![CDATA[@buildlabel@]]></replacetoken>
     </replace>
-    
-    <!-- TODO: fix so these replace's are not required -->    
-    
+
+    <!-- TODO: fix so these replace's are not required -->
+
 </target>
 
 
@@ -95,12 +95,12 @@
 	<copy todir="${result}">
 		<fileset dir="staticDropFiles" />
 	</copy>
-	
+
 	<!--copy buildnotes from plugin directories-->
 	<mkdir dir="${result}/buildnotes" />
 	<copy todir="${result}/buildnotes" flatten="true">
 		<fileset dir="${buildDirectory}/plugins" includes="**/buildnotes_*.html" />
 	</copy>
 </target>
-	
+
 </project>

@@ -5,16 +5,16 @@
         name="processArtifacts"
         depends="doRemoves,doMirror">
 
-        <!-- if not specified, assume doPack = false ... maintains default behavior, if nothing done --> 
+        <!-- if not specified, assume doPack = false ... maintains default behavior, if nothing done -->
         <property name="doPack" value="false" />
 
-        <!-- 
-             This call is to get MD5 hash sums included. We do NOT call pack, since 
+        <!--
+             This call is to get MD5 hash sums included. We do NOT call pack, since
              already should be packed, where appropriate.
              This is a work around we can likely remove eventually. See bug 406263.
-             For PATCH_BUILDs we call twice, once with doPack=false, (do we can do zip file, 
-             without pack.gz files, and a second time, with doPack=true, for 
-             better access via http.  
+             For PATCH_BUILDs we call twice, once with doPack=false, (do we can do zip file,
+             without pack.gz files, and a second time, with doPack=true, for
+             better access via http.
         -->
         <p2.process.artifacts pack="${doPack}" repositoryPath="file://${siteDirOnBuildMachine}" />
 
@@ -32,11 +32,11 @@
             needed in final repo -->
 
         <!--
-           Note: There should be only one category to remove, the "Uncategorized" one that Tycho 
-           always creates (see bug 404103) so if there is ever any we want to leave, 
+           Note: There should be only one category to remove, the "Uncategorized" one that Tycho
+           always creates (see bug 404103) so if there is ever any we want to leave,
            we'll need to make the final iu query more exact.
-           See bug 406389 for why we remove rcp.configuration.feature ... 
-           it too is a "build time" mechanism, but not valid to install. 
+           See bug 406389 for why we remove rcp.configuration.feature ...
+           it too is a "build time" mechanism, but not valid to install.
         -->
         <p2.remove.iu>
             <repository location="file://${siteDirOnBuildMachine}" />
@@ -53,20 +53,20 @@
             name="repositoryDir"
             value="/shared/webtools/committers/wtp-R3.3.0-I/20101209114749/S-3.3.0M4-20101209114749/repository" />
 
-       <!-- 
-            Note: we mirror first (with comparator) to leave original repository in build machines 
-            drop directory untouched. That allows for emergency "redos" without rebuilding, plus, 
-            in case there are differences, it 
-            allows an easy way to compare "old" with "new" (at least for a few days), until 
-            build drop is cleaned off. 
+       <!--
+            Note: we mirror first (with comparator) to leave original repository in build machines
+            drop directory untouched. That allows for emergency "redos" without rebuilding, plus,
+            in case there are differences, it
+            allows an easy way to compare "old" with "new" (at least for a few days), until
+            build drop is cleaned off.
        -->
-       
-       <!-- 
-            We run this mirror task, rather than a straight copy, in order to 
-            do a sanity check with traditional comparator. There should be few differences 
-            from buildtime comparator log, but might be some special cases, such as when 
-            third party jars change. See 
-            https://bugs.eclipse.org/bugs/show_bug.cgi?id=402448 
+
+       <!--
+            We run this mirror task, rather than a straight copy, in order to
+            do a sanity check with traditional comparator. There should be few differences
+            from buildtime comparator log, but might be some special cases, such as when
+            third party jars change. See
+            https://bugs.eclipse.org/bugs/show_bug.cgi?id=402448
        -->
         <echo message="Mirroring main repo: ${repositoryDir}" />
         <echo message="   to build machine location: ${siteDirOnBuildMachine}" />

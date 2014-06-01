@@ -37,5 +37,5 @@ do
   echo [sha1] ${jarfile}
   sha1sum -b ${jarfile} > checksum/${jarfile}.sha1
   echo [sha512] ${jarfile}
-  sha512sum -b ${jarfile} > checksum/${jarfile}.sha512  
+  sha512sum -b ${jarfile} > checksum/${jarfile}.sha512
 done

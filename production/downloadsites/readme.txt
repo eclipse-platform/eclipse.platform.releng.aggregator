@@ -12,10 +12,10 @@ is on the downlaod server, so its recommended, before making changes,
 to get a copy, manually compare with that's here, to see if things
 have changed but not be put into the repository.
 
-Something similar to following is a good way to get all the interesting files for /eclipse/downloadsites, 
-while avoiding the large download drops. index.html and eclipse3x.html are the 
-files created when new drops are uploaded, via "updateIndexes.sh" in sdk directory, 
-so are excluded, since would often be "out of date" and 
+Something similar to following is a good way to get all the interesting files for /eclipse/downloadsites,
+while avoiding the large download drops. index.html and eclipse3x.html are the
+files created when new drops are uploaded, via "updateIndexes.sh" in sdk directory,
+so are excluded, since would often be "out of date" and
 should not be replaced on downloads (via rsync) but instead recreated.
 
 rsync -aP --delete-excluded \
@@ -23,13 +23,13 @@ rsync -aP --delete-excluded \
   --exclude '**/e4/' --exclude '**/updates/' \
   --include '/index.html' --include '**/drops/index.html'  --include '**/drops4/index.html'  \
   --exclude '**/drops/**' --exclude '**/drops4/**' --exclude 'downloads/index.html' --exclude '**/downloads/eclipse3x.html' \
-  build:/home/data/httpd/download.eclipse.org/eclipse/ . 
-  
-To upload whole directory, do not include --delete-excluded (Could likely not do with out any 
-of the excludes/includes, if working with "clean" directory). 
+  build:/home/data/httpd/download.eclipse.org/eclipse/ .
+
+To upload whole directory, do not include --delete-excluded (Could likely not do with out any
+of the excludes/includes, if working with "clean" directory).
 
 rsync -aP \
-  . build:/home/data/httpd/download.eclipse.org/eclipse/ 
+  . build:/home/data/httpd/download.eclipse.org/eclipse/
 
 == Similar for equinox
 
@@ -40,15 +40,15 @@ rsync -aP --delete-excluded \
 
 == Similar for "updates"
 
-The files are the "categories" displayed for the composites sites, such as for 
+The files are the "categories" displayed for the composites sites, such as for
 Kepler sites, such as :
 http://download.eclipse.org/eclipse/updates/4.3/
 http://download.eclipse.org/eclipse/updates/4.3-M-builds/
-and 
+and
 Luna sites, such as :
 http://download.eclipse.org/eclipse/updates/4.4/
 http://download.eclipse.org/eclipse/updates/4.4-I-builds/
 http://download.eclipse.org/eclipse/updates/4.4-N-builds/
 
-As for download sites, there's nothing here that's built or automatically updated, 
-but the files are in in this repo for reference and/or easier review, modification, and to maintain history. 
+As for download sites, there's nothing here that's built or automatically updated,
+but the files are in in this repo for reference and/or easier review, modification, and to maintain history.

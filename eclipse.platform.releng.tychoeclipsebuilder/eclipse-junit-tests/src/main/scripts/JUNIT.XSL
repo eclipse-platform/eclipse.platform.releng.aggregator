@@ -140,7 +140,7 @@
             return curtop;
           }
         }
-        
+
         function keyHandler(e) {
           if (typeof(e) == "undefined") {
             e = event;
@@ -153,7 +153,7 @@
             }
           }
         }
-        
+
         function jumpToNextError(forward) {
           if (typeof(document.getElementsByClassName) == "undefined") {
             document.getElementsByClassName = function (className) {
@@ -202,10 +202,10 @@
           if (target) {
             target.scrollIntoView();
           }
-          
+
           return false;
         }
-        
+
         document.onkeydown = keyHandler;
       ]]>
       </script>

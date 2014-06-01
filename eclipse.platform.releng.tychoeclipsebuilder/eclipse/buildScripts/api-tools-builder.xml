@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- ====================================================================== 
-     Jun 4, 2013 11:06:50 AM                                                        
+<!-- ======================================================================
+     Jun 4, 2013 11:06:50 AM
 
-     API Tools builder integration    
+     API Tools builder integration
      This buildfile calls all of the post-build Ant tasks
-     
+
      This buildfile requires the apitooling-ant.jar and the api-tasks.properties file
      from the org.eclipse.pde.api.tools bundle
-                   
-     mrennie                                                                
+
+     mrennie
      ====================================================================== -->
 <project
   name="API Tools builder integration"
   default="apiToolsReports">
-	
 
-	
+
+
 	<!--
 		The default target that calls apitooling.apifreeze, apitooling.analysis and apitooling.apideprecation
 		and their respective _reportconversion tasks
@@ -24,7 +24,7 @@
     name="apiToolsReports"
     depends="init">
 
-        
+
 		<!-- make a dir to place the XML and HTML output in, per build -->
     <property
       name="report"
@@ -37,7 +37,7 @@
     <property
       name="freeze_html"
       value="${report}/freeze_report.html" />
-		
+
 		<!-- grab the currently built + zipped build -->
     <property
       name="current_location"
@@ -47,7 +47,7 @@
     <property
       name="baseline"
       value="${reference}/${previousBaselineFilename}" />
-        
+
 		<!-- create properties for the filters -->
     <property
       name="exclude_list_location"
@@ -55,16 +55,16 @@
     <property
       name="exclude_list_external_location"
       value="${EBuilderDir}/eclipse/apiexclude/exclude_list_external.txt" />
-		
+
 		<!-- run the freeze task -->
     <antcall target="dofreezeReport" />
-		
+
 		<!-- create the Ant filterstore directory -->
     <property
       name="filter_store"
       value="${buildDirectory}/${buildLabel}/apifilters" />
     <mkdir dir="${filter_store}" />
-		
+
 		<!-- copy all of the .api_filters files out of the plugins from their source -->
     <copy todir="${filter_store}">
       <fileset
@@ -74,7 +74,7 @@
         from=".*(org.eclipse.*\/)(\.settings\/)(\.api_filters)"
         to="\1\3" />
     </copy>
-		
+
 		<!-- create a zip of API filters -->
     <property
       name="apifilterzip"
@@ -84,7 +84,7 @@
       dir="${report}">
       <arg line="-r ${apifilterzip} ${filter_store}" />
     </exec>
-		
+
 		<!-- create HTML output directory -->
     <property
       name="analysis_html"
@@ -92,7 +92,7 @@
     <property
       name="analysis_report"
       value="${report}/analysis/xml" />
-        
+
 		<!-- run the analysis -->
     <apitooling.analysis
       baseline="${baseline}"
@@ -112,7 +112,7 @@
     <property
       name="deprecation_html"
       value="${report}/deprecation/apideprecation.html" />
-        
+
 		<!-- run the deprecation tasks -->
     <apitooling.apideprecation
       baseline="${baseline}"
@@ -129,7 +129,7 @@
     name="init"
     unless="apitoolinginitialized"
     depends="getfreezereference">
-        
+
         <!-- The name for the build - i.e. I20130603-2000 -->
     <fail
       unless="buildLabel"
@@ -140,9 +140,9 @@
     <fail
       unless="previousBaselineFilename"
       message="previousBaselineFilename must be provided" />
-        
-        <!-- 
-          The ?on-disk? location of the previous Eclipse build - for example Eclipse 4.2.2 
+
+        <!--
+          The ?on-disk? location of the previous Eclipse build - for example Eclipse 4.2.2
           If not defined, assume same as file name ... otherwise, assume can be used for "human readable name"?
         -->
     <property
@@ -151,13 +151,13 @@
 
     <fail
       unless="previousBaseURL"
-      message="full URL of previous build must be provided" /> 
-        
+      message="full URL of previous build must be provided" />
+
     <!-- Default buildDirectory -->
     <fail
       unless="buildDirectory"
       message="buildDirectory much be provided" />
-        
+
     <!-- a dir to extract previous baselines in ... remember not to copy apitoolingreference to downloads -->
     <property
       name="reference"
@@ -167,7 +167,7 @@
     <get
       dest="${reference}"
       src="${previousBaseURL}" />
-    <!-- no need to unzip?   
+    <!-- no need to unzip?
     <unzip
       src="${reference}/${previousBaselineFilename}"
       dest="${reference}" />
@@ -178,7 +178,7 @@
       value="true" />
 
   </target>
-    
+
     <!-- there will not always be a freeze report, only after M6 -->
   <target
     name="getfreezereference"
@@ -200,14 +200,14 @@
     <get
       dest="${freezereference}"
       src="${freezeBaseURL}" />
-    <!-- no need to unzip? 
+    <!-- no need to unzip?
     <unzip
       src="${freezereference}/${freezeFilename}"
       dest="${freezereference}" />
     -->
 
   </target>
-    
+
     <!-- there will not always be a freeze report, only after M6 -->
   <target
     name="dofreezeReport"

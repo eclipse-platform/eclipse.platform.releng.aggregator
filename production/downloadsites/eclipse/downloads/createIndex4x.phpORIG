@@ -1,4 +1,4 @@
-<?php  
+<?php
 # Begin: page-specific settings.  Change these.
 $pageTitle    = "Eclipse Project Downloads";
 $pageKeywords = "";
@@ -27,7 +27,7 @@ case 'html':
 <link rel="stylesheet" href="../default_style.css" />
 <title><?php echo $pageTitle;?></title></head>
 <body><?php
-        break;   
+        break;
 default:
     #Otherwise use the default layout (content printed inside the nova theme).
     require_once($_SERVER['DOCUMENT_ROOT'] . "/eclipse.org-common/system/app.class.php");
@@ -36,7 +36,7 @@ default:
     $App  = new App();
     $Nav  = new Nav();
     $Menu   = new Menu();
-    break;     
+    break;
 }?>
 <div class="container_<?php echo $layout;?>">
 <table style="border:0px" cellspacing="5" cellpadding="2" width="100%" >
@@ -95,7 +95,7 @@ builds</a>, access <a href="http://archive.eclipse.org/eclipse/downloads/">archi
 <?php
 
     function startsWithDropPrefix($dirName, $dropPrefix)
-    { 
+    {
 
         $result = false;
         // sanity check "setup" is as we expect
@@ -104,7 +104,7 @@ builds</a>, access <a href="http://archive.eclipse.org/eclipse/downloads/">archi
             if (isset($dirName) && strlen($dirName) > 0) {
                 $firstChar = substr($dirName, 0, 1);
                 //echo "first char: ".$firstChar;
-                foreach($dropPrefix as $type) { 
+                foreach($dropPrefix as $type) {
                     if ($firstChar == "$type") {
                         $result = true;
                         break;
@@ -132,7 +132,7 @@ function runTestBoxes($buildName, $testResultsDirName) {
     if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
         // be sure any previous are reset
         unset ($BUILD_FAILED);
-        include "$subdirDrops/$buildName/buildproperties.php"; 
+        include "$subdirDrops/$buildName/buildproperties.php";
         if (isset ($BUILD_FAILED) && strlen($BUILD_FAILED) > 0) {
             $boxes=-1;
             unset ($BUILD_FAILED);
@@ -140,7 +140,7 @@ function runTestBoxes($buildName, $testResultsDirName) {
     }
     if ($boxes != -1)  {
 
-        // TEMP? appears "old style" builds had directories named "results", but now "testresults" 
+        // TEMP? appears "old style" builds had directories named "results", but now "testresults"
         // and we want to look in $testResultsDirName/consolelogs
         if (file_exists("$subdirDrops/$buildName/$testResultsDirName/consolelogs")) {
             $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName/consolelogs");
@@ -223,14 +223,14 @@ function printBuildColumns($fileName, $parts) {
         // always put in links, since someone may want to look at logs, even if not tests results, per se
         // don't forget to end link, after images decided.
         $boxesTitle="";
-        if ($boxes > -1) { 
+        if ($boxes > -1) {
             $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
         }
         if ($testResultsDirName === "results") {
             echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
         } else {
             echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
-        }   
+        }
 
         if ($boxes == -1) {
             $testimage="caution.gif";
@@ -255,7 +255,7 @@ function printBuildColumns($fileName, $parts) {
             $testalt="Integration tests are running ...";
         }
         echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-        if ($boxes > -1) { 
+        if ($boxes > -1) {
             echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
         }
         echo "</a>\n";
@@ -324,16 +324,16 @@ while ($anEntry = $aDirectory->read()) {
                 $day = substr($timePart, 6, 2);
                 $hour = substr($timePart,8,2);
                 $minute = substr($timePart,10,2);
-                // special logic adds 1 second if build id contains "RC" ... this was 
-                // added for the M build case, where there is an M build and and RC version that 
+                // special logic adds 1 second if build id contains "RC" ... this was
+                // added for the M build case, where there is an M build and and RC version that
                 // have same time stamp. One second should not effect desplayed values.
                 $isRC = strpos($anEntry, "RC");
                 if ($isRC === false) {
                     $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-                } else { 
+                } else {
                     $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
                 }
-                $buckets[$parts[0]][$timeStamp] = $anEntry; 
+                $buckets[$parts[0]][$timeStamp] = $anEntry;
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
                 // latestTimeStamp will not be defined, first time through
                 if (!isset($latestTimeStamp) || !array_key_exists($parts[0],$latestTimeStamp)  || $timeStamp > $latestTimeStamp[$parts[0]]) {
@@ -356,10 +356,10 @@ while ($anEntry = $aDirectory->read()) {
                 $isRC = strpos($anEntry, "RC");
                 if ($isRC === false) {
                     $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
-                } else { 
+                } else {
                     $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
                 }
-                $buckets[$buildType[0]][$timeStamp] = $anEntry;   
+                $buckets[$buildType[0]][$timeStamp] = $anEntry;
 
                 $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
 

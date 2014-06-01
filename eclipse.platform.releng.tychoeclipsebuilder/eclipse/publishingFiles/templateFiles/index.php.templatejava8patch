@@ -106,7 +106,7 @@ if (file_exists("pom_updates/index.html")) {
 }
 ?>
 <?php
-// check if test build only, just to give warning of oversite. 
+// check if test build only, just to give warning of oversite.
 // see bug 404545
 if (isset($testbuildonly) && ($testbuildonly)) {
     echo "<tr><td width=\"75%\">\n";
@@ -135,18 +135,18 @@ if (isset ($BUILD_FAILED) ) {
         echo "Specifically, see <a href=\"buildlogs/$SPECIFIC_LOG\">the log with errors</a>, \n";
         echo "or a <a href=\"$summaryFile[0]\">summary</a>. <br /> \n";
         echo "Or see traditional <a href=\"testResults.php\">Compile Logs</a> (if any). \n";
-    } 
+    }
     echo "</td><tr>";
     // early end to table, since build failed is all we'll print.
     echo "</table>";
-    
-    
+
+
 }
 else {
 ?>
             <tr>
                                 <td width="75%">
-                The page provides access to 
+                The page provides access to
                 Eclipse Java 8 Support (BETA) - This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP.
                                 </td>
                         </tr>
@@ -154,11 +154,11 @@ else {
 
 
                 <div>
-    <table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" > 
+    <table BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%" >
 <?php
 //$servername = $_SERVER["SERVER_NAME"];
 if (! preg_match("/.eclipse.org/i",$servername)) {
-    echo "<tr> To download a file via HTTP click on its corresponding http link below.";			
+    echo "<tr> To download a file via HTTP click on its corresponding http link below.";
 } else {
     echo "<tr>";
 } ?>
@@ -173,15 +173,15 @@ if (! preg_match("/.eclipse.org/i",$servername)) {
     //$testResultsStatus = "%testsStatus%";
     // for PATCH_BUILDS, no tests
     $testResultsStatus = "";
-    
+
 if($testResultsStatus === "pending") {
     echo "<li><a title=\"Tests are pending\" href=\"testResults.php\">View the <b>test results</b> for the current build.</a></li>";
 }
 else if($testResultsStatus === "successful") {
-    echo "<li><a title=\"Test results have no failures\" href=\"testResults.php\">View the <b><font color=\"#00FF00\">test results</font></b> for the current build.</a></li>";	
+    echo "<li><a title=\"Test results have no failures\" href=\"testResults.php\">View the <b><font color=\"#00FF00\">test results</font></b> for the current build.</a></li>";
 }
 else if($testResultsStatus === "failed") {
-    echo "<li><a title=\"Test results have failures\" href=\"testResults.php\">View the <b><font color=\"#FF0000\">test results</font></b> for the current build.</a></li>";	
+    echo "<li><a title=\"Test results have failures\" href=\"testResults.php\">View the <b><font color=\"#FF0000\">test results</font></b> for the current build.</a></li>";
 }
 else {
     echo "<li><a href=\"testResults.php\">View the <b>test results</b> for the current build.</a></li>";
@@ -251,7 +251,7 @@ function genLinks($servername,$BUILD_ID,$zipfile) {
     echo "<td><a href=\"./checksum/$zipfile.md5\">(md5)</a>";
     echo " <a href=\"./checksum/$zipfile.sha1\">(sha1)</a>";
 }
-?>	
+?>
 
 <table align="left" BORDER=0 CELLSPACING=5 CELLPADDING=2 WIDTH="100%">
 
@@ -266,10 +266,10 @@ $STREAM_MINOR = $streamArr[1];
 $STREAM_SERVICE = $streamArr[2];
 
 // We expect $BUILD_ID to be defined in buildproperties.php
-// But it can be defined several times in reference URI, such as once in directory name, 
+// But it can be defined several times in reference URI, such as once in directory name,
 // and once in filename. We want the directory-like part.
-// And to complicate things, in S and R builds, the segment is no longer BUILD_ID, 
-// but a more complicated concatination. 
+// And to complicate things, in S and R builds, the segment is no longer BUILD_ID,
+// but a more complicated concatination.
 if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_TYPE === "M" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y") {
     $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
 } else {
@@ -281,13 +281,13 @@ if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_
         }
         else {
             echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />";
-            // We'll make an assumption that might work. 
+            // We'll make an assumption that might work.
             $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
         }
     }
 }
 
-// assuming "patch_build" means on build machine only, for now. 
+// assuming "patch_build" means on build machine only, for now.
 if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
    $STREAM_REPO_URL="http://build.eclipse.org/eclipse/builds/4P/siteDir/updates/".$STREAM_REPO_NAME;
 } else {
@@ -296,7 +296,7 @@ if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
 $pos = strpos($BUILD_ID, "RC");
 if ($pos === false) {
     $isRC = false;
-} else { 
+} else {
     $isRC = true;
 }
 
@@ -309,19 +309,19 @@ if ($BUILD_TYPE === "N" || $BUILD_TYPE === "P" || $BUILD_TYPE === "I" || $BUILD_
         $BUILD_REPO_NAME=$STREAM_REPO_NAME."/".$BUILD_TYPE."-".$BUILD_ID."-".$timestamp;
     } else {
         echo "Unexpected value of BUILD_TYPE: $BUILD_TYPE. <br />\n";
-        // We'll make an assumption that might work. 
+        // We'll make an assumption that might work.
         $BUILD_REPO_NAME=$STREAM_REPO_NAME."/".$BUILD_ID;
     }
 }
 
-// assuming "patch_build" means on build machine only, for now. 
+// assuming "patch_build" means on build machine only, for now.
 if ( (isset($PATCH_BUILD)) && (strlen($PATCH_BUILD) > 0) ) {
    $BUILD_REPO_URL="http://build.eclipse.org/eclipse/builds/4P/siteDir/updates/".$BUILD_REPO_NAME;
 } else {
    $BUILD_REPO_URL="http://download.eclipse.org/eclipse/updates/".$BUILD_REPO_NAME;
 }
-// checking for existence is especially important for BUILD_REPOs, since they might have been removed. 
-// but we do it here too for sanity check. 
+// checking for existence is especially important for BUILD_REPOs, since they might have been removed.
+// but we do it here too for sanity check.
 if ($servername === "build.eclipse.org") {
     $relativePath="../../../../";
 }
@@ -333,7 +333,7 @@ if (file_exists("$relativePath/updates/".$STREAM_REPO_NAME)) {
     echo "<p>To update your Eclipse installation to this development stream, you can use the software repository at<br />\n";
     echo "&nbsp;&nbsp;<a href=\"$STREAM_REPO_URL\">$STREAM_REPO_URL</a><br />\n";
     echo "</tr> \n";
-} 
+}
 if (file_exists("$relativePath/updates/"."$BUILD_REPO_NAME")) {
     echo "<tr> \n";
     echo "<p>To update your build to use this specific build, you can use the software repository at<br />\n";
@@ -348,11 +348,11 @@ if (file_exists("$relativePath/updates/"."$BUILD_REPO_NAME")) {
 <h3><a name="Zipped Repo"> Zipped Repository (patch only)&nbsp;<a href="details.html#ZippedRepo"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
 <tr> <td align=RIGHT valign=TOP width="5%"> <div align="left"><b>&nbsp;</b></div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
-</tr> 
+</tr>
 
 <tr><td>&nbsp;</td>
 <td>Zipped Repo </td><td><?php genLinks($_SERVER["SERVER_NAME"],$BUILD_ID,"java8patch-$BUILD_ID-repository.zip"); ?></td>
-</tr> 
+</tr>
 
 </table>
 

@@ -39,8 +39,8 @@ then
 fi
 echo "Renaming build $oldname to $newdirname with $newlabel"
 
-#be sure to do "long string" first, since "sort string" will also 
-# match it. 
+#be sure to do "long string" first, since "sort string" will also
+# match it.
 #https://bugs.eclipse.org/bugs/show_bug.cgi?id=435671#7
 
 # specific "replaces" to make sure checksums URLs are correct for equinox
