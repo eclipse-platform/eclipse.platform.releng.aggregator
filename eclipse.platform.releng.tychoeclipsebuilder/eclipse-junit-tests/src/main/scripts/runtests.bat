@@ -58,7 +58,7 @@ echo Specified extdirs (if any): %extdirprop%
 
 :run
 REM ***************************************************************************
-REM	Run tests by running Ant in Eclipse on the test.xml script
+REM  Run tests by running Ant in Eclipse on the test.xml script
 REM ***************************************************************************
 REM get name of org.eclipse.equinox.launcher_*.jar with version label
 dir /b eclipse\plugins\org.eclipse.equinox.launcher_*.jar>launcher-jar-name.txt

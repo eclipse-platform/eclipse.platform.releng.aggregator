@@ -1,10 +1,10 @@
 <project name="Publish Build" default="default">
 
 <!-- Properties that must be passed to this script:
-	buildDirectory: Path to perform the build in.  (A working directory)
-	buildType:		Type of build (nightly, integration etc.)
-	buildId:		Build name
-	buildLabel:		<buildType>-<buildName>-<timestamp>
+  buildDirectory: Path to perform the build in.  (A working directory)
+  buildType:    Type of build (nightly, integration etc.)
+  buildId:    Build name
+  buildLabel:    <buildType>-<buildName>-<timestamp>
 -->
 <property name="result" value="${buildDirectory}/${buildLabel}" />
 
@@ -12,8 +12,8 @@
 <property name="indexFileName" value="index.html" />
 
 <target name="default">
-	<antcall target="generateIndex" />
-	<antcall target="getStaticFiles" />
+  <antcall target="generateIndex" />
+  <antcall target="getStaticFiles" />
 </target>
 
 <target name="generateIndex">
@@ -22,39 +22,39 @@
   <taskdef name="indexResults" classname="${class}" />
 
 <!--
-	isBuildTested:  true|false  should JUnit plugin test results be used to generate index page
-	dropTokenList:  comma separated list of strings which should be replaced by the fileName attribute settings in the testManifest.xml.
-	xmlDirectoryName:  path to directory containing JUnit plugin test results in xml format (see doc is org.eclipse.test).
-	dropDirectoryName: path to directory containing the result of the build.
-	testResultsTemplateFileName:  path to template file used to generate page with links to JUnit test results
-	testResultsHtmlFileName:  name of file which will be generated with links to JUnit test results
-	dropHtmlFileName:  name of generated index page
-	hrefTestResultsTargetPath:  relative path from index page to directory containing JUnit html test results
-	hrefCompileLogsTargetPath:  relative path from index page directory containing compilelogs
-	testManifestFileName:	name of xml file containing descriptions of zip types and log files
+  isBuildTested:  true|false  should JUnit plugin test results be used to generate index page
+  dropTokenList:  comma separated list of strings which should be replaced by the fileName attribute settings in the testManifest.xml.
+  xmlDirectoryName:  path to directory containing JUnit plugin test results in xml format (see doc is org.eclipse.test).
+  dropDirectoryName: path to directory containing the result of the build.
+  testResultsTemplateFileName:  path to template file used to generate page with links to JUnit test results
+  testResultsHtmlFileName:  name of file which will be generated with links to JUnit test results
+  dropHtmlFileName:  name of generated index page
+  hrefTestResultsTargetPath:  relative path from index page to directory containing JUnit html test results
+  hrefCompileLogsTargetPath:  relative path from index page directory containing compilelogs
+  testManifestFileName:  name of xml file containing descriptions of zip types and log files
 
 
 
 -->
 
-	<property name="xmlDirectoryName" value="${result}/testresults/xml" />
-	<property name="dropDirectoryName" value="${result}" />
-	<property name="testResultsTemplateFileName" value="${basedir}/templateFiles/testResults.php.template" />
+  <property name="xmlDirectoryName" value="${result}/testresults/xml" />
+  <property name="dropDirectoryName" value="${result}" />
+  <property name="testResultsTemplateFileName" value="${basedir}/templateFiles/testResults.php.template" />
 <!-- TODO: should require this, and others to be passed in, and fail, if not -->
-	<property name="dropTemplateFileName" value="${basedir}/templateFiles/index.html.template" />
-	<property name="testResultsHtmlFileName" value="testResults.php" />
-	<property name="hrefTestResultsTargetPath" value="testresults/html" />
-	<property name="hrefCompileLogsTargetPath" value="compilelogs" />
-	<property name="compileLogsDirectoryName" value="${result}/compilelogs" />
-	<property name="testManifestFileName" value="${basedir}/testManifest.xml" />
+  <property name="dropTemplateFileName" value="${basedir}/templateFiles/index.html.template" />
+  <property name="testResultsHtmlFileName" value="testResults.php" />
+  <property name="hrefTestResultsTargetPath" value="testresults/html" />
+  <property name="hrefCompileLogsTargetPath" value="compilelogs" />
+  <property name="compileLogsDirectoryName" value="${result}/compilelogs" />
+  <property name="testManifestFileName" value="${basedir}/testManifest.xml" />
 
 
   <indexResults
     isBuildTested="${isBuildTested}"
     buildType="${buildType}"
     dropTokenList="${dropTokenList}"
-  	platformIdentifierToken="${platformIdentifierToken}"
-  	platformSpecificTemplateList="${platformSpecificTemplateList}"
+    platformIdentifierToken="${platformIdentifierToken}"
+    platformSpecificTemplateList="${platformSpecificTemplateList}"
     dropHtmlFileName="${indexFileName}"
     xmlDirectoryName="${xmlDirectoryName}"
     dropDirectoryName="${dropDirectoryName}"
@@ -91,16 +91,16 @@
 
 
 <target name="getStaticFiles">
-	<!--get static files required in the buildLabel directory-->
-	<copy todir="${result}">
-		<fileset dir="staticDropFiles" />
-	</copy>
+  <!--get static files required in the buildLabel directory-->
+  <copy todir="${result}">
+    <fileset dir="staticDropFiles" />
+  </copy>
 
-	<!--copy buildnotes from plugin directories-->
-	<mkdir dir="${result}/buildnotes" />
-	<copy todir="${result}/buildnotes" flatten="true">
-		<fileset dir="${buildDirectory}/plugins" includes="**/buildnotes_*.html" />
-	</copy>
+  <!--copy buildnotes from plugin directories-->
+  <mkdir dir="${result}/buildnotes" />
+  <copy todir="${result}/buildnotes" flatten="true">
+    <fileset dir="${buildDirectory}/plugins" includes="**/buildnotes_*.html" />
+  </copy>
 </target>
 
 </project>

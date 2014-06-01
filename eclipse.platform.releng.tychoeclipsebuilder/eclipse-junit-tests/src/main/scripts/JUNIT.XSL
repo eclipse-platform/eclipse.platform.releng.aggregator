@@ -556,7 +556,7 @@
         </xsl:call-template>
       </xsl:when>
       <xsl:otherwise>
-	<xsl:value-of select="$word"/>
+  <xsl:value-of select="$word"/>
       </xsl:otherwise>
     </xsl:choose>
 </xsl:template>

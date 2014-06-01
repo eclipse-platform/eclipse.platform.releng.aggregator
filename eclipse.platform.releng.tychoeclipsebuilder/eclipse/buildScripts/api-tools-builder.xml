@@ -16,16 +16,16 @@
 
 
 
-	<!--
-		The default target that calls apitooling.apifreeze, apitooling.analysis and apitooling.apideprecation
-		and their respective _reportconversion tasks
-	-->
+  <!--
+    The default target that calls apitooling.apifreeze, apitooling.analysis and apitooling.apideprecation
+    and their respective _reportconversion tasks
+  -->
   <target
     name="apiToolsReports"
     depends="init">
 
 
-		<!-- make a dir to place the XML and HTML output in, per build -->
+    <!-- make a dir to place the XML and HTML output in, per build -->
     <property
       name="report"
       value="${buildDirectory}/${buildLabel}/apitools" />
@@ -38,17 +38,17 @@
       name="freeze_html"
       value="${report}/freeze_report.html" />
 
-		<!-- grab the currently built + zipped build -->
+    <!-- grab the currently built + zipped build -->
     <property
       name="current_location"
       value="${buildDirectory}/${buildLabel}/eclipse-SDK-${buildLabel}-win32.zip" />
 
-		<!-- we would have to fetch the baseline we wanted, or perhaps just link to its location -->
+    <!-- we would have to fetch the baseline we wanted, or perhaps just link to its location -->
     <property
       name="baseline"
       value="${reference}/${previousBaselineFilename}" />
 
-		<!-- create properties for the filters -->
+    <!-- create properties for the filters -->
     <property
       name="exclude_list_location"
       value="${EBuilderDir}/eclipse/apiexclude/exclude_list.txt" />
@@ -56,16 +56,16 @@
       name="exclude_list_external_location"
       value="${EBuilderDir}/eclipse/apiexclude/exclude_list_external.txt" />
 
-		<!-- run the freeze task -->
+    <!-- run the freeze task -->
     <antcall target="dofreezeReport" />
 
-		<!-- create the Ant filterstore directory -->
+    <!-- create the Ant filterstore directory -->
     <property
       name="filter_store"
       value="${buildDirectory}/${buildLabel}/apifilters" />
     <mkdir dir="${filter_store}" />
 
-		<!-- copy all of the .api_filters files out of the plugins from their source -->
+    <!-- copy all of the .api_filters files out of the plugins from their source -->
     <copy todir="${filter_store}">
       <fileset
         dir="${buildWorkingArea}"
@@ -75,7 +75,7 @@
         to="\1\3" />
     </copy>
 
-		<!-- create a zip of API filters -->
+    <!-- create a zip of API filters -->
     <property
       name="apifilterzip"
       value="${report}/apifilters-${buildId}.zip" />
@@ -85,7 +85,7 @@
       <arg line="-r ${apifilterzip} ${filter_store}" />
     </exec>
 
-		<!-- create HTML output directory -->
+    <!-- create HTML output directory -->
     <property
       name="analysis_html"
       value="${report}/analysis/html" />
@@ -93,7 +93,7 @@
       name="analysis_report"
       value="${report}/analysis/xml" />
 
-		<!-- run the analysis -->
+    <!-- run the analysis -->
     <apitooling.analysis
       baseline="${baseline}"
       profile="${current_location}"
@@ -113,7 +113,7 @@
       name="deprecation_html"
       value="${report}/deprecation/apideprecation.html" />
 
-		<!-- run the deprecation tasks -->
+    <!-- run the deprecation tasks -->
     <apitooling.apideprecation
       baseline="${baseline}"
       profile="${current_location}"

@@ -6,12 +6,12 @@
 </head>
 <body>
 <center>
-	<p><font class=indextop>equinox osgi downloads</font><br>
-	<font class=indexsub>get running with equinox</font></p>
-	<p></p>
-	<a href="http://eclipse.org/equinox" target="_top">[home]</a>
-	<a href="http://eclipse.org/equinox/documents">[documents]</a>
-	<a href="http://eclipse.org/equinox/faq.php">[faq]</a>
+  <p><font class=indextop>equinox osgi downloads</font><br>
+  <font class=indexsub>get running with equinox</font></p>
+  <p></p>
+  <a href="http://eclipse.org/equinox" target="_top">[home]</a>
+  <a href="http://eclipse.org/equinox/documents">[documents]</a>
+  <a href="http://eclipse.org/equinox/faq.php">[faq]</a>
 </center>
 <p>For access to archived builds, look <a href="http://archive.eclipse.org/eclipse/equinox/">here</a></p>
 <p class=bar>Latest Downloads</p><?php
@@ -38,38 +38,38 @@
                 }
         }
 
-	for ($i = 0; $i < count($dropType); $i++) {
-		$typeToPrefix[$dropType[$i]] = $dropPrefix[$i];
-	}
+  for ($i = 0; $i < count($dropType); $i++) {
+    $typeToPrefix[$dropType[$i]] = $dropPrefix[$i];
+  }
 
-	$aDirectory = dir("drops");
-	while ($anEntry = $aDirectory->read()) {
+  $aDirectory = dir("drops");
+  while ($anEntry = $aDirectory->read()) {
 
-		// Short cut because we know aDirectory only contains other directories.
+    // Short cut because we know aDirectory only contains other directories.
 
-		if ($anEntry != "." && $anEntry!=".." && $anEntry!="TIME") {
-			$parts = explode("-", $anEntry);
-			if (count($parts) == 3) {
+    if ($anEntry != "." && $anEntry!=".." && $anEntry!="TIME") {
+      $parts = explode("-", $anEntry);
+      if (count($parts) == 3) {
 
-				$buckets[$parts[0]][] = $anEntry;
+        $buckets[$parts[0]][] = $anEntry;
 
-				$timePart = $parts[2];
-				$year = substr($timePart, 0, 4);
-				$month = substr($timePart, 4, 2);
-				$day = substr($timePart, 6, 2);
-				$hour = substr($timePart,8,2);
-				$minute = substr($timePart,10,2);
-				$timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
+        $timePart = $parts[2];
+        $year = substr($timePart, 0, 4);
+        $month = substr($timePart, 4, 2);
+        $day = substr($timePart, 6, 2);
+        $hour = substr($timePart,8,2);
+        $minute = substr($timePart,10,2);
+        $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
 
-				$timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
+        $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
 
-				if ($timeStamp > $latestTimeStamp[$parts[0]]) {
-					$latestTimeStamp[$parts[0]] = $timeStamp;
-					$latestFile[$parts[0]] = $anEntry;
-				}
-			}
+        if ($timeStamp > $latestTimeStamp[$parts[0]]) {
+          $latestTimeStamp[$parts[0]] = $timeStamp;
+          $latestFile[$parts[0]] = $anEntry;
+        }
+      }
 
-			if (count($parts) == 2) {
+      if (count($parts) == 2) {
 
                                 $buildType=substr($parts[0],0,1);
                                 $buckets[$buildType][] = $anEntry;
@@ -88,69 +88,69 @@
                                         $latestFile[$buildType] = $anEntry;
                                 }
                         }
-		}
-	}
+    }
+  }
  ?> <table width="100%" cellspacing=0 cellpadding=3 align=center> <td align=left>
 <TABLE  width="100%" CELLSPACING=0 CELLPADDING=3> <tr> <td width=\"30%\"><b>Build
 Type</b></td><td><b>Build Name</b></td><td><b>Build Date</b></td></tr> <?php
-	foreach($dropType as $value) {
-		$prefix=$typeToPrefix[$value];
-		$fileName = $latestFile[$prefix];
-		echo "<tr>
-			<td width=\"30%\">$value</td>";
+  foreach($dropType as $value) {
+    $prefix=$typeToPrefix[$value];
+    $fileName = $latestFile[$prefix];
+    echo "<tr>
+      <td width=\"30%\">$value</td>";
 
-		$parts = explode("-", $fileName);
+    $parts = explode("-", $fileName);
 
-		// Uncomment the line below if we need click through licenses.
-		// echo "<td><a href=license.php?license=drops/$fileName>$parts[1]</a></td>";
+    // Uncomment the line below if we need click through licenses.
+    // echo "<td><a href=license.php?license=drops/$fileName>$parts[1]</a></td>";
 
-		// Comment the line below if we need click through licenses.
-		if (count($parts)==3)
-			echo "<td><a href=\"drops/$fileName/index.php\">$parts[1]</a></td>";
-		if (count($parts)==2)
-			echo "<td><a href=\"drops/$fileName/index.php\">$fileName</a></td>";
+    // Comment the line below if we need click through licenses.
+    if (count($parts)==3)
+      echo "<td><a href=\"drops/$fileName/index.php\">$parts[1]</a></td>";
+    if (count($parts)==2)
+      echo "<td><a href=\"drops/$fileName/index.php\">$fileName</a></td>";
 
-		echo "<td>$timeStamps[$fileName]</td>";
-		echo "</tr>";
-	}
+    echo "<td>$timeStamps[$fileName]</td>";
+    echo "</tr>";
+  }
 ?> </table></table>&nbsp; <?php
-	foreach($dropType as $value) {
-		$prefix=$typeToPrefix[$value];
-		echo "
-		<table width=\"100%\" cellspacing=0 cellpadding=3 align=center>
-		<tr bgcolor=\"#999999\">
-		<td align=left width=\"30%\"><b><a name=\"$value\"><font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value";
-		echo "s</font></b></a></td>
-		</TR>
-		<TR>
-		<td align=left>
-		<TABLE  width=\"100%\" CELLSPACING=0 CELLPADDING=3>
-		<tr>
-		<td width=\"30%\"><b>Build Name</b></td>
-		<td><b>Build Date</b></td>
-		</tr>";
+  foreach($dropType as $value) {
+    $prefix=$typeToPrefix[$value];
+    echo "
+    <table width=\"100%\" cellspacing=0 cellpadding=3 align=center>
+    <tr bgcolor=\"#999999\">
+    <td align=left width=\"30%\"><b><a name=\"$value\"><font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value";
+    echo "s</font></b></a></td>
+    </TR>
+    <TR>
+    <td align=left>
+    <TABLE  width=\"100%\" CELLSPACING=0 CELLPADDING=3>
+    <tr>
+    <td width=\"30%\"><b>Build Name</b></td>
+    <td><b>Build Date</b></td>
+    </tr>";
 
-		$aBucket = $buckets[$prefix];
-		if (isset($aBucket)) {
-			rsort($aBucket);
-			foreach($aBucket as $innerValue) {
-				$parts = explode("-", $innerValue);
-				echo "<tr>";
+    $aBucket = $buckets[$prefix];
+    if (isset($aBucket)) {
+      rsort($aBucket);
+      foreach($aBucket as $innerValue) {
+        $parts = explode("-", $innerValue);
+        echo "<tr>";
 
-					// Uncomment the line below if we need click through licenses.
-					// echo "<td><a href=\"license.php?license=drops/$innerValue\">$parts[1]</a></td>";
+          // Uncomment the line below if we need click through licenses.
+          // echo "<td><a href=\"license.php?license=drops/$innerValue\">$parts[1]</a></td>";
 
-					// Comment the line below if we need click through licenses.
-					if (count ($parts)==3)
-						echo "<td><a href=\"drops/$innerValue/index.php\">$parts[1]</a></td>";
-					if (count ($parts)==2)
-						echo "<td><a href=\"drops/$innerValue/index.php\">$innerValue</a></td>";
+          // Comment the line below if we need click through licenses.
+          if (count ($parts)==3)
+            echo "<td><a href=\"drops/$innerValue/index.php\">$parts[1]</a></td>";
+          if (count ($parts)==2)
+            echo "<td><a href=\"drops/$innerValue/index.php\">$innerValue</a></td>";
 
-					echo "<td>$timeStamps[$innerValue]</td>
-					</tr>";
-			}
-		}
-		echo "</table></table>&nbsp;";
-	}
+          echo "<td>$timeStamps[$innerValue]</td>
+          </tr>";
+      }
+    }
+    echo "</table></table>&nbsp;";
+  }
 ?> &nbsp;
 </body></html>
