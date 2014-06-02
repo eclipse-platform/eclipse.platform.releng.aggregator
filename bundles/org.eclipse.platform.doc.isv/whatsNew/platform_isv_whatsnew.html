@@ -36,6 +36,55 @@ section of the Workbench User Guide.
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
+  
+   <tr id="e4-views-1">
+    <td class="title">Contribute E4 Views into the IDE</td>
+    <td class="content">
+      As part of our goal to remove some of the barriers between e4-based code and the IDE
+      we've just added a new element 'e4view' into the <code>org.eclipse.ui.views</code>
+      extension point. This allows you to declare a new view for the IDE whose implementation
+      is done in the e4 style (i.e. an annotated POJO).
+      <p>
+        <img src="images/new-e4view-extension.png" alt="new extension"/>
+      </p><p>
+        The new type of extension is identical to the original 'view' except for relaxing the
+        requirement that the 'class' implement IViewPart.
+      </p><p>
+        This is the first trial run for this type of extension. Once we are sure we have the pattern
+        correct, we'll make similar changes to other extension points such as <code>org.eclipse.ui.menus</code>.
+      </p><p>
+        For those that are unaware of the e4 way of coding, here's what the implementation of an e4 view
+        looks like:
+      </p>
+      <pre>
+import javax.annotation.PostConstruct;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+
+public class RealE4View {
+	Label label;
+
+	@PostConstruct
+	void createView(Composite parent) {
+		label = new Label(parent, SWT.BORDER);	
+		label.setText("Testing");
+	}
+
+	@Focus
+	void setFocus() {
+		label.setFocus();
+	}
+}
+      </pre>
+      <p>
+        Note how it's a simple POJO and how few dependencies it has; this has already proven itself as
+        a far more convenient way to write the code and has great advantages in testing (because of its
+        few dependencies).
+      </p>
+    </td>
+  </tr>
       
   <tr id="recenter-command">
     <td class="title">Improved Recenter command</td>
@@ -112,14 +161,6 @@ section of the Workbench User Guide.
     <td class="title">EMenuService released as API</td>
     <td class="content">
         The <code>EMenuService</code> service has been released as API. RCP clients must adjust their package imports to <code>org.eclipse.e4.ui.services</code>.  
-    </td>
-  </tr>
-   
-  <tr id="os-ubuntu"> 
-    <td class="title">Ubuntu menu integration </td>
-    <td class="content">
-       In cooperation with Canonical, the Platform team worked on the support of Eclipse in Ubuntu 14.04. Ubuntu 14.04 supports the Eclipse 4 menu implementation, which had issues
-       in Ubuntu 13.04 and 13.10. For more details, see bugs <a href="https://bugs.launchpad.net/appmenu-gtk/+bug/613119">Eclipse menu does not render correctly in unity bar</a> and <a href="https://bugs.launchpad.net/ubuntu/+source/unity-gtk-module/+bug/1208019">Eclipse menus doesn't show up in Saucy</a>.
     </td>
   </tr>
 
@@ -367,6 +408,13 @@ section of the Workbench User Guide.
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
+  
+  <tr id="swt-needs-1.5"> 
+    <td class="title">SWT requires JRE 1.5</td>
+    <td class="content">
+      The SWT project has moved to Java 1.5 compliance level. SWT applications will now require JRE 1.5 or higher to run.
+    </td>
+  </tr>
    
   <tr id="timing-api"> 
     <td class="title">Added UI timing API</td>
@@ -381,23 +429,22 @@ section of the Workbench User Guide.
       Watchdog</a> plugin in SWT examples.
     </td>
   </tr>
-     
-  <tr id="gtk3-as-default"> 
-    <td class="title">GTK+ 3 used by default</td>
-    <td class="content">
-      SWT and Eclipse will now use the GTK+ 3 libraries by default on all Linux/Unix platforms,
-      whenever GTK+ 3 is installed and available. Previously SWT defaulted to using GTK+ 2.
-      <p>The GTK+ 3 port of SWT is still early access and you can force Eclipse to use the 
-      more stable GTK+2 port by setting the environment variable SWT_GTK3 to 0, if needed.
-      (For example: export SWT_GTK3=0) </p>
-    </td>
-  </tr>
 
   <tr id="styled-text-api"> 
     <td class="title">Added new API in StyledText to get text selection state</td>
     <td class="content">
       <code>StyledText.isTextSelected()</code> can be used to quickly determine whether any text
       in the widget is selected or not.
+    </td>
+  </tr>
+  
+  <tr id="sleep-monitor-api"> 
+    <td class="title">Added API for sleep monitoring</td>
+    <td class="content">
+        SWT has added two new events, <code>SWT.Sleep</code> and <code>SWT.Wakeup</code>,
+        which are sent before the <code>Display</code> event loop goes into sleep and after
+        it wakes up from sleep respectively. These events can e.g. be used to monitor the duration
+        of sleep time in SWT applications.
     </td>
   </tr>
   
@@ -410,28 +457,15 @@ section of the Workbench User Guide.
       (implemented only on Windows currently).
     </td>
   </tr>
-  
-  <tr id="swt-needs-1.5"> 
-    <td class="title">SWT requires JRE 1.5</td>
+     
+  <tr id="gtk3-as-default"> 
+    <td class="title">GTK+ 3 used by default</td>
     <td class="content">
-      The SWT project has moved to Java 1.5 compliance level. SWT applications will now require JRE 1.5 or higher to run.
-    </td>
-  </tr>
-  
-  <tr id="swt-xulrunner24"> 
-    <td class="title">SWT Browser now supports XULRunner 24.x</td>
-    <td class="content">
-        An SWT Browser created with style <code>SWT.MOZILLA</code> can now be used with the XULRunner 24.x runtime.
-    </td>
-  </tr>
-  
-  <tr id="sleep-monitor-api"> 
-    <td class="title">Added API for sleep monitoring</td>
-    <td class="content">
-        SWT has added two new events, <code>SWT.Sleep</code> and <code>SWT.Wakeup</code>,
-        which are sent before the <code>Display</code> event loop goes into sleep and after
-        it wakes up from sleep respectively. These events can e.g. be used to monitor the duration
-        of sleep time in SWT applications.
+      SWT and Eclipse will now use the GTK+ 3 libraries by default on all Linux/Unix platforms,
+      whenever GTK+ 3 is installed and available. Previously SWT defaulted to using GTK+ 2.
+      <p>The GTK+ 3 port of SWT is still early access and you can force Eclipse to use the 
+      more stable GTK+2 port by setting the environment variable SWT_GTK3 to 0, if needed.
+      (For example: export SWT_GTK3=0) </p>
     </td>
   </tr>
   

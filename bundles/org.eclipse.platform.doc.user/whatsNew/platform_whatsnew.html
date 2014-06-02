@@ -29,69 +29,37 @@ document in the plug-in developer's guide.
 <table class="news" border="0" cellpadding="10" cellspacing="0" width="80%">
   <tbody>
 
-  <tr id="e4-views-1">
-    <td class="title">Contribute E4 Views into the IDE</td>
+ <tr id="protect-option">
+    <td class="title">New protection options for Eclipse</td>
     <td class="content">
-      As part of our goal to remove some of the barriers between e4-based code and the IDE
-      we've just added a new element 'e4view' into the <code>org.eclipse.ui.views</code>
-      extension point. This allows you to declare a new view for the IDE whose implementation
-      is done in the e4 style (i.e. an annotated POJO).
-      <p>
-        <img src="images/new-e4view-extension.png" alt="new extension"/>
-      </p><p>
-        The new type of extension is identical to the original 'view' except for relaxing the
-        requirement that the 'class' implement IViewPart.
-      </p><p>
-        This is the first trial run for this type of extension. Once we are sure we have the pattern
-        correct, we'll make similar changes to other extension points such as <code>org.eclipse.ui.menus</code>.
-      </p><p>
-        For those that are unaware of the e4 way of coding, here's what the implementation of an e4 view
-        looks like:
-      </p>
-      <pre>
-import javax.annotation.PostConstruct;
-import org.eclipse.e4.ui.di.Focus;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
-public class RealE4View {
-	Label label;
-
-	@PostConstruct
-	void createView(Composite parent) {
-		label = new Label(parent, SWT.BORDER);	
-		label.setText("Testing");
-	}
-
-	@Focus
-	void setFocus() {
-		label.setFocus();
-	}
-}
-      </pre>
-      <p>
-        Note how it's a simple POJO and how few dependencies it has; this has already proven itself as
-        a far more convenient way to write the code and has great advantages in testing (because of its
-        few dependencies).
-      </p>
+     	A new launcher parameter named <b>-protect</b> has been introduced and it accepts the following values:
+		<ul>
+		<li><b>-protect root</b> can be used to prevent Eclipse from being started as a root user, 
+		either directly or via programs that run with administrative privileges like 'sudo'. 
+		This option is currently implemented only on Linux/UNIX based platforms.</li>
+		<li><b>-protect master</b> can be used to prevent starting of the master instance in a shared install configuration.
+		This option can be used on all platforms supported by Eclipse.</li>	
+		</ul>
+		<p>The above options can either be set in the launcher's <b>.ini</b> file or can be used directly from the command line (e.g eclipse -protect root). 
+		See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=379102">bug 379102</a> for more details.</p>
     </td>
   </tr>
   
    <tr id="e4-views-2">
-    <td class="title">Tweaking the UX</td>
-    <td class="content">
-      We've finally gotten to the point where we can return and address some of the current pain
-      points you all see when using Eclipse 4. This will be part of our focus for each milestone
-      in Luna...while not necessarily 'New' these changes *are* 'Noteworthy'...;-).
-      <p>
-        First up is fixing how we handle minimized views that are brought up by the framework
-        being hard to dismiss. The most common (and justifiably complained about) use case for
+    <td class="title">Improved the handling of minimized views</td>
+    <td class="content">      
+        It was hard to dismiss the minimized views that are brought up by the framework.
+        The most common (and justifiably complained about) use case for
         this is having the Debug view overlay the editor when it hits a breakpoint. This has
-        been refactored to match the 3.x behavior more closely and should now work as expected.
-      </p><p>
-        Next up will be re-enabling the ability to reorder the perspectives on the perspective bar.
-      </p>
+        been refactored to match the 3.x behavior more closely.     
+    </td>
+  </tr>
+
+  <tr id="reorder-perspectives"> 
+    <td class="title">Perspective re-ordering</td>
+    <td class="content">
+      You can now drag and drop the items in the perspective switcher to change the order of your open perspectives.
+    <p><img src="images/move-persp-items.png" alt="moveitems"/></p>
     </td>
   </tr>
   
@@ -117,14 +85,6 @@ public class RealE4View {
     	</p>
     </td>
   </tr>
-
-  <tr id="reorder-perspectives"> 
-    <td class="title">Perspective re-ordering</td>
-    <td class="content">
-      You can now drag and drop the items in the perspective switcher to change the order of your open perspectives.
-    <p><img src="images/move-persp-items.png" alt="moveitems"/></p>
-    </td>
-  </tr>
   
   <tr id="debug-examples"> 
     <td class="title">New debugger examples</td>
@@ -147,9 +107,9 @@ public class RealE4View {
   <tr id="split-editors"> 
     <td class="title">Split Editors</td>
     <td class="content">
-     Finally, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=8009">Bug 8009</a> has been addressed! You can now split / unsplit
-     the currently active editor. Just use one of the new key bindings
-     supplied in Luna:
+     Ever worked on a very huge Java file and had to compare two sections 
+     within the same file? Finally, <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=8009">Bug 8009</a> has been addressed! 
+     You can now split / unsplit the currently active editor. Just use one of the new key bindings supplied in Luna:
      <ul>
      <li><b>Ctrl+_</b> splits the editor one above the other</li>
      <li><b>Ctrl+{</b> splits the editor side by side</li>
@@ -325,6 +285,33 @@ public class RealE4View {
     <td class="title">Model dynamics - perspectives</td>
     <td class="content">
         The renderer of the application model supports now that the icons of perspectives are exchanged at runtime. Such a change is immediately reflected in the user interface.
+    </td>
+  </tr>
+  
+  <tr id="os-ubuntu"> 
+    <td class="title">Ubuntu menu integration </td>
+    <td class="content">
+       In cooperation with Canonical, the Platform team worked on the support of Eclipse in Ubuntu 14.04. Ubuntu 14.04 supports the Eclipse 4 menu implementation, which had issues
+       in Ubuntu 13.04 and 13.10. For more details, see bugs <a href="https://bugs.launchpad.net/appmenu-gtk/+bug/613119">Eclipse menu does not render correctly in unity bar</a> and <a href="https://bugs.launchpad.net/ubuntu/+source/unity-gtk-module/+bug/1208019">Eclipse menus doesn't show up in Saucy</a>.
+    </td>
+  </tr>
+  
+  <tr id="swt-xulrunner24"> 
+    <td class="title">SWT Browser now supports XULRunner 24.x</td>
+    <td class="content">
+        An SWT Browser created with style <code>SWT.MOZILLA</code> can now be used with the XULRunner 24.x runtime.
+    </td>
+  </tr>
+  
+  <tr id="set-gtk-version"> 
+    <td class="title">Set the GTK+ version to be used by Eclipse via the launcher</td>
+    <td class="content">
+        The launcher parameter <b>--launcher.GTK_version</b> can now be used to choose which version of GTK+ will be used by Eclipse on Linux. 
+        The acceptable values are:<ul>
+        <li><b>2</b> for GTK+ 2.x </li>
+        <li><b>3</b> for GTK+ 3.x </li></ul>
+        <p>Note that setting the GTK+ version via this parameter takes precedence over setting the SWT_GTK3 environment variable. 
+        See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=434619">bug 434619</a> for more details.</p>
     </td>
   </tr>
  
