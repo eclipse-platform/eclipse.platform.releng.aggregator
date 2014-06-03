@@ -88,7 +88,7 @@ for its enhanced null analysis (which is disabled by default):
 <li>Method return (syntactically a method annotation is used here)</li>
 <li>Local variables</li>
 <li>Fields</li>
-<li><em>(more to come in the future)</em></li>
+<li>In Java 8, more locations can be annotated with <a href="task-using_null_type_annotations.htm">null type annotations</a></li>
 </ul>
 <p><code>@NonNullByDefault</code> is supported for</p>
 <ul>
@@ -100,6 +100,9 @@ for its enhanced null analysis (which is disabled by default):
 Note, that even the actual qualified names of these annotations are 
 <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_annotation_names">configurable</a>,
 but by default the ones given above are used (from the package <code>org.eclipse.jdt.annotation</code>).
+When using 3rd party null annotations, please ensure that those are properly defined using at least a <code>@Target</code>
+meta annotation, because otherwise the compiler can not distinguish between declaration annotations (Java 5)
+and type annotations (Java 8). 
 </p>
 
 <h2 id="buildpath_setup">Setup of the build path</h2>
@@ -363,39 +366,21 @@ occur at runtime.
 </p>
 <h2 id="complete_specification">Complete specification using an extended type system</h2>
 <p>
-The support for null annotations has been designed in a way that is compatible to
-a future extension, whereby the compiler will be able to guarantee that a certified
-program will never throw a NullPointerException at runtime (with the typical caveats
-about uncheckable parts like reflection).
-While no promise can be made yet regarding such future extension, the basic idea
-is just a different interpretation of what we already have. 
-</p>
-<p>
-By interpreting null annotations as part of the type system we double the number
-of types in a given program: for any given class <code>Cn</code>, the class itself
-is no longer considered as a legal type, but only "<code>@NonNull Cn</code>" and
-"<code>@Nullable Cn</code>" are useful types. So ideally for every value in a program
-we will know if it can be null (and must be checked before dereference) or not.
-If we exclude the third option (un-annotated types) then the compiler can rigorously
-flag <em>every</em> unsafe usage.
-</p>
-<p>
-The current implementation has a major limitation with regard to this goal:
-<ul>
-<li>The Java syntax doesn't allow annotations in some relevant locations,
-	a limitation that is addressed by JSR-308 (scheduled for Java 8).</li>
-</ul>
-<p>
-As of today and despite the current limitation, the vision of fully specified and
-completely checked programs has already some implications that shaped the current
-analysis and the errors/warnings reported by the compiler.
-The details will be presented by explaining the rules that the compiler checks
-and the messages it issues upon violation of a rule.
+The support for null annotations had been designed in a way that should be compatible to
+a future extension. 
+This extension has become part of the Java language as <strong>type annotations (JSR 308)</strong>,
+which have been introduced in Java 8.
+JDT supports to leverage the new concept for 
+<a href="task-using_null_type_annotations.htm">null type annotations</a>.
 </p>
 <h2 id="compiler_messages_explained">Compiler messages explained</h2>
 <p>
+Semantic details of annotation based null analysis are presented here, by explaining the rules
+that the compiler checks and the messages it issues upon violation of a rule.
+</p>
+<p>
 On the corresponding <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm">preference page</a>
-the individual rules checked by the compiler are ground under the following headings: 
+the individual rules checked by the compiler are grouped under the following headings: 
 </p>
 <h3>Violation of null specification</h3>
 <p>As specification violation we handle any situation where a null annotation
