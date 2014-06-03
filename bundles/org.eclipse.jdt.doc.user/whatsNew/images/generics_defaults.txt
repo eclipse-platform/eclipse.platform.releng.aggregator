@@ -1,0 +1,33 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+@NonNullByDefault
+public class Defaults {
+
+    List<String> safeFilter(List<String> in, Predicate<String> pred) {
+        List<String> result = new ArrayList<>();
+        for (String string : in) {
+            if (pred.test(string))
+                result.add(string);
+            else
+                result.add(null);
+        }
+        return result;
+    }
+
+    List<String> safeSingleton(String in) {
+        List<String> result = new ArrayList<>();
+        result.add(in);
+        return result;
+    }
+    
+    @NonNullByDefault({})
+    // default is canceled for this method
+    void unprotectedClient(Predicate<String> myPred, String myString) {
+        List<String> myStrings = safeSingleton(myString);
+        safeFilter(myStrings, myPred);    
+    }
+}
