@@ -38,20 +38,17 @@ section of the Workbench User Guide.
   </tr>
   
    <tr id="e4-views-1">
-    <td class="title">Contribute E4 Views into the IDE</td>
+    <td class="title">Contribute e4 Views into the IDE</td>
     <td class="content">
-      As part of our goal to remove some of the barriers between e4-based code and the IDE
-      we've just added a new element 'e4view' into the <code>org.eclipse.ui.views</code>
-      extension point. This allows you to declare a new view for the IDE whose implementation
+      Native e4 views can now be contributed to the Eclipse workbench via extension point.
+      The <code>org.eclipse.ui.views</code> extension point now supports an <code>e4view</code>
+      element for declaring a new view for the IDE whose implementation
       is done in the e4 style (i.e. an annotated POJO).
       <p>
         <img src="images/new-e4view-extension.png" alt="new extension"/>
       </p><p>
         The new type of extension is identical to the original 'view' except for relaxing the
         requirement that the 'class' implement IViewPart.
-      </p><p>
-        This is the first trial run for this type of extension. Once we are sure we have the pattern
-        correct, we'll make similar changes to other extension points such as <code>org.eclipse.ui.menus</code>.
       </p><p>
         For those that are unaware of the e4 way of coding, here's what the implementation of an e4 view
         looks like:
@@ -79,13 +76,62 @@ public class RealE4View {
 }
       </pre>
       <p>
-        Note how it's a simple POJO and how few dependencies it has; this has already proven itself as
-        a far more convenient way to write the code and has great advantages in testing (because of its
-        few dependencies).
+        Note how it's a simple Java object (POJO) and how few dependencies it has; this has 
+        already proven itself as a far more convenient way to write the code and has great 
+        advantages in testing (because of its few dependencies).
       </p>
     </td>
   </tr>
       
+  <tr id="css-bridge"> 
+    <td class="title">CSS bridge</td>
+    <td class="content">
+      The Eclipse 4 CSS-based styling engine has been connected to the classic Eclipse platform theme APIs through a new
+      mechanism called the <i>CSS bridge</i>. This support enables a number of new user cases:
+	 <ul>
+		<li>
+		  Accessing legacy platform <b>Color and Font</b> definitions from within a CSS style sheet:
+			<p>
+				<img src="images/css-bridge/using-definitions.png" alt=""/>
+			</p>
+		</li>
+		<li>
+			Overriding <b>Color and Font</b> definitions in a CSS style sheet:
+			<p>
+				<img src="images/css-bridge/overriding-definitions.png" alt=""/>
+			</p>
+		</li>
+		<li>
+		  Adding new style definitions within your CSS that will be surfaced for user customization on the <b>Color and Font</b>
+		  preference page:
+			<p>
+				<img src="images/css-bridge/new-definitions.png" alt=""/>
+			</p>
+		</li>
+	 </ul>
+	 <ul>This bridging has a number of nice properties:
+	 	<li>The legacy color theme definitions overridden or added in the CSS style sheet are merged with the current theme.</li>
+	 	<li>When switching themes, overridden values are re-merged with the new theme.</li>
+	 	<li>The new definitions added with the CSS file (the last use case) are available in the CSS theme that provides it.</li>
+	 </ul>
+	 Note that after switching CSS themes, the definitions can be unavailable in the theme registries when the new theme doesn't re-define it.
+	 This means when using theme definitions out of CSS files, you must be prepared for such situations and use proper default values in 
+	 the case when some definitions are missing.
+    </td>
+  </tr>
+  
+  <tr id="theme-association"> 
+    <td class="title">New 'themeAssociation' element of the 'org.eclipse.e4.ui.css.swt.theme' extension&nbsp;point</td>
+    <td class="content">
+      An Eclipse platform CSS theme can now register an association with a legacy platform <b>Color and Font</b> theme. After defining 
+      the proper association between themes, changing themes in the <b>Appearance</b> preference page will automatically set the 
+      associated <b>Color and Font</b> theme.
+	 <p>
+		<img src="images/theme-association.png" alt=""/>
+	</p>
+	</td>
+  </tr>
+
   <tr id="recenter-command">
     <td class="title">Improved Recenter command</td>
     <td class="content">
@@ -132,55 +178,6 @@ public class RealE4View {
     </td>
   </tr>
 
-  <tr id="css-bridge"> 
-    <td class="title">CSS&nbsp;bridge</td>
-    <td class="content">
-     The CSS support for the 3.x theme element definitions is now available (the CSS bridge), for more details see the following bugs:
-	 <ul>
-	  <li><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419016" target="_blank">Bug 419016</a></li>
-	  <li><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419018" target="_blank">Bug 419018</a></li>
-	  <li><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=429338" target="_blank">Bug 429338</a></li>
-     </ul>
-	 The use cases for the bridge:
-	 <ul>
-		<li>
-			Using the Color and FontDefinitions in the CSS style sheet:
-			<p>
-				<img src="images/css-bridge/using-definitions.png" alt=""/>
-			</p>
-		</li>
-		<li>
-			Overriding of the definitions in the CSS style sheet:
-			<p>
-				<img src="images/css-bridge/overriding-definitions.png" alt=""/>
-			</p>
-		</li>
-		<li>
-			Adding the new definitions with the CSS style sheet:
-			<p>
-				<img src="images/css-bridge/new-definitions.png" alt=""/>
-			</p>
-		</li>
-	 </ul>
-	 The 3.x theme definitions overridden or added in the CSS style sheet are merged with the current 3.x theme.<br/>
-	 After switching the 3.x theme they are re-merged with the new theme.<br/><br/>
-	 The new definitions added with the CSS file (the last use case) are available in the CSS theme that provides it.<br/>
-	 After switching the CSS theme the definitions can be unavailable in the theme registries when the new theme doesn't re-define it.
-	 So using such definitions out of the CSS files, we have to be prepared for such situation and use proper default values in the case when some definitions are missing.
-    </td>
-  </tr>
-  
-  <tr id="theme-association"> 
-    <td class="title">New 'themeAssociation' element of the 'org.eclipse.e4.ui.css.swt.theme' extension&nbsp;point</td>
-    <td class="content">
-     Currently the user is able to connect the CSS theme with proper 3.x theme. After defining the proper association between themes, 
-	 when user changes the CSS theme with the combo in the preference dialog, the proper 3.x theme will be set automatically.
-	 <p>
-		<img src="images/theme-association.png" alt=""/>
-	</p>
-	</td>
-  </tr>
-
   <tr id="workspaceLock">
     <td class="title">Removed WorkspaceLock API</td>
     <td class="content">
@@ -225,19 +222,19 @@ public class RealE4View {
   <tr id="MLocalizable">
     <td class="title">MLocalizable mixin interface</td>
     <td class="content">
-      Changed the way in which localization is done in the application model. While before EOperations (methods) where used to get
-	  a localized value, now volatile, transient, derived, unchangeable EStructuralFeatures are used. Doing this enables to send 
+      The mechanism for localizing strings in the application model has been changed. Previously, EOperations (methods) were used to get
+	  a localized value. Now, volatile, transient, derived, unchangeable EStructuralFeatures are used. This enables 
 	  notifications if a localizable value has changed. To mark EClasses who hold localizable informations and to inform them
 	  externally about a changed Locale, the <code>MLocalizable</code> mixin interface is introduced, which contains the single method 
-	  <code>updateLocalization()</code>. This enables to generically search the model for model elements affected by a Locale change and 
-	  force them sending out updates.
+	  <code>updateLocalization()</code>. This enables the platform to generically search the model for model elements affected by a 
+	  Locale change and force them to update.
     </td>
   </tr>
   
   <tr id="Locale_Change_Propagation">
     <td class="title">Locale change propagation</td>
     <td class="content">
-      Introduced the <code>ILocaleChangeService</code> which need to be used to change a Locale at runtime. Using this service will:
+      A new service called <code>ILocaleChangeService</code> has been introduced, which supports changing Locale at runtime. Using this service will:
 	  <ol>
 	    <li>Update the Locale in the application context.</li>
 	    <li>Inform all model elements of an application that implement <code>MLocalization</code> about the change.</li>
@@ -249,7 +246,7 @@ public class RealE4View {
   <tr id="Locale_Change_Consumption">
     <td class="title">Locale change consumption</td>
     <td class="content">
-      There are now three ways to get informed about a Locale change:
+      There are now three ways to be informed about a Locale change:
 	  <ol>
 	    <li>Via event broker by listening to the topic <i>org/eclipse/e4/core/NLS/LOCALE_CHANGE</i></li>
 	    <li>Via dependency injection by getting the value for <code>TranslationService.LOCALE</code> injected (e.g. via method injection)</li>
@@ -262,8 +259,8 @@ public class RealE4View {
   <tr id="ResourceBundleProvider">
     <td class="title">ResourceBundleProvider</td>
     <td class="content">
-      Introduced the <code>ResourceBundleProvider</code> service to abstract out the reference to <code>BundleLocalization</code> OSGi service.
-	  This way users are able to change how ResourceBundles should be looked up within their Eclipse application, e.g. using class-based 
+      A new <code>ResourceBundleProvider</code> service has been introduced to abstract out the reference to the <code>BundleLocalization</code> OSGi service.
+	  This enables application authors to change how ResourceBundles should be looked up within their Eclipse application, e.g. using class-based 
 	  ResourceBundles, loading translations out of a database, loading ResourceBundles from a server by using a different ResourceBundle.Control.
 	  The default implementation <code>DefaultResourceBundleProvider</code> is internally using <code>BundleLocalization</code> to keep the
 	  known default behaviour.
@@ -282,7 +279,7 @@ public class RealE4View {
 	  <code>ResourceBundleProvider</code>. This way the localization of the application model and the localization via new message extension are using 
 	  the same mechanisms. As a small enhancement, this also enables the usage of dot separated keys for translating the application model.
 	  <p>
-	  Also with 4.4 the package <code>org.eclipse.e4.core.services.translation</code> is released as API.
+	  As part of this work, the previously internal package <code>org.eclipse.e4.core.services.translation</code> has been released as API.
 	  </p>
     </td>
   </tr>
@@ -317,9 +314,9 @@ public class RealE4View {
     <td class="content">
       A new filesystem fragment supporting Java 7 file API has been added. The
       new fragment named <code>org.eclipse.core.filesystem.java7</code> allows
-      to retrieve information about files like attributes, file length,
-      permissions, etc. on operating systems that already have JRE supporting
-      Java 7 API but don't have any native Eclipse filesystem fragment. There are three
+      to retrieve information about files such as permissions, link targets,
+      etc. using Java 7 API rather than native code. This enables full filesystem capabilities
+      on platforms with no native Eclipse filesystem fragment. There are three
       different types of filesystems supported:
       <ul>
         <li>DOS/Windows filesystems,</li>
@@ -328,7 +325,7 @@ public class RealE4View {
       </ul>
       The new fragment will be loaded and used automatically when you run
       Eclipse with JRE 7 or newer and no native filesystem fragment applicable
-      for your operating system can be found.
+      for your operating system can be found (such as Solaris, ARM, and s390).
     </td>
   </tr>
     
