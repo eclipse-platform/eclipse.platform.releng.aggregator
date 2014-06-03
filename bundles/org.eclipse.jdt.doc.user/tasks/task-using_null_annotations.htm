@@ -111,19 +111,28 @@ A JAR with the default null annotations is shipped with Eclipse in eclipse/plugi
 This JAR needs to be on the build path at compile time but it is not necessary at run time (so you don't have to ship this to users of your compiled code).
 </p>
 <p>
-There are two quick fixes on unresolved references to <code>@NonNull</code>, <code>@Nullable</code>, or <code>@NonNullByDefault</code> that add the JAR to the build path:
+Starting with Eclipse Luna, two versions of this jar exist, one with declaration annotations for use in Java 7 or below (version 1.1.x) and one with 
+<a href="task-using_null_type_annotations.htm">null type annotations</a> for use in Java 8 (version 2.0.x).
 </p>
-<ul>
-<li>for plain Java projects:
-<p><img src="images/task-null-annotations-qf-simple.png" alt="Copy library with default null annotations to build path"></p>
-</li>
-<li>for OSGi bundles / plug-ins:
-<p><img src="images/task-null-annotations-qf-bundle.png" alt="Add library with default null annotations to build path"></p>
-</li>
-</ul> 
 <p>
-When manually configuring the build path for a OSGi bundle / plug-in, it is recommended to set an <code>additional.bundles</code> entry
-in file <code>build.properties</code> to avoid an undesired runtime dependency.
+<strong>For plain Java projects</strong> there is also a quick fixes on unresolved references to <code>@NonNull</code>, <code>@Nullable</code>, or <code>@NonNullByDefault</code> 
+that adds the suitable version of the JAR to the build path:
+</p>
+<p><img src="images/task-null-annotations-qf-simple.png" alt="Copy library with default null annotations to build path"></p>
+<p><strong>For OSGi bundles / plug-ins</strong> please add one of the following entries to your MANIFEST.MF:
+<dl>
+<dt>When using null annotations in a Java 7 project or below:</dt>
+<dd><pre>
+Require-Bundle: ...,
+ org.eclipse.jdt.annotation;bundle-version="[1.1.0,2.0.0)";resolution:=optional
+</pre></dd>
+<dt>For null type annotations in a Java 8 project please use:</dt>
+<dd><pre>Require-Bundle: ...,
+ org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
+</pre></dd>
+</dl>
+<p>
+See also the discussion in the corresponding section on <a href="task-using_null_type_annotations.htm#compatibility_configuration">compatibility</a>.
 </p>
 <h2 id="interpretation_of_null_annotations">Interpretation of null annotations</h2>
 <p>
