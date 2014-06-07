@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export DROP_ID=I20140605-1635
+export DROP_ID=I20140606-1215
 
 export DL_LABEL=4.4RC4
 export DL_LABEL_EQ=LunaRC4
