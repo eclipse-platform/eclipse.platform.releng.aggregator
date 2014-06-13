@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
@@ -27,14 +28,14 @@ import junit.framework.TestSuite;
 
 
 /**
- * Test suite with user-specified test order. Fails if not all test methods are
- * listed.
+ * Test suite with user-specified test order (fails if not all test methods are listed)
+ * or bytecode declaration order.
  * 
  * <p>
  * <b>Background:</b> {@link java.lang.Class#getDeclaredMethods()} does not
- * specify the order of the methods. Up to JavaSE 6, the methods were usually
- * sorted in declaration order, but in JavaSE 7, the order is random. This class
- * guarantees reliable test execution order.
+ * specify the order of the methods. Up to Java SE 6, the methods were usually
+ * sorted in declaration order, but in Java SE 7 and later, the order is random. This class
+ * guarantees reliable test execution order even for questionable VM implementations.
  * </p>
  * 
  * @since 3.8
@@ -97,8 +98,8 @@ public class OrderedTestSuite extends TestSuite {
 	public OrderedTestSuite(Class testClass, String name) {
 		super(name);
 
-		TestSuite randomOrderSuite= new TestSuite(testClass);
-		ArrayList tests= Collections.list(randomOrderSuite.tests());
+		TestSuite vmOrderSuite= new TestSuite(testClass);
+		ArrayList tests= Collections.list(vmOrderSuite.tests());
 
 		class SortingException extends RuntimeException {
 			private static final long serialVersionUID= 1L;
@@ -107,13 +108,9 @@ public class OrderedTestSuite extends TestSuite {
 				super(message);
 			}
 		}
-		final ArrayList orderedMethodNames= new ArrayList();
-		Class c= testClass;
+		
 		try {
-			while (Test.class.isAssignableFrom(c)) {
-				addDeclaredTestMethodNames(c, orderedMethodNames);
-				c= c.getSuperclass();
-			}
+			final List orderedMethodNames = getBytecodeOrderedTestNames(testClass);
 			Collections.sort(tests, new Comparator() {
 				public int compare(Object o1, Object o2) {
 					if (o1 instanceof TestCase && o2 instanceof TestCase) {
@@ -139,12 +136,33 @@ public class OrderedTestSuite extends TestSuite {
 		}
 	}
 
-	private void addDeclaredTestMethodNames(Class c, ArrayList methodNames) throws IOException {
+	/**
+	 * Returns the names of JUnit-3-style test cases declared in the given <code>testClass</code>
+	 * and its superclasses, in bytecode declaration order, listing test cases from a class before
+	 * the non-overridden test cases from its superclass.
+	 * 
+	 * @param testClass the JUnit-3-style test class
+	 * @return a modifiable <code>List&lt;String&gt;</code> of test names in bytecode declaration order
+	 * @throws IOException if an I/O error occurs.
+
+	 * @since 3.10
+	 */
+	public static List/*<String>*/ getBytecodeOrderedTestNames(Class testClass) throws IOException {
+		ArrayList orderedMethodNames= new ArrayList();
+		Class c= testClass;
+		while (Test.class.isAssignableFrom(c)) {
+			addDeclaredTestMethodNames(c, orderedMethodNames);
+			c= c.getSuperclass();
+		}
+		return orderedMethodNames;
+	}
+
+	private static void addDeclaredTestMethodNames(Class c, ArrayList methodNames) throws IOException {
 		/*
-		 * XXX: This method needs to be updated if new constant pool tags are specified. Current
-		 * supported major class file version: 51 (Java 1.7).
+		 * XXX: This method needs to be updated if new constant pool tags are specified.
+		 * Current supported major class file version: 52 (Java SE 8).
 		 * 
-		 * See JVMS 7, 4.4 The Constant Pool.
+		 * See JVMS 8, 4.4 The Constant Pool.
 		 */
 		String className= c.getName();
 		int lastDot= className.lastIndexOf("."); //$NON-NLS-1$
@@ -222,7 +240,7 @@ public class OrderedTestSuite extends TestSuite {
 			int descIndex= is.readUnsignedShort();
 			if ("()V".equals(constantPoolStrings[descIndex])) { //$NON-NLS-1$
 				String name= constantPoolStrings[nameIndex];
-				if (name.startsWith("test")) //$NON-NLS-1$
+				if (name.startsWith("test") && !methodNames.contains(name)) //$NON-NLS-1$
 					methodNames.add(name);
 			}
 			int attributesCount= is.readUnsignedShort();
