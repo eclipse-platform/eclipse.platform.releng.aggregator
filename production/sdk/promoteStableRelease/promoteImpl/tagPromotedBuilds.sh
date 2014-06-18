@@ -26,5 +26,5 @@ echo "   exit \$RC" >> deferedTag.sh
 echo "fi" >> deferedTag.sh
 echo "popd" >> deferedTag.sh
 chmod +x deferedTag.sh
-echo "Remember to tag milestones with deferedTag.sh" >> "${CL_SITE}/checklist.txt"
+echo "Remember to tag milestones and RCs (but, not Releases) with deferedTag.sh" >> "${CL_SITE}/checklist.txt"
 #TODO: since HIDE_SITE was ${HIDE_SITE}" >> "${CL_SITE}/checklist.txt"
