@@ -6,6 +6,11 @@
 
 include("buildproperties.php");
 
+$streamArr = explode(".", $STREAM);
+$STREAM_MAJOR = $streamArr[0];
+$STREAM_MINOR = $streamArr[1];
+$STREAM_SERVICE = $streamArr[2];
+
 if (array_key_exists("SERVER_NAME", $_SERVER)) {
     $servername = $_SERVER["SERVER_NAME"];
     if ($servername === "build.eclipse.org") {
@@ -134,6 +139,18 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 if (file_exists("news/")) {
     echo "<tr><td width=\"75%\"><font size=\"+1\">";
     echo "<a href=\"news/\"><b>New and Noteworthy</b></a></font></td></tr>";
+}
+// linkToAcknowledgements is a pure "marker file"
+if (file_exists("linkToAcknowledgements")) {
+    echo "<tr><td width=\"75%\"><font size=\"+1\">";
+    echo "<a href=\"http://www.eclipse.org/eclipse/development/acknowledgements_${STREAM_MAJOR}_${STREAM_MINOR}.php\"><b>Acknowledgments</b></a>";
+    echo "</font></td></tr>";
+}
+// linkToReadme is a pure marker file
+if (file_exists("linkToReadme")) {
+    echo "<tr><td width=\"75%\"><font size=\"+1\">";
+    echo "<a href=\"http://www.eclipse.org/eclipse/development/readme_eclipse_${STREAM_MAJOR}.${STREAM_MINOR}.php\"><b>Eclipse Project ${STREAM_MAJOR}.${STREAM_MINOR} Readme</b></a>";
+    echo "</font></td></tr>";
 }
 
 
@@ -295,10 +312,7 @@ function genLinks($servername,$BUILD_ID,$zipfile) {
 <table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
 
 <?php
-$streamArr = explode(".", $STREAM);
-$STREAM_MAJOR = $streamArr[0];
-$STREAM_MINOR = $streamArr[1];
-$STREAM_SERVICE = $streamArr[2];
+
 
 // We expect $BUILD_ID to be defined in buildproperties.php
 // But it can be defined several times in reference URI, such as once in directory name,
