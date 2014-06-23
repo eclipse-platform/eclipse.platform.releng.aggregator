@@ -19,21 +19,21 @@ ob_start();
 <h1>The Eclipse Project Downloads</h1>
 <p>On this
 page you can find the latest builds produced by
-the <a href="http://www.eclipse.org/eclipse">Eclipse
+the <a href="https://www.eclipse.org/eclipse/">Eclipse
 Project</a>. To get started run the program and go through the user and developer
 documentation provided in the on-line help system. If you have problems downloading
 the drops, contact the <a href="mailto:webmaster@eclipse.org">webmaster</a>.
-If you have problems installing or getting the workbench to run, <a href="http://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
-out the Eclipse Project FAQ,</a> or try posting a question to the <a href="http://www.eclipse.org/newsgroups">newsgroup</a>.
+If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
+out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forums</a>.
 
 </p>
 
-<p>See the <a href="http://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
+<p>See the <a href="https://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
 The <a href="http://archive.eclipse.org/eclipse/downloads/">archive site</a> contains older releases (including the last 3.x version, <a href="http://archive.eclipse.org/eclipse/downloads/drops/R-3.8.2-201301310800/">3.8.2</a>).
 For reference, see also
-<a href="http://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>,
+<a href="https://wiki.eclipse.org/Eclipse_Project_Update_Sites">the p2 repositories provided</a>,
 <a href="build_types.html">meaning of kinds of builds</a> (P,M,N,I,S, and R), and the
-<a href="http://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
+<a href="https://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
 </p>
 <p><img src="new.gif" alt="News Item 1" /> ﻿Eclipse support for Java&trade; 8 is built-
 in to <a href="drops4/S-4.4RC4-201406061215/">Luna (4.4)</a> so it, and all subsequent builds, contain full support 
@@ -413,7 +413,7 @@ foreach($dropType as $value) {
   }
 }
 echo "<hr>";
-echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"http://www.eclipse.org/legal/epl/notice.php\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>";
+echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"https://www.eclipse.org/legal/epl/notice.php\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>";
 require("footer.php.html");
 $html = ob_get_clean();
 
