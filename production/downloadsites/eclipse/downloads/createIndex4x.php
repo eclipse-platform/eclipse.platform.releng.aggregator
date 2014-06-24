@@ -39,7 +39,7 @@ For reference, see also
 in to <a href="drops4/S-4.4RC4-201406061215/">Luna (4.4)</a> so it, and all subsequent builds, contain full support 
 for <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">Java&trade; 8</a>.
 For Kepler SR2 (4.3.2), a <a href="https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler">feature patch</a> with 
-preliminary Java&trade; 8 support is available (<a href="drops4/P20140317-1600">P20140317-1600</a>).
+preliminary Java&trade; 8 support is available (<a href="drops4/P20140317-1600/">P20140317-1600i</a>).
 </p>
 <table width="100%">
 <tr>
