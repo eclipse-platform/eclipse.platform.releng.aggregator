@@ -43,7 +43,7 @@ preliminary Java&trade; 8 support is available (<a href="drops4/P20140317-1600/"
 </p>
 <table width="100%">
 <tr>
-<td width="100%" bgcolor="#3b335a"><font color="#FFFFFF" face="Arial,Helvetica">Latest
+<td width="100%" bgcolor="#3b335a"><font color="#FFFFFF" >Latest
 Downloads</font>
 </td>
 </tr>
@@ -364,7 +364,7 @@ foreach($dropType as $value) {
     // (could effect targeted links)
     $valueName=strtr($value,' ','_');
     echo "<td align=\"left\" width=\"100%\"><a name=\"$valueName\">\n";
-    echo "<font color=\"#FFFFFF\" face=\"Arial,Helvetica\">$value\n";
+    echo "<font color=\"#FFFFFF\">$value\n";
     echo "</font></a></td>\n";
     echo "</tr>\n";
     echo "</table>";
