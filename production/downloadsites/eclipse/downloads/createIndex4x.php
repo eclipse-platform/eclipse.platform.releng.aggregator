@@ -13,7 +13,7 @@ $subdirDrops="drops4";
 
 ob_start();
  require("header.php.html");
- 
+
 ?>
 
 <h1>The Eclipse Project Downloads</h1>
@@ -36,16 +36,14 @@ For reference, see also
 <a href="https://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
 </p>
 <p><img src="new.gif" alt="News Item 1" /> ﻿Eclipse support for Java&trade; 8 is built-
-in to <a href="drops4/S-4.4RC4-201406061215/">Luna (4.4)</a> so it, and all subsequent builds, contain full support 
+in to <a href="drops4/S-4.4RC4-201406061215/">Luna (4.4)</a> so it, and all subsequent builds, contain full support
 for <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">Java&trade; 8</a>.
-For Kepler SR2 (4.3.2), a <a href="https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler">feature patch</a> with 
+For Kepler SR2 (4.3.2), a <a href="https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler">feature patch</a> with
 preliminary Java&trade; 8 support is available (<a href="drops4/P20140317-1600/">P20140317-1600</a>).
 </p>
-<table width="100%">
+<table class="downloads">
 <tr>
-<td width="100%" bgcolor="#3b335a"><font color="#FFFFFF" >Latest
-Downloads</font>
-</td>
+<td class="latest">Latest Downloads</td>
 </tr>
 </table>
 
@@ -112,7 +110,7 @@ function printBuildColumns($fileName, $parts) {
   global $subdirDrops;
   // no file name, write empty column
   if ($fileName == "") {
-    echo "<td align=\"left\" width=\"25%\">&nbsp;</td>\n";
+    echo "<td status=\"status\">&nbsp;</td>\n";
     return;
   }
   // get build name, date and time
@@ -134,7 +132,7 @@ function printBuildColumns($fileName, $parts) {
   $time=intval(date("H"))*60+intval(date("i"));
   $diff=($day-$buildDay)*24*60+$time-$buildTime;
   // Add icons
-  echo "<td align=\"left\" width=\"25%\">\n";
+  echo "<td class=\"status\">\n";
   // hard code for now the build is done
   // https://bugs.eclipse.org/bugs/show_bug.cgi?id=378706
   // but later, changed ...
@@ -172,12 +170,14 @@ function printBuildColumns($fileName, $parts) {
     // hard code here, for now, but make come from property file, later
     $expectedTestBoxes=3;
 
+    $boxesTitle="";
+
     // We skip the main "tests" part for patch builds, since don't expect any (for now).
     if ($buildType !== "P") {
 
       // always put in links, since someone may want to look at logs, even if not tests results, per se
       // don't forget to end link, after images decided.
-      $boxesTitle="";
+
       if ($boxes > -1) {
         $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
       }
@@ -302,11 +302,11 @@ while ($anEntry = $aDirectory->read()) {
 
 <!-- This is the summary section, showing latest of each -->
 
-<table width="100%">
+<table class="downloads">
 <tr>
-<th align="left"  width="15%">Build Name</th>
-<th align="left"  width="25%">Build Status</th>
-<th align="left"  width="40%">Build Date</th>
+<th class="name">Build Name</th>
+<th class="status">Build Status</th>
+<th align="date">Build Date</th>
 </tr>
 <?php
 foreach($dropType as $value) {
@@ -330,19 +330,18 @@ foreach($dropType as $value) {
     }
     if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
       echo "<tr>\n";
-      //            echo "<td align=\"left\" width=\"20%\">$value</td>\n";
       if ($fileName == "") {
-        echo "<td align=\"left\" width=\"15%\">&nbsp;</td>\n";
+        echo "<td class=\"name\">&nbsp;</td>\n";
       } else {
         // Note: '$value' basically comes from dlconfig4.php and serves two purposes:
         // 1) the "tool tip" when hovering over the "Latest" build.
         // 2) the "title bar" of remaining sections.
         // In other words dlconfig4.php would have to be expanded if we ever wanted
         // "tool tip" and "section title" to be (slightly) different from each other.
-        echo "<td align=\"left\"  width=\"15%\"><a href=\"$subdirDrops/$fileName/\" title=\"$value\">$buildName</a></td>\n";
+        echo "<td class=\"name\"><a href=\"$subdirDrops/$fileName/\" title=\"$value\">$buildName</a></td>\n";
       }
       $buildName = printBuildColumns($fileName, $parts);
-      echo "<td  align=\"left\" width=\"40%\">$timeStamps[$fileName]</td>\n";
+      echo "<td  class=\"date\">$timeStamps[$fileName]</td>\n";
       echo "</tr>\n";
     }
   }
@@ -357,26 +356,22 @@ foreach($dropType as $value) {
   // skip whole section, if bucket is empty
   if (array_key_exists($prefix,$buckets)) {
 
-    echo "<table width=\"100%\">\n";
+    echo "<table class=\"downloads\">\n";
     // header, colored row
-    echo "<tr bgcolor=\"#76708C\">\n";
     // name attribute can have no spaces, so we tranlate them to underscores
     // (could effect targeted links)
     $valueName=strtr($value,' ','_');
-    echo "<td align=\"left\" width=\"100%\"><a name=\"$valueName\">\n";
-    echo "<font color=\"#FFFFFF\">$value\n";
-    echo "</font></a></td>\n";
+    echo "<tr id=\"valueName\">\n";
+    echo "<td class=\"main\">$value</td>\n";
     echo "</tr>\n";
-    echo "</table>";
+    echo "</table>\n";
 
-    echo "<table width=\"100%\">\n";
+    echo "<table class=\"downloads\">\n";
     echo "<tr>\n";
 
-    // first cell blank, for alignment with top block
-    //echo "<th align=\"left\" width=\"20%\"></th>";
-    echo "<th align=\"left\" width=\"15%\">Build Name</th>\n";
-    echo "<th align=\"left\" width=\"25%\">Build Status</th>\n";
-    echo "<th align=\"left\" width=\"40%\">Build Date</th>\n";
+    echo "<th class=\"name\">Build Name</th>\n";
+    echo "<th class=\"status\">Build Status</th>\n";
+    echo "<th class=\"date\">Build Date</th>\n";
 
     echo "</tr>\n";
     $aBucket = $buckets[$prefix];
@@ -389,22 +384,18 @@ foreach($dropType as $value) {
           $parts = explode("-", $innerValue);
 
           echo "<tr>\n";
-          //echo "<td align=\"left\" width=\"20%\">&nbsp;</td>\n";
-          // Uncomment the line below if we need click through licenses.
-          // echo "<td><a href=\"license.php?license=$subdirDrops/$innerValue\">$parts[1]</a></td>\n";
 
-          // Comment the line below if we need click through licenses.
           $buildName=$innerValue;
           if (count ($parts)==3) {
-            echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
+            echo "<td class=\"name\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
           } else if (count ($parts)==2) {
-            echo "<td align=\"left\" width=\"15%\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
+            echo "<td class=\"name\"><a href=\"$subdirDrops/$innerValue/\">$innerValue</a></td>\n";
           } else {
-            echo "<td align=\"left\" width=\"15%\">Unexpected numberof parts?</td>\n";
+            echo "<td class==\"name\">Unexpected numberof parts?</td>\n";
           }
 
           $buildName = printBuildColumns($innerValue, $parts);
-          echo "<td align=\"left\" width=\"40%\">$timeStamps[$innerValue]</td>\n";
+          echo "<td class=\"date\">$timeStamps[$innerValue]</td>\n";
           echo "</tr>\n";
         }
       }
