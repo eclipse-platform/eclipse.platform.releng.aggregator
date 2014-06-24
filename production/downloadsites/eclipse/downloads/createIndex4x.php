@@ -12,7 +12,21 @@ $subdirDrops="drops4";
 
 
 ob_start();
- require("header.php.html");
+
+/*
+ DL.header.php.html and DL.footer.php.html were original obtained from 
+
+wget http://eclipse.org/eclipse.org-common/themes/solstice/html_template/header.php;
+wget http://eclipse.org/eclipse.org-common/themes/solstice/html_template/footer.php;
+
+and then those files modified to suit our needs. The header required a fair amount of customization, 
+the footer almost none. 
+
+See bug 437494 for a few details.
+https://bugs.eclipse.org/bugs/show_bug.cgi?id=437494
+*/
+
+require("DL.header.php.html");
 
 ?>
 
@@ -20,11 +34,12 @@ ob_start();
 <p>On this
 page you can find the latest builds produced by
 the <a href="https://www.eclipse.org/eclipse/">Eclipse
-Project</a>. To get started run the program and go through the user and developer
-documentation provided in the on-line help system. If you have problems downloading
+Project</a>. To get started, run the program and go through the user and developer
+documentation provided in the help system or 
+see the <a href="http://help.eclipse.org/">web-based help system</a>. If you have problems downloading
 the drops, contact the <a href="mailto:webmaster@eclipse.org">webmaster</a>.
 If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
-out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forums</a>.
+out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forum</a>.
 
 </p>
 
@@ -306,7 +321,7 @@ while ($anEntry = $aDirectory->read()) {
 <tr>
 <th class="name">Build Name</th>
 <th class="status">Build Status</th>
-<th align="date">Build Date</th>
+<th class="date">Build Date</th>
 </tr>
 <?php
 foreach($dropType as $value) {
@@ -361,7 +376,7 @@ foreach($dropType as $value) {
     // name attribute can have no spaces, so we tranlate them to underscores
     // (could effect targeted links)
     $valueName=strtr($value,' ','_');
-    echo "<tr id=\"valueName\">\n";
+    echo "<tr id=\"$valueName\">\n";
     echo "<td class=\"main\">$value</td>\n";
     echo "</tr>\n";
     echo "</table>\n";
@@ -405,7 +420,7 @@ foreach($dropType as $value) {
 }
 echo "<hr>";
 echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"https://www.eclipse.org/legal/epl/notice.php\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>";
-require("footer.php.html");
+require("DL.footer.php.html");
 $html = ob_get_clean();
 
   #echo the computed content
