@@ -74,9 +74,9 @@ source buildeclipse.shsource 2>/dev/null
 # no override for minimal $PATH
 #export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-export BRANCH=R4_3_maintenance
+export BRANCH=R4_4_maintenance
 export BUILD_TYPE=M
-export STREAM=4.3.2
+export STREAM=4.4.1
 
 eclipseStreamMajor=${STREAM:0:1}
 

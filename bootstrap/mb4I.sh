@@ -76,7 +76,7 @@ source buildeclipse.shsource 2>/dev/null
 
 export BRANCH=master
 export BUILD_TYPE=I
-export STREAM=4.4.0
+export STREAM=4.5.0
 
 eclipseStreamMajor=${STREAM:0:1}
 
