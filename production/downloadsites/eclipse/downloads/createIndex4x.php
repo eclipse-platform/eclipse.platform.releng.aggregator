@@ -36,11 +36,9 @@ page you can find the latest builds produced by
 the <a href="https://www.eclipse.org/eclipse/">Eclipse
 Project</a>. To get started, run the program and go through the user and developer
 documentation provided in the help system or 
-see the <a href="http://help.eclipse.org/">web-based help system</a>. If you have problems downloading
-the drops, contact the <a href="mailto:webmaster@eclipse.org">webmaster</a>.
+see the <a href="http://help.eclipse.org/">web-based help system</a>. 
 If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
 out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forum</a>.
-
 </p>
 
 <p>See the <a href="https://www.eclipse.org/downloads/">main Eclipse Foundation download site</a> for convenient all-in-one packages.
