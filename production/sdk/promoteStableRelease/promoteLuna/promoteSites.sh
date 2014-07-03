@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-export DROP_ID=I20140605-1635
+export DROP_ID=I20140606-1215
 
-export DL_LABEL=4.4RC4
-export DL_LABEL_EQ=LunaRC4
+export DL_LABEL=4.4
+export DL_LABEL_EQ=Luna
 
 # for I builds, stable and RCs go to in milestones
-export REPO_SITE_SEGMENT=4.4milestones
-#REPO_SITE_SEGMENT=4.4
+#export REPO_SITE_SEGMENT=4.4milestones
+REPO_SITE_SEGMENT=4.4
 
 export HIDE_SITE=true
 #HIDE_SITE=false
@@ -16,8 +16,8 @@ export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
 # These are what precedes main drop directory name
-export DL_TYPE=S
-#export DL_TYPE=R
+#export DL_TYPE=S
+export DL_TYPE=R
 #export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?)
