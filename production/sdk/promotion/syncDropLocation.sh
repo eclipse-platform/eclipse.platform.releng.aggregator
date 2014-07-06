@@ -90,7 +90,10 @@ function sendPromoteMail ()
   logSize=0
   if [[ -e ${comparatorLogPath} ]]
   then
-     logSize= $(stat -c '%s' ${comparatorLogPath} )
+     logSize=$(stat -c '%s' ${comparatorLogPath} )
+     echo -e "DEBUG: comparatorLog found at\n\t${comparatorLogPath}\n\tWith size of $logSize bytes"
+  else
+     echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
   fi
   
 
@@ -138,17 +141,20 @@ function sendPromoteMail ()
   #TODO: later can use sed, form a proper list
   if [[ -n "${POM_UPDATES}" ]]
   then
-    message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
+    message1="$message1 <p>POM Update Required: ${downloadURL}pom_updates/</p>\n"
   fi
 
   message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>\n"
 
-  message1="$message1 <p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): ${downloadURL}/testResults.php</p>\n"
+  message1="$message1 <p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): ${downloadURL}testResults.php</p>\n"
 
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
-     message1="$message1 <p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages  ${downloadURL}/${comparatorLogRelPath}<p>\n"
+     message1="$message1 <p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages  ${downloadURL}${comparatorLogRelPath}<p>\n"
+  else 
+     echo -e "DEBUG: logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
+  
   
 
   # Do not include repo, if build failed
