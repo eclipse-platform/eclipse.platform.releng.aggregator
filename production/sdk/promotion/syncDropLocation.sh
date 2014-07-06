@@ -62,7 +62,20 @@ function sendPromoteMail ()
   # http://download.eclipse.org/eclipse/downloads/drops4/N20120415-2015/
   # /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/N20120415-2015
 
-
+  comparatorLogRelPath="buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"
+  fsDocRoot="/home/data/httpd/download.eclipse.org"
+  # comparator log is always about 200 or 300 bytes, since it contains some 
+  # identifying information, such as
+  # = = = = 
+  #    Comparator differences from current build
+  #    /shared/eclipse/builds/4N/siteDir/eclipse/downloads/drops4/N20140705-1700
+  #       compared to reference repo at 
+  #     http://download.eclipse.org/eclipse/updates/4.5-I-builds
+  # = = = =
+  # So we'll set "500 bytes" as minimum which should both ignore all "minimum's", 
+  # and catch anything of substance.
+  comparatorLogMinimumSize=500
+  
   mainPath=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
   echo "     mainPath: $mainPath"
   if [[ "$mainPath" == 1 ]]
@@ -72,6 +85,14 @@ function sendPromoteMail ()
   fi
 
   downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
+
+  comparatorLogPath=${fsDocRoot}/${mainPath}/${buildId}/${comparatorLogRelPath}
+  logSize=0
+  if [[ -e ${comparatorLogPath} ]]
+  then
+     logSize= $(stat -c '%s' ${comparatorLogPath} )
+  fi
+  
 
   if [[ -n "${BUILD_FAILED}" ]]
   then
@@ -122,6 +143,13 @@ function sendPromoteMail ()
 
   message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>\n"
 
+  message1="$message1 <p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): ${downloadURL}/testResults.php</p>\n"
+
+  if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
+  then
+     message1="$message1 <p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages  ${downloadURL}/${comparatorLogRelPath}<p>\n"
+  fi
+  
 
   # Do not include repo, if build failed
   if [[ -z "${BUILD_FAILED}" ]]
