@@ -136,13 +136,13 @@ function sendPromoteMail ()
   #we could? to "fix up" TODIR since it's in file form, not URL
   # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
-  message1="${message1}<p>Eclipse downloads: <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}</p>\n"
+  message1="$message1 <p>Eclipse downloads: <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}</p>\n"
 
-  message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}testResults.php</p>\n"
+  message1="$message1 <p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}testResults.php</p>\n"
 
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
-     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
+     message1="$message1 <p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
   else 
      echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
@@ -150,20 +150,20 @@ function sendPromoteMail ()
   # Do not include repo, if build failed
   if [[ -z "${BUILD_FAILED}" ]]
   then
-    message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
-    message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId}</p>\n"
+    message1="$message1 <p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
+    message1="$message1 <p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId}</p>\n"
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
   if [[ -z "${BUILD_FAILED}" && ! "${buildId}" =~ [PYX]  ]]
   then
-    message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
+    message1="$message1 <p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
   fi
 
   if [[ -n "${POM_UPDATES}" ]]
   then
-    message1="${message1}<p>POM Update Required (patches below can be applied on exported email, with <code>git am --scissors &lt; /path/to/patchEmail</code>): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
-    message1="${message1}<p><pre>\n"
+    message1="$message1 <p>POM Update Required (patches below can be applied on exported email, with <code>git am < /path/to/patchEmail</code>): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
+    message1="$message1 <p><pre>\n"
     for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
     do
        echo "DEBUG: pom update file: $file"
@@ -172,11 +172,11 @@ function sendPromoteMail ()
        if [[ -e $file ]]
        then
          # add scissors line ... for each "repo patch"? so extra info is not added to comment
-         message1="${message1}\n-- >8 --\n"
-         message1="${message1}$(cat $file)"
+         message1="$message1 \n-- >8 --\n"
+         message1="$message1 $(cat $file)"
        fi
     done
-    message1="${message1}\n</pre></p>"
+    message1="$message1 \n</pre></p>"
   fi
 
 
