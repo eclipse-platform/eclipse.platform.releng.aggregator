@@ -172,7 +172,7 @@ function sendPromoteMail ()
        if [[ -e $file ]]
        then
          # add scissors line ... for each "repo patch"? so extra info is not added to comment
-         message1="$message1 \n-- >8 --\n
+         message1="$message1 \n-- >8 --\n"
          message1="$message1 $(cat $file)"
        fi
     done
