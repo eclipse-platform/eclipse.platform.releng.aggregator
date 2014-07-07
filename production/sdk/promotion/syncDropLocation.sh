@@ -164,7 +164,7 @@ function sendPromoteMail ()
   then
     message1="$message1 <p>POM Update Required (patches below): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
     message1="$message1 <pre>"
-    for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*
+    for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
     do
        echo "DEBUG: pom update file: $file"
        # rare there would be non-existent file, given the logic that got us here, 
