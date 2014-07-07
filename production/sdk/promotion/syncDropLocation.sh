@@ -62,7 +62,20 @@ function sendPromoteMail ()
   # http://download.eclipse.org/eclipse/downloads/drops4/N20120415-2015/
   # /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/N20120415-2015
 
-
+  comparatorLogRelPath="buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"
+  fsDocRoot="/home/data/httpd/download.eclipse.org"
+  # comparator log is always about 200 or 300 bytes, since it contains some 
+  # identifying information, such as
+  # = = = = 
+  #    Comparator differences from current build
+  #    /shared/eclipse/builds/4N/siteDir/eclipse/downloads/drops4/N20140705-1700
+  #       compared to reference repo at 
+  #     http://download.eclipse.org/eclipse/updates/4.5-I-builds
+  # = = = =
+  # So we'll set "500 bytes" as minimum which should both ignore all "minimum's", 
+  # and catch anything of substance.
+  comparatorLogMinimumSize=500
+  
   mainPath=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
   echo "     mainPath: $mainPath"
   if [[ "$mainPath" == 1 ]]
@@ -72,6 +85,17 @@ function sendPromoteMail ()
   fi
 
   downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
+
+  comparatorLogPath=${fsDocRoot}/${mainPath}/${buildId}/${comparatorLogRelPath}
+  logSize=0
+  if [[ -e ${comparatorLogPath} ]]
+  then
+     logSize=$(stat -c '%s' ${comparatorLogPath} )
+     echo -e "DEBUG: comparatorLog found at\n\t${comparatorLogPath}\n\tWith size of $logSize bytes"
+  else
+     echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
+  fi
+  
 
   if [[ -n "${BUILD_FAILED}" ]]
   then
@@ -112,30 +136,51 @@ function sendPromoteMail ()
   #we could? to "fix up" TODIR since it's in file form, not URL
   # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
 
-  message1=""
+  message1="${message1}<p>Eclipse downloads: <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}</p>\n"
 
-  #TODO: later can use sed, form a proper list
-  if [[ -n "${POM_UPDATES}" ]]
+  message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}testResults.php</p>\n"
+
+  if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
-    message1="$message1 <p>POM Update Required: ${downloadURL}/pom_updates/</p>\n"
+     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
+  else 
+     echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
-
-  message1="$message1 <p>Eclipse downloads: ${downloadURL}</p>\n"
-
 
   # Do not include repo, if build failed
   if [[ -z "${BUILD_FAILED}" ]]
   then
-    message1="$message1 <p>Software site repository: http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
+    message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
+    message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId}</p>\n"
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
   if [[ -z "${BUILD_FAILED}" && ! "${buildId}" =~ [PYX]  ]]
   then
-    message1="$message1 <p>Equinox downloads: http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
+    message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
   fi
 
-  if [[ "${BUILD_KIND}" == "CBI" && "${buildId}" =~ [NMI] ]]
+  if [[ -n "${POM_UPDATES}" ]]
+  then
+    message1="${message1}<p>POM Update Required (patches below can be applied on exported email, with <code>git am --scissors --signoff (committerId) &lt; /path/to/patchEmail</code>): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
+    message1="${message1}<p><pre>\n"
+    for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
+    do
+       echo "DEBUG: pom update file: $file"
+       # rare there would be non-existent file, given the logic that got us here, 
+       # but we'll check just to be sure.
+       if [[ -e $file ]]
+       then
+         # add scissors line ... for each "repo patch"? so extra info is not added to comment
+         message1="${message1}\n-- >8 --\n"
+         message1="${message1}$(cat $file)"
+       fi
+    done
+    message1="${message1}\n</pre></p>"
+  fi
+
+
+  if [[ "${BUILD_KIND}" == "CBI" && ${buildType} =~ [NMI] ]]
   then
     (
     echo "To: ${TO}"
@@ -147,7 +192,7 @@ function sendPromoteMail ()
     echo -e "${message1}"
     echo "</body></html>"
     ) | /usr/lib/sendmail -t
-  elif [[ "${BUILD_KIND}" == "CBI" && "${buildId}" =~ [PYX] ]]
+  elif [[ "${BUILD_KIND}" == "CBI" && ${buildType} =~ [PYX] ]]
   then
     (
     echo "To: ${TO}"
@@ -160,7 +205,7 @@ function sendPromoteMail ()
     echo "</body></html>"
     ) | /usr/lib/sendmail -t
   fi
-  echo "mail sent for $eclipseStream $buildType-build $buildId"
+  echo "INFO: mail sent for $eclipseStream $buildType-build $buildId"
   return 0
 }
 
