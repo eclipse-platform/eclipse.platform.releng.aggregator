@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 // This is purely an example, to use as reference while in workspace. 
 // The actual file, named 'buildproperties.php,
