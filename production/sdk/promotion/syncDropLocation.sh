@@ -163,7 +163,7 @@ function sendPromoteMail ()
   if [[ -n "${POM_UPDATES}" ]]
   then
     message1="$message1 <p>POM Update Required (patches below): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
-    message1="$message1 <p><pre>"
+    message1="$message1 <p><pre>\n"
     for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
     do
        echo "DEBUG: pom update file: $file"
@@ -174,7 +174,7 @@ function sendPromoteMail ()
          message1="$message1 $( cat $file)"
        fi
     done
-    message1="$message1 </pre></p>"
+    message1="$message1 \n</pre></p>"
   fi
 
 
