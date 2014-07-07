@@ -9,7 +9,8 @@ $pageAuthor   = "David Williams";
 $eclipseStream="4";
 include('dlconfig4.php');
 $subdirDrops="drops4";
-
+$expectedtestConfigs=0;
+$testConfigs = array();
 
 ob_start();
 
@@ -24,7 +25,7 @@ the footer almost none.
 
 See bug 437494 for a few details.
 https://bugs.eclipse.org/bugs/show_bug.cgi?id=437494
-*/
+ */
 
 require("DL.header.php.html");
 
@@ -62,53 +63,74 @@ preliminary Java&trade; 8 support is available (<a href="drops4/P20140317-1600/"
 
 <?php
 
-  function startsWithDropPrefix($dirName, $dropPrefix)
-  {
+function startsWithDropPrefix($dirName, $dropPrefix)
+{
 
-    $result = false;
-    // sanity check "setup" is as we expect
-    if (isset($dropPrefix) && is_array($dropPrefix)) {
-      // sanity check input
-      if (isset($dirName) && strlen($dirName) > 0) {
-        $firstChar = substr($dirName, 0, 1);
-        //echo "first char: ".$firstChar;
-        foreach($dropPrefix as $type) {
-          if ($firstChar == "$type") {
-            $result = true;
-            break;
-          }
+  $result = false;
+  // sanity check "setup" is as we expect
+  if (isset($dropPrefix) && is_array($dropPrefix)) {
+    // sanity check input
+    if (isset($dirName) && strlen($dirName) > 0) {
+      $firstChar = substr($dirName, 0, 1);
+      //echo "first char: ".$firstChar;
+      foreach($dropPrefix as $type) {
+        if ($firstChar == "$type") {
+          $result = true;
+          break;
         }
       }
     }
-    else {
-      echo "dropPrefix not defined as expected\n";
-    }
-    return $result;
   }
-function runTestBoxes($buildName, $testResultsDirName) {
+  else {
+    echo "dropPrefix not defined as expected\n";
+  }
+  return $result;
+}
+function calcTestConfigsRan($buildName, $testResultsDirName) {
 
   global $subdirDrops;
-  $testBoxes=array("linux", "macosx", "win32");
-  $length=count($testBoxes);
+  global $expectedtestConfigs;
+
   $boxes=0;
+  // the include file, testConfigs.php defines 'testConfigs' array, 
+  // which consists of strings defining what platforms and vms we test. 
+  // For example, a testConfigs.php file might consist of 
+  // <?php
+  // $expectedTestConfigs = array();
+  // $expectedTestConfigs[]="linux.gtk.x86_64_8.0";
+  // $expectedTestConfigs[]="macosx.cocoa.x86_64_7.0";
+  // $expectedTestConfigs[]="win32.win32.x86_7.0";
+
+  if (file_exists("$subdirDrops/$buildName/testConfigs.php")) {
+    include "$subdirDrops/$buildName/testConfigs.php";
+    $testConfigs = &$expectedTestConfigs;
+  }
+  else  {
+    // minus 2 is code for "testConfigs not found"
+    $boxes=-2;
+    $testConfigs = array();
+  }
+  $expectedtestConfigs=count($testConfigs);
+
   if (file_exists("$subdirDrops/$buildName/buildproperties.php")) {
     // be sure any previous are reset
     unset ($BUILD_FAILED);
     include "$subdirDrops/$buildName/buildproperties.php";
     if (isset ($BUILD_FAILED) && strlen($BUILD_FAILED) > 0) {
+      // minus 1 is taken as numeric code that "build failed".
       $boxes=-1;
       unset ($BUILD_FAILED);
     }
   }
-  if ($boxes != -1)  {
+  if ($boxes != -1 && $boxes != -2)  {
 
     // TEMP? appears "old style" builds had directories named "results", but now "testresults"
     // and we want to look in $testResultsDirName/consolelogs
     if (file_exists("$subdirDrops/$buildName/$testResultsDirName/consolelogs")) {
       $buildDir = dir("$subdirDrops/$buildName/$testResultsDirName/consolelogs");
       while ($file = $buildDir->read()) {
-        for ($i = 0 ; $i < $length ; $i++) {
-          if (strncmp($file, $testBoxes[$i], count($testBoxes[$i])) == 0) {
+        for ($i = 0 ; $i < $expectedtestConfigs ; $i++) {
+          if (strncmp($file, $testConfigs[$i], count($testConfigs[$i])) == 0) {
             $boxes++;
             break;
           }
@@ -116,7 +138,7 @@ function runTestBoxes($buildName, $testResultsDirName) {
       }
     }
   }
-  //echo "boxes: $boxes";
+  //echo "DEBUG: boxes: $boxes";
   return $boxes;
 }
 function printBuildColumns($fileName, $parts) {
@@ -169,8 +191,8 @@ function printBuildColumns($fileName, $parts) {
       }
     }
 
-    $boxes=runTestBoxes($fileName, $testResultsDirName);
-    // boses == -1 is code that "bulid failed" and no tests are expected.
+    $boxes=calcTestConfigsRan($fileName, $testResultsDirName);
+    // boxes == -1 is code that "bulid failed" and no tests are expected.
     if ($boxes == -1) {
       $buildimage="build_failed.gif";
       $buildalt="Build failed";
@@ -180,19 +202,19 @@ function printBuildColumns($fileName, $parts) {
     }
     echo "<a href=\"$dropDir/\"><img style=\"border:0px\" src=\"../images/$buildimage\" title=\"$buildalt\" alt=\"$buildalt\" /></a>\n";
 
-    // hard code here, for now, but make come from property file, later
-    $expectedTestBoxes=3;
+    // set to zero globally, but computed in calcTestConfigsRan
+    global $expectedtestConfigs;
 
     $boxesTitle="";
 
     // We skip the main "tests" part for patch builds, since don't expect any (for now).
-    if ($buildType !== "P") {
+    if ($buildType !== "P" && $boxes !== -2) {
 
       // always put in links, since someone may want to look at logs, even if not tests results, per se
       // don't forget to end link, after images decided.
 
       if ($boxes > -1) {
-        $boxesTitle=$boxes." of ".$expectedTestBoxes." test platforms finished.";
+        $boxesTitle=$boxes." of ".$expectedtestConfigs." test platforms finished.";
       }
       if ($testResultsDirName === "results") {
         echo "<a href=\"$dropDir/results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
@@ -207,7 +229,7 @@ function printBuildColumns($fileName, $parts) {
         // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
         $testimage="caution.gif";
         $testalt="Integration tests did not run, due to unknown reasons.";
-      } elseif ($boxes > 0 && $boxes < $expectedTestBoxes) {
+      } elseif ($boxes > 0 && $boxes < $expectedtestConfigs) {
         if ($diff > 1440) {
           $testimage="junit.gif";
           $testalt="Tests results are available but did not finish on all machines";
@@ -215,7 +237,7 @@ function printBuildColumns($fileName, $parts) {
           $testimage="runtests.gif";
           $testalt="Integration tests are running ...";
         }
-      } elseif ($boxes == $expectedTestBoxes) {
+      } elseif ($boxes == $expectedtestConfigs) {
         $testimage="junit.gif";
         $testalt="Tests results are available";
       } else {
@@ -224,7 +246,7 @@ function printBuildColumns($fileName, $parts) {
       }
       echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
       if ($boxes > -1) {
-        echo "&nbsp;(".$boxes." of ".$expectedTestBoxes." platforms)";
+        echo "&nbsp;(".$boxes." of ".$expectedtestConfigs." platforms)";
       }
       echo "</a>\n";
     } else {
@@ -232,9 +254,15 @@ function printBuildColumns($fileName, $parts) {
       $testimage="results.gif";
       $testalt="Logs from build";
       echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
-      echo "&nbsp;(No automated tests)";
-      echo "</a>\n";
+      if ($buildType == "P") {
+        echo "&nbsp;(No automated tests)";
+      } elseif ($boxes == -2) {
+        echo "&nbsp;(No expected tests)";
+      } else {
+        echo "&nbsp;(unexpected test boxes)";
+      }
     }
+    echo "</a>\n";
   }
   echo "</td>\n";
   return $buildName;
@@ -421,6 +449,6 @@ echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provid
 require("DL.footer.php.html");
 $html = ob_get_clean();
 
-  #echo the computed content
-  echo $html;
+#echo the computed content
+echo $html;
 
