@@ -182,13 +182,12 @@ function printBuildColumns($fileName, $parts) {
     // test results location changed. 'testresults' is new standard
     // but we check for 'results' for older stuff.
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=379408
-    $testResultsDirName="";
     if (file_exists("$dropDir/testresults")) {
       $testResultsDirName="testresults";
-    } else {
-      if (file_exists("$dropDir/results")) {
+    } elseif (file_exists("$dropDir/results")) {
         $testResultsDirName="results";
-      }
+    } else {
+      $testResultsDirName="";
     }
 
     $boxes=calcTestConfigsRan($fileName, $testResultsDirName);
@@ -225,12 +224,12 @@ function printBuildColumns($fileName, $parts) {
       if ($boxes == -1) {
         $testimage="caution.gif";
         $testalt="Integration tests did not run due to failed build";
-      } elseif ($boxes == 0 && $diff > 720) {
-        // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
+      } elseif (($boxes == 0 || $boxes == -3) && $diff > 600) {
+        // assume if no results at all, after 10 hours, assume they didn't run for unknown reasosn
         $testimage="caution.gif";
         $testalt="Integration tests did not run, due to unknown reasons.";
       } elseif ($boxes > 0 && $boxes < $expectedtestConfigs) {
-        if ($diff > 1440) {
+        if ($diff > 720) {
           $testimage="junit.gif";
           $testalt="Tests results are available but did not finish on all machines";
         } else {
@@ -239,7 +238,7 @@ function printBuildColumns($fileName, $parts) {
         }
       } elseif ($boxes == $expectedtestConfigs) {
         $testimage="junit.gif";
-        $testalt="Tests results are available";
+        $testalt="All Tests results are available";
       } else {
         $testimage="runtests.gif";
         $testalt="Integration tests are running ...";
@@ -247,6 +246,8 @@ function printBuildColumns($fileName, $parts) {
       echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
       if ($boxes > -1) {
         echo "&nbsp;(".$boxes." of ".$expectedtestConfigs." platforms)";
+      } elseif ($boxes == -3) {
+        echo "&nbsp;("0 of ".$expectedtestConfigs." platforms)";
       }
       echo "</a>\n";
     } else {
