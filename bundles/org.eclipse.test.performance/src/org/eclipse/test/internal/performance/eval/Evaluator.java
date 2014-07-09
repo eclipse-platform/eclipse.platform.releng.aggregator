@@ -11,7 +11,6 @@
 package org.eclipse.test.internal.performance.eval;
 
 import java.util.HashSet;
-import junit.framework.Assert;
 
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
@@ -21,6 +20,7 @@ import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.test.internal.performance.db.Variations;
 import org.eclipse.test.performance.PerformanceMeter;
+import org.junit.Assert;
 
 /**
  * The default implementation of an evaluator backed by a database.

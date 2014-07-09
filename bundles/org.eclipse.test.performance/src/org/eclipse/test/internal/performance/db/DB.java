@@ -27,8 +27,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import junit.framework.Assert;
-
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -38,6 +36,7 @@ import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.eval.StatisticsSession;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
+import org.junit.Assert;
 
 public class DB {
     
@@ -612,7 +611,7 @@ public class DB {
         String[] names= (String[])values.toArray(new String[values.size()]);
         
         boolean sort= true;
-        Pattern pattern= Pattern.compile("200[3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
+        Pattern pattern= Pattern.compile("20[0-9][3-9][01][0-9][0-3][0-9]"); //$NON-NLS-1$
         final Matcher matcher= pattern.matcher(""); //$NON-NLS-1$
         for (int i= 0; i < names.length; i++) {
             matcher.reset(names[i]);

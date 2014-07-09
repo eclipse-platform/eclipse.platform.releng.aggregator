@@ -20,8 +20,7 @@ import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.eval.StatisticsUtil.Percentile;
-
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * @since 3.1

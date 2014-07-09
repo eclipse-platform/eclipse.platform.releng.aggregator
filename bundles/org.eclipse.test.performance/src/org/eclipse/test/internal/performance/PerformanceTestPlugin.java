@@ -371,6 +371,8 @@ public class PerformanceTestPlugin extends Plugin {
 	        case IStatus.WARNING:
 		        System.err.println("Warning: " + status.getMessage()); //$NON-NLS-1$
 	            break;
+	        default:
+	            break;
 	        }
 	        Throwable exception= status.getException();
 	        if (exception != null)
