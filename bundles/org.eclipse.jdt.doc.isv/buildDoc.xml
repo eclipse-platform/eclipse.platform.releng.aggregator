@@ -41,21 +41,24 @@
 		<record name="${basedir}/jdtconvert.txt" action="stop"/>
 	</target>
 
-	<target name="getJavadocPath" depends="getEclipseJavadocPath" unless="javadoc">
+	<target name="getJavadocPath" depends="getEclipseJavadocPath" unless="javadocExecutable">
 		<!-- WARNING: Ant bug: The <available> task overrides an already set property! https://bugs.eclipse.org/431236#c12 -->
-		<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
-		<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+		<available file="${java.home}/../bin/javadoc.exe" property="javadocExecutable" value="${java.home}/../bin/javadoc.exe"/>
+		<available file="${java.home}/../bin/javadoc" property="javadocExecutable" value="${java.home}/../bin/javadoc" />
 	</target>
 	
-	<target name="getEclipseJavadocPath" unless="javadoc">
+	<target name="getEclipseJavadocPath" unless="javadocExecutable">
 		<!-- Hack to to use custom javadoc executable (need Java 8 for https://bugs.eclipse.org/431236 ) -->
-		<condition property="javadoc" value="${eclipse.javadoc}">
-			<isset property="eclipse.javadoc"/>
+		<condition property="javadocExecutable" value="${eclipse.javadoc}">
+		  <and>
+		     <isset property="eclipse.javadoc"/>
+		     <available file="${eclipse.javadoc}" />
+		  </and>
 		</condition>
 	</target>
 
 
-	<target name="generateJavadoc" depends="getJavadocPath" if="javadoc">
+	<target name="generateJavadoc" depends="getJavadocPath" if="javadocExecutable">
 
 		<!-- HACK to ensure the Platform Doc is built before JDT - call to this script should be moved to build.jars target   -->
 		<!-- NOTE: This works with PDE Build but not with CBI (Maven/Tycho), see https://bugs.eclipse.org/415115 for details. -->
@@ -96,7 +99,8 @@
 		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
 
 <echo>org.eclipse.jdt.doc.isv/buildDoc.xml - generateJavadoc:
-${basedir}/${replaceFile} before _* expansion:</echo>
+      Using javadocExecutable: ${javadocExecutable}</echo>
+<echo>${basedir}/${replaceFile} before _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
 
 			<!-- strip away leading path -->
@@ -121,7 +125,7 @@ ${basedir}/${replaceFile} before _* expansion:</echo>
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
 
-		<exec dir="." executable="${javadoc}" output="doc.bin.log">
+		<exec dir="." executable="${javadocExecutable}" output="doc.bin.log">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx500M" />
 		</exec>
 		
