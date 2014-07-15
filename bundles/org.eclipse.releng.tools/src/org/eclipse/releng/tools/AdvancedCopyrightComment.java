@@ -128,8 +128,9 @@ public class AdvancedCopyrightComment extends CopyrightComment {
 			// if this is the line, containing the ${date}, add in the year
 			if (offset > -1) {
 				writer.print(linePrefix + ' ' + currentLine.substring(0, offset) + getCreationYear());
-				if (hasRevisionYear() && getRevisionYear() != getCreationYear())
-			        writer.print(", " + getRevisionYear()); //$NON-NLS-1$
+				if (hasRevisionYear() && getRevisionYear() != getCreationYear()) {
+			            writer.print(", " + getRevisionYear()); //$NON-NLS-1$
+				}
 				println(writer, currentLine.substring(offset+DATE_VAR.length(), currentLine.length()));
 			} else {
 				// just write out the line

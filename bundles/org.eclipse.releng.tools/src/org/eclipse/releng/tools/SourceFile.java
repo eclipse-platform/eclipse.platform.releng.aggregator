@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Martin Oberhuber (Wind River) - [235572] detect existing comments in bat files
+ *     Leo Ufimtsev lufimtse@redhat.com [276257] fix xml issues.
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -20,21 +21,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.osgi.util.NLS;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.filebuffers.LocationKind;
-
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.osgi.util.NLS;
 
 
 /**
@@ -65,8 +62,8 @@ public abstract class SourceFile {
 			} else if (extension.equals("js")) { //$NON-NLS-1$
 	            return new JavaScriptFile(file);
 			} else if (extension.equals("xml")) { //$NON-NLS-1$
-				if (XmlFile.BUGS_FIXED)
-					return new XmlFile(file);
+		    //[276257] re-enable xml support.
+		    return new XmlFile(file);
 			}
         }
 		return null;
@@ -133,6 +130,7 @@ public abstract class SourceFile {
 			boolean inComment = false;
 			String commentStartString = ""; //$NON-NLS-1$
 			
+			//Loop over the document, extract the comment.
 			while (aLine != null) {
 				contentsWriter.write(aLine);
 				contentsWriter.newLine();
@@ -199,16 +197,18 @@ public abstract class SourceFile {
 	}
 	
 	/**
-	 * @param string
+	 * Given the copyright comment, this method inserts it into the right place in the file.
+	 *
+	 * @param copyRightComment  the complete comment that will be inserted.
 	 */
-	public void insert(String string) {
+	public void insert(String copyRightComment) {
 		ITextFileBuffer fileBuffer= getFileBuffer();
 		if (fileBuffer == null)
 			return;
 
 		try {
 			IDocument document= fileBuffer.getDocument();
-			doInsert(string, document);
+			doInsert(copyRightComment, document);
 			fileBuffer.commit(null, false);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
@@ -245,10 +245,10 @@ public abstract class SourceFile {
 	}
 
 	/**
-	 * @param firstCopyrightComment
-	 * @param string
+	 * @param aCommet
+	 * @param newCopyrightComment          Comment to be inserted.
 	 */
-	public void replace(BlockComment aComment, String string) {
+	public void replace(BlockComment aComment, String newCopyrightComment) {
 		
 	
 		try {
@@ -260,7 +260,7 @@ public abstract class SourceFile {
 
 			IRegion startLine= document.getLineInformation(aComment.start);
 			IRegion endLine= document.getLineInformation(aComment.end + 1);
-			document.replace(startLine.getOffset(), endLine.getOffset() - startLine.getOffset(), string);
+			document.replace(startLine.getOffset(), endLine.getOffset() - startLine.getOffset(), newCopyrightComment);
 			
 			fileBuffer.commit(null, false);
 		

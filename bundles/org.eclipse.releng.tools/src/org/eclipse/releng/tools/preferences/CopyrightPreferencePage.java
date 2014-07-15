@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.eclipse.releng.tools.preferences;
 
-import org.osgi.service.prefs.BackingStoreException;
-
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.source.SourceViewer;
+import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.releng.tools.Messages;
 import org.eclipse.releng.tools.RelEngPlugin;
-import org.eclipse.releng.tools.XmlFile;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -27,22 +33,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.osgi.service.prefs.BackingStoreException;
 
 /**
  * Copyright tools preference page
@@ -136,14 +129,14 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		data.horizontalSpan = 2;
 		fIgnoreProperties.setLayoutData(data);
 
-		if (XmlFile.BUGS_FIXED) {
-			// ignore xml files
-			fIgnoreXml = new Button(fComposite, SWT.CHECK);
-			fIgnoreXml.setText(Messages.getString("CopyrightPreferencePage.9")); //$NON-NLS-1$
-			data = new GridData();
-			data.horizontalSpan = 2;
-			fIgnoreXml.setLayoutData(data);
-		}
+		
+		//[276257] re-enabling xml files
+		fIgnoreXml = new Button(fComposite, SWT.CHECK);
+		fIgnoreXml.setText(Messages.getString("CopyrightPreferencePage.9")); //$NON-NLS-1$
+		data = new GridData();
+		data.horizontalSpan = 2;
+		fIgnoreXml.setLayoutData(data);
+
 
 		KeyListener listener1 = new KeyAdapter() {
 			/* (non-Javadoc)
@@ -261,10 +254,11 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		// disable fix up existing copyright till it works better
 //		handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), store.getBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY));
 		fIgnoreProperties.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));
-		if (XmlFile.BUGS_FIXED)
-			fIgnoreXml.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
+		
+		//[276257] re-enabling xml files
+		fIgnoreXml.setSelection(store.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
 	}
-	
+
 	/**
 	 * Validate the control values in this preference page
 	 */
@@ -335,8 +329,8 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 //		handleReplaceAllEnabled(fReplaceAllExisting.getSelection(), getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY));
 		fIgnoreProperties.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY));
 		
-		if (XmlFile.BUGS_FIXED)
-			fIgnoreXml.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
+		//[276257] re-enabling xml files
+		fIgnoreXml.setSelection(getPreferenceStore().getDefaultBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY));
 		
 		super.performDefaults();
 	}
@@ -356,8 +350,8 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 //		store.setValue(RelEngCopyrightConstants.FIX_UP_EXISTING_KEY, fFixExisting.getSelection());
 		store.setValue(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY, fIgnoreProperties.getSelection());
 		
-		if (XmlFile.BUGS_FIXED)
-			store.setValue(RelEngCopyrightConstants.IGNORE_XML_KEY, fIgnoreXml.getSelection());
+		//[276257] re-enabling xml files
+		store.setValue(RelEngCopyrightConstants.IGNORE_XML_KEY, fIgnoreXml.getSelection());
 		
 		try {
 			InstanceScope.INSTANCE.getNode(RelEngPlugin.ID).flush();

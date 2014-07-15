@@ -294,6 +294,19 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		}
 	}
 
+	/**
+	 * Handle an induvidual file at a time
+	 *
+	 *  <p>Functions:
+	 *  <ul>
+	 *  - <li> get user defined default date </li>
+	 *  - <li> identify if multiple comments inserted. </li>
+	 *    <li> update existing comment or insert a new one </li>
+	 *  </ul>
+	 * @param file     - file to be proccessed (.java, .bat, .xml etc...)
+	 * @param adapter
+	 * @param monitor
+	 */
 	private void processFile(IFile file, RepositoryProviderCopyrightAdapter adapter, IProgressMonitor monitor) {
 		monitor.subTask(file.getFullPath().toOSString());
 
@@ -318,7 +331,9 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 			return;
 		}
 
+		//extract 'current' comment from the document.
 		BlockComment copyrightComment = aSourceFile.getFirstCopyrightComment();
+
 		CopyrightComment ibmCopyright = null;
 		// if replacing all comments, don't even parse, just use default copyright comment
 		if (prefStore.getBoolean(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY)) {
@@ -343,7 +358,9 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 		// figure out revision year
 		int revised = ibmCopyright.getRevisionYear();
-		int lastMod = revised;
+ 		int lastMod = revised;
+
+ 		//Read user defined year from options.
 		if (prefStore.getBoolean(RelEngCopyrightConstants.USE_DEFAULT_REVISION_YEAR_KEY) || adapter == null)
 			lastMod = prefStore.getInt(RelEngCopyrightConstants.REVISION_YEAR_KEY);
 		else {
@@ -385,11 +402,17 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 		// either replace old copyright or put the new one at the top of the file
 		ibmCopyright.setRevisionYear(lastMod);
-		if (copyrightComment == null)
+		if (copyrightComment == null)   //do this on files without comments
 			aSourceFile.insert(ibmCopyright.getCopyrightComment());
-		else {
-			if (!copyrightComment.atTop())
+		else {                          //do this with files that have a copy-right comment already.
+
+		        //Verify that the comment is at the top of the file. Warn otherwise.
+			if (!copyrightComment.atTop() && 
+			        //[276257] XML file is a special case because it can have an xml-header and other headers, thus it can start at an arbirary position.
+			        (aSourceFile.getFileType() != CopyrightComment.XML_COMMENT)) {
+
 				warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.19")); //$NON-NLS-1$
+			}
 			aSourceFile.replace(copyrightComment, ibmCopyright.getCopyrightComment());
 		}
 	}
