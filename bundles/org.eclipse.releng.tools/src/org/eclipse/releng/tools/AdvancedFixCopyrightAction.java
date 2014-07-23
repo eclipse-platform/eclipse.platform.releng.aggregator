@@ -310,45 +310,60 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	private void processFile(IFile file, RepositoryProviderCopyrightAdapter adapter, IProgressMonitor monitor) {
 		monitor.subTask(file.getFullPath().toOSString());
 
-		if (file.getFileExtension() == null) {
-			warn(file, null, Messages.getString("AdvancedFixCopyrightAction.13")); //$NON-NLS-1$
-			return;
+		//Missign file Extension 
+		if (! checkFileExtension(file)) {
+		    return;
 		}
 
+		//Create an instance of the appropriate Source container. (xml/java/bash etc..)
 		SourceFile aSourceFile = SourceFile.createFor(file);
-		if (aSourceFile == null)
-			return;
-
+		if (! checkSourceCreatedOk(aSourceFile, file)) {
+		    return;
+		}
+		
+		//Aquire user settings
 		IPreferenceStore prefStore = RelEngPlugin.getDefault().getPreferenceStore();
-		if ((aSourceFile.getFileType() == CopyrightComment.PROPERTIES_COMMENT && prefStore
-				.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY))
-				|| (aSourceFile.getFileType() == CopyrightComment.XML_COMMENT && prefStore
-				.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY))) {
-			return;
-		}
-		if (aSourceFile.hasMultipleCopyrights()) {
-			warn(file, null, Messages.getString("AdvancedFixCopyrightAction.14")); //$NON-NLS-1$
-			return;
+		
+		//Check if user wants to skip over this file
+		if (! checkUserFileIgnoreSettings(prefStore, aSourceFile)) {
+		    return;
 		}
 
-		//extract 'current' comment from the document.
+		//Skip over source files that have multiple copy-right notes 
+		if (! checkMultipleCopyright(file, aSourceFile)) {
+		    return;
+		}
+
+		//Extract 'current' 'raw' comment from the document.
 		BlockComment copyrightComment = aSourceFile.getFirstCopyrightComment();
 
+		
 		CopyrightComment ibmCopyright = null;
+		
 		// if replacing all comments, don't even parse, just use default copyright comment
 		if (prefStore.getBoolean(RelEngCopyrightConstants.REPLACE_ALL_EXISTING_KEY)) {
+		    
+		        //Aquire user default comments from settings.
 			ibmCopyright = AdvancedCopyrightComment.defaultComment(aSourceFile.getFileType());
 		} else {
+		    
+		        //Parse the raw comment and update the last revision year. (inserting a revision year if neccessary). 
 			ibmCopyright = AdvancedCopyrightComment.parse(copyrightComment, aSourceFile.getFileType());  
+			
+			//Check that the newly created comment was constructed correctly. 
 			if (ibmCopyright == null) {
-				// Let's see if the file is EPL
+			    
+			        //Check against a standard IBM copyright header.
+				//Let's see if the file is EPL
 				ibmCopyright = IBMCopyrightComment.parse(copyrightComment, aSourceFile.getFileType());
 				if (ibmCopyright != null) {
+				        //Could not proccess file at all. 
 					warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.15")); //$NON-NLS-1$
 				}
 			}
 		}
 
+		//Could not determine the 'new' 'copyright' header. Do not procces file. 
 		if (ibmCopyright == null) {
 			warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.16")); //$NON-NLS-1$
 			return;
@@ -356,8 +371,10 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
 		ibmCopyright.setLineDelimiter(aSourceFile.getLineDelimiter());
 
-		// figure out revision year
+		// year last revised as listed in the copyright header. 
 		int revised = ibmCopyright.getRevisionYear();
+		
+		//lasdMod = last touched by user. (e.g as defined 'default' in options). 
  		int lastMod = revised;
 
  		//Read user defined year from options.
@@ -407,15 +424,73 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		else {                          //do this with files that have a copy-right comment already.
 
 		        //Verify that the comment is at the top of the file. Warn otherwise.
-			if (!copyrightComment.atTop() && 
-			        //[276257] XML file is a special case because it can have an xml-header and other headers, thus it can start at an arbirary position.
-			        (aSourceFile.getFileType() != CopyrightComment.XML_COMMENT)) {
-
+		        //[276257] XML file is a special case because it can have an xml-header and other headers, thus it can start at an arbirary position.
+			if (!copyrightComment.atTop() && (aSourceFile.getFileType() != CopyrightComment.XML_COMMENT)) {
 				warn(file, copyrightComment, Messages.getString("AdvancedFixCopyrightAction.19")); //$NON-NLS-1$
 			}
 			aSourceFile.replace(copyrightComment, ibmCopyright.getCopyrightComment());
 		}
 	}
+
+    private boolean checkFileExtension(IFile file) {
+        if (file.getFileExtension() == null) {
+            warn(file, null, Messages.getString("AdvancedFixCopyrightAction.13")); //$NON-NLS-1$
+            return false;
+        } else {
+            return true;
+        }
+    }
+    
+    private boolean checkSourceCreatedOk(SourceFile sourceFile, IFile file) {
+        if (sourceFile == null) {
+            //Warn if source creation failed. 
+            warn(file, null, Messages.getString("AdvancedFixCopyrightAction.20")); //$NON-NLS-1$
+            return false;
+        } else {
+            return true;
+        }
+        
+    }
+    
+	
+    /**
+     * Check if user chose to skip files of this kind. 
+     * 
+     * @param prefStore    Copyright preference store 
+     * @param aSourceFile  Instance of the file to be checked. 
+     * @return             false if user wishes to skip over the file. 
+     */
+    private boolean checkUserFileIgnoreSettings(IPreferenceStore prefStore, SourceFile aSourceFile) {
+
+        // -- Skip file if it's a property file and user chose to ignore property files.
+        if (aSourceFile.getFileType() == CopyrightComment.PROPERTIES_COMMENT
+                && prefStore.getBoolean(RelEngCopyrightConstants.IGNORE_PROPERTIES_KEY)) {
+            return false;
+        }
+        // -- Skip over xml file if the user selected to skip xml files.
+        if (aSourceFile.getFileType() == CopyrightComment.XML_COMMENT
+                && prefStore.getBoolean(RelEngCopyrightConstants.IGNORE_XML_KEY)) {
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Check if the file has multiple copyright notices. Skip such files.
+     * 
+     * @param file
+     * @param aSourceFile
+     * @return true if it has a single notice. 
+     */
+    private boolean checkMultipleCopyright(IFile file, SourceFile aSourceFile) {
+        if (aSourceFile.hasMultipleCopyrights()) {
+            warn(file, null, Messages.getString("AdvancedFixCopyrightAction.14")); //$NON-NLS-1$
+            return false;
+        } else {
+            return true;
+        }
+    }
+	
 
 	private void warn(IFile file, BlockComment firstBlockComment,
 			String errorDescription) {
