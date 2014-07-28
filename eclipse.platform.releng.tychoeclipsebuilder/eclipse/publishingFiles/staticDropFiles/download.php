@@ -36,7 +36,6 @@ if (array_key_exists("SERVER_NAME", $_SERVER)) {
     // we want the /eclipse/downloads/* part, such as
     // /eclipse/downloads/drops4, or
     // /eclipse/downloads/drops, or
-    // /eclipse/downloads/drops4pdebased, etc.
     // function can return empty string
     $refurl=$_SERVER["REQUEST_URI"];
     // We expect $BUILD_ID to be defined in buildproperties.php

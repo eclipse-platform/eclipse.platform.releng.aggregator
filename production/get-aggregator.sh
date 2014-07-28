@@ -3,12 +3,14 @@
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
+  touch "${buildDirectory}/buildFailed-get-aggregator"
   exit 1
 fi
 
 if [ ! -r "$1" ]; then
   echo "$1" cannot be read
   echo USAGE: $0 env_file
+  touch "${buildDirectory}/buildFailed-get-aggregator"
   exit 1
 fi
 
@@ -22,7 +24,7 @@ source "$1"
 cd $BUILD_ROOT
 
 # derived values
-gitCache=$( fn-git-cache "$BUILD_ROOT" "${BRANCH}" )
+gitCache=$( fn-git-cache "$BUILD_ROOT" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [[ -r "$aggDir" ]]

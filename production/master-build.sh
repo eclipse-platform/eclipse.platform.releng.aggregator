@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# master script to drive Eclipse Platform builds.
-RAWDATE=$( date +%s )
+
 
 if [ $# -ne 1 ]; then
   echo USAGE: $0 env_file
@@ -9,22 +8,31 @@ fi
 
 INITIAL_ENV_FILE=$1
 
+
 if [ ! -r "$INITIAL_ENV_FILE" ]; then
   echo "$INITIAL_ENV_FILE" cannot be read
   echo USAGE: $0 env_file
   exit 1
 fi
 
-export BUILD_TIME_PATCHES=${BUILD_TIME_PATCHES:-false}
 
-# force "test build" if doing patch build (since, it really is for tests)
-# and this simply makes sure a human does not forget the "-t" and end up
-# trying to push some patched build (and promoting to downloads).
+export SCRIPT_PATH="${BUILD_ROOT}/production"
 
-if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
-then
-  testbuildonly=true
-fi
+
+source "${SCRIPT_PATH}/build-functions.shsource"
+
+source "${INITIAL_ENV_FILE}"
+
+source "${SCRIPT_PATH}/bashUtilities.shsource"
+source "${SCRIPT_PATH}/bootstrapVariables.shsource"
+
+
+assertNotEmpty gitCache
+assertNotEmpty aggDir
+assertNotEmpty BUILD_ID
+assertNotEmpty buildDirectory
+
+
 
 # remember, local "test builds" that use this script must change
 # or override 'GIT_PUSH' to simply echo, not actually push. Only
@@ -34,10 +42,7 @@ if [[ "${testbuildonly}" == "true" ]]
 then
   GIT_PUSH='echo no git push since testbuildonly'
 fi
-if [[ "${BUILD_TIME_PATCHES}" == "true" ]]
-then
-  GIT_PUSH='echo no git push since testbuildonly AND patched build'
-fi
+
 if [[ "${BUILD_TYPE}" == "N" ]]
 then
   GIT_PUSH='echo no git push done since Nightly'
@@ -49,19 +54,6 @@ fi
 GIT_PUSH=${GIT_PUSH:-'git push'}
 
 
-
-export SCRIPT_PATH="${BUILD_ROOT}/production"
-
-
-source "${SCRIPT_PATH}/build-functions.shsource"
-
-source "${INITIAL_ENV_FILE}"
-
-# BUILD_KIND allows fine tuning of how promoted, tested, download site name, etc.
-# CBI is only primary production build value. In future may use special values for
-# special cases, such as TEST, JAVA8, etc.
-export BUILD_KIND=${BUILD_KIND:-CBI}
-
 cd $BUILD_ROOT
 
 buildrc=0
@@ -70,7 +62,7 @@ buildrc=0
 
 # correct values for cbi-jdt-repo.url and cbi-jdt-version are
 # codified in the parent pom. These variables give an easy way
-# to test "experimental versions" in production build.
+# to test "experimental versions" in production-like build.
 
 if [[ -n $CBI_JDT_REPO_URL ]]
 then
@@ -81,19 +73,9 @@ then
   export CBI_JDT_VERSION_ARG="-Dcbi-jdt-version=$CBI_JDT_VERSION"
 fi
 
-BUILD_ID=$(fn-build-id "$BUILD_TYPE" )
-export buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
-if [[ -z "${buildDirectory}" ]]
-then
-  echo "PROGRAM ERROR: buildDirectory returned from fn-build-dir was empty"
-  exit 1
-else
-  # this should be when we first create buildDirectory
-  echo "Making buildDirectory: ${buildDirectory}"
-  mkdir -p "${buildDirectory}"
-  # it appears GID bit is not always set correctly, so we'll do so explicitly
-  chmod -c g+s "${buildDirectory}"
-fi
+assertNotEmpty buildDirectory
+echo "buildDirectory: >${buildDirectory}<"
+
 export logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
@@ -112,14 +94,14 @@ TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
 export TRACE_OUTPUT=${TRACE_OUTPUT:-$buildDirectory/buildlogs/trace_output.txt}
 echo $BUILD_PRETTY_DATE > ${TRACE_OUTPUT}
 
+assertNotEmpty buildDirectory
+
 # These files have variable/value pairs for this build, suitable for use in
 # shell scripts, PHP files, or as Ant (or Java) properties
 export BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
 export BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
 export BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
 
-gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
-aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
 
 # In production builds, we normally specify CLEAN_LOCAL,
@@ -205,7 +187,6 @@ fn-write-property GIT_PUSH
 fn-write-property LOCAL_REPO
 fn-write-property SCRIPT_PATH
 fn-write-property STREAMS_PATH
-fn-write-property BUILD_KIND
 fn-write-property CBI_JDT_REPO_URL
 fn-write-property CBI_JDT_REPO_URL_ARG
 fn-write-property CBI_JDT_VERSION
@@ -218,6 +199,7 @@ if [[ "${testbuildonly}" == "true" ]]
 then
   fn-write-property testbuildonly
 fi
+fn-write-property buildDirectory
 fn-write-property BUILD_ENV_FILE
 fn-write-property BUILD_ENV_FILE_PHP
 fn-write-property BUILD_ENV_FILE_PROP
@@ -229,9 +211,7 @@ fn-write-property BUILD_TYPE_NAME
 fn-write-property TRACE_OUTPUT
 fn-write-property comparatorRepository
 fn-write-property logsDirectory
-fn-write-property BUILD_TIME_PATCHES
 fn-write-property BUILD_HOME
-
 
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
@@ -249,47 +229,6 @@ else
   $SCRIPT_PATH/update-build-input.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb020_update-build-input_output.txt
   checkForErrorExit $? "Error occurred while updating build input"
 
-  if $BUILD_TIME_PATCHES ; then
-    # temp patches for bugs
-    # apply the pre-created patch from tempPatches
-    # patches created, typically, by navigating to repoToPath, then
-    # git diff --no-prefix > ../eclipse.platform.releng.aggregator/production/tempPatches/<patchFileName>
-    # (then commit and push change to "tempPatches" directory, with normal ID, not with build id)
-
-    repoToPatch=eclipse.jdt.core
-    patchFile=jdtComparatorFix.patch
-    echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
-    patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
-    #checkForErrorExit $? "Error occurred applying patch"
-
-    # Note: to "simulate" qualifier increases, when needed,
-    # the fix/patch must be "committed" (to build repo, not pushed to origin).
-    # This requires more effort to "reset" ... say to HEAD~1, or re-clone the repo,
-    # or else the 'checkout/pull' in next run will not succeed.
-    echo "INFO: commit to build machine repository (no push): $repoToPatch"
-    pushd $aggDir/$repoToPatch/
-    git commit --all -m "temp patch for testing"
-    #checkForErrorExit $? "Error occurred committing patch"
-    popd
-
-    # Note: to "simulate" qualifier increases, when needed,
-    # the fix/patch must be "committed" (to build repo, not pushed to origin).
-    # This requires more effort to "reset" ... say to HEAD~1, or re-clone the repo,
-    # or else the 'checkout/pull' in next run will not succeed.
-    #pushd $aggDir/$repoToPatch
-    #git commit --all -m "temp patch for testing"
-    #checkForErrorExit $? "Error occurred committing patch"
-    #popd
-
-    #repoToPatch=rt.equinox.p2
-    #patchFile=p2SourceFix.patch
-    #echo "INFO: apply patch file, $patchFile, in repo $repoToPatch"
-
-    #patch -p0  --backup -d $aggDir/$repoToPatch  -i $aggDir/production/tempPatches/$patchFile
-    #checkForErrorExit $? "Error occurred applying patch"
-
-
-  fi
 
   # We always make tag commits, if build successful or not, but don't push
   # back to origin if doing N builds or test builds.
@@ -416,7 +355,7 @@ then
 fi
 
 # if all ended well, put "promotion scripts" in known locations
-$SCRIPT_PATH/promote-build.sh $BUILD_KIND $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
+$SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
 
 fn-write-property-close

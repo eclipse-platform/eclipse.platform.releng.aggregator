@@ -1,111 +1,10 @@
 #!/usr/bin/env bash
-# this is not really to be executed, but sourced where needed
 
-# A general purpose utility to check number of arguments match
-# what was expected. Its purpose is to help bullet-proof these scripts
-# when future changes made.
-# Example: (such as in first line of a function)
-#   checkNArgs $# 3
-checkNArgs ()
-{
-  actual=$1
-    expected=$2
-    if [[ -z "$actual" || -z "$expected" ]]
-      then
-        BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-        printf "\n\tPROGRAM ERROR: number of arguments, $actual, or number expected, $expected, was not provided as arguments.\n\n" >${BUILD_FAILED}
-  printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
-  return 9
-    fi
-# possible is used when there are optional arguments, corresponds to "max possible", then "expected" means "min possible"
-    possible=$3
-#echo "     DEBUG checkNArgs funcName[1]: ${FUNCNAME[1]}" >> ${TRACE_OUTPUT}
-#echo "     DEBUG checkNArgs bashSource[2]:   ${BASH_SOURCE[2]}" >> ${TRACE_OUTPUT}
-#echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
-    if [[ -n "${possible}" ]]
-      then
-# if 3 total arguments, make sure first is between 2 and 3rd args (inclusive)
-#echo DEBUG: actual:   $actual
-#echo DEBUG: min expected: $expected
-#echo DEBUG: max possible: $possible
-#arg1=$(( $expected <= $actual ))
-#arg2=$(( $actual <= $possible ))
-#echo "DEBUG: expected <= actual $arg1"
-#echo "DEBUG: actual <= possible $arg2"
-        if  (( $expected <= $actual )) && (( $actual <= $possible ))
-          then
-#echo DEBUG: return 0
-            return 0
-        else
-          BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-            printf "\n\tPROGRAM ERROR: number of arguments, $actual, was not betwen expected, $expected, and possible, $possible.\n" >${BUILD_FAILED}
-  printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
-#echo DEBUG: return 1
-  return 1
-    fi
-    elif [[ $actual != $expected ]]
-    then
-# depends on buildDirectory being exported
-    BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-    printf "\n\tPROGRAM ERROR: expected $expected arguments but was passed $actual.\n" >${BUILD_FAILED}
-  printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
-  return 1
-    else
-      return 0
-        fi
-}
+# General purpose utilities related to git and similar, 
+# to be sourced where needed
 
-# general purpose utility for "hard exit" if return code not zero.
-# especially useful to call/check after basic things that should normally
-# easily succeeed.
-# usage:
-#   checkForErrorExit $? "Failed to copy file (for example)"
-checkForErrorExit ()
-{
-# arg 1 must be return code, $?
-# arg 2 (remaining line) can be message to print before exiting do to non-zero exit code
-  exitCode=$1
-    shift
-    message="$*"
-    if [[ -z "${exitCode}" ]]
-      then
-        echo "PROGRAM ERROR: checkForErrorExit called with no arguments"
-        exit 1
-        fi
-
-        if [[ -z "${message}" ]]
-          then
-            echo "WARNING: checkForErrorExit called without message"
-            message="(Calling program provided no message)"
-            fi
-
-# first make sure exit code is well formed
-            if [[ "${exitCode}" =~ [0] ]]
-              then
-#echo "exitcode was zero"
-                exitrc=0
-            else
-              if [[ "${exitCode}" =~ ^-?[0-9]+$ ]]
-                then
-#echo "exitcode was indeed a legal, non-zero numeric return code"
-                  exitrc=$exitCode
-              else
-#echo "exitode was not numeric, so will force to 1"
-                exitrc=1
-                  fi
-                  fi
-
-                  if [[ $exitrc != 0 ]]
-                    then
-                      echo
-                      echo "   ERROR. exit code: ${exitrc}"
-                      echo "   ERROR. message: ${message}"
-                      echo
-                      exit $exitrc
-                      fi
-}
-
-
+source ${SCRIPT_PATH}/bashUtilities.shsource
+source ${SCRIPT_PATH}/bootstrapVariables.shsource
 
 # USAGE: fn-git-clone URL [BRANCH [TARGET_DIR] ]
 #   URL: file:///gitroot/platform/eclipse.platform.releng.aggregator.git
@@ -114,19 +13,19 @@ checkForErrorExit ()
 fn-git-clone ()
 {
   URL="$1"; shift
-    if [ $# -gt 0 ]; then
-      BRANCH_CMD="-b $1"; shift
-        fi
-        if [ $# -gt 0 ]; then
-          TARGET_DIR="$1"; shift
-            fi
-# We specify --shared so that the
-# directory has group write permissions, as well as g+sx,
-# which is mostly done for easier "cleanup" of directories, etc.,
-# by anyone in "eclipse.platform.releng" group, not just e4Build
-# owner id itself.
-            echo git clone --recursive $BRANCH_CMD $URL $TARGET_DIR
-            git clone --recursive $BRANCH_CMD $URL $TARGET_DIR
+  if [ $# -gt 0 ]; then
+    BRANCH_CMD="-b $1"; shift
+  fi
+  if [ $# -gt 0 ]; then
+    TARGET_DIR="$1"; shift
+  fi
+  # We specify --shared so that the
+  # directory has group write permissions, as well as g+sx,
+  # which is mostly done for easier "cleanup" of directories, etc.,
+  # by anyone in "eclipse.platform.releng" group, not just e4Build
+  # owner id itself.
+  echo git clone --recursive $BRANCH_CMD $URL $TARGET_DIR
+  git clone --recursive $BRANCH_CMD $URL $TARGET_DIR
 }
 
 # USAGE: fn-git-checkout BRANCH | TAG
@@ -134,131 +33,131 @@ fn-git-clone ()
 fn-git-checkout ()
 {
   BRANCH="$1"; shift
-# always fetch before checkout, to be sure new
-# branches are in local repo (in case we are switching
-# to a new branch).
-    echo git fetch current repo before checkout
-    git fetch
+  # always fetch before checkout, to be sure new
+  # branches are in local repo (in case we are switching
+  # to a new branch).
+  echo git fetch current repo before checkout
+  git fetch
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "[ERROR] RC from git fetch: $RC"
+  else
+    echo git checkout "$BRANCH" --force
+    git checkout "$BRANCH" --force
     RC=$?
     if [[ $RC != 0 ]]
-      then
-        echo "[ERROR] RC from git fetch: $RC"
-    else
-      echo git checkout "$BRANCH" --force
-        git checkout "$BRANCH" --force
-        RC=$?
-        if [[ $RC != 0 ]]
-          then
-            echo "[ERROR] RC from git checkout: $RC"
-            fi
-            fi
-            return $RC
+    then
+      echo "[ERROR] RC from git checkout: $RC"
+    fi
+  fi
+  return $RC
 }
 
 # USAGE: fn-git-pull
 fn-git-pull ()
 {
   echo git pull
-    git pull
+  git pull
 }
 
 # USAGE: fn-git-submodule-update
 fn-git-submodule-update ()
 {
   echo "git submodule init"
-    git submodule init
-    echo "git submodule update --recursive"
-    git submodule update --recursive
+  git submodule init
+  echo "git submodule update --recursive"
+  git submodule update --recursive
 }
 
 # USAGE: fn-git-update-submodules
 fn-git-update-submodules ()
 {
   echo git submodule update --init
-    git submodule update --init
+  git submodule update --init
 }
 
 # USAGE: fn-git-clean
 fn-git-clean ()
 {
-# See bug 400657
+  # See bug 400657
   echo git clean -f -d -x
-    git clean -f -d -x
+  git clean -f -d -x
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "[ERROR] RC from git clean: $RC"
+    return $RC
+  else
+    # after initial clean, we'll also use git stash to clean up any temp commits
+    # and modified tracked files, which will also call clean under the covers, I believe,
+    # so may eventually want to do this first? (But, that may not allow the -x type cleanup).
+    git stash
     RC=$?
     if [[ $RC != 0 ]]
-      then
-        echo "[ERROR] RC from git clean: $RC"
-        return $RC
+    then
+      echo "[ERROR] RC from git stash: $RC"
+      return $RC
     else
-# after initial clean, we'll also use git stash to clean up any temp commits
-# and modified tracked files, which will also call clean under the covers, I believe,
-# so may eventually want to do this first? (But, that may not allow the -x type cleanup).
-      git stash
-        RC=$?
-        if [[ $RC != 0 ]]
-          then
-            echo "[ERROR] RC from git stash: $RC"
-            return $RC
-        else
-# we don't really want to save this stash in build directory
-          git stash clear
-            RC=$?
-            if [[ $RC != 0 ]]
-              then
-                echo "[ERROR] RC from git stash clear: $RC"
-                return $RC
-                fi
-                fi
-                fi
-                return 0
+      # we don't really want to save this stash in build directory
+      git stash clear
+      RC=$?
+      if [[ $RC != 0 ]]
+      then
+        echo "[ERROR] RC from git stash clear: $RC"
+        return $RC
+      fi
+    fi
+  fi
+  return 0
 }
 
 # USAGE: fn-git-reset
 fn-git-reset ()
 {
   echo git reset --hard  $@
-    git reset --hard  $@
-    RC=$?
-    if [[ $RC != 0 ]]
-      then
-        echo "[ERROR] RC from git reset: $RC"
-        fi
-        return $RC
+  git reset --hard  $@
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "[ERROR] RC from git reset: $RC"
+  fi
+  return $RC
 }
 
 # USAGE: fn-git-clean-submodules
 fn-git-clean-submodules ()
 {
-# See bug 400657
+  # See bug 400657
   echo git submodule foreach git clean -f -d -x
-    git submodule foreach git clean -f -d -x
+  git submodule foreach git clean -f -d -x
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "[ERROR] RC from submodule foreach git clean: $RC"
+    return $RC
+  else
+    # after initial clean, we'll also use git stash to clean up any temp commits
+    # and modified tracked files, which will also call clean under the covers, I believe,
+    # so may eventually want to do this first? (But, that may not allow the -x type cleanup).
+    git submodule foreach git stash
     RC=$?
     if [[ $RC != 0 ]]
-      then
-        echo "[ERROR] RC from submodule foreach git clean: $RC"
-        return $RC
+    then
+      echo "[ERROR] RC from git submodule stash: $RC"
+      return $RC
     else
-# after initial clean, we'll also use git stash to clean up any temp commits
-# and modified tracked files, which will also call clean under the covers, I believe,
-# so may eventually want to do this first? (But, that may not allow the -x type cleanup).
-      git submodule foreach git stash
-        RC=$?
-        if [[ $RC != 0 ]]
-          then
-            echo "[ERROR] RC from git submodule stash: $RC"
-            return $RC
-        else
-# we don't really want to save this stash in build directory
-          git submodule foreach git stash clear
-            RC=$?
-            if [[ $RC != 0 ]]
-              then
-                echo "[ERROR] RC from git submodule stash clear: $RC"
-                return $RC
-                fi
-                fi
-                fi
-                return 0
+      # we don't really want to save this stash in build directory
+      git submodule foreach git stash clear
+      RC=$?
+      if [[ $RC != 0 ]]
+      then
+        echo "[ERROR] RC from git submodule stash clear: $RC"
+        return $RC
+      fi
+    fi
+  fi
+  return 0
 }
 
 
@@ -266,25 +165,13 @@ fn-git-clean-submodules ()
 fn-git-reset-submodules ()
 {
   echo git submodule foreach git reset --hard HEAD
-    git submodule foreach git reset --hard HEAD
-    RC=$?
-    if [[ $RC != 0 ]]
-      then
-        echo "[ERROR] RC from submodule foreach git reset: $RC"
-        fi
-        return $RC
-}
-
-# USAGE: fn-build-id BUILD_TYPE
-#   BUILD_TYPE: I, M, N, X, Y, P
-# TODO: depends on RAWDATE being exported/global
-fn-build-id ()
-{
-  checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_TYPE="$1"; shift
-        TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
-        echo ${BUILD_TYPE}${TIMESTAMP}
+  git submodule foreach git reset --hard HEAD
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "[ERROR] RC from submodule foreach git reset: $RC"
+  fi
+  return $RC
 }
 
 # USAGE: fn-local-repo URL
@@ -292,16 +179,16 @@ fn-build-id ()
 fn-local-repo ()
 {
   checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-# we assume REPO_AND_ACCESS is exported from calling scripts
-      URL="$1"; shift
-        TO_REPLACE='git://git.eclipse.org/gitroot'
-        if [[ -n "${REPO_AND_ACCESS}" && "${REPO_AND_ACCESS}" != "${TO_REPLACE}" ]]
-          then
-            echo $URL | sed "s!${TO_REPLACE}!${REPO_AND_ACCESS}!g"
-        else
-          echo $URL
-            fi
+  if [[ $? != 0 ]]; then return 1; fi
+  # we assume REPO_AND_ACCESS is exported from calling scripts
+  URL="$1"; shift
+  TO_REPLACE='git://git.eclipse.org/gitroot'
+  if [[ -n "${REPO_AND_ACCESS}" && "${REPO_AND_ACCESS}" != "${TO_REPLACE}" ]]
+  then
+    echo $URL | sed "s!${TO_REPLACE}!${REPO_AND_ACCESS}!g"
+  else
+    echo $URL
+  fi
 }
 
 # USAGE: fn-git-clone-aggregator GIT_CACHE URL BRANCH
@@ -311,19 +198,19 @@ fn-local-repo ()
 fn-git-clone-aggregator ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      GIT_CACHE="$1"; shift
-        URL="$1"; shift
-        BRANCH="$1"; shift
-        if [ ! -e "$GIT_CACHE" ]; then
-          mkdir -p "$GIT_CACHE"
-            fi
-            pushd "$GIT_CACHE"
-            fn-git-clone "$URL" "$BRANCH"
-            popd
-            pushd  $(fn-git-dir "$GIT_CACHE" "$URL" )
-            fn-git-submodule-update
-            popd
+  if [[ $? != 0 ]]; then return 1; fi
+  GIT_CACHE="$1"; shift
+  URL="$1"; shift
+  BRANCH="$1"; shift
+  if [ ! -e "$GIT_CACHE" ]; then
+    mkdir -p "$GIT_CACHE"
+  fi
+  pushd "$GIT_CACHE"
+  fn-git-clone "$URL" "$BRANCH"
+  popd
+  pushd  $(fn-git-dir "$GIT_CACHE" "$URL" )
+  fn-git-submodule-update
+  popd
 }
 
 # USAGE: fn-git-clean-aggregator AGGREGATOR_DIR BRANCH
@@ -332,39 +219,39 @@ fn-git-clone-aggregator ()
 fn-git-clean-aggregator ()
 {
   checkNArgs $# 2
-    if [[ $? != 0 ]]; then return 1; fi
-      AGGREGATOR_DIR="$1"; shift
-        BRANCH="$1"; shift
-        pushd "$AGGREGATOR_DIR"
-        fn-complete-status "Repo state status before any cleaning."
-        fn-git-clean
+  if [[ $? != 0 ]]; then return 1; fi
+  AGGREGATOR_DIR="$1"; shift
+  BRANCH="$1"; shift
+  pushd "$AGGREGATOR_DIR"
+  fn-complete-status "Repo state status before any cleaning."
+  fn-git-clean
+  RC=$?
+  if [[ $RC == 0 ]]
+  then
+    fn-git-clean-submodules
+    RC=$?
+    if [[ $RC == 0 ]]
+    then
+      fn-complete-status "Repo state status after cleaning but before reset."
+      fn-git-reset-submodules
+      RC=$?
+      if [[ $RC == 0 ]]
+      then
+        fn-complete-status "Repo state status after submodules reset but before checkout."
+        fn-git-checkout "$BRANCH"
         RC=$?
         if [[ $RC == 0 ]]
-          then
-            fn-git-clean-submodules
-            RC=$?
-            if [[ $RC == 0 ]]
-              then
-                fn-complete-status "Repo state status after cleaning but before reset."
-                fn-git-reset-submodules
-                RC=$?
-                if [[ $RC == 0 ]]
-                  then
-                    fn-complete-status "Repo state status after submodules reset but before checkout."
-                    fn-git-checkout "$BRANCH"
-                    RC=$?
-                    if [[ $RC == 0 ]]
-                      then
-                        fn-complete-status "Repo state status after checkout but final reset."
-                        fn-git-reset origin/$BRANCH
-                        RC=$?
-                        fn-complete-status "Repo state status after all cleanup in clean-aggregator."
-                        fi
-                        fi
-                        fi
-                        fi
-                        popd
-                        return $RC
+        then
+          fn-complete-status "Repo state status after checkout but final reset."
+          fn-git-reset origin/$BRANCH
+          RC=$?
+          fn-complete-status "Repo state status after all cleanup in clean-aggregator."
+        fi
+      fi
+    fi
+  fi
+  popd
+  return $RC
 }
 
 # USAGE: fn-git-clean-aggregator AGGREGATOR_DIR BRANCH
@@ -373,85 +260,39 @@ fn-git-clean-aggregator ()
 fn-git-clean-aggregator2 ()
 {
   checkNArgs $# 2
-    if [[ $? != 0 ]]; then return 1; fi
-      AGGREGATOR_DIR="$1"; shift
-        BRANCH="$1"; shift
-        pushd "$AGGREGATOR_DIR"
-        fn-complete-status "Repo state status before any cleaning."
-        fn-git-clean
+  if [[ $? != 0 ]]; then return 1; fi
+  AGGREGATOR_DIR="$1"; shift
+  BRANCH="$1"; shift
+  pushd "$AGGREGATOR_DIR"
+  fn-complete-status "Repo state status before any cleaning."
+  fn-git-clean
+  RC=$?
+  if [[ $RC == 0 ]]
+  then
+    fn-git-clean-submodules
+    RC=$?
+    if [[ $RC == 0 ]]
+    then
+      fn-complete-status "Repo state status after clean but before checkout."
+      fn-git-checkout "$BRANCH"
+      RC=$?
+      if [[ $RC == 0 ]]
+      then
+        fn-complete-status "Repo state status after checkout but before reset."
+        fn-git-reset origin/$BRANCH
         RC=$?
         if [[ $RC == 0 ]]
-          then
-            fn-git-clean-submodules
-            RC=$?
-            if [[ $RC == 0 ]]
-              then
-                fn-complete-status "Repo state status after clean but before checkout."
-                fn-git-checkout "$BRANCH"
-                RC=$?
-                if [[ $RC == 0 ]]
-                  then
-                    fn-complete-status "Repo state status after checkout but before reset."
-                    fn-git-reset origin/$BRANCH
-                    RC=$?
-                    if [[ $RC == 0 ]]
-                      then
-                        fn-complete-status "Repo state status after reset but before forced update."
-                        fn-git-update-submodules
-                        RC=$?
-                        fn-complete-status "Repo state status after all cleanup and init in clean-aggregator."
-                        fi
-                        fi
-                        fi
-                        fi
-                        popd
-                        return $RC
-}
-
-# USAGE: fn-git-cache ROOT BRANCH
-#   ROOT: /shared/eclipse/builds
-#   BRANCH: R4_2_maintenance
-fn-git-cache ()
-{
-# we (now) leave branch our of git-cache path, or else "topic branches", such as
-# 'david_williams/II20130409-0900' complicates directory structure
-  checkNArgs $# 2
-    if [[ $? != 0 ]]; then return 1; fi
-      ROOT="$1"; shift
-        BRANCH="$1"; shift
-        echo $ROOT/gitCache
-}
-
-# USAGE: fn-git-dir GIT_CACHE URL
-#   GIT_CACHE: /shared/eclipse/builds/R4_2_maintenance/gitCache
-#   URL: file:///gitroot/platform/eclipse.platform.releng.aggregator.git
-fn-git-dir ()
-{
-  checkNArgs $# 2
-    if [[ $? != 0 ]]; then return 1; fi
-      GIT_CACHE="$1"; shift
-        URL="$1"; shift
-        echo $GIT_CACHE/$( basename "$URL" .git )
-}
-
-# USAGE: fn-build-dir ROOT BUILD_ID STREAM
-#   ROOT: /shared/eclipse/builds
-#   BUILD_ID: M20121119-1900
-#   STREAM: 4.3.0
-fn-build-dir ()
-{
-  checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      ROOT="$1"; shift
-        BUILD_ID="$1"; shift
-        STREAM="$1"; shift
-        eclipseStreamMajor=${STREAM:0:1}
-  dropDirSegment=siteDir/eclipse/downloads/drops
-    if (( $eclipseStreamMajor > 3 ))
-      then
-        dropDirSegment=siteDir/eclipse/downloads/drops4
+        then
+          fn-complete-status "Repo state status after reset but before forced update."
+          fn-git-update-submodules
+          RC=$?
+          fn-complete-status "Repo state status after all cleanup and init in clean-aggregator."
         fi
-        echo $ROOT/$dropDirSegment/$BUILD_ID
+      fi
+    fi
+  fi
+  popd
+  return $RC
 }
 
 # USAGE: fn-basebuilder-dir ROOT BUILD_ID STREAM
@@ -461,12 +302,12 @@ fn-build-dir ()
 fn-basebuilder-dir ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      ROOT="$1"; shift
-        BUILD_ID="$1"; shift
-        STREAM="$1"; shift
-        buildDirectory=$( fn-build-dir "$ROOT" "$BUILD_ID" "$STREAM" )
-        echo $buildDirectory/org.eclipse.releng.basebuilder
+  if [[ $? != 0 ]]; then return 1; fi
+  ROOT="$1"; shift
+  BUILD_ID="$1"; shift
+  STREAM="$1"; shift
+  buildDirectory=$( fn-build-dir "$ROOT" "$BUILD_ID" "$STREAM" )
+  echo $buildDirectory/org.eclipse.releng.basebuilder
 }
 
 
@@ -480,74 +321,74 @@ fn-basebuilder-dir ()
 fn-maven-build-aggregator ()
 {
   checkNArgs $# 7
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        LOCAL_REPO="$1"; shift
-        DEBUG=$1; shift
-        QUIET=$1; shift
-        SIGNING=$1; shift
-        MAVEN_BREE=$1; shift
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  LOCAL_REPO="$1"; shift
+  DEBUG=$1; shift
+  QUIET=$1; shift
+  SIGNING=$1; shift
+  MAVEN_BREE=$1; shift
 
-        MARGS="-DbuildId=$BUILD_ID"
-        if $DEBUG; then
-          MARGS="$MARGS -X"
-            fi
-            if $QUIET; then
-              MARGS="$MARGS -q"
-                fi
-                if $SIGNING; then
-                  MARGS="$MARGS -Peclipse-sign"
-                    fi
-                    if [[ -n "${PATCH_BUILD}" ]]; then
-                      MARGS="$MARGS -PpatchBuild"
-                        fi
+  MARGS="-DbuildId=$BUILD_ID"
+  if $DEBUG; then
+    MARGS="$MARGS -X"
+  fi
+  if $QUIET; then
+    MARGS="$MARGS -q"
+  fi
+  if $SIGNING; then
+    MARGS="$MARGS -Peclipse-sign"
+  fi
+  if [[ -n "${PATCH_BUILD}" ]]; then
+    MARGS="$MARGS -PpatchBuild"
+  fi
 
-                        MARGS="$MARGS ${MAVEN_BREE}"
+  MARGS="$MARGS ${MAVEN_BREE}"
 
-# Here we count on $BUILD_TYPE being exported. TODO: make parameter later?
-                        if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]]
-                          then
-                            FORCEQUALIFIERARG="-DforceContextQualifier=${BUILD_ID}"
-                        else
-# just for safety, make sure unset
-                          FORCEQUALIFIERARG=
-                            fi
+  # Here we count on $BUILD_TYPE being exported. TODO: make parameter later?
+  if [[ -n "$BUILD_TYPE" && "$BUILD_TYPE" == "N" ]]
+  then
+    FORCEQUALIFIERARG="-DforceContextQualifier=${BUILD_ID}"
+  else
+    # just for safety, make sure unset
+    FORCEQUALIFIERARG=
+  fi
 
-                            echo "DEBUG: Variables in $0"
-                            echo "DEBUG: BUILD_ID: $BUILD_ID"
-                            echo "DEBUG: REPO_DIR: $REPO_DIR"
-                            echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
-                            echo "DEBUG: DEBUG: $DEBUG"
-                            echo "DEBUG: QUIET: $QUIET"
-                            echo ""
-                            echo "DEBUG: CBI_JDT_REPO_URL: $CBI_JDT_REPO_URL"
-                            echo "DEBUG: CBI_JDT_VERSION: $CBI_JDT_VERSION"
-                            echo ""
-                            echo "DEBUG: SIGNING: $SIGNING"
-                            echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
-                            echo "DEBUG: MARGS: $MARGS"
-                            echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
+  echo "DEBUG: Variables in $0"
+  echo "DEBUG: BUILD_ID: $BUILD_ID"
+  echo "DEBUG: REPO_DIR: $REPO_DIR"
+  echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
+  echo "DEBUG: DEBUG: $DEBUG"
+  echo "DEBUG: QUIET: $QUIET"
+  echo ""
+  echo "DEBUG: CBI_JDT_REPO_URL: $CBI_JDT_REPO_URL"
+  echo "DEBUG: CBI_JDT_VERSION: $CBI_JDT_VERSION"
+  echo ""
+  echo "DEBUG: SIGNING: $SIGNING"
+  echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
+  echo "DEBUG: MARGS: $MARGS"
+  echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
 
 
 
-# -fail-at-end gives chance for bundles to compile, even after
-# a compile error. Might have to specify --fail-never to see them all? See
-# http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
-                            pushd "$REPO_DIR"
-#mvn $MARGS --fail-never -V \
-#mvn $MARGS --fail-at-end -V \
-#mvn $MARGS  -V \
-                            mvn $MARGS --fail-at-end -V  ${ALT_POM_FILE} \
-                            clean verify \
-                            -DskipTests=true \
-                            -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
-                            -Dtycho.debug.artifactcomparator \
-                            -DcontinueOnFail=true -Djgit.dirtyWorkingTree=error \
-                            -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"  ${FORCEQUALIFIERARG} ${JAVA_DOC_TOOL}
-                            rc=$?
-                            popd
-                            return $rc
+  # -fail-at-end gives chance for bundles to compile, even after
+  # a compile error. Might have to specify --fail-never to see them all? See
+  # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
+  pushd "$REPO_DIR"
+  #mvn $MARGS --fail-never -V \
+    #mvn $MARGS --fail-at-end -V \
+    #mvn $MARGS  -V \
+    mvn $MARGS --fail-at-end -V  ${ALT_POM_FILE} \
+    clean verify \
+    -DskipTests=true \
+    -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
+    -Dtycho.debug.artifactcomparator \
+    -DcontinueOnFail=true -Djgit.dirtyWorkingTree=error \
+    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"  ${FORCEQUALIFIERARG} ${JAVA_DOC_TOOL}
+  rc=$?
+  popd
+  return $rc
 }
 
 # USAGE: fn-submodule-checkout BUILD_ID REPO_DIR REPOSITORIES_TXT
@@ -558,29 +399,29 @@ fn-maven-build-aggregator ()
 fn-submodule-checkout ()
 {
   checkNArgs $# 4
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        SCRIPT="$1"; shift
-        REPOSITORIES_TXT="$1"; shift
-        pushd "$REPO_DIR"
-        git submodule foreach "/bin/bash $SCRIPT $REPOSITORIES_TXT \$name"
-        uninit=$( git submodule | grep "^-" | cut -f2 -d" " | sort -u )
-        if [ ! -z "$uninit" ]; then
-          echo Some modules are not initialized: $uninit
-            return
-            fi
-            conflict=$( git submodule | grep "^U" | cut -f2 -d" " | sort -u )
-            if [ ! -z "$conflict" ]; then
-              echo Some modules have conflicts: $conflict
-                return
-                fi
-                adds=$( git submodule | grep "^+" | cut -f2 -d" " )
-                if [ -z "$adds" ]; then
-                  echo No updates for the submodules
-                    return
-                    fi
-                    popd
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  SCRIPT="$1"; shift
+  REPOSITORIES_TXT="$1"; shift
+  pushd "$REPO_DIR"
+  git submodule foreach "/bin/bash $SCRIPT $REPOSITORIES_TXT \$name"
+  uninit=$( git submodule | grep "^-" | cut -f2 -d" " | sort -u )
+  if [ ! -z "$uninit" ]; then
+    echo Some modules are not initialized: $uninit
+    return
+  fi
+  conflict=$( git submodule | grep "^U" | cut -f2 -d" " | sort -u )
+  if [ ! -z "$conflict" ]; then
+    echo Some modules have conflicts: $conflict
+    return
+  fi
+  adds=$( git submodule | grep "^+" | cut -f2 -d" " )
+  if [ -z "$adds" ]; then
+    echo No updates for the submodules
+    return
+  fi
+  popd
 }
 
 # USAGE: fn-add-submodule-updates REPO_DIR
@@ -588,17 +429,17 @@ fn-submodule-checkout ()
 fn-add-submodule-updates ()
 {
   checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      REPO_DIR="$1"; shift
-        pushd "$REPO_DIR"
-        adds=$( git submodule | grep "^+" | cut -f2 -d" " )
-        if [ -z "$adds" ]; then
-          echo No updates for the submodules
-            return
-            fi
-            echo git add $adds
-            git add $adds
-            popd
+  if [[ $? != 0 ]]; then return 1; fi
+  REPO_DIR="$1"; shift
+  pushd "$REPO_DIR"
+  adds=$( git submodule | grep "^+" | cut -f2 -d" " )
+  if [ -z "$adds" ]; then
+    echo No updates for the submodules
+    return
+  fi
+  echo git add $adds
+  git add $adds
+  popd
 }
 
 # USAGE: fn-tag-build-inputs BUILD_ID REPO_DIR REPOSITORIES_TXT
@@ -608,15 +449,15 @@ fn-add-submodule-updates ()
 fn-tag-build-inputs ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        REPOSITORIES_TXT="$1"; shift
-        pushd "$REPO_DIR"
-        git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi"
-        git tag $BUILD_ID
-        $GIT_PUSH --verbose origin $BUILD_ID
-        popd
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  REPOSITORIES_TXT="$1"; shift
+  pushd "$REPO_DIR"
+  git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi"
+  git tag $BUILD_ID
+  $GIT_PUSH --verbose origin $BUILD_ID
+  popd
 }
 
 # USAGE: fn-pom-version-updater REPO_DIR LOCAL_REPO DEBUG QUIET
@@ -627,55 +468,55 @@ fn-pom-version-updater ()
 {
 
   checkNArgs $# 4
-    if [[ $? != 0 ]]; then return 1; fi
-      REPO_DIR="$1"; shift
-        LOCAL_REPO="$1"; shift
-        DEBUG=$1; shift
-        QUIET=$1; shift
+  if [[ $? != 0 ]]; then return 1; fi
+  REPO_DIR="$1"; shift
+  LOCAL_REPO="$1"; shift
+  DEBUG=$1; shift
+  QUIET=$1; shift
 
-        MARGS=""
-        if $DEBUG; then
-          MARGS="$MARGS -X"
-            fi
-            if $QUIET; then
-              MARGS="$MARGS -q"
-                fi
-                if [[ -n "${PATCH_BUILD}" ]]; then
-                  MARGS="$MARGS -PpatchBuild"
-                    fi
-                    echo "DEBUG: Variables in $0"
-                    echo "DEBUG: PATCH_BUILD: $PATCH_BUILD"
-                    echo "DEBUG: REPO_DIR: $REPO_DIR"
-                    echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
-                    echo "DEBUG: DEBUG: $DEBUG"
-                    echo "DEBUG: QUIET: $QUIET"
-                    echo "DEBUG: MARGS: $MARGS"
-# fail fast if not set up correctly
-                    rc=$(fn-check-dir-exists TMP_DIR)
-                    checkForErrorExit "$rc" "$rc"
+  MARGS=""
+  if $DEBUG; then
+    MARGS="$MARGS -X"
+  fi
+  if $QUIET; then
+    MARGS="$MARGS -q"
+  fi
+  if [[ -n "${PATCH_BUILD}" ]]; then
+    MARGS="$MARGS -PpatchBuild"
+  fi
+  echo "DEBUG: Variables in $0"
+  echo "DEBUG: PATCH_BUILD: $PATCH_BUILD"
+  echo "DEBUG: REPO_DIR: $REPO_DIR"
+  echo "DEBUG: LOCAL_REPO: $LOCAL_REPO"
+  echo "DEBUG: DEBUG: $DEBUG"
+  echo "DEBUG: QUIET: $QUIET"
+  echo "DEBUG: MARGS: $MARGS"
+  # fail fast if not set up correctly
+  rc=$(fn-check-dir-exists TMP_DIR)
+  checkForErrorExit "$rc" "$rc"
 
-                    report=${TMP_DIR}/pom_${BUILD_ID}.txt
-                    pushd "$REPO_DIR"
-                    mvn $MARGS  ${ALT_POM_FILE} \
-                    org.eclipse.tycho:tycho-versions-plugin:0.20.0:update-pom \
-                    -Dmaven.repo.local=$LOCAL_REPO \
-                    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}"
-                    RC=$?
-                    if [[ $RC != 0 ]]
-                      then
-                        echo "ERROR: tycho-versions-plugin:update-pom returned non-zero return code: $RC" >&2
-                    else
-                      changes=$( git status --short -uno | cut -c4- )
-                        if [ -z "$changes" ]; then
-                          echo "INFO: No changes in pom versions" >&2
-                            RC=0
-                        else
-                          echo "INFO: Changes in pom versions: $changes" >&2
-                            RC=0
-                            fi
-                            fi
-                            popd
-                            return $RC
+  report=${TMP_DIR}/pom_${BUILD_ID}.txt
+  pushd "$REPO_DIR"
+  mvn $MARGS  ${ALT_POM_FILE} \
+    org.eclipse.tycho:tycho-versions-plugin:0.20.0:update-pom \
+    -Dmaven.repo.local=$LOCAL_REPO \
+    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: tycho-versions-plugin:update-pom returned non-zero return code: $RC" >&2
+  else
+    changes=$( git status --short -uno | cut -c4- )
+    if [ -z "$changes" ]; then
+      echo "INFO: No changes in pom versions" >&2
+      RC=0
+    else
+      echo "INFO: Changes in pom versions: $changes" >&2
+      RC=0
+    fi
+  fi
+  popd
+  return $RC
 }
 
 # USAGE: fn-pom-version-update-with-commit BUILD_ID REPO_DIR LOCAL_REPO
@@ -688,46 +529,46 @@ fn-pom-version-update-with-commit ()
 {
 
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        LOCAL_REPO="$1"; shift
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  LOCAL_REPO="$1"; shift
 
-# fail fast if not set up correctly
-        rc=$(fn-check-dir-exists TMP_DIR)
-        checkForErrorExit "$rc" "$rc"
+  # fail fast if not set up correctly
+  rc=$(fn-check-dir-exists TMP_DIR)
+  checkForErrorExit "$rc" "$rc"
 
-        report=${TMP_DIR}/pom_${BUILD_ID}.txt
-        MARGS="-DbuildId=$BUILD_ID"
-        if [[ -n "${PATCH_BUILD}" ]]; then
-          MARGS="$MARGS -PpatchBuild"
-            fi
-            pushd "$REPO_DIR"
-            mvn $MARGS  ${ALT_POM_FILE} \
-            org.eclipse.tycho:tycho-versions-plugin:0.20.0:update-pom \
-            -Dmaven.repo.local=$LOCAL_REPO \
-            -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
-            changes=$( git status --short -uno | cut -c4- )
-            if [ -z "$changes" ]; then
-              echo No changes in pom versions
-                return
-                fi
-                repos=$( git status --short -uno | cut -c4- | grep -v pom.xml )
-                for CURRENT_REPO in $repos; do
-                  pushd "$CURRENT_REPO"
-                    pom_only=$( git status --short -uno | grep -v pom.xml | wc -l )
-                    if [[ pom_only == 0 ]]; then
-                      git add $( git status --short -uno | cut -c4- )
-                        git commit -m "Update pom versions for build $BUILD_ID"
-                        echo $GIT_PUSH origin HEAD
-                    else
-                      echo Unable to update poms for $CURRENT_REPO
-                        fi
-                        popd
-                        done
-                        echo git add $changes
-                        git add $changes
-                        popd
+  report=${TMP_DIR}/pom_${BUILD_ID}.txt
+  MARGS="-DbuildId=$BUILD_ID"
+  if [[ -n "${PATCH_BUILD}" ]]; then
+    MARGS="$MARGS -PpatchBuild"
+  fi
+  pushd "$REPO_DIR"
+  mvn $MARGS  ${ALT_POM_FILE} \
+    org.eclipse.tycho:tycho-versions-plugin:0.20.0:update-pom \
+    -Dmaven.repo.local=$LOCAL_REPO \
+    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}"
+  changes=$( git status --short -uno | cut -c4- )
+  if [ -z "$changes" ]; then
+    echo No changes in pom versions
+    return
+  fi
+  repos=$( git status --short -uno | cut -c4- | grep -v pom.xml )
+  for CURRENT_REPO in $repos; do
+    pushd "$CURRENT_REPO"
+    pom_only=$( git status --short -uno | grep -v pom.xml | wc -l )
+    if [[ pom_only == 0 ]]; then
+      git add $( git status --short -uno | cut -c4- )
+      git commit -m "Update pom versions for build $BUILD_ID"
+      echo $GIT_PUSH origin HEAD
+    else
+      echo Unable to update poms for $CURRENT_REPO
+    fi
+    popd
+  done
+  echo git add $changes
+  git add $changes
+  popd
 }
 
 # USAGE: fn-gather-repo BUILD_ID REPO_DIR BUILD_DIR
@@ -737,30 +578,30 @@ fn-pom-version-update-with-commit ()
 fn-gather-repo ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        if [[ -n "${PATCH_BUILD}" ]]
-          then
-            ORIG_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/site
-            TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/repository
-            ORIG_DIR_REPOSITORY=$REPO_DIR/${ORIG_PATH}
-  REPO_DIR_REPOSITORY=$REPO_DIR/${TARGET_PATH}
-  mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  if [[ -n "${PATCH_BUILD}" ]]
+  then
+    ORIG_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/site
+    TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/repository
+    ORIG_DIR_REPOSITORY=$REPO_DIR/${ORIG_PATH}
+    REPO_DIR_REPOSITORY=$REPO_DIR/${TARGET_PATH}
+    mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
 
-        else
-          TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
-            REPO_DIR_REPOSITORY=$REPO_DIR/$TAGET_PATH
-            fi
-            if [[ -d "$REPO_DIR_REPOSITORY" ]]
-              then
-                pushd "$REPO_DIR"
-                cp -r ${TARGET_PATH} $BUILD_DIR
-                popd
-            else
-              echo "   ERROR: $REPO_DIR_REPOSITORY did not exist in fn-gather-repo"
-                fi
+  else
+    TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
+    REPO_DIR_REPOSITORY=$REPO_DIR/$TAGET_PATH
+  fi
+  if [[ -d "$REPO_DIR_REPOSITORY" ]]
+  then
+    pushd "$REPO_DIR"
+    cp -r ${TARGET_PATH} $BUILD_DIR
+    popd
+  else
+    echo "   ERROR: $REPO_DIR_REPOSITORY did not exist in fn-gather-repo"
+  fi
 }
 
 
@@ -772,35 +613,35 @@ fn-gather-repo ()
 fn-gather-sdk ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products
-        if [[ -d "$TARGET_PRODUCTS" ]]
-          then
-            pushd "$TARGET_PRODUCTS"
-            cp org.eclipse.sdk.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc64.zip
-            cp org.eclipse.sdk.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc.zip
-            cp org.eclipse.sdk.ide-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-hpux-gtk-ia64.zip
-            cp org.eclipse.sdk.ide-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc.tar.gz
-            cp org.eclipse.sdk.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64.tar.gz
-            cp org.eclipse.sdk.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390.tar.gz
-            cp org.eclipse.sdk.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390x.tar.gz
-            cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-x86_64.tar.gz
-            cp org.eclipse.sdk.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk.tar.gz
-#cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86_64 eclipse
-#cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
-            cp org.eclipse.sdk.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk.zip
-            cp org.eclipse.sdk.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip
-            cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
-            cp org.eclipse.sdk.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32.zip
-            popd
-        else
-          echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
-            fi
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/sdk/target/products
+  if [[ -d "$TARGET_PRODUCTS" ]]
+  then
+    pushd "$TARGET_PRODUCTS"
+    cp org.eclipse.sdk.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc64.zip
+    cp org.eclipse.sdk.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-aix-gtk-ppc.zip
+    cp org.eclipse.sdk.ide-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-hpux-gtk-ia64.zip
+    cp org.eclipse.sdk.ide-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc.tar.gz
+    cp org.eclipse.sdk.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+    cp org.eclipse.sdk.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390.tar.gz
+    cp org.eclipse.sdk.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390x.tar.gz
+    cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+    cp org.eclipse.sdk.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk.tar.gz
+    #cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86_64 eclipse
+    #cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
+    tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
+    cp org.eclipse.sdk.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk.zip
+    cp org.eclipse.sdk.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip
+    cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
+    cp org.eclipse.sdk.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32.zip
+    popd
+  else
+    echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
+  fi
 }
 
 # USAGE: fn-gather-platform BUILD_ID REPO_DIR BUILD_DIR
@@ -810,35 +651,35 @@ fn-gather-sdk ()
 fn-gather-platform ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/platform/target/products
-        if [[ -d "$TARGET_PRODUCTS" ]]
-          then
-            pushd "$TARGET_PRODUCTS"
-            cp org.eclipse.platform.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip
-            cp org.eclipse.platform.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip
-            cp org.eclipse.platform.ide-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64.zip
-            cp org.eclipse.platform.ide-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz
-            cp org.eclipse.platform.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
-            cp org.eclipse.platform.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz
-            cp org.eclipse.platform.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz
-            cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
-            cp org.eclipse.platform.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
-#cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86_64 eclipse
-#cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
-            cp org.eclipse.platform.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
-            cp org.eclipse.platform.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
-            cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
-            cp org.eclipse.platform.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32.zip
-            popd
-        else
-          echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-platform"
-            fi
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  TARGET_PRODUCTS="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/platform/target/products
+  if [[ -d "$TARGET_PRODUCTS" ]]
+  then
+    pushd "$TARGET_PRODUCTS"
+    cp org.eclipse.platform.ide-aix.gtk.ppc64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip
+    cp org.eclipse.platform.ide-aix.gtk.ppc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip
+    cp org.eclipse.platform.ide-hpux.gtk.ia64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-hpux-gtk-ia64.zip
+    cp org.eclipse.platform.ide-linux.gtk.ppc.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz
+    cp org.eclipse.platform.ide-linux.gtk.ppc64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz
+    cp org.eclipse.platform.ide-linux.gtk.s390.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz
+    cp org.eclipse.platform.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz
+    cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
+    cp org.eclipse.platform.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
+    #cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86_64 eclipse
+    #cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
+    tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
+    cp org.eclipse.platform.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
+    cp org.eclipse.platform.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
+    cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip
+    cp org.eclipse.platform.ide-win32.win32.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32.zip
+    popd
+  else
+    echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-platform"
+  fi
 }
 
 # USAGE: fn-gather-swt-zips BUILD_ID REPO_DIR BUILD_DIR
@@ -848,22 +689,22 @@ fn-gather-platform ()
 fn-gather-swt-zips ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-# TODO: this directory sanity check does not accomplish much, since "binaries/bundles" always
-# exists. Results in "not found" msg. Doubt there's any simple solution.
-        SWT_BUNDLES_DIR="$REPO_DIR"/eclipse.platform.swt.binaries/bundles
-        if [[ -d "$SWT_BUNDLES_DIR" ]]
-          then
-            pushd "$SWT_BUNDLES_DIR"
-            cp  */target/*.zip "$BUILD_DIR"
-                          popd
-                          else
-                          echo "   ERROR: $SWT_BUNDLES_DIR did not exist in fn-gather-swt-zips"
-                          fi
-                          }
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  # TODO: this directory sanity check does not accomplish much, since "binaries/bundles" always
+  # exists. Results in "not found" msg. Doubt there's any simple solution.
+  SWT_BUNDLES_DIR="$REPO_DIR"/eclipse.platform.swt.binaries/bundles
+  if [[ -d "$SWT_BUNDLES_DIR" ]]
+  then
+    pushd "$SWT_BUNDLES_DIR"
+    cp  */target/*.zip "$BUILD_DIR"
+    popd
+  else
+    echo "   ERROR: $SWT_BUNDLES_DIR did not exist in fn-gather-swt-zips"
+  fi
+}
 
 # USAGE: fn-gather-test-zips BUILD_ID REPO_DIR BUILD_DIR
 #   BUILD_ID: I20121116-0700
@@ -871,29 +712,29 @@ fn-gather-swt-zips ()
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-test-zips ()
 {
-checkNArgs $# 3
-if [[ $? != 0 ]]; then return 1; fi
-BUILD_ID="$1"; shift
-REPO_DIR="$1"; shift
-BUILD_DIR="$1"; shift
-TEST_ZIP_DIR="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/target
-if [[ -d "$TEST_ZIP_DIR" ]]
-then
-pushd "$TEST_ZIP_DIR"
-cp eclipse-junit-tests-bundle.zip "$BUILD_DIR"/eclipse-Automated-Tests-${BUILD_ID}.zip
-TEST_FRAMEWORK_DIR=$TEST_ZIP_DIR/eclipse-test-framework
-if [[ -d "$TEST_FRAMEWORK_DIR" ]]
-then
-pushd "$TEST_FRAMEWORK_DIR"
-zip -r "$BUILD_DIR"/eclipse-test-framework-${BUILD_ID}.zip *
-popd
-else
-echo "   ERROR: $TEST_FRAMEWORK_DIR did not exist in fn-gather-test-zips."
-fi
-popd
-else
-echo "   ERROR: $TEST_ZIP_DIR did not exist in fn-gather-test-zips."
-fi
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  TEST_ZIP_DIR="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/target
+  if [[ -d "$TEST_ZIP_DIR" ]]
+  then
+    pushd "$TEST_ZIP_DIR"
+    cp eclipse-junit-tests-bundle.zip "$BUILD_DIR"/eclipse-Automated-Tests-${BUILD_ID}.zip
+    TEST_FRAMEWORK_DIR=$TEST_ZIP_DIR/eclipse-test-framework
+    if [[ -d "$TEST_FRAMEWORK_DIR" ]]
+    then
+      pushd "$TEST_FRAMEWORK_DIR"
+      zip -r "$BUILD_DIR"/eclipse-test-framework-${BUILD_ID}.zip *
+      popd
+    else
+      echo "   ERROR: $TEST_FRAMEWORK_DIR did not exist in fn-gather-test-zips."
+    fi
+    popd
+  else
+    echo "   ERROR: $TEST_ZIP_DIR did not exist in fn-gather-test-zips."
+  fi
 }
 
 
@@ -903,23 +744,23 @@ fi
 #   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
 fn-gather-ecj-jars ()
 {
-checkNArgs $# 3
-if [[ $? != 0 ]]; then return 1; fi
-BUILD_ID="$1"; shift
-REPO_DIR="$1"; shift
-BUILD_DIR="$1"; shift
-ECJ_JAR_DIR="$REPO_DIR"/eclipse.jdt.core/org.eclipse.jdt.core/target
-if [[ -d "$ECJ_JAR_DIR" ]]
-then
-pushd "$ECJ_JAR_DIR"
-# The blob wildcard ('*') is to match "any version number", e.g. 3.9.0, 3.9.1, etc.
-cp org.eclipse.jdt.core-*-SNAPSHOT-batch-compiler.jar "$BUILD_DIR"/ecj-${BUILD_ID}.jar
-cp org.eclipse.jdt.core-*-SNAPSHOT-batch-compiler-src.jar "$BUILD_DIR"/ecjsrc-${BUILD_ID}.jar
-popd
-else
-echo "   ERROR: $ECJ_JAR_DIR did not exist in fn-gather-ecj-jars."
-#TODO eventually, fail the build here? If they don't exist, something must be pretty wrong?
-fi
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  ECJ_JAR_DIR="$REPO_DIR"/eclipse.jdt.core/org.eclipse.jdt.core/target
+  if [[ -d "$ECJ_JAR_DIR" ]]
+  then
+    pushd "$ECJ_JAR_DIR"
+    # The blob wildcard ('*') is to match "any version number", e.g. 3.9.0, 3.9.1, etc.
+    cp org.eclipse.jdt.core-*-SNAPSHOT-batch-compiler.jar "$BUILD_DIR"/ecj-${BUILD_ID}.jar
+    cp org.eclipse.jdt.core-*-SNAPSHOT-batch-compiler-src.jar "$BUILD_DIR"/ecjsrc-${BUILD_ID}.jar
+    popd
+  else
+    echo "   ERROR: $ECJ_JAR_DIR did not exist in fn-gather-ecj-jars."
+    #TODO eventually, fail the build here? If they don't exist, something must be pretty wrong?
+  fi
 }
 
 
@@ -932,41 +773,41 @@ fi
 fn-slice-repos ()
 {
   checkNArgs $# 4
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        BASEBUILDER_LAUNCHER="$1"; shift
-        ANT_SCRIPT="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/repos/buildAll.xml
-        REPO_DIR_DIR="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
-        if [[ -d "$REPO_DIR_DIR" ]]
-          then
-            pushd "$REPO_DIR"
-            java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-            -data ${BUILD_DIR}/workspace-buildrepos \
-            -application org.eclipse.ant.core.antRunner \
-            -buildfile "$ANT_SCRIPT" \
-            -Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
-            -DbuildId="$BUILD_ID" \
-            -DbuildRepo="$REPO_DIR_DIR" \
-            -DpostingDirectory=$(dirname "$BUILD_DIR") \
-            -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
-            -DbuildLabel="$BUILD_ID" \
-            -Djava.io.tmpdir=$TMP_DIR \
-            -DbuildDirectory="$BUILD_DIR"
-            RC=$?
-            popd
-            if [[ $RC != 0 ]]
-              then
-                BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
-                echo "   ERROR: Java antrunner call with $ANT_SCRIPT returned non-zero return code, $RC, in fn-slice-repo" >>${BUILD_FAILED}
-  return $RC
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  BASEBUILDER_LAUNCHER="$1"; shift
+  ANT_SCRIPT="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/repos/buildAll.xml
+  REPO_DIR_DIR="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
+  if [[ -d "$REPO_DIR_DIR" ]]
+  then
+    pushd "$REPO_DIR"
+    java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
+      -data ${BUILD_DIR}/workspace-buildrepos \
+      -application org.eclipse.ant.core.antRunner \
+      -buildfile "$ANT_SCRIPT" \
+      -Declipse.build.configs="$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder \
+      -DbuildId="$BUILD_ID" \
+      -DbuildRepo="$REPO_DIR_DIR" \
+      -DpostingDirectory=$(dirname "$BUILD_DIR") \
+      -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
+      -DbuildLabel="$BUILD_ID" \
+      -Djava.io.tmpdir=$TMP_DIR \
+      -DbuildDirectory="$BUILD_DIR"
+    RC=$?
+    popd
+    if [[ $RC != 0 ]]
+    then
+      BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
+      echo "   ERROR: Java antrunner call with $ANT_SCRIPT returned non-zero return code, $RC, in fn-slice-repo" >>${BUILD_FAILED}
+      return $RC
     fi
-            else
-              BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
-                echo "   ERROR: $REPO_DIR_DIR did not exist in fn-slice-repo. Probably due to an earlier error?" >>${BUILD_FAILED}
-  return 1
-    fi
+  else
+    BUILD_FAILED="${buildDirectory}/buildFailed-slice-repo-error"
+    echo "   ERROR: $REPO_DIR_DIR did not exist in fn-slice-repo. Probably due to an earlier error?" >>${BUILD_FAILED}
+    return 1
+  fi
 }
 
 
@@ -977,22 +818,22 @@ fn-slice-repos ()
 fn-gather-repo-zips ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        if [[ -d "$REPO_DIR" ]]
-          then
-            pushd "$REPO_DIR"/eclipse.platform.repository/target/repos
-            for r in org.eclipse.*; do
-              pushd $r
-                zip -r "$BUILD_DIR"/${r}-${BUILD_ID}.zip *
-                popd
-                done
-                popd
-        else
-          echo "   ERROR: $REPO_DIR did not exist in fn-gather-repo-zips"
-            fi
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  if [[ -d "$REPO_DIR" ]]
+  then
+    pushd "$REPO_DIR"/eclipse.platform.repository/target/repos
+    for r in org.eclipse.*; do
+      pushd $r
+      zip -r "$BUILD_DIR"/${r}-${BUILD_ID}.zip *
+      popd
+    done
+    popd
+  else
+    echo "   ERROR: $REPO_DIR did not exist in fn-gather-repo-zips"
+  fi
 }
 
 # USAGE: fn-gather-compile-logs BUILD_ID REPO_DIR BUILD_DIR
@@ -1002,40 +843,40 @@ fn-gather-repo-zips ()
 fn-gather-compile-logs ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        if [[ -d "$REPO_DIR" ]]
-          then
-            mkdir -p "$BUILD_DIR"/compilelogs/plugins
-            pushd "$REPO_DIR"
-            for dot in $( find * -name "@dot.xml" ); do
-              targetDir=$( dirname "$dot" )
-                echo "Processing $dot in $targetDir"
-                if [ ! -r "$targetDir"/MANIFEST.MF ]; then
-                  echo "**Failed to process $dot in $targetDir. Likely compile error. Will try source MANIFEST.MF in directory containing target."
-                    targetDir=$( dirname "${targetDir}" )
-                    if [ ! -r "$targetDir"/META-INF/MANIFEST.MF ]
-                      then
-                        echo "**Failed to process $dot in $targetDir."
-                    else
-                      BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
-                        BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
-                        mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
-  cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
-  fi
-                else
-                  BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
-                    BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
-                    mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
-  cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
-  fi
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  if [[ -d "$REPO_DIR" ]]
+  then
+    mkdir -p "$BUILD_DIR"/compilelogs/plugins
+    pushd "$REPO_DIR"
+    for dot in $( find * -name "@dot.xml" ); do
+      targetDir=$( dirname "$dot" )
+      echo "Processing $dot in $targetDir"
+      if [ ! -r "$targetDir"/MANIFEST.MF ]; then
+        echo "**Failed to process $dot in $targetDir. Likely compile error. Will try source MANIFEST.MF in directory containing target."
+        targetDir=$( dirname "${targetDir}" )
+        if [ ! -r "$targetDir"/META-INF/MANIFEST.MF ]
+        then
+          echo "**Failed to process $dot in $targetDir."
+        else
+          BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
+          BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
+          mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+          cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+        fi
+      else
+        BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
+        BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
+        mkdir "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+        cp "$dot" "$BUILD_DIR"/compilelogs/plugins/${BUNDLE_ID}_${BUNDLE_VERSION}
+      fi
     done
     popd
-        else
-          echo "   ERROR: $REPO_DIR did not exist in fn-gather-compile-logs"
-            fi
+  else
+    echo "   ERROR: $REPO_DIR did not exist in fn-gather-compile-logs"
+  fi
 }
 
 
@@ -1049,19 +890,19 @@ fn-gather-compile-logs ()
 fn-gather-main-index ()
 {
   checkNArgs $# 6
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        STREAM="$1"; shift
-        BUILD_TYPE="$1"; shift
-        BUILD_PRETTY_DATE="$1"; shift
-        pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  STREAM="$1"; shift
+  BUILD_TYPE="$1"; shift
+  BUILD_PRETTY_DATE="$1"; shift
+  pushd "$REPO_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse/templateFiles
 
-# Simplified by creating PHP variables in buildproperties.php
-        cp "index.php.template${PATCH_BUILD}" "$BUILD_DIR"/index.php
+  # Simplified by creating PHP variables in buildproperties.php
+  cp "index.php.template${PATCH_BUILD}" "$BUILD_DIR"/index.php
 
-        popd
+  popd
 }
 
 # USAGE: fn-parse-compile-logs BUILD_ID ANT_SCRIPT BUILD_DIR BASEBUILDER_LAUNCHER
@@ -1072,25 +913,25 @@ fn-gather-main-index ()
 fn-parse-compile-logs ()
 {
   checkNArgs $# 4
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        ANT_SCRIPT="$1"; shift
-        BUILD_DIR="$1"; shift
-        BASEBUILDER_LAUNCHER="$1"; shift
-        EBuilderDir="${BUILD_DIR}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
-        pushd "$BUILD_DIR"
-        java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-        -data ${BUILD_DIR}/workspace-verifyCompile \
-        -application org.eclipse.ant.core.antRunner \
-        -buildfile "$ANT_SCRIPT" \
-        -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
-        -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
-        -DEBuilderDir="${EBuilderDir}" \
-        -DbuildId="$BUILD_ID" \
-        -DbuildLabel="$BUILD_ID" \
-        -Djava.io.tmpdir=$TMP_DIR \
-        verifyCompile
-        popd
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  ANT_SCRIPT="$1"; shift
+  BUILD_DIR="$1"; shift
+  BASEBUILDER_LAUNCHER="$1"; shift
+  EBuilderDir="${BUILD_DIR}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
+  pushd "$BUILD_DIR"
+  java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
+    -data ${BUILD_DIR}/workspace-verifyCompile \
+    -application org.eclipse.ant.core.antRunner \
+    -buildfile "$ANT_SCRIPT" \
+    -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
+    -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
+    -DEBuilderDir="${EBuilderDir}" \
+    -DbuildId="$BUILD_ID" \
+    -DbuildLabel="$BUILD_ID" \
+    -Djava.io.tmpdir=$TMP_DIR \
+    verifyCompile
+  popd
 }
 
 # USAGE: fn-summarize-comparator-logs BUILD_ID ANT_SCRIPT BUILD_DIR BASEBUILDER_LAUNCHER
@@ -1102,25 +943,25 @@ fn-parse-compile-logs ()
 fn-summarize-comparator-logs ()
 {
   checkNArgs $# 4
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        ANT_SCRIPT="$1"; shift
-        BUILD_DIR="$1"; shift
-        BASEBUILDER_LAUNCHER="$1"; shift
-        EBuilderDir="${BUILD_DIR}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
-        pushd "$BUILD_DIR"
-        java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-        -data ${BUILD_DIR}/workspace-comparatorLogs \
-        -application org.eclipse.ant.core.antRunner \
-        -buildfile "$ANT_SCRIPT" \
-        -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
-        -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
-        -DEBuilderDir="${EBuilderDir}" \
-        -DbuildId="$BUILD_ID" \
-        -DbuildLabel="$BUILD_ID" \
-        -Djava.io.tmpdir=$TMP_DIR \
-        compare
-        popd
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  ANT_SCRIPT="$1"; shift
+  BUILD_DIR="$1"; shift
+  BASEBUILDER_LAUNCHER="$1"; shift
+  EBuilderDir="${BUILD_DIR}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
+  pushd "$BUILD_DIR"
+  java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
+    -data ${BUILD_DIR}/workspace-comparatorLogs \
+    -application org.eclipse.ant.core.antRunner \
+    -buildfile "$ANT_SCRIPT" \
+    -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
+    -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
+    -DEBuilderDir="${EBuilderDir}" \
+    -DbuildId="$BUILD_ID" \
+    -DbuildLabel="$BUILD_ID" \
+    -Djava.io.tmpdir=$TMP_DIR \
+    compare
+  popd
 }
 # USAGE: fn-summarize-apitooling BUILD_ID ANT_SCRIPT BUILD_DIR BASEBUILDER_LAUNCHER
 #   BUILD_ID: I20121116-0700
@@ -1131,45 +972,45 @@ fn-summarize-comparator-logs ()
 fn-summarize-apitooling ()
 {
   checkNArgs $# 4
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        ANT_SCRIPT="$1"; shift
-        BUILD_DIR="$1"; shift
-        BASEBUILDER_LAUNCHER="$1"; shift
-        EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-        pushd "$BUILD_DIR"
-# Make sure FREEZE_PARAMS is defined, but empty space, if not using freeze reports.
-        FREEZE_PARAMS=" "
-# When no "freeze" in effect for a release comment these out. Uncomment after M6, changing to appropriate versions.
-#        FREEZE_PARAMS="-DfreezeBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/S-4.4M6-201403061200/eclipse-SDK-4.4M6-win32.zip \
-#        -DfreezeName=Eclipse-SDK-4.4M6 \
-#        -DfreezeFilename=eclipse-SDK-4.4M6-win32.zip "
-# this API_PREV_REF_LABEL variable should be changed any time the version used
-# by previousBaseURL changes. Its purpose is just to localize changes to this one
-# place, and not have to make further, hard-coded changes to testResults.php.template.
-# Similar for freeze label.
-        API_PREV_REF_LABEL=4.4.0
-        fn-write-property API_PREV_REF_LABEL
-#        API_FREEZE_REF_LABEL=4.5M6
-         API_FREEZE_REF_LABEL=" "
-        fn-write-property API_FREEZE_REF_LABEL
-        java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-        -data ${BUILD_DIR}/workspace-comparatorLogs \
-        -application org.eclipse.ant.core.antRunner \
-        -buildfile "$ANT_SCRIPT" \
-        -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
-        -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
-        -DEBuilderDir=$EBuilderDir \
-        -DbuildId="$BUILD_ID" \
-        -DbuildLabel="$BUILD_ID" \
-        -DbuildWorkingArea="${BUILD_HOME}/4${BUILD_TYPE}/gitCache/eclipse.platform.releng.aggregator" \
-        -DpreviousBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/R-4.4-201406061215/eclipse-SDK-4.4-win32.zip \
-        -DpreviousBaselineName=Eclipse-SDK-4.4 \
-        -DpreviousBaselineFilename=eclipse-SDK-4.4-win32.zip \
-        -Djava.io.tmpdir=$TMP_DIR \
-        ${FREEZE_PARAMS} \
-        apiToolsReports
-        popd
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  ANT_SCRIPT="$1"; shift
+  BUILD_DIR="$1"; shift
+  BASEBUILDER_LAUNCHER="$1"; shift
+  EBuilderDir=$BUILD_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+  pushd "$BUILD_DIR"
+  # Make sure FREEZE_PARAMS is defined, but empty space, if not using freeze reports.
+  FREEZE_PARAMS=" "
+  # When no "freeze" in effect for a release comment these out. Uncomment after M6, changing to appropriate versions.
+  #        FREEZE_PARAMS="-DfreezeBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/S-4.4M6-201403061200/eclipse-SDK-4.4M6-win32.zip \
+    #        -DfreezeName=Eclipse-SDK-4.4M6 \
+    #        -DfreezeFilename=eclipse-SDK-4.4M6-win32.zip "
+  # this API_PREV_REF_LABEL variable should be changed any time the version used
+  # by previousBaseURL changes. Its purpose is just to localize changes to this one
+  # place, and not have to make further, hard-coded changes to testResults.php.template.
+  # Similar for freeze label.
+  API_PREV_REF_LABEL=4.4.0
+  fn-write-property API_PREV_REF_LABEL
+  #        API_FREEZE_REF_LABEL=4.5M6
+  API_FREEZE_REF_LABEL=" "
+  fn-write-property API_FREEZE_REF_LABEL
+  java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
+    -data ${BUILD_DIR}/workspace-comparatorLogs \
+    -application org.eclipse.ant.core.antRunner \
+    -buildfile "$ANT_SCRIPT" \
+    -DbuildDirectory=$(dirname "$BUILD_DIR" ) \
+    -DpostingDirectory=$(dirname "$BUILD_DIR" ) \
+    -DEBuilderDir=$EBuilderDir \
+    -DbuildId="$BUILD_ID" \
+    -DbuildLabel="$BUILD_ID" \
+    -DbuildWorkingArea="${BUILD_HOME}/4${BUILD_TYPE}/gitCache/eclipse.platform.releng.aggregator" \
+    -DpreviousBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/R-4.4-201406061215/eclipse-SDK-4.4-win32.zip \
+    -DpreviousBaselineName=Eclipse-SDK-4.4 \
+    -DpreviousBaselineFilename=eclipse-SDK-4.4-win32.zip \
+    -Djava.io.tmpdir=$TMP_DIR \
+    ${FREEZE_PARAMS} \
+    apiToolsReports
+  popd
 }
 
 # USAGE: fn-publish-eclipse BUILD_TYPE BUILD_STREAM BUILD_ID REPO_DIR BUILD_DIR BASEBUILDER_LAUNCHER
@@ -1182,41 +1023,41 @@ fn-summarize-apitooling ()
 fn-publish-eclipse ()
 {
   checkNArgs $# 6
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_TYPE="$1"; shift
-        BUILD_STREAM="$1"; shift
-        BUILD_ID="$1"; shift
-        AGGR_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        BASEBUILDER_LAUNCHER="$1"; shift
-        EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-        pushd "$BUILD_DIR"
-        java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
-        -data ${BUILD_DIR}/workspace-publish \
-        -application org.eclipse.ant.core.antRunner \
-        -v \
-        -buildfile "$EBuilderDir"/eclipse/helper.xml \
-        -DbuildId="$BUILD_ID" \
-        -DbuildRepo="$AGGR_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository \
-        -DpostingDirectory="$BUILD_ROOT/siteDir/eclipse/downloads/drops4" \
-        -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
-        -DpublishingContent="$EBuilderDir"/eclipse/publishingFiles \
-        -DdropTemplateFileName="${EBuilderDir}/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
-        -DbuildLabel="$BUILD_DIR_SEG" \
-        -DEBuilderDir="$EBuilderDir" \
-        -DAGGR_DIR="$AGGR_DIR" \
-        -DeclipseStream=$BUILD_STREAM \
-        -DbuildType="$BUILD_TYPE" \
-        -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
-        -DbuildDirectory=$(dirname "$BUILD_DIR") \
-        -Djava.io.tmpdir=$TMP_DIR \
-        publish
-# hide experimental builds, for now
-        if [[ $BUILD_ID =~ [PXY] ]]
-          then
-            touch buildHidden
-            fi
-            popd
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_TYPE="$1"; shift
+  BUILD_STREAM="$1"; shift
+  BUILD_ID="$1"; shift
+  AGGR_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  BASEBUILDER_LAUNCHER="$1"; shift
+  EBuilderDir="$BUILD_DIR"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+  pushd "$BUILD_DIR"
+  java -Djava.io.tmpdir=$TMP_DIR -jar "$BASEBUILDER_LAUNCHER" \
+    -data ${BUILD_DIR}/workspace-publish \
+    -application org.eclipse.ant.core.antRunner \
+    -v \
+    -buildfile "$EBuilderDir"/eclipse/helper.xml \
+    -DbuildId="$BUILD_ID" \
+    -DbuildRepo="$AGGR_DIR"/eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository \
+    -DpostingDirectory="$BUILD_ROOT/siteDir/eclipse/downloads/drops4" \
+    -DequinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops" \
+    -DpublishingContent="$EBuilderDir"/eclipse/publishingFiles \
+    -DdropTemplateFileName="${EBuilderDir}/eclipse/publishingFiles/templateFiles/index.php.template${PATCH_BUILD}" \
+    -DbuildLabel="$BUILD_DIR_SEG" \
+    -DEBuilderDir="$EBuilderDir" \
+    -DAGGR_DIR="$AGGR_DIR" \
+    -DeclipseStream=$BUILD_STREAM \
+    -DbuildType="$BUILD_TYPE" \
+    -Dbase.builder=$(dirname $(dirname "$BASEBUILDER_LAUNCHER" ) ) \
+    -DbuildDirectory=$(dirname "$BUILD_DIR") \
+    -Djava.io.tmpdir=$TMP_DIR \
+    publish
+  # hide experimental builds, for now
+  if [[ $BUILD_ID =~ [PXY] ]]
+  then
+    touch buildHidden
+  fi
+  popd
 }
 
 # USAGE: fn-checkout-basebuilder BUILDER_DIR
@@ -1224,27 +1065,27 @@ fn-publish-eclipse ()
 fn-checkout-basebuilder ()
 {
   checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILDER_DIR="$1"; shift
-        if [ -e "$BUILDER_DIR" ]; then
-          echo "A basic builder directory already existed, so not re-fetched."
-            echo "   Directory found at $BUILDER_DIR."
-            return 0
-            fi
-            echo "A basic builder did not exist, so will fetch platform and tools."
-            DROP_DIR=$( dirname "$BUILDER_DIR" )
-# Are these as expected? TODO: change comments.
-            echo "Drop directory: $DROP_DIR"
-            echo "BUILDER_DIR: $BUILDER_DIR"
-            EBuilderDir=$DROP_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
-            if [[ ! -d "${EBuilderDir}" ]]
-              then
-                echo "EBuilderDir did not exist, so will fetch that first"
-                ${SCRIPT_PATH}/getEBuilderForDropDir.sh $DROP_DIR $EBUILDER_HASH
-            else
-              echo "EBuilderDir already existed, so no need to fetch that"
-                fi
-                ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILDER_DIR="$1"; shift
+  if [ -e "$BUILDER_DIR" ]; then
+    echo "A basic builder directory already existed, so not re-fetched."
+    echo "   Directory found at $BUILDER_DIR."
+    return 0
+  fi
+  echo "A basic builder did not exist, so will fetch platform and tools."
+  DROP_DIR=$( dirname "$BUILDER_DIR" )
+  # Are these as expected? TODO: change comments.
+  echo "Drop directory: $DROP_DIR"
+  echo "BUILDER_DIR: $BUILDER_DIR"
+  EBuilderDir=$DROP_DIR/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
+  if [[ ! -d "${EBuilderDir}" ]]
+  then
+    echo "EBuilderDir did not exist, so will fetch that first"
+    ${SCRIPT_PATH}/getEBuilderForDropDir.sh $DROP_DIR $EBUILDER_HASH
+  else
+    echo "EBuilderDir already existed, so no need to fetch that"
+  fi
+  ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$DROP_DIR
 }
 
 # USAGE: fn-basebuilder-launcher BUILDER_DIR
@@ -1252,9 +1093,9 @@ fn-checkout-basebuilder ()
 fn-basebuilder-launcher ()
 {
   checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILDER_DIR="$1"; shift
-        find "$BUILDER_DIR" -name "org.eclipse.equinox.launcher_*.jar" | tail -1
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILDER_DIR="$1"; shift
+  find "$BUILDER_DIR" -name "org.eclipse.equinox.launcher_*.jar" | tail -1
 }
 
 # USAGE: fn-pom-version-report BUILD_ID REPO_DIR BUILD_DIR LOCAL_REPO
@@ -1264,41 +1105,41 @@ fn-basebuilder-launcher ()
 fn-pom-version-report ()
 {
   checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_ID="$1"; shift
-        REPO_DIR="$1"; shift
-        BUILD_DIR="$1"; shift
-        pushd "$REPO_DIR"
-        mkdir -p "$BUILD_DIR"/pom_updates
-        git submodule foreach "if (git status -s -uno | grep pom.xml >/dev/null ); then git diff >$BUILD_DIR/pom_updates/\$name.diff; fi "
-        pushd "$BUILD_DIR"/pom_updates
-        nDiffs=$( ls -1 $BUILD_DIR/pom_updates/*.diff | wc -l )
-# don't create index.html if no diffs to display, as our PHP DL page knows
-# not to display link if index.html is not present.
-if (( $nDiffs > 0 ))
-then
-POM_UPDATES=""
-echo "<html>"  >index.html
-echo "<head>"  >>index.html
-echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
-echo "</head>"  >>index.html
-echo "<body>"  >>index.html
-echo "<h1>POM version report for $BUILD_ID</h1>"  >>index.html
-echo "<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>"  >>index.html
-echo "<ul>"  >>index.html
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  pushd "$REPO_DIR"
+  mkdir -p "$BUILD_DIR"/pom_updates
+  git submodule foreach "if (git status -s -uno | grep pom.xml >/dev/null ); then git diff >$BUILD_DIR/pom_updates/\$name.diff; fi "
+  pushd "$BUILD_DIR"/pom_updates
+  nDiffs=$( ls -1 $BUILD_DIR/pom_updates/*.diff | wc -l )
+  # don't create index.html if no diffs to display, as our PHP DL page knows
+  # not to display link if index.html is not present.
+  if (( $nDiffs > 0 ))
+  then
+    POM_UPDATES=""
+    echo "<html>"  >index.html
+    echo "<head>"  >>index.html
+    echo "<title>POM version report for $BUILD_ID</title>"  >>index.html
+    echo "</head>"  >>index.html
+    echo "<body>"  >>index.html
+    echo "<h1>POM version report for $BUILD_ID</h1>"  >>index.html
+    echo "<p>These repositories need patches to bring their pom.xml files up to the correct version.</p>"  >>index.html
+    echo "<ul>"  >>index.html
 
-for f in *.diff; do
-FNAME=$( basename $f .diff )
-echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
-POM_UPDATES="${POM_UPDATES}<li><a href='$f'>$FNAME</a></li>"
-done
-echo "</ul>" >> index.html
-echo "</html>" >> index.html
-# we write to property files, for later use in email message
-fn-write-property POM_UPDATES
-fi
-popd
-popd
+    for f in *.diff; do
+      FNAME=$( basename $f .diff )
+      echo "<li><a href=\"$f\">$FNAME</a></li>" >> index.html
+      POM_UPDATES="${POM_UPDATES}<li><a href='$f'>$FNAME</a></li>"
+    done
+    echo "</ul>" >> index.html
+    echo "</html>" >> index.html
+    # we write to property files, for later use in email message
+    fn-write-property POM_UPDATES
+  fi
+  popd
+  popd
 }
 
 # USAGE: fn-check-dir-exists DIR_VAR_NAME
@@ -1309,20 +1150,20 @@ popd
 #        checkForErrorExit "$rc" "$rc"
 fn-check-dir-exists ()
 {
-checkNArgs $# 1
-if [[ $? != 0 ]]; then return 1; fi
-DIR_VAR_NAME=$1
-if [[ -z "${!DIR_VAR_NAME}" ]]
-then
-echo "DIR_VAR_NAME, ${DIR_VAR_NAME}, must be defined before running this script."
-else
-if [[ ! -d  "${!DIR_VAR_NAME}" ]]
-then
-echo "The directory DIR_VAR_NAME, ${DIR_VAR_NAME} (\"${!DIR_VAR_NAME}\"), must exist before running this script."
-else
-echo 0
-fi
-fi
+  checkNArgs $# 1
+  if [[ $? != 0 ]]; then return 1; fi
+  DIR_VAR_NAME=$1
+  if [[ -z "${!DIR_VAR_NAME}" ]]
+  then
+    echo "DIR_VAR_NAME, ${DIR_VAR_NAME}, must be defined before running this script."
+  else
+    if [[ ! -d  "${!DIR_VAR_NAME}" ]]
+    then
+      echo "The directory DIR_VAR_NAME, ${DIR_VAR_NAME} (\"${!DIR_VAR_NAME}\"), must exist before running this script."
+    else
+      echo 0
+    fi
+  fi
 }
 
 # USAGE: fn-write-property VAR_NAME
@@ -1348,20 +1189,20 @@ fi
 fn-write-property ()
 {
   checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      VAR_NAME=$1
-        if [[ -z "${VAR_NAME}" ]]
-          then
-            echo "VAR_NAME must be passed to this script, $0."
-            return 1
-            fi
+  if [[ $? != 0 ]]; then return 1; fi
+  VAR_NAME=$1
+  if [[ -z "${VAR_NAME}" ]]
+  then
+    echo "VAR_NAME must be passed to this script, $0."
+    return 1
+  fi
 
-# bash scripts (export may be overkill ... but, just in case needed)
-            echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> $BUILD_ENV_FILE
-# PHP, suitable for direct "include"
-            echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> $BUILD_ENV_FILE_PHP
-# standard properties file
-            echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
+  # bash scripts (export may be overkill ... but, just in case needed)
+  echo "export ${VAR_NAME}=\"${!VAR_NAME}\"" >> $BUILD_ENV_FILE
+  # PHP, suitable for direct "include"
+  echo "\$${VAR_NAME} = \"${!VAR_NAME}\";" >> $BUILD_ENV_FILE_PHP
+  # standard properties file
+  echo "${VAR_NAME} = \"${!VAR_NAME}\"" >> $BUILD_ENV_FILE_PROP
 
 }
 
@@ -1370,15 +1211,15 @@ fn-write-property ()
 fn-write-property-init ()
 {
   checkNArgs $# 0
-    if [[ $? != 0 ]]; then return 1; fi
-# nothing really required for bash shsource, but we'll put in some niceties
-      echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
-        echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
-# PHP, suitable for direct "include": needs to start and end with <?php ... ?>
-        echo "<?php " > $BUILD_ENV_FILE_PHP
-        echo "// properties written for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
-# standard properties file: nothing special required
-        echo "! properties written for $BUILD_ID" > $BUILD_ENV_FILE_PROP
+  if [[ $? != 0 ]]; then return 1; fi
+  # nothing really required for bash shsource, but we'll put in some niceties
+  echo "#!/usr/bin/env bash" > $BUILD_ENV_FILE
+  echo "# properties written for $BUILD_ID" >> $BUILD_ENV_FILE
+  # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+  echo "<?php " > $BUILD_ENV_FILE_PHP
+  echo "// properties written for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+  # standard properties file: nothing special required
+  echo "! properties written for $BUILD_ID" > $BUILD_ENV_FILE_PROP
 
 }
 
@@ -1387,15 +1228,15 @@ fn-write-property-init ()
 fn-write-property-close ()
 {
   checkNArgs $# 0
-    if [[ $? != 0 ]]; then return 1; fi
-# nothing really required for bash shsource, but we'll put in some niceties
-      echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
-# PHP, suitable for direct "include": needs to start and end with <?php ... ?>
-# Note: technically may not need closing ?> for an 'include' ?
-        echo "// finished properties for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
-        echo "?>"  >> $BUILD_ENV_FILE_PHP
-# standard properties file: nothing special required
-        echo "! finshed properties for $BUILD_ID" >> $BUILD_ENV_FILE_PROP
+  if [[ $? != 0 ]]; then return 1; fi
+  # nothing really required for bash shsource, but we'll put in some niceties
+  echo "# finished properties for $BUILD_ID" >> $BUILD_ENV_FILE
+  # PHP, suitable for direct "include": needs to start and end with <?php ... ?>
+  # Note: technically may not need closing ?> for an 'include' ?
+  echo "// finished properties for $BUILD_ID " >> $BUILD_ENV_FILE_PHP
+  echo "?>"  >> $BUILD_ENV_FILE_PHP
+  # standard properties file: nothing special required
+  echo "! finshed properties for $BUILD_ID" >> $BUILD_ENV_FILE_PROP
 
 }
 
@@ -1409,9 +1250,9 @@ fn-write-property-close ()
 fn-complete-status ()
 {
   checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      MESSAGE=$1
-        printf "\n\t%s\n\n" "${MESSAGE}"
-        git status
-        git submodule foreach git status
+  if [[ $? != 0 ]]; then return 1; fi
+  MESSAGE=$1
+  printf "\n\t%s\n\n" "${MESSAGE}"
+  git status
+  git submodule foreach git status
 }

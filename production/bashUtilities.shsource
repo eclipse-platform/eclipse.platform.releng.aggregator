@@ -1,0 +1,135 @@
+#!/usr/bin/env bash
+
+# General purpose utilities that are only related to bash (not 
+# the build, per se.
+
+# A general purpose utility to check number of arguments match
+# what was expected. Its purpose is to help bullet-proof these scripts
+# when future changes made.
+# Example: (such as in first line of a function)
+#   checkNArgs $# 3
+# NOTE: can not be called, until buildDirectory has been defined.
+checkNArgs ()
+{
+  actual=$1
+  expected=$2
+  if [[ -z "$actual" || -z "$expected" ]]
+  then
+    BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
+    printf "\n\tPROGRAM ERROR: number of arguments, $actual, or number expected, $expected, was not provided as arguments.\n\n" >${BUILD_FAILED}
+    printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
+    return 9
+  fi
+  # possible is used when there are optional arguments, corresponds to "max possible", then "expected" means "min possible"
+  possible=$3
+  #echo "     DEBUG checkNArgs funcName[1]: ${FUNCNAME[1]}" >> ${TRACE_OUTPUT}
+  #echo "     DEBUG checkNArgs bashSource[2]:   ${BASH_SOURCE[2]}" >> ${TRACE_OUTPUT}
+  #echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
+  if [[ -n "${possible}" ]]
+  then
+    # if 3 total arguments, make sure first is between 2 and 3rd args (inclusive)
+    #echo DEBUG: actual:   $actual
+    #echo DEBUG: min expected: $expected
+    #echo DEBUG: max possible: $possible
+    #arg1=$(( $expected <= $actual ))
+    #arg2=$(( $actual <= $possible ))
+    #echo "DEBUG: expected <= actual $arg1"
+    #echo "DEBUG: actual <= possible $arg2"
+    if  (( $expected <= $actual )) && (( $actual <= $possible ))
+    then
+      #echo DEBUG: return 0
+      return 0
+    else
+      BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
+      printf "\n\tPROGRAM ERROR: number of arguments, $actual, was not betwen expected, $expected, and possible, $possible.\n" >${BUILD_FAILED}
+      printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
+      #echo DEBUG: return 1
+      return 1
+    fi
+  elif [[ $actual != $expected ]]
+  then
+    # depends on buildDirectory being exported
+    BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
+    printf "\n\tPROGRAM ERROR: expected $expected arguments but was passed $actual.\n" >${BUILD_FAILED}
+    printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
+    return 1
+  else
+    return 0
+  fi
+}
+
+# general purpose utility for "hard exit" if return code not zero.
+# especially useful to call/check after basic things that should normally
+# easily succeeed.
+# usage:
+#   checkForErrorExit $? "Failed to copy file (for example)"
+checkForErrorExit ()
+{
+  # arg 1 must be return code, $?
+  # arg 2 (remaining line) can be message to print before exiting do to non-zero exit code
+  exitCode=$1
+  shift
+  message="$*"
+  if [[ -z "${exitCode}" ]]
+  then
+    echo "PROGRAM ERROR: checkForErrorExit called with no arguments"
+    exit 1
+  fi
+
+  if [[ -z "${message}" ]]
+  then
+    echo "WARNING: checkForErrorExit called without message"
+    message="(Calling program provided no message)"
+  fi
+
+  # first make sure exit code is well formed
+  if [[ "${exitCode}" =~ [0] ]]
+  then
+    #echo "exitcode was zero"
+    exitrc=0
+  else
+    if [[ "${exitCode}" =~ ^-?[0-9]+$ ]]
+    then
+      #echo "exitcode was indeed a legal, non-zero numeric return code"
+      exitrc=$exitCode
+    else
+      #echo "exitode was not numeric, so will force to 1"
+      exitrc=1
+    fi
+  fi
+
+  if [[ $exitrc != 0 ]]
+  then
+    echo
+    echo "   ERROR. exit code: ${exitrc}"
+    echo "   ERROR. message: ${message}"
+    echo
+    exit $exitrc
+  fi
+}
+
+# A general purpose utility to check if variable is 
+# undefinded or empty string and exit if so, 
+# printing a useful diagnosic trace if variable was empty.
+# NOTE: only the variable NAME should be passed as argument, 
+# note its value. Such as 
+#   assertNotEmpty BUILD_ID
+# not
+#   assertNotEmpty $BUILD_ID
+assertNotEmpty ()
+{
+  VAR_NAME=$1
+
+  #echo "DEBUG: VAR_NAME: $VAR_NAME" >&2
+  #echo "DEBUG: \$VAR_NAME: ${!VAR_NAME}" >&2
+  if [[ -z "${!VAR_NAME}" ]]
+  then 
+    printf "\n\tPROGRAM ERROR: %s\n" "${VAR_NAME} was unexpectedly empty or undefined." 
+    printf "\t%s\n\n" "in ${FUNCNAME[1]}, called from line number ${BASH_LINENO[0]} in ${BASH_SOURCE[1]}."
+    exit 1
+  else
+    printf "\n\t%s:\t%s\n" "${VAR_NAME}" "${!VAR_NAME}"
+  fi  
+
+}
+

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# this buildeclipse.shsource file is to ease local builds to override some variables.
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source buildeclipse.shsource 2>/dev/null
+source localbuildproperties.shsource 2>/dev/null
 
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
@@ -175,7 +175,7 @@ fn-publish-equinox ()
 cd $BUILD_ROOT
 
 # derived values
-gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
+gitCache=$( fn-git-cache "$BUILD_ROOT")
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then

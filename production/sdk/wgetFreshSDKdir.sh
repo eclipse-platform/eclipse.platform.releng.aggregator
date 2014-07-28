@@ -4,13 +4,24 @@
 # need to manually check and make sure nothing is running or will
 # be running soon.
 
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localbuildproperties.shsource 2>/dev/null
+export GIT_HOST=${GIT_HOST:-"git.eclipse.org"}
+
+
 # codifying the branch (or tag) to use, so it can be set/chagned in one place
 branch=master
 initScriptTag="h=$branch"
 
 # to use a tag instead of branch, would be tag=X, such as
 # tag=vI20120417-0700, or in full form
-# http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
+# http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
+
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localbuildproperties.shsource 2>/dev/null
+export GIT_HOST=${GIT_HOST:-"git.eclipse.org"}
 
 source /shared/eclipse/sdk/checkForErrorExit.sh
 
@@ -21,7 +32,7 @@ source /shared/eclipse/sdk/checkForErrorExit.sh
 # first get a fresh copy of just this file, put in parent directory
 # since overtime there will be few changes and can re-invoke from there.
 #fileToGet=wgetFreshSDKdir.sh
-#wget --no-verbose -O ../${fileToGet} http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${fileToGet}?${initScriptTag}  2>&1
+#wget --no-verbose -O ../${fileToGet} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${fileToGet}?${initScriptTag}  2>&1
 #checkForErrorExit $? "could not wget file: ${fileToGet}"
 #chmod -c +x ../${fileToGet}
 cd /shared/eclipse
@@ -32,8 +43,8 @@ rm -fr tempeb 2>/dev/null
 mkdir -p tempeb
 checkForErrorExit $? "could not mkdir?!"
 
-#wget -O master.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/snapshot/master.zip
-wget -O master.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip
+#wget -O master.zip http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/snapshot/master.zip
+wget -O master.zip http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip
 checkForErrorExit $? "could not get aggregator?!"
 
 unzip -q ${branch}.zip -d tempeb

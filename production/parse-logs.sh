@@ -22,7 +22,7 @@ source "$1"
 cd $BUILD_ROOT
 
 # derived values
-gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
+gitCache=$( fn-git-cache "$BUILD_ROOT" )
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then
