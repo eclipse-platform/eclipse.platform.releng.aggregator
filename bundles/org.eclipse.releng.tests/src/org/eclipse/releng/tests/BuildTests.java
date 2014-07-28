@@ -122,6 +122,7 @@ public class BuildTests extends TestCase {
 			aProcess.waitFor();
 		} catch (IOException e) {
 			// skip chkpii test if chkpii cannot be run.
+			setName("testChkpii-NotInstalled");
 			System.out.println(e.getMessage());
 			System.out.println("Skipping chkpii test.");
 			assertTrue(true);
