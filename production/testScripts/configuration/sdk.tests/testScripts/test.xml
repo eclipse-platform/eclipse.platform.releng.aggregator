@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  name="Automated Eclipse Testing"
+  name="Automated Eclipse Testing in Production"
   default="all"
   basedir=".">
 
@@ -102,6 +102,14 @@
       value="true">
       <available file="${repoLocation}" />
     </condition>
+    <condition
+      property="extraIU"
+      value="org.eclipse.releng.tools.feature.group">
+      <equals
+        arg1="${testPlugin}"
+        arg2="org.eclipse.releng.tests" />
+    </condition>
+    
     <condition
       property="extraIU"
       value="org.eclipse.equinox.p2.discovery.feature.feature.group">
@@ -340,18 +348,23 @@
     <property
       name="currentBuildRepo"
       value="${org.eclipse.equinox.p2.tests.current.build.repo}" />
-    <echo>-installIU ${extraIU} +</echo>
+    <echo>-installExtraIU ${extraIU} +</echo>
+    <echo>   from ${currentBuildRepo} </echo>
+    <echo>   into ${eclipse-home} </echo>
+    <echo>   using launcher: ${launcherPath} </echo>
     <java
       jar="${launcherPath}"
       failonerror="false"
       dir="${eclipse-home}"
       timeout="900000"
       fork="true"
-      output="${basedir}/director.log"
+      output="${basedir}/director-${extraIU}.log"
+      append="true"
       resultproperty="directorcode">
       <arg line="-vm ${java.home}/bin/java" />
       <arg line="-application org.eclipse.equinox.p2.director" />
       <arg line="-consoleLog" />
+      <arg line="-debug" />
       <arg line="-flavor tooling" />
       <arg line="-installIUs ${extraIU}" />
       <arg line="-p2.os ${os}" />
@@ -375,18 +388,23 @@
       name="launcherPath"
       refid="launcher.paths" />
     <antcall target="setupPlatform" />
-    <echo>-installIU ${testPlugin} +</echo>
+    <echo>-installTestIU ${testPlugin} +</echo>
+    <echo>   from ${repoLocation} </echo>
+    <echo>   into ${eclipse-home} </echo>
+    <echo>   using launcher: ${launcherPath} </echo>
     <java
       jar="${launcherPath}"
       failonerror="false"
       dir="${eclipse-home}"
       timeout="900000"
       fork="true"
-      output="${basedir}/director.log"
+      output="${basedir}/director-${testPlugin}.log"
+      append="true"
       resultproperty="directorcode">
       <arg line="-vm ${java.home}/bin/java" />
       <arg line="-application org.eclipse.equinox.p2.director" />
       <arg line="-consoleLog" />
+      <arg line="-debug" />
       <arg line="-flavor tooling" />
       <arg
         line="-installIUs ${testPlugin},org.eclipse.test,org.eclipse.ant.optional.junit,org.eclipse.test.performance,org.eclipse.test.performance.win32,org.easymock" />
@@ -422,6 +440,7 @@
   <target
     name="init"
     depends="setRuntimeArchive">
+    <loadproperties srcfile="${env.WORKSPACE}/production.properties" />
     <mkdir dir="${results}/xml" />
     <mkdir dir="${results}/html" />
     <mkdir dir="${junit-report-output}" />
@@ -1455,9 +1474,9 @@
         relatively quick, and realtively reliable on build.eclipse.org hardware
     -->
   <target name="platform">
-    <!-- remove for now, bug 400385
+    <!-- remove for now, bug 400385 -->
        <antcall target="relEng" />
-    -->
+
     <antcall target="ant" />
     <antcall target="antui" />
     <antcall target="compare" />

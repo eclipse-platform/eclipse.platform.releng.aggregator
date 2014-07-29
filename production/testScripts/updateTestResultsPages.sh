@@ -11,7 +11,6 @@ then
   printf "\n\t%s\n" "This script, $scriptname requires three arguments, in order: "
   printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.0 or 3.8.0) "
   printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
-  printf "\t\t%s\t%s\n" "BUILD_KIND" "(e.g. CBI or special case) "
   printf "\t%s\n" "for example,"
   printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 CBI"
   exit 1
@@ -32,12 +31,6 @@ then
   exit 1
 fi
 
-# For now only used by CBI
-BUILD_KIND=$3
-if [[ -z "${BUILD_KIND}" ]]
-then
-  BUILD_KIND=CBI
-fi
 
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
@@ -48,21 +41,7 @@ then
   pathToDL=eclipse/downloads/drops$eclipseStreamMajor
 fi
 
-if [[ "$BUILD_KIND" == "PDE" ]]
-then
-  pathToDL="${pathToDL}pdebased"
-fi
-
-if [[ "$BUILD_KIND" == "CBI" ]]
-then
   buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-elif [[ "$BUILD_KIND" == "PDE" ]]
-then
-  buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-else
-  echo "ERROR: BUILD_KIND was not recognized."
-  exit 1
-fi
 
 siteDir=${buildRoot}/siteDir
 
@@ -124,7 +103,7 @@ echo " BUILDFILESTR: $BUILDFILESTR"
 BUILDTARGET=" "
 
 devworkspace="${fromDir}/workspace-updateTestResults"
-devArgs="-Xmx256m -Dhudson=true -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -DBUILD_KIND=${BUILD_KIND}"
+devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId}"
 
 echo
 echo "   dev script:   $0"

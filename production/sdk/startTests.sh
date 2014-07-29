@@ -29,19 +29,13 @@ source buildParams.shsource 2>/dev/null
 # which is how invoke from "promote script"
 eclipseStream=${eclipseStream:-${1}}
 buildId=${buildId:-${2}}
-BUILD_KIND=${BUILD_KIND:-${3}}
-EBUILDER_HASH=${EBUILDER_HASH:-${4}}
+EBUILDER_HASH=${EBUILDER_HASH:-${3}}
 
 if [[ -z ${eclipseStream} || -z ${buildId} ]]
 then
   printf "\n\t%s\n" "ERROR: missing required parameters."
   usage
   exit 1
-fi
-
-if [[ -z "${BUILD_KIND}" ]]
-then
-  BUILD_KIND=CBI
 fi
 
 if [[ -z "${EBUILDER_HASH}" ]]
@@ -72,7 +66,7 @@ else
   exit 1
 fi
 
-source buildeclipse.shsource 2>/dev/null
+source localbuildproperties.shsource 2>/dev/null
 
 echo "values in ${0}"
 echo "eclipseStream: $eclipseStream"
@@ -81,7 +75,6 @@ echo "eclipseStreamMinor: $eclipseStreamMinor"
 echo "eclipseStreamService: $eclipseStreamService"
 echo "buildType: $buildType"
 echo "buildId: $buildId"
-echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 
@@ -107,7 +100,6 @@ HUDSON_TOKEN=windows2012tests ant \
   -DpostingDirectory=${postingDirectory} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
-  -DBUILD_KIND=${BUILD_KIND} \
   -DEBUILDER_HASH=${EBUILDER_HASH} \
   -f ${builderDir}/invokeTestsJSON.xml
 

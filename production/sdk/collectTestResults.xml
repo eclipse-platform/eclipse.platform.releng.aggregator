@@ -18,9 +18,6 @@
         name="eclipseStream"
         value="4.3.0" />
     <property
-        name="BUILD_KIND"
-        value="CBI" />
-    <property
         name="EBUILDER_HASH"
         value="master" />
 
@@ -43,7 +40,8 @@
 
         <mkdir dir="${postingDirectory}/${buildId}/testresults" />
 
-        <unzip overwrite="true"
+    <unzip
+      overwrite="true"
             src="${tmpzipdir}/archive.zip"
             dest="${postingDirectory}/${buildId}/testresults/">
             <globmapper
@@ -51,10 +49,8 @@
                 to="*" />
         </unzip>
 
-        <echo message="DEBUG: eclipseStream buildId BUILD_KIND EBUILDER_HASH: ${eclipseStream} ${buildId} ${BUILD_KIND} ${EBUILDER_HASH}" />
-
         <exec executable="/bin/bash">
-            <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${BUILD_KIND} ${EBUILDER_HASH}" />
+      <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}" />
         </exec>
 
         <delete>
@@ -75,17 +71,27 @@
 
         <property environment="env" />
 
+      <!-- we set these "env" variables here not to effect the 
+           environment, but that because we need some value for them, 
+           so if not actually set in the environment, we create these 
+           with some reasonable default. (Though, if not set in the environment, 
+           could be a sign that somethign is not as expected?)
+     -->
         <property
             name="env.HUDSON_HOST"
             value="hudson.eclipse.org" />
         <property
             name="env.HUDSON_PROTOCOL"
             value="https" />
+        <property
+          name="env.BUILD_HOME"
+          value="/shared/eclipse/builds" />
 
-        <script language="javascript"><![CDATA[
+       <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
+
+       <script language="javascript"><![CDATA[
             var buildId = project.getProperty("buildId");
             var patternbuildType = new RegExp(/^([IMXYNSR])(\d{8})-(\d{4})$/);
-            var buildTech = project.getProperty("BUILD_KIND");
 
             var sArraybuildType = patternbuildType.exec(buildId);
             // sArray 0 is "whole match"
@@ -104,27 +110,21 @@
             project.setProperty("eclipseStreamMinor", eclipseStreamMinor);
             project.setProperty("eclipseStreamService", eclipseStreamService);
 
-            var buildRoot="/shared/eclipse/eclipse" + eclipseStreamMajor + buildType;
-            if (buildTech == "CBI")
-            {
-                buildRoot="/shared/eclipse/builds/" + eclipseStreamMajor + buildType;
-            } else {
-                buildRoot="/shared/eclipse/eclipse" + eclipseStreamMajor + buildType;
-            }
+            var buildhome = project.getProperty("env.BUILD_HOME");
+          
+            var buildRoot= buildhome + "/" + eclipseStreamMajor + buildType;
+
             var siteDir= buildRoot + "/siteDir";
             var postingDirectory = siteDir + "/eclipse/downloads/drops"
             if (eclipseStreamMajor > 3 )
             {
-                postingDirectory = siteDir + "/eclipse/downloads/drops" + eclipseStreamMajor;
-            }
-            if (buildTech == "PDE")
-            {
-                postingDirectory = postingDirectory + "pdebased";
+                postingDirectory = siteDir + "/eclipse/downloads/drops4";
             }
             project.setProperty("postingDirectory", postingDirectory);
             ]]>
         </script>
 
+    <echo message="buildRoot: ${buildRoot}" />
 
         <echo message="postingDirectory: ${postingDirectory}" />
 

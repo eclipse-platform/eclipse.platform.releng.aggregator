@@ -2,6 +2,12 @@
 
 # gets a fresh copy of utility scripts
 
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localbuildproperties.shsource 2>/dev/null
+
+export GIT_HOST=${GIT_HOST:-"git.eclipse.org"}
+
 # codifying the branch (or tag) to use, so it can be set/chagned in one place
 initScriptTag="h=master"
 
@@ -12,13 +18,13 @@ initScriptTag="h=master"
 source checkForErrorExit.sh
 
 gitfile=makeBranch.sh
-wget --no-verbose -O ${gitfile} http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
+wget --no-verbose -O ${gitfile} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
 checkForErrorExit $? "could not wget file: ${gitfile}"
 gitfile=renameBuild.sh
-wget --no-verbose -O ${gitfile} http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
+wget --no-verbose -O ${gitfile} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
 checkForErrorExit $? "could not wget file: ${gitfile}"
 gitfile=checkForErrorExit.sh
-wget --no-verbose -O ${gitfile} http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
+wget --no-verbose -O ${gitfile} http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/${gitfile}?$initScriptTag 2>&1;
 checkForErrorExit $? "could not wget file: ${gitfile}"
 
 # get this script itself (would have to run twice to make use changes, naturally)
@@ -26,7 +32,7 @@ checkForErrorExit $? "could not wget file: ${gitfile}"
 # but will remove it if no differences found.
 # and a command line like the following works well
 
-wget --no-verbose -O wgetFresh.NEW.sh http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/wgetFresh.sh?$initScriptTag 2>&1;
+wget --no-verbose -O wgetFresh.NEW.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/sdk/wgetFresh.sh?$initScriptTag 2>&1;
 
 differs=`diff wgetFresh.NEW.sh wgetFresh.sh`
 

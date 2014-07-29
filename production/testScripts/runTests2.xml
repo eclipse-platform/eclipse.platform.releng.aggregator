@@ -78,15 +78,6 @@
         <property name="DOWNLOAD_HOST" value="download.eclipse.org"/>
         <property name="ARCHIVE_HOST" value="archive.eclipse.org"/>
 
-        <condition
-            property="dropsSuffix"
-            value=""
-            else="pdebased">
-            <equals
-                arg1="${BUILD_KIND}"
-                arg2="CBI" />
-        </condition>
-
         <!-- if not otherwise set, such as by hudson-init,
              assume "current directory" for WORKSPACE -->
         <property
@@ -132,6 +123,7 @@
         <fail unless="buildType" />
 
 
+      <echo message="DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
         <echo message="hudson: ${hudson}" />
         <echo message="WORKSPACE: ${WORKSPACE}" />
         <echo message="buildId: ${buildId}" />
@@ -139,6 +131,9 @@
         <echo message="eclipseBuilderDir: ${eclipseBuilderDir}" />
         <echo message="java.home: ${java.home}" />
         <echo message="eclipseStream: ${eclipseStream}" />
+      <echo message="eclipseStreamMajor: ${eclipseStreamMajor}" />
+      <echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
+        <echo message="eclipseStreamService: ${eclipseStreamService}" />
         <echo message="buildType: ${buildType}" />
 
         <property
@@ -151,7 +146,7 @@
         <mkdir dir="${executionDir}" />
         <echo message="executionDir ${executionDir}" />
 
-        <!-- what's intended/needed? specific, simple repo? Or composite? -->
+        <!-- this is later ?attempted? to be set to what is in equinoxp2tests.properties? -->
         <property
             name="currentbuildrepo"
             value="http://${DOWNLOAD_HOST}/eclipse/updates/${updateSiteSegment}-${buildType}-builds/${buildId}" />
@@ -159,7 +154,7 @@
 
         <property
             name="buildURL"
-            value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}${dropsSuffix}/${buildId}" />
+            value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
 
         <!--
              there's nothing "automatic" about the local cache (so far).
@@ -205,8 +200,8 @@
             src="${archiveLocation}/eclipse-SDK-${buildId}-win32.zip"
             dest="${executionDir}/eclipse-SDK-${buildId}-win32.zip" />
         <get
-            src="${archiveLocation}/eclipse-platform-${buildId}-win32.zip"
-            dest="${executionDir}/eclipse-platform-${buildId}-win32.zip" />
+            src="${stableDirectorLocation}/eclipse-platform-${stableDirectorVersion}-win32.zip"
+            dest="${executionDir}/eclipse-platform-${stableDirectorVersion}-win32.zip" />
     </target>
     <target
         name="getwinzips64"
@@ -216,8 +211,8 @@
             src="${archiveLocation}/eclipse-SDK-${buildId}-win32-x86_64.zip"
             dest="${executionDir}/eclipse-SDK-${buildId}-win32-x86_64.zip" />
         <get
-            src="${archiveLocation}/eclipse-platform-${buildId}-win32-x86_64.zip"
-            dest="${executionDir}/eclipse-platform-${buildId}-win32-x86_64.zip" />
+            src="${stableDirectorLocation}/eclipse-platform-${stableDirectorVersion}-win32-x86_64.zip"
+            dest="${executionDir}/eclipse-platform-${stableDirectorVersion}-win32-x86_64.zip" />
     </target>
     <target
         name="getlinzips"
@@ -227,8 +222,8 @@
             src="${archiveLocation}/eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz"
             dest="${executionDir}/eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz" />
         <get
-            src="${archiveLocation}/eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz"
-            dest="${executionDir}/eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz" />
+            src="${stableDirectorLocation}/eclipse-platform-${stableDirectorVersion}-linux-gtk-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-platform-${stableDirectorVersion}-linux-gtk-x86_64.tar.gz" />
     </target>
 
     <target
@@ -239,8 +234,8 @@
             src="${archiveLocation}/eclipse-SDK-${buildId}-linux-gtk.tar.gz"
             dest="${executionDir}/eclipse-SDK-${buildId}-linux-gtk.tar.gz" />
         <get
-            src="${archiveLocation}/eclipse-platform-${buildId}-linux-gtk.tar.gz"
-            dest="${executionDir}/eclipse-platform-${buildId}-linux-gtk.tar.gz" />
+            src="${stableDirectorLocation}/eclipse-platform-${stableDirectorVersion}-linux-gtk.tar.gz"
+            dest="${executionDir}/eclipse-platform-${stableDirectorVersion}-linux-gtk.tar.gz" />
     </target>
 
     <target
@@ -251,8 +246,8 @@
             src="${archiveLocation}/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz"
             dest="${executionDir}/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz" />
         <get
-            src="${archiveLocation}/eclipse-platform-${buildId}-macosx-cocoa.tar.gz"
-            dest="${executionDir}/eclipse-platform-${buildId}-macosx-cocoa.tar.gz" />
+            src="${stableDirectorLocation}/eclipse-platform-${stableDirectorVersion}-macosx-cocoa.tar.gz"
+            dest="${executionDir}/eclipse-platform-${stableDirectorVersion}-macosx-cocoa.tar.gz" />
     </target>
 
     <target
@@ -263,8 +258,8 @@
             src="${archiveLocation}/eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz"
             dest="${executionDir}/eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz" />
         <get
-            src="${archiveLocation}/eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz"
-            dest="${executionDir}/eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz" />
+            src="${stableDirectorLocation}/eclipse-platform-${stableDirectorVersion}-macosx-cocoa-x86_64.tar.gz"
+            dest="${executionDir}/eclipse-platform-${stableDirectorVersion}-macosx-cocoa-x86_64.tar.gz" />
     </target>
 
     <target
@@ -373,7 +368,7 @@
                     arg2="x86" />
             </and>
         </condition>
-        <echo message="os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
+
         <condition
             property="testPlatform"
             value="linux">
@@ -434,6 +429,7 @@
                     arg2="x86" />
             </and>
         </condition>
+        <echo message="os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
         <echo message="testPlatform  ${testPlatform}" />
         <fail
             unless="testPlatform"
@@ -516,6 +512,7 @@
         <property
             name="p2executionDir"
             value="${windowsfile}" />
+      <!--
         <replace
             file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties"
             token="@executionDir@"
@@ -528,7 +525,8 @@
             file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties"
             token="@org.eclipse.equinox.p2.tests.current.build.repo@"
             value="${currentbuildrepo}" />
-        <property file="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties" />
+            -->
+        <loadproperties srcfile="${eclipseBuilderDir}/sdk.tests/testConfigs/${testPlatform}/equinoxp2tests.properties" />
 
         <echo message="executionDir ${executionDir}" />
 
@@ -546,7 +544,7 @@
 
         <antcall target="configure.team.cvs.test" />
         <echo message="test.xml: ${test.xml}" />
-        <echoproperties description="Echo Properties in runTest2, right before calling test.xml: ${test.xml}" />
+        <echoproperties destfile="${WORKSPACE}/production.properties" description="Echo Properties in runTest2, right before calling test.xml: ${test.xml}" />
         <ant antfile="${test.xml}">
         </ant>
 
@@ -620,10 +618,12 @@
 
                 <!-- bug 376217: repos.properties is one of the files moved from
                     Eclipsebuild to maps project and into a common file, streamSpecific-build.properties -->
+       <!--
         <replace
             token="@localmirror@"
             file="${WORKSPACE}/streamSpecific-build.properties"
             value="${localmirror}" />
+            -->
                 <!-- The reading/loading of the these streamSpecific-build.properties
                     is critical to several stream specific areas of code, so may have to be moved
                     "earlier"? Made it own task for depends on clauses? -->
@@ -652,6 +652,7 @@
 
                 <!-- now that we've done that little merge, let's "fix up" eclipseBuild
                     stuff that depends on exact version numbers -->
+      <!--
         <replace
             dir="${eclipseBuilderDir}"
             token="@eclipseStream@"
@@ -664,6 +665,7 @@
             dir="${eclipseBuilderDir}"
             token="@eclipseStreamMinor@"
             value="${eclipseStreamMinor}" />
+            -->
                 <!-- seems unlikely we'd ever need this all by itself, and not just
                     use eclipseStream, which should be all three fields
                     <replace summary="true"

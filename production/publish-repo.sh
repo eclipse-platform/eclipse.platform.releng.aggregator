@@ -19,7 +19,7 @@ source $SCRIPT_PATH/build-functions.shsource
 source "$1"
 
 # derived values
-gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
+gitCache=$( fn-git-cache "$BUILD_ROOT")
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then

@@ -1,109 +1,10 @@
 #!/usr/bin/env bash
-# this is not really to be executed, but sourced where needed
 
-# A general purpose utility to check number of arguments match
-# what was expected. Its purpose is to help bullet-proof these scripts
-# when future changes made.
-# Example: (such as in first line of a function)
-#   checkNArgs $# 3
-checkNArgs ()
-{
-  actual=$1
-    expected=$2
-    if [[ -z "$actual" || -z "$expected" ]]
-      then
-        BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-        printf "\n\tPROGRAM ERROR: number of arguments, $actual, or number expected, $expected, was not provided as arguments.\n\n" >${BUILD_FAILED}
-  printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
-  return 9
-    fi
-# possible is used when there are optional arguments, corresponds to "max possible", then "expected" means "min possible"
-    possible=$3
-#echo "     DEBUG checkNArgs funcName[1]: ${FUNCNAME[1]}" >> ${TRACE_OUTPUT}
-#echo "     DEBUG checkNArgs bashSource[2]:   ${BASH_SOURCE[2]}" >> ${TRACE_OUTPUT}
-#echo "     DEBUG checkNArgs bashLineNo[1]:   ${BASH_LINENO[1]}" >> ${TRACE_OUTPUT}
-    if [[ -n "${possible}" ]]
-      then
-# if 3 total arguments, make sure first is between 2 and 3rd args (inclusive)
-#echo DEBUG: actual:   $actual
-#echo DEBUG: min expected: $expected
-#echo DEBUG: max possible: $possible
-#arg1=$(( $expected <= $actual ))
-#arg2=$(( $actual <= $possible ))
-#echo "DEBUG: expected <= actual $arg1"
-#echo "DEBUG: actual <= possible $arg2"
-        if  (( $expected <= $actual )) && (( $actual <= $possible ))
-          then
-#echo DEBUG: return 0
-            return 0
-        else
-          BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-            printf "\n\tPROGRAM ERROR: number of arguments, $actual, was not betwen expected, $expected, and possible, $possible.\n" >${BUILD_FAILED}
-  printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
-#echo DEBUG: return 1
-  return 1
-    fi
-    elif [[ $actual != $expected ]]
-    then
-# depends on buildDirectory being exported
-    BUILD_FAILED="${buildDirectory}/buildFailed-program-error"
-    printf "\n\tPROGRAM ERROR: expected $expected arguments but was passed $actual.\n" >${BUILD_FAILED}
-  printf "             Called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[1]} in ${BASH_SOURCE[2]}.\n\n" >>${BUILD_FAILED}
-  return 1
-    else
-      return 0
-        fi
-}
+# General purpose utilities related to git and similar, 
+# to be sourced where needed
 
-# general purpose utility for "hard exit" if return code not zero.
-# especially useful to call/check after basic things that should normally
-# easily succeeed.
-# usage:
-#   checkForErrorExit $? "Failed to copy file (for example)"
-checkForErrorExit ()
-{
-# arg 1 must be return code, $?
-# arg 2 (remaining line) can be message to print before exiting do to non-zero exit code
-  exitCode=$1
-    shift
-    message="$*"
-    if [[ -z "${exitCode}" ]]
-      then
-        echo "PROGRAM ERROR: checkForErrorExit called with no arguments"
-        exit 1
-        fi
-
-        if [[ -z "${message}" ]]
-          then
-            echo "WARNING: checkForErrorExit called without message"
-            message="(Calling program provided no message)"
-            fi
-
-# first make sure exit code is well formed
-            if [[ "${exitCode}" =~ [0] ]]
-              then
-#echo "exitcode was zero"
-                exitrc=0
-            else
-              if [[ "${exitCode}" =~ ^-?[0-9]+$ ]]
-                then
-#echo "exitcode was indeed a legal, non-zero numeric return code"
-                  exitrc=$exitCode
-              else
-#echo "exitode was not numeric, so will force to 1"
-                exitrc=1
-                  fi
-                  fi
-
-                  if [[ $exitrc != 0 ]]
-                    then
-                      echo
-                      echo "   ERROR. exit code: ${exitrc}"
-                      echo "   ERROR. message: ${message}"
-                      echo
-                      exit $exitrc
-                      fi
-}
+source ${SCRIPT_PATH}/bashUtilities.shsource
+source ${SCRIPT_PATH}/bootstrapVariables.shsource
 
 
 
@@ -275,18 +176,6 @@ fn-git-reset-submodules ()
         return $RC
 }
 
-# USAGE: fn-build-id BUILD_TYPE
-#   BUILD_TYPE: I, M, N, X, Y, P
-# TODO: depends on RAWDATE being exported/global
-fn-build-id ()
-{
-  checkNArgs $# 1
-    if [[ $? != 0 ]]; then return 1; fi
-      BUILD_TYPE="$1"; shift
-        TIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$RAWDATE )
-        echo ${BUILD_TYPE}${TIMESTAMP}
-}
-
 # USAGE: fn-local-repo URL
 #   URL: git://git.eclipse.org/gitroot/platform/eclipse.platform.releng.aggregator.git
 fn-local-repo ()
@@ -406,52 +295,6 @@ fn-git-clean-aggregator2 ()
                         fi
                         popd
                         return $RC
-}
-
-# USAGE: fn-git-cache ROOT BRANCH
-#   ROOT: /shared/eclipse/builds
-#   BRANCH: R4_2_maintenance
-fn-git-cache ()
-{
-# we (now) leave branch our of git-cache path, or else "topic branches", such as
-# 'david_williams/II20130409-0900' complicates directory structure
-  checkNArgs $# 2
-    if [[ $? != 0 ]]; then return 1; fi
-      ROOT="$1"; shift
-        BRANCH="$1"; shift
-        echo $ROOT/gitCache
-}
-
-# USAGE: fn-git-dir GIT_CACHE URL
-#   GIT_CACHE: /shared/eclipse/builds/R4_2_maintenance/gitCache
-#   URL: file:///gitroot/platform/eclipse.platform.releng.aggregator.git
-fn-git-dir ()
-{
-  checkNArgs $# 2
-    if [[ $? != 0 ]]; then return 1; fi
-      GIT_CACHE="$1"; shift
-        URL="$1"; shift
-        echo $GIT_CACHE/$( basename "$URL" .git )
-}
-
-# USAGE: fn-build-dir ROOT BUILD_ID STREAM
-#   ROOT: /shared/eclipse/builds
-#   BUILD_ID: M20121119-1900
-#   STREAM: 4.3.0
-fn-build-dir ()
-{
-  checkNArgs $# 3
-    if [[ $? != 0 ]]; then return 1; fi
-      ROOT="$1"; shift
-        BUILD_ID="$1"; shift
-        STREAM="$1"; shift
-        eclipseStreamMajor=${STREAM:0:1}
-  dropDirSegment=siteDir/eclipse/downloads/drops
-    if (( $eclipseStreamMajor > 3 ))
-      then
-        dropDirSegment=siteDir/eclipse/downloads/drops4
-        fi
-        echo $ROOT/$dropDirSegment/$BUILD_ID
 }
 
 # USAGE: fn-basebuilder-dir ROOT BUILD_ID STREAM
@@ -789,10 +632,10 @@ fn-gather-sdk ()
             cp org.eclipse.sdk.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-s390x.tar.gz
             cp org.eclipse.sdk.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk-x86_64.tar.gz
             cp org.eclipse.sdk.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-linux-gtk.tar.gz
-#cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86_64 eclipse
-#cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
+    cp org.eclipse.sdk.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    #tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86_64 eclipse
+    cp org.eclipse.sdk.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz
+    #tar cfz "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.sdk.ide/macosx/cocoa/x86 eclipse
             cp org.eclipse.sdk.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk.zip
             cp org.eclipse.sdk.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip
             cp org.eclipse.sdk.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-SDK-${BUILD_ID}-win32-x86_64.zip
@@ -827,10 +670,10 @@ fn-gather-platform ()
             cp org.eclipse.platform.ide-linux.gtk.s390x.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz
             cp org.eclipse.platform.ide-linux.gtk.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz
             cp org.eclipse.platform.ide-linux.gtk.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz
-#cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86_64 eclipse
-#cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
-            tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
+    cp org.eclipse.platform.ide-macosx.cocoa.x86_64.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    #tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86_64 eclipse
+    cp org.eclipse.platform.ide-macosx.cocoa.x86.tar.gz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz
+    #tar cfz "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-macosx-cocoa.tar.gz -C org.eclipse.platform.ide/macosx/cocoa/x86 eclipse
             cp org.eclipse.platform.ide-solaris.gtk.sparc.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk.zip
             cp org.eclipse.platform.ide-solaris.gtk.x86.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip
             cp org.eclipse.platform.ide-win32.win32.x86_64.zip "$BUILD_DIR"/eclipse-platform-${BUILD_ID}-win32-x86_64.zip

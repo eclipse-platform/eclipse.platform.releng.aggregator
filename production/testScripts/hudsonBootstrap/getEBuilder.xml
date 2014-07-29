@@ -10,11 +10,9 @@
 
         wget -O getEBuilder.xml &dash;&dash;no-verbose   http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 
-        Then use ant to invoke the functionality. Examples:
+        Then use ant to invoke the functionality. Example:
 
-        ant -f getEBuilder.xml  -DBUILD_KIND=CBI -DbuilderVersion=910fca82df3ea649ba8ee758259561582e13bf8b
-
-        ant -f getEBuilder.xml  -DBUILD_KIND=PDE -DbuilderVersion=master -DEBuilderlocal=/home/shared/localcache/
+        ant -f getEBuilder.xml  -DbuilderVersion=910fca82df3ea649ba8ee758259561582e13bf8b
 
     -->
 <project
@@ -81,7 +79,7 @@
     </target>
     <target
         name="init"
-        depends="hudson-init, checkBuildTech"
+    depends="hudson-init"
         unless="getEBuilderInitialized">
 
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
@@ -101,6 +99,17 @@
                 <isset property="EBuilderlocal" />
             </not>
         </condition>
+    <property
+      name="scmProject"
+      value="eclipse.platform.releng.aggregator" />
+
+    <property
+      name="folderName"
+      value="eclipse.platform.releng.aggregator" />
+
+    <property
+      name="eScriptLocation"
+      value="${folderName}/production/testScripts" />
 
         <echo message="hudson: ${hudson}" />
         <echo message="WORKSPACE: ${WORKSPACE}" />
@@ -108,7 +117,6 @@
         <echo message="builderVersion: ${builderVersion}" />
         <echo message="fetchSource: ${fetchSource}" />
         <echo message="folderName: ${folderName}" />
-        <echo message="BUILD_KIND: ${BUILD_KIND}" />
         <echo message="EBuilderlocal: ${EBuilderlocal}" />
 
         <property
@@ -132,92 +140,25 @@
         <mkdir dir="${WORKSPACE}/${folderName}" />
 
         <antcall target="fetchEBuilder" />
-        <antcall target="fetchEBuilderLocal" />
         <antcall target="EBuildercleanup" />
 
         <!-- copy the files we need for subsequent Hudson steps to "well known" location -->
-        <copy verbose="true" file="${WORKSPACE}/${scmProject}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/getBaseBuilder.xml" todir="${WORKSPACE}" />
-        <copy file="${WORKSPACE}/${eScriptLocation}/runTests2.xml" todir="${WORKSPACE}" />
+    <!-- This was previous method, before deciding to use only "production" 
+    <copy
+      verbose="true"
+      file="${WORKSPACE}/${scmProject}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/getBaseBuilder.xml"
+      todir="${WORKSPACE}" />
+      -->
+    <copy
+      verbose="true"
+      file="${WORKSPACE}/${eScriptLocation}/getBaseBuilder.xml"
+      todir="${WORKSPACE}" />
+    <copy
+      file="${WORKSPACE}/${eScriptLocation}/runTests2.xml"
+      todir="${WORKSPACE}" />
 
     </target>
 
-    <target name="initBuildTech">
-
-        <condition
-            property="buildTechCBI"
-            value="true">
-            <equals
-                arg1="${BUILD_KIND}"
-                arg2="CBI"
-                casesensitive="false"
-                trim="true" />
-        </condition>
-        <condition
-            property="buildTechPDE"
-            value="true">
-            <equals
-                arg1="${BUILD_KIND}"
-                arg2="PDE"
-                casesensitive="false"
-                trim="true" />
-        </condition>
-    </target>
-
-    <target
-        name="checkBuildTech"
-        depends="checkBuildTechPDE, checkBuildTechCBI">
-
-        <!-- by default, if not set yet, set according to what PDE needs -->
-        <property
-            name="scmProject"
-            value="eclipse.platform.releng.eclipsebuilder" />
-
-        <!-- the desired folder name (made to stay consistent with exisiting scripts,
-             though normally name of scm project -->
-        <property
-            name="folderName"
-            value="org.eclipse.releng.eclipsebuilder" />
-
-    </target>
-
-    <target
-        name="checkBuildTechCBI"
-        depends="initBuildTech"
-        if="buildTechCBI">
-
-        <property
-            name="scmProject"
-            value="eclipse.platform.releng.aggregator" />
-
-        <property
-            name="folderName"
-            value="eclipse.platform.releng.aggregator" />
-
-        <property
-            name="eScriptLocation"
-            value="${folderName}/production/testScripts" />
-
-    </target>
-    <target
-        name="checkBuildTechPDE"
-        depends="initBuildTech"
-        if="buildTechPDE">
-
-        <property
-            name="scmProject"
-            value="eclipse.platform.releng.eclipsebuilder" />
-
-        <!-- the desired folder name (made to stay consistent with exisiting scripts,
-             though normally name of scm project -->
-        <property
-            name="folderName"
-            value="org.eclipse.releng.eclipsebuilder" />
-
-        <property
-            name="eScriptLocation"
-            value="${folderName}" />
-
-    </target>
     <!-- hurestic to check if we are running on hudson variable, if so -->
     <target name="checkHudson">
         <!-- HUDSON_USER should just be "anonyous" for most of our cases (currently)
@@ -240,7 +181,8 @@
     </target>
     <target
         name="fetchEBuilderFromGit"
-        depends="init">
+    depends="init,fetchEBuilderLocal"
+    unless="EBuilderfetched">
         <echo message="Fetching EBuilder from Git via CGit" />
         <get
             src="http://git.eclipse.org/c/platform/${scmProject}.git/snapshot/${scmProject}-${builderVersion}.zip"
@@ -257,6 +199,9 @@
         </move>
 
         <echo message="Fetched EBuilder to ${WORKSPACE}/${folderName}" />
+    <property
+      name="EBuilderfetched"
+      value="true" />
 
 
     </target>
@@ -288,14 +233,16 @@
     <target
         name="fetchEBuilder"
         depends="init, fetchEBuilderFromGit"
-        unless="EBuilderlocal">
-        <echo message="EBuilder now in ${WORKSPACE}/${folderName}" />
+    unless="EBuilderfetched">
+    <fail message="EBuilder was not fetched by any available method. Is a local variable not set?" />
     </target>
 
     <target
         name="fetchEBuilderLocal"
-        depends="init"
-        if="EBuilderlocal">
+    depends="init,fetchEBuilderDirect"
+    if="EBuilderlocal"
+    unless="EBuilderfetched">
+    <echo message="Fetching pre-made EBuilder subset from local machine." />
         <unzip
             src="${EBuilderlocal}/${scmProject}-${builderVersion}.zip"
             dest="${WORKSPACE}"
@@ -308,6 +255,35 @@
         </move>
 
         <echo message="Copied EBuilder to ${WORKSPACE}/${folderName}" />
+    <property
+      name="EBuilderfetched"
+      value="true" />
+  </target>
+  <target
+    name="fetchEBuilderDirect"
+    depends="init"
+    if="downloadURL"
+    unless="EBuilderfetched">
+    <echo message="Fetching pre-made EBuilder subset from download site." />
+    <get
+      src="${downloadURL}/${scmProject}-${builderVersion}.zip"
+      dest="${WORKSPACE}" />
+    <echo message="Fetched EBuilder from ${downloadURL}" />
+    <unzip
+      src="${WORKSPACE}/${scmProject}-${builderVersion}.zip"
+      dest="${WORKSPACE}"
+      overwrite="true" />
+
+    <move todir="${WORKSPACE}/${folderName}">
+      <fileset dir="${WORKSPACE}/${scmProject}">
+        <include name="**/*" />
+      </fileset>
+    </move>
+
+    <echo message="Copied EBuilder (subset) to ${WORKSPACE}/${folderName}" />
+    <property
+      name="EBuilderfetched"
+      value="true" />
 
     </target>
 </project>

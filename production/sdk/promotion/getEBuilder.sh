@@ -3,9 +3,8 @@
 # Utility script to "bootstrap" Hudson Eclipse Platform Unit tests, to get the
 # basic files needed to get all the other required files and start the test framework.
 
-BUILD_KIND=$1
-EBUILDER_HASH=$2
-WORKSPACE=$3
+EBUILDER_HASH=$1
+WORKSPACE=$2
 
 if [[ -z "${WORKSPACE}" ]]
 then
@@ -25,26 +24,9 @@ then
   EBUILDER_HASH=master
 fi
 
-if [[ -z "${BUILD_KIND}" ]]
-then
-  echo "BUILD_KIND not supplied, assuming CBI"
-  BUILD_KIND=CBI
-fi
-
-if [[ "${BUILD_KIND}" == "CBI" ]]
-then
   EBUILDER=eclipse.platform.releng.aggregator
   TARGETNAME=eclipse.platform.releng.aggregator
   ESCRIPT_LOC=${EBUILDER}/production/testScripts
-elif [[ "$BUILD_KIND" == "PDE" ]]
-then
-  EBUILDER=eclipse.platform.releng.eclipsebuilder
-  TARGETNAME=org.eclipse.releng.eclipsebuilder
-  ESCRIPT_LOC=${TARGETNAME}
-else
-  echo "ERROR: Unexpected value of BUILD_KIND: ${BUILD_KIND}"
-  exit 1
-fi
 
 # don't re-fetch, if already exists.
 # TODO: May need to provide a "force" parameter to use when testing?

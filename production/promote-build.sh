@@ -8,28 +8,8 @@
 
 function usage ()
 {
-  printf "\n\n\t%s\n" "promote-build.sh (BUILD_KIND) if none specified, CBI assumed"
+  printf "\n\n\t%s\n" "promote-build.sh env_file"
 }
-
-BUILD_KIND=$1
-if [[ -z "$BUILD_KIND" ]]
-then
-  BUILD_KIND=CBI
-fi
-
-case $BUILD_KIND in
-
-  'CBI' )
-    echo "Promote Build from CBI"
-    # always assume true, for now, until debugged
-    # testbuildonly=true;
-
-    ;;
-  *) echo "ERROR: Invalid or missing argument to $(basename $0)";
-    usage;
-    exit 1;
-    ;;
-esac
 
 if [[ -z ${SCRIPT_PATH} ]]
 then
@@ -38,7 +18,7 @@ fi
 
 source $SCRIPT_PATH/build-functions.shsource
 
-source "$2" 2>/dev/null
+source "$1" 2>/dev/null
 
 # The 'workLocation' provides a handy central place to have the
 # promote script, and log results. ASSUMING this works for all
@@ -77,12 +57,8 @@ fi
 ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
-# TODO: changed "syncDropLocation" to handle a third parameter (BUILD_KIND)
-# And now a fourth ... eBuilder HASHTAG,so won't always have to assume master, and
-# so the tests can get their own copy.
-# and now a fifth, so we can 'source' all relevent variables ... in particular, we want
-# to see if BUILD_FAILED is defined.
-echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $BUILD_KIND $EBUILDER_HASH $BUILD_ENV_FILE" >> ${promoteScriptLocationEclipse}/${scriptName}
+
+echo "$workLocation/syncDropLocation.sh $STREAM $BUILD_ID $EBUILDER_HASH $BUILD_ENV_FILE" >> ${promoteScriptLocationEclipse}/${scriptName}
 
 # we restrict "others" rights for a bit more security or safety from accidents
 chmod -v ug=rwx,o-rwx ${promoteScriptLocationEclipse}/${scriptName}

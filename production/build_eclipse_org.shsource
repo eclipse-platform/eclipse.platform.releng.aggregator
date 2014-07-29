@@ -2,9 +2,9 @@
 
 # default definitions for this branch
 
-# this buildeclipse.shsource file is to ease local builds to override some variables.
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source buildeclipse.shsource 2>/dev/null
+source localbuildproperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export BRANCH=${BRANCH:-master}
@@ -57,20 +57,6 @@ export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.1.1/bin}
 
 export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$ANT_HOME/bin:$PATH
 
-# if not defined "externally", we use default for eclipse.org
-if [[ -z "${REPO_AND_ACCESS}" ]]
-then
-# unless we are on 'build' machine
-if [[ "build" == "$(hostname)" ]]
-then
-export REPO_AND_ACCESS=file:///gitroot
-else
-export REPO_AND_ACCESS=git://git.eclipse.org/gitroot
-fi
-fi
-
-AGGREGATOR_REPO=${REPO_AND_ACCESS}/platform/eclipse.platform.releng.aggregator.git
-
 # Only used to start antrunner for tests. May not need here?
 BASEBUILDER_TAG=R38M6PlusRC3G
 
@@ -87,7 +73,7 @@ MAVEN_BREE=-Pbree-libs
 
 
 # local, non build.eclipse.org builds (or, test builds) may need to override, and turn off signing.
-# otherwwise, we always sign if I or M builds, but not N builds
+# otherwise, we always sign if I or M builds, but not N builds
 #
 if [[ $BUILD_TYPE =~ [IMXYP] ]]
 then

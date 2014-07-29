@@ -12,7 +12,7 @@
 # Start with minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
 # care is needed not have anything in ${HOME}/bin that would effect the build
-# unintentionally, but is required to make use of "source buildeclipse.shsource" on
+# unintentionally, but is required to make use of "source localbuildproperties.shsource" on
 # local machines.
 # Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
 # to false) for a test I-build on a remote machine.

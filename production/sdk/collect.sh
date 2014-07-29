@@ -11,7 +11,7 @@
 # Start with minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
 # care is needed not have anything in ${HOME}/bin that would effect the build
-# unintentionally, but is required to make use of "source buildeclipse.shsource" on
+# unintentionally, but is required to make use of "source localbuildproperties.shsource" on
 # local machines.
 # Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
 # to false) for a test I-build on a remote machine.
@@ -31,9 +31,9 @@ oldumask=`umask`
 umask 0002
 echo "umask explicitly set to 0002, old value was $oldumask"
 
-# this buildeclipse.shsource file is to ease local builds to override some variables.
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source buildeclipse.shsource 2>/dev/null
+source localbuildproperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export JAVA_HOME=/shared/common/jdk1.7.0-latest
@@ -48,14 +48,12 @@ job="$(echo $inputline | cut -d\  -f1)"
 buildNumber="$(echo $inputline | cut -d\  -f2)"
 buildId="$(echo $inputline | cut -d\  -f3)"
 eclipseStream="$(echo $inputline | cut -d\  -f4)"
-BUILD_KIND="$(echo $inputline | cut -d\  -f5)"
-EBUILDER_HASH="$(echo $inputline | cut -d\  -f6)"
+EBUILDER_HASH="$(echo $inputline | cut -d\  -f5)"
 
 echo "job: $job"
 echo "buildNumber: $buildNumber"
 echo "buildId: $buildId"
 echo "eclipseStream: $eclipseStream"
-echo "BUILD_KIND: $BUILD_KIND"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 ${ANT_HOME}/bin/ant -version
@@ -65,5 +63,4 @@ ${ANT_HOME}/bin/ant -version
   -DbuildNumber=${buildNumber} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
-  -DBUILD_KIND=${BUILD_KIND} \
   -DEBUILDER_HASH=${EBUILDER_HASH}

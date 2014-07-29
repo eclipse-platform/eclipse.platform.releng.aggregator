@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# this buildeclipse.shsource file is to ease local builds to override some variables.
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source buildeclipse.shsource 2>/dev/null
+source localbuildproperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 function dropOnDLServer()
@@ -10,7 +10,7 @@ function dropOnDLServer()
   eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -18,18 +18,11 @@ function dropOnDLServer()
     buildId=$2
     if [[ -z "${buildId}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
-    BUILD_KIND=$3
-    if [[ -z "${BUILD_KIND}" ]]
-      then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
-        return 1;
-  fi
-
-    pathToDL=$( dlToPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
+  pathToDL=$( dlToPath "$eclipseStream" "$buildId")
 
     if [[ "$pathToDL" == 1 ]]
       then
@@ -44,7 +37,7 @@ function updateSiteOnDL()
   eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -52,16 +45,10 @@ function updateSiteOnDL()
     buildId=$2
     if [[ -z "${buildId}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
-    BUILD_KIND=$3
-    if [[ -z "${BUILD_KIND}" ]]
-      then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
-        return 1;
-  fi
 
 # contrary to intuition (and previous behavior, bash 3.1) do NOT use quotes around right side of expression.
     if [[ "${eclipseStream}" =~ ([[:digit:]]*)\.([[:digit:]]*)\.([[:digit:]]*) ]]
@@ -77,15 +64,8 @@ function updateSiteOnDL()
 
   toSiteDir="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
-    if [[ "${BUILD_KIND}" == 'CBI' ]]
-      then
+
         updatesSuffix="builds"
-        elif  [[ "${BUILD_KIND}" == 'PDE' ]]
-        then
-        updatesSuffix="buildspdebased"
-    else
-      echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND"  >&2
-        fi
 
         toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
 # We'll check for existence, and create if doesn't exist ... as long as it is "under" our
@@ -117,7 +97,7 @@ function updateSiteOnBuildDir()
   eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -125,14 +105,7 @@ function updateSiteOnBuildDir()
     buildId=$2
     if [[ -z "${buildId}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
-        return 1;
-  fi
-
-    BUILD_KIND=$3
-    if [[ -z "${BUILD_KIND}" ]]
-      then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -148,34 +121,12 @@ function updateSiteOnBuildDir()
         fi
         buildType=${buildId:0:1}
 
-  if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then
+
       buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-  elif [[ "${BUILD_KIND}" == 'PDE' ]]
-    then
-    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-  else
-    echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
-      return 1
-      fi
 
-
-
-      if [[ "${BUILD_KIND}" == 'CBI' ]]
-        then
           siteDir=${buildRoot}/siteDir
           updatesSuffix="builds"
           fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
-
-  elif [[ "${BUILD_KIND}" == 'PDE' ]]
-    then
-    siteDir=${buildRoot}/siteDir
-    updatesSuffix="buildspdebased"
-    fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
-      else
-        echo "ERROR: Unexpected value of BUILD_KIND, $BUILD_KIND" >&2
-          return 1
-          fi
 
           echo $fromDir
 }
@@ -186,8 +137,7 @@ function dropFromBuildDir ()
 
   eclipseStream=$1
     buildId=$2
-    BUILD_KIND=$3
-    pathFromDL=$( dlFromPath "$eclipseStream" "$buildId" "$BUILD_KIND" )
+  pathFromDL=$( dlFromPath "$eclipseStream" "$buildId" )
 
 
     if [[ "$pathFromDL" == 1 ]]
@@ -199,16 +149,7 @@ function dropFromBuildDir ()
         eclipseStreamMajor=${eclipseStream:0:1}
   buildType=${buildId:0:1}
 
-  if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then
       buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-  elif [[ "${BUILD_KIND}" == 'PDE' ]]
-    then
-    buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-  else
-    echo "ERROR: BUILD_KIND value not recognized, $BUILD_KIND" >&2
-      return 1
-      fi
 
       siteDir=${buildRoot}/siteDir
 
@@ -224,7 +165,7 @@ function dlToPath()
   eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -232,29 +173,12 @@ function dlToPath()
     buildId=$2
     if [[ -z "${buildId}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)" >&2
         return 1;
   fi
-
-    BUILD_KIND=$3
-    if [[ -z "${BUILD_KIND}" ]]
-      then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
-        return 1;
-  fi
-
-
 
     eclipseStreamMajor=${eclipseStream:0:1}
   buildType=${buildId:0:1}
-
-# CBI is "normal" case. In future might have special cases.
-  if [[ "${BUILD_KIND}" == 'CBI' ]]
-    then
-      dropsuffix=""
-  else
-    dropsuffix="pdebased"
-      fi
 
       pathToDL=eclipse/downloads/drops
       if (( $eclipseStreamMajor > 3 ))
@@ -262,19 +186,15 @@ function dlToPath()
           pathToDL=$pathToDL$eclipseStreamMajor
           fi
 
-          pathToDL=$pathToDL$dropsuffix
-#echo "pathToDL: $pathToDL"
           echo $pathToDL
 }
 
-# compute main (left part) of download site.
-# because we want "from" on build machine to stay the same, only change "to" part, to be "pdebased"
 function dlFromPath()
 {
   eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -282,14 +202,7 @@ function dlFromPath()
     buildId=$2
     if [[ -z "${buildId}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)" >&2
-        return 1;
-  fi
-
-    BUILD_KIND=$3
-    if [[ -z "${BUILD_KIND}" ]]
-      then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)" >&2
         return 1;
   fi
 
@@ -314,7 +227,7 @@ function syncDropLocation ()
     eclipseStream=$1
     if [[ -z "${eclipseStream}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)" >&2
         return 1;
   fi
     echo "eclipseStream: $eclipseStream"
@@ -322,23 +235,16 @@ function syncDropLocation ()
     buildId=$2
     if [[ -z "${buildId}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)" >&2
         return 1;
   fi
     echo "buildId: $buildId"
 
-    BUILD_KIND=$3
-    if [[ -z "${BUILD_KIND}" ]]
-      then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide BUILD_KIND as third argumnet, for this function $(basename $0)" >&2
-        return 1;
-  fi
-    echo "BUILD_KIND: $BUILD_KIND"
 
-    EBUILDER_HASH=$4
+  EBUILDER_HASH=$3
     if [[ -z "${EBUILDER_HASH}" ]]
       then
-        printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argument, for this function $(basename $0)" >&2
         return 1;
   fi
     echo "EBUILDER_HASH: $EBUILDER_HASH"
@@ -346,7 +252,7 @@ function syncDropLocation ()
     eclipseStreamMajor=${eclipseStream:0:1}
   buildType=${buildId:0:1}
 
-  fromDir=$( dropFromBuildDir $eclipseStream $buildId $BUILD_KIND )
+  fromDir=$( dropFromBuildDir $eclipseStream $buildId  )
     if [[ ! -d "${fromDir}" ]]
       then
         echo "ERROR: fromDir is not a directory? fromDir: ${fromDir}"
@@ -354,23 +260,25 @@ function syncDropLocation ()
         fi
 
 
-        toDir=$( dropOnDLServer $eclipseStream $buildId $BUILD_KIND )
+  toDir=$( dropOnDLServer $eclipseStream $buildId )
         if [[ ! -d "${toDir}" ]]
           then
             echo "ERROR: toDir is not a directory? toDir: ${toDir}"
             return 1
             fi
 
-            echo "   fromDir: ${fromDir}" >&2
-            echo "     toDir: ${toDir}" >&2
+  echo "   fromDir: ${fromDir}" >&1
+  echo "     toDir: ${toDir}" >&1
 
 # here, for dl site, best not to preserve times, since (if mirrored)
 # would be more accurate for mirroring system to have
 # actual times (and we are copying only one specific
-# sub-sirectory) (But, we do for now, for easier testing)
+  # sub-directory) (But, we do for now, for easier testing)
             if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
               then
-                rsync --recursive --prune-empty-dirs --exclude="*apitoolingreference/*" --exclude="*org.eclipse.releng.basebuilder/*" --exclude="*eclipse.platform.releng.aggregator/*" --exclude="*repository/*" --exclude="*workspace-*/*" "${fromDir}" "${toDir}"
+    # Note the slash at end of aggregator ... we do not want to exclude eclipse.platform.releng.aggregator-(builder hash).zip
+    # TODO: remove --verbose, once confident it works as expected.
+    rsync --times --omit-dir-times --recursive --prune-empty-dirs --exclude="*apitoolingreference/*" --exclude="*org.eclipse.releng.basebuilder/*" --exclude="*eclipse.platform.releng.aggregator/*" --exclude="*repository/*" --exclude="*workspace-*/*" "${fromDir}" "${toDir}"
                 rccode=$?
             else
               rccode=9

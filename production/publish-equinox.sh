@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# this buildeclipse.shsource file is to ease local builds to override some variables.
+# this localbuildproperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source buildeclipse.shsource 2>/dev/null
+source localbuildproperties.shsource 2>/dev/null
 
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
@@ -81,8 +81,8 @@ fn-eq-gather-starterkit ()
     cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86_64.tar.gz
     cp -v org.eclipse.rt.osgistarterkit.product-linux.gtk.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-linux-gtk-x86.tar.gz
 
-    #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
-    tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86_64 rt
+    cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86_64.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz
+    #tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86_64 rt
     #cp -v org.eclipse.rt.osgistarterkit.product-macosx.cocoa.x86.tar.gz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz
     # no longer an x86 version. Bug 420725
     #tar cfz "$DROP_DIR"/EclipseRT-OSGi-StarterKit-${BUILD_ID}-macosx-cocoa-x86.tar.gz -C org.eclipse.rt.osgistarterkit.product/macosx/cocoa/x86 rt
@@ -175,7 +175,7 @@ fn-publish-equinox ()
 cd $BUILD_ROOT
 
 # derived values
-gitCache=$( fn-git-cache "$BUILD_ROOT" "$BRANCH" )
+gitCache=$( fn-git-cache "$BUILD_ROOT")
 aggDir=$( fn-git-dir "$gitCache" "$AGGREGATOR_REPO" )
 
 if [ -z "$BUILD_ID" ]; then
