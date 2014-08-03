@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source localbuildproperties.shsource
+
 #   Utility to test the test.xml file. It's intended to allow rapid confirmation
 #   that the test.xml file ends up "computing" correct values, for various versions
 #   of java and ant.
@@ -32,8 +34,8 @@ unset JRE_HOME
 #   Different versions of Ant are specified here in test script, just to confirm
 #   nothing is specific to any recent version of ant. (Though, some of the machines
 #   have ant 1.6 set as 'default'!)
-export ANT_HOME=/shared/common/apache-ant-1.7.1
-#export ANT_HOME=/shared/common/apache-ant-1.8.4/
+#export ANT_HOME=/shared/common/apache-ant-1.7.1
+export ANT_HOME=/shared/common/apache-ant-1.8.4/
 #export ANT_HOME=/shared/common/apache-ant-1.9.2
 
 #   JAVA_HOME is, at least, what runs the ant instance. If no 'jvm' option is specified,
@@ -42,10 +44,11 @@ export ANT_HOME=/shared/common/apache-ant-1.7.1
 #export JAVA_HOME=/shared/common/jdk1.6.0-latest
 #export JAVA_HOME=/shared/common/jdk1.7.0-latest
 #export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
-export JAVA_HOME=/shared/common/ibm-java-i386-70
+export JAVA_HOME=/shared/common/jdk1.7.0-latest
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 
+export TESTING_TEST_XML=true
 
 #    There are a number of test-<something> methods in test xml which, by convention, mean
 #    to simply test the test script itself. The test-all target runs all of those tests.

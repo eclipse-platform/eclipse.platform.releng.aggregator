@@ -4,79 +4,6 @@
   default="all"
   basedir=".">
 
-  <!--
-     Should be able to record "hudson slave" as part of test results?
-     Or, if that's not defined, perhaps simply "hostname"?
-  -->
-  <property environment="env" />
-
-  <!--properties file containing the build information-->
-  <property file="label.properties" />
-  <!--
-    properties file containing the plugin directory name including version number,
-    and list of required test plug-ins expressed as command-line argument to unzip executable.
-    Generated and packaged at build time.
-  -->
-  <property file="test.properties" />
-  <!--
-    Try using "loadproperties", instead of "properties file=" to see if
-    that will "evaluate" variables as loaded. Otherwise, the <properties form
-    has to move to "top of file" ... outer scope?
-   <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
--->
-  <property
-    name="testingPropertiesfile"
-    value="testing.properties" />
-  <loadproperties>
-    <file file="${testingPropertiesfile}" />
-  </loadproperties>
-
-
-  <!--default directory where test-eclipse will be installed-->
-  <property
-    name="install"
-    value="${basedir}/test-eclipse" />
-
-  <!--suffix added to test output files to identify platform on which tests ran.-->
-  <property
-    name="platform"
-    value="${os}.${ws}.${arch}" />
-
-  <!-- The root of the eclipse installation -->
-  <property
-    name="eclipse-home"
-    value="${install}/eclipse" />
-
-  <property
-    name="repoZip"
-    value="${basedir}/eclipse-junit-tests-${buildId}.zip" />
-  <property
-    name="repoLocation"
-    value="${basedir}/testRepo" />
-  <property
-    name="platformLocation"
-    value="${basedir}/platformLocation" />
-
-  <!-- The directory that will contain all files containing information on the tests that ran.-->
-  <property
-    name="results"
-    value="${basedir}/results" />
-
-  <!--Directory for JUnit report output, console log output and .log content for each test suite.
-            Overrides default in org.eclipse.test/library.xml-->
-  <property
-    name="junit-report-output"
-    value="${results}/${platform}" />
-
-  <!-- this dirctory, with some sort files are created during unit tests
-    ... need to find where to disable jacoco -->
-  <property
-    name="coverage-output"
-    value="${results}/coverageIGNORE" />
-
-  <echo
-    level="debug"
-    message="DEBUG: org.eclipse.core.net.prefs: ${org.eclipse.core.net.prefs}" />
 
   <!--Directory name of org.eclipse.test plug-in installed in ${eclipse-home}-->
   <target
@@ -97,12 +24,13 @@
         string="${runtimeArchive}"
         substring=".tar.gz" />
     </condition>
+    <!--
     <condition
       property="repoexists"
       value="true">
       <available file="${repoLocation}" />
     </condition>
-    
+    -->
     <condition
       property="extraIU"
       value="org.eclipse.releng.tools.feature.group">
@@ -110,7 +38,7 @@
         arg1="${testPlugin}"
         arg2="org.eclipse.releng.tests" />
     </condition>
-    
+
     <condition
       property="extraIU"
       value="org.eclipse.equinox.p2.discovery.feature.feature.group">
@@ -133,10 +61,15 @@
           arg2="org.eclipse.pde.api.tools.tests" />
       </or>
     </condition>
+
     <antcall target="setupRepo" />
     <antcall target="${setupTarget}" />
     <antcall target="configureDeltaPack" />
     <antcall target="installPreferences" />
+    <antcall target="installExtraPlugins" />
+    <antcall target="installTestPlugins" />
+
+
   </target>
 
   <target name="installPreferences">
@@ -165,18 +98,27 @@
   <!--Extract test bundles repo -->
   <target
     name="setupRepo"
-    unless="repoexists">
+    depends="init"
+    unless="testRepoCreated">
     <mkdir dir="${repoLocation}" />
     <exec
-      dir="."
-      executable="unzip">
+      dir="${basedir}"
+      executable="unzip"
+      failonerror="false"
+      resultproperty="unzipResultCode">
       <arg line="-o ${repoZip} -d ${repoLocation}" />
     </exec>
+    <echo message="unzip resultcode: ${unzipResultCode}" />
+    <!-- TODO: can do more checking here, if successful, before we set to value -->
+    <property
+      name="testRepoCreated"
+      value="true" />
   </target>
 
   <!--setup for zip archives-->
   <target
     name="setup-zip"
+    depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
     <delete dir="${install}" />
     <mkdir dir="${install}" />
@@ -185,35 +127,37 @@
       executable="unzip">
       <arg line="-o -qq ${runtimeArchive} -d ${install}" />
     </exec>
-    <antcall target="installExtraPlugins" />
-    <antcall target="installTestPlugins" />
+
   </target>
 
   <!--setup for tar.gz archives-->
   <target
     name="setup-tar.gz"
+    depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
-    <property
-      name="currentDir"
-      value="${basedir}" />
     <delete dir="${install}" />
     <mkdir dir="${install}" />
     <exec
       dir="${install}"
       executable="tar">
-      <arg line="-xzf ${currentDir}/${runtimeArchive}" />
+      <arg line="-xzf ${executionDir}/${runtimeArchive}" />
     </exec>
-    <antcall target="installExtraPlugins" />
-    <antcall target="installTestPlugins" />
+
   </target>
 
   <!--use an stable version of the director so that instability in the current build doesn't cause all the tests to fail -->
-  <target name="setupPlatform">
+  <target
+    name="initPlatformArhiveName"
+    unless="platformArchive">
     <echo message="os.arch ${os.arch}" />
+    <!--
+      we now write this file, just for p2 tests, instead of doing
+      the funky ant replace
     <loadproperties srcfile="equinoxp2tests.properties" />
+    -->
     <condition
       property="platformArchive"
-      value="${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive.linux}">
+      value="eclipse-platform-${buildId}-linux-gtk.tar.gz">
       <and>
         <os family="unix" />
         <not>
@@ -229,7 +173,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive.macosx-x86_64}">
+      value="eclipse-platform-${buildId}-macosx-cocoa.tar-x86_64.gz">
       <and>
         <os family="mac" />
         <os family="unix" />
@@ -241,7 +185,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive.macosx}">
+      value="eclipse-platform-${buildId}-macosx-cocoa.tar.gz">
       <and>
         <os family="mac" />
         <os family="unix" />
@@ -252,7 +196,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive.win32}">
+      value="eclipse-platform-${buildId}-win32.zip">
       <and>
         <os family="windows" />
         <os arch="x86" />
@@ -260,7 +204,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive.win32-x86_64}">
+      value="eclipse-platform-${buildId}-win32-x86_64.zip">
       <and>
         <os family="windows" />
         <or>
@@ -271,7 +215,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive.linux-x86_64}">
+      value="eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz">
       <and>
         <os family="unix" />
         <or>
@@ -285,6 +229,8 @@
       unless="platformArchive"
       message="platformArchive is not defined. Check that conditions cover os arch ${os.arch}. May be VM dependent.)" />
 
+  </target>
+  <target name="setupPlatform">
     <condition
       property="platformTarget"
       value="platform-zip">
@@ -303,40 +249,58 @@
       unless="platformTarget"
       message="platformTarget is not defined. Check that platformArchive variable and value is defined correctly, such as in equinoxp2tests.properties in the appropriate testConfig" />
     <echo message="platformTarget ${platformTarget} platformArchive ${platformArchive}" />
-    <antcall target="${platformTarget}" />
+    <!-- not sure when exactly to expand this? -->
+    <!-- <antcall target="${platformTarget}" /> -->
   </target>
 
 
   <!--setup for platform zip archives-->
   <target
     name="platform-zip"
+    depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
+    <condition property="platformArchiveExists">
+      <available file="${executionDir}/${platformArchive}" />
+    </condition>
+    <fail
+      unless="platformArchiveExists"
+      message="plaform archive did not exist where expected. platformArchive: ${executionDir}/${platformArchive}" />
     <delete dir="${platformLocation}" />
     <mkdir dir="${platformLocation}" />
     <exec
       dir="${platformLocation}"
       executable="unzip">
-      <arg line="-o -qq ${platformArchive} -d ${platformLocation}" />
+      <arg line="-o -qq ${executionDir}/${platformArchive} -d ${executionDir}/${platformLocation}" />
     </exec>
   </target>
 
   <!--setup for platform tar.gz archives-->
   <target
     name="platform-tar.gz"
+    depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
+    <condition property="platformArchiveExists">
+      <available file="${executionDir}/${platformArchive}" />
+    </condition>
+    <fail
+      unless="platformArchiveExists"
+      message="plaform archive did not exist where expected. platformArchive: ${executionDir}/${platformArchive}" />
+
+
     <delete dir="${platformLocation}" />
     <mkdir dir="${platformLocation}" />
     <exec
       dir="${platformLocation}"
       executable="tar">
-      <arg line="-xzf ${platformArchive}" />
+      <arg line="-xzf ${executionDir}/${platformArchive}" />
     </exec>
   </target>
 
   <target
     name="installExtraPlugins"
+    depends="init"
     if="extraIU">
-    <loadproperties srcfile="equinoxp2tests.properties" />
+
     <path id="launcher.paths">
       <fileset
         dir="${eclipse-home}"
@@ -346,20 +310,18 @@
       name="launcherPath"
       refid="launcher.paths" />
 
-    <property
-      name="currentBuildRepo"
-      value="${org.eclipse.equinox.p2.tests.current.build.repo}" />
+
     <echo>-installExtraIU ${extraIU} +</echo>
-    <echo>   from ${currentBuildRepo} </echo>
-    <echo>   into ${eclipse-home} </echo>
-    <echo>   using launcher: ${launcherPath} </echo>
+    <echo> from current.build.repo: ${current.build.repo} </echo>
+    <echo> into eclipse-home: ${eclipse-home} </echo>
+    <echo> using launcher: ${launcherPath} </echo>
     <java
       jar="${launcherPath}"
       failonerror="false"
       dir="${eclipse-home}"
       timeout="900000"
       fork="true"
-      output="${basedir}/director-${extraIU}.log"
+      output="${directorLogs}/director-${extraIU}.log"
       append="true"
       resultproperty="directorcode">
       <arg line="-vm ${java.home}/bin/java" />
@@ -373,13 +335,15 @@
       <arg line="-p2.arch ${arch}" />
       <arg line="-roaming" />
       <arg line="-profile SDKProfile" />
-      <arg line="-repository ${currentBuildRepo}" />
+      <arg line="-repository ${current.build.repo}" />
       <arg line="-destination ${eclipse-home}" />
       <arg line="-bundlepool ${eclipse-home}" />
     </java>
   </target>
 
-  <target name="installTestPlugins">
+  <target
+    name="installTestPlugins"
+    depends="init">
     <path id="launcher.paths">
       <fileset
         dir="${eclipse-home}"
@@ -390,16 +354,16 @@
       refid="launcher.paths" />
     <antcall target="setupPlatform" />
     <echo>-installTestIU ${testPlugin} +</echo>
-    <echo>   from ${repoLocation} </echo>
-    <echo>   into ${eclipse-home} </echo>
-    <echo>   using launcher: ${launcherPath} </echo>
+    <echo> from ${repoLocation} </echo>
+    <echo> into ${eclipse-home} </echo>
+    <echo> using launcher: ${launcherPath} </echo>
     <java
       jar="${launcherPath}"
       failonerror="false"
       dir="${eclipse-home}"
       timeout="900000"
       fork="true"
-      output="${basedir}/director-${testPlugin}.log"
+      output="${directorLogs}/director-${testPlugin}.log"
       append="true"
       resultproperty="directorcode">
       <arg line="-vm ${java.home}/bin/java" />
@@ -439,28 +403,391 @@
   </target>
 
   <target
-    name="init"
-    depends="setRuntimeArchive">
-    <loadproperties srcfile="${env.WORKSPACE}/production.properties" />
+    name="initHudsonWorkspace"
+    unless="WORKSPACE">
+    <property environment="env" />
+    <condition
+      property="WORKSPACE"
+      value="${hudson.WORKSPACE}">
+      <isset property="hudson.WORKSPACE" />
+    </condition>
+  </target>
+
+  <target
+    name="initWorkspace"
+    depends="initHudsonWorkspace"
+    unless="WORKSPACE">
+    <property environment="env" />
+    <condition
+      property="WORKSPACE"
+      value="${env.WORKSPACE}"
+      else="${basedir}">
+      <isset property="env.WORKSPACE" />
+    </condition>
+  </target>
+
+  <target
+    name="initBuildId"
+    unless="buildId">
+    <!--property file that can contain the buildId, if not otherwise set -->
+    <property file="label.properties" />
+    <fail
+      unless="buildId"
+      message="buildId (e.g I20140731-0800) needs to be provided to run the tests" />
+  </target>
+
+  <target
+    name="initBuildType"
+    depends="initBuildId"
+    unless="buildType">
+
+    <fail
+      unless="buildId"
+      message="buildId value must be provided by caller (such as 'I20120717-0800'" />
+         <!--
+              this "buildId check" may be overly strict, but best to start off strict for now,
+              loosen in future if we start to find/have variety
+         -->
+    <condition property="buildIdOK">
+      <matches
+        pattern="^[IMXYNPSR]\d{8}-\d{4}$"
+        string="${buildId}" />
+    </condition>
+    <fail
+      message="buildId variable had unexpected format. Should be of the form  [IMXYNPSR] 8 digits '-' 4 digits, but was ${buildId}"
+      unless="buildIdOK" />
+
+    <script language="javascript"><![CDATA[
+      var buildId = project.getProperty("buildId");
+      var pattern = new RegExp(/^([IMXYNPSR])(\d{8})-(\d{4})$/);
+
+      var sArray = pattern.exec(buildId);
+      // sArray 0 is "whole match"
+      project.setProperty("buildType", sArray[1]);
+      ]]>
+    </script>
+
+
+    <fail unless="buildType" />
+  </target>
+
+  <!--
+     main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor and eclipseStreamMinor
+     Uses script, which requires Java 1.6 (or ... else gets complicated to setup)
+   -->
+  <target name="initStreamVariables">
+    <!--
+        First location is one where file is during produciton builds.
+        Second location is where it is during "unit testing" of the test.xml file.
+    -->
+    <property file="${WORKSPACE}/streamSpecific-build.properties" />
+    <property file="../../streamSpecific-build.properties" />
+    <fail
+      unless="eclipseStream"
+      message="eclipseStream value must be provided by caller, such as '4.3.0'." />
+    <condition property="streamOK">
+      <matches
+        pattern="^\d\.\d(\.\d)?$"
+        string="${eclipseStream}" />
+    </condition>
+    <fail
+      message="eclipseStream variable had unexpected format. Should be of form digit.digit[.digit], but was ${eclipseStream}"
+      unless="streamOK" />
+
+    <script language="javascript"><![CDATA[
+      var eclipseStream = project.getProperty("eclipseStream");
+      var pattern = new RegExp(/^(\d+)\.(\d+)(\.(\d+))?$/);
+
+      var sArray = pattern.exec(eclipseStream);
+      // sArray[0] is "whole match"
+
+      project.setProperty("eclipseStreamMajor", sArray[1]);
+      project.setProperty("eclipseStreamMinor", sArray[2]);
+      // currently don't
+      // set eclipseStreamService since not used,
+      // but it is optional in this context, so if needed, need to check
+      // length of array and assign "0" if not provided.
+      // project.setProperty("eclipseStreamService", sArray[3]);
+      ]]>
+    </script>
+
+    <fail
+      unless="eclipseStreamMajor"
+      message="eclipseStreamMajor not defined or computable" />
+    <fail
+      unless="eclipseStreamMinor"
+      message="eclipseStreamMinor not defined or computable" />
+    <!--
+    <fail
+      unless="eclipseStreamService"
+      message="eclipseStreamService not defined or computable" />
+    -->
+  </target>
+
+  <target
+    name="initBasicDirectories"
+    depends="initWorkspace,initBuildId"
+    unless="basicDirectoriesInitialized">
+
+    <property environment="env" />
+
+    <property
+      name="testDir"
+      value="${WORKSPACE}/workarea/${buildId}" />
+    <echo message="testDir: ${testDir}" />
+
+    <property
+      name="executionDir"
+      value="${testDir}/eclipse-testing" />
+    <mkdir dir="${executionDir}" />
+    <echo message="executionDir: ${executionDir}" />
+
+
+    <!--default directory where test-eclipse-sdk will be installed-->
+    <property
+      name="install"
+      value="${executionDir}/test-eclipse" />
+    <mkdir dir="${install}" />
+    <echo message="install: ${install}" />
+
+
+    <!-- The root of the eclipse installation -->
+    <property
+      name="eclipse-home"
+      value="${install}/eclipse" />
+    <mkdir dir="${eclipse-home}" />
+    <echo message="eclipse-home: ${eclipse-home}" />
+
+    <property
+      name="repoZip"
+      value="${executionDir}/eclipse-junit-tests-${buildId}.zip" />
+    <echo message="repoZip: ${repoZip}" />
+
+    <property
+      name="repoLocation"
+      value="${executionDir}/testRepo" />
+    <echo message="repoLocation: ${repoLocation}" />
+
+
+    <property
+      name="platformLocation"
+      value="${executionDir}/platformLocation" />
+    <mkdir dir="${platformLocation}" />
+    <echo message="platformLocation: ${platformLocation}" />
+
+    <!-- The directory that will contain all files containing information on the tests that ran.-->
+    <property
+      name="results"
+      value="${executionDir}/results" />
+    <mkdir dir="${results}" />
     <mkdir dir="${results}/xml" />
     <mkdir dir="${results}/html" />
+    <echo message="results: ${results}" />
+
+    <!--Directory for JUnit report output, console log output and .log content for each test suite.
+              Overrides default in org.eclipse.test/library.xml-->
+    <property
+      name="junit-report-output"
+      value="${results}/${testedPlatform}" />
     <mkdir dir="${junit-report-output}" />
+    <echo message="junit-report-output: ${junit-report-output}" />
+
+    <property
+      name="directorLogs"
+      value="${executionDir}/directorLogs" />
+    <mkdir dir="${directorLogs}" />
+    <echo message="directorLogs: ${directorLogs}" />
+
+    <!-- this dirctory, with some sort files are created during unit tests
+      ... need to find where to disable/enable jacoco -->
+    <property
+      name="coverage-output"
+      value="${results}/coverageIGNORE" />
+
+    <property
+      name="basicDirectoriesInitialized"
+      value="true" />
+    <echo message="basicDirectoriesInitialized" />
+  </target>
+
+  <!-- this method used only during "unit testing" of this test.xml iself -->
+  <target
+    name="testCopyFilesIfTesting"
+    if="env.TESTING_TEST_XML">
+    <copy todir="${executionDir}">
+      <fileset dir="${basedir}/../testConfigs/linux" />
+    </copy>
+
+  </target>
+
+  <!--
+     DOWNLOAD_HOST and ARCHIVE_HOST can be defined in on command line,
+     or in ANT_OPTS, in which case this logic won't apply
+  -->
+  <target
+    name="initDownloadHosts"
+    depends="checkDownloadHosts"
+    unless="DOWNLOAD_HOST">
+    <!-- we assume if "DOWNLOAD_HOST" is defined, then ARCHICE_HOST has been defined also. -->
+    <echo message="DEBUG: Found DOWNLOAD_HOST not defined. Setting in 'initDownloadHosts'" />
+    <echo message="DEBUG:      env.DOWNLOAD_HOST: ${env.DOWNLOAD_HOST}" />
+    <condition
+      property="DOWNLOAD_HOST"
+      value="${env.DOWNLOAD_HOST}"
+      else="download.eclipse.org">
+      <isset property="env.DOWNLOAD_HOST" />
+    </condition>
+    <condition
+      property="ARCHIVE_HOST"
+      value="${env.ARCHIVE_HOST}"
+      else="archive.eclipse.org">
+      <isset property="env.ARCHIVE_HOST" />
+    </condition>
+  </target>
+  <!--
+     This method is just to help debugging.
+  -->
+  <target
+    name="checkDownloadHosts"
+    if="DOWNLOAD_HOST">
+    <echo message="DEBUG: Found DOWNLOAD_HOST already defined by 'initDownloadHosts'" />
+    <echo message="DEBUG:      DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
+  </target>
+  <target
+    name="init"
+    depends="initWorkspace,initBuildId, initBuildType, initStreamVariables, initDownloadHosts, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive"
+    unless="testingIsInitialized">
+
+    <property environment="env" />
+
+    <echo message="ANT_OPTS: ${env.ANT_OPTS}" />
+    <!--
+        Normally these files are copied by other scripts, if not simply testing this script with "testTestXMLScript.sh",
+        but when testing in isolation, want this simple way to
+        copy what we need. Note: the testCopyFileIfTesting target
+        will need adjustment, depending on OS that the testing is done on.
+    -->
+    <antcall target="testCopyFilesIfTesting" />
+
+    <property
+      name="current.build.repo"
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId}" />
+    <echo message="current.build.repo: ${current.build.repo}" />
+
+
+    <property
+      name="last.release.build.repo"
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${previousReleaseVersion}" />
+    <echo message="last.release.build.repo: ${last.release.build.repo}" />
+
+    <!--
+      properties file containing the plugin directory name including version number,
+      and list of required test plug-ins expressed as command-line argument to unzip executable.
+      Generated and packaged at build time.
+    -->
+    <property file="test.properties" />
+    <!--
+      Try using "loadproperties", instead of "properties file=" to see if
+      that will "evaluate" variables as loaded. Otherwise, the <properties form
+      has to move to "top of file" ... outer scope?
+     <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
+  -->
+    <property
+      name="testingPropertiesfile"
+      value="${executionDir}/testing.properties" />
+    <loadproperties>
+      <file file="${testingPropertiesfile}" />
+    </loadproperties>
+
+    <!--
+       suffix added to test output files, along with VM number,
+       to identify platform on which tests ran. (currently
+       hard coded in vm.properties)
+    -->
+    <property file="vm.properties" />
+    <property
+      name="testedPlatform"
+      value="${os}.${ws}.${arch}" />
+
+
+
+
+
+    <echo
+      level="debug"
+      message="DEBUG: org.eclipse.core.net.prefs: ${org.eclipse.core.net.prefs}" />
+
+
     <!--Unlock files on the Mac before starting tests.
           Required to delete some workspace directories (org.eclipse.core.filebuffers.tests and Team CVS tests).-->
     <exec
-      dir="${basedir}"
+      dir="${executionDir}"
       executable="chflags"
       os="Mac OS X">
       <arg line="-R nouchg ${install}" />
     </exec>
+    <!-- needed only for p2 test -->
+    <property
+      name="org.eclipse.equinox.p2.reconciler.tests.platform.archive"
+      value="${executionDir}/${platformArchive}" />
+
+    <property
+      name="org.eclipse.equinox.p2.reconciler.tests.platform.archive"
+      value="${executionDir}/${platformArchive}" />
+    <property
+      name="org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive"
+      value="NotCurrentlyImplementedOrUsed" />
+    <property
+      name="org.eclipse.equinox.p2.tests.current.build.repo"
+      value="${current.build.repo}" />
+    <property
+      name="org.eclipse.equinox.p2.tests.last.release.build.repo"
+      value="${last.release.build.repo}" />
+
+    <!-- 
+        Specifically use 'antcall' here, in the hope that is allows file to flush and close.
+        There was a vague hint it is not readable by p2? 
+    -->
+    <antcall target="rewriteEquinoxp2PropertiesFile"/>
 
     <!-- <antcall target="printMainProperties" /> -->
+    <property
+      name="testingIsInitialized"
+      value="true" />
+  </target>
 
+  <target name="rewriteEquinoxp2PropertiesFile">
+    <property
+      name="EOL"
+      value="${line.separator}" />
+
+    <echo
+      message="# properties for p2 tests${EOL}"
+      file="${executionDir}/equinoxp2tests.properties"
+      append="false"
+      force="true" />
+
+    <echo
+      message="org.eclipse.equinox.p2.reconciler.tests.platform.archive=${org.eclipse.equinox.p2.reconciler.tests.platform.archive}${EOL}"
+      file="${executionDir}/equinoxp2tests.properties"
+      append="true" />
+    <echo
+      message="org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive=${org.eclipse.equinox.p2.reconciler.tests.lastrelease.platform.archive}${EOL}"
+      file="${executionDir}/equinoxp2tests.properties"
+      append="true" />
+    <echo
+      message="org.eclipse.equinox.p2.tests.current.build.repo=${current.build.repo}${EOL}"
+      file="${executionDir}/equinoxp2tests.properties"
+      append="true" />
+    <echo
+      message="org.eclipse.equinox.p2.tests.last.release.build.repo=${last.release.build.repo}${EOL}"
+      file="${executionDir}/equinoxp2tests.properties"
+      append="true" />
   </target>
 
   <target
     name="setRuntimeArchive"
-    depends="initOSes">
+    unless="runtimeArchive">
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
     <condition
       property="runtimeArchive"
@@ -894,16 +1221,17 @@
 
   <target
     name="junit"
+    depends="init"
     unless="skip.test">
     <antcall target="setup">
     </antcall>
     <property file="finalPluginsVersions.properties" />
     <property
       name="library-file"
-      value="${basedir}/library.xml" />
+      value="${executionDir}/library.xml" />
     <property
       name="junit-stylesheet"
-      value="${basedir}/JUNIT.XSL" />
+      value="${executionDir}/JUNIT.XSL" />
     <echo>trying to find ${testPlugin}_*</echo>
     <fileset
       id="test.plugin.file"
@@ -942,7 +1270,7 @@
     <echo message="testPluginX ${testPluginX}" />
     <property
       name="junit-stylesheet"
-      value="{basedir}/JUNIT.XSL" />
+      value="{executionDir}/JUNIT.XSL" />
     <ant
       antfile="${eclipse-home}/plugins/${testPluginX}"
       dir="${eclipse-home}"
@@ -952,12 +1280,13 @@
   <target
     name="performance"
     if="performance.target.present"
-    unless="skip.test">
+    unless="skip.test"
+    depends="init">
     <antcall target="setup" />
     <property file="finalPluginsVersions.properties" />
     <property
       name="library-file"
-      value="${basedir}/library.xml" />
+      value="${executionDir}/library.xml" />
 
     <echo>trying to find ${testPlugin}_*</echo>
     <fileset
@@ -985,11 +1314,11 @@
   <target name="genResults">
     <copy
       file="${eclipse-home}/${report}.xml"
-      tofile="${results}/xml/${report}_${platform}.xml"
+      tofile="${results}/xml/${report}_${testedPlatform}.xml"
       failonerror="false" />
     <property
       name="junit-stylesheet"
-      value="${basedir}/JUNIT.XSL" />
+      value="${executionDir}/JUNIT.XSL" />
     <!-- some "failures" are "bad enough" that the tests were not unpacked, so style sheet won't exist -->
     <available
       file="${junit-stylesheet}"
@@ -1014,59 +1343,87 @@
     <echo message="ERROR: previous suite test install failed, so style sheet did not exist" />
   </target>
 
-  <target name="ant">
+  <target
+    name="ant"
+    depends="init">
     <runTests testPlugin="org.eclipse.ant.tests.core" />
   </target>
 
-  <target name="antui">
+  <target
+    name="antui"
+    depends="init">
     <runTests testPlugin="org.eclipse.ant.tests.ui" />
   </target>
 
-  <target name="compare">
+  <target
+    name="compare"
+    depends="init">
     <runTests testPlugin="org.eclipse.compare.tests" />
   </target>
 
-  <target name="equinoxds">
+  <target
+    name="equinoxds"
+    depends="init">
     <runTests testPlugin="org.eclipse.equinox.ds.tests" />
   </target>
 
-  <target name="debug">
+  <target
+    name="debug"
+    depends="init">
     <runTests testPlugin="org.eclipse.debug.tests" />
   </target>
 
-  <target name="coreresources">
+  <target
+    name="coreresources"
+    depends="init">
     <runTests testPlugin="org.eclipse.core.tests.resources" />
   </target>
 
-  <target name="coreruntime">
+  <target
+    name="coreruntime"
+    depends="init">
     <runTests testPlugin="org.eclipse.core.tests.runtime" />
   </target>
 
-  <target name="osgi">
+  <target
+    name="osgi"
+    depends="init">
     <runTests testPlugin="org.eclipse.osgi.tests" />
   </target>
 
-  <target name="coreexpressions">
+  <target
+    name="coreexpressions"
+    depends="init">
     <runTests testPlugin="org.eclipse.core.expressions.tests" />
   </target>
 
-  <target name="ltkuirefactoringtests">
+  <target
+    name="ltkuirefactoringtests"
+    depends="init">
     <runTests testPlugin="org.eclipse.ltk.ui.refactoring.tests" />
   </target>
 
-  <target name="ltkcorerefactoringtests">
+  <target
+    name="ltkcorerefactoringtests"
+    depends="init">
     <runTests testPlugin="org.eclipse.ltk.core.refactoring.tests" />
   </target>
 
-  <target name="text">
+  <target
+    name="text"
+    depends="init">
     <runTests testPlugin="org.eclipse.text.tests" />
   </target>
 
-  <target name="jface">
+  <target
+    name="jface"
+    depends="init">
     <runTests testPlugin="org.eclipse.jface.text.tests" />
   </target>
 
-  <target name="jfacedatabinding">
+  <target
+    name="jfacedatabinding"
+    depends="init">
     <runTests testPlugin="org.eclipse.jface.tests.databinding" />
   </target>
 
@@ -1082,7 +1439,7 @@
 
   <target
     name="relEng"
-    depends="setRuntimeArchive">
+    depends="init">
     <runTests testPlugin="org.eclipse.releng.tests" />
     <move
       todir="${results}/chkpii"
@@ -1092,25 +1449,31 @@
       <mapper
         type="glob"
         from="*"
-        to="${platform}_*" />
+        to="${testedPlatform}_*" />
     </move>
   </target>
 
-  <target name="ua">
+  <target
+    name="ua"
+    depends="init">
     <runTests testPlugin="org.eclipse.ua.tests" />
   </target>
 
-  <target name="uadoc">
+  <target
+    name="uadoc"
+    depends="init">
     <runTests testPlugin="org.eclipse.ua.tests.doc" />
   </target>
 
-  <target name="coretestsnet">
+  <target
+    name="coretestsnet"
+    depends="init">
     <runTests testPlugin="org.eclipse.core.tests.net" />
   </target>
 
   <target
     name="jdtcorecompiler"
-    depends="setJVMProperties">
+    depends="init, setJVMProperties">
     <condition
       property="jvm"
       value="${J2SE-5.0}">
@@ -1121,7 +1484,7 @@
 
   <target
     name="jdtapt"
-    depends="setJVMProperties">
+    depends="init,setJVMProperties">
     <property
       name="jvm"
       value="${J2SE-5.0}" />
@@ -1136,7 +1499,7 @@
 
   <target
     name="jdtaptpluggable"
-    depends="setJVMProperties">
+    depends="init, setJVMProperties">
     <property
       name="jvm"
       value="${J2SE-6.0}" />
@@ -1156,7 +1519,7 @@
 
   <target
     name="jdtcorebuilder"
-    depends="setJVMProperties">
+    depends="init, setJVMProperties">
     <!--Run with 1.5 vm if it is available-->
     <condition
       property="jvm"
@@ -1168,7 +1531,7 @@
 
   <target
     name="jdtcompilertool"
-    depends="setJVMProperties">
+    depends="init, setJVMProperties">
     <property
       name="jvm"
       value="${J2SE-6.0}" />
@@ -1187,7 +1550,7 @@
 
   <target
     name="jdtcompilerapt"
-    depends="setJVMProperties">
+    depends="init, setJVMProperties">
     <property
       name="jvm"
       value="${J2SE-6.0}" />
@@ -1206,7 +1569,7 @@
 
   <target
     name="jdtcoremodel"
-    depends="setJVMProperties">
+    depends="init, setJVMProperties">
     <condition
       property="jvm"
       value="${J2SE-5.0}">
@@ -1215,87 +1578,123 @@
     <runTests testPlugin="org.eclipse.jdt.core.tests.model" />
   </target>
 
-  <target name="jdtcoreperf">
+  <target
+    name="jdtcoreperf"
+    depends="init">
     <runTests testPlugin="org.eclipse.jdt.core.tests.performance" />
   </target>
 
-  <target name="jdtdebug">
+  <target
+    name="jdtdebug"
+    depends="init">
     <runTests testPlugin="org.eclipse.jdt.debug.tests" />
   </target>
 
-  <target name="jdtui">
+  <target
+    name="jdtui"
+    depends="init">
     <runTests testPlugin="org.eclipse.jdt.ui.tests" />
   </target>
 
-  <target name="jdtuirefactoring">
+  <target
+    name="jdtuirefactoring"
+    depends="init">
     <runTests testPlugin="org.eclipse.jdt.ui.tests.refactoring" />
   </target>
 
-  <target name="pdeui">
+  <target
+    name="pdeui"
+    depends="init">
     <runTests testPlugin="org.eclipse.pde.ui.tests" />
   </target>
 
-  <target name="pdebuild">
+  <target
+    name="pdebuild"
+    depends="init">
     <property
       name="pdebuild"
       value="true" />
     <runTests testPlugin="org.eclipse.pde.build.tests" />
   </target>
 
-  <target name="swt">
+  <target
+    name="swt"
+    depends="init">
     <runTests testPlugin="org.eclipse.swt.tests" />
   </target>
 
-  <target name="teamcore">
+  <target
+    name="teamcore"
+    depends="init">
     <runTests testPlugin="org.eclipse.team.tests.core" />
   </target>
 
-  <target name="teamcvs">
+  <target
+    name="teamcvs"
+    depends="init">
     <property
       name="teamcvs"
       value="true" />
     <runTests testPlugin="org.eclipse.team.tests.cvs.core" />
   </target>
 
-  <target name="ui">
+  <target
+    name="ui"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.tests" />
   </target>
 
-  <target name="uinavigator">
+  <target
+    name="uinavigator"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.tests.navigator" />
   </target>
 
-  <target name="uircp">
+  <target
+    name="uircp"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.tests.rcp" />
   </target>
 
-  <target name="uiforms">
+  <target
+    name="uiforms"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.tests.forms" />
   </target>
 
-  <target name="uieditors">
+  <target
+    name="uieditors"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.editors.tests" />
   </target>
 
-  <target name="uiperformance">
+  <target
+    name="uiperformance"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.tests.performance" />
   </target>
 
-  <target name="uiviews">
+  <target
+    name="uiviews"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.tests.views.properties.tabbed" />
   </target>
 
-  <target name="uiworkbenchtexteditor">
+  <target
+    name="uiworkbenchtexteditor"
+    depends="init">
     <runTests testPlugin="org.eclipse.ui.workbench.texteditor.tests" />
   </target>
 
-  <target name="update">
+  <target
+    name="update"
+    depends="init">
     <runTests testPlugin="org.eclipse.update.tests.core" />
   </target>
 
   <target
     name="pdeapitooling"
-    depends="setJVMProperties">
+    depends="init,setJVMProperties">
     <property
       name="jvm"
       value="${J2SE-5.0}" />
@@ -1308,64 +1707,102 @@
     <runTests testPlugin="org.eclipse.pde.api.tools.tests" />
   </target>
 
-  <target name="equinoxsecurity">
+  <target
+    name="equinoxsecurity"
+    depends="init">
     <runTests testPlugin="org.eclipse.equinox.security.tests" />
   </target>
 
-  <target name="equinoxp2">
+  <target
+    name="equinoxp2"
+    depends="init">
+    <echo
+      message="DEBUG: org.eclipse.equinox.p2.reconciler.tests.platform.archive: ${org.eclipse.equinox.p2.reconciler.tests.platform.archive} " />
+
     <runTests testPlugin="org.eclipse.equinox.p2.tests" />
   </target>
 
-  <target name="equinoxp2ui">
+  <target
+    name="equinoxp2ui"
+    depends="init">
     <runTests testPlugin="org.eclipse.equinox.p2.tests.ui" />
   </target>
 
-  <target name="equinoxp2discovery">
+  <target
+    name="equinoxp2discovery"
+    depends="init">
     <runTests testPlugin="org.eclipse.equinox.p2.tests.discovery" />
   </target>
 
-  <target name="search">
+  <target
+    name="search"
+    depends="init">
     <runTests testPlugin="org.eclipse.search.tests" />
   </target>
 
-  <target name="pdeds">
+  <target
+    name="pdeds"
+    depends="init">
     <runTests testPlugin="org.eclipse.pde.ds.tests" />
   </target>
 
-  <target name="bidi">
+  <target
+    name="bidi"
+    depends="init">
     <runTests testPlugin="org.eclipse.equinox.bidi.tests" />
   </target>
 
-  <target name="e4Core">
+  <target
+    name="e4Core"
+    depends="init">
     <runTests testPlugin="org.eclipse.e4.core.tests" />
   </target>
 
-  <target name="e4Commands">
+  <target
+    name="e4Commands"
+    depends="init">
     <runTests testPlugin="org.eclipse.e4.core.commands.tests" />
   </target>
 
-  <target name="e4Bindings">
+  <target
+    name="e4Bindings"
+    depends="init">
     <runTests testPlugin="org.eclipse.e4.ui.bindings.tests" />
   </target>
 
-  <target name="e4CssCore">
+  <target
+    name="e4CssCore"
+    depends="init">
     <runTests testPlugin="org.eclipse.e4.ui.tests.css.core" />
   </target>
 
-  <target name="e4CssSwt">
+  <target
+    name="e4CssSwt"
+    depends="init">
     <runTests testPlugin="org.eclipse.e4.ui.tests.css.swt" />
   </target>
 
-  <target name="e4UI">
+  <target
+    name="e4UI"
+    depends="init">
     <runTests testPlugin="org.eclipse.e4.ui.tests" />
   </target>
 
-  <target name="all">
+  <target
+    name="all"
+    depends="init">
+    <!--
+    <antcall target="relEng" />
+    <antcall target="equinoxp2" />
+    -->
     <antcall target="quickTests" />
-    <antcall target="longRunningTests" /> 
+    <antcall target="longRunningTests" />
+    
   </target>
 
-  <target name="quickTests">
+  <target
+    name="quickTests"
+    depends="init">
 
     <antcall target="markCurrentTime">
       <param
@@ -1417,7 +1854,9 @@
 
   </target>
 
-  <target name="longRunningTests">
+  <target
+    name="longRunningTests"
+    depends="init">
 
     <antcall target="markCurrentTime">
       <param
@@ -1474,9 +1913,11 @@
         now serves dual purpose of a "short set" of tests, that area
         relatively quick, and realtively reliable on build.eclipse.org hardware
     -->
-  <target name="platform">
+  <target
+    name="platform"
+    depends="init">
     <!-- remove for now, bug 400385 -->
-       <antcall target="relEng" />
+    <antcall target="relEng" />
 
     <antcall target="ant" />
     <antcall target="antui" />
@@ -1517,7 +1958,9 @@
   <!-- this group is "platform tests" that are Long Running
        (or, perhaps hang?, during performance tests.
   -->
-  <target name="platformLR">
+  <target
+    name="platformLR"
+    depends="init">
     <antcall target="osgi" />
     <antcall target="coreresources" />
     <antcall target="equinoxp2" />
@@ -1534,17 +1977,23 @@
      -->
   </target>
 
-  <target name="pde">
+  <target
+    name="pde"
+    depends="init">
     <antcall target="pdeds" />
     <antcall target="pdeui" />
   </target>
 
-  <target name="pdeLR">
+  <target
+    name="pdeLR"
+    depends="init">
     <antcall target="pdeapitooling" />
     <antcall target="pdebuild" />
   </target>
 
-  <target name="jdt">
+  <target
+    name="jdt"
+    depends="init">
     <antcall target="jdtcompilertool" />
     <antcall target="jdtcompilerapt" />
     <antcall target="jdttext" />
@@ -1555,7 +2004,9 @@
     <antcall target="jdtaptpluggable" />
   </target>
 
-  <target name="jdtLR">
+  <target
+    name="jdtLR"
+    depends="init">
     <antcall target="jdtui" />
     <antcall target="jdtuirefactoring" />
     <antcall target="jdtcoremodel" />
@@ -1613,7 +2064,7 @@
   -->
   <target
     name="printMainProperties"
-    depends="setJVMProperties,getJavaMajorVersion"
+    depends="init,setJVMProperties,getJavaMajorVersion"
     unless="printedMainProperties">
 
     <property
@@ -1751,8 +2202,7 @@
       or will be "0" if the version could not be determined, for some reason.
   -->
 
-  <target
-    name="getJavaMajorVersion">
+  <target name="getJavaMajorVersion">
   <!--
        TODO: this assumes we are running ant, with same VM as we'll eventuall use
        during test. Valid assumption most the time, but ... not necessarily always.
@@ -1941,10 +2391,12 @@
 
   <target
     name="test-all"
-    depends="test-initOSes,test-getJavaMajorVersion">
+    depends="init,test-initOSes,test-getJavaMajorVersion">
   </target>
 
-  <target name="debug-allProperties">
+  <target
+    name="debug-allProperties"
+    depends="init">
     <echoproperties />
   </target>
 </project>
