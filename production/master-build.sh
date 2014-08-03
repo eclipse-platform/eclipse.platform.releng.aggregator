@@ -167,6 +167,7 @@ fn-write-property INITIAL_ENV_FILE
 fn-write-property BUILD_ROOT
 fn-write-property BRANCH
 fn-write-property STREAM
+fn-write-property BUILD_ID
 fn-write-property BUILD_TYPE
 fn-write-property TIMESTAMP
 fn-write-property TMP_DIR
