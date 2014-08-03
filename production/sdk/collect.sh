@@ -63,4 +63,5 @@ ${ANT_HOME}/bin/ant -version
   -DbuildNumber=${buildNumber} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
-  -DEBUILDER_HASH=${EBUILDER_HASH}
+  -DEBUILDER_HASH=${EBUILDER_HASH} \
+  -DBUILD_HOME=${BUILD_HOME}

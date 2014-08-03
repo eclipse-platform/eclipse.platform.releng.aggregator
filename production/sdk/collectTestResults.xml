@@ -28,22 +28,31 @@
     description="Collect Test Results from Hudson to build machine location.">
 
 
-    <mkdir dir="${tmpzipdir}" />
 
     <retry
       retrycount="3"
       retrydelay="1000">
       <get
+        ignoreerrors="true"
+        verbose="true"
         src="${hudsonResultURL}"
         dest="${tmpzipdir}/archive.zip" />
     </retry>
 
-    <mkdir dir="${postingDirectory}/${buildId}/testresults" />
+    <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
+    <retry
+      retrycount="3"
+      retrydelay="1000">
+      <get
+        src="${hudsonTestResultsURL}"
+        dest="${resultsDir}/${job}-${buildNumber}.xml" />
+    </retry>
+
 
     <unzip
       overwrite="true"
       src="${tmpzipdir}/archive.zip"
-      dest="${postingDirectory}/${buildId}/testresults/">
+      dest="${resultsDir}/">
       <globmapper
         from="archive/workarea/${buildId}/eclipse-testing/results/*"
         to="*" />
@@ -53,8 +62,8 @@
       <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}" />
     </exec>
 
-    <delete>
-      <fileset dir="${postingDirectory}/${buildId}/testresults">
+    <delete failonerror="false">
+      <fileset dir="${resultsDir}">
         <include name="${tmpzipdir}" />
         <include name="archive/**" />
       </fileset>
@@ -67,11 +76,12 @@
     unless="collectTestResultsInitialized">
 
     <property environment="env" />
+    <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
 
-      <!-- we set these "env" variables here not to effect the 
-           environment, but that because we need some value for them, 
-           so if not actually set in the environment, we create these 
-           with some reasonable default. (Though, if not set in the environment, 
+    <!-- we set these "env" variables here not to effect the
+           environment, but that because we need some value for them,
+           so if not actually set in the environment, we create these
+           with some reasonable default. (Though, if not set in the environment,
            could be a sign that somethign is not as expected?)
      -->
     <property
@@ -85,6 +95,7 @@
       value="/shared/eclipse/builds" />
 
     <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
+
 
     <script language="javascript"><![CDATA[
             var buildId = project.getProperty("buildId");
@@ -106,11 +117,11 @@
             project.setProperty("eclipseStreamMajor", eclipseStreamMajor);
             project.setProperty("eclipseStreamMinor", eclipseStreamMinor);
             project.setProperty("eclipseStreamService", eclipseStreamService);
-      
-            var buildhome = project.getProperty("env.BUILD_HOME");
-          
-            var buildRoot= buildhome + "/" + eclipseStreamMajor + buildType;
 
+            var buildhome = project.getProperty("env.BUILD_HOME");
+
+            var buildRoot= buildhome + "/" + eclipseStreamMajor + buildType;
+            project.setProperty("buildRoot", buildRoot);
             var siteDir= buildRoot + "/siteDir";
             var postingDirectory = siteDir + "/eclipse/downloads/drops"
             if (eclipseStreamMajor > 3 )
@@ -124,18 +135,35 @@
     <echo message="buildRoot: ${buildRoot}" />
 
     <echo message="postingDirectory: ${postingDirectory}" />
+    <property
+      name="resultsDir"
+      value="${postingDirectory}/${buildId}/testresults" />
+    <!-- attempt to create incase hasn't been created yet -->
+    <mkdir dir="${resultsDir}" />
+    <property
+      name="hudsonResultRootJobURL"
+      value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}/hudson/job/${job}/${buildNumber}/" />
 
     <property
       name="hudsonResultRootURL"
-      value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}/hudson/job/${job}/${buildNumber}/artifact/*zip*" />
+      value="${hudsonResultRootJobURL}/artifact/*zip*" />
     <property
       name="hudsonResultURL"
       value="${hudsonResultRootURL}/archive.zip" />
     <echo message="hudsonResultURL ${hudsonResultURL} " />
 
     <property
+      name="hudsonTestResultsURL"
+      value="${hudsonResultRootJobURL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration" />
+    <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
+
+    <property
       name="tmpzipdir"
-      value="${postingDirectory}/${buildId}/testresults/tmp${job}" />
+      value="${resultsDir}/tmp${job}" />
+
+
+
+    <mkdir dir="${tmpzipdir}" />
 
     <property
       name="collectTestResultsInitialized"
