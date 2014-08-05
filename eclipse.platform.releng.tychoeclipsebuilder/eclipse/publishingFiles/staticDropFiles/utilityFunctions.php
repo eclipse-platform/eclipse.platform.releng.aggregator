@@ -102,16 +102,19 @@ function calcTestConfigsRan($testResultsDirName) {
             $boxes++;
             // our way of matching job names, with test configs, is very limited, 
             // at the moment ... just looking for three letter match between the two.
+            $keyMatchStrings = array("lin","win","mac");
+            foreach ($keyMatchStrings as $keyMatch) {
+
             // First make sure we get "fresh" list of test summary files, each time.
             $testResultsSummaryFiles = glob($testResultsDirName."/ep*-unit-*.xml");
             //echo "DEBUG: found ".count($testResultsSummaryFiles). "summary files<br />";
             //echo "DEBUG: while expected config was $expectedTestConfigs[$i]<br />";
             // Then match the "test config" we found, with the test summary file.
-            if (strpos($expectedTestConfigs[$i], "lin") !== FALSE) {
+            if (strpos($expectedTestConfigs[$i], $keyMatch) !== FALSE) {
               // echo "DEBUG: found matching config: $expectedTestConfigs[$i]<br />";
               foreach ($testResultsSummaryFiles as $summFileName) {
                  // echo "DEBUG: processing $summFileName<br />";
-                 if (strpos($summFileName, "lin") !== FALSE) {
+                 if (strpos($summFileName, $keyMatch) !== FALSE) {
                    //echo "DEBUG: found matching summary file: $summFileName<br />"; 
                    $xmlResults = simplexml_load_file($summFileName);
                    $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
@@ -121,7 +124,7 @@ function calcTestConfigsRan($testResultsDirName) {
                  }
               }
             }
-            
+            }
             break;
           }
         }
