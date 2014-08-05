@@ -653,13 +653,14 @@ public class BuildTests extends TestCase {
 			System.err.println("WARNING: no javadoc logs to test, since RELENGTEST.JAVADOC.URLS property was not set");
 			return;
 		} else {
-			System.err.println("RELENGTEST.JAVADOC.URLS: javadocUrls");
+			System.err.println("RELENGTEST.JAVADOC.URLS: " + javadocUrls);
 		}
 
 		String[] urls= javadocUrls.split(",");
 		URL[] javadocLogs= new URL[urls.length];
 		for (int i= 0; i < urls.length; i++) {
 			javadocLogs[i]= new URL(urls[i]);
+			System.err.println("javadocLogs[" + i + "]: " + javadocLogs[i]);
 		}
 
 		JavadocLog javadocLog= new JavadocLog(javadocLogs);
