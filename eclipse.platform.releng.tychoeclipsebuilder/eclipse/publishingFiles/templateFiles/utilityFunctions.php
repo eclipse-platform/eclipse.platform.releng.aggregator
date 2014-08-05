@@ -52,8 +52,8 @@ directory.
 
 function calcTestConfigsRan($testResultsDirName) {
 
-  global $expectedtestConfigs;
-  global $foundConfigs;
+  global $expectedTestConfigs;
+  global $testResults;
 
   $boxes=0;
   // the include file, testConfigs.php defines 'testConfigs' array, 
@@ -67,14 +67,12 @@ function calcTestConfigsRan($testResultsDirName) {
 
   if (file_exists("testConfigs.php")) {
     include "testConfigs.php";
-    $testConfigs = &$expectedTestConfigs;
   }
   else  {
     // minus 2 is code for "testConfigs not found"
     $boxes=-2;
-    $testConfigs = array();
+    $expectedTestConfigs = array();
   }
-  $expectedtestConfigs=count($testConfigs);
 
   if (file_exists("buildproperties.php")) {
     // be sure any previous are reset
@@ -99,10 +97,34 @@ function calcTestConfigsRan($testResultsDirName) {
     if (file_exists("$testResultsDirName/consolelogs")) {
       $buildDir = dir("$testResultsDirName/consolelogs");
       while ($file = $buildDir->read()) {
-        for ($i = 0 ; $i < $expectedtestConfigs ; $i++) {
-          if (strncmp($file, $testConfigs[$i], count($testConfigs[$i])) == 0) {
+        for ($i = 0 ; $i < count($expectedTestConfigs) ; $i++) {
+          if (strncmp($file, $expectedTestConfigs[$i], count($expectedTestConfigs[$i])) == 0) {
             $boxes++;
-            $foundConfigs[] = $testConfigs[$i];
+            // our way of matching job names, with test configs, is very limited, 
+            // at the moment ... just looking for three letter match between the two.
+            $keyMatchStrings = array("lin","win","mac");
+            foreach ($keyMatchStrings as $keyMatch) {
+
+            // First make sure we get "fresh" list of test summary files, each time.
+            $testResultsSummaryFiles = glob($testResultsDirName."/ep*-unit-*.xml");
+            //echo "DEBUG: found ".count($testResultsSummaryFiles). "summary files<br />";
+            //echo "DEBUG: while expected config was $expectedTestConfigs[$i]<br />";
+            // Then match the "test config" we found, with the test summary file.
+            if (strpos($expectedTestConfigs[$i], $keyMatch) !== FALSE) {
+              // echo "DEBUG: found matching config: $expectedTestConfigs[$i]<br />";
+              foreach ($testResultsSummaryFiles as $summFileName) {
+                 // echo "DEBUG: processing $summFileName<br />";
+                 if (strpos($summFileName, $keyMatch) !== FALSE) {
+                   //echo "DEBUG: found matching summary file: $summFileName<br />"; 
+                   $xmlResults = simplexml_load_file($summFileName);
+                   $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
+                   $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
+                   $testResults[$expectedTestConfigs[$i]]["passCount"]=$xmlResults->passCount;
+                   $testResults[$expectedTestConfigs[$i]]["skipCount"]=$xmlResults->skipCount;
+                 }
+              }
+            }
+            }
             break;
           }
         }
@@ -167,7 +189,7 @@ function printTestSummaryStatus() {
     // don't forget to end link, after images decided.
 
     if ($boxes > -1) {
-      $boxesTitle=$boxes." of ".$expectedtestConfigs." test platforms finished.";
+      $boxesTitle=$boxes." of ".count($expectedTestConfigs)." test platforms finished.";
     }
     if ($testResultsDirName === "results") {
       echo "<a href=\"results/testResults.html\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
@@ -182,7 +204,7 @@ function printTestSummaryStatus() {
       // assume if no results at all, after 12 hours, assume they didn't run for unknown reasosn
       $testimage="caution.gif";
       $testalt="Integration tests did not run, due to unknown reasons.";
-    } elseif ($boxes > 0 && $boxes < $expectedtestConfigs) {
+    } elseif ($boxes > 0 && $boxes < count($expectedTestConfigs)) {
       if ($diff > 1440) {
         $testimage="junit.gif";
         $testalt="Tests results are available but did not finish on all machines";
@@ -190,7 +212,7 @@ function printTestSummaryStatus() {
         $testimage="runtests.gif";
         $testalt="Integration tests are running ...";
       }
-    } elseif ($boxes == $expectedtestConfigs) {
+    } elseif ($boxes == count($expectedTestConfigs)) {
       $testimage="junit.gif";
       $testalt="Tests results are available";
     } else {
@@ -199,7 +221,7 @@ function printTestSummaryStatus() {
     }
     echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
     if ($boxes > -1) {
-      echo "&nbsp;(".$boxes." of ".$expectedtestConfigs." platforms)";
+      echo "&nbsp;(".$boxes." of ".count($expectedTestConfigs)." platforms)";
     }
     echo "</a>\n";
   } else {
