@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ public class MapContentDocument implements ITypedElement, IStreamContentAccessor
 	/**
 	 * Update the tag associated with the given project in the new contents.
 	 */
+	@SuppressWarnings("resource") // The leak warning is a false positive (https://bugs.eclipse.org/371614)
 	public void updateTag(IProject project, String tag) throws CVSException {
 		InputStream inputStream = new BufferedInputStream(
 				new ByteArrayInputStream(newContents.getBytes()));
