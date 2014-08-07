@@ -225,64 +225,74 @@ relating to its results and unit tests.
   $boxes=calcTestConfigsRan($testResultsDirName);
 
   $testResultsStatus = "%testsStatus%";
-  if (file_exists("overrideTestColor")) {
-    $testResultsStatus="successful";
-  }
-  // -3 is special code meaning no testResults directory exists yet.
-  elseif ($boxes == -3) {
-    echo "<li><a title=\"Tests are pending\" href=\"testResults.php\">Tests are pending, view the <b>logs</b> for the current build.</a></li>";
-  }
-  elseif ($testResultsStatus == "pending") {
-    echo "<li><a title=\"Tests are pending\" href=\"testResults.php\">Tests are pending. View the <b>logs</b> for the current build.</a></li>";
-  }
-  elseif ($testResultsStatus == "successful") {
-    echo "<li><a title=\"Test results have no failures\" href=\"testResults.php\">View the <b><font color=\"#00FF00\">logs and test results</font></b> for the current build.</a></li>";
-  }
-  elseif ($testResultsStatus == "failed") {
-    echo "<li><a title=\"Test results have failures\" href=\"testResults.php\">View the <b><font color=\"#FF0000\">logs and test results</font></b> for the current build.</a></li>";
-  }
-  else {
-    echo "<li><a href=\"testResults.php\">View the <b>logs and test results</b> for the current build.</a></li>\n";
-  }
-
-  if ($boxes > -1) {
-    echo "<ul>\n";
-    echo "<li>".$boxes." of ".count($expectedTestConfigs)." test configurations are complete.</li>\n";
-    foreach ($expectedTestConfigs as $config) {
-      echo "<ul>\n";
-      if (isset($testResults[$config])) {
-        $testRes = $testResults[$config];
-        $failed = $testRes['failCount'];
-        $passed = $testRes['passCount'];
-        $skipped = $testRes['skipCount'];
-        $total = $failed + $passed + $skipped;
-        $duration = $testRes['duration'];
-        if (file_exists("overrideTestColor")) {
-          $linkcolor='green';
-        }
+    // -3 is special code meaning no testResults directory exists yet.
+    if (($boxes == -3) || ($testResultsStatus === "pending"))   {   
+        $linkColor=inheret;
+        echo "<li>Tests are pending, view the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link to logs.\" href=\"testResults.php\">logs</a> for the current build.</li>\n";
+    }   
+    else {
+        if ($testResultsStatus === "successful") {
+            $linkColor = 'green';
+        }   
+        elseif ($testResultsStatus === "failed") {
+            // note we don't override  'inherit' cases, just 'failed'.
+            if (file_exists("overrideTestColor")) {
+                $linkColor='green';
+            } else {
+                $linkColor = 'red';
+            }   
+        }   
         else {
-          if ($failed > 0) {
-            $linkColor='red';
-          } else {
-            $linkColor='green';
-          }
-        }
-        // display as list for now. Probably table later.
-        echo "<li>\n";
-        echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
-        echo "  (Failed: ".$failed."   Passed: ".$passed."   Skipped: ".$skipped."   Total: ".$total."   Total test time: ".$duration.")\n";
-        echo "</li>\n";
-        }
-        else {
-          // Yes, all configs intentionally links, since all go to the same palce, but if no results yet, would not look like one. 
-          echo "<li>\n";
-          echo "<a style=\"color:inherit;text-decoration:none\" href=\"testResults.php\">".$config."</a>";
-          echo "</li>\n";
+            // This is a fall-through, unexpected case ... just in case testResultsStatus is something we don't expect.
+            $testColor='inherit';
+        }   
+        echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link to logs and test results.\" href=\"testResults.php\">logs and test results</a> for the current build.</li>\n";
+    }   
+    // TODO: should this be if not equal to -2?
+    if ($boxes > -1) {
+        echo "<ul>\n";
+        echo "<li>".$boxes." of ".count($expectedTestConfigs)." test configurations are complete.</li>\n";
+        foreach ($expectedTestConfigs as $config) {
+            echo "<ul>\n";
+            if (isset($testResults[$config])) {
+                $testRes = $testResults[$config];
+                $failed = $testRes['failCount'];
+                $passed = $testRes['passCount'];
+                $skipped = $testRes['skipCount'];
+                $total = $failed + $passed + $skipped;
+                $duration = $testRes['duration'];
+                if (file_exists("overrideTestColor")) {
+                    $linkColor='green';
+                }   
+                else {
+                    if ($failed > 0) {
+                        // note we don't override  'inherit' cases, just 'failed'.
+                        if (file_exists("overrideTestColor")) {
+                            $linkColor='green';
+                        } else {
+                            $linkColor = 'red';
+                        }   
+                    } else {
+                        $linkColor='green';
+                    }
+                }
+                // display as list for now. Probably table later.
+                echo "<li>\n";
+                echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+                echo "  (Failed: ".$failed."   Passed: ".$passed."   Skipped: ".$skipped."   Total: ".$total."   Total test time: ".$duration.")\n";
+                echo "</li>\n";
+            }
+            else {
+                // Yes, all configs intentionally links, since all go to the same palce, but if no results yet, would not look like one. 
+                echo "<li>\n";
+                echo "<a style=\"color:inherit;text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+                echo "</li>\n";
+            }
+            echo "</ul>\n";
         }
         echo "</ul>\n";
-      }
-      echo "</ul>\n";
     }
+
 
     // if (file_exists("performance/performance.php")) {
     // echo "<li>";
