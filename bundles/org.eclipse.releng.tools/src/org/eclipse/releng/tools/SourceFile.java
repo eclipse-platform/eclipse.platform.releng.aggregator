@@ -103,20 +103,18 @@ public abstract class SourceFile {
 	private void initialize() {
 		textFileBufferManager= FileBuffers.createTextFileBufferManager();
 		try {
-			ITextFileBuffer fileBuffer= getFileBuffer();
-			if (fileBuffer == null)
-				return;
 			
 			IDocument document;
 			try {
-				document= fileBuffer.getDocument();
+			        //connect file buffer. 
+		                ITextFileBuffer fileBuffer = openFileBuffer();
+		                        if (fileBuffer == null)
+		                                return;
+			    
+				document = fileBuffer.getDocument();
 			} finally {
-				try {
-					textFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, null);
-				} catch (CoreException e) {
-					e.printStackTrace();
-					// continue as we were able to get the file buffer and its document
-				}
+				//Close file buffer. 
+                                closeFileBuffer();
 			}
 			
 			lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
@@ -180,7 +178,13 @@ public abstract class SourceFile {
 		}
 	}
 
-	private ITextFileBuffer getFileBuffer() {
+	/**
+	 * If this method is called, <b>ensure</b> that you close the file buffer after usage. <br>
+	 * Otherwise you leave a memory leak. {@link #closeFileBuffer()}
+	 * {@code textFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, null); }
+	 * @return
+	 */
+	private ITextFileBuffer openFileBuffer() {
 		try {
 			textFileBufferManager.connect(file.getFullPath(), LocationKind.IFILE, null);
 		} catch (CoreException e) {
@@ -197,16 +201,29 @@ public abstract class SourceFile {
 	}
 	
 	/**
+	 * This should be called before ending a file operation. <br>
+	 * Companion function to getFileBuffer();
+	 */
+	private void closeFileBuffer() {
+            try {
+                textFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, null);
+            } catch (CoreException e) {
+                    e.printStackTrace();
+            }
+	}
+	
+	
+	/**
 	 * Given the copyright comment, this method inserts it into the right place in the file.
 	 *
 	 * @param copyRightComment  the complete comment that will be inserted.
 	 */
 	public void insert(String copyRightComment) {
-		ITextFileBuffer fileBuffer= getFileBuffer();
-		if (fileBuffer == null)
-			return;
-
 		try {
+		        ITextFileBuffer fileBuffer= openFileBuffer();
+		        if (fileBuffer == null)
+		                 return;
+		    
 			IDocument document= fileBuffer.getDocument();
 			doInsert(copyRightComment, document);
 			fileBuffer.commit(null, false);
@@ -217,11 +234,7 @@ public abstract class SourceFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			try {
-				textFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, null);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
+		    closeFileBuffer();
 		}
 	}
 
@@ -252,7 +265,7 @@ public abstract class SourceFile {
 		
 	
 		try {
-			ITextFileBuffer fileBuffer= getFileBuffer();
+			ITextFileBuffer fileBuffer = openFileBuffer();
 			if (fileBuffer == null)
 				return;
 			
@@ -269,8 +282,9 @@ public abstract class SourceFile {
 		} catch (CoreException e) {
 			e.printStackTrace();
 		} finally  {
+		    closeFileBuffer();
 			try {
-				FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE, null);
+			        FileBuffers.getTextFileBufferManager().disconnect(file.getFullPath(), LocationKind.IFILE, null);
 			} catch (CoreException e) {
 				e.printStackTrace();
 				return;
