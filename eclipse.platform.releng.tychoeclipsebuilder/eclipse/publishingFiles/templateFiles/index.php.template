@@ -253,48 +253,47 @@ relating to its results and unit tests.
     } else {
         $boxesDisplay = $boxes;
 
+    echo "<ul>\n";
+    echo "<li>".$boxesDisplay." of ".count($expectedTestConfigs)." test configurations are complete.</li>\n";
+    foreach ($expectedTestConfigs as $config) {
         echo "<ul>\n";
-        echo "<li>".$boxes." of ".count($expectedTestConfigs)." test configurations are complete.</li>\n";
-        foreach ($expectedTestConfigs as $config) {
-            echo "<ul>\n";
-            if (isset($testResults[$config])) {
-                $testRes = $testResults[$config];
-                $failed = $testRes['failCount'];
-                $passed = $testRes['passCount'];
-                $skipped = $testRes['skipCount'];
-                $total = $failed + $passed + $skipped;
-                $duration = $testRes['duration'];
-                if (file_exists("overrideTestColor")) {
+        if (isset($testResults[$config])) {
+            $testRes = $testResults[$config];
+            $failed = $testRes['failCount'];
+            $passed = $testRes['passCount'];
+            $skipped = $testRes['skipCount'];
+            $total = $failed + $passed + $skipped;
+            $duration = $testRes['duration'];
+            if (file_exists("overrideTestColor")) {
+                $linkColor='green';
+            }   
+            else {
+                if ($failed > 0) {
+                    // note we don't override  'inherit' cases, just 'failed'.
+                    if (file_exists("overrideTestColor")) {
+                        $linkColor='green';
+                    } else {
+                        $linkColor = 'red';
+                    }   
+                } else {
                     $linkColor='green';
                 }   
-                else {
-                    if ($failed > 0) {
-                        // note we don't override  'inherit' cases, just 'failed'.
-                        if (file_exists("overrideTestColor")) {
-                            $linkColor='green';
-                        } else {
-                            $linkColor = 'red';
-                        }   
-                    } else {
-                        $linkColor='green';
-                    }
-                }
-                // display as list for now. Probably table later.
-                echo "<li>\n";
-                echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
-                echo "  (Failed: ".$failed."   Passed: ".$passed."   Skipped: ".$skipped."   Total: ".$total."   Total test time: ".$duration.")\n";
-                echo "</li>\n";
-            }
-            else {
-                // Yes, all configs intentionally links, since all go to the same palce, but if no results yet, would not look like one. 
-                echo "<li>\n";
-                echo "<a style=\"color:inherit;text-decoration:none\" href=\"testResults.php\">".$config."</a>";
-                echo "</li>\n";
-            }
-            echo "</ul>\n";
-        }
+            }   
+            // display as list for now. Probably table later.
+            echo "<li>\n";
+            echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+            echo "  (Failed: ".$failed."   Passed: ".$passed."   Skipped: ".$skipped."   Total: ".$total."   Total test time: ".$duration.")\n";
+            echo "</li>\n";
+        }   
+        else {
+            // Yes, all configs intentionally links, since all go to the same palce, but if no results yet, would not look like one. 
+            echo "<li>\n";
+            echo "<a style=\"color:inherit;text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+            echo "</li>\n";
+        }   
         echo "</ul>\n";
-    }
+    }   
+    echo "</ul>\n";
 
 
     // if (file_exists("performance/performance.php")) {
