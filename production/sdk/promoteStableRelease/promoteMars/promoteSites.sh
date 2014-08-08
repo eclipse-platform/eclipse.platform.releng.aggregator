@@ -5,6 +5,9 @@ export DROP_ID=I20140806-2000
 export DL_LABEL=4.5M1
 export DL_LABEL_EQ=MarsM1
 
+#export DL_LABEL=4.5.1
+#export DL_LABEL_EQ=MarsSR1
+
 # for I builds, stable and RCs go to in milestones
 #export REPO_SITE_SEGMENT=4.4milestones
 REPO_SITE_SEGMENT=4.5
