@@ -8,9 +8,10 @@ export DL_LABEL_EQ=MarsM1
 #export DL_LABEL=4.5.1
 #export DL_LABEL_EQ=MarsSR1
 
-# for I builds, stable and RCs go to in milestones
-#export REPO_SITE_SEGMENT=4.4milestones
-REPO_SITE_SEGMENT=4.5
+# for promoted I builds, both stable and RCs go to into milestones
+export REPO_SITE_SEGMENT=4.5milestones
+# only Releases go into "short named" repo site.
+#export REPO_SITE_SEGMENT=4.5
 
 export HIDE_SITE=true
 #HIDE_SITE=false
