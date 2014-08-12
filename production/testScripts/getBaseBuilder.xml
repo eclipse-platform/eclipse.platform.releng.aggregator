@@ -71,6 +71,7 @@
         depends="hudson-init"
         unless="getBaseBuilderInitialized">
 
+    <property environment="env" />
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
         <property
             name="WORKSPACE"
@@ -93,18 +94,29 @@
             name="folderName"
             value="org.eclipse.releng.basebuilder" />
 
-        <condition property="fetchSource" value="git">
+        <!-- if not set directly by caller, see if it is an environment variable -->
+    <condition
+      property="basebuilderlocal"
+      value="${env.BASEBUILDER_LOCAL}">
+      <isset property="env.BASEBUILDER_LOCAL" />
+    </condition>
+
+    <condition
+      property="fetchSource"
+      value="git">
           <not>
               <isset property="basebuilderlocal" />
           </not>
         </condition>
 
+    <echo message="Properties in getBaseBuilder.xml" />
+    <echo message="basebuilderlocal: ${basebuilderlocal}" />
+    <echo message="fetchSource: ${fetchSource}" />
         <echo message="hudson: ${hudson}" />
         <echo message="WORKSPACE: ${WORKSPACE}" />
         <echo message="basebuilder version: ${builderVersion}" />
         <echo message="cvsRoot: ${cvsRoot}" />
         <echo message="cvsProject: ${cvsProject}" />
-        <echo message="fetchSource: ${fetchSource}" />
 
         <!-- leave useGit undefined to imply to use CVS. Callers can override git defaults with -DfetchSource=cvs
              or, anything besides 'git' implies cvs.

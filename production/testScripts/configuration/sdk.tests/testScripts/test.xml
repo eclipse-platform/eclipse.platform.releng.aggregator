@@ -318,7 +318,8 @@
      main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor and eclipseStreamMinor
      Uses script, which requires Java 1.6 (or ... else gets complicated to setup)
    -->
-  <target name="initStreamVariables">
+  <target name="initStreamVariables"
+          depends="initDownloadHosts">
     <!--
         First location is one where file is during produciton builds.
         Second location is where it is during "unit testing" of the test.xml file.
@@ -430,6 +431,7 @@
   -->
   <target name="initDownloadHosts" depends="checkDownloadHosts" unless="DOWNLOAD_HOST">
     <!-- we assume if "DOWNLOAD_HOST" is defined, then ARCHICE_HOST has been defined also. -->
+    <property environment="env"/>
     <echo message="DEBUG: Found DOWNLOAD_HOST not defined. Setting in 'initDownloadHosts'" />
     <echo message="DEBUG:      env.DOWNLOAD_HOST: ${env.DOWNLOAD_HOST}" />
     <condition property="DOWNLOAD_HOST" value="${env.DOWNLOAD_HOST}" else="download.eclipse.org">
@@ -446,7 +448,7 @@
     <echo message="DEBUG: Found DOWNLOAD_HOST already defined by 'initDownloadHosts'" />
     <echo message="DEBUG:      DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
   </target>
-  <target name="init" depends="initWorkspace,initBuildId, initBuildType, initStreamVariables, initDownloadHosts, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive" unless="testingIsInitialized">
+  <target name="init" depends="initWorkspace,initBuildId, initBuildType, initDownloadHosts, initStreamVariables, initBasicDirectories,initOSes, initPlatformArhiveName, setRuntimeArchive" unless="testingIsInitialized">
 
     <property environment="env" />
 

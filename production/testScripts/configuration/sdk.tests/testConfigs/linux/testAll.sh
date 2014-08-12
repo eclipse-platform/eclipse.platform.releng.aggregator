@@ -22,6 +22,7 @@ eclipseArch=${eclipseArch:-x86_64}
 # see bug 388269
 propertyFile=${propertyFile:-vm.properties}
 
+echo "properties in testAll.sh"
 echo "vmcmd in testAll: ${vmcmd}"
 echo "extdir in testAll (if any): ${extdir}"
 echo "propertyFile in testAll: ${propertyFile}"
