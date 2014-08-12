@@ -135,7 +135,7 @@ ps -ef | grep "metacity" | grep -v grep
 echo
 
 echo "Triple check if any window managers are running (at least metacity should be!):"
-wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz" | grep -v egrep)
+wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|icewm" | grep -v egrep)
 echo "Window Manager processes: $wmpss"
 echo
 echo "extdirprop in runtest: ${extdirprop}"
