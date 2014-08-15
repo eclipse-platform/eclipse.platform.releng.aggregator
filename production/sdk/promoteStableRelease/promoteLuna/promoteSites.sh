@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 
-export DROP_ID=I20140606-1215
+export DROP_ID=M20140813-0800
 
-export DL_LABEL=4.4
-export DL_LABEL_EQ=Luna
+#export DL_LABEL=4.4
+#export DL_LABEL_EQ=Luna
+export DL_LABEL=4.4.1RC1
+export DL_LABEL_EQ=LunaSR1RC1
 
 # for I builds, stable and RCs go to in milestones
-#export REPO_SITE_SEGMENT=4.4milestones
-REPO_SITE_SEGMENT=4.4
+export REPO_SITE_SEGMENT=4.4milestones
+#REPO_SITE_SEGMENT=4.4
 
 export HIDE_SITE=true
 #HIDE_SITE=false
@@ -16,13 +18,13 @@ export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
 # These are what precedes main drop directory name
-#export DL_TYPE=S
-export DL_TYPE=R
+export DL_TYPE=S
+#export DL_TYPE=R
 #export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?)
 # Could probably compute this tag ... but for now easier to type it in each time.
-export NEW_TAG=S4_4_0_RC4
+export NEW_TAG=S4_4_1_RC1
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
@@ -35,8 +37,8 @@ export TRACE_LOG=${PWD}/traceLog.txt
 export TRAIN_NAME=Luna
 
 # Build machine locations (would very seldom change)
-export BUILD_ROOT=/shared/eclipse/builds/4I
-export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.4-I-builds
+export BUILD_ROOT=/shared/eclipse/builds/4M
+export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.4-M-builds
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
