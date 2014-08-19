@@ -12,7 +12,7 @@
 
         Then use ant to invoke the functionality. Example:
 
-        ant -f getEBuilder.xml  -DbuilderVersion=910fca82df3ea649ba8ee758259561582e13bf8b
+        ant -f getEBuilder.xml  -EBUILDER_HASHEBUILDER_HASH=910fca82df3ea649ba8ee758259561582e13bf8b
 
     -->
 <project
@@ -20,84 +20,41 @@
   default="getEBuilder"
   basedir=".">
 
-  <target
-    name="hudson-init"
-    if="hudson"
-    depends="checkHudson">
-         <!-- as of this writing, 04/22/2012, this was current list of
-              hudson provided variables. We take advantage of a number
-              of them, but "translate" them into our own variable names,
-              for a little loser build-system seperattion
-         BUILD_NUMBER
-             The current build number, such as "153"
-         BUILD_ID
-             The current build id, such as "2005-08-22_23-59-59" (YYYY-MM-DD_hh-mm-ss)
-         JOB_NAME
-             Name of the project of this build, such as "foo"
-         BUILD_TAG
-             String of "hudson-${JOB_NAME}-${BUILD_NUMBER}". Convenient to put into a resource file, a jar file, etc for easier identification.
-         EXECUTOR_NUMBER
-             The unique number that identifies the current executor (among executors of the same machine) that's carrying out this build. This is the number you see in the "build executor status", except that the number starts from 0, not 1.
-         NODE_NAME
-             Name of the slave if the build is on a slave, or "" if run on master
-         NODE_LABELS
-             Whitespace-separated list of labels that the node is assigned.
-         JAVA_HOME
-             If your job is configured to use a specific JDK, this variable is set to the JAVA_HOME of the specified JDK. When this variable is set, PATH is also updated to have $JAVA_HOME/bin.
-         WORKSPACE
-             The absolute path of the workspace.
-         HUDSON_URL
-             Full URL of Hudson, like http://server:port/hudson/
-         BUILD_URL
-             Full URL of this build, like http://server:port/hudson/job/foo/15/
-         JOB_URL
-             Full URL of this job, like http://server:port/hudson/job/foo/
-         SVN_REVISION
-             For Subversion-based projects, this variable contains the revision number of the module.
-         CVS_BRANCH
-             For CVS-based projects, this variable contains the branch of the module. If CVS is configured to check out the trunk, this environment variable will not be set.
-         HUDSON_USER
-             Currently logged in user
-             -->
-    <property environment="hudson" />
-    <property
-      name="WORKSPACE"
-      value="${hudson.WORKSPACE}" />
-        <!--
-        <property
-            name="BUILD_ID"
-            value="${hudson.BUILD_ID}" />
-        <property
-            name="BUILD_NUMBER"
-            value="${hudson.BUILD_NUMBER}" />
-        <property
-            name="JOB_NAME"
-            value="${hudson.JOB_NAME}" />
-        -->
 
-
-  </target>
   <target
     name="init"
-    depends="hudson-init"
+    depends="initWorkspace"
     unless="getEBuilderInitialized">
 
-        <!-- assign defaults if not on hudson, for local testing if nothing else -->
+    <!-- assign defaults if not on hudson, for local testing if nothing else -->
     <property
       name="WORKSPACE"
       value="${basedir}" />
 
-        <!-- normally provided by caller, but if not, assume master -->
+    <condition
+      property="gitHost"
+      value="${env.GIT_HOST}"
+      else="git.eclipse.org">
+      <isset property="env.GIT_HOST" />
+    </condition>
+    
+    <!-- normally provided by caller, but if not, assume master -->
     <property
-      name="builderVersion"
+      name="EBUILDER_HASH"
       value="master" />
 
+    <!-- git is fall back, if no method set explicitly -->
     <condition
       property="fetchSource"
       value="git">
-      <not>
-        <isset property="EBuilderlocal" />
-      </not>
+      <and>
+        <not>
+          <isset property="EBuilderlocal" />
+        </not>
+        <not>
+          <isset property="downloadURL" />
+        </not>
+      </and>
     </condition>
     <property
       name="scmProject"
@@ -111,16 +68,16 @@
       name="eScriptLocation"
       value="${folderName}/production/testScripts" />
 
-    <echo message="Properties in 'getEBuilder.xml'" />
-    <echo message="   hudson: ${hudson}" />
-    <echo message="   WORKSPACE: ${WORKSPACE}" />
-    <echo message="   scmProject: ${scmProject}" />
-    <echo message="   builderVersion: ${builderVersion}" />
-    <echo message="   folderName: ${folderName}" />
-    <echo message="The following are used, in order (if defined), to get 'production scripts'" />
-    <echo message="   (fetch) downloadURL: ${downloadURL}" />
-    <echo message="   EBuilderlocal: ${EBuilderlocal}" />
-    <echo message="   fetchSource: ${fetchSource}" />
+    <echo message="=== Properties in 'getEBuilder.xml'" />
+    <echo message="    WORKSPACE: ${WORKSPACE}" />
+    <echo message="    folderName: ${folderName}" />
+    <echo message="    eScriptLocation: ${eScriptLocation}" />
+    <echo message="    scmProject: ${scmProject}" />
+    <echo message="    EBUILDER_HASH: ${EBUILDER_HASH}" />
+    <echo message="    The following are used, in order (if defined), to get 'production scripts'" />
+    <echo message="       (fetchDirect from) downloadURL: ${downloadURL}" />
+    <echo message="       (copy from local cache directory) EBuilderlocal: ${EBuilderlocal}" />
+    <echo message="       fetchSource (from Git): ${fetchSource}" />
 
     <property
       name="getEBuilderInitialized"
@@ -130,78 +87,60 @@
 
   <target
     name="getEBuilder"
-    depends="checkHudson, init">
+    depends="init">
 
-    <fail
-      unless="builderVersion"
-      message="This target needs builderVersion to run" />
-
-        <!-- remove old one, if there, and make sure directory exists for
-             eventual checkout/copy/globmapper
-        -->
+    <!-- remove old one, if there, and make sure directory exists for
+         eventual checkout/copy/globmapper
+    -->
     <delete dir="${WORKSPACE}/${folderName}" />
     <mkdir dir="${WORKSPACE}/${folderName}" />
 
     <antcall target="fetchEBuilder" />
     <antcall target="EBuildercleanup" />
 
-        <!-- copy the files we need for subsequent Hudson steps to "well known" location -->
-    <!-- This was previous method, before deciding to use only "production" 
-    <copy
-      verbose="true"
-      file="${WORKSPACE}/${scmProject}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/getBaseBuilder.xml"
-      todir="${WORKSPACE}" />
-      -->
-    <copy
-      verbose="true"
-      file="${WORKSPACE}/${eScriptLocation}/getBaseBuilder.xml"
-      todir="${WORKSPACE}" />
+    <!-- 
+         Copy the file(s) we need for subsequent steps to "well known" 
+         location. 
+
     <copy
       file="${WORKSPACE}/${eScriptLocation}/runTests2.xml"
       todir="${WORKSPACE}" />
+    -->
+    <!-- remember, 'getBaseBuilder' has it's own properties, which 
+         must be set by now, if desired to make use of them, 
+         such as a common one for local testing would be:
+         basebuilderlocal=/shared/baseBuilderCache
+     -->
+    <ant antfile="${WORKSPACE}/${eScriptLocation}/getBaseBuilder.xml" />
+    <ant antfile="${WORKSPACE}/${eScriptLocation}/runTests2.xml" />
 
   </target>
 
-    <!-- hurestic to check if we are running on hudson variable, if so -->
-  <target name="checkHudson">
-        <!-- HUDSON_USER should just be "anonyous" for most of our cases (currently)
-             but seems a safe variable to check ... if set, assume we are on hudson,
-             if not set, assume we are not and leave "hudson" unset (not false)
-             Hmm, seems HUDSON_USER is not reliably set. The only 4 I saw reliably
-             set were
-             [echoproperties] env.HUDSON_COOKIE
-             [echoproperties] env.HUDSON_HOME
-             [echoproperties] env.HUDSON_SERVER_COOKIE
-             [echoproperties] env.HUDSON_URL
-             Not sure which would be best/safest to use in huristic, but
-             I'll go with URL for now.
-             -->
-    <property environment="env" />
-    <condition property="hudson">
-      <isset property="env.HUDSON_URL" />
-    </condition>
-
-  </target>
   <target
     name="fetchEBuilderFromGit"
     depends="init,fetchEBuilderLocal"
     unless="EBuilderfetched">
     <echo message="Fetching EBuilder from Git via CGit" />
     <get
-      src="http://git.eclipse.org/c/platform/${scmProject}.git/snapshot/${scmProject}-${builderVersion}.zip"
-      dest="${WORKSPACE}/${scmProject}-${builderVersion}.zip" />
+      src="http://${gitHost}/c/platform/${scmProject}.git/snapshot/${scmProject}-${EBUILDER_HASH}.zip"
+      dest="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}.zip" />
     <unzip
-      src="${WORKSPACE}/${scmProject}-${builderVersion}.zip"
-      dest="${WORKSPACE}"
+      src="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}.zip"
+      dest="${WORKSPACE}/tempEBuilder/"
       overwrite="true" />
 
+    <!-- We need only the 'production/testscripts' directory. And input can be of different "depths" depending on where it comes from.  -->
     <move todir="${WORKSPACE}/${folderName}">
-      <fileset dir="${WORKSPACE}/${scmProject}-${builderVersion}">
+      <fileset dir="${WORKSPACE}/tempEBuilder">
         <include name="**/*" />
       </fileset>
+      <mapper
+        type="regexp"
+        from=".*/production/testScripts/(.*)"
+        to="/production/testScripts/\1" />
     </move>
 
-    <echo message="Fetched EBuilder to ${WORKSPACE}/${folderName}" />
+    <echo message="Fetched EBuilder/production/testscrips to ${WORKSPACE}/${folderName}" />
     <property
       name="EBuilderfetched"
       value="true" />
@@ -217,14 +156,17 @@
 
         <!-- we've moved the files, now to remove the empty dir -->
     <delete
-      dir="${WORKSPACE}/${scmProject}-${builderVersion}"
+      dir="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}"
       failonerror="false" />
 
         <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists -->
     <delete
-      file="${WORKSPACE}/${scmProject}-${builderVersion}.zip"
+      file="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}.zip"
       failonerror="false" />
 
+    <delete
+      dir="${WORKSPACE}/tempEBuilder"
+      failonerror="false" />
     <echo message="Cleaned temporary working copies" />
 
   </target>
@@ -246,12 +188,14 @@
     unless="EBuilderfetched">
     <echo message="Fetching pre-made EBuilder subset from local machine." />
     <unzip
-      src="${EBuilderlocal}/${scmProject}-${builderVersion}.zip"
+      src="${EBuilderlocal}/${scmProject}-${EBUILDER_HASH}.zip"
       dest="${WORKSPACE}"
       overwrite="true" />
 
-    <move todir="${WORKSPACE}/${folderName}">
-      <fileset dir="${WORKSPACE}/${scmProject}-${builderVersion}">
+    <move
+      todir="${WORKSPACE}/${folderName}"
+      failonerror="true">
+      <fileset dir="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}">
         <include name="**/*" />
       </fileset>
     </move>
@@ -268,11 +212,11 @@
     unless="EBuilderfetched">
     <echo message="Fetching pre-made EBuilder subset from download site." />
     <get
-      src="${downloadURL}/${scmProject}-${builderVersion}.zip"
+      src="${downloadURL}/${scmProject}-${EBUILDER_HASH}.zip"
       dest="${WORKSPACE}" />
     <echo message="Fetched EBuilder from ${downloadURL}" />
     <unzip
-      src="${WORKSPACE}/${scmProject}-${builderVersion}.zip"
+      src="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}.zip"
       dest="${WORKSPACE}"
       overwrite="true" />
 
@@ -287,5 +231,16 @@
       name="EBuilderfetched"
       value="true" />
 
+  </target>
+  <target
+    name="initWorkspace"
+    unless="WORKSPACE">
+    <property environment="env" />
+    <condition
+      property="WORKSPACE"
+      value="${env.WORKSPACE}"
+      else="${basedir}">
+      <isset property="env.WORKSPACE" />
+    </condition>
   </target>
 </project>
