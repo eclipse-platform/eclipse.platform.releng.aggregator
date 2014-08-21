@@ -58,6 +58,8 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
+	private static final int UNIT_OF_WORK = 1;
+	
 	public class FixCopyrightVisitor implements IResourceVisitor {
 		private final IProgressMonitor monitor;
 		private final RepositoryProviderCopyrightAdapter adapter;
@@ -71,10 +73,35 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		public boolean visit(IResource resource) throws CoreException {
 			if (!monitor.isCanceled()) {
 				if (resource.getType() == IResource.FILE) {
+					monitor.subTask(((IFile) resource).getFullPath().toOSString());
 					processFile((IFile) resource, adapter, monitor);
-				}
+					monitor.worked(UNIT_OF_WORK);
+				} 
 			}
 			return true;
+		}
+	}
+	
+	/**
+	 * Visit each file to count total number of files that we will traverse. 
+	 * This is used to show the progress correctly. 
+	 */
+	private class FileCountVisitor implements IResourceVisitor {
+		private int fileCount;
+		
+		public FileCountVisitor() {
+			this.fileCount = 0;
+		}
+
+		public boolean visit(IResource resource) throws CoreException {
+			if (resource.getType() == IResource.FILE) {
+				fileCount += UNIT_OF_WORK;
+			}
+			return true;
+		}
+		
+		public int getfileCount() {
+			return this.fileCount;
 		}
 	}
 
@@ -152,7 +179,10 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					IResource[] results = getSelectedResources();
 					stream.println(NLS.bind(
 							Messages.getString("AdvancedFixCopyrightAction.3"), Integer.toString(results.length))); //$NON-NLS-1$
-					monitor.beginTask(Messages.getString("AdvancedFixCopyrightAction.4"), results.length * 100 + 100); //$NON-NLS-1$
+					
+					monitor.subTask(Messages.getString("AdvancedFixCopyrightAction.22")); //'initializing' msg.
+					int totalFileCount = countFiles(results);	//this generates ~5% overhead. 
+					monitor.beginTask(Messages.getString("AdvancedFixCopyrightAction.4"), totalFileCount); //$NON-NLS-1$
 
 					RepositoryProviderCopyrightAdapter adapter = createCopyrightAdapter(results);
 					if(adapter == null) {
@@ -169,8 +199,6 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 								Messages.getString("AdvancedFixCopyrightAction.6"), resource.getName())); //$NON-NLS-1$
 						try {
 							resource.accept(new FixCopyrightVisitor(adapter, monitor));
-
-							monitor.worked(100);
 						} catch (CoreException e1) {
 							exceptions.add(e1);
 						}
@@ -208,6 +236,23 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 					monitor.done();
 				}
 				return Status.OK_STATUS;
+			}
+			
+			private int countFiles(IResource[] results) {
+				int sum = 0;
+				for (IResource file : results) {
+					FileCountVisitor fileCountVisitor = new FileCountVisitor();
+					try {
+						file.accept(fileCountVisitor);
+					} catch (CoreException e) {
+						//This exception can be ignored.
+						//Here we are only counting files.
+						//It will be handled when files are actually
+						//proccessed. 
+					}
+					sum += fileCountVisitor.getfileCount();
+				}
+				return sum;
 			}
 		};
 
@@ -308,7 +353,6 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	 * @param monitor
 	 */
 	private void processFile(IFile file, RepositoryProviderCopyrightAdapter adapter, IProgressMonitor monitor) {
-		monitor.subTask(file.getFullPath().toOSString());
 
 		//Missign file Extension 
 		if (! checkFileExtension(file)) {
