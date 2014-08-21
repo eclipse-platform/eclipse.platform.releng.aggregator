@@ -48,8 +48,15 @@ fi
 cp ${WORKSPACE}/${EBUILDER}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/getBaseBuilder.xml ${WORKSPACE}
 cp ${WORKSPACE}/${ESCRIPT_LOC}/runTests2.xml ${WORKSPACE}
 
-# remove on clean exit
-rm ebuilder.zip
-rm -fr tempebuilder
+# remove on clean exit, if they exist
+if [[ -f ebuilder.zip ]]
+then
+  rm ebuilder.zip
+fi
+if [[ -d tempebuilder ]]
+then
+  rm -fr tempebuilder
+fi
 exit 0
+
 

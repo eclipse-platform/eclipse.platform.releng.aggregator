@@ -2,17 +2,57 @@
 
 # This file is used on production machine, running tests on Hudson, Linux
 
+echo "command line as passed into $(basename ${0}): ${*}"
+echo "command line (quoted) as passed into $(basename ${0}): ${@}"
+
+# set minimal path to allow consistency. 
+# plus, want to have "home"/bin directory, to allow overrides in 'localTestsProperties' 
+# for non-production builds.
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/bin
+
 source localTestsProperties.shsource 2>/dev/null
 
 
-# by default, use the java executable on the path for outer and test jvm
-vmcmd=${vmcmd:-/shared/common/jdk-1.6.x86_64/jre/bin/java}
-#vmcmd=java
+# should already be defined, by now, in production tests
+export jvm=${jvm:-/shared/common/jdk-1.6.x86_64/jre/bin/java}
+echo "jvm: $jvm"
 
-echo "vmcmd: $vmcmd"
+if [ -z "${jvm}" -o ! -e ${jvm} ] 
+then 
+  echo "No JVM define, or the defined one was found to not be executable"
+  echo "    jvm: $jvm"
+  exit 1
+fi
 
-#this value must be set when using rsh to execute this script, otherwise the script will execute from the user's home directory
-dir=${PWD}
+stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.4-linux-gtk-x86_64.tar.gz}
+stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
+# Note: test.xml will "reinstall" fresh install of what we are testing, 
+# but we do need an install for initial launcher, and, later, need one for a 
+# stable version of p2 director. For both purposes, we
+# we should use "old and stable" version, 
+# which needs to be installed in ${stableEclipseInstallLocation}. 
+# Note: for production tests, we use ${WORKSPACE}/org.eclipse.releng.basebuilder, 
+# for historical reasons. The "true" (old) basebuilder does not have an 'eclipse' directory; 
+# plugins is directly under org.eclipse.releng.basebuilder.
+if [ ! -r ${stableEclipseInstallLocation} ]
+then
+  mkdir stableEclipseSDK
+  tar -xf ${stableEclipseSDK} -C ${stableEclipseInstallLocation}
+  # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
+  #We no longer use "dropins" for tests! test.xml will "install" them, from "test repo"
+  #unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+fi
+
+launcher=$(find ${stableEclipseInstallLocation} -name "org.eclipse.equinox.launcher_*.jar" )
+echo "launcher: $launcher"
+if [ -z "${launcher}" ]
+then
+   echo "launcher not found in ${stableEclipseInstallLocation}"
+   exit 1
+fi
+
+
+# define, but null out variables we expect on the command line
 
 # operating system, windowing system and architecture variables
 os=
@@ -54,7 +94,7 @@ do
     -extdirprop)
       extdirproperty="-Djava.ext.dirs=${2}";shift;;
     -vm)
-      vmcmd="${2}"; shift;;
+      jvm="${2}"; shift;;
     *)
       tests=$tests\ ${1};;
   esac
@@ -84,28 +124,23 @@ then
   exit 1
 fi
 
-#necessary when invoking this script through rsh
-cd $dir
 
-if [ ! -r eclipse ]
-then
-  tar -xzf eclipse-SDK-*.tar.gz
-  # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
-  unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
-fi
 
 # run tests
-launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
 
-echo " = = = Start list environment variables in effect = = = ="
-env
-echo " = = = End list environment variables in effect = = = ="
+#echo " = = = Start list environment variables in effect = = = ="
+#env
+#echo " = = = End list environment variables in effect = = = ="
 
+# TODO: consider moving all this to 'testAll.sh'. (If testAll.sh stays around) 
 # make sure there is a window manager running. See bug 379026
 # we should not have to, but may be a quirk/bug of hudson setup
 # assuming metacity attaches to "current" display by default (which should have
 # already been set by Hudson). We echo its value here just for extra reference/cross-checks.
 
+# This next section on window mangers is needed if and only if "running in background" or 
+# started on another machine, such as Hudson or Cruisecontrol, where it may be running 
+# "semi headless", but still needs some window manager running for UI tests. 
 echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|icewm):"
 wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|icewm" | grep -v egrep)
 echo "Window Manager processes: $wmpss"
@@ -141,15 +176,7 @@ else
     echo "   giving up. But continuing tests"
   fi
 fi
-#if [[ -z $wmpss ]]
-#then
-#         echo "No window managers processes found running, so will start metacity"
-#metacity --replace --sm-disable  &
-#METACITYPID=$!
-#echo $METACITYPID > epmetacity.pid
-#else
-#echo "Existing window manager found running, so did not force start of metacity"
-#fi
+
 
 echo
 
@@ -170,7 +197,7 @@ echo "extdirproperty in runtest: ${extdirproperty}"
 # -Dtimeout=300000 "${ANT_OPTS}"
 if [[ ! -z "${extdirproperty}" ]]
 then
-  $vmcmd "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+  $jvm "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
 else
-  $vmcmd -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+  $jvm -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests 
 fi
