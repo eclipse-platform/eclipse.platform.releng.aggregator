@@ -12,6 +12,14 @@
       name="EOL"
       value="${line.separator}" />
 
+    <!-- 
+         If not explicitly passed in from caller, assume 'all'. 
+         This is the default target already, in global test.xml, 
+         but this allows us to be explicit (and, make sure it 
+         continues working).
+    -->
+    <property name="testSuite" value="all"/>
+
     <echo message="Variables in 'runTests2.xml'" />
     <echo message="DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
     <echo message="WORKSPACE: ${WORKSPACE}" />
@@ -24,7 +32,7 @@
     <echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
     <echo message="eclipseStreamService: ${eclipseStreamService}" />
     <echo message="buildType: ${buildType}" />
-
+    <echo message="testSuite: ${testSuite}" />
     <property
       name="buildURL"
       value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
@@ -480,7 +488,7 @@
     <printProperty property="ARCHIVE_HOST" />
     <printProperty property="executionDir" />
     <printProperty property="configurationDir" />
-    <printProperty property="args" />
+    <printProperty property="testSuite" />
     <printProperty property="skipDerby" />
     <printProperty property="test.target" />
     <printProperty property="testExecutable" />
@@ -863,8 +871,7 @@
       dir="${executionDir}"
       executable="${testExecutable}">
       <arg line="${executionArguments}" />
-      <!-- TODO: args comes all the way from Hudson. Should be renamed "testSuites" or similar. -->
-      <arg value="${args}" />
+      <arg value="${testSuite}" />
       <env
         key="propertyFile"
         file="${WORKSPACE}/production.properties" />
