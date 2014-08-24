@@ -53,11 +53,17 @@ export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME
 # This variable signals parts of the script that we are testing the test scripts, 
 # and should not actually start the tests.
 export TESTING_TEST_XML=true
+export ANT_OPTS=-Djava.io.tmpdir=${WORKSPACE}/tmp -Xms500m -Xmx500m 
 
 if [[ "$1" == "-c" ]]
 then
   clean
 fi
+
+# print basic diagnostics and properties
+ant -diagnostics
+java -XshowSettings -version
+
 
 #    There are a number of test-<something> methods in test xml which, by convention, mean
 #    to simply test the test script itself. The test-all target runs all of those tests.
@@ -73,7 +79,6 @@ buildId=N20140823-1500
 eclipseStream=4.5.0
 EBUILDER_HASH=d4ca36a125742e490be6b22caca84d7769030758
 
-export ANT_OPTS=-Djava.io.tmpdir=${WORKSPACE}/tmp -Xms500m -Xmx500m 
 ant -f "${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
 
 
