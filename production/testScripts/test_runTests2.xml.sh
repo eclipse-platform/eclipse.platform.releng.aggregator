@@ -47,7 +47,7 @@ export ANT_HOME=/shared/common/apache-ant-1.8.4/
 #export JAVA_HOME=/shared/common/jdk1.7.0-latest
 #export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
 export JAVA_HOME=/shared/common/jdk1.7.0-latest
-export WORKSPACE=/home/davidw/tempworkarea/
+export WORKSPACE=${HOME}/tempworkarea/
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 
 # This variable signals parts of the script that we are testing the test scripts, 
@@ -63,20 +63,17 @@ fi
 #    to simply test the test script itself. The test-all target runs all of those tests.
 
 # Note: currently this file always comes from master, no matter what branch is being built/tested.
-wget -O getEBuilder.xml --no-verbose   http://davidw.com/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+wget -O getEBuilder.xml --no-verbose   http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 
-# Can only test the "download form" if there is a current, accurate build. During development, should use git/master version.
-# The getEBuilder.xml fill invoke "getBaseBuilder.xml" as well. 
-# if that is not desired, set -DskipBaseBuilder=true
-# ant -f getEBuilder.xml  -DskipBaseBuilder=true  -DdownloadURL=http://davidw.com/eclipse/downloads/drops4/M20140815-1230 -DEBUILDER_HASH=c287de2936649dba467d0f208b302be7136de6cc 
-ant -f getEBuilder.xml  
-#-DskipBaseBuilder=true 
+# Can only test the "downloadURL form" if there is a current, accurate build. During development, should use git/master version.
+ 
 
-ANTFILE=eclipse.platform.releng.aggregator/production/testScripts/runTests2.xml
-buildId=M20140815-1230
-eclipseStream=4.1.1
-EBUILDER_HASH=c287de2936649dba467d0f208b302be7136de6cc
+ANTFILE=getEBuilder.xml
+buildId=N20140823-1500
+eclipseStream=4.5.0
+EBUILDER_HASH=d4ca36a125742e490be6b22caca84d7769030758
 
-java -Djava.io.tmpdir=${WORKSPACE}/tmp -DDOWNLOAD_HOST=davidw.com -Xmx500m -jar $WORKSPACE/org.eclipse.releng.basebuilder/plugins/org.eclipse.equinox.launcher.jar  -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -application org.eclipse.ant.core.antRunner -v -f ${ANTFILE} -Djava.io.tmpdir=${WORKSPACE}/tmp -DDOWNLOAD_HOST=davidw.com -Dtest.target=performance -DskipDerby=true
+export ANT_OPTS=-Djava.io.tmpdir=${WORKSPACE}/tmp -Xms500m -Xmx500m 
+ant -f "${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
 
 
