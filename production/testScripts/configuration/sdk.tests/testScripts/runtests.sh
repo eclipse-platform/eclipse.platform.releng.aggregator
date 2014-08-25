@@ -193,13 +193,13 @@ echo
 
 echo "extdirprop in runtest: ${extdirprop}"
 echo "extdirproperty in runtest: ${extdirproperty}"
-echo "ANT_OPTS in runtests: ${ANT_OPTS}"
+echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
 
 
 # -Dtimeout=300000 "${ANT_OPTS}"
 if [[ ! -z "${extdirproperty}" ]]
 then
-  $jvm ${ANT_OPTS} "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
+  $jvm "${ANT_OPTS}" "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
 else
-  $jvm  ${ANT_OPTS} -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests 
+  $jvm  "${ANT_OPTS}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests 
 fi
