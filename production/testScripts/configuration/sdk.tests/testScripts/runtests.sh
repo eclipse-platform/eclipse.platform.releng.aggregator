@@ -191,8 +191,8 @@ wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|i
 echo "Window Manager processes: $wmpss"
 echo
 
-echo "extdirprop in runtest: ${extdirprop}"
-echo "extdirproperty in runtest: ${extdirproperty}"
+echo "extdirprop in runtest.sh: ${extdirprop}"
+echo "extdirproperty in runtest.sh: ${extdirproperty}"
 echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
 
 
