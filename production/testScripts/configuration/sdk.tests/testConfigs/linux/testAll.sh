@@ -52,6 +52,7 @@ echo "    extdir in testAll (if any): ${extdir}"
 echo "    propertyFile in testAll: ${propertyFile}"
 echo "    buildId in testAll: ${buildId}"
 echo "    testedPlatform: ${testedPlatform}"
+echo "    ANT_OPTS: ${ANT_OPTS}"
 
 #execute command to run tests
 /bin/chmod 755 runtests.sh
