@@ -10,135 +10,60 @@
   basedir=".">
 
   <target
-    name="hudson-init"
-    if="hudson"
-    depends="checkHudson">
-         <!-- as of this writing, 04/22/2012, this was current list of
-              hudson provided variables. We take advantage of a number
-              of them, but "translate" them into our own variable names,
-              for a little loser build-system seperattion
-         BUILD_NUMBER
-             The current build number, such as "153"
-         BUILD_ID
-             The current build id, such as "2005-08-22_23-59-59" (YYYY-MM-DD_hh-mm-ss)
-         JOB_NAME
-             Name of the project of this build, such as "foo"
-         BUILD_TAG
-             String of "hudson-${JOB_NAME}-${BUILD_NUMBER}". Convenient to put into a resource file, a jar file, etc for easier identification.
-         EXECUTOR_NUMBER
-             The unique number that identifies the current executor (among executors of the same machine) that's carrying out this build. This is the number you see in the "build executor status", except that the number starts from 0, not 1.
-         NODE_NAME
-             Name of the slave if the build is on a slave, or "" if run on master
-         NODE_LABELS
-             Whitespace-separated list of labels that the node is assigned.
-         JAVA_HOME
-             If your job is configured to use a specific JDK, this variable is set to the JAVA_HOME of the specified JDK. When this variable is set, PATH is also updated to have $JAVA_HOME/bin.
-         WORKSPACE
-             The absolute path of the workspace.
-         HUDSON_URL
-             Full URL of Hudson, like http://server:port/hudson/
-         BUILD_URL
-             Full URL of this build, like http://server:port/hudson/job/foo/15/
-         JOB_URL
-             Full URL of this job, like http://server:port/hudson/job/foo/
-         SVN_REVISION
-             For Subversion-based projects, this variable contains the revision number of the module.
-         CVS_BRANCH
-             For CVS-based projects, this variable contains the branch of the module. If CVS is configured to check out the trunk, this environment variable will not be set.
-         HUDSON_USER
-             Currently logged in user
-             -->
-    <property environment="hudson" />
-    <property
-      name="WORKSPACE"
-      value="${hudson.WORKSPACE}" />
-        <!--
-        <property
-            name="BUILD_ID"
-            value="${hudson.BUILD_ID}" />
-        <property
-            name="BUILD_NUMBER"
-            value="${hudson.BUILD_NUMBER}" />
-        <property
-            name="JOB_NAME"
-            value="${hudson.JOB_NAME}" />
-        -->
-
-
-  </target>
-  <target
     name="init"
-    depends="hudson-init"
+    depends="initWorkspace"
     unless="getBaseBuilderInitialized">
 
     <property environment="env" />
-        <!-- assign defaults if not on hudson, for local testing if nothing else -->
-    <property
-      name="WORKSPACE"
-      value="${basedir}" />
 
+    <!--
+         TODO: eventually should be previousReleaseVersion 
+         which requires "initStreamVariables"
+     -->
     <property
-      name="builderVersion"
+      name="baseBuilderVersion"
       value="R38M6PlusRC3G" />
+    <!-- eventually we will not have a hard coded version -->
+    <fail
+      unless="baseBuilderVersion"
+      message="This script needs baseBuilderVersion to run" />
 
+
+<!--
+    The desired folder name (made to stay consistent
+    old versions ... may want to make more meaningful,
+    eventually.
+-->
     <property
-      name="cvsRoot"
-      value=":pserver:anonymous@dev.eclipse.org:/cvsroot/eclipse" />
-    <property
-      name="cvsProject"
+      name="basebuilderFolderName"
       value="org.eclipse.releng.basebuilder" />
 
-        <!-- the desired folder name (made to stay consistent with cvs module name, though Git project
-             is named eclipse.platform.releng.basebuilder fil-->
-    <property
-      name="folderName"
-      value="org.eclipse.releng.basebuilder" />
-
-        <!-- if not set directly by caller, see if it is an environment variable -->
+    <!-- if not set directly by caller, see if it is an
+         environment variable. If set, is it expected to be
+         the patch to use to find the local, pre-cached version.
+    -->
     <condition
       property="basebuilderlocal"
       value="${env.BASEBUILDER_LOCAL}">
       <isset property="env.BASEBUILDER_LOCAL" />
     </condition>
 
+    <!-- just for better log messages -->
     <condition
       property="fetchSource"
-      value="git">
+      value="Fetching from git via CGit, since not local"
+      else="Using local pre-cached version in ${basebuilderlocal}">
       <not>
         <isset property="basebuilderlocal" />
       </not>
     </condition>
 
-    <echo message="Properties in getBaseBuilder.xml" />
-    <echo message="basebuilderlocal: ${basebuilderlocal}" />
-    <echo message="fetchSource: ${fetchSource}" />
-    <echo message="hudson: ${hudson}" />
-    <echo message="WORKSPACE: ${WORKSPACE}" />
-    <echo message="basebuilder version: ${builderVersion}" />
-    <echo message="cvsRoot: ${cvsRoot}" />
-    <echo message="cvsProject: ${cvsProject}" />
-
-
-        <!-- leave useGit undefined to imply to use CVS. Callers can override git defaults with -DfetchSource=cvs
-             or, anything besides 'git' implies cvs.
-        -->
-    <condition
-      property="useGit"
-      value="true">
-      <equals
-        arg1="${fetchSource}"
-        arg2="git"
-        casesensitive="false"
-        trim="true" />
-    </condition>
-    <echo message="useGit: ${useGit}" />
-        <!-- don't need? yet
-             <echo message="BUILD_ID: ${BUILD_ID}" />
-             <echo message="BUILD_NUMBER: ${BUILD_NUMBER}" />
-             <echo message="JOB_NAME: ${JOB_NAME}" />
-             <echo message="buildId: ${buildId}" />
-             -->
-
+    <echo message="=== Properties in init, of getBaseBuilder.xml" />
+    <echo message="    WORKSPACE: ${WORKSPACE}" />
+    <echo message="    basebuilder version: ${baseBuilderVersion}" />
+    <echo message="    copied to folder: ${basebuilderFolderName}" />
+    <echo message="    fetchSource: ${fetchSource}" />
+    <echo message="    skipBaseBuilder ${skipBaseBuilder}" />
 
        <!-- not used? But, may want in future?
         <condition
@@ -163,125 +88,138 @@
 
   <target
     name="getBaseBuilder"
-    depends="checkHudson, init">
+    depends="init, fetchBaseBuilder"
+    unless="skipBaseBuilder">
 
     <fail
-      unless="builderVersion"
-      message="This script needs builderVersion to run" />
-
-        <!-- remove old one, if there, and make sure one exists for eventual checkout/copy/globmapper -->
-    <delete dir="${WORKSPACE}/${folderName}" />
-    <mkdir dir="${WORKSPACE}/${folderName}" />
-
-    <antcall target="fetchBaseBuilder" />
-    <antcall target="fetchBaseBuilderLocal" />
-
+      unless="basebuilderfetched"
+      message="Failed to get base builder" />
   </target>
-    <!-- hurestic to check if we are running on hudson variable, if so -->
-  <target name="checkHudson">
-        <!-- HUDSON_USER should just be "anonyous" for most of our cases (currently)
-             but seems a safe variable to check ... if set, assume we are on hudson,
-             if not set, assume we are not and leave "hudson" unset (not false)
-             Hmm, seems HUDSON_USER is not reliably set. The only 4 I saw reliably
-             set were
-             [echoproperties] env.HUDSON_COOKIE
-             [echoproperties] env.HUDSON_HOME
-             [echoproperties] env.HUDSON_SERVER_COOKIE
-             [echoproperties] env.HUDSON_URL
-             Not sure which would be best/safest to use in huristic, but
-             I'll go with URL for now.
-             -->
-    <property environment="env" />
-    <condition property="hudson">
-      <isset property="env.HUDSON_URL" />
+
+  <target
+    name="checkIfNeeded"
+    depends="init">
+    <!--
+    At this point, specific to the "fall back" of getting from
+    git, there are two reasons it may no longer be needed. Either the
+    first task, the local fetch, got it, or else the user
+    specified skipBaseBuilder, presumably because they already have it,
+    and they do not need a clean copy.
+    -->
+    <condition property="notNeeded">
+      <or>
+        <istrue value="${skipBaseBuilder}" />
+        <istrue value="${basebuilderfetched}" />
+      </or>
     </condition>
 
   </target>
+
+  <!-- getting from Git is always the fall back -->
   <target
     name="fetchBaseBuilderFromGit"
-    depends="init"
-    if="useGit">
+    depends="init, checkIfNeeded"
+    unless="notNeeded">
     <echo message="Fetching basebuilder from Git via CGit" />
+
+    <!--
+         remove old one, if there, and make sure one exists
+         for eventual checkout/copy/globmapper.
+         Eventually will want to change this, so if already exists,
+         then assume we are done?
+    -->
+    <delete dir="${WORKSPACE}/${basebuilderFolderName}" />
+    <mkdir dir="${WORKSPACE}/${basebuilderFolderName}" />
     <get
-      src="http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${builderVersion}.zip"
-      dest="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
+      src="http://git.eclipse.org/c/platform/eclipse.platform.releng.basebuilder.git/snapshot/eclipse.platform.releng.basebuilder-${baseBuilderVersion}.zip"
+      dest="${WORKSPACE}/basebuilder-${baseBuilderVersion}.zip" />
     <unzip
-      src="${WORKSPACE}/basebuilder-${builderVersion}.zip"
+      src="${WORKSPACE}/basebuilder-${baseBuilderVersion}.zip"
       dest="${WORKSPACE}"
       overwrite="true" />
 
-    <move todir="${WORKSPACE}/${folderName}">
-      <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${builderVersion}">
+    <move todir="${WORKSPACE}/${basebuilderFolderName}">
+      <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${baseBuilderVersion}">
         <include name="**/*" />
       </fileset>
     </move>
 
     <chmod perm="ugo+x">
-      <fileset dir="${WORKSPACE}/${folderName}">
+      <fileset dir="${WORKSPACE}/${basebuilderFolderName}">
         <include name="eclipse" />
         <include name="*.so*" />
       </fileset>
     </chmod>
 
         <!-- we've moved the files, now to remove the empty dir -->
-    <delete dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${builderVersion}" />
+    <delete
+      includeemptydirs="true">
+      <dirset dir="${WORKSPACE}">
+        <include name="eclipse.platform.releng.basebuilder-${baseBuilderVersion}" />
+      </dirset>
+    </delete>
+        <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists -->
 
-        <!-- not sure why I couldn't get globmapper to work here with unzip?
-        <globmapper
-                from="eclipse.platform.releng.basebuilder-${builderVersion}/*"
-                to="${folderName}/*" />
-         -->
-
-        <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists
-        temp leave to save a copy
-        <delete file="${WORKSPACE}/basebuilder-${builderVersion}.zip" />
-        -->
-
+    <delete file="${WORKSPACE}/basebuilder-${baseBuilderVersion}.zip" />
+    <property
+      name="basebuilderfetched"
+      value="true" />
   </target>
 
-  <target
-    name="fetchBaseBuilderFromCVS"
-    depends="init"
-    unless="useGit">
-    <echo message="Fetching basebuilder from CVS" />
-    <cvs
-      cvsroot="${cvsRoot}"
-      command="export"
-      quiet="true"
-      dest="${WORKSPACE}"
-      tag="${builderVersion}"
-      package="${cvsProject}">
-    </cvs>
-  </target>
 
   <target
     name="fetchBaseBuilder"
-    depends="init, fetchBaseBuilderFromCVS, fetchBaseBuilderFromGit"
-    unless="basebuilderlocal">
-    <echo message="Fetched basebuilder to ${WORKSPACE}/${folderName}" />
+    depends="init, fetchBaseBuilderLocal, fetchBaseBuilderFromGit"
+    unless="skipBaseBuilder">
+    <echo message="Fetched basebuilder to ${WORKSPACE}/${basebuilderFolderName}" />
   </target>
   <target
     name="fetchBaseBuilderLocal"
     depends="init"
-    if="basebuilderlocal">
+    if="basebuilderlocal"
+    unless="skipBaseBuilder">
+
+    <!--
+         remove old one, if there, and make sure one exists
+         for eventual checkout/copy/globmapper.
+         Eventually will want to change this, so if already exists,
+         then assume we are done?
+    -->
+    <delete dir="${WORKSPACE}/${basebuilderFolderName}" />
+    <mkdir dir="${WORKSPACE}/${basebuilderFolderName}" />
+
     <unzip
-      src="${basebuilderlocal}/basebuilder-${builderVersion}.zip"
+      src="${basebuilderlocal}/basebuilder-${baseBuilderVersion}.zip"
       dest="${WORKSPACE}"
       overwrite="true" />
 
-    <move todir="${WORKSPACE}/${folderName}">
-      <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${builderVersion}">
+    <move todir="${WORKSPACE}/${basebuilderFolderName}">
+      <fileset dir="${WORKSPACE}/eclipse.platform.releng.basebuilder-${baseBuilderVersion}">
         <include name="**/*" />
       </fileset>
     </move>
 
     <chmod perm="ugo+x">
-      <fileset dir="${WORKSPACE}/${folderName}">
+      <fileset dir="${WORKSPACE}/${basebuilderFolderName}">
         <include name="eclipse" />
         <include name="*.so*" />
       </fileset>
     </chmod>
-    <echo message="Copied basebuilder to ${WORKSPACE}/${folderName}" />
+    <echo message="Copied basebuilder to ${WORKSPACE}/${basebuilderFolderName}" />
+    <property
+      name="basebuilderfetched"
+      value="true" />
 
+  </target>
+  <target
+    name="initWorkspace"
+    unless="WORKSPACE">
+    <property environment="env" />
+    <condition
+      property="WORKSPACE"
+      value="${env.WORKSPACE}"
+      else="${basedir}">
+      <isset property="env.WORKSPACE" />
+    </condition>
   </target>
 </project>
