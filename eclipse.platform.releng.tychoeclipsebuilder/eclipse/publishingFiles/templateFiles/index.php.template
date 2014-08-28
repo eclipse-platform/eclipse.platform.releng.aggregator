@@ -62,7 +62,16 @@ sfHover = function() {
 }
 if (window.attachEvent) window.attachEvent("onload", sfHover);
 </script>
+
+<style>
+table.testTable { border-collapse: collapse; border: 1px solid black;width:80% }
+.testTable th { text-align: left; padding:2px; border-collapse: collapse; border: 1px solid black;}
+.testTable td { text-align: right; width: 10%; padding:2px; border-collapse: collapse; border: 1px solid black;}
+</style>
+
+
 </head>
+
 <body>
 
 <div id="header">
@@ -202,8 +211,8 @@ relating to its results and unit tests.
 </div>
 
 <div class="homeitem3col">
-<h3>Related Links</h3>
-<ul class="midlist">
+<h3>Test and Log Related Links</h3>
+
 
 <?php
     // for current (modern) builds, test results are always in 
@@ -223,19 +232,30 @@ relating to its results and unit tests.
   // of 'overrideTestColor' marker file.
 
   $boxes=calcTestConfigsRan($testResultsDirName);
+  if ($boxes < 0 ) { 
+        $boxesDisplay = 0;
+  } else {
+        $boxesDisplay = $boxes;
+  }
+  
+  echo "<ul class='midlist'>";
+  /* We'll always display link to logs (as normal link, not using color:inherit;) */
+  echo "<li>View the <a  style=\"text-decoration:none\" title=\"Link to logs.\" href=\"testResults.php\">logs for the current build</a>.</li>\n";
 
   $testResultsStatus = "%testsStatus%";
-    // -3 is special code meaning no testResults directory exists yet.
-    if (($boxes == -3) || ($testResultsStatus === "pending"))   {   
-        $linkColor=inheret;
-        echo "<li>Tests are pending, view the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link to logs.\" href=\"testResults.php\">logs</a> for the current build.</li>\n";
-    }   
-    else {
+  
+
+    /* -3 is special code meaning no testResults directory exists yet. */
+    if (($boxes == -3) || ($testResultsStatus === "pending"))   {  
+        $linkColor = 'inherit';
+        echo "<li>Tests are pending. ".$boxesDisplay." of ".count($expectedTestConfigs)." test configurations are complete.</li>\n";
+        }
+    else { 
         if ($testResultsStatus === "successful") {
             $linkColor = 'green';
         }   
         elseif ($testResultsStatus === "failed") {
-            // note we don't override  'inherit' cases, just 'failed'.
+            /* note we don't override 'inherit' cases, just 'failed' cases. */
             if (file_exists("overrideTestColor")) {
                 $linkColor='green';
             } else {
@@ -243,21 +263,18 @@ relating to its results and unit tests.
             }   
         }   
         else {
-            // This is a fall-through, unexpected case ... just in case testResultsStatus is something we don't expect.
+            /* This is a fall-through, unexpected case ... just in case testResultsStatus is something we don't expect. */
             $testColor='inherit';
         }   
-        echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link to logs and test results.\" href=\"testResults.php\">logs and test results</a> for the current build.</li>\n";
+        echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">test results</a> for the current build. ".$boxesDisplay." of ".count($expectedTestConfigs)." test configurations are complete. \n";
     }   
-    if ($boxes < 0 ) { 
-        $boxesDisplay = 0;
-    } else {
-        $boxesDisplay = $boxes;
-    }
 
-    echo "<ul>\n";
-    echo "<li>".$boxesDisplay." of ".count($expectedTestConfigs)." test configurations are complete.</li>\n";
+  echo "<table class=testTable>\n";
+  echo "<tr>";
+  echo "<th style=\"width:20%\">Tested Platform</th><th>Failed</th><th>Passed</th><th>Skipped</th><th>Total</th><th>Test&nbsp;Time&nbsp;(s)</th>\n";
+    
     foreach ($expectedTestConfigs as $config) {
-        echo "<ul>\n";
+        
         if (isset($testResults[$config])) {
             $testRes = $testResults[$config];
             $failed = $testRes['failCount'];
@@ -270,7 +287,7 @@ relating to its results and unit tests.
             }   
             else {
                 if ($failed > 0) {
-                    // note we don't override  'inherit' cases, just 'failed'.
+                    /* note we don't override  'inherit' cases, just 'failed'. */
                     if (file_exists("overrideTestColor")) {
                         $linkColor='green';
                     } else {
@@ -280,22 +297,29 @@ relating to its results and unit tests.
                     $linkColor='green';
                 }   
             }   
-            // display as list for now. Probably table later.
-            echo "<li>\n";
+            echo "<tr>\n";
+            echo "<th>\n";
             echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
-            echo "  (Failed: ".$failed."   Passed: ".$passed."   Skipped: ".$skipped."   Total: ".$total."   Total test time: ".$duration.")\n";
-            echo "</li>\n";
+            echo "</th>\n";
+            echo "<td>$failed</td><td>$passed</td><td>$skipped</td><td>$total</td><td>$duration</td>\n";
+            echo "</tr>\n";
         }   
         else {
-            // Yes, all configs intentionally links, since all go to the same palce, but if no results yet, would not look like one. 
-            echo "<li>\n";
-            echo "<a style=\"color:inherit;text-decoration:none\" href=\"testResults.php\">".$config."</a>";
-            echo "</li>\n";
+            /* Yes, all configs intentionally links, since all go to the same place, but if no results yet, would not look like one. */
+            $linkColor = 'inherit'; 
+            echo "<tr>\n";
+            echo "<th>\n";
+            echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+            echo "</th>\n";
+            echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>\n";
+            echo "</tr>\n";
         }   
-        echo "</ul>\n";
     }   
+     echo "</table>\n";
+    /* table is contained in last link item */
+    echo "</li>\n";
     echo "</ul>\n";
-
+    echo "</div>\n";
 
     // if (file_exists("performance/performance.php")) {
     // echo "<li>";
@@ -309,9 +333,13 @@ relating to its results and unit tests.
     // }
 ?>
 
+<div class="homeitem3col">
+<h3>Related Links</h3>
+<ul class="midlist">
 <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_4_4.xml#target_environments">Target Platforms and Environments</a></li>
 <li><a href="directory.txt">View the Git repositories used for the current build.</a></li>
 <li><a href="http://wiki.eclipse.org/Platform-releng/How_to_check_integrity_of_downloads">How to verify a download.</a></li>
+</ul>
 
 <?php
     # place holder: we don't currently produce these reports, and
