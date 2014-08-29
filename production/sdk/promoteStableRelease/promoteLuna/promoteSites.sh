@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-export DROP_ID=M20140813-0800
+export DROP_ID=M20140829-0500
 
 #export DL_LABEL=4.4
 #export DL_LABEL_EQ=Luna
-export DL_LABEL=4.4.1RC1
-export DL_LABEL_EQ=LunaSR1RC1
+export DL_LABEL=4.4.1RC2
+export DL_LABEL_EQ=LunaSR1RC2
 
 # for I builds, stable and RCs go to in milestones
 export REPO_SITE_SEGMENT=4.4milestones
@@ -18,13 +18,15 @@ export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
 # These are what precedes main drop directory name
-export DL_TYPE=S
+# For Maintenance, it's always 'M' (from M-build) until it's 'R'. 
+# for main line code, it's 'S' (from I-build) until it's 'R'
+#export DL_TYPE=S
 #export DL_TYPE=R
-#export DL_TYPE=M
+export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?)
 # Could probably compute this tag ... but for now easier to type it in each time.
-export NEW_TAG=S4_4_1_RC1
+export NEW_TAG=S4_4_1_RC2
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
