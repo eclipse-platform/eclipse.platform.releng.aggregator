@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2012 IBM Corporation and others.
+ * Copyright (c) 2004, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     IBH SYSTEMS GmbH - allow removing the consoles
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -58,6 +59,12 @@ import org.eclipse.ui.console.MessageConsoleStream;
 
 public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 
+	final class FixConsole extends MessageConsole {
+		private FixConsole() {
+			super(Messages.getString("AdvancedFixCopyrightAction.0"), null); //$NON-NLS-1$
+		}
+	}
+	
 	private static final int UNIT_OF_WORK = 1;
 	
 	public class FixCopyrightVisitor implements IResourceVisitor {
@@ -161,7 +168,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {
 		log = new HashMap();
-		console = new MessageConsole(Messages.getString("AdvancedFixCopyrightAction.0"), null); //$NON-NLS-1$
+		console = new FixConsole();
 		ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] {console});
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(IConsoleConstants.ID_CONSOLE_VIEW);
