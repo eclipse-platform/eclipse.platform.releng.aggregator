@@ -121,7 +121,7 @@ checkForErrorExit $? "could not unzip master?!"
 # will need to manually cleanup dated backups occasionally
 if [[ -d sdkTempSave ]]
 then
-  NOWDATE=`date -u +%Y%m%d%H%M`
+  NOWDATE=$( date -u +%Y%m%d%H%M )
   NEWNAME=sdkTempSave${NOWDATE}
   mv sdkTempSave ${NEWNAME}
   checkForErrorExit $? "could not mv sdkTempSave to ${NEWNAME}"
@@ -142,6 +142,12 @@ if [[ -e sdkTempSave ]]
 then
   if [[ -e sdkdiffout.txt ]]
   then
+    # note positive why, but I've seen us get here, but NOWDATE not defined yet.
+    # But could happen from various scenerios of deleting files or directories involved.
+    if [[ -z "${NOWDATE}" ]]
+    then
+        NOWDATE=$( date -u +%Y%m%d%H%M )
+    fi
     mv sdkdiffout.txt sdkdiffout${NOWDATE}.txt
     checkForErrorExit $? "could not mv sdkdiffout.txt to sdkdiffout${NOWDATE}.txt"
   fi
