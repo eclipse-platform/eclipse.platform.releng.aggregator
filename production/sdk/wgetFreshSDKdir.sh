@@ -109,8 +109,7 @@ then
   checkForErrorExit $? "Could not remove master.zip"
 fi
 
-#wget -O master.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/snapshot/master.zip
-wget -O master.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip
+wget --no-verbose --no-cache -O master.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip 2>&1;
 checkForErrorExit $? "could not get aggregator?!"
 
 unzip -q ${branch}.zip -d tempeb
@@ -142,17 +141,21 @@ if [[ -e sdkTempSave ]]
 then
   if [[ -e sdkdiffout.txt ]]
   then
-    # note positive why, but I've seen us get here, but NOWDATE not defined yet.
+    # not positive why, but I've seen us get here, but NOWDATE not defined yet.
     # But could happen from various scenerios of deleting files or directories involved.
     if [[ -z "${NOWDATE}" ]]
     then
-        NOWDATE=$( date -u +%Y%m%d%H%M )
+      NOWDATE=$( date -u +%Y%m%d%H%M )
     fi
     mv sdkdiffout.txt sdkdiffout${NOWDATE}.txt
     checkForErrorExit $? "could not mv sdkdiffout.txt to sdkdiffout${NOWDATE}.txt"
   fi
   diff -r sdk sdkTempSave > sdkdiffout.txt
-  checkForErrorExit $? "could not run diff"
+  # It's normal for diff to return '1', if differences are found. returns '0' if no differences found.
+  # No need to 'exit' for either '0' or '1'.
+  # Even '2' may or may not be ok, See "info diff".
+  # So, we'll not check return codes for 'diff'.
+  # checkForErrorExit $? "could not run diff"
 fi
 
 find /shared/eclipse/sdk -name "*.sh" -exec chmod -c +x '{}' \;
