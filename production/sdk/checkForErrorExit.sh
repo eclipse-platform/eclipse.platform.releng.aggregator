@@ -1,3 +1,7 @@
+
+# TODO: an enhanced version was put directly in 'wgetFreshSDKdir.sh' 
+# Should check if this is used anywhere, and delete, if not.
+
 function checkForErrorExit ()
 {
   # arg 1 must be return code, $?
