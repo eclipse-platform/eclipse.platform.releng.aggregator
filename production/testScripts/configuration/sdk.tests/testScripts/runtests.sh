@@ -10,7 +10,7 @@ echo "command line (quoted) as passed into $(basename ${0}): ${@}"
 # for non-production builds.
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:~/bin
 
-source localTestsProperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 
 # should already be defined, by now, in production tests

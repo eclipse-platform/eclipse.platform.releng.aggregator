@@ -32,7 +32,7 @@ function clean()
 
 }
 
-source localbuildproperties.shsource
+source localBuildProperties.shsource
 #   Different versions of Ant are specified here in test script, just to confirm
 #   nothing is specific to any recent version of ant. (Though, some of the machines
 #   have ant 1.6 set as 'default'!)
@@ -53,7 +53,7 @@ export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME
 # This variable signals parts of the script that we are testing the test scripts, 
 # and should not actually start the tests.
 export TESTING_TEST_XML=true
-export ANT_OPTS=-Djava.io.tmpdir=${WORKSPACE}/tmp -Xms500m -Xmx500m 
+export ANT_OPTS=-Xms1024m -Xmx1024m -Djava.io.tmpdir=${WORKSPACE}/tmp 
 
 if [[ "$1" == "-c" ]]
 then

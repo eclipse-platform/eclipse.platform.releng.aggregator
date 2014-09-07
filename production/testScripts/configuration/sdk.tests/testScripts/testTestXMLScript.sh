@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source localbuildproperties.shsource
+source localBuildProperties.shsource
 
 #   Utility to test the test.xml file. It's intended to allow rapid confirmation
 #   that the test.xml file ends up "computing" correct values, for various versions

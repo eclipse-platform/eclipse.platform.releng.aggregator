@@ -3,13 +3,13 @@
 echo "command line as passed into $(basename ${0}): ${*}"
 echo "command line (quoted) as passed into $(basename ${0}): ${@}"
 
-# This file, localTestsProperties.shsource, should never exist or be needed for production machine,
+# This file, localBuildProperties.shsource, should never exist or be needed for production machine,
 # but allows an easy way for a "local user" to provide this file
 # somewhere on the search path ($HOME/bin is common),
 # and it will be included here, thus can provide "override values"
 # to those defined by defaults for production machine.,
 # such as for jvm
-source localTestsProperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 if [[ -z "${propertyFile}" ]]
 then
@@ -34,7 +34,7 @@ echo "PWD: $PWD"
 export jvm=${jvm:-/shared/common/jdk-1.6.x86_64/jre/bin/java}
 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
-# this value in localTestsProperties.shsource. (
+# this value in localBuildProperties.shsource. (
 eclipseArch=${eclipseArch:-x86_64}
 
 # production.properties is used in production tests, 
