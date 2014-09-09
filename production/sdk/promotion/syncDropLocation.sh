@@ -4,9 +4,9 @@ SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
 source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 function sendPromoteMail ()
 {
@@ -104,7 +104,7 @@ function sendPromoteMail ()
     # 4.3.0 Build: I20120411-2034
     SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
 
-  # override in localbuildproperties.shsource if doing local tests
+  # override in localBuildProperties.shsource if doing local tests
   TO=${TO:-"platform-releng-dev@eclipse.org"}
 
   # for initial testing, only to me -- change as desired after initial testing.

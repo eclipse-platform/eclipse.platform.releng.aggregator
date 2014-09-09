@@ -3,9 +3,9 @@
 # Simple utility to run as cronjob to run Eclipse Platform builds
 # Normally resides in $BUILD_HOME
 
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 function usage() {
@@ -41,7 +41,7 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_E
 # Start with minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
 # care is needed not have anything in ${HOME}/bin that would effect the build
-# unintentionally, but is required to make use of "source localbuildproperties.shsource" on
+# unintentionally, but is required to make use of "source localBuildProperties.shsource" on
 # local machines.
 # Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
 # to false) for a test I-build on a remote machine.
@@ -61,9 +61,9 @@ oldumask=`umask`
 umask 0002
 echo "umask explicitly set to 0002, old value was $oldumask" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME
 
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 export BRANCH=R4_3_maintenance_Java8
 export BUILD_TYPE=P
