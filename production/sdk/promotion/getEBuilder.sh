@@ -3,6 +3,8 @@
 # Utility script to "bootstrap" Hudson Eclipse Platform Unit tests, to get the
 # basic files needed to get all the other required files and start the test framework.
 
+source localBuildProperties.shsource
+
 EBUILDER_HASH=$1
 WORKSPACE=$2
 
@@ -42,7 +44,13 @@ then
   then
     rm -fr tempebuilder
   fi
-  wget -O ebuilder.zip --no-verbose http://git.eclipse.org/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
+  
+  if [[ -z "${GIT_HOST}" ]]
+  then
+    GIT_HOST=git.eclipse.org
+  fi
+  
+  wget -O ebuilder.zip --no-verbose http://${GIT_HOST}/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
   unzip -q ebuilder.zip -d tempebuilder
   mkdir -p ${WORKSPACE}/${TARGETNAME}
   rsync --recursive "tempebuilder/${EBUILDER}-${EBUILDER_HASH}/" "${WORKSPACE}/${TARGETNAME}/"

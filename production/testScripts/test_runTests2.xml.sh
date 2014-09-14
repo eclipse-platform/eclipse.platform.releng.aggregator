@@ -60,6 +60,11 @@ then
   clean
 fi
 
+if [[ -z "${GIT_HOST}" ]]
+then
+  GIT_HOST=git.eclipse.org
+fi
+
 # print basic diagnostics and properties
 ant -diagnostics
 java -XshowSettings -version
@@ -69,7 +74,7 @@ java -XshowSettings -version
 #    to simply test the test script itself. The test-all target runs all of those tests.
 
 # Note: currently this file always comes from master, no matter what branch is being built/tested.
-wget -O getEBuilder.xml --no-verbose   http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+wget -O getEBuilder.xml --no-verbose   http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 
 # Can only test the "downloadURL form" if there is a current, accurate build. During development, should use git/master version.
  

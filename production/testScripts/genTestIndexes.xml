@@ -36,7 +36,7 @@
             name="dropsDirXSegment"
             value="${dropsDirSegment}" />
 
-        <property 
+        <property
             name="buildRoot"
             value="${buildHome}/${eclipseStreamMajor}${buildType}" />
 
@@ -80,6 +80,18 @@
     </target>
 
     <target name="generateEclipseIndex" depends="init" >
+
+
+        <condition property="testTemplate" value="perfResults.php.template" else="testResults.php.template">
+          <and>
+            <isset property="job" />
+            <contains string="${job}" substring="-perf-" />
+            </and>
+        </condition>
+
+      <echo message="job: ${job}" />
+      <echo message="testTemplate: ${testTemplate}" />
+
         <condition
             property="generatorClass"
             value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
@@ -119,7 +131,7 @@
                 value="${postingDirectory}/${buildId}" />
             <property
                 name="testResultsTemplateFileName"
-                value="${publishingContent}/templateFiles/testResults.php.template" />
+                value="${publishingContent}/templateFiles/${testTemplate}" />
             <property
                 name="dropTemplateFileName"
                 value="${publishingContent}/templateFiles/index.php.template" />

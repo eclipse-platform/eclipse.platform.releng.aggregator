@@ -31,6 +31,7 @@ then
   exit 1
 fi
 
+JOB_NAME=$3
 
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
@@ -103,7 +104,7 @@ echo " BUILDFILESTR: $BUILDFILESTR"
 BUILDTARGET=" "
 
 devworkspace="${fromDir}/workspace-updateTestResults"
-devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId}"
+devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
 
 echo
 echo "   dev script:   $0"

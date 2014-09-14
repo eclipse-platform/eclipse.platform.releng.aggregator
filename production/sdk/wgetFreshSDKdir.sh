@@ -4,13 +4,15 @@
 # need to manually check and make sure nothing is running or will
 # be running soon.
 
+source localBuildProperties.shsource
+
 # codifying the branch (or tag) to use, so it can be set/chagned in one place
 branch=master
 initScriptTag="h=$branch"
 
 # to use a tag instead of branch, would be tag=X, such as
 # tag=vI20120417-0700, or in full form
-# http://git.eclipse.org/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
+# http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
 
 # = = = = = = =
 
@@ -109,7 +111,12 @@ then
   checkForErrorExit $? "Could not remove master.zip"
 fi
 
-wget --no-verbose --no-cache -O master.zip http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip 2>&1;
+if [[ -z "${GIT_HOST}" ]]
+then
+   GIT_HOST=git.eclipse.org
+fi
+
+wget --no-verbose --no-cache -O master.zip http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip 2>&1;
 checkForErrorExit $? "could not get aggregator?!"
 
 unzip -q ${branch}.zip -d tempeb

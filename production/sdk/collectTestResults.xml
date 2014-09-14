@@ -59,7 +59,7 @@
     </unzip>
 
     <exec executable="/bin/bash">
-      <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}" />
+      <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH} ${job}" />
     </exec>
 
     <delete failonerror="false">
@@ -84,12 +84,32 @@
            with some reasonable default. (Though, if not set in the environment,
            could be a sign that somethign is not as expected?)
      -->
-    <property
-      name="env.HUDSON_HOST"
-      value="hudson.eclipse.org" />
+    <condition property="hudsonHost" value="${env.HUDSON_PERF_HOST}">
+      <and>
+       <isset property="HUDSON_PERF_HOST" />
+       <contains string="${job}" substring="-perf-lin" casesensitive="yes"  />
+      </and>
+    </condition>
+    <!-- if that didn't set hudsonHost, check env variable before using fallback default -->
+    <condition property="hudsonHost" value="${env.HUDSON_HOST}" else="hudson.eclipse.org" >
+       <isset property="env.HUDSON_HOST" />
+    </condition>
+
+
     <property
       name="env.HUDSON_PROTOCOL"
       value="https" />
+    <property
+      name="env.HUDSON_PORT"
+      value="80" />
+
+      <condition property="hudsonPathSegment" value="${env.LINUX_PERF_SEGMENT}" else="hudson">
+        <and>
+         <isset property="env.LINUX_PERF_SEGMENT" />
+         <contains string="${job}" substring="-perf-lin" casesensitive="yes"  />
+        </and>
+      </condition>
+
     <property
       name="env.BUILD_HOME"
       value="/shared/eclipse/builds" />
@@ -135,14 +155,19 @@
     <echo message="buildRoot: ${buildRoot}" />
 
     <echo message="postingDirectory: ${postingDirectory}" />
-    <property
-      name="resultsDir"
-      value="${postingDirectory}/${buildId}/testresults" />
+
+
+    <condition property="resultsDir" value="${postingDirectory}/${buildId}/perfresults" else="${postingDirectory}/${buildId}/testresults">
+       <contains string="${job}" substring="-perf-" casesensitive="yes"  />
+    </condition>
+
     <!-- attempt to create incase hasn't been created yet -->
     <mkdir dir="${resultsDir}" />
+
     <property
       name="hudsonResultRootJobURL"
-      value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}/hudson/job/${job}/${buildNumber}/" />
+      value="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/${job}/${buildNumber}/" />
+
 
     <property
       name="hudsonResultRootURL"
