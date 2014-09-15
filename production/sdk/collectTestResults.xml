@@ -1,61 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-  name="collectTestResults"
-  default="collectTestResults"
-  basedir=".">
+<project name="collectTestResults" default="collectTestResults" basedir=".">
 
     <!-- example properties. Caller normally provides. -->
-  <property
-    name="job"
-    value="ep4-unit-mac64" />
-  <property
-    name="buildNumber"
-    value="49" />
-  <property
-    name="buildId"
-    value="N20121014-2000" />
-  <property
-    name="eclipseStream"
-    value="4.3.0" />
-  <property
-    name="EBUILDER_HASH"
-    value="master" />
+  <property name="job" value="ep4-unit-mac64" />
+  <property name="buildNumber" value="49" />
+  <property name="buildId" value="N20121014-2000" />
+  <property name="eclipseStream" value="4.3.0" />
+  <property name="EBUILDER_HASH" value="master" />
 
 
-  <target
-    name="collectTestResults"
-    depends="init"
-    description="Collect Test Results from Hudson to build machine location.">
+  <target name="collectTestResults" depends="init" description="Collect Test Results from Hudson to build machine location.">
 
 
 
-    <retry
-      retrycount="3"
-      retrydelay="1000">
-      <get
-        ignoreerrors="true"
-        verbose="true"
-        src="${hudsonResultURL}"
-        dest="${tmpzipdir}/archive.zip" />
+    <retry retrycount="3" retrydelay="1000">
+      <get ignoreerrors="true" verbose="true" src="${hudsonResultURL}" dest="${tmpzipdir}/archive.zip" />
     </retry>
 
     <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
-    <retry
-      retrycount="3"
-      retrydelay="1000">
-      <get
-        src="${hudsonTestResultsURL}"
-        dest="${resultsDir}/${job}-${buildNumber}.xml" />
+    <retry retrycount="3" retrydelay="1000">
+      <get src="${hudsonTestResultsURL}" dest="${resultsDir}/${job}-${buildNumber}.xml" />
     </retry>
 
 
-    <unzip
-      overwrite="true"
-      src="${tmpzipdir}/archive.zip"
-      dest="${resultsDir}/">
-      <globmapper
-        from="archive/workarea/${buildId}/eclipse-testing/results/*"
-        to="*" />
+    <unzip overwrite="true" src="${tmpzipdir}/archive.zip" dest="${resultsDir}/">
+      <globmapper from="archive/workarea/${buildId}/eclipse-testing/results/*" to="*" />
     </unzip>
 
     <exec executable="/bin/bash">
@@ -71,9 +40,7 @@
 
   </target>
 
-  <target
-    name="init"
-    unless="collectTestResultsInitialized">
+  <target name="init" unless="collectTestResultsInitialized">
 
     <property environment="env" />
     <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
@@ -86,33 +53,32 @@
      -->
     <condition property="hudsonHost" value="${env.HUDSON_PERF_HOST}">
       <and>
-       <isset property="HUDSON_PERF_HOST" />
-       <contains string="${job}" substring="-perf-lin" casesensitive="yes"  />
+        <isset property="HUDSON_PERF_HOST" />
+        <contains string="${job}" substring="-perf-lin" casesensitive="yes" />
       </and>
     </condition>
     <!-- if that didn't set hudsonHost, check env variable before using fallback default -->
-    <condition property="hudsonHost" value="${env.HUDSON_HOST}" else="hudson.eclipse.org" >
-       <isset property="env.HUDSON_HOST" />
+    <condition property="hudsonHost" value="${env.HUDSON_HOST}" else="hudson.eclipse.org">
+      <isset property="env.HUDSON_HOST" />
     </condition>
 
 
-    <property
-      name="env.HUDSON_PROTOCOL"
-      value="https" />
-    <property
-      name="env.HUDSON_PORT"
-      value="443" />
+    <property name="env.HUDSON_PROTOCOL" value="https" />
+    <property name="env.HUDSON_PORT" value="443" />
 
-      <condition property="hudsonPathSegment" value="${env.LINUX_PERF_SEGMENT}" else="hudson">
-        <and>
-         <isset property="env.LINUX_PERF_SEGMENT" />
-         <contains string="${job}" substring="-perf-lin" casesensitive="yes"  />
-        </and>
-      </condition>
+    <!-- if not set externally, set to eclipse default (for -perf-lin jobs) -->
+    <property name="env.LINUX_PERF_SEGMENT" value="perftests" />
 
-    <property
-      name="env.BUILD_HOME"
-      value="/shared/eclipse/builds" />
+
+
+    <condition property="hudsonPathSegment" value="${env.LINUX_PERF_SEGMENT}" else="hudson">
+      <and>
+        <isset property="env.LINUX_PERF_SEGMENT" />
+        <contains string="${job}" substring="-perf-lin" casesensitive="yes" />
+      </and>
+    </condition>
+
+    <property name="env.BUILD_HOME" value="/shared/eclipse/builds" />
 
     <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
 
@@ -158,41 +124,29 @@
 
 
     <condition property="resultsDir" value="${postingDirectory}/${buildId}/perfresults" else="${postingDirectory}/${buildId}/testresults">
-       <contains string="${job}" substring="-perf-" casesensitive="yes"  />
+      <contains string="${job}" substring="-perf-" casesensitive="yes" />
     </condition>
 
     <!-- attempt to create incase hasn't been created yet -->
     <mkdir dir="${resultsDir}" />
 
-    <property
-      name="hudsonResultRootJobURL"
-      value="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/${job}/${buildNumber}/" />
+    <property name="hudsonResultRootJobURL" value="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/${job}/${buildNumber}/" />
 
 
-    <property
-      name="hudsonResultRootURL"
-      value="${hudsonResultRootJobURL}/artifact/*zip*" />
-    <property
-      name="hudsonResultURL"
-      value="${hudsonResultRootURL}/archive.zip" />
+    <property name="hudsonResultRootURL" value="${hudsonResultRootJobURL}/artifact/*zip*" />
+    <property name="hudsonResultURL" value="${hudsonResultRootURL}/archive.zip" />
     <echo message="hudsonResultURL ${hudsonResultURL} " />
 
-    <property
-      name="hudsonTestResultsURL"
-      value="${hudsonResultRootJobURL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration" />
+    <property name="hudsonTestResultsURL" value="${hudsonResultRootJobURL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration" />
     <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
 
-    <property
-      name="tmpzipdir"
-      value="${resultsDir}/tmp${job}" />
+    <property name="tmpzipdir" value="${resultsDir}/tmp${job}" />
 
 
 
     <mkdir dir="${tmpzipdir}" />
 
-    <property
-      name="collectTestResultsInitialized"
-      value="true" />
+    <property name="collectTestResultsInitialized" value="true" />
 
   </target>
 
