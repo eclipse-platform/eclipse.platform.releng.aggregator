@@ -1,4 +1,6 @@
-<project name="Publish Build" default="default">
+<project
+  name="Publish Build"
+  default="default">
 
 <!-- Properties that must be passed to this script:
   buildDirectory: Path to perform the build in.  (A working directory)
@@ -6,20 +8,29 @@
   buildId:    Build name
   buildLabel:    <buildType>-<buildName>-<timestamp>
 -->
-<property name="result" value="${buildDirectory}/${buildLabel}" />
+  <property
+    name="result"
+    value="${buildDirectory}/${buildLabel}" />
 
 <!--name of generated index page-->
-<property name="indexFileName" value="index.html" />
+  <property
+    name="indexFileName"
+    value="index.html" />
 
-<target name="default">
-  <antcall target="generateIndex" />
-  <antcall target="getStaticFiles" />
-</target>
+  <target
+    name="default"
+    depends="getStaticFiles,generateIndex">
+    <echo message="Site published." />
+  </target>
 
-<target name="generateIndex">
+  <target name="generateIndex">
 
-  <property name="class" value="org.eclipse.releng.generators.TestResultsGenerator" />
-  <taskdef name="indexResults" classname="${class}" />
+    <property
+      name="class"
+      value="org.eclipse.releng.generators.TestResultsGenerator" />
+    <taskdef
+      name="indexResults"
+      classname="${class}" />
 
 <!--
   isBuildTested:  true|false  should JUnit plugin test results be used to generate index page
@@ -37,77 +48,125 @@
 
 -->
 
-  <fail unless="job" />
-  <fail unless="testTemplate" />
-    
-  <condition property="testType" value="perf" else="test">
-    <contains string="${job}" substring="-perf-" />
+
+    <condition
+      property="testType"
+      value="perf"
+      else="test">
+      <and>
+        <isset property="job" />
+        <contains
+          string="${job}"
+          substring="-perf-" />
+      </and>
     </condition>
-  
-  <property name="xmlDirectoryName" value="${result}/${testType}results/xml" />
-  <property name="dropDirectoryName" value="${result}" />
-  <property name="testResultsTemplateFileName" value="${basedir}/templateFiles/${testTemplate}" />
+    <condition
+      property="testTemplate"
+      value="perfResults.php.template"
+      else="testResults.php.template">
+      <and>
+        <isset property="job" />
+        <contains
+          string="${job}"
+          substring="-perf-" />
+      </and>
+    </condition>
+    
+    <property
+      name="xmlDirectoryName"
+      value="${result}/${testType}results/xml" />
+    <property
+      name="dropDirectoryName"
+      value="${result}" />
+    <property
+      name="testResultsTemplateFileName"
+      value="${basedir}/templateFiles/${testTemplate}" />
 <!-- TODO: should require this, and others to be passed in, and fail, if not -->
-  <property name="dropTemplateFileName" value="${basedir}/templateFiles/index.html.template" />
-  <property name="testResultsHtmlFileName" value="${testType}Results.php" />
-  <property name="hrefTestResultsTargetPath" value="${testType}results/html" />
-  <property name="hrefCompileLogsTargetPath" value="compilelogs" />
-  <property name="compileLogsDirectoryName" value="${result}/compilelogs" />
-  <property name="testManifestFileName" value="${basedir}/testManifest.xml" />
+    <property
+      name="dropTemplateFileName"
+      value="${basedir}/templateFiles/index.html.template" />
+    <property
+      name="testResultsHtmlFileName"
+      value="${testType}Results.php" />
+    <property
+      name="hrefTestResultsTargetPath"
+      value="${testType}results/html" />
+    <property
+      name="hrefCompileLogsTargetPath"
+      value="compilelogs" />
+    <property
+      name="compileLogsDirectoryName"
+      value="${result}/compilelogs" />
+    <property
+      name="testManifestFileName"
+      value="${basedir}/testManifest.xml" />
 
 
-  <indexResults
-    isBuildTested="${isBuildTested}"
-    buildType="${buildType}"
-    dropTokenList="${dropTokenList}"
-    platformIdentifierToken="${platformIdentifierToken}"
-    platformSpecificTemplateList="${platformSpecificTemplateList}"
-    dropHtmlFileName="${indexFileName}"
-    xmlDirectoryName="${xmlDirectoryName}"
-    dropDirectoryName="${dropDirectoryName}"
-    testResultsTemplateFileName="${testResultsTemplateFileName}"
-    dropTemplateFileName="${dropTemplateFileName}"
-    testResultsHtmlFileName="${testResultsHtmlFileName}"
-    hrefTestResultsTargetPath="${hrefTestResultsTargetPath}"
-    hrefCompileLogsTargetPath="${hrefCompileLogsTargetPath}"
-    compileLogsDirectoryName="${compileLogsDirectoryName}"
-    testManifestFileName="${testManifestFileName}"
-  />
+    <indexResults
+      isBuildTested="${isBuildTested}"
+      buildType="${buildType}"
+      dropTokenList="${dropTokenList}"
+      platformIdentifierToken="${platformIdentifierToken}"
+      platformSpecificTemplateList="${platformSpecificTemplateList}"
+      dropHtmlFileName="${indexFileName}"
+      xmlDirectoryName="${xmlDirectoryName}"
+      dropDirectoryName="${dropDirectoryName}"
+      testResultsTemplateFileName="${testResultsTemplateFileName}"
+      dropTemplateFileName="${dropTemplateFileName}"
+      testResultsHtmlFileName="${testResultsHtmlFileName}"
+      hrefTestResultsTargetPath="${hrefTestResultsTargetPath}"
+      hrefCompileLogsTargetPath="${hrefCompileLogsTargetPath}"
+      compileLogsDirectoryName="${compileLogsDirectoryName}"
+      testManifestFileName="${testManifestFileName}" />
 
 
 
     <!--  Insert Build Name ... apparently still required, until we can update indexing task directly -->
-    <replace file="${result}/${indexFileName}" token="@build@" value="${buildId}"/>
+    <replace
+      file="${result}/${indexFileName}"
+      token="@build@"
+      value="${buildId}" />
 
 
-    <replace dir="${result}" value="${buildId}">
-      <include name="**/*.php"/>
+    <replace
+      dir="${result}"
+      value="${buildId}">
+      <include name="**/*.php" />
       <replacetoken><![CDATA[@build@]]></replacetoken>
     </replace>
 
-    <replace file="${result}/${indexFileName}" token="@buildlabel@" value="${buildId}"/>
+    <replace
+      file="${result}/${indexFileName}"
+      token="@buildlabel@"
+      value="${buildId}" />
 
-    <replace dir="${result}" value="${buildId}">
-      <include name="**/*.php"/>
+    <replace
+      dir="${result}"
+      value="${buildId}">
+      <include name="**/*.php" />
       <replacetoken><![CDATA[@buildlabel@]]></replacetoken>
     </replace>
 
     <!-- TODO: fix so these replace's are not required -->
 
-</target>
+  </target>
 
 
-<target name="getStaticFiles">
+  <target name="getStaticFiles">
   <!--get static files required in the buildLabel directory-->
-  <copy todir="${result}">
-    <fileset dir="staticDropFiles" />
-  </copy>
+    <copy todir="${result}">
+      <fileset dir="staticDropFiles" />
+    </copy>
 
   <!--copy buildnotes from plugin directories-->
-  <mkdir dir="${result}/buildnotes" />
-  <copy todir="${result}/buildnotes" flatten="true">
-    <fileset dir="${buildDirectory}/plugins" includes="**/buildnotes_*.html" />
-  </copy>
-</target>
+    <mkdir dir="${result}/buildnotes" />
+    <copy
+      todir="${result}/buildnotes"
+      flatten="true">
+      <fileset
+        dir="${buildDirectory}/plugins"
+        includes="**/buildnotes_*.html" />
+    </copy>
+  </target>
 
 </project>
