@@ -1,11 +1,15 @@
 <project
-    name="Helper targets"
-    default="generateEclipseIndex"
-    basedir=".">
+  name="Helper targets"
+  default="generateEclipseIndex"
+  basedir=".">
 
-    <target name="init" depends="initStreamVariables" unless="genTestIndexesInitialized">
-        <fail unless="buildId" />
-        <fail unless="eclipseStream" />
+  <target
+    name="init"
+    depends="initStreamVariables"
+    unless="genTestIndexesInitialized">
+    <fail unless="buildId" />
+    <fail unless="eclipseStream" />
+    <fail unless="job" />
 
 
     <script language="javascript">
@@ -19,187 +23,206 @@
       ]]>
     </script>
 
+    <condition
+      property="testTemplate"
+      value="perfResults.php.template"
+      else="testResults.php.template">
+      <and>
+        <isset property="job" />
+        <contains
+          string="${job}"
+          substring="-perf-" />
+      </and>
+    </condition>
+
+    <echo message="job: ${job}" />
+    <echo message="testTemplate: ${testTemplate}" />
+
      <!--
         TODO: make less exactly hard coded in future
          also, check for validity using "matches" digit*\.digit*\.digit*
       -->
-        <condition
-            property="dropsDirSegment"
-            value="drops4"
-            else="drops">
-            <equals
-                arg1="${eclipseStreamMajor}"
-                arg2="4" />
-        </condition>
+    <condition
+      property="dropsDirSegment"
+      value="drops4"
+      else="drops">
+      <equals
+        arg1="${eclipseStreamMajor}"
+        arg2="4" />
+    </condition>
 
-        <property
-            name="dropsDirXSegment"
-            value="${dropsDirSegment}" />
+    <property
+      name="dropsDirXSegment"
+      value="${dropsDirSegment}" />
 
-        <property
-            name="buildRoot"
-            value="${buildHome}/${eclipseStreamMajor}${buildType}" />
+    <property
+      name="buildRoot"
+      value="${buildHome}/${eclipseStreamMajor}${buildType}" />
 
-        <property
-            name="postingDirectory"
-            value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
+    <property
+      name="postingDirectory"
+      value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
 
-        <property
-            name="EBuilderDir"
-            value="${postingDirectory}/${buildId}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder" />
+    <property
+      name="EBuilderDir"
+      value="${postingDirectory}/${buildId}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder" />
 
         <!-- This is purely a subset of tychoeclipsebuilder files, copyied at build time, so part of
         the results output we are working on, so they will be the same once the tests are done, even if gitCache updated by anohter build,
         or a run from previous test results -->
         <!-- /data/shared/eclipse/builds/4N/master/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles -->
-        <property
-            name="publishingContent"
-            value="${EBuilderDir}/eclipse/publishingFiles" />
+    <property
+      name="publishingContent"
+      value="${EBuilderDir}/eclipse/publishingFiles" />
 
         <!-- This is our new, "safe for every test" location -->
-        <property
-            name="base.builder"
-            value="${postingDirectory}/${buildId}/org.eclipse.releng.basebuilder" />
+    <property
+      name="base.builder"
+      value="${postingDirectory}/${buildId}/org.eclipse.releng.basebuilder" />
 
         <!-- publish.xml expects buildLabel in places, instead of buildId,
              though we use them interchangebly -->
-        <property
-            name="buildLabel"
-            value="${buildId}" />
+    <property
+      name="buildLabel"
+      value="${buildId}" />
 
         <!-- Not sure this is the "working directory" expected. May impact ability
         to get/find "buildNotes"? Need to copy such "source" things at build time. -->
-        <property
-            name="buildDirectory"
-            value="${postingDirectory}/${buildId}" />
+    <property
+      name="buildDirectory"
+      value="${postingDirectory}/${buildId}" />
 
 
-        <property name="genTestIndexesInitialized" value="true"/>
+    <property
+      name="genTestIndexesInitialized"
+      value="true" />
 
 
-    </target>
+  </target>
 
-    <target name="generateEclipseIndex" depends="init" >
+  <target
+    name="generateEclipseIndex"
+    depends="init">
 
 
-        <condition property="testTemplate" value="perfResults.php.template" else="testResults.php.template">
-          <and>
-            <isset property="job" />
-            <contains string="${job}" substring="-perf-" />
-            </and>
-        </condition>
+    <condition
+      property="generatorClass"
+      value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
+      <equals
+        arg1="${hudson}"
+        arg2="true" />
+    </condition>
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
 
-      <echo message="job: ${job}" />
-      <echo message="testTemplate: ${testTemplate}" />
+    <echo message="DEBUG: generatorClass: ${generatorClass}" />
+    <available
+      classname="${generatorClass}"
+      property="class"
+      value="${generatorClass}" />
 
-        <condition
-            property="generatorClass"
-            value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
-            <equals
-                arg1="${hudson}"
-                arg2="true" />
-        </condition>
-        <property
-            name="generatorClass"
-            value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
+    <property
+      name="genTestIndexesdropTokenList"
+      value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
 
-        <echo message="DEBUG: generatorClass: ${generatorClass}" />
-        <available
-            classname="${generatorClass}"
-            property="class"
-            value="${generatorClass}" />
+    <property
+      name="isBuildTested"
+      value="true" />
+    <property
+      name="dropTokenList"
+      value="${genTestIndexesdroptTokenList}" />
+    <property
+      name="platformIdentifierToken"
+      value="%platform%" />
+<!-- Remember, even though we no longer use these, if removed here, results
+    in "index out of bounds" error in the custom ant task  -->
+    <property
+      name="platformSpecificTemplateList"
+      value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
 
-        <property name="genTestIndexesdropTokenList"
-            value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
+    <property
+      name="indexFileName"
+      value="index.php" />
+    <property
+      name="result"
+      value="${postingDirectory}/${buildId}" />
+    <property
+      name="testResultsTemplateFileName"
+      value="${publishingContent}/templateFiles/${testTemplate}" />
+    <property
+      name="dropTemplateFileName"
+      value="${publishingContent}/templateFiles/index.php.template" />
+    <property
+      name="testManifestFileName"
+      value="${publishingContent}/testManifest.xml" />
 
-            <property
-                name="isBuildTested"
-                value="true" />
-            <property name="dropTokenList"
-                value="${genTestIndexesdroptTokenList}" />
-            <property
-                name="platformIdentifierToken"
-                value="%platform%" />
-            <property
-                name="platformSpecificTemplateList"
-                value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
-            <property
-                name="indexFileName"
-                value="index.php" />
-            <property
-                name="result"
-                value="${postingDirectory}/${buildId}" />
-            <property
-                name="testResultsTemplateFileName"
-                value="${publishingContent}/templateFiles/${testTemplate}" />
-            <property
-                name="dropTemplateFileName"
-                value="${publishingContent}/templateFiles/index.php.template" />
-            <property
-                name="testManifestFileName"
-                value="${publishingContent}/testManifest.xml" />
+    <antcall target="publishEclipseIndex">
+    </antcall>
 
-        <antcall target="publishEclipseIndex">
-        </antcall>
+  </target>
 
-    </target>
-
-    <target name="publishEclipseIndex">
+  <target
+    name="publishEclipseIndex"
+    depends="init">
 
 
         <!--regenerate the index page with links to test results -->
-        <ant
-            antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
-            dir="${publishingContent}"
-            target="generateIndex">
-            <property
-                name="isBuildTested"
-                value="true" />
-            <property
-                name="buildType"
-                value="${buildType}" />
-            <property
-                name="dropTokenList"
-                value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
-            <property
-                name="platformIdentifierToken"
-                value="%platform%" />
-            <property
-                name="platformSpecificTemplateList"
-                value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
-            <property
-                name="indexFileName"
-                value="index.php" />
-            <property
-                name="result"
-                value="${postingDirectory}/${buildLabel}" />
-            <property
-                name="testResultsTemplateFileName"
-                value="${publishingContent}/templateFiles/testResults.php.template" />
-            <property
-                name="dropTemplateFileName"
-                value="${publishingContent}/templateFiles/index.php.template" />
-            <property
-                name="testManifestFileName"
-                value="${publishingContent}/testManifest.xml" />
-        </ant>
+    <ant
+      antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
+      dir="${publishingContent}"
+      target="generateIndex">
+      <property
+        name="isBuildTested"
+        value="true" />
+      <property
+        name="buildType"
+        value="${buildType}" />
+      <property
+        name="dropTokenList"
+        value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
+      <property
+        name="platformIdentifierToken"
+        value="%platform%" />
+      <!-- Remember, even though we no longer use these, if removed here, results
+          in "index out of bounds" error in the custom ant task, indexResults.  -->
+      <property
+        name="platformSpecificTemplateList"
+        value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
 
-    </target>
+      <property
+        name="indexFileName"
+        value="index.php" />
+      <property
+        name="result"
+        value="${postingDirectory}/${buildLabel}" />
+      <property
+        name="testResultsTemplateFileName"
+        value="${publishingContent}/templateFiles/${testTemplate}" />
+      <property
+        name="dropTemplateFileName"
+        value="${publishingContent}/templateFiles/index.php.template" />
+      <property
+        name="testManifestFileName"
+        value="${publishingContent}/testManifest.xml" />
+    </ant>
 
-    <target name="initStreamVariables">
+  </target>
 
-        <fail
-            unless="eclipseStream"
-            message="eclipseStream must be provided by caller" />
-        <condition property="streamOK">
-            <matches
-                pattern="\d\.\d\.\d"
-                string="${eclipseStream}" />
-        </condition>
-        <fail
-            message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
-            unless="streamOK" />
-        <script language="javascript">
+  <target name="initStreamVariables">
+
+    <fail
+      unless="eclipseStream"
+      message="eclipseStream must be provided by caller" />
+    <condition property="streamOK">
+      <matches
+        pattern="\d\.\d\.\d"
+        string="${eclipseStream}" />
+    </condition>
+    <fail
+      message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
+      unless="streamOK" />
+    <script language="javascript">
           <![CDATA[
             var eclipseStream = project.getProperty("eclipseStream");
             var pattern = new
@@ -211,8 +234,8 @@
             project.setProperty("eclipseStreamMinor", sArray[2]);
             project.setProperty("eclipseStreamService", sArray[3]);
           ]]>
-        </script>
+    </script>
 
-    </target>
+  </target>
 
 </project>

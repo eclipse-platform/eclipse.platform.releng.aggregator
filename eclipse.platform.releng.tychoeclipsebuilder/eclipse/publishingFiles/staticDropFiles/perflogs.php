@@ -101,14 +101,14 @@ function listLogs($myDir) {
 
 function listDegailedLogs ($machineplatform) {
   echo "<strong>Individual $machineplatform test logs</strong><br />";
-  listLogs("testresults/$machineplatform");
-  if (file_exists("testresults/$machineplatform/crashlogs")) {
+  listLogs("perfresults/$machineplatform");
+  if (file_exists("perfresults/$machineplatform/crashlogs")) {
     echo "<strong>Crash logs captured on $machineplatform</strong>";
-    listLogs("testresults/$machineplatform/crashlogs");
+    listLogs("perfresults/$machineplatform/crashlogs");
   }
-  if (file_exists("testresults/$machineplatform/timeoutScreens")) {
+  if (file_exists("perfresults/$machineplatform/timeoutScreens")) {
     echo "<strong>Screen captures for tests timing out on $machineplatform</strong>";
-    listLogs("testresults/$machineplatform/timeoutScreens");
+    listLogs("perfresults/$machineplatform/timeoutScreens");
   }
 }
 
@@ -121,7 +121,7 @@ P {text-indent: 30pt;}
 </STYLE>
 
 
-<title>Test Logs</title>
+<title>Performance Test Logs</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <meta name="author" content="Eclipse Foundation, Inc." />
 <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
@@ -167,14 +167,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 
 <div id="leftcol">
 <ul id="leftnav">
-<li><a href="logs.php">Logs</a></li>
-<li><a href="testResults.php#UnitTest">Unit Test Results</a></li>
-<li><a href="testResults.php#PluginsErrors">Plugins Containing Compile Errors</a></li>
+<li><a href="perflogs.php">Performance Logs</a></li>
+<li><a href="perfResults.php#UnitTest">Performance Unit Test Results</a></li>
 
-</li>
-<li style="background-image: url(../../../eclipse.org-common/stylesheets/leftnav_fade.jpg); background-repeat: repeat-x; border-style: none;">
-<br /><br /><br /><br /><br />
-</li>
 </ul>
 
 </div>
@@ -183,8 +178,8 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div class="homeitem3col">
 <?php
 
-echo "<title>Test Results for $BUILD_ID </title>\n";
-echo "<h2>Test Results for $BUILD_ID </h2>\n";
+echo "<title>Performance Unit Test Results for $BUILD_ID </title>\n";
+echo "<h2>Performance Unit Test Results for $BUILD_ID </h2>\n";
 
 echo "<h3>Logs</h3>\n";
 
@@ -192,24 +187,16 @@ echo "<h3>Logs</h3>\n";
 </ul>
 </li>
 
-<li>
-<strong><a name="javadoc" id="javadoc"></a>Javadoc Logs</strong>
-<ul>
 
-<?php
-listLogs("compilelogs");
-?>
-</ul>
-</li>
 
 
 <li>
 <ul>
-<strong><a name="console" id="console"></a>Console Logs</strong>
-<p>These logs contain the console output captured while running the JUnit automated tests.</p>
+<strong><a name="console" id="console"></a>Performance Test Console Logs</strong>
+<p>These logs contain the console output captured while running the Performance JUnit automated tests.</p>
 <?php
 
-listLogs("testresults/consolelogs");
+listLogs("perfresults/consolelogs");
 
 listDegailedLogs($expectedTestConfigs[0]);
 listDegailedLogs($expectedTestConfigs[1]);
