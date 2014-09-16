@@ -12,11 +12,11 @@ if [ ! -r "$1" ]; then
   exit 1
 fi
 
+source "$1"
+
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
 source $SCRIPT_PATH/build-functions.shsource
-
-source "$1"
 
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT")
