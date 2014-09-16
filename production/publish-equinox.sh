@@ -17,11 +17,11 @@ if [ ! -r "$1" ]; then
   exit 1
 fi
 
+source "$1"
+
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
 source $SCRIPT_PATH/build-functions.shsource
-
-source "$1"
 
 # USAGE: fn-eq-build-dir ROOT BUILD_ID STREAM
 #   ROOT: /shared/eclipse/builds
