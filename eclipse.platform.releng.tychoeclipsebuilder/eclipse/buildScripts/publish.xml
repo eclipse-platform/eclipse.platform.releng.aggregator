@@ -37,9 +37,29 @@
 
 -->
 
-  <fail unless="job" />
-  <fail unless="testTemplate" />
-    
+  <condition
+    property="testType"
+    value="perf"
+    else="test">
+    <and>
+      <isset property="job" />
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </and>
+  </condition>
+  <condition
+    property="testTemplate"
+    value="perfResults.php.template"
+    else="testResults.php.template">
+    <and>
+      <isset property="job" />
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </and>
+  </condition>
+
   <condition property="testType" value="perf" else="test">
     <contains string="${job}" substring="-perf-" />
     </condition>
