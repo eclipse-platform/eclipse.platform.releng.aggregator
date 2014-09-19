@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export DROP_ID=I20140806-2000
+export DROP_ID=I20140918-0330
 
-export DL_LABEL=4.5M1
-export DL_LABEL_EQ=MarsM1
+export DL_LABEL=4.5M2
+export DL_LABEL_EQ=MarsM2
 
 #export DL_LABEL=4.5.1
 #export DL_LABEL_EQ=MarsSR1
@@ -26,7 +26,7 @@ export DL_TYPE=S
 
 # variables used on tagging aggregator for milestones (and RCs?)
 # Could probably compute this tag ... but for now easier to type it in each time.
-export NEW_TAG=S4_5_0_M1
+export NEW_TAG=S4_5_0_M2
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
@@ -108,6 +108,17 @@ rccode=$?
 if [[ $rccode != 0 ]]
 then
   printf "\n\n\t%s\n\n" "ERROR: tagPromotedBuilds.sh failed."
+  exit $rccode
+fi
+
+# create script that automates the second step, doing all deferred actions at once. 
+# (other than sending final email, and updating b3 aggregation file).
+
+${PROMOTE_IMPL}/createDeferredStepsScript.sh
+rccode=$?
+if [[ $rccode != 0 ]]
+then
+  printf "\n\n\t%s\n\n" "ERROR: createDeferredStepsScript.sh failed."
   exit $rccode
 fi
 
