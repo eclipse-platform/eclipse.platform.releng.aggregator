@@ -23,21 +23,21 @@ function errorExit ()
 {
   MSG=$1
   RETURN_CODE=$2
-  # We will count no message as a warning, but, is intended for caller to provide, 
-  # so is technically a programming error. 
+  # We will count no message as a warning, but, is intended for caller to provide,
+  # so is technically a programming error.
   if [[ -z "{MSG}" ]]
   then
-      printf "/n/tWARNING: /t%s" "Call to errorExit provided no message"  
-      MSG="No message provided."
-   fi
-   // May be legitimate not to provide "exit status", in which case we just use '1'.
-   // TODO: Deluxe version would check for positive integer between 0 and 255
-   if [[ -z "${RETURN_CODE}" ]] 
-   then
-     $RETURN_CODE=1
-   fi
-   # Here is whole purpose of this method.
-   printf "\n\tERROR: \t%s" "${MSG} Exit Status: ${RETURN_CODE}"
+    printf "/n/tWARNING: /t%s" "Call to errorExit provided no message"
+    MSG="No message provided."
+  fi
+  # May be legitimate not to provide "exit status", in which case we just use '1'.
+  # TODO: Deluxe version would check for positive integer between 0 and 255
+  if [[ -z "${RETURN_CODE}" ]]
+  then
+    $RETURN_CODE=1
+  fi
+  # Here is whole purpose of this method.
+  printf "\n\tERROR: \t%s" "${MSG} Exit Status: ${RETURN_CODE}"
 }
 
 function checkForErrorExit ()
@@ -122,11 +122,11 @@ checkForErrorExit $? "could not change directory parent of sdk, ${WORK_DIR}."
 # since some "removes" either won't work, or risk removing things we do not intend.
 if [[ -z "${WORK_DIR}" ]]
 then
-   errorExit "WORK_DIR was not defined."
+  errorExit "WORK_DIR was not defined."
 fi
 if [[ "${WORK_DIR}" == "/" || "${WORK_DIR}" == "${HOME}" ]]
 then
-   errorExit "WORK_DIR inappropriately defined as ${WORK_DIR}"
+  errorExit "WORK_DIR inappropriately defined as ${WORK_DIR}"
 fi
 
 # remove if exists from previous (failed) run
@@ -148,7 +148,7 @@ fi
 
 if [[ -z "${GIT_HOST}" ]]
 then
-   GIT_HOST=git.eclipse.org
+  GIT_HOST=git.eclipse.org
 fi
 
 wget --no-verbose --no-cache -O "${WORK_DIR}/master.zip" http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip 2>&1;
