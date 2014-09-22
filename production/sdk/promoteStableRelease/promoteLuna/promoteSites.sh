@@ -2,14 +2,14 @@
 
 export DROP_ID=M20140910-2310
 
-#export DL_LABEL=4.4
-#export DL_LABEL_EQ=Luna
-export DL_LABEL=4.4.1RC4
-export DL_LABEL_EQ=LunaSR1RC4
+export DL_LABEL=4.4.1
+export DL_LABEL_EQ=LunaSR1
+#export DL_LABEL=4.4.1RC4
+#export DL_LABEL_EQ=LunaSR1RC4
 
 # for I builds, stable and RCs go to in milestones
-export REPO_SITE_SEGMENT=4.4milestones
-#REPO_SITE_SEGMENT=4.4
+#export REPO_SITE_SEGMENT=4.4milestones
+export REPO_SITE_SEGMENT=4.4
 
 export HIDE_SITE=true
 #HIDE_SITE=false
@@ -21,8 +21,8 @@ echo "CL_SITE: ${CL_SITE}"
 # For Maintenance, it's always 'M' (from M-build) until it's 'R'. 
 # for main line code, it's 'S' (from I-build) until it's 'R'
 #export DL_TYPE=S
-#export DL_TYPE=R
-export DL_TYPE=M
+export DL_TYPE=R
+#export DL_TYPE=M
 
 # variables used on tagging aggregator for milestones (and RCs?)
 # Could probably compute this tag ... but for now easier to type it in each time.
@@ -108,6 +108,14 @@ rccode=$?
 if [[ $rccode != 0 ]]
 then
   printf "\n\n\t%s\n\n" "ERROR: tagPromotedBuilds.sh failed."
+  exit $rccode
+fi
+
+${PROMOTE_IMPL}/createDeferredStepsScript.sh
+rccode=$?
+if [[ $rccode != 0 ]]
+then
+  printf "\n\n\t%s\n\n" "ERROR: createDeferredStepsScript.sh failed."
   exit $rccode
 fi
 
