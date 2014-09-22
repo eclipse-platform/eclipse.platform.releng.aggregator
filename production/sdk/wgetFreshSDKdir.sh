@@ -4,7 +4,10 @@
 # need to manually check and make sure nothing is running or will
 # be running soon.
 
-source localBuildProperties.shsource
+source localBuildProperties.shsource 2>/dev/null
+
+# Normally, we should be "working in" /shared/eclipse ... the parent of 'sdk' directory.
+export WORK_DIR=${WORK_DIR:-${PWD}}
 
 # codifying the branch (or tag) to use, so it can be set/chagned in one place
 branch=master
@@ -15,6 +18,27 @@ initScriptTag="h=$branch"
 # http://${GIT_HOST}/c/platform/eclipse.platform.releng.eclipsebuilder.git/plain/scripts/wgetFresh.sh?tag=vI20120417-0700
 
 # = = = = = = =
+
+function errorExit ()
+{
+  MSG=$1
+  RETURN_CODE=$2
+  # We will count no message as a warning, but, is intended for caller to provide, 
+  # so is technically a programming error. 
+  if [[ -z "{MSG}" ]]
+  then
+      printf "/n/tWARNING: /t%s" "Call to errorExit provided no message"  
+      MSG="No message provided."
+   fi
+   // May be legitimate not to provide "exit status", in which case we just use '1'.
+   // TODO: Deluxe version would check for positive integer between 0 and 255
+   if [[ -z "${RETURN_CODE}" ]] 
+   then
+     $RETURN_CODE=1
+   fi
+   # Here is whole purpose of this method.
+   printf "\n\tERROR: \t%s" "${MSG} Exit Status: ${RETURN_CODE}"
+}
 
 function checkForErrorExit ()
 {
@@ -91,23 +115,34 @@ then
   exit 0
 fi
 
-cd /shared/eclipse
-checkForErrorExit $? "could not change directory to /shared/eclipse."
+cd "${WORK_DIR}"
+checkForErrorExit $? "could not change directory parent of sdk, ${WORK_DIR}."
+
+# as a sanity check, we make sure WORK_DIR is defined to be something, and not equal to "/" or ${HOME}
+# since some "removes" either won't work, or risk removing things we do not intend.
+if [[ -z "${WORK_DIR}" ]]
+then
+   errorExit "WORK_DIR was not defined."
+fi
+if [[ "${WORK_DIR}" == "/" || "${WORK_DIR}" == "${HOME}" ]]
+then
+   errorExit "WORK_DIR inappropriately defined as ${WORK_DIR}"
+fi
 
 # remove if exists from previous (failed) run
-if [[ -e tempeb ]]
+if [[ -e "${WORK_DIR}/tempeb" ]]
 then
-  rm -fr tempeb/
-  checkForErrorExit $? "Could not remove contents of tempeb"
+  rm -fr "${WORK_DIR}/tempeb"
+  checkForErrorExit $? "Could not remove directory tempeb"
 else
-  mkdir  tempeb
+  mkdir -p "${WORK_DIR}/tempeb"
   checkForErrorExit $? "could not mkdir tempeb"
 fi
 
 # ditto
-if [[ -e master.zip ]]
+if [[ -e "${WORK_DIR}/master.zip" ]]
 then
-  rm master.zip
+  rm "${WORK_DIR}/master.zip"
   checkForErrorExit $? "Could not remove master.zip"
 fi
 
@@ -116,37 +151,37 @@ then
    GIT_HOST=git.eclipse.org
 fi
 
-wget --no-verbose --no-cache -O master.zip http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip 2>&1;
+wget --no-verbose --no-cache -O "${WORK_DIR}/master.zip" http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/snapshot/master.zip 2>&1;
 checkForErrorExit $? "could not get aggregator?!"
 
-unzip -q ${branch}.zip -d tempeb
+unzip -q "${WORK_DIR}/master.zip" -d "${WORK_DIR}/tempeb"
 checkForErrorExit $? "could not unzip master?!"
 
 # save a copy to diff with (and to revert to if needed)
 # after first moving any previous copies.
 # will need to manually cleanup dated backups occasionally
-if [[ -d sdkTempSave ]]
+if [[ -d "${WORK_DIR}/sdkTempSave" ]]
 then
   NOWDATE=$( date -u +%Y%m%d%H%M )
   NEWNAME=sdkTempSave${NOWDATE}
-  mv sdkTempSave ${NEWNAME}
+  mv "${WORK_DIR}/sdkTempSave" "${WORK_DIR}/${NEWNAME}"
   checkForErrorExit $? "could not mv sdkTempSave to ${NEWNAME}"
 fi
 
 # It won't exist, if first time running script, for example.
 if [[ -e sdk ]]
 then
-  mv sdk sdkTempSave
+  mv "${WORK_DIR}/sdk" "${WORK_DIR}/sdkTempSave"
   checkForErrorExit $? "could not mv sdk to sdkTempSave"
 fi
 
-rsync -r tempeb/master/production/sdk/ sdk
-checkForErrorExit $? "could not rsync -r tempeb/master/production/sdk/ to sdk"
+rsync -r "${WORK_DIR}/tempeb/master/production/sdk/" "${WORK_DIR}/sdk"
+checkForErrorExit $? "could not rsync -r ${WORK_DIR}/tempeb/master/production/sdk/ to ${WORK_DIR}/sdk"
 
-# won't be a sdkTempSave, if first time script is ran, for example.
-if [[ -e sdkTempSave ]]
+# there won't be an sdkTempSave, if first time script is ran, for example.
+if [[ -e "${WORK_DIR}/sdkTempSave" ]]
 then
-  if [[ -e sdkdiffout.txt ]]
+  if [[ -e "${WORK_DIR}/sdkdiffout.txt" ]]
   then
     # not positive why, but I've seen us get here, but NOWDATE not defined yet.
     # But could happen from various scenerios of deleting files or directories involved.
@@ -154,10 +189,10 @@ then
     then
       NOWDATE=$( date -u +%Y%m%d%H%M )
     fi
-    mv sdkdiffout.txt sdkdiffout${NOWDATE}.txt
+    mv "${WORK_DIR}/sdkdiffout.txt" "${WORK_DIR}/sdkdiffout${NOWDATE}.txt"
     checkForErrorExit $? "could not mv sdkdiffout.txt to sdkdiffout${NOWDATE}.txt"
   fi
-  diff -r sdk sdkTempSave > sdkdiffout.txt
+  diff -r ""${WORK_DIR}/sdk" "${WORK_DIR}/sdkTempSave" > "${WORK_DIR}/sdkdiffout.txt"
   # It's normal for diff to return '1', if differences are found. returns '0' if no differences found.
   # No need to 'exit' for either '0' or '1'.
   # Even '2' may or may not be ok, See "info diff".
@@ -165,16 +200,16 @@ then
   # checkForErrorExit $? "could not run diff"
 fi
 
-find /shared/eclipse/sdk -name "*.sh" -exec chmod -c +x '{}' \;
+find "${WORK_DIR}/sdk" -name "*.sh" -exec chmod -c +x '{}' \;
 checkForErrorExit $? "could not run find"
 
 # cleanup
-rm master.zip
+rm "${WORK_DIR}/master.zip"
 checkForErrorExit $? "could not cleanup (rm) master.zip"
-rm -fr tempeb
+rm -fr "${WORK_DIR}/tempeb"
 checkForErrorExit $? "could not cleanup (rm) tempeb"
 
-if [[ -e sdkdiffout.txt ]]
+if [[ -e "${WORK_DIR}/sdkdiffout.txt" ]]
 then
   echo -e "\n\tNormal exit. Check sdkdiffout.txt to confirm expected differences were obtained.\n"
 else
