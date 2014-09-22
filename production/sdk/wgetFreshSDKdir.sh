@@ -209,6 +209,7 @@ checkForErrorExit $? "could not cleanup (rm) master.zip"
 rm -fr "${WORK_DIR}/tempeb"
 checkForErrorExit $? "could not cleanup (rm) tempeb"
 
+# sdkdiff will not always exist, such as, if first time running.
 if [[ -e "${WORK_DIR}/sdkdiffout.txt" ]]
 then
   echo -e "\n\tNormal exit. Check sdkdiffout.txt to confirm expected differences were obtained.\n"
