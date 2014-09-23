@@ -9,42 +9,56 @@ function findEclipseExe ()
 
   BUILD_ID=$1
 
-    if [[ -z "${BUILD_ID}" ]]
-      then
-        echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID" 2>>${TRACE_LOG}
-  return 1
-    fi
+  if [[ -z "${BUILD_ID}" ]]
+  then
+    echo "ERROR: this script, $BASH_SOURCE, requires BUILD_ID" 2>>${TRACE_LOG}
+    return 1
+  fi
 
-    BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse/builds/4I}
+  BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse/builds/4I}
   basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_ID}
   if [[ ! -d "${basebuilderParent}" ]]
+  then
+    echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed." 2>>${TRACE_LOG}
+    echo "    basebuilderParent: ${basebuilderParent}" 2>>${TRACE_LOG}
+    return 1
+  fi
+
+  baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
+  if [[ ! -d "${baseBuilderDir}" ]]
+  then
+    echo "WARNING: The basebuilder directory did not exist as expected. Will re-create." 2>>${TRACE_LOG}
+    EBuilder="${BUILD_ROOT}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
+    # make sure that build repo still exists
+    if [[ ! -d ${EBuilder} ]]
     then
-      echo "ERROR: The directory did not exist. Must name existing directory where basebuilder is, or will be installed." 2>>${TRACE_LOG}
-  echo "    basebuilderParent: ${basebuilderParent}" 2>>${TRACE_LOG}
-  return 1
+      echo "ERROR: the EBuilder directory no longer exists. Can no re-create automatically" 2>>${TRACE_LOG}
+      return 1
     fi
-
-# TODO: we could check basebuilder here and if not, install it?
-#        but not required for immediate use case of using to composite repos.
-
-    baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
+    # assume suitable ant in on path
+    ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=${BUILDMACHINE_BASE_DL}/${DROP_ID}
+    if [[ "$?" != 0 ]]
+    then
+      echo "ERROR: Ant failed while executing getBaseBuilderAndTools.xm" 2>>${TRACE_LOG}
+      return 1
+    fi
     if [[ ! -d "${baseBuilderDir}" ]]
-      then
-        echo "ERROR: The directory did not exist." 2>>${TRACE_LOG}
-  echo "    baseBuilderDir: ${baseBuilderDir}" 2>>${TRACE_LOG}
-  return 1
+    then
+      echo "ERROR: The basebuilder directory could not be re-created." 2>>${TRACE_LOG}
     fi
+    return 1
+  fi
 
-    export ECLIPSE_EXE=$baseBuilderDir/eclipse
-    echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
+  export ECLIPSE_EXE=$baseBuilderDir/eclipse
+  echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
 
   if [[ -n ${ECLIPSE_EXE} && -x ${ECLIPSE_EXE} ]]
-    then
-      echo "Found Eclipse executable: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
+  then
+    echo "Found Eclipse executable: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
   else
     echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse" 2>>${TRACE_LOG}
-  return 1
-    fi
+    return 1
+  fi
 
-    return 0
+  return 0
 }

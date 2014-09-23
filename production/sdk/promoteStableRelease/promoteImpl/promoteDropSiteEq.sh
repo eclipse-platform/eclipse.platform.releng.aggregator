@@ -30,9 +30,20 @@ printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID
 rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
 
 printf "\n\t%s\n" "Doing rename of original."
-# TODO: if ${DL_DROP_ID} already exists, we should remove it,
-# since basically means we are "re-running" the script after
-# running it once.
+
+# if DL_DROP_ID already exists, it is from a previous run we are re-doing, do, 
+# we'll remove first, to make sure it's cleaning re-done.
+if [[ -d ${DL_DROP_ID} ]] 
+then 
+  rm -fr ${DL_DROP_ID}
+  RC=$?
+  if [[ $RC != 0 ]] 
+  then 
+    echo -e "/n/tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
+    exit 1
+   fi
+fi
+
 ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
 
 printf "\n\t%s\n" "Moving backup copy back to original."
