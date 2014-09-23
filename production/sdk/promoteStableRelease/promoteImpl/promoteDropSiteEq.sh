@@ -35,6 +35,7 @@ printf "\n\t%s\n" "Doing rename of original."
 # we'll remove first, to make sure it's cleaning re-done.
 if [[ -d ${DL_DROP_ID} ]] 
 then 
+  echo -e "\n\tWARNING: found and will remove existing, previous, version of ${DL_DROP_ID}"
   rm -fr ${DL_DROP_ID}
   RC=$?
   if [[ $RC != 0 ]] 

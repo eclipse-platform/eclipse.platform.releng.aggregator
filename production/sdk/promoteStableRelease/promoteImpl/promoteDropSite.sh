@@ -35,6 +35,7 @@ printf "\n\t%s\n" "Doing rename of original."
 # we'll remove first, to make sure it's cleaning re-done.
 if [[ -d ${DL_DROP_ID} ]] 
 then 
+  echo -e "\n\tWARNING: found and will remove existing, previous, version of ${DL_DROP_ID}"
   rm -fr ${DL_DROP_ID}
   RC=$?
   if [[ $RC != 0 ]] 
@@ -67,11 +68,14 @@ else
   echo "HIDE_SITE value was ${HIDE_SITE}"
 fi
 
-# as a matter of routine, turn "test color" to green, if not already
-touch ${DL_DROP_ID}/overrideTestColor
-
-# and turn on "news flag"
-touch ${DL_DROP_ID}/news
+if [[ "${DL_TYPE}" =~ [SR] ]]
+then
+  # as a matter of routine, turn "test color" to green, if not already
+  touch ${DL_DROP_ID}/overrideTestColor
+  
+  # and turn on "news flag"
+  touch ${DL_DROP_ID}/news
+fi
 
 printf "\n\t%s\n" "rsync to downloads."
 # Here we can rsync with committer id. For Equinox, we have to create a promotion file.
