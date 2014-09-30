@@ -63,7 +63,7 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_E
 
 export BRANCH=R4_4_maintenance
 export BUILD_TYPE=M
-export STREAM=4.4.1
+export STREAM=4.4.2
 
 eclipseStreamMajor=${STREAM:0:1}
 
