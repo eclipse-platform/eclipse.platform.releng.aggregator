@@ -122,7 +122,20 @@
 
     <echo message="postingDirectory: ${postingDirectory}" />
 
-
+    <!-- 
+       Three possible results directories, per platform/build/job (two related to performance tests, one for regular unit tests). 
+       All of these asssume following naming conventions in Hudson jobs. TODO: in future could/should have properties
+       that describe the tests anyway, so might want to use that, to deside results directories.Currently:
+           ends with -baseline: perfBaselineresults
+           contains -perf- : perfresults
+           else: testresults
+       The first two both contain '-perf-' so important to look for '-baseline' first.
+       The last we assume by default is unit tests, but those jobs should contain '-unit-' if 
+       we ever wanted tighter checking that names were as expected.
+    -->
+    <condition property="resultsDir" value="${postingDirectory}/${buildId}/perfBaselineresults">
+      <contains string="${job}" substring="-baseline" casesensitive="yes" />
+    </condition>
     <condition property="resultsDir" value="${postingDirectory}/${buildId}/perfresults" else="${postingDirectory}/${buildId}/testresults">
       <contains string="${job}" substring="-perf-" casesensitive="yes" />
     </condition>

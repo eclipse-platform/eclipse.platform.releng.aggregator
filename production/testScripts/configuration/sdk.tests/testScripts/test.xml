@@ -118,12 +118,21 @@
     name="setup-zip"
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
-    <delete dir="${install}" />
-    <mkdir dir="${install}" />
+    <condition property="runtimeArchiveExists">
+      <available file="${executionDir}/${runtimeArchive}" />
+    </condition>
+    <fail
+      unless="runtimeArchiveExists"
+      message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
+    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <delete
+      dir="${eclipse-home}"
+      verbose="false" />
+    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
     <exec
-      dir="."
+      dir="${install}"
       executable="unzip">
-      <arg line="-o -qq ${runtimeArchive} -d ${install}" />
+      <arg line="${executionDir}/${runtimeArchive} -d ${install}" />
     </exec>
 
   </target>
@@ -133,12 +142,22 @@
     name="setup-tar.gz"
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
-    <delete dir="${install}" />
-    <mkdir dir="${install}" />
+    <condition property="runtimeArchiveExists">
+      <available file="${executionDir}/${runtimeArchive}" />
+    </condition>
+    <fail
+      unless="runtimeArchiveExists"
+      message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
+    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <delete
+      dir="${eclipse-home}"
+      verbose="false" />
+    <!-- <mkdir dir="${eclipse-home}" /> -->
+    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
     <exec
       dir="${install}"
       executable="tar">
-      <arg line="-xzf ${executionDir}/${runtimeArchive}" />
+      <arg line="-xvzf ${executionDir}/${runtimeArchive} -C ${install}" />
     </exec>
 
   </target>
@@ -155,7 +174,7 @@
     -->
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-linux-gtk.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz">
       <and>
         <os family="unix" />
         <not>
@@ -171,7 +190,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz">
       <and>
         <os family="mac" />
         <os family="unix" />
@@ -183,7 +202,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-macosx-cocoa.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa.tar.gz">
       <and>
         <os family="mac" />
         <os family="unix" />
@@ -194,7 +213,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-win32.zip">
+      value="eclipse-platform-${previousReleaseVersion}-win32.zip">
       <and>
         <os family="windows" />
         <os arch="x86" />
@@ -202,7 +221,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-win32-x86_64.zip">
+      value="eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip">
       <and>
         <os family="windows" />
         <or>
@@ -213,7 +232,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz">
       <and>
         <os family="unix" />
         <or>
@@ -247,8 +266,14 @@
       unless="platformTarget"
       message="platformTarget is not defined. Check that platformArchive variable and value is defined correctly, such as in equinoxp2tests.properties in the appropriate testConfig" />
     <echo message="platformTarget ${platformTarget} platformArchive ${platformArchive}" />
-    <!-- not sure when exactly to expand this? -->
-    <!-- <antcall target="${platformTarget}" /> -->
+    <!-- The "platformArchive" is a minimal, stable vesion of eclipse runtime binary, 
+         that is used only for its "p2Director" application, to install tests into 
+         to target test environment. The intent is to make sure that apart of the tests 
+         works consistently, and does not "break the tests", simply because of some recent 
+         but in p2Director. (while unlikely, these days ... since that code is not under active
+         development ... you never know)
+     -->
+    <antcall target="${platformTarget}" />
   </target>
 
 
@@ -258,17 +283,19 @@
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
     <condition property="platformArchiveExists">
-      <available file="${executionDir}/${platformArchive}" />
+      <available file="${platformLocation}/${platformArchive}" />
     </condition>
     <fail
       unless="platformArchiveExists"
-      message="plaform archive did not exist where expected. platformArchive: ${executionDir}/${platformArchive}" />
-    <delete dir="${platformLocation}" />
-    <mkdir dir="${platformLocation}" />
+      message="plaform archive did not exist where expected. platformArchive: ${platformLocation}/${platformArchive}" />
+    <!-- remove eclipse home directory, to be sure completely fresh -->
+    <delete
+      verbose="true"
+      dir="${platformLocation}/eclipse" />
     <exec
       dir="${platformLocation}"
       executable="unzip">
-      <arg line="-o -qq ${executionDir}/${platformArchive} -d ${executionDir}/${platformLocation}" />
+      <arg line=" ${platformLocation}/${platformArchive} -d ${platformLocation}" />
     </exec>
   </target>
 
@@ -278,19 +305,20 @@
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
     <condition property="platformArchiveExists">
-      <available file="${executionDir}/${platformArchive}" />
+      <available file="${platformLocation}/${platformArchive}" />
     </condition>
     <fail
       unless="platformArchiveExists"
-      message="plaform archive did not exist where expected. platformArchive: ${executionDir}/${platformArchive}" />
+      message="plaform archive did not exist where expected. platformArchive: ${platformLocation}/${platformArchive}" />
 
 
-    <delete dir="${platformLocation}" />
-    <mkdir dir="${platformLocation}" />
+    <delete
+      verbose="true"
+      dir="${platformLocation}/eclipse" />
     <exec
       dir="${platformLocation}"
       executable="tar">
-      <arg line="-xzf ${executionDir}/${platformArchive}" />
+      <arg line="-xvzf ${platformLocation}/${platformArchive} -C ${platformLocation}" />
     </exec>
   </target>
 
@@ -475,7 +503,7 @@
     name="initStreamVariables"
     depends="initDownloadHosts">
 
-    <property file="${configurationDir}/streamSpecific-build.properties" />
+    <property file="${configurationDir}/streamSpecific.properties" />
     <fail
       unless="eclipseStream"
       message="eclipseStream value must be provided by caller, such as '4.3.0'." />
@@ -556,7 +584,7 @@
     <property
       name="eclipse-home"
       value="${install}/eclipse" />
-    <mkdir dir="${eclipse-home}" />
+    <!-- <mkdir dir="${eclipse-home}" /> -->
     <echo message="eclipse-home: ${eclipse-home}" />
 
     <property
@@ -669,7 +697,7 @@
 
     <property
       name="last.release.build.repo"
-      value="http://${DOWNLOAD_HOST}/eclipse/updates/${previousReleaseVersion}" />
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${previousReleaseVersionRepo}" />
     <echo message="last.release.build.repo: ${last.release.build.repo}" />
 
     <!--
@@ -775,13 +803,31 @@
       append="true" />
   </target>
 
+  <!-- runtimeArchive is set to either current, just built SDK, or 
+       if "baselinePerf" has been set to true, then that baselinePerf version is used, 
+       such as for performance baselinePerf run. baselinePerf is set in Hudson
+       job.
+  -->
   <target
     name="setRuntimeArchive"
     unless="runtimeArchive">
+      <!-- we'll check "alt" baselinePerf first. This is what's used for "several releases ago", or similar. -->
+    <condition
+      property="buildIdToUse"
+      value="${baselinePerfAltVersion}">
+      <istrue value="${baselinePerfAlt}" />
+    </condition>
+    <condition
+      property="buildIdToUse"
+      value="${baselinePerfVersion}"
+      else="${buildId}">
+      <istrue value="${baselinePerf}" />
+    </condition>
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
+    <echo message="build id of runtimeArchive ${buildIdToUse}" />
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-win32.zip">
+      value="eclipse-SDK-${buildIdToUse}-win32.zip">
       <and>
         <equals
           arg1="${os}"
@@ -796,7 +842,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-win32-x86_64.zip">
+      value="eclipse-SDK-${buildIdToUse}-win32-x86_64.zip">
       <and>
         <equals
           arg1="${os}"
@@ -811,7 +857,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -826,7 +872,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk-x86_64.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -841,7 +887,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk-ppc64.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk-ppc64.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -856,7 +902,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk-ppc.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk-ppc.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -871,7 +917,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-macosx-cocoa-ppc.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa-ppc.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -886,7 +932,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-macosx-cocoa.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -901,7 +947,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -916,7 +962,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-hpux-gtk-ia64.zip">
+      value="eclipse-SDK-${buildIdToUse}-hpux-gtk-ia64.zip">
       <and>
         <equals
           arg1="${os}"
@@ -931,7 +977,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-solaris-gtk.zip">
+      value="eclipse-SDK-${buildIdToUse}-solaris-gtk.zip">
       <and>
         <equals
           arg1="${os}"
@@ -946,7 +992,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-solaris-gtk-x86.zip">
+      value="eclipse-SDK-${buildIdToUse}-solaris-gtk-x86.zip">
       <and>
         <equals
           arg1="${os}"
@@ -961,7 +1007,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-aix-gtk-ppc.zip">
+      value="eclipse-SDK-${buildIdToUse}-aix-gtk-ppc.zip">
       <and>
         <equals
           arg1="${os}"
@@ -976,7 +1022,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-aix-gtk-ppc64.zip">
+      value="eclipse-SDK-${buildIdToUse}-aix-gtk-ppc64.zip">
       <and>
         <equals
           arg1="${os}"

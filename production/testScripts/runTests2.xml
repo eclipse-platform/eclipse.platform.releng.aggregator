@@ -12,18 +12,54 @@
       name="EOL"
       value="${line.separator}" />
 
+    <property
+      name="selectiveVerbose"
+      value="false" />
     <!-- 
          If not explicitly passed in from caller, assume 'all'. 
          This is the default target already, in global test.xml, 
          but this allows us to be explicit (and, make sure it 
          continues working).
     -->
-    <property name="testSuite" value="all"/>
+    <property
+      name="testSuite"
+      value="all" />
+    <property
+      name="buildURL"
+      value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
+    
+    <!-- we'll check "alt" baselinePerf first. This is what's used for "several releases ago", or similar. -->
+    <condition
+      property="buildIdToUse"
+      value="${baselinePerfAltVersion}">
+      <istrue value="${baselinePerfAlt}"/>
+    </condition>
+    <condition
+      property="archiveLocation"
+      value="${baselinePerfAltLocation}">
+      <istrue value="${baselinePerfAlt}"/>
+    </condition>
+    <!-- if 'baselinePerf' is specified, need to it for "buildId", plus adjust URL to it, not what we just built. Only "tests" always get buildURL -->
+    <condition
+      property="buildIdToUse"
+      value="${baselinePerfVersion}"
+      else="${buildId}">
+      <istrue value="${baselinePerf}"/>
+    </condition>
+    <condition
+      property="archiveLocation"
+      value="${baselinePerfLocation}"
+      else="${buildURL}">
+      <istrue value="${baselinePerf}"/>
+    </condition>
+    <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
+    <echo message="build id of runtimeArchive ${buildIdToUse}" />
 
     <echo message="Variables in 'runTests2.xml'" />
     <echo message="DOWNLOAD_HOST: ${DOWNLOAD_HOST}" />
     <echo message="WORKSPACE: ${WORKSPACE}" />
     <echo message="buildId: ${buildId}" />
+    <echo message="buildIdToUse: ${buildIdToUse}" />
     <echo message="relengBaseBuilderDir: ${relengBaseBuilderDir}" />
     <echo message="configurationDir: ${configurationDir}" />
     <echo message="java.home: ${java.home}" />
@@ -33,9 +69,7 @@
     <echo message="eclipseStreamService: ${eclipseStreamService}" />
     <echo message="buildType: ${buildType}" />
     <echo message="testSuite: ${testSuite}" />
-    <property
-      name="buildURL"
-      value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
+
 
     <!--
          there's nothing "automatic" about the local cache (so far).
@@ -46,6 +80,7 @@
          It is intended to speed up local testing to avoid re-downloading
          files.
      -->
+    <!-- currently, following is dead code. Leaving for now as a reminder to allow localCache again, someday -->
     <condition
       property="archiveLocation"
       value="${localCache}"
@@ -63,106 +98,107 @@
 
   <target
     name="getPlatformIndependentZips"
+    depends="init"
     unless="skipInstall">
 
     <get
       retries="5"
-      src="${archiveLocation}/eclipse-Automated-Tests-${buildId}.zip"
+      verbose="${selectiveVerbose}"
+      src="${buildURL}/eclipse-Automated-Tests-${buildId}.zip"
       dest="${testDir}/eclipse-Automated-Tests-${buildId}.zip" />
     <get
       retries="5"
-      src="${archiveLocation}/eclipse-${buildId}-delta-pack.zip"
-      dest="${executionDir}/eclipse-${buildId}-delta-pack.zip" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-${buildIdToUse}-delta-pack.zip"
+      dest="${executionDir}/eclipse-${buildIdToUse}-delta-pack.zip" />
   </target>
 
   <target
     name="getwinzips"
-    depends="getPlatformIndependentZips"
+    depends="init, getPlatformIndependentZips"
     unless="skipInstall">
     <get
-      src="${archiveLocation}/eclipse-SDK-${buildId}-win32.zip"
-      dest="${executionDir}/eclipse-SDK-${buildId}-win32.zip" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-win32.zip"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-win32.zip" />
     <get
-      src="${archiveLocation}/eclipse-platform-${buildId}-win32.zip"
-      dest="${executionDir}/eclipse-platform-${buildId}-win32.zip" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-win32.zip"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-win32.zip" />
     <get
-      src="${stableDirectorLocation}/eclipse-platform-${previousReleaseVersion}-win32.zip"
-      dest="${executionDir}/platformLocation/eclipse-platform-${previousReleaseVersion}-win32.zip" />
+      verbose="${selectiveVerbose}"
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-win32.zip"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-win32.zip" />
   </target>
   <target
     name="getwinzips64"
-    depends="getPlatformIndependentZips"
+    depends="init, getPlatformIndependentZips"
     unless="skipInstall">
     <get
-      src="${archiveLocation}/eclipse-SDK-${buildId}-win32-x86_64.zip"
-      dest="${executionDir}/eclipse-SDK-${buildId}-win32-x86_64.zip" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-win32-x86_64.zip"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-win32-x86_64.zip" />
     <get
-      src="${archiveLocation}/eclipse-platform-${buildId}-win32-x86_64.zip"
-      dest="${executionDir}/eclipse-platform-${buildId}-win32-x86_64.zip" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-win32-x86_64.zip"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-win32-x86_64.zip" />
     <get
-      src="${stableDirectorLocation}/eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip"
-      dest="${executionDir}/platformLocation/eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip" />
+      verbose="${selectiveVerbose}"
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip" />
   </target>
   <target
     name="getlinzips"
-    depends="getPlatformIndependentZips"
+    depends="init, getPlatformIndependentZips"
     unless="skipInstall">
     <get
-      src="${archiveLocation}/eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz"
-      dest="${executionDir}/eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-linux-gtk-x86_64.tar.gz"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-linux-gtk-x86_64.tar.gz" />
     <get
-      src="${archiveLocation}/eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz"
-      dest="${executionDir}/eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-linux-gtk-x86_64.tar.gz"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-linux-gtk-x86_64.tar.gz" />
     <get
-      src="${stableDirectorLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz"
-      dest="${executionDir}/platformLocation/eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz" />
   </target>
 
   <target
     name="getlinzips32"
-    depends="getPlatformIndependentZips"
+    depends="init, getPlatformIndependentZips"
     unless="skipInstall">
     <get
-      src="${archiveLocation}/eclipse-SDK-${buildId}-linux-gtk.tar.gz"
-      dest="${executionDir}/eclipse-SDK-${buildId}-linux-gtk.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-linux-gtk.tar.gz"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-linux-gtk.tar.gz" />
     <get
-      src="${archiveLocation}/eclipse-platform-${buildId}-linux-gtk.tar.gz"
-      dest="${executionDir}/eclipse-platform-${buildId}-linux-gtk.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-linux-gtk.tar.gz"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-linux-gtk.tar.gz" />
     <get
-      src="${stableDirectorLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz"
-      dest="${executionDir}/platformLocation/eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz" />
   </target>
 
-  <!--
-  <target
-    name="getmaczips"
-    depends="getPlatformIndependentZips"
-    unless="skipInstall">
-    <get
-      src="${archiveLocation}/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz"
-      dest="${executionDir}/eclipse-SDK-${buildId}-macosx-cocoa.tar.gz" />
-    <get
-      src="${archiveLocation}/eclipse-platform-${buildId}-macosx-cocoa.tar.gz"
-      dest="${executionDir}/eclipse-platform-${buildId}-macosx-cocoa.tar.gz" />
-    <get
-      src="${stableDirectorLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa.tar.gz"
-      dest="${executionDir}/platformLocation/eclipse-platform-${previousReleaseVersion}-macosx-cocoa.tar.gz" />
-  </target>
-  -->
-  
   <target
     name="getmacosx"
-    depends="getPlatformIndependentZips"
+    depends="init, getPlatformIndependentZips"
     unless="skipInstall">
     <get
-      src="${archiveLocation}/eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz"
-      dest="${executionDir}/eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.tar.gz"
+      dest="${executionDir}/eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.tar.gz" />
     <get
-      src="${archiveLocation}/eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz"
-      dest="${executionDir}/eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${archiveLocation}/eclipse-platform-${buildIdToUse}-macosx-cocoa-x86_64.tar.gz"
+      dest="${executionDir}/eclipse-platform-${buildIdToUse}-macosx-cocoa-x86_64.tar.gz" />
     <get
-      src="${stableDirectorLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz"
-      dest="${executionDir}/platformLocation/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz" />
+      verbose="${selectiveVerbose}"
+      src="${previousReleaseLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz"
+      dest="${platformLocation}/eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz" />
   </target>
 
   <target
@@ -319,7 +355,15 @@
     <echo message="testPlatform  ${testPlatform}" />
   </target>
 
-  <target name="downloadTargetPlatform">
+  <!-- 
+    Note that in getting the target platform, we nearly always get the 'buildId' version, 
+    the one we just built. But, in somecases, we use "baselinePerf" version for performance 
+    regression testing. In that case, we still get the "buildId" version of tests ... the ones
+    we just built ... only what we run them on changes. 
+    When we do use 'baselinePerf',  that is specified as 'true' in Hudson job, which signals 
+    to use the baselinePerf version defined in 'streamSpecific.properties. 
+  -->
+  <target name="downloadTargetPlatform" depends="init">
     <!-- TODO: should add checks for checksum integrity on downloads. Perhaps use mirror URLs? (though, that'd not effect production) -->
     <fail
       unless="testPlatform"
@@ -454,7 +498,7 @@
       name="executionArguments"
       value="${testScript}" />
 
-    <echo message="=== properties for runTests executable:" />
+    <echo message="=== properties in runTests2, for runTests executable:" />
     <echo message="  = properties used in exec task:" />
     <echo message="      executionDir ${executionDir}" />
     <echo message="      testExecutable ${testExecutable}" />
@@ -485,6 +529,9 @@
     <printProperty property="buildType" />
     <printProperty property="eclipseStream" />
     <printProperty property="previousReleaseVersion" />
+    <printProperty property="previousReleaseVersionRepo" />
+    <printProperty property="baselinePerf" />
+    <printProperty property="baselinePerfAlt" />
     <printProperty property="osgi.os" />
     <printProperty property="osgi.ws" />
     <printProperty property="osgi.arch" />
@@ -582,6 +629,10 @@
     <echo message="apiTestsPreviousBaseDLBaseURL: ${apiTestsPreviousBaseDLBaseURL}" />
     <echo message="apiTestsPreviousBaseWin32Filename: ${apiTestsPreviousBaseWin32Filename}" />
 
+    <echo message="previousReleaseLocation: ${previousReleaseLocation}" />
+    <echo message="previousReleaseVersion: ${previousReleaseVersion}" />
+    <echo message="previousReleaseVersionRepo: ${previousReleaseVersionRepo}" />
+
     <property
       name="initStreamSpecificVariablesComplete"
       value="true" />
@@ -674,7 +725,7 @@
   <target
     name="initStreamVariables"
     unless="streamVariablesInitialized">
-    <property file="${configurationDir}/streamSpecific-build.properties" />
+    <property file="${configurationDir}/streamSpecific.properties" />
     <fail
       unless="eclipseStream"
       message="eclipseStream value must be provided by caller, such as '4.3' or '4.4.2." />
@@ -802,11 +853,6 @@
       value="${executionDir}/platformLocation" />
     <mkdir dir="${platformLocation}" />
     <echo message="platformLocation: ${platformLocation}" />
-
-
-
-
-
 
     <property
       name="directorLogs"
@@ -1006,7 +1052,9 @@
     <printPHPProperty
       phpvar="HUDSON_WORKSPACE"
       value="env.WORKSPACE" />
-
+    <printPHPProperty
+        phpvar="TESTED_RUNTIME_ID"
+        value="${buildIdToUse}" />
      <!--
         We end with an empty line, but it is recommended to not
         end included PHP files with "end PHP" marker.

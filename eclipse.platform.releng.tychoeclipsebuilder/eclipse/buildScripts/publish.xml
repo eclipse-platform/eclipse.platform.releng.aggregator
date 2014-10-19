@@ -36,7 +36,16 @@
 
 
 -->
-
+  <condition
+    property="testType"
+    value="perfBaseline">
+    <and>
+      <isset property="job" />
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </and>
+  </condition>
   <condition
     property="testType"
     value="perf"
@@ -46,6 +55,16 @@
       <contains
         string="${job}"
         substring="-perf-" />
+    </and>
+  </condition>
+  <condition
+    property="testTemplate"
+    value="perfBaselineResults.php.template">
+    <and>
+      <isset property="job" />
+      <contains
+        string="${job}"
+        substring="-baseline" />
     </and>
   </condition>
   <condition
@@ -60,9 +79,12 @@
     </and>
   </condition>
 
+  <condition property="testType" value="perfBaseline">
+    <contains string="${job}" substring="-baseline" />
+  </condition>
   <condition property="testType" value="perf" else="test">
     <contains string="${job}" substring="-perf-" />
-    </condition>
+  </condition>
   
   <property name="xmlDirectoryName" value="${result}/${testType}results/xml" />
   <property name="dropDirectoryName" value="${result}" />
