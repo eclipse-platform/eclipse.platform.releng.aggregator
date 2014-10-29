@@ -409,13 +409,42 @@
       <arg line="-bundlepool ${eclipse-home}" />
     </java>
     <antcall target="configureTeamTest" />
-    <antcall target="unzipderby" />
+    <antcall target="installderby" />
   </target>
 
   <target
-    name="unzipderby"
+    name="installderby"
     if="derby"
     unless="skipDerby">
+    <!-- use p2director, not dropins -->
+    <property name="perfrepoLocation" value="http://build.eclipse.org/eclipse/buildtools"/>
+
+    <java
+      jar="${launcherPath}"
+      failonerror="true"
+      dir="${eclipse-home}"
+      timeout="900000"
+      fork="true"
+      output="${directorLogs}/director-${derby}.log"
+      append="true"
+      resultproperty="directorcode">
+      <arg line="-vm ${java.home}/bin/java" />
+      <arg line="-application org.eclipse.equinox.p2.director" />
+      <arg line="-consoleLog" />
+      <arg line="-debug" />
+      <arg line="-flavor tooling" />
+      <arg
+        line="-installIUs ${derby}" />
+      <arg line="-p2.os ${os}" />
+      <arg line="-p2.ws ${ws}" />
+      <arg line="-p2.arch ${arch}" />
+      <arg line="-roaming" />
+      <arg line="-profile SDKProfile" />
+      <arg line="-repository ${perfrepoLocation}" />
+      <arg line="-destination ${eclipse-home}" />
+      <arg line="-bundlepool ${eclipse-home}" />
+    </java>
+    <!--
     <exec
       dir="."
       executable="unzip">
@@ -426,6 +455,7 @@
         dir="${repoLocation}/eclipse/dropins/eclipse/plugins"
         includes="org.apache.derby**/*" />
     </copy>
+    -->
   </target>
 
   <target
@@ -1256,7 +1286,7 @@
       <!--install db plug-ins if running performance tests-->
       <condition
         property="derby"
-        value="eclipse/dropins/eclipse/plugins/org.apache.derby*/**">
+        value="org.apache.derby.core.feature.feature.group">
         <equals
           arg1="${test.target}"
           arg2="performance" />
@@ -1331,6 +1361,21 @@
     <property
       name="junit-stylesheet"
       value="{executionDir}/JUNIT.XSL" />
+    <!-- 
+        unclear if these "performance values" should go in library.xml, or, here. That is, how far does 'inheritence' go?
+        TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM value"?
+        TODO: as of now, we run baseline "last", so that is when we set "assertAgainst". Kind of counter-intuititive.
+    -->
+    <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
+    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatform=${testedPlatform}" />
+    <condition property="eclipse.perf.assertAgainst" value="build=${buildIdToUse}">
+      <not>
+        <equals arg1="${buildIdToUse}" arg2="${buildId}" />
+      </not>
+    </condition>
+    <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+      <isset property="eclipse.perf.assertAgainst"/>
+    </condition>
     <ant
       antfile="${eclipse-home}/plugins/${testPluginX}"
       dir="${eclipse-home}"
