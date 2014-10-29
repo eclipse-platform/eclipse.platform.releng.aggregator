@@ -703,9 +703,11 @@ public class DB {
                 // remote
                 fIsEmbedded= false;
                 // connect over network
-                if (DEBUG) System.out.println("Trying to connect over network..."); //$NON-NLS-1$
-//                Class.forName(" org.apache.derby.jdbc.ClientDriver"); //$NON-NLS-1$
-                Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
+                // connect over network
+                String driverName = "org.apache.derby.jdbc.ClientDriver"; //$NON-NLS-1$
+                System.out.println("Trying to connect over network, with " + driverName + " ..."); //$NON-NLS-1$ //$NON-NLS-2$
+                Class.forName(driverName);
+                //Class.forName("com.ibm.db2.jcc.DB2Driver"); //$NON-NLS-1$
                 info.put("user", PerformanceTestPlugin.getDBUser());	//$NON-NLS-1$
                 info.put("password", PerformanceTestPlugin.getDBPassword());	//$NON-NLS-1$
                 info.put("retrieveMessagesFromServerOnGetMessage", "true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -714,9 +716,9 @@ public class DB {
 				// remote
 				fIsEmbedded = false;
 				// connect over network
-				if (DEBUG)
-					System.out.println("Trying to connect over network..."); //$NON-NLS-1$
-				Class.forName("org.apache.derby.jdbc.ClientDriver"); //$NON-NLS-1$
+				String driverName = "org.apache.derby.jdbc.ClientDriver"; //$NON-NLS-1$
+				System.out.println("Trying to connect over network with " + driverName + " ..."); //$NON-NLS-1$ //$NON-NLS-2$
+				Class.forName(driverName); 
 				info.put("user", PerformanceTestPlugin.getDBUser()); //$NON-NLS-1$
 				info.put("password", PerformanceTestPlugin.getDBPassword()); //$NON-NLS-1$
 				info.put("create", "true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -752,6 +754,7 @@ public class DB {
             try {
                 fConnection= DriverManager.getConnection("jdbc:" + fDBType + ":" + url, info); //$NON-NLS-1$ //$NON-NLS-2$
             } catch (SQLException e) {
+            	System.out.println("SQLException: " + e); //$NON-NLS-1$
                 if ("08001".equals(e.getSQLState()) && DERBY.equals(fDBType)) { //$NON-NLS-1$
                     if (DEBUG) System.out.println("DriverManager.getConnection failed; retrying for cloudscape"); //$NON-NLS-1$
                     // try Cloudscape
