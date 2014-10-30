@@ -763,7 +763,7 @@ public class DB {
                 } else
                     throw e;
             }
-            if (DEBUG) System.out.println("connect succeeded!"); //$NON-NLS-1$
+            System.out.println("connect succeeded!"); //$NON-NLS-1$
  
             fConnection.setAutoCommit(false);
             fSQL= new SQL(fConnection);
@@ -778,11 +778,14 @@ public class DB {
     }
     
     private void disconnect() {
-		if (DEBUG) {
-			if (fStoreCalled)
+		//if (DEBUG) {
+			if (fStoreCalled) {
 				System.out.println("stored " + fStoredSamples + " new datapoints in DB"); //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				System.out.println("no new datapoints in DB"); //$NON-NLS-1$
+			}
 			System.out.println("disconnecting from DB"); //$NON-NLS-1$
-		}
+		//}
         if (fSQL != null) {
             try {
                 fSQL.dispose();
