@@ -1365,15 +1365,12 @@
     <!-- 
         TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
         TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM value"?
-        TODO: as of now, we run baseline "last", so that is when we set "assertAgainst". Kind of counter-intuititive.
         TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it should. Perhaps needs tweak in Hudson job?
     -->
     <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
     <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatform=${testedPlatform}" />
-    <condition property="eclipse.perf.assertAgainst" value="build=${buildIdToUse}">
-      <not>
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion}">
         <equals arg1="${buildIdToUse}" arg2="${buildId}" />
-      </not>
     </condition>
     <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
       <isset property="eclipse.perf.assertAgainst"/>
