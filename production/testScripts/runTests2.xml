@@ -21,9 +21,9 @@
          but this allows us to be explicit (and, make sure it 
          continues working).
     -->
-    <property
-      name="testSuite"
-      value="all" />
+    <condition property="testSuite" value="${env.testSuite}" else="all">
+      <isset property="env.testSuite" />
+    </condition>
     <property
       name="buildURL"
       value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
@@ -550,6 +550,9 @@
     <printProperty property="javaMajorVersion" />
     <printProperty property="testedPlatform" />
     <printProperty property="eclipse.perf.dbloc" />
+    <printProperty property="eclipse.perf.config" />
+    <printProperty property="eclipse.perf.assertAgainst" />
+    
     <!--
     The following will leave pw in file, which is not a lot different that
     leave them printed in log, as we also do. But, could be improved by just leaving
@@ -623,7 +626,18 @@
     </condition>
 
     <loadproperties srcFile="${configurationDir}/streamSpecific.properties" />
-
+    <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
+    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatform=${testedPlatform}" />
+    <!-- 
+         This "assert" property works, in this contects, because we run baseline first, 
+         where buildIdToUse != buildId (so, no "assert" for that baseline run). 
+    -->
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion}">
+        <equals arg1="${buildIdToUse}" arg2="${buildId}" />
+    </condition>
+    <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+      <isset property="eclipse.perf.assertAgainst"/>
+    </condition>
     <!-- echo a few typically expected properties, to make sure getting right file -->
 
     <echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
@@ -1062,7 +1076,15 @@
         value="test.target" />
     <printPHPProperty
         phpvar="ECLIPSE_PERF_DBLOC"
-        value="eclipse.perf.dbloc" />    
+        value="eclipse.perf.dbloc" />
+    
+    <printPHPProperty 
+         phpvar="ECLIPSE_PERF_CONFIG"
+        value="eclipse.perf.config" />
+    <printPHPProperty 
+         phpvar="ECLIPSE_PERF_ASSERTAGAINST"
+        value="eclipse.perf.assertAgainst" />
+
      <!--
         We end with an empty line, but it is recommended to not
         end included PHP files with "end PHP" marker.
