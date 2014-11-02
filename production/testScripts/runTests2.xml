@@ -52,6 +52,18 @@
       else="${buildURL}">
       <istrue value="${baselinePerf}"/>
     </condition>
+    <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
+    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatform=${testedPlatform}" />
+    <!-- 
+         This "assert" property works, in this contects, because we run baseline first, 
+         where buildIdToUse != buildId (so, no "assert" for that baseline run). 
+    -->
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion}">
+        <equals arg1="${buildIdToUse}" arg2="${buildId}" />
+    </condition>
+    <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+      <isset property="eclipse.perf.assertAgainst"/>
+    </condition>
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
     <echo message="build id of runtimeArchive ${buildIdToUse}" />
 
@@ -626,18 +638,7 @@
     </condition>
 
     <loadproperties srcFile="${configurationDir}/streamSpecific.properties" />
-    <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
-    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatform=${testedPlatform}" />
-    <!-- 
-         This "assert" property works, in this contects, because we run baseline first, 
-         where buildIdToUse != buildId (so, no "assert" for that baseline run). 
-    -->
-    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion}">
-        <equals arg1="${buildIdToUse}" arg2="${buildId}" />
-    </condition>
-    <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
-      <isset property="eclipse.perf.assertAgainst"/>
-    </condition>
+
     <!-- echo a few typically expected properties, to make sure getting right file -->
 
     <echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
