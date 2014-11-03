@@ -54,14 +54,14 @@
     </condition>
     <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
     <!-- buildIdToUse equals either baselinePerfVersion or else equalus buildId. In either case we want to collect the data -->
-    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatform=${testedPlatform}" />
+    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatformConfig=${testedPlatformConfig};jvm=${javaMajorVersion}" />
     <!-- 
          This "assert" property works, in this context, because we run baseline first, 
          when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
          But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data. 
          Note: Order does seem to matter ... so we specify "whole" pattern (though, the "performance doc" implies otherwise).  
     -->
-    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};buildId=${buildId};testedPlatform=${testedPlatform}">
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};buildId=${buildId};testedPlatformConfig=${testedPlatformConfig};jvm=${javaMajorVersion}">
         <equals arg1="${buildIdToUse}" arg2="${buildId}" />
     </condition>
     <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
@@ -523,6 +523,7 @@
     <echo message="      propertiesFile: ${WORKSPACE}/production.properties" />
     <echo message="      jvm: ${jvm}" />
     <echo message="      testedPlatform: ${testedPlatform}" />
+    <echo message="      testedPlatformConfig: ${testedPlatformConfig}" />
 
     <antcall target="runtests" />
 
@@ -564,6 +565,7 @@
     <printProperty property="javaversionEscaped" />
     <printProperty property="javaMajorVersion" />
     <printProperty property="testedPlatform" />
+    <printProperty property="testedPlatformConfig" />
     <printProperty property="eclipse.perf.dbloc" />
     <printProperty property="eclipse.perf.config" />
     <printProperty property="eclipse.perf.assertAgainst" />
@@ -820,6 +822,9 @@
     <mkdir dir="${executionDir}" />
     <echo message="executionDir: ${executionDir}" />
 
+    <property
+      name="testedPlatformConfig"
+      value="${osgi.os}.${osgi.ws}.${osgi.arch}" />
     <property
       name="testedPlatform"
       value="${osgi.os}.${osgi.ws}.${osgi.arch}_${javaMajorVersion}" />
