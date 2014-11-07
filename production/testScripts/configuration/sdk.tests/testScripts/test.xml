@@ -844,12 +844,12 @@
       <!-- we'll check "alt" baselinePerf first. This is what's used for "several releases ago", or similar. -->
     <condition
       property="buildIdToUse"
-      value="${baselinePerfAltVersion}">
+      value="${baselinePerfAltVersionLabel}">
       <istrue value="${baselinePerfAlt}" />
     </condition>
     <condition
       property="buildIdToUse"
-      value="${baselinePerfVersion}"
+      value="${baselinePerfVersionLabel}"
       else="${buildId}">
       <istrue value="${baselinePerf}" />
     </condition>
@@ -1371,20 +1371,34 @@
     -->
     <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
     <!-- buildIdToUse equals either baselinePerfVersion or else equalus buildId. In either case we want to collect the data -->
-    <property name="eclipse.perf.config" value="build=${buildIdToUse};buildId=${buildId};testedPlatformConfig=${testedPlatformConfig};jvm=${javaMajorVersion}" />
+    <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
+               Or, else will take large number of "baselines" averaged? -->
+    <condition property="eclipse.perf.config" 
+              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}">
+         <istrue value="${baselinePerfAlt}"/>
+    </condition>
+    <condition property="eclipse.perf.config"
+              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}"
+              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}">
+            <istrue value="${baselinePerf}"/>
+    </condition>
     <!-- 
          This "assert" property works, in this context, because we run baseline first, 
          when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
          But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data. 
-         Note: Order does seem to matter ... so we specify "whole" pattern (though, the "performance doc" implies otherwise).  
+         Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some experiences makes me doubt that?
+         TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
-    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};buildId=${buildId};testedPlatformConfig=${testedPlatformConfig};jvm=${javaMajorVersion}">
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId};">
         <equals arg1="${buildIdToUse}" arg2="${buildId}" />
     </condition>
-    <condition property="frameworkperfargs" value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
-      <isset property="eclipse.perf.assertAgainst"/>
+    <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
+    <condition property="frameworkperfargs" 
+               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" 
+               else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+         <isset property="eclipse.perf.assertAgainst"/>
     </condition>
-    
+
     <ant
       antfile="${eclipse-home}/plugins/${testPluginX}"
       dir="${eclipse-home}"
