@@ -3,6 +3,9 @@
 # Utility to invoke eclipse antrunner to update test index pages and
 # re-sync dl site.
 
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localBuildProperties.shsource 2>/dev/null
 
 if (( $# < 3 ))
 then
@@ -185,7 +188,8 @@ then
 
   echo " = = Now run performance.ui app"
   devworkspace="${fromDir}/workspace-updatePerfResults"
-  vmargs="-Xmx256m -Declipse.perf.dbloc=//172.25.25.57:1527"
+  eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//172.25.25.57:1527}
+  vmargs="-Xmx256m -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
   # assuming for now the intent is that 'data' is meant to accumulate in common location
