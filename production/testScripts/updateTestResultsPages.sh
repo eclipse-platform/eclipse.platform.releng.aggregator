@@ -185,7 +185,7 @@ then
 
   echo " = = Now run performance.ui app"
   devworkspace="${fromDir}/workspace-updatePerfResults"
-  vmargs="-Xmx256m -Declipse.perf.dbloc=//192.168.1.10:1527"
+  vmargs="-Xmx256m -Declipse.perf.dbloc=//172.25.25.57:1527"
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
   # assuming for now the intent is that 'data' is meant to accumulate in common location
