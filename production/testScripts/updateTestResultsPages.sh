@@ -192,7 +192,7 @@ then
   dataDir=/shared/eclipse/perfdataDir
   mkdir -p $dataDir
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
-  XVFB_RUN="/usr/bin/xvfb-run"
+  XVFB_RUN="xvfb-run"
   XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
   # --server-args -screen 0 1024x768x24"
   # 
