@@ -46,7 +46,7 @@ then
   # permissions for later "clean up" routines.
   mkdir -p "${BUILD_DIR}/${EBUILDER}"
   chmod -c g+ws "${BUILD_DIR}/${EBUILDER}"
-  # note the use of "reference" ... we typically only need a little bit of 
+  # note the use of "reference" ... we typically only need a little bit of
   # new stuff, that the gitCache version doesn't have already, if any.
 
   git clone --reference $aggDir ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}
@@ -79,10 +79,10 @@ else
   popd
 fi
 # prepare a (small) zip, for easy retrieval of "production" files, during unit tests on Hudson.
-# This basic function used to be provided by CGit, but was turned off for "snapshots" of commits, 
+# This basic function used to be provided by CGit, but was turned off for "snapshots" of commits,
 # and was a bit overkill for those doing their own "remote" test builds (or tests).
-# This small zip is stored, unadvertised, on download site, and retrieved as part of the 
-# Hudson test "bootstrap". The "production" directory in general, though, is also 
+# This small zip is stored, unadvertised, on download site, and retrieved as part of the
+# Hudson test "bootstrap". The "production" directory in general, though, is also
 # used during the build itself.
 # (hard to know "where" we are at ... so we'll make sure.
 printf "\n\tDEBUG: %s\n" "About to create EBuilder zip: ${EBUILDER}-${EBUILDER_HASH}.zip"

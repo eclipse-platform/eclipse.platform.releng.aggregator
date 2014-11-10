@@ -266,10 +266,10 @@
       unless="platformTarget"
       message="platformTarget is not defined. Check that platformArchive variable and value is defined correctly, such as in equinoxp2tests.properties in the appropriate testConfig" />
     <echo message="platformTarget ${platformTarget} platformArchive ${platformArchive}" />
-    <!-- The "platformArchive" is a minimal, stable vesion of eclipse runtime binary, 
-         that is used only for its "p2Director" application, to install tests into 
-         to target test environment. The intent is to make sure that apart of the tests 
-         works consistently, and does not "break the tests", simply because of some recent 
+    <!-- The "platformArchive" is a minimal, stable vesion of eclipse runtime binary,
+         that is used only for its "p2Director" application, to install tests into
+         to target test environment. The intent is to make sure that apart of the tests
+         works consistently, and does not "break the tests", simply because of some recent
          but in p2Director. (while unlikely, these days ... since that code is not under active
          development ... you never know)
      -->
@@ -474,7 +474,7 @@
     depends="initWorkspace">
     <!--
        during production testing, previous steps persists some properties
-       that we would otherwise not have access too. Such as those set on 
+       that we would otherwise not have access too. Such as those set on
        Hudson command line.
     -->
     <property file="${WORKSPACE}/production.properties" />
@@ -538,10 +538,10 @@
       unless="eclipseStream"
       message="eclipseStream value must be provided by caller, such as '4.3.0'." />
     <!--
-        Not clear why, but I've seen "eclipseStream" value have a trailing 
+        Not clear why, but I've seen "eclipseStream" value have a trailing
         ?blank? that gets picked up when read in as string.
         Seems it might be a couple of ant issues?
-        Luckily we never use it as a whole string (just major and minor) 
+        Luckily we never use it as a whole string (just major and minor)
         so we can ignore spaces.
     -->
     <condition property="streamOK">
@@ -741,7 +741,7 @@
       that will "evaluate" variables as loaded. Otherwise, the <properties form
       has to move to "top of file" ... outer scope?
      <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
-  
+
     <property
       name="testingPropertiesfile"
       value="${executionDir}/testing.properties" />
@@ -755,7 +755,7 @@
        hard coded in vm.properties)
     -->
     <!-- <property file="vm.properties" /> -->
-    <!--now set in initBasicDirectories 
+    <!--now set in initBasicDirectories
     <property
       name="testedPlatform"
       value="${os}.${ws}.${arch}" />
@@ -770,10 +770,10 @@
       <arg line="-R nouchg ${install}" />
     </exec>
 
-    <!-- 
-         Originally needed/provided for p2 tests, but they appear not to 
-         be successful in reading or using these proerties any longer. 
-         Not clear why. So we'll leave it in until understood. (It may be 
+    <!--
+         Originally needed/provided for p2 tests, but they appear not to
+         be successful in reading or using these proerties any longer.
+         Not clear why. So we'll leave it in until understood. (It may be
          useful in other scenarios, such when tested stand alone?)
      -->
     <property
@@ -793,7 +793,7 @@
       name="org.eclipse.equinox.p2.tests.last.release.build.repo"
       value="${last.release.build.repo}" />
 
-    <!-- 
+    <!--
         It is likely we do not need the equinoxp2propertiesFile any longer,
         during production tests, at least.
     -->
@@ -833,8 +833,8 @@
       append="true" />
   </target>
 
-  <!-- runtimeArchive is set to either current, just built SDK, or 
-       if "baselinePerf" has been set to true, then that baselinePerf version is used, 
+  <!-- runtimeArchive is set to either current, just built SDK, or
+       if "baselinePerf" has been set to true, then that baselinePerf version is used,
        such as for performance baselinePerf run. baselinePerf is set in Hudson
        job.
   -->
@@ -1202,9 +1202,9 @@
     name="getcvstestProperties"
     if="cvsPropertiesAvailable"
     depends="checkCVSPropExists">
-    <!-- 
-    TODO: cvstest.properties (file location) is currently 
-    hard coded in 'runTest2.xml' adn passed along this 'test.xml' 
+    <!--
+    TODO: cvstest.properties (file location) is currently
+    hard coded in 'runTest2.xml' adn passed along this 'test.xml'
     via production.properties. Would be better to have the file location
     be part of the platform specific properties files, as we do with "jvm"
     -->
@@ -1355,46 +1355,46 @@
 
 
   <target
-    name="runSuitePerf" 
+    name="runSuitePerf"
     depends="initStreamVariables"
     if="pluginexists">
     <echo message="testPluginX ${testPluginX}" />
     <property
       name="junit-stylesheet"
       value="{executionDir}/JUNIT.XSL" />
-    <!-- 
+    <!--
         TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
         TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM value"?
         TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it should. Perhaps needs tweak in Hudson job?
-        TODO: would have to compute these in runTest2.xml, to make part of production properties, 
+        TODO: would have to compute these in runTest2.xml, to make part of production properties,
               and phpproperties.php
     -->
     <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
     <!-- buildIdToUse equals either baselinePerfVersion or else equalus buildId. In either case we want to collect the data -->
     <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
                Or, else will take large number of "baselines" averaged? -->
-    <condition property="eclipse.perf.config" 
-              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}">
+    <condition property="eclipse.perf.config"
+              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
          <istrue value="${baselinePerfAlt}"/>
     </condition>
     <condition property="eclipse.perf.config"
-              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}"
-              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}">
+              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
+              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
             <istrue value="${baselinePerf}"/>
     </condition>
-    <!-- 
-         This "assert" property works, in this context, because we run baseline first, 
+    <!--
+         This "assert" property works, in this context, because we run baseline first,
          when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-         But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data. 
+         But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data.
          Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some experiences makes me doubt that?
          TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
-    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId};">
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
         <equals arg1="${buildIdToUse}" arg2="${buildId}" />
     </condition>
     <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
-    <condition property="frameworkperfargs" 
-               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" 
+    <condition property="frameworkperfargs"
+               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
                else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
          <isset property="eclipse.perf.assertAgainst"/>
     </condition>
@@ -1929,13 +1929,13 @@
   </target>
 
   <!-- This and all the performance specific targets
-  are temporary, just to help investigate which work, which 
+  are temporary, just to help investigate which work, which
   don't, etc. -->
   <target
     name="allPerformance"
     depends="init">
 <!-- There are 41 test suites to claim they have
-     performanc targts. These "sub groups" are just 
+     performanc targts. These "sub groups" are just
      and attempt to help investigate which work, which don't, etc. -->
     <antcall target="selectPerformance" />
     <antcall target="otherPerformance" />
@@ -1943,9 +1943,9 @@
 
   </target>
   <!-- This and all the performance specific targets
-  are temporary, just to help investigate which work, which 
-  don't, etc. Visually inspected each, and found these 21 do 
-  have performance targets, which means there's about 20 that 
+  are temporary, just to help investigate which work, which
+  don't, etc. Visually inspected each, and found these 21 do
+  have performance targets, which means there's about 20 that
   have empty peformance targets.
    -->
   <target
@@ -1955,18 +1955,22 @@
     <antcall target="compare" />
     <antcall target="coreresources" />
     <antcall target="coreruntime" />
+    <!-- temp remove, just for quicker testing
     <antcall target="jdtdebug" />
     <antcall target="jdtui" />
+    -->
     <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=443233
     <antcall target="osgi" />
     -->
     <antcall target="pdeui" />
     <antcall target="swt" />
+    <!-- temp remove, just for quicker testing
     <antcall target="teamcvs" />
     <antcall target="ua" />
     <antcall target="uiforms" />
     <antcall target="uiperformance" />
     <antcall target="uircp" />
+    -->
 
   </target>
   <target

@@ -147,9 +147,9 @@ if (isset($testbuildonly) && ($testbuildonly)) {
   echo "</td></tr>\n";
 }
 
-// Use of "BUILD_ID" should work for milestones, and releases, but would require a "copy" 
-// being made, say for "4.5RC4" during that period we have prepared final bits, but have not 
-// made visible yet (if we want "N&N" visible from RC build). 
+// Use of "BUILD_ID" should work for milestones, and releases, but would require a "copy"
+// being made, say for "4.5RC4" during that period we have prepared final bits, but have not
+// made visible yet (if we want "N&N" visible from RC build).
 
 if (file_exists("news/")) {
   echo "<tr><td width=\"75%\"><font size=\"+1\">";
@@ -215,9 +215,9 @@ relating to its results and unit tests.
 
 
 <?php
-    // for current (modern) builds, test results are always in 
+    // for current (modern) builds, test results are always in
     // 'testresults'. That directory only exists after first results
-    // have finished and been "published". 
+    // have finished and been "published".
     if (file_exists("testresults")) {
       $testResultsDirName="testresults";
     } elseif (file_exists("results")) {
@@ -226,13 +226,13 @@ relating to its results and unit tests.
       $testResultsDirName="";
     }
 
-  // The failed is given a value by the "generate Index" tasks, 
+  // The failed is given a value by the "generate Index" tasks,
   // but it is supplimented by "nBoxes" and "count(expectedTestConfigs)"
   // BUT, we want to maintain ability to override color with presence
   // of 'overrideTestColor' marker file.
 
   $boxes=calcTestConfigsRan($testResultsDirName);
-  if ($boxes < 0 ) { 
+  if ($boxes < 0 ) {
     $boxesDisplay = 0;
   } else {
     $boxesDisplay = $boxes;
@@ -246,28 +246,28 @@ relating to its results and unit tests.
 
 
   /* -3 is special code meaning no testResults directory exists yet. */
-  if (($boxes == -3) || ($testResultsStatus === "pending"))   {  
+  if (($boxes == -3) || ($testResultsStatus === "pending"))   {
     $linkColor = 'inherit';
     echo "<li>Integration and unit tests are pending.</li>\n";
   }
-  else { 
+  else {
     if ($testResultsStatus === "successful") {
       $linkColor = 'green';
-    }   
+    }
     elseif ($testResultsStatus === "failed") {
       /* note we don't override 'inherit' cases, just 'failed' cases. */
       if (file_exists("overrideTestColor")) {
         $linkColor='green';
       } else {
         $linkColor = 'red';
-      }   
-    }   
+      }
+    }
     else {
       /* This is a fall-through, unexpected case ... just in case testResultsStatus is something we don't expect. */
       $testColor='inherit';
-    }   
+    }
     echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">test results for the current build.</a>\n";
-  }   
+  }
 
   echo "<table class=testTable>\n";
   echo "<caption>".$boxesDisplay." of ".count($expectedTestConfigs)." test configurations are complete.</caption> \n";
@@ -284,7 +284,7 @@ relating to its results and unit tests.
       $duration = $testRes['duration'];
       if (file_exists("overrideTestColor")) {
         $linkColor='green';
-      }   
+      }
       else {
         if ($failed > 0) {
           /* note we don't override  'inherit' cases, just 'failed'. */
@@ -292,29 +292,29 @@ relating to its results and unit tests.
             $linkColor='green';
           } else {
             $linkColor = 'red';
-          }   
+          }
         } else {
           $linkColor='green';
-        }   
-      }   
+        }
+      }
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
       echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
       echo "</td>\n";
       echo "<td>$failed</td><td>$passed</td><td>$total</td><td>$duration</td>\n";
       echo "</tr>\n";
-    }   
+    }
     else {
       /* Yes, all configs intentionally links, since all go to the same place, but if no results yet, would not look like one. */
-      $linkColor = 'inherit'; 
+      $linkColor = 'inherit';
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
       echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
       echo "</td>\n";
       echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>\n";
       echo "</tr>\n";
-    }   
-  }   
+    }
+  }
   echo "</table>\n";
   /* table is contained in last link item */
   echo "</li>\n";
@@ -435,9 +435,9 @@ relating to its results and unit tests.
   // and once in filename. We want the directory-like part.
   // And to complicate things, in S and R builds, the segment is no longer BUILD_ID,
   // but a more complicated concatination.
-  if ($BUILD_TYPE === "M" && $isRC ) { 
+  if ($BUILD_TYPE === "M" && $isRC ) {
     $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."milestones";
-  }   
+  }
   else {
     if ($BUILD_TYPE === "N" || $BUILD_TYPE === "I" || $BUILD_TYPE === "M" || $BUILD_TYPE === "P" || $BUILD_TYPE === "X" || $BUILD_TYPE === "Y") {
       $STREAM_REPO_NAME=$STREAM_MAJOR.".".$STREAM_MINOR."-".$BUILD_TYPE."-"."builds";
@@ -498,42 +498,42 @@ relating to its results and unit tests.
 <tr><td><div class="homeitem3col">
 <h3><a name="EclipseSDK"> Eclipse SDK&nbsp;<a href="details.html#EclipseSDK"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table BORDER=0 CELLSPACING=2 CELLPADDING=0 WIDTH="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %sdk% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="JUnitPlugin"> JUnit Plugin Tests and Automated Testing Framework&nbsp;<a href="details.html#JUnitPlugin"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %tests% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="ExamplePlugins"> Example Plug-ins&nbsp;<a href="details.html#ExamplePlugins"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %example% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="RCPRuntime"> RCP Runtime Binary&nbsp;<a href="details.html#RCPRuntime"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %rcpruntime% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="RCPSDK"> RCP SDK&nbsp;<a href="details.html#RCPSDK"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %rcpsdk% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="DeltaPack"> DeltaPack&nbsp;<a href="details.html#DeltaPack"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %deltapack% </table>
 </div></td></tr>
 
@@ -541,70 +541,70 @@ relating to its results and unit tests.
 <tr><td><div class="homeitem3col">
 <h3><a name="PlatformRuntime"> Platform Runtime Binary&nbsp;<a href="details.html#PlatformRuntime"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %runtime% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="JDTRuntime"> JDT Runtime Binary&nbsp;<a href="details.html#JDTRuntime"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %jdt% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="JDTSDK"> JDT SDK &nbsp;<a href="details.html#JDTSDK"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %jdtsdk% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="JDTCORE"> JDT Core Batch Compiler &nbsp;<a href="details.html#JDTCORE"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %jdtc% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="PDERuntime"> PDE Runtime Binary&nbsp;<a href="details.html#PDERuntime"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %pde% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="PDESDK"> PDE SDK&nbsp;<a href="details.html#PDESDK"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 %pdesdk% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="CVSRuntime"> CVS Client Runtime Binary&nbsp;<a href="details.html#CVSRuntime"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %cvs% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="CVSSDK"> CVS Client SDK&nbsp;<a href="details.html#CVSSDK"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 %cvssdk% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="SWT"> SWT Binary and Source&nbsp;<a href="details.html#SWT"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %swt% </table>
 </div></td></tr>
 
 <tr><td><div class="homeitem3col">
 <h3><a name="org.eclipse.releng"> org.eclipse.releng.tools plug-in&nbsp;<a href="details.html#org.eclipse.releng"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]"></a></h3>
 <table border=0 cellspacing=2 cellpadding=0 width="99%" bordercolor="#999999" >
-<tr> <td align=RIGHT valign=TOP width="5%"> <div align="left">&nbsp;</div></td><td width="36%"><b>Platform</b></td><?php column($servername); ?>
+<tr> <td width="36%"><b>Platform</b></td><?php column($servername); ?>
 </tr> %relengtools% </table>
 </div></td></tr>
 </table>
@@ -617,8 +617,6 @@ relating to its results and unit tests.
 <li><a href="http://www.eclipse.org/legal/termsofuse.php">Terms of Use</a></li>
 <li>Downloads provided under the <a href="http://www.eclipse.org/legal/epl/notice.html">Eclipse Foundation Software User Agreement</a></li>
 </ul>
-<p>Copyright &copy; 2006-2013 The Eclipse Foundation. All Rights
-Reserved</p>
 </div>
 </body>
 </html>

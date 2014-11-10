@@ -111,7 +111,7 @@ then
   exit $rccode
 fi
 
-# create script that automates the second step, doing all deferred actions at once. 
+# create script that automates the second step, doing all deferred actions at once.
 # (other than sending final email, and updating b3 aggregation file).
 
 ${PROMOTE_IMPL}/createDeferredStepsScript.sh

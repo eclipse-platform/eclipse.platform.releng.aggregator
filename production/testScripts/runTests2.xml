@@ -15,10 +15,10 @@
     <property
       name="selectiveVerbose"
       value="false" />
-    <!-- 
-         If not explicitly passed in from caller, assume 'all'. 
-         This is the default target already, in global test.xml, 
-         but this allows us to be explicit (and, make sure it 
+    <!--
+         If not explicitly passed in from caller, assume 'all'.
+         This is the default target already, in global test.xml,
+         but this allows us to be explicit (and, make sure it
          continues working).
     -->
     <condition property="testSuite" value="${env.testSuite}" else="all">
@@ -27,7 +27,7 @@
     <property
       name="buildURL"
       value="http://${DOWNLOAD_HOST}/eclipse/downloads/${dropsDirSegment}/${buildId}" />
-    
+
     <!-- we'll check "alt" baselinePerf first. This is what's used for "several releases ago", or similar. -->
     <condition
       property="buildIdToUse"
@@ -55,28 +55,28 @@
     <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
     <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
                Or, else will take large number of "baselines" averaged? -->
-    <condition property="eclipse.perf.config" 
-              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}">
+    <condition property="eclipse.perf.config"
+              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
          <istrue value="${baselinePerfAlt}"/>
     </condition>
     <condition property="eclipse.perf.config"
-              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}"
-              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId}">
+              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
+              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
             <istrue value="${baselinePerf}"/>
     </condition>
-    <!-- 
-         This "assert" property works, in this context, because we run baseline first, 
+    <!--
+         This "assert" property works, in this context, because we run baseline first,
          when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-         But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data. 
+         But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data.
          Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some experiences makes me doubt that?
          TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
-    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};buildId=${buildId};">
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
         <equals arg1="${buildIdToUse}" arg2="${buildId}" />
     </condition>
     <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
-    <condition property="frameworkperfargs" 
-               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}" 
+    <condition property="frameworkperfargs"
+               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
                else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
       <isset property="eclipse.perf.assertAgainst"/>
     </condition>
@@ -383,13 +383,13 @@
     <echo message="testPlatform  ${testPlatform}" />
   </target>
 
-  <!-- 
-    Note that in getting the target platform, we nearly always get the 'buildId' version, 
-    the one we just built. But, in somecases, we use "baselinePerf" version for performance 
+  <!--
+    Note that in getting the target platform, we nearly always get the 'buildId' version,
+    the one we just built. But, in somecases, we use "baselinePerf" version for performance
     regression testing. In that case, we still get the "buildId" version of tests ... the ones
-    we just built ... only what we run them on changes. 
-    When we do use 'baselinePerf',  that is specified as 'true' in Hudson job, which signals 
-    to use the baselinePerf version defined in 'streamSpecific.properties. 
+    we just built ... only what we run them on changes.
+    When we do use 'baselinePerf',  that is specified as 'true' in Hudson job, which signals
+    to use the baselinePerf version defined in 'streamSpecific.properties.
   -->
   <target name="downloadTargetPlatform" depends="init">
     <!-- TODO: should add checks for checksum integrity on downloads. Perhaps use mirror URLs? (though, that'd not effect production) -->
@@ -494,7 +494,7 @@
       value="${executionDir}/eclipse-junit-tests-${buildId}.zip" />
     <echo message="repoZip: ${repoZip}" />
     <antcall target="unzipTestFramework" />
-    
+
     <!--
         We print these properties to a file primarily to capture variables that
         might have been set in Hudson, which do not "survive" going through the
@@ -547,7 +547,7 @@
     depends="init">
     <!--
          here we want to print properties, such as passed in via Hudson,
-         that can be used later, by test.xml, but since it is started by as seperate
+         that can be used later, by test.xml, but since it is started by as separate
          processes, there is no direct access to Hudson properties ...
          so we make them persistent. In many cases, the property will not be defined,
          in which case we do not want to write anythng for that property (or, it
@@ -582,7 +582,7 @@
     <printProperty property="eclipse.perf.dbloc" />
     <printProperty property="eclipse.perf.config" />
     <printProperty property="eclipse.perf.assertAgainst" />
-    
+
     <!--
     The following will leave pw in file, which is not a lot different that
     leave them printed in log, as we also do. But, could be improved by just leaving
@@ -1099,11 +1099,11 @@
     <printPHPProperty
         phpvar="ECLIPSE_PERF_DBLOC"
         value="eclipse.perf.dbloc" />
-    
-    <printPHPProperty 
+
+    <printPHPProperty
          phpvar="ECLIPSE_PERF_CONFIG"
         value="eclipse.perf.config" />
-    <printPHPProperty 
+    <printPHPProperty
          phpvar="ECLIPSE_PERF_ASSERTAGAINST"
         value="eclipse.perf.assertAgainst" />
 

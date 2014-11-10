@@ -5,4 +5,4 @@ source bashUtilities.shsource
 T1=
 assertNotEmpty T1
 
-echo "Should NOT see this line"  
+echo "Should NOT see this line"

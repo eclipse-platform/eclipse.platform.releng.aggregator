@@ -1,13 +1,13 @@
 <?php
 
 
-/* 
+/*
 This funtion returns a proper "linux time stamp" so we can compute time
-elapsed since build started ... and give different messages if we exceed 
-certain amounts. 
+elapsed since build started ... and give different messages if we exceed
+certain amounts.
 
-We expect the value to be in the form as saved in "buildproperties.php", 
-namely 
+We expect the value to be in the form as saved in "buildproperties.php",
+namely
 $TIMESTAMP = "20140706-2000";
  */
 function timeOfBuild ($timestamp) {
@@ -44,11 +44,11 @@ function testTimeOfBuild() {
   timeOfBuild("20144101-0001");
 }
 /*
-This function was originally copied from 'createIndex4x.php'. 
-Its purpose is to return number of "test runs completed", based 
-on the names of "console logs" that are present in ./testResults/consolelogs 
+This function was originally copied from 'createIndex4x.php'.
+Its purpose is to return number of "test runs completed", based
+on the names of "console logs" that are present in ./testResults/consolelogs
 directory.
- */ 
+ */
 
 function calcTestConfigsRan($testResultsDirName) {
 
@@ -56,9 +56,9 @@ function calcTestConfigsRan($testResultsDirName) {
   global $testResults;
 
   $boxes=0;
-  // the include file, testConfigs.php defines 'testConfigs' array, 
-  // which consists of strings defining what platforms and vms we test. 
-  // For example, a testConfigs.php file might consist of 
+  // the include file, testConfigs.php defines 'testConfigs' array,
+  // which consists of strings defining what platforms and vms we test.
+  // For example, a testConfigs.php file might consist of
   // <?php
   // $expectedTestConfigs = array();
   // $expectedTestConfigs[]="linux.gtk.x86_64_8.0";
@@ -85,7 +85,7 @@ function calcTestConfigsRan($testResultsDirName) {
     }
   }
 
-  // will be empty until there is at least one test result uploaded? 
+  // will be empty until there is at least one test result uploaded?
   if (empty($testResultsDirName)) {
     // contrived code to mean "no results yet"
     $boxes = -3;
@@ -100,7 +100,7 @@ function calcTestConfigsRan($testResultsDirName) {
         for ($i = 0 ; $i < count($expectedTestConfigs) ; $i++) {
           if (strncmp($file, $expectedTestConfigs[$i], count($expectedTestConfigs[$i])) == 0) {
             $boxes++;
-            // our way of matching job names, with test configs, is very limited, 
+            // our way of matching job names, with test configs, is very limited,
             // at the moment ... just looking for three letter match between the two.
             $keyMatchStrings = array("lin","win","mac");
             foreach ($keyMatchStrings as $keyMatch) {
@@ -115,7 +115,7 @@ function calcTestConfigsRan($testResultsDirName) {
               foreach ($testResultsSummaryFiles as $summFileName) {
                  // echo "DEBUG: processing $summFileName<br />";
                  if (strpos($summFileName, $keyMatch) !== FALSE) {
-                   //echo "DEBUG: found matching summary file: $summFileName<br />"; 
+                   //echo "DEBUG: found matching summary file: $summFileName<br />";
                    $xmlResults = simplexml_load_file($summFileName);
                    $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
                    $testResults[$expectedTestConfigs[$i]]["failCount"]=$xmlResults->failCount;
@@ -136,12 +136,12 @@ function calcTestConfigsRan($testResultsDirName) {
 }
 
 /*
-This function was originally copied from 'createIndex4x.php', where 
-the function was named 'printBuildColumns'. It's be heavily modified 
-to be used on individual build DL page. 
+This function was originally copied from 'createIndex4x.php', where
+the function was named 'printBuildColumns'. It's be heavily modified
+to be used on individual build DL page.
 
-Its purpose is to return a short summary of "state of the tests". 
- */ 
+Its purpose is to return a short summary of "state of the tests".
+ */
 function printTestSummaryStatus() {
 
   include_once("buildproperties.php");

@@ -15,13 +15,13 @@ $testConfigs = array();
 ob_start();
 
 /*
- DL.header.php.html and DL.footer.php.html were original obtained from 
+ DL.header.php.html and DL.footer.php.html were original obtained from
 
 wget http://eclipse.org/eclipse.org-common/themes/solstice/html_template/header.php;
 wget http://eclipse.org/eclipse.org-common/themes/solstice/html_template/footer.php;
 
-and then those files modified to suit our needs. The header required a fair amount of customization, 
-the footer almost none. 
+and then those files modified to suit our needs. The header required a fair amount of customization,
+the footer almost none.
 
 See bug 437494 for a few details.
 https://bugs.eclipse.org/bugs/show_bug.cgi?id=437494
@@ -36,8 +36,8 @@ require("DL.header.php.html");
 page you can find the latest builds produced by
 the <a href="https://www.eclipse.org/eclipse/">Eclipse
 Project</a>. To get started, run the program and go through the user and developer
-documentation provided in the help system or 
-see the <a href="http://help.eclipse.org/">web-based help system</a>. 
+documentation provided in the help system or
+see the <a href="http://help.eclipse.org/">web-based help system</a>.
 If you have problems installing or getting the workbench to run, <a href="https://wiki.eclipse.org/index.php/The_Official_Eclipse_FAQs">check
 out the Eclipse Project FAQ,</a> or try posting a question to the <a href="https://www.eclipse.org/forums/">forum</a>.
 </p>
@@ -49,7 +49,7 @@ For reference, see also
 <a href="build_types.html">meaning of kinds of builds</a> (P,M,N,I,S, and R), and the
 <a href="https://www.eclipse.org/eclipse/platform-releng/buildSchedule.html">build schedule</a>.
 </p>
-<p><img src="new.gif" alt="News Item 1" /> ﻿Eclipse support for Java&trade; 8 is built&ndash;in 
+<p><img src="new.gif" alt="News Item 1" /> ﻿Eclipse support for Java&trade; 8 is built&ndash;in
 to <a href="drops4/R-4.4-201406061215/">Luna (4.4)</a> so it, and all subsequent builds, contain full support
 for <a href="http://www.oracle.com/technetwork/java/javase/overview/index.html">Java&trade; 8</a>.
 For Kepler SR2 (4.3.2), a <a href="https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler">feature patch</a> with
@@ -92,9 +92,9 @@ function calcTestConfigsRan($buildName, $testResultsDirName) {
   global $expectedtestConfigs;
 
   $boxes=0;
-  // the include file, testConfigs.php defines 'testConfigs' array, 
-  // which consists of strings defining what platforms and vms we test. 
-  // For example, a testConfigs.php file might consist of 
+  // the include file, testConfigs.php defines 'testConfigs' array,
+  // which consists of strings defining what platforms and vms we test.
+  // For example, a testConfigs.php file might consist of
   // <?php
   // $expectedTestConfigs = array();
   // $expectedTestConfigs[]="linux.gtk.x86_64_8.0";

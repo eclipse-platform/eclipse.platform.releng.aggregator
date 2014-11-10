@@ -3,7 +3,7 @@
 
 #   Utility to test the runTests2.xml file. It's intended to allow rapid confirmation
 #   that the runTests2.xml file computes correct values, for various versions platforms
-#   and various versions of java and ant, etc. 
+#   and various versions of java and ant, etc.
 
 #   In particular, ant can be invoked with one version of java, but another version
 #   of java used to actually run the tests.
@@ -50,10 +50,10 @@ export JAVA_HOME=/shared/common/jdk1.7.0-latest
 export WORKSPACE=${HOME}/tempworkarea/
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 
-# This variable signals parts of the script that we are testing the test scripts, 
+# This variable signals parts of the script that we are testing the test scripts,
 # and should not actually start the tests.
 export TESTING_TEST_XML=true
-export ANT_OPTS=-Xms1024m -Xmx1024m -Djava.io.tmpdir=${WORKSPACE}/tmp 
+export ANT_OPTS=-Xms1024m -Xmx1024m -Djava.io.tmpdir=${WORKSPACE}/tmp
 
 if [[ "$1" == "-c" ]]
 then
@@ -77,7 +77,7 @@ java -XshowSettings -version
 wget -O getEBuilder.xml --no-verbose   http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 
 # Can only test the "downloadURL form" if there is a current, accurate build. During development, should use git/master version.
- 
+
 
 ANTFILE=getEBuilder.xml
 buildId=N20140823-1500

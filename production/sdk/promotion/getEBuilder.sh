@@ -44,12 +44,12 @@ then
   then
     rm -fr tempebuilder
   fi
-  
+
   if [[ -z "${GIT_HOST}" ]]
   then
     GIT_HOST=git.eclipse.org
   fi
-  
+
   wget -O ebuilder.zip --no-verbose http://${GIT_HOST}/c/platform/${EBUILDER}.git/snapshot/${EBUILDER}-${EBUILDER_HASH}.zip 2>&1
   unzip -q ebuilder.zip -d tempebuilder
   mkdir -p ${WORKSPACE}/${TARGETNAME}
@@ -64,9 +64,6 @@ else
   echo "INFO: ebuilder directory found to exist. Not re-fetching."
   echo "INFO:    ${WORKSPACE}/${TARGETNAME}"
 fi
-# copy to well-known location so subsequent steps do not need to know which ebuilder they came from
-#cp ${WORKSPACE}/${ESCRIPT_LOC}/getBaseBuilder.xml ${WORKSPACE}
-#cp ${WORKSPACE}/${ESCRIPT_LOC}/runTests2.xml ${WORKSPACE}
 
 # remove on clean exit, if they exist
 if [[ -f ebuilder.zip ]]

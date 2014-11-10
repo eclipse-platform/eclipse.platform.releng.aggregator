@@ -18,7 +18,7 @@ export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
 # These are what precedes main drop directory name
-# For Maintenance, it's always 'M' (from M-build) until it's 'R'. 
+# For Maintenance, it's always 'M' (from M-build) until it's 'R'.
 # for main line code, it's 'S' (from I-build) until it's 'R'
 #export DL_TYPE=S
 #export DL_TYPE=R

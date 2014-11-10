@@ -19,7 +19,7 @@ function listLogs($myDir) {
     }
   }
 
-  aDirectory.closedir();
+  $aDirectory->close();
   sort($entries);
 
   if ($index < 0) {

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This is DL_DROP_ID for Eclipse. The one for equinox has DL_LABEL_EQ in middle. 
+# This is DL_DROP_ID for Eclipse. The one for equinox has DL_LABEL_EQ in middle.
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 

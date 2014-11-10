@@ -31,15 +31,15 @@ rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
 
 printf "\n\t%s\n" "Doing rename of original."
 
-# if DL_DROP_ID already exists, it is from a previous run we are re-doing, do, 
+# if DL_DROP_ID already exists, it is from a previous run we are re-doing, do,
 # we'll remove first, to make sure it's cleaning re-done.
-if [[ -d ${DL_DROP_ID} ]] 
-then 
+if [[ -d ${DL_DROP_ID} ]]
+then
   echo -e "\n\tWARNING: found and will remove existing, previous, version of ${DL_DROP_ID}"
   rm -fr ${DL_DROP_ID}
   RC=$?
-  if [[ $RC != 0 ]] 
-  then 
+  if [[ $RC != 0 ]]
+  then
     echo -e "/n/tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
     exit 1
    fi

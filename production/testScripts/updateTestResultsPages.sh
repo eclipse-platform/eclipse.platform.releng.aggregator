@@ -4,22 +4,23 @@
 # re-sync dl site.
 
 
-if (( $# < 2 ))
+if (( $# < 3 ))
 then
   # usage:
   scriptname=$(basename $0)
   printf "\n\t%s\n" "This script, $scriptname requires three arguments, in order: "
   printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.0 or 3.8.0) "
   printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
+  printf "\t\t%s\t%s\n" "jobName" "(e.g. ep4I-unit-lin64) "
   printf "\t%s\n" "for example,"
-  printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 CBI"
+  printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 ep4I-unit-lin64"
   exit 1
 fi
 
 eclipseStream=$1
 if [ -z "${eclipseStream}" ]
 then
-  echo "must provide eclipseStream as first argumnet, for this function $0"
+  echo "must provide eclipseStream as first argument, for this function $0"
   exit 1
 fi
 
@@ -27,11 +28,16 @@ fi
 buildId=$2
 if [ -z "${buildId}" ]
 then
-  echo "must provide buildId as second argumnet, for this function $0"
+  echo "must provide buildId as second argument, for this function $0"
   exit 1
 fi
 
 JOB_NAME=$3
+if [ -z "${JOB_NAME}" ]
+then
+  echo "must provide JOB_NAME as third argument, for this function $0"
+  exit 1
+fi
 
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
@@ -42,7 +48,7 @@ then
   pathToDL=eclipse/downloads/drops$eclipseStreamMajor
 fi
 
-  buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
 
 siteDir=${buildRoot}/siteDir
 
@@ -71,7 +77,7 @@ else
   echo $( $devJRE -version )
 fi
 
-# We use a seperate basebuilder for each "drop", to make sure it is specific for that drop,
+# We use a separate basebuilder for each "drop", to make sure it is specific for that drop,
 # and they won't interfere with each other.
 basebuilderDir=${fromDir}/org.eclipse.releng.basebuilder
 aggregatorDir=${fromDir}/eclipse.platform.releng.aggregator
@@ -88,39 +94,123 @@ ECLIPSE_EXE="${basebuilderDir}/eclipse"
 # somehow, seems like this is often not executable ... I guess launcher jar usually used.
 chmod -c +x $ECLIPSE_EXE
 
+export SWT_GTK3=2
+
 if [ ! -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
 then
   echo "ERROR: ECLIPSE_EXE is not defined or not executable: ${ECLIPSE_EXE}"
   exit 1
 fi
 
-BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
+#if [[ $JOB_NAME =~ ^.*-unit-.*$ ]]
+#then
 
-BUILDFILESTR="-f ${BUILDFILE}"
-echo
-echo " BUILDFILESTR: $BUILDFILESTR"
+  BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
 
-# provide blank, to get default
-BUILDTARGET=" "
+  BUILDFILESTR="-f ${BUILDFILE}"
+  echo
+  echo " BUILDFILESTR: $BUILDFILESTR"
 
-devworkspace="${fromDir}/workspace-updateTestResults"
-devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
+  # provide blank, to get default
+  BUILDTARGET=" "
 
-echo
-echo "   dev script:   $0"
-echo "   devworkspace: $devworkspace"
-echo "   devArgs:      $devArgs"
-echo "   devJRE:       $devJRE"
-echo "   BUILDFILESTR: $BUILDFILESTR"
-echo
+  devworkspace="${fromDir}/workspace-updateTestResults"
+  devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
 
-if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
+  echo
+  echo " = = Properties in updateTestResultsPages.sh: -unit- section  = = "
+  echo "   dev script:   $0"
+  echo "   BUILD_HOME:   ${BUILD_HOME}"
+  echo "   devworkspace: $devworkspace"
+  echo "   devArgs:      $devArgs"
+  echo "   devJRE:       $devJRE"
+  echo "   BUILDFILESTR: $BUILDFILESTR"
+  echo "   job:          $JOB_NAME"
+  echo
+
+  if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
+  then
+
+    ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -consolelog -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
+    RC=$?
+    if [[ $RC != 0 ]]
+    then
+      echo "ERROR: eclipse returned non-zero return code, exiting with RC: $RC."
+      exit $RC
+    fi
+  else
+    echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse."
+    RC=1
+    exit $RC
+  fi
+
+#fi
+
+perfJobPattern="^.*-perf-.*$"
+perfBaselineJobPattern="^.*-perf-baseline.*$"
+if [[ $JOB_NAME =~ $perfJobPattern ]]
 then
+  devworkspace="${fromDir}/workspace-installDerbyCore"
+  devArgs="-Xmx256m"
 
-  ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -console -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
+  echo "Collected a performance run result. Doing performance analysis"
+  echo
+  echo " = = Properties in updateTestResultsPages.sh: -perf- section  = = "
+  echo "   dev script:   $0"
+  echo "   buildRoot:    $buildRoot"
+  echo "   BUILD_HOME:   ${BUILD_HOME}"
+  echo "   pathToDL:     $pathToDL"
+  echo "   siteDir:      $siteDir"
+  echo "   fromDir:      $fromDir"
+  echo "   devworkspace: $devworkspace"
+  echo "   devArgs:      $devArgs"
+  echo "   devJRE:       $devJRE"
+  echo "   BUILDFILESTR: $BUILDFILESTR"
+  echo "   job:          $JOB_NAME"
+  echo
+  echo " = = First, installing derby"
+  # make sure derby.core is installed in basebuilder
+  perfrepoLocation=http://build.eclipse.org/eclipse/buildtools
+  derby=org.apache.derby.core.feature.feature.group
+  echo "   perfrepoLocation:   $perfrepoLocation"
+  echo "   derby:              $derby"
+
+  ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.equinox.p2.director -repository ${perfrepoLocation} -installIUs ${derby} -vm $devJRE -vmargs $devArgs
   RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: eclipse returned non-zero return code while installing derby, exiting with RC: $RC."
+    exit $RC
+  fi
+
+  echo " = = Now run performance.ui app"
+  devworkspace="${fromDir}/workspace-updatePerfResults"
+  vmargs="-Xmx256m -Declipse.perf.dbloc=//192.168.1.10:1527"
+  postingDirectory=$fromDir
+  perfOutput=$postingDirectory/performance
+  # assuming for now the intent is that 'data' is meant to accumulate in common location
+  dataDir=/shared/eclipse/perfdataDir
+  mkdir -p $dataDir
+  # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
+  XVFB_RUN="/usr/bin/xvfb-run"
+  XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
+  # --server-args -screen 0 1024x768x24"
+  # 
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -output $perfOutput -dataDir ${dataDir} -print -vm ${devJRE}  -vmargs ${vmargs}
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: eclipse returned non-zero return code while using xvfb to invoke performance.ui app, exiting with RC: $RC."
+    exit $RC
+  fi
+  # if not the baseline pattern, run the "generate index" script
+  if [[ ! $JOB_NAME =~ $perfBaselineJobPattern ]]
+  then
+    echo "temporarily "hard copy" performance.php.template as a sanity check to  ${fromDir}/performance/performance.php."
+    # should eventually go trough "index"? 
+    cp -v ${aggregatorDir}/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles/templateFiles/performance.php.template  ${fromDir}/performance/performance.php
+  fi
 else
-  echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse"
-  RC=1
+  echo "Not a performance run result, exiting without performance analysis."
+  exit 0
 fi
-exit $RC

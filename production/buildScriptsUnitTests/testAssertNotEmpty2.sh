@@ -5,7 +5,7 @@ source bashUtilities.shsource
 T1="some value"
 assertNotEmpty T1
 
-echo "Should see this line"  
+echo "Should see this line"
 
 function testDiagMsg
 {

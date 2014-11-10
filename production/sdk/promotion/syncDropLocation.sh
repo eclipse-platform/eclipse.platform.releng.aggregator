@@ -56,18 +56,18 @@ function sendPromoteMail ()
 
   comparatorLogRelPath="buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt"
   fsDocRoot="/home/data/httpd/download.eclipse.org"
-  # comparator log is always about 200 or 300 bytes, since it contains some 
+  # comparator log is always about 200 or 300 bytes, since it contains some
   # identifying information, such as
-  # = = = = 
+  # = = = =
   #    Comparator differences from current build
   #    /shared/eclipse/builds/4N/siteDir/eclipse/downloads/drops4/N20140705-1700
-  #       compared to reference repo at 
+  #       compared to reference repo at
   #     http://download.eclipse.org/eclipse/updates/4.5-I-builds
   # = = = =
-  # So we'll set "500 bytes" as minimum which should both ignore all "minimum's", 
+  # So we'll set "500 bytes" as minimum which should both ignore all "minimum's",
   # and catch anything of substance.
   comparatorLogMinimumSize=500
-  
+
   mainPath=$( dlToPath "$eclipseStream" "$buildId")
   echo "     mainPath: $mainPath"
   if [[ "$mainPath" == 1 ]]
@@ -87,7 +87,7 @@ function sendPromoteMail ()
   else
      echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
   fi
-  
+
 
   if [[ -n "${BUILD_FAILED}" ]]
   then
@@ -129,7 +129,7 @@ function sendPromoteMail ()
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
      message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
-  else 
+  else
      echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
 
@@ -153,7 +153,7 @@ function sendPromoteMail ()
     for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
     do
        echo "DEBUG: pom update file: $file"
-       # rare there would be non-existent file, given the logic that got us here, 
+       # rare there would be non-existent file, given the logic that got us here,
        # but we'll check just to be sure.
        if [[ -e $file ]]
        then
@@ -207,7 +207,7 @@ function startTests()
   EBUILDER_HASH=$5
   if [[ -z "${EBUILDER_HASH}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function $(basename $0)"
+    printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argument, for this function $(basename $0)"
     return 1;
   fi
 
@@ -237,7 +237,7 @@ function syncRepoSite ()
   eclipseStream=$1
   if [[ -z "${eclipseStream}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"  >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"  >&2
     return 1;
   fi
 
@@ -245,7 +245,7 @@ function syncRepoSite ()
   buildType=$2
   if [[ -z "${buildType}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argument, for this function $(basename $0)" >&2
     return 1;
   fi
 
@@ -325,7 +325,7 @@ echo "Starting $0"
 eclipseStream=$1
 if [[ -z "${eclipseStream}" ]]
 then
-  printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+  printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"
   exit 1
 fi
 echo "eclipseStream: $eclipseStream"
@@ -333,7 +333,7 @@ echo "eclipseStream: $eclipseStream"
 buildId=$2
 if [[ -z "${buildId}" ]]
 then
-  printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+  printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)"
   exit 1
 fi
 echo "buildId: $buildId"
@@ -342,8 +342,8 @@ echo "buildId: $buildId"
 EBUILDER_HASH=$3
 if [[ -z "${EBUILDER_HASH}" ]]
 then
-  printf "\n\n\t%s\n\n" "WARNING: Must provide builder (or aggregator) hash as fourth argumnet, for this function, $0"
-  #printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function, $0"
+  printf "\n\n\t%s\n\n" "WARNING: Must provide builder (or aggregator) hash as fourth argument, for this function, $0"
+  #printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argument, for this function, $0"
   #exit 1;
 fi
 echo "EBUILDER_HASH: $EBUILDER_HASH"
@@ -392,7 +392,7 @@ ${SCRIPTDIR}/getEBuilder.sh  "${EBUILDER_HASH}" "${dropFromBuildDir}"
 # if build failed, don't promote repo
 if [[ -z "$BUILD_FAILED" ]]
 then
-  syncRepoSite "$eclipseStream" "$buildType" 
+  syncRepoSite "$eclipseStream" "$buildType"
   rccode=$?
   if [[ $rccode != 0 ]]
   then

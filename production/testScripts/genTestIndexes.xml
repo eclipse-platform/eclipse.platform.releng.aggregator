@@ -22,8 +22,39 @@
         project.setProperty("buildType", sArray[1]);
       ]]>
     </script>
+    <condition
+      property="dropsDirSegment"
+      value="drops4"
+      else="drops">
+      <equals
+        arg1="${eclipseStreamMajor}"
+        arg2="4" />
+    </condition>
+    <!-- publish.xml expects buildLabel in places, instead of buildId,
+         though we use them interchangebly -->
+    <property
+      name="buildLabel"
+      value="${buildId}" />
+    <property
+      name="dropsDirXSegment"
+      value="${dropsDirSegment}" />
 
-    <!-- Note: results template is selected based on 
+    <property
+      name="buildRoot"
+      value="${buildHome}/${eclipseStreamMajor}${buildType}" />
+
+    <property
+      name="postingDirectory"
+      value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
+    <condition
+      property="resultLocation"
+      value="${postingDirectory}/${buildLabel}/performance"
+      else="${postingDirectory}/${buildLabel}">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <!-- Note: results template is selected based on
          conventions used in hudson jobs names. Should
          move to properties saved in during test run?
     -->
@@ -68,35 +99,13 @@
           string="${job}"
           substring="-perf-" />
       </and>
-    </condition>    
+    </condition>
 
+    <echo message="= = Properties in genTestIndexes.xml = = " />
     <echo message="job: ${job}" />
     <echo message="testTemplate: ${testTemplate}" />
 
-     <!--
-        TODO: make less exactly hard coded in future
-         also, check for validity using "matches" digit*\.digit*\.digit*
-      -->
-    <condition
-      property="dropsDirSegment"
-      value="drops4"
-      else="drops">
-      <equals
-        arg1="${eclipseStreamMajor}"
-        arg2="4" />
-    </condition>
 
-    <property
-      name="dropsDirXSegment"
-      value="${dropsDirSegment}" />
-
-    <property
-      name="buildRoot"
-      value="${buildHome}/${eclipseStreamMajor}${buildType}" />
-
-    <property
-      name="postingDirectory"
-      value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
 
     <property
       name="EBuilderDir"
@@ -115,11 +124,7 @@
       name="base.builder"
       value="${postingDirectory}/${buildId}/org.eclipse.releng.basebuilder" />
 
-        <!-- publish.xml expects buildLabel in places, instead of buildId,
-             though we use them interchangebly -->
-    <property
-      name="buildLabel"
-      value="${buildId}" />
+
 
         <!-- Not sure this is the "working directory" expected. May impact ability
         to get/find "buildNotes"? Need to copy such "source" things at build time. -->
@@ -170,11 +175,6 @@
     <property
       name="platformIdentifierToken"
       value="%platform%" />
-<!-- Remember, even though we no longer use these, if removed here, results
-    in "index out of bounds" error in the custom ant task  -->
-    <property
-      name="platformSpecificTemplateList"
-      value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
 
     <property
       name="indexFileName"
@@ -219,18 +219,12 @@
       <property
         name="platformIdentifierToken"
         value="%platform%" />
-      <!-- Remember, even though we no longer use these, if removed here, results
-          in "index out of bounds" error in the custom ant task, indexResults.  -->
-      <property
-        name="platformSpecificTemplateList"
-        value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
-
       <property
         name="indexFileName"
         value="index.php" />
       <property
         name="result"
-        value="${postingDirectory}/${buildLabel}" />
+        value="${resultLocation}" />
       <property
         name="testResultsTemplateFileName"
         value="${publishingContent}/templateFiles/${testTemplate}" />

@@ -42,6 +42,7 @@ export ANT_HOME=/shared/common/apache-ant-1.9.2
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 
 read inputline
+echo " = = Properties in collect.sh == "
 echo "inputline: $inputline"
 
 job="$(echo $inputline | cut -d\  -f1)"
