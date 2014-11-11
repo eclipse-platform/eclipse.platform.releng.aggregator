@@ -167,7 +167,7 @@ updatePages $eclipseStream $buildId "${EBUILDER_HASH}" $JOB_NAME
 rccode=$?
 if [ $rccode -ne 0 ]
 then
-  echo "ERROR occurred during promotion to download serve: rccode: $rccode."
+  echo "ERROR occurred during promotion to download server: rccode: $rccode."
   exit $rccode
 fi
 
@@ -175,7 +175,7 @@ syncDropLocation "$eclipseStream" "$buildId" "${EBUILDER_HASH}"
 rccode=$?
 if [ $rccode -ne 0 ]
 then
-  echo "ERROR occurred during promotion to download serve: rccode: $rccode."
+  echo "ERROR occurred during promotion to download server: rccode: $rccode."
   exit $rccode
 fi
 
