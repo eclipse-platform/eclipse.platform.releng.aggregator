@@ -18,7 +18,7 @@ while ($anEntry = $aDirectory->read()) {
   }
 }
 
-aDirectory.closedir();
+$aDirectory->close();
 ?>
 
 </body>

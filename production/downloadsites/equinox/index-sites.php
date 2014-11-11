@@ -78,7 +78,7 @@ while ($anEntry = $aDirectory->read()) {
         $fileCount = $fileCount + 1;
       }
     }
-    $aDropDirectory.closedir();
+    $aDropDirectory->closedir();
     // Read the count file
     $countFile = "drops/".$anEntry."/files.count";
     $indexFile = "drops/".$anEntry."/index.php";
@@ -111,7 +111,7 @@ while ($anEntry = $aDirectory->read()) {
     }
   }
 }
-// $aDirectory.closedir();
+$aDirectory->close();
 ?>
 
 <table width="100%" cellspacing=0 cellpadding=3 align=center>

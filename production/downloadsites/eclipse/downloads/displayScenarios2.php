@@ -34,7 +34,7 @@ else{
     echo "$line";
   }
 }
-aDirectory.closedir();
+$aDirectory->close();
 ?>
 
 </body>
