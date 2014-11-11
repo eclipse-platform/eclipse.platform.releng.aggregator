@@ -11,7 +11,10 @@
     <fail unless="eclipseStream" />
     <fail unless="job" />
 
-
+    <property
+      name="isBuildTested"
+      value="true" />
+    
     <script language="javascript">
       <![CDATA[
         var buildId = project.getProperty("buildId");
@@ -46,6 +49,14 @@
     <property
       name="postingDirectory"
       value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
+   
+    <condition
+      property="resultLocation"
+      value="${postingDirectory}/${buildLabel}/performance/baseline">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
     <condition
       property="resultLocation"
       value="${postingDirectory}/${buildLabel}/performance"
@@ -54,6 +65,9 @@
         string="${job}"
         substring="-perf-" />
     </condition>
+    <property
+      name="result"
+      value="${resultLocation}" />
     <!-- Note: results template is selected based on
          conventions used in hudson jobs names. Should
          move to properties saved in during test run?
@@ -89,6 +103,7 @@
           substring="-perf-" />
       </and>
     </condition>
+
     <condition
       property="testManifestFileName"
       value="${publishingContent}/performanceTestManifest.xml"
@@ -101,9 +116,14 @@
       </and>
     </condition>
 
-    <echo message="= = Properties in genTestIndexes.xml = = " />
-    <echo message="job: ${job}" />
-    <echo message="testTemplate: ${testTemplate}" />
+    <echo message="= = Properties in genTestIndexes.xml, init = = " />
+    <echo message="    job: ${job}" />
+    <echo message="    postingDirectory" />
+    <echo message="    testTemplate: ${testTemplate}" />
+    <echo message="    resultLocation: ${resultLocation}" />
+    <echo message="    result: ${result}" />
+    <echo message="    isBuildTested: ${isBuildTested}" />
+
 
 
 
@@ -144,7 +164,10 @@
     name="generateEclipseIndex"
     depends="init">
 
-
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail" />
+<!-- to be removed
     <condition
       property="generatorClass"
       value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
@@ -155,8 +178,8 @@
     <property
       name="generatorClass"
       value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
-
-    <echo message="DEBUG: generatorClass: ${generatorClass}" />
+-->
+    <echo message="   DEBUG: generatorClass: ${generatorClass}" />
     <available
       classname="${generatorClass}"
       property="class"
@@ -166,9 +189,7 @@
       name="genTestIndexesdropTokenList"
       value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
 
-    <property
-      name="isBuildTested"
-      value="true" />
+
     <property
       name="dropTokenList"
       value="${genTestIndexesdroptTokenList}" />
@@ -176,22 +197,26 @@
       name="platformIdentifierToken"
       value="%platform%" />
 
+    
     <property
       name="indexFileName"
       value="index.php" />
-    <property
-      name="result"
-      value="${postingDirectory}/${buildId}" />
+
     <property
       name="testResultsTemplateFileName"
       value="${publishingContent}/templateFiles/${testTemplate}" />
     <property
       name="dropTemplateFileName"
       value="${publishingContent}/templateFiles/index.php.template" />
+
+    <fail
+      unless="testManifestFileName"
+      message="testManifestFileName should have been defined, by now?" />
+    <!-- to be removed
     <property
       name="testManifestFileName"
       value="${publishingContent}/testManifest.xml" />
-
+    -->
     <antcall target="publishEclipseIndex">
     </antcall>
 
@@ -202,32 +227,29 @@
     depends="init">
 
 
+    <fail unless="buildType" message="buildType should have been defined by now" />
+    <fail unless="result" message="result should have been defined by now" />
+
         <!--regenerate the index page with links to test results -->
     <ant
       antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
       dir="${publishingContent}"
       target="generateIndex">
-      <property
-        name="isBuildTested"
-        value="true" />
-      <property
-        name="buildType"
-        value="${buildType}" />
+
       <property
         name="dropTokenList"
         value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
       <property
         name="platformIdentifierToken"
         value="%platform%" />
-      <property
-        name="indexFileName"
-        value="index.php" />
-      <property
-        name="result"
-        value="${resultLocation}" />
+
       <property
         name="testResultsTemplateFileName"
         value="${publishingContent}/templateFiles/${testTemplate}" />
+
+      <property
+        name="indexFileName"
+        value="index.php" />
       <property
         name="dropTemplateFileName"
         value="${publishingContent}/templateFiles/index.php.template" />

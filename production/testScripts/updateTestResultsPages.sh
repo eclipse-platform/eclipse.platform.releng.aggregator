@@ -105,8 +105,8 @@ then
   exit 1
 fi
 
-if [[ $JOB_NAME =~ ^.*-unit-.*$ ]]
-then
+#if [[ $JOB_NAME =~ ^.*-unit-.*$ ]]
+#then
 
   BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
 
@@ -147,7 +147,7 @@ then
     exit $RC
   fi
 
-fi
+#fi
 
 perfJobPattern="^.*-perf-.*$"
 perfBaselineJobPattern="^.*-perf-baseline.*$"
