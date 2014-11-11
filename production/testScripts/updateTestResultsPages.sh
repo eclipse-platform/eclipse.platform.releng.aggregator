@@ -155,6 +155,7 @@ if [[ $JOB_NAME =~ $perfJobPattern ]]
 then
   devworkspace="${fromDir}/workspace-installDerbyCore"
   devArgs="-Xmx256m"
+  BUILDFILESTR="-f ${BUILDFILE}"
 
   echo "Collected a performance run result. Doing performance analysis"
   echo
