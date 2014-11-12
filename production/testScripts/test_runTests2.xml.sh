@@ -32,7 +32,7 @@ function clean()
 
 }
 
-source localBuildProperties.shsource
+source localBuildProperties.shsource 2>/dev/null
 #   Different versions of Ant are specified here in test script, just to confirm
 #   nothing is specific to any recent version of ant. (Though, some of the machines
 #   have ant 1.6 set as 'default'!)

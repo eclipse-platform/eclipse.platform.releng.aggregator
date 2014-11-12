@@ -3,7 +3,7 @@
 # Utility script to "bootstrap" Hudson Eclipse Platform Unit tests, to get the
 # basic files needed to get all the other required files and start the test framework.
 
-source localBuildProperties.shsource
+source localBuildProperties.shsource 2>/dev/null
 
 EBUILDER_HASH=$1
 WORKSPACE=$2
