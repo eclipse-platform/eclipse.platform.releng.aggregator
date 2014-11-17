@@ -240,3 +240,30 @@ function printTestSummaryStatus() {
   echo "</a>\n";
 }
 
+function fileSizeForDisplay($filename) {
+  $onekilo=1024;
+  $onemeg=$onekilo * $onekilo;
+  $criteria = 10 * $onemeg;
+  $scaleChar = " ";
+  if (file_exists($filename)) {
+    $zipfilesize=filesize($filename);
+    if ($zipfilesize > $criteria) {
+      $zipfilesize=round($zipfilesize/$onemeg, 0);
+      $scaleChar = " MB";
+    }
+    else {
+      if ($zipfilesize > $onekilo) {
+        $zipfilesize=round($zipfilesize/$onekilo, 0);
+        $scaleChar = " KB";
+      } else {
+        // use raw size in bytes if less that one 1K
+        $scaleChar = " B";
+      }
+    }
+  }
+  else {
+    $zipfilesize = 0;
+  }
+  $result =  "(" . $zipfilesize . $scaleChar . ")";
+  return $result;
+}

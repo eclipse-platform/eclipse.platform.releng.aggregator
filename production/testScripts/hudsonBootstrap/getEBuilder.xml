@@ -98,19 +98,6 @@
     <antcall target="fetchEBuilder" />
     <antcall target="EBuildercleanup" />
 
-    <!--
-         Copy the file(s) we need for subsequent steps to "well known"
-         location.
-
-    <copy
-      file="${WORKSPACE}/${eScriptLocation}/runTests2.xml"
-      todir="${WORKSPACE}" />
-    -->
-    <!-- remember, 'getBaseBuilder' has it's own properties, which
-         must be set by now, if desired to make use of them,
-         such as a common one for local testing would be:
-         basebuilderlocal=/shared/baseBuilderCache
-     -->
     <ant antfile="${WORKSPACE}/${eScriptLocation}/getBaseBuilder.xml" />
     <ant antfile="${WORKSPACE}/${eScriptLocation}/runTests2.xml" />
 
@@ -140,15 +127,7 @@
         from=".*production([/\\])testScripts(.*)"
         to="production\1testScripts\2" />
     </move>
-<!-- might be better (easier) to use a "copy", rather than a move,
-     with that regexp mapper. Such as below. But, I'm not clear on
-     directory structure if "branch" not used.
-     <copy todir="${WORKSPACE}/${folderName}" >
-    <fileset dir="${${WORKSPACE}/tempEBuilder/${folderName}-${EBUILDER_HASH}">
-        <include name="production/testScripts/**"/>
-    </fileset>
-    </copy>
--->
+
     <echo message="Fetched EBuilder/production/testscrips to ${WORKSPACE}/${folderName}" />
     <property
       name="EBuilderfetched"

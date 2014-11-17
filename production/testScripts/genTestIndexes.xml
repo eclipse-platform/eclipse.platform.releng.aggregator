@@ -11,7 +11,10 @@
     <fail unless="eclipseStream" />
     <fail unless="job" />
 
-
+    <property
+      name="isBuildTested"
+      value="true" />
+    
     <script language="javascript">
       <![CDATA[
         var buildId = project.getProperty("buildId");
@@ -46,38 +49,53 @@
     <property
       name="postingDirectory"
       value="${buildRoot}/siteDir/eclipse/downloads/${dropsDirXSegment}" />
-    
-        <!-- This is our new, "safe for every test" location -->
-    <property
-      name="base.builder"
-      value="${postingDirectory}/${buildId}/org.eclipse.releng.basebuilder" />
 
-        <!-- Not sure this is the "working directory" expected. May impact ability
-        to get/find "buildNotes"? Need to copy such "source" things at build time. -->
-    <property
-      name="buildDirectory"
-      value="${postingDirectory}/${buildId}" />
-
-        <property
-          name="EBuilderDir"
-          value="${postingDirectory}/${buildId}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder" />
-
-            <!-- This is purely a subset of tychoeclipsebuilder files, copyied at build time, so part of
-            the results output we are working on, so they will be the same once the tests are done, even if gitCache updated by anohter build,
-            or a run from previous test results -->
-            <!-- /data/shared/eclipse/builds/4N/master/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles -->
-        <property
-          name="publishingContent"
-          value="${EBuilderDir}/eclipse/publishingFiles" />    
-        
     <condition
-      property="resultLocation"
-      value="${postingDirectory}/${buildLabel}/performance"
-      else="${postingDirectory}/${buildLabel}">
+      property="hrefTestResultsTargetPath"
+      value="baselineAlt/html">
+        <contains
+          string="${job}"
+          substring="-baselineAlt" />
+    </condition>
+    <condition
+      property="hrefTestResultsTargetPath"
+      value="baseline/html">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="hrefTestResultsTargetPath"
+      value="performance/html"
+      else="testresults/html">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
+    
+    <condition
+      property="testResultsHtmlFileName"
+      value="baselineAlt.php">
+        <contains
+          string="${job}"
+          substring="-baselineAlt" />
+    </condition>
+    <condition
+      property="testResultsHtmlFileName"
+      value="baseline.php">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="testResultsHtmlFileName"
+      value="performance.php"
+      else="testResults.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    
     <!-- Note: results template is selected based on
          conventions used in hudson jobs names. Should
          move to properties saved in during test run?
@@ -85,52 +103,71 @@
     <condition
       property="testTemplate"
       value="perfBaselineAltResults.php.template">
-      <and>
-        <isset property="job" />
         <contains
           string="${job}"
           substring="-baselineAlt" />
-      </and>
     </condition>
     <condition
       property="testTemplate"
       value="perfBaselineResults.php.template">
-      <and>
-        <isset property="job" />
         <contains
           string="${job}"
           substring="-baseline" />
-      </and>
     </condition>
     <condition
       property="testTemplate"
       value="performance.php.template"
       else="testResults.php.template">
-      <and>
-        <isset property="job" />
         <contains
           string="${job}"
           substring="-perf-" />
-      </and>
     </condition>
+
     <condition
       property="testManifestFileName"
       value="${publishingContent}/performanceTestManifest.xml"
       else="${publishingContent}/testManifest.xml">
-      <and>
-        <isset property="job" />
         <contains
           string="${job}"
           substring="-perf-" />
-      </and>
     </condition>
 
-    <echo message="= = Properties in genTestIndexes.xml = = " />
-    <echo message="job: ${job}" />
-    <echo message="testTemplate: ${testTemplate}" />
-    <echo message="testManifestFileName: ${testManifestFileName}" />
-    <echo message="resultLocation: ${resultLocation}" />
+    <echo message="= = Properties in genTestIndexes.xml, init = = " />
+    <echo message="    job: ${job}" />
+    <echo message="    postingDirectory: ${postingDirectory}" />
+    <echo message="    testTemplate: ${testTemplate}" />
+    <echo message="    testManifestFileName: ${testManifestFileName}" />
+    <echo message="    hrefTestResultsTargetPath: ${hrefTestResultsTargetPath}" />
+    <echo message="    testResultsHtmlFileName: ${testResultsHtmlFileName}" />
+    <echo message="    isBuildTested: ${isBuildTested}" />
 
+
+
+
+    <property
+      name="EBuilderDir"
+      value="${postingDirectory}/${buildId}/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder" />
+
+        <!-- This is purely a subset of tychoeclipsebuilder files, copyied at build time, so part of
+        the results output we are working on, so they will be the same once the tests are done, even if gitCache updated by anohter build,
+        or a run from previous test results -->
+        <!-- /data/shared/eclipse/builds/4N/master/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder/eclipse/publishingFiles -->
+    <property
+      name="publishingContent"
+      value="${EBuilderDir}/eclipse/publishingFiles" />
+
+        <!-- This is our new, "safe for every test" location -->
+    <property
+      name="base.builder"
+      value="${postingDirectory}/${buildId}/org.eclipse.releng.basebuilder" />
+
+
+
+        <!-- Not sure this is the "working directory" expected. May impact ability
+        to get/find "buildNotes"? Need to copy such "source" things at build time. -->
+    <property
+      name="buildDirectory"
+      value="${postingDirectory}/${buildId}" />
 
 
     <property
@@ -144,7 +181,10 @@
     name="generateEclipseIndex"
     depends="init">
 
-
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail" />
+<!-- to be removed
     <condition
       property="generatorClass"
       value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail">
@@ -155,8 +195,8 @@
     <property
       name="generatorClass"
       value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
-
-    <echo message="DEBUG: generatorClass: ${generatorClass}" />
+-->
+    <echo message="   DEBUG: generatorClass: ${generatorClass}" />
     <available
       classname="${generatorClass}"
       property="class"
@@ -166,32 +206,30 @@
       name="genTestIndexesdropTokenList"
       value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
 
-    <property
-      name="isBuildTested"
-      value="true" />
+
     <property
       name="dropTokenList"
       value="${genTestIndexesdroptTokenList}" />
-    <property
-      name="platformIdentifierToken"
-      value="%platform%" />
 
     <property
       name="indexFileName"
       value="index.php" />
-    <property
-      name="result"
-      value="${postingDirectory}/${buildId}" />
+
     <property
       name="testResultsTemplateFileName"
       value="${publishingContent}/templateFiles/${testTemplate}" />
     <property
       name="dropTemplateFileName"
       value="${publishingContent}/templateFiles/index.php.template" />
+
+    <fail
+      unless="testManifestFileName"
+      message="testManifestFileName should have been defined, by now?" />
+    <!-- to be removed
     <property
       name="testManifestFileName"
       value="${publishingContent}/testManifest.xml" />
-
+    -->
     <antcall target="publishEclipseIndex">
     </antcall>
 
@@ -202,32 +240,25 @@
     depends="init">
 
 
+    <fail unless="buildType" message="buildType should have been defined by now" />
+
         <!--regenerate the index page with links to test results -->
     <ant
       antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
       dir="${publishingContent}"
       target="generateIndex">
-      <property
-        name="isBuildTested"
-        value="true" />
-      <property
-        name="buildType"
-        value="${buildType}" />
+
       <property
         name="dropTokenList"
         value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
-      <property
-        name="platformIdentifierToken"
-        value="%platform%" />
-      <property
-        name="indexFileName"
-        value="index.php" />
-      <property
-        name="result"
-        value="${resultLocation}" />
+
       <property
         name="testResultsTemplateFileName"
         value="${publishingContent}/templateFiles/${testTemplate}" />
+
+      <property
+        name="indexFileName"
+        value="index.php" />
       <property
         name="dropTemplateFileName"
         value="${publishingContent}/templateFiles/index.php.template" />

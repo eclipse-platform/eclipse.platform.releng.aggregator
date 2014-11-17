@@ -9,9 +9,6 @@
         name="publishingContent"
         value="${EBuilderDir}/eclipse/publishingFiles" />
 
-
-
-
     <!-- ===================================================================== -->
     <!-- Set of helper targets for building the Eclipse SDK -->
     <!-- ===================================================================== -->
@@ -235,13 +232,6 @@
                 includes="clickThroughs/" />
         </copy>
 
-        <!--post directory.txt ... no longer done this way
-        <copy
-            file="${buildDirectory}/directory.txt"
-            todir="${postingDirectory}/${buildLabel}"
-            failonerror="false"/>
-            -->
-
         <antcall target="generateEclipseIndex" />
 
         <!--get static files required in the buildLabel directory-->
@@ -296,6 +286,15 @@
             property="class"
             value="${generatorClass}" />
 
+              <condition
+                property="manifestFile"
+                value="${publishingContent}/performanceTestManifest.xml"
+                else="${publishingContent}/testManifest.xml">
+                <contains
+                  string="${job}"
+                  substring="-perf-" />
+              </condition>
+
         <!--regenerate the index page with links to test results-->
         <ant
             antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
@@ -311,9 +310,6 @@
                 name="dropTokenList"
                 value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
             <property
-                name="platformIdentifierToken"
-                value="%platform%" />
-            <property
                 name="indexFileName"
                 value="index.php" />
             <property
@@ -327,7 +323,7 @@
                 value="${publishingContent}/templateFiles/index.php.template" />
             <property
                 name="testManifestFileName"
-                value="${publishingContent}/testManifest.xml" />
+                value="${manifestFile}" />
         </ant>
 
     </target>

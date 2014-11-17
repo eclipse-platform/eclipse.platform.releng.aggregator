@@ -1,35 +1,57 @@
-<project name="Build specific targets and properties" default="noDefault" basedir=".">
+<project
+  name="Build specific targets and properties"
+  default="noDefault"
+  basedir=".">
 
-  <target name="init" unless="helperInitialized">
-    <fail unless="postingDirectory" message="Eclipse drop directory must be provided (yes, even for Equinox drop site creation)." />
+  <target
+    name="init"
+    unless="helperInitialized">
+    <fail
+      unless="postingDirectory"
+      message="Eclipse drop directory must be provided (yes, even for Equinox drop site creation)." />
 
-    <fail unless="equinoxPostingDirectory" message="Root (or parent) of Equinox drop direcotry to be created must be provided." />
+    <fail
+      unless="equinoxPostingDirectory"
+      message="Root (or parent) of Equinox drop direcotry to be created must be provided." />
 
-    <fail unless="eqpublishingContent" message="Root of Equinox template and static files must be provided." />
+    <fail
+      unless="eqpublishingContent"
+      message="Root of Equinox template and static files must be provided." />
 
-    <fail unless="EBuilderDir" message="Root of Eclipse Builder (or Tycho Eclipse Builder) must be provided." />
+    <fail
+      unless="EBuilderDir"
+      message="Root of Eclipse Builder (or Tycho Eclipse Builder) must be provided." />
 
     <property environment="env" />
 
     <!-- we typically expect TMP_DIR to be set in environnment. But, if not, /tmp might work. -->
-    <condition property="TMP" value="${env.TMP_DIR}" else="/tmp">
+    <condition
+      property="TMP"
+      value="${env.TMP_DIR}"
+      else="/tmp">
       <isset property="env.TMP_DIR" />
     </condition>
         <!-- make dir, in case we are first to use it, unlikely as that is -->
     <mkdir dir="$TMP" />
     <echo message="DEBUG: echo properties at start of equinox publish" />
     <echoproperties />
-    <property name="helperInitialized" value="true" />
+    <property
+      name="helperInitialized"
+      value="true" />
 
   </target>
-  <target name="publish" depends="init">
+  <target
+    name="publish"
+    depends="init">
 
         <!-- there are three "buildproperties.* files, each with same variables defined/used
              during the build, such as BUILD_ID, etc. One for PHP, one for Ant, and one for BASH scripts.
              The one for PHP is most likely to be useful on download site.
         -->
     <copy todir="${equinoxPostingDirectory}/${buildId}">
-      <fileset dir="${postingDirectory}" includes="buildproperties.*" />
+      <fileset
+        dir="${postingDirectory}"
+        includes="buildproperties.*" />
     </copy>
 
         <!--
@@ -42,19 +64,31 @@
     <ant antfile="${EBuilderDir}/equinox/buildConfigs/equinox-launchers/build.xml" />
 
     <!-- copy orbit files to equinox download directory (I'm not sure this is necessary any longer?) -->
-    <copy todir="${equinoxPostingDirectory}/${buildDir}" overwrite="true">
-      <fileset dir="${buildRepo}/plugins" includes="org.apache.felix.gogo.*,javax.servlet_*,javax.servlet.jsp_*,org.apache.commons.logging_*,javax.el_*" excludes="*.source_*, *.jar.pack.gz" />
+    <copy
+      todir="${equinoxPostingDirectory}/${buildDir}"
+      overwrite="true">
+      <fileset
+        dir="${buildRepo}/plugins"
+        includes="org.apache.felix.gogo.*,javax.servlet_*,javax.servlet.jsp_*,org.apache.commons.logging_*,javax.el_*"
+        excludes="*.source_*, *.jar.pack.gz" />
     </copy>
 
     <antcall target="updateTestManifests" />
 
-    <property name="generatorClass" value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.EclipseTestResultsGenerator" />
 
-    <available classname="${generatorClass}" property="class" value="${generatorClass}" />
+    <available
+      classname="${generatorClass}"
+      property="class"
+      value="${generatorClass}" />
 
     <!-- generate md5s and sha1s for bundles -->
     <mkdir dir="${equinoxPostingDirectory}/${buildDir}/checksum" />
-    <exec executable="sh" dir="${equinoxPostingDirectory}/${buildDir}">
+    <exec
+      executable="sh"
+      dir="${equinoxPostingDirectory}/${buildDir}">
       <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
     </exec>
 
@@ -69,8 +103,13 @@
         -->
 
     <!--copy compile logs to this posting directory. Not sure needed. Is this where API reports come from? -->
-    <copy todir="${equinoxPostingDirectory}/${buildDir}" overwrite="true">
-      <fileset dir="${postingDirectory}" includes="compilelogs/**/plugins/org.eclipse.osgi*/**,compilelogs/**/plugins/org.eclipse.equinox*/**" excludes="compilelogs/**/plugins/org.eclipse.osgi.test*/**" />
+    <copy
+      todir="${equinoxPostingDirectory}/${buildDir}"
+      overwrite="true">
+      <fileset
+        dir="${postingDirectory}"
+        includes="compilelogs/**/plugins/org.eclipse.osgi*/**,compilelogs/**/plugins/org.eclipse.equinox*/**"
+        excludes="compilelogs/**/plugins/org.eclipse.osgi.test*/**" />
     </copy>
 
 
@@ -92,41 +131,74 @@
          Turns out we still need to run the "indexer" to update DL page, even though
          there are no test results. That's how it fills in the symbols in drop token list.
     -->
-    <property name="class" value="org.eclipse.releng.generators.TestResultsGenerator" />
-    <taskdef name="indexResults" classname="${class}" />
+    <property
+      name="class"
+      value="org.eclipse.releng.generators.TestResultsGenerator" />
+    <taskdef
+      name="indexResults"
+      classname="${class}" />
 
         <!-- equinox uses same test results -->
 
         <!-- provisioning removed per bug 368488
           dropTokenList="%equinox%,%framework%,%extrabundles%,%other%,%provisioning%,%launchers%,%osgistarterkits%"
           -->
-    <indexResults isBuildTested="false" buildType="${buildType}" dropTokenList="%equinox%,%framework%,%extrabundles%,%other%,%launchers%,%osgistarterkits%" platformIdentifierToken="%platform%" dropHtmlFileName="index.php" xmlDirectoryName="${postingDirectory}/testresults/xml" dropDirectoryName="${equinoxPostingDirectory}/${buildDir}" testResultsTemplateFileName="${eqpublishingContent}/templateFiles/testResults.php.template" dropTemplateFileName="${eqpublishingContent}/templateFiles/index.php.template" testResultsHtmlFileName="testResults.php" hrefTestResultsTargetPath="../../../downloads/drops/${buildDir}/testresults/html" hrefCompileLogsTargetPath="compilelogs" compileLogsDirectoryName="${equinoxPostingDirectory}/${buildDir}/compilelogs" testManifestFileName="${eqpublishingContent}/testManifest.xml" />
+    <indexResults
+      isBuildTested="false"
+      buildType="${buildType}"
+      dropTokenList="%equinox%,%framework%,%extrabundles%,%other%,%launchers%,%osgistarterkits%"
+      dropHtmlFileName="index.php"
+      xmlDirectoryName="${postingDirectory}/testresults/xml"
+      dropDirectoryName="${equinoxPostingDirectory}/${buildDir}"
+      testResultsTemplateFileName="${eqpublishingContent}/templateFiles/testResults.php.template"
+      dropTemplateFileName="${eqpublishingContent}/templateFiles/index.php.template"
+      testResultsHtmlFileName="testResults.php"
+      hrefTestResultsTargetPath="../../../downloads/drops/${buildDir}/testresults/html"
+      hrefCompileLogsTargetPath="compilelogs"
+      compileLogsDirectoryName="${equinoxPostingDirectory}/${buildDir}/compilelogs"
+      testManifestFileName="${eqpublishingContent}/testManifest.xml" />
 
 
   </target>
 
 
-  <target name="updateTestManifests" depends="init">
+  <target
+    name="updateTestManifests"
+    depends="init">
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.app" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.app" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.console" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.console" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.supplement" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.supplement" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.device" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.device" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.event" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.event" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.launcher" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.launcher" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.log" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.log" />
     </antcall>
         <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=376921
         <antcall target="updateTestManifest">
@@ -136,7 +208,9 @@
         </antcall>
         -->
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.region" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.region" />
     </antcall>
         <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=376921
         <antcall target="updateTestManifest">
@@ -146,142 +220,233 @@
         </antcall>
         -->
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.metatype" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.metatype" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.useradmin" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.useradmin" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.osgi" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.osgi" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.osgi.util" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.osgi.util" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.osgi.services" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.osgi.services" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.registry" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.registry" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.preferences" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.preferences" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.common" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.common" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.cm" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.cm" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.ds" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.ds" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.http" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.http" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.http.jetty" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.http.jetty" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.io" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.io" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.ip" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.ip" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.jsp.jasper" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.jsp.jasper" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.jsp.jasper.registry" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.jsp.jasper.registry" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.http.registry" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.http.registry" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.http.servlet" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.http.servlet" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.http.servletbridge" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.http.servletbridge" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.servletbridge" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.servletbridge" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.transforms.hook" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.transforms.hook" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.transforms.xslt" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.transforms.xslt" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.util" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.util" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.wireadmin" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.wireadmin" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="javax.servlet" />
+      <param
+        name="bundle.id"
+        value="javax.servlet" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="javax.servlet.jsp" />
+      <param
+        name="bundle.id"
+        value="javax.servlet.jsp" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="javax.el" />
+      <param
+        name="bundle.id"
+        value="javax.el" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.apache.commons.logging" />
+      <param
+        name="bundle.id"
+        value="org.apache.commons.logging" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.apache.felix.gogo.command" />
+      <param
+        name="bundle.id"
+        value="org.apache.felix.gogo.command" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.apache.felix.gogo.runtime" />
+      <param
+        name="bundle.id"
+        value="org.apache.felix.gogo.runtime" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.apache.felix.gogo.shell" />
+      <param
+        name="bundle.id"
+        value="org.apache.felix.gogo.shell" />
     </antcall>
 
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.simpleconfigurator" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.simpleconfigurator" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.concurrent" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.concurrent" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.coordinator" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.coordinator" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.equinox.region" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.equinox.region" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.continuation" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.continuation" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.security" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.security" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.util" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.util" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.http" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.http" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.http" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.http" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.server" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.server" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.io" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.io" />
     </antcall>
     <antcall target="updateTestManifest">
-      <param name="bundle.id" value="org.eclipse.jetty.servlet" />
+      <param
+        name="bundle.id"
+        value="org.eclipse.jetty.servlet" />
     </antcall>
   </target>
 
   <!-- ===================================================================== -->
   <!-- Helper targets -->
   <!-- ===================================================================== -->
-  <target name="updateTestManifest" depends="init">
-    <apply executable="ls" output="${TMP}/${bundle.id}.txt" dir="${equinoxPostingDirectory}/${buildDir}">
+  <target
+    name="updateTestManifest"
+    depends="init">
+    <apply
+      executable="ls"
+      output="${TMP}/${bundle.id}.txt"
+      dir="${equinoxPostingDirectory}/${buildDir}">
       <fileset dir="${equinoxPostingDirectory}/${buildDir}">
         <patternset>
           <include name="${bundle.id}*.jar" />
@@ -289,12 +454,29 @@
       </fileset>
     </apply>
 
-    <replaceregexp file="${TMP}/${bundle.id}.txt" match="/.+/" replace="" />
-    <replaceregexp file="${TMP}/${bundle.id}.txt" match="\.jar" replace="" />
-    <replaceregexp file="${TMP}/${bundle.id}.txt" match="\n" replace="" />
-    <loadfile property="bundle.jar" srcFile="${TMP}/${bundle.id}.txt" failonerror="off" />
-    <delete file="${TMP}/${bundle.id}.txt" failonerror="false" />
-    <replace file="${eqpublishingContent}/testManifest.xml" token="@${bundle.id}@" value="${bundle.jar}" />
+    <replaceregexp
+      file="${TMP}/${bundle.id}.txt"
+      match="/.+/"
+      replace="" />
+    <replaceregexp
+      file="${TMP}/${bundle.id}.txt"
+      match="\.jar"
+      replace="" />
+    <replaceregexp
+      file="${TMP}/${bundle.id}.txt"
+      match="\n"
+      replace="" />
+    <loadfile
+      property="bundle.jar"
+      srcFile="${TMP}/${bundle.id}.txt"
+      failonerror="off" />
+    <delete
+      file="${TMP}/${bundle.id}.txt"
+      failonerror="false" />
+    <replace
+      file="${eqpublishingContent}/testManifest.xml"
+      token="@${bundle.id}@"
+      value="${bundle.jar}" />
   </target>
 
 

@@ -74,28 +74,6 @@ table.testTable { border-collapse: collapse; border: 1px solid black;width:80%;}
 </head>
 <body>
 
-<div id="header">
-<a href="http://www.eclipse.org/"><img src="<?php echo $imagesource;?>/header_logo.gif" width="163" height="68" border="0" alt="Eclipse Logo" class="logo" /></a>
-<div id="searchbar">
-<img src="<?php echo $imagesource;?>/searchbar_transition.gif" width="92" height="26" class="transition" alt="" />
-<img src="<?php echo $imagesource;?>/searchbar_header.gif" width="64" height="17" class="header" alt="Search" />
-<form method="get" action="http://www.eclipse.org/search/search.cgi">
-<input type="hidden" name="t" value="All" />
-<input type="hidden" name="t" value="Doc" />
-<input type="hidden" name="t" value="Downloads" />
-<input type="hidden" name="t" value="Wiki" />
-<input type="hidden" name="wf" value="574a74" />
-<input type="text" name="q" value="" />
-<input type="image" class="button" src="<?php echo $imagesource;?>/searchbar_submit.gif" alt="Submit" onclick="this.submit();" />
-</form>
-</div>
-<ul id="headernav">
-<li class="first"><a href="http://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
-<li><a href="http://www.eclipse.org/legal/">Legal</a></li>
-</ul>
-
-
-</div>
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
 <div id="leftcol">
@@ -266,11 +244,18 @@ relating to its results and unit tests.
       /* This is a fall-through, unexpected case ... just in case testResultsStatus is something we don't expect. */
       $testColor='inherit';
     }
-    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">test results for the current build.</a>\n";
+    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a>\n";
   }
-
+  echo "<li>\n";
+  $generated=file_exists("performance/global_fp.php");
+  if (file_exists("performance.php") && $generated) {
+    echo "View the <a href=\"performance.php\">performance test results</a> for the current build.\n";
+  } else {
+    echo "Performance tests are pending.\n";
+  }
+  echo "</li>\n";
   echo "<table class=testTable>\n";
-  echo "<caption>".$boxesDisplay." of ".count($expectedTestConfigs)." test configurations are complete.</caption> \n";
+  echo "<caption>".$boxesDisplay." of ".count($expectedTestConfigs)." integration and unit test configurations are complete.</caption> \n";
   echo "<tr>";
   echo "<th style=\"width:20%\">Tested Platform</th><th>Failed</th><th>Passed</th><th>Total</th><th>Test&nbsp;Time&nbsp;(s)</th>\n";
 
@@ -318,15 +303,7 @@ relating to its results and unit tests.
   echo "</table>\n";
   /* table is contained in last link item */
   echo "</li>\n";
-  echo "<li>\n";
 
-  $generated=file_exists("performance/global_fp.php");
-  if (file_exists("performance/performance.php") && $generated) {
-    echo "View the <a href=\"performance/performance.php\">performance test results</a> for the current build.\n";
-  } else {
-    echo "Performance tests are pending.\n";
-  }
-  echo "</li>\n";
   echo "</ul>\n";
   echo "</div>\n";
 
@@ -365,9 +342,9 @@ relating to its results and unit tests.
 
   function column($servername) {
 
-    echo "<td width=\"7%\"><b>Download</b></td>";
+    echo "<td width=\"37%\"><b>Download</b></td>";
     echo "<td width=\"7%\"><b>Size</b></td>";
-    echo "<td width=\"37%\"><b>File</b></td>";
+    // echo "<td width=\"37%\"><b>File</b></td>"; 
     echo "<td width=\"11%\"><b>Checksum</b></td>";
     return;
   }
@@ -393,14 +370,14 @@ relating to its results and unit tests.
     global $BUILD_DIR_SEG;
 
     $httplink = "$clickthroughstr$zipfile";
-    $httplabel = "(http)";
-    $httpline =  "<div align=\"left\"><a href=\"$httplink\">$httplabel</a>";
+   // $httplabel = "(http)";
+    $httpline =  "<div align=\"left\"><a href=\"$httplink\">$zipfile</a>";
     $filesize = getDropSize($zipfile);
 
-    echo "$httpline";
+   echo "$httpline";
     echo "&nbsp;&nbsp;";
     echo "<td>$filesize</td>";
-    echo "<td>$zipfile</td>";
+   // echo "<td>$zipfile</td>";
     // make relative so works on build.eclipse.org -- should not be relative. link to checksum should be absolute, so a "mirror" could not change it,
     // bsed on changes it made to the package.
     // TODO: can make some future variables so it has one value on "build" server, and another value on

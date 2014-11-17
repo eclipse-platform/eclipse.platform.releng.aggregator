@@ -3,9 +3,11 @@
 <head>
 
 <?php
-
+$testresults="performance";
 include("buildproperties.php");
 include ('testConfigs.php');
+include ('utilityFunctions.php');
+
 function checkPlatform($line) {
 
   if (preg_match("/win7|win32|linux|macosx/i", $line)) {
@@ -25,34 +27,6 @@ function checkFile($p) {
     return 0;
   }
 
-}
-
-function fileSizeForDisplay($filename) {
-  $onekilo=1024;
-  $onemeg=$onekilo * $onekilo;
-  $criteria = 10 * $onemeg;
-  $scaleChar = " ";
-  if (file_exists($filename)) {
-    $zipfilesize=filesize($filename);
-    if ($zipfilesize > $criteria) {
-      $zipfilesize=round($zipfilesize/$onemeg, 0);
-      $scaleChar = " MB";
-    }
-    else {
-      if ($zipfilesize > $onekilo) {
-        $zipfilesize=round($zipfilesize/$onekilo, 0);
-        $scaleChar = " KB";
-      } else {
-        // use raw size in bytes if less that one 1K
-        $scaleChar = " B";
-      }
-    }
-  }
-  else {
-    $zipfilesize = 0;
-  }
-  $result =  "(" . $zipfilesize . $scaleChar . ")";
-  return $result;
 }
 
 function listLogs($myDir) {
@@ -99,16 +73,18 @@ function listLogs($myDir) {
   }
 }
 
-function listDegailedLogs ($machineplatform) {
-  echo "<strong>Individual $machineplatform test logs</strong><br />";
-  listLogs("perfresults/$machineplatform");
-  if (file_exists("perfresults/$machineplatform/crashlogs")) {
-    echo "<strong>Crash logs captured on $machineplatform</strong>";
-    listLogs("perfresults/$machineplatform/crashlogs");
+function listDetailedLogs ($testresults, $machineplatform) {
+  if (file_exists("$testresults/$machineplatform")) {
+    echo "<strong>Individual $machineplatform test logs</strong><br />";
+    listLogs("$testresults/$machineplatform");
   }
-  if (file_exists("perfresults/$machineplatform/timeoutScreens")) {
+  if (file_exists("$testresults/$machineplatform/crashlogs")) {
+    echo "<strong>Crash logs captured on $machineplatform</strong>";
+    listLogs("$testresults/$machineplatform/crashlogs");
+  }
+  if (file_exists("$testresults/$machineplatform/timeoutScreens")) {
     echo "<strong>Screen captures for tests timing out on $machineplatform</strong>";
-    listLogs("perfresults/$machineplatform/timeoutScreens");
+    listLogs("$testresults/$machineplatform/timeoutScreens");
   }
 }
 
@@ -145,30 +121,12 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 </script>
 </head>
 <body>
-<div id="header">
-<a href="/"><img src="../../../eclipse.org-common/stylesheets/header_logo.gif" width="163" height="68" border="0" alt="Eclipse Logo" class="logo" /></a>
-<div id="searchbar">
-<img src="../../../eclipse.org-common/stylesheets/searchbar_transition.gif" width="92" height="26" class="transition" alt="" />
-<img src="../../../eclipse.org-common/stylesheets/searchbar_header.gif" width="64" height="17" class="header" alt="Search" />
-<form method="get" action="/search/search.cgi">
-<input type="hidden" name="t" value="All" />
-<input type="hidden" name="t" value="Doc" />
-<input type="hidden" name="t" value="Downloads" />
-<input type="hidden" name="t" value="Wiki" />
-<input type="hidden" name="wf" value="574a74" />
-<input type="text" name="q" value="" />
-<input type="image" class="button" src="../../../eclipse.org-common/stylesheets/searchbar_submit.gif" alt="Submit" onclick="this.submit();" />
-</form>
-</div>
-<ul id="headernav">
-<li class="first"><a href="/org/foundation/contact.php">Contact</a></li>
-<li><a href="/legal/">Legal</a></li>
-</ul>
+
 
 <div id="leftcol">
 <ul id="leftnav">
 <li><a href="perflogs.php">Performance Logs</a></li>
-<li><a href="perfResults.php#UnitTest">Performance Unit Test Results</a></li>
+<li><a href="performance.php#UnitTest">Performance Unit Test Results</a></li>
 
 </ul>
 
@@ -196,26 +154,17 @@ echo "<h3>Logs</h3>\n";
 <p>These logs contain the console output captured while running the Performance JUnit automated tests.</p>
 <?php
 
-listLogs("perfresults/consolelogs");
+listLogs("$testresults/consolelogs");
 
-listDegailedLogs($expectedTestConfigs[0]);
-listDegailedLogs($expectedTestConfigs[1]);
-listDegailedLogs($expectedTestConfigs[2]);
+listDetailedLogs($testresults,$expectedTestConfigs[0]);
+listDetailedLogs($testresults,$expectedTestConfigs[1]);
+listDetailedLogs($testresults,$expectedTestConfigs[2]);
 
 
 ?>
 </ul>
 </li>
 </div>
-</br></br></br>
-<div id="footer">
-<ul id="footernav">
-<li class="first"><a href="/">Home</a></li>
-<li><a href="/legal/privacy.php">Privacy Policy</a></li>
-<li><a href="/legal/termsofuse.php">Terms of Use</a></li>
-</ul>
-<p>Copyright &copy; 2006 The Eclipse Foundation. All Rights
-Reserved</p>
-</div>
+
 </body>
 </html>
