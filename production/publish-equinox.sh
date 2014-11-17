@@ -141,7 +141,7 @@ fn-publish-equinox ()
     # following used to be done in "build-configs", based on "master-equinox" feature,
     # but that has now "gone away".
     pushd "${BUILD_MACHINE_DROP_DIR}"
-    unzip -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
+    unzip -o -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
     popd
   else
     echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"
