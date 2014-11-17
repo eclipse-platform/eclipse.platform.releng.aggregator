@@ -163,7 +163,7 @@ then
 
   echo "Collected a performance run result. Doing performance analysis for $JOB_NAME"
   echo
-  echo " = = Properties in updateTestResultsPages.sh: -perf- section  = = "
+  echo " = = Properties in updateTestResultsPages.sh: update derby section  = = "
   echo "   dev script:   $0"
   echo "   buildRoot:    $buildRoot"
   echo "   BUILD_HOME:   ${BUILD_HOME}"
@@ -191,7 +191,7 @@ then
     exit $RC
   fi
 
-  echo " = = Now run performance.ui app"
+  echo " = = Now run performance.ui app = ="
   devworkspace="${fromDir}/workspace-updatePerfResults"
   eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//172.25.25.57:1527}
   vmargs="-Xmx256m -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
@@ -205,7 +205,22 @@ then
   XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
   # --server-args -screen 0 1024x768x24"
   # 
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} -print -vm ${devJRE}  -vmargs ${vmargs}
+  
+    echo " = = Properties in updateTestResultsPages.sh: update derby section  = = "
+  echo "   dev script:   $0"
+  echo "   buildRoot:    $buildRoot"
+  echo "   BUILD_HOME:   ${BUILD_HOME}"
+  echo "   pathToDL:     $pathToDL"
+  echo "   siteDir:      $siteDir"
+  echo "   fromDir:      $fromDir"
+  echo "   devworkspace: $devworkspace"
+  echo "   devArgs:      $devArgs"
+  echo "   devJRE:       $devJRE"
+  echo "   BUILDFILESTR: $BUILDFILESTR"
+  echo "   job:          $JOB_NAME"
+  echo
+  
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} -print -data -fingerprints -vm ${devJRE}  -vmargs ${vmargs}
   RC=$?
   if [[ $RC != 0 ]]
   then
