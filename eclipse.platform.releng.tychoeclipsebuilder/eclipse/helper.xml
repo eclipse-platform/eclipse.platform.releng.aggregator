@@ -1,13 +1,19 @@
 <project
-    name="Helper targets"
-    default="noDefault">
+  name="Helper targets"
+  default="noDefault">
 
-    <fail unless="EBuilderDir" message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
-    <fail unless="postingDirectory" message="postingDirectory must be passed to this script." />
-    <fail unless="buildLabel" message="buildLabel must be passed to this script." />
-    <property
-        name="publishingContent"
-        value="${EBuilderDir}/eclipse/publishingFiles" />
+  <fail
+    unless="EBuilderDir"
+    message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
+  <fail
+    unless="postingDirectory"
+    message="postingDirectory must be passed to this script." />
+  <fail
+    unless="buildLabel"
+    message="buildLabel must be passed to this script." />
+  <property
+    name="publishingContent"
+    value="${EBuilderDir}/eclipse/publishingFiles" />
 
 
 
@@ -15,236 +21,238 @@
     <!-- ===================================================================== -->
     <!-- Set of helper targets for building the Eclipse SDK -->
     <!-- ===================================================================== -->
-    <target name="discoverOS">
-        <condition property="onUnix">
-            <and>
-                <os family="unix" />
-            </and>
-        </condition>
-        <condition property="onWindows">
-            <and>
-                <os family="windows" />
-            </and>
-        </condition>
-    </target>
+  <target name="discoverOS">
+    <condition property="onUnix">
+      <and>
+        <os family="unix" />
+      </and>
+    </condition>
+    <condition property="onWindows">
+      <and>
+        <os family="windows" />
+      </and>
+    </condition>
+  </target>
 
-    <target
-        name="printWarnings"
-        if="onWindows"
-        depends="discoverOS">
-        <echo
-            message="The UNIX versions of your build output will be invalid.  Windows will not preserve symbolic links and permissions on executable files." />
-    </target>
-
-
-    <target name="buildStandAloneSWT">
-        <parallel failonany="true">
-            <sequential>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="ws"
-                        value="win32" />
-                    <param
-                        name="os"
-                        value="win32" />
-                    <param
-                        name="arch"
-                        value="x86" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="ws"
-                        value="win32" />
-                    <param
-                        name="os"
-                        value="win32" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-            </sequential>
-        </parallel>
-        <parallel failonany="true">
-            <antcall target="packageSwtStandalone">
-                <param
-                    name="os"
-                    value="aix" />
-                <param
-                    name="ws"
-                    value="gtk" />
-                <param
-                    name="arch"
-                    value="ppc" />
-            </antcall>
-            <antcall target="packageSwtStandalone">
-                <param
-                    name="os"
-                    value="aix" />
-                <param
-                    name="ws"
-                    value="gtk" />
-                <param
-                    name="arch"
-                    value="ppc64" />
-            </antcall>
-        </parallel>
-        <parallel failonany="true">
-            <sequential>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="solaris" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="sparc" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="solaris" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="x86" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="hpux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="ia64" />
-                </antcall>
-            </sequential>
-        </parallel>
-        <parallel failonany="true">
-            <sequential>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="linux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="x86" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="macosx" />
-                    <param
-                        name="ws"
-                        value="cocoa" />
-                    <param
-                        name="arch"
-                        value="" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="macosx" />
-                    <param
-                        name="ws"
-                        value="cocoa" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="linux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="x86_64" />
-                </antcall>
-                <antcall target="packageSwtStandalone">
-                    <param
-                        name="os"
-                        value="linux" />
-                    <param
-                        name="ws"
-                        value="gtk" />
-                    <param
-                        name="arch"
-                        value="ppc64" />
-                </antcall>
-            </sequential>
-        </parallel>
-
-    </target>
+  <target
+    name="printWarnings"
+    if="onWindows"
+    depends="discoverOS">
+    <echo
+      message="The UNIX versions of your build output will be invalid.  Windows will not preserve symbolic links and permissions on executable files." />
+  </target>
 
 
+  <target name="buildStandAloneSWT">
+    <parallel failonany="true">
+      <sequential>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="ws"
+            value="win32" />
+          <param
+            name="os"
+            value="win32" />
+          <param
+            name="arch"
+            value="x86" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="ws"
+            value="win32" />
+          <param
+            name="os"
+            value="win32" />
+          <param
+            name="arch"
+            value="x86_64" />
+        </antcall>
+      </sequential>
+    </parallel>
+    <parallel failonany="true">
+      <antcall target="packageSwtStandalone">
+        <param
+          name="os"
+          value="aix" />
+        <param
+          name="ws"
+          value="gtk" />
+        <param
+          name="arch"
+          value="ppc" />
+      </antcall>
+      <antcall target="packageSwtStandalone">
+        <param
+          name="os"
+          value="aix" />
+        <param
+          name="ws"
+          value="gtk" />
+        <param
+          name="arch"
+          value="ppc64" />
+      </antcall>
+    </parallel>
+    <parallel failonany="true">
+      <sequential>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="solaris" />
+          <param
+            name="ws"
+            value="gtk" />
+          <param
+            name="arch"
+            value="sparc" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="solaris" />
+          <param
+            name="ws"
+            value="gtk" />
+          <param
+            name="arch"
+            value="x86" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="hpux" />
+          <param
+            name="ws"
+            value="gtk" />
+          <param
+            name="arch"
+            value="ia64" />
+        </antcall>
+      </sequential>
+    </parallel>
+    <parallel failonany="true">
+      <sequential>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="linux" />
+          <param
+            name="ws"
+            value="gtk" />
+          <param
+            name="arch"
+            value="x86" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="macosx" />
+          <param
+            name="ws"
+            value="cocoa" />
+          <param
+            name="arch"
+            value="" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="macosx" />
+          <param
+            name="ws"
+            value="cocoa" />
+          <param
+            name="arch"
+            value="x86_64" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="linux" />
+          <param
+            name="ws"
+            value="gtk" />
+          <param
+            name="arch"
+            value="x86_64" />
+        </antcall>
+        <antcall target="packageSwtStandalone">
+          <param
+            name="os"
+            value="linux" />
+          <param
+            name="ws"
+            value="gtk" />
+          <param
+            name="arch"
+            value="ppc64" />
+        </antcall>
+      </sequential>
+    </parallel>
 
-    <target name="packageSwtStandalone">
-        <condition
-            property="downloadFile"
-            value="swt-${buildId}-${ws}-${os}.zip">
-            <equals
-                arg1="${arch}"
-                arg2="" />
-        </condition>
-        <property
-            name="downloadFile"
-            value="swt-${buildId}-${ws}-${os}-${arch}.zip" />
-        <property
-            name="destination"
-            value="${postingDirectory}/${buildLabel}" />
-        <property
-            name="archiveFullPath"
-            value="${destination}/${downloadFile}" />
-
-        <condition
-            property="swtdir"
-            value="${buildDirectory}/plugins/org.eclipse.swt.${ws}.${os}">
-            <equals
-                arg1="${arch}"
-                arg2="" />
-        </condition>
-
-        <property
-            name="swtdir"
-            value="${buildDirectory}/plugins/org.eclipse.swt.${ws}.${os}.${arch}" />
-        <ant
-            antfile="build.xml"
-            target="swtdownload"
-            dir="${swtdir}">
-        </ant>
-    </target>
+  </target>
 
 
-    <target
-        name="publish"
-        description="Preparing to post the build...">
 
-        <fail unless="AGGR_DIR" message="AGGR_DIR must be defined for this this script" />
+  <target name="packageSwtStandalone">
+    <condition
+      property="downloadFile"
+      value="swt-${buildId}-${ws}-${os}.zip">
+      <equals
+        arg1="${arch}"
+        arg2="" />
+    </condition>
+    <property
+      name="downloadFile"
+      value="swt-${buildId}-${ws}-${os}-${arch}.zip" />
+    <property
+      name="destination"
+      value="${postingDirectory}/${buildLabel}" />
+    <property
+      name="archiveFullPath"
+      value="${destination}/${downloadFile}" />
 
-        <mkdir dir="${postingDirectory}/${buildLabel}/checksum" />
-        <exec
-            executable="sh"
-            dir="${postingDirectory}/${buildLabel}">
-            <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
-        </exec>
+    <condition
+      property="swtdir"
+      value="${buildDirectory}/plugins/org.eclipse.swt.${ws}.${os}">
+      <equals
+        arg1="${arch}"
+        arg2="" />
+    </condition>
+
+    <property
+      name="swtdir"
+      value="${buildDirectory}/plugins/org.eclipse.swt.${ws}.${os}.${arch}" />
+    <ant
+      antfile="build.xml"
+      target="swtdownload"
+      dir="${swtdir}">
+    </ant>
+  </target>
+
+
+  <target
+    name="publish"
+    description="Preparing to post the build...">
+
+    <fail
+      unless="AGGR_DIR"
+      message="AGGR_DIR must be defined for this this script" />
+
+    <mkdir dir="${postingDirectory}/${buildLabel}/checksum" />
+    <exec
+      executable="sh"
+      dir="${postingDirectory}/${buildLabel}">
+      <arg line="${EBuilderDir}/eclipse/extras/produceChecksum.sh" />
+    </exec>
 
         <!--post clickThroughs-->
-        <copy todir="${postingDirectory}/${buildLabel}">
-            <fileset
-                dir="${EBuilderDir}/eclipse"
-                includes="clickThroughs/" />
-        </copy>
+    <copy todir="${postingDirectory}/${buildLabel}">
+      <fileset
+        dir="${EBuilderDir}/eclipse"
+        includes="clickThroughs/" />
+    </copy>
 
         <!--post directory.txt ... no longer done this way
         <copy
@@ -253,15 +261,15 @@
             failonerror="false"/>
             -->
 
-        <antcall target="generateEclipseIndex" />
+    <antcall target="generateEclipseIndex" />
 
         <!--get static files required in the buildLabel directory-->
-        <copy todir="${postingDirectory}/${buildLabel}">
-            <fileset dir="${publishingContent}/staticDropFiles" />
-        </copy>
+    <copy todir="${postingDirectory}/${buildLabel}">
+      <fileset dir="${publishingContent}/staticDropFiles" />
+    </copy>
 
         <!--copy buildnotes from plugin directories-->
-        <mkdir dir="${postingDirectory}/${buildLabel}/buildnotes" />
+    <mkdir dir="${postingDirectory}/${buildLabel}/buildnotes" />
         <!--copy
             todir="${postingDirectory}/${buildLabel}/buildnotes"
             flatten="true">
@@ -271,98 +279,99 @@
         </copy-->
 
         <!--copy javadoc logs-->
-        <copy
-            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/doc.bin.log"
-            tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.javadoc.txt"
-            failonerror="false" />
-        <copy
-            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/doc.bin.log"
-            tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.javadoc.txt"
-            failonerror="false" />
-        <copy
-            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/doc.bin.log"
-            tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.javadoc.txt"
-            failonerror="false" />
-        <copy
-            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/platformconvert.txt"
-            tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.schema.txt"
-            failonerror="false" />
-        <copy
-            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/jdtconvert.txt"
-            tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.schema.txt"
-            failonerror="false" />
-        <copy
-            file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/pdeconvert.txt"
-            tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.schema.txt"
-            failonerror="false" />
+    <copy
+      file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/doc.bin.log"
+      tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.javadoc.txt"
+      failonerror="false" />
+    <copy
+      file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/doc.bin.log"
+      tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.javadoc.txt"
+      failonerror="false" />
+    <copy
+      file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/doc.bin.log"
+      tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.javadoc.txt"
+      failonerror="false" />
+    <copy
+      file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.platform.doc.isv/platformconvert.txt"
+      tofile="${postingDirectory}/${buildLabel}/compilelogs/platform.doc.isv.schema.txt"
+      failonerror="false" />
+    <copy
+      file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.jdt.doc.isv/jdtconvert.txt"
+      tofile="${postingDirectory}/${buildLabel}/compilelogs/jdt.doc.isv.schema.txt"
+      failonerror="false" />
+    <copy
+      file="${AGGR_DIR}/eclipse.platform.common/bundles/org.eclipse.pde.doc.user/pdeconvert.txt"
+      tofile="${postingDirectory}/${buildLabel}/compilelogs/pde.doc.user.schema.txt"
+      failonerror="false" />
 
-    </target>
+  </target>
 
-    <target name="generateEclipseIndex">
-        <property name="generatorClass"
-            value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail" />
+  <target name="generateEclipseIndex">
+    <property
+      name="generatorClass"
+      value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail" />
 
-        <available
-            classname="${generatorClass}"
-            property="class"
-            value="${generatorClass}" />
+    <available
+      classname="${generatorClass}"
+      property="class"
+      value="${generatorClass}" />
 
         <!--regenerate the index page with links to test results-->
-        <ant
-            antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
-            dir="${publishingContent}"
-            target="generateIndex">
-            <property
-                name="isBuildTested"
-                value="true" />
-            <property
-                name="buildType"
-                value="${buildType}" />
-            <property
-                name="dropTokenList"
-                value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
-            <property
-                name="platformIdentifierToken"
-                value="%platform%" />
-            <property
-                name="platformSpecificTemplateList"
-                value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
-            <property
-                name="indexFileName"
-                value="index.php" />
-            <property
-                name="result"
-                value="${postingDirectory}/${buildLabel}" />
-            <property
-                name="testResultsTemplateFileName"
-                value="${publishingContent}/templateFiles/testResults.php.template" />
-            <property
-                name="dropTemplateFileName"
-                value="${publishingContent}/templateFiles/index.php.template" />
-            <property
-                name="testManifestFileName"
-                value="${publishingContent}/testManifest.xml" />
-        </ant>
+    <ant
+      antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
+      dir="${publishingContent}"
+      target="generateIndex">
+      <property
+        name="isBuildTested"
+        value="true" />
+      <property
+        name="buildType"
+        value="${buildType}" />
+      <property
+        name="dropTokenList"
+        value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
+      <property
+        name="platformIdentifierToken"
+        value="%platform%" />
+      <property
+        name="platformSpecificTemplateList"
+        value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
+      <property
+        name="indexFileName"
+        value="index.php" />
+      <property
+        name="result"
+        value="${postingDirectory}/${buildLabel}" />
+      <property
+        name="testResultsTemplateFileName"
+        value="${publishingContent}/templateFiles/testResults.php.template" />
+      <property
+        name="dropTemplateFileName"
+        value="${publishingContent}/templateFiles/index.php.template" />
+      <property
+        name="testManifestFileName"
+        value="${publishingContent}/testManifest.xml" />
+    </ant>
 
-    </target>
+  </target>
 
-    <target
-        name="verifyCompile"
-        if="eclipse.running">
-        <echo message="Checking for compile errors..." />
+  <target
+    name="verifyCompile"
+    if="eclipse.running">
+    <echo message="Checking for compile errors..." />
         <!--create html output for compile logs-->
-        <eclipse.convert
-            input="${postingDirectory}/${buildLabel}/compilelogs"
-            validation="true" />
+    <eclipse.convert
+      input="${postingDirectory}/${buildLabel}/compilelogs"
+      validation="true" />
         <!-- Sends email to recipient list in monitor.properties with compile logs attached if errors found-->
         <!-- <verifyCompile install="${postingDirectory}/${buildLabel}/compilelogs" /> -->
-    </target>
+  </target>
 
     <!-- ===================================================================== -->
     <!-- Default target                                                        -->
     <!-- ===================================================================== -->
-    <target name="noDefault">
-        <echo message="You must specify a target when invoking this file" />
-    </target>
+  <target name="noDefault">
+    <echo message="You must specify a target when invoking this file" />
+  </target>
 
 </project>

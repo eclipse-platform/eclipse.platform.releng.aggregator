@@ -12,7 +12,10 @@
      David Williams - improvements and maintenance
      Lars Vogel - Bug 442042
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse</groupId>
   <artifactId>eclipse-platform-parent</artifactId>
@@ -338,11 +341,11 @@
           <configuration>
             <compilerArgument>${code.ignoredWarnings}</compilerArgument>
             <compilerArguments>
-              <verbose/>
-              <inlineJSR/>
-              <enableJavadoc/>
+              <verbose />
+              <inlineJSR />
+              <enableJavadoc />
               <encoding>${project.build.sourceEncoding}</encoding>
-              <proceedOnError/>
+              <proceedOnError />
               <log>${project.build.directory}/@dot.xml</log>
             </compilerArguments>
             <showWarnings>true</showWarnings>
@@ -728,68 +731,68 @@
            the "template" file be part of the 'saveproperties' directory. Its only purpose
            is to "fill in" the property values named in that file.
        -->
-      <resource>
-        <directory>saveproperties</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
+          <resource>
+            <directory>saveproperties</directory>
+            <filtering>true</filtering>
+          </resource>
+        </resources>
 
-  </build>
-</profile>
+      </build>
+    </profile>
 
-<profile>
-  <id>update-branding-plugins-about.mappings</id>
-  <activation>
-    <file>
-      <exists>${basedir}/about.mappings</exists>
-    </file>
-  </activation>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-        <executions>
-          <execution>
-            <id>process-about.mappings</id>
-            <phase>prepare-package</phase>
+    <profile>
+      <id>update-branding-plugins-about.mappings</id>
+      <activation>
+        <file>
+          <exists>${basedir}/about.mappings</exists>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>2.6</version>
+            <executions>
+              <execution>
+                <id>process-about.mappings</id>
+                <phase>prepare-package</phase>
+                <configuration>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <overwrite>true</overwrite>
+                  <resources>
+                    <resource>
+                      <directory>${basedir}</directory>
+                      <includes>
+                        <include>about.mappings</include>
+                      </includes>
+                      <filtering>true</filtering>
+                    </resource>
+                  </resources>
+                </configuration>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-packaging-plugin</artifactId>
+            <version>${tycho.version}</version>
             <configuration>
-              <outputDirectory>${project.build.directory}</outputDirectory>
-              <overwrite>true</overwrite>
-              <resources>
-                <resource>
-                  <directory>${basedir}</directory>
+              <additionalFileSets>
+                <fileSet>
+                  <directory>${project.build.directory}</directory>
                   <includes>
                     <include>about.mappings</include>
                   </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
+                </fileSet>
+              </additionalFileSets>
             </configuration>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-packaging-plugin</artifactId>
-        <version>${tycho.version}</version>
-        <configuration>
-          <additionalFileSets>
-            <fileSet>
-              <directory>${project.build.directory}</directory>
-              <includes>
-                <include>about.mappings</include>
-              </includes>
-            </fileSet>
-          </additionalFileSets>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-</profile>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
