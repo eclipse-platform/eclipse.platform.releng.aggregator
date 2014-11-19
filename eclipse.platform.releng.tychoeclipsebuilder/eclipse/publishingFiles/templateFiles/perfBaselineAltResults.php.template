@@ -34,7 +34,7 @@ else {
 
 <?php
 
-     echo "<title>Test Results for $BUILD_ID </title>";
+     echo "<title>Test Results for $BUILD_ID Performance Unit Tests</title>";
 ?>
 
 
@@ -56,7 +56,7 @@ P {text-indent: 30pt; margin: inherit}
      <script type="text/javascript">
 
 sfHover = function() {
-     var sfEls = document.getElementById("leftnav").getElementsByTagName("li");
+     var sfEls = document.getElementById("leftnav").getElementsByTagName("LI");
      for (var i=0; i<sfEls.length; i++) {
           sfEls[i].onmouseover=function() {
                this.className+=" sfhover";
@@ -76,8 +76,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div id="leftcol">
 <ul id="leftnav">
 <li><a href="#Logs">Logs</a></li>
-<li><a href="#UnitTest">Unit Test Results</a></li>
-<li><a href="#PluginsErrors">Plugins Containing Compile Errors</a></li>
+<li><a href="#UnitTest">Performance Unit Test Results</a></li>
 
 </ul>
 
@@ -86,94 +85,33 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <?php } ?>
 
 <div id="midcolumn">
-<h2>Test Results</h2>
+<p><b><font face="Verdana" size="+3">Test Results</font></b> </p>
 <div class="homeitem3col">
 <h3><a name="Logs"> Logs <?php echo "$BUILD_ID"; ?></h3>
 <ul>
-<!-- have removed chkpii processing on build.eclilpse.org
-<li> <a href="logs.php#chkpii"><b> CHKPII Test Logs </b></a>
+
+<li> <a href="perflogs.php#console"><b> Console Output Logs </b></a>
 </li>
--->
-<li>
-<a href="logs.php#javadoc"><b> Javadoc Logs </b></a>
-</li>
-<li> <a href="logs.php#console"><b> Console Output Logs </b></a>
-</li>
-<li> <a href="buildlogs.php"><b>Release engineering build logs</b></a>
-</li>
-<?php
-echo " <li><a href=\"apitools/analysis/html/index.html\"><b>API Tools Version Verification Report</b></a>";
-echo "  This tool verifies the versions of the plugins against Eclipse ${API_PREV_REF_LABEL}.&nbsp;&nbsp;
-Exclusions are listed in <a href=\"http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/tree/eclipse.platform.releng.tychoeclipsebuilder/eclipse/apiexclude/exclude_list_external.txt?h=$BRANCH\">.../apiexclude/exclude_list_external.txt</a>.</li> ";
-?>
 
-<?php
-$deprecationFilename="apitools/deprecation/apideprecation.html";
-if (file_exists($deprecationFilename)) {
-echo " <li><a href=\"$deprecationFilename\"><b>API Tools Deprecation Report</b></a>";
-echo "  This tool generates a report for API deprecated since ${API_PREV_REF_LABEL}.</li> ";
-}
-else {
-echo "  <li>No deprecation report. Nothing deprecated since ${API_PREV_REF_LABEL}.</li>";
-}
-?>
-
-<?php
-// have removed coverage measurements for now
-// echo " <li><a href=\"coverage.php\"><b>JaCoCo code coverage report</b></a></li>";
-?>
-
-<?php
-$freezeFilename="apitools/freeze_report.html";
-if (file_exists($freezeFilename)) {
-  echo "<li><a href=\"$freezeFilename\"><b>API Tools Post-API Freeze Report</b></a>&nbsp;&nbsp;";
-  echo "This report describes API changes since ${API_FREEZE_REF_LABEL}.  Exclusions are listed in <a href=\"http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/tree/eclipse.platform.releng.tychoeclipsebuilder/eclipse/apiexclude/exclude_list.txt?h=$BRANCH\">.../apiexclude/exclude_list.txt</a>.</li>";
-}
-else {
-echo "  <li>No freeze report. Only generated in main stream after M6.</li>";
-}
-?>
-
-<?php
-echo " <li><a href=\"apitools/apifilters-$BUILD_ID.zip\"><b>Zip of .api_filters files used in the build</b></a></li>";
-?>
-<?php
-
-    echo"<li>eclipse.platform.releng.aggregator: $BRANCH (branch or hash: $EBUILDER_HASH)</li> ";
-    echo"<li>org.eclipse.releng.basebuilder (only used to start unit tests): $BASEBUILDER_TAG</li> ";
-
-?>
-<?php
-  echo "<li>\n";
-  $generated=file_exists("performance/global_fp.php");
-  if (file_exists("performance.php") && $generated) {
-    echo "View the <a href=\"performance.php\">performance test results</a> for the current build.\n";
-  } else {
-    echo "Performance tests are pending.\n";
-  }
-  echo "</li>\n";
-?>
 </div>
 
 <div class="homeitem3col">
-<h3><a name="UnitTest"> Unit Test Results for <?php echo "$BUILD_ID"; ?> </a></h3>
+<h3><a name="UnitTest">Performance Unit Test Results for <?php echo "$BUILD_ID"; ?> </a></h3>
 
 <p>The table shows the unit test results for this build on the platforms
 tested. You may access the test results page specific to each
 component on a specific platform by clicking the cell link.
 Normally, the number of errors is indicated in the cell.
-A "-1" or "DNF" means the test "Did Not Finish" for unknown reasons
+A "-1" or "DNF" means the test "Did Not Finish" for unknown reasosns
 and hence no results page is available. In that case,
 more information can sometimes be found in
 the <a href="logs.php#console">console logs</a>.</p>
 <?php
-if (file_exists("testNotes.html")) {
+if (file_exists("perfNotes.html")) {
     $my_file = file_get_contents("testNotes.html");
     echo $my_file;
 }
 ?>
-
-
 
 <table width="85%" border="1" bgcolor="#EEEEEE" rules="groups" align="center">
 <tr bgcolor="#9999CC">
@@ -186,42 +124,11 @@ if (file_exists("testNotes.html")) {
 <th width="20%"><?= $expectedTestConfigs[2] ?></th>
 <th><th width="20%"></th>
 </tr>
-
 %testresults%
-
-</table>
-</br>
-</div>
-
-<div class="homeitem3col">
-<h3><a name="PluginsErrors"> Plugins containing compile errors or warnings</a></h3>
-</br>
-&nbsp;&nbsp;The table below shows the plugins in which errors or warnings were encountered. Click on the jar file link to view its
-detailed report.
-</br></br>
-<table width="77%" border="1">
-  <tr>
-    <td><b>Compile Logs (Jar Files)</b></td>
-    <td><b>Errors</b></td>
-    <td><b>Warnings</b></td>
-  </tr>
-
-  %compilelogs%
-
-</table>
-
-<table width="77%" border="1">
-  <tr>
-    <td><b>Compile Logs (Jar Files)</b></td>
-    <td><b>Forbidden Access Warnings</b></td>
-    <td><b>Discouraged Access Warnings</b></td>
-  </tr>
-
-  %accesseslogs%
-
 </table>
 </br>
 </div>
 </div>
+
 </body>
 </html>

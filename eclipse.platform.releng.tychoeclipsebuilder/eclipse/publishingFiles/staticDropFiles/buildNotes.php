@@ -33,7 +33,7 @@ while ($anEntry = $aDirectory->read()) {
   }
 }
 echo "</ul>";
-aDirectory.closedir();
+$aDirectory->close();
 
 
 ?>

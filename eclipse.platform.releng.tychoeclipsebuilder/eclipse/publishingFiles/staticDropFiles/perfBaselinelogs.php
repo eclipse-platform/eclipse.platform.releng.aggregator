@@ -3,7 +3,7 @@
 <head>
 
 <?php
-$testresults="testresults";
+$testresults="baseline";
 include("buildproperties.php");
 include ('testConfigs.php');
 include ('utilityFunctions.php');
@@ -76,7 +76,7 @@ function listLogs($myDir) {
 
 function listDetailedLogs ($testresults, $machineplatform) {
   if (file_exists("$testresults/$machineplatform")) {
-  echo "<strong>Individual $machineplatform test logs</strong><br />";
+    echo "<strong>Individual $machineplatform test logs</strong><br />";
     listLogs("$testresults/$machineplatform");
   }
   if (file_exists("$testresults/$machineplatform/crashlogs")) {
@@ -98,7 +98,7 @@ P {text-indent: 30pt;}
 </STYLE>
 
 
-<title>Test Logs</title>
+<title>Baseline Performance Test Logs</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 <meta name="author" content="Eclipse Foundation, Inc." />
 <meta name="keywords" content="eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide" />
@@ -123,11 +123,15 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 </head>
 <body>
 
+<ul id="headernav">
+<li class="first"><a href="/org/foundation/contact.php">Contact</a></li>
+<li><a href="/legal/">Legal</a></li>
+</ul>
+
 <div id="leftcol">
 <ul id="leftnav">
-<li><a href="logs.php">Logs</a></li>
-<li><a href="testResults.php#UnitTest">Unit Test Results</a></li>
-<li><a href="testResults.php#PluginsErrors">Plugins Containing Compile Errors</a></li>
+<li><a href="perflogs.php">Performance Logs</a></li>
+<li><a href="perfBaselineResults.php#UnitTest">Baseline Performance Unit Test Results</a></li>
 
 </ul>
 
@@ -137,8 +141,8 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <div class="homeitem3col">
 <?php
 
-echo "<title>Test Results for $BUILD_ID </title>\n";
-echo "<h2>Test Results for $BUILD_ID </h2>\n";
+
+echo "<h2>Performance Unit Test Results for $BUILD_ID </h2>\n";
 
 echo "<h3>Logs</h3>\n";
 
@@ -146,21 +150,13 @@ echo "<h3>Logs</h3>\n";
 </ul>
 </li>
 
-<li>
-<strong><a name="javadoc" id="javadoc"></a>Javadoc Logs</strong>
-<ul>
 
-<?php
-listLogs("compilelogs");
-?>
-</ul>
-</li>
 
 
 <li>
 <ul>
-<strong><a name="console" id="console"></a>Console Logs</strong>
-<p>These logs contain the console output captured while running the JUnit automated tests.</p>
+<strong><a name="console" id="console"></a>Performance Test Console Logs</strong>
+<p>These logs contain the console output captured while running the Performance JUnit automated tests.</p>
 <?php
 
 listLogs("$testresults/consolelogs");

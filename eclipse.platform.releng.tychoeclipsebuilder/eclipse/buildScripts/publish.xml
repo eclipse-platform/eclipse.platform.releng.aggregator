@@ -10,16 +10,16 @@
 -->
   <property
     name="result"
-    value="${buildDirectory}/${buildLabel}" />
+    value="${buildDirectory}" />
 
 <!--name of generated index page-->
   <property
     name="indexFileName"
-    value="index.html" />
+    value="index.php" />
 
   <target name="default">
-    <antcall target="generateIndex" />
     <antcall target="getStaticFiles" />
+    <antcall target="generateIndex" />
   </target>
 
   <target name="generateIndex">
@@ -43,46 +43,157 @@
   hrefCompileLogsTargetPath:  relative path from index page directory containing compilelogs
   testManifestFileName:  name of xml file containing descriptions of zip types and log files
 
-
-
 -->
+
+    <condition
+      property="testTemplate"
+      value="perfBaselineResults.php.template">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="testTemplate"
+      value="performance.php.template"
+      else="testResults.php.template">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+
+    <condition
+      property="xmlDirectoryName"
+      value="${result}/baseline/xml">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="xmlDirectoryName"
+      value="${result}/performance/xml"
+      else="${result}/testresults/xml">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+
+    <condition
+      property="manifestFile"
+      value="${basedir}/performanceTestManifest.xml"
+      else="${basedir}/testManifest.xml">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
 
     <property
       name="xmlDirectoryName"
-      value="${result}/testresults/xml" />
+      value="${result}/xml" />
     <property
       name="dropDirectoryName"
-      value="${result}" />
+      value="${postingDirectory}/${buildLabel}" />
     <property
       name="testResultsTemplateFileName"
-      value="${basedir}/templateFiles/testResults.php.template" />
+      value="${basedir}/templateFiles/${testTemplate}" />
 <!-- TODO: should require this, and others to be passed in, and fail, if not -->
     <property
       name="dropTemplateFileName"
       value="${basedir}/templateFiles/index.html.template" />
+
+    <condition
+      property="testResultsHtmlFileName"
+      value="baselineAlt.php">
+      <contains
+        string="${job}"
+        substring="-baselineAlt" />
+    </condition>
+    <condition
+      property="testResultsHtmlFileName"
+      value="baseline.php">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="testResultsHtmlFileName"
+      value="performance.php"
+      else="testResults.php">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <!--
     <property
       name="testResultsHtmlFileName"
       value="testResults.php" />
+      -->
+    <condition
+      property="hrefTestResultsTargetPath"
+      value="baselineAlt/html">
+      <contains
+        string="${job}"
+        substring="-baselineAlt" />
+    </condition>
+    <condition
+      property="hrefTestResultsTargetPath"
+      value="baseline/html">
+      <contains
+        string="${job}"
+        substring="-baseline" />
+    </condition>
+    <condition
+      property="hrefTestResultsTargetPath"
+      value="performance/html"
+      else="testresults/html">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <condition
+      property="doMissingListValue"
+      value="false"
+      else="true">
+      <contains
+        string="${job}"
+        substring="-perf-" />
+    </condition>
+    <!-- 
     <property
       name="hrefTestResultsTargetPath"
-      value="testresults/html" />
+      value="${result}/html" />
+        -->
     <property
       name="hrefCompileLogsTargetPath"
       value="compilelogs" />
     <property
       name="compileLogsDirectoryName"
-      value="${result}/compilelogs" />
+      value="${dropDirectoryName}/compilelogs" />
     <property
       name="testManifestFileName"
-      value="${basedir}/testManifest.xml" />
+      value="${manifestFile}" />
 
+    <echo message=" = = properties in publish.xml == " />
+    <echo message="     job: ${job}" />
+    <echo message="     result: ${result}" />
+    <echo message="     xmlDirectoryName: ${xmlDirectoryName}" />
+    <echo message="     dropDirectoryName ${dropDirectoryName}" />
+    <echo message="     dropTemplateFileName: ${dropTemplateFileName}" />
+    <echo message="     testResultsHtmlFileName: ${testResultsHtmlFileName}" />
+    <echo message="     testTemplate: ${testTemplate}" />
+    <echo message="     testResultsTemplateFileName: ${testResultsTemplateFileName}" />
+    <echo message="     hrefTestResultsTargetPath: ${hrefTestResultsTargetPath}" />
+    <echo message="     hrefCompileLogsTargetPath: ${hrefCompileLogsTargetPath}" />
+    <echo message="     compileLogsDirectoryName: ${compileLogsDirectoryName}" />
+    <echo message="     testManifestFileName: ${testManifestFileName}" />
+    <echo message="     isBuildTested: ${isBuildTested}" />
+    <echo message="     buildType:  ${buildType}" />
+    <echo message="     doMissingListValue:  ${doMissingListValue}" />
 
     <indexResults
       isBuildTested="${isBuildTested}"
       buildType="${buildType}"
       dropTokenList="${dropTokenList}"
       platformIdentifierToken="${platformIdentifierToken}"
-      platformSpecificTemplateList="${platformSpecificTemplateList}"
       dropHtmlFileName="${indexFileName}"
       xmlDirectoryName="${xmlDirectoryName}"
       dropDirectoryName="${dropDirectoryName}"
@@ -92,37 +203,8 @@
       hrefTestResultsTargetPath="${hrefTestResultsTargetPath}"
       hrefCompileLogsTargetPath="${hrefCompileLogsTargetPath}"
       compileLogsDirectoryName="${compileLogsDirectoryName}"
-      testManifestFileName="${testManifestFileName}" />
-
-
-
-    <!--  Insert Build Name ... apparently still required, until we can update indexing task directly -->
-    <replace
-      file="${result}/${indexFileName}"
-      token="@build@"
-      value="${buildId}" />
-
-
-    <replace
-      dir="${result}"
-      value="${buildId}">
-      <include name="**/*.php" />
-      <replacetoken><![CDATA[@build@]]></replacetoken>
-    </replace>
-
-    <replace
-      file="${result}/${indexFileName}"
-      token="@buildlabel@"
-      value="${buildId}" />
-
-    <replace
-      dir="${result}"
-      value="${buildId}">
-      <include name="**/*.php" />
-      <replacetoken><![CDATA[@buildlabel@]]></replacetoken>
-    </replace>
-
-    <!-- TODO: fix so these replace's are not required -->
+      testManifestFileName="${testManifestFileName}"
+      doMissingList="${doMissingListValue}" />
 
   </target>
 

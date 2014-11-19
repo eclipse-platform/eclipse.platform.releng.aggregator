@@ -65,7 +65,7 @@ else
   exit 1
 fi
 
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 echo "values in ${0}"
 echo "eclipseStream: $eclipseStream"

@@ -1,95 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-    name="collectTestResults"
-    default="collectTestResults"
-    basedir=".">
+<project name="collectTestResults" default="collectTestResults" basedir=".">
 
     <!-- example properties. Caller normally provides. -->
-    <property
-        name="job"
-        value="ep4-unit-mac64" />
-    <property
-        name="buildNumber"
-        value="49" />
-    <property
-        name="buildId"
-        value="N20121014-2000" />
-    <property
-        name="eclipseStream"
-        value="4.3.0" />
-    <property
-        name="EBUILDER_HASH"
-        value="master" />
+  <property name="job" value="ep4-unit-mac64" />
+  <property name="buildNumber" value="49" />
+  <property name="buildId" value="N20121014-2000" />
+  <property name="eclipseStream" value="4.3.0" />
+  <property name="EBUILDER_HASH" value="master" />
 
 
-    <target
-        name="collectTestResults"
-        depends="init"
-        description="Collect Test Results from Hudson to build machine location.">
-
-
-        <mkdir dir="${tmpzipdir}" />
-
-        <retry
-            retrycount="3"
-            retrydelay="1000">
-            <get
-                src="${hudsonResultURL}"
-                dest="${tmpzipdir}/archive.zip" />
-        </retry>
-
-        <mkdir dir="${postingDirectory}/${buildId}/testresults" />
-
-    <unzip
-      overwrite="true"
-            src="${tmpzipdir}/archive.zip"
-            dest="${postingDirectory}/${buildId}/testresults/">
-            <globmapper
-                from="archive/workarea/${buildId}/eclipse-testing/results/*"
-                to="*" />
-        </unzip>
-
-        <exec executable="/bin/bash">
-      <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}" />
-        </exec>
-
-        <delete>
-          <fileset dir="${postingDirectory}/${buildId}/testresults">
-              <include name="${tmpzipdir}" />
-              <include name="archive/**" />
-          </fileset>
-        </delete>
-
-    </target>
+  <target name="collectTestResults" depends="init" description="Collect Test Results from Hudson to build machine location.">
 
 
 
+    <retry retrycount="3" retrydelay="1000">
+      <get ignoreerrors="true" verbose="true" src="${hudsonResultURL}" dest="${tmpzipdir}/archive.zip" />
+    </retry>
 
-    <target
-        name="init"
-        unless="collectTestResultsInitialized">
+    <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
+    <retry retrycount="3" retrydelay="1000">
+      <get src="${hudsonTestResultsURL}" dest="${resultsDir}/${job}-${buildNumber}.xml" />
+    </retry>
 
-        <property environment="env" />
 
-      <!-- we set these "env" variables here not to effect the 
-           environment, but that because we need some value for them, 
-           so if not actually set in the environment, we create these 
-           with some reasonable default. (Though, if not set in the environment, 
+    <unzip overwrite="true" src="${tmpzipdir}/archive.zip" dest="${resultsDir}/">
+      <globmapper from="archive/workarea/${buildId}/eclipse-testing/results/*" to="*" />
+    </unzip>
+
+    <exec executable="/bin/bash" failonerror="true">
+      <arg line="/shared/eclipse/sdk/promotion/updateDropLocation.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH} ${job}" />
+    </exec>
+
+    <delete failonerror="false">
+      <fileset dir="${resultsDir}">
+        <include name="${tmpzipdir}" />
+        <include name="archive/**" />
+      </fileset>
+    </delete>
+
+  </target>
+
+  <target name="init" unless="collectTestResultsInitialized">
+
+    <property environment="env" />
+    <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
+
+    <!-- we set these "env" variables here not to effect the
+           environment, but that because we need some value for them,
+           so if not actually set in the environment, we create these
+           with some reasonable default. (Though, if not set in the environment,
            could be a sign that somethign is not as expected?)
      -->
-        <property
-            name="env.HUDSON_HOST"
-            value="hudson.eclipse.org" />
-        <property
-            name="env.HUDSON_PROTOCOL"
-            value="https" />
-        <property
-          name="env.BUILD_HOME"
-          value="/shared/eclipse/builds" />
+    <condition property="hudsonHost" value="${env.HUDSON_PERF_HOST}">
+      <and>
+        <isset property="HUDSON_PERF_HOST" />
+        <contains string="${job}" substring="-perf-lin" casesensitive="yes" />
+      </and>
+    </condition>
+    <!-- if that didn't set hudsonHost, check env variable before using fallback default -->
+    <condition property="hudsonHost" value="${env.HUDSON_HOST}" else="hudson.eclipse.org">
+      <isset property="env.HUDSON_HOST" />
+    </condition>
 
-       <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
 
-       <script language="javascript"><![CDATA[
+    <property name="env.HUDSON_PROTOCOL" value="https" />
+    <property name="env.HUDSON_PORT" value="443" />
+
+    <!-- if not set externally, set to eclipse default (for -perf-lin jobs) -->
+    <property name="env.LINUX_PERF_SEGMENT" value="perftests" />
+
+
+
+    <condition property="hudsonPathSegment" value="${env.LINUX_PERF_SEGMENT}" else="hudson">
+      <and>
+        <isset property="env.LINUX_PERF_SEGMENT" />
+        <contains string="${job}" substring="-perf-lin" casesensitive="yes" />
+      </and>
+    </condition>
+
+    <property name="env.BUILD_HOME" value="/shared/eclipse/builds" />
+
+    <echo message="env.BUILD_HOME: ${env.BUILD_HOME}" />
+
+
+    <script language="javascript"><![CDATA[
             var buildId = project.getProperty("buildId");
             var patternbuildType = new RegExp(/^([IMXYNSR])(\d{8})-(\d{4})$/);
 
@@ -111,9 +105,9 @@
             project.setProperty("eclipseStreamService", eclipseStreamService);
 
             var buildhome = project.getProperty("env.BUILD_HOME");
-          
-            var buildRoot= buildhome + "/" + eclipseStreamMajor + buildType;
 
+            var buildRoot= buildhome + "/" + eclipseStreamMajor + buildType;
+            project.setProperty("buildRoot", buildRoot);
             var siteDir= buildRoot + "/siteDir";
             var postingDirectory = siteDir + "/eclipse/downloads/drops"
             if (eclipseStreamMajor > 3 )
@@ -122,28 +116,54 @@
             }
             project.setProperty("postingDirectory", postingDirectory);
             ]]>
-        </script>
+    </script>
 
     <echo message="buildRoot: ${buildRoot}" />
 
-        <echo message="postingDirectory: ${postingDirectory}" />
+    <echo message="postingDirectory: ${postingDirectory}" />
 
-        <property
-            name="hudsonResultRootURL"
-            value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}/hudson/job/${job}/${buildNumber}/artifact/*zip*" />
-        <property
-            name="hudsonResultURL"
-            value="${hudsonResultRootURL}/archive.zip" />
-        <echo message="hudsonResultURL ${hudsonResultURL} " />
+    <!--
+       Three possible results directories, per platform/build/job (two related to performance tests, one for regular unit tests).
+       All of these asssume following naming conventions in Hudson jobs. TODO: in future could/should have properties
+       that describe the tests anyway, so might want to use that, to deside results directories.Currently:
+           ends with -baseline: baseline
+           contains -perf- : performance
+           else: testresults
+       The first two both contain '-perf-' so important to look for '-baseline' first.
+       The last we assume by default is unit tests, but those jobs should contain '-unit-' if
+       we ever wanted tighter checking that names were as expected.
+    -->
+    <condition property="resultsDir" value="${postingDirectory}/${buildId}/baselineAlt">
+      <contains string="${job}" substring="-baselineAlt" casesensitive="yes" />
+    </condition>
+    <condition property="resultsDir" value="${postingDirectory}/${buildId}/baseline">
+      <contains string="${job}" substring="-baseline" casesensitive="yes" />
+    </condition>
+    <condition property="resultsDir" value="${postingDirectory}/${buildId}/performance" else="${postingDirectory}/${buildId}/testresults">
+      <contains string="${job}" substring="-perf-" casesensitive="yes" />
+    </condition>
 
-        <property
-            name="tmpzipdir"
-            value="${postingDirectory}/${buildId}/testresults/tmp${job}" />
+    <!-- attempt to create incase hasn't been created yet -->
+    <mkdir dir="${resultsDir}" />
 
-        <property
-            name="collectTestResultsInitialized"
-            value="true" />
+    <property name="hudsonResultRootJobURL" value="${env.HUDSON_PROTOCOL}://${hudsonHost}:${env.HUDSON_PORT}/${hudsonPathSegment}/job/${job}/${buildNumber}/" />
 
-    </target>
+
+    <property name="hudsonResultRootURL" value="${hudsonResultRootJobURL}/artifact/*zip*" />
+    <property name="hudsonResultURL" value="${hudsonResultRootURL}/archive.zip" />
+    <echo message="hudsonResultURL ${hudsonResultURL} " />
+
+    <property name="hudsonTestResultsURL" value="${hudsonResultRootJobURL}/testReport/api/xml?tree=failCount,passCount,skipCount,duration" />
+    <echo message="hudsonTestResultsURL ${hudsonTestResultsURL} " />
+
+    <property name="tmpzipdir" value="${resultsDir}/tmp${job}" />
+
+
+
+    <mkdir dir="${tmpzipdir}" />
+
+    <property name="collectTestResultsInitialized" value="true" />
+
+  </target>
 
 </project>

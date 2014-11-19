@@ -6,9 +6,9 @@
 #    the build file, if not build.xml, must be second argument
 #    that can be followed be target or other arguments
 
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 # If used for other things, where a build doesn't exist,

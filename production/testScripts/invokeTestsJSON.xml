@@ -2,9 +2,9 @@
     This program and the accompanying materials are made available under the
     terms of the Eclipse Public License v1.0 which accompanies this distribution,
     and is available at http://www.eclipse.org/legal/epl-v10.html.
-    
+
   Contributors:
-    IBM Corporation - initial API and implementation 
+    IBM Corporation - initial API and implementation
 -->
 
     <!--
@@ -17,29 +17,28 @@
     -->
 
 <project
-    name="Hudson-Tests"
-    default="runTests"
-    basedir=".">
+  name="Hudson-Tests"
+  default="runTests"
+  basedir=".">
 
-    <target
-        name="runTests"
-        depends="init">
-        <echo message="invokeTestsJSON.xml" />
-        <echo message="env.HUDSON_PROTOCOL: ${env.HUDSON_PROTOCOL}" />
-        <echo message="env.HUDSON_HOST: ${env.HUDSON_HOST}" />
-        <echo message="buildId: ${buildId} " />
-        <echo message="eclipseStream: ${eclipseStream}" />
-        <echo message="eclipseStreamMajor: ${eclipseStreamMajor}" />
-        <echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
-        <echo message="buildType: ${buildType}" />
-        <echo message="EBUILDER_HASH: ${EBUILDER_HASH}" />
-        <antcall target="JUnitTests" />
-    </target>
+  <target
+    name="runTests"
+    depends="init">
+    <echo message="== Properties in invokeTestsJSON.xml" />
+    <echo message="buildId: ${buildId} " />
+    <echo message="eclipseStream: ${eclipseStream}" />
+    <echo message="eclipseStreamMajor: ${eclipseStreamMajor}" />
+    <echo message="eclipseStreamMinor: ${eclipseStreamMinor}" />
+    <echo message="buildType: ${buildType}" />
+    <echo message="EBUILDER_HASH: ${EBUILDER_HASH}" />
+    <antcall target="JUnitTests" />
+    <antcall target="PerfTests" />
+  </target>
 
 
-    <target
-        name="JUnitTests"
-        depends="init">
+  <target
+    name="JUnitTests"
+    depends="init">
 
         <!--
           currently we test on three platforms.
@@ -48,33 +47,66 @@
           for greater flexibility in what to test?
         -->
 
-        <parallel>
+    <parallel>
 
-            <antcall target="triggerHudsonTests">
-                <param
-                    name="job"
-                    value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-lin64" />
-            </antcall>
+      <antcall target="triggerHudsonTests">
+        <param
+          name="job"
+          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-lin64" />
+      </antcall>
 
-            <antcall target="triggerHudsonTests">
-                <param
-                    name="job"
-                    value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32" />
-            </antcall>
+      <antcall target="triggerHudsonTests">
+        <param
+          name="job"
+          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32" />
+      </antcall>
 
-            <antcall target="triggerHudsonTests">
-                <param
-                    name="job"
-                    value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
-            </antcall>
+      <antcall target="triggerHudsonTests">
+        <param
+          name="job"
+          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
+      </antcall>
 
-        </parallel>
-    </target>
+    </parallel>
+  </target>
+  <target
+    name="PerfTests"
+    depends="init">
+
+      <!--
+        currently we test on three platforms.
+        So, three parallel calls since on different machines (and Hudson queues).
+        TODO: Can these be called, in parrallel via callant (or, perhaps subant?)
+        for greater flexibility in what to test?
+      -->
+
+    <parallel>
+
+      <antcall target="triggerHudsonPerfTests">
+        <param
+          name="job"
+          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-perf-lin64-baseline" />
+      </antcall>
+<!--
+          <antcall target="triggerHudsonTests">
+              <param
+                  name="job"
+                  value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32" />
+          </antcall>
+
+          <antcall target="triggerHudsonTests">
+              <param
+                  name="job"
+                  value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
+          </antcall>
+-->
+    </parallel>
+  </target>
 
 
-    <target
-        name="triggerHudsonTests"
-        depends="init">
+  <target
+    name="triggerHudsonTests"
+    depends="init">
 
 
 
@@ -90,52 +122,117 @@
      -->
 
         <!-- Hudson jobs currently have four required parameters -->
-        <property
-            name="JSON_buildId"
-            value="{&quot;name&quot;:&quot;buildId&quot;,&quot;value&quot;:&quot;${buildId}&quot;}" />
-        <property
-            name="JSON_eclipseStream"
-            value="{&quot;name&quot;:&quot;eclipseStream&quot;,&quot;value&quot;:&quot;${eclipseStream}&quot;}" />
-        <property
-            name="JSON_EBUILDER_HASH"
-            value="{&quot;name&quot;:&quot;EBUILDER_HASH&quot;,&quot;value&quot;:&quot;${EBUILDER_HASH}&quot;}" />
+    <property
+      name="JSON_buildId"
+      value="{&quot;name&quot;:&quot;buildId&quot;,&quot;value&quot;:&quot;${buildId}&quot;}" />
+    <property
+      name="JSON_eclipseStream"
+      value="{&quot;name&quot;:&quot;eclipseStream&quot;,&quot;value&quot;:&quot;${eclipseStream}&quot;}" />
+    <property
+      name="JSON_EBUILDER_HASH"
+      value="{&quot;name&quot;:&quot;EBUILDER_HASH&quot;,&quot;value&quot;:&quot;${EBUILDER_HASH}&quot;}" />
 
-        <property
-            name="json"
-            value="{&quot;parameter&quot;: [${JSON_buildId},${JSON_eclipseStream},${JSON_EBUILDER_HASH}] }" />
+    <property
+      name="json"
+      value="{&quot;parameter&quot;:[${JSON_buildId},${JSON_eclipseStream},${JSON_EBUILDER_HASH}]}" />
+
+    <echo message="env.HUDSON_PROTOCOL: ${env.HUDSON_PROTOCOL}" />
+    <echo message="env.HUDSON_HOST: ${env.HUDSON_HOST}" />
+    <echo message="env.HUDSON_PORT: ${env.HUDSON_PORT}" />
+
+    <echo message="${json}" />
+    <exec executable="curl">
+      <arg line="-X POST" />
+      <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/hudson/job/${job}/build" />
+      <arg line="-d token=${env.HUDSON_TOKEN}" />
+      <arg value="--data-urlencode" />
+      <arg value="json=${json}" />
+    </exec>
+
+  </target>
+  <target
+    name="triggerHudsonPerfTests"
+    depends="init">
+
+   <!--
+   baseURL used to be "required parameter" for Hudson job, but seemed overly complicated so
+   I compute all this later (based on stream and id) but, I've learned, one disadvantage is this
+   restricts test code locations to "downloads". There might be times we want to do from "build"
+   locations, or similar. Not to mention, other, internal test systems someday.
+
+      <property
+          name="baseURL"
+          value="http://download.eclipse.org/eclipse/downloads/${dropsDirSegment}/${buildId}" />
+   -->
+
+      <!-- Hudson jobs currently have 3 required parameters -->
+    <property
+      name="JSON_buildId"
+      value="{&quot;name&quot;:&quot;buildId&quot;,&quot;value&quot;:&quot;${buildId}&quot;}" />
+    <property
+      name="JSON_eclipseStream"
+      value="{&quot;name&quot;:&quot;eclipseStream&quot;,&quot;value&quot;:&quot;${eclipseStream}&quot;}" />
+    <property
+      name="JSON_EBUILDER_HASH"
+      value="{&quot;name&quot;:&quot;EBUILDER_HASH&quot;,&quot;value&quot;:&quot;${EBUILDER_HASH}&quot;}" />
+
+    <property
+      name="JSON_defaultTestSuite"
+      value="{&quot;name&quot;:&quot;testToRun&quot;,&quot;value&quot;:&quot;selectPerformance&quot;}" />
+
+    <property
+      name="json"
+      value="{&quot;parameter&quot;:[${JSON_buildId},${JSON_eclipseStream},${JSON_EBUILDER_HASH},${JSON_defaultTestSuite}]}" />
+
+    <!-- TODO: "segment" varies by test, and/or environment ... must be an easier way? -->
+    <property
+      name="env.LINUX_PERF_SEGMENT"
+      value="perftests" />
+
+    <echo message="env.HUDSON_PERF_PROTOCOL: ${env.HUDSON_PERF_PROTOCOL}" />
+    <echo message="env.HUDSON_PERF_HOST: ${env.HUDSON_PERF_HOST}" />
+    <echo message="env.HUDSON_PERF_PORT: ${env.HUDSON_PERF_PORT}" />
 
 
+    <echo message="json for curl post: ${json}" />
+    <exec executable="curl">
+      <arg line="-X POST" />
+      <arg
+        value="${env.HUDSON_PERF_PROTOCOL}://${env.HUDSON_PERF_HOST}:${env.HUDSON_PERF_PORT}/${env.LINUX_PERF_SEGMENT}/job/${job}/build" />
+      <arg line="-d token=${env.HUDSON_TOKEN}" />
+      <arg value="--data-urlencode" />
+      <arg value="json=${json}" />
+    </exec>
 
-        <echo message="env.HUDSON_PROTOCOL: ${env.HUDSON_PROTOCOL}" />
-        <echo message="env.HUDSON_HOST: ${env.HUDSON_HOST}" />
+  </target>
 
-        <echo message="${json}" />
-        <exec executable="curl">
-            <arg line="-X POST" />
-            <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}/hudson/job/${job}/build" />
-            <arg line="-d token=${env.HUDSON_TOKEN}" />
-            <arg value="--data-urlencode" />
-            <arg value="json=${json}" />
-        </exec>
+  <target
+    name="init"
+    depends="initStreamVariables"
+    unless="invokeTestsJSONinitialized">
 
-    </target>
+    <property environment="env" />
 
-    <target
-        name="init"
-        depends="initStreamVariables"
-        unless="invokeTestsJSONinitialized">
+    <property
+      name="env.HUDSON_HOST"
+      value="hudson.eclipse.org" />
+    <property
+      name="env.HUDSON_PROTOCOL"
+      value="https" />
+    <property
+      name="env.HUDSON_PORT"
+      value="443" />
+    <property
+      name="env.HUDSON_PERF_HOST"
+      value="hudson.eclipse.org" />
+    <property
+      name="env.HUDSON_PERF_PROTOCOL"
+      value="https" />
+    <property
+      name="env.HUDSON_PERF_PORT"
+      value="443" />
 
-        <property environment="env" />
-
-        <property
-            name="env.HUDSON_HOST"
-            value="hudson.eclipse.org" />
-        <property
-            name="env.HUDSON_PROTOCOL"
-            value="https" />
-
-
-        <script language="javascript">
+    <script language="javascript">
           <![CDATA[
             var buildId = project.getProperty("buildId");
             var pattern = new RegExp(/^([IMXYPNSR])(\d{8})-(\d{4})$/);
@@ -144,27 +241,27 @@
             // sArray 0 is "whole match"
             project.setProperty("buildType", sArray[1]);
           ]]>
-        </script>
+    </script>
+    <echo message="Computed buildType of ${buildType} from ${buildId}" />
+    <property
+      name="invokeTestsJSONinitialized"
+      value="true" />
+  </target>
 
-        <property
-            name="invokeTestsJSONinitialized"
-            value="true" />
-    </target>
+  <target name="initStreamVariables">
 
-    <target name="initStreamVariables">
-
-        <fail
-            unless="eclipseStream"
-            message="eclipseStream must be provided by caller" />
-        <condition property="streamOK">
-            <matches
-                pattern="\d\.\d\.\d"
-                string="${eclipseStream}" />
-        </condition>
-        <fail
-            message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
-            unless="streamOK" />
-        <script language="javascript">
+    <fail
+      unless="eclipseStream"
+      message="eclipseStream must be provided by caller" />
+    <condition property="streamOK">
+      <matches
+        pattern="\d\.\d\.\d"
+        string="${eclipseStream}" />
+    </condition>
+    <fail
+      message="eclipseStream variable had unexpected format. Should be digit.digit.digit, but was ${eclipseStream}"
+      unless="streamOK" />
+    <script language="javascript">
           <![CDATA[
             var eclipseStream = project.getProperty("eclipseStream");
             var pattern = new
@@ -176,9 +273,9 @@
             project.setProperty("eclipseStreamMinor", sArray[2]);
             project.setProperty("eclipseStreamService", sArray[3]);
            ]]>
-        </script>
+    </script>
 
-    </target>
+  </target>
 
 
 </project>

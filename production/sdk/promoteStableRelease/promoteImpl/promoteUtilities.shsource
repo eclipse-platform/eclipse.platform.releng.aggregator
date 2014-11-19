@@ -15,7 +15,10 @@ function findEclipseExe ()
   return 1
     fi
 
-    BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse/builds/4I}
+  if [[ -z "${BUILD_ROOT}" ]]
+  then
+     echo -e "\n\tERROR: BUILT_ROOT not defined, as it should be."
+  fi
   basebuilderParent=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4/${BUILD_ID}
   if [[ ! -d "${basebuilderParent}" ]]
     then
@@ -24,16 +27,38 @@ function findEclipseExe ()
   return 1
     fi
 
-# TODO: we could check basebuilder here and if not, install it?
-#        but not required for immediate use case of using to composite repos.
+  baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
+  if [[ ! -d "${baseBuilderDir}" ]]
+  then
+    echo -e "\n\tWARNING: The basebuilder directory " 2>>${TRACE_LOG}
+    echo -e "\t${baseBuilderDir}" 2>>${TRACE_LOG}
+    echo -e "\tdid not exist as expected. Will re-create.\n" 2>>${TRACE_LOG}
 
-    baseBuilderDir=${basebuilderParent}/org.eclipse.releng.basebuilder
+    EBuilder="${BUILD_ROOT}/gitCache/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder"
+    # make sure that build repo still exists
+    if [[ ! -d ${EBuilder} ]]
+    then
+      echo "ERROR: the EBuilder directory no longer exists. Can no re-create automatically" 2>>${TRACE_LOG}
+      return 1
+    fi
+
+    export TMP_DIR=/shared/eclipse/TMP_DIR
+    mkdir -p "${TMP_DIR}"
+    # assume suitable ant in on path
+    ant -f ${EBuilder}/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=${basebuilderParent}
+    if [[ "$?" != 0 ]]
+    then
+      echo "ERROR: Ant failed while executing getBaseBuilderAndTools.xml" 2>>${TRACE_LOG}
+      return 1
+    fi
     if [[ ! -d "${baseBuilderDir}" ]]
       then
-        echo "ERROR: The directory did not exist." 2>>${TRACE_LOG}
-  echo "    baseBuilderDir: ${baseBuilderDir}" 2>>${TRACE_LOG}
+      echo -e "\n\tERROR: The basebuilder directory, "   2>>${TRACE_LOG}
+      echo -e "\t${baseBuilderDir}"  2>>${TRACE_LOG}
+      echo -e "\twas not re-created.\n" 2>>${TRACE_LOG}
   return 1
     fi
+  fi
 
     export ECLIPSE_EXE=$baseBuilderDir/eclipse
     echo "DEBUG: ECLIPSE_EXE: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
@@ -43,7 +68,9 @@ function findEclipseExe ()
       echo "Found Eclipse executable: ${ECLIPSE_EXE}" 2>>${TRACE_LOG}
   else
     echo "ERROR: ECLIPSE_EXE is not defined to an executable eclipse" 2>>${TRACE_LOG}
-  return 1
+    # bit of a hack to make executable, when it should be already!?
+    chmod -c +x ${ECLIPSE_EXE}
+    # may have in include *.so?
     fi
 
     return 0

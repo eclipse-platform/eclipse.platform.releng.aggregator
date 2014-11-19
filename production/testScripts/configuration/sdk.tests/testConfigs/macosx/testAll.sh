@@ -8,13 +8,13 @@ ulimit -c unlimited
 # to those defined by defaults for production machine.,
 # such as for vmcmd
 
-source localTestsProperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 echo "PWD: $PWD"
 vmcmd=${vmcmd:-/Library/Java/JavaVirtualMachines/jdk1.7.0_51.jdk/Contents/Home/jre/bin/java}
 
 # production machine is x86_64, but some local setups may be 32 bit and will need to provide
-# this value in localTestsProperties.shsource.
+# this value in localBuildProperties.shsource.
 eclipseArch=${eclipseArch:-x86_64}
 
 # vm.properties is used by default on production machines, but will

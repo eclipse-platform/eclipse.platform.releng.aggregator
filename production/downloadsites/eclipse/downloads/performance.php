@@ -29,7 +29,7 @@ while ($aScenario = $aDirectory->read()) {
     $index++;
   }
 }
-aDirectory.closedir();
+$aDirectory->close();
 
 $result=array_unique($packageprefixes);
 

@@ -11,14 +11,14 @@ function usage ()
   printf "\n\n\t%s\n" "promote-build.sh env_file"
 }
 
+source "$1" 2>/dev/null
+
 if [[ -z ${SCRIPT_PATH} ]]
 then
   SCRIPT_PATH=${PWD}
 fi
 
 source $SCRIPT_PATH/build-functions.shsource
-
-source "$1" 2>/dev/null
 
 # The 'workLocation' provides a handy central place to have the
 # promote script, and log results. ASSUMING this works for all

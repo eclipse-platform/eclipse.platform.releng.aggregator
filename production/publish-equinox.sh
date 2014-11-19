@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
@@ -17,11 +17,11 @@ if [ ! -r "$1" ]; then
   exit 1
 fi
 
+source "$1"
+
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
 source $SCRIPT_PATH/build-functions.shsource
-
-source "$1"
 
 # USAGE: fn-eq-build-dir ROOT BUILD_ID STREAM
 #   ROOT: /shared/eclipse/builds
@@ -141,7 +141,7 @@ fn-publish-equinox ()
     # following used to be done in "build-configs", based on "master-equinox" feature,
     # but that has now "gone away".
     pushd "${BUILD_MACHINE_DROP_DIR}"
-    unzip -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
+    unzip -o -j equinox-SDK-${BUILD_ID}.zip plugins/*.jar -x plugins/*jmx* plugins/*.source_*
     popd
   else
     echo "   ERROR: $TARGET_PRODUCTS did not exist in fn-gather-sdks"

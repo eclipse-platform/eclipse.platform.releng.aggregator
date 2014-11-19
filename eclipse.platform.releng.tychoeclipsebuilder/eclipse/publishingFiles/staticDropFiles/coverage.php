@@ -19,7 +19,7 @@ function listLogs($myDir) {
     }
   }
 
-  aDirectory.closedir();
+  $aDirectory->close();
   sort($entries);
 
   if ($index < 0) {
@@ -66,31 +66,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 </script>
 </head>
 <body>
-<div id="header">
-                     <a href="/"><img src="../../../eclipse.org-common/stylesheets/header_logo.gif" width="163" height="68" border="0" alt="Eclipse Logo" class="logo" /></a>
-                     <div id="searchbar">
-                                         <img src="../../../eclipse.org-common/stylesheets/searchbar_transition.gif" width="92" height="26" class="transition" alt="" />
-                                         <img src="../../../eclipse.org-common/stylesheets/searchbar_header.gif" width="64" height="17" class="header" alt="Search" />
-                                         <form method="get" action="/search/search.cgi">
-                                                             <input type="hidden" name="t" value="All" />
-                                                             <input type="hidden" name="t" value="Doc" />
-                                                             <input type="hidden" name="t" value="Downloads" />
-                                                             <input type="hidden" name="t" value="Wiki" />
-                                                             <input type="hidden" name="wf" value="574a74" />
-                                                             <input type="text" name="q" value="" />
-                                                             <input type="image" class="button" src="../../../eclipse.org-common/stylesheets/searchbar_submit.gif" alt="Submit" onclick="this.submit();" />
-                                         </form>
-                     </div>
-                     <ul id="headernav">
-                                         <li class="first"><a href="/org/foundation/contact.php">Contact</a></li>
-                                         <li><a href="/legal/">Legal</a></li>
-                     </ul>
-</div>
 
-</div>
-
-
-</div>
 
 <div id="leftcol">
 <ul id="leftnav">
@@ -98,10 +74,6 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <li><a href="testResults.php#UnitTest">Unit Test Results</a></li>
 <li><a href="testResults.php#PluginsErrors">Plugins Containing Compile Errors</a></li>
 
-  </li>
-  <li style="background-image: url(../../../eclipse.org-common/stylesheets/leftnav_fade.jpg); background-repeat: repeat-x; border-style: none;">
-                                                                                                  <br /><br /><br /><br /><br />
-  </li>
 </ul>
 
 </div>
@@ -123,16 +95,7 @@ listLogs("testresults/reports");
 </ul>
 </div>
 </div>
-</br></br></br>
-<div id="footer">
-                     <ul id="footernav">
-                                         <li class="first"><a href="/">Home</a></li>
-                                         <li><a href="/legal/privacy.php">Privacy Policy</a></li>
-                                         <li><a href="/legal/termsofuse.php">Terms of Use</a></li>
-                     </ul>
-                     <p>Copyright &copy; 2006 The Eclipse Foundation. All Rights
-Reserved</p>
-</div>
+
 </body>
 </html>
 

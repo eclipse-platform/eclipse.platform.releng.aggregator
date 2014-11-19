@@ -54,27 +54,6 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 </head>
 <body>
 
-<div id="header">
-        <a href="http://www.eclipse.org/"><img src="<?php echo $imagesource;?>/header_logo.gif" width="163" height="68" border="0" alt="Eclipse Logo" class="logo" /></a>
-        <div id="searchbar">
-                <img src="<?php echo $imagesource;?>/searchbar_transition.gif" width="92" height="26" class="transition" alt="" />
-                <img src="<?php echo $imagesource;?>/searchbar_header.gif" width="64" height="17" class="header" alt="Search" />
-                <form method="get" action="http://www.eclipse.org/search/search.cgi">
-                        <input type="hidden" name="t" value="All" />
-                        <input type="hidden" name="t" value="Doc" />
-                        <input type="hidden" name="t" value="Downloads" />
-                        <input type="hidden" name="t" value="Wiki" />
-                        <input type="hidden" name="wf" value="574a74" />
-                        <input type="text" name="q" value="" />
-                        <input type="image" class="button" src="<?php echo $imagesource;?>/searchbar_submit.gif" alt="Submit" onclick="this.submit();" />
-                </form>
-        </div>
-        <ul id="headernav">
-                <li class="first"><a href="http://www.eclipse.org/org/foundation/contact.php">Contact</a></li>
-                <li><a href="http://www.eclipse.org/legal/">Legal</a></li>
-        </ul>
-
-</div>
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
 <div id="leftcol">
@@ -165,7 +144,7 @@ if (! preg_match("/.eclipse.org/i",$servername)) {
                 </table>
                 </div>
 
-                <div class="homeitem3col">
+                <div class="homeitem">
                         <h3>Related Links</h3>
                                 <ul class="midlist">
 
@@ -186,13 +165,14 @@ else if($testResultsStatus === "failed") {
 else {
     echo "<li><a href=\"testResults.php\">View the <b>test results</b> for the current build.</a></li>";
 }
-if (file_exists("performance/performance.php")) {
-    echo "<li>";
-    $generated=file_exists("performance/global_fp.php");
-    if (!$generated) echo "<i>";
-    echo "<a href=\"performance/performance.php\">View the <b>performance results</b> for the current build.</a>";
-    if (!$generated) echo "</i>";
-    echo "</li>";
+  echo "<li>\n";
+  $generated=file_exists("performance/global_fp.php");
+  if (file_exists("performance.php") && $generated) {
+    echo "View the <a href=\"performance/performance.php\">performance test results</a> for the current build.\n";
+  } else {
+    echo "Performance tests are pending.\n";
+  }
+  echo "</li>\n";
 }
 ?>
 
@@ -372,15 +352,6 @@ if (file_exists("$relativePath/updates/"."$BUILD_REPO_NAME")) {
 </table>
 <p><br /></p>
 <?php } ?>
-<div id="footer">
-        <ul id="footernav">
-                <li class="first"><a href="http://www.eclipse.org">Home</a></li>
-                <li><a href="http://www.eclipse.org/legal/privacy.php">Privacy Policy</a></li>
-                <li><a href="http://www.eclipse.org/legal/termsofuse.php">Terms of Use</a></li>
-        <li>Downloads provided under the <a href="http://www.eclipse.org/legal/epl/notice.html">Eclipse Foundation Software User Agreement</a></li>
-        </ul>
-    <p>Copyright &copy; 2006-2014 The Eclipse Foundation. All Rights
-Reserved</p>
-</div>
+
 </body>
 </html>

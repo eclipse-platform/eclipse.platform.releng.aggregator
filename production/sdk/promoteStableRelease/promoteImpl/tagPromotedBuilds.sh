@@ -12,7 +12,7 @@ echo "git tag -a -m \"${NEW_ANNOTATION}\" ${NEW_TAG} ${DROP_ID}" >> deferedTag.s
 echo "RC=\$?" >> deferedTag.sh
 echo "if [[ \$RC != 0 ]]" >> deferedTag.sh
 echo "then" >> deferedTag.sh
-echo "   print \"/n/t%s/n\" \"ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${NEW_TAG} and annotation of ${NEW_ANNOTATION}.\"" >> deferedTag.sh
+echo "   printf \"/n/t%s/n\" \"ERROR: Failed to tag aggregator old id, ${DROP_ID}, with new tag, ${NEW_TAG} and annotation of ${NEW_ANNOTATION}.\"" >> deferedTag.sh
 echo "   popd" >> deferedTag.sh
 echo "   exit \$RC" >> deferedTag.sh
 echo "fi" >> deferedTag.sh

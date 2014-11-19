@@ -118,12 +118,21 @@
     name="setup-zip"
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
-    <delete dir="${install}" />
-    <mkdir dir="${install}" />
+    <condition property="runtimeArchiveExists">
+      <available file="${executionDir}/${runtimeArchive}" />
+    </condition>
+    <fail
+      unless="runtimeArchiveExists"
+      message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
+    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <delete
+      dir="${eclipse-home}"
+      verbose="false" />
+    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
     <exec
-      dir="."
+      dir="${install}"
       executable="unzip">
-      <arg line="-o -qq ${runtimeArchive} -d ${install}" />
+      <arg line=" -q ${executionDir}/${runtimeArchive} -d ${install}" />
     </exec>
 
   </target>
@@ -133,12 +142,22 @@
     name="setup-tar.gz"
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
-    <delete dir="${install}" />
-    <mkdir dir="${install}" />
+    <condition property="runtimeArchiveExists">
+      <available file="${executionDir}/${runtimeArchive}" />
+    </condition>
+    <fail
+      unless="runtimeArchiveExists"
+      message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
+    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <delete
+      dir="${eclipse-home}"
+      verbose="false" />
+    <!-- <mkdir dir="${eclipse-home}" /> -->
+    <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
     <exec
       dir="${install}"
       executable="tar">
-      <arg line="-xzf ${executionDir}/${runtimeArchive}" />
+      <arg line="-xf ${executionDir}/${runtimeArchive} -C ${install}" />
     </exec>
 
   </target>
@@ -155,7 +174,7 @@
     -->
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-linux-gtk.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz">
       <and>
         <os family="unix" />
         <not>
@@ -171,7 +190,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-macosx-cocoa-x86_64.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa-x86_64.tar.gz">
       <and>
         <os family="mac" />
         <os family="unix" />
@@ -183,7 +202,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-macosx-cocoa.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-macosx-cocoa.tar.gz">
       <and>
         <os family="mac" />
         <os family="unix" />
@@ -194,7 +213,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-win32.zip">
+      value="eclipse-platform-${previousReleaseVersion}-win32.zip">
       <and>
         <os family="windows" />
         <os arch="x86" />
@@ -202,7 +221,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-win32-x86_64.zip">
+      value="eclipse-platform-${previousReleaseVersion}-win32-x86_64.zip">
       <and>
         <os family="windows" />
         <or>
@@ -213,7 +232,7 @@
     </condition>
     <condition
       property="platformArchive"
-      value="eclipse-platform-${buildId}-linux-gtk-x86_64.tar.gz">
+      value="eclipse-platform-${previousReleaseVersion}-linux-gtk-x86_64.tar.gz">
       <and>
         <os family="unix" />
         <or>
@@ -247,8 +266,14 @@
       unless="platformTarget"
       message="platformTarget is not defined. Check that platformArchive variable and value is defined correctly, such as in equinoxp2tests.properties in the appropriate testConfig" />
     <echo message="platformTarget ${platformTarget} platformArchive ${platformArchive}" />
-    <!-- not sure when exactly to expand this? -->
-    <!-- <antcall target="${platformTarget}" /> -->
+    <!-- The "platformArchive" is a minimal, stable vesion of eclipse runtime binary,
+         that is used only for its "p2Director" application, to install tests into
+         to target test environment. The intent is to make sure that apart of the tests
+         works consistently, and does not "break the tests", simply because of some recent
+         but in p2Director. (while unlikely, these days ... since that code is not under active
+         development ... you never know)
+     -->
+    <antcall target="${platformTarget}" />
   </target>
 
 
@@ -258,17 +283,19 @@
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
     <condition property="platformArchiveExists">
-      <available file="${executionDir}/${platformArchive}" />
+      <available file="${platformLocation}/${platformArchive}" />
     </condition>
     <fail
       unless="platformArchiveExists"
-      message="plaform archive did not exist where expected. platformArchive: ${executionDir}/${platformArchive}" />
-    <delete dir="${platformLocation}" />
-    <mkdir dir="${platformLocation}" />
+      message="plaform archive did not exist where expected. platformArchive: ${platformLocation}/${platformArchive}" />
+    <!-- remove eclipse home directory, to be sure completely fresh -->
+    <delete
+      verbose="false"
+      dir="${platformLocation}/eclipse" />
     <exec
       dir="${platformLocation}"
       executable="unzip">
-      <arg line="-o -qq ${executionDir}/${platformArchive} -d ${executionDir}/${platformLocation}" />
+      <arg line=" -q ${platformLocation}/${platformArchive} -d ${platformLocation}" />
     </exec>
   </target>
 
@@ -278,19 +305,20 @@
     depends="init"
     description="Reinstall the test Eclipse installation if specified by user">
     <condition property="platformArchiveExists">
-      <available file="${executionDir}/${platformArchive}" />
+      <available file="${platformLocation}/${platformArchive}" />
     </condition>
     <fail
       unless="platformArchiveExists"
-      message="plaform archive did not exist where expected. platformArchive: ${executionDir}/${platformArchive}" />
+      message="plaform archive did not exist where expected. platformArchive: ${platformLocation}/${platformArchive}" />
 
 
-    <delete dir="${platformLocation}" />
-    <mkdir dir="${platformLocation}" />
+    <delete
+      verbose="false"
+      dir="${platformLocation}/eclipse" />
     <exec
       dir="${platformLocation}"
       executable="tar">
-      <arg line="-xzf ${executionDir}/${platformArchive}" />
+      <arg line="-xf ${platformLocation}/${platformArchive} -C ${platformLocation}" />
     </exec>
   </target>
 
@@ -381,13 +409,42 @@
       <arg line="-bundlepool ${eclipse-home}" />
     </java>
     <antcall target="configureTeamTest" />
-    <antcall target="unzipderby" />
+    <antcall target="installderby" />
   </target>
 
   <target
-    name="unzipderby"
+    name="installderby"
     if="derby"
     unless="skipDerby">
+    <!-- use p2director, not dropins -->
+    <property name="perfrepoLocation" value="http://build.eclipse.org/eclipse/buildtools"/>
+
+    <java
+      jar="${launcherPath}"
+      failonerror="true"
+      dir="${eclipse-home}"
+      timeout="900000"
+      fork="true"
+      output="${directorLogs}/director-${derby}.log"
+      append="true"
+      resultproperty="directorcode">
+      <arg line="-vm ${java.home}/bin/java" />
+      <arg line="-application org.eclipse.equinox.p2.director" />
+      <arg line="-consoleLog" />
+      <arg line="-debug" />
+      <arg line="-flavor tooling" />
+      <arg
+        line="-installIUs ${derby}" />
+      <arg line="-p2.os ${os}" />
+      <arg line="-p2.ws ${ws}" />
+      <arg line="-p2.arch ${arch}" />
+      <arg line="-roaming" />
+      <arg line="-profile SDKProfile" />
+      <arg line="-repository ${perfrepoLocation}" />
+      <arg line="-destination ${eclipse-home}" />
+      <arg line="-bundlepool ${eclipse-home}" />
+    </java>
+    <!--
     <exec
       dir="."
       executable="unzip">
@@ -398,6 +455,7 @@
         dir="${repoLocation}/eclipse/dropins/eclipse/plugins"
         includes="org.apache.derby**/*" />
     </copy>
+    -->
   </target>
 
   <target
@@ -416,7 +474,7 @@
     depends="initWorkspace">
     <!--
        during production testing, previous steps persists some properties
-       that we would otherwise not have access too. Such as those set on 
+       that we would otherwise not have access too. Such as those set on
        Hudson command line.
     -->
     <property file="${WORKSPACE}/production.properties" />
@@ -475,15 +533,15 @@
     name="initStreamVariables"
     depends="initDownloadHosts">
 
-    <property file="${configurationDir}/streamSpecific-build.properties" />
+    <property file="${configurationDir}/streamSpecific.properties" />
     <fail
       unless="eclipseStream"
       message="eclipseStream value must be provided by caller, such as '4.3.0'." />
     <!--
-        Not clear why, but I've seen "eclipseStream" value have a trailing 
+        Not clear why, but I've seen "eclipseStream" value have a trailing
         ?blank? that gets picked up when read in as string.
         Seems it might be a couple of ant issues?
-        Luckily we never use it as a whole string (just major and minor) 
+        Luckily we never use it as a whole string (just major and minor)
         so we can ignore spaces.
     -->
     <condition property="streamOK">
@@ -556,7 +614,7 @@
     <property
       name="eclipse-home"
       value="${install}/eclipse" />
-    <mkdir dir="${eclipse-home}" />
+    <!-- <mkdir dir="${eclipse-home}" /> -->
     <echo message="eclipse-home: ${eclipse-home}" />
 
     <property
@@ -669,7 +727,7 @@
 
     <property
       name="last.release.build.repo"
-      value="http://${DOWNLOAD_HOST}/eclipse/updates/${previousReleaseVersion}" />
+      value="http://${DOWNLOAD_HOST}/eclipse/updates/${previousReleaseVersionRepo}" />
     <echo message="last.release.build.repo: ${last.release.build.repo}" />
 
     <!--
@@ -683,7 +741,7 @@
       that will "evaluate" variables as loaded. Otherwise, the <properties form
       has to move to "top of file" ... outer scope?
      <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
-  
+
     <property
       name="testingPropertiesfile"
       value="${executionDir}/testing.properties" />
@@ -697,7 +755,7 @@
        hard coded in vm.properties)
     -->
     <!-- <property file="vm.properties" /> -->
-    <!--now set in initBasicDirectories 
+    <!--now set in initBasicDirectories
     <property
       name="testedPlatform"
       value="${os}.${ws}.${arch}" />
@@ -712,10 +770,10 @@
       <arg line="-R nouchg ${install}" />
     </exec>
 
-    <!-- 
-         Originally needed/provided for p2 tests, but they appear not to 
-         be successful in reading or using these proerties any longer. 
-         Not clear why. So we'll leave it in until understood. (It may be 
+    <!--
+         Originally needed/provided for p2 tests, but they appear not to
+         be successful in reading or using these proerties any longer.
+         Not clear why. So we'll leave it in until understood. (It may be
          useful in other scenarios, such when tested stand alone?)
      -->
     <property
@@ -735,7 +793,7 @@
       name="org.eclipse.equinox.p2.tests.last.release.build.repo"
       value="${last.release.build.repo}" />
 
-    <!-- 
+    <!--
         It is likely we do not need the equinoxp2propertiesFile any longer,
         during production tests, at least.
     -->
@@ -775,13 +833,31 @@
       append="true" />
   </target>
 
+  <!-- runtimeArchive is set to either current, just built SDK, or
+       if "baselinePerf" has been set to true, then that baselinePerf version is used,
+       such as for performance baselinePerf run. baselinePerf is set in Hudson
+       job.
+  -->
   <target
     name="setRuntimeArchive"
     unless="runtimeArchive">
+      <!-- we'll check "alt" baselinePerf first. This is what's used for "several releases ago", or similar. -->
+    <condition
+      property="buildIdToUse"
+      value="${baselinePerfAltVersionLabel}">
+      <istrue value="${baselinePerfAlt}" />
+    </condition>
+    <condition
+      property="buildIdToUse"
+      value="${baselinePerfVersionLabel}"
+      else="${buildId}">
+      <istrue value="${baselinePerf}" />
+    </condition>
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
+    <echo message="build id of runtimeArchive ${buildIdToUse}" />
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-win32.zip">
+      value="eclipse-SDK-${buildIdToUse}-win32.zip">
       <and>
         <equals
           arg1="${os}"
@@ -796,7 +872,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-win32-x86_64.zip">
+      value="eclipse-SDK-${buildIdToUse}-win32-x86_64.zip">
       <and>
         <equals
           arg1="${os}"
@@ -811,7 +887,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -826,7 +902,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk-x86_64.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -841,7 +917,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk-ppc64.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk-ppc64.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -856,7 +932,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-linux-gtk-ppc.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-linux-gtk-ppc.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -871,7 +947,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-macosx-cocoa-ppc.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa-ppc.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -886,7 +962,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-macosx-cocoa.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -901,7 +977,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-macosx-cocoa-x86_64.tar.gz">
+      value="eclipse-SDK-${buildIdToUse}-macosx-cocoa-x86_64.tar.gz">
       <and>
         <equals
           arg1="${os}"
@@ -916,7 +992,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-hpux-gtk-ia64.zip">
+      value="eclipse-SDK-${buildIdToUse}-hpux-gtk-ia64.zip">
       <and>
         <equals
           arg1="${os}"
@@ -931,7 +1007,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-solaris-gtk.zip">
+      value="eclipse-SDK-${buildIdToUse}-solaris-gtk.zip">
       <and>
         <equals
           arg1="${os}"
@@ -946,7 +1022,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-solaris-gtk-x86.zip">
+      value="eclipse-SDK-${buildIdToUse}-solaris-gtk-x86.zip">
       <and>
         <equals
           arg1="${os}"
@@ -961,7 +1037,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-aix-gtk-ppc.zip">
+      value="eclipse-SDK-${buildIdToUse}-aix-gtk-ppc.zip">
       <and>
         <equals
           arg1="${os}"
@@ -976,7 +1052,7 @@
     </condition>
     <condition
       property="runtimeArchive"
-      value="eclipse-SDK-${buildId}-aix-gtk-ppc64.zip">
+      value="eclipse-SDK-${buildIdToUse}-aix-gtk-ppc64.zip">
       <and>
         <equals
           arg1="${os}"
@@ -1126,9 +1202,9 @@
     name="getcvstestProperties"
     if="cvsPropertiesAvailable"
     depends="checkCVSPropExists">
-    <!-- 
-    TODO: cvstest.properties (file location) is currently 
-    hard coded in 'runTest2.xml' adn passed along this 'test.xml' 
+    <!--
+    TODO: cvstest.properties (file location) is currently
+    hard coded in 'runTest2.xml' adn passed along this 'test.xml'
     via production.properties. Would be better to have the file location
     be part of the platform specific properties files, as we do with "jvm"
     -->
@@ -1210,7 +1286,7 @@
       <!--install db plug-ins if running performance tests-->
       <condition
         property="derby"
-        value="eclipse/dropins/eclipse/plugins/org.apache.derby*/**">
+        value="org.apache.derby.core.feature.feature.group">
         <equals
           arg1="${test.target}"
           arg2="performance" />
@@ -1280,11 +1356,49 @@
 
   <target
     name="runSuitePerf"
+    depends="initStreamVariables"
     if="pluginexists">
     <echo message="testPluginX ${testPluginX}" />
     <property
       name="junit-stylesheet"
-      value="{executionDir}/JUNIT.XSL" />
+      value="${executionDir}/JUNIT.XSL" />
+    <!--
+        TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
+        TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM value"?
+        TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it should. Perhaps needs tweak in Hudson job?
+        TODO: would have to compute these in runTest2.xml, to make part of production properties,
+              and phpproperties.php
+    -->
+    <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
+    <!-- buildIdToUse equals either baselinePerfVersion or else equalus buildId. In either case we want to collect the data -->
+    <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
+               Or, else will take large number of "baselines" averaged? -->
+    <condition property="eclipse.perf.config"
+              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
+         <istrue value="${baselinePerfAlt}"/>
+    </condition>
+    <condition property="eclipse.perf.config"
+              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
+              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
+            <istrue value="${baselinePerf}"/>
+    </condition>
+    <!--
+         This "assert" property works, in this context, because we run baseline first,
+         when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
+         But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data.
+         Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some experiences makes me doubt that?
+         TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
+    -->
+    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
+        <equals arg1="${buildIdToUse}" arg2="${buildId}" />
+    </condition>
+    <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
+    <condition property="frameworkperfargs"
+               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
+               else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+         <isset property="eclipse.perf.assertAgainst"/>
+    </condition>
+
     <ant
       antfile="${eclipse-home}/plugins/${testPluginX}"
       dir="${eclipse-home}"
@@ -1815,13 +1929,13 @@
   </target>
 
   <!-- This and all the performance specific targets
-  are temporary, just to help investigate which work, which 
+  are temporary, just to help investigate which work, which
   don't, etc. -->
   <target
     name="allPerformance"
     depends="init">
 <!-- There are 41 test suites to claim they have
-     performanc targts. These "sub groups" are just 
+     performanc targts. These "sub groups" are just
      and attempt to help investigate which work, which don't, etc. -->
     <antcall target="selectPerformance" />
     <antcall target="otherPerformance" />
@@ -1829,9 +1943,9 @@
 
   </target>
   <!-- This and all the performance specific targets
-  are temporary, just to help investigate which work, which 
-  don't, etc. Visually inspected each, and found these 21 do 
-  have performance targets, which means there's about 20 that 
+  are temporary, just to help investigate which work, which
+  don't, etc. Visually inspected each, and found these 21 do
+  have performance targets, which means there's about 20 that
   have empty peformance targets.
    -->
   <target
@@ -1843,14 +1957,18 @@
     <antcall target="coreruntime" />
     <antcall target="jdtdebug" />
     <antcall target="jdtui" />
+    <!--https://bugs.eclipse.org/bugs/show_bug.cgi?id=443233
     <antcall target="osgi" />
+    -->
     <antcall target="pdeui" />
     <antcall target="swt" />
     <antcall target="teamcvs" />
     <antcall target="ua" />
     <antcall target="uiforms" />
     <antcall target="uiperformance" />
+    <!-- temp remove, we do not run these in unit tests? See bug 380553.
     <antcall target="uircp" />
+    -->
 
   </target>
   <target

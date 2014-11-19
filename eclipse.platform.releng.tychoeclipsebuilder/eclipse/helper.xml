@@ -2,15 +2,9 @@
   name="Helper targets"
   default="noDefault">
 
-  <fail
-    unless="EBuilderDir"
-    message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
-  <fail
-    unless="postingDirectory"
-    message="postingDirectory must be passed to this script." />
-  <fail
-    unless="buildLabel"
-    message="buildLabel must be passed to this script." />
+    <fail unless="EBuilderDir" message="EBuilderDir (tychoeclipsebuilder dir) must be passed in to this script" />
+    <fail unless="postingDirectory" message="postingDirectory must be passed to this script." />
+    <fail unless="buildLabel" message="buildLabel must be passed to this script." />
   <property
     name="publishingContent"
     value="${EBuilderDir}/eclipse/publishingFiles" />
@@ -236,9 +230,7 @@
     name="publish"
     description="Preparing to post the build...">
 
-    <fail
-      unless="AGGR_DIR"
-      message="AGGR_DIR must be defined for this this script" />
+        <fail unless="AGGR_DIR" message="AGGR_DIR must be defined for this this script" />
 
     <mkdir dir="${postingDirectory}/${buildLabel}/checksum" />
     <exec
@@ -253,13 +245,6 @@
         dir="${EBuilderDir}/eclipse"
         includes="clickThroughs/" />
     </copy>
-
-        <!--post directory.txt ... no longer done this way
-        <copy
-            file="${buildDirectory}/directory.txt"
-            todir="${postingDirectory}/${buildLabel}"
-            failonerror="false"/>
-            -->
 
     <antcall target="generateEclipseIndex" />
 
@@ -307,14 +292,22 @@
   </target>
 
   <target name="generateEclipseIndex">
-    <property
-      name="generatorClass"
+        <property name="generatorClass"
       value="org.eclipse.releng.generators.EclipseTestResultsGeneratorNoMail" />
 
     <available
       classname="${generatorClass}"
       property="class"
       value="${generatorClass}" />
+
+              <condition
+                property="manifestFile"
+                value="${publishingContent}/performanceTestManifest.xml"
+                else="${publishingContent}/testManifest.xml">
+                <contains
+                  string="${job}"
+                  substring="-perf-" />
+              </condition>
 
         <!--regenerate the index page with links to test results-->
     <ant
@@ -331,12 +324,6 @@
         name="dropTokenList"
         value="%sdk%,%tests%,%example%,%rcpruntime%,%rcpsdk%,%deltapack%,%runtime%,%jdt%,%jdtsdk%,%jdtc%,%pde%,%pdesdk%,%cvs%,%cvssdk%,%swt%,%relengtools%" />
       <property
-        name="platformIdentifierToken"
-        value="%platform%" />
-      <property
-        name="platformSpecificTemplateList"
-        value="Windows,${publishingContent}/templateFiles/platform.php.template,winPlatform.php;Linux,${publishingContent}/templateFiles/platform.php.template,linPlatform.php;Solaris,${publishingContent}/templateFiles/platform.php.template,solPlatform.php;AIX,${publishingContent}/templateFiles/platform.php.template,aixPlatform.php;Macintosh,${publishingContent}/templateFiles/platform.php.template,macPlatform.php;HP-UX,${publishingContent}/templateFiles/platform.php.template,hpuxPlatform.php" />
-      <property
         name="indexFileName"
         value="index.php" />
       <property
@@ -350,7 +337,7 @@
         value="${publishingContent}/templateFiles/index.php.template" />
       <property
         name="testManifestFileName"
-        value="${publishingContent}/testManifest.xml" />
+                value="${manifestFile}" />
     </ant>
 
   </target>

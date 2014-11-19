@@ -12,11 +12,11 @@ if [ ! -r "$1" ]; then
   exit 1
 fi
 
+source "$1"
+
 SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
 source $SCRIPT_PATH/build-functions.shsource
-
-source "$1"
 
 # derived values
 gitCache=$( fn-git-cache "$BUILD_ROOT")
@@ -188,21 +188,6 @@ then
   exit $RC
 fi
 
-
-# copy "human readable" (user friendly) HTML file
-# TODO: isn't used at the moment, since "404" allows "directory access",
-# so someday, we'll create improved user friendly PHP file that allows same.
-buildType=${BUILD_ID:0:1}
-rsync --times --omit-dir-times --recursive "${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/" "${siteDirOnBuildMachine}/"
-RC=$?
-if [[ $RC != 0 ]]
-then
-  echo "ERROR: rsync of repo returned error. RC: $RC"
-  echo "       obtained while copying"
-  echo "       from ${EBuilderDir}/eclipse/publishingFiles/staticRepoSiteFiles/${buildType}builds/simple/"
-  echo "       to ${siteDirOnBuildMachine}"
-  exit $RC
-fi
 
 # If doing a "patch build", a "site.xml" is created,
 # so a) we'll remove that that, to avoid confusion, and

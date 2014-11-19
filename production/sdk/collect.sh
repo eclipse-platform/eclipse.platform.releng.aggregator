@@ -11,7 +11,7 @@
 # Start with minimal path for consistency across machines
 # plus, cron jobs do not inherit an environment
 # care is needed not have anything in ${HOME}/bin that would effect the build
-# unintentionally, but is required to make use of "source localbuildproperties.shsource" on
+# unintentionally, but is required to make use of "source localBuildProperties.shsource" on
 # local machines.
 # Likely only a "release engineer" would be interested, such as to override "SIGNING" (setting it
 # to false) for a test I-build on a remote machine.
@@ -31,9 +31,9 @@ oldumask=`umask`
 umask 0002
 echo "umask explicitly set to 0002, old value was $oldumask"
 
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export JAVA_HOME=/shared/common/jdk1.7.0-latest
@@ -42,6 +42,7 @@ export ANT_HOME=/shared/common/apache-ant-1.9.2
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 
 read inputline
+echo " = = Properties in collect.sh == "
 echo "inputline: $inputline"
 
 job="$(echo $inputline | cut -d\  -f1)"
@@ -63,4 +64,5 @@ ${ANT_HOME}/bin/ant -version
   -DbuildNumber=${buildNumber} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
-  -DEBUILDER_HASH=${EBUILDER_HASH}
+  -DEBUILDER_HASH=${EBUILDER_HASH} \
+  -DBUILD_HOME=${BUILD_HOME}

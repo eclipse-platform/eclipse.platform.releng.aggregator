@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# this localbuildproperties.shsource file is to ease local builds to override some variables.
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
-source localbuildproperties.shsource 2>/dev/null
+source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 # Small utility to start unit tests (or re-run them) after a build
@@ -28,7 +28,7 @@ function dlpath()
   eclipseStream=$1
   if [[ -z "${eclipseStream}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"
     return 1;
   fi
 
@@ -36,7 +36,7 @@ function dlpath()
   buildId=$2
   if [[ -z "${buildId}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)"
     return 1;
   fi
 
