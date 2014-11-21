@@ -247,43 +247,44 @@ else {
     }
   }
 
-  if (file_exists("overrideTestColor")) {
+  // This color is for the "list item" (not table)
+  if ($testResultsStatus === "failed") {
+    /* note we don't override  'inherit' cases, just 'failed'. */
+    if (file_exists("overrideTestColor")) {
+      $linkColor='green';
+    } else {
+      $linkColor = 'red';
+    }
+  } elseif ($testResultsStatus === "success") {
+    $linkColor='green';
+  } elseif ($testResultsStatus === "pending") {
+    $linkColor='inherit';
+  } elseif ($testResultsStatus === "inProgress") {
+    // green for now. perhaps intermediate color, since not yet complete? 
     $linkColor='green';
   }
-  else {
-    if ($testResultsStatus === "failed") {
-      /* note we don't override  'inherit' cases, just 'failed'. */
-      if (file_exists("overrideTestColor")) {
-        $linkColor='green';
-      } else {
-        $linkColor = 'red';
-      }
-    } elseif ($testResultsStatus === "success") {
-      $linkColor='green';
-    } elseif ($testResultsStatus === "pending") {
-      $linkColor='inherit';
-    } elseif ($testResultsStatus === "inProgress") {
-      $linkColor='yellow';
-    }
-  }
+
 
 
   if ($testResultsStatus == "pending")   {
     echo "<li>Integration and unit tests are pending.</li>\n";
   } else {
-    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a>\n";
+    // For now, we assume the same words represent the other cases, failed, successs, and inProgress
+    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a></li>\n";
   }
 
 
   /* performance tests line item */
-  echo "<li>\n";
   $generated=file_exists("performance/global_fp.php");
   if (file_exists("performance.php") && $generated) {
-    echo "View the <a href=\"performance.php\">performance test results</a> for the current build.\n";
+    echo "<li>View the <a href=\"performance.php\">performance test results</a> for the current build.</li>\n";
   } else {
-    echo "Performance tests are pending.\n";
+    echo "<li>Performance tests are pending.</li>\n";
   }
-  echo "</li>\n";
+  echo "</ul>\n";
+
+
+  /* summary table of unit tests */
   echo "<table class=testTable>\n";
   echo "<caption>".$boxesDisplay." of ".count($expectedTestConfigs)." integration and unit test configurations are complete.</caption> \n";
   echo "<tr>";
@@ -297,20 +298,20 @@ else {
       $passed = $testRes['passCount'];
       $total = $failed + $passed;
       $duration = $testRes['duration'];
-      if (file_exists("overrideTestColor")) {
-        $linkColor='green';
-      }
-      else {
-        if ($failed > 0) {
-          /* note we don't override  'inherit' cases, just 'failed'. */
-          if (file_exists("overrideTestColor")) {
-            $linkColor='green';
-          } else {
-            $linkColor = 'red';
-          }
-        } else {
+
+      $linkColor = 'inherit';
+      if ($failed > 0) {
+        /* note we don't override  'inherit' cases, just 'failed'. */
+        if (file_exists("overrideTestColor")) {
           $linkColor='green';
+        } else {
+          $linkColor = 'red';
         }
+      } elseif ($failed == 0) {
+        $linkColor='green';
+      } else {
+        // this is probably a PROGRAM ERROR ... should not get here. 
+        $linkColor='inherit';
       }
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
@@ -318,9 +319,10 @@ else {
       echo "</td>\n";
       echo "<td>$failed</td><td>$passed</td><td>$total</td><td>$duration</td>\n";
       echo "</tr>\n";
-    }
-    else {
-      /* Yes, all configs intentionally links, since all go to the same place, but if no results yet, would not look like one. */
+    } else {
+      /* If no results yet, config line in table is still (intentionally) a link, 
+        since all go to the same place. Not sure if that's a good design or not? 
+       */
       $linkColor = 'inherit';
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
@@ -331,10 +333,7 @@ else {
     }
   }
   echo "</table>\n";
-  /* table is contained in last link item */
-  echo "</li>\n";
 
-  echo "</ul>\n";
   echo "</div>\n";
 
 ?>
