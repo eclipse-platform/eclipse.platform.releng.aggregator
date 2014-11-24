@@ -69,6 +69,14 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
   .testTable caption {padding:6px 2px 6px 2px;}
   .testTable th { text-align: left; padding:2px; border-collapse: collapse; border: 1px solid black;}
   .testTable td { text-align: right; width: 10%; padding:2px; border-collapse: collapse; border: 1px solid black;}
+  table.dropTable { border-collapse: collapse; border: 1px solid black;width:80%;}
+  .dropTable caption {padding:6px 2px 6px 2px;}
+  .dropTable th { text-align: left; padding:2px; border-collapse: collapse; border: 1px solid black;}
+  .dropTable td { text-align: right; width: 10%; padding:2px; border-collapse: collapse; border: 1px solid black;}
+  div.dropSection { }
+  .dropSection h3 {padding:6px 2px 6px 2px;}
+  .dropSection th { text-align: left; padding:2px; border-collapse: collapse; border: 1px solid black;}
+  .dropSection td { text-align: right; width: 10%; padding:2px; border-collapse: collapse; border: 1px solid black;}
 </style>
 
 </head>
@@ -97,7 +105,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
       <li><a href="#org.eclipse.releng">Releng Tools</a></li>
     </ul>
 
-  </div>
+  </div> <!-- end left column -->
   <!-- end 'not build failed' -->
   <?php } ?>
 
@@ -174,8 +182,8 @@ else {
     </tr>
   </table>
 
-<!-- end of midcolumn div -->
-</div>
+<!-- end of midcolumn div 
+</div> -->
 
 <div class="homeitem3col">
 <h3>Logs and Test Links</h3>
@@ -259,7 +267,7 @@ else {
   if ($testResultsStatus == "pending")   {
     echo "<li>Integration and unit tests are pending.</li>\n";
   } else {
-    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a>\n";
+    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a></li>\n";
   }
 
 
@@ -273,12 +281,11 @@ else {
 
   echo "</ul>\n";
   
-  echo "<div class=\"homeitem3col\">";
+//  echo "<div class=\"homeitem3col\">";
   echo "<h3>Summary of Unit Tests Results</h3>";
   echo "<table class=\"testTable\">\n";
   echo "<caption>".$boxesDisplay." of ".count($expectedTestConfigs)." integration and unit test configurations are complete.</caption> \n";
-  echo "<tr>";
-  echo "<th style=\"width:20%\">Tested Platform</th><th>Failed</th><th>Passed</th><th>Total</th><th>Test&nbsp;Time&nbsp;(s)</th>\n";
+  echo "<tr><th style=\"width:20%\">Tested Platform</th><th>Failed</th><th>Passed</th><th>Total</th><th>Test&nbsp;Time&nbsp;(s)</th></tr>\n";
 
   foreach ($expectedTestConfigs as $config) {
 
@@ -323,11 +330,11 @@ else {
   }
   echo "</table>\n";
 
-  echo "</div>\n";
+//  echo "</div>\n";
 
 ?>
 
-<div class="homeitem3col">
+<!-- <div class="homeitem3col"> -->
   <h3>Related Links</h3>
   <ul class="midlist">
     <li><a href="https://www.eclipse.org/eclipse/development/plans/eclipse_project_plan_4_4.xml#target_environments">Target Platforms and Environments</a></li>
@@ -351,19 +358,18 @@ else {
   }
 ?>
 </ul>
-</div>
+<!-- /div> -->
 
 <hr class="clearer" />
-</div>
+<!-- </div> -->
 
 <?php
 
-  function column($servername) {
-
-    echo "<td width=\"37%\"><b>Download</b></td>";
-    echo "<td width=\"7%\"><b>Size</b></td>";
-    // echo "<td width=\"37%\"><b>File</b></td>";
-    echo "<td width=\"11%\"><b>Checksum</b></td>";
+  function columnHeads() {
+    echo "<th width="36%">Platform</th>";
+    echo "<th width=\"37%\">Download</th>";
+    echo "<th width=\"7%\">Size</th>";
+    echo "<th width=\"11%\">Checksum</th>";
     return;
   }
 
@@ -383,41 +389,37 @@ else {
     return($filesize);
   }
 
-  function genLinks($servername,$BUILD_ID,$zipfile) {
+  // This function is generated "in line" by the "index" custom ant task. 
+  // Hence, must "stay coordinated" with what is there.
+  function genLinks($zipfile) {
 
     global $clickthroughstr;
     global $BUILD_DIR_SEG;
 
-    $httplink = "$clickthroughstr$zipfile";
-    // $httplabel = "(http)";
-    $httpline =  "<div align=\"left\"><a href=\"$httplink\">$zipfile</a>";
+    $filetarget = "$clickthroughstr$zipfile";
+    $filelink =  "<div align=\"left\"><a href=\"$filetarget\">$zipfile</a></div>";
     $filesize = getDropSize($zipfile);
 
-    echo "$httpline";
-    echo "&nbsp;&nbsp;";
-    echo "<td>$filesize</td>";
-    // echo "<td>$zipfile</td>";
-    // make relative so works on build.eclipse.org -- should not be relative. link to checksum should be absolute, so a "mirror" could not change it,
-    // bsed on changes it made to the package.
+    echo "<td>$filelink</td>\n";
+    echo "<td>$filesize</td>\n";
+    // TODO: investgate using https:// to Eclipse Foundation's database of checksums
     // TODO: can make some future variables so it has one value on "build" server, and another value on
     // downloads, such as in buildproperties.php (value would get changed in "promtoe" script).
     // Also handy/needed when doing "local test builds".
     // Remember, md5 and sha1 are still in "checksum" directory, for at least initial Luna release, just not linked to. See bug
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=423714
     echo "<td><a href=\"http://download.eclipse.org/eclipse/downloads/drops4/$BUILD_DIR_SEG/checksum/$zipfile.sha512\">[SHA512]</a></td>";
-    //echo "<td><a href=\"./checksum/$zipfile.md5\">(md5)</a>";
-    //echo " <a href=\"./checksum/$zipfile.sha1\">(sha1)</a>";
   }
 ?>
 
 
-<div class="homeitem3col">
+<!-- <div class="homeitem3col"> -->
 <table align="left" border="0" cellspacing="5" cellpadding="2" width="100%">
 <tr><td>
 
 
 <h3 id="Repository">Eclipse p2 Repository&nbsp;<a href="details.html#Repository"><img src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a></h3>
-<table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999" >
+<table border="0" cellspacing="1" cellpadding="0" width="99%"  >
 
 <?php
   $pos = strpos($BUILD_ID, "RC");
@@ -477,31 +479,31 @@ else {
   $relativePath4="../../../..";
   $relativePath3="../../..";
   if ((file_exists("$relativePath3/updates/".$STREAM_REPO_NAME)) || (file_exists("$relativePath4/updates/".$STREAM_REPO_NAME))) {
-    echo "<tr> \n";
+    echo "<tr><td> \n";
     echo "To update your Eclipse installation to this development stream, you can use the software repository at<br />\n";
     echo "&nbsp;&nbsp;<a href=\"$STREAM_REPO_URL\">$STREAM_REPO_URL</a><br />\n";
-    echo "</tr> \n";
+    echo "</td></tr> \n";
   }
   if ((file_exists("$relativePath3/updates/"."$BUILD_REPO_NAME")) || (file_exists("$relativePath4/updates/"."$BUILD_REPO_NAME")) ) {
-    echo "<tr> \n";
+    echo "<tr><td> \n";
     echo "To update your build to use this specific build, you can use the software repository at<br />\n";
     echo "&nbsp;&nbsp;<a href=\"$BUILD_REPO_URL\">$BUILD_REPO_URL</a><br />\n";
-    echo "</tr> \n";
+    echo "</td></tr> \n";
   }
 ?>
 
 </table>
-
+</td></tr>
 
 <tr>
   <td>
       <h3 id="EclipseSDK"> Eclipse SDK&nbsp;<a href="details.html#EclipseSDK"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %sdk%
       </table>
@@ -513,10 +515,10 @@ else {
       <h3 id="JUnitPlugin"> JUnit Plugin Tests and Automated Testing Framework&nbsp;<a href="details.html#JUnitPlugin"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %tests%
       </table>
@@ -528,10 +530,10 @@ else {
       <h3 id="ExamplePlugins"> Example Plug-ins&nbsp;<a href="details.html#ExamplePlugins"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %example%
       </table>
@@ -543,10 +545,10 @@ else {
       <h3 id="RCPRuntime"> RCP Runtime Binary&nbsp;<a href="details.html#RCPRuntime"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %rcpruntime%
       </table>
@@ -558,10 +560,10 @@ else {
       <h3 id="RCPSDK"> RCP SDK&nbsp;<a href="details.html#RCPSDK"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %rcpsdk%
       </table>
@@ -573,10 +575,10 @@ else {
       <h3 id="DeltaPack"> DeltaPack&nbsp;<a href="details.html#DeltaPack"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %deltapack%
       </table>
@@ -589,10 +591,10 @@ else {
       <h3 id="PlatformRuntime"> Platform Runtime Binary&nbsp;<a href="details.html#PlatformRuntime"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %runtime%
       </table>
@@ -604,10 +606,10 @@ else {
       <h3 id="JDTRuntime"> JDT Runtime Binary&nbsp;<a href="details.html#JDTRuntime"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %jdt%
       </table>
@@ -619,10 +621,10 @@ else {
       <h3 id="JDTSDK"> JDT SDK &nbsp;<a href="details.html#JDTSDK"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %jdtsdk%
       </table>
@@ -634,10 +636,10 @@ else {
       <h3 id="JDTCORE"> JDT Core Batch Compiler &nbsp;<a href="details.html#JDTCORE"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %jdtc%
       </table>
@@ -649,10 +651,10 @@ else {
       <h3 id="PDERuntime"> PDE Runtime Binary&nbsp;<a href="details.html#PDERuntime"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %pde%
       </table>
@@ -664,10 +666,11 @@ else {
       <h3 id="PDESDK"> PDE SDK&nbsp;<a href="details.html#PDESDK"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
+          </tr>
           %pdesdk%
       </table>
     </td>
@@ -678,10 +681,10 @@ else {
       <h3 id="CVSRuntime"> CVS Client Runtime Binary&nbsp;<a href="details.html#CVSRuntime"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %cvs%
       </table>
@@ -693,10 +696,11 @@ else {
       <h3 id="CVSSDK"> CVS Client SDK&nbsp;<a href="details.html#CVSSDK"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
+        </tr>
           %cvssdk%
       </table>
     </td>
@@ -707,10 +711,10 @@ else {
       <h3 id="SWT"> SWT Binary and Source&nbsp;<a href="details.html#SWT"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %swt%
       </table>
@@ -722,18 +726,20 @@ else {
       <h3 id="org.eclipse.releng"> org.eclipse.releng.tools plug-in&nbsp;<a href="details.html#org.eclipse.releng"><img
             src="../../../eclipse.org-common/stylesheets/more.gif" title="More..." alt="[More]" /></a>
       </h3>
-      <table border="0" cellspacing="2" cellpadding="0" width="99%" bordercolor="#999999">
+      <table border="0" cellspacing="1" cellpadding="0" width="99%" >
         <tr>
-          <td width="36%"><b>Platform</b></td>
-          <?php column($servername); ?>
+          
+          <?php columnHeads(); ?>
         </tr>
         %relengtools%
       </table>
-    </td>
+   </td>
 </tr>
-</table>
-</div>
-<?php } ?>
 
+</td></tr>
+</table>
+</div>  <!-- end homeitem3col -->
+<?php } ?>
+</div> <!-- end midcolumn -->
 </body>
 </html>
