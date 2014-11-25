@@ -262,8 +262,8 @@ function printBuildColumns($fileName, $parts) {
       } else {
         echo "&nbsp;(unexpected test boxes)";
       }
+       echo "</a>\n";
     }
-    echo "</a>\n";
   }
   echo "</td>\n";
   return $buildName;
