@@ -104,7 +104,7 @@ function sendPromoteMail ()
     # 4.3.0 Build: I20120411-2034
     SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
 
-  # override in localbuildproperties.shsource if doing local tests
+  # override in localBuildProperties.shsource if doing local tests
   TO=${TO:-"platform-releng-dev@eclipse.org"}
 
   # for initial testing, only to me -- change as desired after initial testing.
@@ -207,7 +207,7 @@ function startTests()
   EBUILDER_HASH=$5
   if [[ -z "${EBUILDER_HASH}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function $(basename $0)"
+    printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argument, for this function $(basename $0)"
     return 1;
   fi
 
@@ -237,7 +237,7 @@ function syncRepoSite ()
   eclipseStream=$1
   if [[ -z "${eclipseStream}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"  >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"  >&2
     return 1;
   fi
 
@@ -245,7 +245,7 @@ function syncRepoSite ()
   buildType=$2
   if [[ -z "${buildType}" ]]
   then
-    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argumnet, for this function $(basename $0)" >&2
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildType as second argument, for this function $(basename $0)" >&2
     return 1;
   fi
 
@@ -325,7 +325,7 @@ echo "Starting $0"
 eclipseStream=$1
 if [[ -z "${eclipseStream}" ]]
 then
-  printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argumnet, for this function $(basename $0)"
+  printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"
   exit 1
 fi
 echo "eclipseStream: $eclipseStream"
@@ -333,7 +333,7 @@ echo "eclipseStream: $eclipseStream"
 buildId=$2
 if [[ -z "${buildId}" ]]
 then
-  printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argumnet, for this function $(basename $0)"
+  printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)"
   exit 1
 fi
 echo "buildId: $buildId"
@@ -342,8 +342,8 @@ echo "buildId: $buildId"
 EBUILDER_HASH=$3
 if [[ -z "${EBUILDER_HASH}" ]]
 then
-  printf "\n\n\t%s\n\n" "WARNING: Must provide builder (or aggregator) hash as fourth argumnet, for this function, $0"
-  #printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argumnet, for this function, $0"
+  printf "\n\n\t%s\n\n" "WARNING: Must provide builder (or aggregator) hash as fourth argument, for this function, $0"
+  #printf "\n\n\t%s\n\n" "ERROR: Must provide builder (or aggregator) hash as fourth argument, for this function, $0"
   #exit 1;
 fi
 echo "EBUILDER_HASH: $EBUILDER_HASH"
