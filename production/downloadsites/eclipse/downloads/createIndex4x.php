@@ -2,7 +2,7 @@
 # Begin: page-specific settings.  Change these.
 $pageTitle    = "Eclipse Project Downloads";
 $pageKeywords = "eclipse platform sdk pde jdt downloads";
-$pageAuthor   = "David Williams";
+$pageAuthor   = "David Williams and Christopher Guindon";
 
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
@@ -15,19 +15,19 @@ $testConfigs = array();
 ob_start();
 
 /*
- DL.header.php.html and DL.footer.php.html were original obtained from
+ DL.thin.header.php.html was original obtained from
 
-wget http://eclipse.org/eclipse.org-common/themes/solstice/html_template/header.php;
-wget http://eclipse.org/eclipse.org-common/themes/solstice/html_template/footer.php;
+wget https://eclipse.org/eclipse.org-common/themes/solstice/html_template/thin/header.php
 
-and then those files modified to suit our needs. The header required a fair amount of customization,
-the footer almost none.
+and then that file modified to suit our needs.
+Occasionally, our version should be compared to the "standard" to see if anything has
+changed, in the interest of staying consistent.
 
-See bug 437494 for a few details.
-https://bugs.eclipse.org/bugs/show_bug.cgi?id=437494
+See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
+
  */
 
-require("DL.header.php.html");
+require("DL.thin.header.php.html");
 
 ?>
 
@@ -182,12 +182,13 @@ function printBuildColumns($fileName, $parts) {
     // test results location changed. 'testresults' is new standard
     // but we check for 'results' for older stuff.
     // https://bugs.eclipse.org/bugs/show_bug.cgi?id=379408
+    $testResultsDirName="";
     if (file_exists("$dropDir/testresults")) {
       $testResultsDirName="testresults";
-    } elseif (file_exists("$dropDir/results")) {
-        $testResultsDirName="results";
     } else {
-      $testResultsDirName="";
+      if (file_exists("$dropDir/results")) {
+        $testResultsDirName="results";
+      }
     }
 
     $boxes=calcTestConfigsRan($fileName, $testResultsDirName);
@@ -224,12 +225,12 @@ function printBuildColumns($fileName, $parts) {
       if ($boxes == -1) {
         $testimage="caution.gif";
         $testalt="Integration tests did not run due to failed build";
-      } elseif (($boxes == 0 || $boxes == -3) && $diff > 600) {
-        // assume if no results at all, after 10 hours, assume they didn't run for unknown reasosn
+      } elseif ($boxes == 0 && $diff > 720) {
+        // assume if no results at all, after 12 hours, assume they didn't run for unknown reasons
         $testimage="caution.gif";
         $testalt="Integration tests did not run, due to unknown reasons.";
       } elseif ($boxes > 0 && $boxes < $expectedtestConfigs) {
-        if ($diff > 720) {
+        if ($diff > 1440) {
           $testimage="junit.gif";
           $testalt="Tests results are available but did not finish on all machines";
         } else {
@@ -238,23 +239,20 @@ function printBuildColumns($fileName, $parts) {
         }
       } elseif ($boxes == $expectedtestConfigs) {
         $testimage="junit.gif";
-        $testalt="All Tests results are available";
+        $testalt="Tests results are available";
       } else {
         $testimage="runtests.gif";
         $testalt="Integration tests are running ...";
       }
-      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" /></a>\n";
       if ($boxes > -1) {
-        echo "&nbsp;(".$boxes." of ".$expectedtestConfigs." platforms)";
-      } elseif ($boxes == -3) {
-        echo "&nbsp;("0 of ".$expectedtestConfigs." platforms)";
+        echo "&nbsp;(".$boxes." of ".$expectedtestConfigs." platforms)\n";
       }
-      echo "</a>\n";
     } else {
       echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
       $testimage="results.gif";
       $testalt="Logs from build";
-      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
+      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" /></a>";
       if ($buildType == "P") {
         echo "&nbsp;(No automated tests)";
       } elseif ($boxes == -2) {
@@ -262,8 +260,9 @@ function printBuildColumns($fileName, $parts) {
       } else {
         echo "&nbsp;(unexpected test boxes)";
       }
-       echo "</a>\n";
+        
     }
+  //echo "</a>\n";
   }
   echo "</td>\n";
   return $buildName;
@@ -344,7 +343,7 @@ while ($anEntry = $aDirectory->read()) {
 
 <!-- This is the summary section, showing latest of each -->
 
-<table class="downloads">
+<table class="downloads table-striped table-condensed">
 <tr>
 <th class="name">Build Name</th>
 <th class="status">Build Status</th>
@@ -371,7 +370,7 @@ foreach($dropType as $value) {
       $buildName=$parts[1];
     }
     if (!file_exists($subdirDrops."/".$fileName."/buildHidden")) {
-      echo "<tr>\n";
+      echo "<tr style=\"line-hieght:0.8;\">\n";
       if ($fileName == "") {
         echo "<td class=\"name\">&nbsp;</td>\n";
       } else {
@@ -408,7 +407,7 @@ foreach($dropType as $value) {
     echo "</tr>\n";
     echo "</table>\n";
 
-    echo "<table class=\"downloads\">\n";
+    echo "<table class=\"downloads table-striped table-condensed\">\n";
     echo "<tr>\n";
 
     echo "<th class=\"name\">Build Name</th>\n";
@@ -445,8 +444,6 @@ foreach($dropType as $value) {
     echo "</table>\n";
   }
 }
-echo "<hr>";
-echo "<p style=\"text-align:center;font-style:italic;\">All downloads are provided under the terms and conditions of the <a href=\"https://www.eclipse.org/legal/epl/notice.php\">Eclipse Foundation Software User Agreement</a> unless otherwise specified.</p>";
 require("DL.footer.php.html");
 $html = ob_get_clean();
 
