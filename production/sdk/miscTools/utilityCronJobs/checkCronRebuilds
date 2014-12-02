@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+# simply utility to show, and save current cronjobs
+#
+# not a bad idea to save a complete copy before making
+# changes
+
+# must be run from "current user id
+
+OUTPUTDIR=/opt/buildhomes/e4Build/cronjobs
+
+timestamp=$( date +%Y%m%d-%H%M )
+outfilename=${OUTPUTDIR}/crontab-${timestamp}.txt
+crontab -l > $outfilename
+
+# following line if for interactive jobs.
+#printf "\n\tlisting of crontab saved to %s \n\n" ${outfilename}
+
+# check for "rebuilds" that are still enabled, and if found, send
+# an eamil. Since we are running from a cronjob, we'll set it's
+# email parametes to send to right person "on error" (which
+# includes anything written to stderr.
+
+# this depends on certain conventions, such as using the comment
+# of '# rebuilds' immediately before an entry to do the job.
+# So, if the line following '# rebuilds' begins with blank for # we
+# can assume "ok". If that line begins with a digit, then it is
+# still scheduled, when it probably should not be.
+
+rebuildPattern="^# rebuild"
+okPattern="^#"
+notOkPattern="^[ \t]*[0-9\*]+"
+while read LINE
+do
+
+if [[ "${LINE}" =~ $rebuildPattern ]]
+then
+#  echo "DEBUG: $LINE"
+  read NEXTLINE
+#  echo "DEBUG: $NEXTLINE"
+  if [[ "${NEXTLINE}" =~ $notOkPattern ]]
+  then
+    printf "%s\n" "A rebuild job appears to still be scheduled. Please comment it out unless still needed." >&2
+    printf "%s\n" "For $USER on $HOSTNAME, see " >&2
+    printf "%s\n" "$outfilename" >&2
+    printf "%s\n" "Such as, the following (may be more than one on system)." >&2
+    printf "%s\n" "$NEXTLINE" >&2
+    exit 1
+  fi
+fi
+done < "$outfilename"
+exit 0
