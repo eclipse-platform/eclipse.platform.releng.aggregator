@@ -163,6 +163,20 @@ listDetailedLogs($testresults,$expectedTestConfigs[2]);
 
 ?>
 </ul>
+<ul>
+<strong><a name="console" id="console"></a>p2 Director Logs</strong>
+<p>These logs contain the console output captured while installing the automated tests.
+If a test is not being ran at all, this is one place to look, to see if there is a 
+conflict that occurs when trying to installl it.</p>
+<?php
+
+listDetailedLogs($testresults,$expectedTestConfigs[0]/directorLogs);
+listDetailedLogs($testresults,$expectedTestConfigs[1]/directorLogs);
+listDetailedLogs($testresults,$expectedTestConfigs[2]/directorLogs);
+
+
+?>
+</ul>
 </li>
 </div>
 
