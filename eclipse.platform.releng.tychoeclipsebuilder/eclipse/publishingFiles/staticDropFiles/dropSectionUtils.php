@@ -1,7 +1,7 @@
 <?php
 
   function startTable() {
-    echo "<table class=\"table table-striped table-hover table-condensed\">";
+    echo "<table class=\"dropSection table table-striped table-hover table-condensed\">";
     return;
   }
 
