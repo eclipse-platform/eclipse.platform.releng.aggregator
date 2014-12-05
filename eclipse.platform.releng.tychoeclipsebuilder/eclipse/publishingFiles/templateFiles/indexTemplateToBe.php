@@ -27,7 +27,7 @@ See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 
  */
 
-require("../../DL.thin.header.php.html");
+require("DL.thin.header.php.html");
 
 
 include_once("buildproperties.php");
