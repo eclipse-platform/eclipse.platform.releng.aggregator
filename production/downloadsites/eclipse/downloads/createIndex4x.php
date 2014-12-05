@@ -1,7 +1,7 @@
 <?php
-# Begin: page-specific settings.  Change these.
+# Begin: page-specific settings.
 $pageTitle    = "Eclipse Project Downloads";
-$pageKeywords = "eclipse platform sdk pde jdt downloads";
+$pageKeywords = "eclipse,project,plug-ins,plugins,java,ide,swt,refactoring,free java ide,tools,platform,open source,development environment,development,ide";
 $pageAuthor   = "David Williams and Christopher Guindon";
 
 //ini_set("display_errors", "true");
@@ -24,8 +24,7 @@ Occasionally, our version should be compared to the "standard" to see if anythin
 changed, in the interest of staying consistent.
 
 See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
-
- */
+*/
 
 require("DL.thin.header.php.html");
 
@@ -260,7 +259,6 @@ function printBuildColumns($fileName, $parts) {
       } else {
         echo "&nbsp;(unexpected test boxes)";
       }
-        
     }
   //echo "</a>\n";
   }
@@ -283,9 +281,6 @@ while ($anEntry = $aDirectory->read()) {
     // allows non-hidden ones to still show up as "most recent" else will be blank.
     if (!file_exists($subdirDrops."/".$anEntry."/buildHidden")) {
       if (count($parts) == 3) {
-
-        //$buckets[$parts[0]][] = $anEntry;
-
         $timePart = $parts[2];
         $year = substr($timePart, 0, 4);
         $month = substr($timePart, 4, 2);
@@ -311,7 +306,6 @@ while ($anEntry = $aDirectory->read()) {
       }
 
       if (count($parts) == 2) {
-
         $buildType=substr($parts[0],0,1);
         //$buckets[$buildType][] = $anEntry;
         $datePart = substr($parts[0],1);
@@ -328,9 +322,7 @@ while ($anEntry = $aDirectory->read()) {
           $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
         }
         $buckets[$buildType[0]][$timeStamp] = $anEntry;
-
         $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
-
         if (!isset($latestTimeStamp) || !array_key_exists($buildType,$latestTimeStamp) || $timeStamp > $latestTimeStamp[$buildType]) {
           $latestTimeStamp[$buildType] = $timeStamp;
           $latestFile[$buildType] = $anEntry;
@@ -343,7 +335,7 @@ while ($anEntry = $aDirectory->read()) {
 
 <!-- This is the summary section, showing latest of each -->
 
-<table class="downloads table-striped table-condensed">
+<table class="downloads table table-hover table-striped table-condensed">
 <tr>
 <th class="name">Build Name</th>
 <th class="status">Build Status</th>
@@ -407,7 +399,7 @@ foreach($dropType as $value) {
     echo "</tr>\n";
     echo "</table>\n";
 
-    echo "<table class=\"downloads table-striped table-condensed\">\n";
+    echo "<table class=\"downloads table table-hover table-striped table-condensed\">\n";
     echo "<tr>\n";
 
     echo "<th class=\"name\">Build Name</th>\n";
@@ -419,13 +411,9 @@ foreach($dropType as $value) {
     if (isset($aBucket)) {
       krsort($aBucket);
       foreach($aBucket as $innerValue) {
-
         if (!file_exists($subdirDrops."/".$innerValue."/buildHidden")) {
-
           $parts = explode("-", $innerValue);
-
           echo "<tr>\n";
-
           $buildName=$innerValue;
           if (count ($parts)==3) {
             echo "<td class=\"name\"><a href=\"$subdirDrops/$innerValue/\">$parts[1]</a></td>\n";
@@ -434,7 +422,6 @@ foreach($dropType as $value) {
           } else {
             echo "<td class==\"name\">Unexpected numberof parts?</td>\n";
           }
-
           $buildName = printBuildColumns($innerValue, $parts);
           echo "<td class=\"date\">$timeStamps[$innerValue]</td>\n";
           echo "</tr>\n";
