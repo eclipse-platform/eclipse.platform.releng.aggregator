@@ -48,32 +48,42 @@ $STREAM_SERVICE = $streamArr[2];
 
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
-<aside class="col-md-6 list-hover" id="leftcol"  />
-<ul id="leftnav" class="left-nav nav nav-pills nav-stacked /* ul-left-nav fa-ul */ hidden-print" style="text-color:black background-color:#76708C; background-size:cover; background-clip:border-box; /* | padding-box */ border-color: transparent /* | color | inherit? */ ">
+<aside class="col-md-6" id="leftcol" style="margin-top=20px; ">
+<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px" >
     <li><a href="#Repository">Eclipse p2 Repository</a></li>
     <li><a href="#EclipseSDK">Eclipse SDK</a></li>
-    <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
-    <li><a href="#RCPSDK">RCP SDK</a></li>
     <li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
-<ul id=leftnav" class="ul-left-nav fa-ul hidden-print" />
-    <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
-    <li><a href="#JDTSDK">JDT SDK</a></li>
-    <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
-</ul>
-<ul id=leftnav" class="ul-left-nav fa-ul hidden-print" />
-    <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
-    <li><a href="#PDESDK">PDE SDK</a></li>
-</ul>
     <li><a href="#SWT">SWT binary and Source</a></li>
-
-<ul id=leftnav" class="ul-left-nav fa-ul hidden-print" />
-    <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
-    <li><a href="#CVSRuntime">CVS Runtim</a></li>
-    <li><a href="#CVSSDK">CVS SDK</a></li>
-    <li><a href="#org.eclipse.releng">Releng Tools</a></li>
-    <li><a href="#JUnitPlugin">JUnit Plugin Tests and Automated Testing Framework</a></li>
-    <!-- <li><a href="#DeltaPack">Delta Pack</a></li> -->
-</ul>
+    <li><a href="#JDT">JDT Deliverables</a>
+       <ul id=leftnav" class="fa-ul hidden-print style="font-size:8px;" />
+         <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
+         <li><a href="#JDTSDK">JDT SDK</a></li>
+         <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
+       </ul>
+    </li>
+    <li><a href="#PDE">PDE Deliverables</a>
+       <ul id=leftnav" class="fa-ul hidden-print" style="font-size:8px;" />
+         <li><a href="#APITools">PDE API Tools fragments</li>
+         <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
+         <li><a href="#PDESDK">PDE SDK</a></li>
+       </ul>
+    </li>
+    <li><a href="#RCP">RCP Convenience Packages</a>
+        <ul id=leftnav" class="fa-ul hidden-print" style="font-size:8px;" />
+          <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
+          <li><a href="#RCPSDK">RCP SDK</a></li>
+        </ul>
+    </li>
+    <li><a href="#Other">Other Deliverables</a>
+        <ul id=leftnav" class="fa-ul hidden-print" style="font-size:8px;"/>
+           <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
+           <li><a href="#CVSRuntime">CVS Runtime</a></li>
+           <li><a href="#CVSSDK">CVS SDK</a></li>
+           <li><a href="#org.eclipse.releng">Releng Tools</a></li>
+           <li><a href="#JUnitPlugin">JUnit Plugin Tests and Automated Testing Framework</a></li>
+           <!-- <li><a href="#DeltaPack">Delta Pack</a></li> -->
+        </ul>
+    </li>
 </ul>
 </aside>
 
@@ -206,7 +216,7 @@ is logs and tests.</p>
     } elseif ($testResultsStatus === "pending") {
       $linkColor='inherit';
     } elseif ($testResultsStatus === "inProgress") {
-      $linkColor='inheri';
+      $linkColor='inherit';
     }
   }
 
@@ -403,24 +413,6 @@ is logs and tests.</p>
 </tr>
 <?php endTable(); ?>
 
-<h3 id="RCPRuntime"> RCP Runtime Binary and SDK&nbsp;<a href="details.html#RCPRuntime"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-<tr>
-<td><img src = "repo.gif" alt="RCP Repo" /> RCP Runtime Repo </td>
-<?php genLinks("org.eclipse.rcp-${BUILD_ID}.zip"); ?>
-</tr>
-<tr>
-<td><img src = "repo.gif" alt="RCP Source Repo" /> RCP Source Repo </td>
-<?php genLinks("org.eclipse.rcp.source-${BUILD_ID}.zip"); ?>
-</tr>
-<?php endTable(); ?>
-
-
 <h3 id="PlatformRuntime"> Platform Runtime Binary&nbsp;<a href="details.html#PlatformRuntime"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
 </h3>
@@ -606,9 +598,25 @@ is logs and tests.</p>
 </tr>
 
 <?php endTable(); ?>
+<h3 id="RCPRuntime"> RCP Runtime Binary and SDK&nbsp;<a href="details.html#RCPRuntime"><img
+    src="images/more.gif" title="More..." alt="[More]" /></a>
+</h3>
+<?php startTable(); ?>
+<tr>
+  <?php columnHeads(); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="RCP Repo" /> RCP Runtime Repo </td>
+<?php genLinks("org.eclipse.rcp-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="RCP Source Repo" /> RCP Source Repo </td>
+<?php genLinks("org.eclipse.rcp.source-${BUILD_ID}.zip"); ?>
+</tr>
+<?php endTable(); ?>
 
 <!-- Misc. -->
-<h3 id="CVSRuntime"> Misc. Components&nbsp;<a href="details.html#CVSRuntime"><img
+<h3 id="Other">Other Deliverables&nbsp;<a href="details.html#CVSRuntime"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
 </h3>
 <?php startTable(); ?>

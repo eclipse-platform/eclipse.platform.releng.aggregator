@@ -56,7 +56,6 @@ $STREAM_SERVICE = $streamArr[2];
     <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
     <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
     <li><a href="#RCPSDK">RCP SDK</a></li>
-<!--    <li><a href="#DeltaPack">Delta Pack</a></li> -->
     <li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
     <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
     <li><a href="#JDTSDK">JDT SDK</a></li>
@@ -199,7 +198,7 @@ is logs and tests.</p>
     } elseif ($testResultsStatus === "pending") {
       $linkColor='inherit';
     } elseif ($testResultsStatus === "inProgress") {
-      $linkColor='yellow';
+      $linkColor='inherit';
     }
   }
 
@@ -393,9 +392,7 @@ is logs and tests.</p>
 <td>Mac OSX (Mac/Cocoa/x86_64)</td>
 <?php genLinks("eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz"); ?>
 </tr>
-
-
-</table>
+<?php endTable(); ?>
 
 <h3 id="JUnitPlugin"> JUnit Plugin Tests and Automated Testing Framework&nbsp;<a href="details.html#JUnitPlugin"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
@@ -621,7 +618,7 @@ is logs and tests.</p>
 <?php genLinks("org.eclipse.pde.source-${BUILD_ID}.zip"); ?>
 </tr>
 
-</table>
+<?php endTable(); ?>
 
 <h3 id="CVSRuntime"> CVS Client Runtime Binary&nbsp;<a href="details.html#CVSRuntime"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
@@ -635,7 +632,7 @@ is logs and tests.</p>
 <?php genLinks("org.eclipse.cvs-${BUILD_ID}.zip"); ?>
 </tr>
 
-</table>
+<?php endTable(); ?>
 
 <h3 id="CVSSDK"> CVS Client SDK&nbsp;<a href="details.html#CVSSDK"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
@@ -711,7 +708,7 @@ is logs and tests.</p>
 <?php genLinks("swt-${BUILD_ID}-cocoa-macosx-x86_64.zip"); ?>
 </tr>
 
-</table>
+<?php endTable(); ?>
 
 <h3 id="org.eclipse.releng"> org.eclipse.releng.tools plug-in&nbsp;<a href="details.html#org.eclipse.releng"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
@@ -725,7 +722,7 @@ is logs and tests.</p>
 <?php genLinks("org.eclipse.releng.tools-${BUILD_ID}.zip"); ?>
 </tr>
 
-</table>
+<?php endTable(); ?>
 
 <?php } ?>
 </div> <!-- end dropsection -->
@@ -734,9 +731,9 @@ is logs and tests.</p>
 </body>
 </html>
 <?php
-  $html = ob_get_clean();
-
+  #$html = ob_get_clean();
+ ob_end_flush();
   #echo the computed content
-  echo $html;
+ # echo $html;
 ?>
 
