@@ -70,14 +70,12 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 <h2><a name="console" id="console"></a>Console Logs</h2>
 <p>These logs contain the console output captured while running the JUnit automated tests.</p>
 
-<ul>
 <?php
 listLogs("$testresults/consolelogs");
 listDetailedLogs($testresults,$expectedTestConfigs[0]);
 listDetailedLogs($testresults,$expectedTestConfigs[1]);
 listDetailedLogs($testresults,$expectedTestConfigs[2]);
 ?>
-</ul>
 
 </div>
 </div>

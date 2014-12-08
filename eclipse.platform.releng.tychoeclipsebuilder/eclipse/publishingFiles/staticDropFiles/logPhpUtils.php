@@ -46,9 +46,10 @@ function listLogs($myDir) {
   }
 
   if ($index < 0) {
-    echo "<br>There are no test logs for this build.";
+    echo "<p>There are no test logs for this build.</p>\n";
     return;
   }
+  echo "<ul>\n";
   for ($i = 0; $i < $index; $i++) {
     $anEntry = $entries[$i];
     $updateLine = 0;
@@ -57,29 +58,31 @@ function listLogs($myDir) {
       $linktext = $myDir . "_" . $anEntry;
       # remove the directory name from the link to the log
       $dir = substr(strrchr($linktext, "/"), 1);
-      $line = "<td><a href=\"$myDir/$anEntry\">$dir</a> " . fileSizeForDisplay("$myDir/$anEntry") . " </td>";
+      $line = "<a href=\""."$myDir/$anEntry"."\">".$dir."</a> " . fileSizeForDisplay("$myDir/$anEntry");
+
     } else {
-      $line = "<td><a href=\"$myDir/$anEntry\">$anEntry</a> " . fileSizeForDisplay("$myDir/$anEntry") . " </td>";
+      $line = "<a href=\""."$myDir/$anEntry"."\">".$anEntry."</a> " . fileSizeForDisplay("$myDir/$anEntry");
     }
-    echo "<li>$line</li>";
+    echo "<li>$line</li>\n";
   }
+  echo "</ul>\n";
 }
 
 function listDetailedLogs ($testresults, $machineplatform) {
   if (file_exists("$testresults/$machineplatform")) {
-    echo "<strong>Individual $machineplatform test logs</strong><br />";
+    echo "<h4>Individual $machineplatform test logs</h4>\n";
     listLogs("$testresults/$machineplatform");
   }
   if (file_exists("$testresults/$machineplatform/crashlogs")) {
-    echo "<strong>Crash logs captured on $machineplatform</strong>";
+    echo "<h4>Crash logs captured on $machineplatform</h4>\n";
     listLogs("$testresults/$machineplatform/crashlogs");
   }
   if (file_exists("$testresults/$machineplatform/timeoutScreens")) {
-    echo "<strong>Screen captures for tests timing out on $machineplatform</strong>";
+    echo "<h4>Screen captures for tests timing out on $machineplatform</h4>\n";
     listLogs("$testresults/$machineplatform/timeoutScreens");
   }
     if (file_exists("$testresults/$machineplatform/directorLogs")) {
-    echo "<strong>p2 director logs while installing tests on $machineplatform</strong>";
+    echo "<h4>p2 director logs while installing tests on $machineplatform</h4>\n";
     listLogs("$testresults/$machineplatform/directorLogs");
   }
 }
