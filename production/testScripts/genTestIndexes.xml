@@ -14,7 +14,7 @@
     <property
       name="isBuildTested"
       value="true" />
-    
+
     <script language="javascript">
       <![CDATA[
         var buildId = project.getProperty("buildId");
@@ -53,9 +53,9 @@
     <condition
       property="hrefTestResultsTargetPath"
       value="baselineAlt">
-        <contains
-          string="${job}"
-          substring="-baselineAlt" />
+      <contains
+        string="${job}"
+        substring="-baselineAlt" />
     </condition>
     <condition
       property="hrefTestResultsTargetPath"
@@ -66,19 +66,19 @@
     </condition>
     <condition
       property="hrefTestResultsTargetPath"
-      value="performance"
+      value="."
       else="testresults">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
-    
+
     <condition
       property="testResultsHtmlFileName"
       value="baselineAlt.php">
-        <contains
-          string="${job}"
-          substring="-baselineAlt" />
+      <contains
+        string="${job}"
+        substring="-baselineAlt" />
     </condition>
     <condition
       property="testResultsHtmlFileName"
@@ -89,13 +89,13 @@
     </condition>
     <condition
       property="testResultsHtmlFileName"
-      value="performance.php"
+      value="performance/performance.php"
       else="testResults.php">
       <contains
         string="${job}"
         substring="-perf-" />
     </condition>
-    
+
     <!-- Note: results template is selected based on
          conventions used in hudson jobs names. Should
          move to properties saved in during test run?
@@ -103,33 +103,33 @@
     <condition
       property="testTemplate"
       value="perfBaselineAltResults.php.template">
-        <contains
-          string="${job}"
-          substring="-baselineAlt" />
+      <contains
+        string="${job}"
+        substring="-baselineAlt" />
     </condition>
     <condition
       property="testTemplate"
       value="perfBaselineResults.php.template">
-        <contains
-          string="${job}"
-          substring="-baseline" />
+      <contains
+        string="${job}"
+        substring="-baseline" />
     </condition>
     <condition
       property="testTemplate"
       value="performance.php.template"
       else="testResults.php.template">
-        <contains
-          string="${job}"
-          substring="-perf-" />
+      <contains
+        string="${job}"
+        substring="-perf-" />
     </condition>
 
     <condition
       property="testManifestFileName"
       value="${publishingContent}/performanceTestManifest.xml"
       else="${publishingContent}/testManifest.xml">
-        <contains
-          string="${job}"
-          substring="-perf-" />
+      <contains
+        string="${job}"
+        substring="-perf-" />
     </condition>
 
     <echo message="= = Properties in genTestIndexes.xml, init = = " />
@@ -240,9 +240,11 @@
     depends="init">
 
 
-    <fail unless="buildType" message="buildType should have been defined by now" />
+    <fail
+      unless="buildType"
+      message="buildType should have been defined by now" />
 
-       <!--regenerate the index page with links to test results -->
+        <!--regenerate the index page with links to test results -->
     <ant
       antfile="${EBuilderDir}/eclipse/buildScripts/publish.xml"
       dir="${publishingContent}"
