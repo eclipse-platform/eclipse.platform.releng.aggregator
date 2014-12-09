@@ -48,25 +48,42 @@ $STREAM_SERVICE = $streamArr[2];
 
 <?php if (! isset ($BUILD_FAILED) ) { ?>
 
-<aside class="col-md-6" id="leftcol" style="margin-top=20px;" >
-<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px">
+<aside class="col-md-6" id="leftcol" style="margin-top=20px; ">
+<ul class="ul-left-nav fa-ul hidden-print" style="text-color:black; background-color:#EFEBFF; background-size:contain; background-clip:border-box; border-color: black; font-size:12px; font-weight:bold; padding:2px; line-height:1; border-radius: 1;  margin:20px 3px 20px 3px" >
     <li><a href="#Repository">Eclipse p2 Repository</a></li>
     <li><a href="#EclipseSDK">Eclipse SDK</a></li>
-    <li><a href="#JUnitPlugin">Tests and Testing Framework</a></li>
-    <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
-    <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
-    <li><a href="#RCPSDK">RCP SDK</a></li>
- <!--   <li><a href="#DeltaPack">Delta Pack</a></li> -->
     <li><a href="#PlatformRuntime">Platform Runtime Binary</a></li>
-    <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
-    <li><a href="#JDTSDK">JDT SDK</a></li>
-    <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
-    <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
-    <li><a href="#PDESDK">PDE SDK</a></li>
-    <li><a href="#CVSRuntime">CVS Runtime</a></li>
-    <li><a href="#CVSSDK">CVS SDK</a></li>
     <li><a href="#SWT">SWT binary and Source</a></li>
-    <li><a href="#org.eclipse.releng">Releng Tools</a></li>
+    <li><a href="#JDT">JDT Deliverables</a>
+       <ul id=leftnav" class="fa-ul hidden-print style="font-size:8px;" />
+         <li><a href="#JDTRuntime">JDT Runtime Binary</a></li>
+         <li><a href="#JDTSDK">JDT SDK</a></li>
+         <li><a href="#JDTCORE">JDT Core Batch Compiler</a></li>
+       </ul>
+    </li>
+    <li><a href="#PDE">PDE Deliverables</a>
+       <ul id=leftnav" class="fa-ul hidden-print" style="font-size:8px;" />
+         <li><a href="#APITools">PDE API Tools fragments</li>
+         <li><a href="#PDERuntime">PDE Runtime Binary</a></li>
+         <li><a href="#PDESDK">PDE SDK</a></li>
+       </ul>
+    </li>
+    <li><a href="#RCP">RCP Convenience Packages</a>
+        <ul id=leftnav" class="fa-ul hidden-print" style="font-size:8px;" />
+          <li><a href="#RCPRuntime">RCP Runtime Binary</a></li>
+          <li><a href="#RCPSDK">RCP SDK</a></li>
+        </ul>
+    </li>
+    <li><a href="#Other">Other Deliverables</a>
+        <ul id=leftnav" class="fa-ul hidden-print" style="font-size:8px;"/>
+           <li><a href="#ExamplePlugins">Example Plug-ins</a></li>
+           <li><a href="#CVSRuntime">CVS Runtime</a></li>
+           <li><a href="#CVSSDK">CVS SDK</a></li>
+           <li><a href="#org.eclipse.releng">Releng Tools</a></li>
+           <li><a href="#JUnitPlugin">JUnit Plugin Tests and Automated Testing Framework</a></li>
+           <!-- <li><a href="#DeltaPack">Delta Pack</a></li> -->
+        </ul>
+    </li>
 </ul>
 </aside>
 
@@ -325,7 +342,7 @@ is logs and tests.</p>
 
 
 
-<h3 id="EclipseSDK">Eclipse SDK&nbsp;<a href="details.html#EclipseSDK"><img
+<h3 id="EclipseSDK"> Eclipse SDK&nbsp;<a href="details.html#EclipseSDK"><img
      src="images/more.gif" title="More..." alt="[More]" /></a>
 </h3>
 
@@ -334,161 +351,312 @@ is logs and tests.</p>
    <?php columnHeads(); ?>
 </tr>
 
-%sdk%
-
-</table>
-
-<h3 id="JUnitPlugin">Tests and Testing Framework&nbsp;<a href="details.html#JUnitPlugin"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?> 
 <tr>
-  <?php columnHeads(); ?>
+<td>Windows</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-win32.zip"); ?>
 </tr>
-%tests%
-</table>
+<tr>
+<td>Windows (x86_64)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-win32-x86_64.zip"); ?>
+</tr>
+<tr>
+<td>Linux (x86/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (x86_64/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-x86_64.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (PPC/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-ppc.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (PPC64/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (s390x/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-s390x.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (s390/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-s390.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (PPC64LE/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-linux-gtk-ppc64le.tar.gz"); ?>
+</tr>
+<tr>
+<td>Solaris 10 (SPARC/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk.zip"); ?>
+</tr>
+<tr>
+<td>Solaris 10 (x86/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-solaris-gtk-x86.zip"); ?>
+</tr>
+<tr>
+<td>HP-UX (ia64/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-hpux-gtk-ia64.zip"); ?>
+</tr>
+<tr>
+<td>AIX (PPC/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-aix-gtk-ppc.zip"); ?>
+</tr>
+<tr>
+<td>AIX (PPC64/GTK+)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-aix-gtk-ppc64.zip"); ?>
+</tr>
+<tr>
+<td>Mac OSX (Mac/Cocoa/x86_64)</td>
+<?php genLinks("eclipse-SDK-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz"); ?>
+</tr>
+<?php endTable(); ?>
 
-<h3 id="ExamplePlugins">Example Plug-ins&nbsp;<a href="details.html#ExamplePlugins"><img
+<h3 id="PlatformRuntime"> Platform Runtime Binary&nbsp;<a href="details.html#PlatformRuntime"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
 </h3>
 <?php startTable(); ?>
 <tr>
   <?php columnHeads(); ?>
 </tr>
-%example%
-</table>
+<tr>
+<td>Windows</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-win32.zip"); ?>
+</tr>
+<tr>
+<td>Windows (x86_64)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-win32-x86_64.zip"); ?>
+</tr>
+<tr>
+<td>Linux (x86/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (x86_64/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-x86_64.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (PPC/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-ppc.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (PPC64/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-ppc64.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (s390x/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-s390x.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (s390/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-s390.tar.gz"); ?>
+</tr>
+<tr>
+<td>Linux (PPC64LE/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-linux-gtk-ppc64le.tar.gz"); ?>
+</tr>
+<tr>
+<td>Solaris 10 (SPARC/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-solaris-gtk.zip"); ?>
+</tr>
+<tr>
+<td>Solaris 10 (x86/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-solaris-gtk-x86.zip"); ?>
+</tr>
+<tr>
+<td>HPUX (ia64/GTK+)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-hpux-gtk-ia64.zip"); ?>
+</tr>
+<tr>
+<td>AIX (PPC/GTK)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-aix-gtk-ppc.zip"); ?>
+</tr>
+<tr>
+<td>AIX (PPC64/GTK)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-aix-gtk-ppc64.zip"); ?>
+</tr>
+<tr>
+<td>Mac OSX (Mac/Cocoa/x86_64)</td>
+<?php genLinks("eclipse-platform-${BUILD_ID}-macosx-cocoa-x86_64.tar.gz"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif"  alt="Runtime Repo" /> Platform Runtime Repo </td>
+<?php genLinks("org.eclipse.platform-${BUILD_ID}.zip"); ?>
+</tr>
 
-<h3 id="RCPRuntime">RCP Runtime Binary&nbsp;<a href="details.html#RCPRuntime"><img
+<?php endTable(); ?>
+
+<h3 id="JDTRuntime"> JDT Deliverables&nbsp;<a href="details.html#JDTRuntime"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
 </h3>
 <?php startTable(); ?>
 <tr>
   <?php columnHeads(); ?>
 </tr>
-%rcpruntime%
-</table>
+<tr>
+<td><img src = "repo.gif" alt="JDT Repo" /> JDT Runtime Repo </td>
+<?php genLinks("org.eclipse.jdt-${BUILD_ID}.zip"); ?>
+</tr>
 
-<h3 id="RCPSDK">RCP SDK&nbsp;<a href="details.html#RCPSDK"><img
+<tr>
+<td><img src = "repo.gif" alt=" JDT Source Repo" /> JDT Source Repo </td>
+<?php genLinks("org.eclipse.jdt.source-${BUILD_ID}.zip"); ?>
+</tr>
+
+<tr>
+<td>Standalone JDT compiler</td>
+<?php genLinks("ecj-${BUILD_ID}.jar"); ?>
+</tr>
+<tr>
+<td>Standalone JDT compiler with source</td>
+<?php genLinks("ecjsrc-${BUILD_ID}.jar"); ?>
+</tr>
+
+<?php endTable(); ?>
+
+<h3 id="PDERuntime"> PDE Deliverables&nbsp;<a href="details.html#PDERuntime"><img
     src="images/more.gif" title="More..." alt="[More]" /></a>
 </h3>
 <?php startTable(); ?>
 <tr>
   <?php columnHeads(); ?>
 </tr>
-%rcpsdk%
-</table>
+<tr>
+<td><img src = "repo.gif" alt="PDE API Tools" /> PDE API Tools execution environment fragments repo</td>
+<?php genLinks("org.eclipse.pde.api.tools.ee.feature-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="PDE Repo" /> PDE Repo </td>
+<?php genLinks("org.eclipse.pde-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="PDE Source Repo" /> PDE Source Repo </td>
+<?php genLinks("org.eclipse.pde.source-${BUILD_ID}.zip"); ?>
+</tr>
 
+<?php endTable(); ?>
+
+<h3 id="SWT">Standalone SWT Binary and Source&nbsp;<a href="details.html#SWT"><img
+    src="images/more.gif" title="More..." alt="[More]" /></a>
+</h3>
+<?php startTable(); ?>
+<tr>
+  <?php columnHeads(); ?>
+</tr>
+<tr>
+<td>Windows</td>
+<?php genLinks("swt-${BUILD_ID}-win32-win32-x86.zip"); ?>
+</tr>
+<tr>
+<td>Windows (x86_64)</td>
+<?php genLinks("swt-${BUILD_ID}-win32-win32-x86_64.zip"); ?>
+</tr>
+<tr>
+<td>Linux (x86/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-linux-x86.zip"); ?>
+</tr>
+<tr>
+<td>Linux (x86_64/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-linux-x86_64.zip"); ?>
+</tr>
+<tr>
+<td>Linux (PPC/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-linux-ppc.zip"); ?>
+</tr>
+<tr>
+<td>Linux (PPC64/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-linux-ppc64.zip"); ?>
+</tr>
+<tr>
+<td>Linux (PPC64LE/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-linux-ppc64le.zip"); ?>
+</tr>
+<tr>
+<td>Solaris 10 (SPARC/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-solaris-sparc.zip"); ?>
+</tr>
+<tr>
+<td>Solaris 10 (x86/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-solaris-x86.zip"); ?>
+</tr>
+<tr>
+<td>HPUX (ia64/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-hpux-ia64.zip"); ?>
+</tr>
+<tr>
+<td>AIX (PPC/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-aix-ppc.zip"); ?>
+</tr>
+<tr>
+<td>AIX (PPC64/GTK+)</td>
+<?php genLinks("swt-${BUILD_ID}-gtk-aix-ppc64.zip"); ?>
+</tr>
+<tr>
+<td>Mac OSX (Mac/Cocoa/x86_64)</td>
+<?php genLinks("swt-${BUILD_ID}-cocoa-macosx-x86_64.zip"); ?>
+</tr>
+
+<?php endTable(); ?>
+<h3 id="RCPRuntime"> RCP Runtime Binary and SDK&nbsp;<a href="details.html#RCPRuntime"><img
+    src="images/more.gif" title="More..." alt="[More]" /></a>
+</h3>
+<?php startTable(); ?>
+<tr>
+  <?php columnHeads(); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="RCP Repo" /> RCP Runtime Repo </td>
+<?php genLinks("org.eclipse.rcp-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="RCP Source Repo" /> RCP Source Repo </td>
+<?php genLinks("org.eclipse.rcp.source-${BUILD_ID}.zip"); ?>
+</tr>
+<?php endTable(); ?>
+
+<!-- Misc. -->
+<h3 id="Other">Other Deliverables&nbsp;<a href="details.html#CVSRuntime"><img
+    src="images/more.gif" title="More..." alt="[More]" /></a>
+</h3>
+<?php startTable(); ?>
+<tr>
+  <?php columnHeads(); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="Examples" /> Eclipse Examples Repo</td>
+<?php genLinks("org.eclipse.sdk.examples.source-${BUILD_ID}.zip"); ?>
+</tr>
+
+<tr>
+<td><img src = "repo.gif" alt="Releng Tools Repo" /> Releng Tools Repo</td>
+<?php genLinks("org.eclipse.releng.tools-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="CVS Repo" /> CVS Runtime Repo </td>
+<?php genLinks("org.eclipse.cvs-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="CVS Source Repo" /> CVS Source Repo </td>
+<?php genLinks("org.eclipse.cvs.source-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td><img src = "repo.gif" alt="Test Framework" />Test Frameework</td>
+<?php genLinks("eclipse-test-framework-${BUILD_ID}.zip"); ?>
+</tr>
+<tr>
+<td>Test Framework and Unit Tests</td>
+<?php genLinks("eclipse-Automated-Tests-${BUILD_ID}.zip"); ?>
+</tr>
+<?php endTable(); ?>
 <!--
-<h3 id="DeltaPack">DeltaPack&nbsp;<a href="details.html#DeltaPack"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
 <tr>
-  <?php columnHeads(); ?>
+<td>All</td>
+<?php genLinks("eclipse-${BUILD_ID}-delta-pack.zip"); ?>
 </tr>
-%deltapack%
-</table>
 -->
 
-<h3 id="PlatformRuntime">Platform Runtime Binary&nbsp;<a href="details.html#PlatformRuntime"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%runtime%
-</table>
-
-<h3 id="JDTRuntime">JDT Runtime Binary&nbsp;<a href="details.html#JDTRuntime"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%jdt%
-</table>
-
-<h3 id="JDTSDK">JDT SDK &nbsp;<a href="details.html#JDTSDK"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%jdtsdk%
-</table>
-
-<h3 id="JDTCORE">JDT Core Batch Compiler &nbsp;<a href="details.html#JDTCORE"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%jdtc%
-</table>
-
-<h3 id="PDERuntime">PDE Runtime Binary&nbsp;<a href="details.html#PDERuntime"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%pde%
-</table>
-
-<h3 id="PDESDK">PDE SDK&nbsp;<a href="details.html#PDESDK"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%pdesdk%
-</table>
-
-<h3 id="CVSRuntime">CVS Client Runtime Binary&nbsp;<a href="details.html#CVSRuntime"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%cvs%
-</table>
-
-<h3 id="CVSSDK">CVS Client SDK&nbsp;<a href="details.html#CVSSDK"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%cvssdk%
-</table>
-
-<h3 id="SWT">SWT Binary and Source&nbsp;<a href="details.html#SWT"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%swt%
-</table>
-
-<h3 id="org.eclipse.releng">org.eclipse.releng.tools plug-in&nbsp;<a href="details.html#org.eclipse.releng"><img
-    src="images/more.gif" title="More..." alt="[More]" /></a>
-</h3>
-<?php startTable(); ?>
-<tr>
-  <?php columnHeads(); ?>
-</tr>
-%relengtools%
-</table>
+<?php endTable(); ?>
 
 <?php } ?>
 </div> <!-- end dropsection -->
@@ -497,9 +665,9 @@ is logs and tests.</p>
 </body>
 </html>
 <?php
-  $html = ob_get_clean();
-
+  #$html = ob_get_clean();
+ ob_end_flush();
   #echo the computed content
-  echo $html;
+ # echo $html;
 ?>
 
