@@ -243,15 +243,16 @@ function printBuildColumns($fileName, $parts) {
         $testimage="runtests.gif";
         $testalt="Integration tests are running ...";
       }
-      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" /></a>\n";
+      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />\n";
       if ($boxes > -1) {
         echo "&nbsp;(".$boxes." of ".$expectedtestConfigs." platforms)\n";
       }
+      echo "</a>\n";
     } else {
       echo "<a href=\"$dropDir/testResults.php\" title=\"$boxesTitle\" style=\"text-decoration: none\">";
       $testimage="results.gif";
       $testalt="Logs from build";
-      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" /></a>";
+      echo "<img style=\"border:0px\" src=\"../images/$testimage\" title=\"$testalt\" alt=\"$testalt\" />";
       if ($buildType == "P") {
         echo "&nbsp;(No automated tests)";
       } elseif ($boxes == -2) {
@@ -259,8 +260,8 @@ function printBuildColumns($fileName, $parts) {
       } else {
         echo "&nbsp;(unexpected test boxes)";
       }
+      echo "</a>\n";
     }
-  //echo "</a>\n";
   }
   echo "</td>\n";
   return $buildName;
