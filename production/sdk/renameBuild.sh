@@ -16,7 +16,7 @@ newlabel=$3
 function renamefile ()
 {
   # file name is input parameter
-  if [[ $1 =~ (.*)($oldname)(.*) ]]
+  if [[ $1 =~ (.*)($oldname)(.*) && ! $1 =~ .*\.gif ]]
   then
     echo "changing $1 to ${BASH_REMATCH[1]}$newlabel${BASH_REMATCH[3]}"
     mv "$1" "${BASH_REMATCH[1]}$newlabel${BASH_REMATCH[3]}"
