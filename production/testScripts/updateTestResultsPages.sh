@@ -198,8 +198,15 @@ then
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
   # assuming for now the intent is that 'data' is meant to accumulate in common location
-  dataDir=/shared/eclipse/perfdataDir
-  mkdir -p $dataDir
+  dataDir=/shared/eclipse/perfdataDir_${buildId}
+  # make anew, if needed
+  mkdir -p "${dataDir}"
+  RC=$?
+  if [[ $RC != 0 ]] 
+  then 
+      echo "Could mkdir -p $dataDir. Return code was $RC. Exiting."
+      exit $RC
+  fi
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
   XVFB_RUN="xvfb-run"
   XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
@@ -219,9 +226,10 @@ then
   echo "   BUILDFILESTR: $BUILDFILESTR"
   echo "   job:          $JOB_NAME"
   echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS"
+  echo "   current.prefix ${buildType}"
   echo
   
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current.prefix N,I,M,S -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} -print -data -fingerprints -print -vm ${devJRE}  -vmargs ${vmargs}
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current.prefix ${buildType} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} -print -data -fingerprints -print -vm ${devJRE}  -vmargs ${vmargs}
   RC=$?
   if [[ $RC != 0 ]]
   then
