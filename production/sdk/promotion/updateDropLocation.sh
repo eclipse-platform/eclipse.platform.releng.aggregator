@@ -53,7 +53,12 @@ function updatePages()
     printf "\n\n\t%s\n\n" "ERROR: Must provide JOB_NAME as fourth argument, for this function $(basename $0)"
     return 1;
   fi
-
+  JOB_NUMBER=$5
+  if [[ -z "${JOB_NUMBER}" ]]
+  then
+    # technically, not needed, just effects some "documentation" (and directory names) later. 
+    printf "\n\n\t%s\n\n" "WARNING: JOB_NUMBER as fith argument was not provided, for this function $(basename $0)"
+  fi
   eclipseStreamMajor=${eclipseStream:0:1}
   buildType=${buildId:0:1}
 
@@ -64,6 +69,7 @@ function updatePages()
   echo "buildId: $buildId"
   echo "EBUILDER_HASH: $EBUILDER_HASH"
   echo "JOB_NAME: $JOB_NAME"
+  echo "JOB_NUMBER: $JOB_NUMBER"
 
   # compute directory on build machine
   dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" )
@@ -74,7 +80,7 @@ function updatePages()
   ebuilderDropDir="${dropFromBuildDir}/${eclipsebuilder}/production/testScripts"
   echo "DEBUG: ebuilderDropDir: ${ebuilderDropDir}"
 
-  ${ebuilderDropDir}/updateTestResultsPages.sh  $eclipseStream $buildId $JOB_NAME
+  ${ebuilderDropDir}/updateTestResultsPages.sh  $eclipseStream $buildId $JOB_NAME $JOB_NUMBER
   rccode=$?
   if [[ $rccode != 0 ]]
   then

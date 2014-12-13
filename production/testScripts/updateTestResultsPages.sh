@@ -15,8 +15,9 @@ then
   printf "\t\t%s\t%s\n" "eclipseStream" "(e.g. 4.2.0 or 3.8.0) "
   printf "\t\t%s\t%s\n" "buildId" "(e.g. N20120415-2015) "
   printf "\t\t%s\t%s\n" "jobName" "(e.g. ep4I-unit-lin64) "
+  printf "\t\t%s\t%s\n" "jobNumber" "(e.g. 59) "
   printf "\t%s\n" "for example,"
-  printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 ep4I-unit-lin64"
+  printf "\t%s\n\n" "./$scriptname 4.2.0 N20120415-2015 ep4I-unit-lin64 59"
   exit 1
 fi
 
@@ -41,6 +42,15 @@ then
   echo "must provide JOB_NAME as third argument, for this function $0"
   exit 1
 fi
+
+JOB_NUMBER=$4
+if [ -z "${JOB_NUMBER}" ]
+then
+  # technically, not required, though later may want to force and error, since 
+  # probably indicates something is wrong.
+  echo "WARNING: JOB_NUMBER as fourth argument, not provided for this function $0"
+fi
+
 
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
@@ -176,7 +186,8 @@ then
   echo "   devArgs:      $devArgs"
   echo "   devJRE:       $devJRE"
   echo "   BUILDFILESTR: $BUILDFILESTR"
-  echo "   job:          $JOB_NAME"
+  echo "   JOB_NAME:     $JOB_NAME"
+  echo "   JOB_NUMBER:   $JOB_NUMBER"
   echo
   echo " = = First, installing derby"
   # make sure derby.core is installed in basebuilder
@@ -200,7 +211,9 @@ then
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
   # assuming for now the intent is that 'data' is meant to accumulate in common location
-  dataDir=/shared/eclipse/perfdataDir_${buildId}
+  # common location doesn't seem to work, with our multi-run method. So, will 
+  # make unique, for now. (Might work ok, if we just had "short set" and "long set" locations? 
+  dataDir=/shared/eclipse/perfdataDir_${buildId}_$JOB_NAME_$JOB_NUMBER
   # make anew, if needed
   mkdir -p "${dataDir}"
   RC=$?
@@ -218,10 +231,13 @@ then
   then
      current_prefix=" -current.prefix M "
   else
-     current_prefix=" -current.prefix I;N "
+     current_prefix=" -current.prefix N,I "
   fi
   
-  baseline_prefix=" -baseline.prefix R"
+  # This probably is not needed. If not provded, takes "whole name" of baseline
+  # as the prefix. The underscore is simply an (on) end delimiter, not used in the 
+  # end.
+  baseline_prefix=" -baseline.prefix R-4.4-_"
   
   echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = "
   echo "   dev script:   $0"
@@ -234,7 +250,8 @@ then
   echo "   devArgs:      $devArgs"
   echo "   devJRE:       $devJRE"
   echo "   BUILDFILESTR: $BUILDFILESTR"
-  echo "   job:          $JOB_NAME"
+  echo "   JOB_NAME:     $JOB_NAME"
+  echo "   JOB_NUMBER:   $JOB_NUMBER"
   echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS"
   echo "   current_prefix ${current_prefix}"
   echo "   baseline_prefix ${baseline_prefix}"
