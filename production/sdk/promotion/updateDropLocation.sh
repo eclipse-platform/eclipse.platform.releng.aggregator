@@ -97,7 +97,7 @@ function updatePages()
 #    buildId       (e.g. N20120415-2015)
 #    EBUILDER_HASH (SHA1 HASH or branch of eclipse builder to used
 
-if [[ "${#}" != "4" ]]
+if [[ "${#}" -lt "4" ]]
 then
   # usage:
   scriptname=$(basename $0)
