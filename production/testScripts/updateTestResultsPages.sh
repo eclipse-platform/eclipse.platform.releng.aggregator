@@ -157,6 +157,8 @@ perfBaselineJobPattern="^.*-perf-.*-baseline.*$"
 
 if [[ $JOB_NAME =~ $perfJobPattern && ! $JOB_NAME =~ $perfBaselineJobPattern ]]
 then
+  # We run the "performance analysis" tools only on "current" build, for jobs that contain -perf- (and do not contain -baseline)
+  
   devworkspace="${fromDir}/workspace-installDerbyCore"
   devArgs="-Xmx256m"
   BUILDFILESTR="-f ${BUILDFILE}"
@@ -212,8 +214,16 @@ then
   XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
   # --server-args -screen 0 1024x768x24"
   # 
+  if [[ "M" == ${buildType}} ]] 
+  then
+     current_prefix=" -current.prefix M "
+  else
+     current_prefix=" -current.prefix I;N "
+  fi
   
-    echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = "
+  baseline_prefix=" -baseline.prefix R"
+  
+  echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = "
   echo "   dev script:   $0"
   echo "   buildRoot:    $buildRoot"
   echo "   BUILD_HOME:   ${BUILD_HOME}"
@@ -226,10 +236,11 @@ then
   echo "   BUILDFILESTR: $BUILDFILESTR"
   echo "   job:          $JOB_NAME"
   echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS"
-  echo "   current.prefix ${buildType}"
+  echo "   current_prefix ${current_prefix}"
+  echo "   baseline_prefix ${baseline_prefix}"
   echo
   
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current.prefix ${buildType} -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} -print -data -fingerprints -print -vm ${devJRE}  -vmargs ${vmargs}
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} ${baseline_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}
   RC=$?
   if [[ $RC != 0 ]]
   then
@@ -238,52 +249,3 @@ then
   fi
 fi
 
-if [[ $JOB_NAME =~ ${perfBaselineJobPattern} ]]
-then
-  echo "Nothing more to do for baseline"
-  exit 0
-  BUILDFILE=${aggregatorDir}/production/testScripts/genTestIndexes.xml
-
-  BUILDFILESTR="-f ${BUILDFILE}"
-  echo
-  echo " BUILDFILESTR: $BUILDFILESTR"
-
-  # provide blank, to get default
-  BUILDTARGET=" "
-
-  devworkspace="${fromDir}/workspace-updatePerfBaselineTestResults"
-  devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
-
-  echo "Collected a performance baseline run result. Display unit tests for $JOB_NAME"
-  echo
-  echo " = = Properties in updateTestResultsPages.sh: -perf- section  = = "
-  echo "   dev script:   $0"
-  echo "   buildRoot:    $buildRoot"
-  echo "   BUILD_HOME:   ${BUILD_HOME}"
-  echo "   pathToDL:     $pathToDL"
-  echo "   siteDir:      $siteDir"
-  echo "   fromDir:      $fromDir"
-  echo "   devworkspace: $devworkspace"
-  echo "   devArgs:      $devArgs"
-  echo "   devJRE:       $devJRE"
-  echo "   BUILDFILESTR: $BUILDFILESTR"
-  echo "   job:          $JOB_NAME"
-  echo
-
-  if [ -n ${ECLIPSE_EXE} -a -x ${ECLIPSE_EXE} ]
-  then
-
-    ${ECLIPSE_EXE}  --launcher.suppressErrors  -nosplash -consolelog -data $devworkspace -application org.eclipse.ant.core.antRunner $BUILDFILESTR  $BUILDTARGET -vm $devJRE -vmargs $devArgs
-    RC=$?
-    if [[ $RC != 0 ]]
-    then
-      echo "ERROR: eclipse returned non-zero return code, exiting with RC: $RC."
-      exit $RC
-    fi
-  else
-    echo "ERROR: ECLIPSE_EXE is not defined to executable eclipse."
-    RC=1
-    exit $RC
-  fi
-
-fi
