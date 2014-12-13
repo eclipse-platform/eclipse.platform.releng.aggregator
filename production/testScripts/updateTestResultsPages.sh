@@ -213,7 +213,7 @@ then
   # assuming for now the intent is that 'data' is meant to accumulate in common location
   # common location doesn't seem to work, with our multi-run method. So, will 
   # make unique, for now. (Might work ok, if we just had "short set" and "long set" locations? 
-  dataDir=/shared/eclipse/perfdataDir_${buildId}_$JOB_NAME_$JOB_NUMBER
+  dataDir=/shared/eclipse/perfdataDir_${buildId}_${JOB_NAME}_${JOB_NUMBER}
   # make anew, if needed
   mkdir -p "${dataDir}"
   RC=$?
