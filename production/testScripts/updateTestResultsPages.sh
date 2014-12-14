@@ -213,13 +213,21 @@ then
   # assuming for now the intent is that 'data' is meant to accumulate in common location
   # common location doesn't seem to work, with our multi-run method. So, will 
   # make unique, for now. (Might work ok, if we just had "short set" and "long set" locations? 
-  dataDir=/shared/eclipse/perfdataDir_${buildId}_${JOB_NAME}_${JOB_NUMBER}
-  # make anew, if needed
+  ROOT_PERF_DATA=/shared/eclipse/perfdataDir
+  mkdir -p  ${ROOT_PERF_DATA}
+  RC=$?
+  if [[ $RC != 0 ]] 
+  then 
+      echo "Could not mkdir -p ${ROOT_PERF_DATA}. Return code was $RC. Exiting."
+      exit $RC
+  fi
+  dataDir=${ROOT_PERF_DATA}/${buildId}_${JOB_NAME}_${JOB_NUMBER}
+  # make anew
   mkdir -p "${dataDir}"
   RC=$?
   if [[ $RC != 0 ]] 
   then 
-      echo "Could mkdir -p $dataDir. Return code was $RC. Exiting."
+      echo "Could not mkdir -p $dataDir. Return code was $RC. Exiting."
       exit $RC
   fi
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
@@ -234,8 +242,8 @@ then
      current_prefix=" -current.prefix N,I "
   fi
   
-  # This probably is not needed. If not provded, takes "whole name" of baseline
-  # as the prefix. The underscore is simply an (on) end delimiter, not used in the 
+  # This probably is not needed. If not provided, takes "whole name" of baseline
+  # as the prefix. The underscore is simply an (odd) end delimiter?, not used in the 
   # end.
   baseline_prefix=" -baseline.prefix R-4.4-_"
   
