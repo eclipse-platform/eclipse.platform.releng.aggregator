@@ -7,9 +7,6 @@ $pageAuthor   = "David Williams and Christopher Guindon";
 //ini_set("display_errors", "true");
 //error_reporting (E_ALL);
 
-$eclipseStream="4";
-include('../../dlconfig4.php');
-$subdirDrops="drops4";
 $expectedtestConfigs=0;
 $testConfigs = array();
 
@@ -28,6 +25,19 @@ else {
     $clickthroughstr="";
 }
 
+include_once("buildproperties.php");
+include_once("utilityFunctions.php");
+
+// global variables
+$expectedTestConfigs=array();
+$testResults = array();
+$testResultsSummaryFiles=array();
+
+$streamArr = explode(".", $STREAM);
+$STREAM_MAJOR = $streamArr[0];
+$STREAM_MINOR = $streamArr[1];
+$STREAM_SERVICE = $streamArr[2];
+
 ob_start();
 
 /*
@@ -45,19 +55,6 @@ See https://eclipse.org/eclipse.org-common/themes/solstice/docs/
 
 require("DL.thin.header.php.html");
 
-
-include_once("buildproperties.php");
-include_once("utilityFunctions.php");
-
-// global variables
-$expectedTestConfigs=array();
-$testResults = array();
-$testResultsSummaryFiles=array();
-
-$streamArr = explode(".", $STREAM);
-$STREAM_MAJOR = $streamArr[0];
-$STREAM_MINOR = $streamArr[1];
-$STREAM_SERVICE = $streamArr[2];
 ?>
 
 
@@ -104,7 +101,7 @@ if (isset($testbuildonly) && ($testbuildonly)) {
 
 // $NEWS_ID needs to be added to buildproperties.php, such as $NEWS_ID="4.5/M4";
 // Once ready to display it.
-if (isset ($NEWS_ID) {
+if (isset ($NEWS_ID)) {
   echo "<h2><a href=\"http://www.eclipse.org/eclipse/news/${NEWS_ID}/\">New and Noteworthy</a></h2>\n";
 }
 // linkToAcknowledgements is a pure "marker file"
