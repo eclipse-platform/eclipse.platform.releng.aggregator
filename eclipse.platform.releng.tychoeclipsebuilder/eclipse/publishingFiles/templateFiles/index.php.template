@@ -194,22 +194,22 @@ else {
   }
 
   if (file_exists("overrideTestColor")) {
-    $linkColor='green';
+    $linkColor='text-success';
   }
   else {
     if ($testResultsStatus === "failed") {
       /* note we don't override  'inherit' cases, just 'failed'. */
       if (file_exists("overrideTestColor")) {
-        $linkColor='green';
+        $linkColor='text-success';
       } else {
-        $linkColor = 'red';
+        $linkColor = 'text-danger';
       }
     } elseif ($testResultsStatus === "success") {
-      $linkColor='green';
+      $linkColor='text-success';
     } elseif ($testResultsStatus === "pending") {
-      $linkColor='inherit';
+      $linkColor='text-muted';
     } elseif ($testResultsStatus === "inProgress") {
-      $linkColor='inherit';
+      $linkColor='text-muted';
     }
   }
 
@@ -217,9 +217,14 @@ else {
   if ($testResultsStatus == "pending")   {
     echo "<li>Integration and unit tests are pending.</li>\n";
   } else {
-    echo "<li>View the <a  style=\"color:${linkColor};text-decoration:none\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a></li>\n";
+    echo "<li>View the <a  class=\"${linkColor}\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a></li>\n";
   }
 
+  if ($testResultsStatus == "pending")   {
+    echo "<li>Integration and unit tests are pending.</li>\n";
+  } else {
+    echo "<li>View the <a  class=\"${linkColor}\" title=\"Link test results.\" href=\"testResults.php\">integration and unit test results for the current build.</a></li>\n";
+  }
 
   /* performance tests line item */
   $generated=file_exists("performance/global_fp.php");
@@ -245,33 +250,33 @@ else {
       $total = $failed + $passed;
       $duration = $testRes['duration'];
       if (file_exists("overrideTestColor")) {
-        $linkColor='green';
+        $linkColor='text-success';
       }
       else {
         if ($failed > 0) {
           /* note we don't override  'inherit' cases, just 'failed'. */
           if (file_exists("overrideTestColor")) {
-            $linkColor='green';
+            $linkColor='text-success';
           } else {
-            $linkColor = 'red';
+            $linkColor = 'text-danger';
           }
         } else {
-          $linkColor='green';
+          $linkColor='text-sucess';
         }
       }
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
-      echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+      echo "<a class=\"${linkColor}\" href=\"testResults.php\">".$config."</a>";
       echo "</td>\n";
       echo "<td>$failed</td><td>$passed</td><td>$total</td><td>$duration</td>\n";
       echo "</tr>\n";
     }
     else {
       /* Yes, all configs intentionally links, since all go to the same place, but if no results yet, would not look like one. */
-      $linkColor = 'inherit';
+      $linkColor = 'text-muted';
       echo "<tr>\n";
       echo "<td style=\"text-align:left\">\n";
-      echo "<a style=\"color:${linkColor};text-decoration:none\" href=\"testResults.php\">".$config."</a>";
+      echo "<a class=\"${linkColor}\" href=\"testResults.php\">".$config."</a>";
       echo "</td>\n";
       echo "<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>\n";
       echo "</tr>\n";
