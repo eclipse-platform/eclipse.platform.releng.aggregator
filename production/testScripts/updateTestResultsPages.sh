@@ -246,10 +246,12 @@ then
   fi
   
   PERF_OUTFILE=perfAnalysis_${buildId}_${JOB_NAME}_${JOB_NUMBER}.txt
-  echo "Beginning peformance analysis. Results in $PERF_OUTFILE."
-  
+  echo "Beginning performance analysis. Results in $PERF_OUTFILE."
   mkdir -p ${fromDir}/performance
-  echo "Start time: $( date -u +%Y%m%d%H%M )" > ${fromDir}/performance/$PERF_OUTFILE
+  RAW_DATE_START="$(date -u +%s )"
+
+  #echo -e "\n\tDEBUG RAW Date Start: ${RAW_DATE_START} \n"
+  echo -e "\n\tStart Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_START} ) \n" > ${fromDir}/performance/$PERF_OUTFILE
   echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = " >> $PERF_OUTFILE
   echo "   dev script:   $0" >> $PERF_OUTFILE
   echo "   buildRoot:    $buildRoot" >> $PERF_OUTFILE
@@ -275,5 +277,13 @@ then
     echo "ERROR: eclipse returned non-zero return code while using xvfb to invoke performance.ui app, exiting with RC: $RC." 
     exit $RC
   fi
+  RAW_DATE_END="$(date -u +%s )"
+
+  #echo -e "\n\tRAW Date End: ${RAW_DATE_END} \n"
+  echo -e "\n\tEnd Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_END} )"  >> $PERF_OUTFILE
+
+  ELAPSED_SECONDS=${RAW_DATE_END}-${RAW_DATE_START}
+  ELAPSED_TIME=$( show_time ${ELAPSED_SECONDS} )
+  echo -e "\n\tElapsed Time: ${ELAPSED_TIME}"   >> $PERF_OUTFILE
 fi
 
