@@ -146,6 +146,14 @@ then
 fi
 echo "JOB_NAME: $JOB_NAME"
 
+JOB_NUMBER=$5
+if [[ -z "${JOB_NUMBER}" ]]
+then
+  printf "\n\n\t%s\n\n" "ERROR: Must provide job number (JOB_NUMBER) as fifth argument, for this function $(basename $0)"
+  exit 1;
+fi
+echo "JOB_NUMBER: $JOB_NUMBER"
+
 eclipseStreamMajor=${eclipseStream:0:1}
 buildType=${buildId:0:1}
 echo "buildType: $buildType"
@@ -170,7 +178,7 @@ fi
 SCRIPTDIR=$( dirname $0 )
 ${SCRIPTDIR}/getEBuilder.sh "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
-updatePages $eclipseStream $buildId "${EBUILDER_HASH}" $JOB_NAME
+updatePages $eclipseStream $buildId "${EBUILDER_HASH}" $JOB_NAME $JOB_NUMBER
 rccode=$?
 if [ $rccode -ne 0 ]
 then
