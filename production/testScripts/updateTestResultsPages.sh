@@ -262,10 +262,9 @@ then
   echo "   JOB_NUMBER:   $JOB_NUMBER"
   echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS"
   echo "   current_prefix ${current_prefix}"
-  echo "   baseline_prefix ${baseline_prefix}"
   echo
   
-  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} ${baseline_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}
+  ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}
   RC=$?
   if [[ $RC != 0 ]]
   then
