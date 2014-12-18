@@ -48,7 +48,8 @@ if [ -z "${JOB_NUMBER}" ]
 then
   # technically, not required, though later may want to force and error, since 
   # probably indicates something is wrong.
-  echo "WARNING: JOB_NUMBER as fourth argument, not provided for this function $0"
+  echo -e "\n\tERROR: JOB_NUMBER as fourth argument, not provided to this function $0. Exiting."
+  exit 1
 fi
 
 
@@ -238,14 +239,13 @@ then
   if [[ "M" == ${buildType}} ]] 
   then
      current_prefix=" -current.prefix M "
-  else
+  elif [[ ${buildType}} =~ [NI] ]] 
      current_prefix=" -current.prefix N,I "
+  else 
+     echo -e "\n\tPROGRAM ERROR: build type did not equal expected value (M or N or I). Exiting.
+     exit 1
   fi
   
-  # This probably is not needed. If not provided, takes "whole name" of baseline
-  # as the prefix. The underscore is simply an (odd) end delimiter?, not used in the 
-  # end.
-  baseline_prefix=" -baseline.prefix R-4.4-_"
   
   echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = "
   echo "   dev script:   $0"

@@ -56,8 +56,9 @@ function updatePages()
   JOB_NUMBER=$5
   if [[ -z "${JOB_NUMBER}" ]]
   then
-    # technically, not needed, just effects some "documentation" (and directory names) later. 
-    printf "\n\n\t%s\n\n" "WARNING: JOB_NUMBER as fith argument was not provided, for this function $(basename $0)"
+    # technically, may not be needed, just effects some directory names, but will require, for now. 
+    printf "\n\n\t%s\n\n" "ERROR: JOB_NUMBER as fifth argument was not provided, for this function $(basename $0). Exiting."
+    exit 1
   fi
   eclipseStreamMajor=${eclipseStream:0:1}
   buildType=${buildId:0:1}
