@@ -239,6 +239,7 @@ then
   then
      current_prefix=" -current.prefix M "
   elif [[ ${buildType}} =~ [NI] ]] 
+  then
      current_prefix=" -current.prefix N,I "
   else 
      echo -e "\n\tPROGRAM ERROR: build type did not equal expected value (M or N or I). Exiting.
