@@ -7,6 +7,34 @@
 # It should not be used for production builds.
 source localBuildProperties.shsource 2>/dev/null
 
+
+function show_time () {
+    num=$1
+    min=0
+    hour=0
+    day=0
+    if((num>59));then
+        ((sec=num%60))
+        ((num=num/60))
+        if((num>59));then
+            ((min=num%60))
+            ((num=num/60))
+            if((num>23));then
+                ((hour=num%24))
+                ((day=num/24))
+            else
+                ((hour=num))
+            fi
+        else
+            ((min=num))
+        fi
+    else
+        ((sec=num))
+    fi
+    echo "$day d  $hour h  $min m  $sec s"
+}
+
+
 if (( $# < 3 ))
 then
   # usage:
@@ -237,51 +265,57 @@ then
   #
   if [[ ${buildType} =~ [INM] ]]
   then
-     current_prefix=" -current.prefix ${buildType} "
+     if [[ "${buildType}" == "M" ]]
+     then
+      current_prefix=" -current.prefix M "
+     else
+      current_prefix=" -current.prefix I,N "
+     fi
   else
      echo -e "\n\tPROGRAM ERROR: build type did not equal expected value (M or N or I). Exiting."
      exit 1
   fi
 
   PERF_OUTFILE="${fromDir}/performance/perfAnalysis_${buildId}_${JOB_NAME}_${JOB_NUMBER}.txt"
-  echo "Beginning performance analysis. Results in $PERF_OUTFILE."
+  echo "Beginning performance analysis. Results in ${PERF_OUTFILE}."
   mkdir -p "${fromDir}/performance"
   RAW_DATE_START=$( date -u +%s )
 
   #echo -e "\n\tDEBUG RAW Date Start: ${RAW_DATE_START} \n"
-  echo -e "\n\tStart Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_START} ) \n" >$PERF_OUTFILE
-  echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = " >>$PERF_OUTFILE
-  echo "   dev script:   $0" >>$PERF_OUTFILE
-  echo "   buildRoot:    $buildRoot" >>$PERF_OUTFILE
-  echo "   BUILD_HOME:   ${BUILD_HOME}" >>$PERF_OUTFILE
-  echo "   pathToDL:     $pathToDL" >>$PERF_OUTFILE
-  echo "   siteDir:      $siteDir" >>$PERF_OUTFILE
-  echo "   fromDir:      $fromDir" >>$PERF_OUTFILE
-  echo "   devworkspace: $devworkspace" >>$PERF_OUTFILE
-  echo "   devArgs:      $devArgs" >>$PERF_OUTFILE
-  echo "   devJRE:       $devJRE" >>$PERF_OUTFILE
-  echo "   BUILDFILESTR: $BUILDFILESTR" >> $PERF_OUTFILE
-  echo "   JOB_NAME:     $JOB_NAME" >> $PERF_OUTFILE
-  echo "   JOB_NUMBER:   $JOB_NUMBER" >> $PERF_OUTFILE
-  echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS" >> $PERF_OUTFILE
-  echo "   current_prefix ${current_prefix}" >> $PERF_OUTFILE
-  echo >> $PERF_OUTFILE
+  echo -e "\n\tStart Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_START} ) \n" >${PERF_OUTFILE}
+  echo " = = Properties in updateTestResultsPages.sh: performance.ui.resultGenerator section  = = " >>${PERF_OUTFILE}
+  echo "   dev script:   $0" >>${PERF_OUTFILE}
+  echo "   buildRoot:    $buildRoot" >>${PERF_OUTFILE}
+  echo "   BUILD_HOME:   ${BUILD_HOME}" >>${PERF_OUTFILE}
+  echo "   pathToDL:     $pathToDL" >>${PERF_OUTFILE}
+  echo "   siteDir:      $siteDir" >>${PERF_OUTFILE}
+  echo "   fromDir:      $fromDir" >>${PERF_OUTFILE}
+  echo "   devworkspace: $devworkspace" >>${PERF_OUTFILE}
+  echo "   devArgs:      $devArgs" >>${PERF_OUTFILE}
+  echo "   devJRE:       $devJRE" >>${PERF_OUTFILE}
+  echo "   BUILDFILESTR: $BUILDFILESTR" >> ${PERF_OUTFILE}
+  echo "   JOB_NAME:     $JOB_NAME" >> ${PERF_OUTFILE}
+  echo "   JOB_NUMBER:   $JOB_NUMBER" >> ${PERF_OUTFILE}
+  echo "   XVFB_RUN_ARGS $XVFB_RUN_ARGS" >> ${PERF_OUTFILE}
+  echo "   current_prefix ${current_prefix}" >> ${PERF_OUTFILE}
+  echo >> ${PERF_OUTFILE}
 
   ${XVFB_RUN} ${XVFB_RUN_ARGS} ${ECLIPSE_EXE} --launcher.suppressErrors  -nosplash -consolelog -debug -data $devworkspace -application org.eclipse.test.performance.ui.resultGenerator -baseline R-4.4-201406061215 -current ${buildId} -jvm 8.0 -config linux.gtk.x86_64 -config.properties "linux.gtk.x86_64,SUSE Linux Enterprise Server 11 (x86_64)" -output $perfOutput -dataDir ${dataDir} ${current_prefix} -print -vm ${devJRE}  -vmargs ${vmargs}  >> ${PERF_OUTFILE}
   RC=$?
   if [[ $RC != 0 ]]
   then
-    echo "ERROR: eclipse returned non-zero return code while using xvfb to invoke performance.ui app, exiting with RC: $RC."  >> $PERF_OUTFILE
+    echo "ERROR: eclipse returned non-zero return code while using xvfb to invoke performance.ui app, exiting with RC: $RC."  >> ${PERF_OUTFILE}
     echo "ERROR: eclipse returned non-zero return code while using xvfb to invoke performance.ui app, exiting with RC: $RC."
     exit $RC
   fi
   RAW_DATE_END=$( date -u +%s )
 
   #echo -e "\n\tRAW Date End: ${RAW_DATE_END} \n"
-  echo -e "\n\tEnd Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_END} )"  >> $PERF_OUTFILE
+  echo -e "\n\tEnd Time: $( date  +%Y%m%d%H%M%S -d @${RAW_DATE_END} )"  >> ${PERF_OUTFILE}
 
-  ELAPSED_SECONDS=${RAW_DATE_END}-${RAW_DATE_START}
+  ELAPSED_SECONDS=$(( ${RAW_DATE_END} - ${RAW_DATE_START} ))
+  echo -e "\n\tDEBUG: RAW_DATE_END: ${RAW_DATE_END} RAW_DATE_START ${RAW_DATE_START} ELAPSED_SECONDS ${ELAPSED_SECONDS}" >> ${PERF_OUTFILE}
   ELAPSED_TIME=$( show_time ${ELAPSED_SECONDS} )
-  echo -e "\n\tElapsed Time: ${ELAPSED_TIME}"   >> $PERF_OUTFILE
+  echo -e "\n\tElapsed Time: ${ELAPSED_TIME}" >> ${PERF_OUTFILE}
 fi
 
