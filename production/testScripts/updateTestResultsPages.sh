@@ -160,7 +160,7 @@ unittestJobPattern="^.*-unit-.*$"
   BUILDTARGET=" "
 
   devworkspace="${fromDir}/workspace-updateTestResults"
-  devArgs="-Xmx256m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
+  devArgs="-Xmx512m -Dhudson=true -DbuildHome=${BUILD_HOME} -DeclipseStream=${eclipseStream} -DeclipseStreamMajor=${eclipseStreamMajor} -DbuildId=${buildId} -Djob=$JOB_NAME"
 
   echo
   echo " = = Properties in updateTestResultsPages.sh: generate section  = = "
@@ -199,7 +199,7 @@ then
   # We run the "performance analysis" tools only on "current" build, for jobs that contain -perf- (and do not contain -baseline)
 
   devworkspace="${fromDir}/workspace-installDerbyCore"
-  devArgs="-Xmx256m"
+  devArgs="-Xmx512m"
 
 
   echo "Collected a performance run result. Doing performance analysis for $JOB_NAME"
@@ -235,7 +235,7 @@ then
   echo " = = Now run performance.ui app = ="
   devworkspace="${fromDir}/workspace-updatePerfResults"
   eclipse_perf_dbloc_value=${eclipse_perf_dbloc_value:-//172.25.25.57:1527}
-  vmargs="-Xmx256m -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
+  vmargs="-Xmx512m -Declipse.perf.dbloc=${eclipse_perf_dbloc_value}"
   postingDirectory=$fromDir
   perfOutput=$postingDirectory/performance
   # assuming for now the intent is that 'data' is meant to accumulate in common location

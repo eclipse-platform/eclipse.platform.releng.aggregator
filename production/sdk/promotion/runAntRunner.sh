@@ -104,7 +104,7 @@ echo
 
 
 devworkspace="${BUILD_HOME}"/workspace-antRunner
-devArgs=-Xmx256m
+devArgs=-Xmx512m
 
 echo
 echo "   buildId:           ${buildId}"

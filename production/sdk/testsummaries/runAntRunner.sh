@@ -89,7 +89,7 @@ echo
 
 
 devworkspace="${BUILD_HOME}"/workspace-antRunner
-devArgs="-Xmx256m -DbuildId=${buildId}"
+devArgs="-Xmx512m -DbuildId=${buildId}"
 
 echo
 echo "   dev script:   $0"
