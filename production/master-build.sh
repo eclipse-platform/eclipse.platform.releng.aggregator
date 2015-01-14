@@ -286,7 +286,7 @@ else
   popd
 
 
-  $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+#  $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
   # if file exists, pom update failed
   if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
   then
