@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-export DROP_ID=M20140925-0400
+export DROP_ID=M20150114-1500
 
-#export DL_LABEL=4.4.1
-#export DL_LABEL_EQ=LunaSR1
-export DL_LABEL=4.4.1RC4a
-export DL_LABEL_EQ=LunaSR1RC4a
+#export DL_LABEL=4.4.2
+#export DL_LABEL_EQ=LunaSR2
+export DL_LABEL=4.4.2RC1
+export DL_LABEL_EQ=LunaSR2RC1
 
 # for I builds, stable and RCs go to in milestones
-export REPO_SITE_SEGMENT=4.4milestones
+$ for M builds, even RCs also go in <version>-M-builds
+export REPO_SITE_SEGMENT=4.4-M-builds
+#export REPO_SITE_SEGMENT=4.4milestones
 #export REPO_SITE_SEGMENT=4.4
 
 export HIDE_SITE=true
-#HIDE_SITE=false
+#export HIDE_SITE=false
 
 export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
@@ -27,7 +29,7 @@ export DL_TYPE=M
 # variables used on tagging aggregator for milestones (and RCs?)
 # Could probably compute this tag ... but for now easier to type it in each time.
 # Note we always use "S" at the beginning, for sorting consistency
-export NEW_TAG=S4_4_1_RC4a
+export NEW_TAG=S4_4_2_RC1
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
