@@ -177,7 +177,7 @@
           } else {
               windowY--;
           }
-          var targetY = forward ? Number.MAX_VALUE : Number.MIN_VALUE;
+          var targetY = forward ? Number.MAX_VALUE : 0;
           var target;
           var errs = document.getElementsByClassName("Error");
           for (var i = 0; i < errs.length; i++) {
@@ -203,6 +203,8 @@
           }
           if (target) {
             target.scrollIntoView();
+          } else {
+            window.scrollTo(0, forward ? document.body.scrollHeight : 0);
           }
 
           return false;
