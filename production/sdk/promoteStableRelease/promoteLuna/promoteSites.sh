@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-export DROP_ID=M20150114-1500
+export DROP_ID=M20150128-1000
 
 #export DL_LABEL=4.4.2
 #export DL_LABEL_EQ=LunaSR2
-export DL_LABEL=4.4.2RC1
-export DL_LABEL_EQ=LunaSR2RC1
+export DL_LABEL=4.4.2RC2
+export DL_LABEL_EQ=LunaSR2RC2
 
 # for I builds, stable and RCs go to in milestones
 $ for M builds, even RCs also go in <version>-M-builds

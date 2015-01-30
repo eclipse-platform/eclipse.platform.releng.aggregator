@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-export DROP_ID=I20141210-2000
+export DROP_ID=I20150129-1830
 
-export DL_LABEL=4.5M4
-export DL_LABEL_EQ=MarsM4
+export DL_LABEL=4.5M5
+export DL_LABEL_EQ=MarsM5
 
 #export DL_LABEL=4.5.1
 #export DL_LABEL_EQ=MarsSR1
