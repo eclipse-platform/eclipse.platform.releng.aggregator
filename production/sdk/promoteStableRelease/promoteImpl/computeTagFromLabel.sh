@@ -30,7 +30,7 @@ then
   then
     # if there is a match at all, should always be 6 groups (length of 7).
     #echo "Debug/trace output in $TRACE_LOG"
-    echo "DL_LABEL: " $buildLabel &>>$TRACE_LOG
+    echo "DL_LABEL:  $buildLabel" &>>$TRACE_LOG
     echo "Match array length: " ${#BASH_REMATCH[@]} &>>$TRACE_LOG
     echo "whole match: " $BASH_REMATCH &>>$TRACE_LOG
     echo "Group 1: " ${BASH_REMATCH[1]} &>>$TRACE_LOG

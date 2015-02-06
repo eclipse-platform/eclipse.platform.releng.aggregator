@@ -35,7 +35,7 @@ source ${PROMOTE_IMPL}/computeTagFromLabel.sh
 
 # variables used for tagging aggregator for milestones and RCs.
 # Note we always use "S" at the beginning, for sorting consistency
-export NEW_TAG=computeTagFromLabel $DL_LABEL
+export NEW_TAG=$( computeTagFromLabel "$DL_LABEL" )
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
