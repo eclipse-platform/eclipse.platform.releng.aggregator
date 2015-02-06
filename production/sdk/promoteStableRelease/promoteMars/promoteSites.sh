@@ -4,36 +4,43 @@ export DROP_ID=I20150129-1830
 
 export DL_LABEL=4.5M5
 export DL_LABEL_EQ=MarsM5
+#export DL_LABEL=4.5
+#export DL_LABEL_EQ=Mars
 
-#export DL_LABEL=4.5.1
-#export DL_LABEL_EQ=MarsSR1
-
-# for promoted I builds, both stable and RCs go to into milestones
+# for I builds, stable and RCs go to in milestones
+# for M builds, even RCs also go in <version>-M-builds
+#export REPO_SITE_SEGMENT=4.5-M-builds
 export REPO_SITE_SEGMENT=4.5milestones
-# only Releases go into "short named" repo site.
 #export REPO_SITE_SEGMENT=4.5
 
 export HIDE_SITE=true
 #HIDE_SITE=false
 
-export CL_SITE=${PWD}
-echo "CL_SITE: ${CL_SITE}"
-
 # These are what precedes main drop directory name
+# For Maintenance, it's always 'M' (from M-build) until it's 'R'.
+# for main line code, it's 'S' (from I-build) until it's 'R'
 export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 
-# variables used on tagging aggregator for milestones (and RCs?)
-# Could probably compute this tag ... but for now easier to type it in each time.
-export NEW_TAG=S4_5_0_M4
+# = = = = = = = Things past here seldome need to be updated
+
+export CL_SITE=${PWD}
+echo "CL_SITE: ${CL_SITE}"
+
+export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
+export TRACE_LOG=${CL_SITE}/traceLog.txt
+
+source ${PROMOTE_IMPL}/computeTagFromLabel.sh
+
+# variables used for tagging aggregator for milestones and RCs.
+# Note we always use "S" at the beginning, for sorting consistency
+export NEW_TAG=computeTagFromLabel $DL_LABEL
 # For now, we'll just use handy Equinox label for tag annotation, but could elaborate in future
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
 # should very seldom need to change, if ever.
 export AGGR_LOCATION="gitCache/eclipse.platform.releng.aggregator"
-
-export TRACE_LOG=${PWD}/traceLog.txt
 
 # Used in naming repo, etc
 export TRAIN_NAME=Mars
@@ -45,7 +52,6 @@ export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.5-I-builds
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
 
-export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 
 # Eclipse Drop Site (final segment)
@@ -72,7 +78,6 @@ printf "\t%s\n\n" "http://download.eclipse.org/eclipse/updates/${REPO_SITE_SEGME
 printf "\t%s\n" "Equinox specific downloads:" >> "${CL_SITE}/checklist.txt"
 printf "\t%s\n\n" "http://download.eclipse.org/equinox/drops/${EQUINOX_DL_DROP_DIR_SEGMENT}/" >> "${CL_SITE}/checklist.txt"
 
-
 # we do Equinox first, since it has to wait in que until
 # cronjob promotes it
 ${PROMOTE_IMPL}/promoteDropSiteEq.sh ${DROP_ID} ${DL_LABEL_EQ} ${HIDE_SITE}
@@ -90,7 +95,6 @@ then
   printf "\n\n\t%s\n\n" "ERROR: promoteDropSite.sh failed. Subsequent promotion cancelled."
   exit $rccode
 fi
-
 
 ${PROMOTE_IMPL}/promoteRepo.sh ${DROP_ID} ${DL_LABEL} ${REPO_SITE_SEGMENT} ${HIDE_SITE}
 rccode=$?
