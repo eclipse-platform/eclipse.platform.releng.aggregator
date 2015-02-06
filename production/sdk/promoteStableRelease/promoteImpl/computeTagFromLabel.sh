@@ -30,15 +30,15 @@ then
   then
     # if there is a match at all, should always be 6 groups (length of 7).
     #echo "Debug/trace output in $TRACE_LOG"
-    echo "DL_LABEL:  $buildLabel" &>>$TRACE_LOG
-    echo "Match array length: " ${#BASH_REMATCH[@]} &>>$TRACE_LOG
-    echo "whole match: " $BASH_REMATCH &>>$TRACE_LOG
-    echo "Group 1: " ${BASH_REMATCH[1]} &>>$TRACE_LOG
-    echo "Group 2: " ${BASH_REMATCH[2]} &>>$TRACE_LOG
-    echo "Group 3: " ${BASH_REMATCH[3]} &>>$TRACE_LOG
-    echo "Group 4: " ${BASH_REMATCH[4]} &>>$TRACE_LOG
-    echo "Group 5: " ${BASH_REMATCH[5]} &>>$TRACE_LOG
-    echo "Group 6: " ${BASH_REMATCH[6]} &>>$TRACE_LOG
+    echo "DL_LABEL:  $buildLabel" >>$TRACE_LOG
+    echo "Match array length: " ${#BASH_REMATCH[@]} >>$TRACE_LOG
+    echo "whole match: " $BASH_REMATCH >>$TRACE_LOG
+    echo "Group 1: " ${BASH_REMATCH[1]} >>$TRACE_LOG
+    echo "Group 2: " ${BASH_REMATCH[2]} >>$TRACE_LOG
+    echo "Group 3: " ${BASH_REMATCH[3]} >>$TRACE_LOG
+    echo "Group 4: " ${BASH_REMATCH[4]} >>$TRACE_LOG
+    echo "Group 5: " ${BASH_REMATCH[5]} >>$TRACE_LOG
+    echo "Group 6: " ${BASH_REMATCH[6]} >>$TRACE_LOG
   fi
   TAG="S${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
   if [[ -z "${BASH_REMATCH[5]}" ]]
@@ -49,12 +49,12 @@ then
   fi
   TAG=${TAG}_${SERVICE}_${BASH_REMATCH[6]}
 else
-  printf "\n\tWARNING: %s\n" "Build label, $buildLabel, did not match expected 'release' pattern, $PATTERN." &>>$TRACE_LOG
+  printf "\n\tWARNING: %s\n" "Build label, $buildLabel, did not match expected 'release' pattern, $PATTERN." >>$TRACE_LOG
   TAG=""
 fi
 if [[ $DEBUG == "true" ]]
 then
-  echo $TAG &>>$TRACE_LOG
+  echo $TAG >>$TRACE_LOG
 fi
 echo $TAG
 
