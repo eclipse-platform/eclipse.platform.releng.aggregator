@@ -24,31 +24,51 @@ DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 cd ${BUILDMACHINE_BASE_DL}
 cp /shared/eclipse/sdk/renameBuild.sh ${PWD}
 
-printf "\n\n\t%s\n" "Promoting Eclipse site."
-
-printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID" "${DROP_ID}ORIG"
-rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
-
-printf "\n\t%s\n" "Doing rename of original."
-
-# if DL_DROP_ID already exists, it is from a previous run we are re-doing, do,
-# we'll remove first, to make sure it's cleaning re-done.
-if [[ -d ${DL_DROP_ID} ]]
+if [[ ! "${INDEX_ONLY}" == "true" ]]
 then
-  echo -e "\n\tWARNING: found and will remove existing, previous, version of ${DL_DROP_ID}"
-  rm -fr ${DL_DROP_ID}
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo -e "/n/tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
-    exit 1
-   fi
+  printf "\n\n\t%s\n" "Promoting Eclipse site."
+else
+  printf "\n\n\t%s\n" "Promoting Eclipse Index site."
 fi
 
+if [[ ! "${INDEX_ONLY}" == "true" ]]
+then
+  printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID" "${DROP_ID}ORIG"
+  rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
+
+  printf "\n\t%s\n" "Doing rename of original."
+
+  # if DL_DROP_ID already exists, it is from a previous run we are re-doing, do,
+  # we'll remove first, to make sure it's cleaning re-done.
+  if [[ -d ${DL_DROP_ID} ]]
+  then
+    echo -e "\n\tWARNING: found and will remove existing, previous, version of ${DL_DROP_ID}"
+    rm -fr ${DL_DROP_ID}
+    RC=$?
+    if [[ $RC != 0 ]]
+    then
+      echo -e "/n/tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
+      exit 1
+    fi
+  fi
+else
+  # just copy over what's there.
+  # TODO: earlier, we could check to be sure the directory we expect really does exist.
+  printf "\n\t%s\n" "Making copy of original on top of previous renamed version. "
+
+  rsync -ra ${DROP_ID}/ ${DL_DROP_ID}/
+
+
+fi
+
+# We still need to run "renamed" just to pick up "renames" in test results.
 ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
 
-printf "\n\t%s\n" "Moving backup copy back to original."
-mv ${DROP_ID}ORIG ${DROP_ID}
+if [[ ! "${INDEX_ONLY}" == "true" ]]
+then
+  printf "\n\t%s\n" "Moving backup copy back to original."
+  mv ${DROP_ID}ORIG ${DROP_ID}
+fi
 
 rm renameBuild.sh
 
