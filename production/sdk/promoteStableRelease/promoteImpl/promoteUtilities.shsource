@@ -42,7 +42,11 @@ function findEclipseExe ()
       return 1
     fi
 
-    export TMP_DIR=/shared/eclipse/TMP_DIR
+    # BUILD_ROOT should exist, by now, and have some value such as 
+    # export BUILD_ROOT=/shared/eclipse/builds/4M
+    # but, in case not, we'll assume a more generic location.
+    export BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse}
+    export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp} 
     mkdir -p "${TMP_DIR}"
     # assume suitable ant in on path
     ant -f ${EBuilder}/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=${basebuilderParent}
