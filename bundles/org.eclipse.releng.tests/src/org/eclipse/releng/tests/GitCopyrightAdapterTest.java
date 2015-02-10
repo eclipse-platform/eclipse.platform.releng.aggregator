@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Tomasz Zarna and others.
+ * Copyright (c) 2013, 2015 Tomasz Zarna and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,13 +74,15 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
 	public void testLastModifiedYear() throws Exception {
 		final Git git = new Git(db);
-		git.add().addFilepattern(PROJECT_NAME + "/" + FILE1_NAME).call();
-		final PersonIdent committer2011 = new PersonIdent(committer,
-				getDateForYear(2011));
-		git.commit().setMessage("old commit").setCommitter(committer2011)
-				.call();
-		git.add().addFilepattern(PROJECT_NAME + "/" + FILE2_NAME).call();
-		git.commit().setMessage("new commit").call();
+		try {
+			git.add().addFilepattern(PROJECT_NAME + "/" + FILE1_NAME).call();
+			final PersonIdent committer2011 = new PersonIdent(committer, getDateForYear(2011));
+			git.commit().setMessage("old commit").setCommitter(committer2011).call();
+			git.add().addFilepattern(PROJECT_NAME + "/" + FILE2_NAME).call();
+			git.commit().setMessage("new commit").call();
+		} finally {
+			git.close();
+		}
 
 		final GitCopyrightAdapter adapter = new GitCopyrightAdapter(
 				new IResource[] { project });
@@ -93,9 +95,13 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
 	public void testCopyrightUpdateComment() throws Exception {
 		final Git git = new Git(db);
-		git.add().addFilepattern(PROJECT_NAME + "/" + FILE1_NAME).call();
-		git.commit().setMessage("copyright update").call();
+		try {
+			git.add().addFilepattern(PROJECT_NAME + "/" + FILE1_NAME).call();
+			git.commit().setMessage("copyright update").call();
 
+		} finally {
+			git.close();
+		}
 		final GitCopyrightAdapter adapter = new GitCopyrightAdapter(
 				new IResource[] { project });
 		adapter.initialize(NULL_MONITOR);
