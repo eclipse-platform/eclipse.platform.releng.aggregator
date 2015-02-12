@@ -16,8 +16,8 @@ export DROP_ID=M20150204-1700
 
 #export DL_LABEL=4.4.2
 #export DL_LABEL_EQ=LunaSR2
-export DL_LABEL=4.4.2RC3
-export DL_LABEL_EQ=LunaSR2RC3
+export DL_LABEL=4.4.2RC4
+export DL_LABEL_EQ=LunaSR2RC4
 
 # for I builds, stable and RCs go to in milestones
 # for M builds, even RCs also go in <version>-M-builds
