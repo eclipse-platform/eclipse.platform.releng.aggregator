@@ -288,14 +288,18 @@ while ($anEntry = $aDirectory->read()) {
         $day = substr($timePart, 6, 2);
         $hour = substr($timePart,8,2);
         $minute = substr($timePart,10,2);
-        // special logic adds 1 second if build id contains "RC" ... this was
-        // added for the M build case, where there is an M build and and RC version that
-        // have same time stamp. One second should not effect desplayed values.
-        $isRC = strpos($anEntry, "RC");
-        if ($isRC === false) {
+        // special logic adds n seconds if build id contains "RCn". Originally added for the "M-build case" this was
+        // where there is an M build and and RC version that
+        // have same time stamp. One second will not effect the displayed value.
+        // RCn logic was added once we had cases where the RC timestamp did not differ (that is, a previous RC had no changes, 
+        // but the build was copied and renamed, say from "RC3" to "RC4".
+        $pattern="/.*RC([1234]).*/";
+        $matches=array();
+        $isRC = preg_match($pattern, $anEntry, $matches);
+        if ($isRC === false || $isRC == 0) {
           $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
         } else {
-          $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+          $timeStamp = mktime($hour, $minute, $matches[1], $month, $day, $year);
         }
         $buckets[$parts[0]][$timeStamp] = $anEntry;
         $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
@@ -316,11 +320,13 @@ while ($anEntry = $aDirectory->read()) {
         $day = substr($datePart, 6, 2);
         $hour = substr($timePart,0,2);
         $minute = substr($timePart,2,2);
-        $isRC = strpos($anEntry, "RC");
-        if ($isRC === false) {
+        $pattern="/.*RC([1234]).*/";
+        $matches=array();
+        $isRC = preg_match($pattern, $anEntry, $matches);
+        if ($isRC === false || $isRC == 0) {
           $timeStamp = mktime($hour, $minute, 0, $month, $day, $year);
         } else {
-          $timeStamp = mktime($hour, $minute, 1, $month, $day, $year);
+          $timeStamp = mktime($hour, $minute, $matches[1], $month, $day, $year);
         }
         $buckets[$buildType[0]][$timeStamp] = $anEntry;
         $timeStamps[$anEntry] = date("D, j M Y -- H:i (O)", $timeStamp);
