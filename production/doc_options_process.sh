@@ -57,7 +57,6 @@ convertOptions () {
   ;../org.eclipse.equinox.p2.metadata/src
   ;../org.eclipse.equinox.p2.metadata.repository/src
   ;../org.eclipse.equinox.p2.operations/src
-  ;../org.eclipse.equinox.p2.ql/src
   ;../org.eclipse.equinox.p2.repository/src
   ;../org.eclipse.equinox.p2.touchpoint.eclipse/src
   ;../org.eclipse.equinox.p2.ui/src
