@@ -109,14 +109,23 @@
 		</copy>
 	</target>
 
-	<target name="getJavadocPath">
-		<available file="${java.home}/../bin/javadoc.exe" property="javadoc" value="${java.home}/../bin/javadoc.exe"/>
-		<available file="${java.home}/../bin/javadoc" property="javadoc" value="${java.home}/../bin/javadoc" />
+	<target name="getJavadocPath" depends="getEclipseJavadocPath" unless="javadocExecutable">
+		<!-- WARNING: Ant bug: The <available> task overrides an already set property! https://bugs.eclipse.org/431236#c12 -->
+		<available file="${java.home}/../bin/javadoc.exe" property="javadocExecutable" value="${java.home}/../bin/javadoc.exe"/>
+		<available file="${java.home}/../bin/javadoc" property="javadocExecutable" value="${java.home}/../bin/javadoc" />
+	</target>
+	
+	<target name="getEclipseJavadocPath" unless="javadocExecutable">
+		<!-- Use custom javadoc executable if ${eclipse.javadoc} is set -->
+		<condition property="javadocExecutable" value="${eclipse.javadoc}">
+		  <and>
+		     <isset property="eclipse.javadoc"/>
+		     <available file="${eclipse.javadoc}" />
+		  </and>
+		</condition>
 	</target>
 
-	<target name="generateJavadoc" depends="getJavadocPath">
-		<property name="javadoc16" value="${javadoc}" />
-
+	<target name="generateJavadoc" depends="getJavadocPath" if="javadocExecutable">
 		<!-- replace "\n;" with platform-dependent list entry delimiter -->
 		<property name="optionsFile" value="platformOptions.tmp.txt" />
 		<copy file="platformOptions.txt" tofile="${optionsFile}" overwrite="true">
@@ -149,7 +158,8 @@
 		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
 
 <echo>org.eclipse.platform.doc.isv/buildDoc.xml - generateJavadoc:
-${basedir}/${replaceFile} before _* expansion:</echo>
+      Using javadocExecutable: ${javadocExecutable}</echo>
+<echo>${basedir}/${replaceFile} before _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
 
 			<!-- strip away leading path -->
@@ -174,7 +184,7 @@ ${basedir}/${replaceFile} before _* expansion:</echo>
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
 
-		<exec dir="." executable="${javadoc16}" output="doc.bin.log">
+		<exec dir="." executable="${javadocExecutable}" output="doc.bin.log">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
 		</exec>
 		
