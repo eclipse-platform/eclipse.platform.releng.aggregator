@@ -212,16 +212,21 @@ public class Performance {
         PerformanceMeterFactory instance = null;
         if (className != null && className.length() > 0) {
             try {
-                int separator = className.indexOf(':');
-                Bundle bundle = null;
-                if (separator == -1) {
-                    bundle = PerformanceTestPlugin.getDefault().getBundle();
+                Class c = null;
+                if (Platform.isRunning()) {
+                    int separator = className.indexOf(':');
+                    Bundle bundle = null;
+                    if (separator == -1) {
+                        bundle = PerformanceTestPlugin.getDefault().getBundle();
+                    } else {
+                        String bundleName = className.substring(0, separator);
+                        className = className.substring(separator + 1);
+                        bundle = Platform.getBundle(bundleName);
+                    }
+                    c = bundle.loadClass(className);
                 } else {
-                    String bundleName = className.substring(0, separator);
-                    className = className.substring(separator + 1);
-                    bundle = Platform.getBundle(bundleName);
+                    c = Class.forName(className);
                 }
-                Class c = bundle.loadClass(className);
                 instance = (PerformanceMeterFactory) c.newInstance();
             }
             catch (ClassNotFoundException e) {
