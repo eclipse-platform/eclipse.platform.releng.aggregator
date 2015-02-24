@@ -14,16 +14,16 @@
 
 export DROP_ID=M20150204-1700
 
-#export DL_LABEL=4.4.2
-#export DL_LABEL_EQ=LunaSR2
-export DL_LABEL=4.4.2RC4
-export DL_LABEL_EQ=LunaSR2RC4
+export DL_LABEL=4.4.2
+export DL_LABEL_EQ=LunaSR2
+#export DL_LABEL=4.4.2RC4
+#export DL_LABEL_EQ=LunaSR2RC4
 
 # for I builds, stable and RCs go to in milestones
 # for M builds, even RCs also go in <version>-M-builds
-export REPO_SITE_SEGMENT=4.4-M-builds
+#export REPO_SITE_SEGMENT=4.4-M-builds
 #export REPO_SITE_SEGMENT=4.4milestones
-#export REPO_SITE_SEGMENT=4.4
+export REPO_SITE_SEGMENT=4.4
 
 if [[ "$INDEX_ONLY" == "true" ]]
 then
@@ -36,8 +36,8 @@ fi
 # For Maintenance, it's always 'M' (from M-build) until it's 'R'.
 # for main line code, it's 'S' (from I-build) until it's 'R'
 #export DL_TYPE=S
-#export DL_TYPE=R
-export DL_TYPE=M
+export DL_TYPE=R
+#export DL_TYPE=M
 
 # = = = = = = = Things past here seldom need to be updated
 
