@@ -19,25 +19,25 @@ Console output logs <?php echo "$buildName"; ?> </FONT></B></TD></TR></TABLE><P>
 Detailed performance data grouped by scenario prefix</FONT></B></TD></TR></TABLE>
 
 <?php
-$aDirectory = dir("I-scenarios");
-$index=0;
+  $aDirectory = dir("I-scenarios");
+  $index=0;
 
-while ($aScenario = $aDirectory->read()) {
-  if ($aScenario!= "." && $aScenario!= "..") {
-    $parts=explode(".test","$aScenario");
-    $packageprefixes[$index]=$parts[0];
-    $index++;
+  while ($aScenario = $aDirectory->read()) {
+    if ($aScenario!= "." && $aScenario!= "..") {
+      $parts=explode(".test","$aScenario");
+      $packageprefixes[$index]=$parts[0];
+      $index++;
+    }
   }
-}
 $aDirectory->close();
 
-$result=array_unique($packageprefixes);
+  $result=array_unique($packageprefixes);
 
-sort($result);
+  sort($result);
 
-for ($counter=0;$counter<count($result);$counter++){
-  echo "<A HREF=\"displayScenarios.php?I&$result[$counter]\">$result[$counter]*</A><br>";
-}
+  for ($counter=0;$counter<count($result);$counter++){
+     echo "<A HREF=\"displayScenarios.php?I&$result[$counter]\">$result[$counter]*</A><br>";
+  }
 ?>
 
 
