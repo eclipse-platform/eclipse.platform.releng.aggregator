@@ -19,12 +19,15 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -36,16 +39,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 import org.osgi.framework.Bundle;
-import org.xml.sax.SAXException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Platform;
-
+import org.xml.sax.SAXException;
 
 public class BuildTests extends TestCase {
 
@@ -56,13 +56,11 @@ public class BuildTests extends TestCase {
 
 	private static FileTool.IZipFilter getTrueFilter() {
 		return new FileTool.IZipFilter() {
-			public boolean shouldExtract(String fullEntryName,
-					String entryName, int depth) {
+			public boolean shouldExtract(String fullEntryName, String entryName, int depth) {
 				return true;
 			}
 
-			public boolean shouldUnzip(String fullEntryName, String entryName,
-					int depth) {
+			public boolean shouldUnzip(String fullEntryName, String entryName, int depth) {
 				return true;
 			}
 		};
@@ -80,8 +78,7 @@ public class BuildTests extends TestCase {
 		BufferedReader aReader = null;
 
 		try {
-			aReader = new BufferedReader(new InputStreamReader(
-					new FileInputStream(string)));
+			aReader = new BufferedReader(new InputStreamReader(new FileInputStream(string)));
 			String aLine = aReader.readLine();
 			while (aLine != null) {
 				int aNumber = parseLine(aLine);
@@ -115,8 +112,7 @@ public class BuildTests extends TestCase {
 			// test that chkpii is on path by printing chkpii help information
 			Runtime aRuntime = Runtime.getRuntime();
 			Process aProcess = aRuntime.exec(getExec() + " /?");
-			BufferedReader aBufferedReader = new BufferedReader(
-					new InputStreamReader(aProcess.getInputStream()));
+			BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
 			while (aBufferedReader.readLine() != null) {
 			}
 			aProcess.waitFor();
@@ -142,20 +138,17 @@ public class BuildTests extends TestCase {
 			if (zipFile.equals("")) {
 				FileTool.unzip(getTrueFilter(), new File(sniffFolder));
 			} else {
-				FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(
-						sniffFolder));
+				FileTool.unzip(getTrueFilter(), new ZipFile(zipFile), new File(sniffFolder));
 			}
 		} catch (IOException e) {
-			fail(zipFile + ": " + sniffFolder + ": "
-					+ "IOException unzipping Eclipse for chkpii");
+			fail(zipFile + ": " + sniffFolder + ": " + "IOException unzipping Eclipse for chkpii");
 		}
 
 		boolean result1 = testChkpii(HTML);
 		boolean result2 = testChkpii(XML);
 		boolean result3 = testChkpii(PROPERTIES);
-		assertTrue(
-				"Translation errors in files.  See the chkpii logs linked from the test results page for details.",
-				(result1 && result2 && result3));
+		assertTrue("Translation errors in files.  See the chkpii logs linked from the test results page for details.", (result1
+				&& result2 && result3));
 	}
 
 	private boolean testChkpii(int type) {
@@ -163,8 +156,7 @@ public class BuildTests extends TestCase {
 		String chkpiiString = getChkpiiString(type);
 		try {
 			Process aProcess = aRuntime.exec(chkpiiString);
-			BufferedReader aBufferedReader = new BufferedReader(
-					new InputStreamReader(aProcess.getInputStream()));
+			BufferedReader aBufferedReader = new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
 			while (aBufferedReader.readLine() != null) {
 			}
 			aProcess.waitFor();
@@ -184,8 +176,7 @@ public class BuildTests extends TestCase {
 	 * @return String
 	 */
 	private String getChkpiiString(int type) {
-		return getExec() + " " + getFilesToTest(type) + " -E -O "
-				+ getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X "
+		return getExec() + " " + getFilesToTest(type) + " -E -O " + getOutputFile(type) + " -XM @" + getExcludeErrors() + " -X "
 				+ getExcludeFile() + " -S /jsq /tex";
 	}
 
@@ -197,20 +188,17 @@ public class BuildTests extends TestCase {
 	private String locateEclipseZip() {
 
 		// String to use when running as an automated test.
-		String installDir = Platform.getInstallLocation().getURL().getPath()
-				+ ".." + File.separator + "..";
+		String installDir = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + "..";
 
 		// String to use when running in Eclipse
 		// String installDir = BootLoader.getInstallURL().getPath() + "..";
 		File aFile = new File(installDir);
-		
 
 		File[] files = aFile.listFiles();
 		for (int i = 0; i < files.length; i++) {
 			File file = files[i];
 			String fileName = file.getName();
-			if (fileName.startsWith("eclipse-SDK-")
-					&& fileName.endsWith(".zip")) {
+			if (fileName.startsWith("eclipse-SDK-") && fileName.endsWith(".zip")) {
 				return file.getPath();
 			}
 		}
@@ -355,16 +343,13 @@ public class BuildTests extends TestCase {
 
 	}
 
-	public static final String[] REQUIRED_FEATURE_FILES = { "epl-v10.html",
-			"feature.properties", "feature.xml", "license.html" };
+	public static final String[] REQUIRED_FEATURE_FILES = { "epl-v10.html", "feature.properties", "feature.xml", "license.html" };
 	public static final String REQUIRED_FEATURE_SUFFIX = "";
 
-	public static final String[] REQUIRED_PLUGIN_FILES = { "about.html",
-			"plugin.properties", "plugin.xml" };
+	public static final String[] REQUIRED_PLUGIN_FILES = { "about.html", "plugin.properties", "plugin.xml" };
 	public static final String REQUIRED_PLUGIN_SUFFIX = ".jar";
 
-	public static final String[] REQUIRED_FEATURE_PLUGIN_FILES = {
-			"about.html", "about.ini", "about.mappings", "about.properties",
+	public static final String[] REQUIRED_FEATURE_PLUGIN_FILES = { "about.html", "about.ini", "about.mappings", "about.properties",
 			"plugin.properties", "plugin.xml" };
 	public static final String REQUIRED_FEATURE_PLUGIN_SUFFIX = ".gif";
 
@@ -381,8 +366,7 @@ public class BuildTests extends TestCase {
 	public static final String REQUIRED_BUNDLE_MANIFEST = "MANIFEST.MF";
 	public static final String REQUIRED_BUNDLE_SUFFIX = ".jar";
 
-	public static final String[] SUFFIX_EXEMPT_LIST = { "org.eclipse.swt",
-			"org.apache.ant" };
+	public static final String[] SUFFIX_EXEMPT_LIST = { "org.eclipse.swt", "org.apache.ant" };
 
 	public static final int PLUGIN_COUNT = 84; // - 20; // Note this number
 	// must include non-shipping
@@ -406,7 +390,10 @@ public class BuildTests extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		// Automated Test
-		logFileName= Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results" + File.separator + "chkpii"; // A tad bogus but this is where the build wants to copy the results from!
+		logFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results"
+				+ File.separator + "chkpii"; // A tad bogus but this is where
+												// the build wants to copy the
+												// results from!
 
 		// Runtime Workbench - TODO Put me back to Automated status
 		// logFileName = "d:\\results";
@@ -428,8 +415,7 @@ public class BuildTests extends TestCase {
 		File[] features = featureDir.listFiles();
 		for (int i = 0; i < features.length; i++) {
 			File aFeature = features[i];
-			if (!testDirectory(aFeature, REQUIRED_FEATURE_FILES,
-					REQUIRED_FEATURE_SUFFIX)) {
+			if (!testDirectory(aFeature, REQUIRED_FEATURE_FILES, REQUIRED_FEATURE_SUFFIX)) {
 				result.add(aFeature.getPath());
 			}
 
@@ -444,8 +430,7 @@ public class BuildTests extends TestCase {
 				aString = aString + element + "; ";
 			}
 		}
-		assertTrue("Feature directory missing required files: " + aString,
-				result.size() == 0);
+		assertTrue("Feature directory missing required files: " + aString, result.size() == 0);
 	}
 
 	public void testPluginFiles() {
@@ -471,8 +456,7 @@ public class BuildTests extends TestCase {
 				aString = aString + element + "; ";
 			}
 		}
-		assertTrue("Plugin directory missing required files: " + aString,
-				result.size() == 0);
+		assertTrue("Plugin directory missing required files: " + aString, result.size() == 0);
 	}
 
 	private boolean testPluginFile(File aPlugin) {
@@ -483,14 +467,12 @@ public class BuildTests extends TestCase {
 		}
 
 		// Are we a feature plugin?
-		if (testDirectory(aPlugin, REQUIRED_FEATURE_PLUGIN_FILES,
-				REQUIRED_FEATURE_PLUGIN_SUFFIX)) {
+		if (testDirectory(aPlugin, REQUIRED_FEATURE_PLUGIN_FILES, REQUIRED_FEATURE_PLUGIN_SUFFIX)) {
 			return true;
 		}
 
 		// Are we a regular plugin
-		if (testDirectory(aPlugin, REQUIRED_PLUGIN_FILES,
-				REQUIRED_PLUGIN_SUFFIX)) {
+		if (testDirectory(aPlugin, REQUIRED_PLUGIN_FILES, REQUIRED_PLUGIN_SUFFIX)) {
 			return true;
 		}
 
@@ -500,22 +482,18 @@ public class BuildTests extends TestCase {
 		}
 
 		// Are we a fragment
-		if ((testDirectory(aPlugin, REQUIRED_FRAGMENT_FILES,
-				REQUIRED_FRAGMENT_SUFFIX))
-				|| (testBundleDirectory(aPlugin, REQUIRED_BUNDLE_FILES,
-						REQUIRED_BUNDLE_MANIFEST, REQUIRED_FRAGMENT_SUFFIX))) {
+		if ((testDirectory(aPlugin, REQUIRED_FRAGMENT_FILES, REQUIRED_FRAGMENT_SUFFIX))
+				|| (testBundleDirectory(aPlugin, REQUIRED_BUNDLE_FILES, REQUIRED_BUNDLE_MANIFEST, REQUIRED_FRAGMENT_SUFFIX))) {
 			return true;
 		}
 
 		// Are we an swt fragment
-		if (testDirectory(aPlugin, REQUIRED_SWT_FRAGMENT_FILES,
-				REQUIRED_SWT_FRAGMENT_SUFFIX)) {
+		if (testDirectory(aPlugin, REQUIRED_SWT_FRAGMENT_FILES, REQUIRED_SWT_FRAGMENT_SUFFIX)) {
 			return true;
 		}
 
 		// Are we a bundle?
-		if (testBundleDirectory(aPlugin, REQUIRED_BUNDLE_FILES,
-				REQUIRED_BUNDLE_MANIFEST, REQUIRED_BUNDLE_SUFFIX)) {
+		if (testBundleDirectory(aPlugin, REQUIRED_BUNDLE_FILES, REQUIRED_BUNDLE_MANIFEST, REQUIRED_BUNDLE_SUFFIX)) {
 			return true;
 		}
 
@@ -544,13 +522,11 @@ public class BuildTests extends TestCase {
 		return true;
 	}
 
-	private boolean testDirectory(File aDirectory, String[] requiredFiles,
-			String requiredSuffix) {
+	private boolean testDirectory(File aDirectory, String[] requiredFiles, String requiredSuffix) {
 		if (aDirectory.getName().endsWith(".jar")) {
 			return testPluginJar(aDirectory, requiredFiles);
 		} else {
-			if (!Arrays.asList(aDirectory.list()).containsAll(
-					Arrays.asList(requiredFiles))) {
+			if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
 				return false;
 			}
 
@@ -561,24 +537,20 @@ public class BuildTests extends TestCase {
 
 			String plainName = aDirectory.getName().substring(0, index);
 
-			if (requiredSuffix.equals("")
-					|| Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+			if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
 				return true;
-			} else if (aDirectory
-					.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
+			} else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
 				return false;
 			}
 		}
 		return true;
 	}
 
-	private boolean testBundleDirectory(File aDirectory,
-			String[] requiredFiles, String manifestFile, String requiredSuffix) {
+	private boolean testBundleDirectory(File aDirectory, String[] requiredFiles, String manifestFile, String requiredSuffix) {
 		if (aDirectory.getName().endsWith(".jar")) {
 			return testPluginJar(aDirectory, requiredFiles);
 		} else {
-			if (!Arrays.asList(aDirectory.list()).containsAll(
-					Arrays.asList(requiredFiles))) {
+			if (!Arrays.asList(aDirectory.list()).containsAll(Arrays.asList(requiredFiles))) {
 				return false;
 			}
 
@@ -607,11 +579,9 @@ public class BuildTests extends TestCase {
 				return false;
 			}
 
-			if (requiredSuffix.equals("")
-					|| Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
+			if (requiredSuffix.equals("") || Arrays.asList(SUFFIX_EXEMPT_LIST).contains(plainName)) {
 				return true;
-			} else if (aDirectory
-					.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
+			} else if (aDirectory.listFiles(new FileSuffixFilter(requiredSuffix)).length == 0) {
 				return false;
 			}
 		}
@@ -638,8 +608,7 @@ public class BuildTests extends TestCase {
 
 		for (int i = 0; i < sourceDirs.length; i++) {
 			File aSourceDir = sourceDirs[i];
-			if (!testDirectory(aSourceDir, REQUIRED_SOURCE_FILES,
-					REQUIRED_SOURCE_SUFFIX)) {
+			if (!testDirectory(aSourceDir, REQUIRED_SOURCE_FILES, REQUIRED_SOURCE_SUFFIX)) {
 				return false;
 			}
 		}
@@ -647,7 +616,7 @@ public class BuildTests extends TestCase {
 	}
 
 	public void testJavadocLogs() throws Exception {
-		String javadocUrls= System.getProperty("RELENGTEST.JAVADOC.URLS");
+		String javadocUrls = System.getProperty("RELENGTEST.JAVADOC.URLS");
 		// Skip this test if there are no logs to check
 		if (javadocUrls == null) {
 			System.err.println("WARNING: no javadoc logs to test, since RELENGTEST.JAVADOC.URLS property was not set");
@@ -656,22 +625,101 @@ public class BuildTests extends TestCase {
 			System.err.println("RELENGTEST.JAVADOC.URLS: " + javadocUrls);
 		}
 
-		String[] urls= javadocUrls.split(",");
-		URL[] javadocLogs= new URL[urls.length];
-		for (int i= 0; i < urls.length; i++) {
-			javadocLogs[i]= new URL(urls[i]);
+		String[] urls = javadocUrls.split(",");
+		URL[] javadocLogs = new URL[urls.length];
+		for (int i = 0; i < urls.length; i++) {
+			javadocLogs[i] = new URL(urls[i]);
 			System.err.println("javadocLogs[" + i + "]: " + javadocLogs[i]);
 		}
 
-		JavadocLog javadocLog= new JavadocLog(javadocLogs);
-		String message= "javadoc errors and/or warnings in: \n";
-		boolean problemLogsExist= javadocLog.logs.size() > 0;
+		JavadocLog javadocLog = new JavadocLog(javadocLogs);
+		String message = "javadoc errors and/or warnings in: \n";
+		boolean problemLogsExist = javadocLog.logs.size() > 0;
 		if (problemLogsExist) {
-			for (int i= 0; i < javadocLog.logs.size(); i++)
-				message= message.concat(javadocLog.logs.get(i).toString() + "\n");
+			for (int i = 0; i < javadocLog.logs.size(); i++)
+				message = message.concat(javadocLog.logs.get(i).toString() + "\n");
 		}
-		message= message.concat("See the javadoc logs linked from the test results page for details");
-			assertTrue(message, !problemLogsExist);
+		message = message.concat("See the javadoc logs linked from the test results page for details");
+		assertTrue(message, !problemLogsExist);
+	}
+
+	public void testDirtyLogSize() throws Exception {
+		final boolean DEBUG_DIRTY_TEST = true;
+		// MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
+		// "dirReport" always contains some information
+		// in response to the "git status" command. The goal, here, is to
+		// "hard code" previously observed values, to make sure
+		// there is no regressions, which would be implied by a report larger
+		// than those that had been produced before.
+		// The "size" should be expressed in exact bytes as "increases" in
+		// size might be small ... if just a file or two.
+		long MAX_ALLOWED_BYTES = 37179;
+		String buildId = System.getProperty("buildId");
+		assertNotNull("buildId property must be specified for testDirtyLogSize test", buildId);
+		String urlOfFile = "http://download.eclipse.org/eclipse/downloads/drops4/" + buildId + "/buildlogs/dirtReport.txt";
+		URL logURL = new URL(urlOfFile);
+
+		URLConnection urlConnection = logURL.openConnection();
+		// urlConnection.connect();
+		long nBytes = urlConnection.getContentLengthLong();
+		if (DEBUG_DIRTY_TEST) {
+			System.out.println("Debug info for testDirtyLogSize");
+			System.out.println("Debug: nBytes: " + nBytes);
+			printHeaders(urlConnection);
+		}
+		// if find "response does not contain length, on a regular basis, for
+		// some servers, will have to read contents.
+		assertTrue("Either file (url) does not exist, or HTTP response does not contain content length. urlOfFile: " + urlOfFile,
+				(!(-1 == nBytes)));
+		assertTrue("dirtReport file has increased in size, indicating a regression. See " + urlOfFile, nBytes <= MAX_ALLOWED_BYTES);
+		if (MAX_ALLOWED_BYTES > nBytes) {
+			System.out.println("WARNING: MAX_ALLOWED_BYTES was larger than bytes found, by " + (MAX_ALLOWED_BYTES - nBytes)
+					+ ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
+		}
+	}
+
+	private void printHeaders(URLConnection urlConnection) {
+		System.out.println("Debug: Headers for urlConnection to " + urlConnection.getURL());
+		Map<String, List<String>> allFields = urlConnection.getHeaderFields();
+		Set<String> keys = allFields.keySet();
+		for (String key : keys) {
+			List<String> values = allFields.get(key);
+			for (String value : values) {
+				System.out.printf("Debug: %-20s %-30s %n", "key: " + key, "value: " + value);
+			}
+		}
+	}
+	public void testComparatorLogSize() throws Exception {
+		final boolean DEBUG_TEST = true;
+		// MAX_ALLOWED_BYTES will never be 'zero', even if no unexpected comparator warnings, because the
+		// report always contains some information, such as identifying which build it was for.
+		// The goal, here, is to
+		// "hard code" nominal values, to make sure
+		// there is no regressions, which would be implied by a report larger
+		// than that nominal value.
+		long MAX_ALLOWED_BYTES = 210;
+		String buildId = System.getProperty("buildId");
+		assertNotNull("buildId property must be specified for testDirtyLogSize test", buildId);
+		String urlOfFile = "http://download.eclipse.org/eclipse/downloads/drops4/" + buildId + "/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt";
+		URL logURL = new URL(urlOfFile);
+
+		URLConnection urlConnection = logURL.openConnection();
+		// urlConnection.connect();
+		long nBytes = urlConnection.getContentLengthLong();
+		if (DEBUG_TEST) {
+			System.out.println("Debug info for testComparatorLogSize");
+			System.out.println("Debug: nBytes: " + nBytes);
+			printHeaders(urlConnection);
+		}
+		// if find "response does not contain length, on a regular basis, for
+		// some servers, will have to read contents.
+		assertTrue("Either file (url) does not exist, or HTTP response does not contain content length. urlOfFile: " + urlOfFile,
+				(!(-1 == nBytes)));
+		assertTrue("dirtReport file has increased in size, indicating a regression. See " + urlOfFile, nBytes <= MAX_ALLOWED_BYTES);
+		if (MAX_ALLOWED_BYTES > (nBytes + 20)) {
+			System.out.println("WARNING: MAX_ALLOWED_BYTES was larger than bytes found, by " + (MAX_ALLOWED_BYTES - nBytes)
+					+ ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
+		}
 	}
 
 	private class JavadocLog {
@@ -689,16 +737,13 @@ public class BuildTests extends TestCase {
 			BufferedReader in = null;
 			for (int i = 0; i < javadocLogs.length; i++) {
 				try {
-					in = new BufferedReader(new InputStreamReader(
-							javadocLogs[i].openStream()));
+					in = new BufferedReader(new InputStreamReader(javadocLogs[i].openStream()));
 					String tmp;
 					while ((tmp = in.readLine()) != null) {
 						tmp = tmp.toLowerCase();
-						if (tmp.indexOf(JAVADOC_ERROR) != -1
-								|| tmp.indexOf(JAVADOC_WARNING) != -1
+						if (tmp.indexOf(JAVADOC_ERROR) != -1 || tmp.indexOf(JAVADOC_WARNING) != -1
 								|| tmp.indexOf(JAVADOC_JAVA) != -1) {
-							String fileName = new File(javadocLogs[i].getFile())
-									.getName();
+							String fileName = new File(javadocLogs[i].getFile()).getName();
 							if (!logs.contains(fileName))
 								logs.add(fileName);
 						}
@@ -706,45 +751,42 @@ public class BuildTests extends TestCase {
 					in.close();
 
 				} catch (FileNotFoundException e) {
-					logs.add("Unable to find "
-							+ new File(javadocLogs[i].getFile()).getName()
-							+ " to read.");
+					logs.add("Unable to find " + new File(javadocLogs[i].getFile()).getName() + " to read.");
 					e.printStackTrace();
 				} catch (IOException e) {
-					logs.add("Unable to read "
-							+ new File(javadocLogs[i].getFile()).getName());
+					logs.add("Unable to read " + new File(javadocLogs[i].getFile()).getName());
 					e.printStackTrace();
 				}
 			}
 		}
-	} 
- 
-	
+	}
+
 	public void _testComparatorLogs() throws Exception {
 		String os = System.getProperty("os.name");
-		// Only run compare tool on Linux to save time during tests 
+		// Only run compare tool on Linux to save time during tests
 		if (os == null || !os.equalsIgnoreCase("Linux")) {
 			return;
 		}
 
-		// Load the configuration and ensure the mandatory parameters were specified
-		Properties properties= loadCompareConfiguration();
+		// Load the configuration and ensure the mandatory parameters were
+		// specified
+		Properties properties = loadCompareConfiguration();
 		assertNotNull("could not load configuration", properties);
 
-		String compareOldPath= properties.getProperty("compare.old");
+		String compareOldPath = properties.getProperty("compare.old");
 		if (compareOldPath == null || compareOldPath.indexOf("N2") > 0) {
 			return; // Nightly build, skip test
 		}
 
-		String comparatorUrl= System.getProperty("RELENGTEST.COMPARATOR.URL");
+		String comparatorUrl = System.getProperty("RELENGTEST.COMPARATOR.URL");
 		if (comparatorUrl == null) {
-			return; // No logs to check, skip test 
+			return; // No logs to check, skip test
 		}
-		URL comparatorLogs= new URL(comparatorUrl);
-		ComparatorLog comparatorLog= new ComparatorLog(comparatorLogs);
-		String message= "comparator warnings in: \n";
-		boolean problemLogsExist= comparatorLog.logs.size() > 0;
-		message= message.concat("See the 'comparatorlog.txt' in 'Release engineering build logs' for details.");
+		URL comparatorLogs = new URL(comparatorUrl);
+		ComparatorLog comparatorLog = new ComparatorLog(comparatorLogs);
+		String message = "comparator warnings in: \n";
+		boolean problemLogsExist = comparatorLog.logs.size() > 0;
+		message = message.concat("See the 'comparatorlog.txt' in 'Release engineering build logs' for details.");
 		assertTrue(message, !problemLogsExist);
 	}
 
@@ -756,41 +798,34 @@ public class BuildTests extends TestCase {
 		}
 
 		private void findProblems(URL comparatorLogs) {
-		
-			String COMPARATOR_ERROR = "difference found";		
+
+			String COMPARATOR_ERROR = "difference found";
 
 			BufferedReader in = null;
-		
-				try {
-					in = new BufferedReader(new InputStreamReader(
-							comparatorLogs.openStream()));
-					String tmp;
-					while ((tmp = in.readLine()) != null) {
-						tmp = tmp.toLowerCase();
-						if (tmp.indexOf(COMPARATOR_ERROR) != -1) {										
-							String fileName = new File(comparatorLogs.getFile())
-									.getName();
-							if (!logs.contains(fileName))
-								logs.add(fileName);
-						}
-					}
-					in.close();
 
-				} catch (FileNotFoundException e) {
-					logs.add("Unable to find "
-							+ new File(comparatorLogs.getFile()).getName()
-							+ " to read.");
-					e.printStackTrace();
-				} catch (IOException e) {
-					logs.add("Unable to read "
-							+ new File(comparatorLogs.getFile()).getName());
-					e.printStackTrace();
+			try {
+				in = new BufferedReader(new InputStreamReader(comparatorLogs.openStream()));
+				String tmp;
+				while ((tmp = in.readLine()) != null) {
+					tmp = tmp.toLowerCase();
+					if (tmp.indexOf(COMPARATOR_ERROR) != -1) {
+						String fileName = new File(comparatorLogs.getFile()).getName();
+						if (!logs.contains(fileName))
+							logs.add(fileName);
+					}
 				}
-			}		
+				in.close();
+
+			} catch (FileNotFoundException e) {
+				logs.add("Unable to find " + new File(comparatorLogs.getFile()).getName() + " to read.");
+				e.printStackTrace();
+			} catch (IOException e) {
+				logs.add("Unable to read " + new File(comparatorLogs.getFile()).getName());
+				e.printStackTrace();
+			}
+		}
 	}
 
-	
-	
 	/*
 	 * Load the configuration file which should be included in this bundle
 	 */
@@ -799,11 +834,10 @@ public class BuildTests extends TestCase {
 		if (aString == null)
 			return null;
 
-		final String CONFIG_FILENAME= aString + File.separator + "compare.properties";
+		final String CONFIG_FILENAME = aString + File.separator + "compare.properties";
 		Properties properties = new Properties();
 		try {
-			properties.load(new BufferedInputStream(new FileInputStream(
-					CONFIG_FILENAME)));
+			properties.load(new BufferedInputStream(new FileInputStream(CONFIG_FILENAME)));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return null;
@@ -816,14 +850,13 @@ public class BuildTests extends TestCase {
 	}
 
 	private String getVersionCompareCommand() {
-		String javadir= System.getProperty("java.home");
+		String javadir = System.getProperty("java.home");
 		return javadir + File.separator + "bin" + File.separator + "java";
 	}
 
 	// private String buildCommandLine(String source, String destination, String
 	// options, String output) {
-	private String getVersionCompareArguments(String source, String destination,
-			String output, String option) {
+	private String getVersionCompareArguments(String source, String destination, String output, String option) {
 
 		Bundle bundle = Platform.getBundle("org.eclipse.equinox.launcher");
 		URL u = null;
@@ -839,9 +872,7 @@ public class BuildTests extends TestCase {
 			return null;
 		}
 
-
-		String command= "-cp "
-				+ t
+		String command = "-cp " + t
 				+ " org.eclipse.core.launcher.Main -application org.eclipse.pde.tools.versioning.application -clean";
 
 		command += " -new " + source;
@@ -850,15 +881,14 @@ public class BuildTests extends TestCase {
 		if (option != null) {
 			command += " -option " + option;
 		}
-		
+
 		System.out.println("arguments " + command);
-		System.out.println("option "+ option);
+		System.out.println("option " + option);
 
 		return command;
 	}
 
-	private void verifyCompareResults(String source, String destination,
-			String output) {
+	private void verifyCompareResults(String source, String destination, String output) {
 		Document doc = parseResultXML(new File(output));
 		if (doc == null) {
 			String msg = "output file is null";
@@ -869,11 +899,9 @@ public class BuildTests extends TestCase {
 		int errorNumber = getSubElementNumber("Error", list);
 		int warningNumber = getSubElementNumber("Warning", list);
 		if (errorNumber != 0 || warningNumber != 0) {
-			String msg = "Features included in \"" + source
-					+ "\" has been compared to those included in \""
-					+ destination + "\".\n";
-			msg += "There are " + errorNumber + " error messages and "
-					+ warningNumber + " warning messages.\n";
+			String msg = "Features included in \"" + source + "\" has been compared to those included in \"" + destination
+					+ "\".\n";
+			msg += "There are " + errorNumber + " error messages and " + warningNumber + " warning messages.\n";
 			msg += "See the version compare logs linked from the test results page for details";
 			assertTrue(msg, msg == null);
 		}
@@ -921,8 +949,7 @@ public class BuildTests extends TestCase {
 		}
 
 		String compareOldPath = properties.getProperty("compare.old");
-		File compareOldFile = compareOldPath == null ? null : new File(
-				compareOldPath);
+		File compareOldFile = compareOldPath == null ? null : new File(compareOldPath);
 		if (compareOldFile == null) {
 			msg = "Old directory not specified.";
 			unableToRunCompare(msg);
@@ -934,9 +961,8 @@ public class BuildTests extends TestCase {
 		 * Determine if the build is a nightly Nightly builds have qualifiers
 		 * identical the buildId - for instance N200612080010 which means that
 		 * they are lower than v20060921-1945 from an promoted integration build
-		 * and thus cannot be compared 
+		 * and thus cannot be compared
 		 */
-		 
 
 		// disable temporarily
 		if (compareOldPath == null || compareOldPath.indexOf("N2") > 0) {
@@ -945,8 +971,7 @@ public class BuildTests extends TestCase {
 		}
 
 		String compareNewPath = properties.getProperty("compare.new");
-		File compareNewFile = compareNewPath == null ? null : new File(
-				compareNewPath);
+		File compareNewFile = compareNewPath == null ? null : new File(compareNewPath);
 		if (compareNewFile == null) {
 			msg = "New directory not specified.";
 			unableToRunCompare(msg);
@@ -955,18 +980,17 @@ public class BuildTests extends TestCase {
 		}
 
 		String outputFileName = properties.getProperty("compare.output");
-		File compareOutputFile = outputFileName == null ? null : new File(
-				outputFileName);
+		File compareOutputFile = outputFileName == null ? null : new File(outputFileName);
 		if (compareOutputFile == null) {
 			msg = "Output directory not specified.";
 			unableToRunCompare(msg);
 			assertTrue(msg, msg == null);
 			return;
 		}
-		
+
 		String compareOptions = properties.getProperty("compare.options");
-				
-	/*	
+
+		/*
 		 * String outputFileName =
 		 * Platform.getInstallLocation().getURL().getPath() + ".." +
 		 * File.separator + ".." + File.separator + "results" + File.separator +
@@ -977,21 +1001,20 @@ public class BuildTests extends TestCase {
 		 * File(outputFileName); boolean created = outputfile.createNewFile();
 		 * if (created) { } else { msg = "Output dir could not be created.";
 		 * assertTrue(msg, msg == null); } } catch (IOException e) {
-		 * e.printStackTrace(); } 
-*/
-		 
+		 * e.printStackTrace(); }
+		 */
 
-		String command= getVersionCompareCommand();
-		String arguments= getVersionCompareArguments(compareNewPath, compareOldPath, outputFileName, compareOptions);
+		String command = getVersionCompareCommand();
+		String arguments = getVersionCompareArguments(compareNewPath, compareOldPath, outputFileName, compareOptions);
 
-		StringTokenizer tokenizer= new StringTokenizer(arguments);
-		String[] commandArray= new String[tokenizer.countTokens() + 1];
-		commandArray[0]= command;
-		for (int i= 1; tokenizer.hasMoreTokens(); i++)
-			commandArray[i]= tokenizer.nextToken();
+		StringTokenizer tokenizer = new StringTokenizer(arguments);
+		String[] commandArray = new String[tokenizer.countTokens() + 1];
+		commandArray[0] = command;
+		for (int i = 1; tokenizer.hasMoreTokens(); i++)
+			commandArray[i] = tokenizer.nextToken();
 
 		try {
-			Process aProcess= Runtime.getRuntime().exec(commandArray);
+			Process aProcess = Runtime.getRuntime().exec(commandArray);
 			try {
 				// wait until the comparison finishes
 				aProcess.waitFor();
@@ -1017,8 +1040,7 @@ public class BuildTests extends TestCase {
 	 */
 	private Document parseResultXML(File file) {
 		try {
-			DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder();
+			DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			return docBuilder.parse(file);
 		} catch (ParserConfigurationException e) {
 			System.out.println("Unable to parse comparison result file.");
@@ -1030,16 +1052,15 @@ public class BuildTests extends TestCase {
 			System.out.println("Unable to parse comparison result file.");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out
-					.println("Exception trying to parse comparison result file.");
+			System.out.println("Exception trying to parse comparison result file.");
 			e.printStackTrace();
 		}
 		return null;
 	}
 
 	/**
-	 * searches for element whose name attribute equals <code>elementName</code>,
-	 * and return the number of its child nodes if it has been found
+	 * searches for element whose name attribute equals <code>elementName</code>
+	 * , and return the number of its child nodes if it has been found
 	 * 
 	 * @param elementName
 	 *            value of <code>name</code> attribute
@@ -1061,11 +1082,11 @@ public class BuildTests extends TestCase {
 	 * check whether or not the given file potentially represents a platform
 	 * configuration file on the file-system.
 	 * 
-	 * @return <code>true</code> if <code>file</code> is a configuration
-	 *         file <code>false</code> otherwise
+	 * @return <code>true</code> if <code>file</code> is a configuration file
+	 *         <code>false</code> otherwise
 	 * 
-	 * private boolean isConfiguration(File file) { IPath path = new
-	 * Path(file.getAbsolutePath()); return file.isFile() &&
-	 * "platform.xml".equalsIgnoreCase(path.lastSegment()); }
+	 *         private boolean isConfiguration(File file) { IPath path = new
+	 *         Path(file.getAbsolutePath()); return file.isFile() &&
+	 *         "platform.xml".equalsIgnoreCase(path.lastSegment()); }
 	 */
 }
