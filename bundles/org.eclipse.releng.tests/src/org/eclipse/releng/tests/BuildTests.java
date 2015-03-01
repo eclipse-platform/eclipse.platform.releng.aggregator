@@ -656,12 +656,15 @@ public class BuildTests extends TestCase {
 		long MAX_ALLOWED_BYTES = 37179;
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testDirtyLogSize test", buildId);
-		String urlOfFile = "http://download.eclipse.org/eclipse/downloads/drops4/" + buildId + "/buildlogs/dirtReport.txt";
+		String downloadHost = getDownloadHost();
+		String urlOfFile = "http://"+ downloadHost + "/eclipse/downloads/drops4/" + buildId + "/buildlogs/dirtReport.txt";
 		URL logURL = new URL(urlOfFile);
 
 		URLConnection urlConnection = logURL.openConnection();
+		// getContentLength calls "connect" if needed. 
 		// urlConnection.connect();
-		long nBytes = urlConnection.getContentLengthLong();
+		// Note, if expect more than "2 Gig", use getContentLengthLong (in Java 7).
+		long nBytes = urlConnection.getContentLength();
 		if (DEBUG_DIRTY_TEST) {
 			System.out.println("Debug info for testDirtyLogSize");
 			System.out.println("Debug: nBytes: " + nBytes);
@@ -676,6 +679,14 @@ public class BuildTests extends TestCase {
 			System.out.println("WARNING: MAX_ALLOWED_BYTES was larger than bytes found, by " + (MAX_ALLOWED_BYTES - nBytes)
 					+ ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
 		}
+	}
+
+	private String getDownloadHost() {
+		String downloadHost = System.getProperty("downloadHost");
+		if (downloadHost == null) {
+			downloadHost = "download.eclipse.org";
+		}
+		return downloadHost;
 	}
 
 	private void printHeaders(URLConnection urlConnection) {
@@ -700,12 +711,13 @@ public class BuildTests extends TestCase {
 		long MAX_ALLOWED_BYTES = 210;
 		String buildId = System.getProperty("buildId");
 		assertNotNull("buildId property must be specified for testDirtyLogSize test", buildId);
-		String urlOfFile = "http://download.eclipse.org/eclipse/downloads/drops4/" + buildId + "/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt";
+		String downloadHost = getDownloadHost();
+		String urlOfFile = "http://" + downloadHost + "/eclipse/downloads/drops4/" + buildId + "/buildlogs/comparatorlogs/buildtimeComparatorUnanticipated.log.txt";
 		URL logURL = new URL(urlOfFile);
 
 		URLConnection urlConnection = logURL.openConnection();
 		// urlConnection.connect();
-		long nBytes = urlConnection.getContentLengthLong();
+		long nBytes = urlConnection.getContentLength();
 		if (DEBUG_TEST) {
 			System.out.println("Debug info for testComparatorLogSize");
 			System.out.println("Debug: nBytes: " + nBytes);
