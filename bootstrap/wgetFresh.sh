@@ -23,7 +23,7 @@ echo "Fetching bootstrap files from $GIT_HOST"
 wget --no-verbose --no-cache  -O mb4M.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4I.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4N.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4N.sh?h=$initScriptTag 2>&1;
-#wget --no-verbose --no-cache  -O mb4X.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4X.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache  -O mb4X.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4X.sh?h=$initScriptTag 2>&1;
 #wget --no-verbose --no-cache  -O mb4Y.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4Y.sh?h=$initScriptTag 2>&1;
 #wget --no-verbose --no-cache  -O mb4P.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/mb4P.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O bootstrap.shsource http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/bootstrap/bootstrap.shsource?h=$initScriptTag 2>&1;

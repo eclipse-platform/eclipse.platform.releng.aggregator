@@ -61,9 +61,9 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_E
 
 
 
-export BRANCH=R4_3_maintenance_Java8
+export BRANCH=david_williams/macapp
 export BUILD_TYPE=X
-export STREAM=4.3.2
+export STREAM=4.5.0
 
 eclipseStreamMajor=${STREAM:0:1}
 
