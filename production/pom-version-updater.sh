@@ -36,7 +36,7 @@ then
   buildDirectory=$( fn-build-dir "$BUILD_ROOT" "$BUILD_ID" "$STREAM" )
   # create as "indicator file" ... gets filled in more once there is a log to grep
   touch  "${buildDirectory}/buildFailed-pom-version-updater"
-  echo "ERROR: fn-pom-version-updator returned non-zero return code: $RC"
+  echo "ERROR: fn-pom-version-updater returned non-zero return code: $RC"
   exit $RC1
 fi
 fn-pom-version-report "$BUILD_ID" "$aggDir"  "$buildDirectory"
