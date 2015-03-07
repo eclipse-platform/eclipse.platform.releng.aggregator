@@ -5,111 +5,134 @@
         as one of it first build steps to get the eclipse antRunner, for example.
     -->
 <project
-    name="getBaseBuilder"
-    default="getBaseBuilder"
-    basedir=".">
+  name="getBaseBuilder"
+  default="getBaseBuilder"
+  basedir=".">
 
 
-    <target
-        name="init"
-        unless="getBaseBuilderInitialized">
+  <target
+    name="init"
+    unless="getBaseBuilderInitialized">
 
-        <property environment="env" />
+    <property environment="env" />
 
-        <condition
-            property="TMP"
-            value="${env.TMP_DIR}"
-            else="/tmp">
-            <isset property="env.TMP_DIR" />
-        </condition>
-        <echo message="TMP: ${TMP}" />
+    <condition
+      property="TMP"
+      value="${env.TMP_DIR}">
+      <isset property="env.TMP_DIR" />
+    </condition>
+    <condition
+      property="TMP"
+      value="${TMP_DIR}">
+      <isset property="TMP_DIR"
 
-        <condition property="downloadHost" value="${env.DOWNLOAD_HOST}" else="archive.eclipse.org" >
-          <isset property="env.DOWNLOAD_HOST"/>
-        </condition>
+    </condition>
+    <condition
+      property="TMP"
+      value="${env.BUILD_ROOT}/tmp">
+      <isset property="${env.BUILD_ROOT}"
+
+    </condition>
+    <condition
+      property="TMP"
+      value="${BUILD_ROOT}/tmp">
+      <isset property="${BUILD_ROOT}"
+
+    </condition>
+    <fail
+      unless="TMP"
+      message="TMP not defined, since TMP_DIR nor BUILD_ROOT was defined" />
+    <echo message="TMP: ${TMP}" />
+
+    <condition
+      property="downloadHost"
+      value="${env.DOWNLOAD_HOST}"
+      else="archive.eclipse.org">
+      <isset property="env.DOWNLOAD_HOST" />
+    </condition>
         <!--
             TODO: need make platform independendent, as in test.xml, to compute right one.
             (and, pass in?)
             (and make "version" variable)
         -->
-        <property
-            name="platformURL"
-            value="http://${downloadHost}/eclipse/downloads/drops4/R-4.4-201406061215" />
+    <property
+      name="platformURL"
+      value="http://${downloadHost}/eclipse/downloads/drops4/R-4.4-201406061215" />
 
         <!-- we currently use binary platform, since smaller, but could use SDK, if ever a reason to -->
         <!-- moved to SDK to get API Tools -->
-        <property
-            name="platformFile"
-            value="eclipse-SDK-4.4-linux-gtk-x86_64.tar.gz" />
+    <property
+      name="platformFile"
+      value="eclipse-SDK-4.4-linux-gtk-x86_64.tar.gz" />
 
-        <property
-            name="buildTools.repository"
-            value="http://build.eclipse.org/eclipse/buildtools/" />
+    <property
+      name="buildTools.repository"
+      value="http://build.eclipse.org/eclipse/buildtools/" />
 
-        <property
-            name="webtools.repository"
-            value="http://download.eclipse.org/webtools/releng/repository/" />
-        <property
-            name="buildTools.feature"
-            value="org.eclipse.releng.build.tools.feature.feature.group" />
+    <property
+      name="webtools.repository"
+      value="http://download.eclipse.org/webtools/releng/repository/" />
+    <property
+      name="buildTools.feature"
+      value="org.eclipse.releng.build.tools.feature.feature.group" />
       <!-- value="1.0.0.v20140325-1404" -->
-      <property
-          name="buildTools.feature.version"
-          value="" />
-        <property
-            name="webtools.feature"
-            value="org.eclipse.wtp.releng.tools.feature.feature.group" />
-         <property
-            name="webtools.feature.version"
-            value="1.2.0.v201102200505-21-7w312213311616" />
+    <property
+      name="buildTools.feature.version"
+      value="" />
+    <property
+      name="webtools.feature"
+      value="org.eclipse.wtp.releng.tools.feature.feature.group" />
+    <property
+      name="webtools.feature.version"
+      value="1.2.0.v201102200505-21-7w312213311616" />
 
 
         <!-- assign defaults if not on hudson, for local testing if nothing else -->
-        <property
-            name="WORKSPACE"
-            value="${basedir}" />
+    <property
+      name="WORKSPACE"
+      value="${basedir}" />
 
-        <property
-            name="builderVersion"
-            value="R38M6PlusRC3G" />
+    <property
+      name="builderVersion"
+      value="R38M6PlusRC3G" />
 
-        <property
-            name="cvsRoot"
-            value=":pserver:anonymous@dev.eclipse.org:/cvsroot/eclipse" />
-        <property
-            name="cvsProject"
-            value="org.eclipse.releng.basebuilder" />
+    <property
+      name="cvsRoot"
+      value=":pserver:anonymous@dev.eclipse.org:/cvsroot/eclipse" />
+    <property
+      name="cvsProject"
+      value="org.eclipse.releng.basebuilder" />
 
         <!-- the desired folder name (made to stay consistent with cvs module name, though Git project
              is named eclipse.platform.releng.basebuilder fil-->
-        <property
-            name="folderName"
-            value="org.eclipse.releng.basebuilder" />
+    <property
+      name="folderName"
+      value="org.eclipse.releng.basebuilder" />
 
-        <condition
-            property="fetchSource"
-            value="git">
-            <not>
-                <isset property="basebuilderlocal" />
-            </not>
-        </condition>
+    <condition
+      property="fetchSource"
+      value="git">
+      <not>
+        <isset property="basebuilderlocal" />
+      </not>
+    </condition>
 
-        <echo message="WORKSPACE: ${WORKSPACE}" />
-        <echo message="fetchSource: ${fetchSource}" />
+    <echo message="WORKSPACE: ${WORKSPACE}" />
+    <echo message="fetchSource: ${fetchSource}" />
 
         <!-- leave useGit undefined to imply to use CVS. Callers can override git defaults with -DfetchSource=cvs
              or, anything besides 'git' implies cvs.
         -->
-        <condition
-            property="useGit"
-            value="true">
-            <equals
-                arg1="${fetchSource}"
-                arg2="git"
-                casesensitive="false"
-                trim="true" />
-        </condition>
-        <echo message="useGit: ${useGit}" />
+    <condition
+      property="useGit"
+      value="true">
+      <equals
+        arg1="${fetchSource}"
+        arg2="git"
+        casesensitive="false"
+        trim="true" />
+    </condition>
+    <echo message="useGit: ${useGit}" />
         <!-- don't need? yet
              <echo message="BUILD_ID: ${BUILD_ID}" />
              <echo message="BUILD_NUMBER: ${BUILD_NUMBER}" />
@@ -133,68 +156,69 @@
             <isset property="checkout.builder.clean" />
         </condition>
        -->
-        <property
-            name="getBaseBuilderInitialized"
-            value="true" />
-    </target>
+    <property
+      name="getBaseBuilderInitialized"
+      value="true" />
+  </target>
 
 
-    <target
-        name="getBaseBuilder"
-        depends="init">
+  <target
+    name="getBaseBuilder"
+    depends="init">
         <!-- remove old one, if there, and make sure one exists for eventual checkout/copy/globmapper -->
-        <delete dir="${WORKSPACE}/${folderName}" />
-        <mkdir dir="${WORKSPACE}/${folderName}" />
-        <antcall target="fetchBasePlatform" />
-    </target>
+    <delete dir="${WORKSPACE}/${folderName}" />
+    <mkdir dir="${WORKSPACE}/${folderName}" />
+    <antcall target="fetchBasePlatform" />
+  </target>
 
-    <target
-        name="fetchBasePlatform"
-        depends="init"
-        if="platformURL">
-        <get
-            dest="${TMP}/${platformFile}"
-            src="${platformURL}/${platformFile}"
-            usetimestamp="true" />
-        <untar
-            compression="gzip"
-            src="${TMP}/${platformFile}"
-            dest="${TMP}">
-        </untar>
+  <target
+    name="fetchBasePlatform"
+    depends="init"
+    if="platformURL">
+    <get
+      dest="${TMP}/${platformFile}"
+      src="${platformURL}/${platformFile}"
+      usetimestamp="true" />
+    <untar
+      compression="gzip"
+      src="${TMP}/${platformFile}"
+      dest="${TMP}">
+    </untar>
 
-        <chmod perm="ugo+x">
-            <fileset dir="${TMP}/eclipse">
-                <include name="eclipse" />
-                <include name="*.so*" />
-            </fileset>
-        </chmod>
+    <chmod perm="ugo+x">
+      <fileset dir="${TMP}/eclipse">
+        <include name="eclipse" />
+        <include name="*.so*" />
+      </fileset>
+    </chmod>
 
-        <exec
-            dir="${TMP}/eclipse"
-            executable="${TMP}/eclipse/eclipse">
-            <arg value="-nosplash" />
-            <arg value="-debug" />
-            <arg value="-consolelog" />
-            <arg value="-data" />
-            <arg value="${WORKSPACE}/workspace-toolsinstall" />
-            <arg value="-application" />
-            <arg value="org.eclipse.equinox.p2.director" />
-            <arg value="-repository" />
-            <arg value="${buildTools.repository},${webtools.repository}" />
-            <arg value="-installIU" />
-            <arg value="${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version}" />
-            <arg line="-vmargs -Djava.io.tmpdir=${TMP}" />
-        </exec>
+    <exec
+      dir="${TMP}/eclipse"
+      executable="${TMP}/eclipse/eclipse">
+      <arg value="-nosplash" />
+      <arg value="-debug" />
+      <arg value="-consolelog" />
+      <arg value="-data" />
+      <arg value="${WORKSPACE}/workspace-toolsinstall" />
+      <arg value="-application" />
+      <arg value="org.eclipse.equinox.p2.director" />
+      <arg value="-repository" />
+      <arg value="${buildTools.repository},${webtools.repository}" />
+      <arg value="-installIU" />
+      <arg value="${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version}" />
+      <arg line="-vmargs -Djava.io.tmpdir=${TMP}" />
+    </exec>
 
         <!-- we "move" so the directory structure so it flat under basebuilder ...
              for compatibility to older code/scripts  -->
-        <move todir="${WORKSPACE}/${folderName}">
-            <fileset dir="${TMP}/eclipse/">
+    <move todir="${WORKSPACE}/${folderName}">
+      <fileset dir="${TMP}/eclipse/">
 
-            </fileset>
-        </move>
+      </fileset>
+    </move>
 
-        <echo message="platform and tools installed, platformURL: ${platformURL} platform: ${platformFile}, fetched using tychoeclipsebuilder/getBaseBuilderAndTools.xml" />
-    </target>
+    <echo
+      message="platform and tools installed, platformURL: ${platformURL} platform: ${platformFile}, fetched using tychoeclipsebuilder/getBaseBuilderAndTools.xml" />
+  </target>
 
 </project>
