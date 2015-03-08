@@ -44,7 +44,7 @@ export ANT_HOME=/shared/common/apache-ant-1.8.4/
 #export JAVA_HOME=/shared/common/jdk1.6.0-latest
 #export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
 #export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
-export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
+export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.8.0_x64-latest}
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin
 

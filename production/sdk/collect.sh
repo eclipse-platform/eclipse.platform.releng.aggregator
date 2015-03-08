@@ -37,7 +37,7 @@ source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
-export ANT_HOME=/shared/common/apache-ant-1.9.2
+export ANT_HOME=/shared/common/apache-ant-1.9.4
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 
