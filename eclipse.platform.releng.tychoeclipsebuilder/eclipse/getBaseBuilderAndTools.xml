@@ -178,11 +178,19 @@
       dest="${TMP}/${platformFile}"
       src="${platformURL}/${platformFile}"
       usetimestamp="true" />
+    <!-- untar is broken in Ant 1.9.4. See https://bz.apache.org/bugzilla/show_bug.cgi?id=56641
     <untar
       compression="gzip"
       src="${TMP}/${platformFile}"
       dest="${TMP}">
     </untar>
+    -->
+    <exec
+      executable="/bin/tar"
+      dir="${TMP}">
+      <arg value="-xf" />
+      <arg value="${TMP}/${platformFile}" />
+    </exec>
 
     <chmod perm="ugo+x">
       <fileset dir="${TMP}/eclipse">
