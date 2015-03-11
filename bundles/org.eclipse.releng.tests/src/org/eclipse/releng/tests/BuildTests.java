@@ -727,7 +727,7 @@ public class BuildTests extends TestCase {
 		// some servers, will have to read contents.
 		assertTrue("Either file (url) does not exist, or HTTP response does not contain content length. urlOfFile: " + urlOfFile,
 				(!(-1 == nBytes)));
-		assertTrue("dirtReport file has increased in size, indicating a regression. See " + urlOfFile, nBytes <= MAX_ALLOWED_BYTES);
+		assertTrue("Unanticipated comparator log file has increased in size, indicating a regression. See " + urlOfFile, nBytes <= MAX_ALLOWED_BYTES);
 		if (MAX_ALLOWED_BYTES > (nBytes + 20)) {
 			System.out.println("WARNING: MAX_ALLOWED_BYTES was larger than bytes found, by " + (MAX_ALLOWED_BYTES - nBytes)
 					+ ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
