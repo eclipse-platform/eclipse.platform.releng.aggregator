@@ -9,7 +9,7 @@ JAVA_6_HOME=${JAVA_6_HOME:-/shared/common/jdk1.6.0-latest}
 JAVA_7_HOME=${JAVA_7_HOME:-/shared/common/jdk1.7.0-latest}
 JAVA_8_HOME=${JAVA_8_HOME:-/shared/common/jdk1.8.0_x64-latest}
 
-export JAVA_HOME=${JAVA_8_HOME}
+export JAVA_HOME=${JAVA_7_HOME}
 
 devJRE="${JAVA_HOME}"/bin/java
 

@@ -7,7 +7,7 @@ LOG=$(pwd)/log_$( date +%Y%m%d%H%M%S ).txt
 exec >>$LOG 2>&1
 
 LREPO=$(pwd)/../localMavenRepo
-export JAVA_HOME=/opt/local/jdk1.8.0_x64-latest
+export JAVA_HOME=/opt/local/jdk1.7.0-latest
 TMP_DIR=$(pwd)/../tmp
 mkdir -p $TMP_DIR
 export MAVEN_OPTS="-Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR}"
