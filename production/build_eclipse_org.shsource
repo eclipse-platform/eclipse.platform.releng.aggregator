@@ -43,7 +43,7 @@ export TMP_DIR=${TMP_DIR:-${BUILD_ROOT}/tmp}
 mkdir -p ${TMP_DIR}
 
 # these could be machine specific
-export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.8.0_x64-latest}
+export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
 # required for when ant is used. Unclear how maven's "antrun" finds its version of Ant,
 # built in? Or system path?
 # But, without the ANT_OPTS, we do get messages about "to get repeatable builds, to ignore sysclasspath"
@@ -53,8 +53,7 @@ export ANT_OPTS=${ANT_OPTS:-"-Dbuild.sysclasspath=ignore -Dincludeantruntime=fal
 # remember, MaxPermSize is specific to "Oracle VMs". It has to be removed (or over ridden)
 # for other VMs or the VM might fail to start due to unrecognized -XX option.
 # Normally should not use -Declipse.p2.mirrors=false, especially on a regular basis.
-# -XX:MaxPermSize=256M 
-export MAVEN_OPTS=${MAVEN_OPTS:--Xmx2560m -Djava.io.tmpdir=${TMP_DIR} -Dtycho.localArtifacts=ignore}
+export MAVEN_OPTS=${MAVEN_OPTS:--Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR} -Dtycho.localArtifacts=ignore}
 
 export MAVEN_PATH=${MAVEN_PATH:-/shared/common/apache-maven-3.1.1/bin}
 
@@ -88,4 +87,4 @@ fi
 # custom, environment specific setting, required to generate java doc correctly for Java 8 additions,
 # in our production builds. This is anticipated to be temporary, until we find a better way
 # to do it.
-#export JAVA_DOC_TOOL="-Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc"
+export JAVA_DOC_TOOL="-Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc"
