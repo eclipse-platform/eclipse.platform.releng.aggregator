@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,12 +35,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestListener;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.optional.junit.JUnitResultFormatter;
@@ -58,6 +52,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestListener;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 
 /**
  * A TestRunner for JUnit that supports Ant JUnitResultFormatters and running
@@ -77,6 +77,15 @@ public class EclipseTestRunner implements TestListener {
 
 		TestFailedException(Throwable e) {
 			super(e);
+		}
+	}
+	
+	static class ThreadDump extends Exception {
+
+		private static final long serialVersionUID = 1L;
+
+		ThreadDump(String message) {
+			super(message);
 		}
 	}
 
@@ -341,8 +350,12 @@ public class EclipseTestRunner implements TestListener {
 			if (timeout > 0) {
 				new Timer("EclipseTestRunnerTimer", true).schedule(
 						new TimerTask() {
+							
+							volatile boolean assumeUiThreadIsResponsive;
+							
 							@Override
 							public void run() {
+								assumeUiThreadIsResponsive = true;
 								dump(0);
 								try {
 									Thread.sleep(SECONDS_BETWEEN_DUMPS * 1000);
@@ -393,15 +406,43 @@ public class EclipseTestRunner implements TestListener {
 									String name = entry.getKey().getName();
 									StackTraceElement[] stack = entry
 											.getValue();
-									Exception exception = new Exception(name);
+									ThreadDump exception = new ThreadDump("for thread \"" + name + "\"");
 									exception.setStackTrace(stack);
 									exception.printStackTrace();
 								}
 								System.err.flush(); // for bug 420258
+								
+								final Display display = Display.getDefault();
+								
+								if (!assumeUiThreadIsResponsive) {
+									String message = "trying to make UI thread respond";
+									IllegalStateException toThrow = new IllegalStateException(message);
+									Thread t = display.getThread();
+									// Initialize the cause. Its stack trace will be that of the current thread.
+									toThrow.initCause(new RuntimeException(message));
+									// Set the stack trace to that of the target thread.
+									toThrow.setStackTrace(t.getStackTrace());
+									// Stop the thread using the specified throwable.
+									try {
+										t.stop(toThrow);
+									} catch (UnsupportedOperationException e) {
+										// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
+										try {
+											Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
+											stop0.setAccessible(true);
+											stop0.invoke(t, toThrow);
+										} catch (Exception e1) {
+											e1.printStackTrace();
+										}
+									}
+								}
 
-								final Display display = getDisplay();
-								display.syncExec(new Runnable() {
+								assumeUiThreadIsResponsive = false;
+								
+								display.asyncExec(new Runnable() {
 									public void run() {
+										assumeUiThreadIsResponsive= true;
+										
 										// Dump focus control, parents, and
 										// shells:
 										Control focusControl = display
@@ -482,9 +523,6 @@ public class EclipseTestRunner implements TestListener {
 		}
 	}
 
-	/**
-     *   
-     */
 	public EclipseTestRunner(JUnitTest test, String testPluginName,
 			boolean haltOnError, boolean haltOnFailure) {
 		fJunitTest = test;
@@ -500,9 +538,6 @@ public class EclipseTestRunner implements TestListener {
 		}
 	}
 
-	/**
-	 * Returns the Test corresponding to the given suite.
-	 */
 	protected Test getTest(String suiteClassName) throws TestFailedException {
 		if (suiteClassName.length() <= 0) {
 			clearStatus();
@@ -857,15 +892,5 @@ public class EclipseTestRunner implements TestListener {
 		if (fSystemError != null) {
 			fSystemError.println(line);
 		}
-	}
-	
-	private static Display getDisplay() {
-		Display display = Display.getCurrent();
-		if (display == null) {
-			System.err
-					.println("Display.getCurrent() returned null so this is either a core test with no UI, or this test is running in a non-UI thread, so we will use Display.getDefault() to be safe.");
-			display = Display.getDefault();
-		}
-		return display;
 	}
 }
