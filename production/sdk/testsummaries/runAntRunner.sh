@@ -25,17 +25,17 @@ then
   exit 1
 fi
 
-# specify devworkspace and JRE to use to runEclipse
-# remember, we want to use Java 5 for processing artifacts.
+# specify devworkspace and JRE to use to runEclipse.
+# Historically, we wanted to use Java 5 for processing artifacts.
 # Ideally same one used to pre-condition (normalize, -repack)
-# the jars in the first place.
-#JAVA_5_HOME=${JAVA_5_HOME:-/home/shared/orbit/apps/ibm-java2-i386-50/jre}
-#JAVA_5_HOME=${JAVA_5_HOME:-${HOME}/jdks/ibm-java2-x86_64-50}
-JAVA_6_HOME=${JAVA_6_HOME:-/shared/common/jdk-1.6.0_26.x86_64}
+# the jars in the first place since only version that is fully forward 
+# compatible. 
+JAVA_5_HOME=${JAVA_5_HOME:-/shared/common/jdk1.5.0-latest}
+JAVA_6_HOME=${JAVA_6_HOME:-/shared/common/jdk1.6.0-latest}
 JAVA_7_HOME=${JAVA_7_HOME:-/shared/common/jdk1.7.0-latest}
 JAVA_8_HOME=${JAVA_8_HOME:-/shared/common/jdk1.8.0_x64-latest}
 
-export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}}
+export JAVA_HOME=${JAVA_HOME:-${JAVA_7_HOME}}
 
 devJRE=$JAVA_HOME/jre/bin/java
 

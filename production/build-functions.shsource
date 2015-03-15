@@ -160,7 +160,6 @@ fn-git-clean-submodules ()
   return 0
 }
 
-
 # USAGE: fn-git-reset-submodules
 fn-git-reset-submodules ()
 {
@@ -332,7 +331,7 @@ fn-maven-build-aggregator ()
 
   MARGS="-DbuildId=$BUILD_ID"
   if $DEBUG; then
-    MARGS="$MARGS -X"
+    MARGS="$MARGS -X -e"
   fi
   if $QUIET; then
     MARGS="$MARGS -q"
@@ -370,16 +369,18 @@ fn-maven-build-aggregator ()
   echo "DEBUG: MARGS: $MARGS"
   echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
 
-
-
-  # -fail-at-end gives chance for bundles to compile, even after
+  # --fail-at-end gives chance for bundles to compile, even after
   # a compile error. Might have to specify --fail-never to see them all? See
   # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
+  # during debugging, sometimes helpful to change to --fail-fast
   pushd "$REPO_DIR"
-  #mvn $MARGS --fail-never -V \
-    #mvn $MARGS --fail-at-end -V \
-    #mvn $MARGS  -V \
-    mvn $MARGS --fail-at-end -V  ${ALT_POM_FILE} \
+  # lock-snapshots, if not obvious, should only be run occasionally, once ready to "stabilize"
+  # mvn versions:lock-snapshots -Dmaven.repo.local=$LOCAL_REPO -Dincludes=org.eclipse.tycho*  >${logsDirectory}/lock-snapshots.txt
+  # mvn versions:display-plugin-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-plugin-updates.txt
+  # 'dependency updates' not useful for Tycho, since its "dependencies" are via p2.
+  # mvn versions:display-dependency-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-dependency-updates.txt
+  # mvn versions:display-property-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-property-updates.txt
+  mvn $MARGS --fail-fast -V  ${ALT_POM_FILE} \
     clean verify \
     -DskipTests=true \
     -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
@@ -476,7 +477,7 @@ fn-pom-version-updater ()
 
   MARGS=""
   if $DEBUG; then
-    MARGS="$MARGS -X"
+    MARGS="$MARGS -X -e"
   fi
   if $QUIET; then
     MARGS="$MARGS -q"
@@ -877,7 +878,59 @@ fn-gather-compile-logs ()
     done
     popd
   else
-    echo "   ERROR: $REPO_DIR did not exist in fn-gather-compile-logs"
+    echo "[ERROR] $REPO_DIR did not exist in fn-gather-compile-logs"
+  fi
+}
+
+# USAGE: fn-gather-23-compile-logs BUILD_ID REPO_DIR BUILD_DIR
+# This method for use when using Tycho 0.23.0 or greater, due to
+# fix for multi-jar bundles.
+#   BUILD_ID: I20121116-0700
+#   REPO_DIR: /shared/eclipse/builds/R4_2_maintenance/gitCache/eclipse.platform.releng.aggregator
+#   BUILD_DIR: /shared/eclipse/builds/R4_2_maintenance/dirs/M20121120-1747
+fn-gather-compile-logs ()
+{
+  checkNArgs $# 3
+  if [[ $? != 0 ]]; then return 1; fi
+  BUILD_ID="$1"; shift
+  REPO_DIR="$1"; shift
+  BUILD_DIR="$1"; shift
+  if [[ -d "$REPO_DIR" ]]
+  then
+    COLLECTED_LOGS_DIR="${BUILD_DIR}/compilelogs/plugins"
+    mkdir -p "${COLLECTED_LOGS_DIR}"
+    pushd "$REPO_DIR"
+    # The directory 'compilelogs' is used when we generate the logs. See parent pom for compilerArgs.
+    for log in $( find "${REPO_DIR}" -name "compilelogs" -type d ); do
+      targetDir=$( dirname "$log" )
+      # Remember to remove INFO echo, after confirmed working
+      echo -e "\t[INFO] Processing \n\t$log\n\tin\n\t$targetDir"
+      if [ ! -r "$targetDir"/MANIFEST.MF ]; then
+        echo -e "\n\t** Failed to process\n\t$log in \n\t$targetDir. \n\tLikely compile error? Will backup to source MANIFEST.MF in directory containing target."
+        targetDir=$( dirname "${targetDir}" )
+        if [ ! -r "$targetDir"/META-INF/MANIFEST.MF ]
+        then
+          echo "**Failed to process $log in $targetDir."
+        else
+          BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
+          BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/META-INF/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
+          mkdir -p "${COLLECTED_LOGS_DIR}/${BUNDLE_ID}_${BUNDLE_VERSION}"
+          rsync -vr "${log}/" "${COLLECTED_LOGS_DIR}/${BUNDLE_ID}_${BUNDLE_VERSION}/"
+        fi
+      else
+        BUNDLE_ID=$( grep Bundle-SymbolicName "$targetDir"/MANIFEST.MF | cut -f2 -d" " |  cut -f1 -d\; | tr -d '\f\r\n\t' )
+        BUNDLE_VERSION=$(  grep Bundle-Version "$targetDir"/MANIFEST.MF | cut -f2 -d" " | tr -d '\f\r\n\t' )
+        # directory may not be "new", since we now collect @dot.xml, plus nested jar compile logs, of the form <jarName>.jar.xml
+        # as well as handy for "re-running"
+        mkdir -p "${COLLECTED_LOGS_DIR}/${BUNDLE_ID}_${BUNDLE_VERSION}"
+        # All logs should be directly under $log, but ... will specify -r in case not.
+        # Remember to remove 'v' after confirmed working
+        rsync -vr "${log}/" "${COLLECTED_LOGS_DIR}/${BUNDLE_ID}_${BUNDLE_VERSION}/"
+      fi
+    done
+    popd
+  else
+    echo "[ERROR] $REPO_DIR did not exist in fn-gather-compile-logs"
   fi
 }
 

@@ -7,12 +7,12 @@ LOG=$(pwd)/log_$( date +%Y%m%d%H%M%S ).txt
 exec >>$LOG 2>&1
 
 LREPO=$(pwd)/../localMavenRepo
-export JAVA_HOME=/opt/local/jdk1.7.0-latest
-TMP_DIR=$(pwd)/../tmp
+export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
+TMP_DIR=${TMP_DIR:-$(pwd)/../tmp}
 mkdir -p $TMP_DIR
-export MAVEN_OPTS="-Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR}"
-export MAVEN_PATH=/opt/local/apache-maven-3.1.1/bin
-export PATH=$JAVA_HOME/bin:$MAVEN_PATH:$PATH
+export MAVEN_OPTS=${MAVEN_OPTS:-"-Xmx2560m -XX:MaxPermSize=256M -Djava.io.tmpdir=${TMP_DIR}"}
+export MAVEN_PATH=${MAVEN_PATH:-/opt/local/apache-maven-3.1.1/bin}
+export PATH=${JAVA_HOME}/bin:${MAVEN_PATH}:${PATH}
 
 DIR=$( dirname $0 )
 NEW_VER=4.4.0-SNAPSHOT

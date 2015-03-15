@@ -102,7 +102,10 @@ export BUILD_ENV_FILE=${buildDirectory}/buildproperties.shsource
 export BUILD_ENV_FILE_PHP=${buildDirectory}/buildproperties.php
 export BUILD_ENV_FILE_PROP=${buildDirectory}/buildproperties.properties
 
-export LOCAL_REPO="${BUILD_ROOT}"/localMavenRepo
+# initially, for some reason, when "patching Tycho" I *had* to set
+# local repo to the .m2/repository. (bug 461718)
+export LOCAL_REPO="${BUILD_ROOT}/localMavenRepo"
+#export LOCAL_REPO="${HOME}/.m2/repository"
 
 # In production builds, we normally specify CLEAN_LOCAL,
 # and remove any existing LOCAL_REPO, and re-fetch.
@@ -286,8 +289,37 @@ else
   echo "# " >> ${logsDirectory}/relengdirectory.txt
   popd
 
+  if [[ "true" == "${PATCH_TYCHO}" ]]
+  then
+    echo "About to patch Tycho. LOCAL_REPO: ${LOCAL_REPO}"
+    ${SCRIPT_PATH}/buildTycho.sh  2>&1 | tee ${logsDirectory}/tycho23.log.txt
+    rc=$?
+    echo "buildTycho returned $rc"
+    if [[ $rc != 0 ]]
+    then
+      echo "[ERROR] buildTycho.sh returned error code: $rc"
+      exit $rc
+    fi
+  fi
 
-  $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+  if [[ "true" == "${PATCH_SWT}" ]]
+  then
+    echo "About to patchSWT"
+    ${SCRIPT_PATH}/patchSWT.sh
+    rc=$?
+    echo "patchSWT returned $rc"
+    if [[ $rc != 0 ]]
+    then
+      echo "[ERROR] patchSWT returned error code: $rc"
+      exit $rc
+    fi
+  fi
+  if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
+  then
+    echo "[WARNING] Did not run pom-version-updater due to other variable settings"
+  else
+    $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+  fi
   # if file exists, pom update failed
   if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
   then
@@ -297,7 +329,8 @@ else
     BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
     fn-write-property BUILD_FAILED
   else
-    # if updater failed, something fairly large is wrong, so no need to compile
+    # if updater failed, something fairly large is wrong, so no need to compile,
+    # else, we compile - build here.
     $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
     # if file exists, then run maven build failed.
     if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
@@ -360,8 +393,8 @@ fi
 $SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
 
-# check for dirt in working tree. Note. we want near very end, since even things 
-# like "publishing" in theory could leave dirt behind. 
+# check for dirt in working tree. Note. we want near very end, since even things
+# like "publishing" in theory could leave dirt behind.
 $SCRIPT_PATH/dirtReport.sh $BUILD_ENV_FILE >$logsDirectory/dirtReport.txt
 checkForErrorExit $? "Error occurred during dirt report"
 
