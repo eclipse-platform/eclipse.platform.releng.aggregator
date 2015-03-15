@@ -314,6 +314,7 @@ else
       exit $rc
     fi
   fi
+
   if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
   then
     echo "[WARNING] Did not run pom-version-updater due to other variable settings"
