@@ -41,7 +41,14 @@ launcherJar=$( fn-basebuilder-launcher "$basebuilderDir" )
 
 EBuilderDir="$buildDirectory"/eclipse.platform.releng.aggregator/eclipse.platform.releng.tychoeclipsebuilder
 
-fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
+# Temporary fork/condition
+if [[ "true" == "${USING_TYCHO_SNAPSHOT}" ]]
+then
+  fn-gather-23-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
+else
+  fn-gather-compile-logs "$BUILD_ID" "$aggDir" "$buildDirectory"
+fi
+
 fn-parse-compile-logs "$BUILD_ID" \
   "${EBuilderDir}/eclipse/helper.xml" \
   "$buildDirectory" "$launcherJar"
