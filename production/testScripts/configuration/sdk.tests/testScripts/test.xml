@@ -75,7 +75,7 @@
   <target name="installPreferences">
     <property
       name="preferenceDirectory"
-      value="${install}/eclipse/configuration/.settings/" />
+      value="${eclipse-home}/configuration/.settings/" />
     <mkdir dir="${preferenceDirectory}" />
 
     <antcall target="installNetworkPreferences" />
@@ -124,7 +124,7 @@
     <fail
       unless="runtimeArchiveExists"
       message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
-    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <echo message="Deleting existing ${install}, if any." />
     <delete
       dir="${eclipse-home}"
       verbose="false" />
@@ -148,9 +148,9 @@
     <fail
       unless="runtimeArchiveExists"
       message="runtime archive (SDK) did not exist where expected. runtimeArchive: ${executionDir}/${runtimeArchive}" />
-    <echo message="Deleting existing ${eclipse-home}, if any." />
+    <echo message="Deleting existing ${install}, if any." />
     <delete
-      dir="${eclipse-home}"
+      dir="${install}"
       verbose="false" />
     <!-- <mkdir dir="${eclipse-home}" /> -->
     <echo message="Fresh extract ${runtimeArchive} into ${install} for testing." />
@@ -356,14 +356,7 @@
       <arg line="-debug" />
       <arg line="-flavor tooling" />
       <arg line="-installIUs ${extraIU}" />
-      <arg line="-p2.os ${os}" />
-      <arg line="-p2.ws ${ws}" />
-      <arg line="-p2.arch ${arch}" />
-      <arg line="-roaming" />
-      <arg line="-profile SDKProfile" />
       <arg line="-repository ${current.build.repo}" />
-      <arg line="-destination ${eclipse-home}" />
-      <arg line="-bundlepool ${eclipse-home}" />
     </java>
   </target>
 
@@ -399,14 +392,7 @@
       <arg line="-flavor tooling" />
       <arg
         line="-installIUs ${testPlugin},org.eclipse.test,org.eclipse.ant.optional.junit,org.eclipse.test.performance,org.eclipse.test.performance.win32,org.easymock" />
-      <arg line="-p2.os ${os}" />
-      <arg line="-p2.ws ${ws}" />
-      <arg line="-p2.arch ${arch}" />
-      <arg line="-roaming" />
-      <arg line="-profile SDKProfile" />
       <arg line="-repository file:${repoLocation}" />
-      <arg line="-destination ${eclipse-home}" />
-      <arg line="-bundlepool ${eclipse-home}" />
     </java>
     <antcall target="configureTeamTest" />
     <antcall target="installderby" />
@@ -612,9 +598,13 @@
 
 
     <!-- The root of the eclipse installation -->
-    <property
-      name="eclipse-home"
-      value="${install}/eclipse" />
+    <!-- For the context of this script eclipse-home is actually set to be the parent of the folder containing the plugins folder -->
+    <condition
+      property="eclipse-home"
+      value="${install}/Eclipse.app/Contents/Eclipse"
+      else="eclipse">
+      <os family="mac" />
+    </condition>
     <!-- <mkdir dir="${eclipse-home}" /> -->
     <echo message="eclipse-home: ${eclipse-home}" />
 
@@ -1990,7 +1980,7 @@
      It has an empty performance target.
     <antcall target="equinoxp2ui" />
     -->
-    <!-- Caution: org.eclipse.pde.api.tools.tests sets -Xmx to 300M, but does not set -Xms, 
+    <!-- Caution: org.eclipse.pde.api.tools.tests sets -Xmx to 300M, but does not set -Xms,
          so 300M might be less than -Xms
          Will "fix" on testing side, for now, by removing parameters from Hudson's scripts.
     -->
