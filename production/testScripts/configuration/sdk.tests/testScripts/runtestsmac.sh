@@ -95,18 +95,29 @@ fi
 #necessary when invoking this script through rsh
 cd $dir
 
-if [[ ! -r eclipse ]]
+# TODO: should have a variable (or, computation!) to decide if 'eclipse', 
+# or 'Eclipse.app'
+
+ECLIPSE_HOME=Eclipse.app/Contents/Eclipse
+#ECLIPSE_HOME=eclipse
+
+
+if [[ ! -r "${ECLIPSE_HOME}" ]]
 then
   tar -xzf eclipse-SDK-*.tar.gz
   # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
-  unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+  unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d "${ECLIPSE_HOME}/dropins"
 fi
 
-
 # run tests
-launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
+launcher="ls ${ECLIPSE_HOME}/plugins/org.eclipse.equinox.launcher_*.jar"
 
-# it have been recommended not to "probe and publish" information about systems
+if [[ ! -e "${launcher}" ]]
+then
+   echo -e "[ERROR] Failed to find org.eclipse.equinox.launcher_\*jar in ${ECLIPSE_HOME}/plugins"
+fi
+
+# it has been recommended not to "probe and publish" information about systems
 # for slight improvement in security. Bug 387747
 # so I have commented out most such probes, so they won't be routine.
 
