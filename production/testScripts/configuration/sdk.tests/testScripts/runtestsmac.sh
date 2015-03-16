@@ -110,7 +110,7 @@ then
 fi
 
 # run tests
-launcher="ls ${ECLIPSE_HOME}/plugins/org.eclipse.equinox.launcher_*.jar"
+launcher=`ls ${ECLIPSE_HOME}/plugins/org.eclipse.equinox.launcher_*.jar`
 
 if [[ ! -e "${launcher}" ]]
 then
