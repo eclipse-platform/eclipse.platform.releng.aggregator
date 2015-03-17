@@ -1,4 +1,4 @@
-# !/bin/sh
+#!/bin/sh
 
 #array of zipfiles
 zipfiles=`ls *.zip`
