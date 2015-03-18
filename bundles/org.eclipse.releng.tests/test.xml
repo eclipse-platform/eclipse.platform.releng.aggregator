@@ -21,10 +21,17 @@
 	<!-- all tests that are to be run. Initialization for individual tests -->
 	<!-- should be done within the body of the suite target. -->
   <target name="init">
+
     <tstamp />
+
+    <condition property="JAVADOC_OUTPUT_LOCATION" value="${eclipse.home.location}/../../../.." else="${eclipse.home.location}/../.." >
+      <os family="mac" />
+    </condition>
+    
     <condition property="downloadHost" value="${env.DOWNLOAD_HOST}" else="download.eclipse.org">
      <isset property="env.DOWNLOAD_HOST" />
     </condition>
+    
     <condition property="tar.gz">
       <contains
         string="${runtimeArchive}"
@@ -226,9 +233,6 @@
         name="plugin-path"
         value="${eclipse-home}/plugins/${org.eclipse.releng.tests}" />
       
-      <condition property="JAVADOC_OUTPUT_LOCATION" value="${eclipse.home.location}/../../../.." else="${eclipse.home.location}/../.." >
-        <os family="mac" />
-      </condition>
       <property
         name="vmargs"
         value="-DdownloadHost=${downloadHost} -DbuildId=${buildId} -DRELENGTEST.JAVADOC.URLS=${JAVADOC_OUTPUT_LOCATION}/platform.doc.isv.javadoc.txt,${JAVADOC_OUTPUT_LOCATION}/jdt.doc.isv.javadoc.txt,${JAVADOC_OUTPUT_LOCATION}/pde.doc.user.javadoc.txt,${JAVADOC_OUTPUT_LOCATION}/platform.doc.isv.schema.txt,${JAVADOC_OUTPUT_LOCATION}/jdt.doc.isv.schema.txt,${JAVADOC_OUTPUT_LOCATION}/pde.doc.user.schema.txt"  />
