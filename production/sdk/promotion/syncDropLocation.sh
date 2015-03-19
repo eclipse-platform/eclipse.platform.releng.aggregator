@@ -66,7 +66,7 @@ function sendPromoteMail ()
   # = = = =
   # So we'll set "500 bytes" as minimum which should both ignore all "minimum's",
   # and catch anything of substance.
-  comparatorLogMinimumSize=500
+  comparatorLogMinimumSize=210
 
   mainPath=$( dlToPath "$eclipseStream" "$buildId")
   echo "     mainPath: $mainPath"
