@@ -124,7 +124,7 @@
       files.
     -->
     <!-- currently, following is dead code. Leaving for now as a reminder to allow localCache again, someday -->
-    <condition
+   <condition
       property="archiveLocation"
       value="${localCache}"
       else="${buildURL}">
@@ -394,8 +394,8 @@
           arg2="x86" />
       </and>
     </condition>
-    <echo message="os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
-    <echo message="testPlatform  ${testPlatform}" />
+    <echo message="[DEBUG] in runTest2.xml: os ws arch ${osgi.os} ${osgi.ws} ${osgi.arch}" />
+    <echo message="[INFO] in runTest2.xml: testPlatform  ${testPlatform}" />
   </target>
 
   <!--
@@ -488,7 +488,8 @@
     <copy
       todir="${executionDir}"
       verbose="true">
-      <fileset dir="${configurationDir}/sdk.tests/testConfigs/${testPlatform}" />
+      <fileset
+        dir="${configurationDir}/sdk.tests/testConfigs/${testPlatform}" />
     </copy>
     <copy
       verbose="true"
@@ -587,6 +588,7 @@
     <printProperty property="executionDir" />
     <printProperty property="install" />
     <printProperty property="eclipse-home" />
+    <printProperty property="isMacAppLayout" />
     <printProperty property="configurationDir" />
     <printProperty property="testSuite" />
     <printProperty property="skipDerby" />
@@ -678,10 +680,13 @@
 
     <!-- echo a few typically expected properties, to make sure getting right file -->
 
-    <echo message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
+    <echo
+      message="streamSpecificPropertiesTitle: ${streamSpecificPropertiesTitle}" />
 
-    <echo message="apiTestsPreviousBaseDLBaseURL: ${apiTestsPreviousBaseDLBaseURL}" />
-    <echo message="apiTestsPreviousBaseWin32Filename: ${apiTestsPreviousBaseWin32Filename}" />
+    <echo
+      message="apiTestsPreviousBaseDLBaseURL: ${apiTestsPreviousBaseDLBaseURL}" />
+    <echo
+      message="apiTestsPreviousBaseWin32Filename: ${apiTestsPreviousBaseWin32Filename}" />
 
     <echo message="previousReleaseLocation: ${previousReleaseLocation}" />
     <echo message="previousReleaseVersion: ${previousReleaseVersion}" />
@@ -701,7 +706,8 @@
     unless="DOWNLOAD_HOST">
     <!-- we assume if "DOWNLOAD_HOST" is defined, then ARCHIVE_HOST has been defined also. -->
     <property environment="env" />
-    <echo message="DEBUG: Found DOWNLOAD_HOST not defined. Setting in 'initDownloadHosts'" />
+    <echo
+      message="DEBUG: Found DOWNLOAD_HOST not defined. Setting in 'initDownloadHosts'" />
     <echo message="DEBUG:      env.DOWNLOAD_HOST: ${env.DOWNLOAD_HOST}" />
     <condition
       property="DOWNLOAD_HOST"
@@ -890,14 +896,14 @@
       For the context of this script eclipse-home is actually
       set to be the folder containing the plugins folder
     -->
-    <!-- TODO should have another variable, or computation, know if we should check this,
-      or also handle traditional layout, and use "eclipse' folder.
-    -->
     <condition
       property="eclipse-home"
       value="${install}/Eclipse.app/Contents/Eclipse"
       else="${install}/eclipse">
-      <os family="mac" />
+      <and>
+        <os family="mac" />
+        <istrue value="${isMacAppLayout}" />
+      </and>
     </condition>
     <mkdir dir="${eclipse-home}" />
     <echo message="eclipse-home: ${eclipse-home}" />

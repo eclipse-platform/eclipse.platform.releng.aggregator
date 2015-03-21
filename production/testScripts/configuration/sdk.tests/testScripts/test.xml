@@ -4,7 +4,6 @@
   default="all"
   basedir=".">
 
-
   <!--Directory name of org.eclipse.test plug-in installed in ${eclipse-home} -->
   <target
     name="setup"
@@ -24,13 +23,7 @@
         string="${runtimeArchive}"
         substring=".tar.gz" />
     </condition>
-    <!--
-      <condition
-      property="repoexists"
-      value="true">
-      <available file="${repoLocation}" />
-      </condition>
-    -->
+
     <condition
       property="extraIU"
       value="org.eclipse.releng.tools.feature.group">
@@ -427,18 +420,7 @@
       <arg line="-destination ${eclipse-home}" />
       <arg line="-bundlepool ${eclipse-home}" />
     </java>
-    <!--
-      <exec
-      dir="."
-      executable="unzip">
-      <arg line="-o eclipse-junit-tests-*.zip ${derby} -d ${install}" />
-      </exec>
-      <copy todir="${install}/eclipse/dropins/eclipse/plugins">
-      <fileset
-      dir="${repoLocation}/eclipse/dropins/eclipse/plugins"
-      includes="org.apache.derby**/*" />
-      </copy>
-    -->
+
   </target>
 
   <target
@@ -503,18 +485,35 @@
       project.setProperty("buildType", sArray[1]);
       ]]>
     </script>
-
-
     <fail unless="buildType" />
   </target>
 
+  <target
+    name="initStreamSpecificProperties"
+    unless="streamSpecificPropertiesSet">
+    <!--
+      Note: configurationDir is set by runTest2.xml in 'production'
+      environment. Here we will set to basedir, if not already set.
+      But, this file, streamSpecific.properties should always be optional.
+      TODO: better document what is in that file.
+    -->
+    <property
+      name="configurationDir"
+      value="basedir" />
+    <property file="${configurationDir}/streamSpecific.properties" />
+    <property
+      name="streamSpecificPropertiesSet"
+      value="true" />
+  </target>
+
   <!--
-    main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor and eclipseStreamMinor
-    Uses script, which requires Java 1.6 (or ... else gets complicated to setup)
+    main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor
+    and eclipseStreamMinor. Uses Javascript, which requires Java 1.6 (or ... else gets complicated to
+    setup)
   -->
   <target
     name="initStreamVariables"
-    depends="initDownloadHosts">
+    depends="initDownloadHosts,initStreamSpecificProperties">
 
     <property file="${configurationDir}/streamSpecific.properties" />
     <fail
@@ -568,43 +567,10 @@
 
   <target
     name="initBasicDirectories"
-    depends="initWorkspace,initBuildId"
+    depends="initWorkspace,initBuildId, initStreamSpecificProperties, initEclipseHome"
     unless="basicDirectoriesInitialized">
 
     <property environment="env" />
-
-    <property
-      name="testDir"
-      value="${WORKSPACE}/workarea/${buildId}" />
-    <echo message="testDir: ${testDir}" />
-
-    <property
-      name="executionDir"
-      value="${testDir}/eclipse-testing" />
-    <mkdir dir="${executionDir}" />
-    <echo message="executionDir: ${executionDir}" />
-
-
-    <!--default directory where test-eclipse-sdk will be installed -->
-    <property
-      name="install"
-      value="${executionDir}/test-eclipse" />
-    <mkdir dir="${install}" />
-    <echo message="install: ${install}" />
-
-
-    <!--
-      For the context of this script eclipse-home is actually set
-      to be the folder containing the plugins folder
-    -->
-    <condition
-      property="eclipse-home"
-      value="${install}/Eclipse.app/Contents/Eclipse"
-      else="${install}/eclipse">
-      <os family="mac" />
-    </condition>
-    <!-- <mkdir dir="${eclipse-home}" /> -->
-    <echo message="eclipse-home: ${eclipse-home}" />
 
     <property
       name="repoZip"
@@ -665,7 +631,69 @@
     <copy todir="${executionDir}">
       <fileset dir="${basedir}/../testConfigs/linux" />
     </copy>
+  </target>
+  <target
+    name="initInstallDir"
+    depends="initBuildId, initStreamSpecificProperties, checkInstallDir"
+    unless="install">
+    <property
+      name="testDir"
+      value="${WORKSPACE}/workarea/${buildId}" />
+    <echo message="[DEBUG] in test.xml: testDir: ${testDir}" />
 
+    <property
+      name="executionDir"
+      value="${testDir}/eclipse-testing" />
+    <mkdir dir="${executionDir}" />
+    <echo message="[DEBUG] in test.xml: executionDir: ${executionDir}" />
+
+    <!--default directory where test-eclipse-sdk will be installed -->
+    <property
+      name="install"
+      value="${executionDir}/test-eclipse" />
+    <mkdir dir="${install}" />
+    <echo message="[DEBUG] in test.xml: the value of install was set to: ${{install}" />
+  </target>
+
+  <target
+    name="checkInstallDir"
+    if="install">
+    <echo message="[DEBUG] in test.xml: Found the value of install already set, to ${install}" />
+  </target>
+
+  <!--
+    eclipse-home set to be the folder that will later contain the plugins
+    folder.
+    Note: we have to set eclipse-home, rather than use "eclpse.home" or "eclipse.home.location"
+    because at this point we are executing from the "setup" version of eclipse
+    (aka basebuilder)
+    not the actual version of eclipse we will later be testing.
+  -->
+  <target
+    name="initEclipseHome"
+    depends="initStreamSpecificProperties, initInstallDir, checkEclipseHome"
+    unless="eclipse-home">
+
+    <condition
+      property="eclipse-home"
+      value="${install}/Eclipse.app/Contents/Eclipse"
+      else="${install}/eclipse">
+      <and>
+        <os family="mac" />
+        <istrue value="${isMacAppLayout}" />
+      </and>
+    </condition>
+    <echo message="[DEBUG] the value of eclipse-home was set to: ${eclipse-home}" />
+  </target>
+
+  <!--
+    Intended to be called only from initEclipseHome, simply as extra information
+    for debugging
+  -->
+  <target
+    name="checkEclipseHome"
+    if="eclipse-home">
+    <echo message="[DEBUG] Found the value of eclipse-home already set, to ${eclipse-home}" />
   </target>
 
   <!--
@@ -726,17 +754,6 @@
     -->
     <property file="test.properties" />
 
-    <!--
-      suffix added to test output files, along with VM number,
-      to identify platform on which tests ran. (currently
-      hard coded in vm.properties)
-    -->
-    <!-- <property file="vm.properties" /> -->
-    <!--now set in initBasicDirectories
-      <property
-      name="testedPlatform"
-      value="${os}.${ws}.${arch}" />
-    -->
 
     <!--Unlock files on the Mac before starting tests.
       Required to delete some workspace directories (org.eclipse.core.filebuffers.tests and Team CVS tests). -->
@@ -1341,9 +1358,9 @@
       value="${executionDir}/JUNIT.XSL" />
     <!--
       TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
-      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM
+      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM 
       value"?
-      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it
+      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it 
       should. Perhaps needs tweak in Hudson job?
       TODO: would have to compute these in runTest2.xml, to make part of production properties,
       and phpproperties.php
@@ -1368,9 +1385,9 @@
     <!--
       This "assert" property works, in this context, because we run baseline first,
       when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline
+      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline 
       data.
-      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some
+      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some 
       experiences makes me doubt that?
       TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
