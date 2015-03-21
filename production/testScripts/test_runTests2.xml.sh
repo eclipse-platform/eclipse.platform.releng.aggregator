@@ -37,8 +37,8 @@ source localBuildProperties.shsource 2>/dev/null
 #   nothing is specific to any recent version of ant. (Though, some of the machines
 #   have ant 1.6 set as 'default'!)
 #export ANT_HOME=/shared/common/apache-ant-1.7.1
-export ANT_HOME=/shared/common/apache-ant-1.8.4/
-#export ANT_HOME=/shared/common/apache-ant-1.9.2
+#export ANT_HOME=/shared/common/apache-ant-1.8.4/
+export ANT_HOME=/shared/common/apache-ant-1.9.2
 
 #   JAVA_HOME is, at least, what runs the ant instance. If no 'jvm' option is specified,
 #   it also becomes the instance that runs the tests.
@@ -56,7 +56,7 @@ export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME
 export TESTING_TEST_XML=true
 #export ANT_OPTS=-Xms1024m -Xmx1024m -Djava.io.tmpdir=${WORKSPACE}/tmp
 export ANT_OPTS=-Djava.io.tmpdir=${WORKSPACE}/tmp
-
+mkdir ${WORKSPACE}/tmp
 if [[ "$1" == "-c" ]]
 then
   clean
@@ -82,9 +82,10 @@ wget -O getEBuilder.xml --no-verbose   http://${GIT_HOST}/c/platform/eclipse.pla
 
 
 ANTFILE=getEBuilder.xml
-buildId=N20140823-1500
+buildId=I20150320-0800
 eclipseStream=4.5.0
-EBUILDER_HASH=d4ca36a125742e490be6b22caca84d7769030758
+EBUILDER_HASH=master
+#EBUILDER_HASH=d4ca36a125742e490be6b22caca84d7769030758
 
 ant -f "${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
 
