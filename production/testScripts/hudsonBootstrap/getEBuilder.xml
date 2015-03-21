@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-    <!--
-        A utility ant script get the eclipse builder from Git, either old one used with
-        our PDE builds, or new one used with CBI builds. It includes copying getBaseBuilder.xml
-        and runTest2.xml to root of workspace, where subsequent Hudson build steps can easily use them.
+<!--
+  A utility ant script get the eclipse builder from Git, either old one used with
+  our PDE builds, or new one used with CBI builds. It includes copying getBaseBuilder.xml
+  and runTest2.xml to root of workspace, where subsequent Hudson build steps can easily use them.
 
-        Hudson jobs can call this script from ant as one of it first build steps.
-        Such as, start with a wget fetch from CGit (where following $dash; is literally a '-',
-        it is escaped here just for XML rules against two dashes in a comment);
+  Hudson jobs can call this script from ant as one of it first build steps.
+  Such as, start with a wget fetch from CGit (where following $dash; is literally a '-',
+  it is escaped here just for XML rules against two dashes in a comment);
 
-        wget -O getEBuilder.xml &dash;&dash;no-verbose   http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
+  wget -O getEBuilder.xml &dash;&dash;no-verbose http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml
+  2>&1
 
-        Then use ant to invoke the functionality. Example:
+  Then use ant to invoke the functionality. Example:
 
-        ant -f getEBuilder.xml  -EBUILDER_HASH=910fca82df3ea649ba8ee758259561582e13bf8b
+  ant -f getEBuilder.xml -EBUILDER_HASH=910fca82df3ea649ba8ee758259561582e13bf8b
 
-    -->
+-->
 <project
   name="getEBuilder"
   default="getEBuilder"
@@ -90,7 +91,7 @@
     depends="init">
 
     <!-- remove old one, if there, and make sure directory exists for
-         eventual checkout/copy/globmapper
+      eventual checkout/copy/globmapper
     -->
     <delete dir="${WORKSPACE}/${folderName}" />
     <mkdir dir="${WORKSPACE}/${folderName}" />
@@ -119,9 +120,11 @@
     <echo message="preparing to move ${WORKSPACE}/tempEBuilder" />
     <echo message="  into ${WORKSPACE}/${folderName}" />
     <echo message="  using regexp mapper" />
-    <!-- We need only the 'production/testscripts' directory. And input can be of different "depths" depending on where it comes from.  -->
-    <move verbose="true" todir="${WORKSPACE}/${folderName}">
-      <fileset  dir="${WORKSPACE}/tempEBuilder" />
+    <!-- We need only the 'production/testscripts' directory. And input can be of different "depths" depending on where it comes from. -->
+    <move
+      verbose="true"
+      todir="${WORKSPACE}/${folderName}">
+      <fileset dir="${WORKSPACE}/tempEBuilder" />
       <mapper
         type="regexp"
         from=".*production([/\\])testScripts(.*)"
@@ -135,19 +138,19 @@
 
   </target>
 
-    <!-- specify -DnoEBuildercleanup=true on command line, to have zip and folder left in place,
-         such as for debugging or desired to copy the zip to your local cache.
-    -->
+  <!-- specify -DnoEBuildercleanup=true on command line, to have zip and folder left in place,
+    such as for debugging or desired to copy the zip to your local cache.
+  -->
   <target
     name="EBuildercleanup"
     unless="noEBuildercleanup">
 
-        <!-- we've moved the files, now to remove the empty dir -->
+    <!-- we've moved the files, now to remove the empty dir -->
     <delete
       dir="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}"
       failonerror="false" />
 
-        <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists -->
+    <!-- cleanup (may eventually want to "cache" this zip file, so no need to re-fetch if already exists -->
     <delete
       file="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}.zip"
       failonerror="false" />
@@ -159,9 +162,9 @@
 
   </target>
 
-    <!-- Will leave here for now, though doesn't add much. It used to have an additional
-        "fetch from cvs task" (That is, we had three choices: local, git, cvs).
-    -->
+  <!-- Will leave here for now, though doesn't add much. It used to have an additional
+    "fetch from cvs task" (That is, we had three choices: local, git, cvs).
+  -->
   <target
     name="fetchEBuilder"
     depends="init, fetchEBuilderFromGit"
@@ -201,7 +204,25 @@
     <echo message="Fetching pre-made EBuilder subset from download site." />
     <get
       src="${downloadURL}/${scmProject}-${EBUILDER_HASH}.zip"
-      dest="${WORKSPACE}" />
+      dest="${WORKSPACE}"
+      ignoreerrors="true" />
+
+    <available
+      file="${WORKSPACE}/${downloadURL}/${scmProject}-${EBUILDER_HASH}.zip"
+      property="EzipExists" />
+
+    <antcall target="unzipDownloadedZiz" />
+
+    <condition property="EBuilderfetched">
+      <available file="${WORKSPACE}/${folderName}/production" />
+    </condition>
+
+  </target>
+
+  <target
+    name="unzipDownloadedZiz"
+    if="EzipExists">
+
     <echo message="Fetched EBuilder from ${downloadURL}" />
     <unzip
       src="${WORKSPACE}/${scmProject}-${EBUILDER_HASH}.zip"
@@ -213,13 +234,11 @@
         <include name="**/*" />
       </fileset>
     </move>
-
-    <echo message="Copied EBuilder (subset) to ${WORKSPACE}/${folderName}" />
-    <property
-      name="EBuilderfetched"
-      value="true" />
+    <echo message="Moved EBuilder (subset) to ${WORKSPACE}/${folderName}" />
 
   </target>
+
+
   <target
     name="initWorkspace"
     unless="WORKSPACE">
