@@ -16,12 +16,15 @@
       name="selectiveVerbose"
       value="false" />
     <!--
-         If not explicitly passed in from caller, assume 'all'.
-         This is the default target already, in global test.xml,
-         but this allows us to be explicit (and, make sure it
-         continues working).
+      If not explicitly passed in from caller, assume 'all'.
+      This is the default target already, in global test.xml,
+      but this allows us to be explicit (and, make sure it
+      continues working).
     -->
-    <condition property="testSuite" value="${env.testSuite}" else="all">
+    <condition
+      property="testSuite"
+      value="${env.testSuite}"
+      else="all">
       <isset property="env.testSuite" />
     </condition>
     <property
@@ -32,53 +35,65 @@
     <condition
       property="buildIdToUse"
       value="${baselinePerfAltVersionLabel}">
-      <istrue value="${baselinePerfAlt}"/>
+      <istrue value="${baselinePerfAlt}" />
     </condition>
     <condition
       property="archiveLocation"
       value="${baselinePerfAltLocation}">
-      <istrue value="${baselinePerfAlt}"/>
+      <istrue value="${baselinePerfAlt}" />
     </condition>
-    <!-- if 'baselinePerf' is specified, need to it for "buildId", plus adjust URL to it, not what we just built. Only "tests" always get buildURL -->
+    <!-- if 'baselinePerf' is specified, need to it for "buildId", plus adjust URL to it, not what we just built. Only "tests" always
+      get buildURL -->
     <condition
       property="buildIdToUse"
       value="${baselinePerfVersionLabel}"
       else="${buildId}">
-      <istrue value="${baselinePerf}"/>
+      <istrue value="${baselinePerf}" />
     </condition>
     <condition
       property="archiveLocation"
       value="${baselinePerfLocation}"
       else="${buildURL}">
-      <istrue value="${baselinePerf}"/>
+      <istrue value="${baselinePerf}" />
     </condition>
-    <property name="eclipse.perf.dbloc" value="${eclipse.perf.dbloc.value}"/>
+    <property
+      name="eclipse.perf.dbloc"
+      value="${eclipse.perf.dbloc.value}" />
     <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
-               Or, else will take large number of "baselines" averaged? -->
-    <condition property="eclipse.perf.config"
-              value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
-         <istrue value="${baselinePerfAlt}"/>
+      Or, else will take large number of "baselines" averaged? -->
+    <condition
+      property="eclipse.perf.config"
+      value="build=${baselinePerfAltVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
+      <istrue value="${baselinePerfAlt}" />
     </condition>
-    <condition property="eclipse.perf.config"
-              value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
-              else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
-            <istrue value="${baselinePerf}"/>
+    <condition
+      property="eclipse.perf.config"
+      value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion}"
+      else="build=${buildId};config=${testedPlatformConfig};jvm=${javaMajorVersion}">
+      <istrue value="${baselinePerf}" />
     </condition>
     <!--
-         This "assert" property works, in this context, because we run baseline first,
-         when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-         But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline data.
-         Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some experiences makes me doubt that?
-         TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
+      This "assert" property works, in this context, because we run baseline first,
+      when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
+      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline
+      data.
+      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some
+      experiences makes me doubt that?
+      TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
-    <condition property="eclipse.perf.assertAgainst" value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
-        <equals arg1="${buildIdToUse}" arg2="${buildId}" />
+    <condition
+      property="eclipse.perf.assertAgainst"
+      value="build=${baselinePerfVersion};config=${testedPlatformConfig};jvm=${javaMajorVersion};">
+      <equals
+        arg1="${buildIdToUse}"
+        arg2="${buildId}" />
     </condition>
     <!-- frameworkperfargs is used by library.xml ... probably an easier way? -->
-    <condition property="frameworkperfargs"
-               value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
-               else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
-      <isset property="eclipse.perf.assertAgainst"/>
+    <condition
+      property="frameworkperfargs"
+      value="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config} -Declipse.perf.assertAgainst=${eclipse.perf.assertAgainst}"
+      else="-Declipse.perf.dbloc=${eclipse.perf.dbloc} -Declipse.perf.config=${eclipse.perf.config}">
+      <isset property="eclipse.perf.assertAgainst" />
     </condition>
     <echo message="setRuntimeArchive os ${os} ws ${ws} arch ${arch}" />
     <echo message="build id of runtimeArchive ${buildIdToUse}" />
@@ -100,14 +115,14 @@
 
 
     <!--
-         there's nothing "automatic" about the local cache (so far).
-         If specified (such as on hudson command line that executes this
-         file, as, say,
-         -DlocalCache=file:///shared/eclipse/localCache
-         then all the downloads required must be already available there.
-         It is intended to speed up local testing to avoid re-downloading
-         files.
-     -->
+      there's nothing "automatic" about the local cache (so far).
+      If specified (such as on Hudson command line that executes this
+      file, as, say,
+      -DlocalCache=file:///shared/eclipse/localCache
+      then all the downloads required must be already available there.
+      It is intended to speed up local testing to avoid re-downloading
+      files.
+    -->
     <!-- currently, following is dead code. Leaving for now as a reminder to allow localCache again, someday -->
     <condition
       property="archiveLocation"
@@ -385,13 +400,15 @@
 
   <!--
     Note that in getting the target platform, we nearly always get the 'buildId' version,
-    the one we just built. But, in somecases, we use "baselinePerf" version for performance
+    the one we just built. But, in some cases, we use "baselinePerf" version for performance
     regression testing. In that case, we still get the "buildId" version of tests ... the ones
     we just built ... only what we run them on changes.
-    When we do use 'baselinePerf',  that is specified as 'true' in Hudson job, which signals
+    When we do use 'baselinePerf', that is specified as 'true' in Hudson job, which signals
     to use the baselinePerf version defined in 'streamSpecific.properties.
   -->
-  <target name="downloadTargetPlatform" depends="init">
+  <target
+    name="downloadTargetPlatform"
+    depends="init">
     <!-- TODO: should add checks for checksum integrity on downloads. Perhaps use mirror URLs? (though, that'd not effect production) -->
     <fail
       unless="testPlatform"
@@ -425,13 +442,13 @@
         arg2="linux32" />
     </condition>
     <!--
-    <condition
+      <condition
       property="getArtifacts"
       value="getmaczips">
       <equals
-        arg1="${testPlatform}"
-        arg2="macmini" />
-    </condition>
+      arg1="${testPlatform}"
+      arg2="macmini" />
+      </condition>
     -->
     <condition
       property="getArtifacts"
@@ -485,10 +502,10 @@
       destfile="${WORKSPACE}/propertiesAllFromRunTest2.properties" />
 
     <!--
-        TODO: seems this unzip could/should be moved to test.xml? To do once only,
-        of course, if not already done.
-        We (sort of) do in test.xml. See its setupRepo task.
--->
+      TODO: seems this unzip could/should be moved to test.xml? To do once only,
+      of course, if not already done.
+      We (sort of) do in test.xml. See its setupRepo task.
+    -->
     <property
       name="repoZip"
       value="${executionDir}/eclipse-junit-tests-${buildId}.zip" />
@@ -496,24 +513,24 @@
     <antcall target="unzipTestFramework" />
 
     <!--
-        We print these properties to a file primarily to capture variables that
-        might have been set in Hudson, which do not "survive" going through the
-        bat or script files. ... Though, makes me wonder if we really need to do that?
-        Seems we could call test.xml directly?
-        In principle, we could call printProperty from anywhere,
-        but seems best to centralize the function.
-     -->
+      We print these properties to a file primarily to capture variables that
+      might have been set in Hudson, which do not "survive" going through the
+      bat or script files. ... Though, makes me wonder if we really need to do that?
+      Seems we could call test.xml directly?
+      In principle, we could call printProperty from anywhere,
+      but seems best to centralize the function.
+    -->
     <antcall target="printProductionProperties" />
 
     <!--
-        The PHP properties are useful to display (directly or indirectly)
-        on "test results" page (such as "testPlatform" headings).
+      The PHP properties are useful to display (directly or indirectly)
+      on "test results" page (such as "testPlatform" headings).
     -->
     <antcall target="printMainPropertiesAsPHP" />
 
     <!--
-         following are all required by "runtests" ... used to be part of it, but wanted these
-         variables to print out, even if merely testing scripts, but not actually running tests.
+      following are all required by "runtests" ... used to be part of it, but wanted these
+      variables to print out, even if merely testing scripts, but not actually running tests.
     -->
     <condition
       property="executionArguments"
@@ -546,12 +563,12 @@
     name="printProductionProperties"
     depends="init">
     <!--
-         here we want to print properties, such as passed in via Hudson,
-         that can be used later, by test.xml, but since it is started by as separate
-         processes, there is no direct access to Hudson properties ...
-         so we make them persistent. In many cases, the property will not be defined,
-         in which case we do not want to write anythng for that property (or, it
-         will appear to have been set, even if set to an empty string).
+      here we want to print properties, such as passed in via Hudson,
+      that can be used later, by test.xml, but since it is started by as separate
+      processes, there is no direct access to Hudson properties ...
+      so we make them persistent. In many cases, the property will not be defined,
+      in which case we do not want to write anything for that property (or, it
+      will appear to have been set, even if set to an empty string).
     -->
 
     <printProperty property="buildId" />
@@ -586,9 +603,9 @@
     <printProperty property="eclipse.perf.assertAgainst" />
 
     <!--
-    The following will leave pw in file, which is not a lot different that
-    leave them printed in log, as we also do. But, could be improved by just leaving
-    filename in properties, and reading them in at the time needed in test.xml.
+      The following will leave pw in file, which is not a lot different that
+      leave them printed in log, as we also do. But, could be improved by just leaving
+      filename in properties, and reading them in at the time needed in test.xml.
     -->
     <printProperty property="cvstest.properties" />
 
@@ -600,9 +617,9 @@
     <sequential>
       <echo message="DEBUG @{property}: ${@{property}}" />
       <!--
-          for our use, 'del' operation won't typcially delete anything,
-          since would not have been there to begin with, but is an easy way to
-          prevent an undefined property from being written
+        for our use, 'del' operation won't typically delete anything,
+        since would not have been there to begin with, but is an easy way to
+        prevent an undefined property from being written
       -->
       <local name="oper" />
       <condition
@@ -621,20 +638,20 @@
   </macrodef>
 
 
-    <!--
-     This initStreamSpecificVariables target was copied from buildAll.xml and does about exactly the same thing,
-     purposely left close to original, though not as much is actually required.
-     TODO: in future, pull out into one file, and reuse
-     You can tell from comment, it is outdated.
+  <!--
+    This initStreamSpecificVariables target was copied from buildAll.xml and does about exactly the same thing,
+    purposely left close to original, though not as much is actually required.
+    TODO: in future, pull out into one file, and reuse
+    You can tell from comment, it is out dated.
 
-     Its purpose, here, is entirely to pick up "stream specific" stings from the releng maps
-     project, 'configuration' folder.
+    Its purpose, here, is entirely to pick up "stream specific" stings from the releng maps
+    project, 'configuration' folder.
 
-     Important note: here, unlike the one in buildAll.xml, we assume the maps have already
-     been checked out, say by hudson, as a peer of eclipseBuilder, rather then us doing
-     the checkout here, ourselves. Not sure which is easier, but current means hudson job
-     has to be set up with two git checkout steps, right version for maps (for 3.8 vs 4.2).
-     -->
+    Important note: here, unlike the one in buildAll.xml, we assume the maps have already
+    been checked out, say by Hudson, as a peer of eclipseBuilder, rather then us doing
+    the checkout here, ourselves. Not sure which is easier, but current means Hudson job
+    has to be set up with two git checkout steps, right version for maps (for 3.8 vs 4.2).
+  -->
   <target
     name="initStreamSpecificVariables"
     unless="initStreamSpecificVariablesComplete"
@@ -642,11 +659,11 @@
     <echo message="DEBUG: executing initStreamSpecificVariables" />
 
     <!--
-         these condidtions used to be in "init". Conceptually seems right to be in "stream
-         specific" init (since their value depends on stream) but may have side effects?).
-         This is really no longer relevent, as everythign we build/tests comes from
-         "drops4" ... but will leave in case we ever have a "drops5" ... or, have to
-         back port tests to re-test 3.8! (Which, we propably do, for 3.8?)
+      these conditions used to be in "init". Conceptually seems right to be in "stream
+      specific" init (since their value depends on stream) but may have side effects?).
+      This is really no longer relevant, as everything we build/tests comes from
+      "drops4" ... but will leave in case we ever have a "drops5" ... or, have to
+      back port tests to re-test 3.8! (Which, we probably do, for 3.8?)
     -->
     <condition
       property="dropsDirSegment"
@@ -676,8 +693,8 @@
   </target>
 
   <!--
-     DOWNLOAD_HOST and ARCHIVE_HOST can be defined on command line,
-     if running on local test environments.
+    DOWNLOAD_HOST and ARCHIVE_HOST can be defined on command line,
+    if running on local test environments.
   -->
   <target
     name="initDownloadHosts"
@@ -728,10 +745,10 @@
     <fail
       unless="buildId"
       message="buildId value must be provided by caller (such as 'I20120717-0800'" />
-         <!--
-              this "buildId check" may be overly strict, but best to start off strict for now,
-              loosen in future if we start to find/have variety
-         -->
+    <!--
+      this "buildId check" may be overly strict, but best to start off strict for now,
+      loosen in future if we start to find/have variety
+    -->
     <condition property="buildIdOK">
       <matches
         pattern="^[IMXYNPSR]\d{8}-\d{4}$"
@@ -755,10 +772,10 @@
 
     <fail unless="buildType" />
   </target>
-    <!--
-       main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor and eclipseStreamMinor
-       Uses script, which requires Java 1.6 (or ... else gets complicated to setup)
-     -->
+  <!--
+    main purpose of initStreamVariables, it to be sure we have eclipseStreamMajor and eclipseStreamMinor
+    Uses script, which requires Java 1.6 (or ... else gets complicated to setup)
+  -->
   <target
     name="initStreamVariables"
     unless="streamVariablesInitialized">
@@ -798,11 +815,11 @@
     <fail
       unless="eclipseStreamMinor"
       message="eclipseStreamMinor not defined or computable" />
-      <!-- eclipseStreamService may not always be defined? And we do not currently use it.
-    <fail
-        unless="eclipseStreamService"
-        message="eclipseStreamService not defined or computable" />
-      -->
+    <!-- eclipseStreamService may not always be defined? And we do not currently use it.
+      <fail
+      unless="eclipseStreamService"
+      message="eclipseStreamService not defined or computable" />
+    -->
     <fail
       unless="updateSiteSegment"
       message="updateSiteSegment not defined or computable" />
@@ -816,8 +833,6 @@
     name="initBasicDirectories"
     depends="initWorkspace,initBuildId,initPlatformSpecificProperties,setJavaMajorVersion"
     unless="basicDirectoriesInitialized">
-
-    <!-- <property environment="env" /> -->
 
     <property
       name="relengBaseBuilderDir"
@@ -844,7 +859,7 @@
       name="testedPlatform"
       value="${osgi.os}.${osgi.ws}.${osgi.arch}_${javaMajorVersion}" />
 
-    <!-- The directory that will contain all files containing information on the tests that ran.-->
+    <!-- The directory that will contain all files containing information on the tests that ran. -->
     <property
       name="results"
       value="${executionDir}/results" />
@@ -856,14 +871,14 @@
 
 
     <!--Directory for JUnit report output, console log output and .log content for each test suite.
-        Overrides default in org.eclipse.test/library.xml-->
+      Overrides default in org.eclipse.test/library.xml -->
     <property
       name="junit-report-output"
       value="${results}/${testedPlatform}" />
     <mkdir dir="${junit-report-output}" />
     <echo message="junit-report-output: ${junit-report-output}" />
 
-    <!--default directory where test-eclipse-sdk will be installed-->
+    <!--default directory where test-eclipse-sdk will be installed -->
     <property
       name="install"
       value="${executionDir}/test-eclipse" />
@@ -871,12 +886,18 @@
     <echo message="install: ${install}" />
 
 
-    <!-- The root of the eclipse installation -->
-    <!-- TODO should have another variable, or computation, know if we should check this, 
-         or also handle tradtional layout, and use "eclipse' folder. 
+    <!--
+      For the context of this script eclipse-home is actually
+      set to be the folder containing the plugins folder
     -->
-    <condition property="eclipse-home" value="${install}/Eclipse.app/Contents/Eclipse" else="${install}/eclipse">
-        <os family="mac"/>
+    <!-- TODO should have another variable, or computation, know if we should check this,
+      or also handle traditional layout, and use "eclipse' folder.
+    -->
+    <condition
+      property="eclipse-home"
+      value="${install}/Eclipse.app/Contents/Eclipse"
+      else="${install}/eclipse">
+      <os family="mac" />
     </condition>
     <mkdir dir="${eclipse-home}" />
     <echo message="eclipse-home: ${eclipse-home}" />
@@ -887,9 +908,9 @@
     <echo message="repoLocation: ${repoLocation}" />
 
     <!--
-        mostly putting previous platform here, since p2 looks for exactly one
-        occurance of "platform-eclipse-" under executionDir, and if it finds two,
-        it won't "find" any.
+      mostly putting previous platform here, since p2 looks for exactly one
+      occurrence of "platform-eclipse-" under executionDir, and if it finds two,
+      it won't "find" any.
     -->
     <property
       name="platformLocation"
@@ -903,8 +924,8 @@
     <mkdir dir="${directorLogs}" />
     <echo message="directorLogs: ${directorLogs}" />
 
-    <!-- this dirctory, with some sort files are created during unit tests
-      ... need to find where to disable/enable jacoco -->
+    <!-- this directory, with some sort files are created during unit tests
+      ... need to find where to disable/enable JaCoCo -->
     <property
       name="coverage-output"
       value="${results}/coverageIGNORE" />
@@ -942,7 +963,7 @@
     <echo message="testDir: ${testDir}" />
     <echo message="testResults: ${testResults}" />
 
-        <!--set up testing directory-->
+    <!--set up testing directory -->
     <unzip
       src="${testFramework}"
       dest="${testDir}"
@@ -959,7 +980,7 @@
     depends="init"
     unless="env.TESTING_TEST_XML">
 
-    <!--run the tests-->
+    <!--run the tests -->
     <exec
       dir="${executionDir}"
       executable="${testExecutable}">
@@ -978,8 +999,8 @@
   </target>
 
   <!--
-       Prints properties in "PHP form" to use on test results summary,
-       to be sure accurate and meaningful.
+    Prints properties in "PHP form" to use on test results summary,
+    to be sure accurate and meaningful.
   -->
   <target
     name="printMainPropertiesAsPHP"
@@ -1085,9 +1106,9 @@
       phpvar="HUDSON_BUILD_URL"
       value="env.BUILD_URL" />
     <!--
-         With HUDSON_URL and WORKSPACE_PATH should be able
-         to figure out URL to WORKSPACE, though only temporarily
-         available (until next job is ran).
+      With HUDSON_URL and WORKSPACE_PATH should be able
+      to figure out URL to WORKSPACE, though only temporarily
+      available (until next job is ran).
     -->
     <printPHPProperty
       phpvar="HUDSON_URL"
@@ -1096,26 +1117,26 @@
       phpvar="HUDSON_WORKSPACE"
       value="env.WORKSPACE" />
     <printPHPProperty
-        phpvar="TESTED_RUNTIME_ID"
-        value="buildIdToUse" />
+      phpvar="TESTED_RUNTIME_ID"
+      value="buildIdToUse" />
     <printPHPProperty
-        phpvar="TEST_TARGET"
-        value="test.target" />
+      phpvar="TEST_TARGET"
+      value="test.target" />
     <printPHPProperty
-        phpvar="ECLIPSE_PERF_DBLOC"
-        value="eclipse.perf.dbloc" />
+      phpvar="ECLIPSE_PERF_DBLOC"
+      value="eclipse.perf.dbloc" />
 
     <printPHPProperty
-         phpvar="ECLIPSE_PERF_CONFIG"
-        value="eclipse.perf.config" />
+      phpvar="ECLIPSE_PERF_CONFIG"
+      value="eclipse.perf.config" />
     <printPHPProperty
-         phpvar="ECLIPSE_PERF_ASSERTAGAINST"
-        value="eclipse.perf.assertAgainst" />
+      phpvar="ECLIPSE_PERF_ASSERTAGAINST"
+      value="eclipse.perf.assertAgainst" />
 
-     <!--
-        We end with an empty line, but it is recommended to not
-        end included PHP files with "end PHP" marker.
-      -->
+    <!--
+      We end with an empty line, but it is recommended to not
+      end included PHP files with "end PHP" marker.
+    -->
     <echo
       message="${EOL}"
       append="true"
@@ -1136,8 +1157,8 @@
       value="VM used for tests, is same that invoked Ant: '${java.home}/bin/java' (that is, 'jvm' not specified by caller)." />
     <echo message="VMSource: ${VMSource}" />
     <!--
-        Remember, we don't want J2SE-X.0 set at all, if there is nothing
-        that can run tests that require that level.
+      Remember, we don't want J2SE-X.0 set at all, if there is nothing
+      that can run tests that require that level.
     -->
     <property
       name="jvm"
@@ -1154,7 +1175,7 @@
     <echo message="full output from 'java -version' of ${jvm} is " />
     <echo message="${javaversionEscaped}" />
 
-    <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment-->
+    <!--enable tests requiring 1.5 or or greater vms to run if running vm level detected matches required execution environment -->
     <condition
       property="J2SE-8.0"
       value="${jvm}">
@@ -1201,8 +1222,8 @@
       value="VM used for tests, specified by caller: 'jvm'=${jvm}" />
     <echo message="VMSource: ${VMSource}" />
     <!--
-        Remember, we don't want J2SE-X.0 set at all, if there is nothing
-        that can run tests that require that level.
+      Remember, we don't want J2SE-X.0 set at all, if there is nothing
+      that can run tests that require that level.
     -->
     <exec
       executable="${jvm}"
@@ -1252,9 +1273,9 @@
     <echo message="J2SE-5.0:  ${J2SE-5.0}" />
   </target>
   <!--
-      function to centralize how we get (that is, set) the value of
-      'javaMajorVersion'. (expected to be integter, such as 5,6,7,8,9,
-      or will be "0" if the version could not be determined, for some reason.
+    function to centralize how we get (that is, set) the value of
+    'javaMajorVersion'. (expected to be integer, such as 5,6,7,8,9,
+    or will be "0" if the version could not be determined, for some reason.
   -->
 
   <target
@@ -1265,11 +1286,11 @@
     <echo message="javaversion in setJavaMajorVersion: ${javaversionEscaped}" />
     <script language="javascript">
 
-    <!--
-         technically does not have to be wrapped in "CDATA" (Ant and BSD define
-         it that way, but if not done, other tools (such as XML Editor) can
-         break the code by changing the formatting.
-    -->
+      <!--
+        technically does not have to be wrapped in "CDATA" (Ant and BSD define
+        it that way, but if not done, other tools (such as XML Editor) can
+        break the code by changing the formatting.
+      -->
     <![CDATA[
       var javaVer = project.getProperty("javaversionEscaped");
       var pattern = new RegExp(/^.*1\.([456789]\.\d)/);

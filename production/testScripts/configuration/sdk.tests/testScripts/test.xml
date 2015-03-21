@@ -167,11 +167,7 @@
     name="initPlatformArhiveName"
     unless="platformArchive">
     <echo message="os.arch ${os.arch}" />
-    <!--
-      we now write this file, just for p2 tests, instead of doing
-      the funky ant replace
-      <loadproperties srcfile="equinoxp2tests.properties" />
-    -->
+
     <condition
       property="platformArchive"
       value="eclipse-platform-${previousReleaseVersion}-linux-gtk.tar.gz">
@@ -266,7 +262,7 @@
       unless="platformTarget"
       message="platformTarget is not defined. Check that platformArchive variable and value is defined correctly, such as in equinoxp2tests.properties in the appropriate testConfig" />
     <echo message="platformTarget ${platformTarget} platformArchive ${platformArchive}" />
-    <!-- The "platformArchive" is a minimal, stable vesion of eclipse runtime binary,
+    <!-- The "platformArchive" is a minimal, stable version of eclipse runtime binary,
       that is used only for its "p2Director" application, to install tests into
       to target test environment. The intent is to make sure that apart of the tests
       works consistently, and does not "break the tests", simply because of some recent
@@ -597,12 +593,14 @@
     <echo message="install: ${install}" />
 
 
-    <!-- The root of the eclipse installation -->
-    <!-- For the context of this script eclipse-home is actually set to be the parent of the folder containing the plugins folder -->
+    <!--
+      For the context of this script eclipse-home is actually set
+      to be the folder containing the plugins folder
+    -->
     <condition
       property="eclipse-home"
       value="${install}/Eclipse.app/Contents/Eclipse"
-      else="eclipse">
+      else="${install}/eclipse">
       <os family="mac" />
     </condition>
     <!-- <mkdir dir="${eclipse-home}" /> -->
@@ -648,8 +646,8 @@
     <mkdir dir="${directorLogs}" />
     <echo message="directorLogs: ${directorLogs}" />
 
-    <!-- this dirctory, with some sort files are created during unit tests
-      ... need to find where to disable/enable jacoco -->
+    <!-- this directory, with some sort files are created during unit tests
+      ... need to find where to disable/enable JaCoCo -->
     <property
       name="coverage-output"
       value="${results}/coverageIGNORE" />
@@ -660,7 +658,7 @@
     <echo message="basicDirectoriesInitialized" />
   </target>
 
-  <!-- this method used only during "unit testing" of this test.xml iself -->
+  <!-- this method used only during "unit testing" of this test.xml itself -->
   <target
     name="testCopyFilesIfTesting"
     if="env.TESTING_TEST_XML">
@@ -724,22 +722,10 @@
     <!--
       test.properties file contains the plugin name including version number,
       and list of required test plug-ins expressed as command-line argument to unzip executable.
-      Generated and packaged at build time by CBI custom maven task.
+      Generated and packaged at build time by CBI custom Maven task.
     -->
     <property file="test.properties" />
-    <!--
-      Try using "loadproperties", instead of "properties file=" to see if
-      that will "evaluate" variables as loaded. Otherwise, the <properties form
-      has to move to "top of file" ... outer scope?
-      <property file="${eclipseBuilderDir}/eclipse/buildConfigs/sdk.tests/testConfigs/${testPlatform}/testing.properties" />
 
-      <property
-      name="testingPropertiesfile"
-      value="${executionDir}/testing.properties" />
-      <loadproperties>
-      <file file="${testingPropertiesfile}" />
-      </loadproperties>
-    -->
     <!--
       suffix added to test output files, along with VM number,
       to identify platform on which tests ran. (currently
@@ -763,7 +749,7 @@
 
     <!--
       Originally needed/provided for p2 tests, but they appear not to
-      be successful in reading or using these proerties any longer.
+      be successful in reading or using these properties any longer.
       Not clear why. So we'll leave it in until understood. (It may be
       useful in other scenarios, such when tested stand alone?)
     -->
@@ -1195,7 +1181,7 @@
     depends="checkCVSPropExists">
     <!--
       TODO: cvstest.properties (file location) is currently
-      hard coded in 'runTest2.xml' adn passed along this 'test.xml'
+      hard coded in 'runTest2.xml' and passed along this 'test.xml'
       via production.properties. Would be better to have the file location
       be part of the platform specific properties files, as we do with "jvm"
     -->
@@ -1251,7 +1237,7 @@
           name="message"
           value="start @{testPlugin}" />
       </antcall>
-      <!--alwasy use eclipse executable to launch tests with the exception of performance tests -->
+      <!--always use eclipse executable to launch tests with the exception of performance tests -->
       <!--condition property="useEclipseExe" value="true">
         <not>
         <equals arg1="${test.target}" arg2="performance"/>
@@ -1355,9 +1341,9 @@
       value="${executionDir}/JUNIT.XSL" />
     <!--
       TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
-      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM 
+      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM
       value"?
-      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it 
+      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it
       should. Perhaps needs tweak in Hudson job?
       TODO: would have to compute these in runTest2.xml, to make part of production properties,
       and phpproperties.php
@@ -1365,7 +1351,7 @@
     <property
       name="eclipse.perf.dbloc"
       value="${eclipse.perf.dbloc.value}" />
-    <!-- buildIdToUse equals either baselinePerfVersion or else equalus buildId. In either case we want to collect the data -->
+    <!-- buildIdToUse equals either baselinePerfVersion or else equals buildId. In either case we want to collect the data -->
     <!-- TODO: Do we need "buildID" coded somewhere, to know WHICH build to match with?
       Or, else will take large number of "baselines" averaged? -->
     <condition
@@ -1382,9 +1368,9 @@
     <!--
       This "assert" property works, in this context, because we run baseline first,
       when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline 
+      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline
       data.
-      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some 
+      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some
       experiences makes me doubt that?
       TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
@@ -1940,7 +1926,7 @@
     name="allPerformance"
     depends="init">
     <!-- There are 41 test suites to claim they have
-      performanc targts. These "sub groups" are just
+      performance targets. These "sub groups" are just
       and attempt to help investigate which work, which don't, etc. -->
     <antcall target="selectPerformance" />
     <antcall target="otherPerformance" />
@@ -1951,7 +1937,7 @@
     are temporary, just to help investigate which work, which
     don't, etc. Visually inspected each, and found these 21 do
     have performance targets, which means there's about 20 that
-    have empty peformance targets.
+    have empty performance targets.
   -->
   <target
     name="selectPerformance"
@@ -2105,7 +2091,7 @@
   <!--
     admittedly, not quite all of 'platform', but for
     now serves dual purpose of a "short set" of tests, that area
-    relatively quick, and realtively reliable on build.eclipse.org hardware
+    relatively quick, and relatively reliable on build.eclipse.org hardware
   -->
   <target
     name="platform"
@@ -2231,7 +2217,7 @@
         message="@{msg}     "
         append="true"
         file="${junit-report-output}/testTimes.log" />
-      <!-- This executable should run on all unix platforms (linux, mac) -->
+      <!-- This executable should run on all unix platforms (Linux, mac) -->
       <exec
         executable="date"
         append="true"
@@ -2245,7 +2231,7 @@
     name="markCurrentTime"
     depends="checkOS"
     if="isUnix">
-    <!-- caller in callant is expected to supply msg -->
+    <!-- caller in antcall is expected to supply msg -->
     <property
       name="message"
       value="no message given by caller" />
@@ -2255,13 +2241,13 @@
 
   <!--
     function to centralize how we get (that is, set) the value of
-    'javaMajorVersion'. (expected to be integter, such as 5,6,7,8,9,
+    'javaMajorVersion'. (expected to be integer, such as 5,6,7,8,9,
     or will be "0" if the version could not be determined, for some reason.
   -->
 
   <target name="getJavaMajorVersion">
     <!--
-      TODO: this assumes we are running ant, with same VM as we'll eventuall use
+      TODO: this assumes we are running ant, with same VM as we'll eventually use
       during test. Valid assumption most the time, but ... not necessarily always.
     -->
 
@@ -2335,7 +2321,7 @@
         <os family="unix" />
       </or>
     </condition>
-    <!-- if not set above, set to a ridulous value, that will at least give hint of action to take once it causes a failure -->
+    <!-- if not set above, set to a ridiculous value, that will at least give hint of action to take once it causes a failure -->
     <property
       name="guessed.os"
       value="Value of 'os' could not be determined. 'os' must be set as system variable." />
@@ -2363,7 +2349,7 @@
       value="gtk">
       <os family="unix" />
     </condition>
-    <!-- if not set above, set to a ridulous value, that will at least give hint of action to take once it causes a failure -->
+    <!-- if not set above, set to a ridiculous value, that will at least give hint of action to take once it causes a failure -->
     <property
       name="guessed.ws"
       value="Value of 'ws' could not be determined. 'ws' must be set as system variable." />
@@ -2393,7 +2379,7 @@
         <os arch="i586" />
       </or>
     </condition>
-    <!-- if not set above, set to a ridulous value, that will at least give hint of action to take once it causes a failure -->
+    <!-- if not set above, set to a ridiculous value, that will at least give hint of action to take once it causes a failure -->
     <property
       name="guessed.ws"
       value="Value of 'arch' could not be determined. 'arch' must be set as system variable." />
