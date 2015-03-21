@@ -1,12 +1,22 @@
 #!/usr/bin/env bash
 
+# Small utility to test "build area" that correct number of 
+# IUs ae created for "tooling-type" IUs and "config-IUs". 
+# TODO: should formalize in Java, and check repository directly? 
+# TODO: may need adjustment to better check "MacApp" layout? 
+# 3/21/2015 - did check to check for zero symbolic links (used to check 
+# for 6, but now we no longer create them. 
+
 BUILD_HOME="/shared/eclipse/builds"
+
+echo -e "\n\tBUILD_HOME: ${BUILD_HOME}\n"
+
 BUILD_MAJOR_VERSION=4
 BUILD_TYPE=$1
 if [[ -z "$BUILD_TYPE" ]]
 then
     BUILD_TYPE="I"
-    echo -e "\n\tBUILD_TYPE not specified on command line, I assumed"
+    echo -e "\tBUILD_TYPE not specified on command line, 'I' assumed.\n"
 fi
 NERRORS=0
 # products means, sdk.ide (aka SDK), rcp.id, rcp.sdk.id, platform.ide (aka platform binary), platform.sdk
@@ -31,7 +41,7 @@ gtk.solaris.x86 \
 win32.win32.x86 \
 win32.win32.x86_64 \
 )
-
+# M builds, as of 4.4.x had Mac 32 bit
 if [[ ${BUILD_TYPE} == "M" ]]
 then
     PLATFORMS+=(cocoa.macosx.x86)
@@ -88,14 +98,15 @@ printf "\t\tFor full list: %s\n" "grep --include Info.plist -A 1 -r \"<key>CFBun
 
 
 printf "\n\t%s" "Symbolic Link Test: "
-EXPECTED_LINKS=${NPRODUCTS}
-# M builds still have 32 bit Mac's
-if [[ ${BUILD_TYPE} == "M" ]]
-then
-    EXPECTED_LINKS=$(( ${NPRODUCTS} * 2 ))
-fi
-# add one, for the 'rt'. Always only 64 bit.
-EXPECTED_LINKS=$(( $EXPECTED_LINKS + 1 ))
+# expect 0, now with new Mac App layout
+EXPECTED_LINKS=0
+## M builds still have 32 bit Mac's
+#if [[ ${BUILD_TYPE} == "M" ]]
+#then
+#    EXPECTED_LINKS=$(( ${NPRODUCTS} * 2 ))
+#fi
+## add one, for the 'rt'. Always only 64 bit.
+#EXPECTED_LINKS=$(( $EXPECTED_LINKS + 1 ))
 
 nLinks=$( find ${ECLIPSE_BUILD_DIR}/ -lname "*eclipse" -or -lname "*rt" | wc -l ) 
 
@@ -105,7 +116,7 @@ then
     # should "count errors" as we get other tests
     : $((NERRORS++))
 else
-    printf "\t%s\n" "Ok."
+    printf "\t%s\n" "Ok. Found ${nLinks}."
 fi
 
 if [[ $NERRORS != 0 ]]
