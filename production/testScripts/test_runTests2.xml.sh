@@ -76,12 +76,12 @@ java -XshowSettings -version
 # Note: currently this file always comes from master, no matter what branch is being built/tested.
 wget -O ${WORKSPACE}/getEBuilder.xml --no-verbose   http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/testScripts/hudsonBootstrap/getEBuilder.xml 2>&1
 
-# or test the local version, checked-out version from tree location, 
+# or test the local version, checked-out version from tree location,
 # not necessarily checked in, yet, though many other
 # files are still checked out.
 # cp -v hudsonBootstrap/getEBuilder.xml ${WORKSPACE}/
 
-# Can only test the "downloadURL form" if there is a current, accurate build. 
+# Can only test the "downloadURL form" if there is a current, accurate build.
 # During development, should use git/master version. (Not sure what this downloads, then?)
 
 ANTFILE=getEBuilder.xml
@@ -95,14 +95,14 @@ echo "PWD: $PWD"
 
 #  ? There are a number of test-<something> methods in test xml which, by convention, mean
 #    to simply test the test script itself. The test-all target runs all of those tests.
-#  MUST change the arch values here, then testing on other platforms! 
-#ant -f "${WORKSPACE}/${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
-ant -f "${WORKSPACE}/${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
+#  MUST change the arch values here, then testing on other platforms!
+ant -f "${WORKSPACE}/${ANTFILE}" -Dbasebuilderlocal=/shared/eclipse/buildtests -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
+#ant -f "${WORKSPACE}/${ANTFILE}" -Dbasebuilderlocal=/shared/eclipse/buildtests -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
 rc=$?
-if [[ $rc == 0 ]] 
+if [[ $rc == 0 ]]
 then
    echo "Ant returned non-zero return code: $rc."
-else 
+else
    echo "Ant returned normally. (Check log for BUILD FAILED/SUCCESS)"
 fi
 echo "check output in ${WORKSPACE}, especially ${WORKSPACE}/workarea"
