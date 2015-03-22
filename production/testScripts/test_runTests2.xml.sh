@@ -47,7 +47,9 @@ export ANT_HOME=/shared/common/apache-ant-1.9.2
 #export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
 
 export JAVA_HOME=/shared/common/jdk1.7.0-latest
-export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin
+# added /opt/local/bin for 'port' versoin of wget, on Mac
+export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin:/opt/local/bin
+
 # Be sure to set to a "fresh" non-cluttered area, so can be easily cleaned up.
 export WORKSPACE=${HOME}/tempworkarea
 
@@ -93,8 +95,9 @@ echo "PWD: $PWD"
 
 #  ? There are a number of test-<something> methods in test xml which, by convention, mean
 #    to simply test the test script itself. The test-all target runs all of those tests.
-
-ant -f "${WORKSPACE}/${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
+#  MUST change the arch values here, then testing on other platforms! 
+#ant -f "${WORKSPACE}/${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=linux -Dosgi.ws=gtk -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
+ant -f "${WORKSPACE}/${ANTFILE}" -DbuildId=$buildId -DeclipseStream=$eclipseStream -Dosgi.os=macosx -Dosgi.ws=cocoa -Dosgi.arch=x86_64 -DEBUILDER_HASH=${EBUILDER_HASH} -DdownloadURL=http://download.eclipse.org/eclipse/downloads/drops4/${buildId} -Dtest.target=performance -DskipDerby=true
 rc=$?
 if [[ $rc == 0 ]] 
 then
