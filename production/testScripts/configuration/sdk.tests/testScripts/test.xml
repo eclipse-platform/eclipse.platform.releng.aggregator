@@ -490,16 +490,15 @@
 
   <target
     name="initStreamSpecificProperties"
+    depends="initConfigurationDir"
     unless="streamSpecificPropertiesSet">
     <!--
-      Note: configurationDir is set by runTest2.xml in 'production'
-      environment. Here we will set to basedir, if not already set.
+      Note: configurationDir used to be set by runTest2.xml in 'production'
+      environment only. We may want to set to basedir, if not already set.
       But, this file, streamSpecific.properties should always be optional.
       TODO: better document what is in that file.
     -->
-    <property
-      name="configurationDir"
-      value="basedir" />
+
     <property file="${configurationDir}/streamSpecific.properties" />
     <property
       name="streamSpecificPropertiesSet"
@@ -513,7 +512,7 @@
   -->
   <target
     name="initStreamVariables"
-    depends="initDownloadHosts,initStreamSpecificProperties">
+    depends="initDownloadHosts,initConfigurationDir,initStreamSpecificProperties">
 
     <property file="${configurationDir}/streamSpecific.properties" />
     <fail
@@ -629,11 +628,20 @@
     name="testCopyFilesIfTesting"
     if="env.TESTING_TEST_XML">
     <echo message="Test of test running on ${osgi.os}" />
-    <echo message="Reading config from ${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration/sdk.tests/testConfigs/${osgi.os}" />
+    <echo
+      message="Reading config from ${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration/sdk.tests/testConfigs/${osgi.os}" />
     <copy todir="${executionDir}">
-      <fileset dir="${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration/sdk.tests/testConfigs/${osgi.os}" />
+      <fileset
+        dir="${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration/sdk.tests/testConfigs/${osgi.os}" />
     </copy>
   </target>
+
+  <target name="initConfigurationDir">
+    <property
+      name="configurationDir"
+      value="${WORKSPACE}/eclipse.platform.releng.aggregator/production/testScripts/configuration" />
+  </target>
+
   <target
     name="initInstallDir"
     depends="initBuildId, initStreamSpecificProperties, checkInstallDir"
@@ -1360,9 +1368,9 @@
       value="${executionDir}/JUNIT.XSL" />
     <!--
       TODO: seems these "performance values" should "get into" library.xml in an easier way, that didn't require a change in library.xml.
-      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM 
+      TODO: some question on how "fine" to make name. Such as, should "platform, architecture, window system" be "separated" from "VM
       value"?
-      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it 
+      TODO: for local, non-production tests, eclipse.perf.dbloc is not being assigned value from "localTestsProperties.shsource" as it
       should. Perhaps needs tweak in Hudson job?
       TODO: would have to compute these in runTest2.xml, to make part of production properties,
       and phpproperties.php
@@ -1387,9 +1395,9 @@
     <!--
       This "assert" property works, in this context, because we run baseline first,
       when buildIdToUse != buildId that is a "baseline run" (so, no "assert" for that baseline run).
-      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline 
+      But, when buildIdToUse == buildId that is a "normal run" so then we do want to "assert" against the already-collected baseline
       data.
-      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some 
+      Note: Note, docs say order does not matter, and could specify "just build" and reset filled in with what's in 'config', but some
       experiences makes me doubt that?
       TODO: design problem: how to distinguish assert against baseline vs. baseline alt.
     -->
