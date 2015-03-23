@@ -433,8 +433,7 @@
         arg1="${testPlatform}"
         arg2="linux32" />
     </condition>
-    <!-- <condition property="getArtifacts" value="getmaczips"> <equals arg1="${testPlatform}"
-      arg2="macmini" /> </condition> -->
+
     <condition
       property="getArtifacts"
       value="getmacosx">
@@ -610,20 +609,20 @@
     <property
       name="testDir"
       value="${WORKSPACE}/workarea/${buildId}" />
-    <echo message="[DEBUG] in test.xml: testDir: ${testDir}" />
+    <echo message="[DEBUG] in runTests2.xml: testDir: ${testDir}" />
 
     <property
       name="executionDir"
       value="${testDir}/eclipse-testing" />
     <mkdir dir="${executionDir}" />
-    <echo message="[DEBUG] in test.xml: executionDir: ${executionDir}" />
+    <echo message="[DEBUG] in runTests2.xml: executionDir: ${executionDir}" />
 
     <!--default directory where test-eclipse-sdk will be installed -->
     <property
       name="install"
       value="${executionDir}/test-eclipse" />
     <mkdir dir="${install}" />
-    <echo message="[DEBUG] in test.xml: the value of install was set to: ${{install}" />
+    <echo message="[DEBUG] in runTests2.xml: the value of install was set to: ${{install}" />
   </target>
 
 
@@ -646,7 +645,7 @@
         <istrue value="${isMacAppLayout}" />
       </and>
     </condition>
-    <echo message="[DEBUG] the value of eclipse-home was set to: ${eclipse-home}" />
+    <echo message="[DEBUG] in runTest2.xml the value of eclipse-home was set to: ${eclipse-home}" />
   </target>
   <!-- Intended to be called only from initEclipseHome, simply as extra information
     for debugging -->
@@ -862,7 +861,7 @@
 
   <target
     name="initBasicDirectories"
-    depends="initWorkspace,initBuildId, initStreamSpecificProperties,initInstallDir, initEclipseHome, initPlatformSpecificProperties"
+    depends="initWorkspace,initBuildId, initStreamSpecificProperties,initInstallDir, initEclipseHome, initPlatformSpecificProperties, setJavaMajorVersion"
     unless="basicDirectoriesInitialized">
 
     <property environment="env" />
@@ -883,6 +882,14 @@
       value="${executionDir}/platformLocation" />
     <mkdir dir="${platformLocation}" />
     <echo message="platformLocation: ${platformLocation}" />
+    
+    <property
+      name="testedPlatformConfig"
+      value="${osgi.os}.${osgi.ws}.${osgi.arch}" />
+    
+    <property
+      name="testedPlatform"
+      value="${osgi.os}.${osgi.ws}.${osgi.arch}_${javaMajorVersion}" />
 
     <!-- The directory that will contain all files containing information on
       the tests that ran. -->
