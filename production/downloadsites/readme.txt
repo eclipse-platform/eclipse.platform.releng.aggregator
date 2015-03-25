@@ -40,6 +40,9 @@ rsync -aP --delete-excluded \
 
 == Similar for "updates"
 
+NOTE: the files are stored here in XML format, so they are more easily 
+readable, but they should be compressed (jarr'ed up) for deployment.
+
 The files are the "categories" displayed for the composites sites, such as for
 Kepler sites, such as :
 http://download.eclipse.org/eclipse/updates/4.3/
