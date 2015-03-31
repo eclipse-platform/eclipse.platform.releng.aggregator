@@ -22,5 +22,5 @@ fi
 source "$1"
 
 printf "\n\t%s\n\n" "Dirt Report for $BUILD_ID" 
-git -C "$aggDir" status
-git -C "$aggDir" submodule foreach git status
+git -C "$aggDir" status --short
+git -C "$aggDir" submodule foreach git status --short
