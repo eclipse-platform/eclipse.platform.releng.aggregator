@@ -159,8 +159,10 @@
 
 <echo>org.eclipse.platform.doc.isv/buildDoc.xml - generateJavadoc:
       Using javadocExecutable: ${javadocExecutable}</echo>
+<!--
 <echo>${basedir}/${replaceFile} before _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
+-->
 
 			<!-- strip away leading path -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^.*/([^/]*)$$" replace="\1" />
@@ -169,16 +171,20 @@
 			<!-- create "<aa>_*[.jar]=<aa><version>[.jar]" property for lines with a version -->
 		<replaceregexp file="${basedir}/${replaceFile}" flags="g" match="(?m)^(.*)[-_]\d+\.\d+\.\d+.*?(.jar)?$$" replace="\1_*\2=\0" />
 		
+<!--
 <echo>${basedir}/${replaceFile} after _* expansion:</echo>
 <concat><filelist files="${basedir}/${replaceFile}"></filelist></concat>
+-->
 		
 		<!-- workaround for bug 402392, which can make the ${replaceFile} end up empty: -->
 		<echo file="${basedir}/${replaceFile}" append="true">dummyForBug402392=dummyForBug402392&#xA;</echo>
 		
 		<replace file="${basedir}/${optionsFile}" replacefilterfile="${basedir}/${replaceFile}"/>
 
+<!--
 <echo>${basedir}/${optionsFile} after _* expansion:</echo>
 <concat><filelist files="${basedir}/${optionsFile}"></filelist></concat>
+-->
 
 		<!--scrub isv plugin directories of any preexisting api doc content-->
 		<delete dir="reference/api"/>
