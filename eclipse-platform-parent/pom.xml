@@ -358,6 +358,23 @@
               <escapeString>\</escapeString>
             </configuration>
           </execution>
+           <execution>
+            <id>saveproperties</id>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>saveproperties</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -770,7 +787,7 @@
                 </repository>
               </repositories>
               <!-- this is to fix some lucene 3.x compatibility issue -->
-              <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
+                <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
               <!-- actual indexer call -->
               <appArgLine>-data target/apibuild-workspace -application org.eclipse.ant.core.antRunner -buildfile target/.apibuild.xml</appArgLine>
               <dependencies>
@@ -815,19 +832,6 @@
             </executions>
           </plugin>
         </plugins>
-        <resources>
-          <!--
-           This task is to save properties we are explicitly interested in using later,
-           such as when displaying in other reports or php pages. It depends on having
-           the "template" file be part of the 'saveproperties' directory. Its only purpose
-           is to "fill in" the property values named in that file.
-       -->
-          <resource>
-            <directory>saveproperties</directory>
-            <filtering>true</filtering>
-          </resource>
-        </resources>
-
       </build>
     </profile>
 
