@@ -321,12 +321,12 @@ else
     fi
   fi
 
-  if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
-  then
-    echo "[WARNING] Did not run pom-version-updater due to other variable settings"
-  else
+  #if [[ "true" == "${USING_TYCHO_SNAPSHOT}" || "true" == "${PATCH_TYCHO}" ]]
+  #then
+  #  echo "[WARNING] Did not run pom-version-updater due to other variable settings"
+  #else
     $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
-  fi
+  #fi
   # if file exists, pom update failed
   if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
   then
