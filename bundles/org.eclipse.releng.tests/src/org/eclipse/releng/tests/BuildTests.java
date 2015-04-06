@@ -680,7 +680,7 @@ public class BuildTests extends TestCase {
 		assertTrue("Either file (url) does not exist (build may have been removed?), or HTTP response does not contain content length. urlOfFile: " + urlOfFile,
 				(!(-1 == nBytes)));
 		assertFalse("dirtReport file has increased in size, indicating a regression. See " + urlOfFile, nBytes > MAX_ALLOWED_BYTES);
-        assertFalse("Good news! dirtReport file has decreased in size, compared to standard, so the standardDirtReport.txt file should be replaced with the one at " + urlOfFile, nBytes < MAX_ALLOWED_BYTES);
+        assertFalse("Good news! dirtReport file has decreased in size, compared to standard, so the standardDirtReport.txt file should be replaced with the one at " + urlOfFile + ". But NOTE: results may not be accurate, if there are other errors in build, so diff is recommended.", nBytes < MAX_ALLOWED_BYTES);
 
 	}
 
