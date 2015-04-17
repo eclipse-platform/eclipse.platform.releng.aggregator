@@ -199,6 +199,7 @@ fn-write-property CBI_JDT_VERSION_ARG
 fn-write-property PATCH_BUILD
 fn-write-property ALT_POM_FILE
 fn-write-property JAVA_DOC_TOOL
+
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
 then
@@ -209,6 +210,7 @@ fi
 fn-write-property USING_TYCHO_SNAPSHOT
 fn-write-property PATCH_TYCHO
 fn-write-property PATCH_SWT
+fn-write-property JAR_PROCESSOR_JAVA
 
 fn-write-property buildDirectory
 fn-write-property BUILD_ENV_FILE
