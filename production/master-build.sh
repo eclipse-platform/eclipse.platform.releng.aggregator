@@ -210,7 +210,7 @@ fi
 fn-write-property USING_TYCHO_SNAPSHOT
 fn-write-property PATCH_TYCHO
 fn-write-property PATCH_SWT
-fn-write-property JAR_PROCESSOR_JAVA
+#fn-write-property JAR_PROCESSOR_JAVA
 
 fn-write-property buildDirectory
 fn-write-property BUILD_ENV_FILE
