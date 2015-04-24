@@ -33,7 +33,9 @@ NEWUMASK="0002"
 oldumask=$(umask)
 umask $NEWUMASK
 
-
+echo "ulimit (file handles): $( ulimit -n ) "
+ulimit -n 2048
+echo "ulimit (file handles): $( ulimit -n ) "
 
 # all optional
 # normally, when ran from crobjob, none should be specified

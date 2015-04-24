@@ -15,6 +15,10 @@ if [ ! -r "$INITIAL_ENV_FILE" ]; then
   exit 1
 fi
 
+echo "ulimit (file handles): $( ulimit -n ) "
+ulimit -n 2048
+echo "ulimit (file handles): $( ulimit -n ) "
+
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
 
