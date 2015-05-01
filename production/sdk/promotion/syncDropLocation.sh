@@ -82,10 +82,10 @@ function sendPromoteMail ()
   logSize=0
   if [[ -e ${comparatorLogPath} ]]
   then
-     logSize=$(stat -c '%s' ${comparatorLogPath} )
-     echo -e "DEBUG: comparatorLog found at\n\t${comparatorLogPath}\n\tWith size of $logSize bytes"
+    logSize=$(stat -c '%s' ${comparatorLogPath} )
+    echo -e "DEBUG: comparatorLog found at\n\t${comparatorLogPath}\n\tWith size of $logSize bytes"
   else
-     echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
+    echo -e "DEBUG: comparatorLog was surprisingly not found at:\n\t${comparatorLogPath}"
   fi
 
 
@@ -101,8 +101,8 @@ function sendPromoteMail ()
     EXTRA_SUBJECT_STRING="${EXTRA_SUBJECT_STRING} - POM UPDATES REQUIRED"
   fi
 
-    # 4.3.0 Build: I20120411-2034
-    SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
+  # 4.3.0 Build: I20120411-2034
+  SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
 
   # override in localBuildProperties.shsource if doing local tests
   TO=${TO:-"platform-releng-dev@eclipse.org"}
@@ -128,9 +128,9 @@ function sendPromoteMail ()
 
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
-     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
+    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
   else
-     echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
+    echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
 
   # Do not include repo, if build failed
@@ -152,15 +152,15 @@ function sendPromoteMail ()
     message1="${message1}<p><pre>\n"
     for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
     do
-       echo "DEBUG: pom update file: $file"
-       # rare there would be non-existent file, given the logic that got us here,
-       # but we'll check just to be sure.
-       if [[ -e $file ]]
-       then
-         # add scissors line ... for each "repo patch"? so extra info is not added to comment
-         message1="${message1}\n-- >8 --\n"
-         message1="${message1}$(cat $file)"
-       fi
+      echo "DEBUG: pom update file: $file"
+      # rare there would be non-existent file, given the logic that got us here,
+      # but we'll check just to be sure.
+      if [[ -e $file ]]
+      then
+        # add scissors line ... for each "repo patch"? so extra info is not added to comment
+        message1="${message1}\n-- >8 --\n"
+        message1="${message1}$(cat $file)"
+      fi
     done
     message1="${message1}\n</pre></p>"
   fi
@@ -217,20 +217,20 @@ function startTests()
   echo "buildId: $buildId"
   echo "EBUILDER_HASH: $EBUILDER_HASH"
 
-    BUILD_ROOT=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-    eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
-    dlFromPath=$( dlFromPath $eclipseStream $buildId )
-    echo "DEBUG CBI dlFromPath: $dlFromPath"
-    buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
-    echo "DEBGUG CBI buildDropDir: $buildDropDir"
-    builderDropDir=${buildDropDir}/${eclipsebuilder}
-    echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
+  BUILD_ROOT=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
+  dlFromPath=$( dlFromPath $eclipseStream $buildId )
+  echo "DEBUG CBI dlFromPath: $dlFromPath"
+  buildDropDir=${BUILD_ROOT}/siteDir/$dlFromPath/${buildId}
+  echo "DEBGUG CBI buildDropDir: $buildDropDir"
+  builderDropDir=${buildDropDir}/${eclipsebuilder}
+  echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
 
   # finally, execute
   ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
 }
 
-# this funtion currently syncs local repo on build machine, and adds
+# this function currently sync's local repo on build machine, and adds
 # it to composite, on download server.
 function syncRepoSite ()
 {
@@ -262,10 +262,20 @@ function syncRepoSite ()
 
   fromDir=$(updateSiteOnBuildDir "$eclipseStream" "$buildId" )
   toDir=$(updateSiteOnDL "$eclipseStream" "$buildId" )
-  #toDir="/home/data/httpd/download.eclipse.org/eclipse/updates/4.3-builds"
 
   if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
   then
+    # first create XZ compression
+    source createXZ.shsource
+    createXZ "${fromDir}"
+    RC=$?
+    if [[ $RC != 0 ]]
+    then
+      echo -e "\n\tERROR: createXZ returned non-zero return code: $RC"
+      echo -e "\t\tvalue of 'fromDir' was ${fromDir}"
+      exit $RC
+    fi
+
     rsync --times --omit-dir-times --recursive "${fromDir}" "${toDir}"
     RC=$?
   else
@@ -280,6 +290,9 @@ function syncRepoSite ()
     echo "toDir: $toDir" >&2
     return $RC
   fi
+
+
+
   # update composite!
   # add ${buildId} to {toDir}
 
