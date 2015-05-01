@@ -41,7 +41,17 @@ if [[ $RC == 0 ]]
 then
   ${PROMOTE_IMPL}/addRepoProperties.sh ${BUILDMACHINE_SITE} ${REPO_SITE_SEGMENT} ${DL_SITE_ID}
 else
-  echo "ERROR: could not run add repo properties. Add manually."
+  echo "ERROR: could not run add repo properties."
+  exit $RC
+fi
+
+source ${PROMOTE_IMPL}/createXZ.shsource
+createXZ
+RC=$?
+if [[ $RC != 0 ]]
+then
+  echo "ERROR: could not create XZ compressed metadata. Return code: $RC."
+  exit $RC
 fi
 
 printf "\n\t%s\n" "rsync build machine repo site, to downloads repo site."
