@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+function createXZ 
+{
+  # First get back to XML file
+  # Then XZ compress that xml file
+  # then add p2.index
+  #
+  if [[ -z "${BUILDMACHINE_SITE}" ]]
+  then
+    echo "ERROR: this script requires env variable of BUILDMACHINE_SITE"
+    return 1
+  fi
+
+  # confirm exists (pretty bad, if it doesn't!) 
+  CONTENT_JAR_FILE="${BUILDMACHINE_SITE}/content.jar"
+  if [[ ! -e "${CONTENT_JAR_FILE}" ]]
+  then
+    echo -e "\n\tERROR: content.jar file did not exist at ${BUILDMACHINE_SITE}"
+    return 1
+  fi
+
+  unzip "${CONTENT_JAR_FILE}" -d "${BUILDMACHINE_SITE}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: could not unzip ${CONTENT_JAR_FILE}."
+    return $RC
+  fi
+
+  CONTENT_XML_FILE="${BUILDMACHINE_SITE}/content.xml"
+  tz -e "${CONTENT_XML_FILE}"
+  RC=$?
+  if [[ $RC != 0 ]]
+  then
+    echo "ERROR: could not XZ -e ${CONTENT_XML_FILE}."
+    return $RC
+  fi
+
+  P2_INDEX_FILE="${BUILDMACHINE_SITE}/p2.index"
+  echo "metadata.repository.factory.order= content.xml.xz,content.xml,!" > "${P2_INDEX_FILE}"
+  echo "version=1" >> "${P2_INDEX_FILE}"
+
+}
