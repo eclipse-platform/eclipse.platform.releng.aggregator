@@ -33,7 +33,21 @@ NEWUMASK="0002"
 oldumask=$(umask)
 umask $NEWUMASK
 
+echo "ulimit (file handles): $( ulimit -n ) "
+ulimit -n 2048
+echo "ulimit (file handles): $( ulimit -n ) "
 
+echo "locale charmap: $(locale charmap)"
+echo "LC_ALL: $LC_ALL"
+echo "LANG: $LANG"
+echo "LANGUAGE: $LANGUAGE"
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+echo "LC_ALL: $LC_ALL"
+echo "LANG: $LANG"
+echo "LANGUAGE: $LANGUAGE"
+echo "locale charmap: $(locale charmap)"
 
 # all optional
 # normally, when ran from crobjob, none should be specified
