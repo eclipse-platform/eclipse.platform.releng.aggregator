@@ -79,9 +79,9 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NA
 export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
 export CBI_JDT_VERSION="3.9.2.v20140309-1413"
 
-export BRANCH=david_williams/BETA_JAVA8_LUNA
+export BRANCH=BETA_JAVA9
 export BUILD_TYPE=Y
-export STREAM=4.4.0
+export STREAM=4.5.0
 
 eclipseStreamMajor=${STREAM:0:1}
 

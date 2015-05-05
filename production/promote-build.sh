@@ -26,7 +26,7 @@ source $SCRIPT_PATH/build-functions.shsource
 workLocation=/shared/eclipse/sdk/promotion
 
 # the cron job must know about and use this same
-# location to look for its promotions scripts. (i.e. implicite tight coupling)
+# location to look for its promotions scripts. (i.e. implicit tight coupling)
 promoteScriptLocationEclipse=$workLocation/queue
 
 # directory should normally exist -- best to create first, with committer's ID --
@@ -53,7 +53,7 @@ then
   EBUILDER_HASH=master
 fi
 
-# Here is content of promtion script:
+# Here is content of promotion script:
 ptimestamp=$( date +%Y%m%d%H%M )
 echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEclipse}/${scriptName}
 echo "# promotion script created at $ptimestamp" >>  ${promoteScriptLocationEclipse}/${scriptName}
@@ -92,7 +92,7 @@ then
   # correct permissions, but if not, we may need to set some permissions first,
   # then use -p on rsync
 
-  # Here is content of promtion script (note, use same ptimestamp created above):
+  # Here is content of promotion script (note, use same ptimestamp created above):
   echo "#!/usr/bin/env bash" >  ${promoteScriptLocationEquinox}/${scriptName}
   echo "# promotion script created at $ptimestamp" >  ${promoteScriptLocationEquinox}/${scriptName}
   echo "rsync --times --omit-dir-times --recursive \"${eqFromDir}\" \"${eqToDir}\"" >> ${promoteScriptLocationEquinox}/${scriptName}

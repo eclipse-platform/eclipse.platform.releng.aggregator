@@ -134,7 +134,7 @@ elif [ "$BUILD_TYPE" = N ]; then
 elif [ "$BUILD_TYPE" = X ]; then
   BUILD_TYPE_NAME="Experimental Branch"
 elif [ "$BUILD_TYPE" = Y ]; then
-  BUILD_TYPE_NAME="Experimental Branch"
+  BUILD_TYPE_NAME="BETA_JAVA9 Branch"
 elif [ "$BUILD_TYPE" = P ]; then
   BUILD_TYPE_NAME="Patch"
 elif [ "$BUILD_TYPE" = S ]; then
@@ -276,7 +276,7 @@ else
   echo "# This is simply a listing of repositories.txt. Remember that for N-builds, "  >> ${buildDirectory}/directory.txt
   echo "# 'master' is always used, and N-builds are not tagged."  >> ${buildDirectory}/directory.txt
   echo "# I and M builds are tagged with buildId: ${BUILD_ID} "  >> ${buildDirectory}/directory.txt
-  echo "# (when repository is a branch, which it typcally is)."  >> ${buildDirectory}/directory.txt
+  echo "# (when repository is a branch, which it typically is)."  >> ${buildDirectory}/directory.txt
   echo "# " >> ${buildDirectory}/directory.txt
 
   if [[ $BUILD_TYPE =~ [IMXYP] ]]
@@ -353,7 +353,7 @@ else
       BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
       fn-write-property BUILD_FAILED
       # TODO: eventually put in more logic to "track" the failure, so
-      # proper actions and emails can be sent. For example, we'd still want to
+      # proper actions and e-mails can be sent. For example, we'd still want to
       # publish what we have, but not start the tests.
       echo "BUILD FAILED. See ${RUN_MAVEN_BUILD_LOG}."
     else
