@@ -76,8 +76,8 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_E
 
 echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME
 
-export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
-export CBI_JDT_VERSION="3.9.2.v20140309-1413"
+#export CBI_JDT_REPO_URL="http://build.eclipse.org/eclipse/jdtx/"
+#export CBI_JDT_VERSION="3.9.2.v20140309-1413"
 
 export BRANCH=BETA_JAVA9
 export BUILD_TYPE=Y
