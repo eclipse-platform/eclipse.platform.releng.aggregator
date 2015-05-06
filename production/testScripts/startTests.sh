@@ -8,7 +8,7 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 # Small utility to start unit tests (or re-run them) after a build
 # and after upload to downloads server is complete.
 
-# need to be running Java 6 and Ant 1.8 for <sript> to work in invokeTestsJSON
+# need to be running Java 6 and Ant 1.8 for <script> to work in invokeTestsJSON
 # and, default on current build system is Ant 1.7 ... so ...
 export ANT_HOME=/shared/common/apache-ant-1.9.2
 
@@ -93,7 +93,7 @@ fi
 
 if [[ "${buildId}" =~ ([MNIXYP]+)([[:digit:]]*)\-([[:digit:]]*) ]]
 then
-  # old, simpler way, if we don't do regex and input checkinging
+  # old, simpler way, if we don't do regex and input checking
   #buildType=${buildId:0:1}
   buildType=${BASH_REMATCH[1]}
 else

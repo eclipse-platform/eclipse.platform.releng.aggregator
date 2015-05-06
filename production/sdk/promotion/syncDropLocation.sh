@@ -351,7 +351,7 @@ then
 fi
 echo "buildId: $buildId"
 
-#TODO: asssume master for now, if unspecified. But should tighten up to through error as scripts get finished.
+#TODO: assume master for now, if unspecified. But should tighten up to through error as scripts get finished.
 EBUILDER_HASH=$3
 if [[ -z "${EBUILDER_HASH}" ]]
 then
@@ -389,7 +389,7 @@ echo "buildType: $buildType"
 echo "BUILD_ENV_FILE: $BUILD_ENV_FILE"
 
 # = = = = = = = = =
-# compute dirctiory on build machine
+# compute directory on build machine
 dropFromBuildDir=$( dropFromBuildDir "$eclipseStream" "$buildId" )
 echo "dropFromBuildDir: $dropFromBuildDir"
 if [[ ! -d "${dropFromBuildDir}" ]]

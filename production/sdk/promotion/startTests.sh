@@ -56,7 +56,7 @@ fi
 
 if [[ "${buildId}" =~ ([MNIXYP]+)([[:digit:]]*)\-([[:digit:]]*) ]]
 then
-  # old, simpler way, if we don't do regex and input checkinging
+  # old, simpler way, if we don't do regex and input checking
   #buildType=${buildId:0:1}
   buildType=${BASH_REMATCH[1]}
 else
