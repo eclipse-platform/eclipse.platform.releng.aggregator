@@ -266,7 +266,7 @@ function syncRepoSite ()
   if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
   then
     # first create XZ compression
-    source createXZ.shsource
+    source "${SCRIPTDIR}/createXZ.shsource"
     createXZ "${fromDir}"
     RC=$?
     if [[ $RC != 0 ]]
