@@ -63,11 +63,11 @@ if [[ "${HIDE_SITE}" != "true" ]]
 then
   ${PROMOTE_IMPL}/runAntRunner.sh ${PROMOTE_IMPL}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}
 else
-  echo "#!/usr/bin/env bash" > deferedCompositeAdd.sh
-  echo "export JAVA_CMD=$JAVA_CMD" >> deferedCompositeAdd.sh
-  echo "export JAVA_EXEC_DIR=${JAVA_EXEC_DIR}" >> deferedCompositeAdd.sh
-  echo "export ECLIPSE_EXE=${ECLIPSE_EXE}" >> deferedCompositeAdd.sh
-  echo "${PROMOTE_IMPL}/runAntRunner.sh ${PROMOTE_IMPL}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}" >> deferedCompositeAdd.sh
-  chmod +x deferedCompositeAdd.sh
-  echo "Remember to add to composite, deferedCompositeAdd.sh, since HIDE_SITE was ${HIDE_SITE}" >> "${CL_SITE}/checklist.txt"
+  echo "#!/usr/bin/env bash" > deferredCompositeAdd.sh
+  echo "export JAVA_CMD=$JAVA_CMD" >> deferredCompositeAdd.sh
+  echo "export JAVA_EXEC_DIR=${JAVA_EXEC_DIR}" >> deferredCompositeAdd.sh
+  echo "export ECLIPSE_EXE=${ECLIPSE_EXE}" >> deferredCompositeAdd.sh
+  echo "${PROMOTE_IMPL}/runAntRunner.sh ${PROMOTE_IMPL}/addToComposite.xml addToComposite -Drepodir=${DLMACHINE_BASE_SITE} -Dcomplocation=${DL_SITE_ID}" >> deferredCompositeAdd.sh
+  chmod +x deferredCompositeAdd.sh
+  echo "Remember to add to composite, deferredCompositeAdd.sh, since HIDE_SITE was ${HIDE_SITE}" >> "${CL_SITE}/checklist.txt"
 fi
