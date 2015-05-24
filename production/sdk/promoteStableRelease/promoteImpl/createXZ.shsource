@@ -42,6 +42,12 @@ function createXZ
     return 1
   fi
 
+  FORCE_ARG=$2
+  if [[ "-force" == ${FORCE_ARG} ]]
+  then
+    FORCE=true
+  fi
+
   # confirm both content.jar and artifacts.jar exist at this site. Note: strong assumption the jar already exists.
   # In theory, if it did not, we could create the jars from the content.xml and artifacts.xml file,
   # And then create the XZ compressed version of the XML file, but for now this is assumed to be a
@@ -79,38 +85,43 @@ function createXZ
   # If someone does want to "re-generate", then may have to delete p2.index file first, to get past this check.
   # If p2.index file exists, check if it contains the "key" value of 'content.xml.xz' and if it does, assume this
   # site has already been converted.
-  P2_INDEX_FILE="${BUILDMACHINE_SITE}/p2.index"
-  if [[ -e "${P2_INDEX_FILE}" ]]
+  # UNLESS, -force has been specified (as second argument).
+  # Then we puposely reproduce. This is important, for example, after changing the mirrorsURL of artifacts.jar/xml file.
+  if [[ "true" != ${FORCE} ]]
   then
-    grep "content.xml.xz" "${P2_INDEX_FILE}" 1>/dev/null
-    RC=$?
-    # For grep, an RC of 1 means "not found", in which case we continue.
-    # An RC of 0 means "found", so then check for 'artifacts.xml.xz if it
-    # it too is not found, then we assume the repo has already been converted,
-    # and we do not touch anything and bail out.
-    # An RC of 2 or greater means some sort of error, we will bail out anyway, but with
-    # different message.
-    if [[ $RC = 0 ]]
+    P2_INDEX_FILE="${BUILDMACHINE_SITE}/p2.index"
+    if [[ -e "${P2_INDEX_FILE}" ]]
     then
-      grep "artifacts.xml.xz" "${P2_INDEX_FILE}" 1>/dev/null
+      grep "content.xml.xz" "${P2_INDEX_FILE}" 1>/dev/null
       RC=$?
+      # For grep, an RC of 1 means "not found", in which case we continue.
+      # An RC of 0 means "found", so then check for 'artifacts.xml.xz if it
+      # it too is not found, then we assume the repo has already been converted,
+      # and we do not touch anything and bail out.
+      # An RC of 2 or greater means some sort of error, we will bail out anyway, but with
+      # different message.
       if [[ $RC = 0 ]]
       then
-        echo -e "\n\tINFO: Will exit, since contents of p2.index file implies already converted this site at "
-        echo -e "  \t${BUILDMACHINE_SITE}"
-        return 0
+        grep "artifacts.xml.xz" "${P2_INDEX_FILE}" 1>/dev/null
+        RC=$?
+        if [[ $RC = 0 ]]
+        then
+          echo -e "\n\tINFO: Will exit ${0##/*/}, since contents of p2.index file implies already converted this site at "
+          echo -e "  \t${BUILDMACHINE_SITE}"
+          return 0
+        else
+          if [[ $RC > 1 ]]
+          then
+            echo -e "\n\tERROR: Will exit ${0##/*/}, since grep returned an error code of $RC"
+            return $RC
+          fi
+        fi
       else
         if [[ $RC > 1 ]]
         then
-          echo -e "\n\tERROR: Will exit, since grep returned an error code of $RC"
+          echo -e "\n\tERROR: Will exit ${0##/*/}, since grep returned an error code of $RC"
           return $RC
         fi
-      fi
-    else
-      if [[ $RC > 1 ]]
-      then
-        echo -e "\n\tERROR: Will exit, since grep returned an error code of $RC"
-        return $RC
       fi
     fi
   fi

@@ -8,4 +8,4 @@
 source ${HOME}/bin/createXZ.shsource
 # don't think this "export function" is needed here?
 export -f createXZ
-createXZ ${PWD}
+createXZ ${PWD} -force

@@ -12,10 +12,10 @@
 # We only ever check for 'true'
 #export INDEX_ONLY=false
 
-export DROP_ID=I20150430-1445
+export DROP_ID=I20150522-2000
 
-export DL_LABEL=4.5M7
-export DL_LABEL_EQ=MarsM7
+export DL_LABEL=4.5RC2
+export DL_LABEL_EQ=MarsRC2
 #export DL_LABEL=4.5
 #export DL_LABEL_EQ=Mars
 
