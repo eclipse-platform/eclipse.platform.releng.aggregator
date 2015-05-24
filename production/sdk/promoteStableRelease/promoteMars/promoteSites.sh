@@ -14,8 +14,8 @@
 
 export DROP_ID=I20150522-2000
 
-export DL_LABEL=4.5RC2
-export DL_LABEL_EQ=MarsRC2
+export DL_LABEL=4.5RC2a
+export DL_LABEL_EQ=MarsRC2a
 #export DL_LABEL=4.5
 #export DL_LABEL_EQ=Mars
 
