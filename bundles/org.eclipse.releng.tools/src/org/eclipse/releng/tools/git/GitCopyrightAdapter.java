@@ -16,6 +16,12 @@ package org.eclipse.releng.tools.git;
 import java.io.IOException;
 import java.util.Calendar;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.egit.core.project.RepositoryMapping;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -28,14 +34,6 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.releng.tools.RelEngPlugin;
 import org.eclipse.releng.tools.RepositoryProviderCopyrightAdapter;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 
@@ -98,7 +96,7 @@ public class GitCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 										file.getName()), e));
 					} finally {
 						if (walk != null)
-							walk.release();
+							walk.close();
 					}
 				}
 			}
