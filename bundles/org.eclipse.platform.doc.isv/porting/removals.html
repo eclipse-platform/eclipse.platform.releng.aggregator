@@ -24,20 +24,11 @@
 </p>
 
 <p>
-Removed APIs in the Luna (4.4) release:
-</p>
-<ol>
- <li><a href="#workspaceLock">WorkspaceLock</a></li>
- <li><a href="#incrementalProjectBuilder_getRule">IncrementalProjectBuilder#getRule()</a></li>
-</ol>
-
-<p>
-API removals after June 2014:
+Removed APIs in the Mars (4.5) release:
 </p>
 <ol>
  <li><a href="#presentation">Workbench presentation API</a></li>
- <li><a href="#runtime">Eclipse 2.0 runtime model and boot API</a></li>
- <li><a href="#auth">Platform authorization API</a></li>
+ <li><a href="#eclipse2view">Eclipse 2.0 ICompatibleWorkbenchPage</a></li>
  <li><a href="#compositeBundles">Composite Bundles</a></li>
  <li><a href="#batchBundleEvent">Batch Bundle Event</a></li>
  <li><a href="#cssextensions">Remove deprecated CSS extension points</a></li>
@@ -49,14 +40,24 @@ API removals after June 2015:
 <ol>
  <li><a href="#listenerlist">org.eclipse.jface.util.ListenerList</a></li>
  <li><a href="#tabletreeviewer">TableTreeViewer</a></li>
-  <li><a href="#tasklist">org.eclipse.ui.views.tasklist.TaskList</a></li>
+ <li><a href="#tasklist">org.eclipse.ui.views.tasklist.TaskList</a></li>
+ <li><a href="#runtime">Eclipse 2.0 runtime model and boot API</a></li>
+ <li><a href="#auth">Platform authorization API</a></li>
+
 </ol>
 
 <p>
 API removals after June 2016:
 </p>
 <ol>
+</ol>
+
+<p>
+API removals after June 2017:
+</p>
+<ol>
  <li><a href="#icontextcomputer">IContextComputer</a></li>
+ <li><a href="#iplatformrunnable">org.eclipse.core.boot.IPlatformRunnable</a></li>
 </ol>
 
 <hr>
@@ -67,42 +68,6 @@ API removals after June 2016:
 <!-- ############################################## -->
 
 <h2>API removals in this release</h2>
-
-<h3>1. <a name="workspaceLock">WorkspaceLock</a></h3>
-<p>
-The <code>WorkspaceLock</code> API allowed a special client (usually platform UI) to
-hook into the locking protocols used by the workspace implementation. This hook
-was used to mitigate deadlocks due to interaction with synchronous SWT events,
-and was never intended to be used by other clients. In the 3.0 release this API
-was deprecated in favor of a more general API provided by the <code>org.eclipse.core.jobs</code>
-bundle. Invoking this API has had no effect since the 3.0 release. The specific API
-being removed includes:
-</p>
-<ul>
-<li>The <code>org.eclipse.core.resources.WorkspaceLock</code> class.</li>
-<li>The method <code>org.eclipse.core.resources.IWorkspace#setWorkspaceLock</code></li>
-</ul>
-<p>
-For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311240" target="_blank">bug 311240</a>.
-</p>
-
-<h3>2. <a name="incrementalProjectBuilder_getRule">IncrementalProjectBuilder#getRule()</a></h3>
-<p>
-The <code>IncrementalProjectBuilder#getRule()</code> method returned a scheduling rule 
-that was required for building the project by the builder. This method was intended to be used by the builder framework only.
-In the 3.6 release this method was deprecated in favor of a more general method <code>IncrementalProjectBuilder#getRule(int, Map)</code>. 
-The specific API being removed includes:
-</p>
-<ul>
-<li>The method <code>org.eclipse.core.resources.IncrementalProjectBuilder#getRule()</code></li>
-</ul>
-<p>
-For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=310072" target="_blank">bug 310072</a>.
-</p>
-
-<!-- ############################################## -->
-
-<h2>API removals after June 2014</h2>
 
 <h3>1. <a name="presentation">Workbench presentation API</a></h3>
 <p>
@@ -120,24 +85,6 @@ layout and style. The following API will be removed:
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
 </p>
 
-<h3>2. <a name="runtime">Eclipse 2.0 runtime model and boot API</a></h3>
-<p>
-When the Eclipse runtime transitioned to use OSGi as its implementation, some existing
-APIs for interacting with the old runtime were deprecated and moved to a compatibility fragment
-(<tt>org.eclipse.core.runtime.compatibility</tt>). All API that was still valid was moved
-elsewhere. These APIs have been non-functional since Eclipse 3.0 and will therefore
-be removed in the future. The following packages will be removed:
-</p>
-<ul>
- <li><tt>org.eclipse.core.boot</tt></li>
- <li><tt>org.eclipse.core.runtime.model</tt></li>
- </ul>
- The compatibility fragment, <tt>org.eclipse.core.runtime.compatibility</tt> will
- also be removed.
-<p>
-For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
-</p>
-
 <h3>2. <a name="eclipse2view">Eclipse 2.0 ICompatibleWorkbenchPage</a></h3>
 <p>
 Eclipse 4.4 removed the support for Eclipse 2.0 plug-ins. We will therefore remove the <code>ICompatibleWorkbenchPage</code> interface and the <code>org.eclipse.ui.workbench.compatibility</code> plug-in after the Luna release.
@@ -145,31 +92,9 @@ Eclipse 4.4 removed the support for Eclipse 2.0 plug-ins. We will therefore remo
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=431178" target="_blank">bug 431178</a>.
 </p>
 
-<h3>3. <a name="auth">Platform authorization API</a></h3>
-<p>
-Since Eclipse 1.0, the Eclipse Platform class provided API for storing and retrieving
-passwords in a keyring file. This API used an inherently insecure method for encrypting 
-credentials, and used a custom encryption algorithm that made it difficult for some 
-consumers to distribute and export Eclipse-based products. For these and other reasons,
-this API was deprecated and replaced in Eclipse 3.4 with a new Equinox secure storage API.
-In Eclipse 4.2 the implementation of the old authorization methods was removed, but the API left in place. 
-This old API will be removed completely in a future release. The following API methods will
-be removed from <tt>org.eclipse.core.runtime.Platform</tt>:
-</p>
-<ul>
- <li><tt>addAuthorizationInfo(URL serverUrl, String realm, String authScheme, Map info)</tt></li>
- <li><tt>getAuthorizationInfo(URL serverUrl, String realm, String authScheme)</tt></li>
- <li><tt>flushAuthorizationInfo(URL serverUrl, String realm, String authScheme)</tt></li>
- <li><tt>addProtectionSpace(URL resourceUrl, String realm)</tt></li>
- <li><tt>getProtectionSpace(URL resourceUrl)</tt></li>
- </ul>
-<p>
-For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
-</p>
-
 <!-- ############################################## -->
 
-<h3>4. <a name="compositeBundles">Composite Bundles</a></h3>
+<h3>3. <a name="compositeBundles">Composite Bundles</a></h3>
 <p>
 In the Equinox 3.5 release an implementation of an OSGi provisional API was
 included for composite bundles.  This API includes all classes from the
@@ -204,7 +129,7 @@ For further details or to provide feedback on this change, see <a href="https://
 
 <!-- ############################################## -->
 
-<h3>5. <a name="batchBundleEvent">Batch Bundle Event</a></h3>
+<h3>4. <a name="batchBundleEvent">Batch Bundle Event</a></h3>
 <p>
 Since Eclipse 3.1, the Equinox Framework has provided API to allow bundle
 listeners to batch bundle events.  This functionality never has been
@@ -216,7 +141,7 @@ API difficult to use.  For these and other reasons the API package
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=407302" target="_blank">bug 407302</a>.
 </p>
 
-<h3>6. <a name="cssextensions">Remove deprecated CSS extension points</a></h3>
+<h3>5. <a name="cssextensions">Remove deprecated CSS extension points</a></h3>
 <p>
 Since Eclipse 4.0, the Eclipse platform allows styling based on external CSS files.  During the implementation two experimental
 extension points have been created which have been replaced in the meantime.
@@ -260,9 +185,49 @@ For further details or to provide feedback on this change, see <a href="https://
 
 <!-- ############################################## -->
 
+<h3>4. <a name="runtime">Eclipse 2.0 runtime model and boot API</a></h3>
+<p>
+When the Eclipse runtime transitioned to use OSGi as its implementation, some existing
+APIs for interacting with the old runtime were deprecated and moved to a compatibility fragment
+(<tt>org.eclipse.core.runtime.compatibility</tt>). All API that was still valid was moved
+elsewhere. These APIs have been non-functional since Eclipse 3.0 and will therefore
+be removed in the future. The following packages will be removed:
+</p>
+<ul>
+ <li><tt>org.eclipse.core.boot</tt></li>
+ <li><tt>org.eclipse.core.runtime.model</tt></li>
+ </ul>
+ The compatibility fragment, <tt>org.eclipse.core.runtime.compatibility</tt> will
+ also be removed. As a consequence <code>org.eclipse.ui.startup</code> extensions will no longer work if they do not specify a class that implements <code> org.eclipse.ui.IStartup</code>. 
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
+</p>
+
 <!-- ############################################## -->
 
-<h2>API removals after June 2016</h2>
+<h3>5. <a name="auth">Platform authorization API</a></h3>
+<p>
+Since Eclipse 1.0, the Eclipse Platform class provided API for storing and retrieving
+passwords in a keyring file. This API used an inherently insecure method for encrypting 
+credentials, and used a custom encryption algorithm that made it difficult for some 
+consumers to distribute and export Eclipse-based products. For these and other reasons,
+this API was deprecated and replaced in Eclipse 3.4 with a new Equinox secure storage API.
+In Eclipse 4.2 the implementation of the old authorization methods was removed, but the API left in place. 
+This old API will be removed completely in a future release. The following API methods will
+be removed from <tt>org.eclipse.core.runtime.Platform</tt>:
+</p>
+<ul>
+ <li><tt>addAuthorizationInfo(URL serverUrl, String realm, String authScheme, Map info)</tt></li>
+ <li><tt>getAuthorizationInfo(URL serverUrl, String realm, String authScheme)</tt></li>
+ <li><tt>flushAuthorizationInfo(URL serverUrl, String realm, String authScheme)</tt></li>
+ <li><tt>addProtectionSpace(URL resourceUrl, String realm)</tt></li>
+ <li><tt>getProtectionSpace(URL resourceUrl)</tt></li>
+ </ul>
+<p>
+For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
+</p>
+
+<h2>API removals after June 2017</h2>
 <h3>1. <a name="icontextcomputer">IContextComputer and related classes</a></h3>
 <p>
 The <code>org.eclipse.ui.help.IContextComputer</code> class and dependent classes, i.e., org.eclipse.ui.help.WorkbenchHelp, DialogPageContextComputer and ViewContextComputer are deprecated since 2002. These classes are planned to get deleted.
@@ -278,7 +243,6 @@ The <code>org.eclipse.core.boot.IPlatformRunnable</code> interface is planned to
 <p>
 For further details or to provide feedback on this change, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=370248" target="_blank">bug 370248</a>.
 </p>
-
 
 </body>
 </html>
