@@ -46,7 +46,7 @@ else
 fi
 
 source ${PROMOTE_IMPL}/createXZ.shsource
-createXZ ${BUILDMACHINE_SITE} -force
+createXZ ${BUILDMACHINE_SITE}
 RC=$?
 if [[ $RC != 0 ]]
 then

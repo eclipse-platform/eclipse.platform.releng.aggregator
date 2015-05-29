@@ -14,10 +14,10 @@
 # find . -maxdepth 3  -name content.jar  -execdir convertxz.sh '{}' \;
 #
 # The function 'createXZ' takes as input the absolute path of the simple repo.
+# If not specified, we 
 # Returns 0 upon successful completion, else greater than 0 if there
 # is an error of any sort.
 #
-
 function createXZ
 {
   # First get back to XML file
@@ -28,7 +28,9 @@ function createXZ
   # The BUILDMACHINE_SITE is the absolute directory to the simple repo directory.
   # (We typically create on the build machine, before copying (rsync'ing) to downloads server).
   # If a value is passed to this script as the first argument, it is assumed to be the simple repo to process.
-  # Otherwise, we require BUILDMACHINE_SITE to be defined as an environment variable with the simple repo to process.
+  # For historical reasons if path not specified as argument, we look for (require) 
+  # BUILDMACHINE_SITE to be defined as an environment variable with the absolute path of the 
+  # simple repo to process.
 
   if [[ -n "$1" ]]
   then
@@ -37,14 +39,18 @@ function createXZ
 
   if [[ -z "${BUILDMACHINE_SITE}" ]]
   then
-    echo -e "\n\tERROR: this script requires env variable of BUILDMACHINE_SITE,"
+    echo -e "\n\tERROR: this script requires path to repo as first argument, or set in env variable of BUILDMACHINE_SITE,"
     echo "     \tthat is, the directory of the simple repo, that contains content.jar and artifacts.jar."
     return 1
   fi
 
+  # note first argument MUST e specified, to specify second argument.
+  # we assume "use force" by default, since that is the common case.
   FORCE_ARG=$2
-  if [[ "-force" == "${FORCE_ARG}" ]]
+  if [[ "-noforce" == "${FORCE_ARG}" ]]
   then
+    FORCE="false"
+  else 
     FORCE="true"
   fi
 
@@ -86,7 +92,8 @@ function createXZ
   # If p2.index file exists, check if it contains the "key" value of 'content.xml.xz' and if it does, assume this
   # site has already been converted.
   # UNLESS, -force has been specified (as second argument).
-  # Then we puposely reproduce. This is important, for example, after changing the mirrorsURL of artifacts.jar/xml file.
+  # Then we purposely reproduce. This is important, for example, after changing the mirrorsURL of artifacts.jar/xml file.
+  # LATEST: we now assume "use force" by default, since most common case, unless -noforce is provided as command.
   P2_INDEX_FILE="${BUILDMACHINE_SITE}/p2.index"
   if [[ "true" != "${FORCE}" ]]
   then
@@ -96,7 +103,7 @@ function createXZ
       RC=$?
       # For grep, an RC of 1 means "not found", in which case we continue.
       # An RC of 0 means "found", so then check for 'artifacts.xml.xz if it
-      # it too is not found, then we assume the repo has already been converted,
+      # it too is found, then we assume the repo has already been "converted",
       # and we do not touch anything and bail out.
       # An RC of 2 or greater means some sort of error, we will bail out anyway, but with
       # different message.

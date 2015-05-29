@@ -3,27 +3,35 @@
 # Utility function to convert repo site metadata files to XZ compressed files.
 # See https://bugs.eclipse.org/bugs/show_bug.cgi?id=464614
 #
-# The utility makes the strong assumptions that the metadata files are in
-# jar format already. Converts those to their original XML, invoke 'xz -e' on those
-# XML files, and then (re-)create the p2.index file.
-#
-# One use case is to include this script in another, and invoke it in another,
-# such as following to convert a whole sub-tree of repositories.
-#
-# source ${HOME}/bin/createXZ.shsource
-# find . -maxdepth 3  -name content.jar  -execdir convertxz.sh '{}' \;
-#
+# The utility makes the strong assumptions that the metadata files are in the zipped
+# (jar) format already. Converts those to their original XML, invokes 'xz -e' on those
+# XML files (which changed them to *.xml.xz compressed files, 
+# and then (re-)create the p2.index file.
+
+function usage
+{
+  printf "\n\tUtility script to create *.xml.xz compressed metadata files from *.jar counterparts.\n" >&2
+  printf "\n\tUsage: %s [-h] | [-d path] [-n], where " "$(basename $0)" >&2
+  printf "\n\t\t%s\t%s" "h" "help"
+  printf "\n\t\t%s\t%s" "d path"  "directory (absolute path) to simple repository "
+  printf "\n\t\t\t%s" "(if not specified, current directory, $PWD,  is used)"
+  printf "\n\t\t%s\t%s" "n" "no force (i.e does not recreate files, if p2.index says they already exist)."
+  printf "\n\t\t\t%s" "Default is it will recreate them." >&2
+  printf "\n" >&2
+}
+
+
 # The function 'createXZ' takes as input the absolute path of the simple repo.
-# If not specified, we 
+# It can also take "-noforce" as an argument, in which case, it will not re-create
+# the files, if they appear to already exist.
 # Returns 0 upon successful completion, else greater than 0 if there
 # is an error of any sort.
 #
 function createXZ
 {
-  # First get back to XML file
-  # Then XZ compress that xml file
-  # then add p2.index
-  #
+  # First get back to XML files by unzipping the jar files. 
+  # Then XZ compress the XML files,
+  # then create (or recreate) the p2.index file.
 
   # The BUILDMACHINE_SITE is the absolute directory to the simple repo directory.
   # (We typically create on the build machine, before copying (rsync'ing) to downloads server).
@@ -204,3 +212,65 @@ function createXZ
   #   artifact.repository.factory.order= artifacts.xml.xz,!
   return 0
 }
+
+PATH_TO_REPO="${PWD}"
+
+# the initial ':' keeps getopts in quiet mode ... meaning it doesn't print additional "illegal argument" type messages.
+# to get it in completely silent mode, assign $OPTERR=0
+# The second colon means to "read string argument".
+while getopts ':hd:n' OPTION
+do
+  options_found=1
+  case $OPTION in
+    h)
+      usage
+      exit 1
+      ;;
+    d)
+      # directory
+      PATH_TO_REPO="${OPTARG}"
+      if [[ ! -d "${PATH_TO_REPO}" ]]
+      then
+        echo -e "\n\tERROR: provided path, ${PATH_TO_REPO}, does not exist or is not a directory."
+        exit 1
+      else if [[ ! -w "${PATH_TO_REPO}" ]]
+      then
+        echo -e "\n\tERROR: No write access to the provided path, ${PATH_TO_REPO}."
+        exit 1
+      fi
+    fi
+    ;;
+  n)
+    # noforce
+    FORCE_ARG="-noforce"
+    ;;
+  *)
+    # This fall-through is for unrecognized arguments
+    printf "\n\t%s" "ERROR: unknown option found: -$OPTARG." >&2
+    printf "\n" >&2
+    usage
+    exit 1
+    ;;
+esac
+done
+
+# while we currently don't use/expect additional arguments, it's best to
+# shift away arguments handled by above getopts, so other code (in future) could
+# handle additional trailing arguments not intended for getopts.
+shift $(($OPTIND - 1))
+#echo "n args: " $#i
+# just doing this check here as a test (for learning/example)... could never be reached given initial checks
+# at top of this script
+if [[ $# > 1 ]]
+then
+  printf "\n\tUnexpected trailing arguments found:  %s.\n" "$*"
+  usage
+  exit 1
+fi
+
+createXZ "${PATH_TO_REPO}" "${FORCE_ARG}"
+
+# for isolated testing
+#echo PATH_TO_REPO: $PATH_TO_REPO
+#echo FORCE_ARG: $FORCE_ARG
+

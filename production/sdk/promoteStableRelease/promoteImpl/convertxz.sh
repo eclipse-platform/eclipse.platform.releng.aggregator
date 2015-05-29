@@ -6,6 +6,6 @@
 # find . -maxdepth 3  -name content.jar  -execdir convertxz.sh '{}' \;
 
 source ${HOME}/bin/createXZ.shsource
-# don't think this "export function" is needed here?
-export -f createXZ
-createXZ ${PWD} -force
+# add -noforce if we should leave existing xml.xz files alone. (such as from a cron job, 
+# that repeatedly checks a directory tree via 'find', etc.
+createXZ ${PWD} -
