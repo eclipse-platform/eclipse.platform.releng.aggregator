@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2014. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
+<meta name="copyright" content="Copyright (c) Eclipse contributors and others 2015. This page is made available under license. For full details, see the LEGAL section in the documentation that contains this page."/>
 <meta http-equiv="Content-Language" content="en-us"/>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 <link rel="STYLESHEET" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 <style type="text/css">
 table.news td {border-top: solid thin black;}
@@ -12,452 +12,373 @@ table.news tr td.section {font-size: 20px; font-weight: bold;}
 table.news tr td.title {vertical-align: top; width: 30%; font-weight: bold;}
 table.news tr td.content {vertical-align: top; width: 70%;}
 </style>
-<title>Eclipse Platform What's New in Luna (SWT and Plug-in Developers)</title>
+<title>Eclipse Platform What's New in Mars (SWT and Plug-in Developers)</title>
 </head>
 
 <body>
-<h2>What's New in Luna</h2>
+<h2>What's New in Mars (SWT and Plug-in Developers)</h2>
 <p>Here are descriptions of some of the changes of interest to plug-in developers
 made to the Eclipse <a href="#Platform">Platform</a>, <a href="#Equinox">Equinox</a> and
-<a href="#SWT">SWT</a> for the Luna (4.4) release of Eclipse.
+<a href="#SWT">SWT</a> for the Mars (4.5) release of Eclipse.
 </p>
 
 <p>
 New features oriented towards end-users of the platform
 can be viewed in the 
-<a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">What's new</a>
+<a href="../../org.eclipse.platform.doc.user/whatsNew/platform_whatsnew.html">What's New</a>
 section of the Workbench User Guide.
 </p>
 
-<!-- ****************** START OF N&N TABLE ****************** -->
 <table class="news" border="0" cellpadding="10" cellspacing="0" width="80%">
 <tbody>
   <!-- ******************** Platform ********************** -->
   <tr>
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
-  
-   <tr id="e4-views-1">
-    <td class="title">Contribute e4 Views into the IDE</td>
+
+  <tr id="step-filter-ext-point">
+    <td class="title">New stepFilters extension point</td>
     <td class="content">
-      Native e4 views can now be contributed to the Eclipse workbench via extension point.
-      The <code>org.eclipse.ui.views</code> extension point now supports an <code>e4view</code>
-      element for declaring a new view for the IDE whose implementation
-      is done in the e4 style (i.e. an annotated POJO).
+      The new <b>stepFilters</b> extension point allows clients to provide new step filters for existing debug models without having to extend those models. 
       <p>
-        <img src="images/new-e4view-extension.png" alt="new extension"/>
-      </p><p>
-        The new type of extension is identical to the original 'view' except for relaxing the
-        requirement that the 'class' implement IViewPart.
-      </p><p>
-        For those that are unaware of the e4 way of coding, here's what the implementation of an e4 view
-        looks like:
+      To use the new extension point, clients will require a dependency on <code>org.eclipse.debug.core</code>. Clients can then access any contributed step filters 
+      using the new API: <code>org.eclipse.debug.core.DebugPlugin.getStepFilters(String)</code>.
       </p>
+      <p>
+      An example of the new extension point:
+      </p>
+<pre>
+&lt;extension point=&quot;org.eclipse.debug.core.stepFilters&quot;&gt;
+  &lt;stepFilter
+   class=&quot;com.example.ExampleStepFilter&quot;
+   modelIdentifier=&quot;com.example.debug.model&quot;&gt;
+  &lt;/stepFilter&gt;
+&lt;/extension&gt;
+</pre>
+    </td>
+  </tr>
+
+  <tr id="resource-notifications">
+    <td class="title">New debug option for resource change notifications</td>
+    <td class="content">
+      In order to help troubleshooting problems with resource change listeners,
+      a new debug option was added to print information about which event triggers which
+      listener. This option gives a better picture of the flow of all workspace
+      change events and how other plugins react to those changes. To enable the new
+      option, add
       <pre>
-import javax.annotation.PostConstruct;
-import org.eclipse.e4.ui.di.Focus;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-
-public class RealE4View {
-	Label label;
-
-	@PostConstruct
-	void createView(Composite parent) {
-		label = new Label(parent, SWT.BORDER);	
-		label.setText("Testing");
-	}
-
-	@Focus
-	void setFocus() {
-		label.setFocus();
-	}
-}
-      </pre>
-      <p>
-        Note how it's a simple Java object (POJO) and how few dependencies it has; this has 
-        already proven itself as a far more convenient way to write the code and has great 
-        advantages in testing (because of its few dependencies).
-      </p>
+      org.eclipse.core.resources/debug=true
+      org.eclipse.core.resources/notifications=true</pre>
+      in your <a href="http://help.eclipse.org/topic/org.eclipse.pde.doc.user/guide/tools/launchers/tracing.htm">.options file</a>
+      or use the <b>General &gt; Tracing</b> preference page to
+      enable it.
     </td>
   </tr>
-      
-  <tr id="css-bridge"> 
-    <td class="title">CSS bridge</td>
+
+  <tr id="i18n-for-cssbridge">
+    <td class="title">I18n support for CSS bridge</td>
     <td class="content">
-      The Eclipse 4 CSS-based styling engine has been connected to the classic Eclipse platform theme APIs through a new
-      mechanism called the <i>CSS bridge</i>. This support enables a number of new user cases:
-	 <ul>
-		<li>
-		  Accessing legacy platform <b>Color and Font</b> definitions from within a CSS style sheet:
-			<p>
-				<img src="images/css-bridge/using-definitions.png" alt=""/>
-			</p>
-		</li>
-		<li>
-			Overriding <b>Color and Font</b> definitions in a CSS style sheet:
-			<p>
-				<img src="images/css-bridge/overriding-definitions.png" alt=""/>
-			</p>
-		</li>
-		<li>
-		  Adding new style definitions within your CSS that will be surfaced for user customization on the <b>Color and Font</b>
-		  preference page:
-			<p>
-				<img src="images/css-bridge/new-definitions.png" alt=""/>
-			</p>
-		</li>
-	 </ul>
-	 This bridging has a number of nice properties:
-	 <ul>
-	 	<li>The legacy color theme definitions overridden or added in the CSS style sheet are merged with the current theme.</li>
-	 	<li>When switching themes, overridden values are re-merged with the new theme.</li>
-	 	<li>The new definitions added with the CSS file (the last use case) are available in the CSS theme that provides it.</li>
-	 </ul>
-	 Note that after switching CSS themes, the definitions can be unavailable in the theme registries when the new theme doesn't re-define it.
-	 This means when using theme definitions out of CSS files, you must be prepared for such situations and use proper default values in 
-	 the case when some definitions are missing.
+      Internationalization and localization support for the CSS bridge has been added. More information can be found in <b><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=437902">bug 437902</a></b>
+      <p>
+      Example:
+      </p>
+      <p>
+      	1. Modified files needed to enable the i18n support in the CSS bridge for the Polish locale:
+      </p>
+      <img src="images/i18n_for_cssbridge-required_mod_files.png" alt="Modified files for the i18n support"/>
+      <p>
+      	2. Launch the Eclipse instance with the '-nl pl' command line arguments. Running CSS bridge with Polish locale:
+      </p>
+      <img src="images/i18n_for_cssbridge-colorAndFontDialog.png" alt="CSS bridge with polish locale"/>      
+    </td>
+  </tr>
+
+  <tr id="jface-structuredselection">
+    <td class="title">Direct access to structured selection of a JFace Viewer</td>
+    <td class="content">
+      The JFace <code>StructuredViewer</code> class now has an API to access the <code>IStructuredSelection</code> directly.
+      Examples:
+<pre>	IStructuredSelection sel = viewer.getStructuredSelection();
+	ITreeSelection treeSel = treeViewer.getStructuredSelection();</pre>
+      Bye bye <code>(IStructuredSelection) viewer.getSelection()</code>, we won't miss you!
+    </td>
+  </tr>
+
+  <tr id="ant-version-upgrade">
+    <td class="title">Ant 1.9.4</td>
+    <td class="content">
+      Eclipse has adopted Ant version 1.9.4.
+    </td>
+  </tr>
+
+  <tr id="runtime-locale-type-change">
+    <td class="title">Changed type of TranslationService.LOCALE</td>
+    <td class="content">
+      The type of the <code>LOCALE</code> value in the application context was changed from
+      <code>String</code> to <code>Locale</code> (for performance reasons).
+      <p>If you are injecting <code>org.eclipse.e4.core.services.translation.TranslationService.LOCALE</code> in your code, you
+      need to change the type from <code>String</code> to <code>Locale</code>.</p> 
+    </td>
+  </tr>
+
+  <tr id="css-inherit-prop">
+    <td class="title">New 'inherit' value for CSS properties</td>
+    <td class="content">
+		When CSS property gets 'inherit' value then the parent's value will be applied. See more in <b><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=419377">bug 419377</a></b>
+        <p>
+          <img src="images/css-inherit-prop.png" alt="" />
+        </p>
+    </td>
+  </tr>
+
+  <tr id="css-section-prop">
+    <td class="title">New CSS properties for the Section title bar</td>
+    <td class="content">
+		The Forms Section title bar can now be styled with special CSS properties for a Section:
+		<p>
+        	<img src="images/section_css.png"  alt="CSS for Section"/>
+    	</p>
+    	<p>
+    		By using the same color for the background-color-titlebar and
+    		background-color-gradient-titlebar CSS property,
+    		like in the sample above, you get a solid background color.
+    	</p>
+        <p>For more information see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=431635">bug 431635</a>.</p>
+    </td>
+  </tr>
+   <tr id="css-section-multiple">
+    <td class="title">Support for multiple style sheet rules for the same selector</td>
+    <td class="content">
+		The CSS engines now scans all style sheets and combines all matching rules into a common style. This allows plug-ins to override previously defined styles:
+		<p>
+        	<img src="images/css_override.png"  alt="CSS override"/>
+    	</p>
+        <p>For more information see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=458342">bug 458342</a>.</p>
+    </td>
+  </tr>
+
+  <tr id="Job-groups-api">
+    <td class="title">Job groups API</td>
+    <td class="content">
+	A JobGroup API (<code>org.eclipse.core.runtime.jobs.JobGroup</code>) has been added that makes it
+	easier to implement parallel algorithms in Eclipse.
+	<p>Job groups provide a simple way to manage a set of Eclipse Jobs that are responsible
+	for pieces of the same large task. The API supports throttling, joining, cancellation,
+	combined progress and error reporting for all of the jobs in the group. The job grouping
+	functionality can be used to implement performance critical algorithms using cooperating
+	jobs. More information can be found in
+	<b><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=432049">bug 432049</a></b>.</p>
+    </td>
+  </tr>
+
+  <tr id="menuitem-tooltip">
+    <td class="title">Added API to set tooltip for MenuItem</td>
+    <td class="content">
+		SWT now supports setting a tooltip on menu items via <code>MenuItem.setToolTipText()</code>. 
+		<p>
+		For an example, see the <b>Menu</b> tab in the <a href="https://www.eclipse.org/swt/examples.php">ControlExample</a>.</p>
+		<p>
+          <img src="images/tooltip.png" alt="" />
+        </p>
+    </td>
+  </tr>
+
+   <tr id="help-service">
+    <td class="title">Provisional EHelpService service</td>
+    <td class="content">
+		M5 provides the provisional help service <code>EHelpService</code> in the <code>IEclipseContext</code>. 
+		<code>EHelpService</code> is a thin wrapper to the <code>WorkbenchHelpSystem</code> in the Eclipse IDE and allows customers to
+		provide their custom implementation in Eclipse RCP applications.
     </td>
   </tr>
   
-  <tr id="theme-association"> 
-    <td class="title">New 'themeAssociation' element of the 'org.eclipse.e4.ui.css.swt.theme' extension&nbsp;point</td>
+   <tr id="message_registry">
+    <td class="title">Message registry</td>
     <td class="content">
-      An Eclipse platform CSS theme can now register an association with a legacy platform <b>Color and Font</b> theme. After defining 
-      the proper association between themes, changing themes in the <b>Appearance</b> preference page will automatically set the 
-      associated <b>Color and Font</b> theme.
-	 <p>
-		<img src="images/theme-association.png" alt=""/>
-	</p>
+    	Added support for binding control attributes for localization to a value of a messages class.
+    	By using such a binding, the dynamic update of widgets due to locale changes at runtime  (<i>Eclipse Translation Pattern</i>)
+    	gets easier to implement, since the localized widgets (e.g. <code>Labels</code>, <code>Buttons</code>, etc.)
+		are managed by the message registry.
+    	<p>
+    	To use the message binding for a messages class named <code>MyMessages</code>, you need to create a specialized 
+    	<code>BaseMessageRegistry</code> class like shown below:
+    	</p>
+    	<pre>@Creatable
+public class MyMessageRegistry extends BaseMessageRegistry&lt;MyMessages&gt; {
+
+	@Override
+	@Inject
+	public void updateMessages(@Translation MyMessages messages) {
+		super.updateMessages(messages);
+	}
+}</pre>
+    	<p>
+    	It can then be used like this:
+    	</p>
+    	<pre>@Inject
+MyMessageRegistry registry;
+
+@PostConstruct
+public void init(Composite parent) {
+	Label myFirstLabel = new Label(parent, SWT.WRAP);
+	Label mySecondLabel = new Label(parent, SWT.NONE);
+	Label myThirdLabel = new Label(parent, SWT.NONE);
+	
+	// bind myFirstLabel via method reference
+	registry.register(myFirstLabel::setText, (m) -> m.firstLabelMessage);
+	// bind mySecondLabel via method name
+	registry.register(mySecondLabel, "setText", "secondLabelMe
+	ssage");
+	// bind myThirdLabel via property name
+	registry.registerProperty(myThirdLabel, "text", "thirdLabelMessage");
+}</pre>
+    	<p>
+    	The <code>BaseMessageRegistry</code> supports bindings for Java version before Java 8.
+    	</p>
+    </td>
+  </tr>
+
+  <tr id="e4tools-integration">
+    <td class="title">e4 tools integrated into Eclipse platform</td>
+    <td class="content">
+        Parts of the e4 tools have been integrated into the Eclipse platform project. Mainly the Eclipse 4 application
+        model editor and related wizards are now directly available via the Eclipse update site. The e4 project wizard has been
+        integrated into PDE, see the PDE section for more information.
+      <p>
+        <img src="images/updatesitee4tools.png" alt=""/>
+      </p>
+	</td>
+  </tr>
+  <tr id="xpath">
+    <td class="title">XPath expressions for parent element ID in Model Fragments</td>
+    <td class="content">
+		When specifying the target for a fragment contribution, you can now use an
+		XPath expression or a comma-separated list of element IDs instead of a single
+		element ID.
+		<p>The XPath expression uses JXPath internally, so it should reference attributes of the model object,
+		not the XML file.</p>
+		<p>These 2 samples are equivalent:</p>
+		<code>parentElementId="MyMenu1, MyMenu2"</code>
+		<br />
+		<code>parentElementId="xpath://*[@elementId='MyMenu1' or @elementId='MyMenu2']"</code>
+		<p>This feature opens up the possibility to:</p>
+		<ol>
+		<li>Add a fragment to multiple places in a model</li>
+		<li>Target a fragment to multiple application models</li>
+		<li>Specify attributes (such as tags) as the target</li>
+		</ol>
 	</td>
   </tr>
 
-  <tr id="recenter-command">
-    <td class="title">Improved Recenter command</td>
+  <tr id="e4model-icons-displayed">
+    <td class="title">Icons are displayed in model editor and model spy</td>
     <td class="content">
-        Like in Emacs, the <b>Recenter</b> command in textual editors now cycles between center, bottom and top.
-    </td>
-  </tr>
-  
-  <tr id="ant-1.9.2-update">
-    <td class="title">Ant 1.9.2</td>
-    <td class="content">
-    	The platform has been updated to use the latest version of Apache Ant (1.9.2). For
-    more information on what is new in Ant 1.9.2, see the official <a href="http://mirror.olnevhost.net/pub/apache//ant/README.html">what's new</a>.
-    </td>
-  </tr>
-    
-   <tr id="ant-bree-update">
-    <td class="title">Platform Ant BREE update</td>
-    <td class="content">
-    	Platform Ant has had a BREE update to require a Java 1.6 compatible execution environment (or newer).
-    </td>
-  </tr>
-    
-  <tr>
-    <td class="title">Platform Debug BREE update</td>
-    <td class="content">
-    	Platform Debug has had a BREE update to require a Java 1.6 compatible execution environment (or newer).
+        If an Icon URI is defined, it is now displayed in the model editor and in the model spy:
+      <p>
+        <img src="images/model-editor-icons.png" alt=""/>
+      </p>
     </td>
   </tr>
 
-  <tr id="debug-examples"> 
-    <td class="title">New debugger examples</td>
-    <td class="content"> 
-      New examples have been added to the Platform Debug git repository. The <code>org.eclipse.debug.examples.mixedmode</code> project demonstrates
-      how to use Debug's mixed-mode launching support. The <code>org.eclipse.debug.examples.memory</code> project provides sample content to display
-      in the <b>Memory</b> and <b>Registers</b> views.
-    </td>
+  <tr id="default-darkthemecss-forms">
+    <td class="title">Better CSS support for Forms-based editors</td>
+    <td class="content">
+		CSS support for Forms-based editors has been improved. The dark theme included in the Eclipse SDK
+		takes advantages of that, as depicted in the following screenshot:
+       <p>
+        <img src="images/formheader.png" alt=""/>
+      </p>
+	</td>
   </tr>
   
-  <tr id="batik-1-7">
-    <td class="title">Updated to Batik 1.7</td>
-    <td class="content">The Platform now includes a newer version of Apache Batik, version 1.7.0. 
-    This new version is being used for CSS parsing in the declarative styling engine, and is 
-    notably faster than the previous version.
-    </td>
+  <tr id="default-darkthemecss-heapmonitor">
+    <td class="title">Heap Monitor can be styled, dark theme uses that</td>
+    <td class="content">
+		The heap monitor has been extended to allow to set its background color, and the dark theme uses that. The following
+		screenshot show the heap monitor after the change.
+      <p>
+        <img src="images/heap-after.png" alt=""/>
+      </p>
+	</td>
   </tr>
 
-  <tr id="workspaceLock">
-    <td class="title">Removed WorkspaceLock API</td>
-    <td class="content">
-      The <code>WorkspaceLock</code> API allowed a special client (usually Platform UI) to
-      hook into the locking protocols used by the workspace implementation. This hook
-      was used to mitigate deadlocks due to interaction with synchronous SWT events,
-      and was never intended to be used by other clients. In the 3.0 release this API
-      was deprecated in favor of a more general API provided by the <code>org.eclipse.core.jobs</code>
-      bundle. Invoking this API has had no effect since the 3.0 release. The specific API
-      being removed includes:
-      <ul>
-        <li>The <code>org.eclipse.core.resources.WorkspaceLock</code> class.</li>
-        <li>The method <code>org.eclipse.core.resources.IWorkspace#setWorkspaceLock</code></li>
-      </ul>
-      Clients that directly use an API listed above should remove any references to it.
-    </td>
-  </tr>
-  
-  <tr id="incrementalProjectBuilder-getRule">
-    <td class="title">Removed IncrementalProjectBuilder#getRule() API</td>
-    <td class="content">
-      The <code>IncrementalProjectBuilder#getRule()</code> method returned a scheduling rule 
-      that was required for building the project by the builder. This method was intended to be used by the builder framework only.
-      In the 3.6 release this method was deprecated in favor of a more general method <code>IncrementalProjectBuilder#getRule(int, Map)</code>. 
-      The specific API being removed includes:
-      <ul>
-        <li>The method <code>org.eclipse.core.resources.IncrementalProjectBuilder#getRule()</code></li>
-      </ul>
-      Clients that directly call the API listed above should remove any references to it
-      or replace them with calls to <code>IncrementalProjectBuilder#getRule(int, Map)</code>. Clients that implement the API listed
-      above should implement <code>IncrementalProjectBuilder#getRule(int, Map)</code> instead.
-    </td>
-  </tr>
-   
-  <tr id="eclipse-api"> 
-    <td class="title">EMenuService released as API</td>
-    <td class="content">
-        The <code>EMenuService</code> service has been released as API. RCP clients must adjust their package imports to <code>org.eclipse.e4.ui.services</code>.  
-    </td>
-  </tr>
 
-  <tr id="MLocalizable">
-    <td class="title">MLocalizable mixin interface</td>
-    <td class="content">
-      The mechanism for localizing strings in the application model has been changed. Previously, EOperations (methods) were used to get
-	  a localized value. Now, volatile, transient, derived, unchangeable EStructuralFeatures are used. This enables 
-	  notifications if a localizable value has changed. To mark EClasses who hold localizable informations and to inform them
-	  externally about a changed Locale, the <code>MLocalizable</code> mixin interface is introduced, which contains the single method 
-	  <code>updateLocalization()</code>. This enables the platform to generically search the model for model elements affected by a 
-	  Locale change and force them to update.
-    </td>
-  </tr>
-  
-  <tr id="Locale_Change_Propagation">
-    <td class="title">Locale change propagation</td>
-    <td class="content">
-      A new service called <code>ILocaleChangeService</code> has been introduced, which supports changing Locale at runtime. Using this service will:
-	  <ol>
-	    <li>Update the Locale in the application context.</li>
-	    <li>Inform all model elements of an application that implement <code>MLocalization</code> about the change.</li>
-	    <li>Post an event via event broker.</li>
-	  </ol>
-    </td>
-  </tr>
-  
-  <tr id="Locale_Change_Consumption">
-    <td class="title">Locale change consumption</td>
-    <td class="content">
-      There are now three ways to be informed about a Locale change:
-	  <ol>
-	    <li>Via event broker by listening to the topic <i>org/eclipse/e4/core/NLS/LOCALE_CHANGE</i></li>
-	    <li>Via dependency injection by getting the value for <code>TranslationService.LOCALE</code> injected (e.g. via method injection)</li>
-	    <li>Via attaching to the model events listening to the newly introduced LOCALIZED-Features</li>
-	  </ol>
-	  <b>Note:</b> The renderers need to be modified to listen to the LOCALIZED-Features, otherwise the Locale change at runtime isn't supported!
-    </td>
-  </tr>
-  
-  <tr id="ResourceBundleProvider">
-    <td class="title">ResourceBundleProvider</td>
-    <td class="content">
-      A new <code>ResourceBundleProvider</code> service has been introduced to abstract out the reference to the <code>BundleLocalization</code> OSGi service.
-	  This enables application authors to change how ResourceBundles should be looked up within their Eclipse application, e.g. using class-based 
-	  ResourceBundles, loading translations out of a database, loading ResourceBundles from a server by using a different ResourceBundle.Control.
-	  The default implementation <code>DefaultResourceBundleProvider</code> is internally using <code>BundleLocalization</code> to keep the
-	  known default behaviour.
-    </td>
-  </tr>
-  
-  <tr id="TranslationService">
-    <td class="title">TranslationService update</td>
-    <td class="content">
-      The <code>TranslationService</code>, that is used to localize the application model, had several downsides regarding extensibility.
-	  A lot of code needed to be copied in order to create a custom <code>TranslationService</code> that retrieves translations from a different location 
-	  than the OSGi-ResourceBundle. To make it easier for users to implement a custom <code>TranslationService</code>, the API was modified. The method 
-	  <code>getResourceString(String, ResourceBundle)</code> is moved from <code>BundleTranslationProvider</code> to <code>TranslationService</code> with 
-	  protected visibility, as it contains the logic to retrieve and transform the translation key that is set in the application model. The default
-	  implementation <code>BundleTranslationProvider</code> is now using the <code>ResourceBundleHelper</code> in combination with the 
-	  <code>ResourceBundleProvider</code>. This way the localization of the application model and the localization via new message extension are using 
-	  the same mechanisms. As a small enhancement, this also enables the usage of dot separated keys for translating the application model.
-	  <p>
-	  As part of this work, the previously internal package <code>org.eclipse.e4.core.services.translation</code> has been released as API.
-	  </p>
-    </td>
-  </tr>
-  
-  <tr id="CSSIncludes">
-    <td class="title">CSS includes </td>
-    <td class="content">
-      CSS files for Eclipse can now include other CSS files via the 
-      <code>@import url("platform:/plugin/Bundle-Symbolic-Name/path/file.extension");</code> statement. This allows easy reuse of 
-      existing style sheets.
-    </td>
-  </tr>
-  
-  <tr id="osgi-integration"> 
-    <td class="title">Improved OSGi integration</td>
-    <td class="content">
-        Eclipse implementations can retrieve the OSGI <code>BundleContext</code> via an extended object supplier and the <code>@Inject @OSGiBundle</code> annotations. 
-    </td>
-  </tr>
-  
-  <tr id="code-cleanup"> 
-    <td class="title">Platform code improvements</td>
-    <td class="content">
-       During the last milestones, the platform team has invested in cleaning up the existing codes basis to simplify contributions by new and existing contributors. 
-       For more details, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=420779" target="_blank">bug 420779</a>.
-       During this update, several plug-ins have been upgraded to require Java 1.6 instead of Java 1.4 or Java 1.5.
-    </td>
-  </tr>
-    
-  <tr id="java7-filesystem-fragment">
-    <td class="title">New filesystem fragment for Java 7 API</td>
-    <td class="content">
-      A new filesystem fragment supporting Java 7 file API has been added. The
-      new fragment named <code>org.eclipse.core.filesystem.java7</code> allows
-      to retrieve information about files such as permissions, link targets,
-      etc. using Java 7 API rather than native code. This enables full filesystem capabilities
-      on platforms with no native Eclipse filesystem fragment. There are three
-      different types of filesystems supported:
-      <ul>
-        <li>DOS/Windows filesystems,</li>
-        <li>POSIX compliant filesystems, and</li>
-        <li>filesystems that are neither DOS/Windows nor POSIX compliant.</li>
-      </ul>
-      The new fragment will be loaded and used automatically when you run
-      Eclipse with JRE 7 or newer and no native filesystem fragment applicable
-      for your operating system can be found (such as Solaris, ARM, and s390).
-    </td>
-  </tr>
-    
-  
   <!-- ******************** Equinox ********************** -->
   <tr>
     <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
   </tr>
-  
-  <tr id="framework-update-1">
-    <td class="title">Equinox OSGi framework update</td>
+
+  <tr id="jetty9">
+    <td class="title">Updated to Jetty version 9</td>
     <td class="content">
-      The Equinox Framework implementation has been updated to implement the latest
-      API OSGi R6 Framework specification.  The OSGi
-      R6 Core Framework specification (finalized in March 2014) contain
-      enhancements in the following areas:
+      Updated to the Jetty version 9.2.3 to provide the servlet container for the Equinox Http Service implementation.  Jetty 9 implements the Servlet 3.1 specification.  Both Jetty 9 and Servlet 3.1 require Java 7.  Java 7 is now required in order to run the Equinox Http Service and the Eclipse Help system.
+    </td>
+  </tr>
+
+  <tr id="http-white-board">
+    <td class="title">New Http Whiteboard implementation</td>
+    <td class="content">
       <ul>
-         <li> Introduction of Service Scopes to the OSGi Service Registry
-             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0195">RFC 195</a>)
-         </li>
-         <li> Improvements of Weaving Hooks
-             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0191">RFC 191</a>)
-         </li>
-         <li> Clarification of hooks on the system bundle
-             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0198">RFC 198</a>)
-         </li>
-         <li> Native environment namespace
-             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0188">RFC 188</a>)
-         </li>
-         <li> Data Transfer Objects
-             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0185">RFC 185</a>)
-         </li>
-         <li> Extension Bundle Activators
-             (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0204">RFC 204</a>)
-         </li>
-         <li> Addition of FrameworkWiring.findProviders - no RFC
-         </li>
-      </ul>
-      From an Equinox perspective these are considered incremental enhancements.
-      A majority of the development effort during this release cycle is focused on refactoring and, in
-      many cases, rewriting the core Equinox Framework implementation to be based on
-      the OSGi generic dependency model.
-      <p>
-      For most consumers and developers this change should not be noticed.  But, as
-      documented in the <a href="http://wiki.eclipse.org/Equinox/Luna_Framework">wiki</a>,
-      there are four main areas of concern that the community should be aware of:
-      </p>
-      <ul>
-         <li>The Framework no longer uses the old Equinox resolver API
-             org.eclipse.osgi.service.resolver internally to resolve bundles.</li>
-         <li>All Equinox Framework specific hook implementations are broken and will
-             need to migrate.</li>
-         <li>Removal of old style plug-in support. A compatibility fragment is available to add the support back.</li>
-         <li>Removal of PlatformAdmin Service Implementation. A compatibility fragment is available to add support back.</li>
+        <li>New implementation of Http Whiteboard Draft specification. See <a href="http://www.osgi.org/Specifications/Drafts">Current Drafts</a>.</li>
+        <li>Simplify your web development by using whiteboard pattern to create assemblies of servlets, filters, context listeners and grouping them logically in shared contexts.</li>
+        <li>The implementation is a near feature complete implementation of the draft specification.</li>
+        <li>In addition to the Http Whiteboard specification, the Equinox Http Service implementation provides a complete imperative API in order to support the traditional direct registration programming model.</li>
+        <li>Supports Servlet 3.0 features.</li>
+        <li>Ongoing work will continue to provide more tests, improve support for Servlet 3.1 features and to improve stability and performance.</li>
       </ul>
     </td>
   </tr>
-  <tr id="cm-update">
-    <td class="title">Equinox Configuration Admin update</td>
+
+  <tr id="p2-native-dependencies">
+    <td class="title">Prompt for native dependencies</td>
     <td class="content">
-      The Equinox Configuration Admin implementation has been updated to implement
-      the OSGi Configuration Admin Service Specification version 1.5.  The previous
-      release of Equinox Configuration Admin implemented version 1.3.
+      It is now possible with p2 to express dependencies on OS packages and prompt the user to install those when they are not installed.
+	<p><img src="images/os-prompt.png" alt="" /></p>
+	<p>This functionality can be enabled by a new touchpoint instruction. For example:</p> 
+	<pre>org.eclipse.equinox.p2.touchpoint.natives.checkAndPromptNativePackage(distro:debian,package:handbrake,comparator:ge,version:0.9);</pre>
+	<p>At this point, the support is limited to Ubuntu.
+	<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Equinox&amp;component=p2">Contributions</a> to add this support for other OS are welcomed.</p>
+	<p>Integration with Tycho is available from 0.23.0-SNAPSHOT and above.</p>
     </td>
   </tr>
-  
-  <tr id="region-update-1">
-    <td class="title">Equinox Regions update</td>
+
+  <tr id="AbstractSelectionDialog">
+    <td class="title">New API: AbstractSelectionDialog</td>
     <td class="content">
-      The Equinox Regions implementation has been updated to take advantage
-      of Extension Bundle Activators
-      (<a href="https://github.com/osgi/design/tree/master/rfcs/rfc0204">RFC 204</a>)
-       coming in the OSGi R6 specification.
-      This allows Equinox Regions to insert its isolation model before
-      the framework is launched so that proper region behavior can be
-      established before any bundles are loaded in the framework.
-      <p>
-      The Equinox Regions has added a new namespace for sharing bundle lifecycle 
-      operations between regions.  In previous versions of Equinox regions the only way 
-      to share bundle lifecycle operations across different regions was to share complete
-      bundles which also shared all capabilities provided by the bundle.  Now it is
-      possible to use the org.eclipse.equinox.allow.bundle.lifecycle namespace to share
-      only the bundle lifecycle operations between different regions.
-      (see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=418224" target="_blank">bug 418224</a>)
+      <code>org.eclipse.jface.dialogs.AbstractSelectionDialog</code> is an enhanced version of the existing
+      <code>org.eclipse.ui.dialogs.SelectionDialog</code>.
+      It has been added to the org.eclipse.jface bundle, where it is also available for Eclipse 4 RCP applications.
+      
+      <p>The AbstractSelectionDialog API supports generics and varargs.
       </p>
-    </td>
+     </td>
   </tr>
- 
-  
-  <tr id="metatype-update">
-    <td class="title">Equinox Metatype update</td>
+
+  <tr id="css-transparency">
+    <td class="title">CSS support for new COLOR-TRANSPARENT constant</td>
     <td class="content">
-      The Equinox Metatype API has been updated to add the methods to
-      get the minimum and maximum values of an attribute definition.
-      (see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=416640" target="_blank">bug 416640</a>)
+      The CSS engine now supports the COLOR-TRANSPARENT property. The implementation uses SWT's new SWT#COLOR_TRANSPARENT pseudo-color.
+      COLOR-TRANSPARENT allowed to simplify the dark theme significantly.
+      <!-- TODO: Could add a link to an API description, but not to a bug. -->
     </td>
   </tr>
- 
- <tr> 
-    <td class="title">Framework Trace Options</td>
+
+  <tr id="getAdapter">
+    <td class="title">IAdaptable#getAdapter(Class) generified</td>
     <td class="content">
-      The new OSGi framework implementation now supports many of the 
-      previously supported trace options and adds a few more trace options
-      to help debug issues with the framework.  The following trace options 
-      are now implemented:
-      <dl>
-         <dt>debug/bundleTime</dt>
-           <dd>Prints out timing information for bundle activation</dd>
-         <dt>debug/cachedmanifest</dt>
-           <dd>Debug the caching of bundle headers</dd>
-         <dt>debug/location</dt>
-           <dd>Prints out location service debug information</dd>
-         <dt>debug/startlevel</dt>
-           <dd>Prints out start level service debug information</dd>
-         <dt>monitor/activation</dt>
-           <dd>Monitor persistent bundle activation</dd>
-         <dt>resolver/providers</dt>
-           <dd>Prints out information about matching capabilities returned to the resolver and why any were filtered out</dd>
-         <dt>resolver/hooks</dt>
-           <dd>Prints out information about capabilities or resources that were filtered by resolver hooks</dd>
-         <dt>resolver/uses</dt>
-           <dd>Prints out information about uses constraint violations</dd>
-         <dt>resolver/wiring</dt>
-           <dd>Prints out wiring information after the resolve process completes</dd>
-         <dt>resolver/report</dt>
-           <dd>Prints out the resolution report information</dd>
-         <dt>resolver</dt>
-           <dd>enables all resolver trace options</dd>
-      </dl>
-    </td>
+      The <code>org.eclipse.core.runtime.IAdaptable</code> interface has been enhanced to return the requested type from
+      its <code>getAdapter</code> method:
+      
+      <pre>public &lt;T&gt; T getAdapter(Class &lt;T&gt; adapter);</pre>
+      
+      <p>Implementations of this method should also be updated. This has already been done
+      for some platform APIs like <code>org.eclipse.ui.part.WorkbenchPart</code>. Callers and implementers
+      of these APIs can see compile errors or warnings due to this binary-compatible change.</p>
+      
+      <p>For more information, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=442021#c25">bug 442021</a>.</p>
+     </td>
   </tr>
+
 
 
   <!-- *********************** SWT *********************** -->
@@ -465,108 +386,148 @@ public class RealE4View {
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
   
-  <tr id="swt-needs-1.5"> 
-    <td class="title">SWT requires JRE 1.5</td>
+  <tr id="date-time-on-gtk-spin-button">
+	<td class="title">The DateTime widget now uses GtkSpinButton on UNIX/Linux platforms</td>
     <td class="content">
-      The SWT project has moved to Java 1.5 compliance level. SWT applications will now require JRE 1.5 or higher to run.
-    </td>
+      The DateTime widget has been re-implemented to use the GtkSpinButton widget for
+      <code>SWT.DATE</code> and <code>SWT.TIME</code> styles. The new look and feel is as illustrated below:
+      <p><b>GTK+ 2:</b></p>
+          <p>
+            <img src="images/gtk2-date-time.png" alt="" />
+          </p>
+      <p><b>GTK+ 3:</b></p>
+          <p>
+            <img src="images/gtk3-date-time.png" alt="" />
+          </p>
+    </td>    
   </tr>
-   
-  <tr id="timing-api"> 
-    <td class="title">Added UI timing API</td>
-    <td class="content"> 
-      SWT has added two new events, <tt>SWT.PreEvent</tt> and <tt>SWT.PostEvent</tt>,
-      which are sent before and after all events and async runnables. These events can
-      be used to measure the time spent on processing any events. This 
-      can be useful for detecting slow event listeners. Because of its pervasive effect
-      on all events, this listener should be used with <b>extreme</b> caution.
-      For an example of how this can be used, take a look at the 
-      <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.examples.watchdog">
-      Watchdog</a> plugin in SWT examples.
+
+  <tr id="sleep-wakeup-deprecated-replaced">
+    <td class="title">New monitoring events added in place of SWT.Sleep and SWT.Wakeup</td>
+    <td class="content">
+        The <code>SWT.Sleep</code> and <code>SWT.Wakeup</code> events have been deprecated
+        in favor of the more generic events <code>SWT.PreExternalEventDispatch</code> and 
+        <code>SWT.PostExternalEventDispatch</code>, respectively. Clients that were written
+        using the old event names should be updated to refer to the new events.
     </td>
   </tr>
 
-  <tr id="bidi-segments">
-    <td class="title">BIDI segments support for Combo on Windows</td>
+  <tr id="transparent-bg">
+  <td class="title">Transparent background for Control</td>
     <td class="content">
-      The <code>Combo</code> widget now supports the same <code>SegmentListener</code> API as <code>Text</code>.
-      This allows an application to specify
-      segment boundaries and Unicode Control Characters to use in the segment boundaries.
+    	SWT has added support to set a <code>Control</code>'s background as transparent. The <code>Color</code> class now supports specifying an alpha value (integer: 0 to 255) for transparency.
+    	Calling <code>Control#setBackground(Color color)</code> with a transparent color (color with alpha value '0'), sets the control's background as transparent.
+		<p><b>List of new classes and APIs:</b></p>
+		<ul>
+			<li>Class: <code>org.eclipse.swt.graphics.RGBA</code></li>
+			<li>Constant: <code>SWT.COLOR_TRANSPARENT</code> - This is a default transparent color</li>
+			<li>Methods added in <code>org.eclipse.swt.graphics.Color</code></li>
+			<li><ul>
+				<li><code>public Color (Device device, int red, int green, int blue, int alpha)</code></li>
+				<li><code>public Color (Device device, RGB rgb, int alpha)</code></li>
+				<li><code>public Color (Device device, RGBA rgba)</code></li>
+				<li><code>public RGBA getRGBA </code>()</li>
+				<li><code>public int getAlpha ()</code></li>
+			</ul></li>
+		</ul>
+		<p><b>Note:</b></p>
+    	<ul>
+    		<li>Currently, SWT honors only extreme values for alpha i.e, '0'(transparent) or '255'(opaque).</li>
+    		<li>Setting transparent background color fails for some controls on all platforms, they show the default background color instead. For e.g. Text, Combo.</li>
+    		<li>Setting transparent background color for some controls works on GTK3 only, it fails on other platforms. For e.g. Table, Tree.</li>
+    	</ul>
+		For an example on using the new APIs, see <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet365.java">Snippet365</a>.
+		<p>
+			<b>Snippet365 in action</b> (Controls with <code>SWT.COLOR_TRANSPARENT</code> background and Shell with gradient background image)
+		</p>
+		<p>
+        	<img src="images/transparent_control_background.png" alt="Transparent Background on Control widgets" />
+      	</p>
+    </td>
+  </tr>
+
+  <tr id="swt-tools">
+    <td class="title">SWT Tools</td>
+    <td class="content">
+		<a href="https://www.eclipse.org/swt/tools.php">SWT Tools</a> are now available in the Eclipse Platform p2 repository.
+		SWT Tools provides tools for developing SWT itself (JNIGen) but also general purpose tools like  <b>Sleak</b> 
+		(monitors the creation and disposal of SWT graphics resources) and <b>SWT Spy</b> (prints out information like style, layout and parent 
+		about the widget under the cursor).
+    </td>
+  </tr>
+
+  <tr id="high-dpi">
+    <td class="title">APIs for high-DPI monitor support</td>
+    <td class="content">
+      New APIs have been added to provide support for rendering high-resolution images on high-DPI monitors.
       <p>
-      <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/tree/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet332.java"> 
-      Snippet332</a> shows how to accomplish RTL override in a Combo.
+      Two constructors have been added to the <code>Image</code> class. They accept
+      image-provider callbacks that allow clients to supply resolution-dependent versions
+      of images:
       </p>
-      <p><img src="images/combo-bidi-segments.png" alt=""/></p>
-      <p>JFace clients can use <code>BidiUtils#applyBidiProcessing(...)</code> to set pre-defined text types.</p>
-    </td>
+      <pre>public interface ImageDataProvider {
+	public ImageData getImageData (int zoom);
+}
+public interface ImageFileNameProvider {
+	public String getImagePath (int zoom);
+}</pre>
+      
+      <p>
+      Depending on the user's monitor configuration, SWT will request images with the
+      corresponding zoom level. Here's an example that displays 3 original images,
+      followed by variants whose resolution changes depending your monitor's resolution:
+      <a href="http://git.eclipse.org/c/platform/eclipse.platform.swt.git/plain/examples/org.eclipse.swt.snippets/src/org/eclipse/swt/snippets/Snippet367.java">Snippet367.java</a>.
+      </p>
+      
+      <p>
+      Note that this is just the first step to support high-resolution images in
+      SWT and Eclipse-based applications. Work is underway to adopt the new APIs in
+      the platform. Futhermore, more work in SWT is required to properly
+      support drawing into high-resolution images via <code>GC</code>.
+      </p>
+  	</td>
+  </tr>
+  
+  <tr id="evaluate">
+    <td class="title">API to choose security context in Browser#evaluate()</td>
+    <td class="content">
+		A new API <code>Browser#evaluate(String script, boolean trusted)</code> has been added that allows the client to run
+		Javascript code in the Chrome security context or in the normal security context for <code>SWT.MOZILLA</code>
+		style browsers.
+	</td>
   </tr>
 
-  <tr id="styled-text-api"> 
-    <td class="title">Added new API in StyledText to get text selection state</td>
+  <tr id="auto-text-direction">
+    <td class="title">BIDI: SWT Controls now support AUTO text direction</td>
     <td class="content">
-      <code>StyledText.isTextSelected()</code> can be used to quickly determine whether any text
-      in the widget is selected or not.
-    </td>
+      The auto (a.k.a. "contextual") text direction implies that the base text direction is derived from the direction
+      of the first strong (either LTR or RTL) bidi character. Auto text direction is the most appropriate choice when
+      the text content is not known in advance and, hence, it is not yet possible to decide which base direction value,
+      LTR or RTL, would be most suitable at run time.
+      <br />
+      Support for auto text direction has been introduced at the SWT Control level. Auto text direction can be applied
+      through the existing <code>Control#setTextDirection</code> API. The new value for auto direction is expressed as
+      the bitwise disjunction of (<code>SWT#LEFT_TO_RIGHT</code> | <code>SWT#RIGHT_TO_LEFT</code>) bit fields. When 
+      applied onto a Composite control, the auto base direction (similarly to LTR and RTL ones) is inherited by the
+      child components.
+      <br />
+      For example:
+      <ul>
+        <li><code>org.eclipse.swt.widgets.Table.setTextDirection(SWT.LEFT_TO_RIGHT | SWT.RIGHT_TO_LEFT);</code></li>
+	  </ul>
+      Result:
+      <p>
+        <img src="images/auto-text-direction.png" alt=""/>
+      </p>
+      <b>Note:</b> Auto text direction is not yet supported:
+      <ul>
+         <li>in StyledText</li>
+         <li>upon Control creation (but only through <code>Control#setTextDirection</code> call once the Control has been created)</li>      
+      </ul>
+	</td>
   </tr>
-  
-  <tr id="sleep-monitor-api"> 
-    <td class="title">Added API for sleep monitoring</td>
-    <td class="content">
-        SWT has added two new events, <code>SWT.Sleep</code> and <code>SWT.Wakeup</code>,
-        which are sent before the <code>Display</code> event loop goes into sleep and after
-        it wakes up from sleep respectively. These events can e.g. be used to monitor the duration
-        of sleep time in SWT applications.
-    </td>
-  </tr>
-  
-  <tr id="styledtext-bidi">
-    <td class="title">Set text direction for the <code>StyledText</code> widget on Windows</td>
-    <td class="content">
-      The <code>StyledText</code> widget now supports setting the text direction via the 
-      <code>setTextDirection(int)</code> API on the Windows platform. The <code>setTextDirection 
-      (int)</code> and <code>getTextDirection ()</code> APIs are also added to <code>TextLayout</code> 
-      (implemented only on Windows currently).
-    </td>
-  </tr>
-     
-  <tr id="gtk3-as-default"> 
-    <td class="title">GTK+ 3 used by default on Linux distributions (when installed and available)</td>
-    <td class="content">
-      Linux builds come with GTK+ 3 support enabled by default on GTK+ 3 versions prior to 3.10, 
-      versions newer than that will fall back to GTK+ 2.x by default for maximum stability. 
-      The GTK+ 3 support can however still be enabled either by setting the environment variable 
-      <code>SWT_GTK3</code> to <code>1</code> or by adding the launcher parameters <code>--launcher.GTK_version 3</code>.
-    </td>
-  </tr>
-  
-  <tr id="swt-webkit">
-    <td class="title">Experimental support for WebKit2 added to the SWT Browser</td>
-    <td class="content">
-      The SWT Browser now has preliminary support for WebKit2. To try it out, create a browser
-      widget with style <code>SWT.WEBKIT</code>, and set the environment variable SWT_WEBKIT2
-      to 1. This is only supported with GTK+ 3.x; if GTK+ 3 is disabled the browser will 
-      fallback to WebKit1.
-    </td>
-  </tr>
-  
-  <tr id="windows-taskbar-grouping">
-    <td class="title">SWT applications will not be grouped together in the Windows taskbar by default</td>
-    <td class="content">
-      SWT does not initialize the <b>AppUserModelID</b> (which is used by Windows for taskbar grouping) 
-      to "SWT" by default anymore. SWT applications which desire to be grouped together in the
-      Windows taskbar should set an appropriate application name before creating the
-      <code>Display</code> object as shown below:
-      <pre>
-		Display.setAppName("APP_NAME"); // APP_NAME will used as AppUserModelID
-		Display display = new Display();
-	  </pre> 
-    </td>
-  </tr>
-  
-  
 
   </tbody>
-<!-- ****************** END OF N&N TABLE ****************** -->
 </table>
 
 </body>
