@@ -797,21 +797,10 @@ actionSet entries, but Capabilities have not been fully implemented.
 None.
 
 <h3>3.2.6 <a name="I-Platform-SWT">Platform - SWT</a></h3>
-<h4>Eclipse falls back to GTK+ 2 as default on Linux with GTK+ 3 version &gt; 3.8.x</h4>
-<p>Linux builds come with GTK+ 3 support enabled by default on GTK+ 3 versions prior to 3.10, versions newer 
-than that will fall back to GTK+ 2.x by default for maximum stability. The GTK+ 3 support can however, still be 
-enabled by using either the environment variable <code>SWT_GTK3</code> or the launcher parameter 
-<code>--launcher.GTK_version</code> (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=434619">434619</a>)</p>
-
 <h4>Eclipse crashes randomly when using the Webkit based browser on RHEL 6.5</h4>
 <p>The Webkit version (1.2.6) that is bundled with RHEL 6.5 crashes randomly while evaluating Javascript code. 
 This has been fixed in more recent versions of Webkit which are not available on RHEL 6.5 yet. The workaround 
 is to force Eclipse to use the Mozilla XULRunner based browser. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=428347">428347</a>)</p>
-
-<h4>Table content is not rendered when running Eclipse under KDE with GTK+ 3 and "oxygen-gtk" theme</h4>
-<p>Tables in Eclipse are not rendered on Linux distributions with the KDE desktop (such as KUbuntu) 
-when using GTK+ 3 and the corresponding GTK+ 3 desktop theme "oxygen-gtk". The workaround is to switch 
-to a different GTK+ 3 theme. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=432673">432673</a>)</p>
 
 <h4>Eclipse plug-in based on the SWT Browser throws exception</h4>
 <p>The SWT Browser widget uses a platform-specific web browser to render HTML.
@@ -819,11 +808,6 @@ The org.eclipse.swt.SWTError exception (&quot;No more handles&quot;) is thrown
 on platforms that don't meet the requirements for running the Browser widget.
 Supported platforms and prerequisites are listed on the SWT FAQ item <a href="http://www.eclipse.org/swt/faq.php#browserplatforms">
 &quot;Which platforms support the SWT Browser?&quot;</a>.</p>
-
-<h4>Opening File Dialog crashes eclipse (Vista only)</h4>
-<p>On Vista, launching eclipse using <code>-vmargs -Xmx[any size]</code> can crash eclipse when the FileDialog is opened.
-The workaround is to use the default heap size, i.e. do not use the <code>-Xmx</code> VM args.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=188317">188317</a>)</p>
 
 <h4>Eclipse hangs when pasting from an unresponsive application (GTK only)</h4>
 <p>If the application that is supplying the clipboard material is unresponsive,
@@ -840,13 +824,6 @@ a time. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=226636">2266
 To launch eclipse you must disable file locking using the osgi.locking property.
 For example, you could launch eclipse as follows: <br/>
 <code>eclipse -vmargs -Dosgi.locking=none</code>
-</p>
-
-<h4>Strings may be truncated or incorrectly wrapped on RHEL5 (Linux GTK only)</h4>
-<p>
-Strings on wrapping Controls may not appear correctly in some locales on RHEL5 as a result
-of a bug in Pango version 1.14.x.  This problem can be fixed by upgrading the installed
-Pango library to a version that is newer than 1.14.x. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=231951">231951</a>)
 </p>
 
 <h4>Block Selection functionality provided by StyledText is not BIDI aware</h4>
@@ -873,18 +850,55 @@ can occur if the SWT client uses non-advanced GC calls. These problems seem to b
 in the interactions between GDK and X.
 </p>
 
-<h4>Menus do not appear in Unity desktop menu bar</h4>
-<p>On recent Ubuntu Linux distributions that feature the Unity desktop, the menus from the workbench 
-will not appear in the top desktop menu bar. They will continue to appear in the shell.</p>
-
-<h4>Slider controls do not draw on Ubuntu</h4>
-<p>Sliders do not work on Linux distros with overlay scrollbars enabled  (such as
-Ubuntu 12.04). A workaround for this is to disable the overlay scrollbars
-(export LIBOVERLAY_SCROLLBAR=0 ) before launching Eclipse.</p>
-
 <h4>BIDI Segments in Text controls</h4>
 <p>BIDI Segments in Text controls only work on Windows and GTK.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=388578">388578</a>)</p>
+
+<h4>Menu on TaskItem doesn't work for an SWT application when  AppName is not set on Windows</h4>
+<p>When AppName is not set for an SWT application, specify AppName using <code>Display.setAppName()</code> to be able to set Menu to the TaskItem.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=445840">445840</a>)</p>
+
+<h4>Eclipse icon is duplicated in task-bar on Windows</h4>
+<p>Workaround is to pin the launched eclipse application and not the launcher, for more details refer.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=314805">314805</a>)</p>
+
+<h4>Table background is not painted correctly when SWT.EraseItem is used (specific versions of GTK3)</h4>
+<p>With GTK3 version greater than 3.9 and less-equal 3.14.8, Table background is not painted correctly when SWT.EraseItem is used.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=468208">468208</a>)</p>
+
+<h4>Browser crashes when run with XULRunner 31 run-time (Linux only)</h4>
+<p>Launching a SWT Mozilla style Browser with XULRunner 31 run-time crashes on Linux.
+The workaround is to use other supported XULRunner run-times or web-kit.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467646">467646</a>)</p>
+
+<h4>Download progress window not shown with XULRunner 31 run-time</h4>
+<p>Trying to download a file in a SWT Mozilla style Browser using XULRunner 31 run-time doesn't work and the download progress window doesn't open automatically.
+Workaround is to open the download progress-bar dialog by opening chrome://mozapps/content/downloads/downloads.xul and manually re-start the download action.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467203">467203</a>)</p>
+
+<h4>Overdrawn of label decorators with dark-theme on GTK3.10 and above</h4>
+<p>This problem seen with dark-theme on GTK3.10 and above versions. On using label decorators, the label text/background is overdrawn.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=465911">465911</a>)</p>
+
+<h4>Some keybindings/shortcuts become unresponsive (GTK3 only)</h4>
+<p>While using GTK+ 3 on Linux (the default in 4.5 release), it is possible that the keyboard shortcuts stop working all of a sudden.
+This is because of a known problem with GTK3/Xinput2  and can be worked around by setting the environment variable <code>"GDK_CORE_DEVICE_EVENTS=1"</code> before running the application.
+Note that this workaround is not necessary for Eclipse (as the launcher already sets it) but is needed for other SWT based applications.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=435742">435742</a>)</p>
+
+<h4>Eclipse crashes with GTK+ 2 and Oxygen-gtk2 theme under KDE desktop</h4>
+<p>Eclipse crashes when running on KDE using GTK+ 2 and the corresponding desktop theme "Oxygen-gtk2" with a message similar to:<br>
+<code>"java: /build/buildd/gtk2-engines-oxygen-1.4.5/src/animations/oxygencomboboxdata.cpp:87: void Oxygen::ComboBoxData::setButton(GtkWidget*): Assertion `!_button._widget' failed."</code>
+<br><br>The possible workarounds are:<br>
+<ol>
+	<li>Use Eclipse with GTK+ 3 (the default in 4.5 release) and the corresponding theme <code>"Oxygen-gtk3"</code>.</li>
+	<li>Use a newer version of the "Oxygen-gtk2" theme in which the above bug has been fixed.</li>
+	<li>
+		In case versions of GTK+ and/or the theme cannot be altered, edit the existing file "/usr/share/themes/oxygen-gtk/gtk-2.0/gtkrc" and change<br>
+		<code>GtkComboBox::appears-as-list = 1 into GtkComboBox::appears-as-list = 0.</code>
+	</li>
+</ol>
+For more details refer(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=440660">440660</a>)</p>
 
 <h3>3.2.7 <a name="I-Platform-Team-CVS">Platform - Team - CVS</a></h3>
 <p>The following are known problems with the CVS repository provider only, and
