@@ -14,12 +14,14 @@
 or even better, <a href="task-using_null_type_annotations.htm">null type anntations</a>
 can significantly reduce (ideally: eliminate) the danger of <code>NullPointerException</code>
 thrown at program runtime.
-Unfortunately, the API of many libraries does not yet consistently specify,
-where <code>null</code> is allowed, and where it isn't.
+Unfortunately, the API of many libraries does not yet consistently specify
+where <code>null</code> is allowed and where it isn't.
 This can be a major source of incompleteness in this endeavor.
 In order to fill this gap, starting with Eclipse 4.5 (Mars),
-JDT will take into consideration null annotations that are provided
-in separate files attached to a given library.
+JDT supports the concept of <em>external annotations</em>,
+which means that null annotations can be specified in separate files &ndash; without modifying the original library.
+If you attach such external null annotations to a given library,
+JDT will then consider these annotations for its static null analysis.<br>
 This help page describes
 </p>
 <ul>
@@ -79,7 +81,7 @@ the direct child <b>External annotations:</b> of the top-level node called <b>JR
 <h3>Other Classpath Containers</h3>
 <p>Depending on the build technology in use, projects may have additional classpath containers like
 <b>Plug-in Dependencies</b> or <b>Maven Dependencies</b>.
-For these containers, the only option currently is,
+For these containers, the only option currently is
 to specify the external annotation location via each projects build path.
 In this case users are advised to manually ensure that the same location is used
 for all projects of the workspace, <em>see the <a href="#caveat-configure">"Caveat"</a> above.</em>
@@ -92,7 +94,7 @@ external annotations can be attached separately in the <a href="../reference/ref
 <p><u>Pre-requisites:</u>
 External annotations require a library with <a href="../reference/ref-properties-source-attachment.htm">source attachment</a>.
 Additionally, annotation based null analysis must be enabled for the current project,
-an external annotation location must be defined for the library and that location must be a directory, not a zip file.
+an external annotation location must be defined for the library and that location must be a directory (not a zip file) within the workspace.
 </p>
 <p>
 After navigating to the desired class, you may select the type (method parameter or method return type)
@@ -117,7 +119,7 @@ The <b>Problems</b> view will be updated when affected classes are re-compiled.
 <blockquote><b>Be careful:</b>
 When attaching external annotations to a library, keep in mind that you are defining a new contract,
 that will then be used to check your program against.
-The compiler will, however, not check the library, if it actually conforms to this contract.
+The compiler will, however, not check the library, whether it actually conforms to this contract.
 By carelessly marking, e.g., a return type as <code>@NonNull</code> you let the compiler
 advise you to remove null checks against return values from the given method.
 If the library <em>does</em> return null in any situation, this null will hit you unguarded.
@@ -142,7 +144,7 @@ or <a href="../reference/views/ref-view-javadoc.htm">Javadoc view</a>.<br>
 <h2 id="annotation_kind">Declaration annotations vs type annotations</h2>
 <p>Generally, support for external annotations has been developed with regard to fully supporting
 all locations of <a href="task-using_null_type_annotations.htm">null type annotations</a> (Java 8).
-This means, you may point into any detail of a type in a method signature and annotate, e.g., a type parameter, a type bound or an array dimension.
+This means, you may refer to any detail of a type in a method signature and annotate, e.g., a type parameter, a type bound or an array dimension.
 When using declaration annotations, the relevant subset of location shares the same mechanisms for external annotations.
 </p>
 <p>
@@ -159,7 +161,7 @@ Invoking <b>Annotate</b> will create an external annotation that is internally i
 as an annotation on the method (but still the meaning is: describing the return of this method).
 </p>
 <p>
-Other than this one exception, external annotations closely mimic, how annotations directly in a source file would be handled,
+Other than this one exception, external annotations closely mimic how annotations directly within a source file would be handled,
 with a reduced set of locations for declaration annotations, and the full set of locations for type annotations.
 </p>
 </body>
