@@ -125,6 +125,25 @@ type parameter can be used as a <em>type variable</em>, i.e., a placeholder for 
 that is not known at this point.
 </p>
 <p>
+A type variable will typically be used without (further) null annotations, which implies
+that the annotations from the type parameter declaration will apply as detailed below.
+In some situations, however, it is useful to annotate an individual use of a type variable.
+As an example consider the library method <code>java.util.Map.get(Object)</code>,
+which should actually be annotated like this:
+</p>
+<pre>    @Nullable V get(Object key)</pre>
+<p>
+By this declaration we would indicate that the return type is <strong>the nullable variant
+of whatever type V may represent</strong>. In other words, a null annotation on the use
+of a type variable <em>overrides</em> any other null information that would otherwise
+apply to this type. In particular any null annotation on the corresponding type parameter
+declaration (or its bound) is overridden by a null annotation in this position.
+</p>
+<p>
+On the other hand, when using a type variable without immediate null annotations the following rules apply
+depending on the declaration of the corresponding type parameter:
+</p>
+<p>
 A type variable corresponding to a type parameter with a <strong><code>@NonNull</code> upper bound</strong>
 denotes a type that is <em>known to be nonnull</em>.
 </p>
@@ -366,7 +385,7 @@ Require-Bundle: ...,
  org.eclipse.jdt.annotation;bundle-version="[2.0.0,3.0.0)";resolution:=optional
 </pre></dd>
 </dl>
-<h3 id="compatibility_semantics">Semantics</h3>
+<h3 id="compatibility_semantics">Semantics &ndash; NonNullByDefault</h3>
 <p>
 While the fundamental semantics of null annotation remains unchanged,
 the annotation <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
@@ -385,6 +404,24 @@ the annotation <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/e
 </table>
 </li>
 </ul>
+Although the Java 8 variant of
+	 <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a> affects more locations, two noteworthy exceptions exist
+	(as specified in <a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/DefaultLocation.html"
+	><code>DefaultLocation</code></a>):
+<blockquote>
+	<strong>
+	Wildcards and the use of type variables are always excluded from 
+	<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a>.
+	</strong>
+</blockquote>
+<p>
+By this rule, type variables and wildcards retain their intended properties as "unknowns" also in terms of nullness,
+even when they appear in the context of 
+	<a href="PLUGINS_ROOT/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/annotation/NonNullByDefault.html"
+	><code>@NonNullByDefault</code></a>.
+</p>
 
 <h2 id="compiler_messages_explained">Compiler messages explained</h2>
 <p>
