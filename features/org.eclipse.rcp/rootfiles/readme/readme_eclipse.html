@@ -797,6 +797,16 @@ actionSet entries, but Capabilities have not been fully implemented.
 None.
 
 <h3>3.2.6 <a name="I-Platform-SWT">Platform - SWT</a></h3>
+<h4>SWT Browser widget crashes when run with XULRunner 31 run-time (Linux only)</h4>
+<p>Creation of an SWT Mozilla style Browser with XULRunner 31 run-time crashes on Linux.
+The workaround is to use other supported XULRunner run-times or webkit which is the default on Linux.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467646">467646</a>)</p>
+
+<h4>Download progress window not shown with XULRunner 31 run-time</h4>
+<p>Trying to download a file in a SWT Mozilla style Browser using XULRunner 31 run-time doesn't work and the download progress window doesn't open automatically.
+Workaround is to open the download progress-bar dialog by opening chrome://mozapps/content/downloads/downloads.xul and manually re-start the download action.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467203">467203</a>)</p>
+
 <h4>Eclipse crashes randomly when using the Webkit based browser on RHEL 6.5</h4>
 <p>The Webkit version (1.2.6) that is bundled with RHEL 6.5 crashes randomly while evaluating Javascript code. 
 This has been fixed in more recent versions of Webkit which are not available on RHEL 6.5 yet. The workaround 
@@ -808,6 +818,34 @@ The org.eclipse.swt.SWTError exception (&quot;No more handles&quot;) is thrown
 on platforms that don't meet the requirements for running the Browser widget.
 Supported platforms and prerequisites are listed on the SWT FAQ item <a href="http://www.eclipse.org/swt/faq.php#browserplatforms">
 &quot;Which platforms support the SWT Browser?&quot;</a>.</p>
+
+<h4>Table background is not painted correctly when SWT.EraseItem is used (specific versions of GTK3)</h4>
+<p>With GTK3 versions &gt; 3.9 and &lt;= 3.14.8, the Table background is not painted correctly when SWT.EraseItem listener is used.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=468208">468208</a>)</p>
+
+<h4>TreeItems with decorated icons overwrite text with Eclipse dark theme on GTK+ 3.10 and above</h4>
+<p>When using the Eclipse dark theme on GTK+ 3.10 and above, TreeItem widgets with decorated icons (for example, Package Explorer with icons decorated
+by EGit to indicate changed files) have their text and/or background drawn outside the Tree area, possibly overdrawing on other widgets.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=465911">465911</a>)</p>
+
+<h4>Some keybindings/shortcuts become unresponsive (GTK3 only)</h4>
+<p>While using GTK+ 3 on Linux (the default in 4.5 release), it is possible that the keyboard shortcuts stop working all of a sudden.
+This is because of a known problem with GTK3/Xinput2  and can be worked around by setting the environment variable <code>"GDK_CORE_DEVICE_EVENTS=1"</code> before running the application.
+Note that this workaround is not necessary for Eclipse (as the launcher already sets it) but is needed for other SWT based applications.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=435742">435742</a>)</p>
+
+<h4>Eclipse crashes with GTK+ 2 and Oxygen-gtk2 theme under KDE desktop</h4>
+<p>Eclipse crashes when running on KDE using GTK+ 2 and the corresponding desktop theme "Oxygen-gtk2" with a message similar to:<br />
+<code>"java: /build/buildd/gtk2-engines-oxygen-1.4.5/src/animations/oxygencomboboxdata.cpp:87: void Oxygen::ComboBoxData::setButton(GtkWidget*): Assertion `!_button._widget' failed."</code>
+<br />For details, see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=440660">440660</a>. The possible workarounds are:</p>
+<ol>
+	<li>Use Eclipse with GTK+ 3 (the default in 4.5 release) and the corresponding theme "Oxygen-gtk3".</li>
+	<li>Use a newer version of the "Oxygen-gtk2" theme in which the above bug has been fixed.</li>
+	<li>
+		In case versions of GTK+ and/or the theme cannot be altered, edit the existing file "/usr/share/themes/oxygen-gtk/gtk-2.0/gtkrc" and change<br />
+		<code>GtkComboBox::appears-as-list = 1</code> into <code>GtkComboBox::appears-as-list = 0.</code>
+	</li>
+</ol>
 
 <h4>Eclipse hangs when pasting from an unresponsive application (GTK only)</h4>
 <p>If the application that is supplying the clipboard material is unresponsive,
@@ -826,13 +864,6 @@ For example, you could launch eclipse as follows: <br/>
 <code>eclipse -vmargs -Dosgi.locking=none</code>
 </p>
 
-<h4>Block Selection functionality provided by StyledText is not BIDI aware</h4>
-<p>
-When the orientation of characters under the left and right edges of the block
-selection rectangle are not the same, the actual selection ranges (in memory)
-differ from the visual representation of the selection. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=277929">277929</a>)
-</p>
-
 <h4>Older versions of some Windows screen readers no longer work with Eclipse</h4>
 <p>JAWS versions 8 and 9 and Window-Eyes version 6 no longer work well with Eclipse and other SWT applications.
 Window-Eyes 6 will cause Eclipse to crash, and JAWS 8 and 9 can cause SWT applications to crash.
@@ -844,60 +875,24 @@ which will instruct SWT to not attempt to use IA2 interfaces.  An easy way to se
 <code>-Dorg.eclipse.swt.accessibility.UseIA2=false</code> when launching Eclipse or your SWT application. (bug
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=313182">313182</a>)</p>
 
-<h4>Drawing problems when using non-advanced graphics on recent GTK versions</h4>
-<p>On modern Linux distributions with a GTK version greater than 2.18, clipping problems and pixel corruption 
-can occur if the SWT client uses non-advanced GC calls. These problems seem to be caused by low-level bugs 
-in the interactions between GDK and X.
-</p>
-
-<h4>BIDI Segments in Text controls</h4>
-<p>BIDI Segments in Text controls only work on Windows and GTK.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=388578">388578</a>)</p>
-
 <h4>Menu on TaskItem doesn't work for an SWT application when  AppName is not set on Windows</h4>
 <p>When AppName is not set for an SWT application, specify AppName using <code>Display.setAppName()</code> to be able to set Menu to the TaskItem.
 (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=445840">445840</a>)</p>
 
 <h4>Eclipse icon is duplicated in task-bar on Windows</h4>
-<p>Workaround is to pin the launched eclipse application and not the launcher, for more details refer.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=314805">314805</a>)</p>
+<p>Workaround is to pin the launched eclipse application and not the launcher, for more details, refer
+bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=314805">314805</a></p>
 
-<h4>Table background is not painted correctly when SWT.EraseItem is used (specific versions of GTK3)</h4>
-<p>With GTK3 version greater than 3.9 and less-equal 3.14.8, Table background is not painted correctly when SWT.EraseItem is used.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=468208">468208</a>)</p>
+<h4>BIDI Segments in Text controls</h4>
+<p>BIDI Segments in Text controls only work on Windows and GTK.
+(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=388578">388578</a>)</p>
 
-<h4>Browser crashes when run with XULRunner 31 run-time (Linux only)</h4>
-<p>Launching a SWT Mozilla style Browser with XULRunner 31 run-time crashes on Linux.
-The workaround is to use other supported XULRunner run-times or web-kit.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467646">467646</a>)</p>
-
-<h4>Download progress window not shown with XULRunner 31 run-time</h4>
-<p>Trying to download a file in a SWT Mozilla style Browser using XULRunner 31 run-time doesn't work and the download progress window doesn't open automatically.
-Workaround is to open the download progress-bar dialog by opening chrome://mozapps/content/downloads/downloads.xul and manually re-start the download action.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=467203">467203</a>)</p>
-
-<h4>Overdrawn of label decorators with dark-theme on GTK3.10 and above</h4>
-<p>This problem seen with dark-theme on GTK3.10 and above versions. On using label decorators, the label text/background is overdrawn.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=465911">465911</a>)</p>
-
-<h4>Some keybindings/shortcuts become unresponsive (GTK3 only)</h4>
-<p>While using GTK+ 3 on Linux (the default in 4.5 release), it is possible that the keyboard shortcuts stop working all of a sudden.
-This is because of a known problem with GTK3/Xinput2  and can be worked around by setting the environment variable <code>"GDK_CORE_DEVICE_EVENTS=1"</code> before running the application.
-Note that this workaround is not necessary for Eclipse (as the launcher already sets it) but is needed for other SWT based applications.
-(bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=435742">435742</a>)</p>
-
-<h4>Eclipse crashes with GTK+ 2 and Oxygen-gtk2 theme under KDE desktop</h4>
-<p>Eclipse crashes when running on KDE using GTK+ 2 and the corresponding desktop theme "Oxygen-gtk2" with a message similar to:<br />
-<code>"java: /build/buildd/gtk2-engines-oxygen-1.4.5/src/animations/oxygencomboboxdata.cpp:87: void Oxygen::ComboBoxData::setButton(GtkWidget*): Assertion `!_button._widget' failed."</code>
-<br />For details see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=440660">440660</a>. The possible workarounds are:</p>
-<ol>
-	<li>Use Eclipse with GTK+ 3 (the default in 4.5 release) and the corresponding theme <code>"Oxygen-gtk3"</code>.</li>
-	<li>Use a newer version of the "Oxygen-gtk2" theme in which the above bug has been fixed.</li>
-	<li>
-		In case versions of GTK+ and/or the theme cannot be altered, edit the existing file "/usr/share/themes/oxygen-gtk/gtk-2.0/gtkrc" and change<br />
-		<code>GtkComboBox::appears-as-list = 1 into GtkComboBox::appears-as-list = 0.</code>
-	</li>
-</ol>
+<h4>Block Selection functionality provided by StyledText is not BIDI aware</h4>
+<p>
+When the orientation of characters under the left and right edges of the block
+selection rectangle are not the same, the actual selection ranges (in memory)
+differ from the visual representation of the selection. (bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=277929">277929</a>)
+</p>
 
 
 <h3>3.2.7 <a name="I-Platform-Team-CVS">Platform - Team - CVS</a></h3>
