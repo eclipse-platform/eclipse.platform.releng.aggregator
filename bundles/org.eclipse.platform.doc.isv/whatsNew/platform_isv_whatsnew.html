@@ -36,6 +36,50 @@ section of the Workbench User Guide.
     <td id="Platform" class="section" colspan="2"><h2>Platform Changes</h2></td>
   </tr>
 
+  <tr id="Job-groups-api">
+    <td class="title">Job groups API</td>
+    <td class="content">
+	A JobGroup API (<code>org.eclipse.core.runtime.jobs.JobGroup</code>) has been added that makes it
+	easier to implement parallel algorithms in Eclipse.
+	<p>Job groups provide a simple way to manage a set of Eclipse Jobs that are responsible
+	for pieces of the same large task. The API supports throttling, joining, cancellation,
+	combined progress and error reporting for all of the jobs in the group. The job grouping
+	functionality can be used to implement performance critical algorithms using cooperating
+	jobs. More information can be found in
+	<b><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=432049">bug 432049</a></b>.</p>
+    </td>
+  </tr>
+
+  <tr id="jface-structuredselection">
+    <td class="title">Direct access to structured selection of a JFace Viewer</td>
+    <td class="content">
+      The JFace <code>StructuredViewer</code> class now has an API to access the <code>IStructuredSelection</code> directly.
+      Examples:
+<pre>	IStructuredSelection sel = viewer.getStructuredSelection();
+	ITreeSelection treeSel = treeViewer.getStructuredSelection();</pre>
+      Bye bye <code>(IStructuredSelection) viewer.getSelection()</code>, we won't miss you!
+    </td>
+  </tr>
+
+  <tr id="AbstractSelectionDialog">
+    <td class="title">New API: AbstractSelectionDialog</td>
+    <td class="content">
+      <code>org.eclipse.jface.dialogs.AbstractSelectionDialog</code> is an enhanced version of the existing
+      <code>org.eclipse.ui.dialogs.SelectionDialog</code>.
+      It has been added to the org.eclipse.jface bundle, where it is also available for Eclipse 4 RCP applications.
+      
+      <p>The AbstractSelectionDialog API supports generics and varargs.
+      </p>
+     </td>
+  </tr>
+
+  <tr id="ant-version-upgrade">
+    <td class="title">Ant 1.9.4</td>
+    <td class="content">
+      Eclipse has adopted Ant version 1.9.4.
+    </td>
+  </tr>
+
   <tr id="step-filter-ext-point">
     <td class="title">New stepFilters extension point</td>
     <td class="content">
@@ -93,24 +137,6 @@ section of the Workbench User Guide.
     </td>
   </tr>
 
-  <tr id="jface-structuredselection">
-    <td class="title">Direct access to structured selection of a JFace Viewer</td>
-    <td class="content">
-      The JFace <code>StructuredViewer</code> class now has an API to access the <code>IStructuredSelection</code> directly.
-      Examples:
-<pre>	IStructuredSelection sel = viewer.getStructuredSelection();
-	ITreeSelection treeSel = treeViewer.getStructuredSelection();</pre>
-      Bye bye <code>(IStructuredSelection) viewer.getSelection()</code>, we won't miss you!
-    </td>
-  </tr>
-
-  <tr id="ant-version-upgrade">
-    <td class="title">Ant 1.9.4</td>
-    <td class="content">
-      Eclipse has adopted Ant version 1.9.4.
-    </td>
-  </tr>
-
   <tr id="runtime-locale-type-change">
     <td class="title">Changed type of TranslationService.LOCALE</td>
     <td class="content">
@@ -118,6 +144,15 @@ section of the Workbench User Guide.
       <code>String</code> to <code>Locale</code> (for performance reasons).
       <p>If you are injecting <code>org.eclipse.e4.core.services.translation.TranslationService.LOCALE</code> in your code, you
       need to change the type from <code>String</code> to <code>Locale</code>.</p> 
+    </td>
+  </tr>
+
+  <tr id="css-transparency">
+    <td class="title">CSS support for new COLOR-TRANSPARENT constant</td>
+    <td class="content">
+      The CSS engine now supports the COLOR-TRANSPARENT property. The implementation uses SWT's new SWT#COLOR_TRANSPARENT pseudo-color.
+      COLOR-TRANSPARENT allowed to simplify the dark theme significantly.
+      <!-- TODO: Could add a link to an API description, but not to a bug. -->
     </td>
   </tr>
 
@@ -157,36 +192,10 @@ section of the Workbench User Guide.
     </td>
   </tr>
 
-  <tr id="Job-groups-api">
-    <td class="title">Job groups API</td>
-    <td class="content">
-	A JobGroup API (<code>org.eclipse.core.runtime.jobs.JobGroup</code>) has been added that makes it
-	easier to implement parallel algorithms in Eclipse.
-	<p>Job groups provide a simple way to manage a set of Eclipse Jobs that are responsible
-	for pieces of the same large task. The API supports throttling, joining, cancellation,
-	combined progress and error reporting for all of the jobs in the group. The job grouping
-	functionality can be used to implement performance critical algorithms using cooperating
-	jobs. More information can be found in
-	<b><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=432049">bug 432049</a></b>.</p>
-    </td>
-  </tr>
-
-  <tr id="menuitem-tooltip">
-    <td class="title">Added API to set tooltip for MenuItem</td>
-    <td class="content">
-		SWT now supports setting a tooltip on menu items via <code>MenuItem.setToolTipText()</code>. 
-		<p>
-		For an example, see the <b>Menu</b> tab in the <a href="https://www.eclipse.org/swt/examples.php">ControlExample</a>.</p>
-		<p>
-          <img src="images/tooltip.png" alt="" />
-        </p>
-    </td>
-  </tr>
-
    <tr id="help-service">
     <td class="title">Provisional EHelpService service</td>
     <td class="content">
-		M5 provides the provisional help service <code>EHelpService</code> in the <code>IEclipseContext</code>. 
+		Eclipse now provides the provisional help service <code>EHelpService</code> in the <code>IEclipseContext</code>. 
 		<code>EHelpService</code> is a thin wrapper to the <code>WorkbenchHelpSystem</code> in the Eclipse IDE and allows customers to
 		provide their custom implementation in Eclipse RCP applications.
     </td>
@@ -308,6 +317,22 @@ public void init(Composite parent) {
     <td id="Equinox" class="section" colspan="2"><h2>Equinox Changes</h2></td>
   </tr>
 
+  <tr id="getAdapter">
+    <td class="title">IAdaptable#getAdapter(Class) generified</td>
+    <td class="content">
+      The <code>org.eclipse.core.runtime.IAdaptable</code> interface has been enhanced to return the requested type from
+      its <code>getAdapter</code> method:
+      
+      <pre>public &lt;T&gt; T getAdapter(Class &lt;T&gt; adapter);</pre>
+      
+      <p>Implementations of this method should also be updated. This has already been done
+      for some platform APIs like <code>org.eclipse.ui.part.WorkbenchPart</code>. Callers and implementers
+      of these APIs can see compile errors or warnings due to this binary-compatible change.</p>
+      
+      <p>For more information, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=442021#c25">bug 442021</a>.</p>
+     </td>
+  </tr>
+
   <tr id="jetty9">
     <td class="title">Updated to Jetty version 9</td>
     <td class="content">
@@ -342,50 +367,24 @@ public void init(Composite parent) {
     </td>
   </tr>
 
-  <tr id="AbstractSelectionDialog">
-    <td class="title">New API: AbstractSelectionDialog</td>
-    <td class="content">
-      <code>org.eclipse.jface.dialogs.AbstractSelectionDialog</code> is an enhanced version of the existing
-      <code>org.eclipse.ui.dialogs.SelectionDialog</code>.
-      It has been added to the org.eclipse.jface bundle, where it is also available for Eclipse 4 RCP applications.
-      
-      <p>The AbstractSelectionDialog API supports generics and varargs.
-      </p>
-     </td>
-  </tr>
-
-  <tr id="css-transparency">
-    <td class="title">CSS support for new COLOR-TRANSPARENT constant</td>
-    <td class="content">
-      The CSS engine now supports the COLOR-TRANSPARENT property. The implementation uses SWT's new SWT#COLOR_TRANSPARENT pseudo-color.
-      COLOR-TRANSPARENT allowed to simplify the dark theme significantly.
-      <!-- TODO: Could add a link to an API description, but not to a bug. -->
-    </td>
-  </tr>
-
-  <tr id="getAdapter">
-    <td class="title">IAdaptable#getAdapter(Class) generified</td>
-    <td class="content">
-      The <code>org.eclipse.core.runtime.IAdaptable</code> interface has been enhanced to return the requested type from
-      its <code>getAdapter</code> method:
-      
-      <pre>public &lt;T&gt; T getAdapter(Class &lt;T&gt; adapter);</pre>
-      
-      <p>Implementations of this method should also be updated. This has already been done
-      for some platform APIs like <code>org.eclipse.ui.part.WorkbenchPart</code>. Callers and implementers
-      of these APIs can see compile errors or warnings due to this binary-compatible change.</p>
-      
-      <p>For more information, see <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=442021#c25">bug 442021</a>.</p>
-     </td>
-  </tr>
-
-
 
   <!-- *********************** SWT *********************** -->
   <tr>
     <td id="SWT" class="section" colspan="2"><h2>SWT Changes</h2></td>
   </tr>
   
+  <tr id="menuitem-tooltip">
+    <td class="title">Added API to set tooltip for MenuItem</td>
+    <td class="content">
+		SWT now supports setting a tooltip on menu items via <code>MenuItem.setToolTipText()</code>. 
+		<p>
+		For an example, see the <b>Menu</b> tab in the <a href="https://www.eclipse.org/swt/examples.php">ControlExample</a>.</p>
+		<p>
+          <img src="images/tooltip.png" alt="" />
+        </p>
+    </td>
+  </tr>
+
   <tr id="date-time-on-gtk-spin-button">
 	<td class="title">The DateTime widget now uses GtkSpinButton on UNIX/Linux platforms</td>
     <td class="content">
@@ -443,16 +442,6 @@ public void init(Composite parent) {
 		<p>
         	<img src="images/transparent_control_background.png" alt="Transparent Background on Control widgets" />
       	</p>
-    </td>
-  </tr>
-
-  <tr id="swt-tools">
-    <td class="title">SWT Tools</td>
-    <td class="content">
-		<a href="https://www.eclipse.org/swt/tools.php">SWT Tools</a> are now available in the Eclipse Platform p2 repository.
-		SWT Tools provides tools for developing SWT itself (JNIGen) but also general purpose tools like  <b>Sleak</b> 
-		(monitors the creation and disposal of SWT graphics resources) and <b>SWT Spy</b> (prints out information like style, layout and parent 
-		about the widget under the cursor).
     </td>
   </tr>
 
@@ -525,6 +514,16 @@ public interface ImageFileNameProvider {
          <li>upon Control creation (but only through <code>Control#setTextDirection</code> call once the Control has been created)</li>      
       </ul>
 	</td>
+  </tr>
+
+  <tr id="swt-tools">
+    <td class="title">SWT Tools</td>
+    <td class="content">
+		<a href="https://www.eclipse.org/swt/tools.php">SWT Tools</a> are now available in the Eclipse Platform p2 repository.
+		SWT Tools provides tools for developing SWT itself (JNIGen) but also general purpose tools like  <b>Sleak</b> 
+		(monitors the creation and disposal of SWT graphics resources) and <b>SWT Spy</b> (prints out information like style, layout and parent 
+		about the widget under the cursor).
+    </td>
   </tr>
 
   </tbody>
