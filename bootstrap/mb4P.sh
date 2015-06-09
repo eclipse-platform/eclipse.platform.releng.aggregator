@@ -76,10 +76,10 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_E
 
 echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME
 
-export BRANCH=R4_3_maintenance_Java8
+export BRANCH=BETA_JAVA9
 export BUILD_TYPE=P
-export STREAM=4.3.2
-export PATCH_BUILD=java8patch
+export STREAM=4.5.0
+export PATCH_BUILD=java9patch
 
 eclipseStreamMajor=${STREAM:0:1}
 
