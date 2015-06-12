@@ -192,7 +192,7 @@ then
     mv "${WORK_DIR}/sdkdiffout.txt" "${WORK_DIR}/sdkdiffout${NOWDATE}.txt"
     checkForErrorExit $? "could not mv sdkdiffout.txt to sdkdiffout${NOWDATE}.txt"
   fi
-  diff -r "${WORK_DIR}/sdk" "${WORK_DIR}/sdkTempSave" > "${WORK_DIR}/sdkdiffout.txt"
+  diff -w -r "${WORK_DIR}/sdk" "${WORK_DIR}/sdkTempSave" > "${WORK_DIR}/sdkdiffout.txt"
   # It's normal for diff to return '1', if differences are found. returns '0' if no differences found.
   # No need to 'exit' for either '0' or '1'.
   # Even '2' may or may not be ok, See "info diff".
