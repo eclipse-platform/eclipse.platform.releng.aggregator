@@ -209,7 +209,7 @@ then
   # DL page ... and those zip files best without pack.gz files, since they
   # are not used if using local zip archive, so are "wasted" there.
   pushd ${siteDirOnBuildMachine}
-  zip -r ${buildDirectory}/java8patch-${BUILD_ID}-repository.zip  .
+  zip -r ${buildDirectory}/${PATCH_BUILD}-${BUILD_ID}-repository.zip  .
   popd
 
   #    if [[ -n "${PATCH_BUILD}" ]]
