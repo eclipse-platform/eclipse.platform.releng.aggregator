@@ -14,16 +14,16 @@
 
 export DROP_ID=I20150603-2000
 
-export DL_LABEL=4.5RC4
-export DL_LABEL_EQ=MarsRC4
-#export DL_LABEL=4.5
-#export DL_LABEL_EQ=Mars
+#export DL_LABEL=4.5RC4
+#export DL_LABEL_EQ=MarsRC4
+export DL_LABEL=4.5
+export DL_LABEL_EQ=Mars
 
 # for I builds, stable and RCs go to in milestones
 # for M builds, even RCs also go in <version>-M-builds
 #export REPO_SITE_SEGMENT=4.5-M-builds
-export REPO_SITE_SEGMENT=4.5milestones
-#export REPO_SITE_SEGMENT=4.5
+#export REPO_SITE_SEGMENT=4.5milestones
+export REPO_SITE_SEGMENT=4.5
 
 if [[ "$INDEX_ONLY" == "true" ]]
 then
@@ -35,8 +35,8 @@ fi
 # These are what precedes main drop directory name
 # For Maintenance, it's always 'M' (from M-build) until it's 'R'.
 # for main line code, it's 'S' (from I-build) until it's 'R'
-export DL_TYPE=S
-#export DL_TYPE=R
+#export DL_TYPE=S
+export DL_TYPE=R
 #export DL_TYPE=M
 
 # = = = = = = = Things past here seldom need to be updated
