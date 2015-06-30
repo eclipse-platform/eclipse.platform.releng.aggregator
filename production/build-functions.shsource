@@ -589,7 +589,12 @@ fn-gather-repo ()
     TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/repository
     ORIG_DIR_REPOSITORY=$REPO_DIR/${ORIG_PATH}
     REPO_DIR_REPOSITORY=$REPO_DIR/${TARGET_PATH}
-    mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
+    # old site update-site repos are created in 'site', so we move to 'repository'
+    # newer eclipse-repository are in 'repository' already.
+    if [[ -e "${ORIG_PATH}" ]]
+    then
+       mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
+    fi
 
   else
     TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/eclipse.platform.repository/target/repository
