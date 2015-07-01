@@ -86,7 +86,7 @@ wget -O ${WORKSPACE}/getEBuilder.xml --no-verbose   http://${GIT_HOST}/c/platfor
 
 ANTFILE=getEBuilder.xml
 buildId=I20150320-0800
-eclipseStream=4.5.0
+eclipseStream=4.6.0
 EBUILDER_HASH=master
 #EBUILDER_HASH=4295494c43e464a0c4ee39b7e0c847fbc3263f2a
 

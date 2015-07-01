@@ -49,7 +49,7 @@ echo -e "nOldBuilds: $nOldBuilds"
 #find /shared/eclipse/eclipse4N/siteDir/eclipse/downloads/drops4 -maxdepth 1 -ctime +1 -name "N*" -ls -exec rm -fr '{}' \;
 find /shared/eclipse/builds/4N/siteDir/eclipse/downloads/drops4 -maxdepth 1 -ctime +1 -name "N*" -ls -exec rm -fr '{}' \;
 find /shared/eclipse/builds/4N/siteDir/equinox/drops -maxdepth 1 -ctime +1 -name "N*" -ls -exec rm -fr '{}' \;
-find /shared/eclipse/builds/4N/siteDir/updates/4.5-N-builds -maxdepth 1 -ctime +1 -name "N*" -ls -exec rm -fr '{}' \;
+find /shared/eclipse/builds/4N/siteDir/updates/4.6-N-builds -maxdepth 1 -ctime +1 -name "N*" -ls -exec rm -fr '{}' \;
 #
 # promotion scripts
 find /shared/eclipse/sdk/promotion/queue -name "RAN*" -ctime +2 -ls -exec rm '{}' \;
