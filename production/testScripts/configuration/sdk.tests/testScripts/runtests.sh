@@ -24,7 +24,7 @@ then
   exit 1
 fi
 
-stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.4-linux-gtk-x86_64.tar.gz}
+stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5-linux-gtk-x86_64.tar.gz}
 stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
 # Note: test.xml will "reinstall" fresh install of what we are testing,
 # but we do need an install for initial launcher, and, later, need one for a
