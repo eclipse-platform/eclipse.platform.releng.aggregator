@@ -56,7 +56,7 @@ then
   touch  "${buildDirectory}/buildFailed-get-aggregator"
   echo "ERROR: get-aggregator returned non-zero return code: $RC"
   echo "       assuming 'master' for EBUILDER_HASH (for later use), since could not reliably get aggregator."
-  EBUILDER_HASH=master
+  EBUILDER_HASH=R4_5_maintenance
   fn-write-property EBUILDER_HASH
   exit $RC
 fi
