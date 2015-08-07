@@ -16,7 +16,7 @@ export DROP_ID=I20150805-2000
 
 export DL_LABEL=4.6M1
 export DL_LABEL_EQ=NeonM1
-#export DL_LABEL=4.5
+#export DL_LABEL=4.6
 #export DL_LABEL_EQ=Mars
 
 # for I builds, stable and RCs go to in milestones
@@ -63,7 +63,7 @@ export TRAIN_NAME=Neon
 
 # Build machine locations (would very seldom change)
 export BUILD_ROOT=/shared/eclipse/builds/4I
-export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.5-I-builds
+export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.6-I-builds
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
