@@ -27,7 +27,7 @@ ECHO propertyFile in testAll: %propertyFile%
 
 mkdir results\consolelogs
 
-set consolelogs=results\consolelogs\win32.win32.x86_7.0_consolelog.txt
+set consolelogs=results\consolelogs\%testedPlatform%_consolelog.txt
 
 IF DEFINED extdir (
 runtests.bat -extdirprop "%extdir%" -os win32 -ws win32 -arch x86 -vm %vmcmd% -properties %propertyFile%  %* > %consolelogs%
