@@ -29,10 +29,10 @@ mkdir results\consolelogs
 set consolelogs=results\consolelogs\%testedPlatform%_consolelog.txt
 
 IF DEFINED extdir (
-runtests.bat -extdirprop "%extdir%" -os win32 -ws win32 -arch x86_64 -vm %jvm% -properties %propertyFile%  %* >  %consolelogs%
+runtests.bat -extdirprop "%extdir%" -os win32 -ws win32 -arch x86_64 -vm "%jvm%" -properties %propertyFile%  %* >  %consolelogs%
 GOTO END
 )
 
-runtests.bat -os win32 -ws win32 -arch x86_64 -vm %jvm% -properties %propertyFile%  %* > %consolelogs%
+runtests.bat -os win32 -ws win32 -arch x86_64 -vm "%jvm%" -properties %propertyFile%  %* > %consolelogs%
 
 :END
