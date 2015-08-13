@@ -1,7 +1,8 @@
 @echo off
 SETLOCAL
 
-REM default java executable for outer and test vm
+REM default java executable for outer and test vm, in case not 
+REM passed into this script.
 set jvm=java
 
 REM reset list of ant targets in test.xml to execute
@@ -46,7 +47,7 @@ if x%1==x-os set os=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-arch set arch=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-noclean set installmode=noclean&& shift && goto processcmdlineargs
 if x%1==x-properties set properties=-propertyfile %2 && shift && shift && goto processcmdlineargs
-if x%1==x-vm set jvm="%2" && shift && shift && goto processcmdlineargs
+if x%1==x-vm set jvm=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-extdirprop SET extdirproperty="-Djava.ext.dirs=%2" && shift && shift && goto processcmdlineargs
 
 
