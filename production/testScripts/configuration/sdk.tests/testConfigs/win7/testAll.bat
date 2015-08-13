@@ -17,9 +17,9 @@ IF NOT DEFINED propertyFile SET propertyFile=vm.properties
 
 
 REM TODO: not sure it is good to put VM here? Is there a good default here; such as "java"?
-REM currently, in practice, we sometimes set in hudson scripts.
+REM currently, in practice, we sometimes set in Hudson scripts.
 REM https://bugs.eclipse.org/bugs/show_bug.cgi?id=390286
-IF NOT DEFINED vmcmd SET vmcmd=c:\\java\\jdk1.7.0_07\\jre\\bin\\java.exe
+IF NOT DEFINED vmcmd SET vmcmd=c\:\\Program Files\\Java\\jdk1.8.0_51\\jre\\bin\\java.exe
 
 ECHO vmcmd in testAll: %vmcmd%
 ECHO extdir in testAll (if any): %extdir%
