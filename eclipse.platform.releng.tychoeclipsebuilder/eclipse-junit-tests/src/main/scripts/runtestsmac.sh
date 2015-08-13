@@ -5,18 +5,19 @@
 # somewhere on the search path ($HOME/bin is common),
 # and it will be included here, thus can provide "override values"
 # to those defined by defaults for production machine.,
-# such as for vmcmd
+# such as for jvm
 
-source localTestsProperties.shsource
+source localBuildProperties.shsource 2>/dev/null
 
 # by default, use the java executable on the path for outer and test jvm
-#vmcmd=/shared/common/jdk-1.6.x86_64/jre/bin/java
-if [[ -z "{vmcmd}" ]]
+#jvm=/shared/common/jdk-1.6.x86_64/jre/bin/java
+if [[ -z "{jvm}" ]]
 then
-  vmcmd=java
+  echo "jvm was unexpectly undefined, so using 'java'."
+  jvm=java
 fi
 
-echo "vmcmd: $vmcmd"
+echo "jvm: $jvm"
 
 #this value must be set when using rsh to execute this script, otherwise the script will execute from the user's home directory
 dir=.
@@ -61,7 +62,7 @@ do
     -extdirprop)
       extdirproperty="-Djava.ext.dirs=${2}";shift;;
     -vm)
-      vmcmd="${2}"; shift;;
+      jvm="${2}"; shift;;
     *)
       tests=$tests\ ${1};;
   esac
@@ -94,30 +95,43 @@ fi
 #necessary when invoking this script through rsh
 cd $dir
 
-if [[ ! -r eclipse ]]
+# TODO: should have a variable (or, computation!) to decide if 'eclipse', 
+# or 'Eclipse.app'
+
+ECLIPSE_HOME=Eclipse.app/Contents/Eclipse
+#ECLIPSE_HOME=eclipse
+
+
+if [[ ! -r "${ECLIPSE_HOME}" ]]
 then
   tar -xzf eclipse-SDK-*.tar.gz
   # note, the file pattern to match, must not start with */plugins because there is no leading '/' in the zip file, since they are repos.
-  unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d eclipse/dropins/
+  unzip -qq -o -C eclipse-junit-tests-*.zip plugins/org.eclipse.test* -d "${ECLIPSE_HOME}/dropins"
 fi
 
-
 # run tests
-launcher=`ls eclipse/plugins/org.eclipse.equinox.launcher_*.jar`
+launcher=`ls ${ECLIPSE_HOME}/plugins/org.eclipse.equinox.launcher_*.jar`
 
-# it have been recommended not to "probe and publish" information about systems
+if [[ ! -e "${launcher}" ]]
+then
+   echo -e "[ERROR] Failed to find org.eclipse.equinox.launcher_\*jar in ${ECLIPSE_HOME}/plugins"
+fi
+
+# it has been recommended not to "probe and publish" information about systems
 # for slight improvement in security. Bug 387747
 # so I have commented out most such probes, so they won't be routine.
 
 #echo "list all environment variables in effect as tests start"
 #printenv
 
+echo "properties: $properties"
+
 # -Dtimeout=300000 "${ANT_OPTS}"
 if [[ ! -z "${extdirproperty}" ]]
 then
-  $vmcmd "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+  $jvm "${extdirproperty}" -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
 else
-  $vmcmd -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
+  $jvm -Dosgi.os=$os -Dosgi.ws=$ws -Dosgi.arch=$arch  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml $tests -Dws=$ws -Dos=$os -Darch=$arch -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger
 fi
 
 
