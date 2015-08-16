@@ -1,8 +1,9 @@
 @echo off
 SETLOCAL
 
-REM default java executable for outer and test vm, in case not 
+REM default java executable for outer and test vm, in it is case not 
 REM passed into this script.
+REM c\:\\Program Files\\Java\\jdk1.8.0_51\\jre\\bin\\java.exe
 set jvm=java
 
 REM reset list of ant targets in test.xml to execute

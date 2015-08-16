@@ -10,10 +10,10 @@
 source localBuildProperties.shsource 2>/dev/null
 
 # by default, use the java executable on the path for outer and test jvm
-#jvm=/shared/common/jdk-1.6.x86_64/jre/bin/java
+#jvm=/Library/Java/JavaVirtualMachines/jdk1.8.0_51.jdk/Contents/Home/jre/bin/java
 if [[ -z "{jvm}" ]]
 then
-  echo "jvm was unexpectly undefined, so using 'java'."
+  echo "jvm was not defined, so using simple 'java'."
   jvm=java
 fi
 
