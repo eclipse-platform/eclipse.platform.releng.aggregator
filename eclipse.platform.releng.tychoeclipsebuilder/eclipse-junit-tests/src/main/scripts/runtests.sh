@@ -173,8 +173,9 @@ then
     export consolelogs=results/consolelogs/${platformString}_consolelog.txt
     export testedPlatform=${platformString}
   else
-    export consolelogs=results/consolelogs/consolelog.txt
-    export testedPlatform=""
+    # intentionally use 'testedPlatform' as value, if testedPlatform not defined.
+    export testedPlatform="testedPlatform"       
+    export consolelogs=results/consolelogs/${testedPlatform}_consolelog.txt
   fi
 else
   export consolelogs=results/consolelogs/${testedPlatform}_consolelog.txt
