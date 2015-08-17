@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 # This file is used on production machine, running tests on Hudson, Linux
+# Actually, not currently used on production machine. See 
+# following bug for efforts to put "in synch" with production machine 
+# version. 
+# https://bugs.eclipse.org/bugs/show_bug.cgi?id=437069
 
 echo "command line as passed into $(basename ${0}): ${*}"
 echo "command line (quoted) as passed into $(basename ${0}): ${@}"
@@ -15,27 +19,26 @@ source localBuildProperties.shsource 2>/dev/null
 
 # jvm should already be defined, by now, in production tests
 # export jvm=${jvm:-/shared/common/jdk1.8.0_x64/jre/bin/java}
-# but if not, we use a simple 'java'. 
-if [[ -z "{jvm}" ]]
+# but if not, we use a simple 'java'.
+if [[ -z "${jvm}" ]]
 then
   echo "WARNING: jvm was not defined, so using simple 'java'."
   export jvm=$(which java)
 fi
-echo "jvm: $jvm"
 
 if [[ -z "${jvm}" || ! -x ${jvm} ]]
 then
   echo "ERROR: No JVM define, or the defined one was found to not be executable"
-  echo "    jvm: $jvm"
   exit 1
 fi
+echo "jvm: $jvm"
 
-# On production, WORKSPACE is the 'hudson' workspace. 
+# On production, WORKSPACE is the 'hudson' workspace.
 # But, if running standalone, we'll assume "up two" from current directoy
-WORKSPACE=${WORKSPACE:-"../../"};
+WORKSPACE=${WORKSPACE:-"../../.."};
 
 stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5-linux-gtk-x86_64.tar.gz}
-stableEclipseInstdallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
+stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
 
 # Note: test.xml will "reinstall" fresh install of what we are testing,
 # but we do need an install for initial launcher, and, later, need one for a
@@ -45,7 +48,7 @@ stableEclipseInstdallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.e
 # Note: for production tests, we use ${WORKSPACE}/org.eclipse.releng.basebuilder,
 # for historical reasons. The "true" (old) basebuilder does not have an 'eclipse' directory;
 # plugins is directly under org.eclipse.releng.basebuilder.
-if [ ! -r ${stableEclipseInstallLocation} || ! -r "${stableEclipseInstallLocation}/eclipse" ]
+if [[ ! -r ${stableEclipseInstallLocation} || ! -r "${stableEclipseInstallLocation}/eclipse" ]]
 then
   mkdir -p ${stableEclipseInstallLocation}
   tar -xf ${stableEclipseSDK} -C ${stableEclipseInstallLocation}
@@ -54,8 +57,8 @@ fi
 launcher=$(find ${stableEclipseInstallLocation} -name "org.eclipse.equinox.launcher_*.jar" )
 if [ -z "${launcher}" ]
 then
-   echo "ERROR: launcher not found in ${stableEclipseInstallLocation}"
-   exit 1
+  echo "ERROR: launcher not found in ${stableEclipseInstallLocation}"
+  exit 1
 fi
 echo "launcher: $launcher"
 
@@ -118,23 +121,27 @@ then
   echo >&2 "WARNING: On some systems, os, ws, and arch values must be specified,"
   echo >&2 "         but can usually be correctly inferred given the running VM, etc."
   echo >&2 "$usage"
-else 
+else
   platformArgString=""
   platformParmString=""
+  platformString=""
   if [[ -n "${os}" ]]
   then
     platformArgString="${platformArgString} -Dosgi.os=$os"
     platformParmString="${platformParmString} -Dos=$os"
+    platformString="${platformString}${os}"
   fi
   if [[ -n "${ws}" ]]
   then
     platformArgString="${platformArgString} -Dosgi.ws=$ws"
     platformParmString="${platformParmString} -Dws=$ws"
+    platformString="${platformString}_${ws}"
   fi
   if [[ -n "${arch}" ]]
   then
     platformArgString="${platformArgString} -Dosgi.arch=$arch"
     platformParmString="${platformParmString} -Darch=$arch"
+    platformString="${platformString}_${arch}"
   fi
 fi
 
@@ -142,93 +149,55 @@ fi
 
 # run tests
 
-#echo " = = = Start list environment variables in effect = = = ="
+#### Uncomment lines below to have complete list of ENV variables. 
+#echo " = = = Start list environment variables in effect in runtests.sh = = = ="
 #env
-#echo " = = = End list environment variables in effect = = = ="
+#echo " = = = End list environment variables in effect in runtests.sh = = = ="
 
-# TODO: consider moving all this to 'testAll.sh'. (If testAll.sh stays around)
-# make sure there is a window manager running. See bug 379026
-# we should not have to, but may be a quirk/bug of hudson setup
-# assuming metacity attaches to "current" display by default (which should have
-# already been set by Hudson). We echo its value here just for extra reference/cross-checks.
-# TODO: this does not work, when doing local build. I think the 
-#  solution, for both cases, is to start an instance of xvfb? And then should 
-# have a "background" flag to run on back ground (and not the active user display) 
-# since most uses for "local builds" users would want to see the tests running live. 
-
-# This next section on window mangers is needed if and only if "running in background" or
-# started on another machine, such as Hudson or Cruisecontrol, where it may be running
-# "semi headless", but still needs some window manager running for UI tests.
-echo "Check if any window managers are running (xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|icewm):"
-wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|icewm" | grep -v egrep)
-echo "Window Manager processes: $wmpss"
-echo
-
-# in this case, do not "--replace" any existing ones, for this DISPLAY
-# added bit bucket for errors, in attempt to keep from filling up Hudson log with "warnings", such as hundreds of
-#     [exec] Window manager warning: Buggy client sent a _NET_ACTIVE_WINDOW message with a timestamp of 0 for 0x800059 (Java - Ecl)
-#     [exec] Window manager warning: meta_window_activate called by a pager with a 0 timestamp; the pager needs to be fixed.
-#
-metacity --display=$DISPLAY  --sm-disable 2>/dev/null &
-METACITYRC=$?
-METACITYPID=$!
-
-if [[ $METACITYRC == 0 ]]
-then
-  # TODO: we may want to kill the one we started, at end of tests?
-  echo $METACITYPID > epmetacity.pid
-  echo "  metacity (with no --replace) started ok. PID: $METACITYPID"
-else
-  echo "  metacity (with no --replace) failed. RC: $METACITYRC"
-  # This should not interfere with other jobs running on Hudson, the DISPLAY should be "ours".
-  metacity --display=$DISPLAY --replace --sm-disable  &
-  METACITYRC=$?
-  METACITYPID=$!
-  if [[ $METACITYRC == 0 ]]
-  then
-    # TODO: we may want to kill the one we started, at end of tests?
-    echo $METACITYPID > epmetacity.pid
-    echo "  metacity (with --replace) started ok. PID: $METACITYPID"
-  else
-    echo "  metacity (with --replace) failed. RC: $METACITYRC"
-    echo "   giving up. But continuing tests"
-  fi
-fi
-
-
-echo
-
-# list out metacity processes so overtime we can see if they accumulate, or if killed automatically
-# when our process exits. If not automatic, should use epmetacity.pid to kill it when we are done.
-echo "Current metacity processes running (check for accumulation):"
-ps -ef | grep "metacity" | grep -v grep
-echo
-
-echo "Triple check if any window managers are running (at least metacity should be!):"
-wmpss=$(ps -ef | egrep -i "xfwm|twm|metacity|beryl|fluxbox|compiz|kwin|openbox|icewm" | grep -v egrep)
-echo "Window Manager processes: $wmpss"
-echo
-
-# During production tests, we define 'testedPlatform' as a combination of 
-# os, ws, arch, and vm level. But for stand alone tests, by default, 
-# we will just label simply. 
-if [[ -z "${testedPlatform}" ]]
+if [[ "true" == "${START_WINDOW_MGT}" ]]
 then 
-   export testedPlatform=output
+ ./startWindowManager.sh
 fi
+
+# During production tests, we define 'testedPlatform' as a combination of
+# os, ws, arch, and vm level. But for stand alone tests, by default,
+# we will just label simply with what we have. Standalone users can
+# set the value how ever they'd like. The value does not much matter,
+# unless collecting multiple platforms, and processing results, such as
+# build tools indexer.
+#
+if [[ -z "${testedPlatform}" ]]
+then
+  if [[ -n "${platformString}" ]]
+  then
+    export consolelogs=results/consolelogs/${platformString}_consolelog.txt
+    export testedPlatform=${platformString}
+  else
+    export consolelogs=results/consolelogs/consolelog.txt
+    export testedPlatform=""
+  fi
+else
+  export consolelogs=results/consolelogs/${testedPlatform}_consolelog.txt
+fi
+
+mkdir -p results/consolelogs
 
 echo "extdirprop in runtest.sh: ${extdirprop}"
 echo "extdirproperty in runtest.sh: ${extdirproperty}"
 echo "ANT_OPTS in runtests.sh: ${ANT_OPTS}"
 echo "platformArgString: ${platformArgString}"
 echo "platformParmString: ${platformParmString}"
+echo "platformString: ${platformString}"
+echo "testedPlatform: ${testedPlatform}"
 
 # -Dtimeout=300000 "${ANT_OPTS}"
 if [[ -n "${extdirproperty}" ]]
 then
   echo "running with extdir defined"
-  $jvm ${ANT_OPTS} "${extdirproperty}" ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests
+  $jvm ${ANT_OPTS} "${extdirproperty}" ${platformArgString} -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger $tests 2>&1 | tee $consolelogs
 else
   echo "running without extdir defined"
-  $jvm ${ANT_OPTS} ${platformArgString}  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests
+  $jvm ${ANT_OPTS} ${platformArgString}  -jar $launcher -data workspace -application org.eclipse.ant.core.antRunner -file ${PWD}/test.xml  ${ANT_OPTS} ${platformParmString} -D$installmode=true $properties -logger org.apache.tools.ant.DefaultLogger  $tests 2>&1 | tee $consolelogs
 fi
+
+
