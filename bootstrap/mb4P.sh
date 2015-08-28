@@ -76,7 +76,10 @@ echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_E
 
 echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME
 
-export BRANCH=BETA_JAVA9
+# use BETA_JAVA9 to do a "complete build" that includes Java 9 beta code
+# use master to literally build "just the three" bundles that are required.
+#export BRANCH=BETA_JAVA9
+export BRANCH=master
 export BUILD_TYPE=P
 export STREAM=4.6.0
 export PATCH_BUILD=java9patch
