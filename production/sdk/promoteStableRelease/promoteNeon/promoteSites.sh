@@ -12,18 +12,59 @@
 # We only ever check for 'true'
 #export INDEX_ONLY=false
 
-export DROP_ID=I20150805-2000
+export DROP_ID=I20150827-0400
 
-export DL_LABEL=4.6M1
-export DL_LABEL_EQ=NeonM1
-#export DL_LABEL=4.6
-#export DL_LABEL_EQ=Mars
+export BUILD_MAJOR=4
+export BUILD_MINOR=6
+export BUILD_SERVICE=0
+# checkpoint means either milestone or release candidate
+# should be empty for final release
+export CHECKPOINT=M2
+# Used in naming repo and equinox download pages.
+export TRAIN_NAME=Neon
+
+# These are what precedes main drop directory name
+# For Maintenance, it's always 'M' (from M-build) until it's 'R'.
+# for main line code, it's 'S' (from I-build) until it's 'R'
+#export DL_TYPE=S
+export DL_TYPE=R
+#export DL_TYPE=M
+
+export CL_SITE=${PWD}
+echo "CL_SITE: ${CL_SITE}"
+
+export BUILD_TYPE=${DROP_ID:0:1}
+
+# = = = = = = = Things past here seldom need to be updated
+
+# For initial releases, do not include service in label
+if [[ "${BUILD_SERVICE}" == "0" ]]
+then
+  export DL_LABEL=${BUILD_MAJOR}.${BUILD_MINOR}${CHECKPOINT}
+else
+  export DL_LABEL=${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_MINOR}${CHECKPOINT}
+fi
+export DL_LABEL_EQ=${TRAIN_NAME}${CHECKPOINT}
+
+
 
 # for I builds, stable and RCs go to in milestones
 # for M builds, even RCs also go in <version>-M-builds
-#export REPO_SITE_SEGMENT=4.5-M-builds
-export REPO_SITE_SEGMENT=4.6milestones
-#export REPO_SITE_SEGMENT=4.6
+case ${DL_TYPE} in
+  "M" )
+    export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
+    ;;
+  "S" )
+    export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}milestones
+    ;;
+  "R" )
+    export REPO_SITE_SEGMENT=${BUILD_MAJOR}.${BUILD_MINOR}
+    ;;
+  *)
+    echo -e "\n\tERROR: case statement for repo output did not match any pattern."
+    echo -e   "\t       Not written to handle DL_TYPE of ${DL_TYPE}\n"
+    exit 1
+esac
 
 if [[ "$INDEX_ONLY" == "true" ]]
 then
@@ -31,18 +72,6 @@ then
 else
   export HIDE_SITE=true
 fi
-
-# These are what precedes main drop directory name
-# For Maintenance, it's always 'M' (from M-build) until it's 'R'.
-# for main line code, it's 'S' (from I-build) until it's 'R'
-export DL_TYPE=S
-#export DL_TYPE=R
-#export DL_TYPE=M
-
-# = = = = = = = Things past here seldom need to be updated
-
-export CL_SITE=${PWD}
-echo "CL_SITE: ${CL_SITE}"
 
 export PROMOTE_IMPL=/shared/eclipse/sdk/promoteStableRelease/promoteImpl
 export TRACE_LOG=${CL_SITE}/traceLog.txt
@@ -56,14 +85,15 @@ export NEW_TAG=$( computeTagFromLabel "$DL_LABEL" )
 export NEW_ANNOTATION="${DL_LABEL_EQ}"
 # later combined with BUILD_ROOT, so we get the correct clone
 # should very seldom need to change, if ever.
+# We use this for "deferred tagging" so important to "leave the same",
+# until tagged.
 export AGGR_LOCATION="gitCache/eclipse.platform.releng.aggregator"
 
-# Used in naming repo, etc
-export TRAIN_NAME=Neon
 
 # Build machine locations (would very seldom change)
-export BUILD_ROOT=/shared/eclipse/builds/4I
-export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/4.6-I-builds
+# Almost always "I", but does change to "M" for maintenance stream.
+export BUILD_ROOT=/shared/eclipse/builds/${BUILD_MAJOR}${BUILD_TYPE}
+export BUILDMACHINE_BASE_SITE=${BUILD_ROOT}/siteDir/updates/${BUILD_MAJOR}.${BUILD_MINOR}-${BUILD_TYPE}-builds
 
 export BUILDMACHINE_BASE_DL=${BUILD_ROOT}/siteDir/eclipse/downloads/drops4
 export BUILDMACHINE_BASE_EQ=${BUILD_ROOT}/siteDir/equinox/drops
