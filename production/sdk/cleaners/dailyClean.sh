@@ -5,10 +5,10 @@
 cDir="/home/data/httpd/download.eclipse.org/eclipse/downloads/drops4"
 buildType="N*"
 allOldBuilds=$( find ${cDir} -maxdepth 1 -type d -ctime +3 -name "${buildType}*" )
-echo -e "\n\tDEBUG: allOldBuilds: \n${allOldBuilds}"
+#echo -e "\n\tDEBUG: allOldBuilds: \n${allOldBuilds}"
 
 nOldBuilds=$( echo -e "${allOldBuilds}" | wc -l )
-echo -e "nOldBuilds: $nOldBuilds"
+#echo -e "nOldBuilds: $nOldBuilds"
 
 #if (( ${nOldBuilds} > 4 ))
 #then
@@ -17,12 +17,10 @@ echo -e "nOldBuilds: $nOldBuilds"
     newest=$( ls -1 -t -d ${cDir}/${buildType} | head -4)
     #DEBUG    echo -e "\n\tnewest: \n${newest}";
     reNotToDelete=$(printf '%s\n' "${newest[@]}" | paste -sd '|')
-    echo "DEBUG: reNotToDelete: ${reNotToDelete}"
+#    echo "DEBUG: reNotToDelete: ${reNotToDelete}"
     for buildname in ${allOldBuilds}; do
-        if [[ $buildname =~ $reNotToDelete ]]
+        if [[ ! $buildname =~ $reNotToDelete ]]
         then
-            echo -e "Not removed (since one of 4 newest, even though old): \n$buildname"
-        else
             rm -fr $buildname
             RC=$?
             if [[ $RC = 0 ]]
