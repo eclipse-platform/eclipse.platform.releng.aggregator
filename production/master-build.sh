@@ -174,6 +174,9 @@ fn-write-property INITIAL_ENV_FILE
 fn-write-property BUILD_ROOT
 fn-write-property BRANCH
 fn-write-property STREAM
+fn-write-property STREAMMajor
+fn-write-property STREAMMinor
+fn-write-property STREAMService
 fn-write-property aggDir
 fn-write-property BUILD_ID
 fn-write-property BUILD_TYPE
