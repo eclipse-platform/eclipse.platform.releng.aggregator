@@ -340,7 +340,7 @@ fn-maven-build-aggregator ()
     MARGS="$MARGS -Peclipse-sign"
   fi
   if [[ -n "${PATCH_BUILD}" ]]; then
-    MARGS="$MARGS -PpatchBuild"
+    MARGS="$MARGS -P${PATCH_BUILD}"
   fi
 
   MARGS="$MARGS ${MAVEN_BREE}"
@@ -483,7 +483,7 @@ fn-pom-version-updater ()
     MARGS="$MARGS -q"
   fi
   if [[ -n "${PATCH_BUILD}" ]]; then
-    MARGS="$MARGS -PpatchBuild"
+    MARGS="$MARGS -P${PATCH_BUILD}"
   fi
   echo "DEBUG: Variables in $0"
   echo "DEBUG: PATCH_BUILD: $PATCH_BUILD"
@@ -542,7 +542,7 @@ fn-pom-version-update-with-commit ()
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
   MARGS="-DbuildId=$BUILD_ID"
   if [[ -n "${PATCH_BUILD}" ]]; then
-    MARGS="$MARGS -PpatchBuild"
+    MARGS="$MARGS -P${PATCH_BUILD}"
   fi
   pushd "$REPO_DIR"
   mvn $MARGS  ${ALT_POM_FILE} \
@@ -585,8 +585,9 @@ fn-gather-repo ()
   BUILD_DIR="$1"; shift
   if [[ -n "${PATCH_BUILD}" ]]
   then
-    ORIG_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/site
-    TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD}/target/repository
+    PATCH_BUILD_GENERIC=java9patch
+    ORIG_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD_GENERIC}/target/site
+    TARGET_PATH=eclipse.platform.releng.tychoeclipsebuilder/${PATCH_BUILD}/eclipse.releng.repository.${PATCH_BUILD_GENERIC}/target/repository
     ORIG_DIR_REPOSITORY=$REPO_DIR/${ORIG_PATH}
     REPO_DIR_REPOSITORY=$REPO_DIR/${TARGET_PATH}
     # old site update-site repos are created in 'site', so we move to 'repository'

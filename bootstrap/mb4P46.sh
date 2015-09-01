@@ -82,7 +82,7 @@ echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NA
 export BRANCH=master
 export BUILD_TYPE=P
 export STREAM=4.6.0
-export PATCH_BUILD=java9patch
+export PATCH_BUILD=java9patch46
 
 eclipseStreamMajor=${STREAM:0:1}
 
