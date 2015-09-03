@@ -12,18 +12,22 @@
 # We only ever check for 'true'
 #export INDEX_ONLY=false
 
-export DROP_ID=M20150827-0400
+# DROP_ID is the name of the build we are promoting. 
+# That is, the FROM build. The TO name is computed from it, 
+# and a few other variables, below. 
+export DROP_ID=M20150903-0400
 
 export BUILD_MAJOR=4
 export BUILD_MINOR=5
 export BUILD_SERVICE=1
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=RC2
+export CHECKPOINT=RC3
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Mars.1
 
-# These are what precedes main drop directory name
+# These are what precedes main drop directory name -- 
+# that is, for what we are naming the build TO
 # For Maintenance, it's always 'M' (from M-build) until it's 'R'.
 # for main line code, it's 'S' (from I-build) until it's 'R'
 #export DL_TYPE=S
@@ -33,6 +37,8 @@ export DL_TYPE=M
 export CL_SITE=${PWD}
 echo "CL_SITE: ${CL_SITE}"
 
+# BUILD_TYPE is the prefix of the build -- 
+# that is, for what we are naming the build FROM
 export BUILD_TYPE=${DROP_ID:0:1}
 
 # = = = = = = = Things past here seldom need to be updated
