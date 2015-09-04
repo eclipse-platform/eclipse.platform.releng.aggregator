@@ -15,7 +15,7 @@
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=M20150903-0400
+export DROP_ID=M20150904-0015
 
 export BUILD_MAJOR=4
 export BUILD_MINOR=5
