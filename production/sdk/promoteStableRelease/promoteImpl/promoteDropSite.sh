@@ -72,7 +72,7 @@ fi
 if [[ ! "${INDEX_ONLY}" == "true" ]]
 then
   # rename old dir to new dir
-./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
+  ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
 else
   # If indexing only, we still need to run "renamed" just to pick up "renames" in test results., but in "new" directory
   ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL} ${DL_DROP_ID}
@@ -88,24 +88,33 @@ fi
 
 rm renameBuild.sh
 
-# keep hidden, initially, both to confirm all is correct,
-# and in theory could wait a bit to get a mirror or two
-# (in some cases).
-if [[ "${HIDE_SITE}" == "true" ]]
+# If doing a "re-indexing" run, then build may be hidden still, or may not be.
+# we make no assumptions and just leave it alone, if re-indexing. build hidden is
+# created then first promoted, and soing teh "deferred steps" it the only hting that
+# removes (renames) it).
+if [[ "${INDEX_ONLY}" == "true" ]]
 then
-  touch ${DL_DROP_ID}/buildHidden
-  if [[ $? != 0 ]]
-  then
-    echo "touch failed. Exiting."
-    exit 1
-  fi
-  echo "Remember to remove 'buildHidden' file, and re-run updateIndexes.sh since HIDE_SITE was ${HIDE_SITE}." >> "${CL_SITE}/checklist.txt"
+  printf "\tLeaving 'buildHidden' however it was, not changing it, since this is a re-index job only."
 else
-  echo "HIDE_SITE value was ${HIDE_SITE}"
-  if [[ -e ${DL_DROP_ID}/buildHidden ]]
+  # keep hidden, initially, both to confirm all is correct,
+  # and in theory could wait a bit to get a mirror or two
+  # (in some cases).
+  if [[ "${HIDE_SITE}" == "true" ]]
   then
-    mv ${DL_DROP_ID}/buildHidden ${DL_DROP_ID}/buildHiddenFOUND
-    echo "Found existing 'buildHidden' file, and renamed it to 'buildHiddenFOUND' since 'HIDE_SITE' was ${HIDE_SITE}"
+    touch ${DL_DROP_ID}/buildHidden
+    if [[ $? != 0 ]]
+    then
+      echo "touch failed. Exiting."
+      exit 1
+    fi
+    echo "Remember to remove 'buildHidden' file, and re-run updateIndexes.sh since HIDE_SITE was ${HIDE_SITE}." >> "${CL_SITE}/checklist.txt"
+  else
+    echo "HIDE_SITE value was ${HIDE_SITE}"
+    if [[ -e ${DL_DROP_ID}/buildHidden ]]
+    then
+      mv ${DL_DROP_ID}/buildHidden ${DL_DROP_ID}/buildHiddenFOUND
+      echo "Found existing 'buildHidden' file, and renamed it to 'buildHiddenFOUND' since 'HIDE_SITE' was ${HIDE_SITE}"
+    fi
   fi
 fi
 
