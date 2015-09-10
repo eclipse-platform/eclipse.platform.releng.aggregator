@@ -3,6 +3,7 @@ echo -e "\n\tDaily clean of ${HOSTNAME} build machine on $(date )\n"
 echo -e "\tRemember to "turn off" when M build or I build needs to be deferred promoted,"
 echo -e "\tsuch as for "quiet week".\n"
 
+INUSE_BEFORE=$(nice -12 du /shared/eclipse/builds -sh)
 
 function removeOldDirectories ()
 {
@@ -66,5 +67,10 @@ find /shared/eclipse/equinox/promotion/queue -name "ERROR*" -ctime +4 -ls -exec 
 
 cleanBuildMachine builds
 #cleanBuildMachine buildsdavidw
+
+INUSE_AFTER=$(nice -12 du /shared/eclipse/builds -sh)
+
+echo -e "\n\tDisk used before cleaning: $INUSE_BEFORE"
+echo -e "\tDisk used after cleaning: $INUSE_AFTER"
 
 
