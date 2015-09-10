@@ -1,5 +1,7 @@
 # Utility to clean build machine
 echo -e "\n\tDaily clean of ${HOSTNAME} build machine on $(date )\n"
+echo -e "\tRemember to "turn off" when M build or I build needs to be deferred promoted,"
+echo -e "\tsuch as for "quiet week".\n"
 
 
 function removeOldDirectories ()
