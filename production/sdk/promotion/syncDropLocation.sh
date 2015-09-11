@@ -108,7 +108,7 @@ function sendPromoteMail ()
   TO=${TO:-"platform-releng-dev@eclipse.org"}
 
   # for initial testing, only to me -- change as desired after initial testing.
-  if [[ "${buildId}" =~ [PYX] ]]
+  if [[ "${buildType}" =~ [PYX] ]]
   then
     TO="david_williams@us.ibm.com"
   fi
@@ -141,7 +141,7 @@ function sendPromoteMail ()
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
-  if [[ -z "${BUILD_FAILED}" && ! "${buildId}" =~ [PYX]  ]]
+  if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYX]  ]]
   then
     message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
   fi
@@ -225,9 +225,14 @@ function startTests()
   echo "DEBGUG CBI buildDropDir: $buildDropDir"
   builderDropDir=${buildDropDir}/${eclipsebuilder}
   echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
-
-  # finally, execute
-  ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
+  
+  # finally, execute ... unless its a patch build
+  if [[ "${buildType}" != "P" ]]
+  then
+     ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
+  else
+     printf "\n\tNo tests ran for Patch builds.\n"
+  fi
 }
 
 # this function currently sync's local repo on build machine, and adds

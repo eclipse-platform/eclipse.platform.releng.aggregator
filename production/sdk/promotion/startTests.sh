@@ -76,7 +76,6 @@ echo "buildType: $buildType"
 echo "buildId: $buildId"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
-
 buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
 buildDir=${buildRoot}/build
 supportDir=${buildDir}/supportDir

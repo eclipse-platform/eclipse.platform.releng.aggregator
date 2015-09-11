@@ -197,13 +197,13 @@ if [[ -n "${PATCH_BUILD}" ]]
 then
 
   # no longer needed, will remove
-  rm "${siteDirOnBuildMachine}/site.xml"
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo "ERROR: did not remove 'site.xml' as expected. RC: $RC"
-    #exit $RC
-  fi
+#  rm "${siteDirOnBuildMachine}/site.xml"
+#  RC=$?
+#  if [[ $RC != 0 ]]
+#  then
+#    echo "ERROR: did not remove 'site.xml' as expected. RC: $RC"
+#    #exit $RC
+#  fi
 
   # before we created pack.gz files, we'll create zip file, of archive for
   # DL page ... and those zip files best without pack.gz files, since they
