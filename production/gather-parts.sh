@@ -67,7 +67,7 @@ then
     echo "   ERROR: a function from gather-parts.sh returned non-zero return code, $RC" >>${BUILD_FAILED_OUTPUT}
     # We will keep going (bug 477184) if some things produced, they should still 
     # be published wo download ser, ran through the normal "indexing" functions, etc., 
-    # simce could be something there, of interest. 
+    # since could be something there, of interest. 
     # exit $RC
   fi
 fi 
