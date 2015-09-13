@@ -74,6 +74,7 @@ function getReposToRemove ()
     # Some caution is needed here. Seems on eclipse.org "atime" is the one that reflects "when created", 
     # whereas ctime and mtime are all identical, in every directory?! Turns out, mine is that 
     # say too. Apparently p2 "touches" every directory, for some reason. Perhaps only in the "atomic" case? 
+    # But, atime can vary from system to system, depending .. some systems do update, when accessed?
     sortedallOldRepos=( $(find ${cDir} -maxdepth 1 -type d -atime +3 -name "${buildType}" -printf "%C@ %f\n" | sort -n | cut -d\  -f2 ) )
     nOldRepos=${#sortedallOldRepos[@]}
     # all builds "find" command should match above, except for age related (and printf) arguments
