@@ -17,7 +17,7 @@ shopt -s nullglob
 count=0
 #echo "DEBUG: checking ${cDir}/${buildType}"
 files=(${cDir}/${buildType})
-
+# We count on files being "ordered" by date/timestamp in name
 for  ((i=${#files[@]}-1; i>=0; --i)); do
   newest[$count]="${files[$i]}"
   #echo "DEBUG: count = $count"
