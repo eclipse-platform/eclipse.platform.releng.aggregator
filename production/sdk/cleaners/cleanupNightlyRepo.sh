@@ -112,29 +112,7 @@ function getReposToRemove ()
 function cleanNightlyRepo ()
 {
   dryRun=$1
-  echo -e "\n\tDEBUG: dryrun: $dryRun" >&2
-  echo -e "\tDEBUG: directory ${eclipseRepo}" >&2
-  getReposToRemove "${eclipseRepo}"
-  echo -e "\tDEBUG: nRepoDirectoriesToRemove: $nRepoDirectoriesToReomove"
-  generateCleanupXML "${eclipseRepo}" 
-  if [[ -z "${dryRun}" ]]
-  then
-    $eclipseexe -nosplash -data "${devWorkspace}" -application  ${antRunner} -f $antBuildFile -vm ${javaexe} 
-  fi
-  for file in "${reposToRemove[@]}"
-  do
-    echo -e "\tDEBUG: directories to remove: ${eclipseRepo}/${file}"
-    if [[ -z "${dryRun}" ]]
-    then
-      rm -rf ${eclipseRepo}/${file}
-    fi
-  done
-  if [[ -n "${dryRun}" ]]
-  then
-    cat $antBuildFile
-  fi
-}
-# Will use the convenient eclipse known to be installed in /shared/simrel
+  # Will use the convenient eclipse known to be installed in /shared/simrel
 baseBuilder=/shared/simrel/tools/eclipse45/eclipse
 eclipseexe=${baseBuilder}/eclipse
 if [[ ! -x ${eclipseexe} ]]
@@ -155,6 +133,31 @@ fi
 
 antRunner=org.eclipse.ant.core.antRunner
 devWorkspace=/shared/eclipse/sdk/cleaners/workspace-cleanup
+  echo -e "\tDEBUG: Cleaning repository ${eclipseRepo} on $HOSTNAME on $(date ) " >&2
+  getReposToRemove "${eclipseRepo}"
+  generateCleanupXML "${eclipseRepo}" 
+  if [[ -z "${dryRun}" ]]
+  then
+    $eclipseexe -nosplash --launcher.suppressErrors -data "${devWorkspace}" -application  ${antRunner} -f $antBuildFile -vm ${javaexe}
+    RC=$?
+  fi
+  if [[ $RC == 0 ]] 
+  then
+    for file in "${reposToRemove[@]}"
+    do
+      echo -e "\tDEBUG: directories to remove: ${eclipseRepo}/${file}"
+      if [[ -z "${dryRun}" ]]
+      then
+        rm -rf ${eclipseRepo}/${file}
+      fi
+    done
+  fi 
+  if [[ -n "${dryRun}" ]]
+  then
+    cat $antBuildFile
+  fi
+}
+
 antBuildFile=cleanupRepoScript.xml
 
 remoteBase="/home/data/httpd/download.eclipse.org"
