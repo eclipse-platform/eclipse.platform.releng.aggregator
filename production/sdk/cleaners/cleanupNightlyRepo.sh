@@ -70,7 +70,10 @@ function getReposToRemove ()
     echo -e "\t\t${cDir}" >&2
     reposToRemove=()
   else
-    # for "repo names" we want only the last segment of the directory, so use -printf %f.
+    # for "repo names" we want only the last segment of the directory, so use -printf %f. The %C@ is seconds since the beginning of time, for sorting.
+    # Some caution is needed here. Seems on eclipse.org "atime" is the one that reflects "when created", 
+    # whereas ctime and mtime are all identical, in every directory?! 
+    # TODO: I need to understand this better. 
     sortedallOldRepos=( $(find ${cDir} -maxdepth 1 -type d -atime +3 -name "${buildType}" -printf "%C@ %f\n" | sort -n | cut -d\  -f2 ) )
     nOldRepos=${#sortedallOldRepos[@]}
     # all builds "find" command should match above, except for age related (and printf) arguments
