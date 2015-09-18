@@ -12,7 +12,7 @@
 # We only ever check for 'true'
 #export INDEX_ONLY=false
 
-export DROP_ID=I20150827-0400
+export DROP_ID=I20150916-2000
 
 export BUILD_MAJOR=4
 export BUILD_MINOR=6
@@ -26,8 +26,8 @@ export TRAIN_NAME=Neon
 # These are what precedes main drop directory name
 # For Maintenance, it's always 'M' (from M-build) until it's 'R'.
 # for main line code, it's 'S' (from I-build) until it's 'R'
-#export DL_TYPE=S
-export DL_TYPE=R
+export DL_TYPE=S
+#export DL_TYPE=R
 #export DL_TYPE=M
 
 export CL_SITE=${PWD}
