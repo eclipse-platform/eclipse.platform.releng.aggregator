@@ -1,76 +1,88 @@
-# Utility to clean build machine
-echo -e "\n\tDaily clean of ${HOSTNAME} build machine on $(date )\n"
-echo -e "\tRemember to "turn off" when M build or I build needs to be deferred promoted,"
-echo -e "\tsuch as for "quiet week".\n"
+#!/usr/bin/env bash
 
-INUSE_BEFORE=$(nice -12 du /shared/eclipse/builds -sh)
+# Utility to clean build machine
+
+function removeOldPromotionScripts ()
+{
+  ## remove old promotion scripts
+  find /shared/eclipse/sdk/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
+  find /shared/eclipse/sdk/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
+  find /shared/eclipse/sdk/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
+  find /shared/eclipse/equinox/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
+  find /shared/eclipse/equinox/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
+  find /shared/eclipse/equinox/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
+}
 
 function removeOldDirectories ()
 {
   rootdir=$1
   ctimeAge=$2
   pattern=$3
-  [[ -e "${rootdir}" ]] && find "${rootdir}" -maxdepth 1 -type d -ctime ${ctimeAge} -name "${pattern}" -ls -exec rm -fr '{}' \;
-  # Using following form is TOO verbose
-  #[[ -e "${rootdir}" ]] && find "${rootdir}" -maxdepth 1 -ctime ${ctimeAge} -name "${pattern}" -exec rm -vfr '{}' \;
+  echo -e "\n\tCleaning rootdir: ${rootdir}"
+  if [[ -e "${rootdir}" ]] 
+  then
+    # leave at least one, on build machine.
+    # TODO: this may work most of the time, since ran daily, but the correct 
+    # fix is work with the list. This will delete all, on some occasions.
+    # Also, for build machine, it is really only I and M builds that we want to leave one in place.
+    count=$( find "${rootdir}" -maxdepth 1 -type d -ctime ${ctimeAge} -name "${pattern}"  | wc -l )
+    if [[ $count -gt 1 ]]
+    then
+      find "${rootdir}" -maxdepth 1 -type d -ctime ${ctimeAge} -name "${pattern}" -ls -exec rm -fr '{}' \;
+    fi
+  else 
+    echo -e "\t\tINFO: rootdir did not exist."
+  fi
+}
 
+function removeBuildFamily ()
+{
+  basedir="/shared/eclipse/${buildmachine}/${major}${buildType}/siteDir"
+  chkdir="eclipse/downloads/drops4"
+  removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
+  chkdir="equinox/drops"
+  removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
+  chkdir="updates/${major}.${minor}-${buildType}-builds"
+  removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
 }
 
 function cleanBuildMachine ()
 {
+  echo -e "\n\tDaily clean of ${HOSTNAME} build machine on $(date )\n"
+  echo -e "\tRemember to "turn off" when M build or I build needs to be deferred promoted,"
+  echo -e "\tsuch as for "quiet week".\n"
+
+  INUSE_BEFORE=$(nice -12 du /shared/eclipse/builds -sh)
 
   buildmachine=$1
+  major=4
+
+  minor=6
+  days="+4"
   buildType=P
-  basedir="/shared/eclipse/${buildmachine}/4${buildType}/siteDir"
-  chkdir="eclipse/downloads/drops4"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}*" 
-  chkdir="equinox/drops"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}*" 
-  chkdir="updates/4.6-P-builds"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}*" 
+  removeBuildFamily
 
+  minor=6
+  days="+2"
   buildType=N
-  basedir="/shared/eclipse/${buildmachine}/4${buildType}/siteDir"
-  chkdir=eclipse/downloads/drops4
-  removeOldDirectories "${basedir}/${chkdir}" "+2" "${buildType}*" 
-  chkdir=equinox/drops
-  removeOldDirectories "${basedir}/${chkdir}" "+2" "${buildType}*" 
-  chkdir=updates/4.6-N-builds
-  removeOldDirectories "${basedir}/${chkdir}" "+2" "${buildType}*" 
+  removeBuildFamily
 
+  minor=6
+  days="+4"
   buildType=I
-  basedir="/shared/eclipse/${buildmachine}/4${buildType}/siteDir"
-  chkdir="eclipse/downloads/drops4"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}20*" 
-  chkdir="equinox/drops"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}20*" 
-  chkdir="updates/4.6-I-builds"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}20*" 
+  removeBuildFamily
 
+  minor=5
+  days="+4"
   buildType=M
-  basedir="/shared/eclipse/${buildmachine}/4${buildType}/siteDir"
-  chkdir="eclipse/downloads/drops4"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}20*" 
-  chkdir="equinox/drops"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}20*" 
-  chkdir="updates/4.6-I-builds"
-  removeOldDirectories "${basedir}/${chkdir}" "+4" "${buildType}20*" 
+  removeBuildFamily
+
+  INUSE_AFTER=$(nice -12 du /shared/eclipse/builds -sh)
+
+  echo -e "\n\tDisk used before cleaning: $INUSE_BEFORE"
+  echo -e "\tDisk used after cleaning: $INUSE_AFTER"
 }
 
-## remove old promotion scripts
-find /shared/eclipse/sdk/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
-find /shared/eclipse/sdk/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
-find /shared/eclipse/sdk/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
-find /shared/eclipse/equinox/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
-find /shared/eclipse/equinox/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
-find /shared/eclipse/equinox/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
-
 cleanBuildMachine builds
-#cleanBuildMachine buildsdavidw
-
-INUSE_AFTER=$(nice -12 du /shared/eclipse/builds -sh)
-
-echo -e "\n\tDisk used before cleaning: $INUSE_BEFORE"
-echo -e "\tDisk used after cleaning: $INUSE_AFTER"
 
 
