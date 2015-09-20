@@ -45,7 +45,7 @@ for buildname in ${allOldBuilds}; do
     then
       echo -e "Removed: $buildname"
     else
-      echo -e "\n\tAn Error occured removeding $buildname. RC: $RC"
+      echo -e "\n\tAn Error occurred removing $buildname. RC: $RC"
     fi
   fi
 done
