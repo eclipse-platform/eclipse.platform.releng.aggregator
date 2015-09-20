@@ -114,26 +114,26 @@ function cleanNightlyRepo ()
 {
   dryRun=$1
   # Will use the convenient eclipse known to be installed in /shared/simrel
-baseBuilder=/shared/simrel/tools/eclipse45/eclipse
-eclipseexe=${baseBuilder}/eclipse
-if [[ ! -x ${eclipseexe} ]]
-then 
-  echo -e "\n\tERROR: expected eclipse location not found, or not executable"
-  echo -e "\t${eclipseexe}"
-  exit 1
-fi
-JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-export JAVA_HOME=${JAVA_8_HOME}
-javaexe=${JAVA_HOME}/jre/bin/java
-if [[ ! -x ${javaexe} ]]
-then 
-  echo -e "\n\tERROR: expected java location not found, or not executable"
-  echo -e "\t${javaexe}"
-  exit 1
-fi
+  baseBuilder=/shared/simrel/tools/eclipse45/eclipse
+  eclipseexe=${baseBuilder}/eclipse
+  if [[ ! -x ${eclipseexe} ]]
+  then 
+    echo -e "\n\tERROR: expected eclipse location not found, or not executable"
+    echo -e "\t${eclipseexe}"
+    exit 1
+  fi
+  JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
+  export JAVA_HOME=${JAVA_8_HOME}
+  javaexe=${JAVA_HOME}/jre/bin/java
+  if [[ ! -x ${javaexe} ]]
+  then 
+    echo -e "\n\tERROR: expected java location not found, or not executable"
+    echo -e "\t${javaexe}"
+    exit 1
+  fi
 
-antRunner=org.eclipse.ant.core.antRunner
-devWorkspace=/shared/eclipse/sdk/cleaners/workspace-cleanup
+  antRunner=org.eclipse.ant.core.antRunner
+  devWorkspace=/shared/eclipse/sdk/cleaners/workspace-cleanup
   echo -e "\tDEBUG: Cleaning repository ${eclipseRepo} on $HOSTNAME on $(date ) " >&2
   getReposToRemove "${eclipseRepo}"
   generateCleanupXML "${eclipseRepo}" 

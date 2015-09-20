@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# I am not sure what this is for?
 for file in drops4/* 
 do
   if [[ -d $file ]] 

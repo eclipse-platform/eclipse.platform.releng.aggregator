@@ -110,7 +110,7 @@ then
       echo "found eclipse executable, will execute:"
       echo "${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vm ${JAVA_EXEC_DIR} -vmargs ${MIRRORS_URL_ARG} ${ART_REPO_ARG} ${CON_REPO_ARG} ${ART_REPO_NAME_ARG} ${CON_REPO_NAME_ARG} ${STATS_TAG_FEATURE_LIST_ARG} ${STATS_TAG_VERSIONINDICATOR_ARG} ${STATS_TAG_SUFFIX_ARG}"
       # we may need to 'clean' here, since using an installation that has been moved?
-       ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vm ${JAVA_EXEC_DIR} -vmargs ${MIRRORS_URL_ARG} -Dp2ArtifactRepositoryName="${ART_REPO_NAME}" -Dp2MetadataRepositoryName="${CON_REPO_NAME}" ${ART_REPO_ARG} ${CON_REPO_ARG} ${STATS_TAG_FEATURE_LIST_ARG} ${STATS_TAG_VERSIONINDICATOR_ARG} ${STATS_TAG_SUFFIX_ARG}
+      ${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vm ${JAVA_EXEC_DIR} -vmargs ${MIRRORS_URL_ARG} -Dp2ArtifactRepositoryName="${ART_REPO_NAME}" -Dp2MetadataRepositoryName="${CON_REPO_NAME}" ${ART_REPO_ARG} ${CON_REPO_ARG} ${STATS_TAG_FEATURE_LIST_ARG} ${STATS_TAG_VERSIONINDICATOR_ARG} ${STATS_TAG_SUFFIX_ARG}
       #${ECLIPSE_EXE} --launcher.suppressErrors -nosplash -consolelog -debug -data ${devworkspace} -application ${APP_NAME} -vm ${JAVA_EXEC_DIR} -vmargs ${MIRRORS_URL_ARG} -Dp2ArtifactRepositoryName="${ART_REPO_NAME}" -Dp2MetadataRepositoryName="${CON_REPO_NAME}" ${ART_REPO_ARG} ${CON_REPO_ARG}
       RC=$?
     else
