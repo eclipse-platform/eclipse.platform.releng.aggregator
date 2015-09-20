@@ -4,7 +4,7 @@
 
 function removeOldPromotionScripts ()
 {
-  ## remove old promotion scripts
+  echo -e "\n\tRemove old promotion scripts."
   find /shared/eclipse/sdk/promotion/queue -name "RAN*" -ctime +4 -ls -exec rm '{}' \;
   find /shared/eclipse/sdk/promotion/queue -name "TEST*" -ctime +1 -ls -exec rm '{}' \;
   find /shared/eclipse/sdk/promotion/queue -name "ERROR*" -ctime +4 -ls -exec rm '{}' \;
@@ -37,6 +37,12 @@ function removeOldDirectories ()
 
 function removeBuildFamily ()
 {
+  buildmachine=$1
+  major=$2
+  minor=$3
+  days=$4
+  buildType=$5
+
   basedir="/shared/eclipse/${buildmachine}/${major}${buildType}/siteDir"
   chkdir="eclipse/downloads/drops4"
   removeOldDirectories "${basedir}/${chkdir}" "${days}" "${buildType}20*" 
@@ -60,22 +66,24 @@ function cleanBuildMachine ()
   minor=6
   days="+4"
   buildType=P
-  removeBuildFamily
+  removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
   minor=6
   days="+2"
   buildType=N
-  removeBuildFamily
+  removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
   minor=6
   days="+4"
   buildType=I
-  removeBuildFamily
+  removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
 
   minor=5
   days="+4"
   buildType=M
-  removeBuildFamily
+  removeBuildFamily ${buildmachine} ${major} ${minor} ${days} ${buildType}
+
+  removeOldPromotionScripts
 
   INUSE_AFTER=$(nice -12 du /shared/eclipse/builds -sh)
 
