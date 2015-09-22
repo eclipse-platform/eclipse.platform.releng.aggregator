@@ -413,7 +413,7 @@
             <a href="../../testResults.php">Test Results</a> | 
             <a href="../xml/{$filename}"><xsl:value-of select="$filename"/></a>
         </td>
-        <td align="right">Designed for use with <a href='http://www.junit.org'>JUnit</a> and <a href='http://ant.apache.org/ant'>Ant</a>.</td>
+        <td align="right">Designed for use with <a href='http://junit.org/'>JUnit</a> and <a href='https://ant.apache.org/'>Ant</a>.</td>
     </tr>
     </table>
     <hr size="1"/>
