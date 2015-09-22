@@ -10,7 +10,7 @@ echo "# Utility to automate second, deferred step of a promotion (making visible
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "# equinox is only promoted every 30 minutes ... so should do close to the hour, or half hour, " >> "${CL_SITE}/deferredSteps.sh"
 echo "# to avoid looking out of sync." >> "${CL_SITE}/deferredSteps.sh"
-echo "mv /shared/eclipse/equinox/promotion/queue/manual-${DL_LABEL_EQ}.sh /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL_EQ}.sh" >> "${CL_SITE}/deferredSteps.sh"
+echo "mv /shared/eclipse/equinox/promotion/queue/manual-promote-${DL_LABEL_EQ}.sh /shared/eclipse/equinox/promotion/queue/promote-${DL_LABEL_EQ}.sh" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "mv /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/buildHidden /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/buildHiddenORIG" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"

@@ -59,16 +59,22 @@ mv ${currentDropId}ORIG ${currentDropId}
 
 
 PROMOTE_PREFIX="promote"
+MANUAL_PREFIX="manual-promote"
 if [[ "${HIDE_SITE}" == "true" ]]
 then
-  PROMOTE_PREFIX="manual"
-  echo "Remember to change Equinox promote script name from 'manual-' to 'promote-' when time to promote." >> "${CL_SITE}/checklist.txt"
+  # touch buildHidden
+  touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
+  # make "deferred" script to remove buildHidden
+  PROMOTE_PREFIX="manual-promote"
+  echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
+  echo "rm  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
+  > /shared/eclipse/equinox/promotion/queue/${MANUAL_PREFIX}-${DL_LABEL}.sh
 fi
 
 printf "\n\t%s\n" "Creating promote script."
 echo "rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
   > /shared/eclipse/equinox/promotion/queue/${PROMOTE_PREFIX}-${DL_LABEL}.sh
 
-printf "\n\t%s\n" "Make sure promote script is 'executable'."
-chmod +x /shared/eclipse/equinox/promotion/queue/${PROMOTE_PREFIX}-${DL_LABEL}.sh
+printf "\n\t%s\n" "Make sure promote scripts are 'executable'."
+chmod +x "/shared/eclipse/equinox/promotion/queue/*${DL_LABEL}.sh"
 
