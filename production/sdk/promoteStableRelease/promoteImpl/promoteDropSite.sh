@@ -22,7 +22,7 @@ fi
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 cd ${BUILDMACHINE_BASE_DL}
-cp /shared/eclipse/sdk/renameBuild.sh ${PWD}
+
 
 if [[ ! "${INDEX_ONLY}" == "true" ]]
 then
@@ -72,10 +72,22 @@ fi
 if [[ ! "${INDEX_ONLY}" == "true" ]]
 then
   # rename old dir to new dir
-  ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
+  ${PROMOTE_IMPL}/renameBuild.sh ${DROP_ID} ${BUILD_LABEL} ${DL_DROP_ID} ${DL_LABEL}
+  RC=$?
+  if [[ $RC != 0 ]] 
+  then 
+    echo "ERROR: renameBuild.sh returned non-zero return code: $RC."
+    exit $RC
+  fi
 else
   # If indexing only, we still need to run "renamed" just to pick up "renames" in test results., but in "new" directory
-  ./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL} ${DL_DROP_ID}
+  ${PROMOTE_IMPL}/renameBuild.sh ${DROP_ID} ${BUILD_LABEL} ${DL_DROP_ID} ${DL_LABEL} ${DL_DROP_ID}
+  RC=$?
+  if [[ $RC != 0 ]] 
+  then 
+    echo "ERROR: renameBuild.sh returned non-zero return code: $RC."
+    exit $RC
+  fi
 fi
 
 if [[ ! "${INDEX_ONLY}" == "true" ]]
@@ -85,8 +97,6 @@ then
 else
   printf "\n\t%s\n" "Nothing to move back to original, since never copied to ORIG, since INDEX_ONLY was ${INDEX_ONLY}"
 fi
-
-rm renameBuild.sh
 
 # If doing a "re-indexing" run, then build may be hidden still, or may not be.
 # we make no assumptions and just leave it alone, if re-indexing. build hidden is

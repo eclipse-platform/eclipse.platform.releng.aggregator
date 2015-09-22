@@ -14,17 +14,22 @@ echo "mv /shared/eclipse/equinox/promotion/queue/manual-${DL_LABEL_EQ}.sh /share
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "mv /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/buildHidden /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/buildHiddenORIG" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
-echo "# variable, optional step (though, guess it doesn't hurt to always do it, just in case?) " >> "${CL_SITE}/deferredSteps.sh"
-echo "# Actually, though, would be best to do in 'first step', to confirm before visible." >> "${CL_SITE}/deferredSteps.sh"
-echo "touch /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/overrideTestColor" >> "${CL_SITE}/deferredSteps.sh"
-echo "" >> "${CL_SITE}/deferredSteps.sh"
+#echo "# variable, optional step (though, guess it doesn't hurt to always do it, just in case?) " >> "${CL_SITE}/deferredSteps.sh"
+#echo "# Actually, though, would be best to do in 'first step', to confirm before visible." >> "${CL_SITE}/deferredSteps.sh"
+#echo "touch /home/data/httpd/download.eclipse.org/eclipse/downloads/drops4/${DL_DROP_ID}/overrideTestColor" >> "${CL_SITE}/deferredSteps.sh"
+#echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "/shared/eclipse/sdk/updateIndexes.sh" >> "${CL_SITE}/deferredSteps.sh"
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo " # TODO: improve this location assumption, later." >> "${CL_SITE}/deferredSteps.sh"
 echo " # assuming execution of this script is being done directly in the promoteLuna, or promoteMars directory" >> "${CL_SITE}/deferredSteps.sh"
 echo "./deferredCompositeAdd.sh" >> "${CL_SITE}/deferredSteps.sh"
-echo "" >> "${CL_SITE}/deferredSteps.sh"
-echo "./deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
+# We don't tag, during deferred step, when doing a release.
+# It comes a little later.
+if [[ "${DL_TYPE}" != "R" ]] 
+then
+  echo "" >> "${CL_SITE}/deferredSteps.sh"
+  echo "./deferredTag.sh" >> "${CL_SITE}/deferredSteps.sh"
+fi 
 echo "" >> "${CL_SITE}/deferredSteps.sh"
 echo "# In theory could automate the 'announce' mail too ... but, " >> "${CL_SITE}/deferredSteps.sh"
 echo "# should do final 'sanity check' anyway, before " >> "${CL_SITE}/deferredSteps.sh"

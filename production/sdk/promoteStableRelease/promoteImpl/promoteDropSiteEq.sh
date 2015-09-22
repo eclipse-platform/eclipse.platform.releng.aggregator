@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 
-DROP_ID=$1
-DL_LABEL=$2
-HIDE_SITE=$3
+currentDropId=$1
+currentBuildLabelEQ=$2
+DL_LABEL=$3
+HIDE_SITE=$4
 
 function usage ()
 {
-  printf "\n\tUsage: %s DROP_ID DL_LABEL HIDE_SITE" $(basename $0) >&2
-  printf "\n\t\t%s\t%s" "DROP_ID " "such as I20121031-2000." >&2
+  printf "\n\tUsage: %s currentDropId currentBuildLabelEQ DL_LABEL HIDE_SITE" $(basename $0) >&2
+  printf "\n\t\t%s\t%s" "currentDropId " "such as I20121031-2000." >&2
+  printf "\n\t\t%s\t%s" "currentBuildLabelEQ " "such as I20121031-2000 or Mars.1RC3" >&2
   printf "\n\t\t%s\t%s" "DL_LABEL " "such as LunaM3." >&2
   printf "\n\t\t%s\t%s" "HIDE_SITE " "true or false." >&2
 }
 
-if [[ -z "${DROP_ID}" || -z "${DL_LABEL}" || -z "${HIDE_SITE}" ]]
+if [[ -z "${currentDropId}" || -z "${DL_LABEL}" || -z "${HIDE_SITE}" ]]
 then
   printf "\n\n\t%s\n\n" "ERROR: arguments missing in call to $( basename $0 )" >&2
   usage
@@ -22,16 +24,15 @@ fi
 DL_DROP_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 cd ${BUILDMACHINE_BASE_EQ}
-cp /shared/eclipse/sdk/renameBuild.sh .
 
 printf "\n\n\t%s\n" "Making promote script for Equinox"
 
-printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$DROP_ID" "${DROP_ID}ORIG"
-rsync -ra ${DROP_ID}/ ${DROP_ID}ORIG
+printf "\n\t%s\n\t%s to \n\t%s\n" "Making backup copy of original ..." "$currentDropId" "${currentDropId}ORIG"
+rsync -ra ${currentDropId}/ ${currentDropId}ORIG
 
 printf "\n\t%s\n" "Doing rename of original."
 
-# if DL_DROP_ID already exists, it is from a previous run we are re-doing, do,
+# if DL_currentDropId already exists, it is from a previous run we are re-doing, do,
 # we'll remove first, to make sure it's cleaning re-done.
 if [[ -d ${DL_DROP_ID} ]]
 then
@@ -42,15 +43,20 @@ then
   then
     echo -e "/n/tERROR: Could not remove previous (failed) version of DL_DROP_ID, ${DL_DROP_ID}"
     exit 1
-   fi
+  fi
 fi
 
-./renameBuild.sh ${DROP_ID} ${DL_DROP_ID} ${DL_LABEL}
+${PROMOTE_IMPL}/renameBuild.sh ${currentDropId} ${currentBuildLabelEQ} ${DL_DROP_ID} ${DL_LABEL}
+RC=$?
+if [[ $RC != 0 ]] 
+then 
+  echo "ERROR: renameBuild.sh returned non-zero return code: $RC."
+  exit $RC
+fi
 
 printf "\n\t%s\n" "Moving backup copy back to original."
-mv ${DROP_ID}ORIG ${DROP_ID}
+mv ${currentDropId}ORIG ${currentDropId}
 
-rm renameBuild.sh
 
 PROMOTE_PREFIX="promote"
 if [[ "${HIDE_SITE}" == "true" ]]
