@@ -225,9 +225,9 @@ then
     printf "\n\tINFO: %s\n" "No tagging script created, since promoting to an R-Build."
     printf "\tINFO: %s\n" "But, we did create NEWS_ID, ACK_ID and README_ID and added to buildproperties.php, since doing Release promote."
     # We change "the new location", on build machine ... since files are already copied.
-    echo -e "\$NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
-    echo -e "\$ACK_ID=${BUILD_MAJOR}.${BUILD_MINOR}" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
-    echo -e "\$README_ID=${BUILD_MAJOR}.${BUILD_MINOR}" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
+    echo -e "\$NEWS_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
+    echo -e "\$ACK_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
+    echo -e "\$README_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}\";" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
   fi
 else
   printf "\n\tINFO: %s\n" "Doing an INDEX_ONLY run, so tagging script not created."
@@ -236,7 +236,7 @@ fi
 if [[ "${DL_TYPE}" == "S" ]]
 then
   printf "\tINFO: %s\n" "Createed NEWS_ID and added to buildproperties.php, since doing Milestone promote."
-  echo -e "\$NEWS_ID=${BUILD_MAJOR}.${BUILD_MINOR}/${CHECKPOINT}" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
+  echo -e "\$NEWS_ID = \"${BUILD_MAJOR}.${BUILD_MINOR}/${CHECKPOINT}\";" >> "${BUILDMACHINE_BASE_DL}/${ECLIPSE_DL_DROP_DIR_SEGMENT}/buildproperties.php"
 fi
 
 if [[ ! "${INDEX_ONLY}" == "true" ]]
