@@ -2,7 +2,7 @@
 <head>
 <title>Eclipse Download Click Through</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-
+<link rel="stylesheet" href="http://download.eclipse/eclipse/default_style.css" type="text/css">
 <?php
 
 $servername=$_SERVER['SERVER_NAME'];

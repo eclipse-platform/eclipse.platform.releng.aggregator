@@ -9,7 +9,7 @@ echo "<title>Test Results for $BUILD_ID </title>";
 ?>
 
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<link rel="stylesheet" href="../../../default_style.css" type="text/css">
+<link rel="stylesheet" href="http://download.eclipse/eclipse/default_style.css" type="text/css">
 </head>
 <body>
 <p>&nbsp;</p>
