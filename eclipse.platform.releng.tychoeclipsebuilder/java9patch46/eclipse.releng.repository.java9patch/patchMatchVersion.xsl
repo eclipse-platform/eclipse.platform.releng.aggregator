@@ -70,5 +70,5 @@
   <xsl:template match="@range[../@name='org.eclipse.jdt.feature.group']">
     <xsl:attribute name="range"><xsl:value-of select="$patchFeatureVersionRange" /></xsl:attribute>
   </xsl:template>
-  -->
+
 </xsl:stylesheet>
