@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
+# this localBuildProperties.shsource file is to ease local builds to override some variables.
+# It should not be used for production builds.
+source localBuildProperties.shsource 2>/dev/null
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+
 # Small utility to start unit tests (or re-run them) after a build
 # and after upload to downloads server is complete.
 
-# need to be running Java 6 and Ant 1.8 for <sript> to work in invokeTestsJSON
+# need to be running Java 6 and Ant 1.8 for <script> to work in invokeTestsJSON
 # and, default on current build system is Ant 1.7 ... so ...
 export ANT_HOME=/shared/common/apache-ant-1.9.2
 function usage ()
@@ -15,6 +20,37 @@ function usage ()
   printf "\t\t\t%s\n" "buildId == M20120705-1200, IM20121005-0800, etc. "
   printf "\t\t\t\t%s\n" "or, provide those parameters in buildParams.shshource on search path"
 }
+
+# compute main (left part) of download site
+function dlpath()
+{
+  eclipseStream=$1
+  if [[ -z "${eclipseStream}" ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"
+    return 1;
+  fi
+
+
+  buildId=$2
+  if [[ -z "${buildId}" ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)"
+    return 1;
+  fi
+
+  eclipseStreamMajor=${eclipseStream:0:1}
+  buildType=${buildId:0:1}
+
+  pathToDL=eclipse/downloads/drops
+  if (( $eclipseStreamMajor > 3 ))
+  then
+    pathToDL=$pathToDL$eclipseStreamMajor
+  fi
+
+  echo $pathToDL
+}
+
 
 # This file, buildParams.shsource, normally does not exist on build system,
 # but can be provided if running "by hand" as an easy way to provide the
@@ -65,7 +101,6 @@ else
   exit 1
 fi
 
-source localBuildProperties.shsource 2>/dev/null
 
 echo "values in ${0}"
 echo "eclipseStream: $eclipseStream"
@@ -75,29 +110,23 @@ echo "eclipseStreamService: $eclipseStreamService"
 echo "buildType: $buildType"
 echo "buildId: $buildId"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
+echo "BUILD_HOME: ${BUILD_HOME}"
 
-buildRoot=/shared/eclipse/eclipse${eclipseStreamMajor}${buildType}
-buildDir=${buildRoot}/build
-supportDir=${buildDir}/supportDir
-eclipsebuilder=org.eclipse.releng.eclipsebuilder
-builderDir=${supportDir}/$eclipsebuilder
+  buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  eclipsebuilder=eclipse.platform.releng.aggregator/production/testScripts
+  dlPath=$( dlpath $eclipseStream $buildId )
+  echo "DEBUG dlPath: $dlPath"
+  buildDropDir=${buildRoot}/siteDir/$dlPath/${buildId}
+  echo "DEBGUG buildDropDir: $buildDropDir"
+  builderDropDir=${buildDropDir}/${eclipsebuilder}
+  echo "DEBUG: builderDropDir: ${builderDropDir}"
 
-# should buildDirectory be set at "main" one from actual build?
-buildDirectory=${supportDir}/src
-
-# note, to be consistent, I changed json xml file so it adds buildId to postingDirectory
-siteDir=${buildRoot}/siteDir
-postingDirectory=${siteDir}/eclipse/downloads/drops
-if (( "${eclipseStreamMajor}" > 3 ))
-then
-  postingDirectory=${siteDir}/eclipse/downloads/drops${eclipseStreamMajor}
-fi
+echo "DEBUG: invoking test scripts on Hudson"
 
 HUDSON_TOKEN=windows2012tests ant \
-  -DbuildDirectory=${buildDirectory} \
-  -DpostingDirectory=${postingDirectory} \
+  -DpostingDirectory=${$buildDropDir} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
   -DEBUILDER_HASH=${EBUILDER_HASH} \
-  -f ${builderDir}/invokeTestsJSON.xml
+  -f ${builderDropDir}/invokeTestsJSON.xml
 

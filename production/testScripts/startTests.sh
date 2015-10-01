@@ -126,6 +126,7 @@ echo "BUILD_HOME: ${BUILD_HOME}"
 echo "DEBUG: invoking test scripts on Hudson"
 
 HUDSON_TOKEN=windows2012tests ant \
+  -DpostingDirectory=${$buildDropDir} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
   -DEBUILDER_HASH=${EBUILDER_HASH} \

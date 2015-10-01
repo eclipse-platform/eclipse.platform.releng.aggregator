@@ -47,27 +47,24 @@
       for greater flexibility in what to test?)
     -->
 
-    <parallel>
+    <antcall target="triggerHudsonTests">
+      <param
+        name="job"
+        value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32" />
+    </antcall>
 
-      <antcall target="triggerHudsonTests">
-        <param
-          name="job"
-          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-lin64" />
-      </antcall>
+    <antcall target="triggerHudsonTests">
+      <param
+        name="job"
+        value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-lin64" />
+    </antcall>
 
-      <antcall target="triggerHudsonTests">
-        <param
-          name="job"
-          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-win32" />
-      </antcall>
+    <antcall target="triggerHudsonTests">
+      <param
+        name="job"
+        value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
+    </antcall>
 
-      <antcall target="triggerHudsonTests">
-        <param
-          name="job"
-          value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
-      </antcall>
-
-    </parallel>
   </target>
   <target
     name="PerfTests"
@@ -79,8 +76,6 @@
       TODO: Can these be called, in parrallel via callant (or, perhaps subant?)
       for greater flexibility in what to test?
     -->
-
-    <parallel>
 
       <antcall target="triggerHudsonPerfTests">
         <param
@@ -100,7 +95,7 @@
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
         </antcall>
       -->
-    </parallel>
+
   </target>
 
 
@@ -141,20 +136,55 @@
     <echo message="env.HUDSON_PORT: ${env.HUDSON_PORT}" />
     <echo message="env.HUDSON_ROOT_URI: ${env.HUDSON_ROOT_URI}" />
     <echo message="json for unit curl post: ${json}" />
+    <echo message="job: ${job}" />
 
     <exec
       executable="curl"
-      resultproperty="unitCurlRCcode">
+      resultproperty="rcUnit">
       <arg line="-X POST" />
       <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_ROOT_URI}/job/${job}/build" />
       <arg line="-d token=${env.HUDSON_TOKEN}" />
+      <arg value="--fail" />
       <arg value="--data-urlencode" />
       <arg value="json=${json}" />
     </exec>
-
-    <echo message="unitCurlRCcode: ${unitCurlRCcode}" />
-
+    <echo message="DEBUG: rcUnit: ${rcUnit}" />
+    <condition property="invocationNotOk">
+      <not>
+        <equals
+          arg1="${rcUnit}"
+          arg2="0" />
+      </not>
+    </condition>
+    <antcall target="checkInvocation">
+      <param
+        name="returnCode"
+        value="${rcUnit}" />
+      <param
+        name="job"
+        value="${job}" />
+    </antcall>
   </target>
+
+  <target
+    name="checkInvocation"
+    if="invocationNotOk">
+    <echo
+      message="Invocation of Curl did not return 0 return code for ${job}.${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      append="true" />
+    <echo
+      message="   return code was ${returnCode}${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      append="true" />
+    <echo
+      message="   Likely due to Hudson job not being defined (or, possibly network issues).${line.separator}${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      append="true" />
+    <!-- We don't want to fail automatically here, since just one machine may be "offline". -->
+    <echo message="Curl invocation failed. See ${postingDirectory}/TEST_INVOCATION_FAILED${line.separator}" />
+  </target>
+
   <target
     name="triggerHudsonPerfTests"
     depends="init">
@@ -201,18 +231,33 @@
 
     <exec
       executable="curl"
-      resultproperty="perfCurlRCcode">
+      resultproperty="rcPerf">
       <arg line="-X POST" />
       <arg
         value="${env.HUDSON_PERF_PROTOCOL}://${env.HUDSON_PERF_HOST}:${env.HUDSON_PERF_PORT}/${env.LINUX_PERF_SEGMENT}/job/${job}/build" />
       <arg line="-d token=${env.HUDSON_TOKEN}" />
+      <arg value="--fail" />
       <arg value="--data-urlencode" />
       <arg value="json=${json}" />
     </exec>
-
-    <echo message="perfCurlRCcode: ${perfCurlRCcode}" />
-
+    <echo message="DEBUG: rcPerf: ${rcPerf}" />
+    <condition property="invocationNotOk">
+      <not>
+        <equals
+          arg1="${rcPerf}"
+          arg2="0" />
+      </not>
+    </condition>
+    <antcall target="checkInvocation">
+      <param
+        name="returnCode"
+        value="${rcPerf}" />
+      <param
+        name="job"
+        value="${job}" />
+    </antcall>
   </target>
+
 
   <target
     name="init"
@@ -220,6 +265,13 @@
     unless="invokeTestsJSONinitialized">
 
     <property environment="env" />
+    
+    <!-- posting directory should be passed in to us ... but, in case not 
+         we will at least define it.
+    -->
+    <property
+      name="postingDirectory"
+      value="${basedir}/postingDirectory" />
 
     <property
       name="env.HUDSON_HOST"
