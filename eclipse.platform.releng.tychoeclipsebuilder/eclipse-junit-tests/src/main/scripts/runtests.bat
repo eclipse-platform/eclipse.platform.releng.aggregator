@@ -1,8 +1,10 @@
 @echo off
 SETLOCAL
 
-REM default java executable for outer and test vm
-set vmcmd=java
+REM default java executable for outer and test vm, in it is case not 
+REM passed into this script.
+REM c\:\\Program Files\\Java\\jdk1.8.0_51\\jre\\bin\\java.exe
+set jvm=java
 
 REM reset list of ant targets in test.xml to execute
 set tests=
@@ -46,7 +48,7 @@ if x%1==x-os set os=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-arch set arch=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-noclean set installmode=noclean&& shift && goto processcmdlineargs
 if x%1==x-properties set properties=-propertyfile %2 && shift && shift && goto processcmdlineargs
-if x%1==x-vm set vmcmd="%2" && shift && shift && goto processcmdlineargs
+if x%1==x-vm set jvm=%2 && shift && shift && goto processcmdlineargs
 if x%1==x-extdirprop SET extdirproperty="-Djava.ext.dirs=%2" && shift && shift && goto processcmdlineargs
 
 
@@ -70,8 +72,8 @@ set
 
 rem -Dtimeout=300000 "%ANT_OPTS%"
 
-IF NOT EXIST %vmcmd% (
-ECHO ERROR: vmcmd not defined or does not exist: %vmcmd%
+IF NOT EXIST %jvm% (
+ECHO ERROR: jvm not defined or does not exist: %jvm%
 exit 1
 )
 
@@ -79,11 +81,11 @@ REM -XshowSettings is supported on windows VMs but ... not every where. So where
 REM causes VM to not start at all. Can be handy for diagnostics. (without running ant <echoproperties/>
 
 IF DEFINED extdirproperty (
-%vmcmd%  %extdirproperty%  -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch%  -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
+%jvm%  %extdirproperty%  -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch%  -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
 GOTO END
 )
 
-%vmcmd%  -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch%  -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
+%jvm%  -Dosgi.os=%os% -Dosgi.ws=%ws% -Dosgi.arch=%arch% -jar eclipse\plugins\%launcher-jar% -data workspace -application org.eclipse.ant.core.antRunner -file test.xml %tests% -Dws=%ws% -Dos=%os% -Darch=%arch%  -D%installmode%=true %properties% -logger org.apache.tools.ant.DefaultLogger
 
 :END
 

@@ -57,8 +57,11 @@ fn-summarize-comparator-logs "$BUILD_ID" \
   "${EBuilderDir}/eclipse/buildScripts/eclipse_compare.xml" \
   "$buildDirectory" "$launcherJar"
 
+# As far as I know, "API Tooling" is not very useful for a patch feature, or X or Y build.
+if  [[ ! $BUILD_TYPE =~ [PXY] ]]
+then
 fn-summarize-apitooling "$BUILD_ID" \
   "${EBuilderDir}/eclipse/buildScripts/api-tools-builder.xml" \
   "$buildDirectory" "$launcherJar"
-
+fi
 fn-publish-eclipse "$BUILD_TYPE" "$STREAM" "$BUILD_ID" "$aggDir" "$buildDirectory" "$launcherJar"

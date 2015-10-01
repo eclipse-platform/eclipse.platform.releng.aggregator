@@ -204,8 +204,24 @@
       <arg value="--data-urlencode" />
       <arg value="json=${json}" />
     </exec>
-
+    <echo message="DEBUG: rcPerf: ${rcPerf}" />
+    <condition property="invocationNotOk">
+      <not>
+        <equals
+          arg1="${rcPerf}"
+          arg2="0" />
+      </not>
+    </condition>
+    <antcall target="checkInvocation">
+      <param
+        name="returnCode"
+        value="${rcPerf}" />
+      <param
+        name="job"
+        value="${job}" />
+    </antcall>
   </target>
+
 
   <target
     name="init"
@@ -213,6 +229,13 @@
     unless="invokeTestsJSONinitialized">
 
     <property environment="env" />
+
+    <!-- posting directory should be passed in to us ... but, in case not 
+         we will at least define it.
+    -->
+    <property
+      name="postingDirectory"
+      value="${basedir}/postingDirectory" />
 
     <property
       name="env.HUDSON_HOST"

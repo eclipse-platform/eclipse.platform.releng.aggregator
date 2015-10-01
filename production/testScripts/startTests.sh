@@ -61,7 +61,7 @@ function dlpath()
 #
 source buildParams.shsource 2>/dev/null
 
-# can provide eclipseStream and buildId as first to arts to this script
+# can provide eclipseStream and buildId as first two args to this script
 # which is how invoke from "promote script"
 eclipseStream=${eclipseStream:-${1}}
 buildId=${buildId:-${2}}
@@ -126,6 +126,7 @@ echo "BUILD_HOME: ${BUILD_HOME}"
 echo "DEBUG: invoking test scripts on Hudson"
 
 HUDSON_TOKEN=windows2012tests ant \
+  -DpostingDirectory=${buildDropDir} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
   -DEBUILDER_HASH=${EBUILDER_HASH} \

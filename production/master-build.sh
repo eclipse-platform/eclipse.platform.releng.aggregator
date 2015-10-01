@@ -223,7 +223,6 @@ fn-write-property buildDirectory
 fn-write-property BUILD_ENV_FILE
 fn-write-property BUILD_ENV_FILE_PHP
 fn-write-property BUILD_ENV_FILE_PROP
-fn-write-property BUILD_ID
 fn-write-property BUILD_DIR_SEG
 fn-write-property EQ_BUILD_DIR_SEG
 fn-write-property BUILD_PRETTY_DATE

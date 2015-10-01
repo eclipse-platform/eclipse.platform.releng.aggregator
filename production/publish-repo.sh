@@ -197,19 +197,33 @@ if [[ -n "${PATCH_BUILD}" ]]
 then
 
   # no longer needed, will remove
-  rm "${siteDirOnBuildMachine}/site.xml"
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo "ERROR: did not remove 'site.xml' as expected. RC: $RC"
-    #exit $RC
-  fi
+#  rm "${siteDirOnBuildMachine}/site.xml"
+#  RC=$?
+#  if [[ $RC != 0 ]]
+#  then
+#    echo "ERROR: did not remove 'site.xml' as expected. RC: $RC"
+#    #exit $RC
+#  fi
 
   # before we created pack.gz files, we'll create zip file, of archive for
   # DL page ... and those zip files best without pack.gz files, since they
   # are not used if using local zip archive, so are "wasted" there.
   pushd ${siteDirOnBuildMachine}
-  zip -r ${buildDirectory}/java8patch-${BUILD_ID}-repository.zip  .
+  zipfile=${PATCH_BUILD}-${BUILD_ID}-repository.zip
+  zip -r ${buildDirectory}/${zipfile}  .
+  # I guess created after "publish"? The checksums are not created, so we'll just create 
+  # them directly. (Note, adding 256, since we will do that for all, in future, so 
+  # do not want to forget.
+  pushd ${buildDirectory}
+  echo [md5] ${zipfile}
+  md5sum -b ${zipfile} > checksum/${zipfile}.md5
+  echo [sha1] ${zipfile}
+  sha1sum -b ${zipfile} > checksum/${zipfile}.sha1
+  echo [sha256] ${zipfile}
+  sha256sum -b ${zipfile} > checksum/${zipfile}.sha256
+  echo [sha512] ${zipfile}
+  sha512sum -b ${zipfile} > checksum/${zipfile}.sha512
+  popd
   popd
 
   #    if [[ -n "${PATCH_BUILD}" ]]
