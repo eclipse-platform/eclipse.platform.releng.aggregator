@@ -123,17 +123,8 @@ echo "BUILD_HOME: ${BUILD_HOME}"
 
 echo "DEBUG: invoking test scripts on Hudson"
 
-# note, to be consistent, I changed json xml file so it adds buildId to postingDirectory
-siteDir=${buildRoot}/siteDir
-postingDirectory=${siteDir}/eclipse/downloads/drops
-if (( "${eclipseStreamMajor}" > 3 ))
-then
-  postingDirectory=${siteDir}/eclipse/downloads/drops${eclipseStreamMajor}
-fi
-echo "postingDirectory: $postingDirectory"
 HUDSON_TOKEN=windows2012tests ant \
-  -DbuildDirectory=${buildDirectory} \
-  -DpostingDirectory=${postingDirectory} \
+  -DpostingDirectory=${$buildDropDir} \
   -DbuildId=${buildId} \
   -DeclipseStream=${eclipseStream} \
   -DEBUILDER_HASH=${EBUILDER_HASH} \
