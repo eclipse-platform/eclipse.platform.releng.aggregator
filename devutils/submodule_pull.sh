@@ -6,8 +6,8 @@
 # http://wiki.eclipse.org/Platform-releng/Platform_Build#cloning_platform_source_tree
 #
 # intended to be executed "in place" in devutils so we always 'move up' a directory to get to submodule direcotory
-#branch=master
-branch=R4_5_maintenance
+branch=master
+#branch=R4_5_maintenance
 echo rt.equinox.bundles ; cd ../rt.equinox.bundles ; git fetch; git checkout ${branch} ; git pull ;
 echo rt.equinox.framework ; cd ../rt.equinox.framework ; git fetch; git checkout ${branch} ; git pull ;
 echo rt.equinox.binaries ; cd ../rt.equinox.binaries ; git fetch; git checkout ${branch} ; git pull ;
