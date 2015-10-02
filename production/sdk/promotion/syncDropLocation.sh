@@ -77,8 +77,8 @@ function sendPromoteMail ()
   fi
 
   downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
-
-  comparatorLogPath=${fsDocRoot}/${mainPath}/${buildId}/${comparatorLogRelPath}
+  fsDownloadSitePath=${fsDocRoot}/${mainPath}/${buildId}
+  comparatorLogPath=${fsDownloadSitePath}/${comparatorLogRelPath}
   logSize=0
   if [[ -e ${comparatorLogPath} ]]
   then
@@ -108,7 +108,7 @@ function sendPromoteMail ()
   TO=${TO:-"platform-releng-dev@eclipse.org"}
 
   # for initial testing, only to me -- change as desired after initial testing.
-  if [[ "${buildId}" =~ [PYX] ]]
+  if [[ "${buildType}" =~ [PYX] ]]
   then
     TO="david_williams@us.ibm.com"
   fi
@@ -141,7 +141,7 @@ function sendPromoteMail ()
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
-  if [[ -z "${BUILD_FAILED}" && ! "${buildId}" =~ [PYX]  ]]
+  if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYX]  ]]
   then
     message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
   fi
@@ -150,11 +150,11 @@ function sendPromoteMail ()
   then
     message1="${message1}<p>POM Update Required (patches below can be applied on exported email, with <code>git am --scissors --signoff (committerId) &lt; /path/to/patchEmail</code>): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
     message1="${message1}<p><pre>\n"
-    for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
+    for file in ${fsDownloadSitePath}/pom_updates/*.diff
     do
       echo "DEBUG: pom update file: $file"
       # rare there would be non-existent file, given the logic that got us here,
-      # but we'll check just to be sure.
+      # but we will check just to be sure.
       if [[ -e $file ]]
       then
         # add scissors line ... for each "repo patch"? so extra info is not added to comment
@@ -225,9 +225,22 @@ function startTests()
   echo "DEBGUG CBI buildDropDir: $buildDropDir"
   builderDropDir=${buildDropDir}/${eclipsebuilder}
   echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
+  
+  # finally, execute ... unless its a patch build
+  if [[ "${buildType}" != "P" ]]
+  then
+     ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
+  else
+     printf "\n\tNo tests ran for Patch builds.\n"
+  fi
+  // Since we have already uploaded everything, before invoking tests, 
+  // if we got an error invoking tests, must copy-up now. 
+  if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED ]]
+  then
+     dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
+     rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED  ${dlSite}
+  fi
 
-  # finally, execute
-  ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
 }
 
 # this function currently sync's local repo on build machine, and adds
