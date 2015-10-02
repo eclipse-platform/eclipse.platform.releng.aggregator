@@ -56,6 +56,8 @@ GOTO END
 
 :MAXLOOPS
 echo Reached max loops waiting for files to be free to delete
+rem note use of "hard exit" (no /B) as attempt to get Hudson to fail.
+exit 1
 GOTO END
 
 
