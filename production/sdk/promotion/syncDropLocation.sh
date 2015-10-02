@@ -77,8 +77,8 @@ function sendPromoteMail ()
   fi
 
   downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
-
-  comparatorLogPath=${fsDocRoot}/${mainPath}/${buildId}/${comparatorLogRelPath}
+  fsDownloadSitePath=${fsDocRoot}/${mainPath}/${buildId}
+  comparatorLogPath=${fsDownloadSitePath}/${comparatorLogRelPath}
   logSize=0
   if [[ -e ${comparatorLogPath} ]]
   then
@@ -150,11 +150,11 @@ function sendPromoteMail ()
   then
     message1="${message1}<p>POM Update Required (patches below can be applied on exported email, with <code>git am --scissors --signoff (committerId) &lt; /path/to/patchEmail</code>): <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}pom_updates/</p>\n"
     message1="${message1}<p><pre>\n"
-    for file in ${fsDocRoot}/${mainPath}/${buildId}/pom_updates/*.diff
+    for file in ${fsDownloadSitePath}/pom_updates/*.diff
     do
       echo "DEBUG: pom update file: $file"
       # rare there would be non-existent file, given the logic that got us here,
-      # but we'll check just to be sure.
+      # but we will check just to be sure.
       if [[ -e $file ]]
       then
         # add scissors line ... for each "repo patch"? so extra info is not added to comment
@@ -233,6 +233,15 @@ function startTests()
   else
      printf "\n\tNo tests ran for Patch builds.\n"
   fi
+
+  // Since we have already uploaded everything, before invoking tests, 
+  // if we got an error invoking tests, must copy-up now. 
+  if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED ]]
+  then
+     dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
+     rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED  ${dlSite}
+  fi
+
 }
 
 # this function currently sync's local repo on build machine, and adds
