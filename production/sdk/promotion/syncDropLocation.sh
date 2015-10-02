@@ -234,8 +234,8 @@ function startTests()
      printf "\n\tNo tests ran for Patch builds.\n"
   fi
 
-  // Since we have already uploaded everything, before invoking tests, 
-  // if we got an error invoking tests, must copy-up now. 
+  # Since we have already uploaded everything, before invoking tests, 
+  # if we got an error invoking tests, must copy-up now. 
   if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED ]]
   then
      dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
