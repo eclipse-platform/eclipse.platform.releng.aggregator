@@ -236,10 +236,10 @@ function startTests()
 
   # Since we have already uploaded everything, before invoking tests, 
   # if we got an error invoking tests, must copy-up now. 
-  if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED ]]
+  if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED.html ]]
   then
      dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
-     rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED  ${dlSite}
+     rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED.html  ${dlSite}
   fi
 
 }

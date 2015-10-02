@@ -158,6 +158,10 @@
           arg2="0" />
       </not>
     </condition>
+    <!--
+       TODO: We could produced a "TEST_ARE_RUNNING_ON" file here too, when rc = 0 .. that is unless="invocationNoOk" 
+       and included the URL of build or performance machine tests. 
+    -->
     <antcall target="checkInvocation">
       <param
         name="returnCode"
@@ -178,27 +182,27 @@
     name="checkInvocation"
     if="invocationNotOk">
     <echo
-      message="&lt;p&gt;Invocation of Curl did not return 0 return code for ${job}.${line.separator}&lt;br /&gt;"
-      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      message="&lt;p&gt;Invocation of Curl did not return 0 return code for ${job}.&lt;br /&gt;${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED.html"
       append="true" />
     <echo
-      message="   return code was ${returnCode}${line.separator}&lt;br /&gt;"
-      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      message="   return code was ${returnCode}&lt;br /&gt;${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED.html"
       append="true" />
     <echo
-      message="   Likely due to Hudson job not being defined (or, possibly network issues).${line.separator}${line.separator}&lt;br /&gt;"
-      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      message="   Likely due to Hudson job not being defined (or, possibly network issues).&lt;br /&gt;${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED.html"
       append="true" />
     <echo
-      message="&lt;br /&gt;= = = = = &lt;br /&gt;${output}&lt;br /&gt;= = = = = &lt;br /&gt;"
-      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      message="&lt;br /&gt;= = = standard out = = &lt;br /&gt;${output}&lt;br /&gt;${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED.html"
       append="true" />
     <echo
-      message="&lt;br /&gt;= = = = = &lt;br /&gt;${errorOutput}&lt;br /&gt;= = = = = &lt;br /&gt;"
-      file="${postingDirectory}/TEST_INVOCATION_FAILED"
+      message="&lt;br /&gt;= = = standard err = = &lt;br /&gt;${errorOutput}&lt;br /&gt;${line.separator}"
+      file="${postingDirectory}/TEST_INVOCATION_FAILED.html"
       append="true" />
     <!-- We don't want to fail automatically here, since just one machine may be "offline". -->
-    <echo message="Curl invocation failed. See ${postingDirectory}/TEST_INVOCATION_FAILED${line.separator}" />
+    <echo message="Curl invocation failed. See ${postingDirectory}/TEST_INVOCATION_FAILED.html" />
   </target>
 
   <target
@@ -247,7 +251,9 @@
 
     <exec
       executable="curl"
-      resultproperty="rcPerf">
+      resultproperty="rcPerf"      
+      outputproperty="perfOutput"
+      errorproperty="perfErrorOutput">
       <arg line="-X POST" />
       <arg
         value="${env.HUDSON_PERF_PROTOCOL}://${env.HUDSON_PERF_HOST}:${env.HUDSON_PERF_PORT}/${env.LINUX_PERF_SEGMENT}/job/${job}/build" />
@@ -271,6 +277,12 @@
       <param
         name="job"
         value="${job}" />
+      <param
+        name="output"
+        value="${perfOutput}" />
+      <param
+        name="errorOutput"
+        value="${perfErrorOutput}" />
     </antcall>
   </target>
 
