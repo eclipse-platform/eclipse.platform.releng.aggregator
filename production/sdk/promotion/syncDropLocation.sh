@@ -44,7 +44,7 @@ function sendPromoteMail ()
   #   set from="\"Your Friendly WTP Builder\" <real-subscribed-id@real.address>"
   # correction ... doesn't work. Seems the subscription system set's the "from" name, so doesn't work when
   # sent to mail list (just other email addresses)
-  # espeically handy if send from one id (e.g. "david_williams)
+  # especially handy if send from one id (e.g. "david_williams)
   # only good with 'mail', not 'sendmail'
   #export MAILRC=~/.e4Buildmailrc
 
