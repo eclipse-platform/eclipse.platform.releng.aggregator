@@ -17,7 +17,7 @@ else
     SleepTime=60
     currentLoop=0
     nFilesOrDirs=$( find "${WORKSPACE}" -mindepth 1 -maxdepth 1 | wc -l )
-    while [[ ${nFilesOrDirs} > 0 ]]
+    while [[ ${nFilesOrDirs} -gt 0 ]]
     do
       currentLoop=$(( ${currentLoop} + 1 ))
       if [[ ${currentLoop} -gt ${MaxLoops} ]]
