@@ -239,7 +239,7 @@ function startTests()
   if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED.html ]]
   then
      dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
-     rsync -a ${buildDropDir}/${buildId}/TEST_INVOCATION_FAILED.html  ${dlSite}
+     rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED.html  ${dlSite}/${buildId}/
   fi
 
 }
