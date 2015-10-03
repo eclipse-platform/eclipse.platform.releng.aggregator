@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>This job is to write data to /shared/eclipse about a test job that just completed. Then a cron job will check for that data and produced the summary pages and upload to &apos;downloads&apos;.
+Hence, this job needs to be ran from a node that has write access to /shared/eclipse/.</description>
+  <project-properties class="java.util.concurrent.ConcurrentHashMap">
+    <entry>
+      <string>hudson-plugins-disk_usage-DiskUsageProperty</string>
+      <base-property>
+        <originalValue class="hudson.plugins.disk_usage.DiskUsageProperty"/>
+        <propertyOverridden>false</propertyOverridden>
+      </base-property>
+    </entry>
+    <entry>
+      <string>logRotator</string>
+      <log-rotator-property>
+        <originalValue class="hudson.tasks.LogRotator">
+          <daysToKeep>2</daysToKeep>
+          <numToKeep>-1</numToKeep>
+          <artifactDaysToKeep>-1</artifactDaysToKeep>
+          <artifactNumToKeep>-1</artifactNumToKeep>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </log-rotator-property>
+    </entry>
+    <entry>
+      <string>hudson-tasks-Mailer</string>
+      <external-property>
+        <originalValue class="hudson.tasks.Mailer">
+          <recipients>david_williams@us.ibm.com</recipients>
+          <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+          <sendToIndividuals>false</sendToIndividuals>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+        <modified>true</modified>
+      </external-property>
+    </entry>
+    <entry>
+      <string>parametersDefinitionProperties</string>
+      <copy-write-list-property>
+        <originalValue class="hudson.util.CopyOnWriteList">
+          <hudson.model.ParametersDefinitionProperty>
+            <parameterDefinitions>
+              <hudson.model.StringParameterDefinition>
+                <name>triggeringJob</name>
+                <description></description>
+                <defaultValue></defaultValue>
+              </hudson.model.StringParameterDefinition>
+              <hudson.model.StringParameterDefinition>
+                <name>triggeringBuildNumber</name>
+                <description></description>
+                <defaultValue></defaultValue>
+              </hudson.model.StringParameterDefinition>
+              <hudson.model.StringParameterDefinition>
+                <name>buildId</name>
+                <description></description>
+                <defaultValue></defaultValue>
+              </hudson.model.StringParameterDefinition>
+              <hudson.model.StringParameterDefinition>
+                <name>eclipseStream</name>
+                <description></description>
+                <defaultValue></defaultValue>
+              </hudson.model.StringParameterDefinition>
+              <hudson.model.StringParameterDefinition>
+                <name>EBUILDER_HASH</name>
+                <description></description>
+                <defaultValue>master</defaultValue>
+              </hudson.model.StringParameterDefinition>
+            </parameterDefinitions>
+          </hudson.model.ParametersDefinitionProperty>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </copy-write-list-property>
+    </entry>
+    <entry>
+      <string>builders</string>
+      <describable-list-property>
+        <originalValue class="hudson.util.DescribableList">
+          <hudson.tasks.Shell>
+            <command>#!/usr/bin/env bash
+
+echo &quot;triggeringJob: $triggeringJob&quot;
+echo &quot;triggeringBuildNumber: $triggeringBuildNumber&quot;
+echo &quot;buildId: $buildId&quot;
+echo &quot;eclipseStream: $eclipseStream&quot;
+echo &quot;EBUILDER_HASH: $EBUILDER_HASH&quot;
+
+builddatadir=/shared/eclipse/sdk/testjobdata
+
+echo &quot;builddatadir: ${builddatadir}&quot;
+
+echo &quot;HUDSON WORKSPACE: ${WORKSPACE}&quot;
+
+# just in case &quot;first run&quot;
+mkdir -p ${builddatadir}
+
+timestamp=$( date +%Y%m%d%H%M%S%N )
+
+# create data files both here and there (here, just for the record)
+echo $triggeringJob $triggeringBuildNumber $buildId $eclipseStream $EBUILDER_HASH &gt; ${builddatadir}/testjobdata$timestamp.txt
+RC=$?
+if [ $RC -ne 0 ] 
+then
+  echo -e &quot;\n\tCould not &apos;echo&apos; parameters to ${builddatadir}/testjobdata$timestamp.txt. Return code was $RC.\n&quot;
+  exit $RC 
+fi
+
+echo $triggeringJob $triggeringBuildNumber $buildId $eclipseStream $EBUILDER_HASH &gt; ${WORKSPACE}/testjobdata$timestamp.txt.
+RC=$?
+if [ $RC -ne 0 ] 
+then
+  echo -e &quot;\n\tCould not &apos;echo&apos; parameters to ${WORKSPACE}/testjobdata$timestamp.txt. Return code was $RC.\n&quot;
+  exit $RC 
+fi
+
+#remove old ones if over 3 days old
+find ${WORKSPACE} -name &quot;*testjobdata*.txt&quot; -ctime +2 -exec rm &apos;{}&apos; \;
+find ${builddatadir} -name &quot;*testjobdata*.txt&quot; -ctime +2 -exec rm &apos;{}&apos; \;
+</command>
+          </hudson.tasks.Shell>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </describable-list-property>
+    </entry>
+    <entry>
+      <string>jdk</string>
+      <string-property>
+        <originalValue class="string">jdk1.8.0-latest</originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </string-property>
+    </entry>
+    <entry>
+      <string>appointedNode</string>
+      <base-property>
+        <originalValue class="appointed-node-property">
+          <nodeName>fastlane</nodeName>
+          <advancedAffinityChooser>true</advancedAffinityChooser>
+          <canRoam>false</canRoam>
+        </originalValue>
+        <propertyOverridden>false</propertyOverridden>
+      </base-property>
+    </entry>
+    <entry>
+      <string>scm</string>
+      <scm-property>
+        <originalValue class="hudson.scm.NullSCM"/>
+        <propertyOverridden>false</propertyOverridden>
+      </scm-property>
+    </entry>
+  </project-properties>
+  <keepDependencies>false</keepDependencies>
+  <createdBy>david_williams</createdBy>
+  <creationTime>1350529361869</creationTime>
+  <properties>
+    <hudson.security.AuthorizationMatrixProperty>
+      <permission>hudson.model.Item.Configure:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Item.ExtendedRead:ROLE_ECLIPSE.PLATFORM.RELENG</permission>
+      <permission>hudson.model.Item.ExtendedRead:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Run.Delete:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Item.Build:ROLE_ECLIPSE.PLATFORM.RELENG</permission>
+      <permission>hudson.model.Item.Build:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Run.Update:ROLE_ECLIPSE.PLATFORM.RELENG</permission>
+      <permission>hudson.model.Run.Update:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Item.Workspace:anonymous</permission>
+      <permission>hudson.model.Item.Workspace:ROLE_ECLIPSE.PLATFORM.RELENG</permission>
+      <permission>hudson.model.Item.Workspace:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Item.Read:anonymous</permission>
+      <permission>hudson.model.Item.Read:ROLE_ECLIPSE.PLATFORM.RELENG</permission>
+      <permission>hudson.model.Item.Read:david_williams@us.ibm.com</permission>
+      <permission>hudson.model.Item.Delete:david_williams@us.ibm.com</permission>
+    </hudson.security.AuthorizationMatrixProperty>
+  </properties>
+  <cascadingChildrenNames class="java.util.concurrent.CopyOnWriteArraySet"/>
+  <cascading-job-properties class="java.util.concurrent.CopyOnWriteArraySet">
+    <string>org-hudsonci-plugins-snapshotmonitor-WatchedDependenciesProperty</string>
+    <string>hudson-plugins-disk_usage-DiskUsageProperty</string>
+  </cascading-job-properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>false</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <concurrentBuild>false</concurrentBuild>
+  <cleanWorkspaceRequired>false</cleanWorkspaceRequired>
+</project>
