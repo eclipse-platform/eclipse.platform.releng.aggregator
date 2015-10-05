@@ -422,6 +422,27 @@
     <pluginManagement>
       <plugins>
         <plugin>
+           <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <!-- this is actually present in any 0.14+ version -->
+            <version>${tycho-extras.version}</version>
+            <configuration>
+              <executionEnvironment>JavaSE-1.8</executionEnvironment>
+              <repositories>
+                <repository>
+                  <id>eclipse</id>
+                  <layout>p2</layout>
+                  <url>${eclipserun-repo}</url>
+                </repository>
+              </repositories>
+              <!--
+                This is to fix some lucene 3.x compatibility issues.
+                Required for 4.2 and earlier. Not for 4.3 and later.
+                <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
+              -->
+               </configuration>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
           <version>1.8</version>
@@ -820,21 +841,7 @@
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>
-            <!-- this is actually present in any 0.14+ version -->
-            <version>${tycho-extras.version}</version>
             <configuration>
-              <repositories>
-                <repository>
-                  <id>eclipse</id>
-                  <layout>p2</layout>
-                  <url>${eclipserun-repo}</url>
-                </repository>
-              </repositories>
-              <!--
-                This is to fix some lucene 3.x compatibility issues.
-                Required for 4.2 and earlier. Not for 4.3 and later.
-                <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
-              -->
               <!-- actual indexer call -->
               <appArgLine>-data target/apibuild-workspace -application org.eclipse.ant.core.antRunner -buildfile
                 target/.apibuild.xml</appArgLine>
