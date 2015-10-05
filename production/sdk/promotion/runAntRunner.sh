@@ -69,10 +69,9 @@ then
   exit 1
 fi
 
-if [[ -z "${JAVA_HOME}" ]]
-then
-  export JAVA_HOME=${JAVA_HOME:-/shared/common/jdk1.7.0-latest}
-fi
+JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
+export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}} 
+
 if [[ ! -d "${JAVA_HOME}" ]]
 then
   echo "ERROR: JAVA_HOME did not exist."

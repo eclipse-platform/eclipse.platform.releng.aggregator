@@ -123,7 +123,7 @@ function cleanNightlyRepo ()
     exit 1
   fi
   JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
-  export JAVA_HOME=${JAVA_8_HOME}
+  export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}} 
   javaexe=${JAVA_HOME}/jre/bin/java
   if [[ ! -x ${javaexe} ]]
   then 

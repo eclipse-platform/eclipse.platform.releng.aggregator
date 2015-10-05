@@ -44,10 +44,10 @@ export ANT_HOME=/shared/common/apache-ant-1.9.2
 #export JAVA_HOME=/shared/common/jdk1.5.0-latest
 #export JAVA_HOME=/shared/common/jdk1.6.0-latest
 #export JAVA_HOME=/shared/common/jdk1.7.0-latest
-#export JAVA_HOME=/shared/common/jdk1.8.0_x64-latest
+JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
+export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}} 
 
-export JAVA_HOME=/shared/common/jdk1.7.0-latest
-# added /opt/local/bin for 'port' versoin of wget, on Mac
+# added /opt/local/bin for 'port' version of wget, on Mac
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/bin:/opt/local/bin
 
 # Be sure to set to a "fresh" non-cluttered area, so can be easily cleaned up.
