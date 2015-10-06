@@ -19,8 +19,16 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eclipse</groupId>
   <artifactId>eclipse-releng-test-parent</artifactId>
-  <version>4.5.0-SNAPSHOT</version>
+  <version>4.6.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <!--
+    See maven-enforcer-plugin configuration to actually break the build if
+    run with older maven.
+    prerequisites section is kept for now as even if it doesn't break the build, it
+    is used by other plugins like versions-maven-plugin which check and warn
+    for using plugins with older than they require Maven version.
+    If version number changed in one place, be sure to change in the other.
+  -->
   <prerequisites>
     <maven>3.1.1</maven>
   </prerequisites>
@@ -32,12 +40,12 @@
     <buildId>${buildType}${buildTimestamp}</buildId>
     <!--
         releaseName should match the yearly "release train" name.
-        For example, "Luna", "Luna SR1", "Luna SR2", etc.
-        It will show up in "about box", in parenthesis, after version number,
-        such as Version: 4.4.0 (Luna), for main features.
+      For example, "Mars", "Mars.1", "Luna SR2", etc.
+      It will show up in "about box",
+      such as Version: Mars (4.5), for main features.
         See bug 328139.
      -->
-    <releaseName>Mars</releaseName>
+    <releaseName>Neon</releaseName>
     <!--
         The releaseNumbers below, for SDK and Platform, might be
         thought of as the "marketing number" or "branding number",
@@ -52,42 +60,57 @@
         but we'd still want the "marketing number" to be increased to reflect
         "a new yearly release".
     -->
-    <releaseNumberSDK>4.5</releaseNumberSDK>
-    <releaseNumberPlatform>4.5</releaseNumberPlatform>
+    <releaseNumberSDK>4.6</releaseNumberSDK>
+    <releaseNumberPlatform>4.6</releaseNumberPlatform>
 
+    <!-- using snapshot, or locally built (forked) snapshot version for bug 461207 and bug 431116
+      <tycho.version>0.23.0-SNAPSHOT</tycho.version>
+      <tycho-extras.version>0.23.0-SNAPSHOT</tycho-extras.version>
+    -->
 
-    <tycho.version>0.22.0</tycho.version>
-    <tycho-extras.version>0.22.0</tycho-extras.version>
-    <cbi-plugins.version>1.1.1</cbi-plugins.version>
+    <!-- For using Tycho 23.1 (currently "staged", removed staged repo below, once released) -->
+    <tycho.version>0.23.1</tycho.version>
+    <tycho-extras.version>0.23.1</tycho-extras.version>
+
+    <cbi-plugins.version>1.1.2</cbi-plugins.version>
+
     <!--
       The tycho-eclipserun-plugin will create its instance of Eclipse from this
       'eclipiserun-repo' repository, such as for computing .api-descriptions.
     -->
-    <eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.5milestones/S-4.5M5-201501291830/</eclipserun-repo>
+    <eclipserun-repo>http://download.eclipse.org/eclipse/updates/4.6milestones/S-4.6M1-201508052000/</eclipserun-repo>
 
-    <comparator.repo>http://download.eclipse.org/eclipse/updates/4.5-I-builds</comparator.repo>
+    <comparator.repo>http://download.eclipse.org/eclipse/updates/4.6-I-builds</comparator.repo>
 
     <!--
       NOTE: this EMF and ECF URL must match exactly what is in the eclipse-sdk-prereqs.target file.
       We use it (the EMF repo and ECF repo) not only for resolving pre-reqs during the build, but also in 'repository' POM for mirroring
-      a copy of the EMF features and ECF features into our own repository. This is required since we merely "require" EMF (not "include" it).
+      a copy of the EMF features and ECF features into our own repository. This is required since we merely "require" EMF (not "include"
+      it).
       And, of course, in the PDE target file, the URL is expected to be the actual URL, not a variable.
     -->
-    <emf-repo.url>http://download.eclipse.org/modeling/emf/emf/updates/2.11milestones/base/S201501230347/</emf-repo.url>
+    <emf-repo.url>http://download.eclipse.org/modeling/emf/emf/updates/2.12milestones/base/S201508050624/</emf-repo.url>
 
-    <ecf-repo.url>http://download.eclipse.org/rt/ecf/3.9.2/site.p2/</ecf-repo.url>
+    <ecf-repo.url>http://download.eclipse.org/rt/ecf/3.10.1/site.p2/</ecf-repo.url>
 
+    <!-- using snapshot repo for Tycho 0.23.0-SNAPSHOT, such as for bug 461207 -->
+    <!-- Does it hurt to always leave snapshot repo here? Even if not used?
+      <tycho-snapshot-repo.url>https://repo.eclipse.org/content/repositories/tycho-snapshots/</tycho-snapshot-repo.url>
+    -->
     <tycho-repo.url>https://oss.sonatype.org/content/repositories/public/</tycho-repo.url>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <cbi-jdt-repo.url>https://repo.eclipse.org/content/repositories/eclipse-staging/</cbi-jdt-repo.url>
-    <cbi-jdt-version>3.11.0.v20150118-1315</cbi-jdt-version>
+    <!-- jdt.core and jdt.compiler.apt should "match", come from same build, and be signed
+      by same certificate. See bug 462783. -->
+    <cbi-jdt-version>3.12.0.v20150913-1717</cbi-jdt-version>
+    <cbi-jdt-apt-version>1.2.0.v20150824-0550</cbi-jdt-apt-version>
 
     <!--
-        This jetty-version is used by the help system in building the JSPs,
+      This jetty-version is used by the help system in building the pre-compiled JSPs,
         and should change when ever our "shipped" version of Jetty changes.
      -->
-    <jetty-version>9.2.5.v20141112</jetty-version>
+    <jetty-version>9.2.9.v20150224</jetty-version>
 
     <!--
        Production bundles are produced by ignoring the compiler warnings specified
@@ -105,10 +128,21 @@
     -->
     <tests.ignoredWarnings>-warn:-deprecation,raw,unchecked,discouraged</tests.ignoredWarnings>
 
-    <eclipse-repo.url>https://repo.eclipse.org/content/repositories/releases/</eclipse-repo.url>
+    <!--
+      repo for released versions of CBI. Note, we intentionally use as specific a repo as possible.
+      See bug 471835.
+    -->
+    <eclipse-repo.url>https://repo.eclipse.org/content/repositories/cbi/</eclipse-repo.url>
+    <!-- comment out snapshots repo, when not intending to use snapshots. releases come from "eclipse-repo.url"
     <cbi-snapshots-repo.url>https://repo.eclipse.org/content/repositories/cbi-snapshots/</cbi-snapshots-repo.url>
-    <!-- this eclipse-p2-repo.url is specifically for the build individual bundles profile. -->
-    <eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.5-N-builds</eclipse-p2-repo.url>
+    -->
+
+    <!-- this eclipse-p2-repo.url is specifically for the build individual bundles profile and Gerrit jobs.
+      Usually set to N-builds for main dev. cycle, but set to I-builds during RC time 
+      and during milestone stabilization week, (since there are
+      no N-builds during these periods, but daily I-builds).
+    -->
+    <eclipse-p2-repo.url>http://download.eclipse.org/eclipse/updates/4.6-N-builds</eclipse-p2-repo.url>
 
     <!--
         If configuration is not specified at all, in signing plugin, the default
@@ -122,6 +156,8 @@
         see: https://bugs.eclipse.org/419030
     -->
     <jgit.dirtyWorkingTree>ignore</jgit.dirtyWorkingTree>
+
+    <qualifier.format>'v'yyyyMMdd-HHmm</qualifier.format>
 
   </properties>
 
@@ -138,6 +174,13 @@
     </snapshotRepository>
   </distributionManagement>
   <pluginRepositories>
+
+    <!-- only for staged Tycho builds
+    <pluginRepository>
+      <id>tycho-staged</id>
+      <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1022/</url>
+      </pluginRepository>
+    -->
 
     <pluginRepository>
       <id>tycho</id>
@@ -159,6 +202,7 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
+    <!-- comment out cbi snapshots, if not intending to use
     <pluginRepository>
       <id>cbi-snapshots</id>
       <url>${cbi-snapshots-repo.url}</url>
@@ -166,6 +210,7 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
+    -->
     <pluginRepository>
       <id>eclipse</id>
       <url>${eclipse-repo.url}</url>
@@ -191,6 +236,10 @@
         <version>${cbi-plugins.version}</version>
         <executions>
           <execution>
+            <!--
+              Default lifecycle phase: 'GENERATE_SOURCES'
+              See https://maven.apache.org/ref/3.1.1/maven-core/lifecycles.html
+            -->
             <goals>
               <goal>generate-api-build-xml</goal>
             </goals>
@@ -203,15 +252,14 @@
         <configuration>
         <!-- https://bugs.eclipse.org/bugs/show_bug.cgi?id=453757
           <resolveWithExecutionEnvironmentConstraints>false</resolveWithExecutionEnvironmentConstraints>
-
+          -->
           <target>
             <artifact>
               <groupId>org.eclipse</groupId>
               <artifactId>eclipse-sdk-prereqs</artifactId>
-              <version>4.5.0-SNAPSHOT</version>
+              <version>4.6.0-SNAPSHOT</version>
             </artifact>
           </target>
-           -->
           <environments>
             <environment>
               <os>linux</os>
@@ -323,12 +371,77 @@
               <escapeString>\</escapeString>
             </configuration>
           </execution>
+          <execution>
+            <id>saveproperties</id>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <overwrite>true</overwrite>
+              <resources>
+                <resource>
+                  <directory>saveproperties</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
-
+      <plugin>
+        <!--
+          This maven-enforcer-plugin configuration to actually break the build if
+          run with older maven.
+          prerequisites section is kept for now as even if it doesn't break the build, it
+          is used by other plugins like versions-maven-plugin which check and warn
+          for using plugins with older than they require Maven version.
+          If version number changed in one place, be sure to change in the other.
+        -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.1.1</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
     <pluginManagement>
       <plugins>
+        <plugin>
+           <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-eclipserun-plugin</artifactId>
+            <!-- this is actually present in any 0.14+ version -->
+            <version>${tycho-extras.version}</version>
+            <configuration>
+              <executionEnvironment>JavaSE-1.8</executionEnvironment>
+              <repositories>
+                <repository>
+                  <id>eclipse</id>
+                  <layout>p2</layout>
+                  <url>${eclipserun-repo}</url>
+                </repository>
+              </repositories>
+              <!--
+                This is to fix some lucene 3.x compatibility issues.
+                Required for 4.2 and earlier. Not for 4.3 and later.
+                <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
+              -->
+               </configuration>
+        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
@@ -349,19 +462,29 @@
               <artifactId>org.eclipse.jdt.core</artifactId>
               <version>${cbi-jdt-version}</version>
             </dependency>
+            <dependency>
+              <groupId>org.eclipse.jdt</groupId>
+              <artifactId>org.eclipse.jdt.compiler.apt</artifactId>
+              <version>${cbi-jdt-apt-version}</version>
+            </dependency>
           </dependencies>
           <configuration>
             <compilerArgs>
-              <arg>${code.ignoredWarnings}</arg>
-              <arg>-verbose</arg>
-              <arg>-inlineJSR</arg>
-              <arg>-enableJavadoc</arg>
-              <arg>-encoding</arg>
-              <arg>${project.build.sourceEncoding}</arg>
-              <arg>-proceedOnError</arg>
-              <arg>-log</arg>
-              <arg>${project.build.directory}/@dot.xml</arg>
+              <args>${code.ignoredWarnings}</args>
+              <args>-verbose</args>
+              <args>-inlineJSR</args>
+              <args>-enableJavadoc</args>
+              <args>-encoding</args>
+              <args>${project.build.sourceEncoding}</args>
+              <args>-proceedOnError</args>
+              <!-- Use this form, for Tycho 22 or less.
+                <args>-log</args>
+                <args>${project.build.directory}/@dot.xml</args>
+              -->
             </compilerArgs>
+            <!-- Use this form for Tycho 23 or greater -->
+            <log>xml</log>
+            <logDirectory>${project.build.directory}/compilelogs</logDirectory>
             <showWarnings>true</showWarnings>
             <excludeResources>
               <exclude>**/package.html</exclude>
@@ -378,18 +501,15 @@
               <artifactId>tycho-buildtimestamp-jgit</artifactId>
               <version>${tycho-extras.version}</version>
             </dependency>
-            <!--
             <dependency>
               <groupId>org.eclipse.tycho.extras</groupId>
               <artifactId>tycho-sourceref-jgit</artifactId>
               <version>${tycho-extras.version}</version>
             </dependency>
-             -->
           </dependencies>
           <configuration>
             <strictBinIncludes>false</strictBinIncludes>
-            <format>'v'yyyyMMdd-HHmm</format>
-            <!--
+            <format>${qualifier.format}</format>
             <timestampProvider>jgit</timestampProvider>
             <jgit.ignore>
               pom.xml
@@ -399,11 +519,10 @@
             <sourceReferences>
               <generate>true</generate>
             </sourceReferences>
-              -->
             <archive>
               <addMavenDescriptor>false</addMavenDescriptor>
             </archive>
-            <additionalFileSets>
+            <additionalFileSets combine.children="append">
               <fileSet>
                 <directory>${project.build.directory}</directory>
                 <includes>
@@ -475,6 +594,37 @@
   </build>
   <profiles>
     <profile>
+      <id>java9patch46</id>
+      <properties>
+        <qualifier.format>'v'yyyyMMdd-HHmm'_BETA_JAVA9'</qualifier.format>
+
+        <featureToPatch>org.eclipse.jdt</featureToPatch>
+
+        <!-- 
+             For future versions, in addition to changing this value of "featureToPatchVersion", 
+             the same value needs to be edited in 
+             .../java9patch46/org.eclipse.jdt.java9patch/feature.xml
+             and 
+             .../java9patch46/org.eclipse.jdt-feature-dummy/feature.xm
+             and it of course, must "match" what ever version was produced by the build specified
+             a few lines below, as the eclipse-p2-repo-java9patch46 p2 repository, as well as the lower 
+             bound, in 'versionRangeForPatch'.
+         -->
+        <!-- This needs the version of the feature to be patched. -->
+        <featureToPatchVersion>3.12.0.v20150908-0800</featureToPatchVersion>
+        <!-- Can specify an exact range here, or something of a loose range, depending on what's needed. -->
+        <versionRangeForPatch>[3.12.0.v20150908-0800,3.12.0.v20160607-0800)</versionRangeForPatch>
+
+      </properties>
+      <repositories>
+        <repository>
+          <id>eclipse-p2-repo-java9patch46</id>
+          <url>http://download.eclipse.org/eclipse/updates/4.6-I-builds/I20150908-0800/</url>
+          <layout>p2</layout>
+        </repository>
+      </repositories>
+    </profile>
+    <profile>
       <id>build-individual-bundles</id>
       <repositories>
         <repository>
@@ -500,9 +650,6 @@
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-pack200a-plugin</artifactId>
             <version>${tycho-extras.version}</version>
-            <configuration>
-                <fork>true</fork>
-            </configuration>
             <executions>
               <execution>
                 <id>pack200-normalize</id>
@@ -534,9 +681,6 @@
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-pack200b-plugin</artifactId>
             <version>${tycho-extras.version}</version>
-            <configuration>
-                <fork>true</fork>
-            </configuration>
             <executions>
               <execution>
                 <id>pack200-pack</id>
@@ -698,20 +842,10 @@
           <plugin>
             <groupId>org.eclipse.tycho.extras</groupId>
             <artifactId>tycho-eclipserun-plugin</artifactId>
-            <!-- this is actually present in any 0.14+ version -->
-            <version>${tycho-extras.version}</version>
             <configuration>
-              <repositories>
-                <repository>
-                  <id>eclipse</id>
-                  <layout>p2</layout>
-                  <url>${eclipserun-repo}</url>
-                </repository>
-              </repositories>
-              <!-- this is to fix some lucene 3.x compatibility issue -->
-              <argLine>-Dhelp.lucene.tokenizer=standard</argLine>
-              <!-- actuall indexer call -->
-              <appArgLine>-data target/apibuild-workspace -application org.eclipse.ant.core.antRunner -buildfile target/.apibuild.xml</appArgLine>
+              <!-- actual indexer call -->
+              <appArgLine>-data target/apibuild-workspace -application org.eclipse.ant.core.antRunner -buildfile
+                target/.apibuild.xml</appArgLine>
               <dependencies>
                 <!-- list of bundles that we need -->
                 <dependency>
@@ -754,19 +888,6 @@
             </executions>
           </plugin>
         </plugins>
-        <resources>
-          <!--
-           This task is to save properties we are explicitly interested in using later,
-           such as when displaying in other reports or php pages. It depends on having
-           the "template" file be part of the 'saveproperties' directory. Its only purpose
-           is to "fill in" the property values named in that file.
-       -->
-          <resource>
-            <directory>saveproperties</directory>
-            <filtering>true</filtering>
-          </resource>
-        </resources>
-
       </build>
     </profile>
 
