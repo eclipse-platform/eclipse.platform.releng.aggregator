@@ -27,5 +27,7 @@ mvn clean verify  -X -e -Pbree-libs --fail-fast -V \
  -DbuildId=N20151005-1111 \
  -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
  -DforceContextQualifier=N20151005-1111 \
- -Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc
+ -Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc \
+ 2>&1 | tee testout.log
+ 
 
