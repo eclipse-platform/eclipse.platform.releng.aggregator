@@ -17,53 +17,57 @@
     <defaultSigning-excludeInnerJars>true</defaultSigning-excludeInnerJars>
   </properties>
 
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>echoAll</id>
-            <phase>compile</phase>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho.extras</groupId>
+            <artifactId>tycho-eclipserun-plugin</artifactId>
             <configuration>
-              <target>
-                <echoproperties destfile="target/antecho.properties" />
-              </target>
+              <!-- actual indexer call -->
+              <appArgLine>-data target/antrunner-workspace -application org.eclipse.ant.core.antRunner -buildfile
+                target/build.xml</appArgLine>
+              <dependencies>
+                <!-- list of bundles that we need -->
+                <dependency>
+                  <artifactId>org.eclipse.ant.core</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.apache.ant</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.api.tools</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.build</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.pde.core</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.equinox.launcher</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+                <dependency>
+                  <artifactId>org.eclipse.osgi.compatibility.state</artifactId>
+                  <type>eclipse-plugin</type>
+                </dependency>
+              </dependencies>
             </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-help-plugin</artifactId>
-        <version>2.2</version>
-        <executions>
-          <execution>
-            <id>expressions</id>
-            <goals>
-              <goal>expressions</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <output>target/resources/expressions.txt</output>
-            </configuration>
-          </execution>
-          <execution>
-            <id>effective-settings</id>
-            <goals>
-              <goal>effective-settings</goal>
-            </goals>
-            <phase>compile</phase>
-            <configuration>
-              <output>target/resources/effectiveSettings.xml</output>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>eclipse-run</goal>
+                </goals>
+                <phase>compile</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
 
 </project>
