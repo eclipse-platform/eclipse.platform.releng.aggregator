@@ -5,6 +5,10 @@
 # then change to appropriate directory:
 # cd eclipse.platform.releng/tests/eclipse-releng-test-parent/
 
+# remember to get a pristine repo, will need to do something like the following:
+# git clean -f -d -x
+# git reset --hard HEAD
+
 # By default, clean local repo. But, in some cases may want to 
 # comment out, to not always remove it.
 if [[ -e ${PWD}/localMavenRepo ]]
