@@ -5,10 +5,17 @@
 # then change to appropriate directory:
 # cd eclipse.platform.releng/tests/eclipse-releng-test-parent/
 
+# By default, clean local repo. But, in some cases may want to 
+# comment out, to not always remove it.
+if [[ -e ${PWD}/localMavenRepo ]]
+then
+  rm -fr ${PWD}/localMavenRepo
+fi
+
 mvn clean verify  -X -e -Pbree-libs --fail-fast -V \
- -DskipTests=true -Dmaven.repo.local=/shared/eclipse/builds/4N/localMavenRepo \
+ -DskipTests=true -Dmaven.repo.local=${PWD}/localMavenRepo \
  -Dtycho.debug.artifactcomparator -DcontinueOnFail=true -Djgit.dirtyWorkingTree=error \
- -DbuildTimestamp=20151005-0945 -DbuildType=N -DbuildId=N20151005-0945 \
- -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE -DforceContextQualifier=N20151005-0945 \
+ -DbuildTimestamp=20151005-1111 -DbuildType=N -DbuildId=N20151005-1111 \
+ -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE -DforceContextQualifier=N20151005-1111 \
  -Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc
 
