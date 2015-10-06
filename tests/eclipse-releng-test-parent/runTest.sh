@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # need to execute this from "git tree", so, if needed, first run
-git clone git@git.eclipse.org/gitroot/platform/eclipse.platform.releng.git
+# git clone git@git.eclipse.org/gitroot/platform/eclipse.platform.releng.git
+# then change to appropriate directory.
 
 mvn clean verify  -X -e -Pbree-libs --fail-fast -V \
  -DskipTests=true -Dmaven.repo.local=/shared/eclipse/builds/4N/localMavenRepo \
