@@ -17,9 +17,15 @@ then
 fi
 
 mvn clean verify  -X -e -Pbree-libs --fail-fast -V \
- -DskipTests=true -Dmaven.repo.local=${PWD}/localMavenRepo \
- -Dtycho.debug.artifactcomparator -DcontinueOnFail=true -Djgit.dirtyWorkingTree=error \
- -DbuildTimestamp=20151005-1111 -DbuildType=N -DbuildId=N20151005-1111 \
- -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE -DforceContextQualifier=N20151005-1111 \
+ -DskipTests=true \
+ -Dmaven.repo.local=/shared/eclipse/tmp/localMavenRepo \
+ -Dtycho.debug.artifactcomparator \
+ -DcontinueOnFail=true \
+ -Djgit.dirtyWorkingTree=error \
+ -DbuildTimestamp=20151005-1111 \
+ -DbuildType=N \
+ -DbuildId=N20151005-1111 \
+ -Declipse-p2-repo.url=NOT_FOR_PRODUCTION_USE \
+ -DforceContextQualifier=N20151005-1111 \
  -Declipse.javadoc=/shared/common/jdk1.8.0_x64-latest/bin/javadoc
 
