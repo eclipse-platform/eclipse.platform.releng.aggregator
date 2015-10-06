@@ -11,9 +11,9 @@
 
 # By default, clean local repo. But, in some cases may want to 
 # comment out, to not always remove it.
-if [[ -e ${PWD}/localMavenRepo ]]
+if [[ -e /shared/eclipse/tmp/localMavenRepo ]]
 then
-  rm -fr ${PWD}/localMavenRepo
+  rm -fr /shared/eclipse/tmp/localMavenRepo
 fi
 
 mvn clean verify  -X -e -Pbree-libs --fail-fast -V \
