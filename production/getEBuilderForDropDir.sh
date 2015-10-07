@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# version in master
+
 # Utility script to get "ebuilder"
 printf "\n\tDEBUG: %s\n" "executing ${0}"
 printf "\t\t\t%s\n" "As called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[0]} in ${BASH_SOURCE[1]}."
