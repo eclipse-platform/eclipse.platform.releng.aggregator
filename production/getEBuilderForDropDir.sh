@@ -51,37 +51,37 @@ then
   # note the use of "reference" ... we typically only need a little bit of
   # new stuff, that the gitCache version doesn't have already, if any.
 
-  echo "Doing git clone using:  --no-hardlinks --reference  \${aggDir} \${AGGREGATOR_REPO} \${BUILD_DIR}/\${EBUILDER}"
-  echo "which evaluates to git clone --no-hardlinks --reference  ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}"
-  git clone --no-hardlinks  --reference  ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}
+  echo "Doing git clone using:  --reference  \${aggDir} \${AGGREGATOR_REPO} \${BUILD_DIR}/\${EBUILDER}"
+  echo "which evaluates to git clone  --reference  ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}"
+  git clone --reference  ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}
   RC=$?
   if [[ $RC != 0 ]]
   then
     echo "[ERROR] Cloning EBUILDER returned non zero return code: $RC"
     exit $RC
   fi
-else
-  echo "INFO: ebuilder directory found to exist. Not re-cloneing."
-  echo "INFO:    Found: ${BUILD_DIR}/${EBUILDER}"
-  echo "INFO:    But fetching to make sure up to date,"
-  echo "INFO:    before checking out specific HASH (which may make it detached)."
-  pushd ${BUILD_DIR}/${EBUILDER}
-  git fetch
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo "[ERROR] Fetch EBUILDER returned non zero return code: $RC"
-    exit $RC
-  fi
-  git checkout $EBUILDER_HASH
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-    echo "[ERROR] Checking out EBUILDER for $EBUILDER_HASH returned non zero return code: $RC"
-    exit $RC
-  fi
-  popd
 fi
+echo "INFO: ebuilder directory cloned or found to exist."
+echo "INFO:    Location: ${BUILD_DIR}/${EBUILDER}"
+echo "INFO:    fetching to make sure up to date,"
+echo "INFO:    before checking out specific HASH (which will make it detached)."
+pushd ${BUILD_DIR}/${EBUILDER}
+git fetch
+RC=$?
+if [[ $RC != 0 ]]
+then
+  echo "[ERROR] Fetch EBUILDER returned non zero return code: $RC"
+  exit $RC
+fi
+git checkout $EBUILDER_HASH
+RC=$?
+if [[ $RC != 0 ]]
+then
+  echo "[ERROR] Checking out EBUILDER for $EBUILDER_HASH returned non zero return code: $RC"
+  exit $RC
+fi
+popd
+
 # prepare a (small) zip, for easy retrieval of "production" files, during unit tests on Hudson.
 # This basic function used to be provided by CGit, but was turned off for "snapshots" of commits,
 # and was a bit overkill for those doing their own "remote" test builds (or tests).
