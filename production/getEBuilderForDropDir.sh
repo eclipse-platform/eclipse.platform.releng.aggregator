@@ -49,7 +49,9 @@ then
   # note the use of "reference" ... we typically only need a little bit of
   # new stuff, that the gitCache version doesn't have already, if any.
 
-  git clone --reference $aggDir ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}
+  echo "Doing git clone using:  --reference --no-hardlinks --branch \${EBUILDER_HASH} \${aggDir} \${AGGREGATOR_REPO} \${BUILD_DIR}/\${EBUILDER}"
+  echo "which evaluates to git clone --reference --no-hardlinks --branch ${EBUILDER_HASH} ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}"
+  git clone --reference --no-hardlinks --branch ${EBUILDER_HASH} ${aggDir} ${AGGREGATOR_REPO} ${BUILD_DIR}/${EBUILDER}
   RC=$?
   if [[ $RC != 0 ]]
   then
