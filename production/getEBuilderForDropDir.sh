@@ -68,7 +68,7 @@ then
     exit $RC
   fi
 
-  echo "INFO: ebuilder directory cloned.
+  echo "INFO: ebuilder directory cloned."
   echo "INFO:    Location: ${BUILD_DIR}/${EBUILDER}"
   echo "INFO:    checking out specific HASH (which will make it detached)."
   pushd ${BUILD_DIR}/${EBUILDER}
