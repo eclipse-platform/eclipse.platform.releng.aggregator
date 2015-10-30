@@ -6,7 +6,9 @@
 # This "standalone" version is to add the stats property "after the fact".
 # It is not used in the automated "promoteRepos".
 
-export BUILD_ROOT=${BUILD_ROOT:-/shared/eclipse/builds/4P}
+source localBuildProperties.shsource 2>/dev/null
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+export BUILD_ROOT=${BUILD_ROOT:-${BUILD_HOME}/4P}
 
 printf "\n\tDEBUG: %s\n" "BUILD_ROOT: ${BUILD_ROOT}"
 

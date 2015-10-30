@@ -60,15 +60,13 @@ else
   echo -e "\n\tERROR: DROP_ID, ${DROP_ID}, did not match any expected pattern."
   exit 1
 fi
-
+#
 # DEBUG/TEST exit
 #echo "BUILD_TYPE: $BUILD_TYPE"
 #echo "BUILD_LABEL: $BUILD_LABEL"
 #echo "BUILD_TIMESTAMP: $BUILD_TIMESTAMP"
 #exit 
 
-#export BUILD_TYPE=${DROP_ID:0:1}
-#export BUILD_TIMESTAMP=${DROP_ID//[MI-]/}
 # = = = = = = = Things past here seldom need to be updated
 
 # For initial releases, do not include service in label
