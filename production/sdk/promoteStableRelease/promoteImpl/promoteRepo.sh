@@ -35,7 +35,10 @@ DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
 mkdir -p $DLMACHINE_SITE
 
 source ${PROMOTE_IMPL}/promoteUtilities.shsource
-findEclipseExe ${DL_SITE_ID}
+# Better to use "new" copy to find Eclipse?
+#findEclipseExe ${DL_SITE_ID}
+# or "old, existing one? (I think "old" one, since in theory we would not have to copy that part of site to new area.
+findEclipseExe ${DROP_ID}
 RC=$?
 if [[ $RC == 0 ]]
 then
