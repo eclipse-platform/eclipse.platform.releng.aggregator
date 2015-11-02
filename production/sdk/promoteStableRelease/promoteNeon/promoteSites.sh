@@ -51,12 +51,12 @@ export CL_SITE=${PWD}
 # remove any of the scripts we create, such as for 'dry-run', since some of them, 
 # such as 'checklist' are normally appended to, not to mention better to start off 
 # clean. Notice the "verbose", but "ignore non-existent files"
-rm -vf ${CL_SITE}/checklist.txt ${CL_SITE}/deferred* traceLog.txt
+rm -vf ${CL_SITE}/*.txt ${CL_SITE}/deferred*
 
 
 # regex section
 # BUILD_TYPE is the prefix of the build -- 
-# that is, for what we are naming the build FROM
+# that is, for what we are renaming the build FROM
 RCPATTERN="^([MI])-(${BUILD_MAJOR}\.${BUILD_MINOR}\.${BUILD_SERVICE}RC[12345]{1}[abcd]?)-([[:digit:]]{12})$"
 PATTERN="^([MI])([[:digit:]]{8})-([[:digit:]]{4})$"
 if [[ "${DROP_ID}" =~ $RCPATTERN ]]

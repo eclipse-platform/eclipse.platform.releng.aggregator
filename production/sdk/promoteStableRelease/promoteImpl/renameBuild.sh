@@ -195,6 +195,7 @@ perl -w -pi -e "${replaceBuildNameCommand}" ${dirname}/buildproperties.php
 # from original values. Less sure what to do with Ant properties,
 # buildproperties.properties ... but, we'll decide when needed.
 
+#TODO:  these assignments do not look quite right?
 oldString="BUILD_ID = \"${BUILD_LABEL}\""
 # We export explicitly what new TYPE should be, from promoteSites.sh script.
 newString="BUILD_ID = \"${DL_LABEL}\""
