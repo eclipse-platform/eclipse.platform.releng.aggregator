@@ -249,15 +249,17 @@ then
       echo "Could not mkdir -p ${ROOT_PERF_DATA}. Return code was $RC. Exiting."
       exit $RC
   fi
-  dataDir=${ROOT_PERF_DATA}/${buildId}_${JOB_NAME}_${JOB_NUMBER}
+  # Will try "just one". Might get some better results, now that bug 481272 has been fixed. 
+  dataDir=${ROOT_PERF_DATA}
+#  dataDir=${ROOT_PERF_DATA}/${buildId}_${JOB_NAME}_${JOB_NUMBER}
   # make anew
-  mkdir -p "${dataDir}"
-  RC=$?
-  if [[ $RC != 0 ]]
-  then
-      echo "Could not mkdir -p $dataDir. Return code was $RC. Exiting."
-      exit $RC
-  fi
+#  mkdir -p "${dataDir}"
+#  RC=$?
+#  if [[ $RC != 0 ]]
+#  then
+#      echo "Could not mkdir -p $dataDir. Return code was $RC. Exiting."
+#      exit $RC
+#  fi
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
   XVFB_RUN="xvfb-run"
   XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
