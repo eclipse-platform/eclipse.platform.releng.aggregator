@@ -42,6 +42,7 @@ import org.apache.tools.ant.taskdefs.optional.junit.JUnitTest;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.osgi.util.ManifestElement;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -412,94 +413,9 @@ public class EclipseTestRunner implements TestListener {
 								}
 								System.err.flush(); // for bug 420258
 								
-								final Display display = Display.getDefault();
-								
-								if (!assumeUiThreadIsResponsive) {
-									String message = "trying to make UI thread respond";
-									IllegalStateException toThrow = new IllegalStateException(message);
-									Thread t = display.getThread();
-									// Initialize the cause. Its stack trace will be that of the current thread.
-									toThrow.initCause(new RuntimeException(message));
-									// Set the stack trace to that of the target thread.
-									toThrow.setStackTrace(t.getStackTrace());
-									// Stop the thread using the specified throwable.
-									try {
-										t.stop(toThrow);
-									} catch (UnsupportedOperationException e) {
-										// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
-										try {
-											Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
-											stop0.setAccessible(true);
-											stop0.invoke(t, toThrow);
-										} catch (Exception e1) {
-											e1.printStackTrace();
-										}
-									}
+								if (!dumpSwtDisplay(num)) {
+									dumpAwtScreenshot(num);
 								}
-
-								assumeUiThreadIsResponsive = false;
-								
-								display.asyncExec(new Runnable() {
-									public void run() {
-										assumeUiThreadIsResponsive= true;
-										
-										// Dump focus control, parents, and
-										// shells:
-										Control focusControl = display
-												.getFocusControl();
-										if (focusControl != null) {
-											System.err
-													.println("FocusControl: ");
-											StringBuilder indent = new StringBuilder(
-													"  ");
-											do {
-												System.err.println(indent
-														.toString()
-														+ focusControl);
-												focusControl = focusControl
-														.getParent();
-												indent.append("  ");
-											} while (focusControl != null);
-										}
-										Shell[] shells = display.getShells();
-										if (shells.length > 0) {
-											System.err.println("Shells: ");
-											for (int i = 0; i < shells.length; i++) {
-												Shell shell = shells[i];
-												System.err.println((shell
-														.isVisible() ? "  visible: "
-														: "  invisible: ")
-														+ shell);
-											}
-										}
-										System.err.flush(); // for bug 420258
-
-										// Take a screenshot:
-										if (!outputDirectory.exists())
-											outputDirectory.mkdirs();
-										GC gc = new GC(display);
-										final Image image = new Image(display,
-												display.getBounds());
-										gc.copyArea(image, 0, 0);
-										gc.dispose();
-
-										ImageLoader loader = new ImageLoader();
-										loader.data = new ImageData[] { image
-												.getImageData() };
-										String filename = outputDirectory
-												.getAbsolutePath()
-												+ "/"
-												+ classname
-												+ "_screen"
-												+ num
-												+ ".png";
-										loader.save(filename, SWT.IMAGE_PNG);
-										System.err
-												.println("Screenshot saved to: "
-														+ filename);
-										image.dispose();
-									}
-								});
 								
 								// Elapsed time in milliseconds
 								long elapsedTimeMillis = System
@@ -510,6 +426,113 @@ public class EclipseTestRunner implements TestListener {
 								System.err.println("INFO: Seconds to do dump "
 										+ num + ": " + elapsedTimeSec);
 							}
+
+							private String getScreenshotFile(final int num) {
+								if (!outputDirectory.exists()) {
+									outputDirectory.mkdirs();
+								}
+								String filename = outputDirectory.getAbsolutePath()
+										+ "/"
+										+ classname
+										+ "_screen"
+										+ num
+										+ ".png";
+								return filename;
+							}
+
+							private boolean dumpSwtDisplay(final int num) {
+								try {
+									final Display display = Display.getDefault();
+									
+									if (!assumeUiThreadIsResponsive) {
+										String message = "trying to make UI thread respond";
+										IllegalStateException toThrow = new IllegalStateException(message);
+										Thread t = display.getThread();
+										// Initialize the cause. Its stack trace will be that of the current thread.
+										toThrow.initCause(new RuntimeException(message));
+										// Set the stack trace to that of the target thread.
+										toThrow.setStackTrace(t.getStackTrace());
+										// Stop the thread using the specified throwable.
+										try {
+											t.stop(toThrow);
+										} catch (UnsupportedOperationException e) {
+											// Thread#stop(Throwable) doesn't work any more in JDK 8. Try stop0:
+											try {
+												Method stop0 = Thread.class.getDeclaredMethod("stop0", Object.class);
+												stop0.setAccessible(true);
+												stop0.invoke(t, toThrow);
+											} catch (Exception e1) {
+												e1.printStackTrace();
+											}
+										}
+									}
+	
+									assumeUiThreadIsResponsive = false;
+									
+									display.asyncExec(new Runnable() {
+										public void run() {
+											assumeUiThreadIsResponsive= true;
+											
+											// Dump focus control, parents, and
+											// shells:
+											Control focusControl = display
+													.getFocusControl();
+											if (focusControl != null) {
+												System.err
+														.println("FocusControl: ");
+												StringBuilder indent = new StringBuilder(
+														"  ");
+												do {
+													System.err.println(indent
+															.toString()
+															+ focusControl);
+													focusControl = focusControl
+															.getParent();
+													indent.append("  ");
+												} while (focusControl != null);
+											}
+											Shell[] shells = display.getShells();
+											if (shells.length > 0) {
+												System.err.println("Shells: ");
+												for (int i = 0; i < shells.length; i++) {
+													Shell shell = shells[i];
+													System.err.println((shell
+															.isVisible() ? "  visible: "
+															: "  invisible: ")
+															+ shell);
+												}
+											}
+											System.err.flush(); // for bug 420258
+	
+											// Take a screenshot:
+											GC gc = new GC(display);
+											final Image image = new Image(display,
+													display.getBounds());
+											gc.copyArea(image, 0, 0);
+											gc.dispose();
+	
+											ImageLoader loader = new ImageLoader();
+											loader.data = new ImageData[] { image
+													.getImageData() };
+											String filename= getScreenshotFile(num);
+											loader.save(filename, SWT.IMAGE_PNG);
+											System.err
+													.println("Screenshot saved to: "
+															+ filename);
+											image.dispose();
+										}
+									});
+									return true;
+								} catch (SWTException e) {
+									e.printStackTrace();
+									return false;
+								}
+							}
+
+							private void dumpAwtScreenshot(int num) {
+								AwtScreenshot.takeScreenshot(getScreenshotFile(num));
+							}
+							
 						}, timeout);
 			} else {
 				System.err
