@@ -43,9 +43,15 @@ public class Evaluator extends EmptyEvaluator {
 
         // get reference build tag
         Variations refKeys = PerformanceTestPlugin.getAssertAgainst();
-        if (refKeys == null)
+        String assertKey = System.getProperty(PerformanceTestPlugin.ECLIPSE_PERF_ASSERTAGAINST);
+        if (refKeys == null) {
+            PerformanceTestPlugin.logWarning("refkeys was null. " + PerformanceTestPlugin.ECLIPSE_PERF_ASSERTAGAINST + " was " + assertKey); //$NON-NLS-1$ //$NON-NLS-2$
             return; // nothing to do
-
+        }
+        // else 
+        PerformanceTestPlugin.logInfo("refkeys was: " + refKeys.toString() + " \n\t based on " + PerformanceTestPlugin.ECLIPSE_PERF_ASSERTAGAINST + " being set to " + assertKey); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            
+        
         if (!(performanceMeter instanceof InternalPerformanceMeter))
             return; // we cannot handle this.
 

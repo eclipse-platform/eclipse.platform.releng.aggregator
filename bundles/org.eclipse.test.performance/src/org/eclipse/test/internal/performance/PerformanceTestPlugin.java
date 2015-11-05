@@ -42,7 +42,7 @@ public class PerformanceTestPlugin extends Plugin {
    * New properties
    */
   private static final String ECLIPSE_PERF_DBLOC              = "eclipse.perf.dbloc";                                                                                                                                                                                                                                                                                                                                     //$NON-NLS-1$
-  private static final String ECLIPSE_PERF_ASSERTAGAINST      = "eclipse.perf.assertAgainst";                                                                                                                                                                                                                                                                                                             //$NON-NLS-1$
+  public static final String ECLIPSE_PERF_ASSERTAGAINST      = "eclipse.perf.assertAgainst";                                                                                                                                                                                                                                                                                                             //$NON-NLS-1$
   private static final String ECLIPSE_PERF_CONFIG             = "eclipse.perf.config";                                                                                                                                                                                                                                                                                                                                  //$NON-NLS-1$
   private static final String ECLIPSE_PERF_DEFAULT_DIM        = "eclipse.perf.default.dim";                                                                                                                                                                                                                                                                                                                   //$NON-NLS-1$
   private static final String ECLIPSE_PERF_RESULTS_DIMENSIONS = "eclipse.perf.results.dimensions";                                                                                                                                                                                                                                                                                              //$NON-NLS-1$
@@ -328,7 +328,11 @@ public class PerformanceTestPlugin extends Plugin {
       message = ""; //$NON-NLS-1$
     log(new Status(IStatus.WARNING, PLUGIN_ID, IStatus.OK, message, null));
   }
-
+  public static void logInfo(String message) {
+    if (message == null)
+      message = ""; //$NON-NLS-1$
+    log(new Status(IStatus.INFO, PLUGIN_ID, IStatus.OK, message, null));
+  }
   public static void log(Throwable e) {
     log(new Status(IStatus.ERROR, PLUGIN_ID, INTERNAL_ERROR, "Internal Error", e)); //$NON-NLS-1$
   }
