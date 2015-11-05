@@ -11,17 +11,22 @@
  *******************************************************************************/
 package org.eclipse.test;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Dictionary;
@@ -87,6 +92,31 @@ public class EclipseTestRunner implements TestListener {
 
 		ThreadDump(String message) {
 			super(message);
+		}
+	}
+
+	static class StreamForwarder extends Thread {
+		private InputStream fProcessOutput;
+
+		private PrintStream fStream;
+
+		public StreamForwarder(InputStream processOutput, PrintStream stream) {
+			fProcessOutput= processOutput;
+			fStream= stream;
+		}
+
+		@Override
+		public void run() {
+			try {
+				BufferedReader reader= new BufferedReader(new InputStreamReader(fProcessOutput));
+				String line= null;
+				while ((line= reader.readLine()) != null) {
+					fStream.println(line);
+				}
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -427,7 +457,7 @@ public class EclipseTestRunner implements TestListener {
 										+ num + ": " + elapsedTimeSec);
 							}
 
-							private String getScreenshotFile(final int num) {
+							String getScreenshotFile(final int num) {
 								if (!outputDirectory.exists()) {
 									outputDirectory.mkdirs();
 								}
@@ -530,7 +560,46 @@ public class EclipseTestRunner implements TestListener {
 							}
 
 							private void dumpAwtScreenshot(int num) {
-								AwtScreenshot.takeScreenshot(getScreenshotFile(num));
+								String screenshotFile= getScreenshotFile(num);
+								
+								try {
+									URL location= AwtScreenshot.class.getProtectionDomain().getCodeSource().getLocation();
+									String cp= location.toURI().getPath();
+									String javaHome= System.getProperty("java.home");
+									String javaExe= javaHome + File.separatorChar + "bin" + File.separatorChar + "java";
+									if (File.separatorChar == '\\') {
+										javaExe+= ".exe"; // assume it's Windows
+									}
+									System.out.println("Trying to create screenshot at: " + screenshotFile);
+									Process process= Runtime.getRuntime().exec(new String[] { javaExe, "-cp", cp, AwtScreenshot.class.getName(), screenshotFile });
+									new StreamForwarder(process.getErrorStream(), System.err).start();
+									new StreamForwarder(process.getInputStream(), System.out).start();
+									int screenshotTimeout= 15;
+									long end= System.currentTimeMillis() + screenshotTimeout * 1000;
+									boolean done= false;
+									do {
+										try {
+											process.exitValue();
+											done= true;
+										} catch (IllegalThreadStateException e) {
+											try {
+												Thread.sleep(100);
+											} catch (InterruptedException e1) {
+											}
+										}
+									} while (!done && System.currentTimeMillis() < end);
+									
+									if (done) {
+										System.out.println("AwtScreenshot VM finished with exit code " + process.exitValue() + ".");
+									} else {
+										process.destroy();
+										System.out.println("Killed AwtScreenshot VM after " + "timeout" + " seconds.");
+									}
+								} catch (URISyntaxException e) {
+									e.printStackTrace();
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 							}
 							
 						}, timeout);

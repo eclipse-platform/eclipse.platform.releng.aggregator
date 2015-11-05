@@ -22,15 +22,15 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class AwtScreenshot {
-
-	public static void takeScreenshot(String screenshotFile) {
+	
+	public static void main(String[] args) {
 		try {
 			Robot robot= new Robot();
 			Rectangle rect= new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 			BufferedImage image= robot.createScreenCapture(rect);
-			File file= new File(screenshotFile);
+			File file= new File(args[0]);
 			ImageIO.write(image, "png", file);
-
+		
 			System.out.println("AWT screenshot saved to: " + file.getAbsolutePath());
 		} catch (HeadlessException e) {
 			e.printStackTrace();
