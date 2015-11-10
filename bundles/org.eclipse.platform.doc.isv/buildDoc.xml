@@ -26,7 +26,7 @@
 		<property name="runtimeSearchPath" value="${rt.equinox.bundles.bundles},${rt.equinox.framework.bundles},${rt.equinox.p2.bundles}" />
 		<property name="searchPaths" value="${platformSearchPath},${runtimeSearchPath}" />
 
-		<record name="${basedir}/platformconvert.txt" loglevel="warn" action="start"/>
+		<record name="${basedir}/target/platformconvert.txt" loglevel="warn" action="start"/>
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ant}/org.eclipse.ant.core/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ant}/org.eclipse.ant.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.team.bundles}/org.eclipse.compare/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
@@ -77,7 +77,7 @@
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.navigator/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.ui.bundles}/org.eclipse.ui.views.properties.tabbed/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.platform.text}/org.eclipse.ui.workbench.texteditor/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
-		<record name="${basedir}/platformconvert.txt" action="stop"/>
+		<record name="${basedir}/target/platformconvert.txt" action="stop"/>
 	</target>
 
 	<target name="examplesDocCopy" >
@@ -130,7 +130,7 @@
 
 	<target name="generateJavadoc" depends="getJavadocPath" if="javadocExecutable">
 		<!-- replace "\n;" with platform-dependent list entry delimiter -->
-		<property name="optionsFile" value="platformOptions.tmp.txt" />
+		<property name="optionsFile" value="target/platformOptions.tmp.txt" />
 		<copy file="platformOptions.txt" tofile="${optionsFile}" overwrite="true">
 			<filterchain>
 				<expandproperties/>
@@ -157,7 +157,7 @@
 		</dirset>
 		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
 		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
-		<property name="replaceFile" value="platformOptions.replace.txt" />
+		<property name="replaceFile" value="target/platformOptions.replace.txt" />
 		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
 
 <echo>org.eclipse.platform.doc.isv/buildDoc.xml - generateJavadoc:
@@ -193,7 +193,7 @@
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
 
-		<exec dir="." executable="${javadocExecutable}" output="doc.bin.log" timeout="600000">
+		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx1000M" />
 		</exec>
 		

@@ -21,7 +21,7 @@
 
 	<target name="convertSchemaToHtml" if="eclipse.running">
 		<property name="dest" value="reference/extension-points" />
-		<record name="${basedir}/jdtconvert.txt" action="start"/>
+		<record name="${basedir}/target/jdtconvert.txt" action="start"/>
 		
 		<property name="jdtSearchPath" value="${eclipse.jdt.core},${eclipse.jdt.debug},${eclipse.jdt.ui}" />
 		<property name="platformSearchPath" value="${eclipse.platform.ant},${eclipse.platform.debug},${eclipse.platform.platform},${eclipse.platform.resources.bundles},${eclipse.platform.runtime.bundles},${eclipse.platform.swt.bundles},${eclipse.platform.team.bundles},${eclipse.platform.text},${eclipse.platform.ua},${eclipse.platform.ui.bundles}" />
@@ -38,7 +38,7 @@
 		<pde.convertSchemaToHTML manifest="${eclipse.jdt.debug}/org.eclipse.jdt.launching/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 		<pde.convertSchemaToHTML manifest="${eclipse.jdt.ui}/org.eclipse.jdt.ui/plugin.xml" destination="${dest}" additionalsearchpaths="${searchPaths}" />
 
-		<record name="${basedir}/jdtconvert.txt" action="stop"/>
+		<record name="${basedir}/target/jdtconvert.txt" action="stop"/>
 	</target>
 
 	<target name="getJavadocPath" depends="getEclipseJavadocPath" unless="javadocExecutable">
@@ -66,7 +66,7 @@
 		<antcall target="buildPlatformDoc" />
 
 		<!-- replace "\n;" with platform-dependent list entry delimiter -->
-		<property name="optionsFile" value="jdtOptions.tmp.txt" />
+		<property name="optionsFile" value="target/jdtOptions.tmp.txt" />
 		<copy file="jdtOptions.txt" tofile="${optionsFile}" overwrite="true">
 			<filterchain>
 				<expandproperties/>
@@ -95,7 +95,7 @@
 		</dirset>
 		<pathconvert property="fileList" refid="fileSet" dirsep="/" pathsep="&#xA;"/>
 		<pathconvert property="dirList" refid="dirSet" dirsep="/" pathsep="&#xA;"/>
-		<property name="replaceFile" value="jdtOptions.replace.txt" />
+		<property name="replaceFile" value="target/jdtOptions.replace.txt" />
 		<echo file="${basedir}/${replaceFile}">${fileList}&#xA;&#xA;${dirList}&#xA;&#xA;</echo>
 
 <echo>org.eclipse.jdt.doc.isv/buildDoc.xml - generateJavadoc:
@@ -130,7 +130,7 @@
 		<delete dir="reference/api"/>
 		<mkdir dir="reference/api"/>
 
-		<exec dir="." executable="${javadocExecutable}" output="doc.bin.log" timeout="600000">
+		<exec dir="." executable="${javadocExecutable}" output="target/doc.bin.log" timeout="600000">
 			<arg line="@${basedir}/${optionsFile} -J-Xmx500M" />
 		</exec>
 		
