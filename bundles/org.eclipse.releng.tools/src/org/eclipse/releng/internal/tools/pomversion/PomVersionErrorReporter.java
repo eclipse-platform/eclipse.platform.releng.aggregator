@@ -19,25 +19,10 @@ import java.util.jar.JarFile;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Version;
-import org.xml.sax.Attributes;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.eclipse.osgi.util.ManifestElement;
-import org.eclipse.osgi.util.NLS;
-import org.eclipse.releng.tools.RelEngPlugin;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
-
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -48,16 +33,25 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-
+import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.releng.tools.RelEngPlugin;
 import org.eclipse.ui.texteditor.MarkerUtilities;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Version;
+import org.xml.sax.Attributes;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 /**
@@ -295,6 +289,12 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 	public static final IPath MANIFEST_PATH = new Path(JarFile.MANIFEST_NAME);
 
 	/**
+	 * Version of the PomVersionErrorReporter. Needs to be incremented when the version check algorithm changes
+	 * in a way that requires re-validation of the whole workspace.
+	 */
+	public static final int VERSION= 1;
+
+	/**
 	 * Project relative path to the feature.xml file.
 	 */
 	public static final IPath FEATURE_PATH = new Path("feature.xml"); //$NON-NLS-1$
@@ -499,12 +499,17 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 					// we turned it on
 					ResourcesPlugin.getWorkspace().addResourceChangeListener(this, IResourceChangeEvent.POST_BUILD);
 				}
-				IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-				IProject[] projects = root.getProjects();
-				for (int i = 0; i < projects.length; i++) {
-					validate(projects[i]);
-				}
+				validateWorkspace();
 			}
 		}
+	}
+
+	public void validateWorkspace() {
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		IProject[] projects = root.getProjects();
+		for (int i = 0; i < projects.length; i++) {
+			validate(projects[i]);
+		}
+		RelEngPlugin.getPlugin().getPreferenceStore().setValue(IPomVersionConstants.WORKSPACE_VALIDATED, VERSION);
 	}
 }

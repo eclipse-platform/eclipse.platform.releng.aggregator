@@ -13,25 +13,23 @@ package org.eclipse.releng.tools;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.osgi.framework.BundleContext;
-
-import org.eclipse.releng.internal.tools.pomversion.IPomVersionConstants;
-import org.eclipse.releng.internal.tools.pomversion.PomVersionErrorReporter;
-import org.eclipse.team.core.RepositoryProvider;
-
-import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-
+import org.eclipse.core.resources.WorkspaceJob;
+import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.releng.internal.tools.pomversion.IPomVersionConstants;
+import org.eclipse.releng.internal.tools.pomversion.PomVersionErrorReporter;
+import org.eclipse.team.core.RepositoryProvider;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 
 /**
@@ -80,6 +78,16 @@ public class RelEngPlugin extends AbstractUIPlugin {
 			String severity = getPreferenceStore().getString(IPomVersionConstants.POM_VERSION_ERROR_LEVEL);
 			if(!IPomVersionConstants.VALUE_IGNORE.equals(severity)) {
 				ResourcesPlugin.getWorkspace().addResourceChangeListener(fPomReporter, IResourceChangeEvent.POST_BUILD);
+				int workspaceValidated= node.getInt(IPomVersionConstants.WORKSPACE_VALIDATED, 0);
+				if (workspaceValidated < PomVersionErrorReporter.VERSION) {
+					new WorkspaceJob(Messages.getString("RelEngPlugin.0")) { //$NON-NLS-1$
+						@Override
+						public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+							fPomReporter.validateWorkspace();
+							return Status.OK_STATUS;
+						}
+					}.schedule();
+				}
 			}
 		}
 	}

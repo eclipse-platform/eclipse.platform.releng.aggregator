@@ -36,6 +36,12 @@ public interface IPomVersionConstants {
 	public final static String POM_VERSION_ERROR_LEVEL = RelEngPlugin.ID + ".invalidPomVersionErrorLevel"; //$NON-NLS-1$
 
 	/**
+	 * Preference setting that stores a version number that identifies the revision of the plug-in that last validated the whole workspace.
+	 * Preference value must be an integer.
+	 */
+	public final static String WORKSPACE_VALIDATED = RelEngPlugin.ID + ".workspaceValidated"; //$NON-NLS-1$
+
+	/**
 	 * Constant representing the preference value 'ignore'.
 	 * Value is: <code>Ignore</code>
 	 */
