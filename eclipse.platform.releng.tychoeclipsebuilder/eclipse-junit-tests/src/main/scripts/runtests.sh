@@ -37,7 +37,7 @@ echo "jvm: $jvm"
 # But, if running standalone, we'll assume "up two" from current directoy
 WORKSPACE=${WORKSPACE:-"../../.."};
 
-stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5-linux-gtk-x86_64.tar.gz}
+stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5.1-linux-gtk-x86_64.tar.gz}
 stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
 
 # Note: test.xml will "reinstall" fresh install of what we are testing,

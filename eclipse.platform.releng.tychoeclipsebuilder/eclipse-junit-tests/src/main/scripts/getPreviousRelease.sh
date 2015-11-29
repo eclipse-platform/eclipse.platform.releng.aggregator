@@ -7,7 +7,7 @@
 
 mkdir -p workarea/${buildId}/eclipse-testing
 #cp /home/files/buildzips/mars/SR0/R-4.5-201506032000/eclipse-SDK-4.5-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/
-cp /home/files/buildzips/mars/SR0/R-4.5-201506032000/eclipse-platform-4.5-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/platformLocation/
+cp /home/files/buildzips/mars/SR0/R-4.5.1-201509040015/eclipse-platform-4.5.1-linux-gtk-x86_64.tar.gz ./workarea/${buildId}/eclipse-testing/platformLocation/
 
 cp ../../eclipse-SDK-${buildId}-linux-gtk-x86_64.tar.gz workarea/${buildId}/eclipse-testing/
 
