@@ -37,7 +37,7 @@ source localBuildProperties.shsource 2>/dev/null
 #   have ant 1.6 set as 'default'!)
 #export ANT_HOME=/shared/common/apache-ant-1.7.1
 #export ANT_HOME=/shared/common/apache-ant-1.8.4/
-export ANT_HOME=/shared/common/apache-ant-1.9.2
+export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 #   JAVA_HOME is, at least, what runs the ant instance. If no 'jvm' option is specified,
 #   it also becomes the instance that runs the tests.

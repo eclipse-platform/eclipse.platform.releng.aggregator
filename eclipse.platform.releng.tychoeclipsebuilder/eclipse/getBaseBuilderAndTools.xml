@@ -25,13 +25,13 @@
       value="${TMP_DIR}">
       <isset property="TMP_DIR" />
     </condition>
-    
+
     <condition
       property="TMP"
       value="${env.BUILD_ROOT}/tmp">
       <isset property="${env.BUILD_ROOT}" />
     </condition>
-    
+
     <condition
       property="TMP"
       value="${BUILD_ROOT}/tmp">
@@ -126,6 +126,8 @@
       name="folderName"
       value="org.eclipse.releng.basebuilder" />
 
+    <property name="java8vmbindir" value="/shared/common/jdk1.8.0_x64-latest/bin/" />
+    
     <property
       name="getBaseBuilderInitialized"
       value="true" />
@@ -149,27 +151,25 @@
       dest="${TMP}/${platformFile}"
       src="${platformURL}/${platformFile}"
       usetimestamp="true" />
-    <!-- untar is broken in Ant 1.9.4. See https://bz.apache.org/bugzilla/show_bug.cgi?id=56641
-      <untar
+    <untar
       compression="gzip"
       src="${TMP}/${platformFile}"
       dest="${TMP}">
-      </untar>
-    -->
-    <exec
+    </untar>
+    <!-- untar is broken in Ant 1.9.4. See https://bz.apache.org/bugzilla/show_bug.cgi?id=56641
+      <exec
       executable="/bin/tar"
       dir="${TMP}">
       <arg value="-xf" />
       <arg value="${TMP}/${platformFile}" />
-    </exec>
-
+      </exec>
+    -->
     <chmod perm="ugo+x">
       <fileset dir="${TMP}/eclipse">
         <include name="eclipse" />
         <include name="*.so*" />
       </fileset>
     </chmod>
-    <!-- TODO: We should specify concrete JAVA_HOME (or, JRE directory) -->
     <exec
       dir="${TMP}/eclipse"
       failonerror="true"
@@ -186,6 +186,8 @@
       <arg value="-installIU" />
       <arg
         value="${apiTools.iu}/${apiTools.iu.version},${buildTools.feature}/${buildTools.feature.version},${webtools.feature}/${webtools.feature.version}" />
+      <arg value="-vm" />
+      <arg value="${java8vmbindir}" />
       <!-- vmargs must come last -->
       <arg value="-vmargs" />
       <arg value="-Djava.io.tmpdir=${TMP}" />

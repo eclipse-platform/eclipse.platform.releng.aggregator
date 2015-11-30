@@ -10,7 +10,7 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 # need to be running Java 6 and Ant 1.8 for <script> to work in invokeTestsJSON
 # and, default on current build system is Ant 1.7 ... so ...
-export ANT_HOME=/shared/common/apache-ant-1.9.2
+export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 function usage ()
 {

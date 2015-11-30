@@ -38,7 +38,7 @@ export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 JAVA_8_HOME=/shared/common/jdk1.8.0_x64-latest
 export JAVA_HOME=${JAVA_HOME:-${JAVA_8_HOME}}
-export ANT_HOME=/shared/common/apache-ant-1.9.2
+export ANT_HOME=/shared/common/apache-ant-1.9.6
 
 export PATH=${JAVA_HOME}/bin:${ANT_HOME}/bin:$PATH
 
@@ -59,7 +59,7 @@ echo "eclipseStream: $eclipseStream"
 echo "EBUILDER_HASH: $EBUILDER_HASH"
 
 ${ANT_HOME}/bin/ant -version
-#       -lib /shared/common/apache-ant-1.9.2/lib/ \
+#       -lib /shared/common/apache-ant-1.9.6/lib/ \
   ${ANT_HOME}/bin/ant -f /shared/eclipse/sdk/collectTestResults.xml \
   -Djob=${job} \
   -DbuildNumber=${buildNumber} \
