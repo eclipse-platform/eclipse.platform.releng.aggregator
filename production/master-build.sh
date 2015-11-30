@@ -232,6 +232,7 @@ fn-write-property comparatorRepository
 fn-write-property logsDirectory
 fn-write-property BUILD_HOME
 
+BUILD_FAILED=""
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
 # if file exists, then get-aggregator failed
@@ -241,7 +242,7 @@ then
   # Git sometimes fails (returns non-zero error codes) for "warnings".
   # In most cases, but not all, these would be considered errors.
   /bin/grep  "^warning: \|\[ERROR\]"  "${GET_AGGREGATOR_BUILD_LOG}" >> "${buildDirectory}/buildFailed-get-aggregator"
-  BUILD_FAILED="${GET_AGGREGATOR_BUILD_LOG}"
+  BUILD_FAILED="${BUILD_FAILED} \n${GET_AGGREGATOR_BUILD_LOG}"
   fn-write-property BUILD_FAILED
 else
   # if get-aggregator failed, there is no reason to try and update input or run build
@@ -341,7 +342,7 @@ else
     buildrc=1
     /bin/grep "\[ERROR\]" "${POM_VERSION_UPDATE_BUILD_LOG}" >> "${buildDirectory}/buildFailed-pom-version-updater"
     echo "BUILD FAILED. See ${POM_VERSION_UPDATE_BUILD_LOG}."
-    BUILD_FAILED=${POM_VERSION_UPDATE_BUILD_LOG}
+    BUILD_FAILED="${BUILD_FAILED} \n${POM_VERSION_UPDATE_BUILD_LOG}"
     fn-write-property BUILD_FAILED
   else
     # if updater failed, something fairly large is wrong, so no need to compile,
@@ -352,7 +353,7 @@ else
     then
       buildrc=1
       /bin/grep "\[ERROR\]" "${RUN_MAVEN_BUILD_LOG}" >> "${buildDirectory}/buildFailed-run-maven-build"
-      BUILD_FAILED=${RUN_MAVEN_BUILD_LOG}
+      BUILD_FAILED="${BUILD_FAILED} \n${RUN_MAVEN_BUILD_LOG}"
       fn-write-property BUILD_FAILED
       # TODO: eventually put in more logic to "track" the failure, so
       # proper actions and e-mails can be sent. For example, we'd still want to
@@ -365,7 +366,7 @@ else
       then
         buildrc=1
         /bin/grep -i "ERROR" "${GATHER_PARTS_BUILD_LOG}" >> "${buildDirectory}/buildFailed-gather-parts"
-        BUILD_FAILED=${GATHER_PARTS_BUILD_LOG}
+        BUILD_FAILED="${BUILD_FAILED} \n${GATHER_PARTS_BUILD_LOG}"
         fn-write-property BUILD_FAILED
         echo "BUILD FAILED. See ${GATHER_PARTS_BUILD_LOG}."
       fi
