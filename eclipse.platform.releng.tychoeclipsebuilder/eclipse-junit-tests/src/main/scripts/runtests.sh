@@ -16,9 +16,52 @@ vmcmd=java
 
 echo "vmcmd: $vmcmd"
 
-#this value must be set when using rsh to execute this script, otherwise the script will execute from the user's home directory
-dir=${PWD}
+# jvm should already be defined, by now, in production tests
+# export jvm=${jvm:-/shared/common/jdk1.8.0_x64/jre/bin/java}
+# but if not, we use a simple 'java'.
+if [[ -z "${jvm}" ]]
+then
+  echo "WARNING: jvm was not defined, so using simple 'java'."
+  export jvm=$(which java)
+fi
 
+if [[ -z "${jvm}" || ! -x ${jvm} ]]
+then
+  echo "ERROR: No JVM define, or the defined one was found to not be executable"
+  exit 1
+fi
+echo "jvm: $jvm"
+
+# On production, WORKSPACE is the 'hudson' workspace.
+# But, if running standalone, we'll assume "up two" from current directoy
+WORKSPACE=${WORKSPACE:-"../../.."};
+
+stableEclipseSDK=${stableEclipseSDK:-eclipse-SDK-4.5.1-linux-gtk-x86_64.tar.gz}
+stableEclipseInstallLocation=${stableEclipseInstallLocation:-${WORKSPACE}/org.eclipse.releng.basebuilder}
+
+# Note: test.xml will "reinstall" fresh install of what we are testing,
+# but we do need an install for initial launcher, and, later, need one for a
+# stable version of p2 director. For both purposes, we
+# we should use "old and stable" version,
+# which needs to be installed in ${stableEclipseInstallLocation}.
+# Note: for production tests, we use ${WORKSPACE}/org.eclipse.releng.basebuilder,
+# for historical reasons. The "true" (old) basebuilder does not have an 'eclipse' directory;
+# plugins is directly under org.eclipse.releng.basebuilder.
+if [[ ! -r ${stableEclipseInstallLocation} || ! -r "${stableEclipseInstallLocation}/eclipse" ]]
+then
+  mkdir -p ${stableEclipseInstallLocation}
+  tar -xf ${stableEclipseSDK} -C ${stableEclipseInstallLocation}
+fi
+
+launcher=$(find ${stableEclipseInstallLocation} -name "org.eclipse.equinox.launcher_*.jar" )
+if [ -z "${launcher}" ]
+then
+  echo "ERROR: launcher not found in ${stableEclipseInstallLocation}"
+  exit 1
+fi
+echo "launcher: $launcher"
+
+# define, but null out variables we expect on the command line
 # operating system, windowing system and architecture variables
 os=
 ws=
