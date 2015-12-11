@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DROP_ID=$1
+export DROP_ID=$1
 DL_LABEL=$2
 REPO_SITE_SEGMENT=$3
 HIDE_SITE=$4
@@ -26,11 +26,11 @@ DL_SITE_ID=${DL_TYPE}-${DL_LABEL}-${BUILD_TIMESTAMP}
 
 BUILDMACHINE_SITE=${BUILDMACHINE_BASE_SITE}/${DROP_ID}
 
-DLMACHINE_BASE_SITE=/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
+export DLMACHINE_BASE_SITE=/home/data/httpd/download.eclipse.org/eclipse/updates/${REPO_SITE_SEGMENT}
 # just in case first time
 mkdir -p $DLMACHINE_BASE_SITE
 
-DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
+export DLMACHINE_SITE=${DLMACHINE_BASE_SITE}/${DL_SITE_ID}
 # just in case first time
 mkdir -p $DLMACHINE_SITE
 

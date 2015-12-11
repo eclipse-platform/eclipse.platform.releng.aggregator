@@ -61,35 +61,39 @@ mv ${currentDropId}ORIG ${currentDropId}
 PROMOTE_PREFIX="promote"
 MANUAL_PREFIX="manual-${PROMOTE_PREFIX}"
 
+# assume "hide site" is always true (which it is, in practice) to simplify following logic. 
+# can improve later if needed. 
+#if [[ "${HIDE_SITE}" == "true" ]]
+#then
 
-if [[ "${HIDE_SITE}" == "true" ]]
-then
-  # touch buildHidden
+  # add buildHidden to "local" (buildMachine) directory
   touch ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID}/buildHidden
-  # make "deferred" script to remove buildHidden
+  # make "deferred" script to remove buildHidden later
   PROMOTE_VARIABLE=${MANUAL_PREFIX}
-  PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+  DEF_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
   echo "Remember to change Equinox promote script name from ${MANUAL_PREFIX} to ${PROMOTE_PREFIX} when time to promote." >> "${CL_SITE}/checklist.txt"
-  echo "rm  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
-    > ${PFILE}
-else
+  echo "mv  /home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHidden" \
+           "/home/data/httpd/download.eclipse.org/equinox/drops/${DL_DROP_ID}/buildHiddenORIG" \
+    > ${DEF_PFILE}
+#else
   PROMOTE_VARIABLE=${PROMOTE_PREFIX}
-  PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
-  echo "# Script for immediate promotion" > ${PFILE}
-fi
+  IMMED_PFILE="/shared/eclipse/equinox/promotion/queue/${PROMOTE_VARIABLE}-${DL_LABEL}.sh"
+  echo "# Script for immediate promotion" > ${IMMED_PFILE}
+#fi
 
 printf "\n\t%s\n" "Creating promote script."
 echo "rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/download.eclipse.org/equinox/drops/" \
-  >> ${PFILE}
+  >> ${IMMED_PFILE}
 
 # if doing a release, go ahead and archive too.
+# TODO: make deferred
 if [[ "${DL_TYPE}" == "R" ]]
 then
   printf "\n\t%s\n" "Creating archive script."
   echo "rsync -r ${BUILDMACHINE_BASE_EQ}/${DL_DROP_ID} /home/data/httpd/archive.eclipse.org/equinox/drops/" \
-    >> ${PFILE}
+    >> ${IMMED_PFILE}
 fi
 
-printf "\n\t%s\n" "Making sure Equinox promote script is executable ..."
-chmod -c +x ${PFILE}
-
+printf "\n\t%s\n" "Making sure Equinox promote scripts is executable ..."
+chmod -c +x ${IMMED_PFILE}
+chmod -c +x ${DEF_PFILE}
