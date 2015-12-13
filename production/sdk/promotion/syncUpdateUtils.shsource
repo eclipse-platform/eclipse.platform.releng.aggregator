@@ -293,3 +293,33 @@ function syncDropLocation ()
 
   echo "ending syncDropLocation"
 }
+function linkURL ()
+{
+  url="${1}"
+  if [[ -z "${url}" ]]
+    then 
+      echo "Programming error. URL must not be null as argument to 'linkURL'"
+      exit 1
+    fi
+  link="<a href=\"${url}\">${url}</a>"
+  echo ${link}
+}
+
+function sendEclipseMail ()
+{
+   TO="$1"
+   FROM="$2"
+   SUBJECT="$3"
+   message1="$4"
+   (
+    echo "To: ${TO}"
+    echo "From: ${FROM}"
+    echo "MIME-Version: 1.0"
+    echo "Content-Type: text/html; charset=utf-8"
+    echo "Subject: ${SUBJECT}"
+    echo "<html><body>"
+    echo -e "${message1}"
+    echo "</body></html>"
+    ) | /usr/lib/sendmail -t
+ 
+}
