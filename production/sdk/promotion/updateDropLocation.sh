@@ -91,6 +91,102 @@ function updatePages()
 
 }
 
+function sendTestResultsMail ()
+{
+
+  SITE_HOST=${SITE_HOST:-download.eclipse.org}
+
+  echo "     Starting sendTestResultsMail"
+  eclipseStream=$1
+  if [[ -z "${eclipseStream}" ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: Must provide eclipseStream as first argument, for this function $(basename $0)"
+    return 1;
+  fi
+  echo "     eclipseStream: ${eclipseStream}"
+
+  buildId=$2
+  if [[ -z "${buildId}" ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: Must provide buildId as second argument, for this function $(basename $0)"
+    return 1;
+  fi
+  echo "     buildId: ${buildId}"
+
+  JOB_NAME=$3
+  if [[ -z "${JOB_NAME}" ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: Must provide JOB_NAME as third argument, for this function $(basename $0)"
+    return 1;
+  fi
+  echo "     JOB_NAME: ${JOB_NAME}"
+
+  JOB_NUMBER=$4
+  if [[ -z "${JOB_NUMBER}" ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: Must provide JOB_NUMBER as fourth argument, for this function $(basename $0)"
+    return 1;
+  fi
+  echo "     JOB_NUMBER: ${JOB_NUMBER}"
+
+  buildType=${buildId:0:1}
+  echo "     buildType: ${buildType}"
+
+
+  fsDocRoot="/home/data/httpd/download.eclipse.org"
+
+  mainPath=$( dlToPath "$eclipseStream" "$buildId")
+  echo "     mainPath: $mainPath"
+  if [[ "$mainPath" == 1 ]]
+  then
+    printf "\n\n\t%s\n\n" "ERROR: mainPath could not be computed."
+    return 1
+  fi
+
+  downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
+  fsDownloadSitePath=${fsDocRoot}/${mainPath}/${buildId}
+
+export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+testsSummary=downloads/drops4/${buildId}/testResults/${JOB_NAME}-${JOB-NUMBER}.xml
+eclipseSiteTestFile=${buildRoot}/siteDir/${testSummary}
+while IFS='' read -r line || [[ -n "$line" ]]; do
+    echo "Text read from file: $line"
+done < "$eclipseSiteTestFile"
+
+if [[ $line =~ .*\<failCount\>(.*)\<\/failCount\>.* ]]
+then 
+   testsFailed=${BASH_REMATCH[1]}
+fi
+
+  #TODO: put total failures/errors here?
+  EXTRA_SUBJECT_STRING=Failures: ${testsFailed}
+
+  # 4.3.0 Build: I20120411-2034
+  SUBJECT="Test Results available from ${JOB_NAME} for ${buildId} $EXTRA_SUBJECT_STRING"
+
+  # override in localBuildProperties.shsource if doing local tests
+  TO=${TO:-"platform-releng-dev@eclipse.org"}
+
+  # for initial testing, only to me -- change as desired after initial testing.
+  if [[ "${buildType}" =~ [PYX] ]]
+  then
+    TO="david_williams@us.ibm.com"
+    SUBJECT="Experimental: ${SUBJECT}"
+  fi
+
+  FROM=${FROM:-"e4Builder@eclipse.org"}
+
+  link=$(linkURL ${downloadURL}testResults.php)
+  message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and test results: <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
+  
+  sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
+
+  echo "INFO: test results mail sent for $eclipseStream $buildType-build $buildId"
+ 
+  return 0
+}
+
 # this is the single script to call that "does it all" update DL page
 # with test results, and updates index.php summaries.
 # it requires four arguments
@@ -192,6 +288,14 @@ if [ $rccode -ne 0 ]
 then
   echo "ERROR occurred during promotion to download server: rccode: $rccode."
   exit $rccode
+fi
+
+
+
+# do not send for performance tests, for now
+if [[ ! "${JOB_NAME}" =~ .*-perf-.* ]]
+then
+  sendTestResultsMail "$eclipseStream" "$buildId" "${JOB_NAME}" "${JOB_NUMBER}"
 fi
 
 exit 0
