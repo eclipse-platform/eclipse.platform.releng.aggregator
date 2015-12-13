@@ -111,7 +111,6 @@ function sendPromoteMail ()
   if [[ "${buildType}" =~ [PYX] ]]
   then
     TO="david_williams@us.ibm.com"
-    SUBJECT="Experimental: ${SUBJECT}"
   fi
 
   FROM=${FROM:-"e4Builder@eclipse.org"}
@@ -122,15 +121,14 @@ function sendPromoteMail ()
   #REPLYTO="platform-releng-dev@eclipse.org"
   #we could? to "fix up" TODIR since it's in file form, not URL
   # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
-  link=$(linkURL ${downloadURL})
-  message1="${message1}<p>Eclipse downloads: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
-  link=$(linkURL ${downloadURL}testResults.php)
-  message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
+
+  message1="${message1}<p>Eclipse downloads: <br />\n&nbsp;&nbsp;&nbsp;${downloadURL}</p>\n"
+
+  message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and/or test results (eventually): <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}testResults.php</p>\n"
 
   if [[ $logSize -gt  ${comparatorLogMinimumSize} ]]
   then
-    link=$(linkURL ${downloadURL}${comparatorLogRelPath})
-    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}<p>\n"
+    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Check unanticipated comparator messages:  <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${downloadURL}${comparatorLogRelPath}<p>\n"
   else
     echo -e "DEBUG: comparator logSize of $logSize was not greater than comparatorLogMinimumSize of ${comparatorLogMinimumSize}"
   fi
@@ -138,17 +136,14 @@ function sendPromoteMail ()
   # Do not include repo, if build failed
   if [[ -z "${BUILD_FAILED}" ]]
   then
-    link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
-    message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
-    link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)/${buildId}
-    message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+    message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds</p>\n"
+    message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId}</p>\n"
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
   if [[ -z "${BUILD_FAILED}" && ! "${buildType}" =~ [PYX]  ]]
   then
-    link=$(linkURL http://${SITE_HOST}/equinox/drops/${buildId})
-    message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+    message1="${message1}<p>Equinox downloads: <br />\n&nbsp;&nbsp;&nbsp;http://${SITE_HOST}/equinox/drops/${buildId}</p>\n"
   fi
 
   if [[ -n "${POM_UPDATES}" ]]
@@ -170,10 +165,33 @@ function sendPromoteMail ()
     message1="${message1}\n</pre></p>"
   fi
 
-  sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
 
+  if [[ ${buildType} =~ [NMI] ]]
+  then
+    (
+    echo "To: ${TO}"
+    echo "From: ${FROM}"
+    echo "MIME-Version: 1.0"
+    echo "Content-Type: text/html; charset=utf-8"
+    echo "Subject: ${SUBJECT}"
+    echo "<html><body>"
+    echo -e "${message1}"
+    echo "</body></html>"
+    ) | /usr/lib/sendmail -t
+  elif [[ ${buildType} =~ [PYX] ]]
+  then
+    (
+    echo "To: ${TO}"
+    echo "From: ${FROM}"
+    echo "MIME-Version: 1.0"
+    echo "Content-Type: text/html; charset=utf-8"
+    echo "Subject: Experimental: ${SUBJECT}"
+    echo "<html><body>"
+    echo -e "${message1}"
+    echo "</body></html>"
+    ) | /usr/lib/sendmail -t
+  fi
   echo "INFO: mail sent for $eclipseStream $buildType-build $buildId"
- 
   return 0
 }
 
