@@ -329,7 +329,11 @@ fn-maven-build-aggregator ()
   SIGNING=$1; shift
   MAVEN_BREE=$1; shift
 
-  MARGS="-DbuildId=$BUILD_ID"
+  # For now, we always specify --update-snapshots. We may eventually want 
+  # to fine tune that to use it only when we do not "clean workspace" before 
+  # a build. i.e. only specify for nightlies? See bug 480817.
+
+  MARGS="-DbuildId=$BUILD_ID --update-snapshots"
   if $DEBUG; then
     MARGS="$MARGS -X -e"
   fi
@@ -479,7 +483,7 @@ fn-pom-version-updater ()
   DEBUG=$1; shift
   QUIET=$1; shift
 
-  MARGS=""
+  MARGS=" --update-snapshots"
   if $DEBUG; then
     MARGS="$MARGS -X -e"
   fi
@@ -544,7 +548,7 @@ fn-pom-version-update-with-commit ()
   checkForErrorExit "$rc" "$rc"
 
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
-  MARGS="-DbuildId=$BUILD_ID"
+  MARGS="-DbuildId=$BUILD_ID  --update-snapshots"
   if [[ -n "${PATCH_BUILD}" ]]; then
     MARGS="$MARGS -P${PATCH_BUILD}"
   fi
