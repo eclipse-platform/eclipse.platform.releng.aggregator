@@ -201,10 +201,9 @@ function sendTestResultsMail ()
       echo -e "\n\tDEBUG: line: ${line}"
     fi
 
-    EXTRA_SUBJECT_STRING="Failures: ${testsFailed}"
-
-    # 4.3.0 Build: I20120411-2034
-    SUBJECT="Test Results available from ${JOB_NAME} for ${buildId} $EXTRA_SUBJECT_STRING"
+    # Subject is similar to "build finished" subject in syncDropLocation.sh.
+    # 4.3.0 I-Build: I20120411-2034: 7 failures from ep46I-unit-mac64
+    SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId}: ${testsFailed} failures from ${JOB_NAME}"
 
     # override in localBuildProperties.shsource if doing local tests
     TO=${TO:-"platform-releng-dev@eclipse.org"}
