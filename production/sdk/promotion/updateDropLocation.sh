@@ -4,6 +4,35 @@ SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
 source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
+function show_hours_minutes () {
+    num=$1
+    # we are given "seconds.milliseconds" so we truncate milliseconds
+    num=${num%.*}
+    min=0
+    hour=0
+    day=0
+    if((num>59));then
+        ((sec=num%60))
+        ((num=num/60))
+        if((num>59));then
+            ((min=num%60))
+            ((num=num/60))
+            if((num>23));then
+                ((hour=num%24))
+                ((day=num/24))
+            else
+                ((hour=num))
+            fi
+        else
+            ((min=num))
+        fi
+    else
+        ((sec=num))
+    fi
+    echo "$hour h  $min m"
+}
+
+
 # compute main (left part) of download site
 function dlpath()
 {
@@ -143,48 +172,64 @@ function sendTestResultsMail ()
     return 1
   fi
 
-  downloadURL=http://${SITE_HOST}/${mainPath}/${buildId}/
-  fsDownloadSitePath=${fsDocRoot}/${mainPath}/${buildId}
+  downloadURL="http://${SITE_HOST}/${mainPath}/${buildId}/"
+  fsDownloadSitePath="${fsDocRoot}/${mainPath}/${buildId}"
 
-export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
-buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
-testsSummary=downloads/drops4/${buildId}/testResults/${JOB_NAME}-${JOB-NUMBER}.xml
-eclipseSiteTestFile=${buildRoot}/siteDir/${testSummary}
-while IFS='' read -r line || [[ -n "$line" ]]; do
-    echo "Text read from file: $line"
-done < "$eclipseSiteTestFile"
-
-if [[ $line =~ .*\<failCount\>(.*)\<\/failCount\>.* ]]
-then 
-   testsFailed=${BASH_REMATCH[1]}
-fi
-
-  #TODO: put total failures/errors here?
-  EXTRA_SUBJECT_STRING=Failures: ${testsFailed}
-
-  # 4.3.0 Build: I20120411-2034
-  SUBJECT="Test Results available from ${JOB_NAME} for ${buildId} $EXTRA_SUBJECT_STRING"
-
-  # override in localBuildProperties.shsource if doing local tests
-  TO=${TO:-"platform-releng-dev@eclipse.org"}
-
-  # for initial testing, only to me -- change as desired after initial testing.
-  if [[ "${buildType}" =~ [PYX] ]]
+  export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
+  buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  testsSummary="eclipse/downloads/drops4/${buildId}/testresults/${JOB_NAME}-${JOB_NUMBER}.xml"
+  eclipseSiteTestFile="${buildRoot}/siteDir/${testsSummary}"
+  echo -e "\n\tDEBUG: eclipseSiteTestFile: ${eclipseSiteTestFile}"
+  if [[ ! -e "${eclipseSiteTestFile}" ]] 
   then
-    TO="david_williams@us.ibm.com"
-    SUBJECT="Experimental: ${SUBJECT}"
+    echo -e "\nProgramming error. The test summary file was not found where expected:"
+    echo -e "\t${eclipseSiteTestFile}"
+    return 1
+  else
+    # Had trouble reading this file in a while loop. Perhaps because it is one line, 
+    # with no EOL character?
+    read -r line <  "${eclipseSiteTestFile}"
+    echo -e "\n\tDEBUG: Text read from test summary file: ${line}"
+    pattern="^.*<duration>(.*)</duration><failCount>(.*)</failCount><passCount>(.*)</passCount>.*$"
+    if [[ "${line}" =~ ${pattern} ]]
+    then 
+      testsDuration=${BASH_REMATCH[1]}
+      testsFailed=${BASH_REMATCH[2]}
+      testsPassed=${BASH_REMATCH[3]}
+    else 
+      echo -e "\n\tProgramming error. We should always match!?"
+      echo -e "\n\tDEBUG: line: ${line}"
+    fi
+
+    EXTRA_SUBJECT_STRING="Failures: ${testsFailed}"
+
+    # 4.3.0 Build: I20120411-2034
+    SUBJECT="Test Results available from ${JOB_NAME} for ${buildId} $EXTRA_SUBJECT_STRING"
+
+    # override in localBuildProperties.shsource if doing local tests
+    TO=${TO:-"platform-releng-dev@eclipse.org"}
+
+    # for initial testing, only to me -- change as desired after initial testing.
+    if [[ "${buildType}" =~ [PYX] ]]
+    then
+      TO="david_williams@us.ibm.com"
+      SUBJECT="Experimental: ${SUBJECT}"
+    fi
+
+    FROM=${FROM:-"e4Builder@eclipse.org"}
+
+    # repeat subject in message
+    message1="<p>${SUBJECT}</p>\n"
+    link=$(linkURL ${downloadURL}testResults.php)
+    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and test results: <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
+    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Tests Passed: ${testsPassed} &nbsp;&nbsp;&nbsp; Total Number of Tests: $(( testsFailed + testsPassed )) &nbsp;&nbsp;&nbsp; Tests Elapsed Time: $(show_hours_minutes ${testsDuration})</p>\n"
+
+    sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
+
+    echo "INFO: test results mail sent for ${eclipseStream} ${buildType}-build ${buildId}"
+
+    return 0
   fi
-
-  FROM=${FROM:-"e4Builder@eclipse.org"}
-
-  link=$(linkURL ${downloadURL}testResults.php)
-  message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and test results: <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
-  
-  sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
-
-  echo "INFO: test results mail sent for $eclipseStream $buildType-build $buildId"
- 
-  return 0
 }
 
 # this is the single script to call that "does it all" update DL page
