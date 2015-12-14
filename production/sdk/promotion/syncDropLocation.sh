@@ -140,7 +140,7 @@ function sendPromoteMail ()
   then
     link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
     message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
-    link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)/${buildId}
+    link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
     message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
   fi
 
