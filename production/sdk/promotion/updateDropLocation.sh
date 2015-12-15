@@ -223,6 +223,13 @@ function sendTestResultsMail ()
     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and test results: <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Tests Passed: ${testsPassed} &nbsp;&nbsp;&nbsp; Total Number of Tests: $(( testsFailed + testsPassed )) &nbsp;&nbsp;&nbsp; Tests Elapsed Time: $(show_hours_minutes ${testsDuration})</p>\n"
 
+    
+    link=$(linkURL "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/")
+    message1="${message1}<br /><p>&nbsp;&nbsp;&nbsp;In general, the tests can be viewed on Hudson at <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
+ 
+    link=$(linkURL "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/job/${JOB_NAME}/${JOB_NUMBER}/")
+    message1="${message1}<br /><p>&nbsp;&nbsp;&nbsp;For this specific test the specific Hudson job results can be viewed at<br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
+
     sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
 
     echo "INFO: test results mail sent for ${eclipseStream} ${buildType}-build ${buildId}"
