@@ -221,8 +221,7 @@ function sendTestResultsMail ()
     message1="<p>${SUBJECT}</p>\n"
     link=$(linkURL ${downloadURL}testResults.php)
     message1="${message1}<p>&nbsp;&nbsp;&nbsp;Build logs and test results: <br />\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
-    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Tests Passed: ${testsPassed} &nbsp;&nbsp;&nbsp; Total Number of Tests: $(( testsFailed + testsPassed )) &nbsp;&nbsp;&nbsp; Tests Elapsed Time: $(show_hours_minutes ${testsDuration})</p>\n"
-
+    message1="${message1}<p>&nbsp;&nbsp;&nbsp;Tests Passed: ${testsPassed} &nbsp;&nbsp;&nbsp; Total Number of Tests: $(( testsFailed + testsPassed )) &nbsp;&nbsp;&nbsp; Total Tests Time: $(show_hours_minutes ${testsDuration})</p>\n"
     
     link=$(linkURL "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/")
     message1="${message1}<br /><p>&nbsp;&nbsp;&nbsp;In general, the tests can be viewed on Hudson at <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${link}</p>\n"
