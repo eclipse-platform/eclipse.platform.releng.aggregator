@@ -463,23 +463,9 @@ fn-tag-build-inputs ()
   REPO_DIR="$1"; shift
   REPOSITORIES_TXT="$1"; shift
   pushd "$REPO_DIR"
-  # before tagging anything with current build id, 
-  # get the most recent tag that matches the build type
-  # I am assuming BUILD_TYPE has been exported by some calling method, 
-  # so we have access to it without re-computing, and without passing 
-  # as an argument. 
-  # we set REPORTDATE first thing, to get some idea of "time elapsed" since start of build.
-  REPORTDATE=$( date +%s )
-  REPORTTIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$REPORTDATE )
-  lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
   git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi"
   git tag $BUILD_ID
   $GIT_PUSH --verbose origin $BUILD_ID
-  # TODO: other log options to consider?
-  echo -e "\n\tGit log from ${lastTag} to ${BUILD_ID}\n" > ${buildDirectory}/gitDiffs.txt
-  echo -e "\t\tThe tagging, and this report occurred at $REPORTTIMESTAMP\n\n" >> ${buildDirectory}/gitDiffs.txt
-  git log ${lastTag}..${BUILD_ID} >> ${buildDirectory}/gitDiffs.txt
-  git submodule foreach git log ${lastTag}..${BUILD_ID} >> ${buildDirectory}/gitDiffs.txt
   popd
 }
 
