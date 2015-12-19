@@ -265,6 +265,12 @@ function sendTestResultsMail ()
 
     FROM=${FROM:-"e4Builder@eclipse.org"}
 
+    # Artificially mark each message for a particular build with unique message-id-like value.
+    # Even though technically incorrect for the initial message it seems to work in 
+    # most situations.
+    InReplyTo="<${buildId}@build.eclipse.org/build/eclipse/>"
+    Reference="${InReplyTo}"
+
     # repeat subject in message
     message1="<p>${SUBJECT}</p>\n"
     link=$(linkURL ${downloadURL}testResults.php)

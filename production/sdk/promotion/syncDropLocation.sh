@@ -116,12 +116,16 @@ function sendPromoteMail ()
 
   FROM=${FROM:-"e4Builder@eclipse.org"}
 
+  # Artificially mark each message for a particular build with unique message-id-like value.
+  # Even though technically incorrect for the initial message it seems to work in 
+  # most situations.
+  InReplyTo="<${buildId}@build.eclipse.org/build/eclipse/>"
+  Reference="${InReplyTo}"
+
   # make sure reply to goes back to the list
-  # I'm not positive this is required for mailing list?
-  # does anything "from" list, automatically get reply-to: list?
+  # This appears not required for mailing lists?
   #REPLYTO="platform-releng-dev@eclipse.org"
-  #we could? to "fix up" TODIR since it's in file form, not URL
-  # URLTODIR=${TODIR##*${DOWNLOAD_ROOT}}
+
   link=$(linkURL ${downloadURL})
   message1="${message1}<p>Eclipse downloads: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
   link=$(linkURL ${downloadURL}testResults.php)
