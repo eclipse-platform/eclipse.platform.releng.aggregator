@@ -463,8 +463,71 @@ fn-tag-build-inputs ()
   REPO_DIR="$1"; shift
   REPOSITORIES_TXT="$1"; shift
   pushd "$REPO_DIR"
+
+  # == Step 1 of git logging. 
+  # TODO: This may not work right if "streams/repositories.txt" contains tags. 
+  GITLOG_FILENAME=gitLog.txt
+  GITLOG_FILE=${buildDirectory}/${GITLOG_FILENAME}
+  echo "Creating ${GITLOG_FILENAME}"
+  # we set REPORTDATE first thing, to get some idea of "time elapsed" since start of build.
+  # While we still have "tagging" to do, we have by now checked out everything and cleaned up 
+  # the working tree. (So any commits after this time, would definitely not be "included" in build. 
+  REPORTDATE=$( date +%s )
+  # we make in same format as "build id" for easy comparison.
+  REPORTTIMESTAMP=$( date +%Y%m%d-%H%M --date='@'$REPORTDATE )
+  # before tagging anything with current build id, 
+  # get the most recent tag that matches the build type
+  # I am assuming BUILD_TYPE has been exported by some calling method, 
+  # so we have access to it without re-computing, and without passing 
+  # as an argument. 
+  # I am fairly sure this find tags in "local repo", so would work for Nightlies, as well as 
+  # working before we pushed current tag. If found to be empty (no changes) we could skip the build. 
+
+  # I've learned N-builds are "special", since we do not push those tags. 
+  # For I and M builds, though, we do want the "remote" (permanent) tag, to avoid 
+  # picking up tags of cancelled jobs. 
+  if [[ "${BUILD_TYPE}" == "N" ]] 
+  then
+    monthInSeconds=$(( 3600 * 24 * 30 ))
+    rightnow=$(date +%s)
+    oneMonthAgo=$(( rightnow - monthInSeconds))
+    commitish=$(git rev-list --tags="${BUILD_TYPE}*" --max-age=${oneMonthAgo} --max-count=1 )
+    lastTag=$(git describe --tags --abbrev=0 ${commitish})
+    if [[ ! ${lastTag} =~ ^([${BUILD_TYPE}]).*$ ]] 
+    then
+      # Unset if was not an 'N' build (even with all the constraints specified, Git 
+      # will "find" an I-tag, if no N-tag satisfies the constraints.
+      lastTag=""
+    else 
+      echo "DEBUG: lastTag matched ^([${BUILD_TYPE}]).*$"
+    fi
+  else
+    lastTag=$(git describe --tags --match "${BUILD_TYPE}*" --abbrev=0)
+  fi 
+
+  # == Here is where we do the actual tagging  
   git submodule foreach "if grep \"^\${name}:\" $REPOSITORIES_TXT >/dev/null; then git tag $BUILD_ID; $GIT_PUSH --verbose origin $BUILD_ID; else echo Skipping \$name; fi"
   git tag $BUILD_ID
+
+  # == Step 2 of Git logging.
+  if [[ -n "${lastTag}" ]] 
+  then
+    # TODO: other log options to consider? --pretty=oneline?
+    echo -e "\n\tGit log from ${lastTag} (previous) to ${BUILD_ID} (current)\n" > ${GITLOG_FILE}
+    # We include the "time of report" since this report might be included in a "build has started" 
+    # mail message, so it would be good to know if we are much delayed in getting that message out.
+    echo -e "\tThe tagging, and this report, were done at about $REPORTTIMESTAMP\n\n" >> ${GITLOG_FILE}
+    # This first one is for aggregator itself. 
+    git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
+    # And now all submodules. Note we use --quiet specifically not to have the 
+    # "Entering <submodule>" messages printed. 
+    git submodule --quiet foreach git log ${lastTag}..${BUILD_ID} >> ${GITLOG_FILE}
+  else
+    echo -e "\n\tGit log not generated because a reasonable previous tag could not be found." > ${GITLOG_FILE}
+  fi
+  # == end of Git logging
+  
+  # have 'push' at end, since in future we may not build if we find "no changes"
   $GIT_PUSH --verbose origin $BUILD_ID
   popd
 }
@@ -602,7 +665,7 @@ fn-gather-repo ()
     # newer eclipse-repository are in 'repository' already.
     if [[ -e "${ORIG_PATH}" ]]
     then
-       mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
+      mv ${ORIG_DIR_REPOSITORY} ${REPO_DIR_REPOSITORY}
     fi
 
   else
@@ -1052,8 +1115,8 @@ fn-summarize-apitooling ()
   FREEZE_PARAMS=" "
   # When no "freeze" in effect for a release comment these out. Uncomment after M6, changing to appropriate versions.
   #FREEZE_PARAMS="-DfreezeBaseURL=http://download.eclipse.org/eclipse/downloads/drops4/S-4.5M6-201503200800/eclipse-SDK-4.5M6-win32.zip \
-  #   -DfreezeName=Eclipse-SDK-4.5M6 \
-  #   -DfreezeFilename=eclipse-SDK-4.5M6-win32.zip "
+    #   -DfreezeName=Eclipse-SDK-4.5M6 \
+    #   -DfreezeFilename=eclipse-SDK-4.5M6-win32.zip "
   # this API_PREV_REF_LABEL variable should be changed any time the version used
   # by previousBaseURL changes. Its purpose is just to localize changes to this one
   # place, and not have to make further, hard-coded changes to testResults.php.template.
@@ -1326,3 +1389,4 @@ fn-complete-status ()
   git status
   git submodule foreach git status
 }
+
