@@ -251,7 +251,7 @@ function sendTestResultsMail ()
 
     # Subject is similar to "build finished" subject in syncDropLocation.sh.
     # 4.3.0 I-Build: I20120411-2034: 7 failures from ep46I-unit-mac64
-    if [[ "${testsFailed}" == "1" ]]
+    if [[ "${testsFailed}" -eq 1 ]]
     then
       failures="failure"
     else
