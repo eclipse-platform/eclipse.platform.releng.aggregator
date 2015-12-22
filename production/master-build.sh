@@ -121,8 +121,15 @@ export CLEAN_LOCAL=${CLEAN_LOCAL:-true}
 if [[ -d ${LOCAL_REPO} && "${CLEAN_LOCAL}" == "true" ]]
 then
   # remove existing backup, if it exists
-  rm -fr ${LOCAL_REPO}.bak 2>/dev/null
-  mv ${LOCAL_REPO} ${LOCAL_REPO}.bak
+  # if build type is not N-build. Even for N-build, we clean if 
+  # the "day of the week" is Monday (day=1) so it is cleaned once 
+  # per week. We pick Monday since that is typically right before I-build, 
+  # so might avoid some surprises. 
+  if [[ "$BUILD_TYPE" =~ [MIXYPS] || $(date +%u) == 1 ]]
+  then
+    rm -fr ${LOCAL_REPO}.bak 2>/dev/null
+    mv ${LOCAL_REPO} ${LOCAL_REPO}.bak
+  fi
 fi
 export STREAMS_PATH="${aggDir}/streams"
 
