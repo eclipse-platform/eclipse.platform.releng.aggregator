@@ -354,10 +354,13 @@ fn-maven-build-aggregator ()
   then
     FORCEQUALIFIERARG="-DforceContextQualifier=${BUILD_ID}"
     FAIL_OPTION=${FAIL_OPTION:-"--fail-never"}
+    CODE_WARNINGS="-Dcode.ignoredWarnings=-warn:-deprecation"
   else
     # just for safety, make sure unset
     FORCEQUALIFIERARG=
     FAIL_OPTION=${FAIL_OPTION:-"--fail-at-end"}
+    # if not N-build, allow parent pom defaults. We unset for safety.
+    CODE_WARNINGS=
   fi
 
   echo "DEBUG: Variables in $0"
@@ -374,6 +377,7 @@ fn-maven-build-aggregator ()
   echo "DEBUG: MAVEN_BREE: $MAVEN_BREE"
   echo "DEBUG: MARGS: $MARGS"
   echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
+  echo "DEBUG: CODE_WARNINGS: ${CODE_WARNINGS}"
 
   # --fail-at-end gives chance for bundles to compile, even after
   # a compile error. Might have to specify --fail-never to see them all? See
@@ -394,7 +398,7 @@ fn-maven-build-aggregator ()
     -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
     -Dtycho.debug.artifactcomparator \
     -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
-    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"  ${FORCEQUALIFIERARG} ${JAVA_DOC_TOOL}
+    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
   rc=$?
   popd
   return $rc
