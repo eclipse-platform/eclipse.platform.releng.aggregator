@@ -8,13 +8,18 @@ source ${SCRIPTDIR}/syncUpdateUtils.shsource
 # of display string. 
 # TODO: should allow a few types of "desired format" to be specified, such as 
 # in addition to current "hours and minutes" perhaps "minutes and seconds", etc.
-# TODO: not sure it handles "decimal points" well. Currently assumes it is merely 
-# seconds.millesconds, but it will "take" other forms (such as 3.3.3), and produce an answer which 
-# is likely incorrect.
+
 function show_hours_minutes () 
 {
   TESTING=${TESTING:-"false"}
   num=$1
+  # if more than one decimal point, 'convert...' writes an error to standard error, 
+  # and returns "InvalidInput"
+  num=$(convertToZeroPaddedMillisecs $num)
+  if [[ $TESTING == "true" ]] 
+  then
+    printf "\tInput: %s \t" "$num"
+  fi
   # we are sometimes given seconds.milliseconds so we convert to milliseconds
   # by removing the period. Equivalent to seconds times 1000. Just to have common
   # staring point, as integer, since bash can not do 'float' arithmetic.
