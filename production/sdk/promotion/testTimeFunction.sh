@@ -22,7 +22,9 @@ function testTime ()
   show_hours_minutes 54min
   show_hours_minutes 33.33.33
   show_hours_minutes 0
-  show_hours_minutes 
+  show_hours_minutes
+  show_hours_minutes 19778.728
+
 }
 
 testTime

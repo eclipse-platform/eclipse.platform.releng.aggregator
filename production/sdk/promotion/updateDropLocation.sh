@@ -5,18 +5,25 @@ echo "SCRIPTDIR: ${SCRIPTDIR}"
 source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
 # Utility to convert raw millisecond string of digits to "hours, minutes" type
-# of display string. 
-# TODO: should allow a few types of "desired format" to be specified, such as 
+# of display string.
+# TODO: should allow a few types of "desired format" to be specified, such as
 # in addition to current "hours and minutes" perhaps "minutes and seconds", etc.
 
-function show_hours_minutes () 
+function show_hours_minutes ()
 {
   TESTING=${TESTING:-"false"}
   num=$1
-  # if more than one decimal point, 'convert...' writes an error to standard error, 
-  # and returns "InvalidInput"
-  num=$(convertToZeroPaddedMillisecs $num)
-  if [[ $TESTING == "true" ]] 
+
+  # if no decimal points in input number, we assume it is already in the msec form
+  # we want, and this initial conversion to have correct number of zeros
+  # are not needed. Otherwise they 'increase' the number (See bug 485084).
+  if [[ "$num" =~ .*\..* ]]
+  then
+    # if more than one decimal point, 'convert...' writes an error to standard error,
+    # and returns "InvalidInput"
+    num=$(convertToZeroPaddedMillisecs $num)
+  fi
+  if [[ $TESTING == "true" ]]
   then
     printf "\tInput: %s \t" "$num"
   fi
@@ -34,7 +41,7 @@ function show_hours_minutes ()
     hour=0
     day=0
     # assign to radix 10 just to remove leading zeros
-    # in some computations, leading zeros will cause number to be 
+    # in some computations, leading zeros will cause number to be
     # interpreted as hex.
     ((num=10#$num))
     if ((num>1000))
@@ -73,12 +80,12 @@ function show_hours_minutes ()
     fi
   else
     if [[ -z "${num}" ]]
-    then 
+    then
       echo -e "\n\tInvalid argument: it must be all digits, but was null or empty"
     else
       echo -e "\n\tInvalid argument: it must be all digits, but was >${num}<"
     fi
-  fi 
+  fi
 }
 
 # compute main (left part) of download site
@@ -133,7 +140,7 @@ function updatePages()
   JOB_NUMBER=$5
   if [[ -z "${JOB_NUMBER}" ]]
   then
-    # technically, may not be needed, just effects some directory names, but will require, for now. 
+    # technically, may not be needed, just effects some directory names, but will require, for now.
     printf "\n\n\t%s\n\n" "ERROR: JOB_NUMBER as fifth argument was not provided, for this function $(basename $0). Exiting."
     exit 1
   fi
@@ -228,29 +235,29 @@ function sendTestResultsMail ()
   testsSummary="eclipse/downloads/drops4/${buildId}/testresults/${JOB_NAME}-${JOB_NUMBER}.xml"
   eclipseSiteTestFile="${buildRoot}/siteDir/${testsSummary}"
   echo -e "\n\tDEBUG: eclipseSiteTestFile: ${eclipseSiteTestFile}"
-  if [[ ! -e "${eclipseSiteTestFile}" ]] 
+  if [[ ! -e "${eclipseSiteTestFile}" ]]
   then
     echo -e "\nProgramming error. The test summary file was not found where expected:"
     echo -e "\t${eclipseSiteTestFile}"
     return 1
   else
-    # Had trouble reading this file in a while loop. Perhaps because it is one line, 
+    # Had trouble reading this file in a while loop. Perhaps because it is one line,
     # with no EOL character?
     read -r line <  "${eclipseSiteTestFile}"
     echo -e "\n\tDEBUG: Text read from test summary file: ${line}"
     pattern="^.*<duration>(.*)</duration><failCount>(.*)</failCount><passCount>(.*)</passCount>.*$"
     if [[ "${line}" =~ ${pattern} ]]
-    then 
+    then
       testsDuration=${BASH_REMATCH[1]}
       testsFailed=${BASH_REMATCH[2]}
       testsPassed=${BASH_REMATCH[3]}
-    else 
+    else
       echo -e "\n\tProgramming error. We should always match!?"
       echo -e "\n\tDEBUG: line: ${line}"
     fi
 
-    # Now read "elapsed time" duration from Hudson. (The time above is the sum of all unit tests times, 
-    # so does not include "overhead" and is deceptive.) The "-O -" means send output to standard out (instead of file). 
+    # Now read "elapsed time" duration from Hudson. (The time above is the sum of all unit tests times,
+    # so does not include "overhead" and is deceptive.) The "-O -" means send output to standard out (instead of file).
     # Discovered that "xpath plugin 1.03" was needed. Initially had 1.0.2 on local test system.
     elapsedTimeDuration=$( wget -O - "${HUDSON_PROTOCOL}://${HUDSON_HOST}:${HUDSON_PORT}/${HUDSON_ROOT_URI}/view/Eclipse and Equinox/job/${JOB_NAME}/${JOB_NUMBER}/api/xml?xpath=/*/duration/text%28%29")
 
@@ -277,7 +284,7 @@ function sendTestResultsMail ()
     FROM=${FROM:-"e4Builder@eclipse.org"}
 
     # Artificially mark each message for a particular build with unique message-id-like value.
-    # Even though technically incorrect for the initial message it seems to work in 
+    # Even though technically incorrect for the initial message it seems to work in
     # most situations.
     InReplyTo="<${buildId}@build.eclipse.org/build/eclipse/>"
     Reference="${InReplyTo}"
@@ -304,8 +311,8 @@ function sendTestResultsMail ()
   fi
 }
 
-# We do the 'main' function, only if TESTING is not 'true'. 
-# This allows us to test individual functions easily, such as the 
+# We do the 'main' function, only if TESTING is not 'true'.
+# This allows us to test individual functions easily, such as the
 # show_hours_minutes function.
 
 if [[ "${TESTING}" != "true" ]]
