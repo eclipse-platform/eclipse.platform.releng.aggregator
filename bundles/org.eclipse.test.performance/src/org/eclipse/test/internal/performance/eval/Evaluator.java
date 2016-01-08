@@ -29,13 +29,12 @@ public class Evaluator extends EmptyEvaluator {
 
     private AssertChecker[] fCheckers;
 
+    @Override
     public void setAssertCheckers(AssertChecker[] asserts) {
         fCheckers = asserts;
     }
 
-    /*
-     * @see org.eclipse.test.internal.performance.eval.IEvaluator#evaluate(org.eclipse.jdt.ui.tests.performance.PerformanceMeter)
-     */
+    @Override
     public void evaluate(PerformanceMeter performanceMeter) throws RuntimeException {
 
         if (fCheckers == null)

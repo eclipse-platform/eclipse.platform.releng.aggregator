@@ -82,6 +82,7 @@ public class Sample {
         return dataPoints;
     }
 
+    @Override
     public String toString() {
         return "MeteringSession [scenarioID= " + fScenarioID + ", #datapoints: " + fDataPoints.length + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }

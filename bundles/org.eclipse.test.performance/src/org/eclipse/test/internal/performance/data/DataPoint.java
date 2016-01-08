@@ -50,6 +50,7 @@ public class DataPoint {
         return (Scalar) fScalars.get(dimension);
     }
 
+    @Override
     public String toString() {
         return "DataPoint [step= " + fStep + ", #dimensions: " + fScalars.size() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }

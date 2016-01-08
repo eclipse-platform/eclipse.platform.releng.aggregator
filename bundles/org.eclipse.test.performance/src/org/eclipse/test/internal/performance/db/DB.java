@@ -96,6 +96,7 @@ public class DB {
                 // not started as plugin
                 Runtime.getRuntime().addShutdownHook(new Thread() {
 
+                    @Override
                     public void run() {
                         shutdown();
                     }
@@ -147,6 +148,7 @@ public class DB {
      * @param scenarioPattern
      * @deprecated Use queryDistinctValues instead
      */
+    @Deprecated
     public static void queryBuildNames(final List names, final Variations variationPatterns, final String scenarioPattern) {
         getDefault().internalQueryDistinctValues(names, PerformanceTestPlugin.BUILD, variationPatterns, scenarioPattern);
     }
@@ -172,6 +174,7 @@ public class DB {
      * @return Scenario
      * @deprecated Use queryScenarios(Variations variations, ...) instead
      */
+    @Deprecated
     public static Scenario queryScenario(final String configName, final String[] buildPatterns, final String scenarioName) {
         final Variations variations = new Variations();
         variations.put(PerformanceTestPlugin.CONFIG, configName);
@@ -189,6 +192,7 @@ public class DB {
      * @return array of scenarios
      * @deprecated Use queryScenarios(Variations variations, ...) instead
      */
+    @Deprecated
     public static Scenario[] queryScenarios(final String configName, final String buildPattern, final String scenarioPattern) {
         final Variations variations = new Variations();
         variations.put(PerformanceTestPlugin.CONFIG, configName);
@@ -204,6 +208,7 @@ public class DB {
      * @return array of scenarios
      * @deprecated Use queryScenarios(Variations variations, ...) instead
      */
+    @Deprecated
     public static Scenario[] queryScenarios(final String configName, final String[] buildPatterns, final String scenarioPattern,
             final Dim[] dimensions) {
         final Variations variations = new Variations();
@@ -736,6 +741,7 @@ public class DB {
         if (sort) {
             Arrays.sort(names, new Comparator() {
 
+                @Override
                 public int compare(final Object o1, final Object o2) {
                     String s1 = (String) o1;
                     String s2 = (String) o2;

@@ -78,6 +78,7 @@ public class Unit {
          */
     }
 
+    @Override
     public String toString() {
         return "Unit [" + getShortName() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
     }

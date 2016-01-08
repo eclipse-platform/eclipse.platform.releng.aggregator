@@ -12,6 +12,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 public class SystemTimePerformanceMeterFactory extends PerformanceMeterFactory {
 
+    @Override
     protected PerformanceMeter doCreatePerformanceMeter(String scenario) {
         return new SystemTimePerformanceMeter(scenario);
     }

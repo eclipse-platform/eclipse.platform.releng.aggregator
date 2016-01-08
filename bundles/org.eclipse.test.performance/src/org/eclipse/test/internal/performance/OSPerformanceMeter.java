@@ -33,32 +33,24 @@ public class OSPerformanceMeter extends InternalPerformanceMeter {
         fStartTime = System.currentTimeMillis();
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#dispose()
-     */
+    @Override
     public void dispose() {
         fPerformanceMonitor = null;
         fDataPoints = null;
         super.dispose();
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#start()
-     */
+    @Override
     public void start() {
         snapshot(BEFORE);
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#stop()
-     */
+    @Override
     public void stop() {
         snapshot(AFTER);
     }
 
-    /*
-     * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
-     */
+    @Override
     public Sample getSample() {
         if (fDataPoints != null) {
             HashMap runProperties = new HashMap();

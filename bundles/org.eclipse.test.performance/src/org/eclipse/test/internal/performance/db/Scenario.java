@@ -86,6 +86,7 @@ public class Scenario {
      * @param dimensions
      * @deprecated
      */
+    @Deprecated
     public Scenario(String scenario, Variations variations, String seriesKey, Dim[] dimensions) {
         Assert.assertFalse(scenario.indexOf('%') >= 0);
         fScenarioName = scenario;
@@ -219,6 +220,7 @@ public class Scenario {
         fDimensions = (Dim[]) dims.toArray(new Dim[dims.size()]);
         Arrays.sort(fDimensions, new Comparator() {
 
+            @Override
             public int compare(Object o1, Object o2) {
                 Dim d1 = (Dim) o1;
                 Dim d2 = (Dim) o2;

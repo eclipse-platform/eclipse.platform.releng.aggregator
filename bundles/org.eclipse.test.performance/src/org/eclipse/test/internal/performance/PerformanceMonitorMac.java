@@ -54,6 +54,7 @@ class PerformanceMonitorMac extends PerformanceMonitor {
    * @param scalars
    *          where to collect the data
    */
+  @Override
   protected void collectOperatingSystemCounters(Map scalars) {
     synchronized (this) {
       if (isLoaded()) {

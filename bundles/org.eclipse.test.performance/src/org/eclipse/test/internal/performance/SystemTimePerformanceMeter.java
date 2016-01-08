@@ -48,23 +48,17 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
         fStopTime = new ArrayList(initalCapacity);
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#start()
-     */
+    @Override
     public void start() {
         fStartTime.add(new Long(System.currentTimeMillis()));
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#stop()
-     */
+    @Override
     public void stop() {
         fStopTime.add(new Long(System.currentTimeMillis()));
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#commit()
-     */
+    @Override
     public void commit() {
         Assert.isTrue(fStartTime.size() == fStopTime.size());
         System.out.println("Scenario: " + getScenarioName()); //$NON-NLS-1$
@@ -83,15 +77,14 @@ public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
         return buf.toString();
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#dispose()
-     */
+    @Override
     public void dispose() {
         fStartTime = null;
         fStopTime = null;
         super.dispose();
     }
 
+    @Override
     public Sample getSample() {
         Assert.isTrue(fStartTime.size() == fStopTime.size());
 

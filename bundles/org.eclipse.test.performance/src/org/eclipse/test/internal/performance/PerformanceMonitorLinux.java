@@ -27,6 +27,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
    * 
    * @param scalars
    */
+  @Override
   protected void collectOperatingSystemCounters(Map scalars) {
     synchronized (this) {
       /**
@@ -109,6 +110,7 @@ class PerformanceMonitorLinux extends PerformanceMonitor {
    * 
    * @param scalars
    */
+  @Override
   protected void collectGlobalPerformanceInfo(Map scalars) {
     synchronized (this) {
       /**

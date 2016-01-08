@@ -19,6 +19,7 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
 
     private boolean fgNativeGetPerformanceInfoNotAvailable;
 
+    @Override
     protected void collectOperatingSystemCounters(Map scalars) {
         synchronized (this) {
             if (org.eclipse.perfmsr.core.PerformanceMonitor.isLoaded()) {
@@ -56,6 +57,7 @@ class PerformanceMonitorWindows extends PerformanceMonitor {
      * 
      * @param scalars
      */
+    @Override
     protected void collectGlobalPerformanceInfo(Map scalars) {
         synchronized (this) {
             if (!fgNativeGetPerformanceInfoNotAvailable && org.eclipse.perfmsr.core.PerformanceMonitor.isLoaded()) {

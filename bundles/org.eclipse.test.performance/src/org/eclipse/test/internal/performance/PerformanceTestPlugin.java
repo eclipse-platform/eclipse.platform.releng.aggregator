@@ -113,6 +113,7 @@ public class PerformanceTestPlugin extends Plugin {
     fgPlugin = this;
   }
 
+  @Override
   public void stop(BundleContext context) throws Exception {
     DB.shutdown();
     super.stop(context);

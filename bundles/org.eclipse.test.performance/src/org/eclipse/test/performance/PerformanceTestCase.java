@@ -57,6 +57,7 @@ public class PerformanceTestCase extends TestCase {
      * 
      * @throws Exception
      */
+    @Override
     protected void setUp() throws Exception {
         Performance performance = Performance.getDefault();
         fPerformanceMeter = performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
@@ -67,6 +68,7 @@ public class PerformanceTestCase extends TestCase {
      * 
      * @throws Exception
      */
+    @Override
     protected void tearDown() throws Exception {
         fPerformanceMeter.dispose();
     }

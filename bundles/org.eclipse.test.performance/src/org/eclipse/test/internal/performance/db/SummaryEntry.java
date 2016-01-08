@@ -35,6 +35,7 @@ public class SummaryEntry {
         this.comment = comment;
     }
 
+    @Override
     public String toString() {
         return "SummaryEntry(" + isGlobal + "): <" + scenarioName + "> <" + shortName + "> <" + dimension + '>'; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
     }

@@ -26,6 +26,7 @@ public class AbsoluteBandChecker extends AssertChecker {
         fUpperBand = upperBand;
     }
 
+    @Override
     public boolean test(StatisticsSession reference, StatisticsSession measured, StringBuffer message) {
         Dim dimension = getDimension();
 

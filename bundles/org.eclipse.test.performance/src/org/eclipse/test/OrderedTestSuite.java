@@ -117,6 +117,7 @@ public class OrderedTestSuite extends TestSuite {
             final List orderedMethodNames = getBytecodeOrderedTestNames(testClass);
             Collections.sort(tests, new Comparator() {
 
+                @Override
                 public int compare(Object o1, Object o2) {
                     if (o1 instanceof TestCase && o2 instanceof TestCase) {
                         TestCase t1 = (TestCase) o1;
@@ -276,6 +277,7 @@ public class OrderedTestSuite extends TestSuite {
         final Throwable e2 = exception.fillInStackTrace();
         return new TestCase(testMethod + "(" + testClass.getName() + ")") { //$NON-NLS-1$ //$NON-NLS-2$
 
+            @Override
             protected void runTest() throws Throwable {
                 throw e2;
             }

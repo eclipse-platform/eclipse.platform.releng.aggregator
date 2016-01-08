@@ -43,17 +43,13 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
         fStop.put(dimension, new Scalar(dimension, end));
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#dispose()
-     */
+    @Override
     public void dispose() {
         fDataPoints = null;
         super.dispose();
     }
 
-    /*
-     * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
-     */
+    @Override
     public Sample getSample() {
         if (fDataPoints != null)
             return new Sample(getScenarioName(), fStartTime, new HashMap(),
@@ -61,16 +57,12 @@ class TestPerformanceMeter extends InternalPerformanceMeter {
         return null;
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#start()
-     */
+    @Override
     public void start() {
         fDataPoints.add(new DataPoint(BEFORE, fStart));
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#stop()
-     */
+    @Override
     public void stop() {
         fDataPoints.add(new DataPoint(AFTER, fStop));
     }

@@ -15,30 +15,22 @@ import org.eclipse.test.performance.PerformanceMeter;
  */
 public class NullPerformanceMeter extends PerformanceMeter {
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#start()
-     */
+    @Override
     public void start() {
         // do nothing
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#stop()
-     */
+    @Override
     public void stop() {
         // do nothing
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#commit()
-     */
+    @Override
     public void commit() {
         // do nothing
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#dispose()
-     */
+    @Override
     public void dispose() {
         // do nothing
     }

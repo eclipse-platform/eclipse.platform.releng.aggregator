@@ -50,6 +50,7 @@ public class DBTests extends TestCase {
     private static final String DBUSER          = "testUser";         //$NON-NLS-1$
     private static final String DBPASSWD        = "testPassword";     //$NON-NLS-1$
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -61,6 +62,7 @@ public class DBTests extends TestCase {
         System.setProperty("eclipse.perf.assertAgainst", BUILD + "=base"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }

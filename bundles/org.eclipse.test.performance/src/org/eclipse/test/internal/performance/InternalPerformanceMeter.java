@@ -33,6 +33,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
 
     private static class DimensionComparator implements Comparator {
 
+        @Override
         public int compare(Object o1, Object o2) {
             return ((Dim) o1).getId() - ((Dim) o2).getId();
         }
@@ -59,6 +60,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
         fScenarioId = scenarioId;
     }
 
+    @Override
     public void dispose() {
         fScenarioId = null;
     }
@@ -74,9 +76,7 @@ public abstract class InternalPerformanceMeter extends PerformanceMeter {
         return fScenarioId;
     }
 
-    /*
-     * @see org.eclipse.test.performance.PerformanceMeter#commit()
-     */
+    @Override
     public void commit() {
         Sample sample = getSample();
         if (sample != null) {

@@ -39,6 +39,7 @@ public class Variations extends Properties {
      *            a value to store under the build key
      * @deprecated Use the default constructor instead and fill in key/value pairs explicitely.
      */
+    @Deprecated
     public Variations(String configValue, String buildValue) {
         if (configValue != null)
             put(PerformanceTestPlugin.CONFIG, configValue);
