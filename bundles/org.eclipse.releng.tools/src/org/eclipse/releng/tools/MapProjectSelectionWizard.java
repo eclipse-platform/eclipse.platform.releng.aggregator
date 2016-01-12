@@ -56,6 +56,7 @@ public class MapProjectSelectionWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.Wizard#createPageControls(org.eclipse.swt.widgets.Composite)
 	 * @since 3.1
 	 */
+	@Override
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 
@@ -96,6 +97,7 @@ public class MapProjectSelectionWizard extends Wizard {
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#addPages()
 	 */
+	@Override
 	public void addPages() {
 		mapProjectSelectionPage = new MapProjectSelectionPage("MapProjectSelectionPage", //$NON-NLS-1$
 				Messages.getString("MapProjectSelectionWizard.1"), //$NON-NLS-1$
@@ -108,6 +110,7 @@ public class MapProjectSelectionWizard extends Wizard {
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		mapProjectSelectionPage.saveSettings();
 		preferenceStore.setValue(MapProjectPreferencePage.USE_DEFAULT_MAP_PROJECT, mapProjectSelectionPage.useDefaultMapProject());
@@ -120,6 +123,7 @@ public class MapProjectSelectionWizard extends Wizard {
 	 * (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#performCancel()
 	 */
+	@Override
 	public boolean performCancel() {
 		operationCancelled = true;
 		return true;

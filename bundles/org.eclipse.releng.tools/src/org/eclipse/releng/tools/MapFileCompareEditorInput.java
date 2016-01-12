@@ -48,6 +48,7 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 		super(new CompareConfiguration());
 		documents = new MapContentDocument[0];
 		root = new DiffNode(Differencer.NO_CHANGE) {
+			@Override
 			public boolean hasChildren() {
 				return true;
 			}
@@ -58,6 +59,7 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.CompareEditorInput#prepareInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected Object prepareInput(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		CompareConfiguration config = getCompareConfiguration();
 		config.setRightEditable(false);
@@ -77,6 +79,7 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 	/* (non-Javadoc)
 	 * @see org.eclipse.compare.CompareEditorInput#createDiffViewer(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public Viewer createDiffViewer(Composite parent) {
 		viewer =  super.createDiffViewer(parent);
 		viewer.setInput(this);
@@ -107,12 +110,14 @@ public class MapFileCompareEditorInput extends CompareEditorInput {
 		DiffNode[] diffNodes = new DiffNode[documents.length];
 		for (int i = 0; i < diffNodes.length; i++){
 			ResourceNode resourceNode = new ResourceNode(documents[i].getMapFile().getFile()) {
+				@Override
 				public boolean isEditable() {
 					return false;
 				} 
 			};
 						
 			diffNodes[i] = new DiffNode(root, Differencer.CHANGE, null, resourceNode, documents[i]) {
+				@Override
 				public Image getImage() {
 					return getLeft().getImage();
 				}

@@ -49,6 +49,7 @@ public class CompareLocalToMap extends WorkspaceAction {
 	 * 
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 		if (!super.isEnabled())
 			return false;
@@ -98,6 +99,7 @@ public class CompareLocalToMap extends WorkspaceAction {
 	/**
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		//Start the MapProjectSelectionWizard
 		IPreferenceStore preferenceStore = RelEngPlugin.getDefault().getPreferenceStore();

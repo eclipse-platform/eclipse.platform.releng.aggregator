@@ -43,6 +43,7 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	/**
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction#isEnabledForAddedResources()
 	 */
+	@Override
 	protected boolean isEnabledForAddedResources() {
 		return false;
 	}
@@ -50,6 +51,7 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction#isEnabledForNonExistantResources()
 	 */
+	@Override
 	protected boolean isEnabledForNonExistantResources() {
 		return true;
 	}
@@ -57,6 +59,7 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	/**
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.WorkspaceAction#isEnabledForCVSResource(org.eclipse.team.internal.ccvs.core.ICVSResource)
 	 */
+	@Override
 	protected boolean isEnabledForCVSResource(ICVSResource cvsResource) throws CVSException {
 		if (super.isEnabledForCVSResource(cvsResource)) {
 			// Don't enable if there are sticky file revisions in the lineup
@@ -81,6 +84,7 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	 * 
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 		if (!(super.isEnabled()))
 			return false;
@@ -116,6 +120,7 @@ public class ReplaceLocalFromMap extends WorkspaceAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		//Start the MapProjectSelectionWizard
 		IPreferenceStore preferenceStore = RelEngPlugin.getDefault().getPreferenceStore();

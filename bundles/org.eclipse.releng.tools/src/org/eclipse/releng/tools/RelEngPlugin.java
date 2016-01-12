@@ -70,6 +70,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		IEclipsePreferences node = InstanceScope.INSTANCE.getNode(ID);
@@ -95,6 +96,7 @@ public class RelEngPlugin extends AbstractUIPlugin {
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		IEclipsePreferences node = InstanceScope.INSTANCE.getNode(ID);
 		if(node != null) {

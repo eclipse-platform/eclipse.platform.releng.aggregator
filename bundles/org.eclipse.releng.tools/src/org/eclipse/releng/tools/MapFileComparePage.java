@@ -35,6 +35,7 @@ public class MapFileComparePage extends WizardPage {
 	 * 
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		//Need to handle input and rebuild tree only when becoming visible

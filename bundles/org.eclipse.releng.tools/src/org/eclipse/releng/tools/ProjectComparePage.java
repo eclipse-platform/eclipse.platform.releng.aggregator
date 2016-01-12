@@ -108,6 +108,7 @@ public class ProjectComparePage extends WizardPage{
 		buildNotesButton.setText(Messages.getString("ProjectComparePage.2")); //$NON-NLS-1$
 		buildNotesButton.setFont(font);
 		buildNotesButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				buildNotesButtonChecked = buildNotesButton.getSelection();
 			}
@@ -139,6 +140,7 @@ public class ProjectComparePage extends WizardPage{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -215,6 +217,7 @@ public class ProjectComparePage extends WizardPage{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		input.getParticipant().dispose();

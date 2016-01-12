@@ -30,6 +30,7 @@ public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
 		super(resources);
 	}
 
+	@Override
 	public int getLastModifiedYear(IFile file, IProgressMonitor monitor) throws CoreException {
         try {
             monitor.beginTask("Fetching logs from CVS", 100);
@@ -62,6 +63,7 @@ public class CVSCopyrightAdapter extends RepositoryProviderCopyrightAdapter {
         return -1;
 	}
 
+	@Override
 	public void initialize(IProgressMonitor monitor) throws CoreException {
 		// TODO We should perform a bulk "log" command to get the last modified year
 	}

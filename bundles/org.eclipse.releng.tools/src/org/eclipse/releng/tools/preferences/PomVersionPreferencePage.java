@@ -36,9 +36,7 @@ public class PomVersionPreferencePage extends PreferencePage implements
 	 */
 	private PomErrorLevelBlock block = null;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -66,9 +64,7 @@ public class PomVersionPreferencePage extends PreferencePage implements
 	public void init(IWorkbench workbench) {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performCancel()
-	 */
+	@Override
 	public boolean performCancel() {
 		if (this.block != null) {
 			this.block.performCancel();
@@ -76,24 +72,18 @@ public class PomVersionPreferencePage extends PreferencePage implements
 		return super.performCancel();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
-	 */
+	@Override
 	public boolean performOk() {
 		this.block.performOK();
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performApply()
-	 */
+	@Override
 	protected void performApply() {
 		this.block.performApply();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
-	 */
+	@Override
 	protected void performDefaults() {
 		this.block.performDefaults();
 	}

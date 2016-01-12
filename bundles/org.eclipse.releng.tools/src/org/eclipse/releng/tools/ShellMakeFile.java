@@ -29,24 +29,29 @@ public class ShellMakeFile extends SourceFile {
 	//Optional Whitespace, #, optional whitespace, then at least 2 non-word chars repeated till EOL 
 	private static Pattern p = Pattern.compile("\\s*#\\s*\\W{2,}\\s*"); //$NON-NLS-1$
 	
+	@Override
 	public boolean isCommentStart(String aLine) {
 		return p.matcher(aLine).matches();
 	}
 
+	@Override
 	public boolean isCommentEnd(String aLine, String commentStartString) {
 		String s = commentStartString.trim();
 		s = s.substring(s.length()-2);
 		return aLine.trim().endsWith(s);
 	}
 
+	@Override
 	public String getCommentStart() {
 		return "#*"; //unused, Pattern matcher above will be used instead //$NON-NLS-1$
 	}
 
+	@Override
 	public String getCommentEnd() {
 		return "**"; //unused, Pattern matcher above will be used instead //$NON-NLS-1$
 	}
 
+	@Override
 	public int getFileType() {
 		return CopyrightComment.SHELL_MAKE_COMMENT;
 	}
@@ -54,7 +59,8 @@ public class ShellMakeFile extends SourceFile {
         /* (non-Javadoc)
          * @see org.eclipse.releng.tools.SourceFile#doInsert(java.lang.String, org.eclipse.jface.text.IDocument)
          */
-        protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
+        @Override
+		protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
                 // find insert offset (we must skip instructions)
                 int insertOffset = findInsertOffset(document);
 

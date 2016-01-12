@@ -49,9 +49,11 @@ public abstract class ConfigurationBlock {
 		});
 		
 		MouseTrackAdapter labelComboListener= new MouseTrackAdapter() {
+			@Override
 			public void mouseEnter(MouseEvent e) {
 				highlight(parent, labelControl, comboBox, comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : HIGHLIGHT_MOUSE);
 			}
+			@Override
 			public void mouseExit(MouseEvent e) {
 				if (! comboBox.isFocusControl())
 					highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
@@ -61,6 +63,7 @@ public abstract class ConfigurationBlock {
 		labelControl.addMouseTrackListener(labelComboListener);
 		
 		class MouseMoveTrackListener extends MouseTrackAdapter implements MouseMoveListener, MouseListener {
+			@Override
 			public void mouseExit(MouseEvent e) {
 				if (! comboBox.isFocusControl())
 					highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
@@ -94,6 +97,7 @@ public abstract class ConfigurationBlock {
 		parent.addMouseListener(parentListener);
 		
 		MouseAdapter labelClickListener= new MouseAdapter() {
+			@Override
 			public void mouseDown(MouseEvent e) {
 				comboBox.setFocus();
 			}

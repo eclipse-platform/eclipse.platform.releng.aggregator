@@ -40,6 +40,7 @@ public class TagMap extends TagInRepositoryAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#getSelectedCVSResources()
 	 */
+	@Override
 	protected ICVSRemoteResource[] getSelectedRemoteResources() {
 		IResource[] resources = getSelectedResources();
 		List identifiers = new ArrayList();
@@ -129,6 +130,7 @@ public class TagMap extends TagInRepositoryAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 		IResource[] resources = getSelectedResources();
 		if (resources.length == 0) return false;

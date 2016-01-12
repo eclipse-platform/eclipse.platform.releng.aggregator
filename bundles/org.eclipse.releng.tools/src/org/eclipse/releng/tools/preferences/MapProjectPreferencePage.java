@@ -13,12 +13,16 @@ package org.eclipse.releng.tools.preferences;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.releng.tools.MapFile;
 import org.eclipse.releng.tools.MapProject;
 import org.eclipse.releng.tools.Messages;
 import org.eclipse.releng.tools.RelEngPlugin;
-import org.eclipse.team.internal.ui.SWTUtils;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,16 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
-
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
-
+import org.eclipse.team.internal.ui.SWTUtils;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -57,9 +52,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 	private IProject[] workspaceMapProjects;
 	private IPreferenceStore preferenceStore;
 
-	/*
-	 * @see PreferencePage#createContents(Composite)
-	 */
+	@Override
 	protected Control createContents(Composite parent) {
 		preferenceStore = RelEngPlugin.getDefault().getPreferenceStore();
 
@@ -79,6 +72,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		alwaysPromptButton.setLayoutData(data);
 
 		SelectionAdapter selectionListener = new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				update();
 			}
@@ -144,6 +138,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		}
 		projectList.setItems(projectNames);
 		projectList.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				projectSelected();
 			}
@@ -181,9 +176,7 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		// do nothing
 	}
 
-	/*
-	 * @see IPreferencePage#performOk()
-	 */
+	@Override
 	public boolean performOk() {
 		preferenceStore.setValue(USE_DEFAULT_MAP_PROJECT, !(alwaysPromptButton.getSelection()));
 		if (projectList.getSelectionIndex() != -1) {
@@ -193,18 +186,14 @@ public class MapProjectPreferencePage extends PreferencePage implements IWorkben
 		return super.performOk();
 	}
 
-	/* 
-	 * @see PreferencePage#performDefaults()
-	 */
+	@Override
 	protected void performDefaults() {
 		alwaysPromptButton.setSelection(true);
 		update();
 		super.performDefaults();
 	}
 
-	/*
-	 * @see PreferencePage#doGetPreferenceStore()
-	 */
+	@Override
 	protected IPreferenceStore doGetPreferenceStore() {
 		return preferenceStore;
 	}

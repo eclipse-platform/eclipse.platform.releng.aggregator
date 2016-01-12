@@ -22,6 +22,7 @@ public class JavaScriptFile extends SourceFile {
 	/* (non-Javadoc)
 	 * @see Test.popup.actions.SourceFile#getCommentStart()
 	 */
+	@Override
 	public String getCommentStart() {
 		return "/*"; //$NON-NLS-1$
 	}
@@ -29,9 +30,11 @@ public class JavaScriptFile extends SourceFile {
 	/* (non-Javadoc)
 	 * @see Test.popup.actions.SourceFile#getCommentEnd()
 	 */
+	@Override
 	public String getCommentEnd() {
 		return "*/"; //$NON-NLS-1$
 	}
+	@Override
 	public int getFileType() {
 		return CopyrightComment.JAVASCRIPT_COMMENT;
 	}

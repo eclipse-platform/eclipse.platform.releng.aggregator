@@ -158,10 +158,12 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			this.isFeatureProject = isFeatureProject;
 		}
 
+		@Override
 		public void setDocumentLocator(Locator locator) {
 			this.locator = locator;
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			if (ELEMENT_VERSION.equals(qName)) {
 				if (!elements.isEmpty() && ELEMENT_PROJECT.equals(elements.peek())) {
@@ -171,10 +173,12 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			elements.push(qName);
 		}
 
+		@Override
 		public void endElement(String uri, String localName, String qName) throws SAXException {
 			elements.pop();
 		}
 
+		@Override
 		public void characters(char[] ch, int start, int length) throws SAXException {
 			if (checkVersion) {
 				checkVersion = false;
@@ -261,6 +265,7 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 		public FeatureVersionHandler() {
 		}
 
+		@Override
 		public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 			// The version is on the root element, check for the attribute then throw exception to exit early
 			featureVersion = attributes.getValue("version"); //$NON-NLS-1$

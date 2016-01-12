@@ -44,6 +44,7 @@ public class TagAndReleaseOperation extends TagOperation {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.operations.TagOperation#tag(org.eclipse.team.internal.ccvs.core.CVSTeamProvider, org.eclipse.core.resources.IResource[], org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public IStatus tag(
 		CVSTeamProvider provider,
 		IResource[] resources,
@@ -63,6 +64,7 @@ public class TagAndReleaseOperation extends TagOperation {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.operations.CVSOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void execute(IProgressMonitor monitor) throws CVSException, InterruptedException {
 		monitor.beginTask("Tagging with " + getTag().getName(), 100);
 		super.execute(new SubProgressMonitor(monitor, 95));
@@ -85,6 +87,7 @@ public class TagAndReleaseOperation extends TagOperation {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.operations.RepositoryProviderOperation#getSchedulingRule(org.eclipse.team.internal.ccvs.core.CVSTeamProvider)
 	 */
+	@Override
 	protected ISchedulingRule getSchedulingRule(CVSTeamProvider provider) {
 		// We need a rule on both the provider and the releng map project
 		ISchedulingRule rule = super.getSchedulingRule(provider);
@@ -114,6 +117,7 @@ public class TagAndReleaseOperation extends TagOperation {
 		return mapFileUpdated;
 	}
 	
+	@Override
 	protected IStatus[] getErrors() {
 		return super.getErrors();
 	}

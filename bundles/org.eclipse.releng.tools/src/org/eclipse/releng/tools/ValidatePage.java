@@ -39,6 +39,7 @@ public class ValidatePage extends WizardPage {
 	/*
 	 * @see org.eclipse.jface.wizard.WizardPage#canFlipToNextPage()
 	 */
+	@Override
 	public boolean canFlipToNextPage() {
 		return false;
 	}
@@ -46,6 +47,7 @@ public class ValidatePage extends WizardPage {
 	/*
 	 * @see org.eclipse.jface.wizard.WizardPage#getPreviousPage()
 	 */
+	@Override
 	public IWizardPage getPreviousPage() {
 		return null;
 	}

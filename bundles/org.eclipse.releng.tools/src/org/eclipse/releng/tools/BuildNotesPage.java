@@ -110,6 +110,7 @@ public class BuildNotesPage extends WizardPage {
 		updateNotesButton.setText(Messages.getString("BuildNotesPage.2")); //$NON-NLS-1$
 		updateNotesButton.setLayoutData(data);
 		updateNotesButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateNotesButtonChecked = updateNotesButton.getSelection();
 				if (updateNotesButtonChecked) {
@@ -161,6 +162,7 @@ public class BuildNotesPage extends WizardPage {
 		browse = new Button(composite, SWT.PUSH);
 		browse.setText(Messages.getString("BuildNotesPage.8")); //$NON-NLS-1$
 		browse.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IResource iResource = buildNotesFileDialog();
 				if (iResource instanceof IFile) {
@@ -377,6 +379,7 @@ public class BuildNotesPage extends WizardPage {
 		}
 	}
 
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
@@ -400,6 +403,7 @@ public class BuildNotesPage extends WizardPage {
 
 		// filter for .html files only and exclude bin folders
 		dialog.addFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement,
 					Object element) {
 				if (element instanceof IFile) {

@@ -117,6 +117,7 @@ public class IBMCopyrightComment extends CopyrightComment {
 	/**
 	 * Return the body of this copyright comment or null if it cannot be built.
 	 */
+	@Override
 	public String getCopyrightComment() {
 	    String linePrefix = getCommentPrefix();
 	    if (linePrefix == null)

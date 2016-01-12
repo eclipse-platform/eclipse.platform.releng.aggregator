@@ -109,6 +109,7 @@ public class TagPage extends WizardPage{
 		moveButton.setVisible(true);
 		moveButton.setText(Messages.getString("TagPage.7")); //$NON-NLS-1$
 		moveButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				moveButtonSelected = moveButton.getSelection();
 			}
@@ -118,6 +119,7 @@ public class TagPage extends WizardPage{
 		validateButton = new Button(composite,SWT.CHECK);
 		validateButton.setText(Messages.getString("TagPage.8")); //$NON-NLS-1$
 		validateButton.addSelectionListener( new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				validateButtonSelected = validateButton.getSelection();
 			}		
@@ -134,6 +136,7 @@ public class TagPage extends WizardPage{
 		compareButton = new Button(group,SWT.RADIO);
 		compareButton.setText(Messages.getString("TagPage.10")); //$NON-NLS-1$
 		compareButton.addSelectionListener( new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				compareButtonSelected = compareButton.getSelection();
 				updateFinishStatus();
@@ -145,6 +148,7 @@ public class TagPage extends WizardPage{
 		commitButton.setText(Messages.getString("TagPage.11")); //$NON-NLS-1$
 		commitButton.setSelection(true);
 		commitButton.addSelectionListener(new SelectionAdapter(){
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				commitButtonSelected = commitButton.getSelection();	
 			}
@@ -298,6 +302,7 @@ public class TagPage extends WizardPage{
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		ReleaseWizard wizard = (ReleaseWizard)getWizard();

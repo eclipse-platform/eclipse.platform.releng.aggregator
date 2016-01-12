@@ -77,6 +77,7 @@ public class MapProjectSelectionPage extends WizardPage {
 		useDefaultProjectButton = new Button(topContainer, SWT.CHECK);
 		useDefaultProjectButton.setText(Messages.getString("MapProjectSelectionPage.0")); //$NON-NLS-1$
 		useDefaultProjectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				useDefaultMapProject = (useDefaultProjectButton.getSelection());
 				updateOthers();
@@ -165,6 +166,7 @@ public class MapProjectSelectionPage extends WizardPage {
 	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
 	 * @since 3.7
 	 */
+	@Override
 	public void dispose() {
 		if (selectedMapProject != null) {
 			selectedMapProject.dispose();	

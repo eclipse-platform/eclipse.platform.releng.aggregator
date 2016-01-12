@@ -36,6 +36,7 @@ public class MapFile {
 	/**
 	 * @deprecated As of 3.7, replaced by {@link #isMapFile(IFile)}
 	 */
+	@Deprecated
 	public static final String MAP_FILE_EXTENSION = "map"; //$NON-NLS-1$
 	private static final String MAP_FILE_NAME_ENDING = '.' + MAP_FILE_EXTENSION;
 	

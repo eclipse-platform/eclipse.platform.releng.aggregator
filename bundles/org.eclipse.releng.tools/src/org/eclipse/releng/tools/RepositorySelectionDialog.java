@@ -46,12 +46,14 @@ public class RepositorySelectionDialog extends Dialog {
 	public RepositorySelectionDialog(Shell shell) {
 		super(shell);
 	}
+	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
 		okButton = createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		okButton.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent.getShell().setText(Messages.getString("RepositorySelectionDialog.0")); //$NON-NLS-1$
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -67,6 +69,7 @@ public class RepositorySelectionDialog extends Dialog {
 		viewer = new TableViewer(table);
 		viewer.setLabelProvider(new WorkbenchLabelProvider());
 		viewer.setContentProvider(new WorkbenchContentProvider() {
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return locations;
 			}
@@ -100,6 +103,7 @@ public class RepositorySelectionDialog extends Dialog {
 		label.setLayoutData(data);
 		return label;
 	}
+	@Override
 	protected void cancelPressed() {
 		location = null;
 		super.cancelPressed();

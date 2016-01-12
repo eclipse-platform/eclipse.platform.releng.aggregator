@@ -327,6 +327,7 @@ public class MapEntry {
 		this.valid = valid;
 	}
 	
+	@Override
 	public String toString() {
 		return "Entry: " + getMapString();
 	}
@@ -334,6 +335,7 @@ public class MapEntry {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof MapEntry) {
 			return ((MapEntry)obj).getMapString().equals(getMapString());

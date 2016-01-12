@@ -179,6 +179,7 @@ public class AdvancedFixCopyrightAction implements IObjectActionDelegate {
 		final MessageConsoleStream stream = console.newMessageStream();
 
 		WorkspaceJob wJob = new WorkspaceJob(Messages.getString("AdvancedFixCopyrightAction.1")) { //$NON-NLS-1$
+			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 				try {
 					long start = System.currentTimeMillis();

@@ -25,6 +25,7 @@ public class TagAndReleaseAction extends CVSAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.TagAction#execute(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	public void execute(IAction action) throws InvocationTargetException, InterruptedException {		
 		//Start the release wizard
 		ReleaseWizard wizard = new ReleaseWizard();
@@ -38,6 +39,7 @@ public class TagAndReleaseAction extends CVSAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 		return true;
 	}

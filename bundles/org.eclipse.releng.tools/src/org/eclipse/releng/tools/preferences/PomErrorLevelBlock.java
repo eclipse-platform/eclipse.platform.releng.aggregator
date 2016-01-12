@@ -20,12 +20,9 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-
 import org.eclipse.jface.dialogs.Dialog;
-
 import org.eclipse.releng.internal.tools.pomversion.IPomVersionConstants;
 import org.eclipse.releng.tools.RelEngPlugin;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -36,11 +33,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
-
 import org.osgi.service.prefs.BackingStoreException;
 
 /**
@@ -169,9 +164,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 			}
 		}
 			
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
+		@Override
 		public String toString() {
 			return qualifier + '/' + key;
 		}
@@ -208,6 +201,7 @@ public class PomErrorLevelBlock extends ConfigurationBlock {
 	 * Default selection listener for controls on the page
 	 */
 	private SelectionListener selectionlistener = new SelectionAdapter() {
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			if(e.widget instanceof Combo) {
 				Combo combo = (Combo) e.widget;

@@ -57,16 +57,12 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 	private Button fIgnoreProperties;
 	private Button fIgnoreXml;
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */
 	public void init(IWorkbench workbench) {
 		// TODO Auto-generated method stub
 
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-	 */
+
+	@Override
 	protected Control createContents(Composite parent) {
 
 		//The main composite
@@ -142,6 +138,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.KeyAdapter#keyReleased(org.eclipse.swt.events.KeyEvent)
 			 */
+			@Override
 			public void keyReleased(KeyEvent e) {
 				validateValues();
 			}
@@ -307,16 +304,12 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 //		}
 //	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#doGetPreferenceStore()
-	 */
+	@Override
 	protected IPreferenceStore doGetPreferenceStore() {
 		return RelEngPlugin.getDefault().getPreferenceStore();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
-	 */
+	@Override
 	protected void performDefaults() {
 		IPreferenceStore store = getPreferenceStore();
 		
@@ -335,9 +328,7 @@ public class CopyrightPreferencePage extends PreferencePage implements IWorkbenc
 		super.performDefaults();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
-	 */
+	@Override
 	public boolean performOk() {
 		IPreferenceStore store = getPreferenceStore();
 

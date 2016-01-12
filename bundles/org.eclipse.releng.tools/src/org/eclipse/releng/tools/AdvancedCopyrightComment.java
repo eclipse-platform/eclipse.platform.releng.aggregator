@@ -57,7 +57,8 @@ public class AdvancedCopyrightComment extends CopyrightComment {
     /**
      * Return the body of this copyright comment or null if it cannot be built.
      */
-    public String getCopyrightComment() {
+    @Override
+	public String getCopyrightComment() {
 
         if ((preYearLinesString != null || postYearLineString != null)) {
             StringBuilder copyrightComment = new StringBuilder();

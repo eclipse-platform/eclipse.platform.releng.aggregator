@@ -25,24 +25,29 @@ public class BatFile extends SourceFile {
 	//Optional Whitespace, #, optional whitespace, then at least 2 non-word chars repeated till EOL 
 	private static Pattern p = Pattern.compile("\\s*@?[rR][eE][mM]\\s+\\W{2,}\\s*"); //$NON-NLS-1$
 	
+	@Override
 	public boolean isCommentStart(String aLine) {
 		return p.matcher(aLine).matches();
 	}
 
+	@Override
 	public boolean isCommentEnd(String aLine, String commentStartString) {
 		String s = commentStartString.trim();
 		s = s.substring(s.length()-2);
 		return aLine.trim().endsWith(s);
 	}
 
+	@Override
 	public String getCommentStart() {
 		return "@rem **";  //unused, Pattern matcher above will be used instead //$NON-NLS-1$
 	}
 
+	@Override
 	public String getCommentEnd() {
 		return "**";  //unused, Pattern matcher above will be used instead //$NON-NLS-1$
 	}
 	
+	@Override
 	public int getFileType() {
 		return CopyrightComment.BAT_COMMENT;
 	}

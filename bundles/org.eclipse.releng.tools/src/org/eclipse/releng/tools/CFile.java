@@ -19,14 +19,17 @@ public class CFile extends SourceFile {
 		super(file);
 	}
 
+	@Override
 	public String getCommentStart() {
 		return "/*"; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getCommentEnd() {
 		return "*/"; //$NON-NLS-1$
 	}
 	
+	@Override
 	public int getFileType() {
 		return CopyrightComment.C_COMMENT;
 	}

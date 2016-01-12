@@ -97,6 +97,7 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.Wizard#createPageControls(org.eclipse.swt.widgets.Composite)
 	 * @since 3.1
 	 */
+	@Override
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 
@@ -138,6 +139,7 @@ public class ReleaseWizard extends Wizard {
 	/**
 	 * @see org.eclipse.jface.wizard.IWizard#addPages()
 	 */
+	@Override
 	public void addPages() {
 		defaultBeingUsed = false;
 		if (preferenceStore.getBoolean(MapProjectPreferencePage.USE_DEFAULT_MAP_PROJECT) &&
@@ -211,6 +213,7 @@ public class ReleaseWizard extends Wizard {
 	 * @see org.eclipse.jface.wizard.Wizard#dispose()
 	 * @since 3.7
 	 */
+	@Override
 	public void dispose() {
 		if (mapProject != null) {
 			mapProject.dispose();
@@ -280,6 +283,7 @@ public class ReleaseWizard extends Wizard {
 	/**
 	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
 	 */
+	@Override
 	public boolean performFinish() {
 		if(!isProjectSelected())return false;
 		
@@ -368,6 +372,7 @@ public class ReleaseWizard extends Wizard {
 	 * 
 	 * @see org.eclipse.jface.wizard.IWizard#getNextPage(org.eclipse.jface.wizard.IWizardPage)
 	 */
+	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		if (page == mapSelectionPage) {
 			if (selectedProjects == null && preSelectedProjects != null) {
@@ -502,6 +507,7 @@ public class ReleaseWizard extends Wizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.IWizard#canFinish()
 	 */
+	@Override
 	public boolean canFinish() {
 		// There must be projects selected
 		if (!isProjectSelected()) {

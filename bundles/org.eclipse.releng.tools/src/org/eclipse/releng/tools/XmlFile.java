@@ -70,7 +70,8 @@ public class XmlFile extends SourceFile {
          *
          * {@inheritDoc}
          */
-        public boolean isCommentStart(String aLine) {
+        @Override
+		public boolean isCommentStart(String aLine) {
             return aLine.trim().contains(getCommentStart());
 
             //Note, above is a bit different from parent, contains/startswithd:
@@ -87,19 +88,23 @@ public class XmlFile extends SourceFile {
         *
         * {@inheritDoc}
         */
-        public boolean isCommentEnd(String aLine, String commentStartString) {
+        @Override
+		public boolean isCommentEnd(String aLine, String commentStartString) {
                 return aLine.trim().contains(getCommentEnd());
                 //Similarly, uses 'contains' instead of 'starts with'
         }
 	
+	@Override
 	public String getCommentStart() {
 	         return "<!--"; //$NON-NLS-1$
 	}
 
+	@Override
 	public String getCommentEnd() {
 		return "-->"; //$NON-NLS-1$
 	}
 	
+	@Override
 	public int getFileType() {
 		return CopyrightComment.XML_COMMENT;
 	}
@@ -111,7 +116,8 @@ public class XmlFile extends SourceFile {
 	 *  If only updating the year, this method is not called. </p>
 	 * @see org.eclipse.releng.tools.SourceFile#doInsert(java.lang.String, org.eclipse.jface.text.IDocument)
 	 */
-        protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
+        @Override
+		protected void doInsert(final String comment, IDocument document) throws BadLocationException, IOException {
 
             //----------------- XML COMMENT CLEAN UP
             // XML comments need extra-tidy up because we need to consider the existance of an XML header

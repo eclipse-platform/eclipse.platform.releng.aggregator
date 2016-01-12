@@ -60,18 +60,21 @@ public class ProjectSelectionPage extends WizardPage {
 
 	private class MapFileLabelProvider extends LabelProvider {
 		WorkbenchLabelProvider provider = new WorkbenchLabelProvider();
+		@Override
 		public String getText(Object element) {
 			if (element instanceof MapFile) {
 				return ((MapFile)element).getName();
 			}
 			return provider.getText(element);
 		}
+		@Override
 		public Image getImage(Object element) {
 			if (element instanceof MapFile) {
 				return provider.getImage(((MapFile)element).getFile());
 			}
 			return provider.getImage(element);
 		}
+		@Override
 		public void dispose() {
 			provider.dispose();
 			super.dispose();
@@ -111,6 +114,7 @@ public class ProjectSelectionPage extends WizardPage {
 		viewer.setLabelProvider(new MapFileLabelProvider());
 		viewer.setContentProvider(getContentProvider());
 		viewer.setComparator(new ResourceComparator(ResourceComparator.NAME) {
+			@Override
 			public int compare(Viewer viewer, Object o1, Object o2) {
 				if (o1 instanceof MapFile && o2 instanceof MapFile) {
 					return super.compare(viewer, ((MapFile) o1).getFile(), ((MapFile) o2).getFile()); 
@@ -129,6 +133,7 @@ public class ProjectSelectionPage extends WizardPage {
 		compareButton.setText(Messages.getString("ProjectSelectionPage.3")); //$NON-NLS-1$
 		compareButton.setFont(font);
 		compareButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				compareButtonChecked = compareButton.getSelection();
 			}
@@ -142,6 +147,7 @@ public class ProjectSelectionPage extends WizardPage {
 	 */
 	private IContentProvider getContentProvider() {
 		return new WorkbenchContentProvider() {
+			@Override
 			public Object[] getChildren(Object parentElement) {
 				if (parentElement instanceof MapProject) {
 					return mapProject.getValidMapFiles();
@@ -155,6 +161,7 @@ public class ProjectSelectionPage extends WizardPage {
 			 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#getParent(java.lang.Object)
 			 * @since 3.7
 			 */
+			@Override
 			public Object getParent(Object element) {
 				if (mapProject == null)
 					return null;
@@ -171,6 +178,7 @@ public class ProjectSelectionPage extends WizardPage {
 				}
 				return super.getParent(element);
 			}
+			@Override
 			public boolean hasChildren(Object element) {
 				if (element instanceof MapFile) {
 					return ((MapFile)element).getAccessibleProjects().length > 0;
@@ -242,6 +250,7 @@ public class ProjectSelectionPage extends WizardPage {
 	 * @see org.eclipse.jface.wizard.WizardPage#setPreviousPage(org.eclipse.jface.wizard.IWizardPage)
 	 * @since 3.7
 	 */
+	@Override
 	public void setPreviousPage(IWizardPage page) {
 		super.setPreviousPage(page);
 		updatePageComplete();

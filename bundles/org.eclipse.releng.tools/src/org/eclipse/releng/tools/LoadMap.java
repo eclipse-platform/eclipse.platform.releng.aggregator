@@ -43,8 +43,10 @@ public class LoadMap extends CVSAction {
 	/**
 	 * @see org.eclipse.team.internal.ccvs.ui.actions.CVSAction#execute(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	protected void execute(IAction action) throws InvocationTargetException, InterruptedException {
 		run(new WorkspaceModifyOperation(null) {
+			@Override
 			public void execute(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					IResource[] resources = getSelectedResources();
@@ -113,6 +115,7 @@ public class LoadMap extends CVSAction {
 	/**
 	 * @see org.eclipse.team.internal.ui.actions.TeamAction#isEnabled()
 	 */
+	@Override
 	public boolean isEnabled() {
 		IResource[] resources = getSelectedResources();
 		if (resources.length == 0) return false;
