@@ -8,6 +8,8 @@
 
 package org.eclipse.releng.tests;
 
+import static org.junit.Assert.*;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,17 +37,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 
-import junit.framework.TestCase;
-
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class BuildTests extends TestCase {
+public class BuildTests {
 
     private String           logFileName;
     private static final int HTML       = 0;
@@ -108,7 +112,7 @@ public class BuildTests extends TestCase {
 
         return result;
     }
-
+    @Test
     public void testChkpii() {
 
         try {
@@ -122,7 +126,7 @@ public class BuildTests extends TestCase {
         }
         catch (IOException e) {
             // skip chkpii test if chkpii cannot be run.
-            setName("testChkpii-NotInstalled");
+        	System.out.println("testChkpii-NotInstalled");
             System.out.println(e.getMessage());
             System.out.println("Skipping chkpii test.");
             assertTrue(true);
@@ -383,19 +387,8 @@ public class BuildTests extends TestCase {
     // include non-shipping test
     // feature
 
-    /**
-     * Constructor for EmptyDirectoriesTest.
-     * 
-     * @param arg0
-     */
-    public BuildTests(String arg0) {
-        super(arg0);
-    }
-
-    /**
-     * @see TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() {
         // Automated Test
         logFileName = Platform.getInstallLocation().getURL().getPath() + ".." + File.separator + ".." + File.separator + "results"
                 + File.separator + "chkpii"; // A tad bogus but this is where
@@ -406,14 +399,7 @@ public class BuildTests extends TestCase {
         // logFileName = "d:\\results";
         // sourceDirectoryName = "d:\\sourceFetch";
     }
-
-    /**
-     * @see TestCase#tearDown()
-     */
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
     public void testFeatureFiles() {
         List result = new ArrayList();
         String installDir = Platform.getInstallLocation().getURL().getPath();
@@ -439,7 +425,7 @@ public class BuildTests extends TestCase {
         }
         assertTrue("Feature directory missing required files: " + aString, result.size() == 0);
     }
-
+    @Test
     public void testPluginFiles() {
         List result = new ArrayList();
         String installDir = Platform.getInstallLocation().getURL().getPath();
@@ -622,7 +608,7 @@ public class BuildTests extends TestCase {
         }
         return true;
     }
-
+    @Test
     public void testJavadocLogs() throws Exception {
         String javadocUrls = System.getProperty("RELENGTEST.JAVADOC.URLS");
         // Skip this test if there are no logs to check
@@ -650,7 +636,7 @@ public class BuildTests extends TestCase {
         message = message.concat("See the javadoc logs linked from the test results page for details");
         assertTrue(message, !problemLogsExist);
     }
-
+    @Test
     public void testDirtyLogSize() throws Exception {
         final boolean DEBUG_DIRTY_TEST = true;
         // MAX_ALLOWED_BYTES will never be 'zero', even if "no dirt" because the
@@ -717,7 +703,7 @@ public class BuildTests extends TestCase {
             }
         }
     }
-
+    @Test
     public void testComparatorLogSize() throws Exception {
         final boolean DEBUG_TEST = true;
         // MAX_ALLOWED_BYTES will never be 'zero', even if no unexpected comparator warnings, because the
@@ -757,7 +743,7 @@ public class BuildTests extends TestCase {
                         + ", which may indicate MAX_ALLOWED_BYTES needs to be lowered, to catch regressions.");
             }
         } else {
-            setName("noComparatorTestsForNBuilds");
+            System.out.println("noComparatorTestsForNBuilds");
         }
     }
 
@@ -802,8 +788,10 @@ public class BuildTests extends TestCase {
             }
         }
     }
-
-    public void _testComparatorLogs() throws Exception {
+    
+    @Ignore
+    @Test
+    public void testComparatorLogs() throws Exception {
         String os = System.getProperty("os.name");
         // Only run compare tool on Linux to save time during tests
         if (os == null || !os.equalsIgnoreCase("Linux")) {

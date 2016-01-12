@@ -32,7 +32,10 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.util.FileUtils;
 import org.eclipse.releng.tools.git.GitCopyrightAdapter;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
@@ -54,6 +57,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 
 	private IFile file1;
 
+	@Before
 	public void setUp() throws Exception {
 		super.setUp();
 		db = createWorkRepository();
@@ -64,6 +68,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 		connect();
 	}
 
+	@After
 	public void tearDown() throws Exception {
 		if (project.exists())
 			project.delete(true, true, NULL_MONITOR);
@@ -72,6 +77,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 		super.tearDown();
 	}
 
+	@Test
 	public void testLastModifiedYear() throws Exception {
 		final Git git = new Git(db);
 		try {
@@ -93,6 +99,7 @@ public class GitCopyrightAdapterTest extends LocalDiskRepositoryTest {
 		Assert.assertEquals(2011, lastModifiedYear);
 	}
 
+	@Test
 	public void testCopyrightUpdateComment() throws Exception {
 		final Git git = new Git(db);
 		try {

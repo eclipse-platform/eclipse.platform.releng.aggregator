@@ -54,33 +54,35 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 
 /**
  * This class is a modified version of org.eclipse.jgit.junit.LocalDiskRepositoryTestCase
  *
  */
-public class LocalDiskRepositoryTest extends TestCase {
+public class LocalDiskRepositoryTest {
 	private static int testCount;
 	protected PersonIdent committer;
 	private final File trash = new File(new File("target"), "trash");
-	private final List toClose = new ArrayList();
+	private final List<Repository> toClose = new ArrayList<Repository>();
 
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		committer = new PersonIdent("J. Committer", "jcommitter@example.com");
 	}
 
-	protected void tearDown() throws Exception {
+	@After
+	public void tearDown() throws Exception {
 		RepositoryCache.clear();
-		for (Iterator it = toClose.iterator(); it.hasNext();) {
-			Repository r = (Repository) it.next();
+		for (Iterator<Repository> it = toClose.iterator(); it.hasNext();) {
+			Repository r = it.next();
 			r.close();
 		}
 		toClose.clear();

@@ -10,22 +10,24 @@
  *******************************************************************************/
 package org.eclipse.releng.tests;
 
-import junit.framework.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.AllTests;
+
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.TestSuite;
 
-public class AllRelengTests extends TestSuite {
-	public static Test suite() {
-		return new AllRelengTests();
+@RunWith(AllTests.class)
+public class AllRelengTests {
+
+	public static TestSuite suite() {
+		TestSuite suite = new TestSuite();
+		suite.addTest(new JUnit4TestAdapter(BuildTests.class));
+		if (isJGitAvailable())
+			suite.addTest(new JUnit4TestAdapter(GitCopyrightAdapterTest.class));
+		return suite;
 	}
 
-	public AllRelengTests() {
-		addTestSuite(BuildTests.class);
-		if (isJGitAvailable()) {
-			addTestSuite(GitCopyrightAdapterTest.class);
-		}
-	}
-
-	private boolean isJGitAvailable() {
+	private static boolean isJGitAvailable() {
 		try {
 			Class.forName("org.eclipse.jgit.api.Git");
 		} catch (ClassNotFoundException e) {
