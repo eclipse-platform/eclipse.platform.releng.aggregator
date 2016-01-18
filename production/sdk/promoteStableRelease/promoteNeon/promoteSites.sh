@@ -18,7 +18,6 @@ DRYRUN=dry-run
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
 export DROP_ID=I20151209-2300
-#export DROP_ID=M20150904-0015
 
 # Ordinarily, BUILD_LABEL (for Eclipse) and Equinox are the same. 
 # But if we are promoting an "RC" site, then may be different, since 
