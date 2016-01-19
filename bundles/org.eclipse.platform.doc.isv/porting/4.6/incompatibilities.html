@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html lang="en">
+<head>
+<meta name="copyright" content="Copyright (c) 2014 IBM Corporation and others. This page is made available under license. For full details see the LEGAL in the documentation book that contains this page." >
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<link rel="STYLESHEET" href="../../book.css" charset="ISO-8859-1" type="text/css">
+<title>Incompatibilities between Eclipse 4.5 and 4.6</title>
+</head>
+
+<body>
+
+<h1>Incompatibilities between Eclipse 4.5 and 4.6</h1>
+
+<p>
+  Eclipse changed in incompatible ways between 4.5 and 4.6 in ways that affect
+  plug-ins. The following entries describe the areas that changed and provide
+  instructions for migrating 4.5 plug-ins to 4.6. Note that you only need to look
+  here if you are experiencing problems running your 4.5 plug-in on 4.6.
+</p>
+<p>
+See also the list of <a href="../removals.html">deprecated API removals</a> for this release.
+</p>
+
+<ol>
+	<li><a href="#STP-locales">StructuredTextProcessor works in all locales</a></li>
+</ol>
+
+<hr>
+
+<!-- ############################################## -->
+
+<h2>1. <a name="STP-locales">StructuredTextProcessor works in all locales</a></h2>
+<p><strong>What is affected:</strong> Clients that call
+<code>org.eclipse.equinox.bidi.StructuredTextProcessor#*process*(..) methods</code>. 
+</p>
+<p><strong>Description:</strong>
+The process/deprocess methods used to work only in certain locales, and were effectively disabled
+if <code>StructuredTextEnvironment#isProcessingNeeded()</code> returned false.
+This was overly restrictive and prevented bidi-aware code from working in other environments.
+<p><strong>Action required:</strong>
+Clients that need to disable bidi processing should do so on a higher level.
+In Eclipse/JFace, bidi support is typically controlled by the application via
+<code>org.eclipse.jface.util.BidiUtils#setBidiSupport(boolean)</code> or by passing
+<code>-bidi "on=y"</code> on the command line.
+</p>
+
+</body>
+</html>
