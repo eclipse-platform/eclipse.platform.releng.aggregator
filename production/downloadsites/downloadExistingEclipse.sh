@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Utility to download the overall "webpages" from DL site, without getting all 
-# the unnessary things, and espcially without getting the huge artifacts. 
+# Utility to download the overall "web pages" from DL site, without getting all 
+# the unnecessary things, and especially without getting the huge artifacts. 
 
 # This is written to be ran "in place" in a local clone of the git tree, so that 
 # a proper "compare" can be done with what is already checked in to git. 
