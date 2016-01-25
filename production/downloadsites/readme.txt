@@ -1,5 +1,5 @@
 The files in this "downloadsites" directory are
-not used during the build, but are releated. This files make up
+not used during the build, but are related. This files make up
 the "main" download pages, that list each of the builds.
 
 On the download server, they reside under
@@ -8,7 +8,7 @@ On the download server, they reside under
 The are stored here in this repository just to have a safe record
 of them, make them easier to compare/change etc., but there is
 nothing "automatic" about making them current or in synch with what
-is on the downlaod server, so its recommended, before making changes,
+is on the download server, so its recommended, before making changes,
 to get a copy, manually compare with that's here, to see if things
 have changed but not be put into the repository.
 
@@ -35,7 +35,7 @@ rsync -aP \
 
 rsync -aP --delete-excluded \
   --exclude '**/devicekit/' --exclude '**/drops/' --exclude '**/R-3.7.2-201202080800/' \
-  --exclude '**/S-3.7RC4-201106030909/' --exclude '**/testweb/' --exclude '**/.*.swp/' \
+  --exclude '**/S-3.7RC4-201106030909/' --exclude '**/.*.swp/' \
   build:/home/data/httpd/download.eclipse.org/equinox/ .
 
 == Similar for "updates"
