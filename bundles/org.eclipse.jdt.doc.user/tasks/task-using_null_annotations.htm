@@ -79,7 +79,7 @@ for its enhanced null analysis (which is disabled by default):
 <ul>
 <li><code>@NonNull</code>: null is not a legal value</li>
 <li><code>@Nullable</code>: null value is allowed and must be expected</li>
-<li><code>@NonNullByDefault</code>: types in method signatures
+<li><code>@NonNullByDefault</code>: types in method signatures and field declarations
 	that lack a null annotation are regarded as non-null.</li>
 </ul>
 <p>Annotations <code>@NonNull</code> and <code>@Nullable</code> are supported in these locations:</p>
@@ -93,16 +93,17 @@ for its enhanced null analysis (which is disabled by default):
 <p><code>@NonNullByDefault</code> is supported for</p>
 <ul>
 <li>Methods - to affect all types in this method's signature</li>
-<li>Types (classes, interfaces, enums) - to affect all methods in the type body</li>
+<li>Types (classes, interfaces, enums) - to affect all methods and fields in the type body</li>
 <li>Package (via a file <code>package-info.java</code>) - to affect all types in the package</li>
 </ul>
 <p>
 Note, that even the actual qualified names of these annotations are 
 <a href="../reference/preferences/java/compiler/ref-preferences-errors-warnings.htm#null_annotation_names">configurable</a>,
 but by default the ones given above are used (from the package <code>org.eclipse.jdt.annotation</code>).
-When using 3rd party null annotations, please ensure that those are properly defined using at least a <code>@Target</code>
+When using 3rd party null annotation types, please ensure that those are properly defined using at least a <code>@Target</code>
 meta annotation, because otherwise the compiler can not distinguish between declaration annotations (Java 5)
-and type annotations (Java 8). 
+and type annotations (Java 8). Furthermore, some <a href="#cancel_default">details of <code>@NonNullByDefault</code></a> are not supported when using
+3rd party annotation types (see <a href="task-using_null_type_annotations.htm#compatibility_semantics">here</a> for the Java 8 variant). 
 </p>
 
 <h2 id="buildpath_setup">Setup of the build path</h2>
@@ -260,7 +261,7 @@ In this situation you will be forced to omit null annotations
 (<em>plans exist to support adding annotations to libraries after-the-fact, but no promise can be made yet,
 if and when such a feature will be available</em>).
 </p>
-<h3>Canceling a nullness default</h3>
+<h3 id="cancel_default">Canceling a nullness default</h3>
 <p>The situation will get tricky, if a sub-type of a "legacy" type resides in a package for which 
 <code>@NonNullByDefault</code> has been specified. Now a type with an un-annotated super-type
 would need to mark all parameters in overriding methods as <code>@Nullable</code>:
@@ -290,6 +291,9 @@ class MyClass extends LegacyClass {
     }
 }
 </pre>
+<p>Canceling a nullness default may not be possible when using annotation types other than
+<code>org.eclipse.jdt.annotation.NonNullByDefault</code> supplied by Eclipse,
+because other annotation types may not declare the boolean property that is used here.</p>
 <h3 id="fields">The case of fields</h3>
 <p>Null annotations work best when applied in <b>method signatures</b> (<b>local variables</b>
 typically don't even need these, but may also leverage null annotations for bridging between
