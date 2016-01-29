@@ -17,7 +17,7 @@ DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=M20160113-1000
+export DROP_ID=M20160128-1800
 
 # Ordinarily, BUILD_LABEL (for Eclipse) and Equinox are the same. 
 # But if we are promoting an "RC" site, then may be different, since 
@@ -33,7 +33,7 @@ export BUILD_MINOR=5
 export BUILD_SERVICE=2
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=RC1
+export CHECKPOINT=RC2
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Mars.2
 
