@@ -84,6 +84,10 @@ export logsDirectory="${buildDirectory}/buildlogs"
 mkdir -p "${logsDirectory}"
 checkForErrorExit $? "Could not create buildlogs directory: ${logsDirectory}"
 
+export loadLog=${loadLog:-"${logsDirectory}/loadLog.txt"}
+# First step uses '>' to start fresh. Subsequent should use '>>'
+printf "%-35s %s\n" "Load at build start: " "$(uptime)" > ${loadLog}
+
 LOG=$buildDirectory/buildlogs/buildOutput.txt
 #exec >>$LOG 2>&1
 
@@ -206,6 +210,7 @@ fn-write-property CBI_JDT_VERSION_ARG
 fn-write-property PATCH_BUILD
 fn-write-property ALT_POM_FILE
 fn-write-property JAVA_DOC_TOOL
+fn-write-property loadLog
 
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
@@ -234,6 +239,7 @@ fn-write-property BUILD_HOME
 
 
 $SCRIPT_PATH/get-aggregator.sh $BUILD_ENV_FILE 2>&1 | tee ${GET_AGGREGATOR_BUILD_LOG}
+printf "%-35s %s\n" "Load after checkout: " "$(uptime)" >> ${loadLog}
 # if file exists, then get-aggregator failed
 if [[ -f "${buildDirectory}/buildFailed-get-aggregator" ]]
 then
@@ -333,7 +339,10 @@ else
   #then
   #  echo "[WARNING] Did not run pom-version-updater due to other variable settings"
   #else
-    $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+
+  $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+  printf "%-35s %s\n" "Load after run-version-updater: " "$(uptime)" >> ${loadLog}
+
   #fi
   # if file exists, pom update failed
   if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
@@ -347,6 +356,7 @@ else
     # if updater failed, something fairly large is wrong, so no need to compile,
     # else, we compile - build here.
     $SCRIPT_PATH/run-maven-build.sh $BUILD_ENV_FILE 2>&1 | tee ${RUN_MAVEN_BUILD_LOG}
+    printf "%-35s %s\n" "Load after run-maven-build: " "$(uptime)" >> ${loadLog}
     # if file exists, then run maven build failed.
     if [[ -f "${buildDirectory}/buildFailed-run-maven-build" ]]
     then
@@ -361,6 +371,7 @@ else
     else
       # if build run maven build failed, no need to gather parts
       $SCRIPT_PATH/gather-parts.sh $BUILD_ENV_FILE 2>&1 | tee ${GATHER_PARTS_BUILD_LOG}
+      printf "%-35s %s\n" "Load after gather-parts: " "$(uptime)" >> ${loadLog}
       if [[ -f "${buildDirectory}/buildFailed-gather-parts" ]]
       then
         buildrc=1
@@ -375,6 +386,7 @@ fi
 
 $SCRIPT_PATH/publish-eclipse.sh $BUILD_ENV_FILE >$logsDirectory/mb080_publish-eclipse_output.txt
 checkForErrorExit $? "Error occurred during publish-eclipse"
+printf "%-35s %s\n" "Load after publish-eclipse: " "$(uptime)" >> ${loadLog}
 
 
 # We don't publish repo if there was a build failure, it likely doesn't exist.
@@ -401,6 +413,7 @@ then
   then
     $SCRIPT_PATH/publish-equinox.sh $BUILD_ENV_FILE >$logsDirectory/mb085_publish-equinox_output.txt
     checkForErrorExit $? "Error occurred during publish-equinox"
+    printf "%-35s %s\n" "Load after publish-equinox: " "$(uptime)" >> ${loadLog}
   fi
 fi
 
@@ -418,6 +431,8 @@ fn-write-property-close
 # dump ALL environment variables in case its helpful in documenting or
 # debugging build results or differences between runs, especially on different machines
 env 1>$logsDirectory/mb100_all-env-variables_output.txt
+
+printf "%-35s %s\n" "Load at build end: " "$(uptime)" >> ${loadLog}
 
 echo "Exiting build with RC code of $buildrc"
 exit $buildrc
