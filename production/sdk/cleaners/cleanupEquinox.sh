@@ -21,7 +21,7 @@ equinoxBuilds=$remoteBase/equinox/drops
 clean() {
   dir=$1
   prefix=$2
-  pushd $dir
+  pushd $dir > /dev/null
 
   builds=$( ls --format=single-column -d $prefix* | sort | head -n-3 )
 
@@ -31,9 +31,12 @@ clean() {
       rm -rf $f
     done
   fi
-  popd
+  popd > /dev/null
 }
 
+
+echo -e "\n\tCurrent date: $(date +%Y\ %m%d\ %H:%M)"
+echo -e "\tRemoving drops from downloads server at ${equinoxBuilds}\n"
 clean $equinoxBuilds N
 clean $equinoxBuilds I
 
