@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2011 IBM Corporation and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#     IBM Corporation - initial API and implementation
+#*******************************************************************************
+# inherited script from John A. in 2016. 
+# Some 'todos': 
+#   bullet proof a little?
+#   handle M builds too?
+
+remoteBase=/home/data/httpd/download.eclipse.org
+
+equinoxBuilds=$remoteBase/equinox/drops
+
+clean() {
+  dir=$1
+  prefix=$2
+  pushd $dir
+
+  builds=$( ls --format=single-column -d $prefix* | sort | head -n-3 )
+
+  if [[ ! -z $builds ]]; then
+    for f in $builds; do
+      echo -e "\tDeleting: $f\n"
+      rm -rf $f
+    done
+  fi
+  popd
+}
+
+clean $equinoxBuilds N
+clean $equinoxBuilds I
+
