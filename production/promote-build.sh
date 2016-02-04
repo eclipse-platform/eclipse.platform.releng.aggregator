@@ -81,7 +81,7 @@ then
   mkdir -p "${promoteScriptLocationEquinox}"
 
   equinoxPostingDirectory="$BUILD_ROOT/siteDir/equinox/drops"
-  eqFromDir=${equinoxPostingDirectory}/${buildId}
+  eqFromDir=${equinoxPostingDirectory}/${BUILD_ID}
   eqToDir="/home/data/httpd/download.eclipse.org/equinox/drops/"
 
   # Note: for proper mirroring at Eclipse, we probably do not want/need to
