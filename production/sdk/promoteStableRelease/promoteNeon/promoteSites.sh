@@ -27,7 +27,7 @@ export DL_TYPE=S
 #export DL_TYPE=R
 #export DL_TYPE=M
 
-export CL_SITE=${PWD}
+export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promoteMars}
 
 # Ordinarily, BUILD_LABEL (for Eclipse) and Equinox are the same. 
 # But if we are promoting an "RC" site, then may be different, since 
