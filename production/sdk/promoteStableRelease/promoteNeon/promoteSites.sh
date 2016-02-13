@@ -2,7 +2,7 @@
 
 # Utility to rename build and "promote" it to DL Server.
 
-EXPORT DRYRUN=dry-run
+export DRYRUN=dry-run
 
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
