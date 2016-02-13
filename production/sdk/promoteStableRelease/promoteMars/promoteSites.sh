@@ -7,7 +7,7 @@ EXPORT DRYRUN=dry-run
 # DROP_ID is the name of the build we are promoting. 
 # That is, the FROM build. The TO name is computed from it, 
 # and a few other variables, below. 
-export DROP_ID=M20160208-1530
+export DROP_ID=M20160212-1500
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
