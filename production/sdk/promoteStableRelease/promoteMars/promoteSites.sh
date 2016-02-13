@@ -11,7 +11,7 @@ export DROP_ID=M20160212-1500
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=RC3
+export CHECKPOINT=RC4
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Mars.2
 
