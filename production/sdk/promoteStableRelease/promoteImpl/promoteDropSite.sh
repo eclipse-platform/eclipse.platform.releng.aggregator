@@ -132,9 +132,16 @@ if [[ "${DL_TYPE}" =~ [SR] ]]
 then
   # as a matter of routine, turn "test color" to green, if not already
   touch ${DL_DROP_ID}/overrideTestColor
-
   # and turn on "news flag"
   touch ${DL_DROP_ID}/news
+fi
+
+# for M-Builds that are RCs (Release Candidates) also override test color, 
+# but no 'news' until Release
+if [[ "${DL_TYPE}" =~ [M] && "${DL_LABEL}" =~ .*RC.* ]]
+then
+  # as a matter of routine, turn "test color" to green, if not already
+  touch ${DL_DROP_ID}/overrideTestColor
 fi
 
 printf "\n\t%s\n" "rsync to downloads."
