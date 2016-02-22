@@ -11,7 +11,7 @@ export DROP_ID=M20160212-1500
 
 # checkpoint means either milestone or release candidate
 # should be empty for final release
-export CHECKPOINT=RC4
+export CHECKPOINT=
 # Used in naming repo and equinox download pages.
 export TRAIN_NAME=Mars.2
 
@@ -24,8 +24,8 @@ export BUILD_SERVICE=2
 # For Maintenance, it's always 'M' (from M-build) until it's 'R'.
 # for main line code, it's 'S' (from I-build) until it's 'R'
 #export DL_TYPE=S
-#export DL_TYPE=R
-export DL_TYPE=M
+export DL_TYPE=R
+#export DL_TYPE=M
 
 export CL_SITE=${CL_SITE:-/shared/eclipse/sdk/promoteStableRelease/promoteMars}
 
