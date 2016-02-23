@@ -111,13 +111,23 @@ function sendPromoteMail ()
   if [[ "${buildType}" =~ [PYX] ]]
   then
     TO="david_williams@us.ibm.com"
-    SUBJECT="Experimental: ${SUBJECT}"
+    case "${buildType}" in
+      "P" )
+        SUBJECT="Patch Build: ${SUBJECT}" ;;
+      "Y" )
+        SUBJECT="Branch SDK Build: ${SUBJECT}" ;;
+      "X" )
+        SUBJECT="Experimental Build: ${SUBJECT}" ;;
+      *)
+        SUBJECT="Unknown buildType ${buildType}: ${SUBJECT}"
+        echo -e "\n\tWARNING: case statement did not match any pattern!\n"
+    esac
   fi
 
   FROM=${FROM:-"e4Builder@eclipse.org"}
 
   # Artificially mark each message for a particular build with unique message-id-like value.
-  # Even though technically incorrect for the initial message it seems to work in 
+  # Even though technically incorrect for the initial message it seems to work in
   # most situations.
   InReplyTo="<${buildId}@build.eclipse.org/build/eclipse/>"
   Reference="${InReplyTo}"
@@ -210,27 +220,29 @@ function startTests()
   echo "DEBGUG CBI buildDropDir: $buildDropDir"
   builderDropDir=${buildDropDir}/${eclipsebuilder}
   echo "DEBUG: CBI builderDropDir: ${builderDropDir}"
-  
+
   # finally, execute ... unless its a patch build
   if [[ "${buildType}" != "P" ]]
   then
-     ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
+    ${builderDropDir}/startTests.sh ${eclipseStream} ${buildId} ${EBUILDER_HASH}
   else
-     printf "\n\tNo tests ran for Patch builds.\n"
+    printf "\n\tNo tests ran for Patch builds.\n"
   fi
 
-  # Since we have already uploaded everything, before invoking tests, 
-  # if we got an error invoking tests, must copy-up now. 
+  # Since we have already uploaded everything, before invoking tests,
+  # if we got an error invoking tests, must copy-up now.
   if [[ -e ${buildDropDir}/TEST_INVOCATION_FAILED.html ]]
   then
-     dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
-     rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED.html  ${dlSite}/${buildId}/
+    dlSite=$( dropOnDLServer ${eclipseStream} ${buildId} )
+    rsync -a ${buildDropDir}/TEST_INVOCATION_FAILED.html  ${dlSite}/${buildId}/
   fi
 
 }
 
 # this function currently sync's local repo on build machine, and adds
 # it to composite, on download server.
+# NOTE: for patch builds we go ahead and upload, but we do not add to
+# composite automatically, until later, when patch is confirmed.
 function syncRepoSite ()
 {
   eclipseStream=$1
@@ -291,7 +303,6 @@ function syncRepoSite ()
   fi
 
 
-
   # update composite!
   # add ${buildId} to {toDir}
 
@@ -304,9 +315,16 @@ function syncRepoSite ()
   # assume ant is on the path
   ant -f $EBuilderDir/eclipse/getBaseBuilderAndTools.xml -DWORKSPACE=$dropFromBuildDir
 
-  ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
-  RC=$?
+  if [[ "${buildType}" != "P"
+  then
+    ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
+    RC=$?
+  else
+    echo -e "\n\tREMINDER: patch build must be added to composite after confirmation\n"
+    RC=0
+  fi
   return $RC
+
 }
 
 
