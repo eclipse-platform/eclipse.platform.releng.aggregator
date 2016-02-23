@@ -110,15 +110,19 @@ function sendPromoteMail ()
   # for initial testing, only to me -- change as desired after initial testing.
   if [[ "${buildType}" =~ [PYX] ]]
   then
-    TO="david_williams@us.ibm.com"
+    
     case "${buildType}" in
       "P" )
+        TO="david_williams@us.ibm.com, jdt-core-dev@eclipse.org"
         SUBJECT="Patch Build: ${SUBJECT}" ;;
       "Y" )
+        TO="david_williams@us.ibm.com, jdt-core-dev@eclipse.org"
         SUBJECT="Branch SDK Build: ${SUBJECT}" ;;
       "X" )
+        TO="david_williams@us.ibm.com"
         SUBJECT="Experimental Build: ${SUBJECT}" ;;
       *)
+        TO="david_williams@us.ibm.com"
         SUBJECT="Unknown buildType ${buildType}: ${SUBJECT}"
         echo -e "\n\tWARNING: case statement did not match any pattern!\n"
     esac
