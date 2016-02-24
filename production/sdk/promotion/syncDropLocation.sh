@@ -190,7 +190,8 @@ function sendPromoteMail ()
 
   sendEclipseMail "${TO}" "${FROM}" "${SUBJECT}" "${message1}"
 
-  echo "INFO: mail sent for $eclipseStream $buildType-build $buildId"
+  echo -e "\n\tINFO: mail sent for $eclipseStream $buildType-build $buildId"
+  echo "\tINFO:\n\t\t${TO}\n\t\t${FROM}\n\t\t${SUBJECT}\n\t\t${message1}\n"
   return 0
 }
 
