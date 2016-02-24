@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SCRIPTDIR=$( dirname $0 )
+export SCRIPTDIR=$( dirname $0 )
 echo "SCRIPTDIR: ${SCRIPTDIR}"
 source ${SCRIPTDIR}/syncUpdateUtils.shsource
 
@@ -105,30 +105,7 @@ function sendPromoteMail ()
   # 4.3.0 Build: I20120411-2034
   SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
 
-  # override 'TO' in localBuildProperties.shsource if doing local tests
-  # for initial testing, only to me -- change as desired after initial testing.
-  if [[ "${buildType}" =~ [PYX] ]]
-  then
-    case "${buildType}" in
-      "P" )
-        TO=${TO:-"david_williams@us.ibm.com, jdt-core-dev@eclipse.org"}
-        SUBJECT="Patch Build: ${SUBJECT}" ;;
-      "Y" )
-        TO="david_williams@us.ibm.com, jdt-core-dev@eclipse.org"
-        SUBJECT="Branch SDK Build: ${SUBJECT}" ;;
-      "X" )
-        TO=${TO:-"david_williams@us.ibm.com"}
-        SUBJECT="Experimental Build: ${SUBJECT}" ;;
-      *)
-        TO=${TO:-"david_williams@us.ibm.com"}
-        SUBJECT="Unknown buildType ${buildType}: ${SUBJECT}"
-        echo -e "\n\tWARNING: Unreachable code. Programming error. case statement did not match any pattern!\n"
-    esac
-    else
-      TO=${TO:-"platform-releng-dev@eclipse.org"}
-  fi
-
-  FROM=${FROM:-"e4Builder@eclipse.org"}
+  setToAndFromAddresses
 
   # Artificially mark each message for a particular build with unique message-id-like value.
   # Even though technically incorrect for the initial message it seems to work in

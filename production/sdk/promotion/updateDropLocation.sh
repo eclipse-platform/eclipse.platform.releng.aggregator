@@ -271,17 +271,7 @@ function sendTestResultsMail ()
     fi
     SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId}: ${testsFailed} ${failures} from ${JOB_NAME}"
 
-    # override in localBuildProperties.shsource if doing local tests
-    TO=${TO:-"platform-releng-dev@eclipse.org"}
-
-    # for initial testing, only to me -- change as desired after initial testing.
-    if [[ "${buildType}" =~ [PYX] ]]
-    then
-      TO="david_williams@us.ibm.com"
-      SUBJECT="Experimental: ${SUBJECT}"
-    fi
-
-    FROM=${FROM:-"e4Builder@eclipse.org"}
+    setToAndFromAddresses
 
     # Artificially mark each message for a particular build with unique message-id-like value.
     # Even though technically incorrect for the initial message it seems to work in

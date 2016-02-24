@@ -92,7 +92,7 @@ function updateSiteOnDL()
   toSiteDir="/home/data/httpd/download.eclipse.org/eclipse/updates"
 
 
-    updatesSuffix="builds"
+  updatesSuffix="builds"
 
   toMainUpdateDir=$toSiteDir/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/
   # We'll check for existence, and create if doesn't exist ... as long as it is "under" our
@@ -149,11 +149,11 @@ function updateSiteOnBuildDir()
   buildType=${buildId:0:1}
 
 
-    buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
 
-    siteDir=${buildRoot}/siteDir
-    updatesSuffix="builds"
-    fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
+  siteDir=${buildRoot}/siteDir
+  updatesSuffix="builds"
+  fromDir=$siteDir/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-${updatesSuffix}/${buildId}
 
   echo $fromDir
 }
@@ -176,7 +176,7 @@ function dropFromBuildDir ()
   eclipseStreamMajor=${eclipseStream:0:1}
   buildType=${buildId:0:1}
 
-    buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
+  buildRoot=${BUILD_HOME}/${eclipseStreamMajor}${buildType}
 
   siteDir=${buildRoot}/siteDir
 
@@ -324,37 +324,72 @@ function linkURL ()
 {
   url="${1}"
   if [[ -z "${url}" ]]
-    then 
-      echo "Programming error. URL must not be null as argument to 'linkURL'"
-      exit 1
-    fi
+  then 
+    echo "Programming error. URL must not be null as argument to 'linkURL'"
+    exit 1
+  fi
   link="<a href=\"${url}\">${url}</a>"
   echo ${link}
 }
 
 function sendEclipseMail ()
 {
-   TO="$1"
-   FROM="$2"
-   SUBJECT="$3"
-   message1="$4"
-   (
-    echo "To: ${TO}"
-    echo "From: ${FROM}"
-    if [[ -n "${InReplyTo}" ]]
-      then
-        echo "In-Reply-To: ${InReplyTo}"
-      fi
-    if [[ -n "${Reference}" ]]
-      then
-        echo "Reference: ${Reference}"
-      fi
-    echo "MIME-Version: 1.0"
-    echo "Content-Type: text/html; charset=utf-8"
-    echo "Subject: ${SUBJECT}"
-    echo "<html><body>"
-    echo -e "${message1}"
-    echo "</body></html>"
-    ) | /usr/lib/sendmail -t
- 
+  TO="$1"
+  FROM="$2"
+  SUBJECT="$3"
+  message1="$4"
+  (
+  echo "To: ${TO}"
+  echo "From: ${FROM}"
+  if [[ -n "${InReplyTo}" ]]
+  then
+    echo "In-Reply-To: ${InReplyTo}"
+  fi
+  if [[ -n "${Reference}" ]]
+  then
+    echo "Reference: ${Reference}"
+  fi
+  echo "MIME-Version: 1.0"
+  echo "Content-Type: text/html; charset=utf-8"
+  echo "Subject: ${SUBJECT}"
+  echo "<html><body>"
+  echo -e "${message1}"
+  echo "</body></html>"
+  ) | /usr/lib/sendmail -t
+
+}
+
+function setToAndFromAddresses ()
+{
+# This bit of data is used in a few other scripts, such as
+# syncDropLocation.sh and updateDropLoction.sh
+# It primarily sets the TO and FROM fields for email. 
+# It also supplements the SUBJECT.
+
+
+# override 'TO' in localBuildProperties.shsource if doing local tests
+# for initial testing, only to me -- change as desired after initial testing.
+if [[ "${buildType}" =~ [PYX] ]]
+then
+  case "${buildType}" in
+    "P" )
+      export TO=${TO:-"david_williams@us.ibm.com,jdt-core-dev@eclipse.org"}
+      export SUBJECT="Patch Build: ${SUBJECT}" ;;
+    "Y" )
+      export TO=${TO:-"david_williams@us.ibm.com,jdt-core-dev@eclipse.org"}
+      export SUBJECT="Branch SDK Build: ${SUBJECT}" ;;
+    "X" )
+      export TO=${TO:-"david_williams@us.ibm.com"}
+      export SUBJECT="Experimental Build: ${SUBJECT}" ;;
+    *)
+      export TO=${TO:-"david_williams@us.ibm.com"}
+      export SUBJECT="Unknown buildType ${buildType}: ${SUBJECT}"
+      echo -e "\n\tWARNING: Unreachable code. Programming error. case statement did not match any pattern!\n"
+  esac
+else
+  export TO=${TO:-"platform-releng-dev@eclipse.org"}
+fi
+
+export FROM=${FROM:-"e4Builder@eclipse.org"}
+
 }
