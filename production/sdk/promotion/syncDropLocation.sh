@@ -64,9 +64,10 @@ function sendPromoteMail ()
   #       compared to reference repo at
   #     http://download.eclipse.org/eclipse/updates/4.5-I-builds
   # = = = =
-  # So we'll set "500 bytes" as minimum which should both ignore all "minimum's",
+  # So we'll set "250 bytes" as minimum which should both ignore all "minimum's",
   # and catch anything of substance.
-  comparatorLogMinimumSize=210
+  # Will adjust as needed.
+  comparatorLogMinimumSize=250
 
   mainPath=$( dlToPath "$eclipseStream" "$buildId")
   echo "     mainPath: $mainPath"
@@ -104,28 +105,27 @@ function sendPromoteMail ()
   # 4.3.0 Build: I20120411-2034
   SUBJECT="${eclipseStream} ${buildType}-Build: ${buildId} $EXTRA_SUBJECT_STRING"
 
-  # override in localBuildProperties.shsource if doing local tests
-  TO=${TO:-"platform-releng-dev@eclipse.org"}
-
+  # override 'TO' in localBuildProperties.shsource if doing local tests
   # for initial testing, only to me -- change as desired after initial testing.
   if [[ "${buildType}" =~ [PYX] ]]
   then
-    
     case "${buildType}" in
       "P" )
-        TO="david_williams@us.ibm.com, jdt-core-dev@eclipse.org"
+        TO=${TO:-"david_williams@us.ibm.com, jdt-core-dev@eclipse.org"}
         SUBJECT="Patch Build: ${SUBJECT}" ;;
       "Y" )
         TO="david_williams@us.ibm.com, jdt-core-dev@eclipse.org"
         SUBJECT="Branch SDK Build: ${SUBJECT}" ;;
       "X" )
-        TO="david_williams@us.ibm.com"
+        TO=${TO:-"david_williams@us.ibm.com"}
         SUBJECT="Experimental Build: ${SUBJECT}" ;;
       *)
-        TO="david_williams@us.ibm.com"
+        TO=${TO:-"david_williams@us.ibm.com"}
         SUBJECT="Unknown buildType ${buildType}: ${SUBJECT}"
-        echo -e "\n\tWARNING: case statement did not match any pattern!\n"
+        echo -e "\n\tWARNING: Unreachable code. Programming error. case statement did not match any pattern!\n"
     esac
+    else
+      TO=${TO:-"platform-releng-dev@eclipse.org"}
   fi
 
   FROM=${FROM:-"e4Builder@eclipse.org"}
