@@ -133,10 +133,19 @@ function sendPromoteMail ()
   # Do not include repo, if build failed
   if [[ -z "${BUILD_FAILED}" ]]
   then
-    link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
-    message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
-    link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
-    message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+    # custom message if doing patch build
+    if [[ "${buildType}" == "P" ]]
+    then 
+      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
+      message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
+      message1="${message1}<p>Remember: The patch must be confirmed before is it added to the composite: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+    else
+      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds)
+      message1="${message1}<p>Software site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+      link=$(linkURL http://${SITE_HOST}/eclipse/updates/${eclipseStreamMajor}.${eclipseStreamMinor}-${buildType}-builds/${buildId})
+      message1="${message1}<p>Specific (simple) site repository: <br />\n&nbsp;&nbsp;&nbsp;${link}</p>\n"
+    fi
   fi
 
   # Do not include Equinox, if build failed, or if patch or experimental build
