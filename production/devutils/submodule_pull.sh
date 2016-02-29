@@ -1,11 +1,11 @@
 #!/bin/bash
 # for this branch.
 # the branches of submodules should match what is in ../streams/repositories.txt
-# This script assumes aggregator has been cloned,
+# This script assumes aggregator project has been cloned,
 # and submodules initially 'updated', as per
 # http://wiki.eclipse.org/Platform-releng/Platform_Build#cloning_platform_source_tree
 #
-# intended to be executed "in place" in devutils so we always 'move up' a directory to get to submodule direcotory
+# intended to be (temporarily) 'moved up' several directories to get to correct location
 branch=master
 #branch=R4_5_maintenance
 echo rt.equinox.bundles ; cd ../rt.equinox.bundles ; git fetch; git checkout ${branch} ; git pull ;
