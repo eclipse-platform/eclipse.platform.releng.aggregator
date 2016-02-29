@@ -7,6 +7,12 @@
     This script is a starting point for creating a traditional
     "delta pack" for anyone who does not what to use p2 directly.
     
+    The ant task has to be invoked via the antRunner application. Something 
+    similar to 
+      ./eclipse -application org.eclipse.ant.core.antRunner -f createdeltapack.xml
+    
+    Be sure to adjust, or pass in, the appropriate buildLabel and buildRepo.
+    
     Note: the resulting delta pack has not been tested. 
     
     Please comment in bug 470913 with imrovements that can be made.
@@ -21,8 +27,8 @@
       name="projectDir"
       value="${basedir}" />
     <property
-      name="buildId"
-      value="I201503032000" />
+      name="buildLabel"
+      value="latestIBuild" />
     <property
       name="resultsDir"
       value="${projectDir}/results" />
@@ -38,25 +44,22 @@
     <mkdir dir="${buildlogs}" />
 
     <record
-      name="${buildlogs}/deltaPack-${buildId}-log.txt"
+      name="${buildlogs}/deltaPack-${buildLabel}-log.txt"
       action="start" />
 
     <property
       name="buildRepo"
-      value="http://download.eclipse.org/eclipse/updates/4.6/" />
+      value="http://download.eclipse.org/eclipse/updates/I-builds" />
     <property
       name="projectDir"
       value="${basedir}" />
-    <property
-      name="buildId"
-      value="I201503032000" />
     <property
       name="archivePrefix"
       value="eclipse" />
 
     <property
       name="archiveRoot"
-      value="${archivePrefix}-${buildId}" />
+      value="${archivePrefix}-${buildLabel}" />
     <property
       name="archiveName"
       value="${archiveRoot}-delta-pack.zip" />
@@ -148,7 +151,8 @@
         includeOptional="false"
         includeNonGreedy="false"
         followStrict="true"
-        followOnlyFilteredRequirements="true" />
+        followOnlyFilteredRequirements="true"
+        latestVersionOnly="true"/>
     </p2.mirror>
     <p2.remove.iu>
       <repository location="file://${featureTemp}" />
@@ -208,7 +212,7 @@
     -->
 
     <record
-      name="${buildlogs}/deltaPack-${buildId}-log.txt"
+      name="${buildlogs}/deltaPack-${buildLabel}-log.txt"
       action="stop" />
 
   </target>
