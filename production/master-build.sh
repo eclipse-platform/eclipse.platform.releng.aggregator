@@ -51,7 +51,7 @@ if [[ "${BUILD_TYPE}" == "N" ]]
 then
   GIT_PUSH='echo no git push done since Nightly'
 fi
-if [[ "${BUILD_TYPE}" =~ [XY] ]]
+if [[ "${BUILD_TYPE}" == "X" ]]
 then
   GIT_PUSH='echo no git push done since Experimental build'
 fi
