@@ -58,7 +58,7 @@ fn-summarize-comparator-logs "$BUILD_ID" \
   "$buildDirectory" "$launcherJar"
 
 # As far as I know, "API Tooling" is not very useful for a patch feature, or X or Y build.
-if  [[ ! $BUILD_TYPE =~ [PXY] ]]
+if  [[ ! $BUILD_TYPE =~ [PX] ]]
 then
    fn-summarize-apitooling "$BUILD_ID" \
      "${EBuilderDir}/eclipse/buildScripts/api-tools-builder.xml" \
