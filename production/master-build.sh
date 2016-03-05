@@ -347,8 +347,8 @@ else
   #then
   #  echo "[WARNING] Did not run pom-version-updater due to other variable settings"
   #else
-  $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
-  printf "%-35s %s\n" "Load after run-version-updater: " "$(uptime)" >> ${loadLog}
+ # $SCRIPT_PATH/pom-version-updater.sh $BUILD_ENV_FILE 2>&1 | tee ${POM_VERSION_UPDATE_BUILD_LOG}
+ # printf "%-35s %s\n" "Load after run-version-updater: " "$(uptime)" >> ${loadLog}
   #fi
   # if file exists, pom update failed
   if [[ -f "${buildDirectory}/buildFailed-pom-version-updater" ]]
