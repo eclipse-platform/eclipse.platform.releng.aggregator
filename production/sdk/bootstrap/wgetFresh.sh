@@ -20,7 +20,7 @@ initScriptTag=master
 
 echo "Fetching bootstrap files from $GIT_HOST"
 
-wget --no-verbose --no-cache  -O mb4M.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/sdk/bootstrap/mb4N_hudson.sh?h=$initScriptTag 2>&1;
+wget --no-verbose --no-cache  -O mb4N_hudson.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/sdk/bootstrap/mb4N_hudson.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4M.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/sdk/bootstrap/mb4M.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4I.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/sdk/bootstrap/mb4I.sh?h=$initScriptTag 2>&1;
 wget --no-verbose --no-cache  -O mb4N.sh http://${GIT_HOST}/c/platform/eclipse.platform.releng.aggregator.git/plain/production/sdk/bootstrap/mb4N.sh?h=$initScriptTag 2>&1;
