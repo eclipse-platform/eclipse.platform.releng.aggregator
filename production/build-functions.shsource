@@ -394,13 +394,15 @@ fn-maven-build-aggregator ()
   # mvn versions:display-property-updates -Dmaven.repo.local=$LOCAL_REPO > ${logsDirectory}/display-property-updates.txt
   # Note: we pass in bogus eclipse-p2-repo.url value (XXXXX), to help ensure no regressions of 
   # bug 471835 (See bug 478483)  
+  # Note: reactorBuildTimestampProperty was added as a work around for bug 486698.
+  # It should be removed once bug 486783 is fixed. I created bug 489510 as a reminder to remove the workaround.
   mvn $MARGS ${FAIL_OPTION} -V  ${ALT_POM_FILE} \
     clean verify \
     -DskipTests=true \
     -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
     -Dtycho.debug.artifactcomparator \
     -Dcbi.jarsigner.continueOnFail=true -Djgit.dirtyWorkingTree=error \
-    -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
+    -DbuildTimestamp="${TIMESTAMP}" -DreactorBuildTimestampProperty="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}"  -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE" ${FORCEQUALIFIERARG} ${CODE_WARNINGS} ${JAVA_DOC_TOOL}
   rc=$?
   popd
   return $rc
