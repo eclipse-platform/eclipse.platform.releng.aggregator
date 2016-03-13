@@ -64,6 +64,8 @@ do
       ;;
   esac
 done
+# always run in 'test' mode, for Hudson job.
+export testbuildonly=true
 
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
