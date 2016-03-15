@@ -423,6 +423,10 @@ then
   fi
 fi
 
+# create repo reports. Depends on exported 'BUILD_ID'. 
+$SCRIPT_PATH/createReports.sh
+checkForErrorExit $? "Error occurred during createReports.sh"
+
 # if all ended well, put "promotion scripts" in known locations
 $SCRIPT_PATH/promote-build.sh $BUILD_ENV_FILE 2>&1 | tee $logsDirectory/mb090_promote-build_output.txt
 checkForErrorExit $? "Error occurred during promote-build"
