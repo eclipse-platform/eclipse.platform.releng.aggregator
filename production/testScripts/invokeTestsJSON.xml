@@ -32,6 +32,7 @@
     <echo message="buildType: ${buildType}" />
     <echo message="EBUILDER_HASH: ${EBUILDER_HASH}" />
     <antcall target="JUnitTests" />
+    <antcall target="GTK3JUnitTests" />
     <antcall target="PerfTests" />
   </target>
 
@@ -64,8 +65,33 @@
         name="job"
         value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-mac64" />
     </antcall>
+    
+    <antcall target="triggerHudsonTests">
+      <param
+        name="job"
+        value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64" />
+    </antcall>
 
   </target>
+  
+    <target
+    name="GTK3JUnitTests"
+    depends="init">
+
+    <!--
+      currently we test on four platforms.
+      These GTK3 tests are "just like the others", except the URL to "send it to" differs.
+    -->
+
+    
+    <antcall target="triggerHudsonGTK3Tests">
+      <param
+        name="job"
+        value="ep${eclipseStreamMajor}${eclipseStreamMinor}${buildType}-unit-cen64" />
+    </antcall>
+
+  </target>
+  
   <target
     name="PerfTests"
     depends="init">
@@ -145,6 +171,81 @@
       errorproperty="unitErrorOutput">
       <arg line="-X POST" />
       <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_ROOT_URI}/job/${job}/build" />
+      <arg line="-d token=${env.HUDSON_TOKEN}" />
+      <arg value="--fail" />
+      <arg value="--data-urlencode" />
+      <arg value="json=${json}" />
+    </exec>
+    <echo message="DEBUG: rcUnit: ${rcUnit}" />
+    <condition property="invocationNotOk">
+      <not>
+        <equals
+          arg1="${rcUnit}"
+          arg2="0" />
+      </not>
+    </condition>
+    <!--
+       TODO: We could produced a "TEST_ARE_RUNNING_ON" file here too, when rc = 0 .. that is unless="invocationNoOk" 
+       and included the URL of build or performance machine tests. 
+    -->
+    <antcall target="checkInvocation">
+      <param
+        name="returnCode"
+        value="${rcUnit}" />
+      <param
+        name="job"
+        value="${job}" />
+      <param
+        name="output"
+        value="${unitOutput}" />
+      <param
+        name="errorOutput"
+        value="${unitErrorOutput}" />
+    </antcall>
+  </target>
+  <target
+    name="triggerHudsonGTK3Tests"
+    depends="init">
+    <!--
+      baseURL used to be "required parameter" for Hudson job, but seemed overly complicated so
+      I compute all this later (based on stream and id) but, I've learned, one disadvantage is this
+      restricts test code locations to "downloads". There might be times we want to do from "build"
+      locations, or similar. Not to mention, other, internal test systems someday.
+
+      <property
+      name="baseURL"
+      value="http://download.eclipse.org/eclipse/downloads/${dropsDirSegment}/${buildId}" />
+    -->
+
+    <!-- Hudson jobs currently have four required parameters -->
+    <property
+      name="JSON_buildId"
+      value="{&quot;name&quot;:&quot;buildId&quot;,&quot;value&quot;:&quot;${buildId}&quot;}" />
+    <property
+      name="JSON_eclipseStream"
+      value="{&quot;name&quot;:&quot;eclipseStream&quot;,&quot;value&quot;:&quot;${eclipseStream}&quot;}" />
+    <property
+      name="JSON_EBUILDER_HASH"
+      value="{&quot;name&quot;:&quot;EBUILDER_HASH&quot;,&quot;value&quot;:&quot;${EBUILDER_HASH}&quot;}" />
+
+    <property
+      name="json"
+      value="{&quot;parameter&quot;:[${JSON_buildId},${JSON_eclipseStream},${JSON_EBUILDER_HASH}]}" />
+
+    <echo message="env.HUDSON_PROTOCOL: ${env.HUDSON_PROTOCOL}" />
+    <echo message="env.HUDSON_HOST: ${env.HUDSON_HOST}" />
+    <echo message="env.HUDSON_PORT: ${env.HUDSON_PORT}" />
+    <echo message="env.HUDSON_GTK3_ROOT_URI: ${env.HUDSON_GTK3_ROOT_URI}" />
+    <echo message="json for unit curl post: ${json}" />
+    <echo message="job: ${job}" />
+
+    <exec
+      executable="curl"
+      resultproperty="rcUnit"
+      outputproperty="unitOutput"
+      errorproperty="unitErrorOutput">
+      <arg line="-X POST" />
+      <arg value="${env.HUDSON_PROTOCOL}://${env.HUDSON_HOST}:${env.HUDSON_PORT}/${env.HUDSON_GTK3_ROOT_URI}/job/${job}/build" />
       <arg line="-d token=${env.HUDSON_TOKEN}" />
       <arg value="--fail" />
       <arg value="--data-urlencode" />
@@ -313,6 +414,9 @@
     <property
       name="env.HUDSON_ROOT_URI"
       value="shared" />
+    <property
+      name="env.HUDSON_GTK3_ROOT_URI"
+      value="platform" />
     <property
       name="env.HUDSON_PERF_HOST"
       value="hudson.eclipse.org" />
