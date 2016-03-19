@@ -63,7 +63,7 @@ public class UITestApplication  implements IPlatformRunnable, ITestHarness, IApp
 		if (!IPlatformRunnable.EXIT_OK.equals(result)) {
 			System.err.println("UITestRunner: Unexpected result from running application " + application + ": " + result);
 		}
-		return new Integer(fTestRunnerResult);
+		return Integer.valueOf(fTestRunnerResult);
 	}
 	
 	

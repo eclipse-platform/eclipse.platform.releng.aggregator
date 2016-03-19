@@ -31,7 +31,7 @@ public class CoreTestApplication implements IPlatformRunnable {
 	@Override
 	public Object run(Object arguments) throws Exception {
 		String[] args= Platform.getCommandLineArgs();//getCommand//processCommandLine((String[]) arguments);
-		return new Integer(runTests(args));
+		return Integer.valueOf(runTests(args));
 	}
 
 	protected int runTests(String[] args) throws IOException {
