@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 489985
  *******************************************************************************/
 package org.eclipse.releng.tools;
 
@@ -192,7 +193,7 @@ public class GetBugsOperation {
 		}
 		Matcher matcher = bugPattern.matcher(comment);
 		while (matcher.find()) {
-			Integer bugNumber = new Integer(matcher.group(1));
+			Integer bugNumber = Integer.valueOf(matcher.group(1));
 			set.add(bugNumber);
 		}
 	}

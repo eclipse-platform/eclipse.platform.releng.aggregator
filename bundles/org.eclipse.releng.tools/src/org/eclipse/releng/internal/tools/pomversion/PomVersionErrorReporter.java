@@ -7,6 +7,7 @@
  * 
  *  Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 489985
  *******************************************************************************/
 package org.eclipse.releng.internal.tools.pomversion;
 
@@ -430,16 +431,16 @@ public class PomVersionErrorReporter implements IResourceChangeListener, IEclips
 			HashMap<String, Object> attributes = new HashMap<>();
 			attributes.put(IMarker.MESSAGE, message);
 			if (severity.equals(IPomVersionConstants.VALUE_WARNING)){
-				attributes.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_WARNING));
+				attributes.put(IMarker.SEVERITY, Integer.valueOf(IMarker.SEVERITY_WARNING));
 			} else {
-				attributes.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_ERROR));
+				attributes.put(IMarker.SEVERITY, Integer.valueOf(IMarker.SEVERITY_ERROR));
 			}
 			if (lineNumber == -1) {
 				lineNumber = 1;
 			}
-			attributes.put(IMarker.LINE_NUMBER, new Integer(lineNumber));
-			attributes.put(IMarker.CHAR_START, new Integer(charStart));
-			attributes.put(IMarker.CHAR_END, new Integer(charEnd));
+			attributes.put(IMarker.LINE_NUMBER, Integer.valueOf(lineNumber));
+			attributes.put(IMarker.CHAR_START, Integer.valueOf(charStart));
+			attributes.put(IMarker.CHAR_END, Integer.valueOf(charEnd));
 			attributes.put(IPomVersionConstants.POM_CORRECT_VERSION, correctedVersion);
 			MarkerUtilities.createMarker(pom, attributes, IPomVersionConstants.PROBLEM_MARKER_TYPE);
 		} catch (CoreException e){
