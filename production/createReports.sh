@@ -57,7 +57,7 @@ ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_H
 -DreportOutputDir=${output_dir} \
 -DreferenceRepo=${buildToCompare}
 
-${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
+${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx2g \
 -DuseNewApi=true \
 -DreportRepoDir=${buildToTest} \
 -DreportOutputDir=${output_dir} \
