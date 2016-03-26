@@ -8,6 +8,7 @@
 // we'd probably want a consistent ordering.
 
 $expectedTestConfigs = array();
-$expectedTestConfigs[]="linux.gtk.x86_64_8.0";
-$expectedTestConfigs[]="macosx.cocoa.x86_64_8.0";
-$expectedTestConfigs[]="win32.win32.x86_8.0";
+$expectedTestConfigs[]="ep46N-unit-lin64_linux.gtk.x86_64_8.0";
+$expectedTestConfigs[]="ep46N-unit-mac64_macosx.cocoa.x86_64_8.0";
+$expectedTestConfigs[]="ep46N-unit-win32_win32.win32.x86_8.0";
+$expectedTestConfigs[]="ep46N-unit-win32_linux.gtk.x86_64_8.0";
