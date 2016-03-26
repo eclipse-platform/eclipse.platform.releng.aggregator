@@ -7,6 +7,8 @@
 // while not sure how that can be controlled, eventually, in either case
 // we'd probably want a consistent ordering.
 
+include_once("buildproperties.php");
+
 $expectedTestConfigs = array();
 $expectedTestConfigs[]="ep46${BUILD_TYPE}-unit-lin64_linux.gtk.x86_64_8.0";
 $expectedTestConfigs[]="ep46${BUILD_TYPE}-unit-mac64_macosx.cocoa.x86_64_8.0";
