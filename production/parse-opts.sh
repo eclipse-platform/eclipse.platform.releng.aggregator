@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 
-SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
+export SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 
 set -- $( getopt -l buildArea:,stream:,branch: -o "" --  "$@" )
 

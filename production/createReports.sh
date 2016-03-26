@@ -39,9 +39,9 @@ mkdir -p ${output_dir}
 tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
 
 report_app_area="${app_area}/reportApplication"
-if [[ ! -e ${tar_name} ]]
+if [[ ! -e ${TMP_DIR}/${tar_name} ]]
 then
-    wget --no-verbose --no-cache https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+    wget --no-verbose --no-cache -O ${TMP_DIR}/${tar_name} https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
 fi
 # always extract anew each time.
 if [[ -e ${report_app_area} ]]
@@ -50,7 +50,7 @@ then
 fi
 mkdir -p ${report_app_area}
 
-tar -xf org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz -C ${report_app_area}
+tar -xf ${TMP_DIR}/${tar_name} -C ${report_app_area}
 
 ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
 -DreportRepoDir=${buildToTest} \

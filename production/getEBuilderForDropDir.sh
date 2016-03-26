@@ -6,7 +6,7 @@
 printf "\n\tDEBUG: %s\n" "executing ${0}"
 printf "\t\t\t%s\n" "As called from ${FUNCNAME[1]}, called from line number ${BASH_LINENO[0]} in ${BASH_SOURCE[1]}."
 
-SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
+export SCRIPT_PATH=${SCRIPT_PATH:-$(pwd)}
 printf "\n\tINFO: %s\n" "SCRIPT_PATH: $SCRIPT_PATH"
 source $SCRIPT_PATH/build-functions.shsource
 

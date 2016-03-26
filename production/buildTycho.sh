@@ -9,7 +9,7 @@ then
 fi
 # Similar for SCRIPT_PATH, relevant here only if local, isolated 
 # build, else, it is defined elsewhere. 
-SCRIPT_PATH=${SCRIPT_PATH:-${PWD}}
+export SCRIPT_PATH=${SCRIPT_PATH:-${PWD}}
 
 TYCHO_MVN_ARGS="-Dmaven.repo.local=$LOCAL_REPO -Dtycho.localArtifacts=ignore"
 echo -e "\n\tTYCHO_MVN_ARGS: ${TYCHO_MVN_ARGS}\n"
