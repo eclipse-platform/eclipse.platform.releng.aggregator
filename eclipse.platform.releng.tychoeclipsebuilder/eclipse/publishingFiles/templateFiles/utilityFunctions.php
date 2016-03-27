@@ -254,7 +254,7 @@ function computeDisplayConfig($config) {
    $lastUnderscore = strrpos ($config, "_");
    $firstUnderscore = strpos ($config, "_"); 
    $jobname = substr($config,0,$firstUnderscore);
-   $plaformconfig = substr($config,$firstUnderscore+1,$lastUnderscore);
+   $platformconfig = substr($config,$firstUnderscore+1,$lastUnderscore);
    $vmused = substr($config,$lastUnderscore+1);
-   echo $jobname."<br/>".$platformconfig."<br/>".$vmused;
+   return $jobname."<br/>".$platformconfig."<br/>".$vmused;
 }
