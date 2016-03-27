@@ -21,7 +21,7 @@ echo "ulimit (file handles): $( ulimit -n ) "
 
 
 export SCRIPT_PATH="${BUILD_ROOT}/production"
-
+export PROMOTION_SCRIPT_PATH="$SCRIPT_PATH/sdk/promotion"
 
 source "${SCRIPT_PATH}/build-functions.shsource"
 

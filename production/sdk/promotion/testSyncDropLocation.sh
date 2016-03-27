@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # test code, to test individual functions of syncDropLocation.sh
-SCRIPTDIR=$( dirname $0 )
-echo "SCRIPTDIR: ${SCRIPTDIR}"
-source ${SCRIPTDIR}/syncUpdateUtils.shsource
+export PROMOTION_SCRIPT_PATH=${PROMOTION_SCRIPT_PATH:-$( dirname $0 )}
+echo "PROMOTION_SCRIPT_PATH: ${PROMOTION_SCRIPT_PATH}"
+source ${PROMOTION_SCRIPT_PATH}/syncUpdateUtils.shsource
 
 dlToPath=$(dlToPath 4.3.0 I20130227-0112 CBI)
 echo "TEST CBI: dlToPath: $dlToPath"

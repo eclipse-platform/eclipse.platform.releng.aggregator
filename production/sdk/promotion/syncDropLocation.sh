@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-export SCRIPTDIR=$( dirname $0 )
-echo "SCRIPTDIR: ${SCRIPTDIR}"
-source ${SCRIPTDIR}/syncUpdateUtils.shsource
+export PROMOTION_SCRIPT_PATH=${PROMOTION_SCRIPT_PATH:-$( dirname $0 )}
+echo "PROMOTION_SCRIPT_PATH: ${PROMOTION_SCRIPT_PATH}"
+source ${PROMOTION_SCRIPT_PATH}/syncUpdateUtils.shsource
 
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
@@ -268,7 +268,7 @@ function syncRepoSite ()
   if [[ -n "${fromDir}" && -d "${fromDir}" && -n "${toDir}" && -d "${toDir}" ]]
   then
     # first create XZ compression
-    source "${SCRIPTDIR}/createXZ.shsource"
+    source "${PROMOTION_SCRIPT_PATH}/createXZ.shsource"
     createXZ "${fromDir}"
     RC=$?
     if [[ $RC != 0 ]]
@@ -308,7 +308,7 @@ function syncRepoSite ()
 
   if [[ "${buildType}" != "P" ]]
   then
-    ${SCRIPTDIR}/runAntRunner.sh ${buildId} ${eclipseStream} ${SCRIPTDIR}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
+    ${PROMOTION_SCRIPT_PATH}/runAntRunner.sh ${buildId} ${eclipseStream} ${PROMOTION_SCRIPT_PATH}/addToComposite.xml addToComposite -Drepodir=${toDir} -Dcomplocation=${buildId}
     RC=$?
   else
     echo -e "\n\tREMINDER: patch build must be added to composite after confirmation\n"
@@ -406,9 +406,9 @@ then
   echo "       drop directory: ${dropFromBuildDir}"
   exit 1
 fi
-SCRIPTDIR=$( dirname $0 )
-echo "SCRIPTDIR: ${SCRIPTDIR}"
-${SCRIPTDIR}/getEBuilder.sh  "${EBUILDER_HASH}" "${dropFromBuildDir}"
+export PROMOTION_SCRIPT_PATH=${PROMOTION_SCRIPT_PATH:-$( dirname $0 )}
+echo "PROMOTION_SCRIPT_PATH: ${PROMOTION_SCRIPT_PATH}"
+${PROMOTION_SCRIPT_PATH}/getEBuilder.sh  "${EBUILDER_HASH}" "${dropFromBuildDir}"
 
 # if build failed, don't promote repo
 if [[ -z "$BUILD_FAILED" ]]

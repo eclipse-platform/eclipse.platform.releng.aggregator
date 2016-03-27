@@ -39,10 +39,28 @@ mkdir -p ${output_dir}
 tar_name=org.eclipse.cbi.p2repo.analyzers.product-linux.gtk.x86_64.tar.gz
 
 report_app_area="${app_area}/reportApplication"
-if [[ ! -e ${TMP_DIR}/${tar_name} ]]
+
+if [[ -z "${TMP_DIR}" ]]
 then
-    wget --no-verbose --no-cache -O ${TMP_DIR}/${tar_name} https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+  echo -e "\n\t"ERROR: TMP_DIR surprisingly not defined.\n"
+  echo -e "\n\t\tThus stopping create report, but exiting with 0\n"
+  exit 0
 fi
+if [[ ! -d "${TMP_DIR}" ]]
+then
+  echo -e "\n\t"ERROR: TMP_DIR surprisingly did not exist  at ${TMP_DIR}.\n"
+  echo -e "\n\t\tSo, creating ${TMP_DIR}\n"
+  mkdir -p ${TMP_DIR}
+fi
+
+# Let's always refetch for now
+# --no-verbose -quiet
+#if [[ ! -F ${TMP_DIR}/${tar_name} ]]
+#then
+    wget  --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+#else 
+#    echo "${TMP_DIR}/${tar_name} already existed, not re-fetched"
+#fi
 # always extract anew each time.
 if [[ -e ${report_app_area} ]]
 then
@@ -50,7 +68,9 @@ then
 fi
 mkdir -p ${report_app_area}
 
-tar -xf ${TMP_DIR}/${tar_name} -C ${report_app_area}
+echo -e "\n\tExtracting: ${TMP_DIR}/${tar_name}"
+
+tar -xf "${TMP_DIR}/${tar_name}" -C ${report_app_area}
 
 ${report_app_area}/p2analyze -data ${output_dir}/workspace-report -vm ${JAVA_8_HOME}/bin -vmargs -Xmx1g \
 -DreportRepoDir=${buildToTest} \
