@@ -263,7 +263,7 @@ then
 #  fi
   # The performance UI function needs a DISPLAY to function, so we'll give it one via xvfb
   XVFB_RUN="xvfb-run"
-  XVFB_RUN_ARGS="--error-file /shared/eclipse/sdk/testjobdata/xvfb-log.txt"
+  XVFB_RUN_ARGS="--error-file ${TMP_DIR}/xvfb-log.txt"
   # --server-args -screen 0 1024x768x24"
   #
   if [[ ${buildType} =~ [INM] ]]
