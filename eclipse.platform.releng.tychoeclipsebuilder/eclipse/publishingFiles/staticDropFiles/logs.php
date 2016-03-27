@@ -74,6 +74,7 @@ listLogs("$testresults/consolelogs");
 listDetailedLogs($testresults,$expectedTestConfigs[0]);
 listDetailedLogs($testresults,$expectedTestConfigs[1]);
 listDetailedLogs($testresults,$expectedTestConfigs[2]);
+listDetailedLogs($testresults,$expectedTestConfigs[3]);
 ?>
 
 </div>
