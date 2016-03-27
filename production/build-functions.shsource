@@ -380,7 +380,7 @@ fn-maven-build-aggregator ()
   echo "DEBUG: MARGS: $MARGS"
   echo "DEBUG: FORCEQUALIFIERARG: $FORCEQUALIFIERARG"
   echo "DEBUG: CODE_WARNINGS: ${CODE_WARNINGS}"
-
+ 
   # --fail-at-end gives chance for bundles to compile, even after
   # a compile error. Might have to specify --fail-never to see them all? See
   # http://www.sonatype.com/books/mvnref-book/reference/running-sect-options.html#running-sect-failure-option
@@ -396,7 +396,7 @@ fn-maven-build-aggregator ()
   # bug 471835 (See bug 478483)  
   # Note: reactorBuildTimestampProperty was added as a work around for bug 486698.
   # It should be removed once bug 486783 is fixed. I created bug 489510 as a reminder to remove the workaround.
-  mvn $MARGS ${FAIL_OPTION} -V  ${ALT_POM_FILE} \
+  mvn $MARGS ${FAIL_OPTION} ${MAVEN_SETTINGS} -V  ${ALT_POM_FILE} \
     clean verify \
     -DskipTests=true \
     -Dmaven.repo.local=$LOCAL_REPO  $CBI_JDT_REPO_URL_ARG $CBI_JDT_VERSION_ARG \
@@ -577,7 +577,7 @@ fn-pom-version-updater ()
 
   report=${TMP_DIR}/pom_${BUILD_ID}.txt
   pushd "$REPO_DIR"
-  mvn $MARGS  ${ALT_POM_FILE} \
+  mvn ${MAVEN_SETTINGS} $MARGS  ${ALT_POM_FILE} \
     org.eclipse.tycho:tycho-versions-plugin:0.23.1:update-pom \
     -Dmaven.repo.local=$LOCAL_REPO \
     -DbuildTimestamp="${TIMESTAMP}" -DbuildType="${BUILD_TYPE}" -DbuildId="${BUILD_ID}" -Declipse-p2-repo.url="NOT_FOR_PRODUCTION_USE"

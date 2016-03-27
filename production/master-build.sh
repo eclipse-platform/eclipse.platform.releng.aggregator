@@ -36,7 +36,7 @@ assertNotEmpty aggDir
 assertNotEmpty BUILD_ID
 assertNotEmpty buildDirectory
 
-
+export MAVEN_SETTINGS="--settings /shared/eclipse/mavenSettings/settings.xml"
 
 # remember, local "test builds" that use this script must change
 # or override 'GIT_PUSH' to simply echo, not actually push. Only
@@ -218,6 +218,7 @@ fn-write-property PATCH_BUILD
 fn-write-property ALT_POM_FILE
 fn-write-property JAVA_DOC_TOOL
 fn-write-property loadLog
+fn-write-property MAVEN_SETTINGS
 
 # any value of interest/usefulness can be added to BUILD_ENV_FILE
 if [[ "${testbuildonly}" == "true" ]]
