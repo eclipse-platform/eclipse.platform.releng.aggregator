@@ -64,8 +64,6 @@ do
       ;;
   esac
 done
-# always run in 'test' mode, for Hudson job.
-export testbuildonly=true
 
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
@@ -73,13 +71,10 @@ source localBuildProperties.shsource 2>/dev/null
 export BUILD_HOME=${BUILD_HOME:-/shared/eclipse/builds}
 
 SCRIPT_NAME=$0
-LOG_BASE_NAME=${SCRIPT_NAME##*/}
-LOG_OUT_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.out.log
-LOG_ERR_NAME=${BUILD_HOME}/${LOG_BASE_NAME%.*}.err.log
 
-echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) " 1>$LOG_OUT_NAME 2>$LOG_ERR_NAME
+echo "Starting $SCRIPT_NAME at $( date +%Y%m%d-%H%M ) "
 
-echo "umask explicitly set to $NEWUMASK, old value was $oldumask" 1>>$LOG_OUT_NAME 2>>$LOG_ERR_NAME
+echo "umask explicitly set to $NEWUMASK, old value was $oldumask"
 
 export BRANCH=master
 export BUILD_TYPE=N
