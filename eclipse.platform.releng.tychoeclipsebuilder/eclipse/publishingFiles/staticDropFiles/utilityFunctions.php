@@ -267,3 +267,22 @@ function fileSizeForDisplay($filename) {
   $result =  "(" . $zipfilesize . $scaleChar . ")";
   return $result;
 }
+
+/*
+This function "break" the full config string an meaningful 
+underscores, for improved display in tables and similar.
+Remember, some config values can have more than two underscores, 
+such as ep46-unit-lin64_linux.gtk.x86_64_8.0, which should 
+be split as 
+ 	 ep46-unit-lin64
+ 	 lin64_linux.gtk.x86_64
+ 	 8.0
+*/
+function computeDisplayConfig($config) {
+   $lastUnderscore = strrpos ($config, "_");
+   $firstUnderscore = strpos ($config, "_"); 
+   $jobname = substr($config,0,$firstUnderscore);
+   $platformconfig = substr($config,$firstUnderscore+1,$lastUnderscore);
+   $vmused = substr($config,$lastUnderscore+1);
+   return $jobname."<br/>".$platformconfig."<br/>".$vmused;
+}
