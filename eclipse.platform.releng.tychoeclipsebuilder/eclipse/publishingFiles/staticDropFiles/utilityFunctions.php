@@ -100,9 +100,11 @@ function calcTestConfigsRan($testResultsDirName) {
         for ($i = 0 ; $i < count($expectedTestConfigs) ; $i++) {
           if (strncmp($file, $expectedTestConfigs[$i], count($expectedTestConfigs[$i])) == 0) {
             $boxes++;
-            // our way of matching job names, with test configs, is very limited,
-            // at the moment ... just looking for three letter match between the two.
-            $keyMatchStrings = array("lin","win","mac");
+            
+            $keyMatchStrings = array();
+            foreach ($expectedTestConfigs as $config){
+              $keyMatchStrings[] = jobname($config);
+            }
             foreach ($keyMatchStrings as $keyMatch) {
 
             // First make sure we get "fresh" list of test summary files, each time.
@@ -110,11 +112,11 @@ function calcTestConfigsRan($testResultsDirName) {
             //echo "DEBUG: found ".count($testResultsSummaryFiles). "summary files<br />";
             //echo "DEBUG: while expected config was $expectedTestConfigs[$i]<br />";
             // Then match the "test config" we found, with the test summary file.
-            if (strpos($expectedTestConfigs[$i], $keyMatch) !== FALSE) {
+            if (substr_startswith($expectedTestConfigs[$i], $keyMatch)) {
               // echo "DEBUG: found matching config: $expectedTestConfigs[$i]<br />";
               foreach ($testResultsSummaryFiles as $summFileName) {
                  // echo "DEBUG: processing $summFileName<br />";
-                 if (strpos($summFileName, $keyMatch) !== FALSE) {
+                 if (substr_startswith($summFileName, $keyMatch)) {
                    //echo "DEBUG: found matching summary file: $summFileName<br />";
                    $xmlResults = simplexml_load_file($summFileName);
                    $testResults[$expectedTestConfigs[$i]]["duration"]=$xmlResults->duration;
@@ -269,12 +271,12 @@ function fileSizeForDisplay($filename) {
 }
 
 /*
-This function "break" the full config string an meaningful 
+This function "breaks" the full config string at meaningful 
 underscores, for improved display in tables and similar.
 Remember, some config values can have more than two underscores, 
-such as ep46-unit-lin64_linux.gtk.x86_64_8.0, which should 
+such as ep46N-unit-lin64_linux.gtk.x86_64_8.0, which should 
 be split as 
- 	 ep46-unit-lin64
+ 	 ep46N-unit-lin64
  	 lin64_linux.gtk.x86_64
  	 8.0
 */
@@ -284,5 +286,22 @@ function computeDisplayConfig($config) {
    $jobname = substr($config,0,$firstUnderscore);
    $platformconfig = substr($config,$firstUnderscore+1,$lastUnderscore);
    $vmused = substr($config,$lastUnderscore+1);
+   //echo "DEBUG: jobname: ".$jobname."<br/>";
+   //echo "DEBUG: platformconfig: ".$platformconfig."<br/>";
+   //echo "DEBUG: vmused: ".$vmused."<br/>";
    return $jobname."<br/>".$platformconfig."<br/>".$vmused;
+   
+}
+
+/* This function gets the first segment of the config
+   which is 'jobname' on Hudson.
+*/
+function jobname($config) {
+  $firstUnderscore = strpos ($config, "_");
+   $jobname = substr($config,0,$firstUnderscore);
+   return $jobname;
+}
+
+function substr_startswith($haystack, $needle) {
+    return substr($haystack, 0, strlen($needle)) === $needle;
 }
