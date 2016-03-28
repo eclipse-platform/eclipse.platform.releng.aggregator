@@ -65,6 +65,17 @@ do
   esac
 done
 
+
+# Copied from Hudson's standard variables
+export ANT_OPTS=-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts="172.30.206.*" -Dhttps.nonProxyHosts="172.30.206.*" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts="172.30.206.*"
+export http_proxy=http://proxy.eclipse.org:9898
+export ftp_proxy=http://proxy.eclipse.org:9898
+export JVM_OPTS=-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts="172.30.206.*" -Dhttps.nonProxyHosts="172.30.206.*" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts="172.30.206.*"
+export JAVA_ARGS=-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts="172.30.206.*" -Dhttps.nonProxyHosts="172.30.206.*" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts="172.30.206.*"
+export ANT_ARGS=-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts="172.30.206.*" -Dhttps.nonProxyHosts="172.30.206.*" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts="172.30.206.*"onProxyHosts="*.eclipse.org" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts="*.eclipse.org"
+export JAVA_PROXIES=-Dhttp.proxyHost=proxy.eclipse.org -Dhttp.proxyPort=9898 -Dhttps.proxyHost=proxy.eclipse.org -Dhttps.proxyPort=9898 -Dhttp.nonProxyHosts="172.30.206.*" -Dhttps.nonProxyHosts="172.30.206.*" -Dftp.proxyHost=proxy.eclipse.org -Dftp.proxyPort=9898 -Dftp.nonProxyHosts="172.30.206.*"
+
+
 # this localBuildProperties.shsource file is to ease local builds to override some variables.
 # It should not be used for production builds.
 source localBuildProperties.shsource 2>/dev/null
