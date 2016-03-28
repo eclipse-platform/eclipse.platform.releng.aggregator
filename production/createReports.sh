@@ -54,10 +54,11 @@ then
 fi
 
 # Let's always refetch for now
+# TODO: turned off proxy for now. Ideally would set proper environment variables!
 # --no-verbose -quiet
 #if [[ ! -F ${TMP_DIR}/${tar_name} ]]
 #then
-    wget  --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
+    wget --no-proxy --no-cache -O "${TMP_DIR}/${tar_name}" https://hudson.eclipse.org/cbi/job/cbi.p2repo.analyzers.build/lastSuccessfulBuild/artifact/output/products/${tar_name} 2>&1
 #else 
 #    echo "${TMP_DIR}/${tar_name} already existed, not re-fetched"
 #fi
