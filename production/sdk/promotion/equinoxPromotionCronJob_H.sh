@@ -87,7 +87,7 @@ do
       # notice these logs are concatenated on purpose, to give some "history", but
       # that means has to be "manually" removed every now and then.
       # improve as desired.
-      /bin/bash $runningpromotefile 1>>$eqQueueLocation/promotion-out.txt 2>>$eqQueueLocation/promotion-err.txt
+      /bin/bash $runningpromotefile  2>>$eqQueueLocation/promotion-err.txt 1>>$eqQueueLocation/promotion-out.txt
       # to test cron job, without doing anything, comment out above line, and uncomment folloiwng line.
       # then try various types of files file names, etc.
       # echo "DEBUG: normally would execute file here: $promotefile" 1>>$eqQueueLocation/promotion-out.txt 2>>$eqQueueLocation/promotion-err.txt
