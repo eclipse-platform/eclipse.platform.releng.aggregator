@@ -23,7 +23,7 @@ source $SCRIPT_PATH/build-functions.shsource
 # The 'workLocation' provides a handy central place to have the
 # promote script, and log results. ASSUMING this works for all
 # types of builds, etc (which is the goal for the sdk promotions).
-workLocation=/shared/eclipse/promotion/sdk
+workLocation=/shared/eclipse/sdk/promotion
 # the cron job must know about and use the queueLocation
 # to look for its promotions scripts. (i.e. implicit tight coupling)
 queueLocation=/shared/eclipse/promotion/queue
