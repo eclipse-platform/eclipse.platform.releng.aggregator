@@ -32,7 +32,7 @@ queueLocation=/shared/eclipse/promotion/queue
 
 # directory should normally exist -- best to create first, with committer's ID --
 # but in case not
-mkdir -p "${promoteScriptLocationEclipse}"
+mkdir -p "${queueLocation}"
 #env > env.txt
 
 if [[ -z ${STREAM} || -z ${BUILD_ID} ]]
